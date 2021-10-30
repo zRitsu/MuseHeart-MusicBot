@@ -1,0 +1,12 @@
+git+https://github.com/EQUENOS/disnake.git@master
+git+https://github.com/zRitsu/Wavelink.git@disnake
+python-dotenv
+spotipy
+requests
+psutil
+humanize
+tornado
+fake_useragent
+motor
+dnspython
+fake-useragent

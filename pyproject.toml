@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "py-music-bot"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+aiohttp = "^3.7.4"
+python-dotenv = "^0.19.0"
+spotipy = "^2.19.0"
+disnake = {git = "https://github.com/EQUENOS/disnake.git"}
+wavelink = {git = "https://github.com/zRitsu/Wavelink.git", branch = "disnake"}
+psutil = ""
+humanize = ""
+tornado = ""
+requests = ""
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
