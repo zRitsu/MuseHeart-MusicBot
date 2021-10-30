@@ -9,4 +9,3 @@ tornado
 fake_useragent
 motor
 dnspython
-fake-useragent

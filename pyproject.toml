@@ -15,6 +15,9 @@ psutil = ""
 humanize = ""
 tornado = ""
 requests = ""
+dnspython = ""
+fake-useragent = ""
+motor = ""
 
 [tool.poetry.dev-dependencies]
 
