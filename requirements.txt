@@ -6,6 +6,6 @@ requests
 psutil
 humanize
 tornado
-fake_useragent
 motor
 dnspython
+fake-useragent
