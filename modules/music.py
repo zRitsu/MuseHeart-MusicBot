@@ -131,7 +131,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await self.play(inter, query=inter.target.content, position=0, source="ytsearch", search=False)
 
-    PlayOpts = commands.option_enum({"Misturar Playlist": "shuffle", "Inverter Playlist": "reverse"})
+    PlayOpts = commands.option_enum({"Misturar Playlist": "shuffle", "Inverter Playlist": "reversed"})
     SearchSource = commands.option_enum({"Youtube": "ytsearch", "Soundcloud": "scsearch"})
 
     @check_voice()
