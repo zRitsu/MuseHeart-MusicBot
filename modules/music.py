@@ -150,7 +150,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         try:
             static_player = inter.guild_data['player_controller']
-        except AttributeError:
+        except:
             static_player = None
         ephemeral = False
         channel = inter.channel
