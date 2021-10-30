@@ -260,8 +260,13 @@ class PlayerInteractions(disnake.ui.View):
                 if retry_after:
                     raise commands.CommandOnCooldown(cooldown=bucket, retry_after=retry_after, type=cmd._buckets.type)
 
-            #interaction.user_data = await self.bot.db.get_data(interaction.author.id, db_name="users")
-            interaction.guild_data = await self.bot.db.get_data(interaction.guild.id, db_name="guilds")
+            try:
+                #interaction.user_data = await self.bot.db.get_data(interaction.author.id, db_name="users")
+                interaction.guild_data = await self.bot.db.get_data(interaction.guild.id, db_name="guilds")
+            except AttributeError:
+                #interaction.user_data = None
+                interaction.guild_data = None
+
 
             await cmd(interaction, **kwargs)
 
