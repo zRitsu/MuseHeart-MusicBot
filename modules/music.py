@@ -1396,6 +1396,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         elif player.is_previows_music:
             player.is_previows_music = False
 
+        try:
+            player.updating_message.cancel()
+        except:
+            pass
+
         player.locked = False
 
         await player.process_next()
