@@ -134,11 +134,11 @@ async def has_perm(inter):
     if inter.author.guild_permissions.manage_channels:
         return True
 
-    db = await inter.bot.db.get_data(inter.guild.id, 'guilds')
-    user_roles = [r.id for r in inter.author.roles]
+    if inter.guild_data:
+        user_roles = [r.id for r in inter.author.roles]
 
-    if [r for r in db['djroles'] if int(r) in user_roles]:
-        return True
+        if [r for r in inter.guild_data['djroles'] if int(r) in user_roles]:
+            return True
 
     vc = inter.bot.get_channel(player.channel_id)
 
