@@ -137,3 +137,6 @@ test.py
 *.java
 debugger.py
 .settings/
+.classpath
+.project
+*.jar

@@ -23,7 +23,7 @@ if config['lavalink']['local']['start_local_lavalink']:
 
 load_dotenv()
 
-if os.getenv('KEEP_ALIVE', "true") != "false":
+if os.getenv('KEEP_ALIVE') != "false":
     keep_alive()
 
 intents = disnake.Intents.default()
