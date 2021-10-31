@@ -129,7 +129,10 @@ class CustomPlayer(wavelink.Player):
             pass
 
         if self.static:
-            await self.cog.send_idle_embed(self.message, self.command_log)
+            try:
+                await self.cog.send_idle_embed(self.message, self.command_log)
+            except:
+                pass
 
         try:
             await self.destroy_message()
@@ -146,7 +149,7 @@ class CustomPlayer(wavelink.Player):
             self.current = None
             self.bot.loop.create_task(self.bot.tests.tests_start(self))
 
-        await super().destroy()
+        await super().destroy(force=force)
 
     async def idling_mode(self):
 
@@ -351,7 +354,8 @@ class CustomPlayer(wavelink.Player):
                     try:
                         await self.message.edit(embeds=embeds, view=self.view)
                     except:
-                        pass
+                        if not self.bot.get_channel(self.text_channel.id):
+                            await self.destroy(force=True) # canal não existe mais no servidor...
                 return
             except:
                 traceback.print_exc()

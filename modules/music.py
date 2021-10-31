@@ -178,6 +178,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     inter.guild_data['player_controller']['channel'] = None
                     inter.guild_data['player_controller']['message_id'] = None
                     await self.bot.db.update_data(inter.guild.id, inter.guild_data, db_name='guilds')
+                    player.static = False
                 else:
                     try:
                         message = await channel.fetch_message(int(static_player.get('message_id')))
@@ -1048,16 +1049,28 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.slash_command(description="Criar um canal dedicado para pedir músicas e deixar player fixo.")
     async def setupplayer(self, inter: disnake.ApplicationCommandInteraction):
 
-        if self.bot.wavelink.players.get(inter.guild_id):
-            raise GenericError("Você não pode usar este comando com um player ativo no servidor.")
+        #if self.bot.wavelink.players.get(inter.guild_id):
+        #    raise GenericError("Você não pode usar este comando com um player ativo no servidor.")
 
         target = inter.channel.category or inter.guild
         channel = await target.create_text_channel(f"{inter.guild.me.name} song requests")
-        message = await self.send_idle_embed(channel)
+
+        player: CustomPlayer = self.bot.wavelink.players.get(inter.guild_id)
+
+        if player:
+            player.text_channel = channel
+            await player.destroy_message()
+            player.static = True
+            await player.invoke_np()
+            message = player.message
+
+        else:
+            message = await self.send_idle_embed(channel)
 
         inter.guild_data['player_controller']['channel'] = str(channel.id)
         inter.guild_data['player_controller']['message_id'] = str(message.id)
         await self.bot.db.update_data(inter.guild.id, inter.guild_data, db_name='guilds')
+
         embed = disnake.Embed(description=f"**Canal criado: {channel.mention}**\n\nObs: Caso queira reverter esta configuração, apenas delete o canal {channel.mention}", color=inter.guild.me.color)
         await inter.response.send_message(embed=embed, ephemeral=True)
 
