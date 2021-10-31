@@ -1067,6 +1067,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         else:
             message = await self.send_idle_embed(channel)
 
+        await message.create_thread(name="song requests")
+
         inter.guild_data['player_controller']['channel'] = str(channel.id)
         inter.guild_data['player_controller']['message_id'] = str(message.id)
         await self.bot.db.update_data(inter.guild.id, inter.guild_data, db_name='guilds')
@@ -1139,7 +1141,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         channel_id = static_player['channel']
 
-        if not channel_id or str(message.channel.id) != channel_id:
+        if not channel_id or (static_player['message_id'] != str(message.channel.id) and str(message.channel.id) != channel_id):
             return
 
         text_channel = self.bot.get_channel(int(channel_id))
@@ -1163,14 +1165,14 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
     async def parse_song_request(self, message, text_channel, data):
 
-        await message.delete()
-
         if not message.author.voice:
+            await message.delete()
             await message.channel.send(f"{message.author.mention} você deve entrar em um canal de voz para pedir uma música.", delete_after=15)
             return
 
         try:
             if message.guild.me.voice.channel != message.author.voice.channel:
+                await message.delete()
                 await message.channel.send(f"{message.author.mention} você deve entrar no canal <{message.guild.me.voice.channel.id}> para pedir uma música.", delete_after=15)
                 return
         except AttributeError:
@@ -1183,15 +1185,14 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             cls=CustomPlayer,
             requester=message.author,
             guild=message.guild,
-            channel=message.channel,
-            text_channel=text_channel,
+            channel=text_channel,
             static=True,
             cog=self
         )
 
         if not player.message:
             try:
-                cached_message = await message.channel.fetch_message(int(data['player_controller']['message_id']))
+                cached_message = await text_channel.fetch_message(int(data['player_controller']['message_id']))
             except:
                 cached_message = await self.send_idle_embed(message)
                 data['player_controller']['message_id'] = str(cached_message.id)
@@ -1199,10 +1200,31 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             player.message = cached_message
 
+        embed = disnake.Embed(color=message.guild.me.color)
+
         try:
             player.queue.extend(tracks.tracks)
+            if isinstance(message.channel, disnake.Thread):
+                embed.description = f"**Playlist adicionada:**\n[`{tracks.data['playlistInfo']['name']}`]({message.content})" \
+                                    f"\n\n`[{len(tracks.tracks)}] Música(s)`"
+                embed.set_thumbnail(url=tracks.tracks[0].thumb)
+                if self.msg_ad:
+                    embed.description += f" | {self.msg_ad}"
+                await message.channel.send(embed=embed)
+            else:
+                await message.delete()
+
         except AttributeError:
             player.queue.append(tracks[0])
+            if isinstance(message.channel, disnake.Thread):
+                embed.description = f"**Música adicionada:\n[`{tracks[0].title}`]({tracks[0].uri})**" \
+                                    f"\n\n`{tracks[0].author}` | `{time_format(tracks[0].duration) if not tracks[0].is_stream else '🔴 Livestream'}`"
+                embed.set_thumbnail(url=tracks[0].thumb)
+                if self.msg_ad:
+                    embed.description += f" | {self.msg_ad}"
+                await message.channel.send(embed=embed)
+            else:
+                await message.delete()
 
         if not player.is_connected:
             await player.connect(message.author.voice.channel.id)
@@ -1271,7 +1293,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             self.bot.loop.create_task(self.connect_node(node))
 
         if self.bot.config.get('start_local_lavalink', True):
-            self.bot.loop.create_task(self.run_local_lavalink())
+            self.bot.loop.create_task(self.connect_local_lavalink())
 
     async def connect_node(self, data: dict):
 
@@ -1484,7 +1506,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         return message
 
-    async def run_local_lavalink(self):
+    async def connect_local_lavalink(self):
 
         if 'LOCAL' not in self.bot.wavelink.nodes:
             await asyncio.sleep(7)
@@ -1502,5 +1524,23 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             self.bot.loop.create_task(self.connect_node(localnode))
 
-def setup(bot: commands.Bot):
+    @commands.Cog.listener("on_thread_join")
+    async def join_thread_request(self, thread: disnake.Thread):
+
+        try:
+
+            data = await self.bot.db.get_data(thread.guild.id, db_name="guilds")
+
+            if data["player_controller"]["message_id"] != (thread.id):
+                return
+
+        except AttributeError:
+            return
+
+        if thread.guild.me.id in thread._members:
+            return
+
+        await thread.join()
+
+def setup(bot: BotCore):
     bot.add_cog(Music(bot))
