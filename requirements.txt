@@ -3,7 +3,6 @@ git+https://github.com/zRitsu/Wavelink.git@disnake
 python-dotenv
 spotipy
 requests
-psutil
 humanize
 tornado
 motor
