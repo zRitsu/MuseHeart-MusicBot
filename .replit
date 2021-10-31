@@ -1,6 +1,7 @@
 language="python3"
 
-run = """pip3 install -r requirements.txt
+run = """[ -e pom.xml ] && rm pom.xml
+pip3 install -r requirements.txt
 clear
 python3 main.py"""
 
