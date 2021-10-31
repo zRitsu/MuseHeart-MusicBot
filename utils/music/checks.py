@@ -105,9 +105,10 @@ def has_source():
 
 
 def user_cooldown(rate: int, per: int):
-    def custom_cooldown(message):
-        #if message.author.guild_permissions.administrator:
-        #   return None  # sem cooldown
+
+    async def custom_cooldown(inter: disnake.Interaction):
+        if await inter.bot.is_owner(inter.author):
+           return None  # sem cooldown
 
         return commands.Cooldown(rate, per)
 

@@ -46,6 +46,9 @@ lavalink_servers = [
 
 ]
 
+PlayOpts = commands.option_enum({"Misturar Playlist": "shuffle", "Inverter Playlist": "reversed"})
+SearchSource = commands.option_enum({"Youtube": "ytsearch", "Soundcloud": "scsearch"})
+
 class Music(commands.Cog, wavelink.WavelinkMixin):
 
     def __init__(self, bot: BotCore):
@@ -130,9 +133,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await inter.response.send_message(embed=emb, ephemeral=True)
 
         await self.play(inter, query=inter.target.content, position=0, source="ytsearch", search=False)
-
-    PlayOpts = commands.option_enum({"Misturar Playlist": "shuffle", "Inverter Playlist": "reversed"})
-    SearchSource = commands.option_enum({"Youtube": "ytsearch", "Soundcloud": "scsearch"})
 
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
