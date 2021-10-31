@@ -1179,7 +1179,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         except AttributeError:
             pass
 
-        tracks, node = await self.get_tracks(message.content, message.author)
+        tracks, node = await self.get_tracks(message.content.strip("<>"), message.author)
 
         player: CustomPlayer = self.bot.wavelink.get_player(
             guild_id=message.guild.id,
