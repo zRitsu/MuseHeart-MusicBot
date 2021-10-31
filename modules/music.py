@@ -877,7 +877,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         embed = disnake.Embed(color=disnake.Colour.red())
 
         player.command_log = f"{inter.author.mention} **parou o player!**"
-        embed.description = f"**Você parou o player!**"
+        embed.description = f"**{inter.author.mention} parou o player!**"
         await inter.response.send_message(embed=embed, ephemeral=inter.guild_data and inter.guild_data["player_controller"]["channel"] == str(inter.channel.id))
 
         await player.destroy()
