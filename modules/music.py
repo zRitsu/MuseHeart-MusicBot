@@ -49,6 +49,7 @@ lavalink_servers = [
 PlayOpts = commands.option_enum({"Misturar Playlist": "shuffle", "Inverter Playlist": "reversed"})
 SearchSource = commands.option_enum({"Youtube": "ytsearch", "Soundcloud": "scsearch"})
 
+
 class Music(commands.Cog, wavelink.WavelinkMixin):
 
     def __init__(self, bot: BotCore):
