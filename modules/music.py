@@ -120,8 +120,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not query:
             raise GenericError(f"{member.mention} não está com status do spotify, OSU! ou youtube.")
 
-        print(f"test: {query}|")
-
         await self.play(inter, query=query, position=0, source="ytsearch", search=False)
 
     @check_voice()
@@ -188,6 +186,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                         inter.guild_data['player_controller']['message_id'] = str(message.id)
                         await self.bot.db.update_data(inter.guild.id, inter.guild_data, db_name='guilds')
                     player.message = message
+                    if isinstance(inter.channel, disnake.Thread):
+                        player.text_channel = inter.channel.parent
             except Exception:
                 pass
 
@@ -1045,13 +1045,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
     @require_database()
     @commands.has_guild_permissions(administrator=True)
-    @commands.bot_has_guild_permissions(manage_channels=True)
+    @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1,30), commands.BucketType.guild)
     @commands.slash_command(description="Criar um canal dedicado para pedir músicas e deixar player fixo.")
     async def setupplayer(self, inter: disnake.ApplicationCommandInteraction):
-
-        #if self.bot.wavelink.players.get(inter.guild_id):
-        #    raise GenericError("Você não pode usar este comando com um player ativo no servidor.")
 
         target = inter.channel.category or inter.guild
         channel = await target.create_text_channel(f"{inter.guild.me.name} song requests")
@@ -1179,7 +1176,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         except AttributeError:
             pass
 
-        tracks, node = await self.get_tracks(message.content.strip("<>"), message.author)
+        tracks, node = await self.get_tracks(message.content, message.author)
 
         player: CustomPlayer = self.bot.wavelink.get_player(
             guild_id=message.guild.id,
@@ -1267,7 +1264,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         except:
             txt_ephemeral = False
 
-        if update or (inter.player.static and inter.player.text_channel == inter.channel) or not isinstance(inter, disnake.ApplicationCommandInteraction):
+        if update or (inter.player.static and inter.player.text_channel == inter.channel) \
+                or not isinstance(inter, disnake.ApplicationCommandInteraction):
             txt = f"{inter.author.mention} {txt}"
             inter.player.command_log = txt
             if not (component_interaction:=isinstance(inter, disnake.MessageInteraction)) and inter.player.static and not inter.response.is_done():
@@ -1444,6 +1442,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
 
     async def get_tracks(self, query: str, user: disnake.Member, source="ytsearch", process_all=False):
+
+        query = query.strip("<>")
 
         if not URL_REG.match(query):
             query = f"{source}:{query}"
