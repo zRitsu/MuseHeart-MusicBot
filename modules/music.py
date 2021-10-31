@@ -130,8 +130,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def message_play(self, inter: disnake.MessageInteraction):
 
         if not inter.target.content:
-            emb = disnake.Embed(description=f"Não há texto na [mensagem]({inter.message.jump_url}) selecionada...", color=disnake.Colour.red())
+            emb = disnake.Embed(description=f"Não há texto na [mensagem]({inter.target.jump_url}) selecionada...", color=disnake.Colour.red())
             await inter.response.send_message(embed=emb, ephemeral=True)
+            return
 
         await self.play(inter, query=inter.target.content, position=0, source="ytsearch", search=False)
 
