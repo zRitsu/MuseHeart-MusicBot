@@ -1159,10 +1159,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         except Exception as e:
             await message.channel.send(f"{message.author.mention} **ocorreu um erro ao tentar obter resultados para sua busca:** ```py\n{e}```", delete_after=15)
 
-        try:
-            await message.delete()
-        except:
-            pass
+            try:
+                await message.delete()
+            except:
+                pass
+
         await self.song_request_concurrency.release(message)
 
     async def parse_song_request(self, message, text_channel, data):
