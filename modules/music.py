@@ -1153,13 +1153,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         try:
             await self.parse_song_request(message, text_channel, data)
+            if not isinstance(message.channel, disnake.Thread):
+                await message.delete()
+
         except Exception as e:
             await message.channel.send(f"{message.author.mention} **ocorreu um erro ao tentar obter resultados para sua busca:** ```py\n{e}```", delete_after=15)
+            await message.delete()
 
-            try:
-                await message.delete()
-            except:
-                pass
 
         await self.song_request_concurrency.release(message)
 
