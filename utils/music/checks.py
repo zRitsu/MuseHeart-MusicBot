@@ -1,19 +1,6 @@
 import disnake
 from disnake.ext import commands
-from .errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, DiffVoiceChannel, MissingDatabase
-
-
-def require_database():
-
-    def predicate(inter):
-
-        if not inter.bot.db:
-
-            raise MissingDatabase()
-
-        return True
-
-    return commands.check(predicate)
+from .errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, DiffVoiceChannel
 
 
 def has_player():
@@ -51,10 +38,10 @@ def is_requester():
         if not inter.player:
             raise NoPlayer()
 
-        if not inter.player.current:
+        if not inter.player.file_update:
             raise NoSource()
 
-        if inter.player.current.requester == inter.author:
+        if inter.player.file_update.requester == inter.author:
             return True
 
         try:
@@ -96,7 +83,7 @@ def has_source():
         if not inter.player:
             raise NoPlayer()
 
-        if not inter.player.current:
+        if not inter.player.file_update:
             raise NoSource()
 
         return True

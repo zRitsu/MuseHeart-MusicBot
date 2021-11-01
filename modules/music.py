@@ -13,7 +13,7 @@ from utils.client import BotCore
 
 from utils.music.errors import GenericError
 from utils.music.spotify import SpotifyTrack, SpotifyPlaylist, process_spotify
-from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, require_database
+from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj
 from utils.music.models import CustomPlayer, CustomTrack
 from utils.music.converters import time_format, fix_characters, string_to_seconds, get_track_index, URL_REG, YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist
 from utils.music.interactions import VolumeInteraction, QueueInteraction, send_message, SongSelect
@@ -1043,7 +1043,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await self.interaction_message(inter, txt)
 
-    @require_database()
     @commands.has_guild_permissions(administrator=True)
     @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1,30), commands.BucketType.guild)
@@ -1074,7 +1073,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         embed = disnake.Embed(description=f"**Canal criado: {channel.mention}**\n\nObs: Caso queira reverter esta configuração, apenas delete o canal {channel.mention}", color=inter.guild.me.color)
         await inter.response.send_message(embed=embed, ephemeral=True)
 
-    @require_database()
     @commands.has_guild_permissions(administrator=True)
     @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
     @commands.slash_command(description="Adicionar um cargo para a lista de DJ's do servidor.")
@@ -1098,7 +1096,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await inter.response.send_message(f"O cargo {role.mention} foi adicionado à lista de DJ's", ephemeral=True)
 
-    @require_database()
     @commands.has_guild_permissions(administrator=True)
     @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
     @commands.slash_command(description="Remover um cargo para a lista de DJ's do servidor.")

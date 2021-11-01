@@ -6,10 +6,6 @@ class GenericError(commands.CheckFailure):
         self.text = text
 
 
-class MissingDatabase(commands.CheckFailure):
-    pass
-
-
 class MissingSpotifyClient(commands.CheckFailure):
     pass
 

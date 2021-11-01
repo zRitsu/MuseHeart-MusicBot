@@ -33,7 +33,7 @@ intents.presences = True
 mongo_key = os.environ.get("MONGO")
 
 if not mongo_key:
-    print("Token do mongoDB não configurado! funções que requer database vão estar indisponíveis.")
+    print("Token do mongoDB não configurado! será usado o arquivo database.json.")
 
 
 bot = BotCore(

@@ -1,7 +1,7 @@
 from disnake.ext import commands
 from wavelink import Client
 from .music.spotify import spotify_client
-from utils.db import Database
+from utils.db import Database, LocalDatabase
 import os
 import traceback
 
@@ -11,7 +11,7 @@ class BotCore(commands.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         mongo = kwargs.get('mongo')
-        self.db = Database(token=mongo, name=kwargs.pop("db_name", "botdiscord")) if mongo else None
+        self.db = Database(token=mongo, name=kwargs.pop("db_name", "botdiscord")) if mongo else LocalDatabase(self)
         self.wavelink = Client(bot=self)
         self.tests = None
         self.spotify = spotify_client()

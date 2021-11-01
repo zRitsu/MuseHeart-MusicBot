@@ -39,8 +39,8 @@ os passos 6 e 7 para o spotify não são obrigatórios mas caso queira o suporte
 
 ![](https://cdn.discordapp.com/attachments/480195401543188483/903860032955891733/unknown.png)
 
-### MongoDB para database
-o passos 8 não é obrigatório mas caso seja ignorado, alguns comandos que depende de database não vão funcionar (setupguildplayer, add_dj_role, etc), para obter o link de sua database para o passo abaixo [clique aqui](MONGODB_SETUP.md) para ver o tutorial.
+### MongoDB para database (Opcional)
+para obter o link de sua database para o passo abaixo [clique aqui](MONGODB_SETUP.md) para ver o tutorial.
 
 
 - 8 = Em key digite **MONGO** e em value cole o link da sua database do mongoDB e em seguida clique em **Add new secret**.
@@ -50,5 +50,6 @@ o passos 8 não é obrigatório mas caso seja ignorado, alguns comandos que depe
 #############################################################
 
 - 9 = Com todas as secrets devidamente configuradas, clique em **Run** e aguarde o bot ligar normalmente (verifique no discord se ele fica online).
+<br/><br/>
 
 - 10 = Após o bot estar online e rodando normalmente, use o comando {seuprefix}syncguild para sincronizar os comandos slash (para comandos globais use {seuprefix}syncglobal mas este demora 1h para fazer efeito e caso tenha usado o syncguild os comandos vão aparecer duplicados).

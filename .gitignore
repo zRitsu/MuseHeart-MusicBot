@@ -140,3 +140,4 @@ debugger.py
 .classpath
 .project
 *.jar
+database.json
