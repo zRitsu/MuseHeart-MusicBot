@@ -1159,18 +1159,20 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         except Exception as e:
             await message.channel.send(f"{message.author.mention} **ocorreu um erro ao tentar obter resultados para sua busca:** ```py\n{e}```", delete_after=15)
 
+        try:
+            await message.delete()
+        except:
+            pass
         await self.song_request_concurrency.release(message)
 
     async def parse_song_request(self, message, text_channel, data):
 
         if not message.author.voice:
-            await message.delete()
             await message.channel.send(f"{message.author.mention} você deve entrar em um canal de voz para pedir uma música.", delete_after=15)
             return
 
         try:
             if message.guild.me.voice.channel != message.author.voice.channel:
-                await message.delete()
                 await message.channel.send(f"{message.author.mention} você deve entrar no canal <{message.guild.me.voice.channel.id}> para pedir uma música.", delete_after=15)
                 return
         except AttributeError:
@@ -1209,8 +1211,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 if self.msg_ad:
                     embed.description += f" | {self.msg_ad}"
                 await message.channel.send(embed=embed)
-            else:
-                await message.delete()
 
         except AttributeError:
             player.queue.append(tracks[0])
@@ -1221,8 +1221,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 if self.msg_ad:
                     embed.description += f" | {self.msg_ad}"
                 await message.channel.send(embed=embed)
-            else:
-                await message.delete()
 
         if not player.is_connected:
             await player.connect(message.author.voice.channel.id)
