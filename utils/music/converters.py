@@ -81,18 +81,18 @@ def seek_suggestions(inter, query):
     except:
         inter.player = inter.bot.wavelink.players.get(inter.guild.id)
 
-    if not inter.player or not inter.player.file_update:
+    if not inter.player or not inter.player.current:
         return
 
     seeks = []
 
-    if inter.player.file_update.duration >= 90000:
+    if inter.player.current.duration >= 90000:
         times = [int(n * 0.5 * 10) for n in range(20)]
     else:
         times = [int(n * 1 * 10) for n in range(20)]
 
     for p in times:
-        percent = percentage(p, inter.player.file_update.duration)
+        percent = percentage(p, inter.player.current.duration)
         seeks.append(f"{time_format(percent)} | {p}%")
 
     return seeks

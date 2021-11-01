@@ -38,10 +38,10 @@ def is_requester():
         if not inter.player:
             raise NoPlayer()
 
-        if not inter.player.file_update:
+        if not inter.player.current:
             raise NoSource()
 
-        if inter.player.file_update.requester == inter.author:
+        if inter.player.current.requester == inter.author:
             return True
 
         try:
@@ -83,7 +83,7 @@ def has_source():
         if not inter.player:
             raise NoPlayer()
 
-        if not inter.player.file_update:
+        if not inter.player.current:
             raise NoSource()
 
         return True
