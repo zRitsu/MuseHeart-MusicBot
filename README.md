@@ -7,7 +7,5 @@ bot de música em python feito com disnake e lavalink com player interativo etc.
 
 ### Tutorial: Hospedar no windows (em breve...)
 <br/>
-Após o bot estar online e rodando normalmente, use o comando {seuprefix}syncguild para sincronizar os comandos slash (para comandos globais use {seuprefix}syncglobal mas este demora 1h para fazer efeito).
-<br/><br/>
 
-Projeto/Readme ainda em fase inicial*
+Projeto/Readme ainda em construção*

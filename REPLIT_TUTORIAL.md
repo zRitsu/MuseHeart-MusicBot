@@ -49,4 +49,6 @@ o passos 8 não é obrigatório mas caso seja ignorado, alguns comandos que depe
 
 #############################################################
 
-- 9 = Com todas as secrets devidamente configuradas, clique em **Run** e aguarde o bot ligar normalmente (verifique no discord se ele fica online e teste os comandos).
+- 9 = Com todas as secrets devidamente configuradas, clique em **Run** e aguarde o bot ligar normalmente (verifique no discord se ele fica online).
+
+- 10 = Após o bot estar online e rodando normalmente, use o comando {seuprefix}syncguild para sincronizar os comandos slash (para comandos globais use {seuprefix}syncglobal mas este demora 1h para fazer efeito e caso tenha usado o syncguild os comandos vão aparecer duplicados).

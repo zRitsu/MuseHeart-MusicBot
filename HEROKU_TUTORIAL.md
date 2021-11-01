@@ -34,3 +34,5 @@ Após preencher todos os campos necessários clique em **Deploy app** e aguarde 
 ![](https://cdn.discordapp.com/attachments/480195401543188483/903832292772954122/unknown.png)
 
 - 6 = Nos logs você pode verificar se o bot está online ou se ocorreu possíveis erros, agora é só verificar se seu bot está online no discord e testar os comandos.
+
+- 7 = Após o bot estar online e rodando normalmente, use o comando {seuprefix}syncguild para sincronizar os comandos slash (para comandos globais use {seuprefix}syncglobal mas este demora 1h para fazer efeito e caso tenha usado o syncguild os comandos vão aparecer duplicados).
