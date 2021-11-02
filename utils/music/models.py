@@ -310,6 +310,7 @@ class CustomPlayer(wavelink.Player):
                     await interaction.response.defer()
                 except:
                     pass
+                self.cancel_message_task_update()
                 return
         except:
             pass
@@ -356,6 +357,7 @@ class CustomPlayer(wavelink.Player):
                     except:
                         if not self.bot.get_channel(self.text_channel.id):
                             await self.destroy(force=True) # canal não existe mais no servidor...
+                self.cancel_message_task_update()
                 return
             except:
                 traceback.print_exc()
@@ -366,6 +368,8 @@ class CustomPlayer(wavelink.Player):
         self.last_embed = embeds
 
         self.message = await self.text_channel.send(embeds=embeds, view=self.view)
+
+        self.cancel_message_task_update()
 
 
     async def destroy_message(self, destroy_view=True):
@@ -395,6 +399,14 @@ class CustomPlayer(wavelink.Player):
         except AttributeError:
             return
 
+    def cancel_message_task_update(self):
+
+        try:
+            self.updating_message.cancel()
+        except:
+            pass
+        self.updating_message = None
+
     async def update_message_task(self, interaction=None, force=False):
 
         if not interaction and not force:
@@ -404,8 +416,6 @@ class CustomPlayer(wavelink.Player):
             await self.invoke_np(interaction=interaction)
         except:
             traceback.print_exc()
-
-        self.updating_message = None
 
     async def update_message(self, interaction: disnake.Interaction=None, force=False):
 
