@@ -18,10 +18,11 @@ from utils.music.models import CustomPlayer, CustomTrack
 from utils.music.converters import time_format, fix_characters, string_to_seconds, get_track_index, URL_REG, YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist
 from utils.music.interactions import VolumeInteraction, QueueInteraction, send_message, SongSelect
 
-try:
-    from test import Tests
-except:
-    pass
+from test import Tests
+#try:
+#
+#except:
+#    pass
 
 # Caso tennha servidores do lavalink externo, habilite as linhas abaiuxo e adicione/modifique de acordo. (não recomendo adicionar isso  na replit)
 lavalink_servers = [
@@ -64,7 +65,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         try:
             if not hasattr(bot, 'tests') or not bot.tests:
-                bot.tests = Tests()
+                bot.tests = Tests(bot)
         except:
             bot.tests = None
 
@@ -1171,15 +1172,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def parse_song_request(self, message, text_channel, data):
 
         if not message.author.voice:
-            await message.channel.send(f"{message.author.mention} você deve entrar em um canal de voz para pedir uma música.", delete_after=15)
-            await message.delete()
-            return
+            raise Exception(f"você deve entrar em um canal de voz para pedir uma música.")
 
         try:
             if message.guild.me.voice.channel != message.author.voice.channel:
-                await message.channel.send(f"{message.author.mention} você deve entrar no canal <{message.guild.me.voice.channel.id}> para pedir uma música.", delete_after=15)
-                await message.delete()
-                return
+                raise Exception(f"Você deve entrar no canal <{message.guild.me.voice.channel.id}> para pedir uma música.")
         except AttributeError:
             pass
 
