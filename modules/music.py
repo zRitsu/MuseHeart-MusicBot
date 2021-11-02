@@ -18,11 +18,10 @@ from utils.music.models import CustomPlayer, CustomTrack
 from utils.music.converters import time_format, fix_characters, string_to_seconds, get_track_index, URL_REG, YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist
 from utils.music.interactions import VolumeInteraction, QueueInteraction, send_message, SongSelect
 
-from test import Tests
-#try:
-#
-#except:
-#    pass
+try:
+    from test import Tests
+except:
+    pass
 
 # Caso tennha servidores do lavalink externo, habilite as linhas abaiuxo e adicione/modifique de acordo. (não recomendo adicionar isso  na replit)
 lavalink_servers = [
