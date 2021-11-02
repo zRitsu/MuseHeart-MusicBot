@@ -94,9 +94,6 @@ class ErrorHandler(commands.Cog):
         elif isinstance(error, MissingSpotifyClient):
             error_txt = "**Não há suporte a links do spotify no momento.**"
 
-        elif isinstance(error, MissingDatabase):
-            error_txt = "**A minha database não foi configurada...**"
-
         elif isinstance(error, commands.CommandOnCooldown):
             remaing = int(error.retry_after)
             if remaing < 1:
