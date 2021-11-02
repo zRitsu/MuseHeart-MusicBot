@@ -148,6 +148,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             source: SearchSource = commands.Param(name="fonte", description="Selecionar site para busca de músicas (não links)", default="ytsearch"),
     ):
 
+        node = self.bot.wavelink.get_best_node()
+
+        if not node:
+            await inter.response.send_message(content="Não há servidores de música disponível.", ephemeral=True)
+
         try:
             static_player = inter.guild_data['player_controller']
         except:
@@ -160,11 +165,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             ephemeral = True
 
         await inter.response.defer(ephemeral=ephemeral)
-
-        node = self.bot.wavelink.get_best_node()
-
-        if not node:
-            raise GenericError("Não há servidores de música disponível.")
 
         try:
             tracks, node = await self.get_tracks(query, inter.user, source=source, process_all=process_all, node=node)
