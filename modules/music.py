@@ -1166,11 +1166,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if not message.author.voice:
             await message.channel.send(f"{message.author.mention} você deve entrar em um canal de voz para pedir uma música.", delete_after=15)
+            await message.delete()
             return
 
         try:
             if message.guild.me.voice.channel != message.author.voice.channel:
                 await message.channel.send(f"{message.author.mention} você deve entrar no canal <{message.guild.me.voice.channel.id}> para pedir uma música.", delete_after=15)
+                await message.delete()
                 return
         except AttributeError:
             pass
