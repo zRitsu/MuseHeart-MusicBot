@@ -152,6 +152,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if not node:
             await inter.response.send_message(content="Não há servidores de música disponível.", ephemeral=True)
+            return
 
         try:
             static_player = inter.guild_data['player_controller']
