@@ -705,12 +705,15 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             self,
             inter: disnake.ApplicationCommandInteraction,
             query: str = commands.Param(name="nome", description="Nome da música completo.", autocomplete=queue_tracks),
-            position: int = commands.Param(name="posição", description="Posição de destino na fila.")
+            position: int = commands.Param(name="posição", description="Posição de destino na fila.", default=None)
     ):
 
         embed = disnake.Embed(colour=disnake.Colour.red())
 
-        if position < 1:
+        if position is None:
+            position = 1
+
+        elif position < 1:
             embed.description = f"{inter.author.mention}, {position} não é uma posição válida."
             await send_message(inter, embed=embed, ephemeral=True)
             return
