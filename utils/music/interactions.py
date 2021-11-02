@@ -226,7 +226,7 @@ class PlayerInteractions(disnake.ui.View):
             return
 
         elif control == "volume":
-            kwargs = {"vol": None}
+            kwargs = {"value": None}
 
         elif control == "seek":
             kwargs = {"position": None}
