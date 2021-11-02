@@ -161,8 +161,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await inter.response.defer(ephemeral=ephemeral)
 
+        node = self.bot.wavelink.get_best_node()
+
+        if not node:
+            raise GenericError("Não há servidores de música disponível.")
+
         try:
-            tracks, node = await self.get_tracks(query, inter.user, source=source, process_all=process_all)
+            tracks, node = await self.get_tracks(query, inter.user, source=source, process_all=process_all, node=node)
         except Exception as e:
             await inter.edit_original_message(content=f"**Ocorreu um erro:** ```py\n{e}```")
             return
@@ -1438,7 +1443,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await player.process_next()
 
 
-    async def get_tracks(self, query: str, user: disnake.Member, source="ytsearch", process_all=False):
+    async def get_tracks(self, query: str, user: disnake.Member, source="ytsearch", process_all=False, node: wavelink.Node=None):
 
         query = query.strip("<>")
 
@@ -1447,9 +1452,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not process_all and (url_regex := YOUTUBE_VIDEO_REG.match(query)):
             query = url_regex.group()
 
-        node = self.bot.wavelink.get_best_node()
         if not node:
-            raise Exception("Não há servidores de música disponível.")
+            node = self.bot.wavelink.get_best_node()
+
+            if not node:
+                raise Exception("Não há servidores de música disponível.")
 
         tracks = await process_spotify(self.bot, user, query)
 
