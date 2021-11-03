@@ -234,7 +234,7 @@ class PlayerInteractions(disnake.ui.View):
         elif control == "playpause":
             control = "pause" if not player.paused else "resume"
 
-        elif control == "loop":
+        elif control == "loop_mode":
             if player.loop == "current":
                 kwargs['mode'] = 'queue'
             elif player.loop == "queue":

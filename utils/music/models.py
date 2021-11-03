@@ -334,7 +334,7 @@ class CustomPlayer(wavelink.Player):
             "🇳": ["nightcore", get_button_style(self.nightcore, red=False)],
             "⏹️": ["stop"],
             ("🔂" if self.loop == "current" else "🔁"): [
-                "loop", disnake.ButtonStyle.grey
+                "loop_mode", disnake.ButtonStyle.grey
                 if not self.loop else disnake.ButtonStyle.blurple
                 if self.loop == "current"
                 else disnake.ButtonStyle.green
