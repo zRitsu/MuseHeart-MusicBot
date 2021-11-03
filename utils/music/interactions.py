@@ -80,11 +80,11 @@ class QueueInteraction(disnake.ui.View):
 
         for n, page in enumerate(self.pages):
 
-            txt = "\n`---------`\n"
+            txt = "\n"
             for t in page:
                 txt += f"`{counter})` [`{fix_characters(t.title, limit=50)}`]({t.uri})\n" \
-                       f"`[{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` - {t.requester.mention}" \
-                       f"\n`---------`\n"
+                       f"`[{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]`" + \
+                       (f" - `Repetições: {t.repeats}`" if t.repeats else  "") + f" - {t.requester.mention}\n`---------`\n"
 
                 counter += 1
 

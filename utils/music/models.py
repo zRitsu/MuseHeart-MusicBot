@@ -62,6 +62,7 @@ class CustomTrack(wavelink.Track):
     def __init__(self, *args, **kwargs):
         self.requester = kwargs.pop('requester')
         self.playlist = kwargs.pop('playlist', None)
+        self.repeats = kwargs.pop('repeats', 0)
         args[1]['title'] = fix_characters(args[1]['title'])
         super().__init__(*args, **kwargs)
         if self.ytid:
@@ -147,7 +148,7 @@ class CustomPlayer(wavelink.Player):
 
         if self.bot.tests:
             self.current = None
-            self.bot.loop.create_task(self.bot.tests.tests_start(self))
+            await self.bot.tests.tests_start(self, close=True)
 
         await super().destroy(force=force)
 
@@ -253,6 +254,9 @@ class CustomPlayer(wavelink.Player):
               f"> 💠 **⠂Uploader**: `{self.current.author}`\n" \
               f"> 🎧 **⠂Pedido por:** {self.current.requester.mention}\n" \
               f"> 🔊 **⠂Volume:** `{self.volume}%`"
+
+        if self.current.repeats:
+            txt += f"\n> 🔂 **⠂Repetições restantes:** `{self.current.repeats}`"
 
         if self.current.playlist:
             txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(self.current.playlist['name'], limit=17)}`]({self.current.playlist['url']})"

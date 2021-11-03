@@ -146,6 +146,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             search: bool = commands.Param(name="selecionar", description="Escolher uma música manualmente entre os resultados encontrados", default=False),
             process_all: bool = commands.Param(name="carregar_todos", description="Carregar todas as músicas do link (útil caso seja video com playlist).", default=False),
             source: SearchSource = commands.Param(name="fonte", description="Selecionar site para busca de músicas (não links)", default="ytsearch"),
+            repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.", default=0)
     ):
 
         node = self.bot.wavelink.get_best_node()
@@ -168,7 +169,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await inter.response.defer(ephemeral=ephemeral)
 
         try:
-            tracks, node = await self.get_tracks(query, inter.user, source=source, process_all=process_all, node=node)
+            tracks, node = await self.get_tracks(query, inter.user, source=source, process_all=process_all, node=node, repeats=repeat_amount)
         except Exception as e:
             await inter.edit_original_message(content=f"**Ocorreu um erro:** ```py\n{e}```")
             return
@@ -546,12 +547,17 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await self.interaction_message(inter, txt)
 
+
     @check_voice()
     @has_source()
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(3, 5), commands.BucketType.member)
     @commands.slash_command(description="Ativar/Desativar a repetição.")
-    async def loop(
+    async def loop(self, inter: disnake.ApplicationCommandInteraction):
+        pass
+
+    @loop.sub_command(description="Selecionar entre: atual / fila ou desativar.")
+    async def mode(
             self,
             inter: disnake.ApplicationCommandInteraction,
             mode: Literal['current', 'queue', 'off'] = commands.Param(name="modo",
@@ -577,6 +583,32 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player.loop = mode
 
         await self.interaction_message(inter, txt)
+
+    @loop.sub_command(description="Definir quantidade de repetições da música atual.")
+    async def amount(
+            self,
+            inter: disnake.ApplicationCommandInteraction,
+            value: int = commands.Param(name="valor", description="número de repetições.")
+    ):
+
+        player: CustomPlayer = inter.player
+
+        player.current.repeats = value
+
+        embed = disnake.Embed(color=inter.guild.me.color)
+
+        txt = f"{inter.author.mention} definiu a quantidade de repetições da música " \
+              f"[`{(tname:=fix_characters(player.current.title, 25))}`]({player.current.uri}) para **{value}**."
+
+        if player.static and player.text_channel == inter.channel:
+            player.command_log = txt
+            embed.description=f"Quantidade de repetições **({value})** definida para a música: [`{tname}`]({player.current.uri})"
+            await inter.response.send_message(embed=embed, ephemeral=True)
+        else:
+            embed.description = txt
+            await inter.response.send_message(embed=embed)
+
+        await player.update_message()
 
     @check_voice()
     @has_player()
@@ -1424,6 +1456,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             elif player.is_previows_music:
                 player.queue.insert(1, player.last_track)
                 player.is_previows_music = False
+            elif player.last_track.repeats:
+                player.last_track.repeats -= 1
+                player.queue.insert(0, player.last_track)
             else:
                 player.played.append(player.last_track)
 
@@ -1440,7 +1475,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await player.process_next()
 
 
-    async def get_tracks(self, query: str, user: disnake.Member, source="ytsearch", process_all=False, node: wavelink.Node=None):
+    async def get_tracks(self, query: str, user: disnake.Member, source="ytsearch",
+                         process_all=False, node: wavelink.Node=None, repeats=0):
 
         query = query.strip("<>")
 
@@ -1466,7 +1502,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if isinstance(tracks, list):
 
             if not isinstance(tracks[0], SpotifyTrack):
-                tracks = [CustomTrack(track.id, track.info, requester=user) for track in tracks]
+                tracks = [CustomTrack(track.id, track.info, requester=user, repeats=repeats) for track in tracks]
 
         else:
 
