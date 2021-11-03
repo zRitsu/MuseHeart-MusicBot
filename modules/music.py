@@ -547,17 +547,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await self.interaction_message(inter, txt)
 
-
     @check_voice()
     @has_source()
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(3, 5), commands.BucketType.member)
-    @commands.slash_command(description="Ativar/Desativar a repetição.")
-    async def loop(self, inter: disnake.ApplicationCommandInteraction):
-        pass
-
-    @loop.sub_command(description="Selecionar entre: atual / fila ou desativar.")
-    async def mode(
+    @commands.slash_command(description="Selecionar entre: atual / fila ou desativar.")
+    async def loop_mode(
             self,
             inter: disnake.ApplicationCommandInteraction,
             mode: Literal['current', 'queue', 'off'] = commands.Param(name="modo",
@@ -584,8 +579,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await self.interaction_message(inter, txt)
 
-    @loop.sub_command(description="Definir quantidade de repetições da música atual.")
-    async def amount(
+    @check_voice()
+    @has_source()
+    @is_dj()
+    @commands.dynamic_cooldown(user_cooldown(3, 5), commands.BucketType.member)
+    @commands.slash_command(description="Definir quantidade de repetições da música atual.")
+    async def loop_amount(
             self,
             inter: disnake.ApplicationCommandInteraction,
             value: int = commands.Param(name="valor", description="número de repetições.")
