@@ -11,10 +11,28 @@ class Owner(commands.Cog):
     @commands.is_owner()
     @commands.command(aliases=["rd", "recarregar"], hidden=True)
     async def reload(self, ctx):
-        self.bot.load_modules()
-        await ctx.send("Todos os módulos foram recarregados (verifique o terminal/logs)")
+
+        data = self.bot.load_modules()
+
+        txt = ""
+
+        if data["loaded"]:
+            txt += f'```ini\n[Carregados]: {len(data["loaded"])}```\n'
+
+        if data["reloaded"]:
+            txt += f'```ini\n[Recarregados]: {len(data["reloaded"])}```\n'
+
+        if data["error"]:
+            txt += f'```ml\n\'Falharam\': {", ".join(m + ".py" for m in data["error"])}```'
+
+        if not txt:
+            txt = "**Nenhum módulo encontrado...**"
+
+        embed = disnake.Embed(colour=ctx.me.color, description=txt)
+        await ctx.send(embed=embed)
 
     @commands.command(aliases=["syncglobal"])
+    @commands.is_owner()
     async def syncguild(self, ctx, guild_id: int = None):
 
         embed = disnake.Embed(color=disnake.Colour.green())

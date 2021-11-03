@@ -17,21 +17,40 @@ class BotCore(commands.Bot):
         self.spotify = spotify_client()
         self.config = kwargs.pop('config', {})
 
+
     def load_modules(self):
-        print('-' * 30)
-        for filename in os.listdir('./modules'):
-            if not filename.endswith('.py'):
-                continue
-            try:
-                self.reload_extension(f'modules.{filename[:-3]}')
-                print(f"[OK] Módulo [{filename}] recarregado.\n{'-' * 30}")
-            except (commands.ExtensionAlreadyLoaded, commands.ExtensionNotLoaded):
+
+        modules_dir = "modules"
+
+        load_status = {
+            "reloaded": [],
+            "loaded": [],
+            "error": []
+        }
+
+        for item in os.walk(modules_dir):
+            files = filter(lambda f: f.endswith('.py'), item[-1])
+            for file in files:
+                filename, _ = os.path.splitext(file)
+                module_filename = os.path.join(modules_dir, filename).replace('\\', '.').replace('/', '.')
                 try:
-                    self.load_extension(f'modules.{filename[:-3]}')
-                    print(f"[OK] Módulo [{filename}] carregado.\n{'-' * 30}")
-                except:
-                    print(f"[ERRO] Falha ao carregar o módulo: [{filename}] | Erro:"
-                          f"\n{traceback.format_exc()}\n{'-' * 30}")
-            except:
-                print(f"Falha ao carregar/recarregar o módulo: {filename} | Erro:"
-                      f"\n{traceback.format_exc()}\n{'-' * 30}\n")
+                    self.reload_extension(module_filename)
+                    print(f"{'=' * 50}\n[OK] {filename}.py Recarregado.")
+                    load_status["reloaded"].append(filename)
+                except (commands.ExtensionAlreadyLoaded, commands.ExtensionNotLoaded):
+                    try:
+                        self.load_extension(module_filename)
+                        print(f"{'=' * 50}\n[OK] {filename}.py Carregado.")
+                        load_status["loaded"].append(filename)
+                    except Exception:
+                        print((f"{'=' * 50}\n[ERRO] Falha ao carregar/recarregar o módulo: {filename} | Erro:"
+                               f"\n{traceback.format_exc()}"))
+                        load_status["error"].append(filename)
+                except Exception:
+                    print((f"{'=' * 50}\n[ERRO] Falha ao carregar/recarregar o módulo: {filename} | Erro:"
+                      f"\n{traceback.format_exc()}"))
+                    load_status["error"].append(filename)
+
+        print(f"{'=' * 50}")
+
+        return load_status
