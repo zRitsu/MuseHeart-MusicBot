@@ -551,7 +551,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @has_source()
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(3, 5), commands.BucketType.member)
-    @commands.slash_command(description="Selecionar entre: atual / fila ou desativar.")
+    @commands.slash_command(description="Selecionar modo de repetição entre: atual / fila ou desativar.")
     async def loop_mode(
             self,
             inter: disnake.ApplicationCommandInteraction,
