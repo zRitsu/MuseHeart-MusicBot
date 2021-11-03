@@ -27,7 +27,7 @@
 <br/><br/>
 
 
-### Suporte ao spotify
+### Suporte ao spotify (Opcional)
 os passos 6 e 7 para o spotify não são obrigatórios mas caso queira o suporte você terá que ter em mãos o client_id e client_secrect ([clique aqui](SPOTIFY_IDS.md) para ver o tutorial de como obté-los).
 
 - 6 = Em key digite **SPOTIFY_CLIENT_ID** e em value cole o seu client id do spotify e em seguida clique em **Add new secret**.
