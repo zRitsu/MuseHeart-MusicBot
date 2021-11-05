@@ -50,12 +50,18 @@ class Owner(commands.Cog):
         original_list = self.bot._test_guilds
         original_sync_config = self.bot._sync_commands
 
+        invite_url = f"https://discord.com/api/oauth2/authorize?client_id={ctx.bot.user.id}&scope=applications.commands"
+
         if ctx.invoked_with == "syncguild":
             self.bot._test_guilds = [guild.id]
-            embed.description = f"**Comandos sincronizados para o servidor:**\n`{guild.name} [{guild.id}]`"
+            embed.description = f"**Comandos sincronizados para o servidor:**\n`{guild.name} [{guild.id}]`\n\n" \
+                                f"Caso os comandos não apareçam [clique aqui]({invite_url}) para permitir o bot " \
+                                f"criar comandos slash no servidor e use este mesmo comando novamente."
         else:
             self.bot._test_guilds = None
-            embed.description = f"**Comandos globais sincronizados**\n`(as alterações podem demorar até 1 hora)`"
+            embed.description = f"**Comandos globais sincronizados**\n`(as alterações podem demorar até 1 hora)`\n\n" \
+                                f"Caso os comandos não apareçam após esse tempo, [clique aqui]({invite_url}) para permitir o bot " \
+                                f"criar comandos slash no servidor e use este mesmo comando novamente."
 
         self.bot._sync_commands = True
 
