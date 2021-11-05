@@ -21,13 +21,17 @@
 ![](https://cdn.discordapp.com/attachments/480195401543188483/903855391178362941/unknown.png)
 <br/><br/>
 
+### Opcional: Configurar Prefixo
+`Nota: caso este passo seja ignorado, o prefixo padrão será: !!! (@mençãodobot também conta como prefixo).
+o prefixo só será usado apenas em comandos de configuração inicial, pois todos os demais comandos são de barra/slash.`
+
 - 5 = Ainda na mesma tela (com os campos vazios) em key digite **DEFAULT_PREFIX** e em value coloque o prefixo para o seu bot (não precisa ser exatamente o da imagem abaixo) e depois clique em **Add new secret**.
 
 ![](https://cdn.discordapp.com/attachments/480195401543188483/903856305792512040/unknown.png)
 <br/><br/>
 
 
-### Suporte ao spotify (Opcional)
+### Opcional: Suporte ao spotify
 os passos 6 e 7 para o spotify não são obrigatórios mas caso queira o suporte você terá que ter em mãos o client_id e client_secrect ([clique aqui](SPOTIFY_IDS.md) para ver o tutorial de como obté-los).
 
 - 6 = Em key digite **SPOTIFY_CLIENT_ID** e em value cole o seu client id do spotify e em seguida clique em **Add new secret**.
@@ -39,8 +43,10 @@ os passos 6 e 7 para o spotify não são obrigatórios mas caso queira o suporte
 
 ![](https://cdn.discordapp.com/attachments/480195401543188483/903860032955891733/unknown.png)
 
-### MongoDB para database (Opcional)
+### Opcional: MongoDB para database
 para obter o link de sua database para o passo abaixo [clique aqui](MONGODB_SETUP.md) para ver o tutorial.
+<br/>
+`Nota: Caso este passo seja ignorado, será usado o arquivo database.json para base de dados.`
 
 
 - 8 = Em key digite **MONGO** e em value cole o link da sua database do mongoDB e em seguida clique em **Add new secret**.
@@ -52,4 +58,6 @@ para obter o link de sua database para o passo abaixo [clique aqui](MONGODB_SETU
 - 9 = Com todas as secrets devidamente configuradas, clique em **Run** e aguarde o bot ligar normalmente (verifique no discord se ele fica online).
 <br/><br/>
 
-- 10 = Após o bot estar online e rodando normalmente, use o comando {seuprefix}syncguild para sincronizar os comandos slash (para comandos globais use {seuprefix}syncglobal mas este demora 1h para fazer efeito e caso tenha usado o syncguild os comandos vão aparecer duplicados).
+- 10 = Após o bot estar online e rodando normalmente, use o comando `@seubot syncguild` para sincronizar os comandos slash (para comandos globais use {seuprefix}syncglobal mas este demora 1h para fazer efeito e caso tenha usado o syncguild os comandos vão aparecer duplicados).
+<br/>
+Nota: `@seubot` = menção do seu bot
