@@ -11,7 +11,7 @@ ua = UserAgent().random
 async def search_suggestions(inter, query):
 
     if not inter.author.voice:
-        return ["entre em um canal de voz e repita sua busca."]
+        return
 
     if not query or URL_REG.match(query):
         return
@@ -25,7 +25,7 @@ async def search_suggestions(inter, query):
 def queue_tracks(inter, query):
 
     if not inter.author.voice:
-        return ["entre em um canal de voz e repita sua busca."]
+        return
 
     try:
         inter.player
@@ -41,7 +41,7 @@ def queue_tracks(inter, query):
 def queue_playlist(inter, query):
 
     if not inter.author.voice:
-        return ["entre em um canal de voz e repita sua busca."]
+        return
 
     try:
         inter.player
@@ -58,7 +58,7 @@ def queue_playlist(inter, query):
 def queue_author(inter, query):
 
     if not inter.author.voice:
-        return ["entre em um canal de voz e repita sua busca."]
+        return
 
     try:
         inter.player
