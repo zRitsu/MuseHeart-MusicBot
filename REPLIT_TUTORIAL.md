@@ -2,7 +2,14 @@
 
 *OBS: Será necessário criar/logar uma conta na repl.it (não será abordado essa parte no tutorial).
 
-- 1 = Clique no botão abaixo (segurando CTRL ou SHIFT para abrir em nova aba/janela) e aguarde:
+### Antes de prosseguir:
+Verifique se todas as intents do seu bot estão ativadas como na imagem abaixo:
+
+![](https://cdn.discordapp.com/attachments/480195401543188483/906040761047478282/unknown.png)
+
+###
+
+- 1 = Clique no botão abaixo (abra em nova aba ou janela) e aguarde:
 
 [![Run on Repl.it](https://repl.it/badge/github/zRitsu/disnake-LL-music-bot.git)](https://repl.it/github/zRitsu/disnake-LL-music-bot.git)
 

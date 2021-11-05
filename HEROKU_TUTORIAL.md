@@ -6,9 +6,16 @@
 
 <br/>
 
-- 1 = Clique no botão abaixo (segurando CTRL ou SHIFT para abrir em nova aba/janela):
+### Antes de prosseguir:
+Verifique se todas as intents do seu bot estão ativadas como na imagem abaixo:
 
-[![Heroku_Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/zRitsu/disnake-LL-music-bot) 
+![](https://cdn.discordapp.com/attachments/480195401543188483/906040761047478282/unknown.png)
+
+###
+
+- 1 = Clique no botão abaixo (abra em nova aba ou janela):
+
+[![Heroku_Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/zRitsu/disnake-LL-music-bot)
 
 - 2 = preencha os dados que estão como **required** na imagem abaixo (default_prefix e token do bot).
 
