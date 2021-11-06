@@ -120,5 +120,5 @@ def spotify_client() -> Optional[spotipy.Spotify]:
         )
     except Exception as e:
         print(
-            f"A APIKEY do spotify não foi configurada devidamente nas variáveis da host (ou no arquivo .env), verifique e tente novamente caso queira o suporte a músicas do spotify.\nErro: {repr(e)}")
+            f"A APIKEY do spotify não foi configurada devidamente nas variáveis da host (ou no arquivo .env), verifique e tente novamente caso queira o suporte a músicas do spotify (Erro: {repr(e)}).")
         return

@@ -1,11 +1,23 @@
 import disnake
 from disnake.ext import commands
+from utils.client import BotCore
 
+class Misc(commands.Cog):
 
-class Test(commands.Cog):
-
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: BotCore):
         self.bot = bot
+
+    @commands.slash_command(description="Exibir meu link de convite para você me adicionar no seu servidor.")
+    async def invite(self, inter: disnake.ApplicationCommandInteraction):
+
+        await inter.send(
+            embed = disnake.Embed(
+                colour=inter.me.color,
+                description=f"[**Clique aqui**](https://discord.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=0&scope=bot%20applications.commands) "
+                            f"para me adicionar no seu servidor."
+            ),
+            ephemeral=True
+        )
 
     @commands.user_command(name="avatar")
     async def avatar(self, inter: disnake.UserCommandInteraction):
@@ -32,5 +44,5 @@ class Test(commands.Cog):
         await inter.response.send_message(embeds=embeds, ephemeral=True)
 
 
-def setup(bot):
-    bot.add_cog(Test(bot))
+def setup(bot: BotCore):
+    bot.add_cog(Misc(bot))

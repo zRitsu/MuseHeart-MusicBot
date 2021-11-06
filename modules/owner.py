@@ -55,7 +55,7 @@ class Owner(commands.Cog):
         if ctx.invoked_with == "syncguild":
             self.bot._test_guilds = [guild.id]
             embed.description = f"**Comandos sincronizados para o servidor:**\n`{guild.name} [{guild.id}]`\n\n" \
-                                f"Caso os comandos não apareçam [clique aqui]({invite_url}) para permitir o bot " \
+                                f"Caso os comandos de barra não apareçam [clique aqui]({invite_url}) para permitir o bot " \
                                 f"criar comandos slash no servidor e use este mesmo comando novamente."
         else:
             self.bot._test_guilds = None
