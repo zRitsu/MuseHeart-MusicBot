@@ -7,6 +7,6 @@ Tutorial para hospedar seu próprio bot de música deste repositório sem coding
 
 ### Algumas previews:
 
-![img.png](img.png)![]()
+![](https://media.discordapp.net/attachments/480195401543188483/906456601496539166/unknown.png)
 
 ![](https://media.discordapp.net/attachments/480195401543188483/906451275971981382/unknown.png?width=798&height=555)
