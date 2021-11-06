@@ -129,7 +129,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if not inter.target.content:
             emb = disnake.Embed(description=f"Não há texto na [mensagem]({inter.target.jump_url}) selecionada...", color=disnake.Colour.red())
-            await inter.response.send_message(embed=emb, ephemeral=True)
+            await inter.send(embed=emb, ephemeral=True)
             return
 
         await self.play(inter, query=inter.target.content, position=0, source="ytsearch", search=False)
@@ -152,7 +152,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         node = self.bot.wavelink.get_best_node()
 
         if not node:
-            await inter.response.send_message(content="Não há servidores de música disponível.", ephemeral=True)
+            await inter.send(content="Não há servidores de música disponível.", ephemeral=True)
             return
 
         try:
@@ -302,7 +302,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             else:
                 ephemeral = False
             embed = disnake.Embed(description=f"⏭️** ┃ Música pulada:** [`{fix_characters(player.current.title, 30)}`]({player.current.uri})", color=inter.guild.me.color)
-            await inter.response.send_message(embed=embed, ephemeral=ephemeral)
+            await inter.send(embed=embed, ephemeral=ephemeral)
 
 
         if player.loop == "current":
@@ -338,11 +338,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         else:
             if player.static and player.text_channel == inter.channel:
                 player.command_log = f"{inter.author.mention} voltou para a música atual."
-                await inter.response.send_message("voltado com sucesso.", ephemeral=True)
+                await inter.send("voltado com sucesso.", ephemeral=True)
             else:
                 embed = disnake.Embed(description=f"⏮️** ┃ Voltou para a música:** [`{fix_characters(track.title, 30)}`]({track.uri})",
                                       color=inter.guild.me.color)
-                await inter.response.send_message(embed=embed)
+                await inter.send(embed=embed)
 
         if player.loop == "current":
             player.loop = False
@@ -378,7 +378,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             player.votes.add(inter.author)
             if ephemeral:
                 player.command_log = txt
-                await inter.response.send_message("voto adicionado!", ephemeral=True)
+                await inter.send("voto adicionado!", ephemeral=True)
                 await player.update_message()
             else:
                 await send_message(inter, embed=embed, ephemeral=ephemeral)
@@ -386,7 +386,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if ephemeral:
             player.command_log = f"{txt}\n**A anterior foi pulada imediatamente.**"
-            await inter.response.send_message("voto adicionado!", ephemeral=True)
+            await inter.send("voto adicionado!", ephemeral=True)
         else:
             embed.description = f"{txt}\n**A música atual será pulada imediatamente.**"
             await send_message(inter, embed=embed)
@@ -415,7 +415,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             embed.colour = inter.guild.me.colour
             embed.description = "**Selecione o nível do volume abaixo:**"
-            await inter.response.send_message(embed=embed, ephemeral=True, view=view)
+            await inter.send(embed=embed, ephemeral=True, view=view)
             await view.wait()
             if view.volume is None:
                 return
@@ -425,7 +425,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         elif not 4 < value < 151:
             embed.description = "O volume deve estar entre **5** a **150**."
-            return await inter.response.send_message(embed=embed, ephemeral=True)
+            return await inter.send(embed=embed, ephemeral=True)
 
         await player.set_volume(value)
 
@@ -602,10 +602,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if player.static and player.text_channel == inter.channel:
             player.command_log = txt
             embed.description=f"Quantidade de repetições **({value})** definida para a música: [`{tname}`]({player.current.uri})"
-            await inter.response.send_message(embed=embed, ephemeral=True)
+            await inter.send(embed=embed, ephemeral=True)
         else:
             embed.description = txt
-            await inter.response.send_message(embed=embed)
+            await inter.send(embed=embed)
 
         await player.update_message()
 
@@ -625,7 +625,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if index is None:
             embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
-            await inter.response.send_message(embed=embed, ephemeral=True)
+            await inter.send(embed=embed, ephemeral=True)
             return
 
         player: CustomPlayer = inter.player
@@ -641,10 +641,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if player.static and player.text_channel == inter.channel:
             player.command_log = txt
             embed.description=f"música removida: [`{tname}`]({track.uri})"
-            await inter.response.send_message(embed=embed, ephemeral=True)
+            await inter.send(embed=embed, ephemeral=True)
         else:
             embed.description = txt
-            await inter.response.send_message(embed=embed)
+            await inter.send(embed=embed)
 
         await player.update_message()
 
@@ -661,7 +661,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if not player.played:
             embed.description = f"{inter.author.mention} **não há músicas tocadas.**"
-            await inter.response.send_message(embed=embed, ephemeral=True)
+            await inter.send(embed=embed, ephemeral=True)
             return
 
         embed.colour = disnake.Colour.green()
@@ -674,11 +674,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if player.static and player.text_channel == inter.channel:
             player.command_log = txt
             embed.description = f"**você readicionou {qsize} música(s).**"
-            await inter.response.send_message(embed=embed, ephemeral=True)
+            await inter.send(embed=embed, ephemeral=True)
             await player.update_message()
         else:
             embed.description = txt
-            await inter.response.send_message(embed=embed)
+            await inter.send(embed=embed)
 
         if not player.current:
             await player.process_next()
@@ -702,7 +702,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if index is None:
             embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
-            await inter.response.send_message(embed=embed, ephemeral=True)
+            await inter.send(embed=embed, ephemeral=True)
             return
 
         player: CustomPlayer = inter.player
@@ -725,12 +725,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if player.static and player.text_channel == inter.channel:
             player.command_log = f"{inter.author.mention} pulou para a música atual"
             embed.description = f"**você pulou para a música:** [{track_title}]({track.uri})"
-            await inter.response.send_message(embed=embed, ephemeral=True)
+            await inter.send(embed=embed, ephemeral=True)
 
         else:
             embed.description = f"{inter.author.mention} **pulou para a música:** [`{track_title}`]({track.uri})"
             embed.colour = disnake.Colour.green()
-            await inter.response.send_message(embed=embed)
+            await inter.send(embed=embed)
 
         await player.stop()
 
@@ -756,7 +756,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if index is None:
             embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
-            await inter.response.send_message(embed=embed, ephemeral=True)
+            await inter.send(embed=embed, ephemeral=True)
             return
 
         player: CustomPlayer = inter.player
@@ -774,10 +774,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if player.static and player.text_channel == inter.channel:
             embed.description = f"música [`{fix_characters(track.title, limit=25)}`]({track.uri}) movida para a posição **[{position}]** da fila."
             player.command_log = txt
-            await inter.response.send_message(embed=embed, ephemeral=True)
+            await inter.send(embed=embed, ephemeral=True)
         else:
             embed.description = txt
-            await inter.response.send_message(embed=embed)
+            await inter.send(embed=embed)
 
         await player.update_message()
 
@@ -798,7 +798,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if index is None:
             embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
-            await inter.response.send_message(embed=embed, ephemeral=True)
+            await inter.send(embed=embed, ephemeral=True)
             return
 
         player: CustomPlayer = inter.player
@@ -807,7 +807,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if index <= 0:
             embed.description = f"{inter.author.mention} **a música **[`{track.title}`]({track.uri}) já é a próxima da fila."
-            await inter.response.send_message(embed=embed, ephemeral=True)
+            await inter.send(embed=embed, ephemeral=True)
             return
 
         player.queue.rotate(0 - (index))
@@ -819,10 +819,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if player.static and player.text_channel == inter.channel:
             embed.description = f"Fila rotacionada para a música [`{tname}`]({track.uri})."
             player.command_log = txt
-            await inter.response.send_message(embed=embed, ephemeral=True)
+            await inter.send(embed=embed, ephemeral=True)
         else:
             embed.description = txt
-            await inter.response.send_message(embed=embed)
+            await inter.send(embed=embed)
 
         await player.update_message()
 
@@ -859,13 +859,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player: CustomPlayer = inter.player
 
         if player.static:
-            await inter.response.send_message("este comando não pode ser usado no modo fixo do player.", ephemeral=True)
+            await inter.send("este comando não pode ser usado no modo fixo do player.", ephemeral=True)
             return
 
         await player.destroy_message()
         await player.invoke_np()
 
-        await inter.response.send_message("Player reenviado com sucesso!", ephemeral=True)
+        await inter.send("Player reenviado com sucesso!", ephemeral=True)
 
     @has_player()
     @is_dj()
@@ -900,7 +900,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         text = [f"adicionou {user.mention} à lista de DJ's.", f"{user.mention} foi adicionado à lista de DJ's."]
 
         if (inter.player.static and inter.channel == inter.player.text_channel) or isinstance(inter.application_command, commands.InvokableApplicationCommand):
-            await inter.response.send_message(f"{inter.target.mention} adicionado à lista de DJ's!", ephemeral=True)
+            await inter.send(f"{inter.target.mention} adicionado à lista de DJ's!", ephemeral=True)
 
         await self.interaction_message(inter, txt=text, update=True)
 
@@ -916,7 +916,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player.command_log = f"{inter.author.mention} **parou o player!**"
         embed.description = f"**{inter.author.mention} parou o player!**"
-        await inter.response.send_message(embed=embed, ephemeral=inter.guild_data and inter.guild_data["player_controller"]["channel"] == str(inter.channel.id))
+        await inter.send(embed=embed, ephemeral=inter.guild_data and inter.guild_data["player_controller"]["channel"] == str(inter.channel.id))
 
         await player.destroy()
 
@@ -938,7 +938,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         view = QueueInteraction(player, inter.author)
         embed = view.embed
 
-        await inter.response.send_message(embed=embed, view=view, ephemeral=True)
+        await inter.send(embed=embed, view=view, ephemeral=True)
 
         await view.wait()
 
@@ -950,7 +950,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if not self.bot.wavelink.nodes:
             em.description = "**Não há servidores.**"
-            await inter.response.send_message(embed=em)
+            await inter.send(embed=em)
             return
 
         for identifier, node in self.bot.wavelink.nodes.items():
@@ -991,7 +991,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             em.add_field(name=f'**{identifier}** `{status}`', value=txt)
 
-        await inter.response.send_message(embed=em, ephemeral=True)
+        await inter.send(embed=em, ephemeral=True)
 
     @has_player()
     @is_dj()
@@ -1010,7 +1010,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     ):
 
         if not inter.player.queue:
-            await inter.response.send_message("Não há musicas na fila.", ephemeral=True)
+            await inter.send("Não há musicas na fila.", ephemeral=True)
             return
 
         filters = []
@@ -1072,7 +1072,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     deleted_tracks += 1
 
             if not deleted_tracks:
-                await inter.response.send_message("Nenhuma música encontrada!", ephemeral=True)
+                await inter.send("Nenhuma música encontrada!", ephemeral=True)
                 return
 
             txt = [f"removeu {deleted_tracks} música(s) da fila via clear.",
@@ -1108,7 +1108,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await self.bot.db.update_data(inter.guild.id, inter.guild_data, db_name='guilds')
 
         embed = disnake.Embed(description=f"**Canal criado: {channel.mention}**\n\nObs: Caso queira reverter esta configuração, apenas delete o canal {channel.mention}", color=inter.guild.me.color)
-        await inter.response.send_message(embed=embed, ephemeral=True)
+        await inter.send(embed=embed, ephemeral=True)
 
     @commands.has_guild_permissions(administrator=True)
     @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
@@ -1120,18 +1120,18 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     ):
 
         if role == inter.guild.default_role:
-            await inter.response.send_message("Você não pode adicionar este cargo.", ephemeral=True)
+            await inter.send("Você não pode adicionar este cargo.", ephemeral=True)
             return
 
         if str(role.id) in inter.guild_data['djroles']:
-            await inter.response.send_message("Este cargo já está na lista de DJ's", ephemeral=True)
+            await inter.send("Este cargo já está na lista de DJ's", ephemeral=True)
             return
 
         inter.guild_data['djroles'].append(str(role.id))
 
         await self.bot.db.update_data(inter.guild.id, inter.guild_data, db_name="guilds")
 
-        await inter.response.send_message(f"O cargo {role.mention} foi adicionado à lista de DJ's", ephemeral=True)
+        await inter.send(f"O cargo {role.mention} foi adicionado à lista de DJ's", ephemeral=True)
 
     @commands.has_guild_permissions(administrator=True)
     @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
@@ -1144,11 +1144,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if not inter.guild_data['djroles']:
 
-            await inter.response.send_message("Não há cargos na lista de DJ's.", ephemeral=True)
+            await inter.send("Não há cargos na lista de DJ's.", ephemeral=True)
             return
 
         if str(role.id) not in inter.guild_data['djroles']:
-            await inter.response.send_message("Este cargo não está na lista de DJ's\n\n" + "Cargos:\n" +
+            await inter.send("Este cargo não está na lista de DJ's\n\n" + "Cargos:\n" +
                                               " ".join(f"<#{r}>" for r in inter.guild_data['djroles']), ephemeral=True)
             return
 
@@ -1156,7 +1156,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await self.bot.db.update_data(inter.guild.id, inter.guild_data, db_name="guilds")
 
-        await inter.response.send_message(f"O cargo {role.mention} foi removido da lista de DJ's", ephemeral=True)
+        await inter.send(f"O cargo {role.mention} foi removido da lista de DJ's", ephemeral=True)
 
     @commands.Cog.listener("on_message")
     async def song_requests(self, message: disnake.Message):
@@ -1299,7 +1299,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             txt = f"{inter.author.mention} {txt}"
             inter.player.command_log = txt
             if not (component_interaction:=isinstance(inter, disnake.MessageInteraction)) and inter.player.static and not inter.response.is_done():
-                await inter.response.send_message(txt_ephemeral or txt, ephemeral=True)
+                await inter.send(txt_ephemeral or txt, ephemeral=True)
             await inter.player.update_message(interaction=False if (update or not component_interaction) else inter)
             return
 
@@ -1307,7 +1307,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         embed = disnake.Embed(color=disnake.Colour.green(), description=txt_ephemeral or txt)
         await inter.player.update_message()
         if not inter.response.is_done():
-            await inter.response.send_message(embed=embed, ephemeral=ephemeral)
+            await inter.send(embed=embed, ephemeral=ephemeral)
         else:
             await inter.channel.send(embed=embed)
 

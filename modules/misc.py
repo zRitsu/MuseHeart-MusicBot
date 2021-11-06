@@ -41,7 +41,7 @@ class Misc(commands.Cog):
             embed.set_image(asset.with_size(256).url)
             embeds.append(embed)
 
-        await inter.response.send_message(embeds=embeds, ephemeral=True)
+        await inter.send(embeds=embeds, ephemeral=True)
 
 
 def setup(bot: BotCore):

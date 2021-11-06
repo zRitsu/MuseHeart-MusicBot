@@ -23,7 +23,7 @@ async def send_message(
     if inter.response.is_done():
         await inter.edit_original_message(content=text, embed=embed)
     else:
-        await inter.response.send_message(text, embed=embed, ephemeral=ephemeral)
+        await inter.send(text, embed=embed, ephemeral=ephemeral)
 
 
 class VolumeInteraction(disnake.ui.View):
