@@ -14,6 +14,7 @@ from .spotify import SpotifyTrack
 import itertools
 import traceback
 from collections import deque
+from .errors import GenericError
 from typing import Optional, Union, TYPE_CHECKING
 if TYPE_CHECKING:
     from ..client import BotCore
@@ -577,6 +578,10 @@ class YTDLPlayer(BasePlayer):
         else:
             await channel.connect(cls=self.vc, reconnect=True)
         self.vc = self.guild.voice_client
+
+    async def seek(self, position: int):
+        # não implementado ainda...
+        raise GenericError("O sistema de avançar/voltar música ainda não foi implementado para o modo: YoutubeDL.")
 
     @property
     def is_connected(self)  -> bool:
