@@ -30,7 +30,7 @@ def queue_tracks(inter, query):
     try:
         inter.player
     except:
-        inter.player = inter.bot.wavelink.players.get(inter.guild.id)
+        inter.player = inter.bot.music.players.get(inter.guild.id)
 
     if not inter.player:
         return
@@ -46,7 +46,7 @@ def queue_playlist(inter, query):
     try:
         inter.player
     except:
-        inter.player = inter.bot.wavelink.players.get(inter.guild.id)
+        inter.player = inter.bot.music.players.get(inter.guild.id)
 
     if not inter.player:
         return
@@ -63,7 +63,7 @@ def queue_author(inter, query):
     try:
         inter.player
     except:
-        inter.player = inter.bot.wavelink.players.get(inter.guild.id)
+        inter.player = inter.bot.music.players.get(inter.guild.id)
 
     if not inter.player:
         return
@@ -79,7 +79,7 @@ def seek_suggestions(inter, query):
     try:
         inter.player
     except:
-        inter.player = inter.bot.wavelink.players.get(inter.guild.id)
+        inter.player = inter.bot.music.players.get(inter.guild.id)
 
     if not inter.player or not inter.player.current:
         return

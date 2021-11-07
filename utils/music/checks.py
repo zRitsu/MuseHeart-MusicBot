@@ -10,7 +10,7 @@ def has_player():
         try:
             inter.player
         except AttributeError:
-            inter.player = inter.bot.wavelink.players.get(inter.guild.id)
+            inter.player = inter.bot.music.players.get(inter.guild.id)
 
         if not inter.player:
             raise NoPlayer()
@@ -33,7 +33,7 @@ def is_dj():
 def is_requester():
     async def predicate(inter):
 
-        inter.player = inter.bot.wavelink.players.get(inter.guild.id)
+        inter.player = inter.bot.music.players.get(inter.guild.id)
 
         if not inter.player:
             raise NoPlayer()
@@ -78,7 +78,7 @@ def has_source():
         try:
             inter.player
         except:
-            inter.player = inter.bot.wavelink.players.get(inter.guild.id)
+            inter.player = inter.bot.music.players.get(inter.guild.id)
 
         if not inter.player:
             raise NoPlayer()
@@ -109,7 +109,7 @@ async def has_perm(inter):
     try:
         player = inter.player
     except AttributeError:
-        inter.player = inter.bot.wavelink.players.get(inter.guild.id)
+        inter.player = inter.bot.music.players.get(inter.guild.id)
         player = inter.player
 
     if not player:

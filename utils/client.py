@@ -1,9 +1,11 @@
+import aiohttp
 from disnake.ext import commands
-from wavelink import Client
+from typing import Optional
 from .music.spotify import spotify_client
 from utils.db import Database, LocalDatabase
 import os
 import traceback
+from utils.music.models import music_mode
 
 
 class BotCore(commands.Bot):
@@ -11,12 +13,17 @@ class BotCore(commands.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         mongo = kwargs.get('mongo')
+        self.session: Optional[aiohttp.ClientError] = None
         self.db = Database(token=mongo, name=kwargs.pop("db_name", "botdiscord")) if mongo else LocalDatabase(self)
-        self.wavelink = Client(bot=self)
         self.tests = None
         self.spotify = spotify_client()
         self.config = kwargs.pop('config', {})
+        self.music = music_mode(self)
 
+
+    async def on_ready(self):
+        if not self.session:
+            self.session = aiohttp.ClientSession()
 
     def load_modules(self):
 

@@ -6,7 +6,7 @@ from .converters import percentage, time_format, fix_characters
 from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
-    from .models import CustomPlayer
+    from .models import LavalinkPlayer, YTDLPlayer
 
 
 async def send_message(
@@ -184,7 +184,7 @@ class PlayerInteractions(disnake.ui.View):
 
     async def interaction_check(self, interaction: disnake.Interaction):
 
-        player: CustomPlayer = self.bot.wavelink.players.get(interaction.guild.id)
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players.get(interaction.guild.id)
 
         if player.interaction_cooldown:
             await interaction.response.send_message("O player está em cooldown, tente novamente em instantes.",

@@ -1,14 +1,55 @@
+from __future__ import annotations
+
+import pprint
+
 import disnake
 import asyncio
 import wavelink
-from typing import Union, Optional
-from collections import deque
-from .converters import fix_characters, time_format, get_button_style
+from yt_dlp import YoutubeDL
+from functools import partial
+from .converters import fix_characters, time_format, get_button_style, URL_REG
 from .filters import AudioFilter
 from .interactions import PlayerInteractions
 from .spotify import SpotifyTrack
 import itertools
 import traceback
+from collections import deque
+from typing import Optional, Union, TYPE_CHECKING
+if TYPE_CHECKING:
+    from ..client import BotCore
+
+
+
+YDL_OPTIONS = {
+    'noplaylist': True,
+    'nocheckcertificate': True,
+    'ignoreerrors': False,
+    'logtostderr': False,
+    'quiet': True,
+    'no_warnings': True,
+    'retries': 5,
+    'extract_flat': True,
+    'cachedir': False,
+    'extractor_args': {
+        'youtube': {
+            'skip': [
+                'hls',
+                'dash'
+            ],
+            'player_skip': [
+                'js',
+                'configs',
+                'webpage'
+            ]
+        },
+        'youtubetab': ['webpage']
+    }
+}
+
+
+filters = {
+    'nightcore': 'aresample=48000,asetrate=48000*1.25'
+}
 
 
 class WavelinkVoiceClient(disnake.VoiceClient):
@@ -24,7 +65,7 @@ class WavelinkVoiceClient(disnake.VoiceClient):
                  player: wavelink.Player):
         self.bot = client
         self.channel = channel
-        self.wavelink: wavelink.Client = self.bot.wavelink
+        self.wavelink: wavelink.Client = self.bot.music
         self.player = player
 
     async def on_voice_server_update(self, data):
@@ -57,7 +98,7 @@ class WavelinkVoiceClient(disnake.VoiceClient):
         self.cleanup()
 
 
-class CustomTrack(wavelink.Track):
+class LavalinkTrack(wavelink.Track):
 
     def __init__(self, *args, **kwargs):
         self.requester = kwargs.pop('requester')
@@ -73,25 +114,60 @@ class CustomTrack(wavelink.Track):
             self.thumb = self.info.get("artworkUrl", "")
 
 
-class CustomPlayer(wavelink.Player):
+class YTDLPlaylist:
+
+    def __init__(self, data: dict, *, playlist: dict):
+        self.data = data
+
+        self.tracks = [
+            YTDLTrack(
+                data=i,
+            ) for i in data['tracks'] if i.get('duration')]
+
+
+class YTDLTrack:
 
     def __init__(self, *args, **kwargs):
 
-        requester = kwargs.pop('requester')
+        data = kwargs.pop('data', {}) or args[1]
 
-        self.guild = kwargs.pop('guild')
+        self.author = fix_characters(data.get('uploader', ''))
+        self.id = data.pop('source', '')
+        self.title = f"{fix_characters(data.get('title', ''))}"
+        self.thumb = data.get('thumbnail', '')
+        self.uri = data.get('webpage_url') or data.get('url')
+        self.duration = data.get('duration', 0) * 1000
+        self.is_stream = False
+        self.info = data
+        self.requester = kwargs.pop('requester', '')
+        self.playlist = kwargs.pop('playlist', {})
+        self.repeats = kwargs.pop('repeats', 0)
+
+
+class BasePlayer:
+
+    bot: BotCore
+    volume: int
+    node: wavelink.node
+    vc: disnake.VoiceProtocol
+
+    def __init__(self, *args, **kwargs):
+
+        #super().__init__(*args, **kwargs)
+
+        self.requester = kwargs.pop('requester')
+        self.guild: disnake.Guild = kwargs.pop('guild')
         self.text_channel: disnake.TextChannel = kwargs.pop('channel')
-        self.dj = [] if requester.guild_permissions.manage_channels else [requester]
+        self.dj = [] if self.requester.guild_permissions.manage_channels else [self.requester]
         self.message: Optional[disnake.Message] = kwargs.pop('message', None)
         self.static = kwargs.pop('static', False)
         self.cog = kwargs.pop('cog')
         self.filters = {}
-        super().__init__(*args, **kwargs)
         self.queue = deque()
         self.played = deque(maxlen=20)
         self.nightcore = False
         self.loop = False
-        self.last_track: Optional[CustomTrack] = None
+        self.last_track: Optional[LavalinkTrack, YTDLTrack] = None
         self.locked = False
         self.idle = None
         self.idle_timeout = 180  # aguardar 3 minutos para adicionar novas músicas
@@ -100,61 +176,19 @@ class CustomPlayer(wavelink.Player):
         self.command_log = ""
         self.last_embed = None
         self.interaction_cooldown = False
-        self.vc = WavelinkVoiceClient(self.bot, requester.voice.channel, self)
         self.votes = set()
-        self.msg_ad = self.bot.config.get("link")
-
-    async def connect(self, channel_id: int, self_deaf: bool = False):
-
-        if not self.vc:
-            if not self.guild.me.voice:
-                await super().connect(channel_id, self_deaf)
-            return
-
-        self.channel_id = channel_id
-
-        channel = self.bot.get_channel(channel_id)
-
-        await super().connect(channel_id, self_deaf)
-
-        if self.guild.me.voice and self.guild.me.voice.channel.id != channel_id:
-            await self.vc.move_to(channel)
-        else:
-            await channel.connect(cls=self.vc, reconnect=True)
-
-    async def destroy(self, *, force: bool = False):
-
-        try:
-            self.idle.cancel()
-        except:
-            pass
-
-        if self.static:
-            try:
-                await self.cog.send_idle_embed(self.message, self.command_log)
-            except:
-                pass
-
-        try:
-            await self.destroy_message()
-        except:
-            pass
-
-        if self.vc:
-            try:
-                await self.vc.disconnect(force=True)
-            except:
-                pass
-
-        if self.bot.tests:
-            self.current = None
-            await self.bot.tests.tests_start(self, close=True)
-
-        await super().destroy(force=force)
+        self.msg_ad = self.cog.bot.config.get("link")
+        self.view: Optional[disnake.ui.View] = None
+        self.current: Optional[LavalinkTrack, SpotifyTrack, YTDLTrack] = None
+        self.paused = False
+        self.view: Optional[disnake.ui.View] = None
 
     async def idling_mode(self):
 
-        self.view.stop()
+        try:
+            self.view.stop()
+        except:
+            pass
 
         self.view = PlayerInteractions(self.bot)
 
@@ -190,40 +224,6 @@ class CustomPlayer(wavelink.Player):
         self.bot.loop.create_task(self.text_channel.send(embed=embed, delete_after=15 if self.static else None))
         self.bot.loop.create_task(self.destroy())
         return
-
-    async def process_next(self):
-
-        if self.locked:
-            return
-
-        try:
-            track = self.queue.popleft()
-        except:
-            self.idle = self.bot.loop.create_task(self.idling_mode())
-            return
-
-        if not track:
-            return
-
-        try:
-            self.idle.cancel()
-        except:
-            pass
-
-        self.locked = True
-
-        if isinstance(track, SpotifyTrack):
-
-            await track.resolve(self.node)
-
-            if not track.id:
-                return await self.process_next()
-
-        self.last_track = track
-
-        await self.play(track)
-
-        self.locked = False
 
     async def invoke_np(self, force=False, interaction=None):
 
@@ -287,7 +287,8 @@ class CustomPlayer(wavelink.Player):
 
             else:
 
-                embed_queue = disnake.Embed(title=f"Músicas na fila:", color=self.guild.me.color, description=f"\n{queue_txt}")
+                embed_queue = disnake.Embed(title=f"Músicas na fila:", color=self.guild.me.color,
+                                            description=f"\n{queue_txt}")
                 if (qsize := len(self.queue)) > 20:
                     embed_queue.description += f"\n\nE mais **{qsize - 20}** músicas."
                 txt += f"\n{self.msg_ad}" if self.msg_ad else ""
@@ -300,7 +301,8 @@ class CustomPlayer(wavelink.Player):
         if self.static:
             embed.set_image(url=self.current.thumb)
         else:
-            embed.set_image(url="https://cdn.discordapp.com/attachments/480195401543188483/795080813678559273/rainbow_bar2.gif")
+            embed.set_image(
+                url="https://cdn.discordapp.com/attachments/480195401543188483/795080813678559273/rainbow_bar2.gif")
             embed.set_thumbnail(url=self.current.thumb)
 
         if self.bot.tests:
@@ -357,10 +359,14 @@ class CustomPlayer(wavelink.Player):
                     await interaction.response.edit_message(embeds=embeds, view=self.view)
                 else:
                     try:
+                        await interaction.response.defer()
+                    except:
+                        pass
+                    try:
                         await self.message.edit(embeds=embeds, view=self.view)
                     except:
                         if not self.bot.get_channel(self.text_channel.id):
-                            await self.destroy(force=True) # canal não existe mais no servidor...
+                            await self.destroy(force=True)  # canal não existe mais no servidor...
                 self.cancel_message_task_update()
                 return
             except:
@@ -374,7 +380,6 @@ class CustomPlayer(wavelink.Player):
         self.message = await self.text_channel.send(embeds=embeds, view=self.view)
 
         self.cancel_message_task_update()
-
 
     async def destroy_message(self, destroy_view=True):
 
@@ -421,7 +426,7 @@ class CustomPlayer(wavelink.Player):
         except:
             traceback.print_exc()
 
-    async def update_message(self, interaction: disnake.Interaction=None, force=False):
+    async def update_message(self, interaction: disnake.Interaction = None, force=False):
 
         if self.updating_message:
 
@@ -429,7 +434,319 @@ class CustomPlayer(wavelink.Player):
                 await interaction.response.defer()
             return
 
-        self.updating_message = self.bot.loop.create_task(self.update_message_task(interaction=interaction, force=force))
+        self.updating_message = self.bot.loop.create_task(
+            self.update_message_task(interaction=interaction, force=force))
+
+    async def process_next(self):
+
+        if self.locked:
+            return False
+
+        try:
+            track = self.queue.popleft()
+        except Exception:
+            self.idle = self.bot.loop.create_task(self.idling_mode())
+            return False
+
+        if not track:
+            return False
+
+        try:
+            self.idle.cancel()
+        except:
+            pass
+
+        if isinstance(track, SpotifyTrack):
+
+            self.locked = True
+
+            await track.resolve(self.node)
+
+            self.locked = False
+
+            if not track.id:
+                return await self.process_next()
+
+        self.last_track = track
+
+        return track
+
+    async def cleanup(self):
+
+        try:
+            self.idle.cancel()
+        except:
+            pass
+
+        if self.static:
+            try:
+                await self.cog.send_idle_embed(self.message, self.command_log)
+            except:
+                pass
+
+        try:
+            await self.destroy_message()
+        except:
+            pass
+
+        if self.bot.tests:
+            self.current = None
+            await self.bot.tests.tests_start(self, close=True)
+
+    async def track_end(self):
+
+        self.votes.clear()
+
+        self.locked = True
+
+        await asyncio.sleep(0.5)
+
+        if self.last_track:
+
+            if self.loop == "queue":
+                if self.is_previows_music:
+                    self.queue.insert(1, self.last_track)
+                    self.is_previows_music = False
+                else:
+                    self.queue.append(self.last_track)
+            elif self.loop == "current":
+                self.queue.appendleft(self.last_track)
+            elif self.is_previows_music:
+                self.queue.insert(1, self.last_track)
+                self.is_previows_music = False
+            elif self.last_track.repeats:
+                self.last_track.repeats -= 1
+                self.queue.insert(0, self.last_track)
+            else:
+                self.played.append(self.last_track)
+
+        elif self.is_previows_music:
+            self.is_previows_music = False
+
+        try:
+            self.updating_message.cancel()
+        except:
+            pass
+
+        self.locked = False
+
+
+class YTDLPlayer(BasePlayer):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.current = None
+        self.channel_id = kwargs.pop('channel_id', None)
+        self.bot: BotCore = kwargs.pop('bot')
+        self.event = asyncio.Event()
+        self.exiting = False
+        self.locked = False
+        self.vc: Optional[disnake.VoiceClient] = None
+        self.volume = 100
+
+    async def update_filters(self):
+        # quebra-galho
+        self.nightcore = False
+        self.queue.appendleft(self.current)
+        self.last_track = None
+        self.current = None
+        await self.stop()
+
+    async def set_timescale(self, *args, **kwargs):
+        # quebra-galho
+        self.nightcore = True
+        self.queue.appendleft(self.current)
+        self.last_track = None
+        self.current = None
+        await self.stop()
+
+    async def connect(self, channel_id: int, self_deaf: bool = False):
+
+        self.channel_id = channel_id
+
+        if not self.vc:
+            if not self.guild.me.voice:
+                await self.bot.get_channel(channel_id).connect()
+            self.vc = self.guild.voice_client
+            return
+
+        channel = self.bot.get_channel(channel_id)
+
+        if self.guild.me.voice and self.guild.me.voice.channel.id != channel_id:
+            await self.vc.move_to(channel)
+        else:
+            await channel.connect(cls=self.vc, reconnect=True)
+        self.vc = self.guild.voice_client
+
+    @property
+    def is_connected(self)  -> bool:
+        return self.vc is not None
+
+    @property
+    def is_paused(self) -> bool:
+        return self.is_connected and self.vc.is_paused()
+
+    async def destroy(self, force=True):
+
+        self.exiting = True
+
+        if self.guild.me.voice:
+            await self.guild.voice_client.disconnect(force=force)
+        elif self.guild.me.voice_client:
+            self.guild.me.voice_client.cleanup()
+
+        await self.cleanup()
+
+        try:
+            del self.bot.music.players[self.guild.id]
+        except:
+            pass
+
+
+    async def renew_url(self, track: YTDLTrack) -> YTDLTrack:
+
+        to_run = partial(self.bot.ytdl.extract_info, url=track.uri, download=False)
+        info = await self.bot.loop.run_in_executor(None, to_run)
+
+        info['source'] = info['formats'][0]['url']
+
+        return YTDLTrack(data=info, requester=track.requester, playlist=track.playlist)
+
+    async def process_track(self):
+
+        self.event.clear()
+
+        if self.exiting:
+            return
+
+        track: YTDLTrack = await super().process_next()
+
+        if track is False or self.locked:
+            return
+
+        await self.bot.wait_until_ready()
+
+        self.locked = True
+
+        if not track.id:
+
+            try:
+                track = await self.renew_url(track)
+            except Exception as e:
+                traceback.print_exc()
+                try:
+                    await self.text_channel.send(embed=disnake.Embed(
+                        description=f"**Ocorreu um erro durante a reprodução da música:\n[{self.current['title']}]({self.current['webpage_url']})** ```css\n{e}\n```",
+                        color=disnake.Colour.red()))
+                except:
+                    pass
+                await asyncio.sleep(6)
+                self.locked = False
+                await self.process_next()
+                return
+
+        self.current = track
+
+        FFMPEG_OPTIONS = {
+            'before_options': '-nostdin'
+                              ' -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+            'options': '-vn'
+        }
+
+        if self.nightcore:
+            FFMPEG_OPTIONS['options'] += (f" -af \"{filters['nightcore']}\"")
+
+        source = disnake.FFmpegPCMAudio(track.id, **FFMPEG_OPTIONS)
+
+        try:
+            await self.invoke_np()
+        except:
+            traceback.print_exc()
+
+        self.vc.play(source, after=lambda _: self.bot.loop.call_soon_threadsafe(self.event.set))
+
+        self.locked = False
+
+        await self.event.wait()
+
+        source.cleanup()
+
+        self.current = None
+
+        await self.track_end()
+
+        await self.process_next()
+
+    async def stop(self):
+        self.vc.stop()
+
+    async def process_next(self):
+        self.bot.loop.create_task(self.process_track())
+
+
+class LavalinkPlayer(BasePlayer, wavelink.Player):
+
+    def __init__(self, *args, **kwargs):
+        super(LavalinkPlayer, self).__init__(*args, **kwargs)
+        self.queue = deque()
+        self.played = deque(maxlen=20)
+        self.nightcore = False
+        self.loop = False
+        self.last_track: Optional[LavalinkTrack] = None
+        self.locked = False
+        self.idle = None
+        self.idle_timeout = 180  # aguardar 3 minutos para adicionar novas músicas
+        self.is_previows_music = False
+        self.updating_message = None
+        self.command_log = ""
+        self.last_embed = None
+        self.interaction_cooldown = False
+        self.vc = WavelinkVoiceClient(self.bot, self.requester.voice.channel, self)
+        self.votes = set()
+        self.msg_ad = self.bot.config.get("link")
+        self.view: Optional[disnake.ui.View] = None
+
+    async def process_next(self):
+
+        track = await super().process_next()
+
+        if track is False:
+            return
+
+        await self.play(track)
+
+        self.locked = False
+
+    async def connect(self, channel_id: int, self_deaf: bool = False):
+
+        if not self.vc:
+            if not self.guild.me.voice:
+                await super().connect(channel_id, self_deaf)
+            return
+
+        self.channel_id = channel_id
+
+        channel = self.bot.get_channel(channel_id)
+
+        await super().connect(channel_id, self_deaf)
+
+        if self.guild.me.voice and self.guild.me.voice.channel.id != channel_id:
+            await self.vc.move_to(channel)
+        else:
+            await channel.connect(cls=self.vc, reconnect=True)
+
+
+    async def destroy(self, *, force: bool = False):
+
+        try:
+            await self.vc.disconnect(force=True)
+        except:
+            pass
+
+        await self.cleanup()
+
+        await super().destroy(force=force)
+
 
     #######################
     #### Filter Stuffs ####
@@ -558,3 +875,77 @@ class CustomPlayer(wavelink.Player):
         await self.update_filters()
 
         return filter_type
+
+
+class YTDL_Manager:
+
+    def __init__(self, *, bot: BotCore):
+        bot.ytdl = YoutubeDL(YDL_OPTIONS)
+        self.bot = bot
+        self.players = {}
+        self.identifier = "YoutubeDL"
+
+    def get_player(self, guild_id: int, *args, **kwargs):
+
+        try:
+            player = self.players[guild_id]
+        except KeyError:
+            pass
+        else:
+            return player
+
+        kwargs['bot'] = self.bot
+
+        player = YTDLPlayer(*args, **kwargs)
+        self.players[guild_id] = player
+        return player
+
+    #testes
+    def get_best_node(self):
+        return self
+
+    async def get_tracks(self, query: str):
+
+        to_run = partial(self.bot.ytdl.extract_info, url=query, download=False)
+        info = await self.bot.loop.run_in_executor(None, to_run)
+
+        try:
+            data = {
+                'loadType': 'PLAYLIST_LOADED',
+                'playlistInfo': {'name': '', 'selectedTrack': -1},
+                'tracks': []
+            }
+
+            data["playlistInfo"]["name"] = info.pop('title')
+            data["tracks"] = info["entries"]
+
+            playlist = {"name": data["playlistInfo"]["name"], "url": info.pop('webpage_url', query)}
+
+            info['url'] = query
+            return YTDLPlaylist(data, playlist=playlist)
+        except KeyError:
+            entries = [info]
+
+        if query.startswith(("ytsearch:", "scsearch:")):
+            entries = entries[:1]
+
+        tracks = []
+
+        for t in entries:
+
+            if not t.get('duration'):
+                continue
+
+            tracks.append(
+                YTDLTrack(data=t)
+            )
+
+        return tracks
+
+
+def music_mode(bot: BotCore):
+
+    if bot.config.get("youtubedl"):
+        return YTDL_Manager(bot=bot)
+    else:
+        return wavelink.Client(bot=bot)
