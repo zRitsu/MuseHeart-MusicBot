@@ -154,7 +154,7 @@ class BasePlayer:
 
     def __init__(self, *args, **kwargs):
 
-        #super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.requester = kwargs.pop('requester')
         self.guild: disnake.Guild = kwargs.pop('guild')
@@ -915,6 +915,9 @@ class YTDL_Manager:
         info = await self.bot.loop.run_in_executor(None, to_run)
 
         try:
+
+            pprint.pprint(info)
+
             data = {
                 'loadType': 'PLAYLIST_LOADED',
                 'playlistInfo': {'name': '', 'selectedTrack': -1},
