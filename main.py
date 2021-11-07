@@ -14,7 +14,7 @@ try:
 except FileNotFoundError:
     config = {}
 
-if config['lavalink']['local']['start_local_lavalink']:
+if not config.get('youtubedl') and config['lavalink']['local']['start_local_lavalink']:
     run_lavalink(
         lavalink_file_url=config['lavalink']['local']['lavalink_file_url'],
         lavalink_ram_limit=config['lavalink']['local']['lavalink_ram_limit'],
