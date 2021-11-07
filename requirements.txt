@@ -8,3 +8,5 @@ tornado
 motor
 dnspython
 fake-useragent
+PyNaCl
+yt-dlp
