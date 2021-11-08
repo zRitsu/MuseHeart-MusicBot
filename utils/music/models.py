@@ -126,6 +126,17 @@ class YTDLPlaylist:
             ) for i in data['tracks'] if i.get('duration')]
 
 
+class YTDLSource(disnake.PCMVolumeTransformer):
+
+    def __init__(self, source):
+        super().__init__(source)
+
+    @classmethod
+    async def source(cls, url, *, ffmpeg_opts):
+        return cls(disnake.FFmpegPCMAudio(url, **ffmpeg_opts))
+
+
+
 class YTDLTrack:
 
     def __init__(self, *args, **kwargs):
@@ -135,7 +146,6 @@ class YTDLTrack:
         self.author = fix_characters(data.get('uploader', ''))
         self.id = data.pop('source', '')
         self.title = f"{fix_characters(data.get('title', ''))}"
-        self.thumb = data.get('thumbnail', '')
         self.uri = data.get('webpage_url') or data.get('url')
         self.duration = data.get('duration', 0) * 1000
         self.is_stream = False
@@ -143,6 +153,11 @@ class YTDLTrack:
         self.requester = kwargs.pop('requester', '')
         self.playlist = kwargs.pop('playlist', {})
         self.repeats = kwargs.pop('repeats', 0)
+
+        if (data.get("ie_key") or data.get('extractor_key')) == "Youtube":
+            self.thumb = f"https://img.youtube.com/vi/{data['id']}/mqdefault.jpg"
+        else:
+            self.thumb = data.get('thumbnail', '')
 
 
 class BasePlayer:
@@ -154,7 +169,10 @@ class BasePlayer:
 
     def __init__(self, *args, **kwargs):
 
-        super().__init__(*args, **kwargs)
+        try:
+            super().__init__(*args, **kwargs)
+        except:
+            pass
 
         self.requester = kwargs.pop('requester')
         self.guild: disnake.Guild = kwargs.pop('guild')
@@ -561,6 +579,12 @@ class YTDLPlayer(BasePlayer):
         self.current = None
         await self.stop()
 
+    async def set_volume(self, vol: int):
+
+        if self.vc and self.vc.source:
+            self.vc.source.volume  = vol / 100
+        self.volume = vol
+
     async def connect(self, channel_id: int, self_deaf: bool = False):
 
         self.channel_id = channel_id
@@ -661,7 +685,8 @@ class YTDLPlayer(BasePlayer):
         if self.nightcore:
             FFMPEG_OPTIONS['options'] += (f" -af \"{filters['nightcore']}\"")
 
-        source = disnake.FFmpegPCMAudio(track.id, **FFMPEG_OPTIONS)
+        source = await YTDLSource.source(track.id, ffmpeg_opts=FFMPEG_OPTIONS)
+        source.volume = self.volume / 100
 
         try:
             await self.invoke_np()
@@ -739,7 +764,6 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
             await self.vc.move_to(channel)
         else:
             await channel.connect(cls=self.vc, reconnect=True)
-
 
     async def destroy(self, *, force: bool = False):
 
@@ -882,7 +906,7 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
         return filter_type
 
 
-class YTDL_Manager:
+class YTDLManager:
 
     def __init__(self, *, bot: BotCore):
         bot.ytdl = YoutubeDL(YDL_OPTIONS)
@@ -915,8 +939,6 @@ class YTDL_Manager:
         info = await self.bot.loop.run_in_executor(None, to_run)
 
         try:
-
-            pprint.pprint(info)
 
             data = {
                 'loadType': 'PLAYLIST_LOADED',
@@ -954,6 +976,6 @@ class YTDL_Manager:
 def music_mode(bot: BotCore):
 
     if bot.config.get("youtubedl"):
-        return YTDL_Manager(bot=bot)
+        return YTDLManager(bot=bot)
     else:
         return wavelink.Client(bot=bot)
