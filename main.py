@@ -7,6 +7,7 @@ from json import load
 from utils.music.local_lavalink import run_lavalink
 from utils.client import BotCore
 
+load_dotenv()
 
 try:
     with open('config.json', encoding='utf-8') as f:
@@ -14,14 +15,22 @@ try:
 except FileNotFoundError:
     config = {}
 
+yt_dlp_mode = os.environ.get("YOUTUBEDL")
+
+if yt_dlp_mode is True or yt_dlp_mode == "true":
+    config["youtubedl"] = True
+
+ad_link = os.environ.get("LINK")
+
+if ad_link is False or ad_link == "false":
+    config["link"] = ""
+
 if not config.get('youtubedl') and config['lavalink']['local']['start_local_lavalink']:
     run_lavalink(
         lavalink_file_url=config['lavalink']['local']['lavalink_file_url'],
         lavalink_ram_limit=config['lavalink']['local']['lavalink_ram_limit'],
         lavalink_additional_sleep=config['lavalink']['local']['lavalink_additional_sleep'],
     )
-
-load_dotenv()
 
 if os.getenv('KEEP_ALIVE') != "false":
     keep_alive()

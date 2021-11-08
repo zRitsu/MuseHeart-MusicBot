@@ -63,9 +63,13 @@ class SpotifyTrack:
             return
 
         try:
-            yt_track = (await node.get_tracks(f"ytsearch:{self.title}"))[0]
-            self.data = yt_track.info
-            self.id = yt_track.id
+            track = (await node.get_tracks(f"ytsearch:{self.title}"))
+            try:
+                track = track[0]
+            except:
+                track = track.tracks[0]
+            self.info = track.info
+            self.id = track.id
         except IndexError:
             return
         except Exception:

@@ -1477,9 +1477,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if isinstance(tracks, list):
 
-            if isinstance(tracks[0], (wavelink.Track, YTDLTrack)):
-                cls = LavalinkTrack if not self.bot.config.get('youtubedl') else YTDLTrack
-                tracks = [cls(track.id, track.info, requester=user, repeats=repeats) for track in tracks]
+            if isinstance(tracks[0], wavelink.Track):
+                tracks = [LavalinkTrack(track.id, track.info, requester=user, repeats=repeats) for track in tracks]
+            elif isinstance(tracks[0], YTDLTrack):
+                for track in tracks:
+                    track.repeats = repeats
+                    track.requester = user
 
         else:
 
@@ -1489,8 +1492,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     "url": query
                 }
 
-                cls = LavalinkTrack if not self.bot.config.get('youtubedl') else YTDLTrack
-                tracks.tracks = [cls(t.id, t.info, requester=user, playlist=playlist) for t in tracks.tracks]
+                if self.bot.config.get('youtubedl'):
+                    for track in tracks.tracks:
+                        track.repeats = repeats
+                        track.requester = user
+                else:
+                    tracks.tracks = [LavalinkTrack(t.id, t.info, requester=user, playlist=playlist) for t in tracks.tracks]
 
             if (selected := tracks.data['playlistInfo']['selectedTrack']) > 0:
                 tracks.tracks = tracks.tracks[selected:] + tracks.tracks[:selected]

@@ -491,7 +491,7 @@ class BasePlayer:
 
             self.locked = False
 
-            if not track.id:
+            if not track.info.get('ie_key') and not track.id:
                 return await self.process_next()
 
         self.last_track = track
@@ -570,14 +570,14 @@ class YTDLPlayer(BasePlayer):
         self.locked = False
         self.vc: Optional[disnake.VoiceClient] = None
         self.volume = 100
-        self.start_time: Optional[datetime.datetime] = None
+        self.start_time: Optional[datetime.datetime] = disnake.utils.utcnow()
         self.music_core = "YT-DLP (Experimental)"
 
     @property
     def position(self):
 
         try:
-            return (self.start_time - disnake.utils.utcnow()).total_seconds() * 1000
+            return (disnake.utils.utcnow() - self.start_time).total_seconds() * 1000
         except:
             return 0
 
@@ -658,14 +658,15 @@ class YTDLPlayer(BasePlayer):
         except:
             pass
 
-    async def renew_url(self, track: YTDLTrack) -> YTDLTrack:
+    async def renew_url(self, track: Union[YTDLTrack, SpotifyTrack]) -> Union[YTDLTrack, SpotifyTrack]:
 
-        to_run = partial(self.bot.ytdl.extract_info, url=track.uri, download=False)
+        url = track.info['url'] if isinstance(track, SpotifyTrack) else track.uri
+
+        to_run = partial(self.bot.ytdl.extract_info, url=url, download=False)
         info = await self.bot.loop.run_in_executor(None, to_run)
 
-        info['source'] = info['formats'][0]['url']
-
-        return YTDLTrack(data=info, requester=track.requester, playlist=track.playlist)
+        track.id = info['formats'][0]['url']
+        return track
 
     async def process_track(self):
 
@@ -743,6 +744,14 @@ class YTDLPlayer(BasePlayer):
 
     async def process_next(self):
         self.bot.loop.create_task(self.process_track())
+
+    # temp workaround for spotify
+    @property
+    def node(self):
+        return self
+
+    async def get_tracks(self, query: str):
+        return await self.bot.music.get_tracks(query)
 
 
 class LavalinkPlayer(BasePlayer, wavelink.Player):
