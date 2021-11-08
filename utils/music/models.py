@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 import pprint
 
 import disnake
@@ -117,12 +118,13 @@ class LavalinkTrack(wavelink.Track):
 
 class YTDLPlaylist:
 
-    def __init__(self, data: dict, *, playlist: dict):
+    def __init__(self, data: dict, playlist: dict):
         self.data = data
 
         self.tracks = [
             YTDLTrack(
                 data=i,
+                playlist=playlist
             ) for i in data['tracks'] if i.get('duration')]
 
 
@@ -166,6 +168,7 @@ class BasePlayer:
     volume: int
     node: wavelink.node
     vc: disnake.VoiceProtocol
+    music_core: str
 
     def __init__(self, *args, **kwargs):
 
@@ -262,6 +265,11 @@ class BasePlayer:
                 name="Em Pausa:",
                 icon_url="https://cdn.discordapp.com/attachments/480195401543188483/896013933197013002/pause.png"
             )
+
+        embed.set_footer(
+            text=f"Modo do player: {self.music_core}",
+            icon_url="https://cdn.discordapp.com/attachments/480195401543188483/907119505971486810/speaker-loud-speaker.gif"
+        )
 
         if self.current.is_stream:
             duration = "🔴 **⠂Livestream**"
@@ -562,6 +570,25 @@ class YTDLPlayer(BasePlayer):
         self.locked = False
         self.vc: Optional[disnake.VoiceClient] = None
         self.volume = 100
+        self.start_time: Optional[datetime.datetime] = None
+        self.music_core = "YT-DLP (Experimental)"
+
+    @property
+    def position(self):
+
+        try:
+            return (self.start_time - disnake.utils.utcnow()).total_seconds() * 1000
+        except:
+            return 0
+
+    async def set_pause(self, pause: bool):
+
+        if pause:
+            self.vc.pause()
+            self.paused = True
+        else:
+            self.vc.resume()
+            self.paused = False
 
     async def update_filters(self):
         # quebra-galho
@@ -631,7 +658,6 @@ class YTDLPlayer(BasePlayer):
         except:
             pass
 
-
     async def renew_url(self, track: YTDLTrack) -> YTDLTrack:
 
         to_run = partial(self.bot.ytdl.extract_info, url=track.uri, download=False)
@@ -675,6 +701,7 @@ class YTDLPlayer(BasePlayer):
                 return
 
         self.current = track
+        self.last_track = track
 
         FFMPEG_OPTIONS = {
             'before_options': '-nostdin'
@@ -688,14 +715,18 @@ class YTDLPlayer(BasePlayer):
         source = await YTDLSource.source(track.id, ffmpeg_opts=FFMPEG_OPTIONS)
         source.volume = self.volume / 100
 
+        self.vc.play(source, after=lambda _: self.bot.loop.call_soon_threadsafe(self.event.set))
+
+        self.start_time = disnake.utils.utcnow()
+
         try:
             await self.invoke_np()
         except:
             traceback.print_exc()
 
-        self.vc.play(source, after=lambda _: self.bot.loop.call_soon_threadsafe(self.event.set))
-
         self.locked = False
+
+        self.command_log = ""
 
         await self.event.wait()
 
@@ -735,6 +766,7 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
         self.votes = set()
         self.msg_ad = self.bot.config.get("link")
         self.view: Optional[disnake.ui.View] = None
+        self.music_core = "Lavalink"
 
     async def process_next(self):
 
