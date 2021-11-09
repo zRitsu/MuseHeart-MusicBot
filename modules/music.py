@@ -1587,9 +1587,12 @@ def setup(bot: BotCore):
 
             if player.exiting:
                 return
+            
+            if player.static:
+                player.command_log = "O player foi desligado por desconexão\ncom o canal de voz."
 
-            embed = disnake.Embed(description="**Desligando player por desconexão do canal.**", color=member.color)
-
-            await player.text_channel.send(embed=embed, delete_after=10)
+            else:
+                embed = disnake.Embed(description="**Desligando player por desconexão do canal.**", color=member.color)
+                await player.text_channel.send(embed=embed, delete_after=10)
 
             await player.destroy(force=True)
