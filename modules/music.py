@@ -322,6 +322,14 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player: Union[LavalinkPlayer, YTDLPlayer] = inter.player
 
         if not len(player.played) and not len(player.queue):
+
+            # tempfix (função stop ao usar seek)
+            if isinstance(player, YTDLPlayer) and isinstance(inter, disnake.MessageInteraction):
+                try:
+                    await inter.response.defer()
+                except:
+                    pass
+
             await player.seek(0)
             await self.interaction_message(inter, "voltou para o início da música.")
             return
@@ -850,7 +858,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         txt = [f"{txt[0]} o efeito nightcore.", f"Efeito nightcore {txt[1]}."]
 
-        # quebra-galho (função stop ao ativar efeito no modo ytdl)
+        # tempfix (função stop ao ativar efeito no modo ytdl)
         if isinstance(player, YTDLPlayer) and isinstance(inter, disnake.MessageInteraction):
             try:
                 await inter.response.defer()
