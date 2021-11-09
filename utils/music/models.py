@@ -982,7 +982,7 @@ class YTDLManager:
         to_run = partial(self.bot.ytdl.extract_info, url=query, download=False)
         info = await self.bot.loop.run_in_executor(None, to_run)
 
-        try:
+        if info.get('_type') == "playlist":
 
             data = {
                 'loadType': 'PLAYLIST_LOADED',
@@ -997,11 +997,10 @@ class YTDLManager:
 
             info['url'] = query
             return YTDLPlaylist(data, playlist=playlist)
-        except KeyError:
-            entries = [info]
 
-        if query.startswith(("ytsearch:", "scsearch:")):
-            entries = entries[:1]
+        else:
+
+            entries = [info]
 
         tracks = []
 
