@@ -982,7 +982,7 @@ class YTDLManager:
         to_run = partial(self.bot.ytdl.extract_info, url=query, download=False)
         info = await self.bot.loop.run_in_executor(None, to_run)
 
-        if info.get('_type') == "playlist":
+        if info.get('_type') == "playlist" and not info.get('extractor', '').endswith('search'):
 
             data = {
                 'loadType': 'PLAYLIST_LOADED',
@@ -1000,7 +1000,10 @@ class YTDLManager:
 
         else:
 
-            entries = [info]
+            try:
+                entries = info['entries']
+            except:
+                entries = [info]
 
         tracks = []
 
