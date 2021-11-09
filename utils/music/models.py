@@ -8,7 +8,7 @@ import asyncio
 import wavelink
 from yt_dlp import YoutubeDL
 from functools import partial
-from .converters import fix_characters, time_format, get_button_style, URL_REG
+from .converters import fix_characters, time_format, get_button_style
 from .filters import AudioFilter
 from .interactions import PlayerInteractions
 from .spotify import SpotifyTrack
@@ -30,7 +30,7 @@ YDL_OPTIONS = {
     'quiet': True,
     'no_warnings': True,
     'retries': 5,
-    'extract_flat': True,
+    'extract_flat': 'in_playlist',
     'cachedir': False,
     'extractor_args': {
         'youtube': {
@@ -204,6 +204,7 @@ class BasePlayer:
         self.current: Optional[LavalinkTrack, SpotifyTrack, YTDLTrack] = None
         self.paused = False
         self.view: Optional[disnake.ui.View] = None
+        self.seek_time = None
 
     async def idling_mode(self):
 
@@ -631,8 +632,11 @@ class YTDLPlayer(BasePlayer):
         self.vc = self.guild.voice_client
 
     async def seek(self, position: int):
-        # não implementado ainda...
-        raise GenericError("O sistema de avançar/voltar música ainda não foi implementado para o modo: YoutubeDL.")
+        self.queue.appendleft(self.current)
+        self.last_track = None
+        self.current = None
+        self.seek_time = time_format(position)
+        await self.stop()
 
     @property
     def is_connected(self)  -> bool:
@@ -713,8 +717,12 @@ class YTDLPlayer(BasePlayer):
             'options': '-vn'
         }
 
+        if self.seek_time:
+            FFMPEG_OPTIONS['options'] += f' -ss {self.seek_time}'
+            self.seek_time = None
+
         if self.nightcore:
-            FFMPEG_OPTIONS['options'] += (f" -af \"{filters['nightcore']}\"")
+            FFMPEG_OPTIONS['options'] += f" -af \"{filters['nightcore']}\""
 
         source = await YTDLSource.source(track.id, ffmpeg_opts=FFMPEG_OPTIONS)
         source.volume = self.volume / 100

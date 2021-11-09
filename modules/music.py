@@ -507,8 +507,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             embed.description = "Você usou um tempo inválido! Use segundos (1 ou 2 digitos) ou no formato (minutos):(segundos)"
             return await send_message(inter, embed=embed, ephemeral=True)
 
-        update = False
-
         milliseconds = seconds * 1000
 
         if milliseconds < 0:
@@ -525,7 +523,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             f"{'avançou' if milliseconds > player.position else 'voltou'} o tempo da música para: {time_format(milliseconds)}",
             f"O tempo da música foi {'avançada' if milliseconds > player.position else 'retornada'} para: {time_format(milliseconds)}"
         ]
-        await self.interaction_message(inter, txt, update=update)
+        await self.interaction_message(inter, txt)
 
     @check_voice()
     @has_player()
