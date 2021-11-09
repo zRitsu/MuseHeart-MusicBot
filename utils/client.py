@@ -19,11 +19,7 @@ class BotCore(commands.Bot):
         self.spotify = spotify_client()
         self.config = kwargs.pop('config', {})
         self.music = music_mode(self)
-
-
-    async def on_ready(self):
-        if not self.session:
-            self.session = aiohttp.ClientSession()
+        self.session = aiohttp.ClientSession()
 
     def load_modules(self):
 

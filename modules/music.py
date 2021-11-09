@@ -1325,9 +1325,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await self.bot.wait_until_ready()
 
-        if not hasattr(self.bot, 'session') or not self.bot.session:
-            self.bot.session = ClientSession()
-
         for node in lavalink_servers:
             self.bot.loop.create_task(self.connect_node(node))
 
