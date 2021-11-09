@@ -998,12 +998,10 @@ class YTDLManager:
             info['url'] = query
             return YTDLPlaylist(data, playlist=playlist)
 
-        else:
-
-            try:
-                entries = info['entries']
-            except:
-                entries = [info]
+        try:
+            entries = info['entries']
+        except:
+            entries = [info]
 
         tracks = []
 
