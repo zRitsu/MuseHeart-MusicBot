@@ -646,10 +646,13 @@ class YTDLPlayer(BasePlayer):
 
         self.exiting = True
 
-        if self.guild.me.voice:
-            await self.guild.voice_client.disconnect(force=force)
-        elif self.guild.me.voice_client:
-            self.guild.me.voice_client.cleanup()
+        try:
+            if self.guild.me.voice:
+                await self.guild.voice_client.disconnect(force=force)
+            elif self.guild.me.voice_client:
+                self.guild.me.voice_client.cleanup()
+        except AttributeError:
+            pass
 
         await self.cleanup()
 

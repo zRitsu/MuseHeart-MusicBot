@@ -14,7 +14,7 @@ from utils.client import BotCore
 from utils.music.errors import GenericError
 from utils.music.spotify import SpotifyPlaylist, process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj
-from utils.music.models import LavalinkPlayer, LavalinkTrack, YTDLTrack, YTDLPlayer
+from utils.music.models import LavalinkPlayer, LavalinkTrack, YTDLTrack, YTDLPlayer, YTDLManager
 from utils.music.converters import time_format, fix_characters, string_to_seconds, get_track_index, URL_REG, YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist
 from utils.music.interactions import VolumeInteraction, QueueInteraction, send_message, SongSelect
 
@@ -1568,3 +1568,28 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
 def setup(bot: BotCore):
     bot.add_cog(Music(bot))
+
+    if isinstance(bot.music, YTDLManager):
+
+        @bot.listen("on_voice_state_update")
+        async def player_vc_disconnect(member: disnake.Member, before: disnake.VoiceState, after: disnake.VoiceState):
+
+            if member.id != bot.user.id:
+                return
+
+            if after.channel:
+                return
+
+            player: YTDLPlayer = bot.music.players.get(member.guild.id)
+
+            if not player:
+                return
+
+            if player.exiting:
+                return
+
+            embed = disnake.Embed(description="**Desligando player por desconexão do canal.**", color=member.color)
+
+            await player.text_channel.send(embed=embed, delete_after=10)
+
+            await player.destroy(force=True)
