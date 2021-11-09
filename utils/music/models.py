@@ -189,7 +189,7 @@ class BasePlayer:
         self.played = deque(maxlen=20)
         self.nightcore = False
         self.loop = False
-        self.last_track: Optional[LavalinkTrack, YTDLTrack] = None
+        self.last_track: Union[LavalinkTrack, YTDLTrack] = None
         self.locked = False
         self.idle = None
         self.idle_timeout = 180  # aguardar 3 minutos para adicionar novas músicas
@@ -201,7 +201,7 @@ class BasePlayer:
         self.votes = set()
         self.msg_ad = self.cog.bot.config.get("link")
         self.view: Optional[disnake.ui.View] = None
-        self.current: Optional[LavalinkTrack, SpotifyTrack, YTDLTrack] = None
+        self.current: Union[LavalinkTrack, SpotifyTrack, YTDLTrack] = None
         self.paused = False
         self.view: Optional[disnake.ui.View] = None
         self.seek_time = None
