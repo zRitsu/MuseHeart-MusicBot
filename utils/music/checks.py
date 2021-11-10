@@ -94,8 +94,8 @@ def has_source():
 def user_cooldown(rate: int, per: int):
 
     def custom_cooldown(inter: disnake.Interaction):
-        if inter.author == inter.bot.owner or inter.author in inter.bot.owners:
-           return None  # sem cooldown para o dono do bot
+        #if (await inter.bot.is_owner(inter.author)):
+        #   return None  # sem cooldown
 
         return commands.Cooldown(rate, per)
 
