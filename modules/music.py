@@ -121,7 +121,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not query:
             raise GenericError(f"{member.mention} não está com status do spotify, OSU! ou youtube.")
 
-        await self.play(inter, query=query, position=0, source="ytsearch", search=False)
+        await self.play(inter, query=query, position=0, source="ytsearch", manual_selection=False)
 
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
@@ -133,7 +133,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await inter.send(embed=emb, ephemeral=True)
             return
 
-        await self.play(inter, query=inter.target.content, position=0, source="ytsearch", search=False)
+        await self.play(inter, query=inter.target.content, position=0, source="ytsearch", manual_selection=False)
 
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
@@ -144,7 +144,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             query: str = commands.Param(name="busca", desc="Nome ou link da música.", autocomplete=search_suggestions), *,
             position: int = commands.Param(name="posição", description="Colocar a música em uma posição específica", default=0),
             options: PlayOpts = commands.Param(name="opções" ,description="Opções para processar playlist", default=False),
-            search: bool = commands.Param(name="selecionar", description="Escolher uma música manualmente entre os resultados encontrados", default=False),
+            manual_selection: bool = commands.Param(name="selecionar_manualmente", description="Escolher uma música manualmente entre os resultados encontrados", default=False),
             process_all: bool = commands.Param(name="carregar_todos", description="Carregar todas as músicas do link (útil caso seja video com playlist).", default=False),
             source: SearchSource = commands.Param(name="fonte", description="Selecionar site para busca de músicas (não links)", default="ytsearch"),
             repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.", default=0)
@@ -168,6 +168,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             ephemeral = True
 
         await inter.response.defer(ephemeral=ephemeral)
+
+        if manual_selection and isinstance(self.bot.music, YTDLManager):
+            source+="5"
 
         try:
             tracks, node = await self.get_tracks(query, inter.user, source=source, process_all=process_all, node=node, repeats=repeat_amount)
@@ -213,7 +216,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if isinstance(tracks, list):
 
-            if search and len(tracks) > 1:
+            if manual_selection and len(tracks) > 1:
 
                 embed.description=f"**Selecione uma música abaixo**"
                 view = SongSelect(tracks)
@@ -269,7 +272,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if self.msg_ad:
             embed.description += f" | {self.msg_ad}"
 
-        if not search:
+        if not manual_selection:
             await inter.edit_original_message(embed=embed)
 
         if not player.is_connected:
