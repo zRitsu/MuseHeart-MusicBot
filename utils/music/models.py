@@ -6,6 +6,7 @@ import pprint
 import disnake
 import asyncio
 import wavelink
+from urllib import parse
 from yt_dlp import YoutubeDL
 from functools import partial
 from .converters import fix_characters, time_format, get_button_style
@@ -23,7 +24,7 @@ if TYPE_CHECKING:
 
 
 YDL_OPTIONS = {
-    'noplaylist': True,
+    'noplaylist': False,
     'nocheckcertificate': True,
     'ignoreerrors': False,
     'logtostderr': False,
@@ -992,9 +993,14 @@ class YTDLManager:
 
         if info.get('_type') == "playlist" and not info.get('extractor', '').endswith('search'):
 
+            try:
+                selected = int(parse.parse_qs(parse.urlparse(query).query)['index'][0]) -1
+            except:
+                selected = -1
+
             data = {
                 'loadType': 'PLAYLIST_LOADED',
-                'playlistInfo': {'name': '', 'selectedTrack': -1},
+                'playlistInfo': {'name': '', 'selectedTrack': selected},
                 'tracks': []
             }
 
