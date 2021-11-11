@@ -14,7 +14,6 @@ async def send_message(
         text=None,
         *,
         embed: disnake.Embed = None,
-        ephemeral = False
 ):
 
     if inter.type.name != "application_command":
@@ -23,7 +22,7 @@ async def send_message(
     if inter.response.is_done():
         await inter.edit_original_message(content=text, embed=embed)
     else:
-        await inter.send(text, embed=embed, ephemeral=ephemeral)
+        await inter.send(text, embed=embed, ephemeral=True)
 
 
 class VolumeInteraction(disnake.ui.View):
