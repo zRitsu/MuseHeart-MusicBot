@@ -334,13 +334,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             player.command_log = f"{inter.author.mention} voltou para a música atual."
             await inter.response.defer()
         else:
-            if player.static and player.text_channel == inter.channel:
-                player.command_log = f"{inter.author.mention} voltou para a música atual."
-                await inter.send("voltado com sucesso.", ephemeral=True)
-            else:
-                embed = disnake.Embed(description=f"⏮️** ┃ Voltou para a música:** [`{fix_characters(track.title, 30)}`]({track.uri})",
-                                      color=inter.guild.me.color)
-                await inter.send(embed=embed)
+            player.command_log = f"{inter.author.mention} voltou para a música atual."
+            await inter.send("voltado com sucesso.", ephemeral=True)
 
         if player.loop == "current":
             player.loop = False
@@ -562,13 +557,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         txt = f"{inter.author.mention} definiu a quantidade de repetições da música " \
               f"[`{(tname:=fix_characters(player.current.title, 25))}`]({player.current.uri}) para **{value}**."
 
-        if player.static and player.text_channel == inter.channel:
-            player.command_log = txt
-            embed.description=f"Quantidade de repetições **({value})** definida para a música: [`{tname}`]({player.current.uri})"
-            await inter.send(embed=embed, ephemeral=True)
-        else:
-            embed.description = txt
-            await inter.send(embed=embed)
+        player.command_log = txt
+        embed.description=f"Quantidade de repetições **({value})** definida para a música: [`{tname}`]({player.current.uri})"
+        await inter.send(embed=embed, ephemeral=True)
 
         await player.update_message()
 
@@ -601,13 +592,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         txt = f"{inter.author.mention} removeu a música [`{(tname:=fix_characters(track.title, 25))}`]({track.uri}) da fila."
 
-        if player.static and player.text_channel == inter.channel:
-            player.command_log = txt
-            embed.description=f"música removida: [`{tname}`]({track.uri})"
-            await inter.send(embed=embed, ephemeral=True)
-        else:
-            embed.description = txt
-            await inter.send(embed=embed)
+        player.command_log = txt
+        embed.description=f"música removida: [`{tname}`]({track.uri})"
+        await inter.send(embed=embed, ephemeral=True)
 
         await player.update_message()
     
@@ -634,14 +621,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player.queue.extend(player.played)
         player.played.clear()
 
-        if player.static and player.text_channel == inter.channel:
-            player.command_log = txt
-            embed.description = f"**você readicionou {qsize} música(s).**"
-            await inter.send(embed=embed, ephemeral=True)
-            await player.update_message()
-        else:
-            embed.description = txt
-            await inter.send(embed=embed)
+        player.command_log = txt
+        embed.description = f"**você readicionou {qsize} música(s).**"
+        await inter.send(embed=embed, ephemeral=True)
+        await player.update_message()
 
         if not player.current:
             await player.process_next()
@@ -685,15 +668,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         track_title = fix_characters(track.title, limit=30)
 
-        if player.static and player.text_channel == inter.channel:
-            player.command_log = f"{inter.author.mention} pulou para a música atual"
-            embed.description = f"**você pulou para a música:** [{track_title}]({track.uri})"
-            await inter.send(embed=embed, ephemeral=True)
-
-        else:
-            embed.description = f"{inter.author.mention} **pulou para a música:** [`{track_title}`]({track.uri})"
-            embed.colour = disnake.Colour.green()
-            await inter.send(embed=embed)
+        player.command_log = f"{inter.author.mention} pulou para a música atual"
+        embed.description = f"**você pulou para a música:** [{track_title}]({track.uri})"
+        await inter.send(embed=embed, ephemeral=True)
 
         await player.stop()
 
@@ -734,13 +711,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         embed = disnake.Embed(color=disnake.Colour.green())
 
-        if player.static and player.text_channel == inter.channel:
-            embed.description = f"música [`{fix_characters(track.title, limit=25)}`]({track.uri}) movida para a posição **[{position}]** da fila."
-            player.command_log = txt
-            await inter.send(embed=embed, ephemeral=True)
-        else:
-            embed.description = txt
-            await inter.send(embed=embed)
+        embed.description = f"música [`{fix_characters(track.title, limit=25)}`]({track.uri}) movida para a posição **[{position}]** da fila."
+        player.command_log = txt
+        await inter.send(embed=embed, ephemeral=True)
 
         await player.update_message()
 
@@ -779,13 +752,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         txt = f"{inter.author.mention} rotacionou a fila para a música [`{(tname:=fix_characters(track.title, limit=25))}`]({track.uri})."
 
-        if player.static and player.text_channel == inter.channel:
-            embed.description = f"Fila rotacionada para a música [`{tname}`]({track.uri})."
-            player.command_log = txt
-            await inter.send(embed=embed, ephemeral=True)
-        else:
-            embed.description = txt
-            await inter.send(embed=embed)
+        embed.description = f"Fila rotacionada para a música [`{tname}`]({track.uri})."
+        player.command_log = txt
+        await inter.send(embed=embed, ephemeral=True)
 
         await player.update_message()
 
@@ -903,11 +872,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player = inter.player
 
-        embed = disnake.Embed(color=disnake.Colour.red())
-
         if len(player.queue) < 3:
+            embed = disnake.Embed(color=disnake.Colour.red())
             embed.description = "A fila tem que ter no mínimo 3 músicas para ser misturada."
-            await send_message(inter, embed=Embed)
+            await send_message(inter, embed=embed)
             return
 
         shuffle(player.queue)
@@ -926,6 +894,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player: Union[LavalinkPlayer, YTDLPlayer] = inter.player
 
         if len(player.queue) < 2:
+            embed = disnake.Embed(colour=disnake.Colour.red())
             embed.description = "A fila tem que ter no mínimo 2 músicas para inverter a ordem."
             await send_message(inter, embed=Embed)
             return
