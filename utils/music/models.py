@@ -522,6 +522,9 @@ class BasePlayer:
             self.current = None
             await self.bot.tests.tests_start(self, close=True)
 
+        self.queue.clear()
+        self.played.clear()
+
     async def track_end(self):
 
         self.votes.clear()
@@ -652,18 +655,20 @@ class YTDLPlayer(BasePlayer):
         self.exiting = True
 
         try:
-            if self.guild.me.voice:
-                await self.guild.voice_client.disconnect(force=force)
-            elif self.guild.me.voice_client:
-                self.guild.me.voice_client.cleanup()
+            await self.guild.voice_client.disconnect(force=True)
         except AttributeError:
+            pass
+
+        try:
+            self.vc.cleanup()
+        except:
             pass
 
         await self.cleanup()
 
         try:
             del self.bot.music.players[self.guild.id]
-        except:
+        except KeyError:
             pass
 
     async def renew_url(self, track: Union[YTDLTrack, SpotifyTrack]) -> Union[YTDLTrack, SpotifyTrack]:
