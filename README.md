@@ -13,8 +13,8 @@ Tutorial para hospedar seu próprio bot de música deste repositório sem coding
 
 - Player controller (modo normal)
 
-![](https://media.discordapp.net/attachments/480195401543188483/906458723634020352/unknown.png)
+![](https://cdn.discordapp.com/attachments/480195401543188483/908760635637121024/ss1.png)
 
 - Player controller (modo fixo com song requests, configurável com o comando: /setupplayer)
 
-![](https://media.discordapp.net/attachments/480195401543188483/906451275971981382/unknown.png)
+![](https://cdn.discordapp.com/attachments/480195401543188483/908760627642789938/ss2.png)
