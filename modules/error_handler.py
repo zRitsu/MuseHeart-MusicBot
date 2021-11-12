@@ -117,7 +117,7 @@ class ErrorHandler(commands.Cog):
 
         if error_txt:
             embed.description = error_txt
-            return await send_message(inter, embed=embed, ephemeral=True)
+            return await send_message(inter, embed=embed)
 
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
 
@@ -127,7 +127,7 @@ class ErrorHandler(commands.Cog):
         embed.description = f"**Ocorreu um erro no comando:**\n" \
                             f"```py\n{str(repr(error))[:2020].replace(self.bot.http.token, 'mytoken')}```"
 
-        await send_message(inter, embed=embed, ephemeral=True)
+        await send_message(inter, embed=embed)
 
 
 def setup(bot: commands.Bot):
