@@ -231,7 +231,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             duration = time_format(track.duration) if not track.is_stream else '🔴 Livestream'
 
-            player.command_log = f"{inter.author.mention} adicionou [`{fix_characters(track.title, 20)}`]({track.uri}){pos_txt} `({duration})`."
+            log_text = f"{inter.author.mention} adicionou [`{fix_characters(track.title, 20)}`]({track.uri}){pos_txt} `({duration})`."
 
             embed.description = f"**Música adicionada{pos_txt}:\n[`{track.title}`]({track.uri})**\n\n`{track.author}` | `{duration}`"
             embed.set_thumbnail(url=track.thumb)
@@ -255,7 +255,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                 pos_txt = f" na posição {position + 1} da fila"
 
-            player.command_log = f"{inter.author.mention} adicionou a playlist [`{fix_characters(tracks.data['playlistInfo']['name'], 20)}`]({query}){pos_txt} `({len(tracks.tracks)})`."
+            log_text = f"{inter.author.mention} adicionou a playlist [`{fix_characters(tracks.data['playlistInfo']['name'], 20)}`]({query}){pos_txt} `({len(tracks.tracks)})`."
 
             embed.description = f"**Playlist adicionada{pos_txt}:**\n[`{tracks.data['playlistInfo']['name']}`]({query})\n\n`[{len(tracks.tracks)}] Música(s)`"
             embed.set_thumbnail(url=tracks.tracks[0].thumb)
@@ -272,6 +272,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not player.current:
             await player.process_next()
         else:
+            player.command_log = log_text
             await player.update_message()
 
     @check_voice()
