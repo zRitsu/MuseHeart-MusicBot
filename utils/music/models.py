@@ -162,14 +162,14 @@ class YTDLTrack:
         else:
             self.thumb = data.get('thumbnail', '')
 
-
 class BasePlayer:
 
     bot: BotCore
     volume: int
-    node: wavelink.node
+    node: wavelink.Node
     vc: disnake.VoiceProtocol
     music_core: str
+    paused: bool
 
     def __init__(self, *args, **kwargs):
 
@@ -203,7 +203,6 @@ class BasePlayer:
         self.msg_ad = self.cog.bot.config.get("link")
         self.view: Optional[disnake.ui.View] = None
         self.current: Union[LavalinkTrack, SpotifyTrack, YTDLTrack] = None
-        self.paused = False
         self.view: Optional[disnake.ui.View] = None
         self.seek_time = None
 
@@ -586,14 +585,16 @@ class YTDLPlayer(BasePlayer):
         except:
             return 0
 
+    @property
+    def paused(self):
+        return self.vc.is_paused()
+
     async def set_pause(self, pause: bool):
 
         if pause:
             self.vc.pause()
-            self.paused = True
         else:
             self.vc.resume()
-            self.paused = False
 
     async def update_filters(self):
         # quebra-galho
