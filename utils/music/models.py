@@ -662,7 +662,6 @@ class YTDLPlayer(BasePlayer):
         try:
             self.vc.cleanup()
         except:
-            traceback.print_exc()
             pass
 
         await self.cleanup()
