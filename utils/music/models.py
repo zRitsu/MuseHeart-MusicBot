@@ -517,12 +517,12 @@ class BasePlayer:
         except:
             pass
 
-        if self.bot.tests:
-            self.current = None
-            await self.bot.tests.tests_start(self, close=True)
-
         self.queue.clear()
         self.played.clear()
+
+        if self.bot.tests:
+            self.current = None
+            self.bot.loop.create_task(self.bot.tests.tests_start(self, vc_id=self.vc.channel.id, close=True))
 
     async def track_end(self):
 
@@ -826,12 +826,17 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
 
     async def destroy(self, *, force: bool = False):
 
+        await self.cleanup()
+
         try:
             await self.vc.disconnect(force=True)
         except:
             pass
 
-        await self.cleanup()
+        try:
+            self.vc.cleanup()
+        except:
+            pass
 
         await super().destroy(force=force)
 

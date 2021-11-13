@@ -1353,11 +1353,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 vcname = f" **{vc.name}**"
             else:
                 vcname = ""
-            channel = player.text_channel
             embed = disnake.Embed(color=player.guild.me.color)
             embed.description = f"Conexão perdida com o canal de voz{vcname}..."
             embed.description += "\nO player será finalizado..."
-            self.bot.loop.create_task(channel.send(embed=embed, delete_after=15))
+            self.bot.loop.create_task(player.text_channel.send(embed=embed, delete_after=7))
             await player.destroy()
             return
 
