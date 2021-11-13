@@ -16,9 +16,6 @@ async def send_message(
         embed: disnake.Embed = None,
 ):
 
-    if inter.type.name != "application_command":
-        ephemeral = True
-
     if inter.response.is_done():
         await inter.edit_original_message(content=text, embed=embed)
     else:
@@ -266,6 +263,12 @@ class PlayerInteractions(disnake.ui.View):
                 #interaction.user_data = None
                 interaction.guild_data = None
 
+            interaction.bot = self.bot # fix checks below
+
+            for check in cmd.checks:
+                c = await check(interaction)
+                if not c:
+                    raise commands.CheckFailure()
 
             await cmd(interaction, **kwargs)
 

@@ -63,18 +63,6 @@ async def on_ready():
     print(f'{bot.user} [{bot.user.id}] Online.')
 
 
-@bot.before_slash_command_invoke
-@bot.before_user_command_invoke
-@bot.before_message_command_invoke
-async def before_interaction(inter: disnake.ApplicationCommandInteraction):
-    if bot.db:
-        #inter.user_data = await bot.db.get_data(inter.author.id, db_name="users")
-        inter.guild_data = await bot.db.get_data(inter.guild.id, db_name="guilds")
-    else:
-        #inter.user_data = None
-        inter.guild_data = None
-
-
 bot.load_modules()
 
 bot.run(os.environ['TOKEN'])

@@ -1,5 +1,6 @@
 import aiohttp
 from disnake.ext import commands
+import disnake
 from typing import Optional
 from .music.spotify import spotify_client
 from utils.db import Database, LocalDatabase
@@ -20,6 +21,17 @@ class BotCore(commands.Bot):
         self.config = kwargs.pop('config', {})
         self.music = music_mode(self)
         self.session = aiohttp.ClientSession()
+
+    async def on_application_command(self, inter: disnake.ApplicationCommandInteraction):
+
+        if self.db:
+            # inter.user_data = await bot.db.get_data(inter.author.id, db_name="users")
+            inter.guild_data = await self.db.get_data(inter.guild.id, db_name="guilds")
+        else:
+            # inter.user_data = None
+            inter.guild_data = None
+
+        await self.process_application_commands(inter)
 
     def load_modules(self):
 

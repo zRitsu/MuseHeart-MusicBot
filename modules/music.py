@@ -233,7 +233,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             log_text = f"{inter.author.mention} adicionou [`{fix_characters(track.title, 20)}`]({track.uri}){pos_txt} `({duration})`."
 
-            embed.description = f"**Música adicionada{pos_txt}:\n[`{track.title}`]({track.uri})**\n\n`{track.author}` | `{duration}`"
+            embed.description = f"> 🎵 **┃ Adicionado:** [`{track.title}`]({track.uri})\n" \
+                                f"> 🎦 **┃ Uploader:** `{track.author}`\n" \
+                                f"> ✋ **┃ Pedido por:** {inter.author.mention}\n" \
+                                f"> ⌛ **┃ Duração:** `{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}` "
+
             embed.set_thumbnail(url=track.thumb)
 
         else:
@@ -253,15 +257,14 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 for track in tracks.tracks:
                     player.queue.insert(position, track)
 
-                pos_txt = f" na posição {position + 1} da fila"
+                pos_txt = f" (Pos. {position + 1})"
 
             log_text = f"{inter.author.mention} adicionou a playlist [`{fix_characters(tracks.data['playlistInfo']['name'], 20)}`]({query}){pos_txt} `({len(tracks.tracks)})`."
 
-            embed.description = f"**Playlist adicionada{pos_txt}:**\n[`{tracks.data['playlistInfo']['name']}`]({query})\n\n`[{len(tracks.tracks)}] Música(s)`"
+            embed.description = f"> 🎶 **┃ Playlist adicionada{pos_txt}:** [`{tracks.data['playlistInfo']['name']}`]({query})\n" \
+                                f"> ✋ **┃ Pedido por:** {inter.author.mention}\n" \
+                                f"> 🎼 **┃ Música(s):** `[{len(tracks.tracks)}]`"
             embed.set_thumbnail(url=tracks.tracks[0].thumb)
-
-        if self.msg_ad:
-            embed.description += f" | {self.msg_ad}"
 
         if not manual_selection:
             await inter.edit_original_message(embed=embed)
@@ -1075,7 +1078,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def setupplayer(self, inter: disnake.ApplicationCommandInteraction):
 
         target = inter.channel.category or inter.guild
-        channel = await target.create_text_channel(f"{inter.guild.me.name} song requests")
+        channel = await target.create_text_channel(f"{inter.guild.me.name} player controller")
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players.get(inter.guild_id)
 
@@ -1226,8 +1229,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         try:
             player.queue.extend(tracks.tracks)
             if isinstance(message.channel, disnake.Thread):
-                embed.description = f"**Playlist adicionada:**\n[`{tracks.data['playlistInfo']['name']}`]({message.content})" \
-                                    f"\n\n`[{len(tracks.tracks)}] Música(s)`"
+                embed.description = f"> 🎶 **┃ Playlist adicionada:** [`{tracks.data['playlistInfo']['name']}`]({message.content})\n" \
+                                    f"> ✋ **┃ Pedido por:** {message.author.mention}\n" \
+                                    f"> 🎼 **┃ Música(s):** `[{len(tracks.tracks)}]`"
                 embed.set_thumbnail(url=tracks.tracks[0].thumb)
                 if self.msg_ad:
                     embed.description += f" | {self.msg_ad}"
@@ -1236,8 +1240,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         except AttributeError:
             player.queue.append(tracks[0])
             if isinstance(message.channel, disnake.Thread):
-                embed.description = f"**Música adicionada:\n[`{tracks[0].title}`]({tracks[0].uri})**" \
-                                    f"\n\n`{tracks[0].author}` | `{time_format(tracks[0].duration) if not tracks[0].is_stream else '🔴 Livestream'}`"
+                embed.description = f"> 🎵 **┃ Adicionado:** [`{tracks[0].title}`]({tracks[0].uri})\n" \
+                                    f"> 🎦 **┃ Uploader:** `{tracks[0].author}`\n" \
+                                    f"> ✋ **┃ Pedido por:** {message.author.mention}\n" \
+                                    f"> ⌛ **┃ Duração:** `{time_format(tracks[0].duration) if not tracks[0].is_stream else '🔴 Livestream'}` "
                 embed.set_thumbnail(url=tracks[0].thumb)
                 if self.msg_ad:
                     embed.description += f" | {self.msg_ad}"
@@ -1286,10 +1292,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         component_interaction = isinstance(inter, disnake.MessageInteraction)
 
         inter.player.command_log = f"{inter.author.mention} {txt}"
-        await inter.player.update_message(interaction=False if (update or not component_interaction) else inter)
-        if not component_interaction and not inter.response.is_done():
-            await inter.send(txt_ephemeral or txt, ephemeral=True)
-        else:
+        if update or component_interaction:
+            await inter.player.update_message(interaction=False if (update or not component_interaction) else inter)
+
+        if not component_interaction:
+
             txt = f"{inter.author.mention} **{txt}**"
 
             embed = disnake.Embed(color=disnake.Colour.green(),
@@ -1297,8 +1304,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             if not inter.response.is_done():
                 await inter.send(embed=embed, ephemeral=True)
-            else:
-                await inter.channel.send(embed=embed)
 
     async def process_nodes(self):
 
@@ -1481,12 +1486,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
     async def send_idle_embed(self, target: Union[disnake.Message, disnake.TextChannel, disnake.Thread], text=""):
 
-        embed = disnake.Embed(description="**Entre em um canal de voz e peça uma música aqui**\n\n"
-                                          "**FORMATOS SUPORTADOS (nome, link):** "
-                                          "```\nYoutube, Soundcloud, Spotify, Twitch```", color=target.guild.me.color)
+        embed = disnake.Embed(description="**Entre em um canal de voz e peça uma música neste canal ou na conversa abaixo**\n\n"
+                                          "**FORMATOS SUPORTADOS (nome, link):**"
+                                          " ```\nYoutube, Soundcloud, Spotify, Twitch```", color=target.guild.me.color)
 
         if text:
-            embed.description += f"\n__**Última ação:**__ {text}"
+            embed.description += f"\n**ÚLTIMA AÇÃO:** {text.replace('**', '')}"
 
         try:
             avatar = target.guild.me.avatar.url
