@@ -62,7 +62,7 @@ def run_lavalink(
             os.makedirs("./.java")
             p = subprocess.Popen(["tar", "-zxvf", "java.tar.gz", "-C", "./.java"])
             p.wait()
-            os.remove(jdk_filename)
+            os.remove(f"./{jdk_filename}")
 
         java_path = "./.java/jdk-13/bin/"
 
