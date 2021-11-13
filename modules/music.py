@@ -305,7 +305,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await player.stop()
 
     @check_voice()
-    @has_source()
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(2, 8), commands.BucketType.guild)
     @commands.slash_command(description="Voltar para a música anterior (ou para o início da música caso não tenha músicas tocadas/na fila).")
