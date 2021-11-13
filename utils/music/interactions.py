@@ -4,6 +4,7 @@ from disnake.ext import commands
 import asyncio
 from .converters import percentage, time_format, fix_characters
 from typing import TYPE_CHECKING, Union
+import inspect
 
 if TYPE_CHECKING:
     from .models import LavalinkPlayer, YTDLPlayer
@@ -265,8 +266,8 @@ class PlayerInteractions(disnake.ui.View):
 
             interaction.bot = self.bot # fix checks below
 
-            for check in cmd.checks:
-                c = await check(interaction)
+            for command_check in cmd.checks:
+                c = (await command_check(interaction)) if inspect.iscoroutinefunction(command_check) else command_check(interaction)
                 if not c:
                     raise commands.CheckFailure()
 
