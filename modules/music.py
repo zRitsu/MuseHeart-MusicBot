@@ -495,6 +495,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         try:
             await player.seek(milliseconds)
+
+            if player.paused:
+                await player.set_pause(False)
+
         except Exception as e:
             embed.description = f"Ocorreu um erro no comando\n```py\n{repr(e)}```."
             await send_message(inter, embed=Embed)
