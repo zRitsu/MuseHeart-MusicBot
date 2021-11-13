@@ -1283,22 +1283,22 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         except:
             txt_ephemeral = False
 
-        if update or (inter.player.static and inter.player.text_channel == inter.channel) \
-                or not isinstance(inter, disnake.ApplicationCommandInteraction):
-            txt = f"{inter.author.mention} {txt}"
-            inter.player.command_log = txt
-            if not (component_interaction:=isinstance(inter, disnake.MessageInteraction)) and inter.player.static and not inter.response.is_done():
-                await inter.send(txt_ephemeral or txt, ephemeral=True)
-            await inter.player.update_message(interaction=False if (update or not component_interaction) else inter)
-            return
+        component_interaction = isinstance(inter, disnake.MessageInteraction)
 
-        txt = f"{inter.author.mention} **{txt}**"
-        embed = disnake.Embed(color=disnake.Colour.green(), description=txt_ephemeral or txt)
-        await inter.player.update_message()
-        if not inter.response.is_done():
-            await inter.send(embed=embed, ephemeral=True)
+        inter.player.command_log = f"{inter.author.mention} {txt}"
+        await inter.player.update_message(interaction=False if (update or not component_interaction) else inter)
+        if not component_interaction and not inter.response.is_done():
+            await inter.send(txt_ephemeral or txt, ephemeral=True)
         else:
-            await inter.channel.send(embed=embed)
+            txt = f"{inter.author.mention} **{txt}**"
+
+            embed = disnake.Embed(color=disnake.Colour.green(),
+                                description=txt_ephemeral or txt)
+
+            if not inter.response.is_done():
+                await inter.send(embed=embed, ephemeral=True)
+            else:
+                await inter.channel.send(embed=embed)
 
     async def process_nodes(self):
 
