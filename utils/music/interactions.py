@@ -2,13 +2,35 @@ from __future__ import annotations
 import disnake
 from disnake.ext import commands
 import asyncio
-from .converters import percentage, time_format, fix_characters
+from .converters import time_format, fix_characters
 from typing import TYPE_CHECKING, Union
-import inspect
+from inspect import iscoroutinefunction
 
 if TYPE_CHECKING:
     from .models import LavalinkPlayer, YTDLPlayer
 
+
+async def check_cmd(cmd, inter: disnake.Interaction):
+
+    bucket = cmd._buckets.get_bucket(inter)  # type: ignore
+    if bucket:
+        retry_after = bucket.update_rate_limit()
+        if retry_after:
+            raise commands.CommandOnCooldown(cooldown=bucket, retry_after=retry_after, type=cmd._buckets.type)
+
+    inter.bot = inter.bot  # fix checks below
+
+    try:
+        # inter.user_data = await inter.bot.db.get_data(inter.author.id, db_name="users")
+        inter.guild_data = await inter.bot.db.get_data(inter.guild.id, db_name="guilds")
+    except AttributeError:
+        # inter.user_data = None
+        inter.guild_data = None
+
+    for command_check in cmd.checks:
+        c = (await command_check(inter)) if iscoroutinefunction(command_check) else command_check(inter)
+        if not c:
+            raise commands.CheckFailure()
 
 async def send_message(
         inter: Union[disnake.Interaction, disnake.ApplicationCommandInteraction],
@@ -190,15 +212,6 @@ class PlayerInteractions(disnake.ui.View):
 
         vc = self.bot.get_channel(player.channel_id)
 
-        if interaction.user not in vc.members:
-            embed = disnake.Embed(
-                description=f"Você deve estar no canal <#{vc.id}> para usar isto.",
-                color=disnake.Colour.red()
-            )
-
-            await interaction.response.send_message(embed=embed, ephemeral=True)
-            return
-
         control = interaction.data.custom_id[12:]
 
         kwargs = {}
@@ -222,8 +235,26 @@ class PlayerInteractions(disnake.ui.View):
             await interaction.response.send_message(embed=embed, ephemeral=True)
             return
 
-        elif control == "volume":
+        if interaction.user not in vc.members:
+            embed = disnake.Embed(
+                description=f"Você deve estar no canal <#{vc.id}> para usar os botões do player.",
+                color=disnake.Colour.red()
+            )
+
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
+
+        subcmd = None
+
+        if control == "volume":
             kwargs = {"value": None}
+
+        elif control == "queue":
+            subcmd = "show"
+
+        elif control == "shuffle":
+            subcmd = "shuffle"
+            control = "queue"
 
         elif control == "seek":
             kwargs = {"position": None}
@@ -239,8 +270,6 @@ class PlayerInteractions(disnake.ui.View):
             else:
                 kwargs['mode'] = 'current'
 
-        self.bot.get_slash_command(control)
-
         cmd = self.bot.get_slash_command(control)
 
         if not cmd:
@@ -251,25 +280,11 @@ class PlayerInteractions(disnake.ui.View):
 
         try:
 
-            bucket = cmd._buckets.get_bucket(interaction) # type: ignore
-            if bucket:
-                retry_after = bucket.update_rate_limit()
-                if retry_after:
-                    raise commands.CommandOnCooldown(cooldown=bucket, retry_after=retry_after, type=cmd._buckets.type)
+            await check_cmd(cmd, interaction)
 
-            try:
-                #interaction.user_data = await self.bot.db.get_data(interaction.author.id, db_name="users")
-                interaction.guild_data = await self.bot.db.get_data(interaction.guild.id, db_name="guilds")
-            except AttributeError:
-                #interaction.user_data = None
-                interaction.guild_data = None
-
-            interaction.bot = self.bot # fix checks below
-
-            for command_check in cmd.checks:
-                c = (await command_check(interaction)) if inspect.iscoroutinefunction(command_check) else command_check(interaction)
-                if not c:
-                    raise commands.CheckFailure()
+            if subcmd:
+                cmd = cmd.children.get(subcmd)
+                await check_cmd(cmd, interaction)
 
             await cmd(interaction, **kwargs)
 
