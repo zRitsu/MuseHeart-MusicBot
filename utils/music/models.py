@@ -485,6 +485,7 @@ class BasePlayer:
 
         try:
             self.idle.cancel()
+            self.idle = None
         except:
             pass
 

@@ -1510,13 +1510,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         embed = disnake.Embed(description="**Entre em um canal de voz e peça uma música neste canal ou na conversa abaixo**\n\n"
                                           "**FORMATOS SUPORTADOS (nome, link):**"
-                                          " ```\nYoutube, Soundcloud, Spotify, Twitch```", color=target.guild.me.color)
+                                          " ```\nYoutube, Soundcloud, Spotify, Twitch```\n", color=target.guild.me.color)
 
         if text:
-            embed.description += f"\n**ÚLTIMA AÇÃO:** {text.replace('**', '')}"
+            embed.description += f"**ÚLTIMA AÇÃO:** {text.replace('**', '')}\n"
 
         if self.msg_ad:
-            embed.description += f"\n{'-'*40}\n{self.msg_ad}"
+            embed.description += f"{'-'*40}\n{self.msg_ad}"
 
         try:
             avatar = target.guild.me.avatar.url
