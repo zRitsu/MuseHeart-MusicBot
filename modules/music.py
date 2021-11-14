@@ -918,7 +918,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         text = [f"inverteu a ordem das músicas na fila.", "Fila invertida com sucesso!"]
         await self.interaction_message(inter, txt=text, update=True)
 
-    @q.sub_command(description="Exibir as músicas que estão da fila.")
+    @q.sub_command(description="Exibir as músicas que estão na fila.")
     @commands.max_concurrency(1, commands.BucketType.member)
     async def show(self, inter: disnake.ApplicationCommandInteraction):
 
@@ -1298,8 +1298,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         component_interaction = isinstance(inter, disnake.MessageInteraction)
 
         inter.player.command_log = f"{inter.author.mention} {txt}"
-        if update or component_interaction:
-            await inter.player.update_message(interaction=False if (update or not component_interaction) else inter)
+        await inter.player.update_message(interaction=False if (update or not component_interaction) else inter)
 
         if not component_interaction:
 
