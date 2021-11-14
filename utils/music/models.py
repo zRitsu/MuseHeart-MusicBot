@@ -109,12 +109,16 @@ class LavalinkTrack(wavelink.Track):
         self.repeats = kwargs.pop('repeats', 0)
         args[1]['title'] = fix_characters(args[1]['title'])
         super().__init__(*args, **kwargs)
+
         if self.ytid:
             self.thumb = f"https://img.youtube.com/vi/{self.ytid}/mqdefault.jpg"
         elif "soundcloud.com" in self.uri:
             self.thumb = self.info.get("artworkUrl", "").replace('large.jpg', 't500x500.jpg')
         else:
             self.thumb = self.info.get("artworkUrl", "")
+
+        if self.info.get("class") == "YoutubeAudioTrack" and self.playlist:
+            self.uri = f"{self.uri}&list={parse.parse_qs(parse.urlparse(self.playlist['url']).query)['list'][0]}"
 
 
 class YTDLPlaylist:
