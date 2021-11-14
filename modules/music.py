@@ -122,7 +122,16 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not query:
             raise GenericError(f"{member.mention} não está com status do spotify, OSU! ou youtube.")
 
-        await self.play(inter, query=query, position=0, source="ytsearch", manual_selection=False, repeat_amount=0)
+        await self.play(
+            inter,
+            query=query,
+            position=0,
+            options="",
+            manual_selection=False,
+            process_all=False,
+            source="ytsearch",
+            repeat_amount=0,
+        )
 
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
@@ -134,7 +143,16 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await inter.send(embed=emb, ephemeral=True)
             return
 
-        await self.play(inter, query=inter.target.content, position=0, source="ytsearch", manual_selection=False, repeat_amount=0)
+        await self.play(
+            inter,
+            query=inter.target.content,
+            position=0,
+            options="",
+            manual_selection=False,
+            process_all=False,
+            source="ytsearch",
+            repeat_amount=0,
+        )
 
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
