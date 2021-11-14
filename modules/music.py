@@ -159,7 +159,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         try:
             static_player = inter.guild_data['player_controller']
-            channel = inter.guild.get_channel(static_player) or inter.channel
+            channel = inter.guild.get_channel(static_player['channel']) or inter.channel
         except KeyError:
             channel = inter.channel
 
