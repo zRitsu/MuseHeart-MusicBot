@@ -159,9 +159,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         try:
             static_player = inter.guild_data['player_controller']
-        except:
-            static_player = None
-        channel = inter.channel
+            channel = inter.guild.get_channel(static_player) or inter.channel
+        except KeyError:
+            channel = inter.channel
 
         await inter.response.defer(ephemeral=True)
 
