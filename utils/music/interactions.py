@@ -18,8 +18,6 @@ async def check_cmd(cmd, inter: disnake.Interaction):
         if retry_after:
             raise commands.CommandOnCooldown(cooldown=bucket, retry_after=retry_after, type=cmd._buckets.type)
 
-    inter.bot = inter.bot  # fix checks below
-
     try:
         # inter.user_data = await inter.bot.db.get_data(inter.author.id, db_name="users")
         inter.guild_data = await inter.bot.db.get_data(inter.guild.id, db_name="guilds")
@@ -279,6 +277,8 @@ class PlayerInteractions(disnake.ui.View):
         interaction.player = player
 
         try:
+
+            interaction.bot = self.bot  # fix checks below
 
             await check_cmd(cmd, interaction)
 
