@@ -234,7 +234,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             log_text = f"{inter.author.mention} adicionou [`{fix_characters(track.title, 20)}`]({track.uri}){pos_txt} `({duration})`."
 
             embed.description = f"> 🎵 **┃ Adicionado:** [`{track.title}`]({track.uri})\n" \
-                                f"> 🎦 **┃ Uploader:** `{track.author}`\n" \
+                                f"> 💠 **┃ Uploader:** `{track.author}`\n" \
                                 f"> ✋ **┃ Pedido por:** {inter.author.mention}\n" \
                                 f"> ⌛ **┃ Duração:** `{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}` "
 
@@ -1191,8 +1191,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 await message.delete()
 
         except Exception as e:
-            traceback.print_exc()
-            await message.channel.send(f"{message.author.mention} **ocorreu um erro ao tentar obter resultados para sua busca:** ```py\n{e}```", delete_after=15)
+            await message.channel.send(f"{message.author.mention} **ocorreu um erro ao tentar obter resultados para sua busca:** ```py\n{e}```", delete_after=7)
             await message.delete()
 
         await self.song_request_concurrency.release(message)
@@ -1247,7 +1246,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             player.queue.append(tracks[0])
             if isinstance(message.channel, disnake.Thread):
                 embed.description = f"> 🎵 **┃ Adicionado:** [`{tracks[0].title}`]({tracks[0].uri})\n" \
-                                    f"> 🎦 **┃ Uploader:** `{tracks[0].author}`\n" \
+                                    f"> 💠 **┃ Uploader:** `{tracks[0].author}`\n" \
                                     f"> ✋ **┃ Pedido por:** {message.author.mention}\n" \
                                     f"> ⌛ **┃ Duração:** `{time_format(tracks[0].duration) if not tracks[0].is_stream else '🔴 Livestream'}` "
                 embed.set_thumbnail(url=tracks[0].thumb)
@@ -1497,6 +1496,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if text:
             embed.description += f"\n**ÚLTIMA AÇÃO:** {text.replace('**', '')}"
+
+        if self.msg_ad:
+            embed.description += f"\n{'-'*40}\n{self.msg_ad}"
 
         try:
             avatar = target.guild.me.avatar.url

@@ -284,7 +284,7 @@ class BasePlayer:
         txt = f"[**{self.current.title}**]({self.current.uri})\n\n" \
               f"> {duration}\n" \
               f"> 💠 **⠂Uploader**: `{self.current.author}`\n" \
-              f"> 🎧 **⠂Pedido por:** {self.current.requester.mention}\n" \
+              f"> ✋ **⠂Pedido por:** {self.current.requester.mention}\n" \
               f"> 🔊 **⠂Volume:** `{self.volume}%`"
 
         if self.current.repeats:
@@ -323,10 +323,10 @@ class BasePlayer:
                                             description=f"\n{queue_txt}")
                 if (qsize := len(self.queue)) > 20:
                     embed_queue.description += f"\n\nE mais **{qsize - 20}** músicas."
-                txt += f"\n{self.msg_ad}" if self.msg_ad else ""
+                txt += f"{'-'*40}\n{self.msg_ad}" if self.msg_ad else ""
 
         else:
-            txt += f"\n{self.msg_ad}" if self.msg_ad else ""
+            txt += f"{'-'*40}\n{self.msg_ad}" if self.msg_ad else ""
 
         embed.description = txt
 
