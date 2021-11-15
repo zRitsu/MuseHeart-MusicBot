@@ -172,7 +172,6 @@ class BasePlayer:
     volume: int
     node: wavelink.Node
     vc: disnake.VoiceProtocol
-    music_core: str
     paused: bool
 
     def __init__(self, *args, **kwargs):
@@ -214,7 +213,12 @@ class BasePlayer:
     async def members_timeout(self):
 
         await asyncio.sleep(self.idle_timeout)
-        self.command_log = f"O player foi desligado por falta de membros no canal <#{self.vc.channel.id if self.vc else ''}>..."
+        msg = f"O player foi desligado por falta de membros no canal <#{self.vc.channel.id if self.vc else ''}>..."
+        if self.static:
+            self.command_log = msg
+        else:
+            embed = disnake.Embed(description=msg, color=self.guild.me.color)
+            self.bot.loop.create_task(self.text_channel.send(embed=embed))
         await self.destroy()
 
     async def idling_mode(self):
@@ -279,7 +283,7 @@ class BasePlayer:
             )
 
         embed.set_footer(
-            text=f"Modo do player: {self.music_core}",
+            text=str(self),
             icon_url="https://cdn.discordapp.com/attachments/480195401543188483/907119505971486810/speaker-loud-speaker.gif"
         )
 
@@ -303,7 +307,7 @@ class BasePlayer:
         txt += "\n"
 
         if self.command_log:
-            txt += f"```ldif\nUltima Interação:```{self.command_log}\n"
+            txt += f"```ini\n[Última Interação]:```{self.command_log}\n"
 
         if len(self.queue):
 
@@ -317,7 +321,7 @@ class BasePlayer:
 
             if not self.static:
 
-                txt += f"```ldif\nPróximas Músicas:``` {queue_txt}"
+                txt += f"```ini\n[Próximas Músicas]:``` {queue_txt}"
 
                 if (qsize := len(self.queue)) > 3:
                     txt += f"\n\n`E mais {qsize - 3}" + (f" |` {self.msg_ad}" if self.msg_ad else " músicas`")
@@ -593,7 +597,9 @@ class YTDLPlayer(BasePlayer):
         self.vc: Optional[disnake.VoiceClient] = None
         self.volume = 100
         self.start_time: Optional[datetime.datetime] = disnake.utils.utcnow()
-        self.music_core = "YT-DLP (Experimental)"
+
+    def __str__(self) -> str:
+        return "YT-DLP Player (Experimental)"
 
     @property
     def position(self):
@@ -813,7 +819,9 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
         self.votes = set()
         self.msg_ad = self.bot.config.get("link")
         self.view: Optional[disnake.ui.View] = None
-        self.music_core = "Lavalink"
+
+    def __str__(self) -> str:
+        return "Lavalink Player"
 
     async def process_next(self):
 
