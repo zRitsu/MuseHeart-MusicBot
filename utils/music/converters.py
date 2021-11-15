@@ -11,10 +11,10 @@ ua = UserAgent().random
 async def search_suggestions(inter, query):
 
     if not inter.author.voice:
-        return
+        return [query]
 
     if not query or URL_REG.match(query):
-        return
+        return [query]
 
     async with inter.bot.session.get(
             f"http://suggestqueries.google.com/complete/search?client=chrome&ds=yt&q={query}",
@@ -25,7 +25,7 @@ async def search_suggestions(inter, query):
 def queue_tracks(inter, query):
 
     if not inter.author.voice:
-        return
+        return [query]
 
     try:
         inter.player
@@ -33,7 +33,7 @@ def queue_tracks(inter, query):
         inter.player = inter.bot.music.players.get(inter.guild.id)
 
     if not inter.player:
-        return
+        return [query]
 
     return [track.title for track in inter.player.queue if query.lower() in track.title.lower()][:20]
 
@@ -41,7 +41,7 @@ def queue_tracks(inter, query):
 def queue_playlist(inter, query):
 
     if not inter.author.voice:
-        return
+        return [query]
 
     try:
         inter.player
@@ -49,7 +49,7 @@ def queue_playlist(inter, query):
         inter.player = inter.bot.music.players.get(inter.guild.id)
 
     if not inter.player:
-        return
+        return [query]
 
     return list(set([track.playlist['name'] for track in inter.player.queue if track.playlist and
                                query.lower() in track.playlist['name'].lower()]))[:20]
@@ -58,7 +58,7 @@ def queue_playlist(inter, query):
 def queue_author(inter, query):
 
     if not inter.author.voice:
-        return
+        return [query]
 
     try:
         inter.player
@@ -66,7 +66,7 @@ def queue_author(inter, query):
         inter.player = inter.bot.music.players.get(inter.guild.id)
 
     if not inter.player:
-        return
+        return [query]
 
     return list(set([track.author for track in inter.player.queue if query.lower() in track.author.lower()]))[:20]
 
@@ -74,7 +74,7 @@ def queue_author(inter, query):
 def seek_suggestions(inter, query):
 
     if query:
-        return
+        return [query]
 
     try:
         inter.player
@@ -82,7 +82,7 @@ def seek_suggestions(inter, query):
         inter.player = inter.bot.music.players.get(inter.guild.id)
 
     if not inter.player or not inter.player.current:
-        return
+        return [query]
 
     seeks = []
 
