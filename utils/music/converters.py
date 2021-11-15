@@ -10,6 +10,9 @@ ua = UserAgent().random
 
 async def search_suggestions(inter, query):
 
+    if not query:
+        return
+
     if not inter.author.voice:
         return [query]
 
@@ -23,6 +26,9 @@ async def search_suggestions(inter, query):
 
 
 def queue_tracks(inter, query):
+
+    if not query:
+        return
 
     if not inter.author.voice:
         return [query]
@@ -39,6 +45,9 @@ def queue_tracks(inter, query):
 
 
 def queue_playlist(inter, query):
+
+    if not query:
+        return
 
     if not inter.author.voice:
         return [query]
@@ -57,6 +66,9 @@ def queue_playlist(inter, query):
 
 def queue_author(inter, query):
 
+    if not query:
+        return
+
     if not inter.author.voice:
         return [query]
 
@@ -74,7 +86,7 @@ def queue_author(inter, query):
 def seek_suggestions(inter, query):
 
     if query:
-        return [query]
+        return
 
     try:
         inter.player
@@ -82,7 +94,10 @@ def seek_suggestions(inter, query):
         inter.player = inter.bot.music.players.get(inter.guild.id)
 
     if not inter.player or not inter.player.current:
-        return [query]
+        return
+
+    if inter.player.current.is_stream:
+        return
 
     seeks = []
 
