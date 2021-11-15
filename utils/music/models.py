@@ -477,6 +477,7 @@ class BasePlayer:
         try:
             track = self.queue.popleft()
         except Exception:
+            self.last_track = None
             self.idle = self.bot.loop.create_task(self.idling_mode())
             return False
 
@@ -752,6 +753,8 @@ class YTDLPlayer(BasePlayer):
 
         self.command_log = ""
 
+        self.is_previows_music = False
+
         await self.event.wait()
 
         source.cleanup()
@@ -808,6 +811,8 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
             return
 
         await self.play(track)
+
+        self.is_previows_music = False
 
         self.locked = False
 
