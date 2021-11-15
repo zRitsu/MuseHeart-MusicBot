@@ -1571,33 +1571,44 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await thread.join()
 
+    @commands.Cog.listener("on_voice_state_update")
+    async def player_vc_disconnect(
+            self,
+            member: disnake.Member,
+            before: disnake.VoiceState,
+            after: disnake.VoiceState
+    ):
+
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players.get(member.guild.id)
+
+        if not player:
+            return
+
+        if isinstance(player, YTDLPlayer):
+
+            if member.id == self.bot.user.id:
+
+                if player.exiting:
+                    return
+
+                if player.static:
+                    player.command_log = "O player foi desligado por desconexão\ncom o canal de voz."
+
+                else:
+                    embed = disnake.Embed(description="**Desligando player por desconexão do canal.**", color=member.color)
+                    await player.text_channel.send(embed=embed, delete_after=10)
+
+                await player.destroy(force=True)
+                return
+
+        if player.vc and not any(m for m in player.vc.channel.members if not m.bot):
+            player.members_timeout_task = self.bot.loop.create_task(player.members_timeout())
+        else:
+            try:
+                player.members_timeout_task.cancel()
+                player.members_timeout_task = None
+            except:
+                pass
+
 def setup(bot: BotCore):
     bot.add_cog(Music(bot))
-
-    if isinstance(bot.music, YTDLManager):
-
-        @bot.listen("on_voice_state_update")
-        async def player_vc_disconnect(member: disnake.Member, before: disnake.VoiceState, after: disnake.VoiceState):
-
-            if member.id != bot.user.id:
-                return
-
-            if after.channel:
-                return
-
-            player: YTDLPlayer = bot.music.players.get(member.guild.id)
-
-            if not player:
-                return
-
-            if player.exiting:
-                return
-            
-            if player.static:
-                player.command_log = "O player foi desligado por desconexão\ncom o canal de voz."
-
-            else:
-                embed = disnake.Embed(description="**Desligando player por desconexão do canal.**", color=member.color)
-                await player.text_channel.send(embed=embed, delete_after=10)
-
-            await player.destroy(force=True)

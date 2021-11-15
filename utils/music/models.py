@@ -196,8 +196,9 @@ class BasePlayer:
         self.loop = False
         self.last_track: Union[LavalinkTrack, YTDLTrack] = None
         self.locked = False
-        self.idle = None
-        self.idle_timeout = 180  # aguardar 3 minutos para adicionar novas músicas
+        self.idle_task = None
+        self.members_timeout_task = None
+        self.idle_timeout = 180  # aguardar 3 minutos para adicionar novas músicas ou pra sair do canal quando não houver membros.
         self.is_previows_music = False
         self.updating_message = None
         self.command_log = ""
@@ -209,6 +210,12 @@ class BasePlayer:
         self.current: Union[LavalinkTrack, SpotifyTrack, YTDLTrack] = None
         self.view: Optional[disnake.ui.View] = None
         self.seek_time = None
+
+    async def members_timeout(self):
+
+        await asyncio.sleep(self.idle_timeout)
+        self.command_log = f"O player foi desligado por falta de membros no canal <#{self.vc.channel.id if self.vc else ''}>..."
+        await self.destroy()
 
     async def idling_mode(self):
 
@@ -478,15 +485,15 @@ class BasePlayer:
             track = self.queue.popleft()
         except Exception:
             self.last_track = None
-            self.idle = self.bot.loop.create_task(self.idling_mode())
+            self.idle_task = self.bot.loop.create_task(self.idling_mode())
             return False
 
         if not track:
             return False
 
         try:
-            self.idle.cancel()
-            self.idle = None
+            self.idle_task.cancel()
+            self.idle_task = None
         except:
             pass
 
@@ -508,7 +515,12 @@ class BasePlayer:
     async def cleanup(self):
 
         try:
-            self.idle.cancel()
+            self.idle_task.cancel()
+        except:
+            pass
+
+        try:
+            self.members_timeout_task.cancel()
         except:
             pass
 
