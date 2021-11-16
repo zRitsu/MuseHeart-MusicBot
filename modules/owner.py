@@ -31,7 +31,7 @@ class Owner(commands.Cog):
         embed = disnake.Embed(colour=ctx.me.color, description=txt)
         await ctx.send(embed=embed)
 
-    @commands.command(aliases=["syncglobal"])
+    @commands.command(aliases=["syncglobal", "sync"])
     @commands.is_owner()
     async def syncguild(self, ctx, guild_id: int = None):
 
@@ -52,17 +52,17 @@ class Owner(commands.Cog):
 
         invite_url = f"https://discord.com/api/oauth2/authorize?client_id={ctx.bot.user.id}&scope=applications.commands"
 
-        if ctx.invoked_with == "syncguild":
-            self.bot._test_guilds = [guild.id]
-            embed.description = f"**Comandos sincronizados para o servidor:**\n`{guild.name} [{guild.id}]`\n\n" \
-                                f"Caso os comandos de barra não apareçam [clique aqui]({invite_url}) para permitir o bot " \
-                                f"criar comandos slash no servidor e use este mesmo comando novamente."
-        else:
+        if ctx.invoked_with == "syncglobal":
             self.bot._test_guilds = None
             embed.description = f"**Comandos globais sincronizados**\n`(as alterações podem demorar até 1 hora)`\n\n" \
                                 f"Caso os comandos não apareçam após esse tempo, [clique aqui]({invite_url}) para permitir o bot " \
                                 f"criar comandos slash no servidor e use este mesmo comando novamente."
 
+        else:
+            self.bot._test_guilds = [guild.id]
+            embed.description = f"**Comandos sincronizados para o servidor:**\n`{guild.name} [{guild.id}]`\n\n" \
+                                f"Caso os comandos de barra não apareçam, [clique aqui]({invite_url}) para permitir o bot " \
+                                f"criar comandos slash no servidor e use este mesmo comando novamente."
         self.bot._sync_commands = True
 
         try:

@@ -728,7 +728,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if index is None:
             embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
-            await inter.send(embed=embed)
+            await inter.send(embed=embed, ephemeral=True)
             return
 
         player: Union[LavalinkPlayer, YTDLPlayer] = inter.player
@@ -1260,6 +1260,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     embed.description += f" | {self.msg_ad}"
                 await message.channel.send(embed=embed)
 
+            else:
+                player.command_log = f"{message.author.mention} adicionou a playlist " \
+                                     f"[`{fix_characters(tracks.data['playlistInfo']['name'], 20)}`]({tracks.data['playlistInfo']['url']}) `({len(tracks.tracks)})`."
+
+
         except AttributeError:
             player.queue.append(tracks[0])
             if isinstance(message.channel, disnake.Thread):
@@ -1271,6 +1276,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 if self.msg_ad:
                     embed.description += f" | {self.msg_ad}"
                 await message.channel.send(embed=embed)
+
+            else:
+                duration = time_format(tracks[0].duration) if not tracks[0].is_stream else '🔴 Livestream'
+                player.command_log = f"{message.author.mention} adicionou [`{fix_characters(tracks[0].title, 20)}`]({tracks[0].uri}) `({duration})`."
 
         if not player.is_connected:
             await player.connect(message.author.voice.channel.id)
