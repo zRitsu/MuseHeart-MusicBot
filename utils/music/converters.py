@@ -27,11 +27,8 @@ async def search_suggestions(inter, query):
 
 def queue_tracks(inter, query):
 
-    if not query:
-        return
-
     if not inter.author.voice:
-        return [query]
+        return
 
     try:
         inter.player
@@ -39,7 +36,7 @@ def queue_tracks(inter, query):
         inter.player = inter.bot.music.players.get(inter.guild.id)
 
     if not inter.player:
-        return [query]
+        return
 
     return [track.title for track in inter.player.queue if query.lower() in track.title.lower()][:20]
 
@@ -50,7 +47,7 @@ def queue_playlist(inter, query):
         return
 
     if not inter.author.voice:
-        return [query]
+        return
 
     try:
         inter.player
@@ -58,7 +55,7 @@ def queue_playlist(inter, query):
         inter.player = inter.bot.music.players.get(inter.guild.id)
 
     if not inter.player:
-        return [query]
+        return
 
     return list(set([track.playlist['name'] for track in inter.player.queue if track.playlist and
                                query.lower() in track.playlist['name'].lower()]))[:20]
@@ -70,7 +67,7 @@ def queue_author(inter, query):
         return
 
     if not inter.author.voice:
-        return [query]
+        return
 
     try:
         inter.player
@@ -78,7 +75,7 @@ def queue_author(inter, query):
         inter.player = inter.bot.music.players.get(inter.guild.id)
 
     if not inter.player:
-        return [query]
+        return
 
     return list(set([track.author for track in inter.player.queue if query.lower() in track.author.lower()]))[:20]
 
