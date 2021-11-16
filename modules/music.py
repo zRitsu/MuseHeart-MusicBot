@@ -1262,7 +1262,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             else:
                 player.command_log = f"{message.author.mention} adicionou a playlist " \
-                                     f"[`{fix_characters(tracks.data['playlistInfo']['name'], 20)}`]({tracks.data['playlistInfo']['url']}) `({len(tracks.tracks)})`."
+                                     f"[`{fix_characters(tracks.data['playlistInfo']['name'], 20)}`]({tracks.tracks[0].playlist['url']}) `({len(tracks.tracks)})`."
 
 
         except AttributeError:
