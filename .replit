@@ -1,9 +1,10 @@
 language="python3"
 
 run = """[ -e pom.xml ] && rm pom.xml
-pip3 install -r requirements.txt
+(python3.10 --version || (install-pkg python3.10 && install-pkg python3.10-distutils))
+python3.10 -m pip install -r requirements.txt
 clear
-python3 main.py"""
+python3.10 main.py"""
 
 [packager]
 ignoredPackages=["discord.py", "discord"]
