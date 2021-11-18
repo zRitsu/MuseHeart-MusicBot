@@ -46,7 +46,7 @@ if not mongo_key:
 
 
 bot = BotCore(
-    command_prefix=commands.when_mentioned_or(os.environ.get('DEFAULT_PREFIX'), '!!!'),
+    command_prefix=commands.when_mentioned_or(os.environ.get('DEFAULT_PREFIX', '!!!')),
     case_insensitive=True,
     intents=intents,
     test_guilds=[],
