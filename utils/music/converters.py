@@ -43,9 +43,6 @@ def queue_tracks(inter, query):
 
 def queue_playlist(inter, query):
 
-    if not query:
-        return
-
     if not inter.author.voice:
         return
 
