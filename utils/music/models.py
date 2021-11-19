@@ -544,7 +544,7 @@ class BasePlayer:
 
         if self.bot.tests:
             self.current = None
-            self.bot.loop.create_task(self.bot.tests.tests_start(self, vc_id=self.vc.channel.id, close=True))
+            self.bot.loop.create_task(self.bot.tests.tests_start(self, vc_id=self.vc.channel.id if self.vc else None, close=True))
 
     async def track_end(self):
 
