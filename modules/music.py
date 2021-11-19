@@ -622,10 +622,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         embed = disnake.Embed(color=disnake.Colour.green())
 
-        txt = f"{inter.author.mention} removeu a música [`{(tname:=fix_characters(track.title, 25))}`]({track.uri}) da fila."
+        txt = f"{inter.author.mention} removeu a música [`{(fix_characters(track.title, 25))}`]({track.uri}) da fila."
 
         player.command_log = txt
-        embed.description=f"música removida: [`{tname}`]({track.uri})"
+        embed.description=f"**Música removida:** [`{track.title}`]({track.uri})"
+        embed.set_thumbnail(url=track.thumb)
         await inter.send(embed=embed, ephemeral=True)
 
         await player.update_message()
@@ -698,10 +699,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         embed.colour = disnake.Colour.green()
 
-        track_title = fix_characters(track.title, limit=30)
-
         player.command_log = f"{inter.author.mention} pulou para a música atual"
-        embed.description = f"**você pulou para a música:** [{track_title}]({track.uri})"
+        embed.description = f"**Você pulou para a música:** [`{track.title}`]({track.uri})"
+        embed.set_thumbnail(track.thumb)
         await inter.send(embed=embed, ephemeral=True)
 
         await player.stop()
@@ -743,7 +743,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         embed = disnake.Embed(color=disnake.Colour.green())
 
-        embed.description = f"música [`{fix_characters(track.title, limit=25)}`]({track.uri}) movida para a posição **[{position}]** da fila."
+        embed.description = f"**A música foi movida para a posição {position} da fila:** [`{fix_characters(track.title)}`]({track.uri})"
+        embed.set_thumbnail(url=track.thumb)
         player.command_log = txt
         await inter.send(embed=embed, ephemeral=True)
 
@@ -782,9 +783,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         embed.colour=disnake.Colour.green()
 
-        txt = f"{inter.author.mention} rotacionou a fila para a música [`{(tname:=fix_characters(track.title, limit=25))}`]({track.uri})."
+        txt = f"{inter.author.mention} rotacionou a fila para a música [`{(fix_characters(track.title, limit=25))}`]({track.uri})."
 
-        embed.description = f"Fila rotacionada para a música [`{tname}`]({track.uri})."
+        embed.description = f"**Fila rotacionada para a música:** [`{track.title}`]({track.uri})."
+        embed.set_thumbnail(url=track.thumb)
         player.command_log = txt
         await inter.send(embed=embed, ephemeral=True)
 
@@ -1256,8 +1258,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                                     f"> ✋ **┃ Pedido por:** {message.author.mention}\n" \
                                     f"> 🎼 **┃ Música(s):** `[{len(tracks.tracks)}]`"
                 embed.set_thumbnail(url=tracks.tracks[0].thumb)
-                if self.msg_ad:
-                    embed.description += f" | {self.msg_ad}"
                 await message.channel.send(embed=embed)
 
             else:
@@ -1273,8 +1273,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                                     f"> ✋ **┃ Pedido por:** {message.author.mention}\n" \
                                     f"> ⌛ **┃ Duração:** `{time_format(tracks[0].duration) if not tracks[0].is_stream else '🔴 Livestream'}` "
                 embed.set_thumbnail(url=tracks[0].thumb)
-                if self.msg_ad:
-                    embed.description += f" | {self.msg_ad}"
                 await message.channel.send(embed=embed)
 
             else:
