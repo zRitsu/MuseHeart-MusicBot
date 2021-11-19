@@ -1598,6 +1598,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             if member.id == self.bot.user.id:
 
+                if not before.channel and after.channel:
+                    return # bot acabou de entrar no canal de voz.
+
                 if player.exiting:
                     return
 
