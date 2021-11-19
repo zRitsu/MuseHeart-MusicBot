@@ -1189,6 +1189,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if message.author.bot:
             return
 
+        if not message.content:
+            await message.delete()
+            await message.channel.send(f"{message.author.mention} você deve enviar um link/nome da música.", delete_after=9)
+            return
+
         try:
             data = await self.bot.db.get_data(message.guild.id, db_name='guilds')
         except AttributeError:
