@@ -1104,7 +1104,15 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def setupplayer(self, inter: disnake.ApplicationCommandInteraction):
 
         target = inter.channel.category or inter.guild
-        channel = await target.create_text_channel(f"{inter.guild.me.name} player controller")
+
+        perms = {
+            inter.guild.default_role: disnake.PermissionOverwrite(embed_links=False)
+        }
+
+        channel = await target.create_text_channel(
+            f"{inter.guild.me.name} player controller",
+            overwrites=perms
+        )
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players.get(inter.guild_id)
 
