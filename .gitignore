@@ -141,3 +141,4 @@ debugger.py
 .project
 *.jar
 database.json
+/index.html

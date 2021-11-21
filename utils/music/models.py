@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import json
 import pprint
 
 import disnake
@@ -103,10 +104,13 @@ class WavelinkVoiceClient(disnake.VoiceClient):
 
 class LavalinkTrack(wavelink.Track):
 
+    __slots__ = ('requester', 'playlist', 'repeats', 'album')
+
     def __init__(self, *args, **kwargs):
         self.requester = kwargs.pop('requester')
         self.playlist = kwargs.pop('playlist', None)
         self.repeats = kwargs.pop('repeats', 0)
+        self.album = {}
         args[1]['title'] = fix_characters(args[1]['title'])
         super().__init__(*args, **kwargs)
 
@@ -122,6 +126,8 @@ class LavalinkTrack(wavelink.Track):
 
 
 class YTDLPlaylist:
+
+    __slots__ = ('data', 'tracks')
 
     def __init__(self, data: dict, playlist: dict):
         self.data = data
@@ -146,6 +152,9 @@ class YTDLSource(disnake.PCMVolumeTransformer):
 
 class YTDLTrack:
 
+    __slots__ = ('author', 'id', 'title', 'uri', 'duration', 'is_stream', 'info',
+                 'requester', 'playlist', 'album', 'repeats', 'thumb')
+
     def __init__(self, *args, **kwargs):
 
         data = kwargs.pop('data', {}) or args[1]
@@ -159,6 +168,7 @@ class YTDLTrack:
         self.info = data
         self.requester = kwargs.pop('requester', '')
         self.playlist = kwargs.pop('playlist', {})
+        self.album = {}
         self.repeats = kwargs.pop('repeats', 0)
 
         if (data.get("ie_key") or data.get('extractor_key')) == "Youtube":
@@ -173,6 +183,8 @@ class BasePlayer:
     node: wavelink.Node
     vc: disnake.VoiceProtocol
     paused: bool
+    position: int
+    is_paused: bool
 
     def __init__(self, *args, **kwargs):
 
@@ -230,8 +242,7 @@ class BasePlayer:
 
         self.view = PlayerInteractions(self.bot)
 
-        if self.bot.tests:
-            self.bot.loop.create_task(self.bot.tests.tests_start(self))
+        self.bot.loop.create_task(self.process_rpc(self.vc.channel))
 
         controls = {
             "⏮️": ["back"],
@@ -348,8 +359,7 @@ class BasePlayer:
                 url="https://cdn.discordapp.com/attachments/480195401543188483/795080813678559273/rainbow_bar2.gif")
             embed.set_thumbnail(url=self.current.thumb)
 
-        if self.bot.tests:
-            self.bot.loop.create_task(self.bot.tests.tests_start(self))
+        self.bot.loop.create_task(self.process_rpc(self.vc.channel))
 
         embeds = [embed_queue, embed] if embed_queue else [embed]
 
@@ -542,9 +552,108 @@ class BasePlayer:
         self.queue.clear()
         self.played.clear()
 
-        if self.bot.tests:
-            self.current = None
-            self.bot.loop.create_task(self.bot.tests.tests_start(self, vc_id=self.vc.channel.id if self.vc else None, close=True))
+        self.bot.loop.create_task(self.process_rpc(self.vc.channel, close=True))
+
+    async def process_rpc(self,  voice_channel: disnake.VoiceChannel, close=False, user: disnake.Member = None):
+
+        if close:
+
+            for m in voice_channel.members:
+
+                if m.bot:
+                    continue
+
+                try:
+                    user_ws = self.bot.ws_users[m.id]["ws"]
+                except KeyError:
+                    continue
+
+                data = {
+                    "op": "close",
+                    "bot_id": self.bot.user.id,
+                    "public": True
+                }
+
+                try:
+                    user_ws.write_message(json.dumps(data))
+                except Exception:
+                    traceback.print_exc()
+
+            return
+
+        vc_members = [m for m in voice_channel.members if not m.bot and (not m.voice.deaf or not m.voice.self_deaf)]
+
+        stats = {
+            "op": "update",
+            "track": None,
+            "bot_id": self.bot.user.id,
+            "public": True,
+            "info": {
+                "members": len(vc_members),
+                "channel": {
+                    "name": voice_channel.name,
+                    "id": voice_channel.id
+                },
+                "guild": {
+                    "name": voice_channel.guild.name,
+                    "id": voice_channel.guild.id
+                }
+            }
+        }
+
+        if not self.current:
+
+            stats.update(
+                {
+                    "op": "idle",
+                    "bot_id": self.bot.user.id,
+                    "public": True,
+                }
+            )
+
+        else:
+
+            track: Optional[LavalinkTrack, YTDLTrack, SpotifyTrack] = self.current
+
+            stats["track"] = {
+                "title": track.title,
+                "url": track.uri,
+                "author": track.author,
+                "duration": track.duration,
+                "stream": track.is_stream,
+                "position": self.position,
+                "paused": self.is_paused,
+                "loop": self.current.repeats or self.loop
+            }
+
+            if track.playlist:
+                stats["track"].update(
+                    {
+                        "playlist_name": track.playlist['name'],
+                        "playlist_url": track.playlist['url'],
+                    }
+                )
+
+            if track.album:
+                stats["track"].update(
+                    {
+                        "album_name": track.album['name'],
+                        "album_url": track.album['url'],
+                    }
+                )
+
+        if user:
+            self.bot.ws_users[user.id]["ws"].write_message(json.dumps(stats))
+
+        else:
+            for m in vc_members:
+                try:
+                    if stats == self.bot.ws_users[m.id]["last"]:
+                        continue
+                    self.bot.ws_users[m.id]["ws"].write_message(json.dumps(stats))
+                    self.bot.ws_users[m.id]["last"] = stats
+                except KeyError:
+                    pass
 
     async def track_end(self):
 

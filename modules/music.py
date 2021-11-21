@@ -64,12 +64,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         self.song_request_concurrency = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
-        try:
-            if not hasattr(bot, 'tests') or not bot.tests:
-                bot.tests = Tests(bot)
-        except:
-            bot.tests = None
-
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.user_command(name="enqueue presence track")
@@ -1306,10 +1300,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await asyncio.sleep(1)
 
     def cog_unload(self):
-        try:
-            self.bot.test.exit_test()
-        except:
-            pass
 
         for m in list(sys.modules):
             if m.startswith("utils.music"):

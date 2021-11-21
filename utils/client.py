@@ -16,11 +16,11 @@ class BotCore(commands.Bot):
         mongo = kwargs.get('mongo')
         self.session: Optional[aiohttp.ClientError] = None
         self.db = Database(token=mongo, name=kwargs.pop("db_name", "botdiscord")) if mongo else LocalDatabase(self)
-        self.tests = None
         self.spotify = spotify_client()
         self.config = kwargs.pop('config', {})
         self.music = music_mode(self)
         self.session = aiohttp.ClientSession()
+        self.ws_users = {}
 
     async def on_application_command(self, inter: disnake.ApplicationCommandInteraction):
 

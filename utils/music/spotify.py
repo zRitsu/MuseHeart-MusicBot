@@ -41,7 +41,7 @@ class SpotifyPlaylist:
 
 class SpotifyTrack:
 
-    def __init__(self, *, uri, title, authors, thumb, duration, requester, playlist = None, repeats=0):
+    def __init__(self, *, uri, title, authors, thumb, duration, requester, playlist = None, album=None, repeats=0):
         self.author = fix_characters(authors[0]['name'])
         self.authors = [fix_characters(i['name']) for i in authors]
         self.id = ""
@@ -53,6 +53,7 @@ class SpotifyTrack:
         self.info = {}
         self.requester = requester
         self.playlist = playlist or {}
+        self.album = album or {}
         self.repeats = repeats
 
         self.title += ' - ' + ', '.join(a for a in self.authors if not a in self.title)
@@ -87,8 +88,21 @@ async def process_spotify(bot: commands.bot, requester: disnake.Member, query: s
 
     if url_type == "track":
         t = bot.spotify.track(url_id)
-        return [SpotifyTrack(uri=t['external_urls']['spotify'], authors=t["artists"], title=t['name'],
-                             thumb=t['album']['images'][0]['url'], duration=t['duration_ms'], requester=requester)]
+
+        album = {
+                "name": t['album']["name"],
+                "url": t['album']['external_urls']['spotify'],
+            }
+
+        return [SpotifyTrack(
+            uri=t['external_urls']['spotify'],
+            authors=t["artists"],
+            title=t['name'],
+            thumb=t['album']['images'][0]['url'],
+            duration=t['duration_ms'],
+            album=album,
+            requester=requester
+        )]
 
     data = {
         'loadType': 'PLAYLIST_LOADED',

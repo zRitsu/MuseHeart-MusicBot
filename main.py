@@ -2,10 +2,10 @@ import disnake
 from disnake.ext import commands
 import os
 from dotenv import load_dotenv
-from keep_alive import keep_alive
 from json import load
 from utils.music.local_lavalink import run_lavalink
 from utils.client import BotCore
+from web_app import run_app
 
 load_dotenv()
 
@@ -32,9 +32,6 @@ if not config.get('youtubedl') and config['lavalink']['local']['start_local_lava
         lavalink_additional_sleep=config['lavalink']['local']['lavalink_additional_sleep'],
     )
 
-if os.getenv('KEEP_ALIVE') != "false":
-    keep_alive()
-
 intents = disnake.Intents.default()
 intents.members = True
 intents.presences = True
@@ -57,6 +54,8 @@ bot = BotCore(
     mongo=mongo_key
 )
 
+if os.getenv('KEEP_ALIVE') != "false":
+    run_app([bot])
 
 @bot.event
 async def on_ready():
