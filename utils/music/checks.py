@@ -135,5 +135,5 @@ async def has_perm(inter):
         player.dj.append(inter.author)
         await inter.channel.send(embed=disnake.Embed(
             description=f"{inter.author.mention} foi adicionado à lista de DJ's por não haver um no canal <#{vc.id}>.",
-            color=inter.me.color))
+            color=inter.me.color), delete_after=10)
         return True
