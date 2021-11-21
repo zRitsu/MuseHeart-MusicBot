@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pprint
-
+import disnake
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
@@ -65,17 +65,19 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                 pass
 
             bot.ws_users[user_id] = user
+            voice_channel: Optional[disnake.VoiceChannel] = None
 
             for p in bot.music.players.values():
                 vc = p.bot.get_channel(p.channel_id)
                 if user_id in [m.id for m in vc.members]:
                     player = p
+                    voice_channel = vc
                     break
 
-            if player and player.vc:
+            if player and voice_channel:
 
-                if [m.id for m in player.vc.channel.members if m == user_id]:
-                    bot.loop.create_task(player.process_rpc)
+                if [m.id for m in voice_channel.members if m.id == user_id]:
+                    bot.loop.create_task(player.process_rpc(voice_channel))
 
 
     def check_origin(self, origin: str):

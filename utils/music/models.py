@@ -557,6 +557,19 @@ class BasePlayer:
     async def process_rpc(self,  voice_channel: disnake.VoiceChannel, close=False, user: disnake.Member = None):
 
         if close:
+            
+            data = {
+                "op": "close",
+                "bot_id": self.bot.user.id,
+                "public": True
+            }
+
+            if user:
+                try:
+                    self.bot.ws_users[user.id]["ws"].write_message(json.dumps(data))
+                    return
+                except KeyError:
+                    return
 
             for m in voice_channel.members:
 
@@ -568,18 +581,11 @@ class BasePlayer:
                 except KeyError:
                     continue
 
-                data = {
-                    "op": "close",
-                    "bot_id": self.bot.user.id,
-                    "public": True
-                }
-
                 try:
                     user_ws.write_message(json.dumps(data))
                 except Exception:
                     traceback.print_exc()
 
-            return
 
         vc_members = [m for m in voice_channel.members if not m.bot and (not m.voice.deaf or not m.voice.self_deaf)]
 

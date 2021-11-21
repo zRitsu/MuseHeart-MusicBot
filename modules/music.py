@@ -752,7 +752,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def rotate(
             self,
             inter: disnake.ApplicationCommandInteraction,
-            query: str = commands.Param(name="nome", description="Nome da música completo.", autocomplete=queue_tracks)
+            query: str = commands.Param(
+                name="nome", description="Nome da música completo.", autocomplete=queue_tracks)
     ):
 
         embed = disnake.Embed(colour=disnake.Colour.red())
@@ -775,7 +776,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player.queue.rotate(0 - (index))
 
-        embed.colour=disnake.Colour.green()
+        embed.colour = disnake.Colour.green()
 
         txt = f"{inter.author.mention} rotacionou a fila para a música [`{(fix_characters(track.title, limit=25))}`]({track.uri})."
 
@@ -1626,6 +1627,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 player.members_timeout_task = None
             except:
                 pass
+
+        # rich presence stuff
+        if not after or before.channel != after.channel:
+            await player.process_rpc(player.vc.channel, close=True, user=member)
+            await player.process_rpc(player.vc.channel)
 
 def setup(bot: BotCore):
     bot.add_cog(Music(bot))
