@@ -983,6 +983,8 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
         except:
             pass
 
+        self.exiting = True
+
         await super().destroy(force=force)
 
 
