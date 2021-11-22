@@ -221,6 +221,7 @@ class BasePlayer:
         self.current: Union[LavalinkTrack, SpotifyTrack, YTDLTrack] = None
         self.view: Optional[disnake.ui.View] = None
         self.seek_time = None
+        self.exiting = False
 
     async def members_timeout(self):
 
@@ -707,7 +708,6 @@ class YTDLPlayer(BasePlayer):
         self.channel_id = kwargs.pop('channel_id', None)
         self.bot: BotCore = kwargs.pop('bot')
         self.event = asyncio.Event()
-        self.exiting = False
         self.locked = False
         self.vc: Optional[disnake.VoiceClient] = None
         self.volume = 100

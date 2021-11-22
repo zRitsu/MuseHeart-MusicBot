@@ -1630,7 +1630,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 pass
 
         # rich presence stuff
-        if not after or before.channel != after.channel:
+        if not player.exiting and not after or before.channel != after.channel:
             await player.process_rpc(player.vc.channel, close=True, user=member)
             await player.process_rpc(player.vc.channel)
 
