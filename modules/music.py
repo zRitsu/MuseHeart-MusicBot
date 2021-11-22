@@ -581,10 +581,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         embed = disnake.Embed(color=inter.guild.me.color)
 
         txt = f"{inter.author.mention} definiu a quantidade de repetições da música " \
-              f"[`{(tname:=fix_characters(player.current.title, 25))}`]({player.current.uri}) para **{value}**."
+              f"[`{(fix_characters(player.current.title, 25))}`]({player.current.uri}) para **{value}**."
 
         player.command_log = txt
-        embed.description=f"Quantidade de repetições **({value})** definida para a música: [`{tname}`]({player.current.uri})"
+        embed.description=f"**Quantidade de repetições [{value}] definida para a música:** [`{player.current.title}`]({player.current.uri})"
+        embed.set_image(url=player.current.thumb)
         await inter.send(embed=embed, ephemeral=True)
 
         await player.update_message()

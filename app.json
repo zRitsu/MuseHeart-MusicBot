@@ -46,7 +46,7 @@
       },
       "KEEP_ALIVE": {
         "description": "Não precisa mexer aqui!",
-        "value": "false",
+        "value": "true",
         "required": false
       }
   }
