@@ -215,7 +215,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         embed = disnake.Embed(color=disnake.Colour.red())
 
-        embed.colour = inter.guild.me.color
+        embed.colour = self.bot.get_color(inter.me)
 
         position-=1
 
@@ -315,7 +315,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await inter.response.defer()
         else:
             player.command_log = f"{inter.author.mention} pulou a música."
-            embed = disnake.Embed(description=f"⏭️** ┃ Música pulada:** [`{fix_characters(player.current.title, 30)}`]({player.current.uri})", color=inter.guild.me.color)
+            embed = disnake.Embed(description=f"⏭️** ┃ Música pulada:** [`{fix_characters(player.current.title, 30)}`]({player.current.uri})", color=self.bot.get_color(inter.me))
             await inter.send(embed=embed, ephemeral=True)
 
         if player.loop == "current":
@@ -419,7 +419,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             view = VolumeInteraction(inter)
 
-            embed.colour = inter.guild.me.colour
+            embed.colour = self.bot.get_color(inter.me)
             embed.description = "**Selecione o nível do volume abaixo:**"
             await inter.send(embed=embed, ephemeral=True, view=view)
             await view.wait()
@@ -578,7 +578,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player.current.repeats = value
 
-        embed = disnake.Embed(color=inter.guild.me.color)
+        embed = disnake.Embed(color=self.bot.get_color(inter.me))
 
         txt = f"{inter.author.mention} definiu a quantidade de repetições da música " \
               f"[`{(fix_characters(player.current.title, 25))}`]({player.current.uri}) para **{value}**."
@@ -959,7 +959,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.slash_command(description="Ver informações dos servidores de música.")
     async def nodeinfo(self, inter: disnake.ApplicationCommandInteraction):
 
-        em = disnake.Embed(color=inter.guild.me.color, title="Servidores de música:")
+        em = disnake.Embed(color=self.bot.get_color(inter.me), title="Servidores de música:")
 
         if not self.bot.music.nodes:
             em.description = "**Não há servidores.**"
@@ -1128,7 +1128,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         inter.guild_data['player_controller']['message_id'] = str(message.id)
         await self.bot.db.update_data(inter.guild.id, inter.guild_data, db_name='guilds')
 
-        embed = disnake.Embed(description=f"**Canal criado: {channel.mention}**\n\nObs: Caso queira reverter esta configuração, apenas delete o canal {channel.mention}", color=inter.guild.me.color)
+        embed = disnake.Embed(description=f"**Canal criado: {channel.mention}**\n\nObs: Caso queira reverter esta configuração, apenas delete o canal {channel.mention}", color=self.bot.get_color(inter.me))
         await inter.send(embed=embed, ephemeral=True)
 
     @commands.has_guild_permissions(administrator=True)
@@ -1261,7 +1261,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             player.message = cached_message
 
-        embed = disnake.Embed(color=message.guild.me.color)
+        embed = disnake.Embed(color=self.bot.get_color(message.guild.me))
 
         try:
             player.queue.extend(tracks.tracks)
@@ -1399,7 +1399,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 vcname = f" **{vc.name}**"
             else:
                 vcname = ""
-            embed = disnake.Embed(color=player.guild.me.color)
+            embed = disnake.Embed(color=self.bot.get_color(player.guild.me))
             embed.description = f"Conexão perdida com o canal de voz{vcname}..."
             embed.description += "\nO player será finalizado..."
             self.bot.loop.create_task(player.text_channel.send(embed=embed, delete_after=7))
@@ -1526,7 +1526,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         embed = disnake.Embed(description="**Entre em um canal de voz e peça uma música neste canal ou na conversa abaixo**\n\n"
                                           "**FORMATOS SUPORTADOS (nome, link):**"
-                                          " ```ini\n[Youtube, Soundcloud, Spotify, Twitch]```\n", color=target.guild.me.color)
+                                          " ```ini\n[Youtube, Soundcloud, Spotify, Twitch]```\n", color=self.bot.get_color(target.guild.me))
 
         if text:
             embed.description += f"**ÚLTIMA AÇÃO:** {text.replace('**', '')}\n"

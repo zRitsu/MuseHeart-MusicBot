@@ -1,7 +1,7 @@
 import aiohttp
 from disnake.ext import commands
 import disnake
-from typing import Optional
+from typing import Optional, Union
 from .music.spotify import spotify_client
 from utils.db import Database, LocalDatabase
 import os
@@ -21,6 +21,17 @@ class BotCore(commands.Bot):
         self.music = music_mode(self)
         self.session = aiohttp.ClientSession()
         self.ws_users = {}
+        self.color = kwargs.pop("embed_color", None)
+
+    def get_color(self, me: disnake.Member):
+
+        if self.color:
+            return self.color
+
+        if me.color.value == 0:
+            return 0x2F3136
+
+        return me.color
 
     async def on_application_command(self, inter: disnake.ApplicationCommandInteraction):
 

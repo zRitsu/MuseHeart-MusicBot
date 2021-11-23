@@ -230,7 +230,7 @@ class BasePlayer:
         if self.static:
             self.command_log = msg
         else:
-            embed = disnake.Embed(description=msg, color=self.guild.me.color)
+            embed = disnake.Embed(description=msg, color=self.bot.get_color(self.guild.me))
             self.bot.loop.create_task(self.text_channel.send(embed=embed))
         await self.destroy()
 
@@ -260,7 +260,7 @@ class BasePlayer:
         embed = disnake.Embed(
             description=f"**Não há músicas na fila. Adicione uma música ou use um dos botões abaixo\n\n"
                         f"[O Player será desligado em: {time_format(self.idle_timeout * 1000)}]**",
-            color=self.guild.me.colour
+            color=self.bot.get_color(self.guild.me)
         )
 
         if self.static or self.text_channel.last_message_id == self.message.id:
@@ -280,7 +280,7 @@ class BasePlayer:
         if not self.current:
             return
 
-        embed = disnake.Embed(color=self.guild.me.color)
+        embed = disnake.Embed(color=self.bot.get_color(self.guild.me))
         embed_queue = None
 
         if not self.paused:
@@ -342,7 +342,7 @@ class BasePlayer:
 
             else:
 
-                embed_queue = disnake.Embed(title=f"Músicas na fila:", color=self.guild.me.color,
+                embed_queue = disnake.Embed(title=f"Músicas na fila:", color=self.bot.get_color(self.guild.me),
                                             description=f"\n{queue_txt}")
                 if (qsize := len(self.queue)) > 20:
                     embed_queue.description += f"\n\nE mais **{qsize - 20}** músicas."

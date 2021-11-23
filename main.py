@@ -51,7 +51,8 @@ bot = BotCore(
     sync_commands_on_cog_unload=False,
     config=config,
     db_name="botdiscord",
-    mongo=mongo_key
+    mongo=mongo_key,
+    color=os.environ.get("EMBED_COLOR")
 )
 
 if os.getenv('KEEP_ALIVE') != "false":

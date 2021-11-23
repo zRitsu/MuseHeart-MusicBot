@@ -83,7 +83,7 @@ class QueueInteraction(disnake.ui.View):
         self.current = 0
         self.max_page = len(self.pages) - 1
         super().__init__(timeout=timeout)
-        self.embed = disnake.Embed(color=user.guild.me.color)
+        self.embed = disnake.Embed(color=player.bot.get_color(user.guild.me))
         self.update_pages()
         self.update_embed()
 
@@ -187,7 +187,7 @@ class SongSelect(disnake.ui.View):
         embed = disnake.Embed(
             description=f"**Música selecionada:** [`{self.track.title}`]({self.track.uri})\n\n"
                         f"`{self.track.author}` | `{time_format(self.track.duration) if not self.track.is_stream else '🔴 Livestream'}`",
-            color=interaction.guild.me.color
+            color=interaction.bot.get_color(interaction.me)
         ).set_thumbnail(self.track.thumb)
         await interaction.response.edit_message(embed=embed, view=None)
         self.stop()
@@ -227,7 +227,7 @@ class PlayerInteractions(disnake.ui.View):
                             f"🔊 `= Ajustar volume.`\n"
                             f"🔁 `= Ativar/Desativar repetição.`\n"
                             f"📑 `= Exibir a fila de música.`\n",
-                color=interaction.guild.me.color
+                color=self.bot.get_color(interaction.me)
             )
 
             await interaction.response.send_message(embed=embed, ephemeral=True)

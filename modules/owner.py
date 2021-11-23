@@ -28,7 +28,7 @@ class Owner(commands.Cog):
         if not txt:
             txt = "**Nenhum módulo encontrado...**"
 
-        embed = disnake.Embed(colour=ctx.me.color, description=txt)
+        embed = disnake.Embed(colour=self.bot.get_color(ctx.me), description=txt)
         await ctx.send(embed=embed)
 
     @commands.command(aliases=["syncglobal", "sync"])
