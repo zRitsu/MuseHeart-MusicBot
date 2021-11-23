@@ -244,34 +244,30 @@ class PlayerInteractions(disnake.ui.View):
 
         subcmd = None
 
-        match control:
+        if control == "volume":
+            kwargs = {"value": None}
 
-            case "volume":
-                kwargs = {"value": None}
+        elif control == "queue":
+            subcmd = "show"
 
-            case "queue":
-                subcmd = "show"
+        elif control == "shuffle":
+            subcmd = "shuffle"
+            control = "queue"
 
-            case "shuffle":
-                subcmd = "shuffle"
-                control = "queue"
+        elif control == "seek":
+            kwargs = {"position": None}
 
-            case "seek":
-                kwargs = {"position": None}
+        elif control == "playpause":
+            control = "pause" if not player.paused else "resume"
 
-            case "playpause":
-                control = "pause" if not player.paused else "resume"
+        elif control == "loop_mode":
 
-            case "loop_mode":
-
-                match player.loop:
-
-                    case "current":
-                        kwargs['mode'] = 'queue'
-                    case "queue":
-                        kwargs['mode'] = 'off'
-                    case _:
-                        kwargs['mode'] = 'current'
+            if player.loop == "current":
+                kwargs['mode'] = 'queue'
+            elif player.loop == "queue":
+                kwargs['mode'] = 'off'
+            else:
+                kwargs['mode'] = 'current'
 
         cmd = self.bot.get_slash_command(control)
 

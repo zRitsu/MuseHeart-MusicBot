@@ -1456,13 +1456,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if player.locked:
             return
 
-        match payload.reason:
-            case "FINISHED":
-                player.command_log = ""
-            case "STOPPED":
-                pass
-            case _:
-                return
+        if payload.reason == "FINISHED":
+            player.command_log = ""
+        elif payload.reason == "STOPPED":
+            pass
+        else:
+            return
 
         await player.track_end()
 
