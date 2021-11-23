@@ -558,7 +558,7 @@ class BasePlayer:
     async def process_rpc(self,  voice_channel: disnake.VoiceChannel, close=False, user: disnake.Member = None):
 
         if close:
-            
+
             data = {
                 "op": "close",
                 "bot_id": self.bot.user.id,
@@ -587,6 +587,8 @@ class BasePlayer:
                 except Exception:
                     traceback.print_exc()
 
+        if self.exiting:
+            return
 
         vc_members = [m for m in voice_channel.members if not m.bot and (not m.voice.deaf or not m.voice.self_deaf)]
 
