@@ -1406,8 +1406,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await player.destroy()
             return
 
-        # fix para dpy 2x (erro ocasionado ao mudar o bot de canal), 4006 = internal error
-        if payload.code in [4006, 4000]:
+        if payload.code == 4000: # internal error
+            await asyncio.sleep(3)
+            await player.current(player.channel_id)
+            return
+
+        # fix para dpy 2x (erro ocasionado ao mudar o bot de canal)
+        if payload.code == 4006:
 
             await player.connect(player.channel_id)
             return
