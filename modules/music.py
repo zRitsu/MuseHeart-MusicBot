@@ -158,7 +158,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             position: int = commands.Param(name="posição", description="Colocar a música em uma posição específica", default=0),
             options: PlayOpts = commands.Param(name="opções" ,description="Opções para processar playlist", default=False),
             manual_selection: bool = commands.Param(name="selecionar_manualmente", description="Escolher uma música manualmente entre os resultados encontrados", default=False),
-            process_all: bool = commands.Param(name="carregar_todos", description="Carregar todas as músicas do link (útil caso seja video com playlist).", default=False),
+            process_all: bool = commands.Param(name="carregar_playlist", description="Carregar todas as músicas do link (útil caso seja video com playlist associada).", default=False),
             source: SearchSource = commands.Param(name="fonte", description="Selecionar site para busca de músicas (não links)", default="ytsearch"),
             repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.", default=0)
     ):
