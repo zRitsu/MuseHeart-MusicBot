@@ -8,6 +8,41 @@ URL_REG = re.compile(r'https?://(?:www\.)?.+')
 YOUTUBE_VIDEO_REG = re.compile(r"(https?://)?(www\.)?youtube\.(com|nl)/watch\?v=([-\w]+)")
 ua = UserAgent().random
 
+perms_translations = {
+	"create_instant_invite": "Criar convite instantâneo",
+	"kick_members": "Expulsar membros",
+	"ban_members": "Banir membros",
+	"administrator": "Administrador",
+	"manage_channels": "Gerenciar canais",
+	"manage_guild": "Gerenciar servidor",
+	"add_reactions": "Adicionar reações",
+	"view_audit_log": "Ver o registro de auditoria",
+	"priority_speaker": "Voz prioritária",
+	"stream": "Transmitir em canais de voz",
+	"read_messages": "Ler mensagens",
+	"send_messages": "Enviar mensagens",
+	"send_tts_messages": "Enviar mensagens em TTS",
+	"manage_messages": "Gerenciar mensagens",
+	"embed_links": "Inserir links",
+	"attach_files": "Anexar arquivos",
+	"read_message_history": "Ver histórico de mensagens",
+	"mention_everyone": "Mencionar todos",
+	"external_emojis": "Usar emojis externos",
+	"view_guild_insights": "Ver informação do servidor",
+	"connect": "Conectar",
+	"speak": "Falar",
+	"mute_members": "Silenciar membros",
+	"deafen_members": "Ensurdecer membros",
+	"move_members": "Mover membros",
+	"use_voice_activation": "Usar detecção de voz",
+	"change_nickname": "Mudar apelido",
+	"manage_nicknames": "Gerenciar apelidos",
+	"manage_roles": "Gerenciar cargos",
+	"manage_webhooks": "Gerenciar webhooks",
+	"manage_emojis": "Gerenciar emojis",
+	"use_slash_commands": "Usar comandos de barra",
+}
+
 async def search_suggestions(inter, query):
 
     if not query:
