@@ -11,7 +11,7 @@ class Owner(commands.Cog):
 
 
     @commands.is_owner()
-    @commands.command(aliases=["rd", "recarregar"], hidden=True)
+    @commands.command(aliases=["rd", "recarregar"], description="Recarregar os módulos (apenas para dono do bot).")
     async def reload(self, ctx):
 
         data = self.bot.load_modules()
@@ -34,7 +34,9 @@ class Owner(commands.Cog):
         await ctx.send(embed=embed)
 
 
-    @commands.command()
+    @commands.command(description="Sincronizar/Registrar os comandos de barra globalmente (demora 1h para fazer efeito "
+                                  "e caso tenha usado o syncguild os comandos podem aparecer duplicados sendo necessário "
+                                  "remover a integração/bot do servidor e readicioná-lo no servidor).")
     @commands.is_owner()
     async def syncglobal(self, ctx: commands.Context):
 
@@ -64,7 +66,7 @@ class Owner(commands.Cog):
         self.bot._sync_commands = original_sync_config
 
 
-    @commands.command(aliases=["sync"])
+    @commands.command(aliases=["sync"], description="Sincronizar/Registrar os comandos de barra no servidor.")
     @commands.has_guild_permissions(manage_guild=True)
     @commands.cooldown(2, 300, commands.BucketType.guild)
     async def syncguild(self, ctx: commands.Context):
@@ -94,5 +96,36 @@ class Owner(commands.Cog):
         self.bot._sync_commands = original_sync_config
 
 
+    @commands.command(name="help", aliases=["ajuda"], hidden=True)
+    @commands.cooldown(1, 3, commands.BucketType.guild)
+    async def help_(self, ctx: commands.Context):
+
+        embed = disnake.Embed(color=self.bot.get_color(ctx.me), title="Meus comandos", description="")
+
+        if ctx.me.avatar:
+            embed.set_thumbnail(url=ctx.me.avatar.with_static_format("png").url)
+
+        for cmd in self.bot.commands:
+
+            if cmd.hidden:
+                continue
+
+            embed.description += f"**{cmd.name}**"
+
+            if cmd.aliases:
+                embed.description += f" [{', '.join(a for a in cmd.aliases)}]"
+
+            if cmd.description:
+                embed.description += f" ```ldif\n{cmd.description}```"
+
+            embed.description += "\n"
+
+        if self.bot.slash_commands:
+            embed.description += "`Veja meus comandos de barra usando:` **/**"
+
+        await ctx.reply(embed=embed)
+
+
 def setup(bot: BotCore):
+    bot.remove_command("help")
     bot.add_cog(Owner(bot))

@@ -1,7 +1,7 @@
 import aiohttp
 from disnake.ext import commands
 import disnake
-from typing import Optional, Union
+from typing import Optional
 from .music.spotify import spotify_client
 from utils.db import Database, LocalDatabase
 import os
@@ -22,6 +22,27 @@ class BotCore(commands.Bot):
         self.session = aiohttp.ClientSession()
         self.ws_users = {}
         self.color = kwargs.pop("embed_color", None)
+
+    async def on_message(self, message: disnake.Message):
+
+        if message.content == f"<@{self.user.id}>" or message.content == f"<@!{self.user.id}>":
+
+            prefix = (await self.get_prefix(message))[-1]
+
+            embed = disnake.Embed(
+                description=f"Olá, meu prefixo atual é: **{prefix}**\n"
+                            f"Caso queira ver meus comandos de texto use **{prefix}help**\n",
+                color=self.get_color(message.guild.me)
+            )
+
+            if self.slash_commands:
+                embed.description += f"Veja também meus comandos de barra usando: **/**"
+
+            await message.reply(embed=embed)
+            return
+
+        await self.process_commands(message)
+
 
     def get_color(self, me: disnake.Member):
 
