@@ -35,8 +35,8 @@ class Owner(commands.Cog):
 
 
     @commands.command(description="Sincronizar/Registrar os comandos de barra globalmente (demora 1h para fazer efeito "
-                                  "e caso tenha usado o syncguild os comandos podem aparecer duplicados sendo necessário "
-                                  "remover a integração/bot do servidor e readicioná-lo no servidor).")
+                                  "e caso tenha usado o syncguild os comandos podem aparecer duplicados, sendo necessário "
+                                  "remover a integração/bot do servidor e readicionar novamente).")
     @commands.is_owner()
     async def syncglobal(self, ctx: commands.Context):
 
