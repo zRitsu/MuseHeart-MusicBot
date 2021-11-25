@@ -224,7 +224,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             if manual_selection and len(tracks) > 1:
 
                 embed.description=f"**Selecione uma música abaixo**"
-                view = SongSelect(tracks)
+                view = SongSelect(tracks, self.bot)
                 view.message = await inter.edit_original_message(embed=embed, view=view)
                 await view.wait()
                 if not view.track:

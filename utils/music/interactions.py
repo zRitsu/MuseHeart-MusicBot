@@ -8,6 +8,7 @@ from inspect import iscoroutinefunction
 
 if TYPE_CHECKING:
     from .models import LavalinkPlayer, YTDLPlayer
+    from ..client import BotCore
 
 
 async def check_cmd(cmd, inter: disnake.Interaction):
@@ -164,11 +165,12 @@ class QueueInteraction(disnake.ui.View):
 
 class SongSelect(disnake.ui.View):
 
-    def __init__(self, items):
+    def __init__(self, items, bot: BotCore):
         super().__init__(timeout=30)
         self.tracks = items
         self.message = None
         self.track = None
+        self.bot = bot
 
         tracks = []
 
@@ -187,7 +189,7 @@ class SongSelect(disnake.ui.View):
         embed = disnake.Embed(
             description=f"**Música selecionada:** [`{self.track.title}`]({self.track.uri})\n\n"
                         f"`{self.track.author}` | `{time_format(self.track.duration) if not self.track.is_stream else '🔴 Livestream'}`",
-            color=interaction.bot.get_color(interaction.me)
+            color=self.bot.get_color(interaction.guild.me)
         ).set_thumbnail(self.track.thumb)
         await interaction.response.edit_message(embed=embed, view=None)
         self.stop()
