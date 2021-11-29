@@ -9,12 +9,6 @@ from utils.client import BotCore
 from utils.db import Database, LocalDatabase
 from web_app import run_app
 
-try:
-    if os.environ["IS_SOURCE"]: # impedir o uso do botão run na replit direto da source pra fork.
-        raise Exception("Este código não pode ser executado a partir do botão \"run\".")
-except KeyError:
-    pass
-
 load_dotenv()
 
 try:
