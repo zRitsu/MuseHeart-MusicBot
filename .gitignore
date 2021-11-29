@@ -142,3 +142,4 @@ debugger.py
 *.jar
 database.json
 /index.html
+/local_dbs/

@@ -1,10 +1,13 @@
+from __future__ import annotations
 import asyncio
 import collections.abc
 import json
 import os
 
 from motor.motor_asyncio import AsyncIOMotorClient
-from typing import Literal
+from typing import Literal, TYPE_CHECKING
+if TYPE_CHECKING:
+    from .client import BotCore
 
 
 db_models = {
@@ -21,7 +24,7 @@ db_models = {
 
 class LocalDatabase:
 
-    def __init__(self, bot):
+    def __init__(self, bot: BotCore):
 
         self.bot = bot
 
@@ -33,12 +36,15 @@ class LocalDatabase:
         self.file_update = 0
         self.data_update = 0
 
-        if not os.path.isfile('database.json'):
-            with open('database.json', 'w') as f:
+        if not os.path.isdir("./local_dbs"):
+            os.makedirs("local_dbs")
+
+        if not os.path.isfile(f'./local_dbs/{bot.user.id}.json'):
+            with open(f'./local_dbs/{bot.user.id}.json', 'w') as f:
                 json.dump(self.data, f)
 
         else:
-            with open('database.json') as f:
+            with open(f'./local_dbs/{bot.user.id}.json') as f:
                 self.data = json.load(f)
 
         self.bot.loop.create_task(self.write_json_task())
@@ -49,7 +55,7 @@ class LocalDatabase:
 
             if self.file_update != self.data_update:
 
-                with open('database.json', 'w') as f:
+                with open(f'./local_dbs/{self.bot.user.id}.json', 'w') as f:
                     json.dump(self.data, f)
 
                 self.file_update += 1

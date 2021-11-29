@@ -1,3 +1,5 @@
+import pprint
+
 import disnake
 from disnake.embeds import Embed
 from disnake.ext import commands
@@ -6,8 +8,9 @@ import wavelink
 import asyncio
 from fake_useragent import UserAgent
 import sys
+import os
+import json
 from random import shuffle
-from aiohttp import ClientSession
 from typing import Literal, Union
 import humanize
 from utils.client import BotCore
@@ -24,28 +27,16 @@ try:
 except:
     pass
 
-# Caso tennha servidores do lavalink externo, habilite as linhas abaiuxo e adicione/modifique de acordo. (não recomendo adicionar isso  na replit)
-lavalink_servers = [
+lavalink_servers = []
 
-    # {
-    #    'host': '127.0.0.1', # ip ou link (não inclua http:// ou https://)
-    #    'port': 2333,
-    #    'password': 'senhadoteulavalink',
-    #    'identifier': 'SERVER 1',
-    #    'region': 'us_central',
-    #    'secure': False,
-    # },
+for k, v in os.environ.items():
+    if not k.lower().startswith("lavalink_node_"):
+        continue
+    try:
+        lavalink_servers.append(json.loads(v))
+    except Exception as e:
+        print(f"Falha ao adicionar node: {k}, erro: {repr(e)}")
 
-    # {
-    #    'host': 'lavalink.freyacodes.com',
-    #    'port': 80,
-    #    'password': 'senha',
-    #    'identifier': 'SERVER 2',
-    #    'region': 'us_central',
-    #    'secure': False,
-    # },
-
-]
 
 PlayOpts = commands.option_enum({"Misturar Playlist": "shuffle", "Inverter Playlist": "reversed"})
 SearchSource = commands.option_enum({"Youtube": "ytsearch", "Soundcloud": "scsearch"})
@@ -1349,7 +1340,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         for node in lavalink_servers:
             self.bot.loop.create_task(self.connect_node(node))
 
-        if self.bot.config.get('start_local_lavalink', True):
+        if self.bot.config["lavalink"]["local"].get('start_local_lavalink', True):
             self.bot.loop.create_task(self.connect_local_lavalink())
 
     async def connect_node(self, data: dict):
@@ -1367,7 +1358,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             while not self.bot.is_closed():
                 if retries >= max_retries:
-                    print(f"Todas as tentativas de conectar ao servidor [{data['identifier']}] falharam.")
+                    print(f"{self.bot.user} - Todas as tentativas de conectar ao servidor [{data['identifier']}] falharam.")
                     return
                 else:
                     try:
@@ -1375,7 +1366,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                             break
                     except Exception:
                         backoff += 2
-                        print(f'Falha ao conectar no servidor [{data["identifier"]}], nova tentativa [{retries}/{max_retries}] em {backoff} segundos.')
+                        print(f'{self.bot.user} - Falha ao conectar no servidor [{data["identifier"]}], nova tentativa [{retries}/{max_retries}] em {backoff} segundos.')
                         await asyncio.sleep(backoff)
                         retries += 1
                         continue
@@ -1432,8 +1423,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         player.current = None
+
         if payload.error == "This IP address has been blocked by YouTube (429)":
             player.queue.appendleft(player.last_track)
+            player.node.available = False
+            newnode = [n for n in self.bot.music.nodes if n.available and n.is_available]
+            if newnode:
+                await player.change_node(newnode[0].identifier)
         else:
             player.played.append(player.last_track)
 
@@ -1444,7 +1440,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
     @wavelink.WavelinkMixin.listener()
     async def on_node_ready(self, node: wavelink.Node):
-        print(f'Servidor de música: [{node.identifier}] está pronto para uso!')
+        print(f'{self.bot.user} - Servidor de música: [{node.identifier}] está pronto para uso!')
 
     @wavelink.WavelinkMixin.listener('on_track_start')
     async def track_start(self, node, payload: wavelink.TrackStart):

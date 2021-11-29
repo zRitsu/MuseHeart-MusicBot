@@ -13,15 +13,15 @@ class BotCore(commands.Bot):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        mongo = kwargs.get('mongo')
         self.session: Optional[aiohttp.ClientError] = None
-        self.db = Database(token=mongo, name=kwargs.pop("db_name", "botdiscord")) if mongo else LocalDatabase(self)
+        self.db: Optional[LocalDatabase, Database] = None
         self.spotify = spotify_client()
         self.config = kwargs.pop('config', {})
         self.music = music_mode(self)
         self.session = aiohttp.ClientSession()
         self.ws_users = {}
         self.color = kwargs.pop("embed_color", None)
+        self.bot_ready = False
 
     async def on_message(self, message: disnake.Message):
 
@@ -56,6 +56,10 @@ class BotCore(commands.Bot):
 
     async def on_application_command(self, inter: disnake.ApplicationCommandInteraction):
 
+        if not self.bot_ready:
+            await inter.send("O bot ainda não está pronto para uso.", ephemeral=True)
+            return
+
         if self.db:
             # inter.user_data = await bot.db.get_data(inter.author.id, db_name="users")
             inter.guild_data = await self.db.get_data(inter.guild.id, db_name="guilds")
@@ -82,19 +86,19 @@ class BotCore(commands.Bot):
                 module_filename = os.path.join(modules_dir, filename).replace('\\', '.').replace('/', '.')
                 try:
                     self.reload_extension(module_filename)
-                    print(f"{'=' * 50}\n[OK] {filename}.py Recarregado.")
+                    print(f"{'=' * 50}\n[OK] {self.user} - {filename}.py Recarregado.")
                     load_status["reloaded"].append(filename)
                 except (commands.ExtensionAlreadyLoaded, commands.ExtensionNotLoaded):
                     try:
                         self.load_extension(module_filename)
-                        print(f"{'=' * 50}\n[OK] {filename}.py Carregado.")
+                        print(f"{'=' * 50}\n[OK] {self.user} - {filename}.py Carregado.")
                         load_status["loaded"].append(filename)
                     except Exception:
-                        print((f"{'=' * 50}\n[ERRO] Falha ao carregar/recarregar o módulo: {filename} | Erro:"
+                        print((f"{'=' * 50}\n[ERRO] {self.user} - Falha ao carregar/recarregar o módulo: {filename} | Erro:"
                                f"\n{traceback.format_exc()}"))
                         load_status["error"].append(filename)
                 except Exception:
-                    print((f"{'=' * 50}\n[ERRO] Falha ao carregar/recarregar o módulo: {filename} | Erro:"
+                    print((f"{'=' * 50}\n[ERRO] {self.user} - Falha ao carregar/recarregar o módulo: {filename} | Erro:"
                       f"\n{traceback.format_exc()}"))
                     load_status["error"].append(filename)
 
