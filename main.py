@@ -47,8 +47,14 @@ bots = []
 
 def load_bot(token: str):
 
+    try:
+        token, prefix = token.split()[:2]
+        prefix = commands.when_mentioned_or(prefix)
+    except:
+        prefix = commands.when_mentioned
+
     bot = BotCore(
-        command_prefix=commands.when_mentioned,
+        command_prefix=prefix,
         case_insensitive=True,
         intents=intents,
         test_guilds=[],
