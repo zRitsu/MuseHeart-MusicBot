@@ -39,10 +39,6 @@ class LocalDatabase:
         if not os.path.isdir("./local_dbs"):
             os.makedirs("local_dbs")
 
-        # Medida temporária para evitar perca de dados do método antigo durante a migração para a nova versão...
-        if os.path.isfile("./database.json"):
-            os.rename("./database.json", f"./local_dbs/{bot.user.id}.json")
-
         if not os.path.isfile(f'./local_dbs/{bot.user.id}.json'):
             with open(f'./local_dbs/{bot.user.id}.json', 'w') as f:
                 json.dump(self.data, f)
