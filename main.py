@@ -57,11 +57,9 @@ def load_bot(token: str):
         command_prefix=prefix,
         case_insensitive=True,
         intents=intents,
-        test_guilds=[],
-        sync_commands=False,
-        sync_commands_on_cog_unload=False,
+        #test_guilds=[],
+        sync_commands=True,
         config=config,
-        db_name="botdiscord",
         color=os.environ.get("EMBED_COLOR")
     )
 
