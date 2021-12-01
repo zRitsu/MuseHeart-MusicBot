@@ -51,7 +51,7 @@ def load_bot(token: str):
         token, prefix = token.split()[:2]
         prefix = commands.when_mentioned_or(prefix)
     except:
-        if token == os.environ["TOKEN"] and (envtoken:=os.environ.get("TOKEN")):
+        if token == os.environ["TOKEN"] and (envtoken:=os.environ.get("PREFIX")):
             prefix = commands.when_mentioned_or(envtoken)
         else:
             prefix = commands.when_mentioned
