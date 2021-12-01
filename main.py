@@ -75,11 +75,8 @@ def load_bot(token: str):
             bot.load_modules()
             mongo = mongo_key
 
-            # Medida temporária para evitar perca de dados do método antigo durante a migração para a nova versão...
-            if token == os.environ["TOKEN"] and os.path.isfile("./database.json"):
-                os.rename("./database.json", f"./local_dbs/{bot.user.id}.json")
-
-            bot.db = Database(token=mongo, name=str(bot.user.id)) if mongo else LocalDatabase(bot)
+            bot.db = Database(token=mongo, name=str(bot.user.id)) if mongo \
+                else LocalDatabase(bot, rename_db=token == os.environ["TOKEN"] and os.path.isfile("./database.json"))
             bot.bot_ready = True
 
     bots.append(bot)
