@@ -42,10 +42,11 @@ class Owner(commands.Cog):
         embed = disnake.Embed(color=disnake.Colour.green())
         invite_url = f"https://discord.com/api/oauth2/authorize?client_id={ctx.bot.user.id}&scope=applications.commands"
 
-        embed.description = f"Este comando atualmente não é mais necessário ser usado..." \
+        embed.description = "Este comando atualmente não é mais necessário ser usado..." \
                             f"Mas caso os comandos de barra não apareçam, [clique aqui]({invite_url}) para permitir o bot " \
-                            f"criar comandos slash no servidor e use este mesmo comando novamente.\n" \
-                            f"Se o problema ainda persistir, tente reiniciar seu discord."
+                            "criar comandos slash no servidor e use este mesmo comando novamente.\n" \
+                            "Se o problema ainda persistir, tente reiniciar seu discord ou em último aguarde 60 minutos" \
+                            "para concluir a sincronização dos comandos globalmente."
         await ctx.send(embed=embed)
 
 
