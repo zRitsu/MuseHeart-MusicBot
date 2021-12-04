@@ -1346,9 +1346,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def connect_node(self, data: dict):
 
         data['rest_uri'] = ("https" if data.get('secure') else "http") + f"://{data['host']}:{data['port']}"
-
         data['user_agent'] = UserAgent().random
-
+        search = data.pop("search", True)
         max_retries = data.pop('retries', 0)
 
         if max_retries:
@@ -1371,7 +1370,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                         retries += 1
                         continue
 
-        await self.bot.music.initiate_node(**data)
+        node = await self.bot.music.initiate_node(**data)
+        node.search = search
 
     @wavelink.WavelinkMixin.listener("on_websocket_closed")
     async def node_ws_voice_closed(self, node, payload: wavelink.events.WebsocketClosed):
@@ -1488,7 +1488,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         tracks = await process_spotify(self.bot, user, query)
 
         if not tracks:
-            tracks = await node.get_tracks(query)
+
+            try:
+                node_seach = sorted([n for n in self.bot.music.nodes.values() if n.search and n.available], key=lambda n: n.players)[0]
+            except:
+                node_seach = node
+
+            tracks = await node_seach.get_tracks(query)
 
         if not tracks:
             raise Exception("Não houve resultados para sua busca.")
