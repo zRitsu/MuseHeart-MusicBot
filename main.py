@@ -61,7 +61,7 @@ def load_bot(token: str):
         case_insensitive=True,
         intents=intents,
         #test_guilds=[],
-        sync_commands=True,
+        sync_commands=False,
         config=config,
         color=os.environ.get("EMBED_COLOR")
     )

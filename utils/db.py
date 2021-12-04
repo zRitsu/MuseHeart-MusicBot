@@ -12,10 +12,11 @@ if TYPE_CHECKING:
 
 db_models = {
       "guilds": {
-        "ver": 1.0,
+        "ver": 1.1,
         "player_controller": {
             "channel": None,
-            "message_id": None
+            "message_id": None,
+            "skin": "default"
         },
         "djroles": []
     }
@@ -76,6 +77,10 @@ class LocalDatabase:
 
             data = dict(db_models[db_name])
 
+        elif data[db_name]["ver"] < db_models[db_name]["ver"]:
+
+            data = update_values(data, db_models)
+
         return data
 
 
@@ -119,6 +124,10 @@ class Database:
                 data = dict(db_models[db_name])
                 data['_id'] = id_
                 await self.push_data(data, db_name)
+
+            elif data[db_name]["ver"] < db_models[db_name]["ver"]:
+                data = update_values(data, db_models)
+                await self.update_data(id_, data, db_name=db_name)
 
             self.cache[db_name][id_] = data
 

@@ -1,3 +1,5 @@
+from importlib import import_module
+
 import aiohttp
 from disnake.ext import commands
 import disnake
@@ -22,6 +24,32 @@ class BotCore(commands.Bot):
         self.ws_users = {}
         self.color = kwargs.pop("embed_color", None)
         self.bot_ready = False
+        self.player_skins = {}
+        self.default_skin = self.config.get("DEFAULT_SKIN", "default")
+        self.load_skins()
+
+    def load_skins(self):
+
+        for skin in os.listdir("./utils/music/skins"):
+
+            if not skin.endswith(".py"):
+                continue
+
+            try:
+                skin_file = import_module(f"utils.music.skins.{skin[:-3]}")
+
+                if not hasattr(skin_file, "load"):
+                    print(f"Skin ignorada: {skin} | Função load() não configurada/encontrada...")
+                    continue
+
+                self.player_skins[skin[:-3]] = skin_file.load
+
+            except Exception:
+                print(f"Falha ao carregar skin: {traceback.format_exc()}")
+
+        if not self.default_skin in self.player_skins:
+            self.default_skin = "default"
+
 
     async def on_message(self, message: disnake.Message):
 

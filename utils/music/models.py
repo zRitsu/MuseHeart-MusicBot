@@ -222,6 +222,8 @@ class BasePlayer:
         self.view: Optional[disnake.ui.View] = None
         self.seek_time = None
         self.exiting = False
+        self.skin = self.bot.player_skins[kwargs.pop("skin", self.bot.default_skin)]
+
 
     async def members_timeout(self):
 
@@ -280,89 +282,7 @@ class BasePlayer:
         if not self.current:
             return
 
-        embed = disnake.Embed(color=self.bot.get_color(self.guild.me))
-        embed_queue = None
-
-        if not self.paused:
-            embed.set_author(
-                name="Tocando Agora:",
-                icon_url="https://cdn.discordapp.com/attachments/480195401543188483/895862881105616947/music_equalizer.gif"
-            )
-        else:
-            embed.set_author(
-                name="Em Pausa:",
-                icon_url="https://cdn.discordapp.com/attachments/480195401543188483/896013933197013002/pause.png"
-            )
-
-        embed.set_footer(
-            text=str(self),
-            icon_url="https://cdn.discordapp.com/attachments/480195401543188483/907119505971486810/speaker-loud-speaker.gif"
-        )
-
-        if self.current.is_stream:
-            duration = "🔴 **⠂Livestream**"
-        else:
-            duration = f"⏰ **⠂Duração:** `{time_format(self.current.duration)}`"
-
-        txt = f"[**{self.current.title}**]({self.current.uri})\n\n" \
-              f"> {duration}\n" \
-              f"> 💠 **⠂Uploader**: `{self.current.author}`\n" \
-              f"> ✋ **⠂Pedido por:** {self.current.requester.mention}\n" \
-              f"> 🔊 **⠂Volume:** `{self.volume}%`"
-
-        if self.current.repeats:
-            txt += f"\n> 🔂 **⠂Repetições restantes:** `{self.current.repeats}`"
-
-        if self.current.playlist:
-            txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(self.current.playlist['name'], limit=17)}`]({self.current.playlist['url']})"
-
-        txt += "\n"
-
-        if self.command_log:
-            txt += f"```ini\n[Última Interação]:```{self.command_log}\n"
-
-        if len(self.queue):
-
-            char_limit = 26 if not self.static else 33
-
-            queue_txt = "\n".join(
-                f"`{n + 1}) [{time_format(t.duration) if t.duration else '🔴 Livestream'}]` [`{fix_characters(t.title, char_limit)}`]({t.uri})"
-                for n, t
-                in (enumerate(itertools.islice(self.queue, (20 if self.static else 3))))
-            )
-
-            if not self.static:
-
-                txt += f"```ini\n[Próximas Músicas]:``` {queue_txt}"
-
-                if (qsize := len(self.queue)) > 3:
-                    txt += f"\n\n`E mais {qsize - 3}" + (f" |` {self.msg_ad}" if self.msg_ad else " músicas`")
-                else:
-                    txt += f"\n\n{self.msg_ad}" if self.msg_ad else ""
-
-            else:
-
-                embed_queue = disnake.Embed(title=f"Músicas na fila:", color=self.bot.get_color(self.guild.me),
-                                            description=f"\n{queue_txt}")
-                if (qsize := len(self.queue)) > 20:
-                    embed_queue.description += f"\n\nE mais **{qsize - 20}** músicas."
-                txt += f"{'-'*40}\n{self.msg_ad}" if self.msg_ad else ""
-
-        else:
-            txt += f"{'-'*40}\n{self.msg_ad}" if self.msg_ad else ""
-
-        embed.description = txt
-
-        if self.static:
-            embed.set_image(url=self.current.thumb)
-        else:
-            embed.set_image(
-                url="https://cdn.discordapp.com/attachments/480195401543188483/795080813678559273/rainbow_bar2.gif")
-            embed.set_thumbnail(url=self.current.thumb)
-
-        self.bot.loop.create_task(self.process_rpc(self.vc.channel))
-
-        embeds = [embed_queue, embed] if embed_queue else [embed]
+        embeds = self.skin(self)
 
         try:
             if self.message and embeds == self.last_embed and (self.static or self.is_last_message()):
