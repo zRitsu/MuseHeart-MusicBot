@@ -79,7 +79,10 @@ class LocalDatabase:
 
         elif data["ver"] < db_models[db_name]["ver"]:
 
-            data = update_values(data, db_models[db_name])
+            data = update_values(dict(db_models[db_name]), data)
+            data["ver"] = db_models[db_name]["ver"]
+
+            await self.update_data(id_, data, db_name=db_name)
 
         return data
 
@@ -118,6 +121,7 @@ class Database:
         data = self.cache[db_name].get(id_)
 
         if not data:
+
             data = await db.find_one({"_id": id_})
 
             if not data:
@@ -126,7 +130,9 @@ class Database:
                 await self.push_data(data, db_name)
 
             elif data["ver"] < db_models[db_name]["ver"]:
-                data = update_values(data, db_models[db_name])
+                data = update_values(dict(db_models[db_name]), data)
+                data["ver"] = db_models[db_name]["ver"]
+
                 await self.update_data(id_, data, db_name=db_name)
 
             self.cache[db_name][id_] = data
