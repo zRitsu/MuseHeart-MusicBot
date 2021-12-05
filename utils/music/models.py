@@ -213,7 +213,7 @@ class BasePlayer:
         self.is_previows_music = False
         self.updating_message = None
         self.command_log = ""
-        self.last_embed = None
+        self.last_data = None
         self.interaction_cooldown = False
         self.votes = set()
         self.msg_ad = self.cog.bot.config.get("link")
@@ -282,10 +282,11 @@ class BasePlayer:
         if not self.current:
             return
 
-        embeds = self.skin(self)
+        #embeds = self.skin(self)
+        data = self.skin(self)
 
         try:
-            if self.message and embeds == self.last_embed and (self.static or self.is_last_message()):
+            if self.message and data == self.last_data and (self.static or self.is_last_message()):
                 try:
                     await interaction.response.defer()
                 except:
@@ -330,14 +331,14 @@ class BasePlayer:
         if self.message and (self.static or not force or self.is_last_message()):
             try:
                 if interaction and not interaction.response.is_done():
-                    await interaction.response.edit_message(embeds=embeds, view=self.view)
+                    await interaction.response.edit_message(view=self.view, **data)
                 else:
                     try:
                         await interaction.response.defer()
                     except:
                         pass
                     try:
-                        await self.message.edit(embeds=embeds, view=self.view)
+                        await self.message.edit(view=self.view, **data)
                     except:
                         if not self.bot.get_channel(self.text_channel.id):
                             await self.destroy(force=True)  # canal não existe mais no servidor...
@@ -349,9 +350,9 @@ class BasePlayer:
 
         await self.destroy_message(destroy_view=False)
 
-        self.last_embed = embeds
+        self.last_data = data
 
-        self.message = await self.text_channel.send(embeds=embeds, view=self.view)
+        self.message = await self.text_channel.send(view=self.view, **data)
 
         self.cancel_message_task_update()
 
@@ -371,7 +372,7 @@ class BasePlayer:
             except:
                 pass
 
-        self.last_embed = None
+        self.last_data = None
 
         self.message = None
 

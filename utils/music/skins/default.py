@@ -2,10 +2,14 @@ from ..models import LavalinkPlayer
 import disnake
 from ..converters import fix_characters, time_format
 import itertools
-from typing import List
 
 
-def load(player: LavalinkPlayer) -> List[disnake.Embed]:
+def load(player: LavalinkPlayer) -> dict:
+
+    data = {
+        "content": None,
+        "embeds": None
+    }
 
     embed = disnake.Embed(color=player.bot.get_color(player.guild.me))
     embed_queue = None
@@ -89,6 +93,6 @@ def load(player: LavalinkPlayer) -> List[disnake.Embed]:
 
     player.bot.loop.create_task(player.process_rpc(player.vc.channel))
 
-    embeds = [embed_queue, embed] if embed_queue else [embed]
+    data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
 
-    return embeds
+    return data
