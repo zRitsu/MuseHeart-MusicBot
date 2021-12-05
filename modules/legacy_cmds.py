@@ -34,20 +34,36 @@ class Owner(commands.Cog):
         await ctx.send(embed=embed)
 
 
-    @commands.command(aliases=["sync"], description="Sincronizar/Registrar os comandos de barra.", hidden=True)
-    @commands.has_guild_permissions(manage_guild=True)
-    @commands.cooldown(2, 300, commands.BucketType.guild)
-    async def syncguild(self, ctx: commands.Context):
+    @commands.command(aliases=["sync"], description="Sincronizar/Registrar os comandos de barra globalmente.")
+    @commands.is_owner()
+    async def syncglobal(self, ctx: commands.Context):
 
         embed = disnake.Embed(color=disnake.Colour.green())
+
+        original_list = self.bot._test_guilds
+        original_sync_config = self.bot._sync_commands
         invite_url = f"https://discord.com/api/oauth2/authorize?client_id={ctx.bot.user.id}&scope=applications.commands"
 
-        embed.description = "Este comando atualmente não é mais necessário ser usado..." \
-                            f"Mas caso os comandos de barra não apareçam, [clique aqui]({invite_url}) para permitir o bot " \
-                            "criar comandos slash no servidor e use este mesmo comando novamente.\n" \
-                            "Se o problema ainda persistir, tente reiniciar seu discord ou em último aguarde 60 minutos" \
-                            "para concluir a sincronização dos comandos globalmente."
-        await ctx.send(embed=embed)
+        self.bot._test_guilds = None
+        self.bot._sync_commands = True
+
+        try:
+            await self.bot._sync_application_commands()
+            embed.description = f"**Comandos globais sincronizados**\n\n" \
+                                "Caso os comandos não apareçam tente alguns procedimentos abaixo:\n\n" \
+                                f"`1 -` [`clique aqui`]({invite_url}) `para me permitir criar comandos de barra no servidor.`\n\n" \
+                                "`2 - Caso o passo acima não funcione, experimente reabrir seu discord.`\n\n" \
+                                f"`3 - Se o problema persistir, aguarde 60 minutos para concluir a sincronização dos comandos globais.`"   
+            await ctx.send(embed=embed)
+
+        except Exception as e:
+            traceback.print_exc()
+            embed.colour = disnake.Colour.red()
+            embed.description = f"**Falha ao sincronizar:** ```py\n{repr(e)}```"
+            await ctx.send(embed=embed)
+
+        self.bot._test_guilds = original_list
+        self.bot._sync_commands = original_sync_config
 
 
     @commands.command(name="help", aliases=["ajuda"], hidden=True)
