@@ -48,11 +48,6 @@
         "description": "Não precisa mexer aqui!",
         "value": "true",
         "required": false
-      },
-      "LAVALINK_NODE_SOMETHING_HOST": {
-        "description": "Lavalink Server público fornecido por: https://support.something.host/en/article/lavalink-hosting-okm26z",
-        "value": "{\"host\": \"lava.link\", \"port\": 80, \"password\": \"youshallnotpass\", \"identifier\": \"SomethingHost\", \"secure\": false, \"region\": \"eu_germany\"}",
-        "required": false
       }
   }
 }
