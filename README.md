@@ -1,5 +1,5 @@
 # disnake-LL-music-bot
-### bot de música em python programado usando as libs do disnake e lavalink/YT-DLP com player interativo, comandos slash etc.
+### bot de música programado em python com player interativo, comandos barra/slash, etc. Utilizando as libs disnake e lavalink/YT-DLP.
 
 
 Tutorial para hospedar seu próprio bot de música deste repositório sem coding: [clique aqui](https://github.com/zRitsu/disnake-LL-music-bot/wiki)
