@@ -222,7 +222,7 @@ class BasePlayer:
         self.view: Optional[disnake.ui.View] = None
         self.seek_time = None
         self.exiting = False
-        self.skin = self.bot.player_skins[kwargs.pop("skin", self.bot.default_skin)]
+        self.skin = self.cog.bot.player_skins[kwargs.pop("skin", self.cog.bot.default_skin)]
 
 
     async def members_timeout(self):
