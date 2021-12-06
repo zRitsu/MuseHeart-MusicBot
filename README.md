@@ -17,4 +17,4 @@ Tutorial para hospedar seu próprio bot de música deste repositório sem coding
 
 - Player controller (modo fixo com song requests, configurável com o comando: /setupplayer)
 
-![](https://media.discordapp.net/attachments/480195401543188483/917307619495018526/unknown.png?width=1285&height=676)
+![](https://media.discordapp.net/attachments/480195401543188483/917307619495018526/unknown.png)
