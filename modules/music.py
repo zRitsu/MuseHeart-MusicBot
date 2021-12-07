@@ -184,7 +184,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             embed = disnake.Embed(
                 description="**O link contém vídeo com playlist.**\n`selecione uma opção em até 30 segundos para prosseguir.`",
-                color=inter.guild.me.colour
+                color=self.bot.get_color(inter.guild.me)
             )
 
             await inter.send(embed=embed, view=view, ephemeral=True)
@@ -1264,7 +1264,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                 embed = disnake.Embed(
                     description="**O link contém vídeo com playlist.**\n`selecione uma opção em até 30 segundos para prosseguir.`",
-                    color=message.guild.me.colour
+                    color=self.bot.get_color(message.guild.me)
                 )
 
                 msg = await message.channel.send(message.author.mention,embed=embed, view=view)
