@@ -20,7 +20,7 @@ from utils.music.spotify import SpotifyPlaylist, process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj
 from utils.music.models import LavalinkPlayer, LavalinkTrack, YTDLTrack, YTDLPlayer, YTDLManager
 from utils.music.converters import time_format, fix_characters, string_to_seconds, get_track_index, URL_REG, YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist
-from utils.music.interactions import VolumeInteraction, QueueInteraction, send_message, SongSelect
+from utils.music.interactions import VolumeInteraction, QueueInteraction, send_message, SongSelect, SelectInteraction
 
 try:
     from test import Tests
@@ -149,7 +149,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             position: int = commands.Param(name="posição", description="Colocar a música em uma posição específica", default=0),
             options: PlayOpts = commands.Param(name="opções" ,description="Opções para processar playlist", default=False),
             manual_selection: bool = commands.Param(name="selecionar_manualmente", description="Escolher uma música manualmente entre os resultados encontrados", default=False),
-            process_all: bool = commands.Param(name="carregar_playlist", description="Carregar todas as músicas do link (útil caso seja video com playlist associada).", default=False),
             source: SearchSource = commands.Param(name="fonte", description="Selecionar site para busca de músicas (não links)", default="ytsearch"),
             repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.", default=0)
     ):
@@ -166,13 +165,41 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         except KeyError:
             channel = inter.channel
 
-        await inter.response.defer(ephemeral=True)
-
         if manual_selection and isinstance(self.bot.music, YTDLManager):
             source+="5"
 
+        query = query.strip("<>")
+
+        if not URL_REG.match(query):
+            query = f"{source}:{query}"
+
+        elif (url_regex := YOUTUBE_VIDEO_REG.match(query)):
+
+            view = SelectInteraction(
+                user=inter.author,
+                opts = [
+                    disnake.SelectOption(label="Música", emoji="🎵", description="Carregar apenas a música do link.", value="music"),
+                    disnake.SelectOption(label="Playlist", emoji="🎶", description="Carregar playlist com a música atual.", value="playlist"),
+                ], timeout=30)
+
+            embed = disnake.Embed(
+                description="**O link contém vídeo com playlist.**\n`selecione uma opção em até 30 segundos para prosseguir.`",
+                color=inter.guild.me.colour
+            )
+
+            await inter.send(embed=embed, view=view, ephemeral=True)
+
+            await view.wait()
+
+            if view.selected == "music":
+                query = url_regex.group()
+
+            inter.response = view.inter.response
+
+        await inter.response.defer(ephemeral=True)
+
         try:
-            tracks, node = await self.get_tracks(query, inter.user, source=source, process_all=process_all, node=node, repeats=repeat_amount)
+            tracks, node = await self.get_tracks(query, inter.user, source=source, node=node, repeats=repeat_amount)
         except Exception as e:
             traceback.print_exc()
             await inter.edit_original_message(content=f"**Ocorreu um erro:** ```py\n{e}```")
@@ -279,7 +306,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             embed.set_thumbnail(url=tracks.tracks[0].thumb)
 
         if not manual_selection:
-            await inter.edit_original_message(embed=embed)
+            await inter.edit_original_message(embed=embed, view=None)
 
         if not player.is_connected:
             await player.connect(inter.author.voice.channel.id)
@@ -1217,18 +1244,57 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await message.channel.send(f"{message.author.mention} você deve aguardar seu pedido de música anterior carregar...", delete_after=10)
             return
 
+        message.content = message.content.strip("<>")
+
+        msg = None
+
         try:
-            await self.parse_song_request(message, text_channel, data)
+
+            if not URL_REG.match(message.content):
+                message.content = f"ytsearch:{message.content}"
+
+            elif (url_regex := YOUTUBE_VIDEO_REG.match(message.content)):
+
+                view = SelectInteraction(
+                    user = message.author,
+                    opts = [
+                        disnake.SelectOption(label="Música", emoji="🎵", description="Carregar apenas a música do link.", value="music"),
+                        disnake.SelectOption(label="Playlist", emoji="🎶", description="Carregar playlist com a música atual.", value="playlist"),
+                    ], timeout=30)
+
+                embed = disnake.Embed(
+                    description="**O link contém vídeo com playlist.**\n`selecione uma opção em até 30 segundos para prosseguir.`",
+                    color=message.guild.me.colour
+                )
+
+                msg = await message.channel.send(message.author.mention,embed=embed, view=view)
+
+                await view.wait()
+
+                await view.inter.response.defer()
+
+                if view.selected == "music":
+                    message.content = url_regex.group()
+
+            await self.parse_song_request(message, text_channel, data, response=msg)
             if not isinstance(message.channel, disnake.Thread):
                 await message.delete()
+                try:
+                    await msg.delete()
+                except:
+                    pass
 
         except Exception as e:
-            await message.channel.send(f"{message.author.mention} **ocorreu um erro ao tentar obter resultados para sua busca:** ```py\n{e}```", delete_after=7)
+            text = f"{message.author.mention} **ocorreu um erro ao tentar obter resultados para sua busca:** ```py\n{e}```"
+            if msg:
+                await msg.edit(content=text, embed=None, view=None, delete_after=7)
+            else:
+                await message.channel.send(text, delete_after=7)
             await message.delete()
 
         await self.song_request_concurrency.release(message)
 
-    async def parse_song_request(self, message, text_channel, data):
+    async def parse_song_request(self, message, text_channel, data, *, response=None):
 
         if not message.author.voice:
             raise Exception(f"você deve entrar em um canal de voz para pedir uma música.")
@@ -1271,7 +1337,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                                     f"> ✋ **┃ Pedido por:** {message.author.mention}\n" \
                                     f"> 🎼 **┃ Música(s):** `[{len(tracks.tracks)}]`"
                 embed.set_thumbnail(url=tracks.tracks[0].thumb)
-                await message.channel.send(embed=embed)
+                if response:
+                    await response.edit(content=None, embed=embed, view=None)
+                else:
+                    await message.channel.send(embed=embed)
 
             else:
                 player.command_log = f"{message.author.mention} adicionou a playlist " \
@@ -1286,7 +1355,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                                     f"> ✋ **┃ Pedido por:** {message.author.mention}\n" \
                                     f"> ⌛ **┃ Duração:** `{time_format(tracks[0].duration) if not tracks[0].is_stream else '🔴 Livestream'}` "
                 embed.set_thumbnail(url=tracks[0].thumb)
-                await message.channel.send(embed=embed)
+                if response:
+                    await response.edit(content=None, embed=embed, view=None)
+                else:
+                    await message.channel.send(embed=embed)
 
             else:
                 duration = time_format(tracks[0].duration) if not tracks[0].is_stream else '🔴 Livestream'
@@ -1479,15 +1551,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await player.process_next()
 
 
-    async def get_tracks(self, query: str, user: disnake.Member, source="ytsearch",
-                         process_all=False, node: wavelink.Node=None, repeats=0):
-
-        query = query.strip("<>")
-
-        if not URL_REG.match(query):
-            query = f"{source}:{query}"
-        if not process_all and (url_regex := YOUTUBE_VIDEO_REG.match(query)):
-            query = url_regex.group()
+    async def get_tracks(self, query: str, user: disnake.Member, node: wavelink.Node=None, repeats=0):
 
         if not node:
             node = self.bot.music.get_best_node()

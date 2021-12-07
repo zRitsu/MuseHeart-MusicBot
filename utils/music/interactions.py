@@ -3,7 +3,7 @@ import disnake
 from disnake.ext import commands
 import asyncio
 from .converters import time_format, fix_characters
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Union, List
 from inspect import iscoroutinefunction
 
 if TYPE_CHECKING:
@@ -195,9 +195,32 @@ class SongSelect(disnake.ui.View):
         self.stop()
 
 
+class SelectInteraction(disnake.ui.View):
+
+    def __init__(self, user: disnake.Member, opts: List[disnake.SelectOption], *, timeout=180):
+        super().__init__(timeout=timeout)
+        self.user = user
+        self.selected = opts[0].value
+        select_menu = disnake.ui.Select(placeholder='Selecione uma opção:', options=opts)
+        select_menu.callback = self.callback
+        self.add_item(select_menu)
+        self.inter = None
+
+    async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
+
+        if interaction.user == self.user:
+            return True
+
+        await interaction.send(f"Apenas {self.user} pode interagir aqui.", ephemeral = True)
+
+    async def callback(self, interaction: disnake.Interaction):
+        self.selected = interaction.data.values[0]
+        self.inter = interaction
+        self.stop()
+
 class PlayerInteractions(disnake.ui.View):
 
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: BotCore):
         self.bot = bot
         super().__init__(timeout=None)
 
