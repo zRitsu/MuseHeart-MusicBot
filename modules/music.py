@@ -1567,12 +1567,15 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if not tracks:
 
-            try:
-                node_seach = sorted([n for n in self.bot.music.nodes.values() if n.search and n.available], key=lambda n: n.players)[0]
-            except:
-                node_seach = node
+            if node.search:
+                node_search = node
+            else:
+                try:
+                    node_search = sorted([n for n in self.bot.music.nodes.values() if n.search and n.available], key=lambda n: n.players)[0]
+                except:
+                    node_search = node
 
-            tracks = await node_seach.get_tracks(query)
+            tracks = await node_search.get_tracks(query)
 
         if not tracks:
             raise Exception("Não houve resultados para sua busca.")
