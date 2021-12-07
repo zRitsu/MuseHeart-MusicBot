@@ -200,7 +200,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await inter.response.defer(ephemeral=True)
 
         try:
-            tracks, node = await self.get_tracks(query, inter.user, source=source, node=node, repeats=repeat_amount)
+            tracks, node = await self.get_tracks(query, inter.user, node=node, repeats=repeat_amount)
         except Exception as e:
             await inter.edit_original_message(content=f"**Ocorreu um erro:** ```py\n{e}```")
             return
