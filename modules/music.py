@@ -194,7 +194,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             if view.selected == "music":
                 query = url_regex.group()
 
-            inter.response = view.inter.response
+            if view.inter.response:
+                inter.response = view.inter.response
 
         await inter.response.defer(ephemeral=True)
 
@@ -1271,7 +1272,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                 await view.wait()
 
-                await view.inter.response.defer()
+                try:
+                    await view.inter.response.defer()
+                except:
+                    pass
 
                 if view.selected == "music":
                     message.content = url_regex.group()
@@ -1285,6 +1289,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     pass
 
         except Exception as e:
+            traceback.print_exc()
             text = f"{message.author.mention} **ocorreu um erro ao tentar obter resultados para sua busca:** ```py\n{e}```"
             if msg:
                 await msg.edit(content=text, embed=None, view=None, delete_after=7)
