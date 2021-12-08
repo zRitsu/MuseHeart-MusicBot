@@ -175,7 +175,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not URL_REG.match(query):
             query = f"{source}:{query}"
 
-        elif (url_regex := YOUTUBE_VIDEO_REG.match(query)):
+        elif "&list=" in query:
 
             view = SelectInteraction(
                 user=inter.author,
@@ -194,7 +194,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await view.wait()
 
             if view.selected == "music":
-                query = url_regex.group()
+                query = YOUTUBE_VIDEO_REG.match(query).group()
 
             if view.inter.response:
                 inter.response = view.inter.response
@@ -1255,7 +1255,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             if not URL_REG.match(message.content):
                 message.content = f"ytsearch:{message.content}"
 
-            elif (url_regex := YOUTUBE_VIDEO_REG.match(message.content)):
+            elif "&list=" in message.content:
 
                 view = SelectInteraction(
                     user = message.author,
@@ -1279,7 +1279,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     pass
 
                 if view.selected == "music":
-                    message.content = url_regex.group()
+                    message.content = YOUTUBE_VIDEO_REG.match(message.content).group()
 
             await self.parse_song_request(message, text_channel, data, response=msg)
             if not isinstance(message.channel, disnake.Thread):
