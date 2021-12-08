@@ -694,7 +694,7 @@ class YTDLPlayer(BasePlayer):
 
         if self.guild.me.voice and self.guild.me.voice.channel.id != channel_id:
             await self.vc.move_to(channel)
-        else:
+        elif not self.guild.voice_client:
             await channel.connect(cls=self.vc, reconnect=True)
         self.vc = self.guild.voice_client
 
