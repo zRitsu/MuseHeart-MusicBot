@@ -113,7 +113,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             position=0,
             options="",
             manual_selection=False,
-            process_all=False,
             source="ytsearch",
             repeat_amount=0,
         )
@@ -134,7 +133,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             position=0,
             options="",
             manual_selection=False,
-            process_all=False,
             source="ytsearch",
             repeat_amount=0,
         )
