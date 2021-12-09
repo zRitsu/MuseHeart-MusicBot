@@ -1459,6 +1459,52 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         node = await self.bot.music.initiate_node(**data)
         node.search = search
 
+
+    @wavelink.WavelinkMixin.listener("on_node_connection_closed")
+    async def node_connection_closed(self, node: wavelink.Node):
+
+        if node._websocket.auto_reconnect:
+            return
+
+        retries = 0
+        backoff = 7
+
+
+        for player in list(node.players.values()):
+            try:
+                node = self.bot.music.get_best_node()
+            except wavelink.ZeroConnectedNodes:
+                try:
+                    await player.text_channel.send("O player foi finalizado por falta de servidores de música...", delete_after=11)
+                except:
+                    pass
+                await player.destroy()
+                continue
+
+            try:
+                await player.change_node(node.identifier)
+            except:
+                traceback.print_exc()
+
+
+        print(f"{self.bot.user} - [{node.identifier}] Conexão perdida - reconectando em {backoff} segundos.")
+
+        await asyncio.sleep(backoff)
+
+        while not node._websocket._closed:
+            try:
+                async with self.bot.session.get(node.rest_uri, timeout=backoff):
+                    await node._websocket._connect()
+                    break
+            except Exception:
+                backoff += 10
+                print(
+                    f'{self.bot.user} - Falha ao reconectar no servidor [{node.identifier}], nova tentativa em {backoff} segundos.')
+                await asyncio.sleep(backoff)
+                retries += 1
+                continue
+
+
     @wavelink.WavelinkMixin.listener("on_websocket_closed")
     async def node_ws_voice_closed(self, node, payload: wavelink.events.WebsocketClosed):
 
@@ -1572,7 +1618,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             else:
                 try:
                     node_search = sorted([n for n in self.bot.music.nodes.values() if n.search and n.available], key=lambda n: n.players)[0]
-                except:
+                except IndexError:
                     node_search = node
 
             tracks = await node_search.get_tracks(query)
