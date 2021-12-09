@@ -13,6 +13,7 @@ import json
 from random import shuffle
 from typing import Literal, Union
 import humanize
+from urllib import parse
 from utils.client import BotCore
 
 from utils.music.errors import GenericError
@@ -1638,6 +1639,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         else:
 
             if not isinstance(tracks, SpotifyPlaylist):
+
+                try:
+                    if tracks.tracks[0].info.get("class") == "YoutubeAudioTrack":
+                        query = f"https://www.youtube.com/playlist?list={parse.parse_qs(parse.urlparse(query).query)['list'][0]}"
+                except IndexError:
+                    pass
+
                 playlist = {
                     "name": tracks.data['playlistInfo']['name'],
                     "url": query
@@ -1648,6 +1656,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                         track.repeats = repeats
                         track.requester = user
                 else:
+
                     tracks.tracks = [LavalinkTrack(t.id, t.info, requester=user, playlist=playlist) for t in tracks.tracks]
 
             if (selected := tracks.data['playlistInfo']['selectedTrack']) > 0:

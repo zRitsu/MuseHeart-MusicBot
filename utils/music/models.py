@@ -14,10 +14,8 @@ from .converters import fix_characters, time_format, get_button_style
 from .filters import AudioFilter
 from .interactions import PlayerInteractions
 from .spotify import SpotifyTrack
-import itertools
 import traceback
 from collections import deque
-from .errors import GenericError
 from typing import Optional, Union, TYPE_CHECKING
 if TYPE_CHECKING:
     from ..client import BotCore
