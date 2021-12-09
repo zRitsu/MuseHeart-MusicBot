@@ -1493,17 +1493,19 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await asyncio.sleep(backoff)
 
         while not node._websocket._closed:
-            try:
-                async with self.bot.session.get(node.rest_uri, timeout=backoff):
-                    await node._websocket._connect()
+
+            async with self.bot.session.get(node.rest_uri, timeout=backoff) as r:
+                if r.status in [401, 200]:
                     break
-            except Exception:
-                backoff += 10
-                print(
-                    f'{self.bot.user} - Falha ao reconectar no servidor [{node.identifier}], nova tentativa em {backoff} segundos.')
-                await asyncio.sleep(backoff)
-                retries += 1
-                continue
+                else:
+                    backoff += 10
+                    print(
+                        f'{self.bot.user} - Falha ao reconectar no servidor [{node.identifier}] e: {r.status}, nova tentativa em {backoff} segundos.')
+                    await asyncio.sleep(backoff)
+                    retries += 1
+                    continue
+
+        await node._websocket._connect()
 
 
     @wavelink.WavelinkMixin.listener("on_websocket_closed")
