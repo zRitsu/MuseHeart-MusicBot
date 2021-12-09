@@ -1456,7 +1456,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                         retries += 1
                         continue
 
-        node = await self.bot.music.initiate_node(**data)
+        node = await self.bot.music.initiate_node(auto_reconnect=False, **data)
         node.search = search
 
 
