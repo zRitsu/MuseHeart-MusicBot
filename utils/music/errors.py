@@ -105,6 +105,7 @@ def parse_error(ctx: Union[disnake.ApplicationCommandInteraction, commands.Conte
         error_txt = f"{ctx.author.mention} **{txt[error.per]} e ainda não teve seu{'s' if error.number > 1 else ''} " \
                     f"uso{'s' if error.number > 1 else ''} finalizado{'s' if error.number > 1 else ''}!**"
 
-    traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+    if not error_txt:
+        traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
 
     return error_txt
