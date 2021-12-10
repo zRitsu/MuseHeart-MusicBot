@@ -34,6 +34,11 @@ class Owner(commands.Cog):
         await ctx.send(embed=embed)
 
 
+    @commands.command(hidden=True)
+    async def syncguild(self, ctx: commands.Context):
+        await ctx.reply(f"Este comando foi desativado, use: {ctx.prefix}{self.syncglobal.name}")
+
+
     @commands.command(aliases=["sync"], description="Sincronizar/Registrar os comandos de barra globalmente.")
     @commands.is_owner()
     async def syncglobal(self, ctx: commands.Context):
