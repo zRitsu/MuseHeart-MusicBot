@@ -35,6 +35,7 @@ class Owner(commands.Cog):
 
 
     @commands.command(hidden=True)
+    @commands.is_owner()
     async def syncguild(self, ctx: commands.Context):
         await ctx.reply(f"Este comando foi desativado, use: {ctx.prefix}{self.syncglobal.name}")
 
