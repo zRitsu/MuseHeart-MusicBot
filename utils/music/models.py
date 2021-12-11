@@ -197,6 +197,7 @@ class BasePlayer:
         self.dj = [] if self.requester.guild_permissions.manage_channels else [self.requester]
         self.message: Optional[disnake.Message] = kwargs.pop('message', None)
         self.static = kwargs.pop('static', False)
+        self.request_channel: bool = kwargs.pop("request_channel", False)
         self.cog = kwargs.pop('cog')
         self.filters = {}
         self.queue = deque()
@@ -221,6 +222,7 @@ class BasePlayer:
         self.seek_time = None
         self.exiting = False
         self.skin = self.cog.bot.player_skins[kwargs.pop("skin", self.cog.bot.default_skin)]
+        self.has_thread: bool = False
 
 
     async def members_timeout(self):
@@ -263,15 +265,13 @@ class BasePlayer:
             color=self.bot.get_color(self.guild.me)
         )
 
-        if self.static or self.text_channel.last_message_id == self.message.id:
+        if self.has_thread or self.static or self.text_channel.last_message_id == self.message.id:
             await self.message.edit(embed=embed, content=None, view=self.view)
         else:
             self.message = await self.text_channel.send(embed=embed, view=self.view)
 
         await asyncio.sleep(self.idle_timeout)
-        embed = disnake.Embed(description="**O player foi desligado por inatividade...**",
-                              color=disnake.Colour.dark_gold())
-        self.bot.loop.create_task(self.text_channel.send(embed=embed, delete_after=15 if self.static else None))
+        self.command_log = "**O player foi desligado por inatividade...**"
         self.bot.loop.create_task(self.destroy())
         return
 

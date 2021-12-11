@@ -11,7 +11,7 @@ import sys
 import os
 import json
 from random import shuffle
-from typing import Literal, Union
+from typing import Literal, Optional, Union
 import humanize
 from urllib import parse
 from utils.client import BotCore
@@ -858,6 +858,14 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if player.static:
             await inter.send("este comando não pode ser usado no modo fixo do player.", ephemeral=True)
             return
+        
+        if player.has_thread:
+            embed = disnake.Embed(
+                    color=self.bot.get_color(inter.guild.me),
+                description=f"este comando não pode ser usado com uma conversa ativa na [mensagem]({player.message.jump_url}) do player."
+                )
+            await inter.send(embed=embed, ephemeral=True)
+            return
 
         await player.destroy_message()
         await player.invoke_np()
@@ -1207,6 +1215,25 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await inter.send(f"O cargo {role.mention} foi removido da lista de DJ's", ephemeral=True)
 
+    @commands.Cog.listener("on_message_delete")
+    async def player_message_delete(self, message: disnake.Message):
+
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players.get(message.guild.id)
+
+        if not player:
+            return
+
+        if message.id != player.message.id:
+            return
+
+        thread = self.bot.get_channel(message.id)
+
+        if not thread:
+            return
+
+        player.has_thread = False
+        await thread.edit(archived=True, locked=True, name=f"arquivado: {thread.name}")
+
     @commands.Cog.listener("on_message")
     async def song_requests(self, message: disnake.Message):
 
@@ -1220,18 +1247,27 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             data = await self.bot.db.get_data(message.guild.id, db_name='guilds')
         except AttributeError:
             return
+        
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players.get(message.guild.id)
 
-        static_player = data['player_controller']
+        if player and isinstance(message.channel, disnake.Thread) and not player.static:
 
-        channel_id = static_player['channel']
+            player.has_thread = True
+            text_channel = message.channel
 
-        if not channel_id or (static_player['message_id'] != str(message.channel.id) and str(message.channel.id) != channel_id):
-            return
+        else:
 
-        text_channel = self.bot.get_channel(int(channel_id))
+            static_player = data['player_controller']
 
-        if not text_channel or not text_channel.permissions_for(message.guild.me).send_messages:
-            return
+            channel_id = static_player['channel']
+
+            if not channel_id or (static_player['message_id'] != str(message.channel.id) and str(message.channel.id) != channel_id):
+                return
+
+            text_channel = self.bot.get_channel(int(channel_id))
+
+            if not text_channel or not text_channel.permissions_for(message.guild.me).send_messages:
+                return
 
         if not message.content:
             await message.delete()
@@ -1713,9 +1749,23 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             self.bot.loop.create_task(self.connect_node(localnode))
 
+    @commands.Cog.listener("on_thread_delete")
+    async def player_thread_delete(self, thread: disnake.Thread):
+
+        player: Union[LavalinkPlayer, YTDLPlayer] = None
+
+        if not player:
+            return
+
+        if thread.id != player.message.id:
+            return
+
+        player.has_thread = False
+
+    
     @commands.Cog.listener("on_thread_join")
     async def join_thread_request(self, thread: disnake.Thread):
-
+        
         try:
 
             data = await self.bot.db.get_data(thread.guild.id, db_name="guilds")
