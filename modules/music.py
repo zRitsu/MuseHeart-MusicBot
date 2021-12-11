@@ -1620,7 +1620,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 node_search = node
             else:
                 try:
-                    node_search = sorted([n for n in self.bot.music.nodes.values() if n.search and n.available], key=lambda n: n.players)[0]
+                    node_search = sorted([n for n in self.bot.music.nodes.values() if n.search and n.available], key=lambda n: len(n.players))[0]
                 except IndexError:
                     node_search = node
 
