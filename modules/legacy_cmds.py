@@ -34,40 +34,70 @@ class Owner(commands.Cog):
         await ctx.send(embed=embed)
 
 
-    @commands.command(aliases=["sync"], description="Sincronizar/Registrar os comandos de barra no servidor.")
-    @commands.has_guild_permissions(manage_guild=True)
-    @commands.cooldown(2, 300, commands.BucketType.guild)
-    async def syncguild(self, ctx: commands.Context):
-
-        embed = disnake.Embed(color=disnake.Colour.green())
+    async def sync_guild_commands(self, *, ctx: commands.Context = None, guilds = None):
 
         original_list = self.bot._test_guilds
         original_sync_config = self.bot._sync_commands
-        invite_url = f"https://discord.com/api/oauth2/authorize?client_id={ctx.bot.user.id}&scope=applications.commands"
 
-        self.bot._test_guilds = [ctx.guild.id]
+        self.bot._test_guilds = guilds if not guilds is None else []
         self.bot._sync_commands = True
 
         try:
             await self.bot._sync_application_commands()
-            embed.description = f"**Comandos sincronizados para o servidor:**\n`{ctx.guild.name} [{ctx.guild.id}]`\n\n" \
-                                f"`Caso os comandos de barra não apareçam,` [`clique aqui`]({invite_url}) `para me permitir " \
-                                f"criar comandos slash no servidor e use este mesmo comando novamente.`\n\n" \
-                                f"`Nota: Caso o comando de barra sofra alguma atualização/alteração nos parâmetros e " \
-                                f"texto será necessário usar este comando em todos os servidores novamente, recomendo " \
-                                f"que use o comando: {self.syncglobal.name}`"
-            await ctx.send(embed=embed)
+            error_txt = ""
         except Exception as e:
             traceback.print_exc()
-            embed.colour = disnake.Colour.red()
-            embed.description = f"**Falha ao sincronizar:** ```py\n{repr(e)}```"
-            await ctx.send(embed=embed)
+            error_txt = repr(e)
+
+        if ctx:
+
+            embed = disnake.Embed(color=disnake.Colour.green())
+
+            if not error_txt:
+
+                invite_url = f"https://discord.com/api/oauth2/authorize?client_id={ctx.bot.user.id}&scope=applications.commands"
+
+                if len(guilds) > 1:
+                    txt = f"**Comandos sincronizados para {len(guilds)} servidores**"
+                else:
+                    txt = f"**Comandos sincronizados para o servidor:**\n`{ctx.guild.name} [{ctx.guild.id}]`"
+
+                embed.description = f"{txt}\n\n" \
+                                    f"`Caso os comandos de barra não apareçam,` [`clique aqui`]({invite_url}) `para me permitir " \
+                                    f"criar comandos slash no servidor e use este mesmo comando novamente.`\n\n" \
+                                    f"`Nota: Caso o comando de barra sofra alguma atualização/alteração nos parâmetros e " \
+                                    f"texto será necessário usar este comando em todos os servidores novamente, recomendo " \
+                                    f"que use o comando: {self.syncglobal.name}`"
+                await ctx.send(embed=embed)
+
+            else:
+
+                embed.colour = disnake.Colour.red()
+                embed.description = f"**Falha ao sincronizar:** ```py\n{error_txt}```"
+                await ctx.send(embed=embed)
 
         self.bot._test_guilds = original_list
         self.bot._sync_commands = original_sync_config
 
 
-    @commands.command(description="Sincronizar/Registrar os comandos de barra globalmente.")
+    @commands.command(aliases=["sync"], description="Sincronizar/Registrar os comandos de barra no servidor.")
+    @commands.has_guild_permissions(manage_guild=True)
+    @commands.cooldown(2, 300, commands.BucketType.guild)
+    async def syncguild(self, ctx: commands.Context):
+
+        await self.sync_guild_commands(ctx=ctx, guilds=[ctx.guild.id])
+
+
+    @commands.command(aliases=["sgs"], description="Sincronizar/Registrar os comandos de barra em todos os servidores.\n"
+                                                   "Nota: Dependendo da quantidade de servidores que o bot está. "
+                                                   "Recomendo usar o comando syncglobal ao invés deste")
+    @commands.is_owner()
+    async def syncguilds(self, ctx: commands.Context):
+        await self.sync_guild_commands(ctx=ctx, guilds=[g.id for g in ctx.bot.guilds])
+
+
+    @commands.command(description="Sincronizar/Registrar os comandos de barra globalmente.\n"
+                                  "Nota: Os comandos de barra podem demorar 60 minutos ou mais pra aparecer em todos os servidores.")
     @commands.is_owner()
     async def syncglobal(self, ctx: commands.Context):
 
