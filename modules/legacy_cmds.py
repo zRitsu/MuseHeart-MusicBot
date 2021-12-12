@@ -34,13 +34,40 @@ class Owner(commands.Cog):
         await ctx.send(embed=embed)
 
 
-    @commands.command(hidden=True)
-    @commands.is_owner()
+    @commands.command(aliases=["sync"], description="Sincronizar/Registrar os comandos de barra no servidor.")
+    @commands.has_guild_permissions(manage_guild=True)
+    @commands.cooldown(2, 300, commands.BucketType.guild)
     async def syncguild(self, ctx: commands.Context):
-        await ctx.reply(f"Este comando foi desativado, use: {ctx.prefix}{self.syncglobal.name}")
+
+        embed = disnake.Embed(color=disnake.Colour.green())
+
+        original_list = self.bot._test_guilds
+        original_sync_config = self.bot._sync_commands
+        invite_url = f"https://discord.com/api/oauth2/authorize?client_id={ctx.bot.user.id}&scope=applications.commands"
+
+        self.bot._test_guilds = [ctx.guild.id]
+        self.bot._sync_commands = True
+
+        try:
+            await self.bot._sync_application_commands()
+            embed.description = f"**Comandos sincronizados para o servidor:**\n`{ctx.guild.name} [{ctx.guild.id}]`\n\n" \
+                                f"`Caso os comandos de barra não apareçam,` [`clique aqui`]({invite_url}) `para me permitir " \
+                                f"criar comandos slash no servidor e use este mesmo comando novamente.`\n\n" \
+                                f"`Nota: Caso o comando de barra sofra alguma atualização/alteração nos parâmetros e " \
+                                f"texto será necessário usar este comando em todos os servidores novamente, recomendo " \
+                                f"que use o comando: {self.syncglobal.name}`"
+            await ctx.send(embed=embed)
+        except Exception as e:
+            traceback.print_exc()
+            embed.colour = disnake.Colour.red()
+            embed.description = f"**Falha ao sincronizar:** ```py\n{repr(e)}```"
+            await ctx.send(embed=embed)
+
+        self.bot._test_guilds = original_list
+        self.bot._sync_commands = original_sync_config
 
 
-    @commands.command(aliases=["sync"], description="Sincronizar/Registrar os comandos de barra globalmente.")
+    @commands.command(description="Sincronizar/Registrar os comandos de barra globalmente.")
     @commands.is_owner()
     async def syncglobal(self, ctx: commands.Context):
 
