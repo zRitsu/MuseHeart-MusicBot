@@ -67,7 +67,7 @@ class Owner(commands.Cog):
         self.bot._sync_commands = original_sync_config
 
 
-    @commands.command(aliases=["sync"], description="Sincronizar/Registrar os comandos de barra globalmente.")
+    @commands.command(description="Sincronizar/Registrar os comandos de barra globalmente.")
     @commands.is_owner()
     async def syncglobal(self, ctx: commands.Context):
 
