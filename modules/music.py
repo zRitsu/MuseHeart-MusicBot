@@ -1220,7 +1220,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players.get(message.guild.id)
 
-        if not player:
+        if not player or not player.message:
             return
 
         if message.id != player.message.id:
