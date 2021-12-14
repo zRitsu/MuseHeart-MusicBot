@@ -9,6 +9,7 @@ class ErrorHandler(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
+
     @commands.Cog.listener('on_user_command_error')
     @commands.Cog.listener('on_message_command_error')
     @commands.Cog.listener('on_slash_command_error')
@@ -20,10 +21,9 @@ class ErrorHandler(commands.Cog):
 
         if error_txt:
             embed.description = error_txt
-            return await send_message(inter, embed=embed)
-
-        embed.description = f"**Ocorreu um erro no comando:**\n" \
-                            f"```py\n{str(repr(error))[:2020].replace(self.bot.http.token, 'mytoken')}```"
+        else:
+            embed.description = f"**Ocorreu um erro no comando:**\n" \
+                                f"```py\n{str(repr(error))[:2020].replace(self.bot.http.token, 'mytoken')}```"
 
         await send_message(inter, embed=embed)
 
@@ -35,15 +35,14 @@ class ErrorHandler(commands.Cog):
 
         error_txt = parse_error(ctx, error)
 
-        if error_txt:
-            embed.description = error_txt
-            return await ctx.reply(embed=embed)
-
         if isinstance(error, commands.CommandNotFound):
             return
 
-        embed.description = f"**Ocorreu um erro no comando:**\n" \
-                            f"```py\n{str(repr(error))[:2020].replace(self.bot.http.token, 'mytoken')}```"
+        if error_txt:
+            embed.description = error_txt
+        else:
+            embed.description = f"**Ocorreu um erro no comando:**\n" \
+                                f"```py\n{str(repr(error))[:2020].replace(self.bot.http.token, 'mytoken')}```"
 
         await ctx.reply(embed=embed)
 

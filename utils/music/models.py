@@ -280,11 +280,10 @@ class BasePlayer:
         if not self.current:
             return
 
-        #embeds = self.skin(self)
         data = self.skin(self)
 
         try:
-            if self.message and data == self.last_data and (self.static or self.is_last_message()):
+            if self.message and data == self.last_data and (self.has_thread or self.static or self.is_last_message()):
                 try:
                     await interaction.response.defer()
                 except:
@@ -326,7 +325,7 @@ class BasePlayer:
                 style = disnake.ButtonStyle.grey
             self.view.add_item(disnake.ui.Button(emoji=button, custom_id=f"musicplayer_{control[0]}", style=style))
 
-        if self.message and (self.static or not force or self.is_last_message()):
+        if self.message and (self.has_thread or self.static or not force or self.is_last_message()):
             try:
                 if interaction and not interaction.response.is_done():
                     await interaction.response.edit_message(view=self.view, **data)
