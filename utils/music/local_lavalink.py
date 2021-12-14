@@ -54,6 +54,8 @@ def run_lavalink(
             with zipfile.ZipFile(jdk_filename, 'r') as zip_ref:
                 zip_ref.extractall("./.java")
 
+            os.remove(jdk_filename)
+
         else:
             jdk_url, jdk_filename = ["https://download.java.net/openjdk/jdk13/ri/openjdk-13+33_linux-x64_bin.tar.gz",
                                      "java.tar.gz"]
@@ -65,8 +67,6 @@ def run_lavalink(
             os.remove(f"./{jdk_filename}")
 
         java_path = "./.java/jdk-13/bin/"
-
-        os.remove(jdk_filename)
 
     for filename, url in downloads.items():
         download_file(url, filename)
