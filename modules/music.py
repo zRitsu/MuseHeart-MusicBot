@@ -1220,10 +1220,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players.get(message.guild.id)
 
-        if not player or not player.message:
-            return
-
-        if message.id != player.message.id:
+        try:
+            if message.id != player.message.id:
+                return
+        except AttributeError:
             return
 
         thread = self.bot.get_channel(message.id)
