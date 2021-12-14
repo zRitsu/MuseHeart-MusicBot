@@ -271,9 +271,16 @@ class BasePlayer:
             self.message = await self.text_channel.send(embed=embed, view=self.view)
 
         await asyncio.sleep(self.idle_timeout)
-        self.command_log = "**O player foi desligado por inatividade...**"
+
+        msg =  "**O player foi desligado por inatividade...**"
+
+        if self.static:
+            self.command_log = msg
+        else:
+            embed = disnake.Embed(description=msg, color=self.bot.get_color(self.guild.me))
+            self.bot.loop.create_task(self.text_channel.send(embed=embed))
+
         self.bot.loop.create_task(self.destroy())
-        return
 
     async def invoke_np(self, force=False, interaction=None):
 
@@ -844,7 +851,6 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
         self.last_track: Optional[LavalinkTrack] = None
         self.locked = False
         self.idle = None
-        self.idle_timeout = 180  # aguardar 3 minutos para adicionar novas músicas
         self.is_previows_music = False
         self.updating_message = None
         self.command_log = ""
