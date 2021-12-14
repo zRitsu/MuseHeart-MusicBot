@@ -1232,6 +1232,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         player.has_thread = False
+        player.message = None
         await thread.edit(archived=True, locked=True, name=f"arquivado: {thread.name}")
 
     @commands.Cog.listener("on_message")
