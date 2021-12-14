@@ -1044,6 +1044,7 @@ class YTDLManager:
         self.bot = bot
         self.players = {}
         self.identifier = "YoutubeDL"
+        self.search = True
 
     def get_player(self, guild_id: int, *args, **kwargs):
 
