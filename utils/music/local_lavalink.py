@@ -4,7 +4,6 @@ import re
 import os
 import time
 import zipfile
-import tarfile
 
 def download_file(url, filename):
     if os.path.isfile(filename):

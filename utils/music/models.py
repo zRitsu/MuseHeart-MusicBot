@@ -217,7 +217,7 @@ class BasePlayer:
         self.last_data = None
         self.interaction_cooldown = False
         self.votes = set()
-        self.msg_ad = self.cog.bot.config.get("link")
+        self.msg_ad = self.cog.bot.config.get("LINK")
         self.view: Optional[disnake.ui.View] = None
         self.current: Union[LavalinkTrack, SpotifyTrack, YTDLTrack] = None
         self.view: Optional[disnake.ui.View] = None
@@ -860,7 +860,6 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
         self.interaction_cooldown = False
         self.vc = WavelinkVoiceClient(self.bot, self.requester.voice.channel, self)
         self.votes = set()
-        self.msg_ad = self.bot.config.get("link")
         self.view: Optional[disnake.ui.View] = None
 
     def __str__(self) -> str:
@@ -1120,7 +1119,7 @@ class YTDLManager:
 
 def music_mode(bot: BotCore):
 
-    if bot.config.get("youtubedl"):
+    if bot.config.get("YOUTUBEDL") == "true":
         return YTDLManager(bot=bot)
     else:
         return wavelink.Client(bot=bot)

@@ -9,29 +9,33 @@ from utils.client import BotCore
 from utils.db import Database, LocalDatabase
 from web_app import run_app
 
+CONFIGS = {
+    "VOTE_SKIP_AMOUNT": "3",
+    "DEFAULT_PREFIX": "!!!",
+    "LINK": "[`Crie seu próprio bot de música`](https://www.youtube.com/watch?v=zTXF4QA05Ic)",
+    "YOUTUBEDL": "true",
+
+    # Local lavalink stuffs
+    "START_LOCAL_LAVALINK": "true",
+    "LAVALINK_ADDITIONAL_SLEEP": "0",
+    "LAVALINK_RAM_LIMIT": "120",
+    "LAVALINK_CPU_CORES": "2",
+    "LAVALINK_FILE_URL": "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/Lavalink.jar"
+}
+
 load_dotenv()
 
-try:
-    with open('config.json', encoding='utf-8') as f:
-        config = load(f)
-except FileNotFoundError:
-    config = {}
+for cfg in CONFIGS:
+    try:
+        CONFIGS[cfg] = os.environ[cfg]
+    except KeyError:
+        continue
 
-yt_dlp_mode = os.environ.get("YOUTUBEDL")
-
-if yt_dlp_mode is True or yt_dlp_mode == "true":
-    config["youtubedl"] = True
-
-ad_link = os.environ.get("LINK")
-
-if ad_link is False or ad_link == "false":
-    config["link"] = ""
-
-if not config.get('youtubedl') and config['lavalink']['local']['start_local_lavalink']:
+if CONFIGS.get('YOUTUBEDL') != "true" and CONFIGS['START_LOCAL_LAVALINK'] == "true":
     run_lavalink(
-        lavalink_file_url=config['lavalink']['local']['lavalink_file_url'],
-        lavalink_ram_limit=config['lavalink']['local']['lavalink_ram_limit'],
-        lavalink_additional_sleep=config['lavalink']['local']['lavalink_additional_sleep'],
+        lavalink_file_url=CONFIGS['LAVALINK_FILE_URL'],
+        lavalink_ram_limit=CONFIGS['LAVALINK_RAM_LIMIT'],
+        lavalink_additional_sleep=int(CONFIGS['LAVALINK_ADDITIONAL_SLEEP']),
     )
 
 intents = disnake.Intents.default()
@@ -62,7 +66,7 @@ def load_bot(token: str):
         intents=intents,
         #test_guilds=[],
         sync_commands=False,
-        config=config,
+        config=CONFIGS,
         color=os.environ.get("EMBED_COLOR")
     )
 

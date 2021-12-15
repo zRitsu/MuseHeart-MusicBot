@@ -412,9 +412,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         embed.colour = disnake.Colour.green()
 
-        txt = f"{inter.author.mention} **votou para pular a música atual (votos: {len(player.votes) + 1}/{self.bot.config.get('vote_skip_amount', 3)}).**"
+        txt = f"{inter.author.mention} **votou para pular a música atual (votos: {len(player.votes) + 1}/{self.bot.config.get('VOTE_SKIP_AMOUNT', 3)}).**"
 
-        if len(player.votes) < self.bot.config.get('vote_skip_amount', 3):
+        if len(player.votes) < self.bot.config.get('VOTE_SKIP_AMOUNT', 3):
             embed.description = txt
             player.votes.add(inter.author)
             player.command_log = txt
@@ -1464,7 +1464,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         for node in lavalink_servers:
             self.bot.loop.create_task(self.connect_node(node))
 
-        if self.bot.config["lavalink"]["local"].get('start_local_lavalink', True):
+        if self.bot.config['START_LOCAL_LAVALINK'] == "true" and self.bot.config["YOUTUBEDL"] != "true":
             self.bot.loop.create_task(self.connect_local_lavalink())
 
     async def connect_node(self, data: dict):
