@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from ..client import BotCore
 
 
-audioformats = ["mp3", "ogg", "m4a", "webm"]
+audioformats = ["mp3", "ogg", "m4a", "webm", "mp4"]
 
 YDL_OPTIONS = {
     'format': 'bestaudio/best',
@@ -747,7 +747,7 @@ class YTDLPlayer(BasePlayer):
         to_run = partial(self.bot.ytdl.extract_info, url=url, download=False)
         info = await self.bot.loop.run_in_executor(None, to_run)
 
-        track.id = [f for f in info["formats"] if f["audio_ext"] in audioformats][0]["url"]
+        track.id = [f for f in info["formats"] if f["ext"] in audioformats][0]["url"]
         return track
 
     async def process_track(self):
