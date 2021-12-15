@@ -1080,7 +1080,7 @@ class YTDLManager:
         if info.get('_type') == "playlist" and not info.get('extractor', '').endswith('search'):
 
             try:
-                selected = int(parse.parse_qs(parse.urlparse(query).query)['index'][0]) -1
+                selected = int(parse.parse_qs(parse.urlparse(query).query)['index'][0]) #-1
             except:
                 selected = -1
 
