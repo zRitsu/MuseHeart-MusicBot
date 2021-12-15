@@ -995,6 +995,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.slash_command(description="Ver informações dos servidores de música.")
     async def nodeinfo(self, inter: disnake.ApplicationCommandInteraction):
 
+        if self.bot.config["YOUTUBEDL"] == "true":
+            await inter.send("Este comando não funciona no modo YT-DLP.", ephemeral=True)
+            return
+
         em = disnake.Embed(color=self.bot.get_color(inter.me), title="Servidores de música:")
 
         if not self.bot.music.nodes:
