@@ -49,7 +49,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         self.bot = bot
 
-        self.msg_ad = True if bot.config["LINK"] == "true" else False
+        self.msg_ad = False if bot.config["LINK"] == "false" else bot.config["LINK"]
 
         if bot.config["YOUTUBEDL"] != "true":
             self.bot.loop.create_task(self.process_nodes())
