@@ -51,7 +51,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         self.msg_ad = bot.config.get("link")
 
-        if not bot.config.get("youtubedl"):
+        if bot.config.get("youtubedl") != "true":
             self.bot.loop.create_task(self.process_nodes())
 
         self.song_request_concurrency = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
