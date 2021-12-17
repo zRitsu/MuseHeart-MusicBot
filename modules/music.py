@@ -1591,7 +1591,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player: Union[LavalinkPlayer, YTDLPlayer] = payload.player
         track = player.last_track
         embed = disnake.Embed(
-            description=f"**Falha ao reproduzir música:\n[{track.title}]({track.uri})** ```java\n{payload.error}\n```",
+            description=f"**Falha ao reproduzir música:\n[{track.title}]({track.uri})** ```java\n{payload.error}```"
+                        f"**Servidor:** `{player.node.identifier}`",
             color=disnake.Colour.red())
         await player.text_channel.send(embed=embed, delete_after=10 if player.static else None)
 
