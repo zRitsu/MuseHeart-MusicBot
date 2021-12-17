@@ -863,7 +863,7 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
         self.view: Optional[disnake.ui.View] = None
 
     def __str__(self) -> str:
-        return "Lavalink Player"
+        return f"Lavalink Player | Server: {self.node.identifier}"
 
     async def process_next(self):
 
