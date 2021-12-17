@@ -1603,7 +1603,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if payload.error == "This IP address has been blocked by YouTube (429)":
             player.queue.appendleft(player.last_track)
             player.node.available = False
-            newnode = [n for n in self.bot.music.nodes if n.available and n.is_available]
+            newnode = [n for n in self.bot.music.nodes if n != player.node and n.available and n.is_available]
             if newnode:
                 await player.change_node(newnode[0].identifier)
         else:
