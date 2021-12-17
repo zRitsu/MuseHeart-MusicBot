@@ -13,7 +13,7 @@ CONFIGS = {
     "VOTE_SKIP_AMOUNT": "3",
     "DEFAULT_PREFIX": "!!!",
     "LINK": "[`Crie seu próprio bot de música`](https://www.youtube.com/watch?v=zTXF4QA05Ic)",
-    "YOUTUBEDL": "true",
+    "YOUTUBEDL": "false",
 
     # Local lavalink stuffs
     "START_LOCAL_LAVALINK": "true",
