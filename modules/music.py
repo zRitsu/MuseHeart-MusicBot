@@ -20,7 +20,9 @@ from utils.music.errors import GenericError
 from utils.music.spotify import SpotifyPlaylist, process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj
 from utils.music.models import LavalinkPlayer, LavalinkTrack, YTDLTrack, YTDLPlayer, YTDLManager
-from utils.music.converters import time_format, fix_characters, string_to_seconds, get_track_index, URL_REG, YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist
+from utils.music.converters import time_format, fix_characters, string_to_seconds, get_track_index, URL_REG, \
+    YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist, \
+    node_suggestions
 from utils.music.interactions import VolumeInteraction, QueueInteraction, send_message, SongSelect, SelectInteraction
 
 try:
@@ -137,6 +139,22 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             source="ytsearch",
             repeat_amount=0,
         )
+
+    @check_voice()
+    @has_player()
+    @is_dj()
+    @commands.cooldown(1, 10, commands.BucketType.guild)
+    async def change_node(
+            self,
+            inter: disnake.ApplicationCommandInteraction,
+            node: str = commands.Param(name="servidor", description="Servidor de música para migrar o player", autocomplete=node_suggestions)
+    ):
+
+        await inter.player.change_node(node)
+
+        txt = [f"Migrou o player para o servidor de música **{node}%**", f"**O player foi migrado para o servidor de música:** `{node}`"]
+        await self.interaction_message(inter, txt)
+
 
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
@@ -1090,7 +1108,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if not filters:
             inter.player.queue.clear()
-            txt = ['limpou a fila de música.', 'Fila limpa com sucesso.']
+            txt = ['limpou a fila de música.', '**Fila limpa com sucesso.**']
 
         else:
 
@@ -1219,6 +1237,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await self.bot.db.update_data(inter.guild.id, inter.guild_data, db_name="guilds")
 
         await inter.send(f"O cargo {role.mention} foi removido da lista de DJ's", ephemeral=True)
+
 
     @commands.Cog.listener("on_message_delete")
     async def player_message_delete(self, message: disnake.Message):
@@ -1786,6 +1805,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         await thread.join()
+
 
     @commands.Cog.listener("on_voice_state_update")
     async def player_vc_disconnect(
