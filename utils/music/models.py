@@ -494,6 +494,7 @@ class BasePlayer:
 
             if user:
                 try:
+                    data["user"] = user.id
                     self.bot.ws_users[user.id]["ws"].write_message(json.dumps(data))
                     return
                 except KeyError:
@@ -508,6 +509,8 @@ class BasePlayer:
                     user_ws = self.bot.ws_users[m.id]["ws"]
                 except KeyError:
                     continue
+
+                data["user"] = m.id
 
                 try:
                     user_ws.write_message(json.dumps(data))
@@ -579,6 +582,7 @@ class BasePlayer:
                 )
 
         if user:
+            stats["user"] = user.id
             self.bot.ws_users[user.id]["ws"].write_message(json.dumps(stats))
 
         else:
@@ -586,6 +590,7 @@ class BasePlayer:
                 try:
                     if stats == self.bot.ws_users[m.id]["last"]:
                         continue
+                    stats["user"] = m.id
                     self.bot.ws_users[m.id]["ws"].write_message(json.dumps(stats))
                     self.bot.ws_users[m.id]["last"] = stats
                 except KeyError:

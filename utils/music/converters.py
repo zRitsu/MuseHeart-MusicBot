@@ -8,6 +8,23 @@ URL_REG = re.compile(r'https?://(?:www\.)?.+')
 YOUTUBE_VIDEO_REG = re.compile(r"(https?://)?(www\.)?youtube\.(com|nl)/watch\?v=([-\w]+)")
 ua = UserAgent().random
 
+
+replaces = [
+    ('&quot;', '"'),
+    ('&amp;', '&'),
+    ('(', '\u0028'),
+    (')', '\u0029'),
+    ('[', '【'),
+    (']', '】'),
+    ("  ", " "),
+    ("*", '"'),
+    ("_", ' '),
+    ("{", "\u0028"),
+    ("}", "\u0029"),
+    ("`", "'")
+]
+
+
 perms_translations = {
 	"create_instant_invite": "Criar convite instantâneo",
 	"kick_members": "Expulsar membros",
@@ -151,20 +168,7 @@ def get_button_style(enabled: bool, red=True):
 
 
 def fix_characters(text: str, limit: int = 0):
-    replaces = [
-        ('&quot;', '"'),
-        ('&amp;', '&'),
-        ('(', '\u0028'),
-        (')', '\u0029'),
-        ('[', '【'),
-        (']', '】'),
-        ("  ", " "),
-        ("*", '"'),
-        ("_", ' '),
-        ("{", "\u0028"),
-        ("}", "\u0029"),
-        ("`", "'")
-    ]
+
     for r in replaces:
         text = text.replace(r[0], r[1])
 
