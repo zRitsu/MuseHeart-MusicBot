@@ -150,6 +150,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             node: str = commands.Param(name="servidor", description="Servidor de música para migrar o player", autocomplete=node_suggestions)
     ):
 
+        if not node in self.bot.music.nodes:
+            raise GenericError(f"O servidor de música **{node}** não foi encontrado.")
+
+        if node == inter.player.node.identifier:
+            raise GenericError(f"O player já está no servidor de música **{node}**.")
+
         await inter.player.change_node(node)
 
         txt = [f"Migrou o player para o servidor de música **{node}%**", f"**O player foi migrado para o servidor de música:** `{node}`"]
