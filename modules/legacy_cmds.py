@@ -1,3 +1,5 @@
+import os
+
 import disnake
 from disnake.ext import commands
 import traceback
@@ -11,7 +13,7 @@ class Owner(commands.Cog):
 
 
     @commands.is_owner()
-    @commands.command(aliases=["rd", "recarregar"], description="Recarregar os módulos (apenas para dono do bot).")
+    @commands.command(aliases=["rd", "recarregar"], description="Recarregar os módulos (apenas para meu dono).")
     async def reload(self, ctx):
 
         data = self.bot.load_modules()
@@ -32,6 +34,14 @@ class Owner(commands.Cog):
 
         embed = disnake.Embed(colour=self.bot.get_color(ctx.me), description=txt)
         await ctx.send(embed=embed)
+
+    @commands.is_owner()
+    @commands.command(aliases=["up", "atualizar"], description="Atualizaro code do bot (apenas para meu dono).")
+    async def update(self, ctx: commands.Context):
+
+        os.system("git pull --allow-unrelated-histories -X theirs")
+
+        await ctx.send(F"Verifique o console/terminal para conferir o update e reinicie o bot.")
 
 
     async def sync_guild_commands(self, *, ctx: commands.Context = None, guilds = None):
@@ -88,7 +98,7 @@ class Owner(commands.Cog):
         await self.sync_guild_commands(ctx=ctx, guilds=[ctx.guild.id])
 
 
-    @commands.command(aliases=["sgs"], description="Sincronizar/Registrar os comandos de barra em todos os servidores.\n"
+    @commands.command(aliases=["sgs"], description="Sincronizar/Registrar os comandos de barra em todos os servidores (apenas para meu dono).\n"
                                                    "Nota: Dependendo da quantidade de servidores que o bot está. "
                                                    "Recomendo usar o comando syncglobal ao invés deste")
     @commands.is_owner()
@@ -96,7 +106,7 @@ class Owner(commands.Cog):
         await self.sync_guild_commands(ctx=ctx, guilds=[g.id for g in ctx.bot.guilds])
 
 
-    @commands.command(description="Sincronizar/Registrar os comandos de barra globalmente.\n"
+    @commands.command(description="Sincronizar/Registrar os comandos de barra globalmente (apenas para meu dono).\n"
                                   "Nota: Os comandos de barra podem demorar 60 minutos ou mais pra aparecer em todos os servidores.")
     @commands.is_owner()
     async def syncglobal(self, ctx: commands.Context):
