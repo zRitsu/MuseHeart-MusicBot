@@ -142,10 +142,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @has_player()
     @is_dj()
     @commands.cooldown(1, 10, commands.BucketType.guild)
+    @commands.slash_command(description="Migrar o player para outro servidor de música.")
     async def change_node(
             self,
             inter: disnake.ApplicationCommandInteraction,
-            node: str = commands.Param(name="servidor", description="Servidor de música para migrar o player", autocomplete=node_suggestions)
+            node: str = commands.Param(name="servidor", description="Servidor de música", autocomplete=node_suggestions)
     ):
 
         if not node in self.bot.music.nodes:
