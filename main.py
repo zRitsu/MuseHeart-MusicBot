@@ -47,9 +47,12 @@ mongo_key = os.environ.get("MONGO")
 if not mongo_key:
     print(f"Token do mongoDB não configurado! será usado um arquivo json para database.\n{'-'*30}")
 
-commit = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+try:
+    commit = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+    print(f"Commit ver: {commit}\n{'-'*30}")
+except:
+    commit = None
 
-print(f"Commit ver: {commit}\n{'-'*30}")
 print(f"Modo do player: {'Lavalink' if CONFIGS['YOUTUBEDL'] != 'true' else 'YT-DLP'}\n{'-'*30}")
 
 bots = []

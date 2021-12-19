@@ -376,6 +376,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await player.stop()
 
     @check_voice()
+    @has_source()
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(2, 8), commands.BucketType.guild)
     @commands.slash_command(description="Voltar para a música anterior (ou para o início da música caso não tenha músicas tocadas/na fila).")
@@ -1564,17 +1565,21 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         while node._websocket._closed:
 
-            async with self.bot.session.get(node.rest_uri, timeout=backoff) as r:
-                if r.status in [401, 200, 400]:
-                    await node._websocket._connect()
-                    return
-                else:
-                    backoff += 10
-                    print(
-                        f'{self.bot.user} - Falha ao reconectar no servidor [{node.identifier}] e: {r.status}, nova tentativa em {backoff} segundos.')
-                    await asyncio.sleep(backoff)
-                    retries += 1
-                    continue
+            e = ""
+
+            try:
+                async with self.bot.session.get(node.rest_uri, timeout=backoff) as r:
+                    if r.status in [401, 200, 400]:
+                        await node._websocket._connect()
+                        return
+            except Exception as e:
+                pass
+
+            backoff += 10
+            print(f'{self.bot.user} - Falha ao reconectar no servidor [{node.identifier}] e: {r.status}, nova tentativa em {backoff} segundos. Erro: {repr(e)}')
+            await asyncio.sleep(backoff)
+            retries += 1
+            continue
 
 
     @wavelink.WavelinkMixin.listener("on_websocket_closed")
