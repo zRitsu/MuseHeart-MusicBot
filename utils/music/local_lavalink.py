@@ -72,7 +72,7 @@ def run_lavalink(
 
     cmd = f'{java_path}java -XX:ActiveProcessorCount={lavalink_cpu_cores} -Xmx{lavalink_ram_limit}m -jar Lavalink.jar'
 
-    print(f"Iniciando Lavalink (dependendo da hospedagem o lavalink pode demorar iniciar, "
+    print(f"Iniciando o servidor Lavalink (dependendo da hospedagem o lavalink pode demorar iniciar, "
           f"o que pode ocorrer falhas em algumas tentativas de conexão até ele iniciar totalmente).\n{'-'*30}")
 
     subprocess.Popen(cmd.split(), stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)

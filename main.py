@@ -1,4 +1,6 @@
 import asyncio
+import subprocess
+
 import disnake
 from disnake.ext import commands
 import os
@@ -45,18 +47,25 @@ mongo_key = os.environ.get("MONGO")
 if not mongo_key:
     print(f"Token do mongoDB não configurado! será usado um arquivo json para database.\n{'-'*30}")
 
+commit = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+
+print(f"Commit ver: {commit}\n{'-'*30}")
+print(f"Modo do player: {'Lavalink' if CONFIGS['YOUTUBEDL'] != 'true' else 'YT-DLP'}\n{'-'*30}")
+
 bots = []
 
 def load_bot(token: str):
 
     try:
-        token, prefix = token.split()[:2]
-        prefix = commands.when_mentioned_or(prefix)
+        token, default_prefix = token.split()[:2]
+        prefix = commands.when_mentioned_or(default_prefix)
     except:
         if token == os.environ["TOKEN"]:
-            prefix = commands.when_mentioned_or(os.environ.get("DEFAULT_PREFIX", "!!!"))
+            default_prefix = os.environ.get("DEFAULT_PREFIX", "!!!")
+            prefix = commands.when_mentioned_or(default_prefix)
         else:
             prefix = commands.when_mentioned
+            default_prefix = None
 
     bot = BotCore(
         command_prefix=prefix,
@@ -65,7 +74,9 @@ def load_bot(token: str):
         #test_guilds=[],
         sync_commands=False,
         config=CONFIGS,
-        color=os.environ.get("EMBED_COLOR")
+        color=os.environ.get("EMBED_COLOR"),
+        commit=commit,
+        default_prefix=default_prefix,
     )
 
     bot.token = token
@@ -75,6 +86,14 @@ def load_bot(token: str):
         print(f'{bot.user} [{bot.user.id}] Online.')
 
         if not bot.bot_ready:
+
+            if not bot.owner:
+                botowner = (await bot.application_info())
+                try:
+                    bot.owner = botowner.team.members[0]
+                except AttributeError:
+                    bot.owner = botowner.owner
+
             bot.load_modules()
             mongo = mongo_key
 

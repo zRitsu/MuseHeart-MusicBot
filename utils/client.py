@@ -27,6 +27,8 @@ class BotCore(commands.Bot):
         self.player_skins = {}
         self.default_skin = self.config.get("DEFAULT_SKIN", "default")
         self.load_skins()
+        self.commit = kwargs.get("commit", "N/A")
+        self.default_prefix = kwargs.get("default_prefix", None)
 
     def load_skins(self):
 
