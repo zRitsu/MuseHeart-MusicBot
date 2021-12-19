@@ -3,7 +3,6 @@ import disnake
 from disnake.ext import commands
 import os
 from dotenv import load_dotenv
-from json import load
 from utils.music.local_lavalink import run_lavalink
 from utils.client import BotCore
 from utils.db import Database, LocalDatabase

@@ -1300,6 +1300,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             if not text_channel or not text_channel.permissions_for(message.guild.me).send_messages:
                 return
 
+        if message.is_system():
+            #correção temporária de uma possivel mensagem de sistema chegar até aqui ao iniciar uma thread.
+            return
+
         if not message.content:
             await message.delete()
             await message.channel.send(f"{message.author.mention} você deve enviar um link/nome da música.", delete_after=9)
