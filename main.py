@@ -11,7 +11,6 @@ from web_app import run_app
 CONFIGS = {
     "VOTE_SKIP_AMOUNT": "3",
     "DEFAULT_PREFIX": "!!!",
-    "LINK": "[`Crie seu próprio bot de música`](https://www.youtube.com/watch?v=zTXF4QA05Ic)",
     "YOUTUBEDL": "false",
 
     # Local lavalink stuffs

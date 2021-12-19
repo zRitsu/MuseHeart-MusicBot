@@ -67,9 +67,7 @@ def load(player: LavalinkPlayer) -> dict:
             txt += f"```ini\n[Próximas Músicas]:``` {queue_txt}"
 
             if (qsize := len(player.queue)) > 3:
-                txt += f"\n\n`E mais {qsize - 3}" + (f" |` {player.msg_ad}" if player.msg_ad else " músicas`")
-            else:
-                txt += f"\n\n{player.msg_ad}" if player.msg_ad else ""
+                txt += f"\n\n`E mais {qsize - 3}" + " músicas`"
 
         else:
 
@@ -77,10 +75,6 @@ def load(player: LavalinkPlayer) -> dict:
                                         description=f"\n{queue_txt}")
             if (qsize := len(player.queue)) > 20:
                 embed_queue.description += f"\n\nE mais **{qsize - 20}** músicas."
-            txt += f"{'-' * 40}\n{player.msg_ad}" if player.msg_ad else ""
-
-    else:
-        txt += f"{'-' * 40}\n{player.msg_ad}" if player.msg_ad else ""
 
     embed.description = txt
 

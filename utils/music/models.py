@@ -217,7 +217,6 @@ class BasePlayer:
         self.last_data = None
         self.interaction_cooldown = False
         self.votes = set()
-        self.msg_ad = self.cog.msg_ad
         self.view: Optional[disnake.ui.View] = None
         self.current: Union[LavalinkTrack, SpotifyTrack, YTDLTrack] = None
         self.view: Optional[disnake.ui.View] = None

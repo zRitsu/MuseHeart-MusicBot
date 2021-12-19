@@ -51,8 +51,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         self.bot = bot
 
-        self.msg_ad = False if bot.config["LINK"] == "false" else bot.config["LINK"]
-
         if bot.config["YOUTUBEDL"] != "true":
             self.bot.loop.create_task(self.process_nodes())
 
@@ -1745,9 +1743,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if text:
             embed.description += f"**ÚLTIMA AÇÃO:** {text.replace('**', '')}\n"
-
-        if self.msg_ad:
-            embed.description += f"{'-'*40}\n{self.msg_ad}"
 
         try:
             avatar = target.guild.me.avatar.url
