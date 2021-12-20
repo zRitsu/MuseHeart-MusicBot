@@ -1575,7 +1575,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 error = repr(e)
 
             backoff += 10
-            print(f'{self.bot.user} - Falha ao reconectar no servidor [{node.identifier}] e: {r.status}, nova tentativa em {backoff} segundos. Erro: {error}')
+            print(f'{self.bot.user} - Falha ao reconectar no servidor [{node.identifier}] e: {error}, nova tentativa em {backoff} segundos. Erro: {error}')
             await asyncio.sleep(backoff)
             retries += 1
             continue
