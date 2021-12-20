@@ -157,7 +157,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await inter.player.change_node(node)
 
-        txt = [f"Migrou o player para o servidor de música **{node}%**", f"**O player foi migrado para o servidor de música:** `{node}`"]
+        txt = [f"Migrou o player para o servidor de música **{node}**", f"**O player foi migrado para o servidor de música:** `{node}`"]
         await self.interaction_message(inter, txt)
 
 
