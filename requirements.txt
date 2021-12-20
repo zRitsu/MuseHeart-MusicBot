@@ -10,3 +10,4 @@ dnspython
 fake-useragent
 PyNaCl
 yt-dlp
+disnake-jishaku

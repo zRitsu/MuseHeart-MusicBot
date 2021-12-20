@@ -84,6 +84,9 @@ def load_bot(token: str):
 
     bot.token = token
 
+    bot.load_extension('jishaku')
+    bot.get_command("jsk").hidden = True
+
     @bot.listen()
     async def on_ready():
         print(f'{bot.user} [{bot.user.id}] Online.')
