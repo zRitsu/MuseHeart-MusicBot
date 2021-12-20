@@ -1572,7 +1572,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     if r.status in [401, 200, 400]:
                         await node._websocket._connect()
                         return
-                error = await r.text()
+                    error = await r.text()
             except Exception as e:
                 error = repr(e)
 
