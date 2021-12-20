@@ -70,7 +70,7 @@ async def node_suggestions(inter, query):
 
     if not query:
 
-        return [n for n in inter.bot.music.nodes.values() if n != inter.player.node and n.available and n.is_available]
+        return [n.identifier for n in inter.bot.music.nodes.values() if n != inter.player.node and n.available and n.is_available]
 
     return [n.identifier for n in inter.bot.music.nodes.values() if n != inter.player.node
             and query.lower() in n.identifier.lower() and n.available and n.is_available]
