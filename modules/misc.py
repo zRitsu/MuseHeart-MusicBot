@@ -1,5 +1,6 @@
 from typing import Optional
 import disnake
+import wavelink
 from disnake.ext import commands
 from utils.client import BotCore
 from utils.music.models import LavalinkPlayer
@@ -21,7 +22,7 @@ class Misc(commands.Cog):
             description=f"**Sobre mim:**\n\n"
                         f"> **Estou em:** `{len(self.bot.guilds)} servidor(es)`\n"
                         f"> **Players ativos:** `{len(self.bot.music.players)}`\n"
-                        f"> **Modo do player:** `{'Lavalink' if isinstance(self.bot.music, LavalinkPlayer) else 'YT-DLP (Experimental)'}`\n"
+                        f"> **Modo do player:** `{'Lavalink' if isinstance(self.bot.music, wavelink.Client) else 'YT-DLP (Experimental)'}`\n"
                         f"> **Commit:** `{self.bot.commit}`\n",
             color=self.bot.get_color(inter.guild.me)
         )
