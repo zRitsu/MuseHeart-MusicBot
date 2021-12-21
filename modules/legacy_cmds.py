@@ -40,16 +40,28 @@ class Owner(commands.Cog):
     @commands.command(aliases=["up", "atualizar"], description="Atualizaro code do bot (apenas para meu dono).")
     async def update(self, ctx: commands.Context):
 
-        out = ""
+        await ctx.message.add_reaction("⏲️")
+
+        out_git = ""
 
         with ShellReader('git pull --allow-unrelated-histories -X theirs') as reader:
             async for x in reader:
-                out += f"{x}\n"
+                out_git += f"{x}\n"
+
+        if "Already up to date" in out_git:
+            await ctx.send("Já estou com os ultimos updates instalados...")
+            return
+
+        out_pip = ""
+
+        with ShellReader('pip3 install -r requirements.txt') as reader:
+            async for x in reader:
+                out_pip += f"{x}\n"
 
         embed = disnake.Embed(
             color=self.bot.get_color(ctx.guild.me),
             title="Status do update:",
-            description=f"```{out[:1018]}```",
+            description=f"```{out_git[:1018]}```",
         )
 
         embed.set_footer(text="Reinicie o bot após as alterações.")
