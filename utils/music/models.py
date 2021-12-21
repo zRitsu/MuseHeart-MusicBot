@@ -269,6 +269,7 @@ class BasePlayer:
         if self.has_thread or self.static or self.text_channel.last_message_id == self.message.id:
             await self.message.edit(embed=embed, content=None, view=self.view)
         else:
+            await self.destroy_message()
             self.message = await self.text_channel.send(embed=embed, view=self.view)
 
         await asyncio.sleep(self.idle_timeout)
