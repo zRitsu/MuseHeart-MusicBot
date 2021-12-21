@@ -4,6 +4,7 @@ import disnake
 from disnake.ext import commands
 import traceback
 from utils.client import BotCore
+from jishaku.shell import ShellReader
 
 
 class Owner(commands.Cog):
@@ -39,9 +40,21 @@ class Owner(commands.Cog):
     @commands.command(aliases=["up", "atualizar"], description="Atualizaro code do bot (apenas para meu dono).")
     async def update(self, ctx: commands.Context):
 
-        os.system("git pull --allow-unrelated-histories -X theirs")
+        out = ""
 
-        await ctx.send(F"Verifique o console/terminal para conferir o update e reinicie o bot.")
+        with ShellReader('git pull --allow-unrelated-histories -X theirs') as reader:
+            async for x in reader:
+                out += f"{x}\n"
+
+        embed = disnake.Embed(
+            color=self.bot.get_color(ctx.guild.me),
+            title="Status do update:",
+            description=f"```{out[:1018]}```",
+        )
+
+        embed.set_footer(text="Reinicie o bot após as alterações.")
+
+        await ctx.send(embed=embed)
 
 
     async def sync_guild_commands(self, *, ctx: commands.Context = None, guilds = None):
