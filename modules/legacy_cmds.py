@@ -1,10 +1,11 @@
 import os
+import subprocess
 
 import disnake
 from disnake.ext import commands
 import traceback
 from utils.client import BotCore
-from jishaku.shell import ShellReader
+from utils.music.errors import GenericError
 
 
 class Owner(commands.Cog):
@@ -38,25 +39,21 @@ class Owner(commands.Cog):
 
     @commands.is_owner()
     @commands.command(aliases=["up", "atualizar"], description="Atualizaro code do bot (apenas para meu dono).")
-    async def update(self, ctx: commands.Context):
+    async def update(self, ctx: commands.Context, usepip="no"):
+
+        if usepip not in ["píp", "no"]:
+            raise GenericError(f"Opção inválida: {usepip}")
 
         await ctx.message.add_reaction("⏲️")
 
-        out_git = ""
-
-        with ShellReader('git pull --allow-unrelated-histories -X theirs') as reader:
-            async for x in reader:
-                out_git += f"{x}\n"
+        out_git = subprocess.check_output("git pull --allow-unrelated-histories -X theirs", shell=True, text=True)
 
         if "Already up to date" in out_git:
             await ctx.send("Já estou com os ultimos updates instalados...")
             return
 
-        out_pip = ""
-
-        with ShellReader('pip3 install -r requirements.txt') as reader:
-            async for x in reader:
-                out_pip += f"{x}\n"
+        if usepip == "pip":
+            subprocess.check_output("pip3 install -r requirements.txt", shell=True, text=True)
 
         embed = disnake.Embed(
             color=self.bot.get_color(ctx.guild.me),
