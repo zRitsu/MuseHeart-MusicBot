@@ -896,8 +896,9 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
 
         await super().connect(channel_id, self_deaf)
 
-        if self.guild.me.voice and self.guild.me.voice.channel.id != channel_id:
-            await self.vc.move_to(channel)
+        if self.guild.me.voice:
+            if self.guild.me.voice.channel.id != channel_id:
+                await self.vc.move_to(channel)
         else:
             await channel.connect(cls=self.vc, reconnect=True)
 
