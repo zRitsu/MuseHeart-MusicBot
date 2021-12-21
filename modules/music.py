@@ -25,11 +25,6 @@ from utils.music.converters import time_format, fix_characters, string_to_second
     node_suggestions
 from utils.music.interactions import VolumeInteraction, QueueInteraction, send_message, SongSelect, SelectInteraction
 
-try:
-    from test import Tests
-except:
-    pass
-
 lavalink_servers = []
 
 for k, v in os.environ.items():
