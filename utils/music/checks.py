@@ -1,6 +1,6 @@
 import disnake
 from disnake.ext import commands
-from .errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, DiffVoiceChannel
+from .errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, DiffVoiceChannel, GenericError
 
 
 def has_player():
@@ -21,9 +21,23 @@ def has_player():
 
 
 def is_dj():
+
     async def predicate(inter):
+
         if not await has_perm(inter):
             raise NotDJorStaff()
+
+        return True
+
+    return commands.check(predicate)
+
+
+def can_send_message():
+
+    async def predicate(inter):
+
+        if not inter.channel.permissions_for(inter.guild.me).send_messages:
+            raise GenericError("Não tenho permissão de enviar mensagens neste canal.")
 
         return True
 

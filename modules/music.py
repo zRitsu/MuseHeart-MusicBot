@@ -18,7 +18,7 @@ from utils.client import BotCore
 
 from utils.music.errors import GenericError
 from utils.music.spotify import SpotifyPlaylist, process_spotify
-from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj
+from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, can_send_message
 from utils.music.models import LavalinkPlayer, LavalinkTrack, YTDLTrack, YTDLPlayer, YTDLManager
 from utils.music.converters import time_format, fix_characters, string_to_seconds, get_track_index, URL_REG, \
     YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist, \
@@ -53,6 +53,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
+    @can_send_message()
     @commands.user_command(name="enqueue presence track")
     async def user_play(self, inter: disnake.MessageInteraction):
 
@@ -115,6 +116,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
+    @can_send_message()
     @commands.message_command(name="add to queue")
     async def message_play(self, inter: disnake.MessageInteraction):
 
@@ -155,8 +157,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         txt = [f"Migrou o player para o servidor de música **{node}**", f"**O player foi migrado para o servidor de música:** `{node}`"]
         await self.interaction_message(inter, txt)
 
-
     @check_voice()
+    @can_send_message()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.slash_command(name="play", description="Tocar música em um canal de voz.")
     async def play(
