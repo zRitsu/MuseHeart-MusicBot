@@ -53,7 +53,7 @@ class BotCore(commands.Bot):
             self.default_skin = "default"
 
 
-    async def check_skin(self, skin: str):
+    def check_skin(self, skin: str):
 
         if not skin in self.player_skins:
             return "default"
