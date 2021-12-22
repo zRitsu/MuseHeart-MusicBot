@@ -61,11 +61,11 @@ class LocalDatabase:
             if self.file_update != self.data_update:
 
                 with open(f'./local_dbs/{self.bot.user.id}.json', 'w') as f:
-                    json.dump(self.data, f)
+                    f.write(json.dumps(self.data))
 
                 self.file_update += 1
 
-            await asyncio.sleep(30)
+            await asyncio.sleep(3)
 
     async def get_data(self, id_: int, *, db_name: Literal['users', 'guilds']):
 

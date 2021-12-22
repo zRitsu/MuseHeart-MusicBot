@@ -14,6 +14,7 @@ CONFIGS = {
     "VOTE_SKIP_AMOUNT": "3",
     "DEFAULT_PREFIX": "!!!",
     "YOUTUBEDL": "false",
+    "DEFAULT_SKIN": "default",
 
     # Local lavalink stuffs
     "START_LOCAL_LAVALINK": "true",

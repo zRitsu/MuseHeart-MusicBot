@@ -205,6 +205,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await inter.edit_original_message(content=f"**Ocorreu um erro:** ```py\n{e}```")
             return
 
+        try:
+            skin = inter.guild_data["player_controller"]["skin"]
+        except:
+            skin = self.bot.default_skin
+
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.get_player(
             guild_id=inter.guild.id,
             cls=LavalinkPlayer,
@@ -214,7 +219,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             node_id=node.identifier,
             cog=self,
             static=True if (static_player and static_player['channel']) else False,
-            skin=inter.guild_data["player_controller"]["skin"]
+            skin=skin
         )
 
         if static_player and not player.message:
