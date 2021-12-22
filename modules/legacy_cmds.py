@@ -48,13 +48,17 @@ class Owner(commands.Cog):
 
         embed = disnake.Embed(color=self.bot.get_color(ctx.guild.me))
 
-        try:
-            out_git = subprocess.check_output("git pull --allow-unrelated-histories -X theirs", shell=True, text=True)
-        except Exception as e:
-            embed.title = "Ocorreu um erro:"
-            embed.description = f"Code: {e.returncode} | {e.output}"
-            await ctx.send(embed=embed)
-            return
+        out_git = ""
+
+        for cmd in ["git reset --hard", "git pull --allow-unrelated-histories -X theirs"]:
+
+            try:
+                out_git += subprocess.check_output(cmd, shell=True, text=True) + "\n\n"
+            except Exception as e:
+                embed.title = "Ocorreu um erro:"
+                embed.description = f"Code: {e.returncode} | {e.output}"
+                await ctx.send(embed=embed)
+                return
 
         if "Already up to date" in out_git:
             embed.description = f"**Já estou com os ultimos updates instalados...**"
