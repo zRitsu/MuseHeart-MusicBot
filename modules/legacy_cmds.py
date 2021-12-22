@@ -39,7 +39,7 @@ class Owner(commands.Cog):
 
 
     def run_command(self, cmd):
-        return subprocess.check_output(cmd, shell=True).decode(sys.stdout.encoding).strip()
+        return subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
 
 
     @commands.is_owner()
