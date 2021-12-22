@@ -53,6 +53,13 @@ class BotCore(commands.Bot):
             self.default_skin = "default"
 
 
+    async def check_skin(self, skin: str):
+
+        if not skin in self.player_skins:
+            return "default"
+
+        return skin
+
     async def on_message(self, message: disnake.Message):
 
         if message.content == f"<@{self.user.id}>" or message.content == f"<@!{self.user.id}>":

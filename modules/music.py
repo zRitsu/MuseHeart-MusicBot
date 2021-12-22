@@ -206,7 +206,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         try:
-            skin = inter.guild_data["player_controller"]["skin"]
+            skin = self.bot.check_skin(inter.guild_data["player_controller"]["skin"])
         except:
             skin = self.bot.default_skin
 
