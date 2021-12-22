@@ -50,7 +50,7 @@ class Owner(commands.Cog):
         if usepip not in ["píp", "no"]:
             raise GenericError(f"Opção inválida: {usepip}")
 
-        if not os.path.isdir("./git"):
+        if not os.path.isdir("./.git"):
             raise GenericError("Não há pasta .git no diretório do bot.")
 
         await ctx.message.add_reaction("⏲️")
