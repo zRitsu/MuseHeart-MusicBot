@@ -46,21 +46,26 @@ class Owner(commands.Cog):
 
         await ctx.message.add_reaction("⏲️")
 
-        out_git = subprocess.check_output("git pull --allow-unrelated-histories -X theirs", shell=True, text=True)
+        embed = disnake.Embed(color=self.bot.get_color(ctx.guild.me))
+
+        try:
+            out_git = subprocess.check_output("git pull --allow-unrelated-histories -X theirs", shell=True, text=True)
+        except Exception as e:
+            embed.title = "Ocorreu um erro:"
+            embed.description = f"Code: {e.returncode} | {e.output}"
+            await ctx.send(embed=embed)
+            return
 
         if "Already up to date" in out_git:
-            await ctx.send("Já estou com os ultimos updates instalados...")
+            embed.description = f"**Já estou com os ultimos updates instalados...**"
+            await ctx.send(embed=embed)
             return
 
         if usepip == "pip":
             subprocess.check_output("pip3 install -r requirements.txt", shell=True, text=True)
 
-        embed = disnake.Embed(
-            color=self.bot.get_color(ctx.guild.me),
-            title="Status do update:",
-            description=f"```{out_git[:1018]}```",
-        )
-
+        embed.title = "Status do update:"
+        embed.description = f"```{out_git[:1018]}```",
         embed.set_footer(text="Reinicie o bot após as alterações.")
 
         await ctx.send(embed=embed)
