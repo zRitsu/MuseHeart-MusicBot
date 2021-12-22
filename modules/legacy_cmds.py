@@ -86,7 +86,7 @@ class Owner(commands.Cog):
         text = "Reinicie o bot após as alterações."
 
         if original_req != new_req:
-            text += "Será necessário atualizar as dependências."
+            text += "\nNota: Será necessário atualizar as dependências."
 
         embed.title = "Status do update:"
         embed.description = f"```{out_git[:1018]}```\n\n{text}",
