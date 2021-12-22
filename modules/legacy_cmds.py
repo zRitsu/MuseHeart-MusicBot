@@ -37,6 +37,11 @@ class Owner(commands.Cog):
         embed = disnake.Embed(colour=self.bot.get_color(ctx.me), description=txt)
         await ctx.send(embed=embed)
 
+
+    def run_command(self, cmd):
+        return subprocess.check_output(cmd, shell=True).decode(sys.stdout.encoding).strip()
+
+
     @commands.is_owner()
     @commands.command(aliases=["up", "atualizar"], description="Atualizaro code do bot (apenas para meu dono).")
     async def update(self, ctx: commands.Context, usepip="no"):
@@ -48,29 +53,43 @@ class Owner(commands.Cog):
 
         embed = disnake.Embed(color=self.bot.get_color(ctx.guild.me))
 
-        out_git = ""
+        try:
+            self.run_command("git reset --hard")
+        except Exception as e:
+            embed.title = "Ocorreu um erro no git reset:"
+            embed.description = f"Code: {e.returncode} | {e.output}"
+            await ctx.send(embed=embed)
+            return
 
-        for cmd in ["git reset --hard", "git pull --allow-unrelated-histories -X theirs"]:
+        with open("requirements.txt") as f:
+            original_req = f.read()
 
-            try:
-                out_git += subprocess.check_output(cmd, shell=True).decode(sys.stdout.encoding).strip() + "\n\n"
-            except Exception as e:
-                embed.title = "Ocorreu um erro:"
-                embed.description = f"Code: {e.returncode} | {e.output}"
-                await ctx.send(embed=embed)
-                return
+        try:
+            out_git = self.run_command("git pull")
+        except Exception as e:
+            embed.title = "Ocorreu um erro no git pull:"
+            embed.description = f"Code: {e.returncode} | {e.output}"
+            await ctx.send(embed=embed)
+            return
 
         if "Already up to date" in out_git:
             embed.description = f"**Já estou com os ultimos updates instalados...**"
             await ctx.send(embed=embed)
             return
 
+        with open("requirements.txt") as f:
+            new_req = f.read()
+
         if usepip == "pip":
             subprocess.check_output("pip3 install -r requirements.txt", shell=True, text=True)
 
+        text = "Reinicie o bot após as alterações."
+
+        if original_req != new_req:
+            text += "Será necessário atualizar as dependências."
+
         embed.title = "Status do update:"
-        embed.description = f"```{out_git[:1018]}```",
-        embed.set_footer(text="Reinicie o bot após as alterações.")
+        embed.description = f"```{out_git[:1018]}```\n\n{text}",
 
         await ctx.send(embed=embed)
 
