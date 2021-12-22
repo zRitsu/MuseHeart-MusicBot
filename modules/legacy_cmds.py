@@ -1,4 +1,4 @@
-import os
+import sys
 import subprocess
 
 import disnake
@@ -53,7 +53,7 @@ class Owner(commands.Cog):
         for cmd in ["git reset --hard", "git pull --allow-unrelated-histories -X theirs"]:
 
             try:
-                out_git += subprocess.check_output(cmd, shell=True, text=True) + "\n\n"
+                out_git += subprocess.check_output(cmd, shell=True).decode(sys.stdout.encoding).strip() + "\n\n"
             except Exception as e:
                 embed.title = "Ocorreu um erro:"
                 embed.description = f"Code: {e.returncode} | {e.output}"
