@@ -65,7 +65,7 @@ class Owner(commands.Cog):
             original_req = f.read()
 
         try:
-            out_git = self.run_command("git pull")
+            out_git = self.run_command("git pull --allow-unrelated-histories -X theirs")
         except Exception as e:
             embed.title = "Ocorreu um erro no git pull:"
             embed.description = f"Code: {e.returncode} | {e.output}"
