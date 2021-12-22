@@ -1566,9 +1566,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             try:
                 await player.change_node(new_node.identifier)
+                await player.update_message()
             except:
                 traceback.print_exc()
-
 
         print(f"{self.bot.user} - [{node.identifier}] Conexão perdida - reconectando em {backoff} segundos.")
 
