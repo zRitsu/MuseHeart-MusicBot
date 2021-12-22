@@ -3,7 +3,10 @@ import disnake
 import wavelink
 from disnake.ext import commands
 from utils.client import BotCore
-from utils.music.models import LavalinkPlayer
+import psutil
+import humanize
+from os import getpid
+import platform
 
 
 class Misc(commands.Cog):
@@ -18,12 +21,18 @@ class Misc(commands.Cog):
         if not self.source_owner:
             self.source_owner = await self.bot.get_or_fetch_user(815907450090946571)
 
+        ram_usage = humanize.naturalsize(psutil.Process(getpid()).memory_info().rss)
+
         embed = disnake.Embed(
             description=f"**Sobre mim:**\n\n"
                         f"> **Estou em:** `{len(self.bot.guilds)} servidor(es)`\n"
                         f"> **Players ativos:** `{len(self.bot.music.players)}`\n"
-                        f"> **Modo do player:** `{'Lavalink' if isinstance(self.bot.music, wavelink.Client) else 'YT-DLP (Experimental)'}`\n"
-                        f"> **Commit:** `{self.bot.commit}`\n",
+                        f"> **Tipo de player usado:** `{'Lavalink' if isinstance(self.bot.music, wavelink.Client) else 'YT-DLP (Experimental)'}`\n"
+                        f"> **Commit atual:** `{self.bot.commit}`\n"
+                        f"> **Versão do Disnake:** `{disnake.__version__}`\n"
+                        f"> **Versão do python:** {platform.python_version()}\n"
+                        f"> **Latencia:** `{round(self.bot.latency * 1000)}ms`\n"
+                        f"> **Uso de RAM:** {ram_usage}\n",
             color=self.bot.get_color(inter.guild.me)
         )
 
