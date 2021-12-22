@@ -136,28 +136,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         )
 
     @check_voice()
-    @has_player()
-    @is_dj()
-    @commands.cooldown(1, 10, commands.BucketType.guild)
-    @commands.slash_command(description="Migrar o player para outro servidor de música.")
-    async def change_node(
-            self,
-            inter: disnake.ApplicationCommandInteraction,
-            node: str = commands.Param(name="servidor", description="Servidor de música", autocomplete=node_suggestions)
-    ):
-
-        if not node in self.bot.music.nodes:
-            raise GenericError(f"O servidor de música **{node}** não foi encontrado.")
-
-        if node == inter.player.node.identifier:
-            raise GenericError(f"O player já está no servidor de música **{node}**.")
-
-        await inter.player.change_node(node)
-
-        txt = [f"Migrou o player para o servidor de música **{node}**", f"**O player foi migrado para o servidor de música:** `{node}`"]
-        await self.interaction_message(inter, txt)
-
-    @check_voice()
     @can_send_message()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.slash_command(name="play", description="Tocar música em um canal de voz.")
@@ -1013,61 +991,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await view.wait()
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.slash_command(description="Ver informações dos servidores de música.")
-    async def nodeinfo(self, inter: disnake.ApplicationCommandInteraction):
-
-        if self.bot.config["YOUTUBEDL"] == "true":
-            await inter.send("Este comando não funciona no modo YT-DLP.", ephemeral=True)
-            return
-
-        em = disnake.Embed(color=self.bot.get_color(inter.me), title="Servidores de música:")
-
-        if not self.bot.music.nodes:
-            em.description = "**Não há servidores.**"
-            await inter.send(embed=em)
-            return
-
-        for identifier, node in self.bot.music.nodes.items():
-            if not node.available: continue
-
-            txt = f"Região: `{node.region.title()}`\n"
-
-            current_player = True if node.players.get(inter.guild.id) else False
-
-            if node.stats:
-                used = humanize.naturalsize(node.stats.memory_used)
-                total = humanize.naturalsize(node.stats.memory_allocated)
-                free = humanize.naturalsize(node.stats.memory_free)
-                cpu_cores = node.stats.cpu_cores
-                cpu_usage = f"{node.stats.lavalink_load * 100:.2f}"
-                started = node.stats.players
-
-                ram_txt = f'RAM: `{used}/{free} ({total})`'
-
-                txt += f'{ram_txt}\n' \
-                       f'CPU Cores: `{cpu_cores}`\n' \
-                       f'Uso de CPU: `{cpu_usage}%`\n' \
-                       f'Uptime: `{time_format(node.stats.uptime)}`'
-
-                if started:
-                    txt += "\nPlayers: "
-                    players = node.stats.playing_players
-                    idle = started - players
-                    if players:
-                        txt += f'`[▶️{players}]`' + (" " if idle else "")
-                    if idle:
-                        txt += f'`[💤{idle}]`'
-
-            if current_player:
-                status = "🌟"
-            else:
-                status = "✅" if node.is_available else '❌'
-
-            em.add_field(name=f'**{identifier}** `{status}`', value=txt)
-
-        await inter.send(embed=em, ephemeral=True)
-
     @has_player()
     @is_dj()
     @commands.max_concurrency(1, commands.BucketType.guild)
@@ -1153,6 +1076,84 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             txt = [f"removeu {deleted_tracks} música(s) da fila via clear.",
                    f"{deleted_tracks} música(s) removidas da fila com sucesso."]
 
+        await self.interaction_message(inter, txt)
+
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.slash_command(description="Ver informações dos servidores de música.")
+    async def nodeinfo(self, inter: disnake.ApplicationCommandInteraction):
+
+        if self.bot.config["YOUTUBEDL"] == "true":
+            await inter.send("Este comando não funciona no modo YT-DLP.", ephemeral=True)
+            return
+
+        em = disnake.Embed(color=self.bot.get_color(inter.me), title="Servidores de música:")
+
+        if not self.bot.music.nodes:
+            em.description = "**Não há servidores.**"
+            await inter.send(embed=em)
+            return
+
+        for identifier, node in self.bot.music.nodes.items():
+            if not node.available: continue
+
+            txt = f"Região: `{node.region.title()}`\n"
+
+            current_player = True if node.players.get(inter.guild.id) else False
+
+            if node.stats:
+                used = humanize.naturalsize(node.stats.memory_used)
+                total = humanize.naturalsize(node.stats.memory_allocated)
+                free = humanize.naturalsize(node.stats.memory_free)
+                cpu_cores = node.stats.cpu_cores
+                cpu_usage = f"{node.stats.lavalink_load * 100:.2f}"
+                started = node.stats.players
+
+                ram_txt = f'RAM: `{used}/{free} ({total})`'
+
+                txt += f'{ram_txt}\n' \
+                       f'CPU Cores: `{cpu_cores}`\n' \
+                       f'Uso de CPU: `{cpu_usage}%`\n' \
+                       f'Uptime: `{time_format(node.stats.uptime)}`'
+
+                if started:
+                    txt += "\nPlayers: "
+                    players = node.stats.playing_players
+                    idle = started - players
+                    if players:
+                        txt += f'`[▶️{players}]`' + (" " if idle else "")
+                    if idle:
+                        txt += f'`[💤{idle}]`'
+
+            if current_player:
+                status = "🌟"
+            else:
+                status = "✅" if node.is_available else '❌'
+
+            em.add_field(name=f'**{identifier}** `{status}`', value=txt)
+
+        await inter.send(embed=em, ephemeral=True)
+
+    @check_voice()
+    @has_player()
+    @is_dj()
+    @commands.cooldown(1, 10, commands.BucketType.guild)
+    @commands.slash_command(description="Migrar o player para outro servidor de música.")
+    async def change_node(
+            self,
+            inter: disnake.ApplicationCommandInteraction,
+            node: str = commands.Param(name="servidor", description="Servidor de música", autocomplete=node_suggestions)
+    ):
+
+        if not node in self.bot.music.nodes:
+            raise GenericError(f"O servidor de música **{node}** não foi encontrado.")
+
+        if node == inter.player.node.identifier:
+            raise GenericError(f"O player já está no servidor de música **{node}**.")
+
+        await inter.player.change_node(node)
+
+        txt = [f"Migrou o player para o servidor de música **{node}**",
+               f"**O player foi migrado para o servidor de música:** `{node}`"]
         await self.interaction_message(inter, txt)
 
     @commands.has_guild_permissions(administrator=True)
@@ -1317,6 +1318,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         msg = None
 
+        error = None
+
         try:
 
             if not URL_REG.match(message.content):
@@ -1349,6 +1352,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     message.content = YOUTUBE_VIDEO_REG.match(message.content).group()
 
             await self.parse_song_request(message, text_channel, data, response=msg)
+
             if not isinstance(message.channel, disnake.Thread):
                 await message.delete()
                 try:
@@ -1356,13 +1360,19 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 except:
                     pass
 
+        except GenericError as e:
+            error = f"{message.author.mention}. {e}"
+
         except Exception as e:
             traceback.print_exc()
-            text = f"{message.author.mention} **ocorreu um erro ao tentar obter resultados para sua busca:** ```py\n{e}```"
+            error = f"{message.author.mention} **ocorreu um erro ao tentar obter resultados para sua busca:** ```py\n{e}```"
+
+        if error:
+
             if msg:
-                await msg.edit(content=text, embed=None, view=None, delete_after=7)
+                await msg.edit(content=error, embed=None, view=None, delete_after=7)
             else:
-                await message.channel.send(text, delete_after=7)
+                await message.channel.send(error, delete_after=7)
             await message.delete()
 
         await self.song_request_concurrency.release(message)
@@ -1370,11 +1380,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def parse_song_request(self, message, text_channel, data, *, response=None):
 
         if not message.author.voice:
-            raise Exception(f"você deve entrar em um canal de voz para pedir uma música.")
+            raise GenericError(f"você deve entrar em um canal de voz para pedir uma música.")
 
         try:
             if message.guild.me.voice.channel != message.author.voice.channel:
-                raise Exception(f"Você deve entrar no canal <{message.guild.me.voice.channel.id}> para pedir uma música.")
+                raise GenericError(f"Você deve entrar no canal <{message.guild.me.voice.channel.id}> para pedir uma música.")
         except AttributeError:
             pass
 
