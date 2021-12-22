@@ -1,3 +1,4 @@
+import os
 import sys
 import subprocess
 
@@ -49,17 +50,15 @@ class Owner(commands.Cog):
         if usepip not in ["píp", "no"]:
             raise GenericError(f"Opção inválida: {usepip}")
 
-        await ctx.message.add_reaction("⏲️")
+        if not os.path.isdir("./git"):
+            raise GenericError("Não há pasta .git no diretório do bot.")
 
-        embed = disnake.Embed(color=self.bot.get_color(ctx.guild.me))
+        await ctx.message.add_reaction("⏲️")
 
         try:
             self.run_command("git reset --hard")
         except Exception as e:
-            embed.title = "Ocorreu um erro no git reset:"
-            embed.description = f"Code: {e.returncode} | {e.output}"
-            await ctx.send(embed=embed)
-            return
+            raise GenericError(f"Ocorreu um erro no git reset.\nCode: {e.returncode} | {e.output}")
 
         with open("requirements.txt") as f:
             original_req = f.read()
@@ -67,15 +66,10 @@ class Owner(commands.Cog):
         try:
             out_git = self.run_command("git pull --allow-unrelated-histories -X theirs")
         except Exception as e:
-            embed.title = "Ocorreu um erro no git pull:"
-            embed.description = f"Code: {e.returncode} | {e.output}"
-            await ctx.send(embed=embed)
-            return
+            raise GenericError(f"Ocorreu um erro no git pull:\nCode: {e.returncode} | {e.output}")
 
         if "Already up to date" in out_git:
-            embed.description = f"**Já estou com os ultimos updates instalados...**"
-            await ctx.send(embed=embed)
-            return
+            raise GenericError("Já estou com os ultimos updates instalados...")
 
         with open("requirements.txt") as f:
             new_req = f.read()
@@ -83,13 +77,16 @@ class Owner(commands.Cog):
         if usepip == "pip":
             subprocess.check_output("pip3 install -r requirements.txt", shell=True, text=True)
 
-        text = "Reinicie o bot após as alterações."
+        text = "`Reinicie o bot após as alterações.`"
 
         if original_req != new_req:
-            text += "\nNota: Será necessário atualizar as dependências."
+            text += "\n`Nota: Será necessário atualizar as dependências.`"
 
-        embed.title = "Status do update:"
-        embed.description = f"```{out_git[:1018]}```\n\n{text}",
+        embed = disnake.Embed(
+            description = f"```{out_git[:2018]}``` {text}",
+            title="Update efetuado com sucesso!",
+            color=self.bot.get_color(ctx.guild.me)
+        )
 
         await ctx.send(embed=embed)
 
