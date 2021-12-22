@@ -1,4 +1,4 @@
-disnake==2.2.2
+disnake==2.3.0
 git+https://github.com/zRitsu/Wavelink.git@disnake
 python-dotenv
 spotipy

@@ -933,7 +933,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @has_player()
     @is_dj()
     @commands.slash_command(description="Parar o player e me desconectar do canal de voz.")
-    async def stop(self, inter: disnake.Interaction):
+    async def stop(self, inter: disnake.ApplicationCommandInteraction):
 
         player: Union[LavalinkPlayer, YTDLPlayer] = inter.player
 
