@@ -1536,10 +1536,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         retries = 0
         backoff = 7
 
-
         for player in list(node.players.values()):
             try:
-                node = self.bot.music.get_best_node()
+                new_node: wavelink.Node = self.bot.music.get_best_node()
             except wavelink.ZeroConnectedNodes:
                 try:
                     await player.text_channel.send("O player foi finalizado por falta de servidores de música...", delete_after=11)
@@ -1549,7 +1548,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 continue
 
             try:
-                await player.change_node(node.identifier)
+                await player.change_node(new_node.identifier)
             except:
                 traceback.print_exc()
 
