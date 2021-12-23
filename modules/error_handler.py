@@ -17,13 +17,8 @@ class ErrorHandler(commands.Cog):
 
         embed = disnake.Embed(color=disnake.Colour.red())
 
-        error_txt = parse_error(inter, error)
-
-        if error_txt:
-            embed.description = error_txt
-        else:
-            embed.description = f"**Ocorreu um erro no comando:**\n" \
-                                f"```py\n{str(repr(error))[:2020].replace(self.bot.http.token, 'mytoken')}```"
+        embed.description = parse_error(inter, error) or "**Ocorreu um erro no comando:**\n" \
+                                f"```py\n{repr(error)[:2020].replace(self.bot.http.token, 'mytoken')}```"
 
         await send_message(inter, embed=embed)
 
@@ -33,15 +28,10 @@ class ErrorHandler(commands.Cog):
 
         embed = disnake.Embed(color=disnake.Colour.red())
 
-        error_txt = parse_error(ctx, error)
-
         if isinstance(error, commands.CommandNotFound):
             return
 
-        if error_txt:
-            embed.description = error_txt
-        else:
-            embed.description = f"**Ocorreu um erro no comando:**\n" \
+        embed.description = parse_error(ctx, error) or "**Ocorreu um erro no comando:**\n" \
                                 f"```py\n{str(repr(error))[:2020].replace(self.bot.http.token, 'mytoken')}```"
 
         await ctx.reply(embed=embed)

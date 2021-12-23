@@ -1547,9 +1547,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @wavelink.WavelinkMixin.listener("on_node_connection_closed")
     async def node_connection_closed(self, node: wavelink.Node):
 
-        if node._websocket.auto_reconnect:
-            return
-
         retries = 0
         backoff = 7
 
@@ -1576,8 +1573,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         while True:
 
+            if retries == 30:
+                print(f"{self.bot.user} - [{node.identifier}] Todas as tentativas de reconectar falharam...")
+                return
+
             try:
-                async with self.bot.session.get(node.rest_uri, timeout=backoff) as r:
+                async with self.bot.session.get(node.rest_uri) as r:
                     if r.status in [401, 200, 400]:
                         await node.connect(self.bot)
                         return
@@ -1585,7 +1586,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             except Exception as e:
                 error = repr(e)
 
-            backoff += 10
+            backoff *= 1.5
             print(f'{self.bot.user} - Falha ao reconectar no servidor [{node.identifier}] nova tentativa em {backoff} segundos. Erro: {error}')
             await asyncio.sleep(backoff)
             retries += 1
