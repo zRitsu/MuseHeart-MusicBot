@@ -210,7 +210,7 @@ class BasePlayer:
         self.locked = False
         self.idle_task = None
         self.members_timeout_task = None
-        self.idle_timeout = 180  # aguardar 3 minutos para adicionar novas músicas ou pra sair do canal quando não houver membros.
+        self.idle_timeout = self.cog.bot.config["IDLE_TIMEOUT"]
         self.is_previows_music = False
         self.updating_message = None
         self.command_log = ""
@@ -224,6 +224,7 @@ class BasePlayer:
         self.exiting = False
         self.skin = self.cog.bot.player_skins[kwargs.pop("skin", self.cog.bot.default_skin)]
         self.has_thread: bool = False
+        self.nonstop = False
 
 
     async def members_timeout(self):
@@ -609,7 +610,7 @@ class BasePlayer:
 
         if self.last_track:
 
-            if self.loop == "queue":
+            if self.loop == "queue" or self.nonstop:
                 if self.is_previows_music:
                     self.queue.insert(1, self.last_track)
                     self.is_previows_music = False

@@ -1083,6 +1083,31 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await self.interaction_message(inter, txt)
 
+    @has_player()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.has_guild_permissions(manage_guild=True)
+    @commands.slash_command(description="Ativar/Desativar o modo interrupta do player (24/7).")
+    async def nonstop(self, inter: disnake.ApplicationCommandInteraction):
+
+        player: Union[LavalinkPlayer, YTDLPlayer] = inter.player
+
+        player.nonstop = not player.nonstop
+
+        texts = ["ativou", "ativado"] if player.nonstop else ["desativou", "desativado"]
+
+        text = [f"{texts[0]} o modo interrupto do player.", f"Modo interrupto {texts[1]} com sucesso!"]
+
+        if not len(player.queue):
+            player.queue.extend(player.played)
+            player.played.clear()
+
+        if player.current:
+            await self.interaction_message(inter, txt=text, update=True)
+            return
+
+        player.command_log = text
+        await player.process_next()
+
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.slash_command(description="Ver informações dos servidores de música.")
     async def nodeinfo(self, inter: disnake.ApplicationCommandInteraction):
@@ -1862,7 +1887,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 await player.destroy(force=True)
                 return
 
-        if player.vc and not any(m for m in player.vc.channel.members if not m.bot):
+        if not player.nonstop and player.vc and not any(m for m in player.vc.channel.members if not m.bot):
             player.members_timeout_task = self.bot.loop.create_task(player.members_timeout())
         else:
             try:

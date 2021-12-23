@@ -47,6 +47,9 @@ def load(player: LavalinkPlayer) -> dict:
     if player.current.playlist:
         txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist['name'], limit=17)}`]({player.current.playlist['url']})"
 
+    if player.nonstop:
+        txt += "\n> ♾️ **⠂Modo interrupto:** `Ativado`"
+
     txt += "\n"
 
     if player.command_log:

@@ -15,6 +15,7 @@ CONFIGS = {
     "DEFAULT_PREFIX": "!!!",
     "YOUTUBEDL": "false",
     "DEFAULT_SKIN": "default",
+    "IDLE_TIMEOUT": "180",
 
     # Local lavalink stuffs
     "START_LOCAL_LAVALINK": "true",
@@ -31,6 +32,11 @@ for cfg in CONFIGS:
         CONFIGS[cfg] = os.environ[cfg]
     except KeyError:
         continue
+
+CONFIGS["IDLE_TIMEOUT"] = int(CONFIGS["IDLE_TIMEOUT"])
+
+if CONFIGS["IDLE_TIMEOUT"] < 30:
+    CONFIGS["IDLE_TIMEOUT"] = 30
 
 if CONFIGS.get('YOUTUBEDL') != "true" and CONFIGS['START_LOCAL_LAVALINK'] == "true":
     run_lavalink(
