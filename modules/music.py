@@ -1574,12 +1574,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await asyncio.sleep(backoff)
 
-        while node._websocket._closed:
+        while True:
 
             try:
                 async with self.bot.session.get(node.rest_uri, timeout=backoff) as r:
                     if r.status in [401, 200, 400]:
-                        await node._websocket._connect()
+                        await node.connect(self.bot)
                         return
                     error = r.status
             except Exception as e:
