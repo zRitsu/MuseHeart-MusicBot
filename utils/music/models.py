@@ -544,6 +544,11 @@ class BasePlayer:
             }
         }
 
+        try:
+            stats["thumb"] = self.bot.user.avatar.with_format("png").url
+        except AttributeError:
+            stats["thumb"] = self.bot.user.default_avatar.with_format("png").url
+
         if not self.current:
 
             stats.update(
@@ -557,6 +562,8 @@ class BasePlayer:
         else:
 
             track: Optional[LavalinkTrack, YTDLTrack, SpotifyTrack] = self.current
+
+            stats["thumb"] = track.thumb
 
             stats["track"] = {
                 "title": track.title,
