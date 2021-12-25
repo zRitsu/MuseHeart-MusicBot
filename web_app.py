@@ -45,7 +45,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             self.close()
             return
 
-        print(f"Nova conexão - User: {user_id} | IP: {self.request.remote_ip}")
+        print(f"Nova conexão - IP: {self.request.remote_ip}")
 
         self.user_id = user_id
 
@@ -87,7 +87,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         if not self.user_id:
             print(f"Conexão Finalizada - IP: {self.request.remote_ip}")
         else:
-            print(f"Conexão Finalizada - User: {self.user_id}  | IP: {self.request.remote_ip}")
+            print(f"Conexão Finalizada - User: {self.user_id}")
             for bot in self.bots:
                 try:
                     del bot.ws_users[self.user_id]
