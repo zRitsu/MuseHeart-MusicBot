@@ -45,7 +45,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             self.close()
             return
 
-        print(f"Nova conexão - IP: {self.request.remote_ip}")
+        print(f"Nova conexão - User: {user_id}")
 
         self.user_id = user_id
 
