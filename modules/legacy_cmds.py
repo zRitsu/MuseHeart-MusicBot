@@ -74,7 +74,7 @@ class Owner(commands.Cog):
             new_req = f.read()
 
         if usepip == "pip":
-            subprocess.check_output("pip3 install -r requirements.txt", shell=True, text=True)
+            subprocess.check_output("pip3 install -U -r requirements.txt", shell=True, text=True)
 
         text = "`Reinicie o bot após as alterações.`"
 
