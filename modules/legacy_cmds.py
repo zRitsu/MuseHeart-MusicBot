@@ -46,7 +46,7 @@ class Owner(commands.Cog):
     @commands.command(aliases=["up", "atualizar"], description="Atualizaro code do bot (apenas para meu dono).")
     async def update(self, ctx: commands.Context, usepip="no"):
 
-        if usepip not in ["píp", "no"]:
+        if usepip not in ["pip", "no"]:
             raise GenericError(f"Opção inválida: {usepip}")
 
         if not os.path.isdir("./.git"):
