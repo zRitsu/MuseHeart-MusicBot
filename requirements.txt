@@ -1,5 +1,5 @@
 disnake==2.3.0
-git+https://github.com/zRitsu/Wavelink.git@bbba4aa6d3354536fe9f8f49a39703d269d23e36
+git+https://github.com/zRitsu/Wavelink.git@7406059ded57f18403ed8fba659f5ac0390fadc4
 python-dotenv
 spotipy
 requests

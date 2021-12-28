@@ -1576,21 +1576,27 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         backoff = 7
 
         for player in list(node.players.values()):
-            try:
-                new_node: wavelink.Node = self.bot.music.get_best_node()
-            except wavelink.ZeroConnectedNodes:
-                try:
-                    await player.text_channel.send("O player foi finalizado por falta de servidores de música...", delete_after=11)
-                except:
-                    pass
-                await player.destroy()
-                continue
 
             try:
+
+                new_node: wavelink.Node = self.bot.music.get_best_node()
+
+                if not new_node:
+
+                    try:
+                        await player.text_channel.send("O player foi finalizado por falta de servidores de música...", delete_after=11)
+                    except:
+                        pass
+                    await player.destroy()
+                    continue
+
                 await player.change_node(new_node.identifier)
                 await player.update_message()
+
             except:
+
                 traceback.print_exc()
+                continue
 
         print(f"{self.bot.user} - [{node.identifier}] Conexão perdida - reconectando em {backoff} segundos.")
 
@@ -1671,11 +1677,19 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player.current = None
 
         if payload.error == "This IP address has been blocked by YouTube (429)":
-            player.queue.appendleft(player.last_track)
             player.node.available = False
             newnode = [n for n in self.bot.music.nodes.values() if n != player.node and n.available and n.is_available]
             if newnode:
+                player.queue.appendleft(player.last_track)
                 await player.change_node(newnode[0].identifier)
+            else:
+                embed = disnake.Embed(
+                    color=self.bot.get_color(player.guild.me),
+                    description="**O player foi finalizado por falta de servidores disponíveis.**"
+                )
+                await player.text_channel.send(embed=embed, delete_after=15)
+                await player.destroy(force=True)
+                return
         else:
             player.played.append(player.last_track)
 
