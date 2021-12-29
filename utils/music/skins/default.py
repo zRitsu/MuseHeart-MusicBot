@@ -41,8 +41,8 @@ def load(player: LavalinkPlayer) -> dict:
           f"> ✋ **⠂Pedido por:** {player.current.requester.mention}\n" \
           f"> 🔊 **⠂Volume:** `{player.volume}%`"
 
-    if player.current.repeats:
-        txt += f"\n> 🔂 **⠂Repetições restantes:** `{player.current.repeats}`"
+    if player.current.track_loops:
+        txt += f"\n> 🔂 **⠂Repetições restantes:** `{player.current.track_loops}`"
 
     if player.current.playlist:
         txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist['name'], limit=17)}`]({player.current.playlist['url']})"

@@ -41,7 +41,7 @@ class SpotifyPlaylist:
 
 class SpotifyTrack:
 
-    def __init__(self, *, uri, title, authors, thumb, duration, requester, playlist = None, album=None, repeats=0):
+    def __init__(self, *, uri, title, authors, thumb, duration, requester, playlist = None, album=None, track_loops=0):
         self.author = fix_characters(authors[0]['name'])
         self.authors = [fix_characters(i['name']) for i in authors]
         self.id = ""
@@ -54,7 +54,7 @@ class SpotifyTrack:
         self.requester = requester
         self.playlist = playlist or {}
         self.album = album or {}
-        self.repeats = repeats
+        self.track_loops = track_loops
 
         self.title += ' - ' + ', '.join(a for a in self.authors if not a in self.title)
 

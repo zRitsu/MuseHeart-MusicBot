@@ -199,7 +199,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await inter.response.defer(ephemeral=True)
 
         try:
-            tracks, node = await self.get_tracks(query, inter.user, node=node, repeats=repeat_amount)
+            tracks, node = await self.get_tracks(query, inter.user, node=node, track_loops=repeat_amount)
         except Exception as e:
             traceback.print_exc()
             await inter.edit_original_message(content=f"**Ocorreu um erro:** ```py\n{e}```")
@@ -580,7 +580,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if mode == 'off':
             mode = False
-            player.current.repeats = 0
+            player.current.track_loops = 0
 
         if mode == player.loop:
             await self.interaction_message(inter, "Não teve alteração no modo de repetição atual.")
@@ -608,7 +608,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player: Union[LavalinkPlayer, YTDLPlayer] = inter.player
 
-        player.current.repeats = value
+        player.current.track_loops = value
 
         embed = disnake.Embed(color=self.bot.get_color(inter.me))
 
@@ -1729,7 +1729,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await player.process_next()
 
 
-    async def get_tracks(self, query: str, user: disnake.Member, node: wavelink.Node=None, repeats=0):
+    async def get_tracks(self, query: str, user: disnake.Member, node: wavelink.Node=None, track_loops=0):
 
         if not node:
             node = self.bot.music.get_best_node()
@@ -1757,10 +1757,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if isinstance(tracks, list):
 
             if isinstance(tracks[0], wavelink.Track):
-                tracks = [LavalinkTrack(track.id, track.info, requester=user, repeats=repeats) for track in tracks]
+                tracks = [LavalinkTrack(track.id, track.info, requester=user, track_loops=track_loops) for track in tracks]
             elif isinstance(tracks[0], YTDLTrack):
                 for track in tracks:
-                    track.repeats = repeats
+                    track.track_loops = track_loops
                     track.requester = user
 
         else:
@@ -1780,7 +1780,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                 if self.bot.config.get('YOUTUBEDL') == "true":
                     for track in tracks.tracks:
-                        track.repeats = repeats
+                        track.track_loops = track_loops
                         track.requester = user
                 else:
 

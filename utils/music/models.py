@@ -104,12 +104,12 @@ class WavelinkVoiceClient(disnake.VoiceClient):
 
 class LavalinkTrack(wavelink.Track):
 
-    __slots__ = ('requester', 'playlist', 'repeats', 'album')
+    __slots__ = ('requester', 'playlist', 'track_loops', 'album')
 
     def __init__(self, *args, **kwargs):
         self.requester = kwargs.pop('requester')
         self.playlist = kwargs.pop('playlist', None)
-        self.repeats = kwargs.pop('repeats', 0)
+        self.track_loops = kwargs.pop('track_loops', 0)
         self.album = {}
         args[1]['title'] = fix_characters(args[1]['title'])
         super().__init__(*args, **kwargs)
@@ -153,7 +153,7 @@ class YTDLSource(disnake.PCMVolumeTransformer):
 class YTDLTrack:
 
     __slots__ = ('author', 'id', 'title', 'uri', 'duration', 'is_stream', 'info',
-                 'requester', 'playlist', 'album', 'repeats', 'thumb')
+                 'requester', 'playlist', 'album', 'track_loops', 'thumb')
 
     def __init__(self, *args, **kwargs):
 
@@ -169,7 +169,7 @@ class YTDLTrack:
         self.requester = kwargs.pop('requester', '')
         self.playlist = kwargs.pop('playlist', {})
         self.album = {}
-        self.repeats = kwargs.pop('repeats', 0)
+        self.track_loops = kwargs.pop('track_loops', 0)
 
         if (data.get("ie_key") or data.get('extractor_key')) == "Youtube":
             self.thumb = f"https://img.youtube.com/vi/{data['id']}/mqdefault.jpg"
@@ -573,7 +573,7 @@ class BasePlayer:
                 "stream": track.is_stream,
                 "position": self.position,
                 "paused": self.is_paused,
-                "loop": self.current.repeats or self.loop
+                "loop": self.current.track_loops or self.loop
             }
 
             if track.playlist:
@@ -622,8 +622,8 @@ class BasePlayer:
             elif self.is_previows_music:
                 self.queue.insert(1, self.last_track)
                 self.is_previows_music = False
-            elif self.last_track.repeats:
-                self.last_track.repeats -= 1
+            elif self.last_track.track_loops:
+                self.last_track.track_loops -= 1
                 self.queue.insert(0, self.last_track)
             elif self.loop == "queue" or self.nonstop:
                 if self.is_previows_music:
