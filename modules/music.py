@@ -1650,7 +1650,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if payload.code == 4000: # internal error
             await asyncio.sleep(3)
-            await player.current(player.channel_id)
+            await player.connect(player.channel_id)
             return
 
         # fix para dpy 2x (erro ocasionado ao mudar o bot de canal)
