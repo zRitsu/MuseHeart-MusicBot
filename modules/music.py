@@ -572,15 +572,15 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             self,
             inter: disnake.ApplicationCommandInteraction,
             mode: Literal['current', 'queue', 'off'] = commands.Param(name="modo",
-                description="current = Música atual / queue = fila / off = desativar",
-                default=lambda inter: 'off' if inter.player.loop else 'current'
+                description="current = Música atual / queue = fila / off = desativar"
             )
     ):
 
-        player = inter.player
+        player: Union[LavalinkPlayer, YTDLPlayer] = inter.player
 
         if mode == 'off':
             mode = False
+            player.current.repeats = 0
 
         if mode == player.loop:
             await self.interaction_message(inter, "Não teve alteração no modo de repetição atual.")

@@ -617,13 +617,7 @@ class BasePlayer:
 
         if self.last_track:
 
-            if self.loop == "queue" or self.nonstop:
-                if self.is_previows_music:
-                    self.queue.insert(1, self.last_track)
-                    self.is_previows_music = False
-                else:
-                    self.queue.append(self.last_track)
-            elif self.loop == "current":
+            if self.loop == "current":
                 self.queue.appendleft(self.last_track)
             elif self.is_previows_music:
                 self.queue.insert(1, self.last_track)
@@ -631,6 +625,12 @@ class BasePlayer:
             elif self.last_track.repeats:
                 self.last_track.repeats -= 1
                 self.queue.insert(0, self.last_track)
+            elif self.loop == "queue" or self.nonstop:
+                if self.is_previows_music:
+                    self.queue.insert(1, self.last_track)
+                    self.is_previows_music = False
+                else:
+                    self.queue.append(self.last_track)
             else:
                 self.played.append(self.last_track)
 
