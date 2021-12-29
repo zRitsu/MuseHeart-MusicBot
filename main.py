@@ -1,4 +1,5 @@
 import asyncio
+import json
 import subprocess
 
 import disnake
@@ -24,6 +25,12 @@ CONFIGS = {
     "LAVALINK_CPU_CORES": "2",
     "LAVALINK_FILE_URL": "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/Lavalink.jar"
 }
+
+try:
+    with open("config.json") as f:
+        CONFIGS.update(json.load(f))
+except FileNotFoundError:
+    pass
 
 load_dotenv()
 
