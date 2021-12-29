@@ -252,7 +252,7 @@ class PlayerInteractions(disnake.ui.View):
                             f"🔊 `= Ajustar volume.`\n"
                             f"🔁 `= Ativar/Desativar repetição.`\n"
                             f"📑 `= Exibir a fila de música.`\n",
-                color=self.bot.get_color(interaction.me)
+                color=self.bot.get_color(interaction.guild.me)
             )
 
             await interaction.response.send_message(embed=embed, ephemeral=True)

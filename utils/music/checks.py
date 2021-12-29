@@ -74,7 +74,7 @@ def check_voice():
     def predicate(inter):
 
         try:
-            if inter.author.voice.channel != inter.me.voice.channel:
+            if inter.author.voice.channel != inter.guild.me.voice.channel:
                 raise DiffVoiceChannel()
         except AttributeError:
             pass
@@ -149,5 +149,5 @@ async def has_perm(inter):
         player.dj.append(inter.author)
         await inter.channel.send(embed=disnake.Embed(
             description=f"{inter.author.mention} foi adicionado à lista de DJ's por não haver um no canal <#{vc.id}>.",
-            color=player.bot.get_color(inter.me)), delete_after=10)
+            color=player.bot.get_color(inter.guild.me)), delete_after=10)
         return True

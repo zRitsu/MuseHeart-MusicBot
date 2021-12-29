@@ -247,7 +247,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         embed = disnake.Embed(color=disnake.Colour.red())
 
-        embed.colour = self.bot.get_color(inter.me)
+        embed.colour = self.bot.get_color(inter.guild.me)
 
         position-=1
 
@@ -347,7 +347,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await inter.response.defer()
         else:
             player.command_log = f"{inter.author.mention} pulou a música."
-            embed = disnake.Embed(description=f"⏭️** ┃ Música pulada:** [`{fix_characters(player.current.title, 30)}`]({player.current.uri})", color=self.bot.get_color(inter.me))
+            embed = disnake.Embed(description=f"⏭️** ┃ Música pulada:** [`{fix_characters(player.current.title, 30)}`]({player.current.uri})", color=self.bot.get_color(inter.guild.me))
             await inter.send(embed=embed, ephemeral=True)
 
         if player.loop == "current":
@@ -451,7 +451,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             view = VolumeInteraction(inter)
 
-            embed.colour = self.bot.get_color(inter.me)
+            embed.colour = self.bot.get_color(inter.guild.me)
             embed.description = "**Selecione o nível do volume abaixo:**"
             await inter.send(embed=embed, ephemeral=True, view=view)
             await view.wait()
@@ -610,7 +610,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player.current.track_loops = value
 
-        embed = disnake.Embed(color=self.bot.get_color(inter.me))
+        embed = disnake.Embed(color=self.bot.get_color(inter.guild.me))
 
         txt = f"{inter.author.mention} definiu a quantidade de repetições da música " \
               f"[`{(fix_characters(player.current.title, 25))}`]({player.current.uri}) para **{value}**."
@@ -1116,7 +1116,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await inter.send("Este comando não funciona no modo YT-DLP.", ephemeral=True)
             return
 
-        em = disnake.Embed(color=self.bot.get_color(inter.me), title="Servidores de música:")
+        em = disnake.Embed(color=self.bot.get_color(inter.guild.me), title="Servidores de música:")
 
         if not self.bot.music.nodes:
             em.description = "**Não há servidores.**"
@@ -1221,7 +1221,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         inter.guild_data['player_controller']['message_id'] = str(message.id)
         await self.bot.db.update_data(inter.guild.id, inter.guild_data, db_name='guilds')
 
-        embed = disnake.Embed(description=f"**Canal criado: {channel.mention}**\n\nObs: Caso queira reverter esta configuração, apenas delete o canal {channel.mention}", color=self.bot.get_color(inter.me))
+        embed = disnake.Embed(description=f"**Canal criado: {channel.mention}**\n\nObs: Caso queira reverter esta configuração, apenas delete o canal {channel.mention}", color=self.bot.get_color(inter.guild.me))
         await inter.send(embed=embed, ephemeral=True)
 
     @commands.has_guild_permissions(administrator=True)

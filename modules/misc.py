@@ -68,7 +68,7 @@ class Misc(commands.Cog):
 
         await inter.send(
             embed = disnake.Embed(
-                colour=self.bot.get_color(inter.me),
+                colour=self.bot.get_color(inter.guild.me),
                 description=f"[**Clique aqui**](https://discord.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=0&scope=bot%20applications.commands) "
                             f"para me adicionar no seu servidor."
             ),
@@ -93,7 +93,7 @@ class Misc(commands.Cog):
 
         for name, asset in assets.items():
             embed = disnake.Embed(description=f"{inter.target.mention} **[{name}]({asset.with_size(2048).url})**",
-                                  color=self.bot.get_color(inter.me))
+                                  color=self.bot.get_color(inter.guild.me))
             embed.set_image(asset.with_size(256).url)
             embeds.append(embed)
 
