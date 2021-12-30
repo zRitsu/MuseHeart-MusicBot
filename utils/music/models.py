@@ -295,6 +295,8 @@ class BasePlayer:
 
         data = self.skin(self)
 
+        self.bot.loop.create_task(self.process_rpc(self.vc.channel))
+
         try:
             if self.message and data == self.last_data and (self.has_thread or self.static or self.is_last_message()):
                 try:
@@ -402,8 +404,6 @@ class BasePlayer:
         self.updating_message = None
 
     async def update_message_task(self, interaction=None, force=False):
-
-        self.bot.loop.create_task(self.process_rpc(self.vc.channel))
 
         if not interaction and not force:
             await asyncio.sleep(5)
