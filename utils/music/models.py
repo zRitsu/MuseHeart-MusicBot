@@ -500,7 +500,7 @@ class BasePlayer:
             data = {
                 "op": "close",
                 "bot_id": self.bot.user.id,
-                "public": True
+                "public": (await self.bot.application_info()).bot_public
             }
 
             if user:
@@ -613,6 +613,10 @@ class BasePlayer:
                     self.bot.ws_users[m.id]["last"] = stats
                 except KeyError:
                     pass
+
+                except TypeError:
+                    pprint.pprint(stats)
+                    traceback.print_exc()
 
     async def track_end(self):
 

@@ -44,8 +44,13 @@ class Misc(commands.Cog):
         if self.bot.default_prefix:
             embed.description += f"> **Prefixo:** {self.bot.default_prefix}\n"
 
-        embed.description += f"\n[`[Invite]`](https://discord.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=8&scope=bot%20applications.commands) | " \
-                             f"[`[Source]`](https://github.com/zRitsu/disnake-LL-music-bot)"
+        links = "[`[Source]`](https://github.com/zRitsu/disnake-LL-music-bot)"
+
+        if (await self.bot.application_info()).bot_public:
+            links = f"\n[`[Invite]`](https://discord.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=" \
+                    f"8&scope=bot%20applications.commands) | {links}"
+
+        embed.description += f"> {links}"
 
         try:
             avatar = self.bot.owner.avatar.with_static_format("png").url
