@@ -50,7 +50,7 @@ class Misc(commands.Cog):
             links = f"[`[Invite]`](https://discord.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=" \
                     f"8&scope=bot%20applications.commands) | {links}"
 
-        embed.description += f"\n> {links}"
+        embed.description += f"> {links}\n"
 
         try:
             avatar = self.bot.owner.avatar.with_static_format("png").url
