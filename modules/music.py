@@ -578,13 +578,16 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player: Union[LavalinkPlayer, YTDLPlayer] = inter.player
 
+        if mode == player.loop:
+            await self.interaction_message(inter, "Não teve alteração no modo de repetição atual.")
+            return
+
         if mode == 'off':
             mode = False
             player.current.track_loops = 0
 
-        if mode == player.loop:
-            await self.interaction_message(inter, "Não teve alteração no modo de repetição atual.")
-            return
+        elif mode == "current":
+            player.current.track_loops = 0
 
         if mode:
             txt = [f"ativou a repetição da {'música' if mode == 'current' else 'fila'}.", f"Repetição da {'música' if mode == 'current' else 'fila'} ativada com sucesso."]
