@@ -43,7 +43,7 @@ class Owner(commands.Cog):
 
 
     @commands.is_owner()
-    @commands.command(aliases=["up", "atualizar"], description="Atualizaro code do bot (apenas para meu dono).")
+    @commands.command(aliases=["up", "atualizar"], description="Atualizar o code do bot usando git (apenas para meu dono).")
     async def update(self, ctx: commands.Context, usepip="no"):
 
         if usepip not in ["pip", "no"]:

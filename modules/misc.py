@@ -30,9 +30,9 @@ class Misc(commands.Cog):
                         f"> **Tipo de player usado:** `{'Lavalink' if isinstance(self.bot.music, wavelink.Client) else 'YT-DLP (Experimental)'}`\n"
                         f"> **Commit atual:** `{self.bot.commit}`\n"
                         f"> **Versão do Disnake:** `{disnake.__version__}`\n"
-                        f"> **Versão do python:** {platform.python_version()}\n"
+                        f"> **Versão do python:** `{platform.python_version()}`\n"
                         f"> **Latencia:** `{round(self.bot.latency * 1000)}ms`\n"
-                        f"> **Uso de RAM:** {ram_usage}\n",
+                        f"> **Uso de RAM:** `{ram_usage}`\n",
             color=self.bot.get_color(inter.guild.me)
         )
 
@@ -48,9 +48,9 @@ class Misc(commands.Cog):
 
         if (await self.bot.application_info()).bot_public:
             links = f"[`[Invite]`](https://discord.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=" \
-                    f"8&scope=bot%20applications.commands) | {links}"
+                    f"8&scope=bot%20applications.commands) **|** {links}"
 
-        embed.description += f"> {links}\n"
+        embed.description += f">  {links}\n"
 
         try:
             avatar = self.bot.owner.avatar.with_static_format("png").url
