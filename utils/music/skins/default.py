@@ -88,8 +88,6 @@ def load(player: LavalinkPlayer) -> dict:
             url="https://cdn.discordapp.com/attachments/480195401543188483/795080813678559273/rainbow_bar2.gif")
         embed.set_thumbnail(url=player.current.thumb)
 
-    player.bot.loop.create_task(player.process_rpc(player.vc.channel))
-
     data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
 
     return data

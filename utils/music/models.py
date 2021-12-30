@@ -413,6 +413,11 @@ class BasePlayer:
 
     async def update_message(self, interaction: disnake.Interaction = None, force=False):
 
+        try:
+            await self.process_rpc(self.vc.channel)
+        except:
+            pass
+
         if self.updating_message:
 
             if interaction and not interaction.response.is_done():
@@ -486,7 +491,12 @@ class BasePlayer:
 
         self.bot.loop.create_task(self.process_rpc(self.vc.channel, close=True))
 
-    async def process_rpc(self,  voice_channel: disnake.VoiceChannel, close=False, user: disnake.Member = None):
+    async def process_rpc(
+            self,
+            voice_channel: Union[disnake.VoiceChannel, disnake.StageChannel],
+            close = False,
+            user: disnake.Member = None
+    ):
 
         if close:
 
