@@ -403,6 +403,8 @@ class BasePlayer:
 
     async def update_message_task(self, interaction=None, force=False):
 
+        self.bot.loop.create_task(self.process_rpc(self.vc.channel))
+
         if not interaction and not force:
             await asyncio.sleep(5)
 
@@ -412,11 +414,6 @@ class BasePlayer:
             traceback.print_exc()
 
     async def update_message(self, interaction: disnake.Interaction = None, force=False):
-
-        try:
-            await self.process_rpc(self.vc.channel)
-        except:
-            pass
 
         if self.updating_message:
 
