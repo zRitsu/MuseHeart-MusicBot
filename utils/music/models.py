@@ -499,8 +499,7 @@ class BasePlayer:
 
             data = {
                 "op": "close",
-                "bot_id": self.bot.user.id,
-                "public": (await self.bot.application_info()).bot_public
+                "bot_id": self.bot.user.id
             }
 
             if user:
@@ -537,7 +536,6 @@ class BasePlayer:
             "op": "update",
             "track": None,
             "bot_id": self.bot.user.id,
-            "public": True,
             "info": {
                 "members": len(vc_members),
                 "channel": {
@@ -562,7 +560,7 @@ class BasePlayer:
                 {
                     "op": "idle",
                     "bot_id": self.bot.user.id,
-                    "public": True,
+                    "public": (await self.bot.application_info()).bot_public
                 }
             )
 
