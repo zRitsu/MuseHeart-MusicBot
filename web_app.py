@@ -1,10 +1,7 @@
 from __future__ import annotations
-
-import ast
 import asyncio
 import pprint
 import time
-
 import aiohttp
 import disnake
 import tornado.ioloop
@@ -13,7 +10,7 @@ import tornado.websocket
 import logging
 import json
 import traceback
-from typing import TYPE_CHECKING, Optional, List, Awaitable
+from typing import TYPE_CHECKING, Optional, List
 
 if TYPE_CHECKING:
     from utils.client import BotCore
@@ -21,7 +18,6 @@ if TYPE_CHECKING:
 
 
 logging.getLogger('tornado.access').disabled = True
-
 
 
 class IndexHandler(tornado.web.RequestHandler):
@@ -38,69 +34,72 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.users_ws = users_ws
+        self.bots_ws = bots_ws
+        for b in self.bots:
+            b.ws_server = self
 
-    def initialize(self):
         self.user_id: Optional[int] = None
+        self.is_bot: bool = False
+
+    #def initialize(self):
+    #    self.user_id: Optional[int] = None
+    #    self.is_bot: bool = False
 
     def on_message(self, message):
 
-        data_ws = json.loads(message)
+        self.data = json.loads(message)
 
-        try:
-            user_id = data_ws.get("user_id")
-        except AttributeError:
-            print(type(data_ws), data_ws)
-            traceback.print_exc()
-            return
-
-        is_bot = data_ws.pop("bot", False)
+        user_id = self.data.get("user_id")
+        bot_id = self.data.get("bot_id")
 
         if not user_id:
 
-            for u in users_ws.values():
+            if not bot_id:
+                stats = {
+                    "op": "error",
+                    "message": "Desconectado por falta de id de usuario..."
+                }
+                print(f"desconectando: por falta de id de usuario {self.request.remote_ip}\nDados: {self.data}")
+                self.write_message(json.dumps(stats))
+                self.close()
+
+            for u in self.users_ws.values():
                 try:
-                    u.write_message(json.dumps(data_ws))
+                    u.write_message(json.dumps(self.data))
                 except Exception as e:
                     print(f"Erro ao processar dados do rpc para o user {user_id}: {repr(e)}")
-                    #continue
-            return
-            #stats = {
-            #    "op": "error",
-            #    "message": "Desconectado por falta de id de usuario..."
-            #}
-            #print(f"desconectando: por falta de id de usuario {self.request.remote_ip}")
-            #self.write_message(json.dumps(stats))
-            #self.close()
-            #return
 
-        if is_bot:
+            return
+
+        self.user_id = int(user_id)
+
+        self.is_bot = self.data.pop("bot", False)
+
+        if self.is_bot:
             print(f"Nova conexão - Bot: {user_id} {self.request.remote_ip}")
             try:
-                del bots_ws[user_id]
+                del self.bots_ws[user_id]
             except:
                 pass
-            bots_ws[user_id] = self
+            self.bots_ws[user_id] = self
             return
 
-        print(f"Nova conexão - User: {user_id} {self.request.remote_ip}")
-
-        user_id = int(user_id)
-
-        self.user_id = user_id
+        print(f"Nova conexão - User: {user_id}")
 
         try:
-            del users_ws[user_id]
+            del self.users_ws[user_id]
         except:
             pass
-        users_ws[user_id] = self
+        self.users_ws[user_id] = self
 
-        if not bots_ws:
+        if not self.bots_ws:
             print(f"Não há conexões ws com bots pra processar rpc do user: {user_id}")
             return
 
-        for b in bots_ws.values():
+        for b in self.bots_ws.values():
             try:
-                b.write_message(json.dumps(data_ws))
+                b.write_message(json.dumps(self.data))
             except Exception as e:
                 print(f"Erro ao processar dados do rpc para o bot {user_id}: {repr(e)}")
 
@@ -109,12 +108,45 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         return True
 
     def on_close(self):
+
         if not self.user_id:
             print(f"Conexão Finalizada - IP: {self.request.remote_ip}")
+            return
+
+        if self.is_bot:
+
+            # método temporário pra corrigir um problema ao logar múltiplos bots no mesmo ip.
+            for i in list(bots_ws):
+
+                try:
+                    b = bots_ws[i]
+                except KeyError:
+                    continue
+
+                if self.request.remote_ip != b.request.remote_ip:
+                    continue
+
+                print(f"Conexão Finalizada - Bot: {i}")
+
+                try:
+                    del self.bots_ws[i]
+                except:
+                    pass
+
+                data = {"op": "close", "bot_id": i}
+                for i, w in self.users_ws.items():
+                    try:
+                        w.write_message(data)
+                        print("op sent")
+                    except Exception as e:
+                        print(f"Erro ao processar dados do rpc para o user {i}: {repr(e)}")
+
         else:
+
             print(f"Conexão Finalizada - User: {self.user_id}")
+
             try:
-                del users_ws[self.user_id]
+                del self.users_ws[self.user_id]
             except:
                 pass
 
@@ -133,6 +165,11 @@ class WSClient:
         self.connection = await self.session.ws_connect(self.url)
         self.backoff = 7
         print(f"RPC Server Conectado: {self.url}")
+
+        for bot in self.bots:
+            for player in bot.music.players.values():
+                voice_channel = player.vc.channel
+                bot.loop.create_task(player.process_rpc(voice_channel))
 
     @property
     def is_connected(self):
@@ -202,13 +239,12 @@ class WSClient:
 
             except aiohttp.WSServerHandshakeError:
                 print(f"Servidor offline, tentando conectar novamente ao server RPC em {self.backoff} segundos.")
-                await asyncio.sleep(self.backoff)
-                self.backoff *= 1.5
             except Exception:
                 traceback.print_exc()
                 print(f"Reconectando ao server RPC em {self.backoff} segundos.")
-                await asyncio.sleep(self.backoff)
-                self.backoff *= 1.5
+
+            await asyncio.sleep(self.backoff)
+            self.backoff *= 1.5
 
 
 async def run_ws_client(url, bots):

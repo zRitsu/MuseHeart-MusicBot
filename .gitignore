@@ -136,6 +136,8 @@ logs/
 test.py
 *.java
 debugger.py
+discloud.bat
+discloud.txt
 .settings/
 .classpath
 .project
