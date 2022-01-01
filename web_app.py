@@ -58,7 +58,11 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         if not user_id:
 
             for u in users_ws.values():
-                u.write_message(json.dumps(data_ws))
+                try:
+                    u.write_message(json.dumps(data_ws))
+                except Exception as e:
+                    print(f"Erro ao processar dados do rpc para o user {user_id}: {repr(e)}")
+                    #continue
             return
             #stats = {
             #    "op": "error",
@@ -80,12 +84,6 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
         print(f"Nova conexão - User: {user_id} {self.request.remote_ip}")
 
-        for b in bots_ws.values():
-            try:
-                b.write_message(json.dumps(data_ws))
-            except Exception as e:
-                print(f"Erro ao processar dados do rpc para o user {user_id}: {repr(e)}")
-
         user_id = int(user_id)
 
         self.user_id = user_id
@@ -95,6 +93,16 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         except:
             pass
         users_ws[user_id] = self
+
+        if not bots_ws:
+            print(f"Não há conexões ws com bots pra processar rpc do user: {user_id}")
+            return
+
+        for b in bots_ws.values():
+            try:
+                b.write_message(json.dumps(data_ws))
+            except Exception as e:
+                print(f"Erro ao processar dados do rpc para o bot {user_id}: {repr(e)}")
 
 
     def check_origin(self, origin: str):
@@ -119,10 +127,11 @@ class WSClient:
         self.connection = None
         self.ws_loop_task = None
         self.backoff = 7
+        self.session = aiohttp.ClientSession()
 
     async def connect(self):
-        session = aiohttp.ClientSession()
-        self.connection = await session.ws_connect(self.url)
+        self.connection = await self.session.ws_connect(self.url)
+        self.backoff = 7
         print(f"RPC Server Conectado: {self.url}")
 
     @property
@@ -156,11 +165,13 @@ class WSClient:
                 message = await self.connection.receive()
 
                 if not message.data:
-                    await asyncio.sleep(self.backoff)
-                    self.backoff *= 1.5
+                    #await asyncio.sleep(self.backoff)
+                    #self.backoff *= 1.5
                     continue
 
                 data = json.loads(message.data)
+
+                pprint.pprint(data)
 
                 user_id = int(data.get("user_id", 0))
 
@@ -189,6 +200,10 @@ class WSClient:
                             if [m.id for m in voice_channel.members if m.id == user_id]:
                                 bot.loop.create_task(player.process_rpc(voice_channel))
 
+            except aiohttp.WSServerHandshakeError:
+                print(f"Servidor offline, tentando conectar novamente ao server RPC em {self.backoff} segundos.")
+                await asyncio.sleep(self.backoff)
+                self.backoff *= 1.5
             except Exception:
                 traceback.print_exc()
                 print(f"Reconectando ao server RPC em {self.backoff} segundos.")

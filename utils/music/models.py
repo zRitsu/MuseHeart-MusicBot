@@ -497,47 +497,30 @@ class BasePlayer:
 
         if close:
 
-            data = {
+            stats = {
                 "op": "close",
                 "bot_id": self.bot.user.id
             }
 
             if user:
-                try:
-                    data["user"] = user.id
-                    self.bot.ws_users[user.id]["ws"].write_message(json.dumps(data))
-                    return
-                except KeyError:
-                    return
+                stats["users"] = [user.id]
+            else:
+                stats["users"] = [m.id for m in voice_channel.members if not m.bot]
 
-            for m in voice_channel.members:
-
-                if m.bot:
-                    continue
-
-                try:
-                    user_ws = self.bot.ws_users[m.id]["ws"]
-                except KeyError:
-                    continue
-
-                data["user"] = m.id
-
-                try:
-                    user_ws.write_message(json.dumps(data))
-                except Exception:
-                    traceback.print_exc()
+            try:
+                await self.bot.ws_client.send(stats)
+            except Exception:
+                traceback.print_exc()
+            return
 
         if self.exiting:
             return
-
-        vc_members = [m for m in voice_channel.members if not m.bot and (not m.voice.deaf or not m.voice.self_deaf)]
 
         stats = {
             "op": "update",
             "track": None,
             "bot_id": self.bot.user.id,
             "info": {
-                "members": len(vc_members),
                 "channel": {
                     "name": voice_channel.name,
                     "id": voice_channel.id
@@ -598,23 +581,12 @@ class BasePlayer:
                 )
 
         if user:
-            stats["user"] = user.id
-            self.bot.ws_users[user.id]["ws"].write_message(json.dumps(stats))
+            stats["users"] = [user.id]
 
         else:
-            for m in vc_members:
-                try:
-                    if stats == self.bot.ws_users[m.id]["last"]:
-                        continue
-                    stats["user"] = m.id
-                    self.bot.ws_users[m.id]["ws"].write_message(json.dumps(stats))
-                    self.bot.ws_users[m.id]["last"] = stats
-                except KeyError:
-                    pass
+            stats["users"] = [m.id for m in voice_channel.members if not m.bot and (not m.voice.deaf or not m.voice.self_deaf)]
 
-                except TypeError:
-                    pprint.pprint(stats)
-                    traceback.print_exc()
+        await self.bot.ws_client.send(stats)
 
     async def track_end(self):
 

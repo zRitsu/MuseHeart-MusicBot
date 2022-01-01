@@ -1563,7 +1563,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                             break
                     except Exception:
                         backoff += 2
-                        print(f'{self.bot.user} - Falha ao conectar no servidor [{data["identifier"]}], nova tentativa [{retries}/{max_retries}] em {backoff} segundos.')
+                        #print(f'{self.bot.user} - Falha ao conectar no servidor [{data["identifier"]}], nova tentativa [{retries}/{max_retries}] em {backoff} segundos.')
                         await asyncio.sleep(backoff)
                         retries += 1
                         continue
