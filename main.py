@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from utils.music.local_lavalink import run_lavalink
 from utils.client import BotCore
 from utils.db import Database, LocalDatabase
-from web_app import run_app
+from web_app import run_app, run_ws_client
 
 CONFIGS = {
     "VOTE_SKIP_AMOUNT": "3",
@@ -17,6 +17,7 @@ CONFIGS = {
     "YOUTUBEDL": "false",
     "DEFAULT_SKIN": "default",
     "IDLE_TIMEOUT": "180",
+    "RPC_SERVER": "http://localhost:8080/ws",
 
     # Local lavalink stuffs
     "START_LOCAL_LAVALINK": "true",
@@ -119,6 +120,10 @@ def load_bot(token: str):
 
             bot.db = Database(token=mongo, name=str(bot.user.id)) if mongo \
                 else LocalDatabase(bot, rename_db=token == os.environ["TOKEN"] and os.path.isfile("./database.json"))
+
+            if bot.ws_client and bot.ws_client.is_connected:
+                await bot.ws_client.send({"user_id": bot.user.id, "bot": True})
+
             bot.bot_ready = True
 
     bots.append(bot)
@@ -136,5 +141,7 @@ if os.getenv('KEEP_ALIVE') != "false":
     run_app(bots)
 
 loop = asyncio.get_event_loop()
+
+loop.create_task(run_ws_client(CONFIGS["RPC_SERVER"], bots))
 
 loop.run_until_complete(start_bots())
