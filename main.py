@@ -122,7 +122,7 @@ def load_bot(token: str):
                 else LocalDatabase(bot, rename_db=token == os.environ["TOKEN"] and os.path.isfile("./database.json"))
 
             if bot.ws_client and bot.ws_client.is_connected:
-                await bot.ws_client.send({"user_id": bot.user.id, "bot": True})
+                await bot.ws_client.connect()
 
             bot.bot_ready = True
 

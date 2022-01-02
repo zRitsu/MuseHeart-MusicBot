@@ -34,8 +34,6 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.users_ws = users_ws
-        self.bots_ws = bots_ws
         for b in self.bots:
             b.ws_server = self
 
@@ -48,10 +46,10 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def on_message(self, message):
 
-        self.data = json.loads(message)
+        data = json.loads(message)
 
-        user_id = self.data.get("user_id")
-        bot_id = self.data.get("bot_id")
+        user_id = data.get("user_id")
+        bot_id = data.get("bot_id")
 
         if not user_id:
 
@@ -60,13 +58,13 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                     "op": "error",
                     "message": "Desconectado por falta de id de usuario..."
                 }
-                print(f"desconectando: por falta de id de usuario {self.request.remote_ip}\nDados: {self.data}")
+                print(f"desconectando: por falta de id de usuario {self.request.remote_ip}\nDados: {data}")
                 self.write_message(json.dumps(stats))
                 self.close()
 
-            for u in self.users_ws.values():
+            for u in users_ws.values():
                 try:
-                    u.write_message(json.dumps(self.data))
+                    u.write_message(json.dumps(data))
                 except Exception as e:
                     print(f"Erro ao processar dados do rpc para o user {user_id}: {repr(e)}")
 
@@ -74,32 +72,32 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
         self.user_id = int(user_id)
 
-        self.is_bot = self.data.pop("bot", False)
+        self.is_bot = data.pop("bot", False)
 
         if self.is_bot:
             print(f"Nova conexão - Bot: {user_id} {self.request.remote_ip}")
             try:
-                del self.bots_ws[user_id]
+                del bots_ws[user_id]
             except:
                 pass
-            self.bots_ws[user_id] = self
+            bots_ws[user_id] = self
             return
 
         print(f"Nova conexão - User: {user_id}")
 
         try:
-            del self.users_ws[user_id]
+            del users_ws[user_id]
         except:
             pass
-        self.users_ws[user_id] = self
+        users_ws[user_id] = self
 
-        if not self.bots_ws:
+        if not bots_ws:
             print(f"Não há conexões ws com bots pra processar rpc do user: {user_id}")
             return
 
-        for b in self.bots_ws.values():
+        for i, b in bots_ws.items():
             try:
-                b.write_message(json.dumps(self.data))
+                b.write_message(json.dumps(data))
             except Exception as e:
                 print(f"Erro ao processar dados do rpc para o bot {user_id}: {repr(e)}")
 
@@ -129,12 +127,12 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                 print(f"Conexão Finalizada - Bot: {i}")
 
                 try:
-                    del self.bots_ws[i]
+                    del bots_ws[i]
                 except:
                     pass
 
                 data = {"op": "close", "bot_id": i}
-                for i, w in self.users_ws.items():
+                for i, w in users_ws.items():
                     try:
                         w.write_message(data)
                         print("op sent")
@@ -146,7 +144,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             print(f"Conexão Finalizada - User: {self.user_id}")
 
             try:
-                del self.users_ws[self.user_id]
+                del users_ws[self.user_id]
             except:
                 pass
 
@@ -166,10 +164,14 @@ class WSClient:
         self.backoff = 7
         print(f"RPC Server Conectado: {self.url}")
 
+        for b in self.bots:
+            await self.send({"user_id": b.user.id, "bot": True})
+
+        await asyncio.sleep(1)
+
         for bot in self.bots:
             for player in bot.music.players.values():
-                voice_channel = player.vc.channel
-                bot.loop.create_task(player.process_rpc(voice_channel))
+                bot.loop.create_task(player.process_rpc(player.vc.channel))
 
     @property
     def is_connected(self):
