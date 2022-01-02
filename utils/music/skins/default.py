@@ -50,6 +50,9 @@ def load(player: LavalinkPlayer) -> dict:
     if player.nonstop:
         txt += "\n> ♾️ **⠂Modo interrupto:** `Ativado`"
 
+    if player.static and player.vc:
+        txt += f"\n> *️⃣ **⠂Canal de voz:** [`{player.vc.channel.name}`](http://discordapp.com/channels/{player.guild.id}/{player.vc.channel.id})"
+
     txt += "\n"
 
     if player.command_log:
