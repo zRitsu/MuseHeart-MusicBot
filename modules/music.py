@@ -138,11 +138,35 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @check_voice()
     @can_send_message()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
+    @commands.slash_command(name="search", description="Pesquisar uma música com .")
+    async def search(
+            self,
+            inter: disnake.ApplicationCommandInteraction,
+            query: str = commands.Param(name="busca", desc="Nome ou link da música.", autocomplete=search_suggestions), *,
+            position: int = commands.Param(name="posição", description="Colocar a música em uma posição específica", default=0),
+            options: PlayOpts = commands.Param(name="opções", description="Opções para processar playlist", default=False),
+            source: SearchSource = commands.Param(name="fonte", description="Selecionar site para busca de músicas (não links)", default="ytsearch"),
+            repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.", default=0)
+    ):
+
+        await self.play(
+            inter,
+            query=query,
+            position=position,
+            options=options,
+            manual_selection=True,
+            source=source,
+            repeat_amount=repeat_amount
+        )
+
+    @check_voice()
+    @can_send_message()
+    @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.slash_command(name="play", description="Tocar música em um canal de voz.")
     async def play(
             self,
             inter: disnake.ApplicationCommandInteraction,
-            query: str = commands.Param(name="busca", desc="Nome ou link da música.", autocomplete=search_suggestions), *,
+            query: str = commands.Param(name="busca", desc="Nome ou link da música."), *,
             position: int = commands.Param(name="posição", description="Colocar a música em uma posição específica", default=0),
             options: PlayOpts = commands.Param(name="opções" ,description="Opções para processar playlist", default=False),
             manual_selection: bool = commands.Param(name="selecionar_manualmente", description="Escolher uma música manualmente entre os resultados encontrados", default=False),
@@ -1851,7 +1875,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player.has_thread = False
 
-    
+
     @commands.Cog.listener("on_thread_join")
     async def join_thread_request(self, thread: disnake.Thread):
         
