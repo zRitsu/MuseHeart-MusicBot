@@ -35,15 +35,8 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for b in self.bots:
-            b.ws_server = self
-
         self.user_id: Optional[int] = None
         self.is_bot: bool = False
-
-    #def initialize(self):
-    #    self.user_id: Optional[int] = None
-    #    self.is_bot: bool = False
 
     def on_message(self, message):
 
