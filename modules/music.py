@@ -1904,7 +1904,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 await player.destroy(force=True)
                 return
 
-        if not player.nonstop and player.vc and not any(m for m in player.vc.channel.members if not m.bot):
+        if not player.nonstop and player.guild.me.voice and not any(m for m in player.guild.me.voice.channel.members if not m.bot):
             player.members_timeout_task = self.bot.loop.create_task(player.members_timeout())
         else:
             try:
@@ -1919,8 +1919,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         if not after or before.channel != after.channel:
-            await player.process_rpc(player.vc.channel, user=member, close=True)
-            await player.process_rpc(player.vc.channel)
+            await player.process_rpc(player.guild.me.voice.channel, user=member, close=True)
+            await player.process_rpc(player.guild.me.voice.channel)
 
 def setup(bot: BotCore):
     bot.add_cog(Music(bot))

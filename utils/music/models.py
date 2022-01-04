@@ -60,12 +60,12 @@ class WavelinkVoiceClient(disnake.VoiceClient):
 
     # Esta classe é apenas um tapa-buraco pra versão 2.x do dpy ou outro fork atualizado.
 
-    def __call__(self, client: disnake.Client, channel: disnake.VoiceChannel):
-        self.client: disnake.Client = client
+    def __call__(self, client: BotCore, channel: disnake.VoiceChannel):
+        self.client = client
         self.channel: disnake.VoiceChannel = channel
         return self
 
-    def __init__(self, client: disnake.Client, channel: Union[disnake.VoiceChannel, disnake.StageChannel],
+    def __init__(self, client: BotCore, channel: Union[disnake.VoiceChannel, disnake.StageChannel],
                  player: wavelink.Player):
         self.bot = client
         self.channel = channel
@@ -225,12 +225,13 @@ class BasePlayer:
         self.skin = self.cog.bot.player_skins[kwargs.pop("skin", self.cog.bot.default_skin)]
         self.has_thread: bool = False
         self.nonstop = False
+        self.ws_client = None
 
 
     async def members_timeout(self):
 
         await asyncio.sleep(self.idle_timeout)
-        msg = f"O player foi desligado por falta de membros no canal <#{self.vc.channel.id if self.vc else ''}>..."
+        msg = f"O player foi desligado por falta de membros no canal <#{self.guild.me.voice.channel.id if self.guild.me.voice else ''}>..."
         if self.static:
             self.command_log = msg
         else:
@@ -247,7 +248,7 @@ class BasePlayer:
 
         self.view = PlayerInteractions(self.bot)
 
-        self.bot.loop.create_task(self.process_rpc(self.vc.channel))
+        self.bot.loop.create_task(self.process_rpc(self.guild.me.voice.channel))
 
         controls = {
             "⏮️": ["back"],
@@ -295,7 +296,8 @@ class BasePlayer:
 
         data = self.skin(self)
 
-        self.bot.loop.create_task(self.process_rpc(self.vc.channel))
+        if self.guild.me.voice:
+            self.bot.loop.create_task(self.process_rpc(self.guild.me.voice.channel))
 
         try:
             if self.message and data == self.last_data and (self.has_thread or self.static or self.is_last_message()):
@@ -486,7 +488,7 @@ class BasePlayer:
         self.queue.clear()
         self.played.clear()
 
-        self.bot.loop.create_task(self.process_rpc(self.vc.channel, close=True))
+        self.bot.loop.create_task(self.process_rpc(self.guild.me.voice.channel, close=True))
 
     async def process_rpc(
             self,
@@ -495,11 +497,17 @@ class BasePlayer:
             user: disnake.Member = None
     ):
 
+        try:
+            thumb = self.bot.user.avatar.with_format("png").url
+        except AttributeError:
+            thumb = self.bot.user.default_avatar.with_format("png").url
+
         if close:
 
             stats = {
                 "op": "close",
-                "bot_id": self.bot.user.id
+                "bot_id": self.bot.user.id,
+                "thumb": thumb
             }
 
             if user:
@@ -520,6 +528,7 @@ class BasePlayer:
             "op": "update",
             "track": None,
             "bot_id": self.bot.user.id,
+            "thumb": thumb,
             "info": {
                 "channel": {
                     "name": voice_channel.name,
@@ -531,11 +540,6 @@ class BasePlayer:
                 }
             }
         }
-
-        try:
-            stats["thumb"] = self.bot.user.avatar.with_format("png").url
-        except AttributeError:
-            stats["thumb"] = self.bot.user.default_avatar.with_format("png").url
 
         if not self.current:
 
@@ -561,7 +565,7 @@ class BasePlayer:
                 "stream": track.is_stream,
                 "position": self.position,
                 "paused": self.is_paused,
-                "loop": self.current.track_loops or self.loop
+                "loop": self.current.track_loops or self.loop,
             }
 
             if track.playlist:
@@ -685,21 +689,16 @@ class YTDLPlayer(BasePlayer):
 
     async def connect(self, channel_id: int, self_deaf: bool = False):
 
-        self.channel_id = channel_id
-
-        if not self.vc:
-            if not self.guild.me.voice:
-                await self.bot.get_channel(channel_id).connect()
-            self.vc = self.guild.voice_client
-            return
-
         channel = self.bot.get_channel(channel_id)
 
-        if self.guild.me.voice and self.guild.me.voice.channel.id != channel_id:
+        self.channel_id = channel_id
+
+        if not self.guild.me.voice:
+            await channel.connect(self_deaf=self_deaf)
+            return
+
+        if self.guild.me.voice.channel.id != channel_id:
             await self.vc.move_to(channel)
-        elif not self.guild.voice_client:
-            await channel.connect(cls=self.vc, reconnect=True)
-        self.vc = self.guild.voice_client
 
     async def seek(self, position: int):
         self.queue.appendleft(self.current)
@@ -855,7 +854,7 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
         self.command_log = ""
         self.last_embed = None
         self.interaction_cooldown = False
-        self.vc = WavelinkVoiceClient(self.bot, self.requester.voice.channel, self)
+        self.vc: Optional[WavelinkVoiceClient] = None
         self.votes = set()
         self.view: Optional[disnake.ui.View] = None
 
@@ -877,22 +876,20 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
 
     async def connect(self, channel_id: int, self_deaf: bool = False):
 
-        if not self.vc:
-            if not self.guild.me.voice:
-                await super().connect(channel_id, self_deaf)
-            return
-
         self.channel_id = channel_id
 
         channel = self.bot.get_channel(channel_id)
 
-        await super().connect(channel_id, self_deaf)
+        if not self.vc:
+            self.vc = WavelinkVoiceClient(self.bot, channel, self)
 
-        if self.guild.me.voice:
-            if self.guild.me.voice.channel.id != channel_id:
-                await self.vc.move_to(channel)
-        else:
+        if not self.guild.me.voice:
             await channel.connect(cls=self.vc, reconnect=True)
+
+        elif self.guild.me.voice.channel.id != channel_id:
+            await self.vc.move_to(channel)
+
+        await super().connect(channel_id, self_deaf)
 
     async def destroy(self, *, force: bool = False):
 

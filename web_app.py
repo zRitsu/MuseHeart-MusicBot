@@ -12,6 +12,7 @@ import json
 import traceback
 from typing import TYPE_CHECKING, Optional, List
 
+
 if TYPE_CHECKING:
     from utils.client import BotCore
     from utils.music.models import LavalinkPlayer, YTDLPlayer
@@ -77,6 +78,10 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         if self.is_bot:
             print(f"Nova conexão - Bot: {user_id} {self.request.remote_ip}")
             try:
+                bots_ws[user_id].close()
+            except:
+                pass
+            try:
                 del bots_ws[user_id]
             except:
                 pass
@@ -132,10 +137,10 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                     pass
 
                 data = {"op": "close", "bot_id": i}
+
                 for i, w in users_ws.items():
                     try:
                         w.write_message(data)
-                        print("op sent")
                     except Exception as e:
                         print(f"Erro ao processar dados do rpc para o user {i}: {repr(e)}")
 
@@ -165,13 +170,14 @@ class WSClient:
         print(f"RPC Server Conectado: {self.url}")
 
         for b in self.bots:
+            await b.wait_until_ready()
             await self.send({"user_id": b.user.id, "bot": True})
 
         await asyncio.sleep(1)
 
         for bot in self.bots:
             for player in bot.music.players.values():
-                bot.loop.create_task(player.process_rpc(player.vc.channel))
+                bot.loop.create_task(player.process_rpc(player.guild.me.voice.channel))
 
     @property
     def is_connected(self):
