@@ -163,8 +163,13 @@ class WSClient:
         self.ws_loop_task = None
         self.backoff = 7
         self.session = aiohttp.ClientSession()
+        self.ready = False
 
     async def connect(self):
+
+        if self.ready:
+            return
+
         self.connection = await self.session.ws_connect(self.url)
         self.backoff = 7
         print(f"RPC Server Conectado: {self.url}")
@@ -173,11 +178,11 @@ class WSClient:
             await b.wait_until_ready()
             await self.send({"user_id": b.user.id, "bot": True})
 
-        await asyncio.sleep(1)
-
         for bot in self.bots:
             for player in bot.music.players.values():
                 bot.loop.create_task(player.process_rpc(player.guild.me.voice.channel))
+
+        self.ready = True
 
     @property
     def is_connected(self):
@@ -251,6 +256,7 @@ class WSClient:
                 traceback.print_exc()
                 print(f"Reconectando ao server RPC em {self.backoff} segundos.")
 
+            self.ready = False
             await asyncio.sleep(self.backoff)
             self.backoff *= 1.5
 
