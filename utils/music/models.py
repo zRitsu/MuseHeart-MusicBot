@@ -345,8 +345,7 @@ class BasePlayer:
         if self.message and (self.has_thread or self.static or not force or self.is_last_message()):
             try:
                 if interaction and not interaction.response.is_done():
-                    await interaction.edit_original_message(view=self.view, **data)
-                    #await interaction.response.edit_message(view=self.view, **data)
+                    await interaction.response.edit_message(view=self.view, **data)
                 else:
                     try:
                         await interaction.response.defer()
