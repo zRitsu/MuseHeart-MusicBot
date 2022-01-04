@@ -1,21 +1,22 @@
 from __future__ import annotations
+
 import asyncio
+import json
+import logging
 import pprint
 import time
+import traceback
+from typing import TYPE_CHECKING, Optional
+
 import aiohttp
 import disnake
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
-import logging
-import json
-import traceback
-from typing import TYPE_CHECKING, Optional, List
-
 
 if TYPE_CHECKING:
-    from utils.client import BotCore
     from utils.music.models import LavalinkPlayer, YTDLPlayer
+    from utils.client import BotCore
 
 
 logging.getLogger('tornado.access').disabled = True
@@ -30,8 +31,6 @@ users_ws = {}
 bots_ws = {}
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
-
-    bots: List[BotCore]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -81,7 +80,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             bots_ws[user_id] = self
             return
 
-        print(f"Nova conexão - User: {user_id}")
+        print(f"Nova conexão - User: {user_id} | {data}")
 
         try:
             del users_ws[user_id]
@@ -96,6 +95,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         for i, b in bots_ws.items():
             try:
                 b.write_message(json.dumps(data))
+                print(f"dados [{data}] enviados ao bot: {i}")
             except Exception as e:
                 print(f"Erro ao processar dados do rpc para o bot {user_id}: {repr(e)}")
 
@@ -149,8 +149,8 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
 class WSClient:
 
-    def __init__(self, url: str, bots=None):
-        self.bots: list = bots or []
+    def __init__(self, url: str, bot: BotCore):
+        self.bot: BotCore = bot
         self.url: str = url
         self.connection = None
         self.ws_loop_task = None
@@ -167,13 +167,11 @@ class WSClient:
         self.backoff = 7
         print(f"RPC Server Conectado: {self.url}")
 
-        for b in self.bots:
-            await b.wait_until_ready()
-            await self.send({"user_id": b.user.id, "bot": True})
+        await self.bot.wait_until_ready()
+        await self.send({"user_id": self.bot.user.id, "bot": True})
 
-        for bot in self.bots:
-            for player in bot.music.players.values():
-                bot.loop.create_task(player.process_rpc(player.guild.me.voice.channel))
+        for player in self.bot.music.players.values():
+            self.bot.loop.create_task(player.process_rpc(player.guild.me.voice.channel))
 
         self.ready = True
 
@@ -208,13 +206,11 @@ class WSClient:
                 message = await self.connection.receive()
 
                 if not message.data:
-                    #await asyncio.sleep(self.backoff)
-                    #self.backoff *= 1.5
+                    await asyncio.sleep(self.backoff)
+                    self.backoff *= 1.10
                     continue
 
                 data = json.loads(message.data)
-
-                pprint.pprint(data)
 
                 user_id = int(data.get("user_id", 0))
 
@@ -229,19 +225,17 @@ class WSClient:
 
                     voice_channel: Optional[disnake.VoiceChannel] = None
 
-                    for bot in self.bots:
+                    for p in self.bot.music.players.values():
+                        vc = p.bot.get_channel(p.channel_id)
+                        if user_id in [m.id for m in vc.members]:
+                            player = p
+                            voice_channel = vc
+                            break
 
-                        for p in bot.music.players.values():
-                            vc = p.bot.get_channel(p.channel_id)
-                            if user_id in [m.id for m in vc.members]:
-                                player = p
-                                voice_channel = vc
-                                break
+                    if player and voice_channel:
 
-                        if player and voice_channel:
-
-                            if [m.id for m in voice_channel.members if m.id == user_id]:
-                                bot.loop.create_task(player.process_rpc(voice_channel))
+                        if [m.id for m in voice_channel.members if m.id == user_id]:
+                            self.bot.loop.create_task(player.process_rpc(voice_channel))
 
             except aiohttp.WSServerHandshakeError:
                 print(f"Servidor offline, tentando conectar novamente ao server RPC em {self.backoff} segundos.")
@@ -254,11 +248,8 @@ class WSClient:
             self.backoff *= 1.5
 
 
-async def run_ws_client(url, bots):
-    ws = WSClient(url, bots=bots)
-    for bot in bots:
-        bot.ws_client = ws
-    await ws.ws_loop()
+def run_ws_client(bot: BotCore):
+    bot.loop.create_task(bot.ws_client.ws_loop())
 
 
 def run_app(bots: list):

@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from utils.music.local_lavalink import run_lavalink
 from utils.client import BotCore
 from utils.db import Database, LocalDatabase
-from web_app import run_app, run_ws_client
+from web_app import run_app
 
 CONFIGS = {
     "VOTE_SKIP_AMOUNT": "3",
@@ -121,8 +121,7 @@ def load_bot(token: str):
             bot.db = Database(token=mongo, name=str(bot.user.id)) if mongo \
                 else LocalDatabase(bot, rename_db=token == os.environ["TOKEN"] and os.path.isfile("./database.json"))
 
-            if bot.ws_client and bot.ws_client.is_connected:
-                await bot.ws_client.connect()
+            bot.loop.create_task(bot.ws_client.ws_loop())
 
             bot.bot_ready = True
 
@@ -141,7 +140,5 @@ if os.getenv('KEEP_ALIVE') != "false":
     run_app(bots)
 
 loop = asyncio.get_event_loop()
-
-loop.create_task(run_ws_client(CONFIGS["RPC_SERVER"], bots))
 
 loop.run_until_complete(start_bots())

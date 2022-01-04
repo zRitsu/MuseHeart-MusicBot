@@ -1,15 +1,17 @@
+from __future__ import annotations
 from importlib import import_module
 
 import aiohttp
 from disnake.ext import commands
 import disnake
 from typing import Optional
+
+from web_app import WSClient
+from .music.models import music_mode
 from .music.spotify import spotify_client
 from utils.db import Database, LocalDatabase
 import os
 import traceback
-from utils.music.models import music_mode
-
 
 class BotCore(commands.Bot):
 
@@ -21,7 +23,6 @@ class BotCore(commands.Bot):
         self.config = kwargs.pop('config', {})
         self.music = music_mode(self)
         self.session = aiohttp.ClientSession()
-        self.ws_users = {}
         self.color = kwargs.pop("embed_color", None)
         self.bot_ready = False
         self.player_skins = {}
@@ -29,6 +30,7 @@ class BotCore(commands.Bot):
         self.load_skins()
         self.commit = kwargs.get("commit", "N/A")
         self.default_prefix = kwargs.get("default_prefix", None)
+        self.ws_client = WSClient(self.config["RPC_SERVER"], bot=self)
 
     def load_skins(self):
 
