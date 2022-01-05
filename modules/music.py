@@ -138,7 +138,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @check_voice()
     @can_send_message()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
-    @commands.slash_command(name="search", description="Pesquisar uma música com .")
+    @commands.slash_command(name="search", description="Buscar música e escolher uma entre os resultados para tocar.")
     async def search(
             self,
             inter: disnake.ApplicationCommandInteraction,
