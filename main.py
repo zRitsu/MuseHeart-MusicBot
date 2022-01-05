@@ -1,50 +1,16 @@
 import asyncio
-import json
-import subprocess
+from subprocess import check_output
 
 import disnake
 from disnake.ext import commands
-import os
-from dotenv import load_dotenv
+from os import environ, path
 from utils.music.local_lavalink import run_lavalink
 from utils.client import BotCore
 from utils.db import Database, LocalDatabase
 from web_app import run_app
+from configs import load_config
 
-CONFIGS = {
-    "VOTE_SKIP_AMOUNT": "3",
-    "DEFAULT_PREFIX": "!!!",
-    "YOUTUBEDL": "false",
-    "DEFAULT_SKIN": "default",
-    "IDLE_TIMEOUT": "180",
-    "RPC_SERVER": "http://localhost:8080/ws",
-
-    # Local lavalink stuffs
-    "START_LOCAL_LAVALINK": "true",
-    "LAVALINK_ADDITIONAL_SLEEP": "0",
-    "LAVALINK_RAM_LIMIT": "120",
-    "LAVALINK_CPU_CORES": "2",
-    "LAVALINK_FILE_URL": "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/Lavalink.jar"
-}
-
-try:
-    with open("config.json") as f:
-        CONFIGS.update(json.load(f))
-except FileNotFoundError:
-    pass
-
-load_dotenv()
-
-for cfg in CONFIGS:
-    try:
-        CONFIGS[cfg] = os.environ[cfg]
-    except KeyError:
-        continue
-
-CONFIGS["IDLE_TIMEOUT"] = int(CONFIGS["IDLE_TIMEOUT"])
-
-if CONFIGS["IDLE_TIMEOUT"] < 30:
-    CONFIGS["IDLE_TIMEOUT"] = 30
+CONFIGS = load_config()
 
 if CONFIGS.get('YOUTUBEDL') != "true" and CONFIGS['START_LOCAL_LAVALINK'] == "true":
     run_lavalink(
@@ -53,17 +19,15 @@ if CONFIGS.get('YOUTUBEDL') != "true" and CONFIGS['START_LOCAL_LAVALINK'] == "tr
         lavalink_additional_sleep=int(CONFIGS['LAVALINK_ADDITIONAL_SLEEP']),
     )
 
-intents = disnake.Intents.default()
-intents.members = True
-intents.presences = True
+intents = disnake.Intents.all()
 
-mongo_key = os.environ.get("MONGO")
+mongo_key = environ.get("MONGO")
 
 if not mongo_key:
     print(f"Token do mongoDB não configurado! será usado um arquivo json para database.\n{'-'*30}")
 
 try:
-    commit = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+    commit = check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
     print(f"Commit ver: {commit}\n{'-'*30}")
 except:
     commit = None
@@ -78,8 +42,8 @@ def load_bot(token: str):
         token, default_prefix = token.split()[:2]
         prefix = commands.when_mentioned_or(default_prefix)
     except:
-        if token == os.environ["TOKEN"]:
-            default_prefix = os.environ.get("DEFAULT_PREFIX", "!!!")
+        if token == environ["TOKEN"]:
+            default_prefix = CONFIGS["DEFAULT_PREFIX"]
             prefix = commands.when_mentioned_or(default_prefix)
         else:
             prefix = commands.when_mentioned
@@ -92,7 +56,7 @@ def load_bot(token: str):
         #test_guilds=[],
         sync_commands=False,
         config=CONFIGS,
-        color=os.environ.get("EMBED_COLOR"),
+        color=CONFIGS["EMBED_COLOR"],
         commit=commit,
         default_prefix=default_prefix,
     )
@@ -116,10 +80,9 @@ def load_bot(token: str):
                     bot.owner = botowner.owner
 
             bot.load_modules()
-            mongo = mongo_key
 
-            bot.db = Database(token=mongo, name=str(bot.user.id)) if mongo \
-                else LocalDatabase(bot, rename_db=token == os.environ["TOKEN"] and os.path.isfile("./database.json"))
+            bot.db = Database(token=mongo_key, name=str(bot.user.id)) if mongo_key \
+                else LocalDatabase(bot, rename_db=token == environ["TOKEN"] and path.isfile("./database.json"))
 
             bot.loop.create_task(bot.ws_client.ws_loop())
 
@@ -127,7 +90,7 @@ def load_bot(token: str):
 
     bots.append(bot)
 
-for t in [os.environ["TOKEN"]] + [v for k, v in os.environ.items() if k.lower().startswith("token_bot_")]:
+for t in [environ["TOKEN"]] + [v for k, v in environ.items() if k.lower().startswith("token_bot_")]:
     load_bot(t)
 
 async def start_bots():
@@ -136,8 +99,7 @@ async def start_bots():
         [asyncio.create_task(bot.start(bot.token)) for bot in bots]
     )
 
-if os.getenv('KEEP_ALIVE') != "false":
-    run_app(bots)
+run_app(bots)
 
 loop = asyncio.get_event_loop()
 
