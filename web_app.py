@@ -163,7 +163,7 @@ class WSClient:
         if self.ready:
             return
 
-        self.connection = await self.session.ws_connect(self.url)
+        self.connection = await self.session.ws_connect(self.url, heartbeat=30)
         self.backoff = 7
         print(f"RPC Server Conectado: {self.url}")
 
@@ -192,7 +192,11 @@ class WSClient:
                 self.backoff *= 1.5
                 await self.send(data)
 
-        await self.connection.send_json(data)
+        try:
+            await self.connection.send_json(data)
+        except:
+            self.ready = False
+            await self.send(data)
 
     async def ws_loop(self):
 
