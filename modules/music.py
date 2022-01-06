@@ -225,7 +225,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         try:
             tracks, node = await self.get_tracks(query, inter.user, node=node, track_loops=repeat_amount)
         except Exception as e:
-            traceback.print_exc()
+            if not isinstance(e, GenericError):
+                traceback.print_exc()
             await inter.edit_original_message(content=f"**Ocorreu um erro:** ```py\n{e}```")
             return
 
@@ -1762,7 +1763,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             node = self.bot.music.get_best_node()
 
             if not node:
-                raise Exception("Não há servidores de música disponível.")
+                raise GenericError("Não há servidores de música disponível.")
 
         tracks = await process_spotify(self.bot, user, query)
 
@@ -1779,7 +1780,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             tracks = await node_search.get_tracks(query)
 
         if not tracks:
-            raise Exception("Não houve resultados para sua busca.")
+            raise GenericError("Não houve resultados para sua busca.")
 
         if isinstance(tracks, list):
 
