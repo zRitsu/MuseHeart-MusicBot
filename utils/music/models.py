@@ -598,6 +598,11 @@ class BasePlayer:
 
         self.locked = True
 
+        try:
+            self.updating_message.cancel()
+        except:
+            pass
+
         await asyncio.sleep(0.5)
 
         if self.last_track:
@@ -621,11 +626,6 @@ class BasePlayer:
 
         elif self.is_previows_music:
             self.is_previows_music = False
-
-        try:
-            self.updating_message.cancel()
-        except:
-            pass
 
         self.locked = False
 
