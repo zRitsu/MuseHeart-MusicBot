@@ -1212,6 +1212,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         txt = [f"Migrou o player para o servidor de música **{node}**",
                f"**O player foi migrado para o servidor de música:** `{node}`"]
+
         await self.interaction_message(inter, txt)
 
     @commands.has_guild_permissions(administrator=True)
@@ -1676,7 +1677,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await player.destroy()
             return
 
-        if payload.code == 4000: # internal error
+        if payload.code in [4000, 1006]: # internal error
             await asyncio.sleep(3)
             await player.connect(player.channel_id)
             return
@@ -1687,7 +1688,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await player.connect(player.channel_id)
             return
 
-        print(f"Erro no canal de voz! server: {player.guild.name} reason: {payload.reason} | code: {payload.code}")
+        print(f"Erro no canal de voz! guild: {player.guild.name} | server: {payload.player.node.identifier} | reason: {payload.reason} | code: {payload.code}")
 
     @wavelink.WavelinkMixin.listener('on_track_exception')
     async def wavelink_track_error(self, node, payload: wavelink.TrackException):
