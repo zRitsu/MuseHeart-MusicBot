@@ -151,7 +151,7 @@ class Owner(commands.Cog):
                         "`Nota: Caso o bot tenha sido invitado no server antes da minha primeira execução, os comandos "
                         "de barra podem demorar até 1 hora pra aparecer em todos os servidores. Caso queira usar os "
                         "comandos imediatamente neste servidor você terá que me expulsar e me adicionar novamente "
-                        f"usando deste` [`link`]({invite_url})..."
+                        f"através deste` [`link`]({invite_url})..."
         )
 
         await ctx.send(embed=embed)
