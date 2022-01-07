@@ -90,7 +90,7 @@ class Owner(commands.Cog):
         await ctx.send(embed=embed)
 
 
-    async def sync_guild_commands(self, *, ctx: commands.Context = None, guilds = None):
+    """async def sync_guild_commands(self, *, ctx: commands.Context = None, guilds = None):
 
         original_list = self.bot._test_guilds
         original_sync_config = self.bot._sync_commands
@@ -133,18 +133,33 @@ class Owner(commands.Cog):
                 await ctx.send(embed=embed)
 
         self.bot._test_guilds = original_list
-        self.bot._sync_commands = original_sync_config
+        self.bot._sync_commands = original_sync_config"""
 
 
-    @commands.command(aliases=["sync"], description="Sincronizar/Registrar os comandos de barra no servidor.")
+    @commands.command(aliases=["sync"], description="Sincronizar/Registrar os comandos de barra no servidor.", hidden=True)
     @commands.has_guild_permissions(manage_guild=True)
-    @commands.cooldown(2, 300, commands.BucketType.guild)
+    #@commands.cooldown(2, 300, commands.BucketType.guild)
     async def syncguild(self, ctx: commands.Context):
 
-        await self.sync_guild_commands(ctx=ctx, guilds=[ctx.guild.id])
+        invite_url = f"https://discord.com/api/oauth2/authorize?client_id={ctx.bot.user.id}&permissions=8&scope=bot%20applications.commands"
+
+        embed = disnake.Embed(
+            color=self.bot.get_color(ctx.guild.me),
+            description="**Este comando não é mais necessário ser usado.**\n\n" \
+                        f"`Caso os comandos de barra não apareçam,` [`clique aqui`]({invite_url}) `para me conceder "
+                        f"permissão de criar comandos de barra no servidor.`\n\n" \
+                        "`Nota: Caso o bot tenha sido invitado no server antes da minha primeira execução, os comandos "
+                        "de barra podem demorar até 1 hora pra aparecer em todos os servidores. Caso queira usar os "
+                        "comandos imediatamente neste servidor você terá que me expulsar e me adicionar novamente "
+                        f"usando deste` [`link`]({invite_url})..."
+        )
+
+        await ctx.send(embed=embed)
+
+        #await self.sync_guild_commands(ctx=ctx, guilds=[ctx.guild.id])
 
 
-    @commands.command(aliases=["sgs"], description="Sincronizar/Registrar os comandos de barra em todos os servidores (apenas para meu dono).\n"
+    """@commands.command(aliases=["sgs"], description="Sincronizar/Registrar os comandos de barra em todos os servidores (apenas para meu dono).\n"
                                                    "Nota: Dependendo da quantidade de servidores que o bot está. "
                                                    "Recomendo usar o comando syncglobal ao invés deste")
     @commands.is_owner()
@@ -182,7 +197,7 @@ class Owner(commands.Cog):
             await ctx.send(embed=embed)
 
         self.bot._test_guilds = original_list
-        self.bot._sync_commands = original_sync_config
+        self.bot._sync_commands = original_sync_config"""
 
 
     @commands.command(name="help", aliases=["ajuda"], hidden=True)
