@@ -36,16 +36,18 @@ print(f"Modo do player: {'Lavalink' if CONFIGS['YOUTUBEDL'] != 'true' else 'YT-D
 
 bots = []
 
-def load_bot(token: str):
+def load_bot(bot_name: str, token: str, main=False):
 
-    try:
-        token, default_prefix = token.split()[:2]
+    if main:
+        default_prefix = CONFIGS["DEFAULT_PREFIX"]
         prefix = commands.when_mentioned_or(default_prefix)
-    except:
-        if token == environ["TOKEN"]:
-            default_prefix = CONFIGS["DEFAULT_PREFIX"]
+
+    else:
+
+        try:
+            token, default_prefix = token.split()[:2]
             prefix = commands.when_mentioned_or(default_prefix)
-        else:
+        except:
             prefix = commands.when_mentioned
             default_prefix = None
 
@@ -54,7 +56,8 @@ def load_bot(token: str):
         case_insensitive=True,
         intents=intents,
         #test_guilds=[],
-        sync_commands=False,
+        sync_commands=True,
+        sync_commands_debug=True,
         config=CONFIGS,
         color=CONFIGS["EMBED_COLOR"],
         commit=commit,
@@ -65,6 +68,7 @@ def load_bot(token: str):
 
     bot.load_extension('jishaku')
     bot.get_command("jsk").hidden = True
+    bot.load_modules(bot_name)
 
     @bot.listen()
     async def on_ready():
@@ -79,10 +83,8 @@ def load_bot(token: str):
                 except AttributeError:
                     bot.owner = botowner.owner
 
-            bot.load_modules()
-
             bot.db = Database(token=mongo_key, name=str(bot.user.id)) if mongo_key \
-                else LocalDatabase(bot, rename_db=token == environ["TOKEN"] and path.isfile("./database.json"))
+                else LocalDatabase(bot, rename_db=main and path.isfile("./database.json"))
 
             bot.loop.create_task(bot.ws_client.ws_loop())
 
@@ -90,8 +92,22 @@ def load_bot(token: str):
 
     bots.append(bot)
 
-for t in [environ["TOKEN"]] + [v for k, v in environ.items() if k.lower().startswith("token_bot_")]:
-    load_bot(t)
+main_token = environ.get("TOKEN")
+
+if main_token:
+    load_bot("Main Bot", main_token, main=True)
+
+for k, v in environ.items():
+
+    if not k.lower().startswith("token_bot_"):
+        continue
+
+    bot_name = k[10:] or "Sec. Bot"
+
+    load_bot(bot_name, v)
+
+if not bots:
+    raise Exception("O token do bot não foi configurado devidamente!")
 
 async def start_bots():
 

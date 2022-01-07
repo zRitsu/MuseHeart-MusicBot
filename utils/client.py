@@ -108,7 +108,7 @@ class BotCore(commands.Bot):
 
         await self.process_application_commands(inter)
 
-    def load_modules(self):
+    def load_modules(self, bot_name: str = None):
 
         modules_dir = "modules"
 
@@ -118,6 +118,9 @@ class BotCore(commands.Bot):
             "error": []
         }
 
+        if not bot_name:
+            bot_name = self.user
+
         for item in os.walk(modules_dir):
             files = filter(lambda f: f.endswith('.py'), item[-1])
             for file in files:
@@ -125,19 +128,19 @@ class BotCore(commands.Bot):
                 module_filename = os.path.join(modules_dir, filename).replace('\\', '.').replace('/', '.')
                 try:
                     self.reload_extension(module_filename)
-                    print(f"{'=' * 50}\n[OK] {self.user} - {filename}.py Recarregado.")
+                    print(f"{'=' * 50}\n[OK] {bot_name} - {filename}.py Recarregado.")
                     load_status["reloaded"].append(filename)
                 except (commands.ExtensionAlreadyLoaded, commands.ExtensionNotLoaded):
                     try:
                         self.load_extension(module_filename)
-                        print(f"{'=' * 50}\n[OK] {self.user} - {filename}.py Carregado.")
+                        print(f"{'=' * 50}\n[OK] {bot_name} - {filename}.py Carregado.")
                         load_status["loaded"].append(filename)
                     except Exception:
-                        print((f"{'=' * 50}\n[ERRO] {self.user} - Falha ao carregar/recarregar o módulo: {filename} | Erro:"
+                        print((f"{'=' * 50}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename} | Erro:"
                                f"\n{traceback.format_exc()}"))
                         load_status["error"].append(filename)
                 except Exception:
-                    print((f"{'=' * 50}\n[ERRO] {self.user} - Falha ao carregar/recarregar o módulo: {filename} | Erro:"
+                    print((f"{'=' * 50}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename} | Erro:"
                       f"\n{traceback.format_exc()}"))
                     load_status["error"].append(filename)
 
