@@ -464,6 +464,8 @@ class BasePlayer:
 
     async def cleanup(self):
 
+        self.bot.loop.create_task(self.process_rpc(self.guild.me.voice.channel, close=True))
+
         try:
             self.idle_task.cancel()
         except:
@@ -488,7 +490,6 @@ class BasePlayer:
         self.queue.clear()
         self.played.clear()
 
-        self.bot.loop.create_task(self.process_rpc(self.guild.me.voice.channel, close=True))
 
     async def process_rpc(
             self,
@@ -639,7 +640,7 @@ class YTDLPlayer(BasePlayer):
         self.bot: BotCore = kwargs.pop('bot')
         self.event = asyncio.Event()
         self.locked = False
-        self.vc: Optional[disnake.VoiceClient] = None
+        self.vc: Optional[disnake.VoiceClient] = self.guild.voice_client
         self.volume = 100
         self.start_time: Optional[datetime.datetime] = disnake.utils.utcnow()
 
@@ -656,14 +657,14 @@ class YTDLPlayer(BasePlayer):
 
     @property
     def paused(self):
-        return self.vc.is_paused()
+        return self.guild.voice_client.is_paused()
 
     async def set_pause(self, pause: bool):
 
         if pause:
-            self.vc.pause()
+            self.guild.voice_client.pause()
         else:
-            self.vc.resume()
+            self.guild.voice_client.resume()
 
     async def update_filters(self):
         # quebra-galho
@@ -683,22 +684,22 @@ class YTDLPlayer(BasePlayer):
 
     async def set_volume(self, vol: int):
 
-        if self.vc and self.vc.source:
-            self.vc.source.volume  = vol / 100
+        if self.guild.voice_client and self.guild.voice_client.source:
+            self.guild.voice_client.source.volume  = vol / 100
         self.volume = vol
 
     async def connect(self, channel_id: int, self_deaf: bool = False):
 
-        channel = self.bot.get_channel(channel_id)
+        channel: disnake.VoiceChannel = self.bot.get_channel(channel_id)
 
         self.channel_id = channel_id
 
         if not self.guild.me.voice:
-            await channel.connect(self_deaf=self_deaf)
+            await channel.connect()
             return
 
         if self.guild.me.voice.channel.id != channel_id:
-            await self.vc.move_to(channel)
+            await self.guild.voice_client.move_to(channel)
 
     async def seek(self, position: int):
         self.queue.appendleft(self.current)
@@ -709,11 +710,11 @@ class YTDLPlayer(BasePlayer):
 
     @property
     def is_connected(self)  -> bool:
-        return self.vc is not None
+        return self.guild.voice_client is not None
 
     @property
     def is_paused(self) -> bool:
-        return self.is_connected and self.vc.is_paused()
+        return self.is_connected and self.guild.voice_client.is_paused()
 
     async def destroy(self, force=True):
 
@@ -725,7 +726,7 @@ class YTDLPlayer(BasePlayer):
             pass
 
         try:
-            self.vc.cleanup()
+            self.guild.voice_client.cleanup()
         except:
             pass
 
@@ -798,7 +799,7 @@ class YTDLPlayer(BasePlayer):
         source = await YTDLSource.source(track.id, ffmpeg_opts=FFMPEG_OPTIONS)
         source.volume = self.volume / 100
 
-        self.vc.play(source, after=lambda _: self.bot.loop.call_soon_threadsafe(self.event.set))
+        self.guild.voice_client.play(source, after=lambda _: self.bot.loop.call_soon_threadsafe(self.event.set))
 
         self.start_time = disnake.utils.utcnow()
 
@@ -824,7 +825,7 @@ class YTDLPlayer(BasePlayer):
         await self.process_next()
 
     async def stop(self):
-        self.vc.stop()
+        self.guild.voice_client.stop()
 
     async def process_next(self):
         self.bot.loop.create_task(self.process_track())
