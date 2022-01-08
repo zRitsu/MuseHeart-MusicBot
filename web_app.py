@@ -55,11 +55,11 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                 self.write_message(json.dumps(stats))
                 self.close()
 
-            for u in users_ws.values():
+            for u, ws in users_ws.items():
                 try:
-                    u.write_message(json.dumps(data))
+                    ws.write_message(json.dumps(data))
                 except Exception as e:
-                    print(f"Erro ao processar dados do rpc para o user {user_id}: {repr(e)}")
+                    print(f"Erro ao processar dados do rpc para o user {u}: {repr(e)}")
 
             return
 
