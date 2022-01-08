@@ -52,7 +52,7 @@ class LocalDatabase:
             with open(f'./local_dbs/{bot.user.id}.json') as f:
                 self.data = json.load(f)
 
-        self.bot.loop.create_task(self.write_json_task())
+        self.json_task = self.bot.loop.create_task(self.write_json_task())
 
     async def write_json_task(self):
 
