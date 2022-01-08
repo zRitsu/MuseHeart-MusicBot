@@ -2000,7 +2000,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         data['player_controller']['channel'] = None
         data['player_controller']['message_id'] = None
-        player = self.bot.music.get_player(guild_id)
+        player = self.bot.music.players.get(guild_id)
         if player:
             player.static = False
             player.text_channel = inter.channel.parent if isinstance(inter.channel, disnake.Thread) else inter.channel
