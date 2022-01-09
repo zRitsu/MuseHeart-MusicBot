@@ -1616,6 +1616,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
     async def connect_node(self, data: dict):
 
+        if data["identifier"] in self.bot.music.nodes:
+            return
+
         data['rest_uri'] = ("https" if data.get('secure') else "http") + f"://{data['host']}:{data['port']}"
         data['user_agent'] = UserAgent().random
         search = data.pop("search", True)
