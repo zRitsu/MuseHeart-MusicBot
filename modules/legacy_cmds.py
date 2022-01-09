@@ -101,7 +101,7 @@ class Owner(commands.Cog):
         embed = disnake.Embed(
             #description = f"```{out_git[:2018]}``` {text}",
             description = f"{txt}\n\n{text}",
-            title="Update efetuado com sucesso!",
+            title="Atualização realizada com sucesso!",
             color=self.bot.get_color(ctx.guild.me)
         )
 
