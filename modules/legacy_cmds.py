@@ -96,13 +96,12 @@ class Owner(commands.Cog):
             text += "\n`Nota: Será necessário atualizar as dependências.`"
 
         txt = "\n".join(
-            f"[`{c['abbreviated_commit']}`]({self.bot.remote_git_url}/commit/{c['commit']}) - {(c['subject'][:60] + '...') if len(c['subject']) > 59 else c['subject']}"
+            f"[`{c['abbreviated_commit']}`]({self.bot.remote_git_url}/commit/{c['commit']}) `- {(c['subject'][:60] + '...') if len(c['subject']) > 59 else c['subject']}`"
             for c in git_log[:10])
 
         embed = disnake.Embed(
-            # description = f"```{out_git[:2018]}``` {text}",
-            description=f"{txt}\n\n{text}",
-            title="Atualização realizada com sucesso!",
+            description=f"{txt}\n\n`📄` **Log:** ```py\n{out_git[:1000]}```{text}",
+            title="`✅` Atualização realizada com sucesso!",
             color=self.bot.get_color(ctx.guild.me)
         )
 
