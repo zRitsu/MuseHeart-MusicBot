@@ -28,7 +28,7 @@ class Misc(commands.Cog):
                         f"> **Estou em:** `{len(self.bot.guilds)} servidor(es)`\n"
                         f"> **Players ativos:** `{len(self.bot.music.players)}`\n"
                         f"> **Tipo de player usado:** `{'Lavalink' if isinstance(self.bot.music, wavelink.Client) else 'YT-DLP (Experimental)'}`\n"
-                        f"> **Commit atual:** `{self.bot.commit}`\n"
+                        f"> **Commit atual:** [`{self.bot.commit}`]({self.bot.remote_git_url}/commit/{self.bot.commit})\n"
                         f"> **Versão do Disnake:** `{disnake.__version__}`\n"
                         f"> **Versão do python:** `{platform.python_version()}`\n"
                         f"> **Latencia:** `{round(self.bot.latency * 1000)}ms`\n"

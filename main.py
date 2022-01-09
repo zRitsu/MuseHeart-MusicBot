@@ -31,6 +31,12 @@ try:
     print(f"Commit ver: {commit}\n{'-'*30}")
 except:
     commit = None
+    
+try:
+    remote_git_url = check_output(['git', 'remote', '-v']).decode(
+        'ascii').strip().split("\n")[0][7:].replace(".git (fetch)", "")
+except:
+    remote_git_url = ""
 
 print(f"Modo do player: {'Lavalink' if CONFIGS['YOUTUBEDL'] != 'true' else 'YT-DLP'}\n{'-'*30}")
 
@@ -61,6 +67,7 @@ def load_bot(bot_name: str, token: str, main=False):
         config=CONFIGS,
         color=CONFIGS["EMBED_COLOR"],
         commit=commit,
+        remote_git_url=remote_git_url,
         default_prefix=default_prefix,
     )
 

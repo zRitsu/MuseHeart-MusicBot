@@ -29,6 +29,7 @@ class BotCore(commands.Bot):
         self.default_skin = self.config.get("DEFAULT_SKIN", "default")
         self.load_skins()
         self.commit = kwargs.get("commit", "N/A")
+        self.remote_git_url = kwargs.get("remote_git_url", "")
         self.default_prefix = kwargs.get("default_prefix", None)
         self.ws_client = WSClient(self.config["RPC_SERVER"], bot=self)
 
