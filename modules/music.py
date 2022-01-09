@@ -1181,6 +1181,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         for identifier, node in self.bot.music.nodes.items():
+
             if not node.available: continue
 
             txt = f"Região: `{node.region.title()}`\n"
@@ -1200,16 +1201,21 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 txt += f'{ram_txt}\n' \
                        f'CPU Cores: `{cpu_cores}`\n' \
                        f'Uso de CPU: `{cpu_usage}%`\n' \
-                       f'Uptime: `{time_format(node.stats.uptime)}`'
+                       f'Uptime: `{time_format(node.stats.uptime)}\n`'
 
                 if started:
-                    txt += "\nPlayers: "
+                    txt += "Players: "
                     players = node.stats.playing_players
                     idle = started - players
                     if players:
                         txt += f'`[▶️{players}]`' + (" " if idle else "")
                     if idle:
                         txt += f'`[💤{idle}]`'
+
+                    txt += "\n"
+
+                if node.website:
+                    txt += f'[`Website do server`]({node.website})\n'
 
             if current_player:
                 status = "🌟"
@@ -1614,6 +1620,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         data['user_agent'] = UserAgent().random
         search = data.pop("search", True)
         max_retries = data.pop('retries', 0)
+        node_website = data.pop('website', '')
 
         if max_retries:
 
@@ -1637,6 +1644,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         node = await self.bot.music.initiate_node(auto_reconnect=False, **data)
         node.search = search
+        node.website = node_website
 
 
     @wavelink.WavelinkMixin.listener("on_node_connection_closed")
