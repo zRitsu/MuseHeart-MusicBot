@@ -165,7 +165,8 @@ class WSClient:
 
         self.connection = await self.session.ws_connect(self.url, heartbeat=30)
         self.backoff = 7
-        print(f"RPC Server Conectado: {self.bot.user} - {self.url}")
+        #print(f"RPC Server Conectado: {self.bot.user} - {self.url}")
+        print(f"{self.bot.user} - RPC Server Conectado")
 
         await self.bot.wait_until_ready()
         await self.send({"user_id": self.bot.user.id, "bot": True})
@@ -174,6 +175,13 @@ class WSClient:
             self.bot.loop.create_task(player.process_rpc(player.guild.me.voice.channel))
 
         self.ready = True
+
+        try:
+            self.ws_loop_task.cancel()
+        except:
+            pass
+
+        self.ws_loop_task = self.bot.loop.create_task(self.ws_loop())
 
     @property
     def is_connected(self):
@@ -186,8 +194,9 @@ class WSClient:
                 await self.connect()
                 self.backoff = 7
             except Exception as e:
-                print(f"Falha ao processar rpc: {repr(e)}")
-                print(f"Reconectando ao server RPC em {self.backoff} segundos.")
+                #print(f"Falha ao processar RPC: {repr(e)}")
+                print(f"{self.bot.user} - Falha ao processar RPC!")
+                print(f"{self.bot.user} - Reconectando ao server RPC em {self.backoff} segundos.")
                 await asyncio.sleep(self.backoff)
                 self.backoff *= 1.5
                 await self.send(data)
@@ -244,7 +253,7 @@ class WSClient:
             except aiohttp.WSServerHandshakeError:
                 print(f"Servidor offline, tentando conectar novamente ao server RPC em {self.backoff} segundos.")
             except Exception:
-                traceback.print_exc()
+                #traceback.print_exc()
                 print(f"Reconectando ao server RPC em {self.backoff} segundos.")
 
             self.ready = False
