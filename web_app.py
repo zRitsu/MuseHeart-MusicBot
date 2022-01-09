@@ -153,7 +153,6 @@ class WSClient:
         self.bot: BotCore = bot
         self.url: str = url
         self.connection = None
-        self.ws_loop_task = None
         self.backoff = 7
         self.session = aiohttp.ClientSession()
         self.ready = False
@@ -176,12 +175,7 @@ class WSClient:
 
         self.ready = True
 
-        try:
-            self.ws_loop_task.cancel()
-        except:
-            pass
-
-        self.ws_loop_task = self.bot.loop.create_task(self.ws_loop())
+        await self.ws_loop()
 
     @property
     def is_connected(self):
@@ -215,6 +209,7 @@ class WSClient:
 
                 if not self.is_connected:
                     await self.connect()
+                    return
 
                 message = await self.connection.receive()
 
@@ -251,10 +246,10 @@ class WSClient:
                             self.bot.loop.create_task(player.process_rpc(voice_channel))
 
             except aiohttp.WSServerHandshakeError:
-                print(f"Servidor offline, tentando conectar novamente ao server RPC em {self.backoff} segundos.")
+                print(f"{self.bot.user} - Servidor offline, tentando conectar novamente ao server RPC em {self.backoff} segundos.")
             except Exception:
                 #traceback.print_exc()
-                print(f"Reconectando ao server RPC em {self.backoff} segundos.")
+                print(f"{self.bot.user} - Reconectando ao server RPC em {self.backoff} segundos.")
 
             self.ready = False
             await asyncio.sleep(self.backoff)
