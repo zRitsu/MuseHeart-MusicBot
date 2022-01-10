@@ -145,7 +145,7 @@ async def has_perm(inter):
     vc = inter.bot.get_channel(player.channel_id)
 
     if not vc and inter.author.voice:
-        player.dj.append(inter.guild)
+        player.dj.append(inter.author)
 
     elif inter.bot.intents.members and not [m for m in vc.members if
                                         not m.bot and (m.guild_permissions.manage_channels or m in player.dj)]:
