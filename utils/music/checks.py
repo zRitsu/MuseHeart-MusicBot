@@ -147,7 +147,7 @@ async def has_perm(inter):
     if not vc and inter.author.voice:
         player.dj.append(inter.guild)
 
-    elif inter.bot.intents.members and vc and not [m for m in vc.members if
+    elif inter.bot.intents.members and not [m for m in vc.members if
                                         not m.bot and (m.guild_permissions.manage_channels or m in player.dj)]:
         player.dj.append(inter.author)
         await inter.channel.send(embed=disnake.Embed(
