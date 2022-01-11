@@ -39,11 +39,6 @@
         "description": "URL do mongoDB (Obrigatório para preservar dados de alguns comandos/sistemas, pois se seu app aqui for reiniciado todos os dados serão perdidos). Veja como obter um: https://github.com/zRitsu/disnake-LL-music-bot/blob/main/MONGODB_SETUP.md",
         "required": false
       },
-      "YOUTUBEDL": {
-        "description": "Experimental: Usar YT-DLP (YoutubeDL) ao invés do Lavalink, true = Ativado, false = Desativado.",
-        "value": "false",
-        "required": false
-      },
       "KEEP_ALIVE": {
         "description": "Não precisa mexer aqui!",
         "value": "true",

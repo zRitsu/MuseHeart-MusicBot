@@ -12,7 +12,7 @@ from configs import load_config
 
 CONFIGS = load_config()
 
-if CONFIGS.get('YOUTUBEDL') != "true" and CONFIGS['START_LOCAL_LAVALINK'] == "true":
+if CONFIGS['START_LOCAL_LAVALINK'] == "true":
     run_lavalink(
         lavalink_file_url=CONFIGS['LAVALINK_FILE_URL'],
         lavalink_ram_limit=CONFIGS['LAVALINK_RAM_LIMIT'],
@@ -37,8 +37,6 @@ try:
         'ascii').strip().split("\n")[0][7:].replace(".git (fetch)", "")
 except:
     remote_git_url = ""
-
-print(f"Modo do player: {'Lavalink' if CONFIGS['YOUTUBEDL'] != 'true' else 'YT-DLP'}\n{'-'*30}")
 
 bots = []
 

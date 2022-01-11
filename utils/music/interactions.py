@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Union, List
 from inspect import iscoroutinefunction
 
 if TYPE_CHECKING:
-    from .models import LavalinkPlayer, YTDLPlayer
+    from .models import LavalinkPlayer
     from ..client import BotCore
 
 
@@ -226,7 +226,7 @@ class PlayerInteractions(disnake.ui.View):
 
     async def interaction_check(self, interaction: disnake.Interaction):
 
-        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players.get(interaction.guild.id)
+        player: LavalinkPlayer = self.bot.music.players.get(interaction.guild.id)
 
         if player.interaction_cooldown:
             await interaction.response.send_message("O player está em cooldown, tente novamente em instantes.",

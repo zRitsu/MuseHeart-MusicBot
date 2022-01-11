@@ -7,7 +7,6 @@ def load_config():
     CONFIGS = {
         "VOTE_SKIP_AMOUNT": "3",
         "DEFAULT_PREFIX": "!!!",
-        "YOUTUBEDL": "false",
         "DEFAULT_SKIN": "default",
         "IDLE_TIMEOUT": "180",
         "RPC_SERVER": "http://localhost:8080/ws",

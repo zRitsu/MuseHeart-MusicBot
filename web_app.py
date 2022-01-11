@@ -15,7 +15,7 @@ import tornado.web
 import tornado.websocket
 
 if TYPE_CHECKING:
-    from utils.music.models import LavalinkPlayer, YTDLPlayer
+    from utils.music.models import LavalinkPlayer
     from utils.client import BotCore
 
 
@@ -229,7 +229,7 @@ class WSClient:
 
                 if op == "rpc_update":
 
-                    player: Optional[LavalinkPlayer, YTDLPlayer] = None
+                    player: Optional[LavalinkPlayer] = None
 
                     voice_channel: Optional[disnake.VoiceChannel] = None
 
