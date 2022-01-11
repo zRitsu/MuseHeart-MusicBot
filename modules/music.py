@@ -625,6 +625,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player.loop = mode
 
+        self.bot.loop.create_task(player.process_rpc())
+
         await self.interaction_message(inter, txt)
 
 
@@ -652,6 +654,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         embed.description=f"**Quantidade de repetições [{value}] definida para a música:** [`{player.current.title}`]({player.current.uri})"
         embed.set_thumbnail(url=player.current.thumb)
         await inter.send(embed=embed, ephemeral=True)
+
+        self.bot.loop.create_task(player.process_rpc())
 
         await player.update_message()
 
