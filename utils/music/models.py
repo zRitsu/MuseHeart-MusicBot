@@ -84,23 +84,27 @@ class LavalinkTrack(wavelink.Track):
             self.uri = f"{self.uri}&list={parse.parse_qs(parse.urlparse(self.playlist['url']).query)['list'][0]}"
 
 
-class BasePlayer:
+class LavalinkPlayer(wavelink.Player):
 
     bot: BotCore
-    volume: int
-    node: wavelink.Node
-    vc: disnake.VoiceProtocol
-    paused: bool
-    position: int
-    is_paused: bool
 
     def __init__(self, *args, **kwargs):
-
-        try:
-            super().__init__(*args, **kwargs)
-        except:
-            pass
-
+        super(LavalinkPlayer, self).__init__(*args, **kwargs)
+        self.queue = deque()
+        self.played = deque(maxlen=20)
+        self.nightcore = False
+        self.loop = False
+        self.last_track: Optional[LavalinkTrack] = None
+        self.locked = False
+        self.idle = None
+        self.is_previows_music = False
+        self.updating_message = None
+        self.command_log = ""
+        self.last_embed = None
+        self.interaction_cooldown = False
+        self.vc: Optional[WavelinkVoiceClient] = None
+        self.votes = set()
+        self.view: Optional[disnake.ui.View] = None
         self.requester = kwargs.pop('requester')
         self.guild: disnake.Guild = kwargs.pop('guild')
         self.text_channel: disnake.TextChannel = kwargs.pop('channel')
@@ -136,6 +140,10 @@ class BasePlayer:
         self.ws_client = None
 
 
+    def __str__(self) -> str:
+        return f"Lavalink Player | Server: {self.node.identifier}"
+
+
     async def members_timeout(self):
 
         await asyncio.sleep(self.idle_timeout)
@@ -154,9 +162,9 @@ class BasePlayer:
         except:
             pass
 
-        self.view = PlayerInteractions(self.bot)
-
         self.bot.loop.create_task(self.process_rpc(self.guild.me.voice.channel))
+
+        self.view = PlayerInteractions(self.bot)
 
         controls = {
             "⏮️": ["back"],
@@ -187,7 +195,7 @@ class BasePlayer:
 
         await asyncio.sleep(self.idle_timeout)
 
-        msg =  "**O player foi desligado por inatividade...**"
+        msg = "**O player foi desligado por inatividade...**"
 
         if self.static:
             self.command_log = msg
@@ -203,9 +211,6 @@ class BasePlayer:
             return
 
         data = self.skin(self)
-
-        if self.guild.me.voice:
-            self.bot.loop.create_task(self.process_rpc(self.guild.me.voice.channel))
 
         try:
             if self.message and data == self.last_data and (self.has_thread or self.static or self.is_last_message()):
@@ -334,47 +339,11 @@ class BasePlayer:
         self.updating_message = self.bot.loop.create_task(
             self.update_message_task(interaction=interaction, force=force))
 
-    async def process_next(self):
-
-        if self.locked:
-            return False
-
-        try:
-            track = self.queue.popleft()
-        except Exception:
-            self.last_track = None
-            self.idle_task = self.bot.loop.create_task(self.idling_mode())
-            return False
-
-        if not track:
-            return False
-
-        try:
-            self.idle_task.cancel()
-            self.idle_task = None
-        except:
-            pass
-
-        if isinstance(track, SpotifyTrack):
-
-            self.locked = True
-
-            await track.resolve(self.node)
-
-            self.locked = False
-
-            if not track.info.get('ie_key') and not track.id:
-                return await self.process_next()
-
-        self.last_track = track
-
-        return track
-
     async def cleanup(self):
 
         vc = self.bot.get_channel(self.channel_id)
 
-        self.bot.loop.create_task(self.process_rpc(self.guild.me.voice.channel, close=True))
+        self.bot.loop.create_task(self.process_rpc(vc, close=True))
 
         try:
             self.idle_task.cancel()
@@ -400,13 +369,17 @@ class BasePlayer:
         self.queue.clear()
         self.played.clear()
 
-
     async def process_rpc(
             self,
-            voice_channel: Union[disnake.VoiceChannel, disnake.StageChannel],
-            close = False,
+            voice_channel: Optional[disnake.VoiceChannel, disnake.StageChannel] = None,
+            close=False,
             user: disnake.Member = None
     ):
+
+        if not voice_channel:
+            voice_channel = self.bot.get_channel(self.channel_id)
+            if not voice_channel:
+                return
 
         try:
             thumb = self.bot.user.avatar.with_format("png").url
@@ -499,7 +472,8 @@ class BasePlayer:
             stats["users"] = [user.id]
 
         else:
-            stats["users"] = [m.id for m in voice_channel.members if not m.bot and (not m.voice.deaf or not m.voice.self_deaf)]
+            stats["users"] = [m.id for m in voice_channel.members if
+                              not m.bot and (not m.voice.deaf or not m.voice.self_deaf)]
 
         await self.bot.ws_client.send(stats)
 
@@ -540,38 +514,43 @@ class BasePlayer:
 
         self.locked = False
 
-
-class LavalinkPlayer(BasePlayer, wavelink.Player):
-
-    def __init__(self, *args, **kwargs):
-        super(LavalinkPlayer, self).__init__(*args, **kwargs)
-        self.queue = deque()
-        self.played = deque(maxlen=20)
-        self.nightcore = False
-        self.loop = False
-        self.last_track: Optional[LavalinkTrack] = None
-        self.locked = False
-        self.idle = None
-        self.is_previows_music = False
-        self.updating_message = None
-        self.command_log = ""
-        self.last_embed = None
-        self.interaction_cooldown = False
-        self.vc: Optional[WavelinkVoiceClient] = None
-        self.votes = set()
-        self.view: Optional[disnake.ui.View] = None
-
-    def __str__(self) -> str:
-        return f"Lavalink Player | Server: {self.node.identifier}"
-
     async def process_next(self):
 
-        track = await super().process_next()
-
-        if track is False:
+        if self.locked:
             return
 
+        try:
+            track = self.queue.popleft()
+        except Exception:
+            self.last_track = None
+            self.idle_task = self.bot.loop.create_task(self.idling_mode())
+            return
+
+        if not track:
+            return
+
+        try:
+            self.idle_task.cancel()
+            self.idle_task = None
+        except:
+            pass
+
+        if isinstance(track, SpotifyTrack):
+
+            self.locked = True
+
+            await track.resolve(self.node)
+
+            self.locked = False
+
+            if not track.id:
+                return await self.process_next()
+
+        self.last_track = track
+
         await self.play(track)
+
+        self.bot.loop.create_task(self.process_rpc())
 
         self.is_previows_music = False
 

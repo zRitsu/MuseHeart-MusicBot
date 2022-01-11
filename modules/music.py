@@ -509,6 +509,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await player.set_pause(True)
 
+        self.bot.loop.create_task(player.process_rpc(inter.guild.me.voice.channel))
+
         txt = ["pausou a música.", "Musica pausada."]
 
         await self.interaction_message(inter, txt)
@@ -531,6 +533,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         await player.set_pause(False)
+
+        self.bot.loop.create_task(player.process_rpc(inter.guild.me.voice.channel))
 
         txt = ["retomou a música.", "Música retomada"]
         await self.interaction_message(inter, txt)
@@ -1939,7 +1943,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if member.id == self.bot.user.id:
 
             if (not before.channel and after.channel) or member.voice:
-                self.bot.loop.create_task(player.process_rpc(member.voice.channel))
                 return # bot acabou de entrar no canal de voz.
 
             if player.static:
@@ -1948,6 +1951,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             else:
                 embed = disnake.Embed(description="**Desligando player por desconexão do canal.**", color=member.color)
                 await player.text_channel.send(embed=embed, delete_after=10)
+
+            self.bot.loop.create_task(player.process_rpc(before.channel, close=True))
 
             await player.destroy(force=True)
             return
