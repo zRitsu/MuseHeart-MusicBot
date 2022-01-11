@@ -63,7 +63,7 @@ class Misc(commands.Cog):
         )
 
         # resolvi add essa opção...
-        # mas caso use, por favor considere de alguma forma fornecer crédito de alguma forma :(
+        # mas caso use, por favor considere de alguma forma fornecer crédito :(
         if self.bot.config.get("HIDE_SOURCE_OWNER") != "false" and self.bot.owner.id == self.source_owner.id:
             embed.footer.text += f" | Source by: {self.source_owner}"
 
