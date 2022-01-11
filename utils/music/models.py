@@ -10,7 +10,8 @@ from .interactions import PlayerInteractions
 from .spotify import SpotifyTrack
 import traceback
 from collections import deque
-from typing import Optional, Union, TYPE_CHECKING
+from typing import Optional, Union, TYPE_CHECKING, List
+
 if TYPE_CHECKING:
     from ..client import BotCore
 
@@ -373,7 +374,7 @@ class LavalinkPlayer(wavelink.Player):
             self,
             voice_channel: Optional[disnake.VoiceChannel, disnake.StageChannel] = None,
             close=False,
-            user: disnake.Member = None
+            users: List[disnake.Member] = None
     ):
 
         if not voice_channel:
@@ -394,8 +395,8 @@ class LavalinkPlayer(wavelink.Player):
                 "thumb": thumb
             }
 
-            if user:
-                stats["users"] = [user.id]
+            if users:
+                stats["users"] = [u.id for u in users]
             else:
                 stats["users"] = [m.id for m in voice_channel.members if not m.bot]
 
@@ -468,12 +469,11 @@ class LavalinkPlayer(wavelink.Player):
                     }
                 )
 
-        if user:
-            stats["users"] = [user.id]
+        if users:
+            stats["users"] = [m.id for m in users if not m.bot]
 
         else:
-            stats["users"] = [m.id for m in voice_channel.members if
-                              not m.bot and (not m.voice.deaf or not m.voice.self_deaf)]
+            stats["users"] = [m.id for m in voice_channel.members if not m.bot]
 
         await self.bot.ws_client.send(stats)
 

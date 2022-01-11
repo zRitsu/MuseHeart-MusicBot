@@ -1972,8 +1972,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         if not after or before.channel != after.channel:
-            await player.process_rpc(player.guild.me.voice.channel, user=member, close=True)
-            await player.process_rpc(player.guild.me.voice.channel)
+            await player.process_rpc(player.guild.me.voice.channel, users=[member], close=True)
+            await player.process_rpc(player.guild.me.voice.channel, users=[m for m in player.guild.me.voice.channel.members if m != member and not m.bot])
 
 
     async def reset_controller_db(self, guild_id: int, data: dict, inter: disnake.ApplicationCommandInteraction = None):
