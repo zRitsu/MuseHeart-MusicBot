@@ -72,10 +72,20 @@ def run_lavalink(
 
     cmd = f'{java_path}java'
 
-    if lavalink_cpu_cores >= 1:
+    try:
+        lavalink_ram_limit = int(lavalink_ram_limit)
+    except TypeError:
+        lavalink_ram_limit = 0
+
+    try:
+        lavalink_cpu_cores = int(lavalink_cpu_cores)
+    except TypeError:
+        lavalink_cpu_cores = 0
+
+    if int(lavalink_cpu_cores) >= 1:
         cmd += f" -XX:ActiveProcessorCount={lavalink_cpu_cores}"
 
-    if lavalink_ram_limit > 10:
+    if int(lavalink_ram_limit) > 10:
         cmd += f" -Xmx{lavalink_ram_limit}m"
 
     cmd += " -jar Lavalink.jar"
