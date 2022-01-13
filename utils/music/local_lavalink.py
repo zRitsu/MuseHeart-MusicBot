@@ -15,8 +15,9 @@ def download_file(url, filename):
     r.close()
 
 def run_lavalink(
-    lavalink_file_url=None,
-    lavalink_ram_limit=100,
+    lavalink_file_url = None,
+    lavalink_initial_ram = 30,
+    lavalink_ram_limit = 100,
     lavalink_additional_sleep = None,
     lavalink_cpu_cores = 1,
 ):
@@ -73,6 +74,11 @@ def run_lavalink(
     cmd = f'{java_path}java'
 
     try:
+        lavalink_initial_ram = int(lavalink_initial_ram)
+    except TypeError:
+        lavalink_initial_ram = 0
+
+    try:
         lavalink_ram_limit = int(lavalink_ram_limit)
     except TypeError:
         lavalink_ram_limit = 0
@@ -87,6 +93,9 @@ def run_lavalink(
 
     if int(lavalink_ram_limit) > 10:
         cmd += f" -Xmx{lavalink_ram_limit}m"
+
+    if lavalink_initial_ram > 0 and lavalink_initial_ram < lavalink_ram_limit:
+        cmd += f" -Xms{lavalink_ram_limit}m"
 
     cmd += " -jar Lavalink.jar"
 

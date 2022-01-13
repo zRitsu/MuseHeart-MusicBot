@@ -15,6 +15,7 @@ def load_config():
         # Local lavalink stuffs
         "START_LOCAL_LAVALINK": "true",
         "LAVALINK_ADDITIONAL_SLEEP": "0",
+        "LAVALINK_INITIAL_RAM": "30",
         "LAVALINK_RAM_LIMIT": "120",
         "LAVALINK_CPU_CORES": "2",
         "LAVALINK_FILE_URL": "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/Lavalink.jar"
