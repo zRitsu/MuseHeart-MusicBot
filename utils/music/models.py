@@ -392,13 +392,9 @@ class LavalinkPlayer(wavelink.Player):
             stats = {
                 "op": "close",
                 "bot_id": self.bot.user.id,
-                "thumb": thumb
+                "thumb": thumb,
+                "users": [u.id for u in users or voice_channel.members]
             }
-
-            if users:
-                stats["users"] = [u.id for u in users]
-            else:
-                stats["users"] = [m.id for m in voice_channel.members if not m.bot]
 
             try:
                 await self.bot.ws_client.send(stats)
@@ -413,6 +409,7 @@ class LavalinkPlayer(wavelink.Player):
             "op": "update",
             "track": None,
             "bot_id": self.bot.user.id,
+            "users": [m.id for m in (users or voice_channel.members) if not m.bot],
             "thumb": thumb,
             "info": {
                 "channel": {
@@ -474,12 +471,6 @@ class LavalinkPlayer(wavelink.Player):
                         "album_url": track.album['url'],
                     }
                 )
-
-        if users:
-            stats["users"] = [m.id for m in users if not m.bot]
-
-        else:
-            stats["users"] = [m.id for m in voice_channel.members if not m.bot]
 
         await self.bot.ws_client.send(stats)
 
