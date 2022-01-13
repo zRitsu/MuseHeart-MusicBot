@@ -8,7 +8,7 @@ from utils.music.local_lavalink import run_lavalink
 from utils.client import BotCore
 from utils.db import Database, LocalDatabase
 from web_app import run_app
-from configs import load_config
+from config_loader import load_config
 
 CONFIGS = load_config()
 
