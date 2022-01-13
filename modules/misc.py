@@ -18,7 +18,7 @@ def placeholders(bot: BotCore, text: str):
         return ""
 
     return text\
-        .replace("{users}", str(len([m for m in bot.users])))\
+        .replace("{users}", str(len([m for m in bot.users if not m.bot])))\
         .replace("{playing}", str(len(bot.music.players)))\
         .replace("{guilds}", str(len(bot.guilds)))\
         .replace("{uptime}", str((disnake.utils.utcnow() - bot.uptime).total_seconds()))
