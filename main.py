@@ -15,6 +15,7 @@ CONFIGS = load_config()
 if CONFIGS['START_LOCAL_LAVALINK'] == "true":
     run_lavalink(
         lavalink_file_url=CONFIGS['LAVALINK_FILE_URL'],
+        lavalink_initial_ram=CONFIGS['LAVALINK_INITIAL_RAM'],
         lavalink_ram_limit=CONFIGS['LAVALINK_RAM_LIMIT'],
         lavalink_additional_sleep=int(CONFIGS['LAVALINK_ADDITIONAL_SLEEP']),
     )
