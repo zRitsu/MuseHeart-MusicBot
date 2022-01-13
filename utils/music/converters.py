@@ -64,15 +64,15 @@ perms_translations = {
 async def node_suggestions(inter, query):
 
     try:
-        inter.player = inter.bot.music.players[inter.guild.id]
+        node = inter.bot.music.players[inter.guild.id].node
     except KeyError:
-        return
+        node = None
 
     if not query:
 
-        return [n.identifier for n in inter.bot.music.nodes.values() if n != inter.player.node and n.available and n.is_available]
+        return [n.identifier for n in inter.bot.music.nodes.values() if n != node and n.available and n.is_available]
 
-    return [n.identifier for n in inter.bot.music.nodes.values() if n != inter.player.node
+    return [n.identifier for n in inter.bot.music.nodes.values() if n != node
             and query.lower() in n.identifier.lower() and n.available and n.is_available]
 
 
