@@ -1,3 +1,5 @@
+import asyncio
+import datetime
 from typing import Optional
 import disnake
 import wavelink
@@ -32,7 +34,8 @@ class Misc(commands.Cog):
                         f"> **Versão do Disnake:** `{disnake.__version__}`\n"
                         f"> **Versão do python:** `{platform.python_version()}`\n"
                         f"> **Latencia:** `{round(self.bot.latency * 1000)}ms`\n"
-                        f"> **Uso de RAM:** `{ram_usage}`\n",
+                        f"> **Uso de RAM:** `{ram_usage}`\n"
+                        f"> **Uptime:** `{str((datetime.timedelta(seconds=(disnake.utils.utcnow() - self.bot.uptime).total_seconds()))).split('.')[0]}`\n",
             color=self.bot.get_color(inter.guild.me)
         )
 
@@ -105,6 +108,13 @@ class Misc(commands.Cog):
             embeds.append(embed)
 
         await inter.send(embeds=embeds, ephemeral=True)
+
+    def cog_unload(self):
+
+        try:
+            self.task.cancel()
+        except:
+            pass
 
 
 def setup(bot: BotCore):

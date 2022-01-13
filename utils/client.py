@@ -32,6 +32,7 @@ class BotCore(commands.Bot):
         self.remote_git_url = kwargs.get("remote_git_url", "")
         self.default_prefix = kwargs.get("default_prefix", None)
         self.ws_client = WSClient(self.config["RPC_SERVER"], bot=self)
+        self.uptime = disnake.utils.utcnow()
 
     def load_skins(self):
 
