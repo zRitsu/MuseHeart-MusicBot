@@ -393,6 +393,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             await player.seek(0)
             await self.interaction_message(inter, "voltou para o início da música.")
+            self.bot.loop.create_task(player.process_rpc())
             return
 
         try:
@@ -582,8 +583,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         except Exception as e:
             embed.description = f"Ocorreu um erro no comando\n```py\n{repr(e)}```."
-            await send_message(inter, embed=Embed)
+            await send_message(inter, embed=embed)
             return
+
+        self.bot.loop.create_task(player.process_rpc())
 
         txt = [
             f"{'avançou' if milliseconds > player.position else 'voltou'} o tempo da música para: {time_format(milliseconds)}",

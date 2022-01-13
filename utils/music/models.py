@@ -421,10 +421,16 @@ class LavalinkPlayer(wavelink.Player):
                 },
                 "guild": {
                     "name": voice_channel.guild.name,
-                    "id": voice_channel.guild.id
+                    "id": voice_channel.guild.id,
+                    "vc_url": f"http://discordapp.com/channels/{self.guild_id}/{self.channel_id}"
                 }
             }
         }
+
+        try:
+            stats["info"]["guild"]["icon"] = self.guild.icon.with_static_format("png").url
+        except AttributeError:
+            pass
 
         if not self.current:
 
