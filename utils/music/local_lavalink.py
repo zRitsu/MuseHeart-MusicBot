@@ -70,7 +70,15 @@ def run_lavalink(
     for filename, url in downloads.items():
         download_file(url, filename)
 
-    cmd = f'{java_path}java -XX:ActiveProcessorCount={lavalink_cpu_cores} -Xmx{lavalink_ram_limit}m -jar Lavalink.jar'
+    cmd = f'{java_path}java'
+
+    if lavalink_cpu_cores >= 1:
+        cmd += f" -XX:ActiveProcessorCount={lavalink_cpu_cores}"
+
+    if lavalink_ram_limit > 10:
+        cmd += f" -Xmx{lavalink_ram_limit}m"
+
+    cmd += " -jar Lavalink.jar"
 
     print(f"Iniciando o servidor Lavalink (dependendo da hospedagem o lavalink pode demorar iniciar, "
           f"o que pode ocorrer falhas em algumas tentativas de conexão até ele iniciar totalmente).\n{'-'*30}")
