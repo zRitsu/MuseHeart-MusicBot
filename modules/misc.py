@@ -2,13 +2,26 @@ import asyncio
 import datetime
 from typing import Optional
 import disnake
-import wavelink
 from disnake.ext import commands
 from utils.client import BotCore
 import psutil
 import humanize
-from os import getpid
+from itertools import cycle
+from random import shuffle
+from os import getpid, environ
 import platform
+
+
+def placeholders(bot: BotCore, text: str):
+
+    if not text:
+        return ""
+
+    return text\
+        .replace("{users}", str(len([m for m in bot.users])))\
+        .replace("{playing}", str(len(bot.music.players)))\
+        .replace("{guilds}", str(len(bot.guilds)))\
+        .replace("{uptime}", str((disnake.utils.utcnow() - bot.uptime).total_seconds()))
 
 
 class Misc(commands.Cog):
@@ -16,6 +29,37 @@ class Misc(commands.Cog):
     def __init__(self, bot: BotCore):
         self.bot = bot
         self.source_owner: Optional[disnake.User] = None
+        self.activities = None
+        self.task = self.bot.loop.create_task(self.presences())
+
+
+    async def presences(self):
+
+        if not self.activities:
+
+            activities = []
+
+            for i in placeholders(self.bot, environ.get("LISTENING_PRESENCES", "")).split("||"):
+                activities.append(disnake.Activity(type=disnake.ActivityType.listening, name=i))
+
+            for i in placeholders(self.bot, environ.get("WATCHING_PRESENCES", "")).split("||"):
+                activities.append(disnake.Activity(type=disnake.ActivityType.watching, name=i))
+
+            for i in placeholders(self.bot, environ.get("PLAYING_PRESENCES", "")).split("||"):
+                activities.append(disnake.Game(name=i))
+
+            shuffle(activities)
+
+            self.activities = cycle(activities)
+
+        while True:
+
+            await self.bot.wait_until_ready()
+
+            await self.bot.change_presence(activity=next(self.activities))
+
+            await asyncio.sleep(300)
+
 
     @commands.slash_command(description="Exibir informações sobre mim.")
     async def about(self, inter: disnake.ApplicationCommandInteraction):
