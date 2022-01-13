@@ -21,7 +21,7 @@ def placeholders(bot: BotCore, text: str):
         .replace("{users}", str(len([m for m in bot.users if not m.bot])))\
         .replace("{playing}", str(len(bot.music.players)))\
         .replace("{guilds}", str(len(bot.guilds)))\
-        .replace("{uptime}", str((disnake.utils.utcnow() - bot.uptime).total_seconds()))
+        .replace("{uptime}", str(datetime.timedelta(seconds=(disnake.utils.utcnow() - bot.uptime).total_seconds())))
 
 
 class Misc(commands.Cog):
