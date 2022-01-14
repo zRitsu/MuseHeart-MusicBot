@@ -106,7 +106,7 @@ class Misc(commands.Cog):
         try:
             avatar = self.bot.owner.avatar.with_static_format("png").url
         except AttributeError:
-            avatar = None
+            avatar = ""
 
         embed.set_footer(
             icon_url=avatar,
