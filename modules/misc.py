@@ -12,18 +12,6 @@ from os import getpid, environ
 import platform
 
 
-def placeholders(bot: BotCore, text: str):
-
-    if not text:
-        return ""
-
-    return text\
-        .replace("{users}", str(len([m for m in bot.users if not m.bot])))\
-        .replace("{playing}", str(len(bot.music.players)))\
-        .replace("{guilds}", str(len(bot.guilds)))\
-        .replace("{uptime}", str(datetime.timedelta(seconds=(disnake.utils.utcnow() - bot.uptime).total_seconds())))
-
-
 class Misc(commands.Cog):
 
     def __init__(self, bot: BotCore):
@@ -32,6 +20,17 @@ class Misc(commands.Cog):
         self.activities = None
         self.task = self.bot.loop.create_task(self.presences())
 
+    def placeholders(self, text: str):
+
+        if not text:
+            return ""
+
+        return text \
+            .replace("{users}", str(len([m for m in self.bot.users if not m.bot]))) \
+            .replace("{playing}", str(len(self.bot.music.players))) \
+            .replace("{guilds}", str(len(self.bot.guilds))) \
+            .replace("{uptime}", str(datetime.timedelta(seconds=(disnake.utils.utcnow() - self.bot.uptime).total_seconds())))
+
 
     async def presences(self):
 
@@ -39,13 +38,13 @@ class Misc(commands.Cog):
 
             activities = []
 
-            for i in placeholders(self.bot, environ.get("LISTENING_PRESENCES", "")).split("||"):
+            for i in environ.get("LISTENING_PRESENCES", "").split("||"):
                 activities.append(disnake.Activity(type=disnake.ActivityType.listening, name=i))
 
-            for i in placeholders(self.bot, environ.get("WATCHING_PRESENCES", "")).split("||"):
+            for i in environ.get("WATCHING_PRESENCES", "").split("||"):
                 activities.append(disnake.Activity(type=disnake.ActivityType.watching, name=i))
 
-            for i in placeholders(self.bot, environ.get("PLAYING_PRESENCES", "")).split("||"):
+            for i in environ.get("PLAYING_PRESENCES", "").split("||"):
                 activities.append(disnake.Game(name=i))
 
             shuffle(activities)
@@ -56,7 +55,11 @@ class Misc(commands.Cog):
 
             await self.bot.wait_until_ready()
 
-            await self.bot.change_presence(activity=next(self.activities))
+            activity = next(self.activities)
+
+            activity.name = self.placeholders(activity.name)
+
+            await self.bot.change_presence(activity=activity)
 
             await asyncio.sleep(300)
 
