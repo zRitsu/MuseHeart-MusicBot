@@ -8,6 +8,5 @@ tornado
 motor
 dnspython
 fake-useragent
-PyNaCl
 disnake-jishaku
-psutil-wheels
+psutil
