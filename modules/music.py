@@ -36,8 +36,19 @@ for k, v in os.environ.items():
         print(f"Falha ao adicionar node: {k}, erro: {repr(e)}")
 
 
-PlayOpts = commands.option_enum({"Misturar Playlist": "shuffle", "Inverter Playlist": "reversed"})
-SearchSource = commands.option_enum({"Youtube": "ytsearch", "Soundcloud": "scsearch"})
+PlayOpts = commands.option_enum(
+    {
+        "Misturar Playlist": "shuffle",
+        "Inverter Playlist": "reversed",
+    }
+)
+
+SearchSource = commands.option_enum(
+    {
+        "Youtube": "ytsearch",
+        "Soundcloud": "scsearch"
+    }
+)
 
 
 class Music(commands.Cog, wavelink.WavelinkMixin):
@@ -149,6 +160,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             options: PlayOpts = commands.Param(name="opções", description="Opções para processar playlist", default=False),
             source: SearchSource = commands.Param(name="fonte", description="Selecionar site para busca de músicas (não links)", default="ytsearch"),
             repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.", default=0),
+            hide_playlist: bool = commands.Param(description="Não incluir detalhes da playlist nas músicas.", default=False),
             server: str = commands.Param(name="server", desc="Usar um servidor de música específico na busca.", autocomplete=node_suggestions, default=None)
     ):
 
@@ -160,6 +172,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             manual_selection=True,
             source=source,
             repeat_amount=repeat_amount,
+            hide_playlist=hide_playlist,
             server=server
         )
 
@@ -177,6 +190,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             manual_selection: bool = commands.Param(name="selecionar_manualmente", description="Escolher uma música manualmente entre os resultados encontrados", default=False),
             source: SearchSource = commands.Param(name="fonte", description="Selecionar site para busca de músicas (não links)", default="ytsearch"),
             repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.", default=0),
+            hide_playlist: bool = commands.Param(name="esconder_playlist", description="Não incluir detalhes da playlist nas músicas.", default=False),
             server: str = commands.Param(name="server", desc="Usar um servidor de música específico na busca.", autocomplete=node_suggestions, default=None)
     ):
 
@@ -229,7 +243,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await inter.response.defer(ephemeral=True)
 
         try:
-            tracks, node = await self.get_tracks(query, inter.user, node=node, track_loops=repeat_amount)
+            tracks, node = await self.get_tracks(query, inter.user, node=node, track_loops=repeat_amount,
+                                                 hide_playlist=hide_playlist)
         except Exception as e:
             if not isinstance(e, GenericError):
                 traceback.print_exc()
@@ -1809,7 +1824,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await player.process_next()
 
 
-    async def get_tracks(self, query: str, user: disnake.Member, node: wavelink.Node=None, track_loops=0):
+    async def get_tracks(
+            self, query: str, user: disnake.Member, node: wavelink.Node=None,
+            track_loops=0, hide_playlist=False):
 
         if not node:
             node = self.bot.music.get_best_node()
@@ -1852,7 +1869,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 playlist = {
                     "name": tracks.data['playlistInfo']['name'],
                     "url": query
-                }
+                } if not hide_playlist else {}
 
                 tracks.tracks = [LavalinkTrack(t.id, t.info, requester=user, playlist=playlist) for t in tracks.tracks]
 
