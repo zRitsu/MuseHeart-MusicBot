@@ -117,13 +117,12 @@ class Owner(commands.Cog):
 
         embed = disnake.Embed(
             color=self.bot.get_color(ctx.guild.me),
-            description="**Este comando não é mais necessário ser usado.**\n\n" \
-                        f"`Caso os comandos de barra não apareçam,` [`clique aqui`]({invite_url}) `para me conceder "
+            description="**Este comando não é mais necessário ser usado (A sincronização dos comandos agora é automático).**\n\n" \
+                        f"`Caso os comandos de barra não apareçam,` [`clique aqui`]({invite_url}) `para me permitir "
                         f"permissão de criar comandos de barra no servidor.`\n\n" \
-                        "`Nota: Caso o bot tenha sido invitado no server antes da minha primeira execução, os comandos "
-                        "de barra podem demorar até 1 hora pra aparecer em todos os servidores. Caso queira usar os "
-                        "comandos imediatamente neste servidor você terá que me expulsar e me adicionar novamente "
-                        f"através deste` [`link`]({invite_url})..."
+                        "`Nota: em alguns casos os comandos de barra podem demorar até uma hora pra aparecer em todos "
+                        "os servidores. Caso queira usar os comandos de barra imediatamente neste servidor você terá que "
+                        "me expulsar e em seguida me adicionar novamente através deste` [`link`]({invite_url})..."
         )
 
         await ctx.send(embed=embed)
