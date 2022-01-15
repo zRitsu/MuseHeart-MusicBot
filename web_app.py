@@ -164,8 +164,8 @@ class WSClient:
 
         self.connection = await self.session.ws_connect(self.url, heartbeat=30)
         self.backoff = 7
-        #print(f"RPC Server Conectado: {self.bot.user} - {self.url}")
-        print(f"{self.bot.user} - RPC Server Conectado")
+        #print(f"RPC client conectado: {self.bot.user} - {self.url}")
+        print(f"{self.bot.user} - RPC client conectado")
 
         await self.bot.wait_until_ready()
         await self.send({"user_id": self.bot.user.id, "bot": True})
