@@ -40,13 +40,13 @@ class Misc(commands.Cog):
             activities = []
 
             for i in environ.get("LISTENING_PRESENCES", "").split("||"):
-                activities.append(disnake.Activity(type=disnake.ActivityType.listening, name=i))
+                activities.append({"name":i, "type": "listening"})
 
             for i in environ.get("WATCHING_PRESENCES", "").split("||"):
-                activities.append(disnake.Activity(type=disnake.ActivityType.watching, name=i))
+                activities.append({"name": i, "type": "watching"})
 
             for i in environ.get("PLAYING_PRESENCES", "").split("||"):
-                activities.append(disnake.Game(name=i))
+                activities.append({"name": i, "type": "playing"})
 
             shuffle(activities)
 
@@ -56,9 +56,16 @@ class Misc(commands.Cog):
 
             await self.bot.wait_until_ready()
 
-            activity = next(self.activities)
+            activity_data = next(self.activities)
 
-            activity.name = self.placeholders(activity.name)
+            if activity_data["type"] == "listening":
+                activity = disnake.Activity(type=disnake.ActivityType.listening, name=self.placeholders(activity_data["name"]))
+
+            elif activity_data["type"] == "watching":
+                activity = disnake.Activity(type=disnake.ActivityType.watching, name=self.placeholders(activity_data["name"]))
+
+            else:
+                activity = disnake.Game(name=self.placeholders(activity_data["name"]))
 
             await self.bot.change_presence(activity=activity)
 
