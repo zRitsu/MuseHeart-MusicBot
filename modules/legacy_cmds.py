@@ -120,9 +120,9 @@ class Owner(commands.Cog):
             description="**Este comando não é mais necessário ser usado (A sincronização dos comandos agora é automático).**\n\n" \
                         f"`Caso os comandos de barra não apareçam,` [`clique aqui`]({invite_url}) `para me permitir "
                         f"permissão de criar comandos de barra no servidor.`\n\n" \
-                        "`Nota: em alguns casos os comandos de barra podem demorar até uma hora pra aparecer em todos "
+                        "`Nota: Em alguns casos os comandos de barra podem demorar até uma hora pra aparecer em todos "
                         "os servidores. Caso queira usar os comandos de barra imediatamente neste servidor você terá que "
-                        "me expulsar e em seguida me adicionar novamente através deste` [`link`]({invite_url})..."
+                        "me expulsar do servidor e em seguida me adicionar novamente através deste` [`link`]({invite_url})..."
         )
 
         await ctx.send(embed=embed)
