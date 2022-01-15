@@ -113,7 +113,7 @@ class Misc(commands.Cog):
         try:
             avatar = self.bot.owner.avatar.with_static_format("png").url
         except AttributeError:
-            avatar = ""
+            avatar = self.bot.owner.default_avatar.with_static_format("png").url
 
         embed.set_footer(
             icon_url=avatar,
