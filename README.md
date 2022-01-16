@@ -2,8 +2,10 @@
 ### bot de música programado em python com player interativo, comandos barra/slash, etc. Utilizando as libs disnake e lavalink.
 
 
-Tutorial para hospedar seu próprio bot de música deste repositório sem coding: [clique aqui](https://github.com/zRitsu/disnake-LL-music-bot/wiki)
+Tutorial para hospedar seu próprio bot de música deste repositório sem coding: [clique aqui](https://github.com/zRitsu/disnake-LL-music-bot/wiki).
 <br/>
+
+Caso não queira criar um bot próprio, há um bot meu já feito e hospedado usando esta source, você pode adicioná-la [clicando aqui](https://discord.com/api/oauth2/authorize?client_id=825460549419794462&permissions=397564505200&scope=bot%20applications.commands).
 
 ### Algumas previews:
 
