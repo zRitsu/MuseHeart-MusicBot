@@ -1730,7 +1730,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await player.destroy()
             return
 
-        if payload.code in [4000, 1006]: # internal error
+        if payload.code in [
+            4000, # internal error
+            1006,
+            4005 # Already authenticated.
+        ]:
             await asyncio.sleep(3)
             await player.connect(player.channel_id)
             return
