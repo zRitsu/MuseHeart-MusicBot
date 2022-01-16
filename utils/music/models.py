@@ -206,10 +206,13 @@ class LavalinkPlayer(wavelink.Player):
 
         self.bot.loop.create_task(self.destroy())
 
-    async def invoke_np(self, force=False, interaction=None):
+    async def invoke_np(self, force=False, interaction=None, rpc_update=False):
 
         if not self.current:
             return
+
+        if rpc_update:
+            self.bot.loop.create_task(self.process_rpc())
 
         data = self.skin(self)
 
@@ -319,17 +322,17 @@ class LavalinkPlayer(wavelink.Player):
             pass
         self.updating_message = None
 
-    async def update_message_task(self, interaction=None, force=False):
+    async def update_message_task(self, interaction=None, force=False, rpc_update=False):
 
         if not interaction and not force:
             await asyncio.sleep(5)
 
         try:
-            await self.invoke_np(interaction=interaction)
+            await self.invoke_np(interaction=interaction, rpc_update=rpc_update)
         except:
             traceback.print_exc()
 
-    async def update_message(self, interaction: disnake.Interaction = None, force=False):
+    async def update_message(self, interaction: disnake.Interaction = None, force=False, rpc_update=False):
 
         if self.updating_message:
 
@@ -338,7 +341,7 @@ class LavalinkPlayer(wavelink.Player):
             return
 
         self.updating_message = self.bot.loop.create_task(
-            self.update_message_task(interaction=interaction, force=force))
+            self.update_message_task(interaction=interaction, force=force, rpc_update=rpc_update))
 
     async def cleanup(self):
 

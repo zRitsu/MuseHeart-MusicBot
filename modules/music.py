@@ -413,8 +413,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not len(player.played) and not len(player.queue):
 
             await player.seek(0)
-            await self.interaction_message(inter, "voltou para o início da música.")
-            self.bot.loop.create_task(player.process_rpc())
+            await self.interaction_message(inter, "voltou para o início da música.", rpc_update=True)
             return
 
         try:
@@ -531,11 +530,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await player.set_pause(True)
 
-        self.bot.loop.create_task(player.process_rpc(inter.guild.me.voice.channel))
-
         txt = ["pausou a música.", "Musica pausada."]
 
-        await self.interaction_message(inter, txt)
+        await self.interaction_message(inter, txt, rpc_update=True)
 
 
     @check_voice()
@@ -556,10 +553,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await player.set_pause(False)
 
-        self.bot.loop.create_task(player.process_rpc(inter.guild.me.voice.channel))
-
         txt = ["retomou a música.", "Música retomada"]
-        await self.interaction_message(inter, txt)
+        await self.interaction_message(inter, txt, rpc_update=True)
 
 
     @check_voice()
@@ -611,10 +606,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             f"{'avançou' if milliseconds > player.position else 'voltou'} o tempo da música para: {time_format(milliseconds)}",
             f"O tempo da música foi {'avançada' if milliseconds > player.position else 'retornada'} para: {time_format(milliseconds)}"
         ]
-        await self.interaction_message(inter, txt)
-
-        await asyncio.sleep(5)
-        self.bot.loop.create_task(player.process_rpc())
+        await self.interaction_message(inter, txt, rpc_update=True)
 
 
     @check_voice()
@@ -680,9 +672,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         embed.set_thumbnail(url=player.current.thumb)
         await inter.send(embed=embed, ephemeral=True)
 
-        self.bot.loop.create_task(player.process_rpc())
-
-        await player.update_message()
+        await player.update_message(rpc_update=True)
 
 
     @check_voice()
@@ -912,7 +902,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         txt = [f"{txt[0]} o efeito nightcore.", f"Efeito nightcore {txt[1]}."]
 
-        await self.interaction_message(inter, txt)
+        await self.interaction_message(inter, txt, rpc_update=True)
 
 
     @has_source()
@@ -1591,7 +1581,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             inter.player = self.bot.music.players.get(inter.guild.id)
 
 
-    async def interaction_message(self, inter: disnake.Interaction, txt, update=False):
+    async def interaction_message(self, inter: disnake.Interaction, txt, update=False, rpc_update=False):
 
         try:
             txt, txt_ephemeral = txt
@@ -1601,7 +1591,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         component_interaction = isinstance(inter, disnake.MessageInteraction)
 
         inter.player.command_log = f"{inter.author.mention} {txt}"
-        await inter.player.update_message(interaction=False if (update or not component_interaction) else inter)
+        await inter.player.update_message(interaction=False if (update or not component_interaction) else inter, rpc_update=rpc_update)
 
         if not component_interaction:
 
