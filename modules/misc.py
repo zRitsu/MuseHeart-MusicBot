@@ -8,7 +8,7 @@ import psutil
 import humanize
 from itertools import cycle
 from random import shuffle
-from os import getpid, environ
+from os import getpid
 import platform
 
 
@@ -39,13 +39,13 @@ class Misc(commands.Cog):
 
             activities = []
 
-            for i in environ.get("LISTENING_PRESENCES", "").split("||"):
+            for i in self.bot.config.get("LISTENING_PRESENCES", "").split("||"):
                 activities.append({"name":i, "type": "listening"})
 
-            for i in environ.get("WATCHING_PRESENCES", "").split("||"):
+            for i in self.bot.config.get("WATCHING_PRESENCES", "").split("||"):
                 activities.append({"name": i, "type": "watching"})
 
-            for i in environ.get("PLAYING_PRESENCES", "").split("||"):
+            for i in self.bot.config.get("PLAYING_PRESENCES", "").split("||"):
                 activities.append({"name": i, "type": "playing"})
 
             shuffle(activities)

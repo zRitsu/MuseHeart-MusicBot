@@ -1,5 +1,5 @@
 from json import load
-from dotenv import load_dotenv
+from dotenv import dotenv_values
 from os import environ
 
 def load_config():
@@ -11,6 +11,8 @@ def load_config():
         "IDLE_TIMEOUT": "180",
         "RPC_SERVER": "http://localhost:8080/ws",
         "EMBED_COLOR": None,
+        "SPOTIFY_CLIENT_ID": None,
+        "SPOTIFY_CLIENT_SECRET": None,
 
         # Local lavalink stuffs
         "START_LOCAL_LAVALINK": "true",
@@ -27,17 +29,10 @@ def load_config():
     except FileNotFoundError:
         pass
 
-    load_dotenv()
-
-    for cfg in list(CONFIGS) + ["TOKEN", "MONGO"]:
-        try:
-            CONFIGS[cfg] = environ[cfg]
-        except KeyError:
-            continue
-
-    for env in environ:
-        if env.lower().startswith("token_bot_"):
-            CONFIGS[env] = environ[env]
+    try:
+        CONFIGS.update(dotenv_values())
+    except:
+        pass
 
     CONFIGS["IDLE_TIMEOUT"] = int(CONFIGS["IDLE_TIMEOUT"])
 

@@ -128,12 +128,12 @@ async def process_spotify(bot: commands.bot, requester: disnake.Member, query: s
         return SpotifyPlaylist(data, requester=requester, playlist=playlist)
 
 
-def spotify_client() -> Optional[spotipy.Spotify]:
+def spotify_client(config: dict) -> Optional[spotipy.Spotify]:
     try:
         return spotipy.Spotify(
             auth_manager=SpotifyClientCredentials(
-                client_id=os.environ['SPOTIFY_CLIENT_ID'],
-                client_secret=os.environ["SPOTIFY_CLIENT_SECRET"]
+                client_id=config['SPOTIFY_CLIENT_ID'],
+                client_secret=config["SPOTIFY_CLIENT_SECRET"]
             )
         )
     except Exception as e:

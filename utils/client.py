@@ -6,9 +6,10 @@ from disnake.ext import commands
 import disnake
 from typing import Optional
 
+from spotipy import Spotify
+
 from web_app import WSClient
 from .music.models import music_mode
-from .music.spotify import spotify_client
 from utils.db import Database, LocalDatabase
 import os
 import traceback
@@ -19,8 +20,8 @@ class BotCore(commands.Bot):
         super().__init__(*args, **kwargs)
         self.session: Optional[aiohttp.ClientError] = None
         self.db: Optional[LocalDatabase, Database] = None
-        self.spotify = spotify_client()
         self.config = kwargs.pop('config', {})
+        self.spotify: Spotify = kwargs.pop('spotify', None)
         self.music = music_mode(self)
         self.session = aiohttp.ClientSession()
         self.color = kwargs.pop("embed_color", None)

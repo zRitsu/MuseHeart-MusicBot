@@ -7,6 +7,7 @@ from os import path
 from utils.music.local_lavalink import run_lavalink
 from utils.client import BotCore
 from utils.db import Database, LocalDatabase
+from utils.music.spotify import spotify_client
 from web_app import run_app
 from config_loader import load_config
 
@@ -26,6 +27,8 @@ mongo_key = CONFIGS.get("MONGO")
 
 if not mongo_key:
     print(f"Token do mongoDB não configurado! será usado um arquivo json para database.\n{'-'*30}")
+
+spotify = spotify_client(CONFIGS)
 
 try:
     commit = check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
@@ -66,6 +69,7 @@ def load_bot(bot_name: str, token: str, main=False):
         config=CONFIGS,
         color=CONFIGS["EMBED_COLOR"],
         commit=commit,
+        spotify=spotify,
         remote_git_url=remote_git_url,
         default_prefix=default_prefix,
     )
