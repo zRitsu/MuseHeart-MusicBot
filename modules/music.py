@@ -1795,7 +1795,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def track_start(self, node, payload: wavelink.TrackStart):
 
         player: LavalinkPlayer = payload.player
-        await player.invoke_np(force=True if (not player.loop or not player.is_last_message()) else False)
+        await player.invoke_np(force=True if (not player.loop or not player.is_last_message()) else False, rpc_update=True)
         player.command_log = ""
 
 

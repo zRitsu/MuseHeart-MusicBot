@@ -550,8 +550,6 @@ class LavalinkPlayer(wavelink.Player):
 
         await self.play(track)
 
-        self.bot.loop.create_task(self.process_rpc())
-
         self.is_previows_music = False
 
         self.locked = False
