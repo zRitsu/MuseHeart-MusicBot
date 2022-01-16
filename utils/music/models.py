@@ -140,6 +140,8 @@ class LavalinkPlayer(wavelink.Player):
         self.nonstop = False
         self.ws_client = None
 
+        print(f"Player Iniciado - Servidor: {self.guild.name} [{self.guild_id}]")
+
 
     def __str__(self) -> str:
         return f"Lavalink Player | Server: {self.node.identifier}"
@@ -586,6 +588,8 @@ class LavalinkPlayer(wavelink.Player):
             pass
 
         self.exiting = True
+
+        print(f"Player Finalizado - Servidor: {self.guild.name} [{self.guild_id}]")
 
         await super().destroy(force=force)
 
