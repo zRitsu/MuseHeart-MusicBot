@@ -33,13 +33,13 @@ class Owner(commands.Cog):
         txt = ""
 
         if data["loaded"]:
-            txt += f'```ini\n[Carregados]: {len(data["loaded"])}```\n'
+            txt += f'**Módulos carregados:** ```ansi\n[0;34m{" [0;37m| [0;34m".join(data["loaded"])}```\n'
 
         if data["reloaded"]:
-            txt += f'```ini\n[Recarregados]: {len(data["reloaded"])}```\n'
+            txt += f'**Módulos recarregados:** ```ansi\n[0;32m{" [0;37m| [0;32m".join(data["reloaded"])}```\n'
 
         if data["error"]:
-            txt += f'```ml\n\'Falharam\': {", ".join(m + ".py" for m in data["error"])}```'
+            txt += f'**Módulos que falharam:** ```ansi\n[0;31m{" [0;37m| [0;31m".join(data["error"])}```\n'
 
         if not txt:
             txt = "**Nenhum módulo encontrado...**"
