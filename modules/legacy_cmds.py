@@ -3,9 +3,16 @@ import subprocess
 import json
 import disnake
 from disnake.ext import commands
-import traceback
 from utils.client import BotCore
 from utils.music.errors import GenericError
+
+
+git_format = "--pretty=format:\"{%n  'commit': '%H',%n  'abbreviated_commit': '%h',%n  'tree': '%T',%n  " \
+             "'abbreviated_tree': '%t',%n  'parent': '%P',%n  'abbreviated_parent': '%p',%n  'refs': '%D',%n  " \
+             "'encoding': '%e',%n  'subject': '%s',%n  'sanitized_subject_line': '%f',%n  'body': '%b',%n  " \
+             "'commit_notes': '%N',%n  'verification_flag': '%G?',%n  'signer': '%GS',%n  'signer_key': " \
+             "'%GK',%n  'author': {%n    'name': '%aN',%n    'email': '%aE',%n    'date': '%aD'%n  }," \
+             "%n  'commiter': {%n    'name': '%cN',%n    'email': '%cE',%n    'date': '%cD'%n  }%n},\""
 
 
 def run_command(cmd):
@@ -76,12 +83,6 @@ class Owner(commands.Cog):
                 commit = l.replace("Updating ", "").replace("..", "...")
                 break
 
-        git_format = "--pretty=format:\"{%n  'commit': '%H',%n  'abbreviated_commit': '%h',%n  'tree': '%T',%n  " \
-                     "'abbreviated_tree': '%t',%n  'parent': '%P',%n  'abbreviated_parent': '%p',%n  'refs': '%D',%n  " \
-                     "'encoding': '%e',%n  'subject': '%s',%n  'sanitized_subject_line': '%f',%n  'body': '%b',%n  " \
-                     "'commit_notes': '%N',%n  'verification_flag': '%G?',%n  'signer': '%GS',%n  'signer_key': " \
-                     "'%GK',%n  'author': {%n    'name': '%aN',%n    'email': '%aE',%n    'date': '%aD'%n  }," \
-                     "%n  'commiter': {%n    'name': '%cN',%n    'email': '%cE',%n    'date': '%cD'%n  }%n},\""
         git_log = json.loads("[" + run_command(f"git log {commit} {git_format}").replace("'", "\"")[:-1] + "]")
 
         with open("requirements.txt") as f:
@@ -117,9 +118,9 @@ class Owner(commands.Cog):
 
         embed = disnake.Embed(
             color=self.bot.get_color(ctx.guild.me),
-            description="**Este comando não é mais necessário ser usado (A sincronização dos comandos agora é automático).**\n\n" \
+            description="**Este comando não é mais necessário ser usado (A sincronização dos comandos agora é automática).**\n\n" \
                         f"`Caso os comandos de barra não apareçam,` [`clique aqui`]({invite_url}) `para me permitir "
-                        f"permissão de criar comandos de barra no servidor.`\n\n" \
+                        f"criar comandos de barra no servidor.`\n\n" \
                         "`Nota: Em alguns casos os comandos de barra podem demorar até uma hora pra aparecer em todos "
                         "os servidores. Caso queira usar os comandos de barra imediatamente neste servidor você terá que "
                         "me expulsar do servidor e em seguida me adicionar novamente através deste` [`link`]({invite_url})..."
