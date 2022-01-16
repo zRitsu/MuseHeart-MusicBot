@@ -3,7 +3,7 @@ from subprocess import check_output
 
 import disnake
 from disnake.ext import commands
-from os import environ, path
+from os import path
 from utils.music.local_lavalink import run_lavalink
 from utils.client import BotCore
 from utils.db import Database, LocalDatabase
@@ -22,7 +22,7 @@ if CONFIGS['START_LOCAL_LAVALINK'] == "true":
 
 intents = disnake.Intents.all()
 
-mongo_key = environ.get("MONGO")
+mongo_key = CONFIGS.get("MONGO")
 
 if not mongo_key:
     print(f"Token do mongoDB não configurado! será usado um arquivo json para database.\n{'-'*30}")
@@ -98,12 +98,12 @@ def load_bot(bot_name: str, token: str, main=False):
 
     bots.append(bot)
 
-main_token = environ.get("TOKEN")
+main_token = CONFIGS.get("TOKEN")
 
 if main_token:
     load_bot("Main Bot", main_token, main=True)
 
-for k, v in environ.items():
+for k, v in CONFIGS.items():
 
     if not k.lower().startswith("token_bot_"):
         continue

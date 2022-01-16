@@ -29,7 +29,7 @@ def load_config():
 
     load_dotenv()
 
-    for cfg in CONFIGS:
+    for cfg in CONFIGS + ["TOKEN", "MONGO"]:
         try:
             CONFIGS[cfg] = environ[cfg]
         except KeyError:
