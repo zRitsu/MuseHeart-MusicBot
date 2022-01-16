@@ -176,9 +176,39 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             server=server
         )
 
+    @has_player()
+    @is_dj()
+    @commands.slash_command(description="Me conectar em um canal de voz (ou me mover para um).")
+    async def connect(
+            self,
+            inter: disnake.ApplicationCommandInteraction,
+            channel: Union[disnake.VoiceChannel, disnake.StageChannel] = commands.Param(name="canal", description="Canal para me conectar", default=None)
+    ):
+
+        player = inter.player
+
+        if not channel:
+            channel = inter.author.voice.channel
+
+        await player.connect(channel.id)
+
+        if inter.application_command == self.connect:
+            txt = [
+                f"{'me moveu para o' if channel != inter.guild.me.voice and inter.guild.me.voice.channel else 'me reconectou no'}"
+                f" canal <#{channel.id}>",
+                f"**Conectei no canal** <#{channel.id}>."
+            ]
+            await self.interaction_message(inter, txt, rpc_update=True)
+
+        if isinstance(channel, disnake.StageChannel):
+            await asyncio.sleep(1)
+            if inter.guild.me.guild_permissions.manage_guild:
+                await inter.guild.me.edit(suppress=False)
+            else:
+                await inter.guild.me.request_to_speak()
+
 
     @check_voice()
-    @can_send_message()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.slash_command(name="play", description="Tocar música em um canal de voz.")
     async def play(
@@ -359,14 +389,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await inter.edit_original_message(embed=embed, view=None)
 
         if not player.is_connected:
-            await player.connect(inter.author.voice.channel.id)
-
-            if isinstance(inter.author.voice.channel, disnake.StageChannel):
-                await asyncio.sleep(1)
-                if inter.guild.me.guild_permissions.manage_guild:
-                    await inter.guild.me.edit(suppress=False)
-                else:
-                    await inter.guild.me.request_to_speak()
+            inter.player = player
+            await self.connect(inter, channel=inter.author.voice.channel)
 
         if not player.current:
             await player.process_next()
