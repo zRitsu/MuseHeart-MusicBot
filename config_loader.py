@@ -23,6 +23,16 @@ def load_config():
         "LAVALINK_FILE_URL": "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/Lavalink.jar"
     }
 
+    for cfg in list(CONFIGS) + ["TOKEN", "MONGO"]:
+        try:
+            CONFIGS[cfg] = environ[cfg]
+        except KeyError:
+            continue
+
+    for env in environ:
+        if env.lower().startswith("token_bot_"):
+            CONFIGS[env] = environ[env]
+
     try:
         with open("config.json") as f:
             CONFIGS.update(load(f))
