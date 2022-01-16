@@ -29,11 +29,15 @@ def load_config():
 
     load_dotenv()
 
-    for cfg in CONFIGS + ["TOKEN", "MONGO"]:
+    for cfg in list(CONFIGS) + ["TOKEN", "MONGO"]:
         try:
             CONFIGS[cfg] = environ[cfg]
         except KeyError:
             continue
+
+    for env in environ:
+        if env.lower().startswith("token_bot_"):
+            CONFIGS[env] = environ[env]
 
     CONFIGS["IDLE_TIMEOUT"] = int(CONFIGS["IDLE_TIMEOUT"])
 
