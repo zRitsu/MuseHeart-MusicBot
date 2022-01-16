@@ -98,10 +98,11 @@ class LocalDatabase:
 
 class Database:
 
-    def __init__(self, token, name):
+    def __init__(self, bot: BotCore, token: str, name: str):
         self._connect = AsyncIOMotorClient(token, connectTimeoutMS=30000)
         self._database = self._connect[name]
         self.name = name
+        self.bot = bot
         self.cache = {
             'guilds': {},
             'users': {}
@@ -111,6 +112,23 @@ class Database:
 
         db = self._database[db_name]
         await db.insert_one(data)
+
+    async def update_from_json(self):
+
+        with open(f"./local_dbs/{self.bot.user.id}.json") as f:
+            json_data = json.load(f)
+
+        for db_name, db_data in json_data.items():
+
+            if not db_data:
+                continue
+
+            for id_, data in db_data.items():
+
+                if data == db_models["guilds"]:
+                    continue
+
+                await self.update_data(id_=id_, data=data, db_name=db_name)
 
     async def get_data(self, id_: int, *, db_name: Literal['users', 'guilds']):
 

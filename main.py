@@ -93,7 +93,7 @@ def load_bot(bot_name: str, token: str, main=False):
                 except AttributeError:
                     bot.owner = botowner.owner
 
-            bot.db = Database(token=mongo_key, name=str(bot.user.id)) if mongo_key \
+            bot.db = Database(bot=bot, token=mongo_key, name=str(bot.user.id)) if mongo_key \
                 else LocalDatabase(bot, rename_db=main and path.isfile("./database.json"))
 
             bot.loop.create_task(bot.ws_client.ws_loop())
