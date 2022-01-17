@@ -25,16 +25,6 @@ from utils.music.converters import time_format, fix_characters, string_to_second
     node_suggestions
 from utils.music.interactions import VolumeInteraction, QueueInteraction, send_message, SongSelect, SelectInteraction
 
-lavalink_servers = []
-
-for k, v in os.environ.items():
-    if not k.lower().startswith("lavalink_node_"):
-        continue
-    try:
-        lavalink_servers.append(json.loads(v))
-    except Exception as e:
-        print(f"Falha ao adicionar node: {k}, erro: {repr(e)}")
-
 
 PlayOpts = commands.option_enum(
     {
@@ -1632,8 +1622,14 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await self.bot.wait_until_ready()
 
-        for node in lavalink_servers:
-            self.bot.loop.create_task(self.connect_node(node))
+        for k,v in self.bot.config.items():
+
+            if not k.lower().startswith("lavalink_node_"):
+                continue
+            try:
+                self.bot.loop.create_task(self.connect_node(json.loads(v)))
+            except Exception as e:
+                print(f"Falha ao adicionar node: {k}, erro: {repr(e)}")
 
         if self.bot.config['START_LOCAL_LAVALINK'] == "true":
             self.bot.loop.create_task(self.connect_local_lavalink())
