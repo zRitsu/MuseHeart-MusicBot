@@ -9,7 +9,7 @@ def load_config():
         "DEFAULT_PREFIX": "!!!",
         "DEFAULT_SKIN": "default",
         "IDLE_TIMEOUT": "180",
-        "RPC_SERVER": "http://localhost:8080/ws",
+        "RPC_SERVER": "ws://localhost:8080/ws",
         "EMBED_COLOR": None,
         "SPOTIFY_CLIENT_ID": None,
         "SPOTIFY_CLIENT_SECRET": None,
