@@ -1655,6 +1655,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             backoff = 7
             retries = 1
 
+            print(f"{self.bot.user} - Iniciando servidor de música: {data['identifier']}")
+
             while not self.bot.is_closed():
                 if retries >= max_retries:
                     print(f"{self.bot.user} - Todas as tentativas de conectar ao servidor [{data['identifier']}] falharam.")
