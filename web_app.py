@@ -202,13 +202,13 @@ class WSClient:
                                 users.remove(i)
 
             except aiohttp.WSServerHandshakeError:
-                print(f"{self.bot.user} - Servidor offline, tentando conectar novamente ao server RPC em {self.backoff} segundos.")
+                print(f"{self.bot.user} - Servidor offline, tentando conectar novamente ao server RPC em {int(self.backoff)} segundos.")
             except Exception:
-                print(f"{self.bot.user} - Reconectando ao server RPC em {self.backoff} segundos.")
+                print(f"{self.bot.user} - Reconectando ao server RPC em {int(self.backoff)} segundos.")
 
             self.ready = False
             await asyncio.sleep(self.backoff)
-            self.backoff *= 1.5
+            self.backoff *= 2.5
 
 
 def run_ws_client(bot: BotCore):
