@@ -27,77 +27,59 @@ class IndexHandler(tornado.web.RequestHandler):
         self.write("olá :)")
         # self.render("index.html") #será implementado futuramente...
 
-users_ws = {}
-bots_ws = {}
+users_ws = []
+bots_ws = []
+
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.user_id: Optional[int] = None
-        self.is_bot: bool = False
+        self.user_ids = []
+        self.bot_id = None
 
     def on_message(self, message):
 
         data = json.loads(message)
 
-        user_id = data.get("user_id")
+        ws_id = data.get("user_ids")
         bot_id = data.get("bot_id")
 
-        if not user_id:
+        if not ws_id:
 
             if not bot_id:
-                stats = {
-                    "op": "error",
-                    "message": "Desconectado por falta de id de usuario..."
-                }
                 print(f"desconectando: por falta de id de usuario {self.request.remote_ip}\nDados: {data}")
-                self.write_message(json.dumps(stats))
-                self.close()
+                self.close(code=1005, reason="Desconectando: por falta de ids de usuario")
+                return
 
-            for u, ws in users_ws.items():
+            for ws in users_ws:
                 try:
                     ws.write_message(json.dumps(data))
                 except Exception as e:
-                    print(f"Erro ao processar dados do rpc para o user {u}: {repr(e)}")
+                    print(f"Erro ao processar dados do rpc para os users [{', '.join(ws.user_ids)}]: {repr(e)}")
 
             return
 
-        self.user_id = int(user_id)
+        is_bot = data.pop("bot", False)
 
-        self.is_bot = data.pop("bot", False)
-
-        if self.is_bot:
-            print(f"Nova conexão - Bot: {user_id} {self.request.remote_ip}")
-            try:
-                bots_ws[user_id].close()
-            except:
-                pass
-            try:
-                del bots_ws[user_id]
-            except:
-                pass
-            bots_ws[user_id] = self
+        if is_bot:
+            print(f"Nova conexão - Bot: {ws_id} {self.request.remote_ip}")
+            self.bot_id = ws_id
+            bots_ws.append(self)
             return
 
-        print(f"Nova conexão - User: {user_id} | {data}")
+        self.user_ids = ws_id
 
-        try:
-            del users_ws[user_id]
-        except:
-            pass
-        users_ws[user_id] = self
+        print("\n".join(f"Nova conexão - User: {u} | {data}" for u in self.user_ids))
 
-        if not bots_ws:
-            print(f"Não há conexões ws com bots pra processar rpc do user: {user_id}")
-            return
-
-        for i, b in bots_ws.items():
+        for w in bots_ws:
             try:
-                b.write_message(json.dumps(data))
-                print(f"dados [{data}] enviados ao bot: {i}")
+                w.write_message(json.dumps(data))
+                print(f"dados enviados ao bot: {w.bot_id} {data}")
             except Exception as e:
-                print(f"Erro ao processar dados do rpc para o bot {user_id}: {repr(e)}")
+                print(f"Erro ao processar dados do rpc para o bot {w.bot_id}: {repr(e)}")
+
+        users_ws.append(self)
 
 
     def check_origin(self, origin: str):
@@ -105,46 +87,27 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def on_close(self):
 
-        if not self.user_id:
-            print(f"Conexão Finalizada - IP: {self.request.remote_ip}")
+        if self.user_ids:
+            print("\n".join(f"Conexão Finalizada - User: {u}" for u in self.user_ids))
+            users_ws.remove(self)
             return
 
-        if self.is_bot:
-
-            # método temporário pra corrigir um problema ao logar múltiplos bots no mesmo ip.
-            for i in list(bots_ws):
-
-                try:
-                    b = bots_ws[i]
-                except KeyError:
-                    continue
-
-                if self.request.remote_ip != b.request.remote_ip:
-                    continue
-
-                print(f"Conexão Finalizada - Bot: {i}")
-
-                try:
-                    del bots_ws[i]
-                except:
-                    pass
-
-                data = {"op": "close", "bot_id": i}
-
-                for i, w in users_ws.items():
-                    try:
-                        w.write_message(data)
-                    except Exception as e:
-                        print(f"Erro ao processar dados do rpc para o user {i}: {repr(e)}")
+        if not self.bot_id:
+            print(f"Conexão Finalizada - IP: {self.request.remote_ip}")
 
         else:
 
-            print(f"Conexão Finalizada - User: {self.user_id}")
+            print(f"Conexão Finalizada - Bot: {self.bot_id}")
 
-            try:
-                del users_ws[self.user_id]
-            except:
-                pass
+            data = {"op": "close", "bot_id": self.bot_id}
+
+            for w in users_ws:
+                try:
+                    w.write_message(data)
+                except Exception as e:
+                    print(f"Erro ao processar dados do rpc para os usuários: [{', '.join(w.user_ids)}]: {repr(e)}")
+
+        bots_ws.remove(self)
 
 
 class WSClient:
@@ -168,7 +131,7 @@ class WSClient:
         print(f"{self.bot.user} - RPC client conectado")
 
         await self.bot.wait_until_ready()
-        await self.send({"user_id": self.bot.user.id, "bot": True})
+        await self.send({"user_ids": self.bot.user.id, "bot": True})
 
         for player in self.bot.music.players.values():
             self.bot.loop.create_task(player.process_rpc(player.guild.me.voice.channel))
@@ -198,6 +161,7 @@ class WSClient:
         try:
             await self.connection.send_json(data)
         except:
+            traceback.print_exc()
             self.ready = False
             await self.send(data)
 
@@ -220,35 +184,26 @@ class WSClient:
 
                 data = json.loads(message.data)
 
-                user_id = int(data.get("user_id", 0))
+                users: list = data.get("users")
 
-                if not user_id:
+                if not users:
                     continue
 
                 op = data.get("op")
 
                 if op == "rpc_update":
 
-                    player: Optional[LavalinkPlayer] = None
-
-                    voice_channel: Optional[disnake.VoiceChannel] = None
-
-                    for p in self.bot.music.players.values():
-                        vc = p.bot.get_channel(p.channel_id)
-                        if user_id in [m.id for m in vc.members]:
-                            player = p
-                            voice_channel = vc
-                            break
-
-                    if player and voice_channel:
-
-                        if [m.id for m in voice_channel.members if m.id == user_id]:
-                            self.bot.loop.create_task(player.process_rpc(voice_channel))
+                    for player in self.bot.music.players.values():
+                        vc: disnake.VoiceChannel = player.bot.get_channel(player.channel_id)
+                        vc_user_ids = [m.id for m in vc.members if m.id in users]
+                        if vc_user_ids:
+                            self.bot.loop.create_task(player.process_rpc(vc))
+                            for i in vc_user_ids:
+                                users.remove(i)
 
             except aiohttp.WSServerHandshakeError:
                 print(f"{self.bot.user} - Servidor offline, tentando conectar novamente ao server RPC em {self.backoff} segundos.")
             except Exception:
-                #traceback.print_exc()
                 print(f"{self.bot.user} - Reconectando ao server RPC em {self.backoff} segundos.")
 
             self.ready = False

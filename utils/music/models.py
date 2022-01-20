@@ -448,9 +448,8 @@ class LavalinkPlayer(wavelink.Player):
 
             track: Optional[LavalinkTrack, SpotifyTrack] = self.current
 
-            stats["thumb"] = track.thumb
-
             stats["track"] = {
+                "thumb": track.thumb,
                 "title": track.title,
                 "url": track.uri,
                 "author": track.author,
