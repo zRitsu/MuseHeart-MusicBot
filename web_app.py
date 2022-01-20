@@ -75,7 +75,6 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         for w in bots_ws:
             try:
                 w.write_message(json.dumps(data))
-                print(f"dados enviados ao bot: {w.bot_id} {data}")
             except Exception as e:
                 print(f"Erro ao processar dados do rpc para o bot {w.bot_id}: {repr(e)}")
 
