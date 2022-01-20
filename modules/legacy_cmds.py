@@ -1,6 +1,7 @@
 import os
 import subprocess
 import json
+import traceback
 import disnake
 from disnake.ext import commands
 from utils.client import BotCore
@@ -83,7 +84,11 @@ class Owner(commands.Cog):
                 commit = l.replace("Updating ", "").replace("..", "...")
                 break
 
-        git_log = json.loads("[" + run_command(f"git log {commit} {git_format}").replace("'", "\"")[:-1] + "]")
+        try:
+            git_log = json.loads("[" + run_command(f"git log {commit} {git_format}").replace("'", "\"")[:-1] + "]")
+        except:
+            traceback.print_exc()
+            git_log = []
 
         with open("requirements.txt") as f:
             new_req = f.read()
