@@ -120,10 +120,10 @@ class Owner(commands.Cog):
             color=self.bot.get_color(ctx.guild.me),
             description="**Este comando não é mais necessário ser usado (A sincronização dos comandos agora é automática).**\n\n" \
                         f"`Caso os comandos de barra não apareçam,` [`clique aqui`]({invite_url}) `para me permitir "
-                        f"criar comandos de barra no servidor.`\n\n" \
+                        "criar comandos de barra no servidor.`\n\n" \
                         "`Nota: Em alguns casos os comandos de barra podem demorar até uma hora pra aparecer em todos "
                         "os servidores. Caso queira usar os comandos de barra imediatamente neste servidor você terá que "
-                        "me expulsar do servidor e em seguida me adicionar novamente através deste` [`link`]({invite_url})..."
+                        f"me expulsar do servidor e em seguida me adicionar novamente através deste` [`link`]({invite_url})..."
         )
 
         await ctx.send(embed=embed)
