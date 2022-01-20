@@ -183,7 +183,7 @@ class WSClient:
 
                 data = json.loads(message.data)
 
-                users: list = data.get("users")
+                users: list = data.get("user_ids")
 
                 if not users:
                     continue
@@ -191,6 +191,8 @@ class WSClient:
                 op = data.get("op")
 
                 if op == "rpc_update":
+
+                    print("aaaaa", print(users))
 
                     for player in self.bot.music.players.values():
                         vc: disnake.VoiceChannel = player.bot.get_channel(player.channel_id)
