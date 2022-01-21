@@ -424,7 +424,6 @@ class LavalinkPlayer(wavelink.Player):
                 "guild": {
                     "name": voice_channel.guild.name,
                     "id": voice_channel.guild.id,
-                    "vc_url": f"http://discordapp.com/channels/{self.guild_id}/{self.channel_id}"
                 }
             }
         }
