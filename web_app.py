@@ -192,8 +192,6 @@ class WSClient:
 
                 if op == "rpc_update":
 
-                    print("aaaaa", print(users))
-
                     for player in self.bot.music.players.values():
                         vc: disnake.VoiceChannel = player.bot.get_channel(player.channel_id)
                         vc_user_ids = [m.id for m in vc.members if m.id in users]
