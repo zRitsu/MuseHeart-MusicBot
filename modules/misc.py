@@ -72,6 +72,21 @@ class Misc(commands.Cog):
             await asyncio.sleep(300)
 
 
+    @commands.Cog.listener("on_guild_join")
+    async def bot_add(self, guild: disnake.Guild):
+
+        if not guild.system_channel:
+            return
+
+        embed = disnake.Embed(
+            description="Olá.\nPara ver todos os meus meus comandos use **/**\n\n"
+                        f"Caso os comandos não apareçam, use o comando:\n{self.bot.default_prefix}syncguild",
+            color=self.bot.get_color(guild.me)
+        )
+
+        await guild.system_channel.send(embed=embed)
+
+
     @commands.slash_command(description="Exibir informações sobre mim.")
     async def about(self, inter: disnake.ApplicationCommandInteraction):
 
