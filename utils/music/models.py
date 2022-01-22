@@ -367,6 +367,19 @@ class LavalinkPlayer(wavelink.Player):
             except:
                 pass
 
+        elif self.has_thread:
+            try:
+                channel: disnake.Thread = self.bot.get_channel(self.message.id)
+                await channel.send(
+                    embed=disnake.Embed(
+                        description="**Player finalizado.**",
+                        color=self.bot.get_color(self.guild.me)
+                    )
+                )
+                await channel.edit(archived=True)
+            except:
+                pass
+
         try:
             await self.destroy_message()
         except:

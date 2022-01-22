@@ -1944,9 +1944,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.Cog.listener("on_thread_delete")
     async def player_thread_delete(self, thread: disnake.Thread):
 
-        player: LavalinkPlayer = None
+        player: Optional[LavalinkPlayer] = None
 
         if not player:
+            return
+
+        if player.exiting:
             return
 
         if thread.id != player.message.id:
