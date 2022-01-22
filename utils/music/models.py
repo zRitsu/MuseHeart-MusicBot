@@ -397,6 +397,7 @@ class LavalinkPlayer(wavelink.Player):
             stats = {
                 "op": "close",
                 "bot_id": self.bot.user.id,
+                "bot_name": str(self.bot.user),
                 "thumb": thumb,
                 "users": [u.id for u in users or voice_channel.members]
             }
@@ -414,6 +415,7 @@ class LavalinkPlayer(wavelink.Player):
             "op": "update",
             "track": None,
             "bot_id": self.bot.user.id,
+            "bot_name": str(self.bot.user),
             "users": [m.id for m in (users or voice_channel.members) if not m.bot],
             "thumb": thumb,
             "info": {
@@ -439,6 +441,7 @@ class LavalinkPlayer(wavelink.Player):
                 {
                     "op": "idle",
                     "bot_id": self.bot.user.id,
+                    "bot_name": str(self.bot.user),
                     "public": (await self.bot.application_info()).bot_public
                 }
             )
