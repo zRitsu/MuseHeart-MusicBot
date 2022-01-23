@@ -40,13 +40,16 @@ class Misc(commands.Cog):
             activities = []
 
             for i in self.bot.config.get("LISTENING_PRESENCES", "").split("||"):
-                activities.append({"name":i, "type": "listening"})
+                if i:
+                    activities.append({"name":i, "type": "listening"})
 
             for i in self.bot.config.get("WATCHING_PRESENCES", "").split("||"):
-                activities.append({"name": i, "type": "watching"})
+                if i:
+                    activities.append({"name": i, "type": "watching"})
 
             for i in self.bot.config.get("PLAYING_PRESENCES", "").split("||"):
-                activities.append({"name": i, "type": "playing"})
+                if i:
+                    activities.append({"name": i, "type": "playing"})
 
             shuffle(activities)
 
