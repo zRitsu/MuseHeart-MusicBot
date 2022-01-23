@@ -214,8 +214,7 @@ def run_ws_client(bot: BotCore):
     bot.loop.create_task(bot.ws_client.ws_loop())
 
 
-def run_app(bots: list):
-    WebSocketHandler.bots = bots
+def run_app():
     app = tornado.web.Application([
         (r'/', IndexHandler),
         (r'/ws', WebSocketHandler),
@@ -227,5 +226,5 @@ def run_app(bots: list):
 if __name__ == '__main__':
     run_app([])
     time.sleep(3)
-    run_ws_client("http://localhost:8080", [])
+    run_ws_client("http://localhost:8080")
     tornado.ioloop.IOLoop.instance().start()
