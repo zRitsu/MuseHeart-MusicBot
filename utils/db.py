@@ -3,7 +3,8 @@ import asyncio
 import collections.abc
 import json
 import os
-
+import disnake
+from disnake.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 from typing import Literal, TYPE_CHECKING
 if TYPE_CHECKING:
@@ -12,7 +13,8 @@ if TYPE_CHECKING:
 
 db_models = {
       "guilds": {
-        "ver": 1.1,
+        "ver": 1.2,
+        "prefix": "",
         "player_controller": {
             "channel": None,
             "message_id": None,
@@ -23,16 +25,32 @@ db_models = {
 }
 
 
-class LocalDatabase:
+async def guild_prefix(bot: BotCore, message: disnake.Message):
+    if not message.guild:
+        prefixes = (bot.default_prefix,)
+    else:
+        data = await bot.db.get_data(message.guild.id, db_name="guilds")
+        prefixes = (data.get("prefix", bot.default_prefix), )
 
-    def __init__(self, bot: BotCore, rename_db: bool = False):
+    return commands.when_mentioned_or(*prefixes)(bot, message)
 
+
+class BaseDB:
+
+    def __init__(self, bot: BotCore):
         self.bot = bot
-
+        self.db_models = db_models
+        self.db_models["prefix"] = self.bot.default_prefix or bot.config["DEFAULT_PREFIX"]
         self.data = {
             'guilds': {},
             'users': {}
         }
+
+
+class LocalDatabase(BaseDB):
+
+    def __init__(self, bot: BotCore, rename_db: bool = False):
+        super().__init__(bot)
 
         self.file_update = 0
         self.data_update = 0
@@ -75,12 +93,12 @@ class LocalDatabase:
 
         if not data:
 
-            data = dict(db_models[db_name])
+            data = dict(self.db_models[db_name])
 
-        elif data["ver"] < db_models[db_name]["ver"]:
+        elif data["ver"] < self.db_models[db_name]["ver"]:
 
-            data = update_values(dict(db_models[db_name]), data)
-            data["ver"] = db_models[db_name]["ver"]
+            data = update_values(dict(self.db_models[db_name]), data)
+            data["ver"] = self.db_models[db_name]["ver"]
 
             await self.update_data(id_, data, db_name=db_name)
 
@@ -96,17 +114,13 @@ class LocalDatabase:
         self.data_update += 1
 
 
-class Database:
+class MongoDatabase(BaseDB):
 
     def __init__(self, bot: BotCore, token: str, name: str):
+        super().__init__(bot)
         self._connect = AsyncIOMotorClient(token, connectTimeoutMS=30000)
         self._database = self._connect[name]
         self.name = name
-        self.bot = bot
-        self.cache = {
-            'guilds': {},
-            'users': {}
-        }
 
     async def push_data(self, data, db_name: Literal['users', 'guilds']):
 
@@ -125,7 +139,7 @@ class Database:
 
             for id_, data in db_data.items():
 
-                if data == db_models["guilds"]:
+                if data == self.db_models["guilds"]:
                     continue
 
                 await self.update_data(id_=id_, data=data, db_name=db_name)
@@ -136,24 +150,24 @@ class Database:
 
         id_ = str(id_)
 
-        data = self.cache[db_name].get(id_)
+        data = self.data[db_name].get(id_)
 
         if not data:
 
             data = await db.find_one({"_id": id_})
 
             if not data:
-                data = dict(db_models[db_name])
+                data = dict(self.db_models[db_name])
                 data['_id'] = id_
                 await self.push_data(data, db_name)
 
-            elif data["ver"] < db_models[db_name]["ver"]:
-                data = update_values(dict(db_models[db_name]), data)
-                data["ver"] = db_models[db_name]["ver"]
+            elif data["ver"] < self.db_models[db_name]["ver"]:
+                data = update_values(dict(self.db_models[db_name]), data)
+                data["ver"] = self.db_models[db_name]["ver"]
 
                 await self.update_data(id_, data, db_name=db_name)
 
-            self.cache[db_name][id_] = data
+            self.data[db_name][id_] = data
 
         return data
 
@@ -165,7 +179,7 @@ class Database:
         id_ = str(id_)
 
         d = await db.update_one({'_id': id_}, {'$set': data}, upsert=False)
-        self.cache[db_name][id_] = data
+        self.data[db_name][id_] = data
         return d
 
 

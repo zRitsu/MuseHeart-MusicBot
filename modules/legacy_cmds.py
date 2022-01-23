@@ -155,12 +155,36 @@ class Owner(commands.Cog):
             if cmd.description:
                 embed.description += f" ```ldif\n{cmd.description}```"
 
+            if cmd.usage:
+                embed.description += f" ```ldif\n{self.bot.default_prefix}{cmd.name} {cmd.usage}```"
+
             embed.description += "\n"
 
         if self.bot.slash_commands:
             embed.description += "`Veja meus comandos de barra usando:` **/**"
 
         await ctx.reply(embed=embed)
+
+
+    @commands.has_guild_permissions(administrator=True)
+    @commands.cooldown(1, 10, commands.BucketType.guild)
+    @commands.command(
+        aliases=["mudarprefixo", "prefix", "changeprefix"],
+        description="Alterar o prefixo do servidor",
+        usage="prefixo"
+    )
+    async def setprefix(self, ctx: commands.Context, prefix: str):
+
+        data = await self.bot.db.get_data(ctx.guild.id, db_name="guilds")
+        data["prefix"] = prefix
+        await self.bot.db.update_data(ctx.guild.id, data, db_name="guilds")
+
+        embed = disnake.Embed(
+            description=f"**Prefixo do servidor agora é:** {prefix}",
+            color=self.bot.get_color(ctx.guild.me)
+        )
+
+        await ctx.send(embed=embed)
 
 
 def setup(bot: BotCore):

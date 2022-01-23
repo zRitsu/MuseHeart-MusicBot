@@ -1,12 +1,10 @@
 import asyncio
 from subprocess import check_output
-
 import disnake
-from disnake.ext import commands
 from os import path
 from utils.music.local_lavalink import run_lavalink
 from utils.client import BotCore
-from utils.db import Database, LocalDatabase
+from utils.db import MongoDatabase, LocalDatabase, guild_prefix
 from utils.music.spotify import spotify_client
 from web_app import run_app
 from config_loader import load_config
@@ -26,16 +24,16 @@ intents = disnake.Intents.all()
 mongo_key = CONFIGS.get("MONGO")
 
 if not mongo_key:
-    print(f"Token do mongoDB não configurado! será usado um arquivo json para database.\n{'-'*30}")
+    print(f"Token do mongoDB não configurado! será usado um arquivo json para database.\n{'-' * 30}")
 
 spotify = spotify_client(CONFIGS)
 
 try:
     commit = check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
-    print(f"Commit ver: {commit}\n{'-'*30}")
+    print(f"Commit ver: {commit}\n{'-' * 30}")
 except:
     commit = None
-    
+
 try:
     remote_git_url = check_output(['git', 'remote', '-v']).decode(
         'ascii').strip().split("\n")[0][7:].replace(".git (fetch)", "")
@@ -44,26 +42,18 @@ except:
 
 bots = []
 
+
 def load_bot(bot_name: str, token: str, main=False):
-
-    if main:
+    try:
+        token, default_prefix = token.split()[:2]
+    except:
         default_prefix = CONFIGS["DEFAULT_PREFIX"]
-        prefix = commands.when_mentioned_or(default_prefix)
-
-    else:
-
-        try:
-            token, default_prefix = token.split()[:2]
-            prefix = commands.when_mentioned_or(default_prefix)
-        except:
-            prefix = commands.when_mentioned
-            default_prefix = None
 
     bot = BotCore(
-        command_prefix=prefix,
+        command_prefix=guild_prefix,
         case_insensitive=True,
         intents=intents,
-        #test_guilds=[],
+        # test_guilds=[],
         sync_commands=True,
         sync_commands_debug=True,
         config=CONFIGS,
@@ -93,7 +83,7 @@ def load_bot(bot_name: str, token: str, main=False):
                 except AttributeError:
                     bot.owner = botowner.owner
 
-            bot.db = Database(bot=bot, token=mongo_key, name=str(bot.user.id)) if mongo_key \
+            bot.db = MongoDatabase(bot=bot, token=mongo_key, name=str(bot.user.id)) if mongo_key \
                 else LocalDatabase(bot, rename_db=main and path.isfile("./database.json"))
 
             bot.loop.create_task(bot.ws_client.ws_loop())
@@ -101,6 +91,7 @@ def load_bot(bot_name: str, token: str, main=False):
             bot.bot_ready = True
 
     bots.append(bot)
+
 
 main_token = CONFIGS.get("TOKEN")
 
@@ -119,11 +110,12 @@ for k, v in CONFIGS.items():
 if not bots:
     raise Exception("O token do bot não foi configurado devidamente!")
 
-async def start_bots():
 
+async def start_bots():
     await asyncio.wait(
         [asyncio.create_task(bot.start(bot.token)) for bot in bots]
     )
+
 
 run_app()
 

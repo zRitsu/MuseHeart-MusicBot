@@ -1,16 +1,13 @@
 from __future__ import annotations
 from importlib import import_module
-
 import aiohttp
 from disnake.ext import commands
 import disnake
 from typing import Optional
-
 from spotipy import Spotify
-
 from web_app import WSClient
 from .music.models import music_mode
-from utils.db import Database, LocalDatabase
+from utils.db import MongoDatabase, LocalDatabase
 import os
 import traceback
 
@@ -19,7 +16,7 @@ class BotCore(commands.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.session: Optional[aiohttp.ClientError] = None
-        self.db: Optional[LocalDatabase, Database] = None
+        self.db: Optional[LocalDatabase, MongoDatabase] = None
         self.config = kwargs.pop('config', {})
         self.spotify: Spotify = kwargs.pop('spotify', None)
         self.music = music_mode(self)
@@ -34,6 +31,7 @@ class BotCore(commands.Bot):
         self.default_prefix = kwargs.get("default_prefix", None)
         self.ws_client = WSClient(self.config["RPC_SERVER"], bot=self)
         self.uptime = disnake.utils.utcnow()
+
 
     def load_skins(self):
 
