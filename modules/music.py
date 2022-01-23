@@ -1377,6 +1377,16 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await thread.edit(archived=True, locked=True, name=f"arquivado: {thread.name}")
 
 
+    @commands.Cog.listener()
+    async def on_ready(self):
+
+        for player in self.bot.music.players.values():
+            try:
+                await player.connect(player.channel_id)
+            except:
+                traceback.print_exc()
+
+
     @commands.Cog.listener("on_message")
     async def song_requests(self, message: disnake.Message):
 

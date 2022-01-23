@@ -3,10 +3,8 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-import pprint
-import time
 import traceback
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import aiohttp
 import disnake
@@ -15,7 +13,6 @@ import tornado.web
 import tornado.websocket
 
 if TYPE_CHECKING:
-    from utils.music.models import LavalinkPlayer
     from utils.client import BotCore
 
 
