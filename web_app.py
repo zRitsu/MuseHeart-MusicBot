@@ -210,10 +210,6 @@ class WSClient:
             self.backoff *= 2.5
 
 
-def run_ws_client(bot: BotCore):
-    bot.loop.create_task(bot.ws_client.ws_loop())
-
-
 def run_app():
     app = tornado.web.Application([
         (r'/', IndexHandler),
@@ -224,7 +220,5 @@ def run_app():
 
 
 if __name__ == '__main__':
-    run_app([])
-    time.sleep(3)
-    run_ws_client("http://localhost:8080")
+    run_app()
     tornado.ioloop.IOLoop.instance().start()
