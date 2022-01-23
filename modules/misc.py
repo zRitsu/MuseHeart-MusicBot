@@ -73,7 +73,7 @@ class Misc(commands.Cog):
 
 
     @commands.Cog.listener("on_guild_join")
-    async def bot_add(self, guild: disnake.Guild):
+    async def guild_add(self, guild: disnake.Guild):
 
         if not guild.system_channel:
             return
