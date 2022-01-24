@@ -48,7 +48,7 @@ class BaseDB:
     def __init__(self, bot: BotCore):
         self.bot = bot
         self.db_models = dict(db_models)
-        self.db_models["prefix"] = bot.config["DEFAULT_PREFIX"]
+        self.db_models["prefix"] = bot.default_prefix or bot.config["DEFAULT_PREFIX"]
         self.data = {
             'guilds': {},
             'users': {}
