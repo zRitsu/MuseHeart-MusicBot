@@ -36,7 +36,7 @@ async def guild_prefix(bot: BotCore, message: disnake.Message):
         prefix = data.get("prefix", bot.default_prefix)
 
         if not prefix:
-            prefix = bot.default_prefix or "!!!"
+            prefix = bot.default_prefix
             data["prefix"] = prefix
             await bot.db.update_data(message.guild.id, data, db_name="guilds")
 
@@ -48,7 +48,7 @@ class BaseDB:
     def __init__(self, bot: BotCore):
         self.bot = bot
         self.db_models = dict(db_models)
-        self.db_models["prefix"] = bot.default_prefix or bot.config["DEFAULT_PREFIX"]
+        self.db_models["prefix"] = bot.default_prefix
         self.data = {
             'guilds': {},
             'users': {}

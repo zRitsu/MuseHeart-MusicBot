@@ -18,7 +18,7 @@ class BotCore(commands.Bot):
         self.session: Optional[aiohttp.ClientError] = None
         self.db: Optional[LocalDatabase, MongoDatabase] = None
         self.config = kwargs.pop('config', {})
-        self.default_prefix = self.config["DEFAULT_PREFIX"] or "!!!"
+        self.default_prefix = kwargs.pop("default_prefix", "!!!")
         self.spotify: Spotify = kwargs.pop('spotify', None)
         self.music = music_mode(self)
         self.session = aiohttp.ClientSession()
