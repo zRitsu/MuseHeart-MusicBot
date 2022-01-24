@@ -1509,7 +1509,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         try:
             if message.guild.me.voice.channel != message.author.voice.channel:
-                raise GenericError(f"Você deve entrar no canal <{message.guild.me.voice.channel.id}> para pedir uma música.")
+                raise GenericError(f"Você deve entrar no canal <#{message.guild.me.voice.channel.id}> para pedir uma música.")
         except AttributeError:
             pass
 
