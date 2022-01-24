@@ -18,6 +18,7 @@ class BotCore(commands.Bot):
         self.session: Optional[aiohttp.ClientError] = None
         self.db: Optional[LocalDatabase, MongoDatabase] = None
         self.config = kwargs.pop('config', {})
+        self.default_prefix = self.config["DEFAULT_PREFIX"] or "!!!"
         self.spotify: Spotify = kwargs.pop('spotify', None)
         self.music = music_mode(self)
         self.session = aiohttp.ClientSession()
@@ -28,7 +29,6 @@ class BotCore(commands.Bot):
         self.load_skins()
         self.commit = kwargs.get("commit", "N/A")
         self.remote_git_url = kwargs.get("remote_git_url", "")
-        self.default_prefix = kwargs.get("default_prefix", None)
         self.ws_client = WSClient(self.config["RPC_SERVER"], bot=self)
         self.uptime = disnake.utils.utcnow()
 

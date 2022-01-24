@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 db_models = {
       "guilds": {
         "ver": 1.2,
-        "prefix": "",
+        "prefix": "!!!",
         "player_controller": {
             "channel": None,
             "message_id": None,
@@ -27,20 +27,28 @@ db_models = {
 
 async def guild_prefix(bot: BotCore, message: disnake.Message):
     if not message.guild:
-        prefixes = (bot.default_prefix,)
-    else:
-        data = await bot.db.get_data(message.guild.id, db_name="guilds")
-        prefixes = (data.get("prefix", bot.default_prefix), )
+        prefix = bot.default_prefix
 
-    return commands.when_mentioned_or(*prefixes)(bot, message)
+    else:
+
+        data = await bot.db.get_data(message.guild.id, db_name="guilds")
+
+        prefix = data.get("prefix", bot.default_prefix)
+
+        if not prefix:
+            prefix = bot.default_prefix or "!!!"
+            data["prefix"] = prefix
+            await bot.db.update_data(message.guild.id, data, db_name="guilds")
+
+    return commands.when_mentioned_or(*(prefix, ))(bot, message)
 
 
 class BaseDB:
 
     def __init__(self, bot: BotCore):
         self.bot = bot
-        self.db_models = db_models
-        self.db_models["prefix"] = self.bot.default_prefix or bot.config["DEFAULT_PREFIX"]
+        self.db_models = dict(db_models)
+        self.db_models["prefix"] = bot.config["DEFAULT_PREFIX"]
         self.data = {
             'guilds': {},
             'users': {}

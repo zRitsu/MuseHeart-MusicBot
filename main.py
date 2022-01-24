@@ -45,7 +45,7 @@ bots = []
 
 def load_bot(bot_name: str, token: str, main=False):
     try:
-        token, default_prefix = token.split()[:2]
+        token, default_prefix = token.split()
     except:
         default_prefix = CONFIGS["DEFAULT_PREFIX"]
 
