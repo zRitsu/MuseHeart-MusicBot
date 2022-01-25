@@ -20,7 +20,9 @@ logging.getLogger('tornado.access').disabled = True
 
 try:
     # repl.it stuff
-    index_message = f"<br><br>Link para RPC:<br>wss://{environ['REPL_SLUG']}.{environ['REPL_OWNER']}.repl.co:443/ws"
+    index_message = f"<br><br>Link para RPC:<br>wss://{environ['REPL_SLUG']}.{environ['REPL_OWNER']}.repl.co:443/ws" \
+                    f"<br><p><a href=\"https://github.com/zRitsu/DC-MusicBot-RPC/releases\" target=\"_blank\">" \
+                    f"Baixe o app de rich presence aqui.</a></p>"
 except KeyError:
     index_message = ""
 
