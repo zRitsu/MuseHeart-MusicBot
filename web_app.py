@@ -5,7 +5,7 @@ import json
 import logging
 import traceback
 from typing import TYPE_CHECKING
-
+from os import environ
 import aiohttp
 import disnake
 import tornado.ioloop
@@ -18,14 +18,20 @@ if TYPE_CHECKING:
 
 logging.getLogger('tornado.access').disabled = True
 
-
-class IndexHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.write("olá :)")
-        # self.render("index.html") #será implementado futuramente...
+try:
+    # repl.it stuff
+    index_message = f"\n\nLink para RPC:\nwss://{environ['REPL_OWNER']}.{environ['REPL_OWNER']}.repl.co:443/ws"
+except KeyError:
+    index_message = ""
 
 users_ws = []
 bots_ws = []
+
+
+class IndexHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.write(f"olá :){index_message}")
+        # self.render("index.html") #será implementado futuramente...
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):

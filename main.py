@@ -14,7 +14,6 @@ CONFIGS = load_config()
 if not CONFIGS["DEFAULT_PREFIX"]:
     CONFIGS["DEFAULT_PREFIX"] = "!!!"
 
-
 if CONFIGS['START_LOCAL_LAVALINK'] == "true":
     run_lavalink(
         lavalink_file_url=CONFIGS['LAVALINK_FILE_URL'],
