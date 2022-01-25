@@ -20,7 +20,7 @@ logging.getLogger('tornado.access').disabled = True
 
 try:
     # repl.it stuff
-    index_message = f"<br><br>Link para RPC:<br>wss://{environ['REPL_OWNER']}.{environ['REPL_OWNER']}.repl.co:443/ws"
+    index_message = f"<br><br>Link para RPC:<br>wss://{environ['REPL_SLUG']}.{environ['REPL_OWNER']}.repl.co:443/ws"
 except KeyError:
     index_message = ""
 
