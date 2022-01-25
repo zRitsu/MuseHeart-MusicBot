@@ -85,7 +85,8 @@ class Owner(commands.Cog):
                 break
 
         try:
-            git_log = json.loads("[" + run_command(f"git log {commit} {git_format}").replace("'", "\"")[:-1] + "]")
+            git_log = json.loads("[" + run_command(f"git log {commit} {git_format}").replace("'", "\"")
+                                 .replace(':', '.')[:-1] + "]")
         except:
             traceback.print_exc()
             git_log = []
