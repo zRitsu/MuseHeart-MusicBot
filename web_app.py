@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 import asyncio
 import json
 import logging
@@ -12,27 +11,54 @@ import tornado.ioloop
 import tornado.web
 import tornado.websocket
 
+
 if TYPE_CHECKING:
     from utils.client import BotCore
 
 
 logging.getLogger('tornado.access').disabled = True
 
-try:
-    # repl.it stuff
-    index_message = f"<br><br>Link para RPC:<br>wss://{environ['REPL_SLUG']}.{environ['REPL_OWNER']}.repl.co:443/ws" \
-                    f"<br><p><a href=\"https://github.com/zRitsu/DC-MusicBot-RPC/releases\" target=\"_blank\">" \
-                    f"Baixe o app de rich presence aqui.</a></p>"
-except KeyError:
-    index_message = ""
-
 users_ws = []
 bots_ws = []
 
 
 class IndexHandler(tornado.web.RequestHandler):
+
+    def initialize(self, bots: list, ws_url: str):
+        self.bots = bots
+        self.ws_url = ws_url
+        self.text = ""
+
+    async def prepare(self):
+
+        cells = ""
+
+        for bot in self.bots:
+            await bot.wait_until_ready()
+            try:
+                avatar = bot.user.avatar.with_static_format("png").url
+            except AttributeError:
+                avatar = bot.user.default_avatar.with_static_format("png").url
+
+            cells += f"<tr><td><img src=\"{avatar}\" width=128 weight=128></img></td>\n" \
+                     f"<td>Adicionar:<br><a href=\"https://discord.com/api/oauth2/authorize?client_id={bot.user.id}&" \
+                     f"permissions=398361750608&scope=bot%20applications.commands\" target=\"_blank\">{bot.user}</a></td></tr>"
+
+        if cells:
+
+            style = """<style>
+            table, th, td {
+                border:1px solid black;
+                text-align: center;
+            }
+            </style>"""
+
+            self.text = f"<p style=\"font-size:30px\">Bots Disponíveis:</p>{style}\n<table>{cells}</table>"
+
     def get(self):
-        self.write(f"olá :){index_message}")
+        self.write(f"{self.text or 'olá :]'}<br><p><a href=\"https://github.com/zRitsu/DC-MusicBot-RPC/releases\" "
+                   f"target=\"_blank\">Baixe o app de rich presence aqui.</a></p><br>Link para adicionar no app de RPC "
+                   f"abaixo:<p style=\"color:blue\">{self.ws_url}</p><br>")
         # self.render("index.html") #será implementado futuramente...
 
 
@@ -215,9 +241,18 @@ class WSClient:
             self.backoff *= 2.5
 
 
-def run_app():
+def run_app(bots:list = None, ws_url = "http://localhost:8080/ws"):
+
+    try:
+        # repl.it stuff
+        ws_url = f"wss://{environ['REPL_SLUG']}.{environ['REPL_OWNER']}.repl.co:443/ws"
+    except KeyError:
+        pass
+
+    bots = bots or []
+
     app = tornado.web.Application([
-        (r'/', IndexHandler),
+        (r'/', IndexHandler, {'bots': bots, 'ws_url': ws_url}),
         (r'/ws', WebSocketHandler),
     ])
 

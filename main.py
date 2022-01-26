@@ -119,8 +119,7 @@ async def start_bots():
         [asyncio.create_task(bot.start(bot.token)) for bot in bots]
     )
 
-
-run_app()
+run_app(bots)
 
 loop = asyncio.get_event_loop()
 
