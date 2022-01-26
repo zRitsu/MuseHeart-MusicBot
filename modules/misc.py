@@ -81,9 +81,11 @@ class Misc(commands.Cog):
         if not guild.system_channel:
             return
 
+        prefix = (await self.bot.db.get_data(guild.id, db_name="guilds"))["prefix"] or self.bot.default_prefix
+
         embed = disnake.Embed(
             description="Olá.\nPara ver todos os meus comandos use **/**\n\n"
-                        f"Caso os comandos não apareçam, use o comando:\n{self.bot.default_prefix}syncguild",
+                        f"Caso os comandos não apareçam, use o comando:\n{prefix}syncguild",
             color=self.bot.get_color(guild.me)
         )
 
@@ -117,8 +119,10 @@ class Misc(commands.Cog):
         except AttributeError:
             pass
 
+        prefix = inter.guild_data["prefix"] or self.bot.default_prefix
+
         if self.bot.default_prefix:
-            embed.description += f"> **Prefixo:** {self.bot.default_prefix}\n"
+            embed.description += f"> **Prefixo:** {prefix}\n"
 
         links = "[`[Source]`](https://github.com/zRitsu/disnake-LL-music-bot)"
 
