@@ -299,6 +299,7 @@ class LavalinkPlayer(wavelink.Player):
                 pass
 
             self.view = None
+
         if not self.static:
             try:
                 await self.message.delete()
@@ -369,21 +370,20 @@ class LavalinkPlayer(wavelink.Player):
 
         elif self.has_thread:
             try:
-                channel: disnake.Thread = self.bot.get_channel(self.message.id)
-                await channel.send(
+                await self.message.edit(
                     embed=disnake.Embed(
                         description="**Player finalizado.**",
                         color=self.bot.get_color(self.guild.me)
-                    )
+                    ), view=None
                 )
-                await channel.edit(archived=True)
-            except:
-                pass
+                channel: disnake.Thread = self.bot.get_channel(self.message.id)
+                await channel.edit(archived=True, locked=True)
+            except Exception:
+                print(f"Falha ao arquivar thread do servidor: {self.guild.name}\n{traceback.format_exc()}")
 
-        try:
+        else:
+
             await self.destroy_message()
-        except:
-            pass
 
         self.queue.clear()
         self.played.clear()

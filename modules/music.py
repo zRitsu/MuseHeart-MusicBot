@@ -8,7 +8,6 @@ import wavelink
 import asyncio
 from fake_useragent import UserAgent
 import sys
-import os
 import json
 from random import shuffle
 from typing import Literal, Optional, Union
