@@ -111,7 +111,7 @@ class Owner(commands.Cog):
                 break
 
         try:
-            git_log = json.loads("[" + run_command(f"git log {commit} {git_format}").replace("'", "\"")[:-1] + "]")
+            git_log = json.loads("[" + run_command(f"git log {commit} {git_format}")[:-1].replace("'", "\"") + "]")
         except:
             traceback.print_exc()
             git_log = []
@@ -142,8 +142,8 @@ class Owner(commands.Cog):
     @commands.command(aliases=["latest", "lastupdate"], description="Ver meus últimos updates.")
     async def updatelog(self, ctx: commands.Context, amount: int = 10):
 
-        data = self.format_log(json.loads("[" + run_command(f"git log -{amount or 10} {git_format}")
-                                          .replace("'", "\"")[:-1] + "]"))
+        data = self.format_log(json.loads("[" + run_command(f"git log -{amount or 10} {git_format}")[:-1]
+                                          .replace("'", "\"") + "]"))
 
         embed = disnake.Embed(
             description=f"🔰 ** | Atualizações recentes:**\n\n{data}",
