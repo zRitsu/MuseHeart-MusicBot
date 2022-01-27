@@ -8,12 +8,31 @@ from utils.client import BotCore
 from utils.music.errors import GenericError
 
 
-git_format = "--pretty=format:\"{%n  'commit': '%H',%n  'abbreviated_commit': '%h',%n  'tree': '%T',%n  " \
-             "'abbreviated_tree': '%t',%n  'parent': '%P',%n  'abbreviated_parent': '%p',%n  'refs': '%D',%n  " \
-             "'encoding': '%e',%n  'subject': '%s',%n  'sanitized_subject_line': '%f',%n  'body': '%b',%n  " \
-             "'commit_notes': '%N',%n  'verification_flag': '%G?',%n  'signer': '%GS',%n  'signer_key': " \
-             "'%GK',%n  'author': {%n    'name': '%aN',%n    'email': '%aE',%n    'date': '%aD'%n  }," \
-             "%n  'commiter': {%n    'name': '%cN',%n    'email': '%cE',%n    'date': '%cD'%n  }%n},\""
+git_format = "--pretty=format:\"" + json.dumps(
+    {
+        'commit': '%H',
+        'abbreviated_commit': '%h',
+        'subject': '%s'
+        #'tree': '%T',
+        #'parent': '%P',
+        #'refs': '%D',
+        #'encoding': '%e',
+        #'commit_notes': '%N',
+        #'verification_flag': '%G?',
+        #'signer': '%GS',
+        #'signer_key': '%GK',
+        #'author': {
+        #'name': 'AUTHOR',
+        #'email': '%aE',
+        #'date': '%ai'
+        #},
+        #    'commiter': {
+        #    'name': 'COMMITER',
+        #    'email': '%cE',
+        #    'date': '%ci'
+        #}
+    }
+).replace("\"", "'") + ","
 
 
 def run_command(cmd):
@@ -85,8 +104,7 @@ class Owner(commands.Cog):
                 break
 
         try:
-            git_log = json.loads("[" + run_command(f"git log {commit} {git_format}").replace("'", "\"")
-                                 .replace(':', '.')[:-1] + "]")
+            git_log = json.loads("[" + run_command(f"git log {commit} {git_format}").replace("'", "\"")[:-1] + "]")
         except:
             traceback.print_exc()
             git_log = []
