@@ -44,6 +44,12 @@ class Owner(commands.Cog):
     def __init__(self, bot: BotCore):
         self.bot = bot
 
+
+    def format_log(self, data: list):
+        return "\n".join( f"[`{c['abbreviated_commit']}`]({self.bot.remote_git_url}/commit/{c['commit']}) `- "
+                          f"{(c['subject'][:60] + '...') if len(c['subject']) > 59 else c['subject']}`" for c in data)
+
+
     @commands.is_owner()
     @commands.command(aliases=["rd", "recarregar"], description="Recarregar os módulos (apenas para meu dono).")
     async def reload(self, ctx):
@@ -66,6 +72,7 @@ class Owner(commands.Cog):
 
         embed = disnake.Embed(colour=self.bot.get_color(ctx.me), description=txt)
         await ctx.send(embed=embed)
+
 
     @commands.is_owner()
     @commands.command(aliases=["up", "atualizar"],
@@ -120,9 +127,7 @@ class Owner(commands.Cog):
         if original_req != new_req:
             text += "\n`Nota: Será necessário atualizar as dependências.`"
 
-        txt = "\n".join(
-            f"[`{c['abbreviated_commit']}`]({self.bot.remote_git_url}/commit/{c['commit']}) `- {(c['subject'][:60] + '...') if len(c['subject']) > 59 else c['subject']}`"
-            for c in git_log[:10])
+        txt = self.format_log(git_log[:10])
 
         embed = disnake.Embed(
             description=f"{txt}\n\n`📄` **Log:** ```py\n{out_git[:1000]}```{text}",
@@ -131,6 +136,22 @@ class Owner(commands.Cog):
         )
 
         await ctx.send(embed=embed)
+
+
+    @commands.is_owner()
+    @commands.command(aliases=["latest", "lastupdate"], description="Ver meus últimos updates.")
+    async def updatelog(self, ctx: commands.Context, amount: int = 10):
+
+        data = self.format_log(json.loads("[" + run_command(f"git log -{amount or 10} {git_format}")
+                                          .replace("'", "\"")[:-1] + "]"))
+
+        embed = disnake.Embed(
+            description=f"🔰 ** | Atualizações recentes:**\n\n{data}",
+            color=self.bot.get_color(ctx.guild.me)
+        )
+
+        await ctx.send(embed=embed)
+
 
     @commands.command(aliases=["sync"], description="Sincronizar/Registrar os comandos de barra no servidor.",
                       hidden=True)
