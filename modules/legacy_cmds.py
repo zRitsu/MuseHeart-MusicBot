@@ -7,33 +7,14 @@ from disnake.ext import commands
 from utils.client import BotCore
 from utils.music.errors import GenericError
 
+if os.name == "nt":
+    q1 = "\"" ; q2 = "'"
+else:
+    q1 = "'" ; q2 = "\""
 
-git_format = "--pretty=format:\"" + json.dumps(
-    {
-        'commit': '%H',
-        'abbreviated_commit': '%h',
-        'subject': '%s'
-        #'tree': '%T',
-        #'parent': '%P',
-        #'refs': '%D',
-        #'encoding': '%e',
-        #'commit_notes': '%N',
-        #'verification_flag': '%G?',
-        #'signer': '%GS',
-        #'signer_key': '%GK',
-        #'author': {
-        #'name': 'AUTHOR',
-        #'email': '%aE',
-        #'date': '%ai'
-        #},
-        #    'commiter': {
-        #    'name': 'COMMITER',
-        #    'email': '%cE',
-        #    'date': '%ci'
-        #}
-    }
-).replace("\"", "'") + ","
-
+git_format = f"--pretty=format:{q1}" + "{" + f"{q2}commit{q2}: {q2}%H{q2}, " \
+                                                f"{q2}abbreviated_commit{q2}: {q2}%h{q2}, " \
+                                                f"{q2}subject{q2}: {q2}%s{q2}" + "}" + q1 + ","
 
 def run_command(cmd):
     return subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
