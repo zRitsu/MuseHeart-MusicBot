@@ -993,7 +993,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player.command_log = f"{inter.author.mention} **parou o player!**"
         embed.description = f"**{inter.author.mention} parou o player!**"
-        await inter.send(embed=embed, ephemeral=player.static)
+        await inter.send(embed=embed, ephemeral=player.static or player.has_thread)
 
         await player.destroy()
 

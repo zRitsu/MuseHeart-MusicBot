@@ -200,7 +200,7 @@ class LavalinkPlayer(wavelink.Player):
 
         msg = "**O player foi desligado por inatividade...**"
 
-        if self.static:
+        if self.static or self.has_thread:
             self.command_log = msg
         else:
             embed = disnake.Embed(description=msg, color=self.bot.get_color(self.guild.me))
@@ -372,7 +372,7 @@ class LavalinkPlayer(wavelink.Player):
             try:
                 await self.message.edit(
                     embed=disnake.Embed(
-                        description="**Player finalizado.**",
+                        description=self.command_log,
                         color=self.bot.get_color(self.guild.me)
                     ), view=None
                 )
