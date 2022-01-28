@@ -165,7 +165,7 @@ class Owner(commands.Cog):
                "os servidores. Caso queira usar os comandos de barra imediatamente neste servidor você terá que " \
                f"me expulsar do servidor e em seguida me adicionar novamente através deste` [`link`]({invite_url})..."
 
-    @commands.command(aliases=["sync"], description="Sincronizar/Registrar os comandos de barra no servidor.",
+    @commands.command(description="Sincronizar/Registrar os comandos de barra no servidor.",
                       hidden=True)
     @commands.has_guild_permissions(manage_guild=True)
     async def syncguild(self, ctx: commands.Context):
@@ -180,7 +180,7 @@ class Owner(commands.Cog):
 
 
     @commands.is_owner()
-    @commands.command(aliases="sync", description="Sincronizar os comandos de barra manualmente.")
+    @commands.command(aliases=["sync"], description="Sincronizar os comandos de barra manualmente.")
     async def synccmds(self, ctx: commands.Context):
 
         if self.bot.config["AUTO_SYNC_COMMANDS"] == "true":
