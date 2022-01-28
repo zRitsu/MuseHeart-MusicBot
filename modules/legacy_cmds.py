@@ -154,25 +154,47 @@ class Owner(commands.Cog):
         await ctx.send(embed=embed)
 
 
+    async def sync_message(self):
+
+        invite_url = f"https://discord.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=8&scope=bot" \
+                     f"%20applications.commands "
+
+        return f"`Caso os comandos de barra não apareçam,` [`clique aqui`]({invite_url}) `para me permitir " \
+               "criar comandos de barra no servidor.`\n\n" \
+               "`Nota: Em alguns casos os comandos de barra podem demorar até uma hora pra aparecer/atualizar em todos " \
+               "os servidores. Caso queira usar os comandos de barra imediatamente neste servidor você terá que " \
+               f"me expulsar do servidor e em seguida me adicionar novamente através deste` [`link`]({invite_url})..."
+
     @commands.command(aliases=["sync"], description="Sincronizar/Registrar os comandos de barra no servidor.",
                       hidden=True)
     @commands.has_guild_permissions(manage_guild=True)
     async def syncguild(self, ctx: commands.Context):
 
-        invite_url = f"https://discord.com/api/oauth2/authorize?client_id={ctx.bot.user.id}&permissions=8&scope=bot" \
-                     f"%20applications.commands "
-
         embed = disnake.Embed(
             color=self.bot.get_color(ctx.guild.me),
-            description="**Este comando não é mais necessário ser usado (A sincronização dos comandos agora é automática).**\n\n" \
-                        f"`Caso os comandos de barra não apareçam,` [`clique aqui`]({invite_url}) `para me permitir "
-                        "criar comandos de barra no servidor.`\n\n" \
-                        "`Nota: Em alguns casos os comandos de barra podem demorar até uma hora pra aparecer em todos "
-                        "os servidores. Caso queira usar os comandos de barra imediatamente neste servidor você terá que "
-                        f"me expulsar do servidor e em seguida me adicionar novamente através deste` [`link`]({invite_url})..."
+            description="**Este comando não é mais necessário ser usado (A sincronização dos comandos agora "
+                        f"é automática).**\n\n{self.sync_message()}"
         )
 
         await ctx.send(embed=embed)
+
+
+    @commands.is_owner()
+    @commands.command(aliases="sync", description="Sincronizar os comandos de barra manualmente.")
+    async def synccmds(self, ctx: commands.Context):
+
+        if self.bot.config["AUTO_SYNC_COMMANDS"] == "true":
+            raise GenericError("A sincronização automática está ativada.")
+
+        await self.bot._sync_application_commands()
+
+        embed = disnake.Embed(
+            color=self.bot.get_color(ctx.guild.me),
+            description=f"**Os comandos de barra foram sincronizados com sucesso!**\n\n{self.sync_message()}"
+        )
+
+        await ctx.send(embed=embed)
+
 
     @commands.command(name="help", aliases=["ajuda"], hidden=True)
     @commands.cooldown(1, 3, commands.BucketType.guild)

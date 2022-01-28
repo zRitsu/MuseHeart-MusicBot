@@ -57,7 +57,7 @@ def load_bot(bot_name: str, token: str, main=False):
         case_insensitive=True,
         intents=intents,
         # test_guilds=[],
-        sync_commands=True,
+        sync_commands=CONFIGS["AUTO_SYNC_COMMANDS"] == "true",
         sync_commands_debug=True,
         config=CONFIGS,
         color=CONFIGS["EMBED_COLOR"],

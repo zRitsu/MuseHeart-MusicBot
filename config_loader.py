@@ -9,6 +9,7 @@ def load_config():
         "VOTE_SKIP_AMOUNT": "3",
         "DEFAULT_PREFIX": "!!!",
         "DEFAULT_SKIN": "default",
+        "AUTO_SYNC_COMMANDS": "true",
         "IDLE_TIMEOUT": "180",
         "RPC_SERVER": "ws://localhost:8080/ws",
         "EMBED_COLOR": None,
