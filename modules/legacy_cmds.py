@@ -88,6 +88,9 @@ class Owner(commands.Cog):
                 for c in self.git_init_cmds:
                     out_git += run_command(c) + "\n"
 
+                self.bot.commit = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+                self.bot.remote_git_url = self.bot.config["SOURCE_REPO"][:-4]
+
             else:
 
                 try:
@@ -144,6 +147,12 @@ class Owner(commands.Cog):
     @commands.is_owner()
     @commands.command(aliases=["latest", "lastupdate"], description="Ver meus últimos updates.")
     async def updatelog(self, ctx: commands.Context, amount: int = 10):
+
+        if not os.path.isdir("./.git"):
+            raise GenericError("Não há repositorio iniciado no diretório do bot...\nNota: Use o comando update.")
+
+        if not self.bot.remote_git_url:
+            self.bot.remote_git_url = self.bot.config["SOURCE_REPO"][:-4]
 
         data = self.format_log(json.loads("[" + run_command(f"git log -{amount or 10} {git_format}")[:-1]
                                           .replace("'", "\"") + "]"))
