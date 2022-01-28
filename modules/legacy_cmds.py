@@ -3,6 +3,7 @@ import shutil
 import subprocess
 import json
 import traceback
+from io import BytesIO
 import disnake
 from disnake.ext import commands
 from utils.client import BotCore
@@ -225,6 +226,25 @@ class Owner(commands.Cog):
         )
 
         await ctx.send(embed=embed)
+
+
+    @commands.is_owner()
+    @commands.command(aliases=["export"], description="Exportar minhas configs/env.")
+    async def exportenv(self, ctx: commands.Context):
+
+        fp = BytesIO(bytes(json.dumps(self.bot.config, indent=4), 'utf-8'))
+        try:
+            await ctx.author.send(
+                embed=disnake.Embed(
+                    description="**Não divulge/mostre esse arquivo pra ninguém e muito cuidado ao postar print's "
+                                "do conteudo dele e não adicione esse arquivo em locais público comos github, repl.it, "
+                                "glitch.com, etc!**",
+                    color=self.bot.get_color(ctx.guild.me)),
+                file=disnake.File(fp=fp, filename="config.json"), delete_after=60)
+        except disnake.Forbidden:
+            await ctx.send("Seu DM está desativado!")
+            return
+        await ctx.message.add_reaction("👍")
 
 
 def setup(bot: BotCore):
