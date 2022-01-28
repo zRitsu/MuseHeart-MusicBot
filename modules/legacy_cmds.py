@@ -259,7 +259,7 @@ class Owner(commands.Cog):
             await ctx.author.send(
                 embed=disnake.Embed(
                     description="**Não divulge/mostre esse arquivo pra ninguém e muito cuidado ao postar print's "
-                                "do conteudo dele e não adicione esse arquivo em locais público comos github, repl.it, "
+                                "do conteudo dele e não adicione esse arquivo em locais públicos como github, repl.it, "
                                 "glitch.com, etc!**",
                     color=self.bot.get_color(ctx.guild.me)),
                 file=disnake.File(fp=fp, filename="config.json"), delete_after=60)
