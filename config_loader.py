@@ -14,6 +14,7 @@ def load_config():
         "EMBED_COLOR": None,
         "SPOTIFY_CLIENT_ID": None,
         "SPOTIFY_CLIENT_SECRET": None,
+        "SOURCE_REPO": "https://github.com/zRitsu/disnake-LL-music-bot.git",
 
         # Local lavalink stuffs
         "START_LOCAL_LAVALINK": "true",

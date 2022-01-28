@@ -1,4 +1,5 @@
 import os
+import shutil
 import subprocess
 import json
 import traceback
@@ -24,6 +25,12 @@ class Owner(commands.Cog):
 
     def __init__(self, bot: BotCore):
         self.bot = bot
+        self.git_init_cmds = [
+            "git init",
+            f'git remote add origin {self.bot.config["SOURCE_REPO"]}',
+            'git fetch origin',
+            'git checkout -b main -f --track origin/main'
+        ]
 
 
     def format_log(self, data: list):
@@ -56,67 +63,79 @@ class Owner(commands.Cog):
 
 
     @commands.is_owner()
+    @commands.max_concurrency(1, commands.BucketType.default)
     @commands.command(aliases=["up", "atualizar"],
                       description="Atualizar o code do bot usando git (apenas para meu dono).")
-    async def update(self, ctx: commands.Context, usepip="no"):
+    async def update(self, ctx: commands.Context, *, opts: str = ""): #TODO: Rever se há alguma forma de usar commands.Flag sem um argumento obrigatório, ex: --pip.
 
-        if usepip not in ["pip", "no"]:
-            raise GenericError(f"Opção inválida: {usepip}")
+        out_git = ""
 
-        if not os.path.isdir("./.git"):
-            raise GenericError("Não há pasta .git no diretório do bot.")
-
-        await ctx.message.add_reaction("⏲️")
-
-        try:
-            run_command("git reset --hard")
-        except Exception as e:
-            raise GenericError(f"Ocorreu um erro no git reset.\nCode: {e.returncode} | {e.output}")
+        git_log = []
 
         with open("requirements.txt") as f:
             original_req = f.read()
 
-        try:
-            out_git = run_command("git pull --allow-unrelated-histories -X theirs")
-        except Exception as e:
-            raise GenericError(f"Ocorreu um erro no git pull:\nCode: {e.returncode} | {e.output}")
+        async with ctx.typing():
 
-        if "Already up to date" in out_git:
-            raise GenericError("Já estou com os ultimos updates instalados...")
+            if not os.path.isdir("./.git") or (force:="--force" in opts):
 
-        commit = ""
+                if force:
+                    shutil.rmtree("./.git")
 
-        for l in out_git.split("\n"):
-            if l.startswith("Updating"):
-                commit = l.replace("Updating ", "").replace("..", "...")
-                break
+                for c in self.git_init_cmds:
+                    out_git += run_command(c) + "\n"
 
-        try:
-            git_log = json.loads("[" + run_command(f"git log {commit} {git_format}")[:-1].replace("'", "\"") + "]")
-        except:
-            traceback.print_exc()
-            git_log = []
+            else:
 
-        with open("requirements.txt") as f:
-            new_req = f.read()
+                try:
+                    run_command("git reset --hard")
+                except Exception as e:
+                    raise GenericError(f"Ocorreu um erro no git reset.\nCode: {e.returncode} | {e.output}")
 
-        if usepip == "pip":
-            subprocess.check_output("pip3 install -U -r requirements.txt", shell=True, text=True)
+                try:
+                    out_git += run_command("git pull --allow-unrelated-histories -X theirs")
+                except:
+                    try:
+                        run_command(f"git reset --hard HEAD~1")
+                        out_git += run_command("git pull --allow-unrelated-histories -X theirs")
+                    except Exception as e:
+                        raise GenericError(f"Ocorreu um erro no git pull:\nCode: {e.returncode} | {e.output}")
 
-        text = "`Reinicie o bot após as alterações.`"
+                if "Already up to date" in out_git:
+                    raise GenericError("Já estou com os ultimos updates instalados...")
 
-        if original_req != new_req:
-            text += "\n`Nota: Será necessário atualizar as dependências.`"
+                commit = ""
 
-        txt = self.format_log(git_log[:10])
+                for l in out_git.split("\n"):
+                    if l.startswith("Updating"):
+                        commit = l.replace("Updating ", "").replace("..", "...")
+                        break
 
-        embed = disnake.Embed(
-            description=f"{txt}\n\n`📄` **Log:** ```py\n{out_git[:1000]}```{text}",
-            title="`✅` Atualização realizada com sucesso!",
-            color=self.bot.get_color(ctx.guild.me)
-        )
+                try:
+                    git_log = json.loads("[" + run_command(f"git log {commit} {git_format}")[:-1].replace("'", "\"") + "]")
+                except:
+                    traceback.print_exc()
 
-        await ctx.send(embed=embed)
+            with open("requirements.txt") as f:
+                new_req = f.read()
+
+            text = "`Reinicie o bot após as alterações.`"
+
+            if "--pip" in opts:
+                subprocess.check_output("pip3 install -U -r requirements.txt", shell=True, text=True)
+
+            elif original_req != new_req:
+                text += "\n`Nota: Será necessário atualizar as dependências.`"
+
+            txt = self.format_log(git_log[:10])
+
+            embed = disnake.Embed(
+                description=f"{txt}\n\n`📄` **Log:** ```py\n{out_git[:1000]}```{text}",
+                title="`✅` Atualização realizada com sucesso!",
+                color=self.bot.get_color(ctx.guild.me)
+            )
+
+            await ctx.send(embed=embed)
 
 
     @commands.is_owner()
