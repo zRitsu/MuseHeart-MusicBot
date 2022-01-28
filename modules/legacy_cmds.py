@@ -78,7 +78,9 @@ class Owner(commands.Cog):
 
         async with ctx.typing():
 
-            if not os.path.isdir("./.git") or (force:="--force" in opts):
+            force = "--force" in opts
+
+            if not os.path.isdir("./.git") or force:
 
                 if force:
                     shutil.rmtree("./.git")
