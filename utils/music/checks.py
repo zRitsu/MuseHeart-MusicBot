@@ -1,6 +1,7 @@
 import disnake
 from disnake.ext import commands
-from .errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, DiffVoiceChannel, GenericError
+from .errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, DiffVoiceChannel, GenericError, \
+    MissingVoicePerms
 
 
 def has_player():
@@ -45,6 +46,7 @@ def can_send_message():
 
 
 def is_requester():
+
     async def predicate(inter):
 
         inter.player = inter.bot.music.players.get(inter.guild.id)
@@ -82,12 +84,18 @@ def check_voice():
         if not inter.author.voice:
             raise NoVoice()
 
+        perms = inter.author.voice.channel.permissions_for(inter.guild.me)
+
+        if not perms.connect or not perms.speak:
+            raise MissingVoicePerms(inter.author.voice.channel)
+
         return True
 
     return commands.check(predicate)
 
 
 def has_source():
+
     def predicate(inter):
 
         try:
@@ -121,6 +129,7 @@ def user_cooldown(rate: int, per: int):
 
 
 async def has_perm(inter):
+
     try:
         player = inter.player
     except AttributeError:

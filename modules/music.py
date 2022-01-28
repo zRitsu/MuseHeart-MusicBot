@@ -15,7 +15,7 @@ import humanize
 from urllib import parse
 from utils.client import BotCore
 
-from utils.music.errors import GenericError
+from utils.music.errors import GenericError, MissingVoicePerms
 from utils.music.spotify import SpotifyPlaylist, process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, can_send_message
 from utils.music.models import LavalinkPlayer, LavalinkTrack
@@ -177,11 +177,17 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player = inter.player
 
         if not channel:
-            channel = inter.author.voice.channel
+            channel: Union[disnake.VoiceChannel, disnake.StageChannel] = inter.author.voice.channel
 
         await player.connect(channel.id)
 
         if inter.application_command == self.connect:
+
+            perms = channel.permissions_for(inter.guild.me)
+
+            if not perms.connect or not perms.speak:
+                raise MissingVoicePerms(channel)
+
             txt = [
                 f"{'me moveu para o' if channel != inter.guild.me.voice and inter.guild.me.voice.channel else 'me reconectou no'}"
                 f" canal <#{channel.id}>",

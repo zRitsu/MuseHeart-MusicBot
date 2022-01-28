@@ -25,6 +25,12 @@ class NoVoice(commands.CheckFailure):
     pass
 
 
+class MissingVoicePerms(commands.CheckFailure):
+
+    def __init(self, voice_channel: Union[disnake.VoiceChannel, disnake.StageChannel]):
+        self.voice_channel = voice_channel
+
+
 class DiffVoiceChannel(commands.CheckFailure):
     pass
 
@@ -50,6 +56,9 @@ def parse_error(ctx: Union[disnake.ApplicationCommandInteraction, commands.Conte
     if isinstance(error, NotDJorStaff):
         error_txt = "**Você deve estar na lista de DJ ou ter a permissão de **Gerenciar canais** " \
                     "para usar este comando.**"
+
+    elif isinstance(error, MissingVoicePerms):
+        error_txt = f"**Não tenho permissão para conectar/falar no canal:** {error.voice_channel.mention}"
 
     elif isinstance(error, commands.NotOwner):
         error_txt = "**Apenas meu(s) desenvolvedor(es) pode(m) usar este comando.**"
