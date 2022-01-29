@@ -8,6 +8,10 @@ if TYPE_CHECKING:
     from utils.client import BotCore
 
 
+def panel_command(*args, **kwargs)-> PanelCommand:
+    return commands.command(*args, **kwargs, cls=PanelCommand)
+
+
 class PanelCommand(commands.Command):
     def __init__(self, func, **kwargs):
         self.emoji = kwargs.pop("emoji")

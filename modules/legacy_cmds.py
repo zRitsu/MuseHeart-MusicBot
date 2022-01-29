@@ -7,7 +7,8 @@ from io import BytesIO
 from typing import Union
 import disnake
 from disnake.ext import commands
-from utils.client import BotCore, panel_command
+from utils.client import BotCore
+from utils.owner_panel import panel_command
 from utils.music.errors import GenericError
 
 if os.name == "nt":

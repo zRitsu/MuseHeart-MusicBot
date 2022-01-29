@@ -10,11 +10,7 @@ from .music.models import music_mode
 from utils.db import MongoDatabase, LocalDatabase
 import os
 import traceback
-from .owner_panel import PanelView, PanelCommand
-
-
-def panel_command(*args, **kwargs)-> PanelCommand:
-    return commands.command(*args, **kwargs, cls=PanelCommand)
+from .owner_panel import PanelView
 
 
 class BotCore(commands.Bot):
