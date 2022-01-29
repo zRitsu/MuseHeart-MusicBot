@@ -10,6 +10,12 @@ from .music.models import music_mode
 from utils.db import MongoDatabase, LocalDatabase
 import os
 import traceback
+from .owner_panel import PanelView, PanelCommand
+
+
+def panel_command(*args, **kwargs)-> PanelCommand:
+    return commands.command(*args, **kwargs, cls=PanelCommand)
+
 
 class BotCore(commands.Bot):
 
@@ -67,18 +73,24 @@ class BotCore(commands.Bot):
 
         if message.content == f"<@{self.user.id}>" or message.content == f"<@!{self.user.id}>":
 
-            prefix = (await self.get_prefix(message))[-1]
+            embed = disnake.Embed(color=self.get_color(message.guild.me))
 
-            embed = disnake.Embed(
-                description=f"Olá, meu prefixo atual é: **{prefix}**\n"
-                            f"Caso queira ver meus comandos de texto use **{prefix}help**\n",
-                color=self.get_color(message.guild.me)
-            )
+            if not (await self.is_owner(message.author)):
 
-            if self.slash_commands:
-                embed.description += f"Veja também meus comandos de barra usando: **/**"
+                prefix = (await self.get_prefix(message))[-1]
 
-            await message.reply(embed=embed)
+                embed.description = f"Olá, meu prefixo atual é: **{prefix}**\n" \
+                                    f"Caso queira ver meus comandos de texto use **{prefix}help**\n"
+
+                if self.slash_commands:
+                    embed.description += f"Veja também meus comandos de barra usando: **/**"
+
+            view = PanelView(self)
+            embed.title = "PAINEL DE CONTROLE."
+            embed.set_footer(text="Clique em uma tarefa que deseja executar.")
+            view.embed = embed
+
+            await message.reply(embed=embed, view=view)
             return
 
         await self.process_commands(message)

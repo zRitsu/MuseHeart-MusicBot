@@ -4,9 +4,10 @@ import subprocess
 import json
 import traceback
 from io import BytesIO
+from typing import Union
 import disnake
 from disnake.ext import commands
-from utils.client import BotCore
+from utils.client import BotCore, panel_command
 from utils.music.errors import GenericError
 
 if os.name == "nt":
@@ -40,8 +41,9 @@ class Owner(commands.Cog):
 
 
     @commands.is_owner()
-    @commands.command(aliases=["rd", "recarregar"], description="Recarregar os módulos (apenas para meu dono).")
-    async def reload(self, ctx):
+    @panel_command(aliases=["rd", "recarregar"], description="Recarregar os módulos (apenas para meu dono).", emoji="🔄",
+                   alt_name="Carregar/Recarregar módulos.")
+    async def reload(self, ctx: Union[commands.Context, disnake.MessageInteraction]):
 
         data = self.bot.load_modules()
 
@@ -59,15 +61,19 @@ class Owner(commands.Cog):
         if not txt:
             txt = "**Nenhum módulo encontrado...**"
 
-        embed = disnake.Embed(colour=self.bot.get_color(ctx.me), description=txt)
-        await ctx.send(embed=embed)
+        if isinstance(ctx, commands.Context):
+            embed = disnake.Embed(colour=self.bot.get_color(ctx.me), description=txt)
+            await ctx.send(embed=embed)
+        else:
+            return txt
 
 
     @commands.is_owner()
     @commands.max_concurrency(1, commands.BucketType.default)
-    @commands.command(aliases=["up", "atualizar"],
-                      description="Atualizar o code do bot usando git (apenas para meu dono).")
-    async def update(self, ctx: commands.Context, *, opts: str = ""): #TODO: Rever se há alguma forma de usar commands.Flag sem um argumento obrigatório, ex: --pip.
+    @panel_command(aliases=["up", "atualizar"], description="Atualizar o code do bot usando git (apenas para meu dono).",
+                   emoji="⏬", alt_name="Atualizar Bot")
+    async def update(self, ctx: Union[commands.Context, disnake.MessageInteraction], *,
+                     opts: str = ""): #TODO: Rever se há alguma forma de usar commands.Flag sem um argumento obrigatório, ex: --pip.
 
         out_git = ""
 
@@ -127,20 +133,24 @@ class Owner(commands.Cog):
             elif "requirements.txt" in text:
                 text += "\n`Nota: Será necessário atualizar as dependências.`"
 
-            txt = self.format_log(git_log[:10])
+            txt = "`✅` Atualização realizada com sucesso!\n\n" \
+                  f"{self.format_log(git_log[:10])}\n\n`📄` **Log:** ```py\n{out_git[:1000]}```{text}"
 
-            embed = disnake.Embed(
-                description=f"{txt}\n\n`📄` **Log:** ```py\n{out_git[:1000]}```{text}",
-                title="`✅` Atualização realizada com sucesso!",
-                color=self.bot.get_color(ctx.guild.me)
-            )
+            if isinstance(ctx, commands.Context):
+                embed = disnake.Embed(
+                    description=txt,
+                    color=self.bot.get_color(ctx.guild.me)
+                )
+                await ctx.send(embed=embed)
 
-            await ctx.send(embed=embed)
+            else:
+                return txt
 
 
     @commands.is_owner()
-    @commands.command(aliases=["latest", "lastupdate"], description="Ver meus últimos updates.")
-    async def updatelog(self, ctx: commands.Context, amount: int = 10):
+    @panel_command(aliases=["latest", "lastupdate"], description="Ver minhas atualizações mais recentes.", emoji="📈",
+                   alt_name="Ultimas atualizações")
+    async def updatelog(self, ctx: Union[commands.Context, disnake.MessageInteraction], amount: int = 10):
 
         if not os.path.isdir("./.git"):
             raise GenericError("Não há repositorio iniciado no diretório do bot...\nNota: Use o comando update.")
@@ -148,15 +158,21 @@ class Owner(commands.Cog):
         if not self.bot.remote_git_url:
             self.bot.remote_git_url = self.bot.config["SOURCE_REPO"][:-4]
 
-        data = self.format_log(json.loads("[" + run_command(f"git log -{amount or 10} {git_format}")[:-1]
-                                          .replace("'", "\"") + "]"))
+        txt = f"🔰 ** | Atualizações recentes:**\n\n" + \
+              self.format_log(json.loads("[" + run_command(f"git log -{amount or 10} {git_format}")[:-1]
+                                         .replace("'", "\"") + "]"))
 
-        embed = disnake.Embed(
-            description=f"🔰 ** | Atualizações recentes:**\n\n{data}",
-            color=self.bot.get_color(ctx.guild.me)
-        )
+        if isinstance(ctx, commands.Context):
 
-        await ctx.send(embed=embed)
+            embed = disnake.Embed(
+                description=txt,
+                color=self.bot.get_color(ctx.guild.me)
+            )
+
+            await ctx.send(embed=embed)
+
+        else:
+            return txt
 
 
     async def sync_message(self):
@@ -170,10 +186,10 @@ class Owner(commands.Cog):
                "os servidores. Caso queira usar os comandos de barra imediatamente neste servidor você terá que " \
                f"me expulsar do servidor e em seguida me adicionar novamente através deste` [`link`]({invite_url})..."
 
-    @commands.command(description="Sincronizar/Registrar os comandos de barra no servidor.",
-                      hidden=True)
+
     @commands.has_guild_permissions(manage_guild=True)
-    async def syncguild(self, ctx: commands.Context):
+    @commands.command(description="Sincronizar/Registrar os comandos de barra no servidor.", hidden=True)
+    async def syncguild(self, ctx: Union[commands.Context, disnake.MessageInteraction]):
 
         embed = disnake.Embed(
             color=self.bot.get_color(ctx.guild.me),
@@ -185,20 +201,28 @@ class Owner(commands.Cog):
 
 
     @commands.is_owner()
-    @commands.command(aliases=["sync"], description="Sincronizar os comandos de barra manualmente.")
-    async def synccmds(self, ctx: commands.Context):
+    @panel_command(aliases=["sync"], description="Sincronizar os comandos de barra manualmente.", emoji="⌨️",
+                   alt_name="Sincronizar comandos manualmente.")
+    async def synccmds(self, ctx: Union[commands.Context, disnake.MessageInteraction]):
 
         if self.bot.config["AUTO_SYNC_COMMANDS"] == "true":
             raise GenericError("A sincronização automática está ativada.")
 
         await self.bot._sync_application_commands()
 
-        embed = disnake.Embed(
-            color=self.bot.get_color(ctx.guild.me),
-            description=f"**Os comandos de barra foram sincronizados com sucesso!**\n\n{self.sync_message()}"
-        )
+        txt = f"**Os comandos de barra foram sincronizados com sucesso!**\n\n{self.sync_message()}"
 
-        await ctx.send(embed=embed)
+        if isinstance(ctx, commands.Context):
+
+            embed = disnake.Embed(
+                color=self.bot.get_color(ctx.guild.me),
+                description=txt
+            )
+
+            await ctx.send(embed=embed)
+
+        else:
+            return txt
 
 
     @commands.command(name="help", aliases=["ajuda"], hidden=True)
@@ -256,22 +280,28 @@ class Owner(commands.Cog):
 
 
     @commands.is_owner()
-    @commands.command(aliases=["export"], description="Exportar minhas configs/env.")
-    async def exportenv(self, ctx: commands.Context):
+    @panel_command(aliases=["export"], description="Exportar minhas configs/env em um arquivo no DM.", emoji="🔐",
+                   alt_name="Exportar env/config")
+    async def exportenv(self, ctx: Union[commands.Context, disnake.MessageInteraction]):
 
         fp = BytesIO(bytes(json.dumps(self.bot.config, indent=4), 'utf-8'))
         try:
-            await ctx.author.send(
-                embed=disnake.Embed(
+            embed=disnake.Embed(
                     description="**Não divulge/mostre esse arquivo pra ninguém e muito cuidado ao postar print's "
                                 "do conteudo dele e não adicione esse arquivo em locais públicos como github, repl.it, "
                                 "glitch.com, etc!**",
-                    color=self.bot.get_color(ctx.guild.me)),
+                    color=self.bot.get_color(ctx.guild.me))
+            embed.set_footer(text="Por medida de segurança, esta mensagem será deletada em 60 segundos.")
+            await ctx.author.send(embed=embed,
                 file=disnake.File(fp=fp, filename="config.json"), delete_after=60)
+
         except disnake.Forbidden:
-            await ctx.send("Seu DM está desativado!")
-            return
-        await ctx.message.add_reaction("👍")
+            raise GenericError("Seu DM está desativado!")
+
+        if isinstance(ctx, commands.Context):
+            await ctx.message.add_reaction("👍")
+        else:
+            return "Arquivo de configuração enviado com sucesso no seu DM."
 
 
 def setup(bot: BotCore):

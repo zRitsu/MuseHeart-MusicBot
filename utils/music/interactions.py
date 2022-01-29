@@ -68,7 +68,7 @@ class VolumeInteraction(disnake.ui.View):
         select.callback = self.callback
         self.add_item(select)
 
-    async def callback(self, interaction: disnake.Interaction):
+    async def callback(self, interaction: disnake.MessageInteraction):
         await interaction.response.edit_message(content=f"Volume alterado!",embed=None, view=None)
         self.volume = int(interaction.data.values[0][4:])
         self.stop()

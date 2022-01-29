@@ -47,7 +47,10 @@ class NotRequester(commands.CheckFailure):
     pass
 
 
-def parse_error(ctx: Union[disnake.ApplicationCommandInteraction, commands.Context], error: Exception):
+def parse_error(
+        ctx: Union[disnake.ApplicationCommandInteraction, commands.Context, disnake.MessageInteraction],
+        error: Exception
+):
 
     error_txt = None
 
