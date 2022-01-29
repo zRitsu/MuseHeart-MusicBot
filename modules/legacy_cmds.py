@@ -73,9 +73,6 @@ class Owner(commands.Cog):
 
         git_log = []
 
-        with open("requirements.txt") as f:
-            original_req = f.read()
-
         async with ctx.typing():
 
             force = "--force" in opts
@@ -122,15 +119,12 @@ class Owner(commands.Cog):
                 except:
                     traceback.print_exc()
 
-            with open("requirements.txt") as f:
-                new_req = f.read()
-
             text = "`Reinicie o bot após as alterações.`"
 
             if "--pip" in opts:
                 subprocess.check_output("pip3 install -U -r requirements.txt", shell=True, text=True)
 
-            elif original_req != new_req:
+            elif "requirements.txt" in text:
                 text += "\n`Nota: Será necessário atualizar as dependências.`"
 
             txt = self.format_log(git_log[:10])
