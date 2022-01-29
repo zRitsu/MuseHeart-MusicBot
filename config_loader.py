@@ -33,7 +33,7 @@ def load_config():
             continue
 
     for env in environ:
-        if env.lower().startswith("token_bot_"):
+        if env.lower().startswith("token_bot_") or env.lower().startswith("lavalink_node_"):
             CONFIGS[env] = environ[env]
 
     try:
