@@ -1364,6 +1364,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.Cog.listener("on_message_delete")
     async def player_message_delete(self, message: disnake.Message):
 
+        if not message.guild:
+            return
+
         player: LavalinkPlayer = self.bot.music.players.get(message.guild.id)
 
         try:
