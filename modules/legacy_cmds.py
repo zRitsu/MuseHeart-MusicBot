@@ -80,72 +80,70 @@ class Owner(commands.Cog):
 
         git_log = []
 
-        async with ctx.typing():
+        force = "--force" in opts
 
-            force = "--force" in opts
+        if not os.path.isdir("./.git") or force:
 
-            if not os.path.isdir("./.git") or force:
+            if force:
+                shutil.rmtree("./.git")
 
-                if force:
-                    shutil.rmtree("./.git")
+            for c in self.git_init_cmds:
+                out_git += run_command(c) + "\n"
 
-                for c in self.git_init_cmds:
-                    out_git += run_command(c) + "\n"
+            self.bot.commit = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+            self.bot.remote_git_url = self.bot.config["SOURCE_REPO"][:-4]
 
-                self.bot.commit = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
-                self.bot.remote_git_url = self.bot.config["SOURCE_REPO"][:-4]
+        else:
 
-            else:
+            try:
+                run_command("git reset --hard")
+            except Exception as e:
+                raise GenericError(f"Ocorreu um erro no git reset.\nCode: {e.returncode} | {e.output}")
 
+            try:
+                out_git += run_command("git pull --allow-unrelated-histories -X theirs")
+            except:
                 try:
-                    run_command("git reset --hard")
-                except Exception as e:
-                    raise GenericError(f"Ocorreu um erro no git reset.\nCode: {e.returncode} | {e.output}")
-
-                try:
+                    run_command(f"git reset --hard HEAD~1")
                     out_git += run_command("git pull --allow-unrelated-histories -X theirs")
-                except:
-                    try:
-                        run_command(f"git reset --hard HEAD~1")
-                        out_git += run_command("git pull --allow-unrelated-histories -X theirs")
-                    except Exception as e:
-                        raise GenericError(f"Ocorreu um erro no git pull:\nCode: {e.returncode} | {e.output}")
+                except Exception as e:
+                    raise GenericError(f"Ocorreu um erro no git pull:\nCode: {e.returncode} | {e.output}")
 
-                if "Already up to date" in out_git:
-                    raise GenericError("Já estou com os ultimos updates instalados...")
+            if "Already up to date" in out_git:
+                raise GenericError("Já estou com os ultimos updates instalados...")
 
-                commit = ""
+            commit = ""
 
-                for l in out_git.split("\n"):
-                    if l.startswith("Updating"):
-                        commit = l.replace("Updating ", "").replace("..", "...")
-                        break
+            for l in out_git.split("\n"):
+                if l.startswith("Updating"):
+                    commit = l.replace("Updating ", "").replace("..", "...")
+                    break
 
-                try:
-                    git_log = json.loads("[" + run_command(f"git log {commit} {git_format}")[:-1].replace("'", "\"") + "]")
-                except:
-                    traceback.print_exc()
+            try:
+                git_log = json.loads("[" + run_command(f"git log {commit} {git_format}")[:-1].replace("'", "\"") + "]")
+            except:
+                traceback.print_exc()
 
-            text = "`Reinicie o bot após as alterações.`"
+        text = "`Reinicie o bot após as alterações.`"
 
-            if "--pip" in opts:
-                subprocess.check_output("pip3 install -U -r requirements.txt", shell=True, text=True)
+        if "--pip" in opts:
+            subprocess.check_output("pip3 install -U -r requirements.txt", shell=True, text=True)
 
-            elif "requirements.txt" in text:
-                text += "\n`Nota: Será necessário atualizar as dependências.`"
+        elif "requirements.txt" in text:
+            text += "\n`Nota: Será necessário atualizar as dependências.`"
 
-            txt = "`✅` Atualização realizada com sucesso!\n\n" \
-                  f"{self.format_log(git_log[:10])}\n\n`📄` **Log:** ```py\n{out_git[:1000]}```{text}"
+        txt = "`✅` Atualização realizada com sucesso!\n\n" \
+              f"{self.format_log(git_log[:10])}\n\n`📄` **Log:** ```py\n{out_git[:1000]}```{text}"
 
-            if isinstance(ctx, commands.Context):
-                embed = disnake.Embed(
-                    description=txt,
-                    color=self.bot.get_color(ctx.guild.me)
-                )
-                await ctx.send(embed=embed)
+        if isinstance(ctx, commands.Context):
+            embed = disnake.Embed(
+                description=txt,
+                color=self.bot.get_color(ctx.guild.me)
+            )
+            await ctx.send(embed=embed)
 
-            else:
-                return txt
+        else:
+            return txt
 
 
     @commands.is_owner()
