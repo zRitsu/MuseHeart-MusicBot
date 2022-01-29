@@ -8,6 +8,15 @@ from utils.db import MongoDatabase, LocalDatabase, guild_prefix
 from utils.music.spotify import spotify_client
 from web_app import run_app
 from config_loader import load_config
+import logging
+from logging.handlers import RotatingFileHandler
+
+logger = logging.getLogger('disnake')
+logger.setLevel(logging.DEBUG)
+handler = RotatingFileHandler('disnake.log', maxBytes=4096, encoding='utf-8', mode='w')
+handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+logger.addHandler(handler)
+
 
 CONFIGS = load_config()
 
