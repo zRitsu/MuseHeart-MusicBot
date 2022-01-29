@@ -81,10 +81,14 @@ class BotCore(commands.Bot):
                 if self.slash_commands:
                     embed.description += f"Veja também meus comandos de barra usando: **/**"
 
-            view = PanelView(self)
-            embed.title = "PAINEL DE CONTROLE."
-            embed.set_footer(text="Clique em uma tarefa que deseja executar.")
-            view.embed = embed
+                view = None
+
+            else:
+
+                view = PanelView(self)
+                embed.title = "PAINEL DE CONTROLE."
+                embed.set_footer(text="Clique em uma tarefa que deseja executar.")
+                view.embed = embed
 
             await message.reply(embed=embed, view=view)
             return
