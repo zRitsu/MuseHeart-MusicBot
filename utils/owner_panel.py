@@ -15,8 +15,8 @@ def panel_command(*args, **kwargs)-> PanelCommand:
 class PanelCommand(commands.Command):
     def __init__(self, func, **kwargs):
         self.emoji = kwargs.pop("emoji")
-        self.hidden = True
         super().__init__(func, **kwargs)
+        self.hidden = True
         self.alt_name = kwargs.pop("alt_name", self.name)
 
 
