@@ -42,7 +42,7 @@ class Owner(commands.Cog):
 
 
     @commands.is_owner()
-    @panel_command(aliases=["rd", "recarregar"], description="Recarregar os módulos (apenas para meu dono).", emoji="🔄",
+    @panel_command(aliases=["rd", "recarregar"], description="Recarregar os módulos.", emoji="🔄",
                    alt_name="Carregar/Recarregar módulos.")
     async def reload(self, ctx: Union[commands.Context, disnake.MessageInteraction]):
 
@@ -71,7 +71,7 @@ class Owner(commands.Cog):
 
     @commands.is_owner()
     @commands.max_concurrency(1, commands.BucketType.default)
-    @panel_command(aliases=["up", "atualizar"], description="Atualizar o code do bot usando git (apenas para meu dono).",
+    @panel_command(aliases=["up", "atualizar"], description="Atualizar o code do bot usando git.",
                    emoji="⏬", alt_name="Atualizar Bot")
     async def update(self, ctx: Union[commands.Context, disnake.MessageInteraction], *,
                      opts: str = ""): #TODO: Rever se há alguma forma de usar commands.Flag sem um argumento obrigatório, ex: --pip.
@@ -279,7 +279,7 @@ class Owner(commands.Cog):
 
 
     @commands.is_owner()
-    @panel_command(aliases=["export"], description="Exportar minhas configs/env em um arquivo no DM.", emoji="🔐",
+    @panel_command(aliases=["export"], description="Exportar minhas configs/secrets/env pra um arquivo no DM.", emoji="🔐",
                    alt_name="Exportar env/config")
     async def exportenv(self, ctx: Union[commands.Context, disnake.MessageInteraction]):
 
