@@ -174,7 +174,7 @@ class Owner(commands.Cog):
             return txt
 
 
-    async def sync_message(self):
+    def sync_message(self):
 
         invite_url = f"https://discord.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=8&scope=bot" \
                      f"%20applications.commands "
