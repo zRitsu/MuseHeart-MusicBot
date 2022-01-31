@@ -108,6 +108,11 @@ class BotCore(commands.Bot):
 
     async def on_application_command(self, inter: disnake.ApplicationCommandInteraction):
 
+        if not inter.guild:
+            await inter.send("Meus comandos não podem ser usados no DM.\n"
+                             "Use em algum servidor que estou presente.")
+            return
+
         if not self.bot_ready:
             await inter.send("O bot ainda não está pronto para uso.", ephemeral=True)
             return
