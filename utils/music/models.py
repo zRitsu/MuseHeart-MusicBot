@@ -170,16 +170,25 @@ class LavalinkPlayer(wavelink.Player):
         self.view = PlayerInteractions(self.bot)
 
         controls = {
-            "⏮️": ["back"],
-            "⏹️": ["stop"],
+            "⏮️": ["back", "Voltar /p música anterior"],
+            "🛑": ["stop", "Parar o player"],
         }
 
         for button, control in controls.items():
+
             try:
                 style = control[1]
             except IndexError:
                 style = disnake.ButtonStyle.grey
-            self.view.add_item(disnake.ui.Button(emoji=button, custom_id=f"musicplayer_{control[0]}", style=style))
+
+            self.view.add_item(
+                disnake.ui.Button(
+                    emoji=button,
+                    custom_id=f"musicplayer_{control[0]}",
+                    style=style,
+                    label=control[1]
+                )
+            )
 
         embed = disnake.Embed(
             description=f"**Não há músicas na fila. Adicione uma música ou use um dos botões abaixo\n\n"
