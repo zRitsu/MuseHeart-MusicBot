@@ -176,16 +176,11 @@ class LavalinkPlayer(wavelink.Player):
 
         for button, control in controls.items():
 
-            try:
-                style = control[1]
-            except IndexError:
-                style = disnake.ButtonStyle.grey
-
             self.view.add_item(
                 disnake.ui.Button(
                     emoji=button,
                     custom_id=f"musicplayer_{control[0]}",
-                    style=style,
+                    style=disnake.ButtonStyle.grey,
                     label=control[1]
                 )
             )

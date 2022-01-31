@@ -21,6 +21,10 @@ db_models = {
             "skin": "default"
         },
         "djroles": []
+    },
+    "users": {
+        "ver": 1.0,
+        "fav_links": {},
     }
 }
 
