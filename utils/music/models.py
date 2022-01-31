@@ -170,7 +170,7 @@ class LavalinkPlayer(wavelink.Player):
         self.view = PlayerInteractions(self.bot)
 
         controls = {
-            "⏮️": ["back", "Voltar /p música anterior"],
+            "⏮️": ["back", "Voltar p/ música anterior"],
             "🛑": ["stop", "Parar o player"],
         }
 
