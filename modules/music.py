@@ -2010,20 +2010,23 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if member.id == self.bot.user.id:
 
-            if (not before.channel and after.channel) or member.voice:
+            if (not before.channel and after.channel):
                 return # bot acabou de entrar no canal de voz.
 
-            if player.static:
-                player.command_log = "O player foi desligado por desconexão\ncom o canal de voz."
+            if not member.voice:
 
-            else:
-                embed = disnake.Embed(description="**Desligando player por desconexão do canal.**", color=member.color)
-                await player.text_channel.send(embed=embed, delete_after=10)
+                if player.static:
+                    player.command_log = "O player foi desligado por desconexão\ncom o canal de voz."
 
-            self.bot.loop.create_task(player.process_rpc(before.channel, close=True))
+                else:
+                    embed = disnake.Embed(description="**Desligando player por desconexão do canal.**",
+                                          color=self.bot.get_color(member))
+                    self.bot.loop.create_task(player.text_channel.send(embed=embed, delete_after=10))
 
-            await player.destroy(force=True)
-            return
+                self.bot.loop.create_task(player.process_rpc(before.channel, close=True))
+
+                await player.destroy(force=True)
+                return
 
         if not player.nonstop and player.guild.me.voice and not any(m for m in player.guild.me.voice.channel.members if not m.bot):
             player.members_timeout_task = self.bot.loop.create_task(player.members_timeout())
