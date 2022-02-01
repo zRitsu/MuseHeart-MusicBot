@@ -112,7 +112,8 @@ class Misc(commands.Cog):
         if self.bot.commit:
             embed.description += f"> **Commit atual:** [`{self.bot.commit}`]({self.bot.remote_git_url}/commit/{self.bot.commit})\n"
 
-        embed.description += f"> **Versão do Disnake:** `{disnake.__version__}`\n" \
+        embed.description += f"> **Versão do Python:** `{platform.python_version()}`\n"\
+                             f"> **Versão do Disnake:** `{disnake.__version__}`\n" \
                              f"> **Latencia:** `{round(self.bot.latency * 1000)}ms`\n" \
                              f"> **Uso de RAM:** `{ram_usage}`\n" \
                              f"> **Uptime:** `{str((datetime.timedelta(seconds=(disnake.utils.utcnow() - self.bot.uptime).total_seconds()))).split('.')[0]}`\n"
