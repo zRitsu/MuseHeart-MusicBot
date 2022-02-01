@@ -144,7 +144,7 @@ class LavalinkPlayer(wavelink.Player):
 
 
     def __str__(self) -> str:
-        return f"Lavalink Player | Server: {self.node.identifier}"
+        return f"Servidor de música: {self.node.identifier}"
 
 
     async def members_timeout(self):
