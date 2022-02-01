@@ -102,17 +102,20 @@ class Misc(commands.Cog):
 
         embed = disnake.Embed(
             description=f"**Sobre mim:**\n\n"
-                        f"> **Estou em:** `{len(self.bot.guilds)} servidor(es)`\n"
-                        f"> **Players ativos:** `{len(self.bot.music.players)}`\n"
-                        f"> **Tipo de player usado:** `Lavalink`\n"
-                        f"> **Commit atual:** [`{self.bot.commit}`]({self.bot.remote_git_url}/commit/{self.bot.commit})\n"
-                        f"> **Versão do Disnake:** `{disnake.__version__}`\n"
-                        f"> **Versão do python:** `{platform.python_version()}`\n"
-                        f"> **Latencia:** `{round(self.bot.latency * 1000)}ms`\n"
-                        f"> **Uso de RAM:** `{ram_usage}`\n"
-                        f"> **Uptime:** `{str((datetime.timedelta(seconds=(disnake.utils.utcnow() - self.bot.uptime).total_seconds()))).split('.')[0]}`\n",
+                        f"> **Estou em:** `{len(self.bot.guilds)} servidor(es)`\n",
             color=self.bot.get_color(inter.guild.me)
         )
+
+        if self.bot.music.players:
+            embed.description += f"> **Players ativos:** `{len(self.bot.music.players)}`\n"
+
+        if self.bot.commit:
+            embed.description += f"> **Commit atual:** [`{self.bot.commit}`]({self.bot.remote_git_url}/commit/{self.bot.commit})\n"
+
+        embed.description += f"> **Versão do Disnake:** `{disnake.__version__}`\n" \
+                             f"> **Latencia:** `{round(self.bot.latency * 1000)}ms`\n" \
+                             f"> **Uso de RAM:** `{ram_usage}`\n" \
+                             f"> **Uptime:** `{str((datetime.timedelta(seconds=(disnake.utils.utcnow() - self.bot.uptime).total_seconds()))).split('.')[0]}`\n"
 
         try:
             embed.set_thumbnail(url=self.bot.user.avatar.with_static_format("png").url)

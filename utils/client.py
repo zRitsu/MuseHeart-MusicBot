@@ -13,7 +13,7 @@ import traceback
 from .owner_panel import PanelView
 
 
-class BotCore(commands.Bot):
+class BotCore(commands.AutoShardedBot):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
