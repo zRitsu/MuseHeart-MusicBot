@@ -60,10 +60,10 @@ def load(player: LavalinkPlayer) -> dict:
 
     if len(player.queue):
 
-        char_limit = 26 if not player.static else 33
+        char_limit = 22 if not player.static else 33
 
         queue_txt = "\n".join(
-            f"`{n + 1}) [{time_format(t.duration) if t.duration else '🔴 Livestream'}]` [`{fix_characters(t.title, char_limit)}`]({t.uri})"
+            f"`{n + 1}|{time_format(t.duration) if t.duration else '🔴 Livestream'}|` [`{fix_characters(t.title, char_limit)}`]({t.uri})"
             for n, t
             in (enumerate(itertools.islice(player.queue, (20 if player.static else 3))))
         )
@@ -88,7 +88,7 @@ def load(player: LavalinkPlayer) -> dict:
         embed.set_image(url=player.current.thumb)
     else:
         embed.set_image(
-            url="https://cdn.discordapp.com/attachments/480195401543188483/795080813678559273/rainbow_bar2.gif")
+            url="https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif")
         embed.set_thumbnail(url=player.current.thumb)
 
     data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
