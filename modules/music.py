@@ -2041,6 +2041,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 await player.destroy(force=True)
                 return
 
+        elif member.bot: # ignorar outros bots
+            return
+
         if not player.nonstop and player.guild.me.voice and not any(m for m in player.guild.me.voice.channel.members if not m.bot):
             player.members_timeout_task = self.bot.loop.create_task(player.members_timeout())
         else:
