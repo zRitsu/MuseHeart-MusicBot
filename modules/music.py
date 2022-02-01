@@ -236,6 +236,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         except KeyError:
             channel = inter.channel
 
+        if channel.permissions_for(inter.guild.me).send_messages:
+            raise GenericError(f"Não tenho permissão para enviar mensagens no canal: {channel.mention}")
+
         query = query.strip("<>")
 
         if not URL_REG.match(query):
@@ -1835,6 +1838,16 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def track_start(self, node, payload: wavelink.TrackStart):
 
         player: LavalinkPlayer = payload.player
+
+        if not player.text_channel.permissions_for(player.guild.me).send_messages:
+            try:
+                print(f"{player.guild.name} [{player.guild.id}] - Desligando player por falta de permissão para enviar "
+                      f"mensagens no canal: {player.text_channel.name} [{player.text_channel.id}]")
+            except Exception:
+                traceback.print_exc()
+            await player.destroy()
+            return
+
         await player.invoke_np(force=True if (not player.loop or not player.is_last_message()) else False, rpc_update=True)
         player.command_log = ""
 
