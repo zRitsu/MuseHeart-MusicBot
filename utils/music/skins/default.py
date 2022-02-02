@@ -60,13 +60,24 @@ def load(player: LavalinkPlayer) -> dict:
 
     if len(player.queue):
 
+        if player.static:
+            queue_size = 20
+            queue_text = 33
+            queue_img = ""
+
+        else:
+            queue_size = 3
+            queue_text = 31
+            queue_img = "https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif"
+
         queue_txt = "\n".join(
-            f"`{n + 1}) [{time_format(t.duration) if t.duration else '🔴 Livestream'}]` [`{fix_characters(t.title, 34)}`]({t.uri})"
-            for n, t in (enumerate(itertools.islice(player.queue, 20 if player.static else 3)))
+            f"`{n + 1}) [{time_format(t.duration) if t.duration else '🔴 Livestream'}]` [`{fix_characters(t.title, queue_text)}`]({t.uri})"
+            for n, t in (enumerate(itertools.islice(player.queue, queue_size)))
         )
 
         embed_queue = disnake.Embed(title=f"Músicas na fila: {len(player.queue)}", color=player.bot.get_color(player.guild.me),
                                     description=f"\n{queue_txt}")
+        embed_queue.set_image(url=queue_img)
 
     embed.description = txt
 
