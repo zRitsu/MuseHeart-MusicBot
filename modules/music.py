@@ -1759,17 +1759,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if payload.code == 4014:
 
-            if player.guild.me.voice:
-                return
-            vc = player.bot.get_channel(player.channel_id)
-            if vc:
-                vcname = f" **{vc.name}**"
+            if player.static:
+                player.command_log = "O player foi desligado por perca de conexão com o canal de voz."
             else:
-                vcname = ""
-            embed = disnake.Embed(color=self.bot.get_color(player.guild.me))
-            embed.description = f"Conexão perdida com o canal de voz{vcname}..."
-            embed.description += "\nO player será finalizado..."
-            self.bot.loop.create_task(player.text_channel.send(embed=embed, delete_after=7))
+                embed = disnake.Embed(description="**Desligando player por perca de conexãoo com o canal de voz.**",
+                                      color=self.bot.get_color(player.guild.me))
+                self.bot.loop.create_task(player.text_channel.send(embed=embed, delete_after=7))
             await player.destroy()
             return
 
@@ -2016,32 +2011,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             after: disnake.VoiceState
     ):
 
+        if member.bot: # ignorar bots
+            return
+
         player: LavalinkPlayer = self.bot.music.players.get(member.guild.id)
 
         if not player:
-            return
-
-        if member.id == self.bot.user.id:
-
-            if (not before.channel and after.channel):
-                return # bot acabou de entrar no canal de voz.
-
-            if not member.voice:
-
-                if player.static:
-                    player.command_log = "O player foi desligado por desconexão\ncom o canal de voz."
-
-                else:
-                    embed = disnake.Embed(description="**Desligando player por desconexão do canal.**",
-                                          color=self.bot.get_color(member))
-                    self.bot.loop.create_task(player.text_channel.send(embed=embed, delete_after=10))
-
-                self.bot.loop.create_task(player.process_rpc(before.channel, close=True))
-
-                await player.destroy(force=True)
-                return
-
-        elif member.bot: # ignorar outros bots
             return
 
         if not player.nonstop and player.guild.me.voice and not any(m for m in player.guild.me.voice.channel.members if not m.bot):
