@@ -2,8 +2,8 @@ language="python3"
 
 run = """[ -z "$IS_SOURCE" ] || { python3 preview.py; kill "$PPID"; exit 1; }
 [ -e pom.xml ] && rm pom.xml
-#pip3 install -r requirements.txt
-#clear
+pip3 install -r requirements.txt
+clear
 python3 main.py"""
 
 [packager]
