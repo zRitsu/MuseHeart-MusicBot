@@ -35,7 +35,7 @@ def load(player: LavalinkPlayer) -> dict:
     else:
         duration = f"⏰ **⠂Duração:** `{time_format(player.current.duration)}`"
 
-    txt = f"[**{player.current.title}**]({player.current.uri})\n\n" \
+    txt = f"[`{player.current.title}`]({player.current.uri})\n\n" \
           f"> {duration}\n" \
           f"> 💠 **⠂Uploader**: `{player.current.author}`\n" \
           f"> ✋ **⠂Pedido por:** {player.current.requester.mention}\n" \
@@ -60,27 +60,13 @@ def load(player: LavalinkPlayer) -> dict:
 
     if len(player.queue):
 
-        char_limit = 22 if not player.static else 33
-
         queue_txt = "\n".join(
-            f"`{n + 1}|{time_format(t.duration) if t.duration else '🔴 Livestream'}|` [`{fix_characters(t.title, char_limit)}`]({t.uri})"
-            for n, t
-            in (enumerate(itertools.islice(player.queue, (20 if player.static else 3))))
+            f"`{n + 1}) [{time_format(t.duration) if t.duration else '🔴 Livestream'}]` [`{fix_characters(t.title, 34)}`]({t.uri})"
+            for n, t in (enumerate(itertools.islice(player.queue, 20 if player.static else 3)))
         )
 
-        if not player.static:
-
-            txt += f"```ini\n[Próximas Músicas]:``` {queue_txt}"
-
-            if (qsize := len(player.queue)) > 3:
-                txt += f"\n\n`E mais {qsize - 3}" + " músicas`"
-
-        else:
-
-            embed_queue = disnake.Embed(title=f"Músicas na fila:", color=player.bot.get_color(player.guild.me),
-                                        description=f"\n{queue_txt}")
-            if (qsize := len(player.queue)) > 20:
-                embed_queue.description += f"\n\nE mais **{qsize - 20}** músicas."
+        embed_queue = disnake.Embed(title=f"Músicas na fila: {len(player.queue)}", color=player.bot.get_color(player.guild.me),
+                                    description=f"\n{queue_txt}")
 
     embed.description = txt
 
