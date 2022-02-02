@@ -241,24 +241,25 @@ class LavalinkPlayer(wavelink.Player):
         self.view = PlayerInteractions(self.bot)
 
         controls = {
-            "⏯️": ("playpause", get_button_style(self.paused)),
-            "⏮️": ("back"),
-            "⏭️": ("skip"),
-            "🔀": ("shuffle"),
-            "🇳": ("nightcore", get_button_style(self.nightcore, red=False)),
-            "⏹️": ("stop"),
+            "⏯️": ("playpause", get_button_style(self.paused),),
+            "⏮️": ("back",),
+            "⏭️": ("skip",),
+            "🔀": ("shuffle",),
+            "🇳": ("nightcore", get_button_style(self.nightcore, red=False),),
+            "⏹️": ("stop",),
             ("🔂" if self.loop == "current" else "🔁"): (
-                "loop_mode", disnake.ButtonStyle.grey
-                if not self.loop else disnake.ButtonStyle.blurple
-                if self.loop == "current"
-                else disnake.ButtonStyle.green
+                "loop_mode",
+                disnake.ButtonStyle.grey if not self.loop
+                else disnake.ButtonStyle.blurple
+                if self.loop == "current" else disnake.ButtonStyle.green,
             ),
-            "🔊": ("volume"),
-            "📑": ('queue'),
-            "ℹ️": ("help")
+            "🔊": ("volume",),
+            "📑": ('queue',),
+            "ℹ️": ("help",)
         }
 
         for button, control in controls.items():
+
             try:
                 style = control[1]
             except IndexError:
