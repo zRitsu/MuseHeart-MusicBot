@@ -93,7 +93,10 @@ def load_config():
         "START_LOCAL_LAVALINK"
 
     ]:
-        CONFIGS[i] = bools[CONFIGS[i]]
+        try:
+            CONFIGS[i] = bools[CONFIGS[i]]
+        except KeyError:
+            continue
 
     if CONFIGS["IDLE_TIMEOUT"] < 30:
         CONFIGS["IDLE_TIMEOUT"] = 30
