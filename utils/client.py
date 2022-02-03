@@ -106,6 +106,15 @@ class BotCore(commands.AutoShardedBot):
 
         return me.color
 
+
+    async def on_application_command_autocomplete(self, inter: disnake.ApplicationCommandInteraction):
+
+        if not self.bot_ready:
+            return
+
+        await super().on_application_command_autocomplete(inter)
+
+
     async def on_application_command(self, inter: disnake.ApplicationCommandInteraction):
 
         if not inter.guild:
@@ -118,13 +127,14 @@ class BotCore(commands.AutoShardedBot):
             return
 
         if self.db:
-            # inter.user_data = await bot.db.get_data(inter.author.id, db_name="users")
+            # inter.user_data = await self.db.get_data(inter.author.id, db_name="users")
             inter.guild_data = await self.db.get_data(inter.guild.id, db_name="guilds")
         else:
             # inter.user_data = None
             inter.guild_data = None
 
-        await self.process_application_commands(inter)
+        await super().on_application_command(inter)
+
 
     def load_modules(self, bot_name: str = None):
 

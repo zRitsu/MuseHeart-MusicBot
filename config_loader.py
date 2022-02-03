@@ -15,6 +15,7 @@ def load_config():
         "EMBED_COLOR": None,
         "SPOTIFY_CLIENT_ID": None,
         "SPOTIFY_CLIENT_SECRET": None,
+        "MAX_USER_FAVS": "10",  # limiite de favoritos por membro (0 ou menor que isso = sem limites)
         "SOURCE_REPO": "https://github.com/zRitsu/disnake-LL-music-bot.git",
 
         # Local lavalink stuffs
@@ -48,6 +49,7 @@ def load_config():
         pass
 
     CONFIGS["IDLE_TIMEOUT"] = int(CONFIGS["IDLE_TIMEOUT"])
+    CONFIGS["MAX_USER_FAVS"] = int(CONFIGS["MAX_USER_FAVS"])
 
     if CONFIGS["EMBED_COLOR"] in ["false", "none"]:
         CONFIGS["EMBED_COLOR"] = None

@@ -126,6 +126,17 @@ def queue_playlist(inter, query):
                                query.lower() in track.playlist['name'].lower()]))[:20]
 
 
+async def fav_list(inter, query: str, *, prefix=""):
+
+    return [f"{prefix}{favname}" for favname in (await inter.bot.db.get_data(inter.author.id, db_name="users"))["fav_links"]
+            if not query or query in favname]
+
+
+async def fav_add_autocomplete(inter, query: str):
+
+    return await fav_list(inter, query, prefix="> fav: ")
+
+
 def queue_author(inter, query):
 
     if not query:

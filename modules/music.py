@@ -21,7 +21,7 @@ from utils.music.checks import check_voice, user_cooldown, has_player, has_sourc
 from utils.music.models import LavalinkPlayer, LavalinkTrack
 from utils.music.converters import time_format, fix_characters, string_to_seconds, get_track_index, URL_REG, \
     YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist, \
-    node_suggestions
+    node_suggestions, fav_add_autocomplete
 from utils.music.interactions import VolumeInteraction, QueueInteraction, send_message, SongSelect, SelectInteraction
 
 
@@ -209,7 +209,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def play(
             self,
             inter: disnake.ApplicationCommandInteraction,
-            query: str = commands.Param(name="busca", desc="Nome ou link da música."), *,
+            query: str = commands.Param(name="busca", desc="Nome ou link da música.", autocomplete=fav_add_autocomplete), *,
             position: int = commands.Param(name="posição", description="Colocar a música em uma posição específica", default=0),
             options: PlayOpts = commands.Param(name="opções" ,description="Opções para processar playlist", default=False),
             manual_selection: bool = commands.Param(name="selecionar_manualmente", description="Escolher uma música manualmente entre os resultados encontrados", default=False),
@@ -239,34 +239,40 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not channel.permissions_for(inter.guild.me).send_messages:
             raise GenericError(f"Não tenho permissão para enviar mensagens no canal: {channel.mention}")
 
-        query = query.strip("<>")
+        if query.startswith("> fav:"):
+            user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
+            query = user_data["fav_links"][query[7:]]
 
-        if not URL_REG.match(query):
-            query = f"{source}:{query}"
+        else:
 
-        elif "&list=" in query:
+            query = query.strip("<>")
 
-            view = SelectInteraction(
-                user=inter.author,
-                opts = [
-                    disnake.SelectOption(label="Música", emoji="🎵", description="Carregar apenas a música do link.", value="music"),
-                    disnake.SelectOption(label="Playlist", emoji="🎶", description="Carregar playlist com a música atual.", value="playlist"),
-                ], timeout=30)
+            if not URL_REG.match(query):
+                query = f"{source}:{query}"
 
-            embed = disnake.Embed(
-                description="**O link contém vídeo com playlist.**\n`selecione uma opção em até 30 segundos para prosseguir.`",
-                color=self.bot.get_color(inter.guild.me)
-            )
+            elif "&list=" in query:
 
-            await inter.send(embed=embed, view=view, ephemeral=True)
+                view = SelectInteraction(
+                    user=inter.author,
+                    opts = [
+                        disnake.SelectOption(label="Música", emoji="🎵", description="Carregar apenas a música do link.", value="music"),
+                        disnake.SelectOption(label="Playlist", emoji="🎶", description="Carregar playlist com a música atual.", value="playlist"),
+                    ], timeout=30)
 
-            await view.wait()
+                embed = disnake.Embed(
+                    description="**O link contém vídeo com playlist.**\n`selecione uma opção em até 30 segundos para prosseguir.`",
+                    color=self.bot.get_color(inter.guild.me)
+                )
 
-            if view.selected == "music":
-                query = YOUTUBE_VIDEO_REG.match(query).group()
+                await inter.send(embed=embed, view=view, ephemeral=True)
 
-            if view.inter.response:
-                inter.response = view.inter.response
+                await view.wait()
+
+                if view.selected == "music":
+                    query = YOUTUBE_VIDEO_REG.match(query).group()
+
+                if view.inter.response:
+                    inter.response = view.inter.response
 
         await inter.response.defer(ephemeral=True)
 
