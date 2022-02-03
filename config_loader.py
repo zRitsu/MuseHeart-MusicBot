@@ -37,9 +37,24 @@ def load_config():
         "SOURCE_REPO": "https://github.com/zRitsu/disnake-LL-music-bot.git", # Link do github pra ser usado em comandos como o de update,
         "HIDE_SOURCE_OWNER": False,  # Ocultar link do meu repositório no comando /about. Caso altere isso, por favor considere de alguma forma fornecer crédito. :(
 
-        #############################
-        ### Local lavalink stuffs ###
-        #############################
+        #########################################################################################
+        ### Bot presences:                                                                    ###
+        ### Status pra exibir no bot, caso queira mais de 1 pra tipo específico separe com || ###
+        ###                                                                                   ###
+        ### Placeholders:                                                                     ###
+        ### {users} -> quantidade de usuários.                                                ###
+        ### {guilds} -> quantidade de servidores.                                             ###
+        ### {playing} -> quantidade de players ativos.                                        ###
+        ### {uptime} -> uptime do bot.                                                        ###
+        #########################################################################################
+
+        "LISTENING_PRESENCES": "Músicas",
+        "WATCHING_PRESENCES": "{users} usuário(s)",
+        "PLAYING_PRESENCES": "Em {guilds} servidor(es) || Estou online há: {uptime}",
+
+        ##############################
+        ### Local lavalink stuffs: ###
+        ##############################
 
         "START_LOCAL_LAVALINK": True, # Iniciar um servidor lavalink localmente (Nota, requer uma vps/host com 512mb no mínimo, caso desative ignore todos os itens abaixo mas você terá que adicionar um servidor lavalink externo).
         "LAVALINK_ADDITIONAL_SLEEP": 0, # Tempo adicional pra aguardar o servidor lavalink iniciar (atualmente não é muito necessário e talvez em breve irei retirar).
