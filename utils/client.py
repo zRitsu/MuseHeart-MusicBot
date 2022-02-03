@@ -67,6 +67,9 @@ class BotCore(commands.AutoShardedBot):
 
     async def on_message(self, message: disnake.Message):
 
+        if not self.bot_ready:
+            return
+
         if message.content == f"<@{self.user.id}>" or message.content == f"<@!{self.user.id}>":
 
             embed = disnake.Embed(color=self.get_color(message.guild.me))
@@ -93,7 +96,7 @@ class BotCore(commands.AutoShardedBot):
             await message.reply(embed=embed, view=view)
             return
 
-        await self.process_commands(message)
+        await super().on_message(message)
 
 
     def get_color(self, me: disnake.Member):
