@@ -116,7 +116,7 @@ class FavManager(commands.Cog):
                 if resp.attachments:
 
                     if not resp.attachments[0].filename.endswith(".json"):
-                        await inter.author.send("Formato inválido! Envie novamente...")
+                        await inter.author.send("Tipo de arquivo inválido! Envie novamente...")
                         continue
 
                     data = (await resp.attachments[0].read()).decode('utf-8')
