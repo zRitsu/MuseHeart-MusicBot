@@ -41,12 +41,12 @@ def load_config():
         ### Local lavalink stuffs ###
         #############################
 
-        "START_LOCAL_LAVALINK": True,
-        "LAVALINK_ADDITIONAL_SLEEP": 0,
-        "LAVALINK_INITIAL_RAM": 30,
-        "LAVALINK_RAM_LIMIT": 120,
-        "LAVALINK_CPU_CORES": 2,
-        "LAVALINK_FILE_URL": "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/Lavalink.jar"
+        "START_LOCAL_LAVALINK": True, # iniciar um servidor lavalink localmente (Nota, requer uma vps/host com 512mb no mínimo, caso desative ignore todos os itens abaixo).
+        "LAVALINK_ADDITIONAL_SLEEP": 0, # Tempo adicional pra aguardar o servidor lavalink iniciar (atualmente não é muito necessário e talvez em breve irei retirar).
+        "LAVALINK_INITIAL_RAM": 30, # Quantidade de ram inicial pra ser usado no processo do servidor lavalink.
+        "LAVALINK_RAM_LIMIT": 120, # Limite de ram pra ser usado no processo do servidor lavalink
+        "LAVALINK_CPU_CORES": 2, # quantidade de cpu cores pra ser usado no servidor lavalink
+        "LAVALINK_FILE_URL": "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/Lavalink.jar" # link pra baixar o arquivo Lavalink.jar
     }
 
     for cfg in list(CONFIGS) + ["TOKEN", "MONGO"]:
@@ -73,7 +73,7 @@ def load_config():
     if CONFIGS["EMBED_COLOR"] is False:
         CONFIGS["EMBED_COLOR"] = None
 
-    # converter configs que requer número int.
+    # converter strings que requer número int.
     for i in [
         "MAX_USER_FAVS",
         "IDLE_TIMEOUT",
@@ -85,7 +85,7 @@ def load_config():
     ]:
         CONFIGS[i] = int(CONFIGS[i])
 
-    # converter configs que requer valor bool/nulo.
+    # converter strings que requer valor bool/nulo.
     for i in [
         "AUTO_SYNC_COMMANDS",
         "EMBED_COLOR",
@@ -93,10 +93,10 @@ def load_config():
         "START_LOCAL_LAVALINK"
 
     ]:
-        try:
-            CONFIGS[i] = bools[CONFIGS[i]]
-        except KeyError:
+        if CONFIGS[i] in (True, False, None):
             continue
+
+        CONFIGS[i] = bools[CONFIGS[i]]
 
     if CONFIGS["IDLE_TIMEOUT"] < 30:
         CONFIGS["IDLE_TIMEOUT"] = 30
