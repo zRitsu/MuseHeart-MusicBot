@@ -175,7 +175,7 @@ class FavManager(commands.Cog):
             embed = disnake.Embed(
                 description=f"Seus favoritos estão aqui.\nVocê pode importar usando o comando: `/{self.import_.name}`",
                 color=self.bot.get_color(inter.guild.me))
-            await inter.author.dm_channel.send(embed=embed, file=disnake.File(fp=fp, filename="favoritos.json"))
+            await inter.author.send(embed=embed, file=disnake.File(fp=fp, filename="favoritos.json"))
 
         except disnake.Forbidden:
             raise GenericError("Seu DM está desativado!")
