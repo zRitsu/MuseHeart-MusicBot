@@ -228,13 +228,16 @@ def time_format(milliseconds: Union[int, float], use_names: bool = False) -> str
 
             times.append(f"{time_} {name}" + ("s" if time_ > 1 else ""))
 
-        last_time = times.pop()
+        try:
+            last_time = times.pop()
+        except IndexError:
+            last_time = None
+            times = ["1 segundo"]
 
         strings = ", ".join(t for t in times)
 
         if last_time:
             strings += f" e {last_time}"
-
 
     else:
 
