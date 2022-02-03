@@ -83,7 +83,10 @@ def load_config():
         "LAVALINK_RAM_LIMIT",
         "LAVALINK_CPU_CORES"
     ]:
-        CONFIGS[i] = int(CONFIGS[i])
+        try:
+            CONFIGS[i] = int(CONFIGS[i])
+        except ValueError:
+            raise Exception(f"Você usou uma configuração inválida! {i}: {CONFIGS[i]}")
 
     # converter strings que requer valor bool/nulo.
     for i in [
@@ -96,7 +99,10 @@ def load_config():
         if CONFIGS[i] in (True, False, None):
             continue
 
-        CONFIGS[i] = bools[CONFIGS[i]]
+        try:
+            CONFIGS[i] = bools[CONFIGS[i]]
+        except KeyError:
+            raise Exception(f"Você usou uma configuração inválida! {i}: {CONFIGS[i]}")
 
     if CONFIGS["IDLE_TIMEOUT"] < 30:
         CONFIGS["IDLE_TIMEOUT"] = 30
