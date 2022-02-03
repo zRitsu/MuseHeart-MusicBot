@@ -204,8 +204,8 @@ class Owner(commands.Cog):
                    alt_name="Sincronizar comandos manualmente.")
     async def synccmds(self, ctx: Union[commands.Context, disnake.MessageInteraction]):
 
-        if self.bot.config["AUTO_SYNC_COMMANDS"] == "true":
-            raise GenericError("A sincronização automática está ativada.")
+        if self.bot.config["AUTO_SYNC_COMMANDS"] is True:
+            raise GenericError("Isso não pode ser usado com a sincronização automática ativada...")
 
         await self.bot._sync_application_commands()
 

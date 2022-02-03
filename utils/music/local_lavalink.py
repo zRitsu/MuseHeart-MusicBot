@@ -73,21 +73,6 @@ def run_lavalink(
 
     cmd = f'{java_path}java'
 
-    try:
-        lavalink_initial_ram = int(lavalink_initial_ram)
-    except TypeError:
-        lavalink_initial_ram = 0
-
-    try:
-        lavalink_ram_limit = int(lavalink_ram_limit)
-    except TypeError:
-        lavalink_ram_limit = 0
-
-    try:
-        lavalink_cpu_cores = int(lavalink_cpu_cores)
-    except TypeError:
-        lavalink_cpu_cores = 0
-
     if int(lavalink_cpu_cores) >= 1:
         cmd += f" -XX:ActiveProcessorCount={lavalink_cpu_cores}"
 

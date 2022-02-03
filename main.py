@@ -23,7 +23,7 @@ CONFIGS = load_config()
 if not CONFIGS["DEFAULT_PREFIX"]:
     CONFIGS["DEFAULT_PREFIX"] = "!!!"
 
-if CONFIGS['START_LOCAL_LAVALINK'] == "true":
+if CONFIGS['START_LOCAL_LAVALINK'] is True:
     run_lavalink(
         lavalink_file_url=CONFIGS['LAVALINK_FILE_URL'],
         lavalink_initial_ram=CONFIGS['LAVALINK_INITIAL_RAM'],
@@ -66,7 +66,7 @@ def load_bot(bot_name: str, token: str, main=False):
         case_insensitive=True,
         intents=intents,
         # test_guilds=[],
-        sync_commands=CONFIGS["AUTO_SYNC_COMMANDS"] == "true",
+        sync_commands=CONFIGS["AUTO_SYNC_COMMANDS"] is True,
         sync_commands_debug=True,
         config=CONFIGS,
         color=CONFIGS["EMBED_COLOR"],

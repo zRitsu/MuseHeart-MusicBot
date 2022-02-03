@@ -1658,7 +1658,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             except Exception as e:
                 print(f"Falha ao adicionar node: {k}, erro: {repr(e)}")
 
-        if self.bot.config['START_LOCAL_LAVALINK'] == "true":
+        if self.bot.config['START_LOCAL_LAVALINK'] is True:
             self.bot.loop.create_task(self.connect_local_lavalink())
 
 
