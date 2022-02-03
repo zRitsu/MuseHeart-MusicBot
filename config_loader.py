@@ -41,11 +41,11 @@ def load_config():
         ### Local lavalink stuffs ###
         #############################
 
-        "START_LOCAL_LAVALINK": True, # iniciar um servidor lavalink localmente (Nota, requer uma vps/host com 512mb no mínimo, caso desative ignore todos os itens abaixo).
+        "START_LOCAL_LAVALINK": True, # Iniciar um servidor lavalink localmente (Nota, requer uma vps/host com 512mb no mínimo, caso desative ignore todos os itens abaixo mas você terá que adicionar um servidor lavalink externo).
         "LAVALINK_ADDITIONAL_SLEEP": 0, # Tempo adicional pra aguardar o servidor lavalink iniciar (atualmente não é muito necessário e talvez em breve irei retirar).
         "LAVALINK_INITIAL_RAM": 30, # Quantidade de ram inicial pra ser usado no processo do servidor lavalink.
-        "LAVALINK_RAM_LIMIT": 120, # Limite de ram pra ser usado no processo do servidor lavalink
-        "LAVALINK_CPU_CORES": 2, # quantidade de cpu cores pra ser usado no servidor lavalink
+        "LAVALINK_RAM_LIMIT": 120, # Limite de ram pra ser usado no processo do servidor lavalink.
+        "LAVALINK_CPU_CORES": 2, # Quantidade de cpu cores pra ser usado no servidor lavalink.
         "LAVALINK_FILE_URL": "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/Lavalink.jar" # link pra baixar o arquivo Lavalink.jar
     }
 
