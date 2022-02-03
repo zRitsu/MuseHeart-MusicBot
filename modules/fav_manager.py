@@ -180,7 +180,7 @@ class FavManager(commands.Cog):
         except disnake.Forbidden:
             raise GenericError("Seu DM está desativado!")
 
-        await inter.send("Seus favoritos foram enviados no seu DM.")
+        await inter.send("Seus favoritos foram enviados no seu DM.", ephemeral=True)
 
 
 def setup(bot: BotCore):
