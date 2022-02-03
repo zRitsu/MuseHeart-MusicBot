@@ -1,4 +1,6 @@
 import datetime
+from typing import Union
+
 from fake_useragent import UserAgent
 import disnake
 import re
@@ -205,19 +207,50 @@ def fix_characters(text: str, limit: int = 0):
     return text
 
 
-def time_format(milliseconds):
-    m, s = divmod(int(milliseconds / 1000), 60)
-    h, m = divmod(m, 60)
+def time_format(milliseconds: Union[int, float], use_names: bool = False) -> str:
 
-    strings = f"{m:02d}:{s:02d}"
+    minutes, seconds = divmod(int(milliseconds / 1000), 60)
+    hours, minutes = divmod(minutes, 60)
+    days, hours = divmod(hours, 24)
 
-    if h:
-        strings = f"{h}:{strings}"
+    if use_names:
+
+        times = []
+
+        for time_, name in (
+                (days, "dia"),
+                (hours, "hora"),
+                (minutes, "minuto"),
+                (seconds,"segundo")
+        ):
+            if not time_:
+                continue
+
+            times.append(f"{time_} {name}" + ("s" if time_ > 1 else ""))
+
+        last_time = times.pop()
+
+        strings = ", ".join(t for t in times)
+
+        if last_time:
+            strings += f" e {last_time}"
+
+
+    else:
+
+        strings = f"{minutes:02d}:{seconds:02d}"
+
+        if hours:
+            strings = f"{hours}:{strings}"
+
+        if days:
+            strings = (f"{days} dias" if days > 1 else f"{days} dia") + (f", {strings}" if strings != "00:00" else "")
 
     return strings
 
 
 time_names = ["seconds", "minutes", "hours"]
+
 
 def string_to_seconds(time):
     try:

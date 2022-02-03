@@ -4,6 +4,7 @@ from typing import Optional
 import disnake
 from disnake.ext import commands
 from utils.client import BotCore
+from utils.music.converters import time_format
 import psutil
 import humanize
 from itertools import cycle
@@ -29,8 +30,7 @@ class Misc(commands.Cog):
             .replace("{users}", str(len([m for m in self.bot.users if not m.bot]))) \
             .replace("{playing}", str(len(self.bot.music.players))) \
             .replace("{guilds}", str(len(self.bot.guilds))) \
-            .replace("{uptime}", str(datetime.timedelta(seconds=(disnake.utils.utcnow() - self.bot.uptime)
-                                                        .total_seconds())).split('.')[0])
+            .replace("{uptime}", time_format((disnake.utils.utcnow() - self.bot.uptime).total_seconds(), use_names=True))
 
 
     async def presences(self):
