@@ -33,6 +33,11 @@ class BotCore(commands.AutoShardedBot):
         self.remote_git_url = kwargs.get("remote_git_url", "")
         self.ws_client = WSClient(self.config["RPC_SERVER"], bot=self)
         self.uptime = disnake.utils.utcnow()
+        try:
+            self.env_owner_ids = set(int(i) for i in self.config["OWNER_IDS"].split("||"))
+        except ValueError:
+            print("Você usou uma configuração inválida na lista de OWNER_IDS.")
+            self.env_owner_ids = set()
 
 
     def load_skins(self):
@@ -68,7 +73,7 @@ class BotCore(commands.AutoShardedBot):
 
     async def is_owner(self, user: Union[disnake.User, disnake.Member]) -> bool:
 
-        if str(user.id) in self.config["OWNER_IDS"]:
+        if user.id in self.env_owner_ids:
             return True
 
         await super().is_owner(user)
