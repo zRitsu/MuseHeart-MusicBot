@@ -76,7 +76,7 @@ class BotCore(commands.AutoShardedBot):
         if user.id in self.env_owner_ids:
             return True
 
-        await super().is_owner(user)
+        return await super().is_owner(user)
 
 
     async def on_message(self, message: disnake.Message):
