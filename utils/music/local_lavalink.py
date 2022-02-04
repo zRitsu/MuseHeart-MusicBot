@@ -1,4 +1,5 @@
 import subprocess
+from typing import Optional
 import requests
 import re
 import os
@@ -15,11 +16,11 @@ def download_file(url, filename):
     r.close()
 
 def run_lavalink(
-    lavalink_file_url = None,
-    lavalink_initial_ram = 30,
-    lavalink_ram_limit = 100,
-    lavalink_additional_sleep = None,
-    lavalink_cpu_cores = 1,
+    lavalink_file_url: Optional[str] = None,
+    lavalink_initial_ram: int = 30,
+    lavalink_ram_limit: int = 100,
+    lavalink_additional_sleep: int = 0,
+    lavalink_cpu_cores: int = 1,
 ):
 
     download_java = False
@@ -73,10 +74,10 @@ def run_lavalink(
 
     cmd = f'{java_path}java'
 
-    if int(lavalink_cpu_cores) >= 1:
+    if lavalink_cpu_cores >= 1:
         cmd += f" -XX:ActiveProcessorCount={lavalink_cpu_cores}"
 
-    if int(lavalink_ram_limit) > 10:
+    if lavalink_ram_limit > 10:
         cmd += f" -Xmx{lavalink_ram_limit}m"
 
     if lavalink_initial_ram > 0 and lavalink_initial_ram < lavalink_ram_limit:
