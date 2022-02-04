@@ -27,7 +27,7 @@ class NoVoice(commands.CheckFailure):
 
 class MissingVoicePerms(commands.CheckFailure):
 
-    def __init(self, voice_channel: Union[disnake.VoiceChannel, disnake.StageChannel]):
+    def __init__(self, voice_channel: Union[disnake.VoiceChannel, disnake.StageChannel]):
         self.voice_channel = voice_channel
 
 
