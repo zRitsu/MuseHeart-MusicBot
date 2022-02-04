@@ -58,7 +58,7 @@ def load(player: LavalinkPlayer) -> dict:
 
 
     txt = f"[`{player.current.title}`]({player.current.uri})\n\n" \
-          f"> 💠 **⠂Por**: `{fix_characters(player.current.author, uploader_text_size)}`\n" \
+          f"> 💠 **⠂Por:** `{fix_characters(player.current.author, uploader_text_size)}`\n" \
           f"> {duration}\n" \
           f"> ✋ **⠂Pedido por:** {player.current.requester.mention}\n" \
           f"> 🔊 **⠂Volume:** `{player.volume}%`"
