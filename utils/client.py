@@ -3,7 +3,7 @@ from importlib import import_module
 import aiohttp
 from disnake.ext import commands
 import disnake
-from typing import Optional
+from typing import Optional, Union
 from spotipy import Spotify
 from web_app import WSClient
 from .music.models import music_mode
@@ -64,6 +64,15 @@ class BotCore(commands.AutoShardedBot):
             return "default"
 
         return skin
+
+
+    async def is_owner(self, user: Union[disnake.User, disnake.Member]) -> bool:
+
+        if str(user.id) in self.config["OWNER_IDS"]:
+            return True
+
+        await super().is_owner(user)
+
 
     async def on_message(self, message: disnake.Message):
 

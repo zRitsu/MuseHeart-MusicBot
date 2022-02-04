@@ -28,6 +28,7 @@ def load_config():
         "DEFAULT_PREFIX": "!!!", # prefixo padrão do bot.
         "DEFAULT_SKIN": "default", # skin padrão do player (você pode copiar a skin padrão e deixa-la com outro nome e editar o arquivo a seu gosto, ela não será afetada por minhas alterações em updates).
         "AUTO_SYNC_COMMANDS": True, # Sincronizar comandos automaticamente ao ligar o bot.
+        "OWNER_IDS": "", # ID de usuário pra lista de owner/dono do bot, caso use mais de 1 id separe por || (Qualquer id que for colocado na lista vai permitir o membro ter acesso total ao bot, tome cuidado!)
         "IDLE_TIMEOUT": 180, # Tempo em segundos pro bot aguardar por novas músicas no modo de espera.
         "RPC_SERVER": "ws://localhost:8080/ws", # Link do servidor RPC (pra status do membro), caso não tenha será usado localmente.
         "EMBED_COLOR": None, # cor da embed do player (caso não tenha será usado a cor do cargo do bot).
