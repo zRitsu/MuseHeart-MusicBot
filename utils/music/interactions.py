@@ -44,6 +44,33 @@ async def send_message(
         await inter.send(text, embed=embed, ephemeral=True)
 
 
+async def send_idle_embed(target: Union[disnake.Message, disnake.TextChannel, disnake.Thread], text=""):
+
+    embed = disnake.Embed(description="**Entre em um canal de voz e peça uma música neste canal ou na conversa abaixo**\n\n"
+                                      "**FORMATOS SUPORTADOS (nome, link):**"
+                                      " ```ini\n[Youtube, Soundcloud, Spotify, Twitch]```\n", color=self.bot.get_color(target.guild.me))
+
+    if text:
+        embed.description += f"**ÚLTIMA AÇÃO:** {text.replace('**', '')}\n"
+
+    try:
+        avatar = target.guild.me.avatar.url
+    except:
+        avatar = target.guild.me.default_avatar.url
+    embed.set_thumbnail(avatar)
+
+    if isinstance(target, disnake.Message):
+        if target.author == target.guild.me:
+            await target.edit(embed=embed, content=None, view=None)
+            message = target
+        else:
+            message = await target.channel.send(embed=embed)
+    else:
+        message = await target.send(embed=embed)
+
+    return message
+
+
 class VolumeInteraction(disnake.ui.View):
 
     def __init__(self, inter):

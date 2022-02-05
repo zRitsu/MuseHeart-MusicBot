@@ -6,7 +6,7 @@ import wavelink
 from urllib import parse
 from .converters import fix_characters, time_format, get_button_style
 from .filters import AudioFilter
-from .interactions import PlayerInteractions
+from .interactions import PlayerInteractions, send_idle_embed
 from .spotify import SpotifyTrack
 import traceback
 from collections import deque
@@ -369,7 +369,7 @@ class LavalinkPlayer(wavelink.Player):
 
         if self.static:
             try:
-                await self.cog.send_idle_embed(self.message, self.command_log)
+                await send_idle_embed(self.message, self.command_log)
             except:
                 pass
 

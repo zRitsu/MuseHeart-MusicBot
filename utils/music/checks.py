@@ -89,6 +89,12 @@ def check_voice():
         if not perms.connect or not perms.speak:
             raise MissingVoicePerms(inter.author.voice.channel)
 
+        try:
+            if inter.guild_data["check_other_bots_in_vc"] and any(m for m in inter.author.voice.channel.members if m.bot):
+                raise GenericError(f"Há outro bot conectado no canal: <#{inter.author.voice.channel}>")
+        except KeyError:
+            pass
+
         return True
 
     return commands.check(predicate)

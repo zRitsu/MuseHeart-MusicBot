@@ -12,6 +12,8 @@ from random import shuffle
 from os import getpid
 import platform
 
+desc_prefix = "🔰 [Outros] 🔰 | "
+
 
 class Misc(commands.Cog):
 
@@ -92,7 +94,7 @@ class Misc(commands.Cog):
         await guild.system_channel.send(embed=embed)
 
 
-    @commands.slash_command(description="Exibir informações sobre mim.")
+    @commands.slash_command(description=f"{desc_prefix}Exibir informações sobre mim.")
     async def about(self, inter: disnake.ApplicationCommandInteraction):
 
         if not self.source_owner:
@@ -152,7 +154,7 @@ class Misc(commands.Cog):
         await inter.send(embed=embed)
 
 
-    @commands.slash_command(description="Exibir meu link de convite para você me adicionar no seu servidor.")
+    @commands.slash_command(description=f"{desc_prefix}Exibir meu link de convite para você me adicionar no seu servidor.")
     async def invite(self, inter: disnake.ApplicationCommandInteraction):
 
         await inter.send(

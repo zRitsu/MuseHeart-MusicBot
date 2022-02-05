@@ -11,6 +11,8 @@ import json
 if TYPE_CHECKING:
     from utils.client import BotCore
 
+desc_prefix = "💗 [Favoritos] 💗 | "
+
 
 class FavManager(commands.Cog):
 
@@ -24,7 +26,7 @@ class FavManager(commands.Cog):
         pass
 
 
-    @fav.sub_command(description="Adcionar um link para sua lista de favoritos.")
+    @fav.sub_command(description=f"{desc_prefix}Adicionar um link para sua lista de favoritos.")
     async def add(
             self,
             inter: disnake.ApplicationCommandInteraction,
@@ -46,7 +48,7 @@ class FavManager(commands.Cog):
                          ephemeral=True)
 
 
-    @fav.sub_command(description="Editar o nome de um link da sua lista de favoritos.")
+    @fav.sub_command(description=f"{desc_prefix}Editar o nome de um link da sua lista de favoritos.")
     async def edit(
             self,
             inter: disnake.ApplicationCommandInteraction,
@@ -77,7 +79,7 @@ class FavManager(commands.Cog):
         await inter.send("Favorito editado com sucesso!", ephemeral=True)
 
 
-    @fav.sub_command(description="Remover um link da sua lista de favoritos.")
+    @fav.sub_command(description=f"{desc_prefix}Remover um link da sua lista de favoritos.")
     async def remove(
             self,
             inter: disnake.ApplicationCommandInteraction,
@@ -96,7 +98,7 @@ class FavManager(commands.Cog):
         await inter.send("Link removido com sucesso!", ephemeral=True)
 
 
-    @fav.sub_command(name="import",description="Importar seus favoritos a partir de um arquivo.")
+    @fav.sub_command(name="import",description=f"{desc_prefix}Importar seus favoritos a partir de um arquivo.")
     async def import_(self, inter: disnake.ApplicationCommandInteraction):
 
         try:
@@ -161,7 +163,7 @@ class FavManager(commands.Cog):
                                 "Eles vão aparecer quando usar o comando /play (no preenchimento automático da busca).")
 
 
-    @fav.sub_command(description="Exportar seus favoritos em um arquivo no seu DM.")
+    @fav.sub_command(description=f"{desc_prefix}Exportar seus favoritos em um arquivo no seu DM.")
     async def export(self, inter: disnake.ApplicationCommandInteraction):
 
         user_data = await self.bot.db.get_data(inter.author.id, db_name="users")

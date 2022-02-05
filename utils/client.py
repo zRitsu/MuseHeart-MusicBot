@@ -191,4 +191,9 @@ class BotCore(commands.AutoShardedBot):
 
         print(f"{'=' * 50}")
 
+        for c in self.slash_commands:
+            if (desc:=len(c.description)) > 100:
+                raise Exception(f"A descrição do comando {c.name} excedeu a quantidade de caracteres permitido "
+                                f"no discord (100), quantidade atual: {desc}")
+
         return load_status
