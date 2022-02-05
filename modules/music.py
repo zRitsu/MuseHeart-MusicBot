@@ -1833,6 +1833,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if thread.guild.me.id in thread._members:
             return
 
+        player.has_thread = True
+
         embed = disnake.Embed(
             description="**Esta conversa será usada temporariamente para pedir músicas apenas enviando "
                         "o nome/link sem necessidade de usar comando.**",
