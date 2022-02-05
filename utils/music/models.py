@@ -369,7 +369,7 @@ class LavalinkPlayer(wavelink.Player):
 
         if self.static:
             try:
-                await send_idle_embed(self.message, self.command_log)
+                await send_idle_embed(self.message, self.command_log, bot=self.bot)
             except:
                 pass
 

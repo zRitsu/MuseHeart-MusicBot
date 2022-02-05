@@ -44,11 +44,11 @@ async def send_message(
         await inter.send(text, embed=embed, ephemeral=True)
 
 
-async def send_idle_embed(target: Union[disnake.Message, disnake.TextChannel, disnake.Thread], text=""):
+async def send_idle_embed(target: Union[disnake.Message, disnake.TextChannel, disnake.Thread], text="", *, bot: BotCore):
 
     embed = disnake.Embed(description="**Entre em um canal de voz e peça uma música neste canal ou na conversa abaixo**\n\n"
                                       "**FORMATOS SUPORTADOS (nome, link):**"
-                                      " ```ini\n[Youtube, Soundcloud, Spotify, Twitch]```\n", color=self.bot.get_color(target.guild.me))
+                                      " ```ini\n[Youtube, Soundcloud, Spotify, Twitch]```\n", color=bot.get_color(target.guild.me))
 
     if text:
         embed.description += f"**ÚLTIMA AÇÃO:** {text.replace('**', '')}\n"

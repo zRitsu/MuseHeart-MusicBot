@@ -76,7 +76,7 @@ class MusicSettings(commands.Cog):
             message = player.message
 
         else:
-            message = await send_idle_embed(channel)
+            message = await send_idle_embed(channel, bot=self.bot)
 
         await message.create_thread(name="song requests")
 

@@ -323,7 +323,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 except TypeError:
                     await self.reset_controller_db(inter.guild_id, inter.guild_data, inter=inter)
                 except:
-                    message = await send_idle_embed(inter.channel)
+                    message = await send_idle_embed(inter.channel, bot=self.bot)
                     inter.guild_data['player_controller']['message_id'] = str(message.id)
                     await self.bot.db.update_data(inter.guild.id, inter.guild_data, db_name='guilds')
                 player.message = message
@@ -1406,7 +1406,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             try:
                 cached_message = await text_channel.fetch_message(int(data['player_controller']['message_id']))
             except:
-                cached_message = await send_idle_embed(message)
+                cached_message = await send_idle_embed(message, bot=self.bot)
                 data['player_controller']['message_id'] = str(cached_message.id)
                 await self.bot.db.update_data(message.guild.id, data, db_name='guilds')
 
