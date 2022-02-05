@@ -131,7 +131,7 @@ def queue_playlist(inter, query):
 async def fav_list(inter, query: str, *, prefix=""):
 
     return [f"{prefix}{favname}" for favname in (await inter.bot.db.get_data(inter.author.id, db_name="users"))["fav_links"]
-            if not query or query in favname]
+            if not query or query in favname][:20]
 
 
 async def fav_add_autocomplete(inter, query: str):

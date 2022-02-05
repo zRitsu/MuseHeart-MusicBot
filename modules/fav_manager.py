@@ -35,11 +35,19 @@ class FavManager(commands.Cog):
     ):
 
         if not URL_REG.match(url):
-            raise GenericError("Você não adicionou um link válido...")
+            raise GenericError("**Você não adicionou um link válido...**")
 
         user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
 
-        user_data["fav_links"][name.lower()] = url
+        if len(user_data["fav_links"]) > (max_favs:=self.bot.config["MAX_USER_FAVS"]) and not self.bot.is_owner(inter.author):
+            raise GenericError(f"**Você excedeu a quantidade de favoritos permitido ({max_favs}).**")
+
+        try:
+            del user_data["fav_links"][name.lower()]
+        except KeyError:
+            pass
+
+        user_data["fav_links"][name] = url
 
         await self.bot.db.update_data(inter.author.id, user_data, db_name="users")
 
@@ -58,21 +66,21 @@ class FavManager(commands.Cog):
     ):
 
         if not name and not url:
-            raise GenericError("Você não especificou nenhum dos itens opcionais: novo_nome e novo_link.")
+            raise GenericError("**Você não especificou nenhum dos itens opcionais: novo_nome e novo_link.**")
 
         user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
 
         try:
             if name:
-                new_url = str(user_data["fav_links"][item.lower()])
-                del user_data["fav_links"][item.lower()]
-                user_data["fav_links"][name.lower()] = url or new_url
+                new_url = str(user_data["fav_links"][item])
+                del user_data["fav_links"][item]
+                user_data["fav_links"][name] = url or new_url
 
             elif url:
-                user_data["fav_links"][item.lower()] = url
+                user_data["fav_links"][item] = url
 
         except KeyError:
-            raise GenericError(f"Não há favorito com o nome: {item}")
+            raise GenericError(f"**Não há favorito com o nome:** {item}")
 
         await self.bot.db.update_data(inter.author.id, user_data, db_name="users")
 
@@ -89,9 +97,9 @@ class FavManager(commands.Cog):
         user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
 
         try:
-            del user_data["fav_links"][item.lower()]
+            del user_data["fav_links"][item]
         except:
-            raise GenericError(f"Não há favorito com o nome: {item}")
+            raise GenericError(f"**Não há favorito com o nome:** {item}")
 
         await self.bot.db.update_data(inter.author.id, user_data, db_name="users")
 
@@ -104,7 +112,7 @@ class FavManager(commands.Cog):
         try:
             msg = await inter.author.send("Envie o arquivo de sua playlist em até 60 segundos.")
         except disnake.Forbidden:
-            raise GenericError("Seu DM está desativado...\nAtive-o e repita o comando.")
+            raise GenericError("**Seu DM está desativado...\nAtive-o e repita o comando.**")
 
         await inter.send("Enviei uma solicitação em suas mensagens privadas.", ephemeral=True)
 
@@ -134,26 +142,36 @@ class FavManager(commands.Cog):
         try:
             json_data = json.loads(data)
         except:
-            raise GenericError("Ocorreu um erro ao ler o arquivo, por favor revise-o e use o comando novamente.")
+            await inter.author.send("Ocorreu um erro ao ler o arquivo, por favor revise-o e use o comando novamente.")
+            return
 
         for url in json_data.values():
 
             if not isinstance(url, str) or not URL_REG.match(url):
-                raise GenericError(f"O seu arquivo contém link inválido: ```ldif\n{url}```")
+                await inter.author.send(f"O seu arquivo contém link inválido: ```ldif\n{url}```")
+                return
 
         user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
+
+        for name in json_data.keys():
+            try:
+                del user_data["fav_links"][name.lower()]
+            except KeyError:
+                continue
 
         if self.bot.config["MAX_USER_FAVS"] > 0:
 
             if (json_size:=len(json_data)) > self.bot.config["MAX_USER_FAVS"]:
-                raise GenericError(f"A quantidade de itens no seu arquivo de favorito excede "
+                await inter.author.send(f"A quantidade de itens no seu arquivo de favorito excede "
                                    f"a quantidade máxima permitida ({self.bot.config['MAX_USER_FAVS']}).")
+                return
 
             if (json_size + (user_favs:=len(user_data["fav_links"]))) > self.bot.config["MAX_USER_FAVS"]:
-                raise GenericError("Você não possui espaço suficiente para adicionar todos os favoritos de seu arquivo...\n"
+                await inter.author.send("Você não possui espaço suficiente para adicionar todos os favoritos de seu arquivo...\n"
                                    f"Limite atual: {self.bot.config['MAX_USER_FAVS']}\n"
                                    f"Quantidade de favoritos salvos: {user_favs}\n"
                                    f"Você precisa de: {(json_size + user_favs)-self.bot.config['MAX_USER_FAVS']}")
+                return
 
         user_data["fav_links"].update(json_data)
 
@@ -169,8 +187,8 @@ class FavManager(commands.Cog):
         user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
 
         if not user_data["fav_links"]:
-            raise GenericError(f"Você não possui links favoritos..\n"
-                               f"Adicione um usando o comando: /{self.add.name}")
+            raise GenericError(f"**Você não possui links favoritos..\n"
+                               f"Adicione um usando o comando: /{self.add.name}**")
 
         fp = BytesIO(bytes(json.dumps(user_data["fav_links"], indent=4), 'utf-8'))
         try:
@@ -180,7 +198,7 @@ class FavManager(commands.Cog):
             await inter.author.send(embed=embed, file=disnake.File(fp=fp, filename="favoritos.json"))
 
         except disnake.Forbidden:
-            raise GenericError("Seu DM está desativado!")
+            raise GenericError("**Seu DM está desativado!**")
 
         await inter.send("Seus favoritos foram enviados no seu DM.", ephemeral=True)
 
