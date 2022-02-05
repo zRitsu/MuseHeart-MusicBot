@@ -182,7 +182,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not channel:
             channel: Union[disnake.VoiceChannel, disnake.StageChannel] = inter.author.voice.channel
 
-        if inter.guild_data["check_other_bots_in_vc"] and any(m for m in channel.members if m.bot):
+        if inter.guild_data["check_other_bots_in_vc"] and any(m for m in channel.members if m.bot and m != inter.guild.me):
             raise GenericError(f"**Há outro bot conectado no canal:** <#{inter.author.voice.channel.id}>")
 
         await player.connect(channel.id)
