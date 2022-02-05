@@ -1824,25 +1824,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
     @commands.Cog.listener("on_thread_join")
     async def join_thread_request(self, thread: disnake.Thread):
-        
-        try:
-
-            data = await self.bot.db.get_data(thread.guild.id, db_name="guilds")
-
-            if data["player_controller"]["message_id"] != (thread.id):
-                return
-
-        except AttributeError:
-            return
-
-        if thread.guild.me.id in thread._members:
-            return
-
-        await thread.join()
 
         player: LavalinkPlayer = self.bot.music.players.get(thread.guild.id)
 
-        if not player or player.static:
+        if not player or player.static or player.message.id != thread.id:
+            return
+
+        if thread.guild.me.id in thread._members:
             return
 
         embed = disnake.Embed(
