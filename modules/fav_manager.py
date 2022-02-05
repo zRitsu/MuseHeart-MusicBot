@@ -39,7 +39,8 @@ class FavManager(commands.Cog):
 
         user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
 
-        if len(user_data["fav_links"]) > (max_favs:=self.bot.config["MAX_USER_FAVS"]) and not self.bot.is_owner(inter.author):
+        if len(user_data["fav_links"]) > (max_favs:=self.bot.config["MAX_USER_FAVS"]) and not \
+                (await self.bot.is_owner(inter.author)):
             raise GenericError(f"**Você excedeu a quantidade de favoritos permitido ({max_favs}).**")
 
         try:
@@ -106,6 +107,26 @@ class FavManager(commands.Cog):
         await inter.send("Link removido com sucesso!", ephemeral=True)
 
 
+    @fav.sub_command(name="clear", description=f"{desc_prefix}Limpar sua lista de favoritos.")
+    async def clear_(self, inter: disnake.ApplicationCommandInteraction):
+
+        data = await self.bot.db.get_data(inter.author.id, db_name="users")
+
+        if not data["fav_links"]:
+            raise GenericError("**Você não possui links favoritos!**")
+
+        data["fav_links"].clear()
+
+        await self.bot.db.update_data(inter.author.id, data, db_name="users")
+
+        embed = disnake.Embed(
+            description="Sua lista de favoritos foi limpa com sucesso!",
+            color=self.bot.get_color(inter.guild.me)
+        )
+
+        await inter.send(embed=embed, ephemeral=True)
+
+
     @fav.sub_command(name="import",description=f"{desc_prefix}Importar seus favoritos a partir de um arquivo.")
     async def import_(self, inter: disnake.ApplicationCommandInteraction):
 
@@ -159,7 +180,7 @@ class FavManager(commands.Cog):
             except KeyError:
                 continue
 
-        if self.bot.config["MAX_USER_FAVS"] > 0:
+        if self.bot.config["MAX_USER_FAVS"] > 0 and not (await self.bot.is_owner(inter.author)):
 
             if (json_size:=len(json_data)) > self.bot.config["MAX_USER_FAVS"]:
                 await inter.author.send(f"A quantidade de itens no seu arquivo de favorito excede "
