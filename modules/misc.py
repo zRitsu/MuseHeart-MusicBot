@@ -86,10 +86,15 @@ class Misc(commands.Cog):
         prefix = (await self.bot.db.get_data(guild.id, db_name="guilds"))["prefix"] or self.bot.default_prefix
 
         embed = disnake.Embed(
-            description="Olá.\nPara ver todos os meus comandos use **/**\n\n"
-                        f"Caso os comandos não apareçam, use o comando:\n{prefix}syncguild",
+            description="Olá.\nPara ver todos os meus comandos use **/**\n\n",
             color=self.bot.get_color(guild.me)
         )
+
+        if cmd:=self.bot.get_slash_command("setupplayer"):
+            embed.description += f"Caso queira, use o comando /{cmd.name} para criar um canal dedicado pra pedir " \
+                                 "músicas sem comandos e deixar o music player fixo no canal.\n\n"
+
+        embed.description += f"Caso os comandos não apareçam, use o comando:\n{prefix}syncguild"
 
         await guild.system_channel.send(embed=embed)
 
