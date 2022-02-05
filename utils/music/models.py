@@ -151,9 +151,8 @@ class LavalinkPlayer(wavelink.Player):
 
         await asyncio.sleep(self.idle_timeout)
         msg = f"O player foi desligado por falta de membros no canal <#{self.guild.me.voice.channel.id if self.guild.me.voice else ''}>..."
-        if self.static:
-            self.command_log = msg
-        else:
+        self.command_log = msg
+        if not self.static:
             embed = disnake.Embed(description=msg, color=self.bot.get_color(self.guild.me))
             self.bot.loop.create_task(self.text_channel.send(embed=embed))
         await self.destroy()
