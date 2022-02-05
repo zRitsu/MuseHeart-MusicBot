@@ -238,8 +238,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         try:
             static_player = inter.guild_data['player_controller']
-            channel = inter.guild.get_channel(static_player['channel']) or inter.channel
-        except KeyError:
+            channel = inter.guild.get_channel(int(static_player['channel'])) or inter.channel
+        except (KeyError, TypeError):
             channel = inter.channel
 
         if not channel.permissions_for(inter.guild.me).send_messages:
@@ -280,7 +280,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 if view.inter.response:
                     inter.response = view.inter.response
 
-        await inter.response.defer(ephemeral=True)
+        await inter.response.defer(ephemeral=inter.guild_data['player_controller']["channel"] == str(inter.channel.id))
 
         try:
             tracks, node = await self.get_tracks(query, inter.user, node=node, track_loops=repeat_amount,
