@@ -1840,6 +1840,19 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await thread.join()
 
+        player: LavalinkPlayer = self.bot.music.players.get(thread.guild.id)
+
+        if not player or player.static:
+            return
+
+        embed = disnake.Embed(
+            description="**Esta conversa será usada temporariamente para pedir músicas apenas enviando "
+                        "o nome/link sem necessidade de usar comando.**",
+            color=self.bot.get_color(thread.guild.me)
+        )
+
+        await thread.send(embed=embed)
+
 
     @commands.Cog.listener("on_voice_state_update")
     async def player_vc_disconnect(
