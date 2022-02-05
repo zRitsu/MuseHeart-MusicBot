@@ -213,9 +213,12 @@ class SongSelect(disnake.ui.View):
 
     async def callback(self, interaction: disnake.Interaction):
         self.track = self.tracks[int(interaction.data.values[0])]
+
         embed = disnake.Embed(
-            description=f"**Música selecionada:** [`{self.track.title}`]({self.track.uri})\n\n"
-                        f"`{self.track.author}` | `{time_format(self.track.duration) if not self.track.is_stream else '🔴 Livestream'}`",
+            description=f"> 🎵 **┃ Selecionado:** [`{self.track.title}`]({self.track.uri})\n" \
+                        f"> 💠 **┃ Uploader:** `{self.track.author}`\n" \
+                        f"> ✋ **┃ Pedido por:** {interaction.author.mention}\n" \
+                        f"> ⌛ **┃ Duração:** `{time_format(self.track.duration) if not self.track.is_stream else '🔴 Livestream'}` ",
             color=self.bot.get_color(interaction.guild.me)
         ).set_thumbnail(self.track.thumb)
         await interaction.response.edit_message(embed=embed, view=None)
