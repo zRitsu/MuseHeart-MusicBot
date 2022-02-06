@@ -35,6 +35,7 @@ def load_config():
         "MAX_USER_FAVS": 10, # limiite de favoritos por membro (0 ou menor que isso = sem limites)
         "SPOTIFY_CLIENT_ID": '', # Necessário para o suporte ao spotify.
         "SPOTIFY_CLIENT_SECRET": '', # Necessário para o suporte ao spotify.
+        "INTERACTION_COMMAND_ONLY": False, # Não permitir o uso dos comandos de texto com prefixo.
         "SOURCE_REPO": "https://github.com/zRitsu/disnake-LL-music-bot.git", # Link do github pra ser usado em comandos como o de update,
         "HIDE_SOURCE_OWNER": False,  # Ocultar link do meu repositório no comando /about. Caso altere isso, por favor considere de alguma forma fornecer crédito. :(
 

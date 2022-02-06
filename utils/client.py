@@ -12,6 +12,8 @@ from .music.models import music_mode
 from utils.db import MongoDatabase, LocalDatabase
 import os
 import traceback
+
+from .music.skins.others import sync_message
 from .owner_panel import PanelView
 
 
@@ -94,11 +96,12 @@ class BotCore(commands.AutoShardedBot):
 
                 prefix = (await self.get_prefix(message))[-1]
 
-                embed.description = f"Olá, meu prefixo atual é: **{prefix}**\n" \
-                                    f"Caso queira ver meus comandos de texto use **{prefix}help**\n"
+                embed.description = f"**Olá {message.author.mention}.\n" \
+                                    f"Para ver todos os meus comandos use: /**\n\n{sync_message(self)}"
 
-                if self.slash_commands:
-                    embed.description += f"Veja também meus comandos de barra usando: **/**"
+                if not self.config["INTERACTION_COMMAND_ONLY"]:
+                    embed.description += f"\n\nTambém tenho comandos de texto por prefixo.\n" \
+                                        f"Para ver todos os meus comandos de texto use **{prefix}help**\n"
 
                 view = None
 

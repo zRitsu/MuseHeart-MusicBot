@@ -8,6 +8,7 @@ from typing import Union
 import disnake
 from disnake.ext import commands
 from utils.client import BotCore
+from utils.music.skins.others import sync_message
 from utils.owner_panel import panel_command
 from utils.music.errors import GenericError
 
@@ -173,19 +174,6 @@ class Owner(commands.Cog):
         else:
             return txt
 
-
-    def sync_message(self):
-
-        invite_url = f"https://discord.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=8&scope=bot" \
-                     f"%20applications.commands "
-
-        return f"`Caso os comandos de barra não apareçam,` [`clique aqui`]({invite_url}) `para me permitir " \
-               "criar comandos de barra no servidor.`\n\n" \
-               "`Nota: Em alguns casos os comandos de barra podem demorar até uma hora pra aparecer/atualizar em todos " \
-               "os servidores. Caso queira usar os comandos de barra imediatamente neste servidor você terá que " \
-               f"me expulsar do servidor e em seguida me adicionar novamente através deste` [`link`]({invite_url})..."
-
-
     @commands.has_guild_permissions(manage_guild=True)
     @commands.command(description="Sincronizar/Registrar os comandos de barra no servidor.", hidden=True)
     async def syncguild(self, ctx: Union[commands.Context, disnake.MessageInteraction]):
@@ -193,7 +181,7 @@ class Owner(commands.Cog):
         embed = disnake.Embed(
             color=self.bot.get_color(ctx.guild.me),
             description="**Este comando não é mais necessário ser usado (A sincronização dos comandos agora "
-                        f"é automática).**\n\n{self.sync_message()}"
+                        f"é automática).**\n\n{sync_message(self.bot)}"
         )
 
         await ctx.send(embed=embed)
@@ -205,11 +193,11 @@ class Owner(commands.Cog):
     async def synccmds(self, ctx: Union[commands.Context, disnake.MessageInteraction]):
 
         if self.bot.config["AUTO_SYNC_COMMANDS"] is True:
-            raise GenericError("Isso não pode ser usado com a sincronização automática ativada...")
+            raise GenericError(f"**Isso não pode ser usado com a sincronização automática ativada...**\n\n{sync_message(self.bot)}")
 
         await self.bot._sync_application_commands()
 
-        txt = f"**Os comandos de barra foram sincronizados com sucesso!**\n\n{self.sync_message()}"
+        txt = f"**Os comandos de barra foram sincronizados com sucesso!**\n\n{sync_message(self.bot)}"
 
         if isinstance(ctx, commands.Context):
 

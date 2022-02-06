@@ -1,7 +1,9 @@
+import disnake
+from disnake.ext import commands
 import asyncio
 from subprocess import check_output
-import disnake
 from os import path
+from utils.music.errors import GenericError
 from utils.music.local_lavalink import run_lavalink
 from utils.client import BotCore
 from utils.db import MongoDatabase, LocalDatabase, guild_prefix
@@ -81,6 +83,16 @@ def load_bot(bot_name: str, token: str, main=False):
     bot.load_extension('jishaku')
     bot.get_command("jsk").hidden = True
     bot.load_modules(bot_name)
+
+
+    @bot.check
+    async def check_commands(ctx: commands.Context):
+
+        if CONFIGS['INTERACTION_COMMAND_ONLY'] and not (await bot.is_owner(ctx.author)):
+            raise GenericError("Os comandos de texto estão desativados!")
+
+        return True
+
 
     @bot.listen()
     async def on_ready():
