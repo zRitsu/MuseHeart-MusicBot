@@ -103,9 +103,9 @@ class BotCore(commands.AutoShardedBot):
                     embed.description += f"\n\n{sync_message(self)}"
 
                 else:
-                    embed.description += "\n\n`Caso os meus comandos de barra não estejam aparecendo, peça para " \
+                    embed.description += "\n\n`Caso os meus comandos de barra não estejam aparecendo. Peça para " \
                                          "um administrador me marcar para seguir alguns procedimentos para corrigir" \
-                                         " este problema.`"
+                                         " esse problema.`"
 
                 if not self.config["INTERACTION_COMMAND_ONLY"]:
                     embed.description += f"\n\nTambém tenho comandos de texto por prefixo.\n" \
