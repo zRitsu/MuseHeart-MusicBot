@@ -11,7 +11,6 @@ import sys
 import json
 from random import shuffle
 from typing import Literal, Optional, Union
-import humanize
 from urllib import parse
 from utils.client import BotCore
 
