@@ -97,7 +97,15 @@ class BotCore(commands.AutoShardedBot):
                 prefix = (await self.get_prefix(message))[-1]
 
                 embed.description = f"**Olá {message.author.mention}.\n" \
-                                    f"Para ver todos os meus comandos use: /**\n\n{sync_message(self)}"
+                                    f"Para ver todos os meus comandos use: /**"
+
+                if message.author.guild_permissions.administrator:
+                    embed.description += f"\n\n{sync_message(self)}"
+
+                else:
+                    embed.description += "\n\n`Caso os meus comandos de barra não estejam aparecendo, peça para " \
+                                         "um administrador me marcar para seguir alguns procedimentos para corrigir" \
+                                         " este problema.`"
 
                 if not self.config["INTERACTION_COMMAND_ONLY"]:
                     embed.description += f"\n\nTambém tenho comandos de texto por prefixo.\n" \

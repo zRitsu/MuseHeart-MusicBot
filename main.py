@@ -88,8 +88,8 @@ def load_bot(bot_name: str, token: str, main=False):
     @bot.check
     async def check_commands(ctx: commands.Context):
 
-        if CONFIGS['INTERACTION_COMMAND_ONLY'] and not (await bot.is_owner(ctx.author)):
-            raise GenericError("Os comandos de texto estão desativados!")
+        if bot.config['INTERACTION_COMMAND_ONLY'] and not (await bot.is_owner(ctx.author)):
+            raise GenericError("**Os comandos de texto estão desativados!**")
 
         return True
 

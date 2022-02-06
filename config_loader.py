@@ -110,6 +110,7 @@ def load_config():
         "AUTO_SYNC_COMMANDS",
         "EMBED_COLOR",
         "HIDE_SOURCE_OWNER",
+        "INTERACTION_COMMAND_ONLY",
         "START_LOCAL_LAVALINK"
 
     ]:
