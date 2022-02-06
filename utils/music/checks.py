@@ -84,6 +84,13 @@ def check_voice():
         if not inter.author.voice:
             raise NoVoice()
 
+        if not inter.guild.me.voice:
+
+            perms = inter.author.voice.channel.permissions_for(inter.guild.me)
+
+            if not perms.connect or not perms.speak:
+                raise MissingVoicePerms(inter.author.voice.channel)
+
         return True
 
     return commands.check(predicate)
