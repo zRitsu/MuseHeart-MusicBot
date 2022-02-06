@@ -388,7 +388,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                 pos_txt = f" (Pos. {position + 1})"
 
-            log_text = f"{inter.author.mention} adicionou a playlist [`{fix_characters(tracks.data['playlistInfo']['name'], 20)}`]({query}){pos_txt} `({len(tracks.tracks)})`."
+            if hide_playlist:
+                log_text = f"Adicionou uma playlist com {len(tracks.tracks)} música(s)."
+            else:
+                log_text = f"{inter.author.mention} adicionou a playlist [`{fix_characters(tracks.data['playlistInfo']['name'], 20)}`]({query}){pos_txt} `({len(tracks.tracks)})`."
 
             embed.description = f"> 🎶 **┃ Playlist adicionada{pos_txt}:** [`{tracks.data['playlistInfo']['name']}`]({query})\n" \
                                 f"> ✋ **┃ Pedido por:** {inter.author.mention}\n" \
