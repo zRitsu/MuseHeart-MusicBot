@@ -34,6 +34,12 @@ class FavManager(commands.Cog):
             url: str = commands.Param(name="link", description="link para favoritar (recomendável: link de playlist)"),
     ):
 
+        if len(name) > (max_name_chars:=self.bot.config["USER_FAV_MAX_NAME_LENGTH"]):
+            raise GenericError(f"**Quantidade máxima de caracteres permitidos no nome: {max_name_chars}**")
+
+        if len(url) > (max_url_chars:=self.bot.config["USER_FAV_MAX_URL_LENGTH"]):
+            raise GenericError(f"**Quantidade máxima de caracteres permitidos no link: {max_url_chars}**")
+
         if not URL_REG.match(url):
             raise GenericError("**Você não adicionou um link válido...**")
 
@@ -57,7 +63,7 @@ class FavManager(commands.Cog):
                          ephemeral=True)
 
 
-    @fav.sub_command(description=f"{desc_prefix}Editar o nome de um link da sua lista de favoritos.")
+    @fav.sub_command(description=f"{desc_prefix}Editar um item da sua lista de favoritos.")
     async def edit(
             self,
             inter: disnake.ApplicationCommandInteraction,
@@ -68,6 +74,12 @@ class FavManager(commands.Cog):
 
         if not name and not url:
             raise GenericError("**Você não especificou nenhum dos itens opcionais: novo_nome e novo_link.**")
+
+        if len(name) > (max_name_chars:=self.bot.config["USER_FAV_MAX_NAME_LENGTH"]):
+            raise GenericError(f"**Quantidade máxima de caracteres permitidos no nome: {max_name_chars}**")
+
+        if len(url) > (max_url_chars:=self.bot.config["USER_FAV_MAX_URL_LENGTH"]):
+            raise GenericError(f"**Quantidade máxima de caracteres permitidos no link: {max_url_chars}**")
 
         user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
 
@@ -168,6 +180,9 @@ class FavManager(commands.Cog):
 
         for url in json_data.values():
 
+            if len(url) > (max_url_chars := self.bot.config["USER_FAV_MAX_URL_LENGTH"]):
+                raise GenericError(f"**Um item de seu arquivo {url} ultrapassa a quantidade de caracteres permitido:{max_url_chars}**")
+
             if not isinstance(url, str) or not URL_REG.match(url):
                 await inter.author.send(f"O seu arquivo contém link inválido: ```ldif\n{url}```")
                 return
@@ -175,6 +190,8 @@ class FavManager(commands.Cog):
         user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
 
         for name in json_data.keys():
+            if len(name) > (max_name_chars := self.bot.config["USER_FAV_MAX_NAME_LENGTH"]):
+                raise GenericError(f"**Um item de seu arquivo ({name}) ultrapassa a quantidade de caracteres permitido:{max_name_chars}**")
             try:
                 del user_data["fav_links"][name.lower()]
             except KeyError:

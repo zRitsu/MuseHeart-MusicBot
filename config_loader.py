@@ -1,4 +1,3 @@
-import json
 from json import load
 from dotenv import dotenv_values
 from os import environ
@@ -33,6 +32,8 @@ def load_config():
         "RPC_SERVER": "ws://localhost:8080/ws", # Link do servidor RPC (pra status do membro), caso não tenha será usado localmente.
         "EMBED_COLOR": None, # cor da embed do player (caso não tenha será usado a cor do cargo do bot).
         "MAX_USER_FAVS": 10, # limiite de favoritos por membro (0 ou menor que isso = sem limites)
+        "USER_FAV_MAX_NAME_LENGTH": 35,  # limite de caracteres no nome de playlists
+        "USER_FAV_MAX_URL_LENGTH": 90, # limite de caracteres no link de playlists
         "SPOTIFY_CLIENT_ID": '', # Necessário para o suporte ao spotify.
         "SPOTIFY_CLIENT_SECRET": '', # Necessário para o suporte ao spotify.
         "INTERACTION_COMMAND_ONLY": False, # Não permitir o uso dos comandos de texto com prefixo.
