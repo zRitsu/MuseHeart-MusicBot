@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import datetime
 from importlib import import_module
 import aiohttp
 from disnake.ext import commands
@@ -13,7 +12,7 @@ from utils.db import MongoDatabase, LocalDatabase
 import os
 import traceback
 
-from .music.skins.others import sync_message
+from utils.others import sync_message
 from .owner_panel import PanelView
 
 

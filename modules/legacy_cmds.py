@@ -8,7 +8,7 @@ from typing import Union
 import disnake
 from disnake.ext import commands
 from utils.client import BotCore
-from utils.music.skins.others import sync_message
+from utils.others import sync_message
 from utils.owner_panel import panel_command
 from utils.music.errors import GenericError
 
