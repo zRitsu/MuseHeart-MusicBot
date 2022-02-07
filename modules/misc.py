@@ -204,5 +204,67 @@ class Misc(commands.Cog):
             pass
 
 
+class GuildLog(commands.Cog):
+
+    def __init__(self, bot: BotCore):
+        self.bot = bot
+
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild: disnake.Guild):
+
+        print(f"Removido do servidor: {guild.name} - [{guild.id}]")
+
+        if not self.bot.config["BOT_ADD_REMOVE_LOG"]:
+            return
+
+        channel = self.bot.get_channel(self.bot.config["BOT_ADD_REMOVE_LOG"])
+
+        if not channel:
+            return
+
+        embed = disnake.Embed(
+            description=f"**Me removeram do servidor:**\n"
+                        f"```{guild.name}```\n"
+                        f"**ID:** `{guild.id}`",
+            color=disnake.Colour.red()
+        )
+
+        embed.set_thumbnail(url=guild.icon.replace(static_format="png").url)
+
+        await channel.send(self.bot.owner.mention, embed=embed)
+
+    @commands.Cog.listener()
+    async def on_guild_join(self, guild: disnake.Guild):
+
+        print(f"Novo servidor: {guild.name} - [{guild.id}]")
+
+        if not self.bot.config["BOT_ADD_REMOVE_LOG"]:
+            return
+
+        channel = self.bot.get_channel(self.bot.config["BOT_ADD_REMOVE_LOG"])
+
+        if not channel:
+            return
+
+        created_at = int(guild.created_at.timestamp())
+
+        embed =disnake.Embed(
+            description="__**Me adicionaram em um novo servidor:**__\n"
+                        f"```{guild.name}```\n"
+                        f"**ID:** `{guild.id}`\n"
+		                f"**Dono:** `{guild.owner}`\n"
+                        f"**Criado em:** <t:{created_at}:f> - <t:{created_at}:R>\n"
+		                f"**Nível de verificação:** `{guild.verification_level or 'nenhuma'}`\n"
+		                f"**Membros:** `{len([m for m in guild.members if not m.bot])}`\n"
+		                f"**Bots:** `{len([m for m in guild.members if m.bot])}`\n",
+            color=disnake.Colour.green()
+        )
+
+        embed.set_thumbnail(url=guild.icon.replace(static_format="png").url)
+
+        await channel.send(self.bot.owner.mention, embed=embed)
+
+
 def setup(bot: BotCore):
     bot.add_cog(Misc(bot))
+    bot.add_cog(GuildLog(bot))

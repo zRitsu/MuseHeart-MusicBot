@@ -27,17 +27,18 @@ def load_config():
         "DEFAULT_PREFIX": "!!!", # prefixo padrão do bot.
         "DEFAULT_SKIN": "default", # skin padrão do player (você pode copiar a skin padrão e deixa-la com outro nome e editar o arquivo a seu gosto, ela não será afetada por minhas alterações em updates).
         "AUTO_SYNC_COMMANDS": True, # Sincronizar comandos automaticamente ao ligar o bot.
-        "OWNER_IDS": "", # ID de usuário pra lista de owner/dono do bot, caso use mais de 1 id separe por || (Qualquer id que for colocado na lista vai permitir o membro ter acesso total ao bot, tome cuidado!)
+        "OWNER_IDS": "", # ID de usuário pra lista de owner/dono do bot, caso use mais de 1 id separe por || (Qualquer id que for colocado na lista vai permitir o membro ter acesso total ao bot, tome cuidado!).
         "IDLE_TIMEOUT": 180, # Tempo em segundos pro bot aguardar por novas músicas no modo de espera.
         "RPC_SERVER": "ws://localhost:8080/ws", # Link do servidor RPC (pra status do membro), caso não tenha será usado localmente.
         "EMBED_COLOR": None, # cor da embed do player (caso não tenha será usado a cor do cargo do bot).
         "MAX_USER_FAVS": 10, # limiite de favoritos por membro (0 ou menor que isso = sem limites)
-        "USER_FAV_MAX_NAME_LENGTH": 35,  # limite de caracteres no nome de playlists
-        "USER_FAV_MAX_URL_LENGTH": 90, # limite de caracteres no link de playlists
+        "USER_FAV_MAX_NAME_LENGTH": 35,  # limite de caracteres no nome de playlists.
+        "USER_FAV_MAX_URL_LENGTH": 90, # limite de caracteres no link de playlists.
+        "BOT_ADD_REMOVE_LOG": 0, # ID do canal para envio de logs quando o bot for adicionado/removido de um server (0 = desativado).
         "SPOTIFY_CLIENT_ID": '', # Necessário para o suporte ao spotify.
         "SPOTIFY_CLIENT_SECRET": '', # Necessário para o suporte ao spotify.
         "INTERACTION_COMMAND_ONLY": False, # Não permitir o uso dos comandos de texto com prefixo.
-        "SOURCE_REPO": "https://github.com/zRitsu/disnake-LL-music-bot.git", # Link do github pra ser usado em comandos como o de update,
+        "SOURCE_REPO": "https://github.com/zRitsu/disnake-LL-music-bot.git", # Link do github pra ser usado em comandos como o de update.
         "HIDE_SOURCE_OWNER": False,  # Ocultar link do meu repositório no comando /about. Caso altere isso, por favor considere de alguma forma fornecer crédito. :(
 
         #########################################################################################
@@ -101,8 +102,8 @@ def load_config():
         "LAVALINK_RAM_LIMIT",
         "LAVALINK_CPU_CORES",
         "USER_FAV_MAX_NAME_LENGTH",
-        "USER_FAV_MAX_URL_LENGTH"
-
+        "USER_FAV_MAX_URL_LENGTH",
+        "BOT_ADD_REMOVE_LOG"
     ]:
         try:
             CONFIGS[i] = int(CONFIGS[i])
