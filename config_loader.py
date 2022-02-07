@@ -99,7 +99,10 @@ def load_config():
         "LAVALINK_ADDITIONAL_SLEEP",
         "LAVALINK_INITIAL_RAM",
         "LAVALINK_RAM_LIMIT",
-        "LAVALINK_CPU_CORES"
+        "LAVALINK_CPU_CORES",
+        "USER_FAV_MAX_NAME_LENGTH",
+        "USER_FAV_MAX_URL_LENGTH"
+
     ]:
         try:
             CONFIGS[i] = int(CONFIGS[i])
