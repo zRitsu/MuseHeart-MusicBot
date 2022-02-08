@@ -156,11 +156,11 @@ async def has_perm(inter):
     vc = inter.bot.get_channel(player.channel_id)
 
     if not vc and inter.author.voice:
-        player.dj.append(inter.author)
+        player.dj.add(inter.author)
 
     elif inter.bot.intents.members and not [m for m in vc.members if
                                         not m.bot and (m.guild_permissions.manage_channels or m in player.dj)]:
-        player.dj.append(inter.author)
+        player.dj.add(inter.author)
         await inter.channel.send(embed=disnake.Embed(
             description=f"{inter.author.mention} foi adicionado à lista de DJ's por não haver um no canal <#{vc.id}>.",
             color=player.bot.get_color(inter.guild.me)), delete_after=10)

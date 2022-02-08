@@ -103,8 +103,7 @@ class LavalinkPlayer(wavelink.Player):
         self.view: Optional[disnake.ui.View] = None
         self.guild: disnake.Guild = kwargs.pop('guild')
         self.text_channel: disnake.TextChannel = kwargs.pop('channel')
-        requester: disnake.Member = kwargs.pop('requester')
-        self.dj: list = [] if requester.guild_permissions.manage_channels else [requester]
+        self.dj: set = set()
         self.message: Optional[disnake.Message] = kwargs.pop('message', None)
         self.static: bool = kwargs.pop('static', False)
         self.request_channel: bool = kwargs.pop("request_channel", False)
@@ -122,6 +121,11 @@ class LavalinkPlayer(wavelink.Player):
         self.ws_client = None
         self.update_player: bool = True
         self.message_updater_task: Optional[asyncio.Task] = None
+
+        requester: disnake.Member = kwargs.pop('requester')
+
+        if not requester.guild_permissions.manage_channels:
+            self.dj.add(requester)
 
         print(f"Player Iniciado - Servidor: {self.guild.name} [{self.guild_id}]")
 

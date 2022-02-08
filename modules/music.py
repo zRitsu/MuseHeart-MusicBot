@@ -997,7 +997,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await send_message(inter, embed=embed)
             return
 
-        inter.player.dj.append(user)
+        inter.player.dj.add(user)
         text = [f"adicionou {user.mention} à lista de DJ's.", f"{user.mention} foi adicionado à lista de DJ's."]
 
         if (inter.player.static and inter.channel == inter.player.text_channel) or isinstance(inter.application_command, commands.InvokableApplicationCommand):
