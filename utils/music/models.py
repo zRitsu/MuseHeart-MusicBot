@@ -345,15 +345,8 @@ class LavalinkPlayer(wavelink.Player):
         if rpc_update:
             self.bot.loop.create_task(self.process_rpc())
 
-        if force or interaction and not interaction.response.is_done():
+        if force or (interaction and not interaction.response.is_done()):
             await self.invoke_np(interaction=interaction)
-
-        else:
-            try:
-                await interaction.response.defer()
-            except AttributeError:
-                pass
-
 
 
     async def cleanup(self):
