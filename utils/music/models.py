@@ -117,7 +117,6 @@ class LavalinkPlayer(wavelink.Player):
         self.idle_timeout = self.cog.bot.config["IDLE_TIMEOUT"]
         self.command_log = ""
         self.last_data = None
-        self.current: Optional[LavalinkTrack, SpotifyTrack] = None
         self.seek_time = None
         self.exiting = False
         self.skin = self.cog.bot.player_skins[kwargs.pop("skin", self.cog.bot.default_skin)]
