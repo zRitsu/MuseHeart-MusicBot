@@ -326,7 +326,7 @@ class LavalinkPlayer(wavelink.Player):
 
         while True:
 
-            await asyncio.sleep(10)
+            await asyncio.sleep(self.bot.config["PLAYER_MESSAGE_UPDATE_INTERVAL"])
 
             if self.update_player:
 
