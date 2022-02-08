@@ -1723,6 +1723,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if player.locked:
             return
 
+        player.update_player = False
+
         if payload.reason == "FINISHED":
             player.command_log = ""
         elif payload.reason == "STOPPED":
