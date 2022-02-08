@@ -123,7 +123,7 @@ class LavalinkPlayer(wavelink.Player):
         self.has_thread: bool = False
         self.nonstop = False
         self.ws_client = None
-        self.update_message = True
+        self.update_player = True
         self.message_updater_task = None
 
         print(f"Player Iniciado - Servidor: {self.guild.name} [{self.guild_id}]")
@@ -211,7 +211,7 @@ class LavalinkPlayer(wavelink.Player):
         if not self.message_updater_task:
             self.message_updater_task = self.bot.loop.create_task(self.message_updater())
         else:
-            self.update_message = False
+            self.update_player = False
 
         if rpc_update:
             self.bot.loop.create_task(self.process_rpc())
@@ -323,23 +323,13 @@ class LavalinkPlayer(wavelink.Player):
         except AttributeError:
             return
 
-    async def update_message_task(self, interaction=None, force=False, rpc_update=False):
-
-        if not interaction and not force:
-            await asyncio.sleep(5)
-
-        try:
-            await self.invoke_np(interaction=interaction, rpc_update=rpc_update)
-        except:
-            traceback.print_exc()
-
     async def message_updater(self):
 
         while True:
 
             await asyncio.sleep(10)
 
-            if self.update_message:
+            if self.update_player:
 
                 try:
                     await self.invoke_np()
@@ -348,7 +338,7 @@ class LavalinkPlayer(wavelink.Player):
 
             else:
 
-                self.update_message = True
+                self.update_player = True
 
     async def update_message(self, interaction: disnake.Interaction = None, force=False, rpc_update=False):
 
