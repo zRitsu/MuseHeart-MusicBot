@@ -89,42 +89,39 @@ class LavalinkPlayer(wavelink.Player):
     bot: BotCore
 
     def __init__(self, *args, **kwargs):
-        super(LavalinkPlayer, self).__init__(*args, **kwargs)
-        self.queue = deque()
-        self.played = deque(maxlen=20)
-        self.nightcore = False
+        super().__init__(*args, **kwargs)
+        self.queue: deque = deque()
+        self.played: deque = deque(maxlen=20)
+        self.nightcore: bool = False
         self.loop = False
         self.last_track: Optional[LavalinkTrack] = None
-        self.locked = False
-        self.idle = None
-        self.is_previows_music = False
-        self.last_embed = None
-        self.interaction_cooldown = False
+        self.locked: bool = False
+        self.is_previows_music: bool = False
+        self.interaction_cooldown: bool = False
         self.vc: Optional[WavelinkVoiceClient] = None
-        self.votes = set()
+        self.votes: set = set()
         self.view: Optional[disnake.ui.View] = None
-        self.requester = kwargs.pop('requester')
         self.guild: disnake.Guild = kwargs.pop('guild')
         self.text_channel: disnake.TextChannel = kwargs.pop('channel')
-        self.dj = [] if self.requester.guild_permissions.manage_channels else [self.requester]
+        requester: disnake.Member = kwargs.pop('requester')
+        self.dj: list = [] if requester.guild_permissions.manage_channels else [requester]
         self.message: Optional[disnake.Message] = kwargs.pop('message', None)
-        self.static = kwargs.pop('static', False)
+        self.static: bool = kwargs.pop('static', False)
         self.request_channel: bool = kwargs.pop("request_channel", False)
         self.cog = kwargs.pop('cog')
-        self.filters = {}
-        self.idle_task = None
-        self.members_timeout_task = None
+        self.filters: dict = {}
+        self.idle_task: Optional[asyncio.Task] = None
+        self.members_timeout_task: Optional[asyncio.Task] = None
         self.idle_timeout = self.cog.bot.config["IDLE_TIMEOUT"]
-        self.command_log = ""
-        self.last_data = None
-        self.seek_time = None
-        self.exiting = False
+        self.command_log: str = ""
+        self.last_data: dict = {}
+        self.exiting: bool = False
         self.skin = self.cog.bot.player_skins[kwargs.pop("skin", self.cog.bot.default_skin)]
         self.has_thread: bool = False
-        self.nonstop = False
+        self.nonstop: bool = False
         self.ws_client = None
-        self.update_player = True
-        self.message_updater_task = None
+        self.update_player: bool = True
+        self.message_updater_task: Optional[asyncio.Task] = None
 
         print(f"Player Iniciado - Servidor: {self.guild.name} [{self.guild_id}]")
 
@@ -208,11 +205,6 @@ class LavalinkPlayer(wavelink.Player):
         if not self.current:
             return
 
-        if not self.message_updater_task:
-            self.message_updater_task = self.bot.loop.create_task(self.message_updater())
-        else:
-            self.update_player = False
-
         if rpc_update:
             self.bot.loop.create_task(self.process_rpc())
 
@@ -227,6 +219,9 @@ class LavalinkPlayer(wavelink.Player):
                 return
         except:
             pass
+
+        if not self.message_updater_task:
+            self.message_updater_task = self.bot.loop.create_task(self.message_updater())
 
         try:
             self.view.stop()
@@ -346,6 +341,7 @@ class LavalinkPlayer(wavelink.Player):
             self.bot.loop.create_task(self.process_rpc())
 
         if force or (interaction and not interaction.response.is_done()):
+            self.update_player = False
             await self.invoke_np(interaction=interaction)
 
 
