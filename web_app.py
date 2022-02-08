@@ -148,16 +148,23 @@ class WSClient:
         self.bot: BotCore = bot
         self.url: str = url
         self.connection = None
-        self.backoff = 7
+        self.backoff: int = 7
         self.session = aiohttp.ClientSession()
-        self.ready = False
+        self.ready: bool  = False
+        self.data: dict = {}
+        self.connecting: bool = False
 
     async def connect(self):
 
-        if self.ready:
+        if self.ready or self.connecting:
             return
 
+        self.connecting = True
+
         self.connection = await self.session.ws_connect(self.url, heartbeat=30)
+
+        self.connecting = False
+
         self.backoff = 7
         #print(f"RPC client conectado: {self.bot.user} - {self.url}")
         print(f"{self.bot.user} - RPC client conectado")
@@ -178,6 +185,8 @@ class WSClient:
 
     async def send(self, data):
 
+        self.data = data
+
         if not self.is_connected:
             try:
                 await self.connect()
@@ -188,14 +197,14 @@ class WSClient:
                 print(f"{self.bot.user} - Reconectando ao server RPC em {self.backoff} segundos.")
                 await asyncio.sleep(self.backoff)
                 self.backoff *= 1.5
-                await self.send(data)
+                await self.send(self.data)
 
         try:
-            await self.connection.send_json(data)
+            await self.connection.send_json(self.data)
         except:
             traceback.print_exc()
             self.ready = False
-            await self.send(data)
+            await self.send(self.data)
 
     async def ws_loop(self):
 
