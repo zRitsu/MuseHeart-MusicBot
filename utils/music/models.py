@@ -100,7 +100,6 @@ class LavalinkPlayer(wavelink.Player):
         self.idle = None
         self.is_previows_music = False
         self.updating_message = None
-        self.command_log = ""
         self.last_embed = None
         self.interaction_cooldown = False
         self.vc: Optional[WavelinkVoiceClient] = None
@@ -164,6 +163,12 @@ class LavalinkPlayer(wavelink.Player):
         except:
             pass
 
+        try:
+            self.message_updater_task.cancel()
+        except:
+            pass
+        self.message_updater_task = None
+
         self.bot.loop.create_task(self.process_rpc(self.guild.me.voice.channel))
 
         self.view = PlayerInteractions(self.bot)
@@ -215,6 +220,11 @@ class LavalinkPlayer(wavelink.Player):
 
         if not self.current:
             return
+
+        if not self.message_updater_task:
+            self.message_updater_task = self.bot.loop.create_task(self.message_updater())
+        else:
+            self.updater_task = False
 
         if rpc_update:
             self.bot.loop.create_task(self.process_rpc())
@@ -293,6 +303,15 @@ class LavalinkPlayer(wavelink.Player):
 
         self.cancel_message_task_update()
 
+    async def set_pause(self, pause: bool) -> None:
+
+        try:
+            self.message_updater_task.cancel()
+        except:
+            pass
+        self.message_updater_task = None
+        await super().set_pause(pause)
+
     async def destroy_message(self, destroy_view=True):
 
         if destroy_view:
@@ -339,16 +358,38 @@ class LavalinkPlayer(wavelink.Player):
         except:
             traceback.print_exc()
 
+    async def message_updater(self):
+
+        while True:
+
+            await asyncio.sleep(10)
+
+            if self.updater_task:
+
+                try:
+                    await self.invoke_np()
+                except:
+                    traceback.print_exc()
+
+            else:
+
+                self.updater_task = True
+
+    updater_task = True
+    message_updater_task = None
+
     async def update_message(self, interaction: disnake.Interaction = None, force=False, rpc_update=False):
 
-        if self.updating_message:
+        if rpc_update:
+            await self.process_rpc()
 
-            if interaction and not interaction.response.is_done():
-                await interaction.response.defer()
-            return
+        if force:
+            await self.invoke_np(interaction=interaction)
 
-        self.updating_message = self.bot.loop.create_task(
-            self.update_message_task(interaction=interaction, force=force, rpc_update=rpc_update))
+        elif interaction and not interaction.response.is_done():
+            await interaction.response.defer()
+
+
 
     async def cleanup(self):
 
@@ -358,6 +399,11 @@ class LavalinkPlayer(wavelink.Player):
 
         try:
             self.idle_task.cancel()
+        except:
+            pass
+
+        try:
+            self.message_updater_task.cancel()
         except:
             pass
 

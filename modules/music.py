@@ -1711,7 +1711,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         await player.invoke_np(force=True if (not player.loop or not player.is_last_message()) else False, rpc_update=True)
-        player.command_log = ""
 
 
     @wavelink.WavelinkMixin.listener()

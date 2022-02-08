@@ -1,7 +1,19 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
+
 if TYPE_CHECKING:
     from utils.client import BotCore
+
+
+class ProgressBar:
+
+    def __init__(
+            self,
+            position: Union[int, float],
+            total: Union[int, float],
+    ):
+        self.start = int(100 * position / total / 10)
+        self.end = 9 - self.start
 
 
 def sync_message(bot: BotCore):

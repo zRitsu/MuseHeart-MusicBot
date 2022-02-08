@@ -2,6 +2,7 @@ from ..models import LavalinkPlayer
 import disnake
 from ..converters import fix_characters, time_format
 import itertools
+from ...others import ProgressBar
 
 
 def load(player: LavalinkPlayer) -> dict:
@@ -33,7 +34,13 @@ def load(player: LavalinkPlayer) -> dict:
     if player.current.is_stream:
         duration = "🔴 **⠂Livestream**"
     else:
-        duration = f"⏰ **⠂Duração:** `{time_format(player.current.duration)}`"
+
+        progress = ProgressBar(player.position, player.current.duration)
+
+        duration = f"```\n[{time_format(player.position)}] {('='*progress.start)}▶️{'='*progress.end} " \
+                   f"[{time_format(player.current.duration)}]```\n"
+
+        #duration = f"⏰ **⠂Duração:** `{time_format(player.current.duration)}`"
 
     vc_txt = ""
 
@@ -59,7 +66,6 @@ def load(player: LavalinkPlayer) -> dict:
 
     txt = f"[`{player.current.title}`]({player.current.uri})\n\n" \
           f"> 💠 **⠂Por:** `{fix_characters(player.current.author, uploader_text_size)}`\n" \
-          f"> {duration}\n" \
           f"> ✋ **⠂Pedido por:** {player.current.requester.mention}\n" \
           f"> 🔊 **⠂Volume:** `{player.volume}%`"
 
@@ -75,7 +81,9 @@ def load(player: LavalinkPlayer) -> dict:
     txt += f"{vc_txt}\n"
 
     if player.command_log:
-        txt += f"```ini\n[Última Interação]:```{player.command_log}\n"
+        txt += f"> ✅ **⠂Última Interação:** {player.command_log}\n"
+
+    txt += duration
 
     if len(player.queue):
 
