@@ -435,6 +435,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if player.loop == "current":
             player.loop = False
 
+        player.current.track_loops = 0
+
         await player.stop()
 
 
