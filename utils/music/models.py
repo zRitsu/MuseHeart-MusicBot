@@ -112,23 +112,12 @@ class LavalinkPlayer(wavelink.Player):
         self.request_channel: bool = kwargs.pop("request_channel", False)
         self.cog = kwargs.pop('cog')
         self.filters = {}
-        self.queue = deque()
-        self.played = deque(maxlen=20)
-        self.nightcore = False
-        self.loop = False
-        self.last_track: Optional[LavalinkTrack] = None
-        self.locked = False
         self.idle_task = None
         self.members_timeout_task = None
         self.idle_timeout = self.cog.bot.config["IDLE_TIMEOUT"]
-        self.is_previows_music = False
         self.command_log = ""
         self.last_data = None
-        self.interaction_cooldown = False
-        self.votes = set()
-        self.view: Optional[disnake.ui.View] = None
         self.current: Optional[LavalinkTrack, SpotifyTrack] = None
-        self.view: Optional[disnake.ui.View] = None
         self.seek_time = None
         self.exiting = False
         self.skin = self.cog.bot.player_skins[kwargs.pop("skin", self.cog.bot.default_skin)]
