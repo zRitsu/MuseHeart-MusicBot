@@ -365,7 +365,7 @@ class LavalinkPlayer(wavelink.Player):
     async def update_message(self, interaction: disnake.Interaction = None, force=False, rpc_update=False):
 
         if rpc_update:
-            await self.process_rpc()
+            self.bot.loop.create_task(self.process_rpc())
 
         if force:
             await self.invoke_np(interaction=interaction)
