@@ -1841,7 +1841,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player.has_thread = True
 
         embed = disnake.Embed(
-            description="**Esta conversa será usada temporariamente para pedir músicas apenas enviando "
+            description="**Essa conversa será usada temporariamente para pedir músicas apenas enviando "
                         "o nome/link sem necessidade de usar comando.**",
             color=self.bot.get_color(thread.guild.me)
         )
