@@ -281,14 +281,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await inter.response.defer(ephemeral=hide_playlist or inter.guild_data['player_controller']["channel"] == str(inter.channel.id))
 
-        try:
-            tracks, node = await self.get_tracks(query, inter.user, node=node, track_loops=repeat_amount,
-                                                 hide_playlist=hide_playlist)
-        except Exception as e:
-            if not isinstance(e, GenericError):
-                traceback.print_exc()
-            await inter.edit_original_message(content=f"**Ocorreu um erro:** ```py\n{e}```")
-            return
+        tracks, node = await self.get_tracks(query, inter.user, node=node, track_loops=repeat_amount,
+                                             hide_playlist=hide_playlist)
 
         try:
             skin = self.bot.check_skin(inter.guild_data["player_controller"]["skin"])
@@ -361,12 +355,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             log_text = f"{inter.author.mention} adicionou [`{fix_characters(track.title, 20)}`]({track.uri}){pos_txt} `({duration})`."
 
-            embed.description = f"> 🎵 **┃ Adicionado:** [`{track.title}`]({track.uri})\n" \
-                                f"> 💠 **┃ Uploader:** `{track.author}`\n" \
-                                f"> ✋ **┃ Pedido por:** {inter.author.mention}\n" \
-                                f"> ⌛ **┃ Duração:** `{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}` "
-
+            embed.set_author(
+                name=fix_characters(track.title, 35),
+                url=track.uri
+            )
             embed.set_thumbnail(url=track.thumb)
+            embed.description = f"`{fix_characters(track.author, 15)}`**┃**`{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}`**┃**{inter.author.mention}"
 
         else:
 
@@ -388,14 +382,22 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 pos_txt = f" (Pos. {position + 1})"
 
             if hide_playlist:
-                log_text = f"Adicionou uma playlist com {len(tracks.tracks)} música(s)."
+                log_text = f"Adicionou uma playlist com {len(tracks.tracks)} música(s) {pos_txt}."
             else:
                 log_text = f"{inter.author.mention} adicionou a playlist [`{fix_characters(tracks.data['playlistInfo']['name'], 20)}`]({query}){pos_txt} `({len(tracks.tracks)})`."
 
-            embed.description = f"> 🎶 **┃ Playlist adicionada{pos_txt}:** [`{tracks.data['playlistInfo']['name']}`]({query})\n" \
-                                f"> ✋ **┃ Pedido por:** {inter.author.mention}\n" \
-                                f"> 🎼 **┃ Música(s):** `[{len(tracks.tracks)}]`"
+            total_duration = 0
+
+            for t in tracks.tracks:
+                if not t.is_stream:
+                    total_duration += t.duration
+
+            embed.set_author(
+                name=fix_characters(tracks.data['playlistInfo']['name'], 35),
+                url=query
+            )
             embed.set_thumbnail(url=tracks.tracks[0].thumb)
+            embed.description = f"`{len(tracks.tracks)} música(s)`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
 
         if not manual_selection:
             await inter.edit_original_message(embed=embed, view=None)
