@@ -186,6 +186,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await player.connect(channel.id)
 
+        try:
+            player.members_timeout_task.cancel()
+        except:
+            pass
+
         if inter.application_command == self.connect:
 
             perms = channel.permissions_for(inter.guild.me)
