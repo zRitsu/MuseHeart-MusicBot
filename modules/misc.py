@@ -1,10 +1,10 @@
-import asyncio
-import datetime
-from typing import Optional
 import disnake
 from disnake.ext import commands
+import asyncio
+from typing import Optional
+from aiohttp import ClientSession
 from utils.client import BotCore
-from utils.music.converters import time_format
+from utils.music.converters import time_format, URL_REG
 import psutil
 import humanize
 from itertools import cycle
@@ -209,17 +209,20 @@ class GuildLog(commands.Cog):
     def __init__(self, bot: BotCore):
         self.bot = bot
 
+        if URL_REG.match(bot.config["BOT_ADD_REMOVE_LOG"]):
+            hook_url = bot.config["BOT_ADD_REMOVE_LOG"]
+        else:
+            print("URL do webhook inválido (para envio de logs ao adicionar/remover bot).")
+            hook_url = ""
+
+        self.hook_url: str = hook_url
+
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: disnake.Guild):
 
         print(f"Removido do servidor: {guild.name} - [{guild.id}]")
 
-        if not self.bot.config["BOT_ADD_REMOVE_LOG"]:
-            return
-
-        channel = self.bot.get_channel(self.bot.config["BOT_ADD_REMOVE_LOG"])
-
-        if not channel:
+        if not self.hook_url:
             return
 
         embed = disnake.Embed(
@@ -231,19 +234,14 @@ class GuildLog(commands.Cog):
 
         embed.set_thumbnail(url=guild.icon.replace(static_format="png").url)
 
-        await channel.send(self.bot.owner.mention, embed=embed)
+        await self.send_hook(self.bot.owner.mention, embed=embed)
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: disnake.Guild):
 
         print(f"Novo servidor: {guild.name} - [{guild.id}]")
 
-        if not self.bot.config["BOT_ADD_REMOVE_LOG"]:
-            return
-
-        channel = self.bot.get_channel(self.bot.config["BOT_ADD_REMOVE_LOG"])
-
-        if not channel:
+        if not self.hook_url:
             return
 
         created_at = int(guild.created_at.timestamp())
@@ -262,7 +260,19 @@ class GuildLog(commands.Cog):
 
         embed.set_thumbnail(url=guild.icon.replace(static_format="png").url)
 
-        await channel.send(self.bot.owner.mention, embed=embed)
+        await self.send_hook(self.bot.owner.mention, embed=embed)
+
+
+    async def send_hook(self, content="", *, embed: disnake.Embed=None):
+
+        async with ClientSession() as session:
+            webhook = disnake.Webhook.from_url(self.hook_url, session=session)
+            await webhook.send(
+                content=content,
+                username=self.bot.user.name,
+                avatar_url=self.bot.user.avatar.replace(static_format='png').url,
+                embed=embed
+            )
 
 
 def setup(bot: BotCore):
