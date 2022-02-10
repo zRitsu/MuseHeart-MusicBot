@@ -1867,14 +1867,16 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not player:
             return
 
-        if not player.nonstop and player.guild.me.voice and not any(m for m in player.guild.me.voice.channel.members if not m.bot):
+        try:
+            player.members_timeout_task.cancel()
+        except:
+            pass
+
+        if not player.nonstop and player.guild.me.voice and not any(
+                m for m in player.guild.me.voice.channel.members if not m.bot):
             player.members_timeout_task = self.bot.loop.create_task(player.members_timeout())
         else:
-            try:
-                player.members_timeout_task.cancel()
-                player.members_timeout_task = None
-            except:
-                pass
+            player.members_timeout_task = None
 
         # rich presence stuff
 
