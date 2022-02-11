@@ -343,7 +343,7 @@ class PlayerInteractions(disnake.ui.View):
             try:
 
                 modal_inter: disnake.ModalInteraction = await self.bot.wait_for(
-                    "modal_submit", check=lambda i: i.author == interaction.author and i.custom_id == "add_song", timeout=30
+                    "modal_submit", check=lambda i: i.author == interaction.author and i.custom_id == "add_song"
                 )
 
                 query = modal_inter.text_values["song_input"]
@@ -370,7 +370,6 @@ class PlayerInteractions(disnake.ui.View):
                 interaction.response = modal_inter.response
 
             except asyncio.TimeoutError:
-                await modal_inter.send("Tempo esgotado!", ephemeral=True)
                 return
 
         cmd = self.bot.get_slash_command(control)
