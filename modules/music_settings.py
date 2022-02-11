@@ -33,7 +33,7 @@ class MusicSettings(commands.Cog):
     @commands.slash_command(description=f"{desc_prefix}Permitir/bloquear de me conectar em um canal onde há outros bots.")
     async def dont_connect_other_bot_vc(
             self, inter: disnake.ApplicationCommandInteraction,
-            opt: str = commands.Param(choices=["Ativar", "Desativar"])
+            opt: str = commands.Param(choices=["Ativar", "Desativar"], description="Escolha: ativar ou desativar")
     ):
 
         inter.guild_data["check_other_bots_in_vc"] = opt == "Ativar"

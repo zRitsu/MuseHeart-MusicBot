@@ -30,7 +30,7 @@ class FavManager(commands.Cog):
     async def add(
             self,
             inter: disnake.ApplicationCommandInteraction,
-            name: str = commands.Param(name="nome"),
+            name: str = commands.Param(name="nome", description="Nome do favorito."),
             url: str = commands.Param(name="link", description="link para favoritar (recomendável: link de playlist)"),
     ):
 
@@ -67,9 +67,9 @@ class FavManager(commands.Cog):
     async def edit(
             self,
             inter: disnake.ApplicationCommandInteraction,
-            item: str = commands.Param(autocomplete=fav_list), *,
-            name: str = commands.Param(name="novo_nome", default=""),
-            url: str = commands.Param(name="novo_link", default="")
+            item: str = commands.Param(autocomplete=fav_list, description="item dos favoritos para editar."), *,
+            name: str = commands.Param(name="novo_nome", default="", description="Novo nome para o favorito."),
+            url: str = commands.Param(name="novo_link", default="", description="Novo link para o favorito.")
     ):
 
         if not name and not url:
@@ -104,7 +104,7 @@ class FavManager(commands.Cog):
     async def remove(
             self,
             inter: disnake.ApplicationCommandInteraction,
-            item: str = commands.Param(autocomplete=fav_list),
+            item: str = commands.Param(autocomplete=fav_list, description="Favorito para remover."),
     ):
 
         user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
