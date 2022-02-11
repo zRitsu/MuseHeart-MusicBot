@@ -72,6 +72,9 @@ def load(player: LavalinkPlayer) -> dict:
     if player.current.track_loops:
         txt += f"\n> 🔂 **⠂Repetições restantes:** `{player.current.track_loops}`"
 
+    if player.nightcore:
+        txt += f"\n> 🇳 **⠂Efeito nightcore:** `ativado`"
+
     if player.current.playlist:
         txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist['name'], limit=playlist_text_size)}`]({player.current.playlist['url']})"
 

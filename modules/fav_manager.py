@@ -140,43 +140,24 @@ class FavManager(commands.Cog):
 
 
     @fav.sub_command(name="import",description=f"{desc_prefix}Importar seus favoritos a partir de um arquivo.")
-    async def import_(self, inter: disnake.ApplicationCommandInteraction):
+    async def import_(
+            self,
+            inter: disnake.ApplicationCommandInteraction,
+            file: disnake.Attachment = commands.Param(name="arquivo", description="arquivo em formato .json")
+    ):
+
+        if file.size > 2097152:
+            raise GenericError("**O tamanho do arquivo não pode ultrapassar 2Mb!**")
+
+        if not file.filename.endswith(".json"):
+            raise GenericError("**Tipo de arquivo inválido!**")
 
         try:
-            msg = await inter.author.send("Envie o arquivo de sua playlist em até 60 segundos.")
-        except disnake.Forbidden:
-            raise GenericError("**Seu DM está desativado...\nAtive-o e repita o comando.**")
-
-        await inter.send("Enviei uma solicitação em suas mensagens privadas.", ephemeral=True)
-
-        data = None
-
-        try:
-            while not self.bot.is_closed():
-                resp: disnake.Message = await self.bot.wait_for("message", check=lambda
-                    m: m.channel == msg.channel and m.author.id == inter.author.id and m.attachments, timeout=60)
-
-                if resp.attachments:
-
-                    if not resp.attachments[0].filename.endswith(".json"):
-                        await inter.author.send("Tipo de arquivo inválido! Envie novamente...")
-                        continue
-
-                    data = (await resp.attachments[0].read()).decode('utf-8')
-                    break
-
-        except asyncio.TimeoutError:
-            await msg.channel.send("Tempo esgotado!")
-            return
-
-        if not data:
-            return
-
-        try:
+            data = (await file.read()).decode('utf-8')
             json_data = json.loads(data)
-        except:
-            await inter.author.send("Ocorreu um erro ao ler o arquivo, por favor revise-o e use o comando novamente.")
-            return
+        except Exception as e:
+            raise GenericError("**Ocorreu um erro ao ler o arquivo, por favor revise-o e use o comando novamente.**\n"
+                               f"```py\n{repr(e)}```")
 
         for url in json_data.values():
 
@@ -215,8 +196,13 @@ class FavManager(commands.Cog):
 
         await self.bot.db.update_data(inter.author.id, user_data, db_name="users")
 
-        await inter.author.send("Os links foram importados com sucesso!\n"
-                                "Eles vão aparecer quando usar o comando /play (no preenchimento automático da busca).")
+        await inter.send(
+            ephemeral=True,
+            embed = disnake.Embed(
+                description = "**Os links foram importados com sucesso!**\n"
+                              "**Eles vão aparecer quando usar o comando /play (no preenchimento automático da busca).**",
+            )
+        )
 
 
     @fav.sub_command(description=f"{desc_prefix}Exportar seus favoritos em um arquivo no seu DM.")
@@ -229,16 +215,12 @@ class FavManager(commands.Cog):
                                f"Adicione um usando o comando: /{self.add.name}**")
 
         fp = BytesIO(bytes(json.dumps(user_data["fav_links"], indent=4), 'utf-8'))
-        try:
-            embed = disnake.Embed(
-                description=f"Seus favoritos estão aqui.\nVocê pode importar usando o comando: `/{self.import_.name}`",
-                color=self.bot.get_color(inter.guild.me))
-            await inter.author.send(embed=embed, file=disnake.File(fp=fp, filename="favoritos.json"))
 
-        except disnake.Forbidden:
-            raise GenericError("**Seu DM está desativado!**")
+        embed = disnake.Embed(
+            description=f"Seus favoritos estão aqui.\nVocê pode importar usando o comando: `/{self.import_.name}`",
+            color=self.bot.get_color(inter.guild.me))
 
-        await inter.send("Seus favoritos foram enviados no seu DM.", ephemeral=True)
+        await inter.send(embed=embed, file=disnake.File(fp=fp, filename="favoritos.json"), ephemeral=True)
 
 
 def setup(bot: BotCore):

@@ -1,8 +1,11 @@
 from __future__ import annotations
+
+import pprint
+
 import disnake
 from disnake.ext import commands
 import asyncio
-from .converters import time_format, fix_characters
+from .converters import time_format, fix_characters, URL_REG
 from typing import TYPE_CHECKING, Union, List
 from inspect import iscoroutinefunction
 
@@ -272,16 +275,17 @@ class PlayerInteractions(disnake.ui.View):
         if control == "help":
 
             embed = disnake.Embed(
-                description=f"📘 **IFORMAÇÕES SOBRE OS BOTÕES** 📘\n\n"
-                            f"⏯️ `= Pausar/Retomar a música.`\n"
-                            f"⏮️ `= Voltar para a música tocada anteriormente.`\n"
-                            f"⏭️ `= Pular para a próxima música.`\n"
-                            f"🔀 `= Misturar as músicas da fila.`\n"
-                            f"🇳 `= Ativar/Desativar o efeito Nightcore`\n"
-                            f"⏹️ `= Parar o player e me desconectar do canal.`\n"
-                            f"🔊 `= Ajustar volume.`\n"
-                            f"🔁 `= Ativar/Desativar repetição.`\n"
-                            f"📑 `= Exibir a fila de música.`\n",
+                description="📘 **IFORMAÇÕES SOBRE OS BOTÕES** 📘\n\n"
+                            "⏯️ `= Pausar/Retomar a música.`\n"
+                            "⏮️ `= Voltar para a música tocada anteriormente.`\n"
+                            "⏭️ `= Pular para a próxima música.`\n"
+                            "🔀 `= Misturar as músicas da fila.`\n"
+                            "➕ `= Adicionar música.`\n"
+                            #"🇳 `= Ativar/Desativar o efeito Nightcore`\n"
+                            "⏹️ `= Parar o player e me desconectar do canal.`\n"
+                            "🔊 `= Ajustar volume.`\n"
+                            "🔁 `= Ativar/Desativar repetição.`\n"
+                            "📑 `= Exibir a fila de música.`\n",
                 color=self.bot.get_color(interaction.guild.me)
             )
 
@@ -324,6 +328,87 @@ class PlayerInteractions(disnake.ui.View):
             else:
                 kwargs['mode'] = 'current'
 
+        elif control == "add_song":
+
+            await interaction.response.send_modal(
+                title="Adicionar música",
+                custom_id="add_song",
+                components=[
+                    disnake.ui.TextInput(
+                        style=disnake.TextInputStyle.short,
+                        label="Nome/link da música (envie em até 30 seg).",
+                        custom_id="song_input",
+                        max_length=90,
+                    )
+                ],
+            )
+
+            try:
+
+                modal_inter: disnake.ModalInteraction = await self.bot.wait_for(
+                    "modal_submit", check=lambda i: i.author == interaction.author and i.custom_id == "add_song", timeout=30
+                )
+
+                await modal_inter.response.defer(ephemeral=True)
+
+                query = modal_inter.text_values["song_input"]
+
+                if not URL_REG.match(query):
+                    query = f"ytsearch:{query}"
+
+                try:
+                    tracks, node = await player.cog.get_tracks(
+                        query=query,
+                        user=modal_inter.user,
+                        node=player.node
+                    )
+                except Exception as e:
+                    self.bot.dispatch('slash_command_error', modal_inter, e)
+                    return
+
+                embed = disnake.Embed()
+
+                if isinstance(tracks, list):
+
+                    track = tracks[0]
+                    player.queue.append(track)
+                    duration = time_format(track.duration) if not track.is_stream else '🔴 Livestream'
+                    embed.set_author(
+                        name=fix_characters(track.title, 35),
+                        url=track.uri
+                    )
+                    embed.set_thumbnail(url=track.thumb)
+                    embed.description = f"`{fix_characters(track.author, 15)}`**┃**`{duration}`**┃**{modal_inter.author.mention}"
+                    player.command_log = f"{modal_inter.author.mention} adicionou [`{fix_characters(track.title, 20)}`]({track.uri}){f' `({duration})`'}."
+
+                else:
+
+                    total_duration = 0
+
+                    for t in tracks.tracks:
+                        if not t.is_stream:
+                            total_duration += t.duration
+
+                    player.queue.extend(tracks.tracks)
+
+                    player.command_log = f"{modal_inter.author.mention} adicionou a playlist " \
+                                         f"[`{fix_characters(tracks.data['playlistInfo']['name'], 20)}`]({query}) " \
+                                         f"`({len(tracks.tracks)})`."
+
+                    embed.set_author(
+                        name=fix_characters(tracks.data['playlistInfo']['name'], 35),
+                        url=query
+                    )
+                    embed.set_thumbnail(url=tracks.tracks[0].thumb)
+                    embed.description = f"`{len(tracks.tracks)} música(s)`**┃**`{time_format(total_duration)}`**┃**{modal_inter.author.mention}"
+
+                await modal_inter.send(embed=embed, ephemeral=True)
+                return
+
+            except asyncio.TimeoutError:
+                await modal_inter.send("Tempo esgotado!", ephemeral=True)
+                return
+
         cmd = self.bot.get_slash_command(control)
 
         if not cmd:
@@ -333,8 +418,6 @@ class PlayerInteractions(disnake.ui.View):
         interaction.player = player
 
         try:
-
-            interaction.bot = self.bot  # fix checks below
 
             await check_cmd(cmd, interaction)
 
