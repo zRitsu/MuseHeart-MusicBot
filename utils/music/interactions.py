@@ -277,7 +277,7 @@ class PlayerInteractions(disnake.ui.View):
                             "⏮️ `= Voltar para a música tocada anteriormente.`\n"
                             "⏭️ `= Pular para a próxima música.`\n"
                             "🔀 `= Misturar as músicas da fila.`\n"
-                            "➕ `= Adicionar música.`\n"
+                            "🎵 `= Adicionar música.`\n"
                             #"🇳 `= Ativar/Desativar o efeito Nightcore`\n"
                             "⏹️ `= Parar o player e me desconectar do canal.`\n"
                             "🔊 `= Ajustar volume.`\n"
