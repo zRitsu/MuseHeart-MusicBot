@@ -199,6 +199,7 @@ class FavManager(commands.Cog):
         await inter.send(
             ephemeral=True,
             embed = disnake.Embed(
+                color=self.bot.get_color(inter.guild.me),
                 description = "**Os links foram importados com sucesso!**\n"
                               "**Eles vão aparecer quando usar o comando /play (no preenchimento automático da busca).**",
             )
