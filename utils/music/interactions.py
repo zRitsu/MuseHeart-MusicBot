@@ -334,6 +334,7 @@ class PlayerInteractions(disnake.ui.View):
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
                         label="Nome/link da música (envie em até 30 seg).",
+                        placeholder="Nome ou link do youtube/spotify/soundcloud etc.",
                         custom_id="song_input",
                         max_length=90,
                     )
