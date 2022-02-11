@@ -183,7 +183,7 @@ class WSClient:
     def is_connected(self):
         return self.connection and not self.connection.closed
 
-    async def send(self, data):
+    async def send(self, data: dict):
 
         self.data = data
 
@@ -201,10 +201,12 @@ class WSClient:
 
         try:
             await self.connection.send_json(self.data)
-        except:
+        except Exception as e:
             traceback.print_exc()
-            self.ready = False
-            await self.send(self.data)
+
+            if not isinstance(e, AttributeError):
+                self.ready = False
+                await self.send(self.data)
 
     async def ws_loop(self):
 
