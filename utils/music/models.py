@@ -241,7 +241,7 @@ class LavalinkPlayer(wavelink.Player):
             "⏭️": ("skip",),
             "🔀": ("shuffle",),
             #"🇳": ("nightcore", get_button_style(self.nightcore, red=False),),
-            "🎵": ("add_song",),
+            "🎶": ("add_song",),
             "⏹️": ("stop",),
             ("🔂" if self.loop == "current" else "🔁"): (
                 "loop_mode",

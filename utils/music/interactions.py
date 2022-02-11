@@ -277,7 +277,7 @@ class PlayerInteractions(disnake.ui.View):
                             "⏮️ `= Voltar para a música tocada anteriormente.`\n"
                             "⏭️ `= Pular para a próxima música.`\n"
                             "🔀 `= Misturar as músicas da fila.`\n"
-                            "🎵 `= Adicionar música.`\n"
+                            "🎶 `= Adicionar música.`\n"
                             #"🇳 `= Ativar/Desativar o efeito Nightcore`\n"
                             "⏹️ `= Parar o player e me desconectar do canal.`\n"
                             "🔊 `= Ajustar volume.`\n"
@@ -333,7 +333,7 @@ class PlayerInteractions(disnake.ui.View):
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Nome/link da música (envie em até 30 seg).",
+                        label="Nome/link da música.",
                         placeholder="Nome ou link do youtube/spotify/soundcloud etc.",
                         custom_id="song_input",
                         max_length=90,
