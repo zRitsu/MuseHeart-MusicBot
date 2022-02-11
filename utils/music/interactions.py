@@ -1,11 +1,8 @@
 from __future__ import annotations
-
-import pprint
-
 import disnake
 from disnake.ext import commands
 import asyncio
-from .converters import time_format, fix_characters, URL_REG
+from .converters import time_format, fix_characters
 from typing import TYPE_CHECKING, Union, List
 from inspect import iscoroutinefunction
 
@@ -349,61 +346,28 @@ class PlayerInteractions(disnake.ui.View):
                     "modal_submit", check=lambda i: i.author == interaction.author and i.custom_id == "add_song", timeout=30
                 )
 
-                await modal_inter.response.defer(ephemeral=True)
-
                 query = modal_inter.text_values["song_input"]
 
-                if not URL_REG.match(query):
-                    query = f"ytsearch:{query}"
+                control = "play"
 
-                try:
-                    tracks, node = await player.cog.get_tracks(
-                        query=query,
-                        user=modal_inter.user,
-                        node=player.node
-                    )
-                except Exception as e:
-                    self.bot.dispatch('slash_command_error', modal_inter, e)
-                    return
+                kwargs.update(
+                    {
+                        "query": query,
+                        "position": 0,
+                        "options": False,
+                        "manual_selection": False,
+                        "source": "ytsearch",
+                        "repeat_amount": 0,
+                        "hide_playlist": False,
+                        "server": None,
+                        "hidden": True
+                    }
+                )
 
-                embed = disnake.Embed()
-
-                if isinstance(tracks, list):
-
-                    track = tracks[0]
-                    player.queue.append(track)
-                    duration = time_format(track.duration) if not track.is_stream else '🔴 Livestream'
-                    embed.set_author(
-                        name=fix_characters(track.title, 35),
-                        url=track.uri
-                    )
-                    embed.set_thumbnail(url=track.thumb)
-                    embed.description = f"`{fix_characters(track.author, 15)}`**┃**`{duration}`**┃**{modal_inter.author.mention}"
-                    player.command_log = f"{modal_inter.author.mention} adicionou [`{fix_characters(track.title, 20)}`]({track.uri}){f' `({duration})`'}."
-
-                else:
-
-                    total_duration = 0
-
-                    for t in tracks.tracks:
-                        if not t.is_stream:
-                            total_duration += t.duration
-
-                    player.queue.extend(tracks.tracks)
-
-                    player.command_log = f"{modal_inter.author.mention} adicionou a playlist " \
-                                         f"[`{fix_characters(tracks.data['playlistInfo']['name'], 20)}`]({query}) " \
-                                         f"`({len(tracks.tracks)})`."
-
-                    embed.set_author(
-                        name=fix_characters(tracks.data['playlistInfo']['name'], 35),
-                        url=query
-                    )
-                    embed.set_thumbnail(url=tracks.tracks[0].thumb)
-                    embed.description = f"`{len(tracks.tracks)} música(s)`**┃**`{time_format(total_duration)}`**┃**{modal_inter.author.mention}"
-
-                await modal_inter.send(embed=embed, ephemeral=True)
-                return
+                #TODO: Ver um método melhor de setar o interaction.player (ModalInteraction não dá pra setar)...
+                interaction.token = modal_inter.token
+                interaction.id = modal_inter.id
+                interaction.response = modal_inter.response
 
             except asyncio.TimeoutError:
                 await modal_inter.send("Tempo esgotado!", ephemeral=True)
