@@ -359,8 +359,7 @@ class PlayerInteractions(disnake.ui.View):
                         "source": "ytsearch",
                         "repeat_amount": 0,
                         "hide_playlist": False,
-                        "server": None,
-                        "hidden": True
+                        "server": None
                     }
                 )
 
