@@ -1867,7 +1867,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             after: disnake.VoiceState
     ):
 
-        if member.bot and member.id != self.bot.user.id: # ignorar bots
+        if member.bot: # ignorar bots
             return
 
         player: LavalinkPlayer = self.bot.music.players.get(member.guild.id)
