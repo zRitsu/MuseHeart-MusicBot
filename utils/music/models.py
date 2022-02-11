@@ -415,7 +415,7 @@ class LavalinkPlayer(wavelink.Player):
         except AttributeError:
             thumb = self.bot.user.default_avatar.with_format("png").url
 
-        if close:
+        if close or self.guild.me not in voice_channel.members:
 
             stats = {
                 "op": "close",
