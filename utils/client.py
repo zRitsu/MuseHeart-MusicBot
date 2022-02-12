@@ -185,23 +185,23 @@ class BotCore(commands.AutoShardedBot):
                 module_filename = os.path.join(modules_dir, filename).replace('\\', '.').replace('/', '.')
                 try:
                     self.reload_extension(module_filename)
-                    print(f"{'=' * 50}\n[OK] {bot_name} - {filename}.py Recarregado.")
+                    print(f"{'=' * 48}\n[OK] {bot_name} - {filename}.py Recarregado.")
                     load_status["reloaded"].append(f"{filename}.py")
                 except (commands.ExtensionAlreadyLoaded, commands.ExtensionNotLoaded):
                     try:
                         self.load_extension(module_filename)
-                        print(f"{'=' * 50}\n[OK] {bot_name} - {filename}.py Carregado.")
+                        print(f"{'=' * 48}\n[OK] {bot_name} - {filename}.py Carregado.")
                         load_status["loaded"].append(f"{filename}.py")
                     except Exception:
-                        print((f"{'=' * 50}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename} | Erro:"
+                        print((f"{'=' * 48}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename} | Erro:"
                                f"\n{traceback.format_exc()}"))
                         load_status["error"].append(f"{filename}.py")
                 except Exception:
-                    print((f"{'=' * 50}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename} | Erro:"
+                    print((f"{'=' * 48}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename} | Erro:"
                       f"\n{traceback.format_exc()}"))
                     load_status["error"].append(f"{filename}.py")
 
-        print(f"{'=' * 50}")
+        print(f"{'=' * 48}")
 
         for c in self.slash_commands:
             if (desc:=len(c.description)) > 100:
