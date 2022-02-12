@@ -116,7 +116,6 @@ class LavalinkPlayer(wavelink.Player):
         self.last_data: dict = {}
         self.exiting: bool = False
         self.skin = self.cog.bot.player_skins[kwargs.pop("skin", self.cog.bot.default_skin)]
-        self.has_thread: bool = False
         self.nonstop: bool = False
         self.ws_client = None
         self.update_player: bool = True
@@ -132,6 +131,11 @@ class LavalinkPlayer(wavelink.Player):
 
     def __str__(self) -> str:
         return f"Servidor de música: {self.node.identifier}"
+
+
+    @property
+    def has_thread(self):
+        return self.message and self.message.thread
 
 
     async def members_timeout(self):

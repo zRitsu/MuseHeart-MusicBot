@@ -1259,7 +1259,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not thread:
             return
 
-        player.has_thread = False
         player.message = None
         await thread.edit(archived=True, locked=True, name=f"arquivado: {thread.name}")
 
@@ -1292,7 +1291,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if player and isinstance(message.channel, disnake.Thread) and not player.static:
 
-            player.has_thread = True
             text_channel = message.channel
 
         else:
@@ -1834,8 +1832,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if thread.id != player.message.id:
             return
 
-        player.has_thread = False
-
 
     @commands.Cog.listener("on_thread_join")
     async def join_thread_request(self, thread: disnake.Thread):
@@ -1847,8 +1843,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if thread.guild.me.id in thread._members:
             return
-
-        player.has_thread = True
 
         embed = disnake.Embed(
             description="**Essa conversa será usada temporariamente para pedir músicas apenas enviando "
