@@ -152,18 +152,13 @@ class WSClient:
         self.session = aiohttp.ClientSession()
         self.ready: bool  = False
         self.data: dict = {}
-        self.connecting: bool = False
 
     async def connect(self):
 
-        if self.ready or self.connecting:
+        if self.ready:
             return
 
-        self.connecting = True
-
         self.connection = await self.session.ws_connect(self.url, heartbeat=30)
-
-        self.connecting = False
 
         self.backoff = 7
         #print(f"RPC client conectado: {self.bot.user} - {self.url}")
@@ -177,8 +172,6 @@ class WSClient:
 
         self.ready = True
 
-        await self.ws_loop()
-
     @property
     def is_connected(self):
         return self.connection and not self.connection.closed
@@ -188,25 +181,12 @@ class WSClient:
         self.data = data
 
         if not self.is_connected:
-            try:
-                await self.connect()
-                self.backoff = 7
-            except Exception as e:
-                #print(f"Falha ao processar RPC: {repr(e)}")
-                print(f"{self.bot.user} - Falha ao processar RPC!")
-                print(f"{self.bot.user} - Reconectando ao server RPC em {self.backoff} segundos.")
-                await asyncio.sleep(self.backoff)
-                self.backoff *= 1.5
-                await self.send(self.data)
+            return
 
         try:
             await self.connection.send_json(self.data)
-        except Exception as e:
+        except Exception:
             traceback.print_exc()
-
-            if not isinstance(e, AttributeError):
-                self.ready = False
-            #    await self.send(self.data)
 
     async def ws_loop(self):
 
@@ -244,14 +224,17 @@ class WSClient:
                             for i in vc_user_ids:
                                 users.remove(i)
 
+                continue
+
             except aiohttp.WSServerHandshakeError:
                 print(f"{self.bot.user} - Servidor offline, tentando conectar novamente ao server RPC em {int(self.backoff)} segundos.")
             except Exception:
                 print(f"{self.bot.user} - Reconectando ao server RPC em {int(self.backoff)} segundos.")
 
-            self.ready = False
-            await asyncio.sleep(self.backoff)
-            self.backoff *= 2.5
+        self.ready = False
+        await asyncio.sleep(self.backoff)
+        self.backoff *= 2.5
+        self.bot.loop.create_task(self.connect())
 
 
 def run_app(bots:list = None, ws_url = "http://localhost:8080/ws"):
