@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 db_models = {
       "guilds": {
         "ver": 1.4,
-        "prefix": "!!!",
+        "prefix": "",
         "player_controller": {
             "channel": None,
             "message_id": None,
@@ -38,12 +38,7 @@ async def guild_prefix(bot: BotCore, message: disnake.Message):
 
         data = await bot.db.get_data(message.guild.id, db_name="guilds")
 
-        prefix = data.get("prefix", bot.default_prefix)
-
-        if not prefix:
-            prefix = bot.default_prefix
-            data["prefix"] = prefix
-            await bot.db.update_data(message.guild.id, data, db_name="guilds")
+        prefix = data.pop("prefix", bot.default_prefix) or bot.default_prefix
 
     return commands.when_mentioned_or(*(prefix, ))(bot, message)
 
