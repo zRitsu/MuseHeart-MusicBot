@@ -204,8 +204,8 @@ class WSClient:
         except Exception as e:
             traceback.print_exc()
 
-            #if not isinstance(e, AttributeError):
-            #    self.ready = False
+            if not isinstance(e, AttributeError):
+                self.ready = False
             #    await self.send(self.data)
 
     async def ws_loop(self):
