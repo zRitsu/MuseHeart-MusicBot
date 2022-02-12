@@ -26,12 +26,12 @@ class FavManager(commands.Cog):
         pass
 
 
-    @fav.sub_command(description=f"{desc_prefix}Adicionar um link para sua lista de favoritos.")
+    @fav.sub_command(description=f"{desc_prefix}Adicionar um link (recomendável: de playlist) para sua lista de favoritos.")
     async def add(
             self,
             inter: disnake.ApplicationCommandInteraction,
             name: str = commands.Param(name="nome", description="Nome do favorito."),
-            url: str = commands.Param(name="link", description="link para favoritar (recomendável: link de playlist)"),
+            url: str = commands.Param(name="link", description="link para favoritar (recomendável: de playlist)"),
     ):
 
         if len(name) > (max_name_chars:=self.bot.config["USER_FAV_MAX_NAME_LENGTH"]):
@@ -139,6 +139,32 @@ class FavManager(commands.Cog):
         await inter.send(embed=embed, ephemeral=True)
 
 
+    @fav.sub_command(name="list", description=f"{desc_prefix}Exibir sua lista de favoritos.")
+    async def list_(
+            self, inter: disnake.ApplicationCommandInteraction,
+            hidden: bool = commands.Param(
+                name="Ocultar",
+                description="Apenas você pode ver a lista de favoritos.",
+                default=False)
+    ):
+
+        user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
+
+        if not user_data["fav_links"]:
+            raise GenericError(f"**Você não possui links favoritos..\n"
+                               f"Você pode adicionar usando o comando: /{self.add.name}**")
+
+        embed = disnake.Embed(
+            color=self.bot.get_color(inter.guild.me),
+            title="Seus Links Favoritos:",
+            description="\n".join(f"{n+1}) [`{f[0]}`]({f[1]})" for n, f in enumerate(user_data["fav_links"].items()))
+        )
+
+        embed.set_footer(text="Você pode usá-los no comando /play")
+
+        await inter.send(embed=embed, ephemeral=hidden)
+
+
     @fav.sub_command(name="import",description=f"{desc_prefix}Importar seus favoritos a partir de um arquivo.")
     async def import_(
             self,
@@ -213,7 +239,7 @@ class FavManager(commands.Cog):
 
         if not user_data["fav_links"]:
             raise GenericError(f"**Você não possui links favoritos..\n"
-                               f"Adicione um usando o comando: /{self.add.name}**")
+                               f"Você pode adicionar usando o comando: /{self.add.name}**")
 
         fp = BytesIO(bytes(json.dumps(user_data["fav_links"], indent=4), 'utf-8'))
 
