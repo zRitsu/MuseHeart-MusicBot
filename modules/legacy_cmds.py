@@ -133,8 +133,12 @@ class Owner(commands.Cog):
         elif "requirements.txt" in text:
             text += "\n`Nota: Será necessário atualizar as dependências.`"
 
-        txt = "`✅` Atualização realizada com sucesso!\n\n" \
-              f"{self.format_log(git_log[:10])}\n\n`📄` **Log:** ```py\n{out_git[:1000]}```{text}"
+        txt = "`✅` **Atualização realizada com sucesso!**"
+
+        if git_log:
+            txt += f"\n\n{self.format_log(git_log[:10])}"
+
+        txt += f"\n\n`📄` **Log:** ```py\n{out_git[:1000]}```{text}"
 
         if isinstance(ctx, commands.Context):
             embed = disnake.Embed(
