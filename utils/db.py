@@ -38,7 +38,7 @@ async def guild_prefix(bot: BotCore, message: disnake.Message):
 
         data = await bot.db.get_data(message.guild.id, db_name="guilds")
 
-        prefix = data.pop("prefix", bot.default_prefix) or bot.default_prefix
+        prefix = data.get("prefix") or bot.default_prefix
 
     return commands.when_mentioned_or(*(prefix, ))(bot, message)
 
@@ -165,9 +165,7 @@ class MongoDatabase(BaseDB):
             data = await db.find_one({"_id": id_})
 
             if not data:
-                data = dict(self.db_models[db_name])
-                data['_id'] = id_
-                await self.push_data(data, db_name)
+                return dict(self.db_models[db_name])
 
             elif data["ver"] < self.db_models[db_name]["ver"]:
                 data = update_values(dict(self.db_models[db_name]), data)
@@ -186,7 +184,7 @@ class MongoDatabase(BaseDB):
 
         id_ = str(id_)
 
-        d = await db.update_one({'_id': id_}, {'$set': data}, upsert=False)
+        d = await db.update_one({'_id': id_}, {'$set': data}, upsert=True)
         self.data[db_name][id_] = data
         return d
 
