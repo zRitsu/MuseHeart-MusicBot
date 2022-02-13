@@ -5,7 +5,7 @@ from disnake.ext import commands
 from typing import TYPE_CHECKING
 from utils.music.checks import user_cooldown
 from utils.music.converters import time_format
-from utils.music.interactions import send_idle_embed
+from utils.others import send_idle_embed
 from utils.music.models import LavalinkPlayer
 
 if TYPE_CHECKING:

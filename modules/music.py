@@ -21,8 +21,8 @@ from utils.music.models import LavalinkPlayer, LavalinkTrack
 from utils.music.converters import time_format, fix_characters, string_to_seconds, get_track_index, URL_REG, \
     YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist, \
     node_suggestions, fav_add_autocomplete
-from utils.music.interactions import VolumeInteraction, QueueInteraction, send_message, SongSelect, SelectInteraction, \
-    send_idle_embed, check_cmd
+from utils.music.interactions import VolumeInteraction, QueueInteraction, SongSelect, SelectInteraction
+from utils.others import check_cmd, send_message, send_idle_embed
 
 PlayOpts = commands.option_enum(
     {

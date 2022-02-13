@@ -1,7 +1,7 @@
 import disnake
 from disnake.ext import commands
 from utils.music.errors import parse_error
-from utils.music.interactions import send_message
+from utils.others import send_message
 
 
 class ErrorHandler(commands.Cog):
