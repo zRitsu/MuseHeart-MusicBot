@@ -143,7 +143,7 @@ class FavManager(commands.Cog):
     async def list_(
             self, inter: disnake.ApplicationCommandInteraction,
             hidden: bool = commands.Param(
-                name="Ocultar",
+                name="ocultar",
                 description="Apenas você pode ver a lista de favoritos.",
                 default=False)
     ):
