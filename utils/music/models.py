@@ -5,7 +5,7 @@ import wavelink
 from urllib import parse
 from .converters import fix_characters, time_format, get_button_style
 from .filters import AudioFilter
-from .interactions import PlayerInteractions, send_idle_embed
+from .interactions import send_idle_embed
 from .spotify import SpotifyTrack
 import traceback
 from collections import deque
@@ -163,38 +163,32 @@ class LavalinkPlayer(wavelink.Player):
 
         self.bot.loop.create_task(self.process_rpc(self.guild.me.voice.channel))
 
-        self.view = PlayerInteractions(self.bot)
-
-        controls = {
-            "⏮️": ("back", "Voltar p/ música anterior"),
-            "🛑": ("stop", "Parar o player"),
-        }
-
-        for button, control in controls.items():
-
-            self.view.add_item(
-                disnake.ui.Button(
-                    emoji=button,
-                    custom_id=f"musicplayer_{control[0]}",
-                    style=disnake.ButtonStyle.grey,
-                    label=control[1]
-                )
-            )
+        components = [
+            disnake.ui.Button(
+                emoji=button[0],
+                custom_id=f"musicplayer_{button[1]}",
+                style=disnake.ButtonStyle.grey,
+                label=button[2]
+            ) for button in [
+                ["⏮️", "back", "Voltar p/ música anterior"],
+                ["🛑", "stop", "Parar o player"]
+            ]
+        ]
 
         embed = disnake.Embed(
             description=f"**Não há músicas na fila. Adicione uma música ou use um dos botões abaixo\n\n"
-                        f"[O Player será desligado em: {time_format(self.idle_timeout * 1000)}]**",
+                        f"[O Player será desligado em: {time_format(self.idle_timeout * 1000, use_names=True)}]**",
             color=self.bot.get_color(self.guild.me)
         )
 
         if self.has_thread or self.static or self.text_channel.last_message_id == self.message.id:
-            await self.message.edit(embed=embed, content=None, view=self.view)
+            await self.message.edit(embed=embed, content=None, components=components)
         else:
             try:
                 await self.message.delete()
             except:
                 pass
-            self.message = await self.text_channel.send(embed=embed, view=self.view)
+            self.message = await self.text_channel.send(embed=embed, components=components)
 
         await asyncio.sleep(self.idle_timeout)
 
@@ -231,12 +225,7 @@ class LavalinkPlayer(wavelink.Player):
         if not self.message_updater_task:
             self.message_updater_task = self.bot.loop.create_task(self.message_updater())
 
-        try:
-            self.view.stop()
-        except:
-            pass
-
-        self.view = PlayerInteractions(self.bot)
+        components = []
 
         controls = {
             "⏯️": ("playpause", get_button_style(self.paused),),
@@ -263,19 +252,19 @@ class LavalinkPlayer(wavelink.Player):
                 style = control[1]
             except IndexError:
                 style = disnake.ButtonStyle.grey
-            self.view.add_item(disnake.ui.Button(emoji=button, custom_id=f"musicplayer_{control[0]}", style=style))
+            components.append(disnake.ui.Button(emoji=button, custom_id=f"musicplayer_{control[0]}", style=style))
 
         if self.message and (self.has_thread or self.static or not force or self.is_last_message()):
             try:
                 if interaction and not interaction.response.is_done():
-                    await interaction.response.edit_message(view=self.view, **data)
+                    await interaction.response.edit_message(components=components, **data)
                 else:
                     try:
                         await interaction.response.defer()
                     except:
                         pass
                     try:
-                        await self.message.edit(view=self.view, **data)
+                        await self.message.edit(components=components, **data)
                     except:
                         if not self.bot.get_channel(self.text_channel.id):
                             await self.destroy(force=True)  # canal não existe mais no servidor...
@@ -288,7 +277,7 @@ class LavalinkPlayer(wavelink.Player):
 
         self.last_data = data
 
-        self.message = await self.text_channel.send(view=self.view, **data)
+        self.message = await self.text_channel.send(components=components, **data)
 
     async def set_pause(self, pause: bool) -> None:
 

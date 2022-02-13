@@ -22,7 +22,7 @@ from utils.music.converters import time_format, fix_characters, string_to_second
     YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist, \
     node_suggestions, fav_add_autocomplete
 from utils.music.interactions import VolumeInteraction, QueueInteraction, send_message, SongSelect, SelectInteraction, \
-    send_idle_embed
+    send_idle_embed, check_cmd
 
 PlayOpts = commands.option_enum(
     {
@@ -1271,6 +1271,153 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 await player.connect(player.channel_id)
             except:
                 traceback.print_exc()
+
+
+    @commands.Cog.listener("on_button_click")
+    async def player_controller(self, interaction: disnake.MessageInteraction):
+
+        player: LavalinkPlayer = self.bot.music.players.get(interaction.guild.id)
+
+        if not player or interaction.message != player.message:
+            return
+
+        if player.interaction_cooldown:
+            await interaction.response.send_message("O player está em cooldown, tente novamente em instantes.",
+                                                    ephemeral=True)
+            return
+
+        vc = self.bot.get_channel(player.channel_id)
+
+        control = interaction.data.custom_id[12:]
+
+        kwargs = {}
+
+        if control == "help":
+            embed = disnake.Embed(
+                description="📘 **IFORMAÇÕES SOBRE OS BOTÕES** 📘\n\n"
+                            "⏯️ `= Pausar/Retomar a música.`\n"
+                            "⏮️ `= Voltar para a música tocada anteriormente.`\n"
+                            "⏭️ `= Pular para a próxima música.`\n"
+                            "🔀 `= Misturar as músicas da fila.`\n"
+                            "🎶 `= Adicionar música.`\n"
+                            # "🇳 `= Ativar/Desativar o efeito Nightcore`\n"
+                            "⏹️ `= Parar o player e me desconectar do canal.`\n"
+                            "🔊 `= Ajustar volume.`\n"
+                            "🔁 `= Ativar/Desativar repetição.`\n"
+                            "📑 `= Exibir a fila de música.`\n",
+                color=self.bot.get_color(interaction.guild.me)
+            )
+
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
+
+        subcmd = None
+
+        if control == "add_song":
+
+            await interaction.response.send_modal(
+                title="Adicionar música",
+                custom_id="add_song",
+                components=[
+                    disnake.ui.TextInput(
+                        style=disnake.TextInputStyle.short,
+                        label="Nome/link da música.",
+                        placeholder="Nome ou link do youtube/spotify/soundcloud etc.",
+                        custom_id="song_input",
+                        max_length=90,
+                    )
+                ],
+            )
+
+            try:
+
+                modal_inter: disnake.ModalInteraction = await self.bot.wait_for(
+                    "modal_submit", check=lambda i: i.author == interaction.author and i.custom_id == "add_song"
+                )
+
+                query = modal_inter.text_values["song_input"]
+
+                control = "play"
+
+                kwargs.update(
+                    {
+                        "query": query,
+                        "position": 0,
+                        "options": False,
+                        "manual_selection": False,
+                        "source": "ytsearch",
+                        "repeat_amount": 0,
+                        "hide_playlist": False,
+                        "server": None
+                    }
+                )
+
+                # TODO: Ver um método melhor de setar o interaction.player (ModalInteraction não dá pra setar)...
+                interaction.token = modal_inter.token
+                interaction.id = modal_inter.id
+                interaction.response = modal_inter.response
+
+            except asyncio.TimeoutError:
+                return
+
+        elif interaction.user not in vc.members:
+            embed = disnake.Embed(
+                description=f"Você deve estar no canal <#{vc.id}> para usar os botões do player.",
+                color=disnake.Colour.red()
+            )
+
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
+
+        elif control == "volume":
+            kwargs = {"value": None}
+
+        elif control == "queue":
+            subcmd = "show"
+
+        elif control == "shuffle":
+            subcmd = "shuffle"
+            control = "queue"
+
+        elif control == "seek":
+            kwargs = {"position": None}
+
+        elif control == "playpause":
+            control = "pause" if not player.paused else "resume"
+
+        elif control == "loop_mode":
+
+            if player.loop == "current":
+                kwargs['mode'] = 'queue'
+            elif player.loop == "queue":
+                kwargs['mode'] = 'off'
+            else:
+                kwargs['mode'] = 'current'
+
+        cmd = self.bot.get_slash_command(control)
+
+        if not cmd:
+            await interaction.response.send_message(f"comando {control} não encontrado/implementado.", ephemeral=True)
+            return
+
+        interaction.player = player
+
+        try:
+
+            await check_cmd(cmd, interaction)
+
+            if subcmd:
+                cmd = cmd.children.get(subcmd)
+                await check_cmd(cmd, interaction)
+
+            await cmd(interaction, **kwargs)
+
+            player.interaction_cooldown = True
+            await asyncio.sleep(1)
+            player.interaction_cooldown = False
+
+        except Exception as e:
+            self.bot.dispatch('slash_command_error', interaction, e)
 
 
     @commands.Cog.listener("on_message")
