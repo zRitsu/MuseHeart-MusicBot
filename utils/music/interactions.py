@@ -126,41 +126,6 @@ class QueueInteraction(disnake.ui.View):
         await interaction.response.edit_message(embed=self.embed)
 
 
-class SongSelect(disnake.ui.View):
-
-    def __init__(self, items, bot: BotCore):
-        super().__init__(timeout=30)
-        self.tracks = items
-        self.message = None
-        self.track = None
-        self.bot = bot
-
-        tracks = []
-
-        for n, t in enumerate(items[:25]):
-            tracks.append(disnake.SelectOption(label=t.title, value=str(n), description=f"{t.author} [{time_format(t.duration)}]"))
-
-        select = disnake.ui.Select(placeholder='Resultados:', options=tracks)
-        select.callback = self.callback
-        self.add_item(select)
-
-    async def on_timeout(self) -> None:
-        await self.message.edit(content="Tempo esgotado!", embed=None, view=None)
-
-    async def callback(self, interaction: disnake.Interaction):
-        self.track = self.tracks[int(interaction.data.values[0])]
-
-        embed = disnake.Embed(
-            description=f"> 🎵 **┃ Selecionado:** [`{self.track.title}`]({self.track.uri})\n" \
-                        f"> 💠 **┃ Uploader:** `{self.track.author}`\n" \
-                        f"> ✋ **┃ Pedido por:** {interaction.author.mention}\n" \
-                        f"> ⌛ **┃ Duração:** `{time_format(self.track.duration) if not self.track.is_stream else '🔴 Livestream'}` ",
-            color=self.bot.get_color(interaction.guild.me)
-        ).set_thumbnail(self.track.thumb)
-        await interaction.response.edit_message(embed=embed, view=None)
-        self.stop()
-
-
 class SelectInteraction(disnake.ui.View):
 
     def __init__(self, user: disnake.Member, opts: List[disnake.SelectOption], *, timeout=180):

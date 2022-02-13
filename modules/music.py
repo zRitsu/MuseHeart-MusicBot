@@ -21,7 +21,7 @@ from utils.music.models import LavalinkPlayer, LavalinkTrack
 from utils.music.converters import time_format, fix_characters, string_to_seconds, get_track_index, URL_REG, \
     YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist, \
     node_suggestions, fav_add_autocomplete
-from utils.music.interactions import VolumeInteraction, QueueInteraction, SongSelect, SelectInteraction
+from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
 from utils.others import check_cmd, send_message, send_idle_embed
 
 PlayOpts = commands.option_enum(
@@ -338,14 +338,35 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             if manual_selection and len(tracks) > 1:
 
-                embed.description=f"**Selecione uma música abaixo**"
-                view = SongSelect(tracks, self.bot)
-                view.message = await inter.edit_original_message(embed=embed, view=view)
-                await view.wait()
-                if not view.track:
-                    return
+                embed.description = f"**Selecione uma música abaixo:**"
 
-                track = view.track
+                components = [
+                    disnake.ui.Select(
+                        placeholder='Resultados:',
+                        custom_id="track_selection",
+                        options=[
+                            disnake.SelectOption(
+                                label=t.title,
+                                value=f"track_select_{n}",
+                                description=f"{t.author} [{time_format(t.duration)}]")
+                            for n, t in enumerate(tracks[:25])
+                        ]
+                    )
+                ]
+
+                await inter.edit_original_message(embed=embed, components=components)
+
+                try:
+                    select_interaction: disnake.MessageInteraction = await self.bot.wait_for(
+                        "dropdown",
+                        timeout=45,
+                        check=lambda i: i.author == inter.author and i.data.custom_id == "track_selection"
+                    )
+                except asyncio.TimeoutError:
+                    raise GenericError("Tempo esgotado!")
+
+                track = tracks[int(select_interaction.data.values[0][13:])]
+
 
             else:
                 track = tracks[0]
@@ -404,8 +425,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             embed.set_thumbnail(url=tracks.tracks[0].thumb)
             embed.description = f"`{len(tracks.tracks)} música(s)`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
 
-        if not manual_selection:
-            await inter.edit_original_message(embed=embed, view=None)
+        await inter.edit_original_message(embed=embed, view=None)
 
         if not player.is_connected:
             inter.player = player
