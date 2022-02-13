@@ -117,7 +117,6 @@ class LavalinkPlayer(wavelink.Player):
         self.exiting: bool = False
         self.skin = self.cog.bot.player_skins[kwargs.pop("skin", self.cog.bot.default_skin)]
         self.nonstop: bool = False
-        self.ws_client = None
         self.update_player: bool = True
         self.message_updater_task: Optional[asyncio.Task] = None
 

@@ -196,45 +196,44 @@ class WSClient:
 
                 if not self.is_connected:
                     await self.connect()
-                    return
 
-                message = await self.connection.receive()
+            except Exception as e:
+                if isinstance(e, aiohttp.WSServerHandshakeError):
+                    print(f"{self.bot.user} - Servidor offline, tentando conectar novamente ao server RPC em {int(self.backoff)} segundos.")
+                else:
+                    print(f"{self.bot.user} - Reconectando ao server RPC em {int(self.backoff)} segundos.")
 
-                if not message.data:
-                    await asyncio.sleep(self.backoff)
-                    self.backoff *= 1.10
-                    continue
-
-                data = json.loads(message.data)
-
-                users: list = data.get("user_ids")
-
-                if not users:
-                    continue
-
-                op = data.get("op")
-
-                if op == "rpc_update":
-
-                    for player in self.bot.music.players.values():
-                        vc: disnake.VoiceChannel = player.bot.get_channel(player.channel_id)
-                        vc_user_ids = [m.id for m in vc.members if m.id in users]
-                        if vc_user_ids:
-                            self.bot.loop.create_task(player.process_rpc(vc))
-                            for i in vc_user_ids:
-                                users.remove(i)
-
+                self.ready = False
+                await asyncio.sleep(self.backoff)
+                self.backoff *= 2.5
                 continue
 
-            except aiohttp.WSServerHandshakeError:
-                print(f"{self.bot.user} - Servidor offline, tentando conectar novamente ao server RPC em {int(self.backoff)} segundos.")
-            except Exception:
-                print(f"{self.bot.user} - Reconectando ao server RPC em {int(self.backoff)} segundos.")
+            message = await self.connection.receive()
 
-        self.ready = False
-        await asyncio.sleep(self.backoff)
-        self.backoff *= 2.5
-        self.bot.loop.create_task(self.connect())
+            if message.type is aiohttp.WSMsgType.CLOSED:
+                print(f"{self.bot.user} - RPC Websocket Closed: {message.extra}")
+                self.ready = False
+                await asyncio.sleep(self.backoff)
+                continue
+
+            data = json.loads(message.data)
+
+            users: list = data.get("user_ids")
+
+            if not users:
+                continue
+
+            op = data.get("op")
+
+            if op == "rpc_update":
+
+                for player in self.bot.music.players.values():
+                    vc: disnake.VoiceChannel = player.bot.get_channel(player.channel_id)
+                    vc_user_ids = [m.id for m in vc.members if m.id in users]
+                    if vc_user_ids:
+                        self.bot.loop.create_task(player.process_rpc(vc))
+                        for i in vc_user_ids:
+                            users.remove(i)
 
 
 def run_app(bots:list = None, ws_url = "http://localhost:8080/ws"):
