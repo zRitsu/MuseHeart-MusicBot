@@ -12,15 +12,15 @@ bools = {
 
 def load_config():
 
-    #############################################################################################
-    #####
-    #####  Nota:
-    #####  As configs abaixo serve apenas como modelo, caso esteja na repl.it/heroku etc
-    #####  altere elas criando uma secret/env colocando o value/key conforme os itens abaixo,
-    #####  caso seja outra host, use o arquivo .env ou config.json e modifique de acordo com
-    #####  os valores exibidos no modelo abaixo.
-    #####
-    #############################################################################################
+    ###############################################################################################
+    #####                                                                                     #####
+    #####  Nota:                                                                              #####
+    #####  As configs abaixo serve apenas como modelo, caso esteja na repl.it/heroku etc      #####
+    #####  altere elas criando uma secret/env colocando o value/key conforme os itens abaixo, #####
+    #####  caso seja outra host, use o arquivo .env ou config.json e modifique de acordo com  #####
+    #####  os valores exibidos no modelo abaixo.                                              #####
+    #####                                                                                     #####
+    ###############################################################################################
 
     CONFIGS = {
         "VOTE_SKIP_AMOUNT": 3, # quantidade de votos necessários para o comando de voteskip.
@@ -42,18 +42,18 @@ def load_config():
         "SOURCE_REPO": "https://github.com/zRitsu/disnake-LL-music-bot.git", # Link do github pra ser usado em comandos como o de update.
         "HIDE_SOURCE_OWNER": False,  # Ocultar link do meu repositório no comando /about. Caso altere isso, por favor considere de alguma forma fornecer crédito. :(
 
-        #########################################################################################
-        ### Bot presences:                                                                    ###
-        ### Status pra exibir no bot, caso queira mais de 1 pra tipo específico separe com || ###
-        ###                                                                                   ###
-        ### Placeholders:                                                                     ###
-        ### {users} -> quantidade de usuários.                                                ###
-        ### {guilds} -> quantidade de servidores.                                             ###
-        ### {playing} -> quantidade de players ativos.                                        ###
-        ### {uptime} -> uptime do bot.                                                        ###
-        #########################################################################################
+        #############################################################################################
+        ##### Bot presences:                                                                    #####
+        ##### Status pra exibir no bot, caso queira mais de 1 pra tipo específico separe com || #####
+        #####                                                                                   #####
+        ##### Placeholders:                                                                     #####
+        ##### {users} -> quantidade de usuários.                                                #####
+        ##### {guilds} -> quantidade de servidores.                                             #####
+        ##### {playing} -> quantidade de players ativos.                                        #####
+        ##### {uptime} -> uptime do bot.                                                        #####
+        #############################################################################################
 
-        "LISTENING_PRESENCES": "Músicas",
+        "LISTENING_PRESENCES": "Músicas || /play",
         "WATCHING_PRESENCES": "{users} usuário(s)",
         "PLAYING_PRESENCES": "Em {guilds} servidor(es) || Estou online há: {uptime}",
 
