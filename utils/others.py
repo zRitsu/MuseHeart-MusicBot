@@ -68,9 +68,11 @@ async def send_message(
 
 async def send_idle_embed(target: Union[disnake.Message, disnake.TextChannel, disnake.Thread], text="", *, bot: BotCore):
 
-    embed = disnake.Embed(description="**Entre em um canal de voz e peça uma música neste canal ou na conversa abaixo**\n\n"
+    embed = disnake.Embed(description="**Entre em um canal de voz e peça uma música aqui no canal ou na conversa abaixo "
+                                      "(ou clique no botão abaixo)**\n\n"
                                       "**FORMATOS SUPORTADOS (nome, link):**"
-                                      " ```ini\n[Youtube, Soundcloud, Spotify, Twitch]```\n", color=bot.get_color(target.guild.me))
+                                      " ```ini\n[Youtube, Soundcloud, Spotify, Twitch]```\n",
+                          color=bot.get_color(target.guild.me))
 
     if text:
         embed.description += f"**ÚLTIMA AÇÃO:** {text.replace('**', '')}\n"
@@ -81,13 +83,22 @@ async def send_idle_embed(target: Union[disnake.Message, disnake.TextChannel, di
         avatar = target.guild.me.default_avatar.url
     embed.set_thumbnail(avatar)
 
+    components = [
+        disnake.ui.Button(
+            emoji="🎶",
+            custom_id=f"musicplayer_add_song",
+            style=disnake.ButtonStyle.grey,
+            label="Adicionar música."
+        )
+    ]
+
     if isinstance(target, disnake.Message):
         if target.author == target.guild.me:
-            await target.edit(embed=embed, content=None, view=None)
+            await target.edit(embed=embed, content=None, components=components)
             message = target
         else:
-            message = await target.channel.send(embed=embed)
+            message = await target.channel.send(embed=embed, components=components)
     else:
-        message = await target.send(embed=embed)
+        message = await target.send(embed=embed, components=components)
 
     return message
