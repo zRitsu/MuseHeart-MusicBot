@@ -35,12 +35,10 @@ def load(player: LavalinkPlayer) -> dict:
         duration = "```ini\n🔴 [Livestream]```"
     else:
 
-        progress = ProgressBar(player.position, player.current.duration)
+        progress = ProgressBar(player.position, player.current.duration, bar_count=20 if  player.static else 10)
 
         duration = f"```ini\n[{time_format(player.position)}] {('='*progress.start)}🔴️{'='*progress.end} " \
                    f"[{time_format(player.current.duration)}]```\n"
-
-        #duration = f"⏰ **⠂Duração:** `{time_format(player.current.duration)}`"
 
     vc_txt = ""
 

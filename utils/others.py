@@ -16,9 +16,10 @@ class ProgressBar:
             self,
             position: Union[int, float],
             total: Union[int, float],
+            bar_count: int = 10
     ):
-        self.start = int(100 * position / total / 10)
-        self.end = 9 - self.start
+        self.start = int(bar_count * (position / total))
+        self.end = int(bar_count - self.start) - 1
 
 
 def sync_message(bot: BotCore):
