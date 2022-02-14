@@ -360,7 +360,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     select_interaction: disnake.MessageInteraction = await self.bot.wait_for(
                         "dropdown",
                         timeout=45,
-                        check=lambda i: i.author == inter.author and i.data.custom_id == "track_selection"
+                        check=lambda i: i.author == inter.author and i.id == inter.id
                     )
                 except asyncio.TimeoutError:
                     raise GenericError("Tempo esgotado!")
@@ -1352,7 +1352,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             try:
 
                 modal_inter: disnake.ModalInteraction = await self.bot.wait_for(
-                    "modal_submit", check=lambda i: i.author == interaction.author and i.custom_id == "add_song"
+                    "modal_submit", check=lambda i: i.author == interaction.author and i.id == interaction.id
                 )
 
                 query = modal_inter.text_values["song_input"]
