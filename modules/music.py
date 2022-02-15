@@ -191,7 +191,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         except:
             pass
 
-        if inter.application_command == self.connect:
+        if isinstance(inter, disnake.ApplicationCommandInteraction) and inter.application_command == self.connect:
 
             perms = channel.permissions_for(inter.guild.me)
 
@@ -1296,40 +1296,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.Cog.listener("on_button_click")
     async def player_controller(self, interaction: disnake.MessageInteraction):
 
-        player: LavalinkPlayer = self.bot.music.players.get(interaction.guild.id)
-
-        if not player or interaction.message != player.message:
-            return
-
-        if player.interaction_cooldown:
-            await interaction.response.send_message("O player está em cooldown, tente novamente em instantes.",
-                                                    ephemeral=True)
-            return
-
-        vc = self.bot.get_channel(player.channel_id)
-
-        control = interaction.data.custom_id[12:]
-
         kwargs = {}
 
-        if control == "help":
-            embed = disnake.Embed(
-                description="📘 **IFORMAÇÕES SOBRE OS BOTÕES** 📘\n\n"
-                            "⏯️ `= Pausar/Retomar a música.`\n"
-                            "⏮️ `= Voltar para a música tocada anteriormente.`\n"
-                            "⏭️ `= Pular para a próxima música.`\n"
-                            "🔀 `= Misturar as músicas da fila.`\n"
-                            "🎶 `= Adicionar música.`\n"
-                            # "🇳 `= Ativar/Desativar o efeito Nightcore`\n"
-                            "⏹️ `= Parar o player e me desconectar do canal.`\n"
-                            "🔊 `= Ajustar volume.`\n"
-                            "🔁 `= Ativar/Desativar repetição.`\n"
-                            "📑 `= Exibir a fila de música.`\n",
-                color=self.bot.get_color(interaction.guild.me)
-            )
-
-            await interaction.response.send_message(embed=embed, ephemeral=True)
+        if not interaction.data.custom_id.startswith("musicplayer_"):
             return
+
+        control = interaction.data.custom_id[12:]
 
         subcmd = None
 
@@ -1377,42 +1349,77 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 interaction.id = modal_inter.id
                 interaction.response = modal_inter.response
 
+                player: LavalinkPlayer = self.bot.music.players.get(interaction.guild.id)
+
             except asyncio.TimeoutError:
                 return
 
-        elif interaction.user not in vc.members:
-            embed = disnake.Embed(
-                description=f"Você deve estar no canal <#{vc.id}> para usar os botões do player.",
-                color=disnake.Colour.red()
-            )
+        else:
 
-            await interaction.response.send_message(embed=embed, ephemeral=True)
-            return
+            player: LavalinkPlayer = self.bot.music.players.get(interaction.guild.id)
 
-        elif control == "volume":
-            kwargs = {"value": None}
+            if not player or interaction.message != player.message:
+                return
 
-        elif control == "queue":
-            subcmd = "show"
+            if player.interaction_cooldown:
+                await interaction.response.send_message("O player está em cooldown, tente novamente em instantes.",
+                                                        ephemeral=True)
+                return
 
-        elif control == "shuffle":
-            subcmd = "shuffle"
-            control = "queue"
+            vc = self.bot.get_channel(player.channel_id)
 
-        elif control == "seek":
-            kwargs = {"position": None}
+            if control == "help":
+                embed = disnake.Embed(
+                    description="📘 **IFORMAÇÕES SOBRE OS BOTÕES** 📘\n\n"
+                                "⏯️ `= Pausar/Retomar a música.`\n"
+                                "⏮️ `= Voltar para a música tocada anteriormente.`\n"
+                                "⏭️ `= Pular para a próxima música.`\n"
+                                "🔀 `= Misturar as músicas da fila.`\n"
+                                "🎶 `= Adicionar música.`\n"
+                                # "🇳 `= Ativar/Desativar o efeito Nightcore`\n"
+                                "⏹️ `= Parar o player e me desconectar do canal.`\n"
+                                "🔊 `= Ajustar volume.`\n"
+                                "🔁 `= Ativar/Desativar repetição.`\n"
+                                "📑 `= Exibir a fila de música.`\n",
+                    color=self.bot.get_color(interaction.guild.me)
+                )
 
-        elif control == "playpause":
-            control = "pause" if not player.paused else "resume"
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+                return
 
-        elif control == "loop_mode":
+            if interaction.user not in vc.members:
+                embed = disnake.Embed(
+                    description=f"Você deve estar no canal <#{vc.id}> para usar os botões do player.",
+                    color=disnake.Colour.red()
+                )
 
-            if player.loop == "current":
-                kwargs['mode'] = 'queue'
-            elif player.loop == "queue":
-                kwargs['mode'] = 'off'
-            else:
-                kwargs['mode'] = 'current'
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+                return
+
+            elif control == "volume":
+                kwargs = {"value": None}
+
+            elif control == "queue":
+                subcmd = "show"
+
+            elif control == "shuffle":
+                subcmd = "shuffle"
+                control = "queue"
+
+            elif control == "seek":
+                kwargs = {"position": None}
+
+            elif control == "playpause":
+                control = "pause" if not player.paused else "resume"
+
+            elif control == "loop_mode":
+
+                if player.loop == "current":
+                    kwargs['mode'] = 'queue'
+                elif player.loop == "queue":
+                    kwargs['mode'] = 'off'
+                else:
+                    kwargs['mode'] = 'current'
 
         cmd = self.bot.get_slash_command(control)
 
@@ -1432,9 +1439,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             await cmd(interaction, **kwargs)
 
-            player.interaction_cooldown = True
-            await asyncio.sleep(1)
-            player.interaction_cooldown = False
+            try:
+                player.interaction_cooldown = True
+                await asyncio.sleep(1)
+                player.interaction_cooldown = False
+            except AttributeError:
+                pass
 
         except Exception as e:
             self.bot.dispatch('slash_command_error', interaction, e)
