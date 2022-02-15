@@ -1321,7 +1321,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         subcmd = None
 
         try:
-            await self.song_request_concurrency.acquire(interaction)
+            await self.player_interaction_concurrency.acquire(interaction)
         except:
             await send_message(interaction, "Você já tem uma interação em aberto...")
             return
@@ -1513,8 +1513,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 pass
 
         except Exception as e:
-            await self.player_interaction_concurrency.release(interaction)
             self.bot.dispatch('slash_command_error', interaction, e)
+
+        print("aaaaa")
+        await self.player_interaction_concurrency.release(interaction)
 
 
     @commands.Cog.listener("on_message")
