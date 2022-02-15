@@ -824,7 +824,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 description="Nome da música completo.",
                 autocomplete=queue_tracks
             ),
-            bump: str = commands.Param(
+            bump_only: str = commands.Param(
                 choices=["sim", "não"],
                 description="Apenas tocar a música imediatamente (sem rotacionar a flia)",
                 default="sim"
@@ -850,7 +850,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if player.loop == "current":
             player.loop = False
 
-        if bump == "sim":
+        if bump_only == "sim":
             del player.queue[index]
             player.queue.appendleft(track)
 
