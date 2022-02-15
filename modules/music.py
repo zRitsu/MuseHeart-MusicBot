@@ -1367,6 +1367,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 if not opts:
                     await send_message(interaction, "**Você não possui favoritos...\n"
                                                     "Adicione um usando o comando /fav add**")
+                    await self.player_interaction_concurrency.release(interaction)
+                    return
 
                 components = [
                     disnake.ui.Select(
