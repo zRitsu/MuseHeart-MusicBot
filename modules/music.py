@@ -1377,6 +1377,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                 await interaction.send(
                     embed=disnake.Embed(
+                        color=self.bot.get_color(interaction.guild.me),
                         description="**Selecione um favorito:**"
                     ),
                     components=components,
