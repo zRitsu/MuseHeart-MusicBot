@@ -20,7 +20,7 @@ class ErrorHandler(commands.Cog):
         embed.description = parse_error(inter, error) or "**Ocorreu um erro no comando:**\n" \
                                 f"```py\n{repr(error)[:2020].replace(self.bot.http.token, 'mytoken')}```"
 
-        await send_message(inter, embed=embed, clear_components=True)
+        await send_message(inter, embed=embed)
 
 
     @commands.Cog.listener("on_command_error")
