@@ -1320,12 +1320,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         subcmd = None
 
-        try:
-            await self.player_interaction_concurrency.acquire(interaction)
-        except:
-            await send_message(interaction, "Você já tem uma interação em aberto...")
-            return
-
         if control in ("add_song", "enqueue_fav"):
 
             if control == "add_song":
@@ -1351,7 +1345,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     )
 
                 except asyncio.TimeoutError:
-                    await self.player_interaction_concurrency.release(interaction)
                     return
 
                 query = modal_inter.text_values["song_input"]
@@ -1361,6 +1354,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 interaction.response = modal_inter.response
 
             else: # enqueue_fav
+
+                try:
+                    await self.player_interaction_concurrency.acquire(interaction)
+                except:
+                    await send_message(interaction, "Você já tem uma interação em aberto...")
+                    return
 
                 opts = [disnake.SelectOption(label=f, value=f) for f in (await fav_list(interaction, ""))]
 
@@ -1403,6 +1402,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                 query = f"> fav: {select_interaction.data.values[0]}"
 
+                await self.player_interaction_concurrency.release(interaction)
+
             player: LavalinkPlayer = self.bot.music.players.get(interaction.guild.id)
 
             control = "play"
@@ -1430,7 +1431,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             if player.interaction_cooldown:
                 await interaction.response.send_message("O player está em cooldown, tente novamente em instantes.",
                                                         ephemeral=True)
-                await self.player_interaction_concurrency.release(interaction)
                 return
 
             vc = self.bot.get_channel(player.channel_id)
@@ -1452,7 +1452,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 )
 
                 await interaction.response.send_message(embed=embed, ephemeral=True)
-                await self.player_interaction_concurrency.release(interaction)
                 return
 
             if interaction.user not in vc.members:
@@ -1493,7 +1492,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if not cmd:
             await interaction.response.send_message(f"comando {control} não encontrado/implementado.", ephemeral=True)
-            await self.player_interaction_concurrency.release(interaction)
             return
 
         interaction.player = player
@@ -1517,8 +1515,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         except Exception as e:
             self.bot.dispatch('slash_command_error', interaction, e)
-
-        await self.player_interaction_concurrency.release(interaction)
 
 
     @commands.Cog.listener("on_message")
