@@ -1515,7 +1515,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         except Exception as e:
             self.bot.dispatch('slash_command_error', interaction, e)
 
-        print("aaaaa")
         await self.player_interaction_concurrency.release(interaction)
 
 
