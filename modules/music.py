@@ -827,7 +827,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             bump_only: str = commands.Param(
                 choices=["sim", "não"],
                 description="Apenas tocar a música imediatamente (sem rotacionar a flia)",
-                default="sim"
+                default="não"
             )
     ):
 
