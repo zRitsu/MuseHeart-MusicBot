@@ -819,7 +819,16 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def skipto(
             self,
             inter: disnake.ApplicationCommandInteraction, *,
-            query: str = commands.Param(name="nome", description="Nome da música completo.", autocomplete=queue_tracks)
+            query: str = commands.Param(
+                name="nome",
+                description="Nome da música completo.",
+                autocomplete=queue_tracks
+            ),
+            bump: str = commands.Param(
+                choices=["sim", "não"],
+                description="Apenas tocar a música imediatamente (sem rotacionar a flia)",
+                default="sim"
+            )
     ):
 
         embed = disnake.Embed(color=disnake.Colour.red())
@@ -841,7 +850,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if player.loop == "current":
             player.loop = False
 
-        if index > 0:
+        if bump == "sim":
+            del player.queue[index]
+            player.queue.appendleft(track)
+
+        elif index > 0:
             player.queue.rotate(0 - (index))
 
         embed.colour = disnake.Colour.green()
