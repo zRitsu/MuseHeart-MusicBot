@@ -1349,7 +1349,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                         "query": query,
                         "position": 0,
                         "options": False,
-                        "manual_selection": False,
+                        "manual_selection": True,
                         "source": "ytsearch",
                         "repeat_amount": 0,
                         "hide_playlist": False,
