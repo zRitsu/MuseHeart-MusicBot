@@ -59,12 +59,15 @@ async def send_message(
         text=None,
         *,
         embed: disnake.Embed = None,
+        clear_components = False
 ):
 
+    kwargs = {} if not clear_components else {"components": None}
+
     if inter.response.is_done():
-        await inter.edit_original_message(content=text, embed=embed)
+        await inter.edit_original_message(content=text, embed=embed, **kwargs)
     else:
-        await inter.send(text, embed=embed, ephemeral=True)
+        await inter.send(text, embed=embed, ephemeral=True, **kwargs)
 
 
 async def send_idle_embed(target: Union[disnake.Message, disnake.TextChannel, disnake.Thread], text="", *, bot: BotCore):
@@ -87,9 +90,15 @@ async def send_idle_embed(target: Union[disnake.Message, disnake.TextChannel, di
     components = [
         disnake.ui.Button(
             emoji="🎶",
-            custom_id=f"musicplayer_add_song",
+            custom_id="musicplayer_add_song",
             style=disnake.ButtonStyle.grey,
             label="Adicionar música."
+        ),
+        disnake.ui.Button(
+            emoji="💗",
+            custom_id="musicplayer_enqueue_fav",
+            style=disnake.ButtonStyle.grey,
+            label="Adicionar/Tocar favorito."
         )
     ]
 

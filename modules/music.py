@@ -20,7 +20,7 @@ from utils.music.checks import check_voice, user_cooldown, has_player, has_sourc
 from utils.music.models import LavalinkPlayer, LavalinkTrack
 from utils.music.converters import time_format, fix_characters, string_to_seconds, get_track_index, URL_REG, \
     YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist, \
-    node_suggestions, fav_add_autocomplete
+    node_suggestions, fav_add_autocomplete, fav_list
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
 from utils.others import check_cmd, send_message, send_idle_embed
 
@@ -1318,54 +1318,93 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         subcmd = None
 
-        if control == "add_song":
+        if control in ("add_song", "enqueue_fav"):
 
-            await interaction.response.send_modal(
-                title="Adicionar música",
-                custom_id=f"add_song_{interaction.id}",
-                components=[
-                    disnake.ui.TextInput(
-                        style=disnake.TextInputStyle.short,
-                        label="Nome/link da música.",
-                        placeholder="Nome ou link do youtube/spotify/soundcloud etc.",
-                        custom_id="song_input",
-                        max_length=90,
-                    )
-                ],
-            )
+            if control == "add_song":
 
-            try:
-
-                modal_inter: disnake.ModalInteraction = await self.bot.wait_for(
-                    "modal_submit", check=lambda i: i.author == interaction.author and i.data.custom_id == f"add_song_{interaction.id}"
+                await interaction.response.send_modal(
+                    title="Adicionar música",
+                    custom_id=f"add_song_{interaction.id}",
+                    components=[
+                        disnake.ui.TextInput(
+                            style=disnake.TextInputStyle.short,
+                            label="Nome/link da música.",
+                            placeholder="Nome ou link do youtube/spotify/soundcloud etc.",
+                            custom_id="song_input",
+                            max_length=90,
+                        )
+                    ],
                 )
+
+                try:
+
+                    modal_inter: disnake.ModalInteraction = await self.bot.wait_for(
+                        "modal_submit", check=lambda i: i.author == interaction.author and i.data.custom_id == f"add_song_{interaction.id}"
+                    )
+
+                except asyncio.TimeoutError:
+                    return
 
                 query = modal_inter.text_values["song_input"]
 
-                control = "play"
-
-                kwargs.update(
-                    {
-                        "query": query,
-                        "position": 0,
-                        "options": False,
-                        "manual_selection": True,
-                        "source": "ytsearch",
-                        "repeat_amount": 0,
-                        "hide_playlist": False,
-                        "server": None
-                    }
-                )
-
-                # TODO: Ver um método melhor de setar o interaction.player (ModalInteraction não dá pra setar)...
                 interaction.token = modal_inter.token
                 interaction.id = modal_inter.id
                 interaction.response = modal_inter.response
 
-                player: LavalinkPlayer = self.bot.music.players.get(interaction.guild.id)
+            else: # enqueue_fav
 
-            except asyncio.TimeoutError:
-                return
+                opts = [disnake.SelectOption(label=f, value=f) for f in (await fav_list(interaction, ""))]
+
+                if not opts:
+                    raise GenericError("**Você não possui favoritos...\n"
+                                       "Adicione um usando o comando /fav add**")
+
+                components = [
+                    disnake.ui.Select(
+                        custom_id=f"enqueue_fav_{interaction.id}",
+                        options=opts
+                    )
+                ]
+
+                await interaction.send(
+                    embed=disnake.Embed(
+                        description="**Selecione um favorito:**"
+                    ),
+                    components=components,
+                    ephemeral=True
+                )
+
+                try:
+                    select_interaction: disnake.MessageInteraction = await self.bot.wait_for(
+                        "dropdown",
+                        timeout=45,
+                        check=lambda i: i.author == interaction.author and i.data.custom_id == f"enqueue_fav_{interaction.id}"
+                    )
+                except asyncio.TimeoutError:
+                    raise GenericError("Tempo esgotado!")
+
+                interaction.token = select_interaction.token
+                interaction.id = select_interaction.id
+                interaction.response = select_interaction.response
+
+                query = f"> fav: {select_interaction.data.values[0]}"
+
+            player: LavalinkPlayer = self.bot.music.players.get(interaction.guild.id)
+
+            control = "play"
+
+            kwargs.update(
+                {
+                    "query": query,
+                    "position": 0,
+                    "options": False,
+                    "manual_selection": True,
+                    "source": "ytsearch",
+                    "repeat_amount": 0,
+                    "hide_playlist": False,
+                    "server": None
+                }
+            )
 
         else:
 
