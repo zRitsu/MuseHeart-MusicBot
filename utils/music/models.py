@@ -228,9 +228,6 @@ class LavalinkPlayer(wavelink.Player):
         except:
             pass
 
-        if not self.message_updater_task:
-            self.message_updater_task = self.bot.loop.create_task(self.message_updater())
-
         components = []
 
         controls = {
@@ -259,6 +256,9 @@ class LavalinkPlayer(wavelink.Player):
             except IndexError:
                 style = disnake.ButtonStyle.grey
             components.append(disnake.ui.Button(emoji=button, custom_id=f"musicplayer_{control[0]}", style=style))
+
+        if not self.message_updater_task:
+            self.message_updater_task = self.bot.loop.create_task(self.message_updater())
 
         if self.message and (self.has_thread or self.static or not force or self.is_last_message()):
             try:

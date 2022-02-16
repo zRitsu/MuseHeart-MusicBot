@@ -1966,7 +1966,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if player.locked:
             return
 
-        player.update_player = False
+        try:
+            player.message_updater_task.cancel()
+        except:
+            pass
+        player.message_updater_task = None
 
         if payload.reason == "FINISHED":
             player.command_log = ""
