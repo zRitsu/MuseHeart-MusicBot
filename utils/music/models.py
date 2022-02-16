@@ -163,23 +163,28 @@ class LavalinkPlayer(wavelink.Player):
 
         self.bot.loop.create_task(self.process_rpc(self.guild.me.voice.channel))
 
+        button_items = [
+                ["⏮️", "back", "Voltar p/ música anterior"],
+                ["🛑", "stop", "Parar o player"],
+                ["🎶", "add_song", "Adicionar música"],
+                ["💗", "enqueue_fav", "Adicionar favorito"]
+            ]
+
         components = [
             disnake.ui.Button(
                 emoji=button[0],
                 custom_id=f"musicplayer_{button[1]}",
                 style=disnake.ButtonStyle.grey,
-                label=button[2]
-            ) for button in [
-                ["⏮️", "back", "Voltar p/ música anterior"],
-                ["🛑", "stop", "Parar o player"]
-            ]
+            ) for button in button_items
         ]
 
         embed = disnake.Embed(
-            description=f"**Não há músicas na fila. Adicione uma música ou use um dos botões abaixo\n\n"
-                        f"[O Player será desligado em: {time_format(self.idle_timeout * 1000, use_names=True)}]**",
+            description=f"**Não há músicas na fila. Adicione uma música ou use um dos botões abaixo**\n\n" +
+                        "\n".join(f"{b[0]} `= {b[2]}`" for b in button_items),
             color=self.bot.get_color(self.guild.me)
         )
+
+        embed.set_footer(text=f"O Player será desligado em: {time_format(self.idle_timeout * 1000, use_names=True)}")
 
         if self.has_thread or self.static or self.text_channel.last_message_id == self.message.id:
             await self.message.edit(embed=embed, content=None, components=components)
