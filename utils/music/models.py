@@ -167,7 +167,8 @@ class LavalinkPlayer(wavelink.Player):
                 ["⏮️", "back", "Voltar p/ música anterior"],
                 ["🛑", "stop", "Parar o player"],
                 ["🎶", "add_song", "Adicionar música"],
-                ["💗", "enqueue_fav", "Adicionar favorito"]
+                ["💗", "enqueue_fav", "Adicionar favorito"],
+                ["↪️", "readd", f"Tocar a(s) música(s) novamente ({len(self.played)})"]
             ]
 
         components = [
