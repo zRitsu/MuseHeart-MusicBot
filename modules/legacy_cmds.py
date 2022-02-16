@@ -120,10 +120,12 @@ class Owner(commands.Cog):
                     commit = l.replace("Updating ", "").replace("..", "...")
                     break
 
+            data = "[" + run_command(f"git log {commit} {git_format}")[:-1].replace("'", "\"") + "]"
             try:
-                git_log = json.loads("[" + run_command(f"git log {commit} {git_format}")[:-1].replace("'", "\"") + "]")
-            except:
+                git_log = json.loads(data)
+            except Exception:
                 traceback.print_exc()
+                print("-"*30 + "\n" + data + "\n" + "-"*30)
 
         text = "`Reinicie o bot após as alterações.`"
 
