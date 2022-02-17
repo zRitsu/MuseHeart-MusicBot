@@ -88,7 +88,7 @@ def parse_error(
         error_txt = "**Não há músicas no player atualmente.**"
 
     elif isinstance(error, NoVoice):
-        error_txt = "**Você deve estar em um canal de voz para usar este comando.**"
+        error_txt = "**Você deve entrar em um canal de voz para usar este comando.**"
 
     elif isinstance(error, NoPlayer):
         error_txt = "**Não há player inicializado no servidor.**"
