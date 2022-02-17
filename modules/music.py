@@ -1324,6 +1324,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             if control in ("add_song", "enqueue_fav"):
 
+                if not interaction.user.voice:
+                    raise GenericError("**Você deve entrar em um canal de voz para usar este botão.**")
+
                 if control == "add_song":
 
                     await interaction.response.send_modal(
@@ -1356,9 +1359,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     interaction.response = modal_inter.response
 
                 else: # enqueue_fav
-
-                    if not interaction.user.voice:
-                        raise GenericError("**Você deve entrar em um canal de voz para usar este botão.**")
 
                     try:
                         await self.player_interaction_concurrency.acquire(interaction)
