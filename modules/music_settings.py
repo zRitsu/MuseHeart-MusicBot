@@ -53,7 +53,7 @@ class MusicSettings(commands.Cog):
     @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1,30), commands.BucketType.guild)
     @commands.slash_command(description=f"{desc_prefix}Criar um canal dedicado para pedir músicas e deixar player fixado.")
-    async def setupplayer(self, inter: disnake.ApplicationCommandInteraction):
+    async def setup(self, inter: disnake.ApplicationCommandInteraction):
 
         target = inter.channel.category or inter.guild
 

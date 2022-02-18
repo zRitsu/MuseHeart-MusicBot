@@ -91,7 +91,7 @@ class Misc(commands.Cog):
             color=self.bot.get_color(guild.me)
         )
 
-        if cmd:=self.bot.get_slash_command("setupplayer"):
+        if cmd:=self.bot.get_slash_command("setup"):
             embed.description += f"Se quiser, use o comando **/{cmd.name}** para criar um canal dedicado pra pedir " \
                                  "músicas sem comandos e deixar o music player fixo no canal.\n\n"
 
