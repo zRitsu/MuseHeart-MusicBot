@@ -90,6 +90,12 @@ class LavalinkPlayer(wavelink.Player):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.guild: disnake.Guild = kwargs.pop('guild')
+        self.text_channel: disnake.TextChannel = kwargs.pop('channel')
+        self.message: Optional[disnake.Message] = kwargs.pop('message', None)
+        self.static: bool = kwargs.pop('static', False)
+        self.request_channel: bool = kwargs.pop("request_channel", False)
+        self.skin = self.bot.player_skins[kwargs.pop("skin", self.bot.default_skin)]
         self.queue: deque = deque()
         self.played: deque = deque(maxlen=20)
         self.nightcore: bool = False
@@ -101,21 +107,14 @@ class LavalinkPlayer(wavelink.Player):
         self.vc: Optional[WavelinkVoiceClient] = None
         self.votes: set = set()
         self.view: Optional[disnake.ui.View] = None
-        self.guild: disnake.Guild = kwargs.pop('guild')
-        self.text_channel: disnake.TextChannel = kwargs.pop('channel')
         self.dj: set = set()
-        self.message: Optional[disnake.Message] = kwargs.pop('message', None)
-        self.static: bool = kwargs.pop('static', False)
-        self.request_channel: bool = kwargs.pop("request_channel", False)
-        self.cog = kwargs.pop('cog')
         self.filters: dict = {}
         self.idle_task: Optional[asyncio.Task] = None
         self.members_timeout_task: Optional[asyncio.Task] = None
-        self.idle_timeout = self.cog.bot.config["IDLE_TIMEOUT"]
+        self.idle_timeout = self.bot.config["IDLE_TIMEOUT"]
         self.command_log: str = ""
         self.last_data: dict = {}
         self.exiting: bool = False
-        self.skin = self.cog.bot.player_skins[kwargs.pop("skin", self.cog.bot.default_skin)]
         self.nonstop: bool = False
         self.update_player: bool = True
         self.message_updater_task: Optional[asyncio.Task] = None
