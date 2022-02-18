@@ -76,7 +76,9 @@ def load_config():
             continue
 
     for env in environ:
-        if env.lower().startswith("token_bot_") or env.lower().startswith("lavalink_node_"):
+        if env.lower().startswith("token_bot_") or \
+                env.lower().startswith("lavalink_node_") or \
+                env.lower().startswith("test_guilds_"):
             CONFIGS[env] = environ[env]
 
     try:
