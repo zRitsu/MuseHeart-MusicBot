@@ -63,11 +63,16 @@ def load_bot(bot_name: str, token: str, main=False):
     except:
         default_prefix = CONFIGS["DEFAULT_PREFIX"]
 
+    try:
+        test_guilds = list([int(i) for i in CONFIGS[f"TEST_GUILDS_{bot_name}"].split("||")])
+    except:
+        test_guilds = None
+
     bot = BotCore(
         command_prefix=guild_prefix,
         case_insensitive=True,
         intents=intents,
-        # test_guilds=[],
+        test_guilds=test_guilds,
         sync_commands=CONFIGS["AUTO_SYNC_COMMANDS"] is True,
         sync_commands_debug=True,
         config=CONFIGS,
