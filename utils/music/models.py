@@ -186,7 +186,7 @@ class LavalinkPlayer(wavelink.Player):
 
         embed.set_footer(text=f"O Player será desligado em: {time_format(self.idle_timeout * 1000, use_names=True)}")
 
-        if self.has_thread or self.static or self.text_channel.last_message_id == self.message.id:
+        if self.message and self.has_thread or self.static or self.text_channel.last_message_id == self.message.id:
             await self.message.edit(embed=embed, content=None, components=components)
         else:
             try:
