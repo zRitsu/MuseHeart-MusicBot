@@ -106,7 +106,6 @@ class LavalinkPlayer(wavelink.Player):
         self.interaction_cooldown: bool = False
         self.vc: Optional[WavelinkVoiceClient] = None
         self.votes: set = set()
-        self.view: Optional[disnake.ui.View] = None
         self.dj: set = set()
         self.filters: dict = {}
         self.idle_task: Optional[asyncio.Task] = None
@@ -148,11 +147,6 @@ class LavalinkPlayer(wavelink.Player):
         await self.destroy()
 
     async def idling_mode(self):
-
-        try:
-            self.view.stop()
-        except:
-            pass
 
         try:
             self.message_updater_task.cancel()
@@ -285,7 +279,7 @@ class LavalinkPlayer(wavelink.Player):
                 traceback.print_exc()
                 pass
 
-        await self.destroy_message(destroy_view=False)
+        await self.destroy_message()
 
         self.last_data = data
 
@@ -300,16 +294,7 @@ class LavalinkPlayer(wavelink.Player):
         self.message_updater_task = None
         await super().set_pause(pause)
 
-    async def destroy_message(self, destroy_view=True):
-
-        if destroy_view:
-
-            try:
-                self.view.stop()
-            except:
-                pass
-
-            self.view = None
+    async def destroy_message(self):
 
         if not self.static:
             try:
