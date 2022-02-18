@@ -303,7 +303,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             guild=inter.guild,
             channel=channel,
             node_id=node.identifier,
-            cog=self,
             static=True if static_player.get('channel') else False,
             skin=skin
         )
@@ -1642,7 +1641,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             guild=message.guild,
             channel=text_channel,
             static=True,
-            cog=self,
             skin=data["player_controller"]["skin"]
         )
 
