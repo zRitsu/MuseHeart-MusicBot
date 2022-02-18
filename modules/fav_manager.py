@@ -11,7 +11,7 @@ import json
 if TYPE_CHECKING:
     from utils.client import BotCore
 
-desc_prefix = "💗 [Favoritos] 💗 | "
+desc_prefix = "⭐ [Favoritos] ⭐ | "
 
 
 class FavManager(commands.Cog):
