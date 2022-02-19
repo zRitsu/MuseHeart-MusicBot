@@ -67,7 +67,7 @@ async def send_message(
         kwargs["embed"] = embed
 
     if inter.response.is_done():
-        await inter.edit_original_message(content=text **kwargs)
+        await inter.edit_original_message(content=text, **kwargs)
     else:
         await inter.send(text, ephemeral=True, **kwargs)
 
