@@ -209,7 +209,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if isinstance(channel, disnake.StageChannel):
             await asyncio.sleep(1)
-            if inter.guild.me.guild_permissions.manage_guild:
+            if inter.guild.me.guild_permissions.request_to_speak:
                 await inter.guild.me.edit(suppress=False)
             else:
                 await inter.guild.me.request_to_speak()
