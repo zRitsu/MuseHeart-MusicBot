@@ -149,7 +149,7 @@ class WSClient:
         self.url: str = url
         self.connection = None
         self.backoff: int = 7
-        self.session = aiohttp.ClientSession()
+        self.session = self.bot.session or aiohttp.ClientSession()
         self.ready: bool  = False
         self.data: dict = {}
 
