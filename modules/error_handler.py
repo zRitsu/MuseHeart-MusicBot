@@ -28,7 +28,7 @@ class ErrorHandler(commands.Cog):
                                 f"```py\n{repr(error)[:2020].replace(self.bot.http.token, 'mytoken')}```"
 
             if self.bot.config["SUPPORT_SERVER"]:
-                embed.description += f"Caso queira, reporte esse erro no meu [`servidor de suporte`]({self.bot.config['SUPPORT_SERVER']})."
+                embed.description += f"\nCaso queira, reporte esse erro no meu [`servidor de suporte`]({self.bot.config['SUPPORT_SERVER']})."
 
         else:
 
@@ -52,7 +52,7 @@ class ErrorHandler(commands.Cog):
                                 f"```py\n{repr(error)[:2020].replace(self.bot.http.token, 'mytoken')}```"
 
             if self.bot.config["SUPPORT_SERVER"]:
-                embed.description += f"Caso queira, reporte esse erro no meu [`servidor de suporte`]({self.bot.config['SUPPORT_SERVER']})."
+                embed.description += f"\nCaso queira, reporte esse erro no meu [`servidor de suporte`]({self.bot.config['SUPPORT_SERVER']})."
 
         else:
 
