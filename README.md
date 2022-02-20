@@ -17,6 +17,6 @@ Caso não queira criar um bot próprio, há um bot meu já feito e hospedado usa
 
 ![](https://media.discordapp.net/attachments/554468640942981147/944942948406153276/unknown.png)
 
-- Player controller (modo fixo/extendido com song requests, configurável com o comando: /setup)
+- Player controller (modo fixo/estendido com song requests, configurável com o comando: /setup)
 
 ![](https://media.discordapp.net/attachments/554468640942981147/944945573834936340/unknown.png?width=969&height=676)
