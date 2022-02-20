@@ -70,7 +70,7 @@ class MusicSettings(commands.Cog):
                 read_message_history=True
             ),
             inter.guild.me: disnake.PermissionOverwrite(
-                embed_links=False,
+                embed_links=True,
                 send_messages=True,
                 send_messages_in_threads=True,
                 read_messages=True,
