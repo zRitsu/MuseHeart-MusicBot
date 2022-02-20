@@ -72,8 +72,8 @@ class Owner(commands.Cog):
 
     @commands.is_owner()
     @commands.max_concurrency(1, commands.BucketType.default)
-    @panel_command(aliases=["up", "atualizar"], description="Atualizar o code do bot usando git.",
-                   emoji="⏬", alt_name="Atualizar Bot")
+    @panel_command(aliases=["up", "atualizar"], description="Atualizar meu code usando o git.",
+                   emoji="<:git:944873798166020116>", alt_name="Atualizar Bot")
     async def update(self, ctx: Union[commands.Context, disnake.MessageInteraction], *,
                      opts: str = ""): #TODO: Rever se há alguma forma de usar commands.Flag sem um argumento obrigatório, ex: --pip.
 
@@ -194,7 +194,7 @@ class Owner(commands.Cog):
 
 
     @commands.is_owner()
-    @panel_command(aliases=["sync"], description="Sincronizar os comandos de barra manualmente.", emoji="⌨️",
+    @panel_command(aliases=["sync"], description="Sincronizar os comandos de barra manualmente.", emoji="<:slash:944875586839527444>",
                    alt_name="Sincronizar comandos manualmente.")
     async def synccmds(self, ctx: Union[commands.Context, disnake.MessageInteraction]):
 
