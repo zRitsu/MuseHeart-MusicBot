@@ -133,7 +133,7 @@ class Misc(commands.Cog):
 
         prefix = inter.guild_data["prefix"] or self.bot.default_prefix
 
-        if self.bot.default_prefix:
+        if self.bot.default_prefix and not self.bot.config["INTERACTION_COMMAND_ONLY"]:
             embed.description += f"> **Prefixo:** {prefix}\n"
 
         links = "[`[Source]`](https://github.com/zRitsu/disnake-LL-music-bot)"
