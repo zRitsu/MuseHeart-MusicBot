@@ -672,7 +672,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             f"{'avançou' if milliseconds > player.position else 'voltou'} o tempo da música para: {time_format(milliseconds)}",
             f"O tempo da música foi {'avançada' if milliseconds > player.position else 'retornada'} para: {time_format(milliseconds)}"
         ]
-        await self.interaction_message(inter, txt, rpc_update=True)
+        await self.interaction_message(inter, txt)
+
+        await asyncio.sleep(2)
+        self.bot.loop.create_task(player.process_rpc())
 
 
     @check_voice()
