@@ -142,6 +142,9 @@ class Misc(commands.Cog):
             links = f"[`[Invite]`](https://discord.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=" \
                     f"8&scope=bot%20applications.commands) **|** {links}"
 
+        if self.bot.config["SUPPORT_SERVER"]:
+            links += f" **|** [`[Suporte]`]({self.bot.config['SUPPORT_SERVER']})"
+
         embed.description += f">  {links}\n"
 
         try:
@@ -154,7 +157,7 @@ class Misc(commands.Cog):
             text=f"Dono(a): {self.bot.owner}"
         )
 
-        if self.bot.config.get("HIDE_SOURCE_OWNER") is not False and self.bot.owner.id == self.source_owner.id:
+        if self.bot.config["HIDE_SOURCE_OWNER"] is not False and self.bot.owner.id == self.source_owner.id:
             embed.footer.text += f" | Source by: {self.source_owner}"
 
         await inter.send(embed=embed)

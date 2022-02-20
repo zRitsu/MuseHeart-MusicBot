@@ -1,12 +1,16 @@
+from __future__ import annotations
 import disnake
 from disnake.ext import commands
 from utils.music.errors import parse_error
 from utils.others import send_message
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from utils.client import BotCore
 
 class ErrorHandler(commands.Cog):
     
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: BotCore):
         self.bot = bot
 
 
@@ -17,8 +21,18 @@ class ErrorHandler(commands.Cog):
 
         embed = disnake.Embed(color=disnake.Colour.red())
 
-        embed.description = parse_error(inter, error) or "**Ocorreu um erro no comando:**\n" \
+        error_msg = parse_error(inter, error)
+
+        if not error_msg:
+            embed.description = "**Ocorreu um erro no comando:**\n" \
                                 f"```py\n{repr(error)[:2020].replace(self.bot.http.token, 'mytoken')}```"
+
+            if self.bot.config["SUPPORT_SERVER"]:
+                embed.description += f"Caso queira, reporte esse erro no meu [`servidor de suporte`]({self.bot.config['SUPPORT_SERVER']})."
+
+        else:
+
+            embed.description = error_msg
 
         await send_message(inter, embed=embed)
 
@@ -31,11 +45,21 @@ class ErrorHandler(commands.Cog):
         if isinstance(error, commands.CommandNotFound):
             return
 
-        embed.description = parse_error(ctx, error) or "**Ocorreu um erro no comando:**\n" \
-                                f"```py\n{str(repr(error))[:2020].replace(self.bot.http.token, 'mytoken')}```"
+        error_msg = parse_error(ctx, error)
+
+        if not error_msg:
+            embed.description = "**Ocorreu um erro no comando:**\n" \
+                                f"```py\n{repr(error)[:2020].replace(self.bot.http.token, 'mytoken')}```"
+
+            if self.bot.config["SUPPORT_SERVER"]:
+                embed.description += f"Caso queira, reporte esse erro no meu [`servidor de suporte`]({self.bot.config['SUPPORT_SERVER']})."
+
+        else:
+
+            embed.description = error_msg
 
         await ctx.reply(embed=embed)
 
 
-def setup(bot: commands.Bot):
+def setup(bot: BotCore):
     bot.add_cog(ErrorHandler(bot))

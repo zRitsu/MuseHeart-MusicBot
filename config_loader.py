@@ -41,6 +41,7 @@ def load_config():
         "INTERACTION_COMMAND_ONLY": False, # Não permitir o uso dos comandos de texto com prefixo.
         "SOURCE_REPO": "https://github.com/zRitsu/disnake-LL-music-bot.git", # Link do github pra ser usado em comandos como o de update.
         "HIDE_SOURCE_OWNER": False,  # Ocultar link do meu repositório no comando /about. Caso altere isso, por favor considere de alguma forma fornecer crédito. :(
+        "SUPPORT_SERVER": "", # invite do servidor de suporte (exibido no comando about e nos erros dos comandos).
 
         #############################################################################################
         ##### Bot presences:                                                                    #####
