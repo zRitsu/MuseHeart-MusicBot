@@ -11,12 +11,12 @@ Caso não queira criar um bot próprio, há um bot meu já feito e hospedado usa
 
 - Comandos de barra / Slash commands
 
-![](https://media.discordapp.net/attachments/480195401543188483/906456601496539166/unknown.png)
+![](https://media.discordapp.net/attachments/554468640942981147/944942596814426122/unknown.png)
 
-- Player controller (modo normal)
+- Player controller (modo normal/mini-player)
 
-![](https://cdn.discordapp.com/attachments/480195401543188483/917249722702520381/unknown.png)
+![](https://media.discordapp.net/attachments/554468640942981147/944942948406153276/unknown.png)
 
-- Player controller (modo fixo com song requests, configurável com o comando: /setupplayer)
+- Player controller (modo fixo/extendido com song requests, configurável com o comando: /setup)
 
-![](https://media.discordapp.net/attachments/480195401543188483/917307619495018526/unknown.png)
+![](https://media.discordapp.net/attachments/554468640942981147/944945573834936340/unknown.png?width=969&height=676)
