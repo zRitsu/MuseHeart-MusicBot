@@ -130,6 +130,13 @@ class LavalinkPlayer(wavelink.Player):
         return f"Servidor de música: {self.node.identifier}"
 
 
+    def __repr__(self):
+        return f"<volume={self.volume} " \
+               f"current_position={time_format(self.position) if self.position else 'Idling'} " \
+               f"queue={len(self.queue)} loop={self.loop} EQ=\"{self.eq}\" guild=\"{self.guild.name}\" " \
+               f"node=\"{self.node.identifier}\">"
+
+
     @property
     def has_thread(self):
         return self.message and self.message.thread
