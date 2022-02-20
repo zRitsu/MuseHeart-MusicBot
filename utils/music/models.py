@@ -40,6 +40,7 @@ class WavelinkVoiceClient(disnake.VoiceClient):
         await self.wavelink.update_handler(lavalink_data)
 
     async def on_voice_state_update(self, data):
+
         lavalink_data = {
             't': 'VOICE_STATE_UPDATE',
             'd': data
