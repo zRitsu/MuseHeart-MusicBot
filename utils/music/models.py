@@ -134,7 +134,7 @@ class LavalinkPlayer(wavelink.Player):
         return f"<volume={self.volume} " \
                f"current_position={time_format(self.position) if self.position else 'Idling'} " \
                f"queue={len(self.queue)} loop={self.loop} EQ=\"{self.eq}\" guild=\"{self.guild.name}\" " \
-               f"node=\"{self.node.identifier}\">"
+               f"node=\"{self.node.identifier}\" 24/7=\"{self.nonstop}\">"
 
 
     @property
