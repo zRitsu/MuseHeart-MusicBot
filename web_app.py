@@ -149,7 +149,6 @@ class WSClient:
         self.url: str = url
         self.connection = None
         self.backoff: int = 7
-        self.session = self.bot.session or aiohttp.ClientSession()
         self.ready: bool  = False
         self.data: dict = {}
 
@@ -158,13 +157,17 @@ class WSClient:
         if self.ready:
             return
 
-        self.connection = await self.session.ws_connect(self.url, heartbeat=30)
+        await self.bot.wait_until_ready()
+
+        if not self.bot.session:
+            self.bot.session = aiohttp.ClientSession()
+
+        self.connection = await self.bot.session.ws_connect(self.url, heartbeat=30)
 
         self.backoff = 7
         #print(f"RPC client conectado: {self.bot.user} - {self.url}")
         print(f"{self.bot.user} - RPC client conectado")
 
-        await self.bot.wait_until_ready()
         await self.send({"user_ids": self.bot.user.id, "bot": True})
 
         for player in self.bot.music.players.values():
