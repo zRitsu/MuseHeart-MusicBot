@@ -53,12 +53,32 @@ class MusicSettings(commands.Cog):
     @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1,30), commands.BucketType.guild)
     @commands.slash_command(description=f"{desc_prefix}Criar um canal dedicado para pedir músicas e deixar player fixado.")
-    async def setup(self, inter: disnake.ApplicationCommandInteraction):
+    async def setup(self, inter: disnake.AppCmdInter):
 
-        target = inter.channel.category or inter.guild
+
+        if inter.channel.category and inter.channel.category.permissions_for(inter.guild.me).send_messages:
+            target = inter.channel.category
+        else:
+            target = inter.guild
 
         perms = {
-            inter.guild.default_role: disnake.PermissionOverwrite(embed_links=False)
+            inter.guild.default_role: disnake.PermissionOverwrite(
+                embed_links=False,
+                send_messages=True,
+                send_messages_in_threads=True,
+                read_messages=True,
+                read_message_history=True
+            ),
+            inter.guild.me: disnake.PermissionOverwrite(
+                embed_links=False,
+                send_messages=True,
+                send_messages_in_threads=True,
+                read_messages=True,
+                read_message_history=True,
+                manage_messages=True,
+                manage_channels=True,
+                attach_files=True,
+            )
         }
 
         channel = await target.create_text_channel(
