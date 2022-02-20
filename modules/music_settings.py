@@ -74,6 +74,7 @@ class MusicSettings(commands.Cog):
                 send_messages=True,
                 send_messages_in_threads=True,
                 read_messages=True,
+                create_public_threads=True,
                 read_message_history=True,
                 manage_messages=True,
                 manage_channels=True,
