@@ -1438,7 +1438,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 vc = self.bot.get_channel(player.channel_id)
 
                 if not vc:
-                    await player.destroy(force=True)
+                    self.bot.loop.create_task(player.destroy(force=True))
+                    return
 
                 if control == "help":
                     embed = disnake.Embed(
