@@ -1908,7 +1908,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         # fix para dpy 2x (erro ocasionado ao mudar o bot de canal)
         if payload.code == 4006:
 
-            await player.connect(player.channel_id)
+            if not player.guild.me.voice:
+                return
+
+            await player.connect(player.guild.me.voice.channel.id)
             return
 
 
