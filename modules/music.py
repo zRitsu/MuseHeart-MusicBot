@@ -2117,7 +2117,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             after: disnake.VoiceState
     ):
 
-        if member.bot: # ignorar bots
+        if member.bot and member.id != self.bot.user.id: # ignorar outros bots
             return
 
         player: LavalinkPlayer = self.bot.music.players.get(member.guild.id)
@@ -2138,7 +2138,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         # rich presence stuff
 
-        if player.exiting:
+        if player.exiting or member.bot:
             return
 
         if not after or before.channel != after.channel:
