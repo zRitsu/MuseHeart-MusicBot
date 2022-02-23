@@ -1878,6 +1878,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         print(f"Erro no canal de voz! guild: {player.guild.name} | server: {payload.player.node.identifier} | reason: {payload.reason} | code: {payload.code}")
 
+        if player.exiting:
+            return
+
         if payload.code == 4014:
 
             if player.guild.me.voice:
@@ -1898,9 +1901,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             4005 # Already authenticated.
         ]:
             await asyncio.sleep(3)
-
-            if player.guild.me.voice:
-                return
 
             await player.connect(player.channel_id)
             return
