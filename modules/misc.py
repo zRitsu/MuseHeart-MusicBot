@@ -75,7 +75,7 @@ class Misc(commands.Cog):
 
             await self.bot.change_presence(activity=activity)
 
-            await asyncio.sleep(300)
+            await asyncio.sleep(self.bot.config["PRESENCE_INTERVAL"])
 
 
     @commands.Cog.listener("on_guild_join")

@@ -39,6 +39,7 @@ def load_config():
         "SPOTIFY_CLIENT_ID": '', # Necessário para o suporte ao spotify.
         "SPOTIFY_CLIENT_SECRET": '', # Necessário para o suporte ao spotify.
         "INTERACTION_COMMAND_ONLY": False, # Não permitir o uso dos comandos de texto com prefixo.
+        "PRESENCE_INTERVAL": 900, # Tempo em segundos para alterar a presence do bot.
         "SOURCE_REPO": "https://github.com/zRitsu/disnake-LL-music-bot.git", # Link do github pra ser usado em comandos como o de update.
         "HIDE_SOURCE_OWNER": False,  # Ocultar link do meu repositório no comando /about. Caso altere isso, por favor considere de alguma forma fornecer crédito. :(
         "SUPPORT_SERVER": "", # invite do servidor de suporte (exibido no comando about e nos erros dos comandos).
@@ -107,7 +108,8 @@ def load_config():
         "LAVALINK_CPU_CORES",
         "USER_FAV_MAX_NAME_LENGTH",
         "USER_FAV_MAX_URL_LENGTH",
-        "PLAYER_MESSAGE_UPDATE_INTERVAL"
+        "PLAYER_MESSAGE_UPDATE_INTERVAL",
+        "PRESENCE_INTERVAL"
     ]:
         try:
             CONFIGS[i] = int(CONFIGS[i])
@@ -131,6 +133,9 @@ def load_config():
             CONFIGS[i] = bools[CONFIGS[i]]
         except KeyError:
             raise Exception(f"Você usou uma configuração inválida! {i}: {CONFIGS[i]}")
+
+    if CONFIGS["PRESENCE_INTERVAL"] < 300:
+        CONFIGS["PRESENCE_INTERVAL"] = 300
 
     if CONFIGS["IDLE_TIMEOUT"] < 30:
         CONFIGS["IDLE_TIMEOUT"] = 30
