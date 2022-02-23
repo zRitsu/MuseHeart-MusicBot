@@ -114,7 +114,7 @@ class LavalinkPlayer(wavelink.Player):
         self.idle_timeout = self.bot.config["IDLE_TIMEOUT"]
         self.command_log: str = ""
         self.last_data: dict = {}
-        self.exiting: bool = False
+        self.is_closing: bool = False
         self.nonstop: bool = False
         self.update_player: bool = True
         self.message_updater_task: Optional[asyncio.Task] = None
@@ -428,7 +428,7 @@ class LavalinkPlayer(wavelink.Player):
                 traceback.print_exc()
             return
 
-        if self.exiting:
+        if self.is_closing:
             return
 
         stats = {
@@ -603,7 +603,7 @@ class LavalinkPlayer(wavelink.Player):
         except:
             pass
 
-        self.exiting = True
+        self.is_closing = True
 
         print(f"Player Finalizado - Servidor: {self.guild.name} [{self.guild_id}]")
 

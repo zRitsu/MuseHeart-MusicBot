@@ -1878,7 +1878,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         print(f"Erro no canal de voz! guild: {player.guild.name} | server: {payload.player.node.identifier} | reason: {payload.reason} | code: {payload.code}")
 
-        if player.exiting:
+        if player.is_closing:
             return
 
         if payload.code == 4014:
@@ -2082,7 +2082,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not player:
             return
 
-        if player.exiting:
+        if player.is_closing:
             return
 
         if thread.id != player.message.id:
@@ -2138,7 +2138,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         # rich presence stuff
 
-        if player.exiting or member.bot:
+        if player.is_closing or member.bot:
             return
 
         if not after or before.channel != after.channel:
