@@ -165,12 +165,14 @@ class LavalinkPlayer(wavelink.Player):
         self.bot.loop.create_task(self.process_rpc(self.guild.me.voice.channel))
 
         button_items = [
-                ["⏮️", "back", "Voltar p/ música anterior"],
+                ["⏮️", "back", "Tocar a música anterior"],
                 ["🛑", "stop", "Parar o player"],
                 ["🎶", "add_song", "Adicionar música"],
-                ["⭐", "enqueue_fav", "Adicionar favorito"],
-                ["↪️", "readd", f"Tocar a(s) música(s) novamente ({len(self.played)})"]
+                ["⭐", "enqueue_fav", "Adicionar favorito na fila"]
             ]
+
+        if len(self.played) > 1:
+            button_items.append(["↪️", "readd", f"Tocar todas as músicas novamente ({len(self.played)})"])
 
         components = [
             disnake.ui.Button(
