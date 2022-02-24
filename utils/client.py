@@ -157,7 +157,7 @@ class BotCore(commands.AutoShardedBot):
             return
 
         if self.config["COMMAND_LOG"]:
-            print(f"cmd log: [{inter.guild.name} - {inter.guild.id}] {datetime.datetime.utcnow().strftime('%d/%m/%Y - %H:%M:%S')} (UTC)\n"
+            print(f"cmd log: [user: {inter.author} - {inter.author.id}] - [guild: {inter.guild.name} - {inter.guild.id}] {datetime.datetime.utcnow().strftime('%d/%m/%Y - %H:%M:%S')} (UTC)\n"
                   f"{inter.data}\n" + ("-"*15))
 
         try:
