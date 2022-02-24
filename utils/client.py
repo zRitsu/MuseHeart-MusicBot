@@ -157,8 +157,8 @@ class BotCore(commands.AutoShardedBot):
             return
 
         if self.config["COMMAND_LOG"]:
-            print(f"cmd log: [user: {inter.author} - {inter.author.id}] - [guild: {inter.guild.name} - {inter.guild.id}] {datetime.datetime.utcnow().strftime('%d/%m/%Y - %H:%M:%S')} (UTC)\n"
-                  f"{inter.data}\n" + ("-"*15))
+            print(f"cmd log: [user: {inter.author} - {inter.author.id}] - [guild: {inter.guild.name} - {inter.guild.id}] {datetime.datetime.utcnow().strftime('%d/%m/%Y - %H:%M:%S')} (UTC)\n" +
+                  ((f"{inter.data.options}\n" if inter.data.options else "") + ("-"*15)) )
 
         try:
             # inter.user_data = await self.db.get_data(inter.author.id, db_name="users")
