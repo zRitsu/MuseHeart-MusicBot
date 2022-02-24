@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 from importlib import import_module
 import aiohttp
 from disnake.ext import commands
@@ -155,10 +156,14 @@ class BotCore(commands.AutoShardedBot):
             await inter.send("O bot ainda não está pronto para uso.", ephemeral=True)
             return
 
-        if self.db:
+        if self.config["COMMAND_LOG"]:
+            print(f"cmd log: [{inter.guild.name} - {inter.guild.id}] {datetime.datetime.utcnow().strftime('%d/%m/%Y - %H:%M:%S')} (UTC)\n"
+                  f"{inter.data}\n" + ("-"*15))
+
+        try:
             # inter.user_data = await self.db.get_data(inter.author.id, db_name="users")
             inter.guild_data = await self.db.get_data(inter.guild.id, db_name="guilds")
-        else:
+        except AttributeError:
             # inter.user_data = None
             inter.guild_data = None
 
