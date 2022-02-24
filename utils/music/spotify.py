@@ -1,7 +1,6 @@
 import disnake
 from disnake.ext import commands
 import re
-import os
 from .converters import fix_characters
 from wavelink import Node
 import traceback
@@ -69,6 +68,7 @@ class SpotifyTrack:
                 track = track[0]
             except:
                 track = track.tracks[0]
+            track.info["sourceName"] = "spotify"
             self.info = track.info
             self.id = track.id
         except IndexError:

@@ -38,7 +38,7 @@ def load(player: LavalinkPlayer) -> dict:
         progress = ProgressBar(
             player.position,
             player.current.duration,
-            bar_count=20 if (player.static and player.current.info.get("sourceName") == "youtube") else 10
+            bar_count=10 if not player.static else (20 if player.current.info.get("sourceName") == "youtube" else 17)
         )
 
         duration = f"```ini\n[{time_format(player.position)}] {('='*progress.start)}🔴️{'='*progress.end} " \
