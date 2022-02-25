@@ -186,19 +186,14 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if inter.guild_data["check_other_bots_in_vc"] and any(m for m in channel.members if m.bot and m != inter.guild.me):
             raise GenericError(f"**Há outro bot conectado no canal:** <#{inter.author.voice.channel.id}>")
 
-        await player.connect(channel.id)
-
-        try:
-            player.members_timeout_task.cancel()
-        except:
-            pass
-
         if isinstance(inter, disnake.ApplicationCommandInteraction) and inter.application_command == self.connect:
 
             perms = channel.permissions_for(inter.guild.me)
 
             if not perms.connect or not perms.speak:
                 raise MissingVoicePerms(channel)
+
+            await player.connect(channel.id)
 
             txt = [
                 f"{'me moveu para o' if channel != inter.guild.me.voice and inter.guild.me.voice.channel else 'me reconectou no'}"
@@ -207,11 +202,19 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             ]
             await self.interaction_message(inter, txt, rpc_update=True)
 
+        else:
+            await player.connect(channel.id)
+
+        try:
+            player.members_timeout_task.cancel()
+        except:
+            pass
+
         if isinstance(channel, disnake.StageChannel):
-            await asyncio.sleep(1)
-            if channel.permissions_for(inter.guild.me).manage_permissions:
+            stage_perms =  channel.permissions_for(inter.guild.me)
+            if stage_perms.manage_permissions:
                 await inter.guild.me.edit(suppress=False)
-            elif channel.permissions_for(inter.guild.me).request_to_speak:
+            elif stage_perms.request_to_speak:
                 await inter.guild.me.request_to_speak()
 
 
