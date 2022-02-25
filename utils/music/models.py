@@ -105,7 +105,7 @@ class LavalinkPlayer(wavelink.Player):
         self.locked: bool = False
         self.is_previows_music: bool = False
         self.interaction_cooldown: bool = False
-        self.vc: Optional[WavelinkVoiceClient] = None
+        self.voice_client: Optional[WavelinkVoiceClient] = None
         self.votes: set = set()
         self.dj: set = set()
         self.filters: dict = {}
@@ -536,7 +536,11 @@ class LavalinkPlayer(wavelink.Player):
 
     async def process_next(self):
 
-        if self.locked:
+        if self.locked or self.is_closing:
+            return
+
+        if not self.is_connected:
+            self.bot.loop.create_task(self.destroy(force=True))
             return
 
         try:
@@ -580,14 +584,14 @@ class LavalinkPlayer(wavelink.Player):
 
         channel = self.bot.get_channel(channel_id)
 
-        if not self.vc:
-            self.vc = WavelinkVoiceClient(self.bot, channel, self)
+        if not self.voice_client:
+            self.voice_client = WavelinkVoiceClient(self.bot, channel, self)
 
         if not self.guild.me.voice:
-            await channel.connect(cls=self.vc, reconnect=True)
+            await channel.connect(cls=self.voice_client, reconnect=True)
 
         elif self.guild.me.voice.channel.id != channel_id:
-            await self.vc.move_to(channel)
+            await self.voice_client.move_to(channel)
 
         await super().connect(channel_id, self_deaf)
 
@@ -596,12 +600,12 @@ class LavalinkPlayer(wavelink.Player):
         await self.cleanup()
 
         try:
-            await self.vc.disconnect(force=True)
+            await self.voice_client.disconnect(force=True)
         except:
             pass
 
         try:
-            self.vc.cleanup()
+            self.voice_client.cleanup()
         except:
             pass
 
