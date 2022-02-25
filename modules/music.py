@@ -211,12 +211,15 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             pass
 
         if isinstance(channel, disnake.StageChannel):
+
+            while not inter.guild.me.voice:
+                await asyncio.sleep(1)
+
             stage_perms =  channel.permissions_for(inter.guild.me)
             if stage_perms.manage_permissions:
                 await inter.guild.me.edit(suppress=False)
             elif stage_perms.request_to_speak:
                 await inter.guild.me.request_to_speak()
-
 
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
