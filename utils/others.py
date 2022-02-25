@@ -94,7 +94,7 @@ async def send_idle_embed(target: Union[disnake.Message, disnake.TextChannel, di
             emoji="🎶",
             custom_id="musicplayer_add_song",
             style=disnake.ButtonStyle.grey,
-            label="Adicionar música."
+            label="Pedir música."
         ),
         disnake.ui.Button(
             emoji="⭐",

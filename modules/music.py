@@ -1343,7 +1343,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 if control == "add_song":
 
                     await interaction.response.send_modal(
-                        title="Adicionar música",
+                        title="Pedir uma música",
                         custom_id=f"add_song_{interaction.id}",
                         components=[
                             disnake.ui.TextInput(
@@ -1461,7 +1461,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                                     "⏮️ `= Voltar para a música tocada anteriormente.`\n"
                                     "⏭️ `= Pular para a próxima música.`\n"
                                     "🔀 `= Misturar as músicas da fila.`\n"
-                                    "🎶 `= Adicionar música.`\n"
+                                    "🎶 `= Pedir uma música.`\n"
                                     # "🇳 `= Ativar/Desativar o efeito Nightcore`\n"
                                     "⏹️ `= Parar o player e me desconectar do canal.`\n"
                                     "🔊 `= Ajustar volume.`\n"
