@@ -43,6 +43,8 @@ class FavManager(commands.Cog):
         if not URL_REG.match(url):
             raise GenericError("**Você não adicionou um link válido...**")
 
+        await inter.response.defer(ephemeral=True)
+
         user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
 
         if len(user_data["fav_links"]) > (max_favs:=self.bot.config["MAX_USER_FAVS"]) and not \
@@ -58,9 +60,8 @@ class FavManager(commands.Cog):
 
         await self.bot.db.update_data(inter.author.id, user_data, db_name="users")
 
-        await inter.send("Link Salvo/Atualizado com sucesso nos seus favoritos!\n"
-                         "Ele vai aparecer quando usar o comando /play (no preenchimento automático da busca).",
-                         ephemeral=True)
+        await inter.edit_original_message(content="Link Salvo/Atualizado com sucesso nos seus favoritos!\n"
+                         "Ele vai aparecer quando usar o comando /play (no preenchimento automático da busca).")
 
 
     @fav.sub_command(description=f"{desc_prefix}Editar um item da sua lista de favoritos.")
@@ -81,6 +82,8 @@ class FavManager(commands.Cog):
         if len(url) > (max_url_chars:=self.bot.config["USER_FAV_MAX_URL_LENGTH"]):
             raise GenericError(f"**Quantidade máxima de caracteres permitidos no link: {max_url_chars}**")
 
+        await inter.response.defer(ephemeral=True)
+
         user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
 
         try:
@@ -97,7 +100,7 @@ class FavManager(commands.Cog):
 
         await self.bot.db.update_data(inter.author.id, user_data, db_name="users")
 
-        await inter.send("Favorito editado com sucesso!", ephemeral=True)
+        await inter.edit_original_message(content="Favorito editado com sucesso!")
 
 
     @fav.sub_command(description=f"{desc_prefix}Remover um link da sua lista de favoritos.")
@@ -106,6 +109,8 @@ class FavManager(commands.Cog):
             inter: disnake.ApplicationCommandInteraction,
             item: str = commands.Param(autocomplete=fav_list, description="Favorito para remover."),
     ):
+
+        await inter.response.defer(ephemeral=True)
 
         user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
 
@@ -116,11 +121,13 @@ class FavManager(commands.Cog):
 
         await self.bot.db.update_data(inter.author.id, user_data, db_name="users")
 
-        await inter.send("Link removido com sucesso!", ephemeral=True)
+        await inter.edit_original_message(content="Link removido com sucesso!")
 
 
     @fav.sub_command(name="clear", description=f"{desc_prefix}Limpar sua lista de favoritos.")
     async def clear_(self, inter: disnake.ApplicationCommandInteraction):
+
+        await inter.response.defer(ephemeral=True)
 
         data = await self.bot.db.get_data(inter.author.id, db_name="users")
 
@@ -136,7 +143,7 @@ class FavManager(commands.Cog):
             color=self.bot.get_color(inter.guild.me)
         )
 
-        await inter.send(embed=embed, ephemeral=True)
+        await inter.edit_original_message(embed=embed)
 
 
     @fav.sub_command(name="list", description=f"{desc_prefix}Exibir sua lista de favoritos.")
@@ -147,6 +154,8 @@ class FavManager(commands.Cog):
                 description="Apenas você pode ver a lista de favoritos.",
                 default=False)
     ):
+
+        await inter.response.defer(ephemeral=hidden)
 
         user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
 
@@ -162,7 +171,7 @@ class FavManager(commands.Cog):
 
         embed.set_footer(text="Você pode usá-los no comando /play")
 
-        await inter.send(embed=embed, ephemeral=hidden)
+        await inter.edit_original_message(embed=embed)
 
 
     @fav.sub_command(name="import",description=f"{desc_prefix}Importar seus favoritos a partir de um arquivo.")
@@ -177,6 +186,9 @@ class FavManager(commands.Cog):
 
         if not file.filename.endswith(".json"):
             raise GenericError("**Tipo de arquivo inválido!**")
+
+
+        await inter.response.defer(ephemeral=True)
 
         try:
             data = (await file.read()).decode('utf-8')
@@ -219,8 +231,7 @@ class FavManager(commands.Cog):
 
         await self.bot.db.update_data(inter.author.id, user_data, db_name="users")
 
-        await inter.send(
-            ephemeral=True,
+        await inter.edit_original_message(
             embed = disnake.Embed(
                 color=self.bot.get_color(inter.guild.me),
                 description = "**Os links foram importados com sucesso!**\n"
@@ -231,6 +242,8 @@ class FavManager(commands.Cog):
 
     @fav.sub_command(description=f"{desc_prefix}Exportar seus favoritos em um arquivo no seu DM.")
     async def export(self, inter: disnake.ApplicationCommandInteraction):
+
+        await inter.response.defer(ephemeral=True)
 
         user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
 
@@ -244,7 +257,7 @@ class FavManager(commands.Cog):
             description=f"Seus favoritos estão aqui.\nVocê pode importar usando o comando: `/{self.import_.name}`",
             color=self.bot.get_color(inter.guild.me))
 
-        await inter.send(embed=embed, file=disnake.File(fp=fp, filename="favoritos.json"), ephemeral=True)
+        await inter.edit_original_message(embed=embed, file=disnake.File(fp=fp, filename="favoritos.json"))
 
 
 def setup(bot: BotCore):
