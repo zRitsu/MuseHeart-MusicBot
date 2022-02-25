@@ -1378,6 +1378,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     except:
                         raise GenericError("**Você já tem uma interação em aberto...**")
 
+                    await interaction.response.defer()
+
                     opts = [disnake.SelectOption(label=f, value=f) for f in (await fav_list(interaction, ""))]
 
                     if not opts:
