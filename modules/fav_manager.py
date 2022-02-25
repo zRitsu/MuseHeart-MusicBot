@@ -191,8 +191,7 @@ class FavManager(commands.Cog):
                 raise GenericError(f"**Um item de seu arquivo {url} ultrapassa a quantidade de caracteres permitido:{max_url_chars}**")
 
             if not isinstance(url, str) or not URL_REG.match(url):
-                await inter.author.send(f"O seu arquivo contém link inválido: ```ldif\n{url}```")
-                return
+                raise GenericError(f"O seu arquivo contém link inválido: ```ldif\n{url}```")
 
         user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
 
@@ -207,16 +206,14 @@ class FavManager(commands.Cog):
         if self.bot.config["MAX_USER_FAVS"] > 0 and not (await self.bot.is_owner(inter.author)):
 
             if (json_size:=len(json_data)) > self.bot.config["MAX_USER_FAVS"]:
-                await inter.author.send(f"A quantidade de itens no seu arquivo de favorito excede "
+                raise GenericError(f"A quantidade de itens no seu arquivo de favorito excede "
                                    f"a quantidade máxima permitida ({self.bot.config['MAX_USER_FAVS']}).")
-                return
 
             if (json_size + (user_favs:=len(user_data["fav_links"]))) > self.bot.config["MAX_USER_FAVS"]:
-                await inter.author.send("Você não possui espaço suficiente para adicionar todos os favoritos de seu arquivo...\n"
+                raise GenericError("Você não possui espaço suficiente para adicionar todos os favoritos de seu arquivo...\n"
                                    f"Limite atual: {self.bot.config['MAX_USER_FAVS']}\n"
                                    f"Quantidade de favoritos salvos: {user_favs}\n"
                                    f"Você precisa de: {(json_size + user_favs)-self.bot.config['MAX_USER_FAVS']}")
-                return
 
         user_data["fav_links"].update(json_data)
 
