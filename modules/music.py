@@ -1530,18 +1530,40 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.Cog.listener("on_message")
     async def song_requests(self, message: disnake.Message):
 
+        if not message.guild:
+            return
+
         if message.is_system():
             return
 
         if message.author.bot:
+
+            try:
+                player: LavalinkPlayer = self.bot.music.players[message.guild.id]
+            except KeyError:
+                return
+
+            if message.channel != player.text_channel:
+                return
+
+            if message.author == message.guild.me and message.webhook_id:
+                return
+
+            player.last_message_id = message.id
             return
 
         try:
             data = await self.bot.db.get_data(message.guild.id, db_name='guilds')
         except AttributeError:
             return
-        
+
         player: LavalinkPlayer = self.bot.music.players.get(message.guild.id)
+
+        try:
+            if player.text_channel == message.channel:
+                player.last_message_id = message.id
+        except AttributeError:
+            pass
 
         if player and isinstance(message.channel, disnake.Thread) and not player.static:
 
@@ -1560,10 +1582,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             if not text_channel or not text_channel.permissions_for(message.guild.me).send_messages:
                 return
-
-        if message.is_system():
-            #correção temporária de uma possivel mensagem de sistema chegar até aqui ao iniciar uma thread.
-            return
 
         if not message.content:
             await message.delete()

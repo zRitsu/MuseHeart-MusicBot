@@ -115,6 +115,7 @@ class LavalinkPlayer(wavelink.Player):
         self.command_log: str = ""
         self.last_data: dict = {}
         self.is_closing: bool = False
+        self.last_message_id: Optional[int] = None
         self.nonstop: bool = False
         self.update_player: bool = True
         self.message_updater_task: Optional[asyncio.Task] = None
@@ -319,7 +320,7 @@ class LavalinkPlayer(wavelink.Player):
     def is_last_message(self):
 
         try:
-            return self.text_channel.last_message_id == self.message.id
+            return self.last_message_id == self.message.id
         except AttributeError:
             return
 
