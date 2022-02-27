@@ -19,7 +19,7 @@ other_bots_vc_opts = commands.option_enum(
 )
 
 
-desc_prefix = "🛠️ [Configurações]🛠️ | "
+desc_prefix = "🔧 [Configurações] 🔧 | "
 
 
 class MusicSettings(commands.Cog):
