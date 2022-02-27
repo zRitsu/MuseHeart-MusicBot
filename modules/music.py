@@ -1538,15 +1538,15 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if message.author.bot:
 
+            if message.flags.ephemeral:
+                return
+
             try:
                 player: LavalinkPlayer = self.bot.music.players[message.guild.id]
             except KeyError:
                 return
 
             if message.channel != player.text_channel:
-                return
-
-            if message.author == message.guild.me and message.flags.ephemeral:
                 return
 
             player.last_message_id = message.id
