@@ -248,8 +248,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         static_player = {}
 
+        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+
         try:
-            static_player = inter.guild_data['player_controller']
+            static_player = guild_data['player_controller']
             channel = inter.guild.get_channel(int(static_player['channel'])) or inter.channel
         except (KeyError, TypeError):
             channel = inter.channel
@@ -292,13 +294,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 if view.inter.response:
                     inter.response = view.inter.response
 
-        await inter.response.defer(ephemeral=hide_playlist or inter.guild_data['player_controller']["channel"] == str(inter.channel.id))
+        await inter.response.defer(ephemeral=hide_playlist or guild_data['player_controller']["channel"] == str(inter.channel.id))
 
         tracks, node = await self.get_tracks(query, inter.user, node=node, track_loops=repeat_amount,
                                              hide_playlist=hide_playlist)
 
         try:
-            skin = self.bot.check_skin(inter.guild_data["player_controller"]["skin"])
+            skin = self.bot.check_skin(guild_data["player_controller"]["skin"])
         except:
             skin = self.bot.default_skin
 
@@ -320,17 +322,17 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 channel = None
 
             if not channel:
-                await self.reset_controller_db(inter.guild_id, inter.guild_data, inter=inter)
+                await self.reset_controller_db(inter.guild_id, guild_data, inter=inter)
 
             else:
                 try:
                     message = await channel.fetch_message(int(static_player.get('message_id')))
                 except TypeError:
-                    await self.reset_controller_db(inter.guild_id, inter.guild_data, inter=inter)
+                    await self.reset_controller_db(inter.guild_id, guild_data, inter=inter)
                 except:
                     message = await send_idle_embed(inter.channel, bot=self.bot)
-                    inter.guild_data['player_controller']['message_id'] = str(message.id)
-                    await self.bot.db.update_data(inter.guild.id, inter.guild_data, db_name='guilds')
+                    guild_data['player_controller']['message_id'] = str(message.id)
+                    await self.bot.db.update_data(inter.guild.id, guild_data, db_name='guilds')
                 player.message = message
 
         pos_txt = ""
@@ -1321,15 +1323,50 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 traceback.print_exc()
 
 
+    async def process_player_interaction(
+            self,
+            interaction: Union[disnake.MessageInteraction, disnake.ModalInteraction],
+            player: LavalinkPlayer,
+            control: str,
+            subcmd: str,
+            kwargs: dict
+    ):
+
+        cmd = self.bot.get_slash_command(control)
+
+        if not cmd:
+            raise GenericError(f"comando {control} não encontrado/implementado.")
+
+        try:
+            interaction.player = player
+        except:
+            pass
+
+        await check_cmd(cmd, interaction)
+
+        if subcmd:
+            cmd = cmd.children.get(subcmd)
+            await check_cmd(cmd, interaction)
+
+        await cmd(interaction, **kwargs)
+
+        try:
+            player.interaction_cooldown = True
+            await asyncio.sleep(1)
+            player.interaction_cooldown = False
+        except AttributeError:
+            pass
+
+
     @commands.Cog.listener("on_button_click")
     async def player_controller(self, interaction: disnake.MessageInteraction):
-
-        kwargs = {}
 
         if not interaction.data.custom_id.startswith("musicplayer_"):
             return
 
         control = interaction.data.custom_id[12:]
+
+        kwargs = {}
 
         subcmd = None
 
@@ -1344,7 +1381,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                     await interaction.response.send_modal(
                         title="Pedir uma música",
-                        custom_id=f"add_song_{interaction.id}",
+                        custom_id="modal_add_song",
                         components=[
                             disnake.ui.TextInput(
                                 style=disnake.TextInputStyle.short,
@@ -1356,20 +1393,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                         ],
                     )
 
-                    try:
-
-                        modal_inter: disnake.ModalInteraction = await self.bot.wait_for(
-                            "modal_submit", check=lambda i: i.author == interaction.author and i.data.custom_id == f"add_song_{interaction.id}"
-                        )
-
-                    except asyncio.TimeoutError:
-                        return
-
-                    query = modal_inter.text_values["song_input"]
-
-                    interaction.token = modal_inter.token
-                    interaction.id = modal_inter.id
-                    interaction.response = modal_inter.response
+                    return
 
                 else: # enqueue_fav
 
@@ -1421,22 +1445,22 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                     await self.player_interaction_concurrency.release(interaction)
 
-                player: LavalinkPlayer = self.bot.music.players.get(interaction.guild.id)
+                    player: LavalinkPlayer = self.bot.music.players.get(interaction.guild.id)
 
-                control = "play"
+                    control = "play"
 
-                kwargs.update(
-                    {
-                        "query": query,
-                        "position": 0,
-                        "options": False,
-                        "manual_selection": True,
-                        "source": "ytsearch",
-                        "repeat_amount": 0,
-                        "hide_playlist": False,
-                        "server": None
-                    }
-                )
+                    kwargs.update(
+                        {
+                            "query": query,
+                            "position": 0,
+                            "options": False,
+                            "manual_selection": True,
+                            "source": "ytsearch",
+                            "repeat_amount": 0,
+                            "hide_playlist": False,
+                            "server": None
+                        }
+                    )
 
             else:
 
@@ -1501,30 +1525,49 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     else:
                         kwargs['mode'] = 'current'
 
-            cmd = self.bot.get_slash_command(control)
-
-            if not cmd:
-                raise GenericError(f"comando {control} não encontrado/implementado.")
-
-            interaction.player = player
-
-            await check_cmd(cmd, interaction)
-
-            if subcmd:
-                cmd = cmd.children.get(subcmd)
-                await check_cmd(cmd, interaction)
-
-            await cmd(interaction, **kwargs)
-
-            try:
-                player.interaction_cooldown = True
-                await asyncio.sleep(1)
-                player.interaction_cooldown = False
-            except AttributeError:
-                pass
+            await self.process_player_interaction(
+                interaction = interaction,
+                player = player,
+                control = control,
+                subcmd = subcmd,
+                kwargs = kwargs
+            )
 
         except Exception as e:
             self.bot.dispatch('slash_command_error', interaction, e)
+
+
+    @commands.Cog.listener("on_modal_submit")
+    async def song_request_modal(self, inter: disnake.ModalInteraction):
+
+        if inter.custom_id != "modal_add_song":
+            return
+
+        query = inter.text_values["song_input"]
+
+        player: LavalinkPlayer = self.bot.music.players.get(inter.guild.id)
+
+        kwargs = {
+            "query": query,
+            "position": 0,
+            "options": False,
+            "manual_selection": True,
+            "source": "ytsearch",
+            "repeat_amount": 0,
+            "hide_playlist": False,
+            "server": None
+        }
+
+        try:
+            await self.process_player_interaction(
+                interaction = inter,
+                player = player,
+                control = "play",
+                kwargs=kwargs,
+                subcmd="",
+            )
+        except Exception as e:
+            self.bot.dispatch('slash_command_error', inter, e)
 
 
     @commands.Cog.listener("on_message")
