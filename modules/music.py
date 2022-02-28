@@ -290,7 +290,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 if view.selected == "music":
                     query = YOUTUBE_VIDEO_REG.match(query).group()
 
-                if view.inter.response:
+                if view.inter.response and not isinstance(inter, disnake.ModalInteraction):
                     inter.response = view.inter.response
 
         await inter.response.defer(ephemeral=hide_playlist or guild_data['player_controller']["channel"] == str(inter.channel.id))
