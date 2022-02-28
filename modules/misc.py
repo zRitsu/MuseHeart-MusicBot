@@ -235,7 +235,10 @@ class GuildLog(commands.Cog):
             color=disnake.Colour.red()
         )
 
-        embed.set_thumbnail(url=guild.icon.replace(static_format="png").url)
+        try:
+            embed.set_thumbnail(url=guild.icon.replace(static_format="png").url)
+        except AttributeError:
+            pass
 
         await self.send_hook(self.bot.owner.mention, embed=embed)
 
@@ -261,7 +264,10 @@ class GuildLog(commands.Cog):
             color=disnake.Colour.green()
         )
 
-        embed.set_thumbnail(url=guild.icon.replace(static_format="png").url)
+        try:
+            embed.set_thumbnail(url=guild.icon.replace(static_format="png").url)
+        except AttributeError:
+            pass
 
         await self.send_hook(self.bot.owner.mention, embed=embed)
 
