@@ -97,18 +97,21 @@ class LocalDatabase(BaseDB):
 
         id_ = str(id_)
 
-        data = self.data[db_name].get(id_)
+        try:
+            data = self.data[db_name][id_]
 
-        if not data:
+        except KeyError:
 
             data = dict(self.db_models[db_name])
 
-        elif data["ver"] < self.db_models[db_name]["ver"]:
+        else:
 
-            data = update_values(dict(self.db_models[db_name]), data)
-            data["ver"] = self.db_models[db_name]["ver"]
+            if data["ver"] < self.db_models[db_name]["ver"]:
 
-            await self.update_data(id_, data, db_name=db_name)
+                data = update_values(dict(self.db_models[db_name]), data)
+                data["ver"] = self.db_models[db_name]["ver"]
+
+                await self.update_data(id_, data, db_name=db_name)
 
         return data
 
@@ -158,9 +161,10 @@ class MongoDatabase(BaseDB):
 
         id_ = str(id_)
 
-        data = self.data[db_name].get(id_)
+        try:
+            data = self.data[db_name][id_]
 
-        if not data:
+        except KeyError:
 
             data = await db.find_one({"_id": id_})
 
