@@ -257,7 +257,7 @@ class LavalinkPlayer(wavelink.Player):
             ),
             "🔊": ("volume",),
             "📑": ('queue',),
-            "ℹ️": ("help",)
+            "<:help:947781412017279016>": ("help",)
         }
 
         for button, control in controls.items():
