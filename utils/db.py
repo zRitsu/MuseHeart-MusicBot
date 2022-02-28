@@ -99,19 +99,15 @@ class LocalDatabase(BaseDB):
 
         try:
             data = self.data[db_name][id_]
-
         except KeyError:
+            return dict(self.db_models[db_name])
 
-            data = dict(self.db_models[db_name])
+        if data["ver"] < self.db_models[db_name]["ver"]:
 
-        else:
+            data = update_values(dict(self.db_models[db_name]), data)
+            data["ver"] = self.db_models[db_name]["ver"]
 
-            if data["ver"] < self.db_models[db_name]["ver"]:
-
-                data = update_values(dict(self.db_models[db_name]), data)
-                data["ver"] = self.db_models[db_name]["ver"]
-
-                await self.update_data(id_, data, db_name=db_name)
+            await self.update_data(id_, data, db_name=db_name)
 
         return data
 
@@ -157,16 +153,14 @@ class MongoDatabase(BaseDB):
 
     async def get_data(self, id_: int, *, db_name: Literal['users', 'guilds']):
 
-        db = self._database[db_name]
-
         id_ = str(id_)
 
         try:
-            data = self.data[db_name][id_]
+            return self.data[db_name][id_]
 
         except KeyError:
 
-            data = await db.find_one({"_id": id_})
+            data = await self._database[db_name].find_one({"_id": id_})
 
             if not data:
                 return dict(self.db_models[db_name])
@@ -179,7 +173,7 @@ class MongoDatabase(BaseDB):
 
             self.data[db_name][id_] = data
 
-        return data
+            return data
 
 
     async def update_data(self, id_, data: dict, *, db_name: Literal['users', 'guilds']):
