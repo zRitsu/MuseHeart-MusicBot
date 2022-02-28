@@ -243,8 +243,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             node = self.bot.music.get_best_node()
 
         if not node:
-            await inter.send(content="Não há servidores de música disponível.", ephemeral=True)
-            return
+            raise GenericError("Não há servidores de música disponível.")
 
         static_player = {}
 
