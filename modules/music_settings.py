@@ -36,9 +36,11 @@ class MusicSettings(commands.Cog):
             opt: str = commands.Param(choices=["Ativar", "Desativar"], description="Escolha: ativar ou desativar")
     ):
 
-        inter.guild_data["check_other_bots_in_vc"] = opt == "Ativar"
+        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
 
-        await self.bot.db.update_data(inter.guild.id, inter.guild_data, db_name="guilds")
+        guild_data["check_other_bots_in_vc"] = opt == "Ativar"
+
+        await self.bot.db.update_data(inter.guild.id, guild_data, db_name="guilds")
 
         embed = disnake.Embed(
             color=self.bot.get_color(inter.guild.me),
@@ -101,9 +103,11 @@ class MusicSettings(commands.Cog):
 
         await message.create_thread(name="song requests")
 
-        inter.guild_data['player_controller']['channel'] = str(channel.id)
-        inter.guild_data['player_controller']['message_id'] = str(message.id)
-        await self.bot.db.update_data(inter.guild.id, inter.guild_data, db_name='guilds')
+        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+
+        guild_data['player_controller']['channel'] = str(channel.id)
+        guild_data['player_controller']['message_id'] = str(message.id)
+        await self.bot.db.update_data(inter.guild.id, guild_data, db_name='guilds')
 
         embed = disnake.Embed(description=f"**Canal criado: {channel.mention}**\n\nObs: Caso queira reverter esta configuração, apenas delete o canal {channel.mention}", color=self.bot.get_color(inter.guild.me))
         await inter.send(embed=embed, ephemeral=True)
@@ -122,13 +126,15 @@ class MusicSettings(commands.Cog):
             await inter.send("Você não pode adicionar este cargo.", ephemeral=True)
             return
 
-        if str(role.id) in inter.guild_data['djroles']:
+        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+
+        if str(role.id) in guild_data['djroles']:
             await inter.send("Este cargo já está na lista de DJ's", ephemeral=True)
             return
 
-        inter.guild_data['djroles'].append(str(role.id))
+        guild_data['djroles'].append(str(role.id))
 
-        await self.bot.db.update_data(inter.guild.id, inter.guild_data, db_name="guilds")
+        await self.bot.db.update_data(inter.guild.id, guild_data, db_name="guilds")
 
         await inter.send(f"O cargo {role.mention} foi adicionado à lista de DJ's", ephemeral=True)
 
@@ -142,19 +148,23 @@ class MusicSettings(commands.Cog):
             role: disnake.Role = commands.Param(name="cargo", description="Cargo")
     ):
 
-        if not inter.guild_data['djroles']:
+        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+
+        if not guild_data['djroles']:
 
             await inter.send("Não há cargos na lista de DJ's.", ephemeral=True)
             return
 
-        if str(role.id) not in inter.guild_data['djroles']:
+        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+
+        if str(role.id) not in guild_data['djroles']:
             await inter.send("Este cargo não está na lista de DJ's\n\n" + "Cargos:\n" +
-                                              " ".join(f"<#{r}>" for r in inter.guild_data['djroles']), ephemeral=True)
+                                              " ".join(f"<#{r}>" for r in guild_data['djroles']), ephemeral=True)
             return
 
-        inter.guild_data['djroles'].remove(str(role.id))
+        guild_data['djroles'].remove(str(role.id))
 
-        await self.bot.db.update_data(inter.guild.id, inter.guild_data, db_name="guilds")
+        await self.bot.db.update_data(inter.guild.id, guild_data, db_name="guilds")
 
         await inter.send(f"O cargo {role.mention} foi removido da lista de DJ's", ephemeral=True)
 

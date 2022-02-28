@@ -180,10 +180,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player = self.bot.music.players[inter.guild.id]
 
+        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+
         if not channel:
             channel: Union[disnake.VoiceChannel, disnake.StageChannel] = inter.author.voice.channel
 
-        if inter.guild_data["check_other_bots_in_vc"] and any(m for m in channel.members if m.bot and m != inter.guild.me):
+        if guild_data["check_other_bots_in_vc"] and any(m for m in channel.members if m.bot and m != inter.guild.me):
             raise GenericError(f"**Há outro bot conectado no canal:** <#{inter.author.voice.channel.id}>")
 
         if isinstance(inter, disnake.ApplicationCommandInteraction) and inter.application_command == self.connect:
@@ -290,8 +292,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 if view.selected == "music":
                     query = YOUTUBE_VIDEO_REG.match(query).group()
 
-                if view.inter.response and not isinstance(inter, disnake.ModalInteraction):
-                    inter.response = view.inter.response
+                if view.inter.response:
+                    inter = view.inter
 
         await inter.response.defer(ephemeral=hide_playlist or guild_data['player_controller']["channel"] == str(inter.channel.id))
 

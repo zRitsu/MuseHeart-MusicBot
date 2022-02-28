@@ -161,13 +161,6 @@ class BotCore(commands.AutoShardedBot):
                   f" - [cmd: {inter.data.name}] "
                   f"{datetime.datetime.utcnow().strftime('%d/%m/%Y - %H:%M:%S')} (UTC)\n" + ("-"*15))
 
-        try:
-            # inter.user_data = await self.db.get_data(inter.author.id, db_name="users")
-            inter.guild_data = await self.db.get_data(inter.guild.id, db_name="guilds")
-        except AttributeError:
-            # inter.user_data = None
-            inter.guild_data = None
-
         await super().on_application_command(inter)
 
 

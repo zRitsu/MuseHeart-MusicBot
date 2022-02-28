@@ -131,7 +131,9 @@ class Misc(commands.Cog):
         except AttributeError:
             pass
 
-        prefix = inter.guild_data["prefix"] or self.bot.default_prefix
+        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+
+        prefix = guild_data["prefix"] or self.bot.default_prefix
 
         if self.bot.default_prefix and not self.bot.config["INTERACTION_COMMAND_ONLY"]:
             embed.description += f"> **Prefixo:** {prefix}\n"

@@ -41,15 +41,6 @@ async def check_cmd(cmd, inter: Union[disnake.Interaction, disnake.ModalInteract
         if retry_after:
             raise commands.CommandOnCooldown(cooldown=bucket, retry_after=retry_after, type=cmd._buckets.type)
 
-
-    if not isinstance(inter, disnake.ModalInteraction):
-        try:
-            # inter.user_data = await inter.bot.db.get_data(inter.author.id, db_name="users")
-            inter.guild_data = await inter.bot.db.get_data(inter.guild.id, db_name="guilds")
-        except AttributeError:
-            # inter.user_data = None
-            inter.guild_data = None
-
     for command_check in cmd.checks:
         c = (await command_check(inter)) if iscoroutinefunction(command_check) else command_check(inter)
         if not c:
