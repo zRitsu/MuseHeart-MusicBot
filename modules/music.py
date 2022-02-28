@@ -178,7 +178,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             channel: Union[disnake.VoiceChannel, disnake.StageChannel] = commands.Param(name="canal", description="Canal para me conectar", default=None)
     ):
 
-        player = inter.player
+        player = self.bot.music.players[inter.guild.id]
 
         if not channel:
             channel: Union[disnake.VoiceChannel, disnake.StageChannel] = inter.author.voice.channel
@@ -436,7 +436,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await inter.edit_original_message(embed=embed, view=None)
 
         if not player.is_connected:
-            inter.player = player
             await self.connect(inter, channel=inter.author.voice.channel)
 
         if not player.current:
