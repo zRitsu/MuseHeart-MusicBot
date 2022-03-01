@@ -95,16 +95,6 @@ def load_config():
     except:
         pass
 
-    # itens não usados na env do bot em si
-    for i in [
-        "GOOGLE_EMAIL",
-        "GOOGLE_PASSWORD"
-    ]:
-        try:
-            del CONFIGS[i]
-        except KeyError:
-            continue
-
     if CONFIGS["EMBED_COLOR"] is False:
         CONFIGS["EMBED_COLOR"] = None
 
