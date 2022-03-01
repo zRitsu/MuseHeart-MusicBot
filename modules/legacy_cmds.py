@@ -318,9 +318,24 @@ class Owner(commands.Cog):
             channel=ctx.channel
         )
 
-        await player.connect(ctx.author.voice.channel.id)
+        channel = ctx.author.voice.channel
 
-        await asyncio.sleep(1.5)
+        await player.connect(channel.id)
+
+        self.bot.loop.create_task(ctx.message.add_reaction("👍"))
+
+        while not ctx.guild.me.voice:
+            await asyncio.sleep(1)
+
+        if isinstance(channel, disnake.StageChannel):
+
+            stage_perms =  channel.permissions_for(ctx.guild.me)
+            if stage_perms.manage_permissions:
+                await ctx.guild.me.edit(suppress=False)
+            elif stage_perms.request_to_speak:
+                await ctx.guild.me.request_to_speak()
+
+            await asyncio.sleep(1.5)
 
         await player.process_next()
 
