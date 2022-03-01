@@ -7,6 +7,7 @@ import traceback
 from io import BytesIO
 from typing import Union
 import disnake
+import wavelink
 from disnake.ext import commands
 from utils.client import BotCore
 from utils.music.checks import check_voice
@@ -310,7 +311,13 @@ class Owner(commands.Cog):
         except KeyError:
             pass
 
+        node: wavelink.Node = self.bot.music.get_best_node()
+
+        if not node:
+            raise GenericError("**Não há servidores de música disponível!**")
+
         player: LavalinkPlayer = self.bot.music.get_player(
+            node_id=node.identifier,
             guild_id=ctx.guild.id,
             cls=LavalinkPlayer,
             requester=ctx.author,
