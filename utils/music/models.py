@@ -81,7 +81,7 @@ class LavalinkTrack(wavelink.Track):
         else:
             self.thumb = self.info.get("artworkUrl", "")
 
-        if self.info.get("sourceName") == "youtube" and self.playlist:
+        if self.info.get("class") == "YoutubeAudioTrack" and self.playlist:
             self.uri = f"{self.uri}&list={parse.parse_qs(parse.urlparse(self.playlist['url']).query)['list'][0]}"
 
 
