@@ -1,3 +1,4 @@
+import asyncio
 import os
 import shutil
 import subprocess
@@ -8,6 +9,8 @@ from typing import Union
 import disnake
 from disnake.ext import commands
 from utils.client import BotCore
+from utils.music.checks import check_voice
+from utils.music.models import LavalinkPlayer
 from utils.others import sync_message
 from utils.owner_panel import panel_command
 from utils.music.errors import GenericError
@@ -295,6 +298,32 @@ class Owner(commands.Cog):
             await ctx.message.add_reaction("👍")
         else:
             return "Arquivo de configuração enviado com sucesso no seu DM."
+
+
+    @check_voice()
+    @commands.command()
+    @commands.command(description='inicializar um player no servidor.', aliases=["sp", "spw"])
+    async def spawn(self, ctx: commands.Context):
+
+        try:
+            self.bot.music.players[ctx.guild.id] #type ignore
+            raise GenericError("**Já há um player iniciado no servidor.**")
+        except KeyError:
+            pass
+
+        player: LavalinkPlayer = self.bot.music.get_player(
+            guild_id=ctx.guild.id,
+            cls=LavalinkPlayer,
+            requester=ctx.author,
+            guild=ctx.guild,
+            channel=ctx.channel
+        )
+
+        await player.connect(ctx.author.voice.channel.id)
+
+        await asyncio.sleep(1.5)
+
+        await player.process_next()
 
 
 def setup(bot: BotCore):
