@@ -301,7 +301,6 @@ class Owner(commands.Cog):
 
 
     @check_voice()
-    @commands.command()
     @commands.command(description='inicializar um player no servidor.', aliases=["sp", "spw"])
     async def spawn(self, ctx: commands.Context):
 
