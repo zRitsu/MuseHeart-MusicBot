@@ -10,4 +10,3 @@ dnspython
 fake-useragent
 disnake-jishaku
 psutil
-flask
