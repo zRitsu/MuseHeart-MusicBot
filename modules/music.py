@@ -648,7 +648,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player: LavalinkPlayer = inter.player
 
         if player.current.is_stream:
-            embed.description = "Você não pode usar este comando em uma livestream."
+            embed.description = "Você não pode usar esse comando em uma livestream."
             await send_message(inter, embed=embed)
             return
 
@@ -1008,7 +1008,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if player.has_thread:
             embed = disnake.Embed(
                     color=self.bot.get_color(inter.guild.me),
-                description=f"este comando não pode ser usado com uma conversa ativa na [mensagem]({player.message.jump_url}) do player."
+                    description=f"esse comando não pode ser usado com uma conversa ativa na [mensagem]({player.message.jump_url}) do player."
                 )
             await inter.send(embed=embed, ephemeral=True)
             return
@@ -1375,7 +1375,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             if control in ("add_song", "enqueue_fav"):
 
                 if not interaction.user.voice:
-                    raise GenericError("**Você deve entrar em um canal de voz para usar este botão.**")
+                    raise GenericError("**Você deve entrar em um canal de voz para usar esse botão.**")
 
                 if control == "add_song":
 

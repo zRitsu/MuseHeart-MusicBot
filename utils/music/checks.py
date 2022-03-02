@@ -38,7 +38,7 @@ def can_send_message():
     async def predicate(inter):
 
         if not inter.channel.permissions_for(inter.guild.me).send_messages:
-            raise GenericError("Não tenho permissão de enviar mensagens neste canal.")
+            raise GenericError("Não tenho permissão de enviar mensagens no canal atual.")
 
         return True
 

@@ -27,7 +27,7 @@ def sync_message(bot: BotCore):
     return f"`Caso os comandos de barra não apareçam,` [`clique aqui`]({invite_url}) `para me permitir " \
            "criar comandos de barra no servidor.`\n\n" \
            "`Nota: Em alguns casos os comandos de barra podem demorar até uma hora pra aparecer/atualizar em todos " \
-           "os servidores. Caso queira usar os comandos de barra imediatamente neste servidor você terá que " \
+           "os servidores. Caso queira usar os comandos de barra imediatamente no servidor você terá que " \
            f"me expulsar do servidor e em seguida me adicionar novamente através deste` [`link`]({invite_url})..."
 
 

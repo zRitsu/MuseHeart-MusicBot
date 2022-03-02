@@ -190,7 +190,7 @@ class Owner(commands.Cog):
 
         embed = disnake.Embed(
             color=self.bot.get_color(ctx.guild.me),
-            description="**Este comando não é mais necessário ser usado (A sincronização dos comandos agora "
+            description="**Esse comando não é mais necessário ser usado (A sincronização dos comandos agora "
                         f"é automática).**\n\n{sync_message(self.bot)}"
         )
 

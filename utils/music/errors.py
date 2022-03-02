@@ -64,14 +64,14 @@ def parse_error(
         error_txt = f"**Não tenho permissão para conectar/falar no canal:** {error.voice_channel.mention}"
 
     elif isinstance(error, commands.NotOwner):
-        error_txt = "**Apenas meu(s) desenvolvedor(es) pode(m) usar este comando.**"
+        error_txt = "**Apenas meu(s) desenvolvedor(es) pode(m) usar esse comando.**"
 
     elif isinstance(error, commands.BotMissingPermissions):
-        error_txt = "Não tenho as seguintes permissões para executar este comando: ```\n{}```" \
+        error_txt = "Não tenho as seguintes permissões para executar esse comando: ```\n{}```" \
             .format(", ".join(perms_translations.get(perm, perm) for perm in error.missing_permissions))
 
     elif isinstance(error, commands.MissingPermissions):
-        error_txt = "Você não possui as seguintes permissões para executar este comando: ```\n{}```" \
+        error_txt = "Você não possui as seguintes permissões para executar esse comando: ```\n{}```" \
             .format(", ".join(perms_translations.get(perm, perm) for perm in error.missing_permissions))
 
     elif isinstance(error, GenericError):
@@ -82,13 +82,13 @@ def parse_error(
                     "**Gerenciar canais** para pular músicas.**"
 
     elif isinstance(error, DiffVoiceChannel):
-        error_txt = "**Você deve estar no meu canal de voz atual para usar este comando.**"
+        error_txt = "**Você deve estar no meu canal de voz atual para usar esse comando.**"
 
     elif isinstance(error, NoSource):
         error_txt = "**Não há músicas no player atualmente.**"
 
     elif isinstance(error, NoVoice):
-        error_txt = "**Você deve entrar em um canal de voz para usar este comando.**"
+        error_txt = "**Você deve entrar em um canal de voz para usar esse comando.**"
 
     elif isinstance(error, NoPlayer):
         error_txt = "**Não há player inicializado no servidor.**"
@@ -100,15 +100,15 @@ def parse_error(
         remaing = int(error.retry_after)
         if remaing < 1:
             remaing = 1
-        error_txt = "**Você deve aguardar {} para usar este comando.**".format(time_format(int(remaing) * 1000))
+        error_txt = "**Você deve aguardar {} para usar esse comando.**".format(time_format(int(remaing) * 1000))
 
     elif isinstance(error, commands.MaxConcurrencyReached):
         txt = f"{error.number} vezes " if error.number > 1 else ''
         txt = {
-            commands.BucketType.member: f"você já usou esse comando {txt}neste servidor",
-            commands.BucketType.guild: f"esse comando já foi usado {txt}neste servidor",
+            commands.BucketType.member: f"você já usou esse comando {txt}no servidor",
+            commands.BucketType.guild: f"esse comando já foi usado {txt}no servidor",
             commands.BucketType.user: f"você já usou esse comando {txt}",
-            commands.BucketType.channel: f"esse comando já foi usado {txt}neste atual",
+            commands.BucketType.channel: f"esse comando já foi usado {txt}no canal atual",
             commands.BucketType.category: f"esse comando já foi usado {txt}na categoria do canal atual",
             commands.BucketType.role: f"esse comando já foi usado {txt}por um membro que possui o cargo permitido",
             commands.BucketType.default: f"esse comando já foi usado {txt}por alguém"

@@ -123,13 +123,13 @@ class MusicSettings(commands.Cog):
     ):
 
         if role == inter.guild.default_role:
-            await inter.send("Você não pode adicionar este cargo.", ephemeral=True)
+            await inter.send("Você não pode adicionar esse cargo.", ephemeral=True)
             return
 
         guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
 
         if str(role.id) in guild_data['djroles']:
-            await inter.send("Este cargo já está na lista de DJ's", ephemeral=True)
+            await inter.send(f"O cargo {role.mention} já está na lista de DJ's", ephemeral=True)
             return
 
         guild_data['djroles'].append(str(role.id))
@@ -158,7 +158,7 @@ class MusicSettings(commands.Cog):
         guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
 
         if str(role.id) not in guild_data['djroles']:
-            await inter.send("Este cargo não está na lista de DJ's\n\n" + "Cargos:\n" +
+            await inter.send(f"O cargo {role.mention} não está na lista de DJ's\n\n" + "Cargos:\n" +
                                               " ".join(f"<#{r}>" for r in guild_data['djroles']), ephemeral=True)
             return
 
