@@ -316,13 +316,23 @@ class Owner(commands.Cog):
         if not node:
             raise GenericError("**Não há servidores de música disponível!**")
 
+        guild_data = await self.bot.db.get_data(ctx.guild.id, db_name="guilds")
+
+        static_player = guild_data['player_controller']
+
+        try:
+            channel = ctx.guild.get_channel(int(static_player['channel'])) or ctx.channel
+        except (KeyError, TypeError):
+            channel = ctx.channel
+
         player: LavalinkPlayer = self.bot.music.get_player(
             node_id=node.identifier,
             guild_id=ctx.guild.id,
             cls=LavalinkPlayer,
             requester=ctx.author,
             guild=ctx.guild,
-            channel=ctx.channel
+            channel=channel,
+            static=bool(static_player['channel'])
         )
 
         channel = ctx.author.voice.channel

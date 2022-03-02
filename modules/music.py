@@ -312,7 +312,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             guild=inter.guild,
             channel=channel,
             node_id=node.identifier,
-            static=True if static_player.get('channel') else False,
+            static=bool(static_player['channel']),
             skin=skin
         )
 
