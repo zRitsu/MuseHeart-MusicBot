@@ -93,18 +93,18 @@ class ErrorHandler(commands.Cog):
             custom_id=f"error_report_submit_{inter.message.id}",
             components=[
                 disnake.ui.TextInput(
-                    style=disnake.TextInputStyle.short,
-                    label="Link de uma image/print",
-                    custom_id="image_url",
-                    max_length=300,
-                    required=False
-                ),
-                disnake.ui.TextInput(
                     style=disnake.TextInputStyle.long,
                     label="Detalhes",
                     custom_id="error_details",
                     max_length=1900,
                     required=True
+                ),
+                disnake.ui.TextInput(
+                    style=disnake.TextInputStyle.short,
+                    label="Link de imagem/print do erro (Opcional)",
+                    custom_id="image_url",
+                    max_length=300,
+                    required=False
                 )
             ]
         )
