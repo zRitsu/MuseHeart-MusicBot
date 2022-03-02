@@ -1,8 +1,6 @@
 from __future__ import annotations
-
 from inspect import iscoroutinefunction
-from typing import TYPE_CHECKING, Union
-
+from typing import TYPE_CHECKING, Union, Optional
 import disnake
 from disnake.ext import commands
 
@@ -52,12 +50,16 @@ async def send_message(
         text=None,
         *,
         embed: disnake.Embed = None,
+        components: Optional = None,
 ):
 
     # correção temporária usando variavel kwargs.
     kwargs = {}
     if embed:
         kwargs["embed"] = embed
+
+    if components:
+        kwargs["components"] = components
 
     if inter.response.is_done():
         await inter.edit_original_message(content=text, **kwargs)

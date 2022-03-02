@@ -36,6 +36,7 @@ def load_config():
         "USER_FAV_MAX_NAME_LENGTH": 35,  # limite de caracteres no nome de playlists.
         "USER_FAV_MAX_URL_LENGTH": 90, # limite de caracteres no link de playlists.
         "BOT_ADD_REMOVE_LOG": '', # Link do webhook para envio de logs quando o bot for adicionado/removido de um server.
+        "ERROR_REPORT_WEBHOOK": '', # Link do webhook para envio dos reports de erros.
         "PLAYER_MESSAGE_UPDATE_INTERVAL": 15, # Intervalo para atualizar a mensagem do player controller. (min = 10 e max = 45)
         "SPOTIFY_CLIENT_ID": '', # Necessário para o suporte ao spotify.
         "SPOTIFY_CLIENT_SECRET": '', # Necessário para o suporte ao spotify.
