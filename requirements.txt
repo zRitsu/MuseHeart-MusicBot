@@ -6,7 +6,6 @@ requests
 humanize
 tornado
 motor
-dnspython
 fake-useragent
 disnake-jishaku
 psutil
