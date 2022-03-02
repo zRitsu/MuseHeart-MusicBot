@@ -85,7 +85,7 @@ class ErrorHandler(commands.Cog):
             return
 
         if str(inter.author.id) not in inter.message.content:
-            await inter.send(f"Apenas o usuário {inter.message.content} pode usar esse botão!")
+            await inter.send(f"Apenas o usuário {inter.message.content} pode usar esse botão!", ephemeral=True)
             return
 
         await inter.response.send_modal(
