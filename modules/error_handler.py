@@ -20,7 +20,7 @@ class ErrorHandler(commands.Cog):
         if self.bot.config["ERROR_REPORT_WEBHOOK"]:
             self.components.append(
                 disnake.ui.Button(
-                    label="Reportar este erro",
+                    label="Reporte esse erro",
                     custom_id="report_error",
                     emoji="⚠"
                 )
@@ -84,26 +84,30 @@ class ErrorHandler(commands.Cog):
         if inter.data.custom_id != "report_error":
             return
 
+        if str(inter.author.id) not in inter.message.content:
+            await inter.send(f"Apenas o usuário {inter.message.content} pode usar esse botão!")
+            return
+
         await inter.response.send_modal(
-                        title="Reportar erro",
-                        custom_id=f"error_report_submit_{inter.message.id}",
-                        components=[
-                            disnake.ui.TextInput(
-                                style=disnake.TextInputStyle.short,
-                                label="Link de uma image/print",
-                                custom_id="image_url",
-                                max_length=300,
-                                required=False
-                            ),
-                            disnake.ui.TextInput(
-                                style=disnake.TextInputStyle.long,
-                                label="Detalhes",
-                                custom_id="error_details",
-                                max_length=1900,
-                                required=True
-                            )
-                        ],
-                    )
+            title="Reportar erro",
+            custom_id=f"error_report_submit_{inter.message.id}",
+            components=[
+                disnake.ui.TextInput(
+                    style=disnake.TextInputStyle.short,
+                    label="Link de uma image/print",
+                    custom_id="image_url",
+                    max_length=300,
+                    required=False
+                ),
+                disnake.ui.TextInput(
+                    style=disnake.TextInputStyle.long,
+                    label="Detalhes",
+                    custom_id="error_details",
+                    max_length=1900,
+                    required=True
+                )
+            ]
+        )
 
 
     @commands.Cog.listener("on_modal_submit")
