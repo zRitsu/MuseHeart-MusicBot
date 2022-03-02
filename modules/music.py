@@ -1952,6 +1952,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if payload.code == 4014:
 
+            await asyncio.sleep(3)
+
             if player.guild.me.voice:
                 return
 
