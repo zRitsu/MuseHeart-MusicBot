@@ -43,7 +43,7 @@ class SpotifyPlaylist:
                 duration=i['track']['duration_ms'],
                 requester=requester,
                 playlist=playlist,
-                album=process_album_info(i)
+                album=process_album_info(i['track'])
             ) for i in data['tracks'] if i.get('track')]
 
 
