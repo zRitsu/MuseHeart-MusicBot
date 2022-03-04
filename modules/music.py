@@ -218,10 +218,17 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 await asyncio.sleep(1)
 
             stage_perms =  channel.permissions_for(inter.guild.me)
-            if stage_perms.manage_permissions:
+
+            if stage_perms.manage_roles:
                 await inter.guild.me.edit(suppress=False)
             elif stage_perms.request_to_speak:
                 await inter.guild.me.request_to_speak()
+
+            else:
+                if player.command_log:
+                    player.command_log += "\n"
+                player.command_log += "**Nota:** não tenho autoridade de falar no palco automaticamente (preciso da permissão de um staff)"
+
 
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)

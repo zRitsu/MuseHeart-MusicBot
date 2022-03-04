@@ -57,7 +57,6 @@ class MusicSettings(commands.Cog):
     @commands.slash_command(description=f"{desc_prefix}Criar um canal dedicado para pedir músicas e deixar player fixado.")
     async def setup(self, inter: disnake.AppCmdInter):
 
-
         if inter.channel.category and inter.channel.category.permissions_for(inter.guild.me).send_messages:
             target = inter.channel.category
         else:

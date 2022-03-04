@@ -92,7 +92,7 @@ class Misc(commands.Cog):
         )
 
         if cmd:=self.bot.get_slash_command("setup"):
-            embed.description += f"Se quiser, use o comando **/{cmd.name}** para criar um canal dedicado pra pedir " \
+            embed.description += f"Se quiser, use o comando **/{cmd.name}** para criar um canal dedicado para pedir " \
                                  "músicas sem comandos e deixar o music player fixo no canal.\n\n"
 
         embed.description += f"Caso os comandos de barra (/) não apareçam, use o comando:\n{prefix}syncguild"
