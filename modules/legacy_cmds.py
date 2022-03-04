@@ -125,7 +125,7 @@ class Owner(commands.Cog):
                     commit = l.replace("Updating ", "").replace("..", "...")
                     break
 
-            data = run_command(f"git log {commit} {git_format}").split()
+            data = run_command(f"git log {commit} {git_format}").split("\n")
 
             for d in data:
                 t = d.split("*****")
