@@ -12,10 +12,15 @@ from typing import Optional
 
 spotify_regex = re.compile("https://open.spotify.com?.+(album|playlist|track)/([a-zA-Z0-9]+)")
 
+def process_album_info(track: dict):
+    return {
+        "name": track['album']["name"],
+        "url": track['album']['external_urls']['spotify']
+    }
 
 def fix_spotify_data(data: dict):
     try:
-        return data["track"]
+        data = data["track"]
     except KeyError:
         data = {"track": data}
         return data
@@ -34,7 +39,8 @@ class SpotifyPlaylist:
                 thumb=i['track']['album']['images'][0]['url'],
                 duration=i['track']['duration_ms'],
                 requester=requester,
-                playlist=playlist
+                playlist=playlist,
+                album=process_album_info(i)
             ) for i in data['tracks'] if i.get('track')]
 
 
@@ -89,10 +95,7 @@ async def process_spotify(bot: commands.bot, requester: disnake.Member, query: s
     if url_type == "track":
         t = bot.spotify.track(url_id)
 
-        album = {
-                "name": t['album']["name"],
-                "url": t['album']['external_urls']['spotify'],
-            }
+        album = process_album_info(t)
 
         return [SpotifyTrack(
             uri=t['external_urls']['spotify'],
