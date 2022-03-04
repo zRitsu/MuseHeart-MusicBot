@@ -124,7 +124,7 @@ class Owner(commands.Cog):
                     commit = l.replace("Updating ", "").replace("..", "...")
                     break
 
-            data = "[" + run_command(f"git log {commit} {git_format}")[:-1].replace("'", "\"") + "]"
+            data = "[" + run_command(f"git log {commit} {git_format}")[:-1].replace("\"", "\\\"").replace("'", "\"") + "]"
             try:
                 git_log = json.loads(data)
             except Exception:
@@ -168,9 +168,9 @@ class Owner(commands.Cog):
         if not self.bot.remote_git_url:
             self.bot.remote_git_url = self.bot.config["SOURCE_REPO"][:-4]
 
-        txt = f"🔰 ** | Atualizações recentes:**\n\n" + \
-              self.format_log(json.loads("[" + run_command(f"git log -{amount or 10} {git_format}")[:-1]
-                                         .replace("'", "\"") + "]"))
+        json_string = run_command(f"git log -{amount or 10} {git_format}")[:-1].replace("\"", "\\\"").replace("'", "\"")
+
+        txt = f"🔰 ** | Atualizações recentes:**\n\n" + self.format_log(json.loads("[" + json_string + "]"))
 
         if isinstance(ctx, commands.Context):
 
