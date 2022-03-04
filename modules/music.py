@@ -222,14 +222,16 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             if stage_perms.manage_roles:
                 await inter.guild.me.edit(suppress=False)
             else:
-                if player.command_log:
-                    player.command_log += "\n"
+
+                embed = disnake.Embed(color=self.bot.get_color(inter.guild.me))
 
                 if stage_perms.request_to_speak:
                     await inter.guild.me.request_to_speak()
-                    player.command_log += "**Nota:** Preciso que um staff aceite minha solicitação pra falar no palco."
+                    embed.description = f"Preciso que aceite minha solicitação pra falar no palco."
                 else:
-                    player.command_log += "**Nota:** não tenho autoridade de falar no palco automaticamente (preciso da permissão de um staff)"
+                    embed.description = f"Não tenho autoridade de falar no palco automaticamente (preciso da permissão de um staff)"
+
+                await inter.channel.send(inter.author.mention, embed=embed, delete_after=13)
 
 
     @check_voice()
