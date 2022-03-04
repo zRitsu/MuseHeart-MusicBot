@@ -221,13 +221,15 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             if stage_perms.manage_roles:
                 await inter.guild.me.edit(suppress=False)
-            elif stage_perms.request_to_speak:
-                await inter.guild.me.request_to_speak()
-
             else:
                 if player.command_log:
                     player.command_log += "\n"
-                player.command_log += "**Nota:** não tenho autoridade de falar no palco automaticamente (preciso da permissão de um staff)"
+
+                if stage_perms.request_to_speak:
+                    await inter.guild.me.request_to_speak()
+                    player.command_log += "**Nota:** Preciso que um staff aceite minha solicitação pra falar no palco."
+                else:
+                    player.command_log += "**Nota:** não tenho autoridade de falar no palco automaticamente (preciso da permissão de um staff)"
 
 
     @check_voice()
