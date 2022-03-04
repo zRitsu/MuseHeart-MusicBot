@@ -3,7 +3,6 @@ import os
 import shutil
 import subprocess
 import json
-import traceback
 from io import BytesIO
 from typing import Union
 import disnake
@@ -16,14 +15,16 @@ from utils.others import sync_message
 from utils.owner_panel import panel_command
 from utils.music.errors import GenericError
 
-if os.name == "nt":
-    q1 = "\"" ; q2 = "'"
-else:
-    q1 = "'" ; q2 = "\""
 
-git_format = f"--pretty=format:{q1}" + "{" + f"{q2}commit{q2}: {q2}%H{q2}, " \
-                                                f"{q2}abbreviated_commit{q2}: {q2}%h{q2}, " \
-                                                f"{q2}subject{q2}: {q2}%s{q2}" + "}" + q1 + ","
+os_quote = "\"" if os.name == "nt" else "'"
+git_format = f"--pretty=format:{os_quote}%H*****%h*****%s{os_quote}"
+
+def replaces(txt):
+
+    if os.name == "nt":
+        return txt.replace("\"", f"\\'").replace("'", "\"")
+
+    return txt.replace("\"", f"\\\"").replace("'", "\"")
 
 def run_command(cmd):
     return subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
@@ -124,12 +125,11 @@ class Owner(commands.Cog):
                     commit = l.replace("Updating ", "").replace("..", "...")
                     break
 
-            data = "[" + run_command(f"git log {commit} {git_format}")[:-1].replace("\"", "\\\"").replace("'", "\"") + "]"
-            try:
-                git_log = json.loads(data)
-            except Exception:
-                traceback.print_exc()
-                print("-"*30 + "\n" + data + "\n" + "-"*30)
+            data = run_command(f"git log {commit} {git_format}").split()
+
+            for d in data:
+                t = d.split("*****")
+                git_log.append({"commit": t[0], "abbreviated_commit": t[1], "subject": t[2]})
 
         text = "`Reinicie o bot após as alterações.`"
 
@@ -168,9 +168,15 @@ class Owner(commands.Cog):
         if not self.bot.remote_git_url:
             self.bot.remote_git_url = self.bot.config["SOURCE_REPO"][:-4]
 
-        json_string = run_command(f"git log -{amount or 10} {git_format}")[:-1].replace("\"", "\\\"").replace("'", "\"")
+        git_log = []
 
-        txt = f"🔰 ** | Atualizações recentes:**\n\n" + self.format_log(json.loads("[" + json_string + "]"))
+        data = run_command(f"git log -{amount or 10} {git_format}").split("\n")
+
+        for d in data:
+            t = d.split("*****")
+            git_log.append({"commit": t[0], "abbreviated_commit": t[1], "subject": t[2]})
+
+        txt = f"🔰 ** | Atualizações recentes:**\n\n" + self.format_log(git_log)
 
         if isinstance(ctx, commands.Context):
 
