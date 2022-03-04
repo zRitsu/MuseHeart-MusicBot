@@ -13,10 +13,13 @@ from typing import Optional
 spotify_regex = re.compile("https://open.spotify.com?.+(album|playlist|track)/([a-zA-Z0-9]+)")
 
 def process_album_info(track: dict):
-    return {
-        "name": track['album']["name"],
-        "url": track['album']['external_urls']['spotify']
-    }
+    try:
+        return {
+            "name": track['album']["name"],
+            "url": track['album']['external_urls']['spotify']
+        }
+    except KeyError:
+        return {}
 
 def fix_spotify_data(data: dict):
     try:
