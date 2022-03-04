@@ -77,7 +77,7 @@ class SpotifyTrack:
             traceback.print_exc()
 
 
-async def process_spotify(bot: commands.bot, requester: disnake.Member, query: str):
+async def process_spotify(bot: commands.bot, requester: disnake.Member, query: str, *, hide_playlist=False):
     if not (matches := spotify_regex.match(query)):
         return
 
@@ -122,7 +122,7 @@ async def process_spotify(bot: commands.bot, requester: disnake.Member, query: s
         data["playlistInfo"]["name"] = result['name']
         data["tracks"] = result['tracks']['items']
 
-    playlist = {"name": result['name'], "url": query}
+    playlist = {"name": result['name'], "url": query} if not hide_playlist else {}
 
     if data["tracks"]:
         return SpotifyPlaylist(data, requester=requester, playlist=playlist)

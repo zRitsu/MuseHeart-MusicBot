@@ -2093,7 +2093,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             if not node:
                 raise GenericError("Não há servidores de música disponível.")
 
-        tracks = await process_spotify(self.bot, user, query)
+        tracks = await process_spotify(self.bot, user, query, hide_playlist=hide_playlist)
 
         if not tracks:
 
