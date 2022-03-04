@@ -322,8 +322,10 @@ class Owner(commands.Cog):
 
         try:
             channel = ctx.guild.get_channel(int(static_player['channel'])) or ctx.channel
+            message = await channel.fetch_message(int(static_player.get('message_id')))
         except (KeyError, TypeError):
             channel = ctx.channel
+            message = None
 
         player: LavalinkPlayer = self.bot.music.get_player(
             node_id=node.identifier,
@@ -332,6 +334,7 @@ class Owner(commands.Cog):
             requester=ctx.author,
             guild=ctx.guild,
             channel=channel,
+            message=message,
             static=bool(static_player['channel'])
         )
 
