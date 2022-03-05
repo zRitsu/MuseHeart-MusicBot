@@ -104,7 +104,7 @@ class Misc(commands.Cog):
     async def about(
             self,
             inter: disnake.AppCmdInter,
-            hidden: bool = commands.Param(name="Modo oculto", description="Não exibir a mensagem do comando", default=False)
+            hidden: bool = commands.Param(name="modo_oculto", description="Não exibir a mensagem do comando", default=False)
     ):
 
         if not self.source_owner:
