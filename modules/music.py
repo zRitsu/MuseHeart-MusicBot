@@ -1789,7 +1789,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 player.command_log = f"{message.author.mention} adicionou [`{fix_characters(tracks[0].title, 20)}`]({tracks[0].uri}) `({duration})`."
 
         if not player.is_connected:
-            await self.connect(message)
+            await self.connect(message, message.author.voice.channel)
 
         if not player.current:
             await player.process_next()
