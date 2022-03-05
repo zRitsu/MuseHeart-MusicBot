@@ -50,7 +50,7 @@ def load(player: LavalinkPlayer) -> dict:
         queue_size = 20
         queue_text_size = 33
         queue_img = ""
-        playlist_text_size = 17
+        playlist_text_size = 20
         uploader_text_size = 22
 
         try:
