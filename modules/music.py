@@ -1716,7 +1716,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def parse_song_request(self, message, text_channel, data, *, response=None):
 
         if not message.author.voice:
-            raise GenericError(f"você deve entrar em um canal de voz para pedir uma música.")
+            raise GenericError("você deve entrar em um canal de voz para pedir uma música.")
+
+        if not message.author.voice.channel.permissions_for(message.guild.me).connect:
+            raise GenericError(f"Não tenho permissão para conectar no canal <{message.author.voice.channel.id}>")
+
+        if not message.author.voice.channel.permissions_for(message.guild.me).speak:
+            raise GenericError(f"Não tenho permissão para falar no canal <{message.author.voice.channel.id}>")
 
         try:
             if message.guild.me.voice.channel != message.author.voice.channel:
@@ -1783,7 +1789,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 player.command_log = f"{message.author.mention} adicionou [`{fix_characters(tracks[0].title, 20)}`]({tracks[0].uri}) `({duration})`."
 
         if not player.is_connected:
-            await player.connect(message.author.voice.channel.id)
+            await self.connect(message)
 
         if not player.current:
             await player.process_next()
