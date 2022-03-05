@@ -101,7 +101,11 @@ class Misc(commands.Cog):
 
 
     @commands.slash_command(description=f"{desc_prefix}Exibir informações sobre mim.")
-    async def about(self, inter: disnake.ApplicationCommandInteraction):
+    async def about(
+            self,
+            inter: disnake.AppCmdInter,
+            hidden: bool = commands.Param(name="Modo oculto", description="Não exibir a mensagem do comando", default=False)
+    ):
 
         if not self.source_owner:
             self.source_owner = await self.bot.get_or_fetch_user(815907450090946571)
@@ -162,7 +166,7 @@ class Misc(commands.Cog):
         if self.bot.config["HIDE_SOURCE_OWNER"] is not False and self.bot.owner.id == self.source_owner.id:
             embed.footer.text += f" | Source by: {self.source_owner}"
 
-        await inter.send(embed=embed)
+        await inter.send(embed=embed, ephemeral=hidden)
 
 
     @commands.slash_command(description=f"{desc_prefix}Exibir meu link de convite para você me adicionar no seu servidor.")
