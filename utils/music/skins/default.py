@@ -77,15 +77,11 @@ def load(player: LavalinkPlayer) -> dict:
     if player.nightcore:
         txt += f"\n> 🇳 **⠂Efeito nightcore:** `ativado`"
 
-    try:
+    if player.current.album:
         txt += f"\n> 💽 **⠂Álbum:** [`{fix_characters(player.current.album['name'], limit=playlist_text_size)}`]({player.current.album['url']})"
-    except KeyError:
-        pass
 
-    try:
+    if player.current.playlist:
         txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist['name'], limit=playlist_text_size)}`]({player.current.playlist['url']})"
-    except KeyError:
-        pass
 
     if player.nonstop:
         txt += "\n> ♾️ **⠂Modo interrupto:** `Ativado`"
