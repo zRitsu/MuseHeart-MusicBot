@@ -62,7 +62,7 @@ def load(player: LavalinkPlayer) -> dict:
         queue_size = 3
         queue_text_size = 31
         queue_img = "https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif"
-        playlist_text_size = 11
+        playlist_text_size = 13
         uploader_text_size = 17
 
 
