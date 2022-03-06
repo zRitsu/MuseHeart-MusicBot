@@ -81,7 +81,7 @@ class Misc(commands.Cog):
     @commands.Cog.listener("on_guild_join")
     async def guild_add(self, guild: disnake.Guild):
 
-        if not guild.system_channel:
+        if not guild.system_channel or guild.system_channel.permissions_for(guild.me).send_messages:
             return
 
         prefix = (await self.bot.db.get_data(guild.id, db_name="guilds"))["prefix"] or self.bot.default_prefix
@@ -92,7 +92,7 @@ class Misc(commands.Cog):
         )
 
         if cmd:=self.bot.get_slash_command("setup"):
-            embed.description += f"Se quiser, use o comando **/{cmd.name}** para criar um canal dedicado para pedir " \
+            embed.description += f"Caso queira, use o comando **/{cmd.name}** para criar um canal dedicado para pedir " \
                                  "músicas sem comandos e deixar o music player fixo no canal.\n\n"
 
         embed.description += f"Caso os comandos de barra (/) não apareçam, use o comando:\n{prefix}syncguild"
