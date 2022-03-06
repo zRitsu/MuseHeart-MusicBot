@@ -135,18 +135,16 @@ async def process_spotify(bot: BotCore, requester: disnake.Member, query: str, *
             t['album'] = {'images': [{'url': result['images'][0]['url']}]}
         data["tracks"] = [fix_spotify_data(i) for i in result['tracks']['items']]
 
-    else:
+    elif url_type == "artist":
+        result = bot.spotify.artist_top_tracks(url_id)
+        data["playlistInfo"]["name"] = "As mais tocadas de: " + [a["name"] for a in result["tracks"][0]["artists"] if a["id"] == url_id][0]
+        data["tracks"] = result["tracks"]
+        result["name"] = data["playlistInfo"]["name"]
 
-        if url_type == "artist":
-            result = bot.spotify.artist_top_tracks(url_id)
-            data["playlistInfo"]["name"] = "As mais tocadas de: " + [a["name"] for a in result["tracks"][0]["artists"] if a["id"] == url_id][0]
-            data["tracks"] = result["tracks"]
-            result["name"] = data["playlistInfo"]["name"]
-
-        else: # playlist
-            result = bot.spotify.playlist(playlist_id=url_id)
-            data["playlistInfo"]["name"] = result['name']
-            data["tracks"] = result['tracks']['items']
+    else: # playlist
+        result = bot.spotify.playlist(playlist_id=url_id)
+        data["playlistInfo"]["name"] = result['name']
+        data["tracks"] = result['tracks']['items']
 
     playlist = {"name": result['name'], "url": query} if not hide_playlist else {}
 
