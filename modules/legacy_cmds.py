@@ -308,8 +308,8 @@ class Owner(commands.Cog):
 
 
     @check_voice()
-    @commands.command(description='inicializar um player no servidor.', aliases=["sp", "spw"])
-    async def spawn(self, ctx: commands.Context):
+    @commands.command(description='inicializar um player no servidor.', aliases=["spawn", "sp", "spw", "smn"])
+    async def summon(self, ctx: commands.Context):
 
         try:
             self.bot.music.players[ctx.guild.id] #type ignore
