@@ -21,14 +21,15 @@ class ProgressBar:
 
 
 def sync_message(bot: BotCore):
-    invite_url = f"https://discord.com/api/oauth2/authorize?client_id={bot.user.id}&permissions=8&scope=bot" \
-                 f"%20applications.commands "
+    app_commands_invite = f"https://discord.com/api/oauth2/authorize?client_id={bot.user.id}&scope=applications.commands"
+    bot_invite = f"https://discord.com/api/oauth2/authorize?client_id={bot.user.id}&permissions=397287680080&scope=bot%" \
+                 f"20applications.commands"
 
-    return f"`Caso os comandos de barra não apareçam,` [`clique aqui`]({invite_url}) `para me permitir " \
+    return f"`Caso os comandos de barra não apareçam,` [`clique aqui`]({app_commands_invite}) `para me permitir " \
            "criar comandos de barra no servidor.`\n\n" \
            "`Nota: Em alguns casos os comandos de barra podem demorar até uma hora pra aparecer/atualizar em todos " \
            "os servidores. Caso queira usar os comandos de barra imediatamente no servidor você terá que " \
-           f"me expulsar do servidor e em seguida me adicionar novamente através deste` [`link`]({invite_url})..."
+           f"me expulsar do servidor e em seguida me adicionar novamente através deste` [`link`]({bot_invite})..."
 
 
 async def check_cmd(cmd, inter: Union[disnake.Interaction, disnake.ModalInteraction]):
