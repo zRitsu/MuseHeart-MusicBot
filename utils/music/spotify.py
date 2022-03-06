@@ -1,5 +1,5 @@
+from __future__ import annotations
 import disnake
-from disnake.ext import commands
 import re
 from .converters import fix_characters
 from wavelink import Node
@@ -7,10 +7,12 @@ import traceback
 from .errors import MissingSpotifyClient
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
+if TYPE_CHECKING:
+    from utils.client import BotCore
 
 
-spotify_regex = re.compile("https://open.spotify.com?.+(album|playlist|track)/([a-zA-Z0-9]+)")
+spotify_regex = re.compile("https://open.spotify.com?.+(album|playlist|artist|track)/([a-zA-Z0-9]+)")
 
 def process_album_info(track: dict):
     try:
@@ -34,17 +36,27 @@ class SpotifyPlaylist:
     def __init__(self, data: dict, requester: disnake.Member, *, playlist):
         self.data = data
 
-        self.tracks = [
-            SpotifyTrack(
-                uri=i['track']['external_urls']['spotify'],
-                authors=i['track']["artists"],
-                title=i['track']['name'],
-                thumb=i['track']['album']['images'][0]['url'],
-                duration=i['track']['duration_ms'],
-                requester=requester,
-                playlist=playlist,
-                album=process_album_info(i['track'])
-            ) for i in data['tracks'] if i.get('track')]
+        self.tracks = []
+
+        for i in data['tracks']:
+
+            try:
+                track = i['track']
+            except KeyError:
+                track = i
+
+            self.tracks.append(
+                SpotifyTrack(
+                    uri=track['external_urls']['spotify'],
+                    authors=track["artists"],
+                    title=track['name'],
+                    thumb=track['album']['images'][0]['url'],
+                    duration=track['duration_ms'],
+                    requester=requester,
+                    playlist=playlist,
+                    album=process_album_info(track)
+                )
+            )
 
 
 class SpotifyTrack:
@@ -86,7 +98,7 @@ class SpotifyTrack:
             traceback.print_exc()
 
 
-async def process_spotify(bot: commands.bot, requester: disnake.Member, query: str, *, hide_playlist=False):
+async def process_spotify(bot: BotCore, requester: disnake.Member, query: str, *, hide_playlist=False):
     if not (matches := spotify_regex.match(query)):
         return
 
@@ -123,10 +135,18 @@ async def process_spotify(bot: commands.bot, requester: disnake.Member, query: s
             t['album'] = {'images': [{'url': result['images'][0]['url']}]}
         data["tracks"] = [fix_spotify_data(i) for i in result['tracks']['items']]
 
-    else: # playlist
-        result = bot.spotify.playlist(playlist_id=url_id)
-        data["playlistInfo"]["name"] = result['name']
-        data["tracks"] = result['tracks']['items']
+    else:
+
+        if url_type == "artist":
+            result = bot.spotify.artist_top_tracks(url_id)
+            data["playlistInfo"]["name"] = "As mais tocadas de: " + [a["name"] for a in result["tracks"][0]["artists"] if a["id"] == url_id][0]
+            data["tracks"] = result["tracks"]
+            result["name"] = data["playlistInfo"]["name"]
+
+        else: # playlist
+            result = bot.spotify.playlist(playlist_id=url_id)
+            data["playlistInfo"]["name"] = result['name']
+            data["tracks"] = result['tracks']['items']
 
     playlist = {"name": result['name'], "url": query} if not hide_playlist else {}
 
