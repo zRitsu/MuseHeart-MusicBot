@@ -170,7 +170,7 @@ class LavalinkPlayer(wavelink.Player):
         if self.last_track:
             buttons.append(["⏮️", "back", "Tocar a música anterior"])
 
-        buttons.append(
+        buttons.extend(
             [
                 ["🛑", "stop", "Parar o player"],
                 ["🎶", "add_song", "Pedir uma música"],
