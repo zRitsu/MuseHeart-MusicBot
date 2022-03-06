@@ -165,27 +165,33 @@ class LavalinkPlayer(wavelink.Player):
 
         self.bot.loop.create_task(self.process_rpc(self.guild.me.voice.channel))
 
-        button_items = [
-                ["⏮️", "back", "Tocar a música anterior"],
+        buttons = []
+
+        if self.last_track:
+            buttons.append(["⏮️", "back", "Tocar a música anterior"])
+
+        buttons.append(
+            [
                 ["🛑", "stop", "Parar o player"],
                 ["🎶", "add_song", "Pedir uma música"],
                 ["⭐", "enqueue_fav", "Adicionar favorito na fila"]
             ]
+        )
 
         if len(self.played) > 1:
-            button_items.append(["↪️", "readd", f"Tocar todas as músicas novamente ({len(self.played)})"])
+            buttons.append(["↪️", "readd", f"Tocar todas as músicas novamente ({len(self.played)})"])
 
         components = [
             disnake.ui.Button(
                 emoji=button[0],
                 custom_id=f"musicplayer_{button[1]}",
                 style=disnake.ButtonStyle.grey,
-            ) for button in button_items
+            ) for button in buttons
         ]
 
         embed = disnake.Embed(
             description=f"**Não há músicas na fila. Adicione uma música ou use um dos botões abaixo**\n\n" +
-                        "\n".join(f"{b[0]} `= {b[2]}`" for b in button_items),
+                        "\n".join(f"{b[0]} `= {b[2]}`" for b in buttons),
             color=self.bot.get_color(self.guild.me)
         )
 
