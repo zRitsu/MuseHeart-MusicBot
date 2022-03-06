@@ -167,10 +167,10 @@ class LavalinkPlayer(wavelink.Player):
 
         buttons = []
 
-        if (played:=len(self.played)) == 1 or self.last_track:
+        if (played:=len(self.played)) or self.last_track:
             buttons.append(["⏮️", "back", "Tocar a música anterior"])
 
-        elif played > 1:
+        if played > 1:
             buttons.append(["↪️", "readd", f"Tocar todas as músicas novamente ({len(self.played)})"])
 
         buttons.extend(
