@@ -367,7 +367,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                         custom_id=f"track_selection_{inter.id}",
                         options=[
                             disnake.SelectOption(
-                                label=t.title,
+                                label=t.title[:99],
                                 value=f"track_select_{n}",
                                 description=f"{t.author} [{time_format(t.duration)}]")
                             for n, t in enumerate(tracks[:25])
