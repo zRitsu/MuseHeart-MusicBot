@@ -1415,12 +1415,15 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                     await interaction.response.defer()
 
-                    opts = [disnake.SelectOption(label=f, value=f) for f in (await fav_list(interaction, ""))]
+                    opts = [disnake.SelectOption(label=f, value=f, emoji="<:play:734221719774035968>")
+                            for f in (await fav_list(interaction, ""))]
 
                     if not opts:
                         await self.player_interaction_concurrency.release(interaction)
                         raise GenericError("**Você não possui favoritos...\n"
                                            "Adicione um usando o comando /fav add**")
+
+                    opts.append(disnake.SelectOption(label="Cancelar", value="cancel", emoji="❌"))
 
                     components = [
                         disnake.ui.Select(
@@ -1433,7 +1436,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                         embed=disnake.Embed(
                             color=self.bot.get_color(interaction.guild.me),
                             description="**Selecione um favorito:**"
-                        ),
+                        ).set_footer(text="Você tem apenas 45 segundos para escolher!"),
                         components=components,
                         ephemeral=True
                     )
@@ -1441,20 +1444,30 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     try:
                         select_interaction: disnake.MessageInteraction = await self.bot.wait_for(
                             "dropdown",
-                            timeout=30,
+                            timeout=45,
                             check=lambda i: i.author == interaction.author and i.data.custom_id == f"enqueue_fav_{interaction.id}"
                         )
                     except asyncio.TimeoutError:
                         await self.player_interaction_concurrency.release(interaction)
-                        raise GenericError("Tempo esgotado!")
+                        return
+
+                    await self.player_interaction_concurrency.release(interaction)
+
+                    if select_interaction.data.values[0] == "cancel":
+                        await select_interaction.response.edit_message(
+                            embed=disnake.Embed(
+                                description="**Seleção cancelada!**",
+                                color=self.bot.get_color(interaction.guild.me)
+                            ),
+                            components=None
+                        )
+                        return
 
                     interaction.token = select_interaction.token
                     interaction.id = select_interaction.id
                     interaction.response = select_interaction.response
 
                     query = f"> fav: {select_interaction.data.values[0]}"
-
-                    await self.player_interaction_concurrency.release(interaction)
 
                     player: LavalinkPlayer = self.bot.music.players.get(interaction.guild.id)
 
