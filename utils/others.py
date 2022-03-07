@@ -56,16 +56,14 @@ async def send_message(
 
     # correção temporária usando variavel kwargs.
     kwargs = {}
+
     if embed:
         kwargs["embed"] = embed
 
-    if components:
-        kwargs["components"] = components
-
     if inter.response.is_done():
-        await inter.edit_original_message(content=text, **kwargs)
+        await inter.edit_original_message(content=text, components=components, **kwargs)
     else:
-        await inter.send(text, ephemeral=True, **kwargs)
+        await inter.send(text, components=components, ephemeral=True, **kwargs)
 
 
 async def send_idle_embed(target: Union[disnake.Message, disnake.TextChannel, disnake.Thread], text="", *, bot: BotCore):
