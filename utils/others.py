@@ -63,7 +63,11 @@ async def send_message(
     if inter.response.is_done():
         await inter.edit_original_message(content=text, components=components, **kwargs)
     else:
-        await inter.send(text, components=components, ephemeral=True, **kwargs)
+
+        if components:
+            kwargs["components"] = components
+
+        await inter.send(text, ephemeral=True, **kwargs)
 
 
 async def send_idle_embed(target: Union[disnake.Message, disnake.TextChannel, disnake.Thread], text="", *, bot: BotCore):
