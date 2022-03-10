@@ -2,6 +2,7 @@ from __future__ import annotations
 import disnake
 import re
 from .converters import fix_characters
+from functools import partial
 from wavelink import Node
 import traceback
 from .errors import MissingSpotifyClient
@@ -98,7 +99,12 @@ class SpotifyTrack:
             traceback.print_exc()
 
 
+def query_spotify_track(func, url_id: str):
+    return func(url_id)
+
+
 async def process_spotify(bot: BotCore, requester: disnake.Member, query: str, *, hide_playlist=False):
+
     if not (matches := spotify_regex.match(query)):
         return
 
@@ -108,16 +114,18 @@ async def process_spotify(bot: BotCore, requester: disnake.Member, query: str, *
     url_type, url_id = matches.groups()
 
     if url_type == "track":
-        t = bot.spotify.track(url_id)
 
-        album = process_album_info(t)
+        query_func = partial(query_spotify_track, bot.spotify.track, url_id)
+        result = await bot.loop.run_in_executor(None, query_func)
+
+        album = process_album_info(result)
 
         return [SpotifyTrack(
-            uri=t['external_urls']['spotify'],
-            authors=t["artists"],
-            title=t['name'],
-            thumb=t['album']['images'][0]['url'],
-            duration=t['duration_ms'],
+            uri=result['external_urls']['spotify'],
+            authors=result["artists"],
+            title=result['name'],
+            thumb=result['album']['images'][0]['url'],
+            duration=result['duration_ms'],
             album=album,
             requester=requester
         )]
@@ -129,20 +137,29 @@ async def process_spotify(bot: BotCore, requester: disnake.Member, query: str, *
     }
 
     if url_type == "album":
-        result = bot.spotify.album(url_id)
+
+        query_func = partial(query_spotify_track, bot.spotify.album, url_id)
+        result = await bot.loop.run_in_executor(None, query_func)
+
         data["playlistInfo"]["name"] = result['name']
         for t in result['tracks']['items']:
             t['album'] = {'images': [{'url': result['images'][0]['url']}]}
         data["tracks"] = [fix_spotify_data(i) for i in result['tracks']['items']]
 
     elif url_type == "artist":
-        result = bot.spotify.artist_top_tracks(url_id)
+
+        query_func = partial(query_spotify_track, bot.spotify.artist_top_tracks, url_id)
+        result = await bot.loop.run_in_executor(None, query_func)
+
         data["playlistInfo"]["name"] = "As mais tocadas de: " + [a["name"] for a in result["tracks"][0]["artists"] if a["id"] == url_id][0]
         data["tracks"] = result["tracks"]
         result["name"] = data["playlistInfo"]["name"]
 
     else: # playlist
-        result = bot.spotify.playlist(playlist_id=url_id)
+
+        query_func = partial(query_spotify_track, bot.spotify.playlist, url_id)
+        result = await bot.loop.run_in_executor(None, query_func)
+
         data["playlistInfo"]["name"] = result['name']
         data["tracks"] = result['tracks']['items']
 
