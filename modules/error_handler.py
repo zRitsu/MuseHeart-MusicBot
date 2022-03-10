@@ -131,7 +131,6 @@ class ErrorHandler(commands.Cog):
             )
             return
 
-
         image_url = inter.text_values["image_url"]
 
         if image_url and not URL_REG.match(image_url):
@@ -158,7 +157,7 @@ class ErrorHandler(commands.Cog):
             embed=disnake.Embed(
                 description="**Erro reportado com sucesso!**",
                 color=self.bot.get_color(inter.guild.me)
-            )
+            ), ephemeral=True
         )
 
         try:
