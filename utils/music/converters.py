@@ -101,14 +101,11 @@ def queue_tracks(inter, query):
         return
 
     try:
-        inter.player
-    except:
-        inter.player = inter.bot.music.players.get(inter.guild.id)
-
-    if not inter.player:
+        player = inter.bot.music.players[inter.guild.id]
+    except KeyError:
         return
 
-    return [track.title for track in inter.player.queue if query.lower() in track.title.lower()][:20]
+    return [track.title for track in player.queue if query.lower() in track.title.lower()][:20]
 
 
 def queue_playlist(inter, query):
@@ -117,14 +114,11 @@ def queue_playlist(inter, query):
         return
 
     try:
-        inter.player
-    except:
-        inter.player = inter.bot.music.players.get(inter.guild.id)
-
-    if not inter.player:
+        player = inter.bot.music.players[inter.guild.id]
+    except KeyError:
         return
 
-    return list(set([track.playlist['name'] for track in inter.player.queue if track.playlist and
+    return list(set([track.playlist['name'] for track in player.queue if track.playlist and
                                query.lower() in track.playlist['name'].lower()]))[:20]
 
 
@@ -148,14 +142,11 @@ def queue_author(inter, query):
         return
 
     try:
-        inter.player
-    except:
-        inter.player = inter.bot.music.players.get(inter.guild.id)
-
-    if not inter.player:
+        player = inter.bot.music.players[inter.guild.id]
+    except KeyError:
         return
 
-    return list(set([track.author for track in inter.player.queue if query.lower() in track.author.lower()]))[:20]
+    return list(set([track.author for track in player.queue if query.lower() in track.author.lower()]))[:20]
 
 
 def seek_suggestions(inter, query):
@@ -164,25 +155,22 @@ def seek_suggestions(inter, query):
         return
 
     try:
-        inter.player
-    except:
-        inter.player = inter.bot.music.players.get(inter.guild.id)
-
-    if not inter.player or not inter.player.current:
+        player = inter.bot.music.players[inter.guild.id]
+    except KeyError:
         return
 
-    if inter.player.current.is_stream:
+    if not player.current or player.current.is_stream:
         return
 
     seeks = []
 
-    if inter.player.current.duration >= 90000:
+    if player.current.duration >= 90000:
         times = [int(n * 0.5 * 10) for n in range(20)]
     else:
         times = [int(n * 1 * 10) for n in range(20)]
 
     for p in times:
-        percent = percentage(p, inter.player.current.duration)
+        percent = percentage(p, player.current.duration)
         seeks.append(f"{time_format(percent)} | {p}%")
 
     return seeks

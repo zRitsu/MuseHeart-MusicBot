@@ -185,7 +185,10 @@ class MusicSettings(commands.Cog):
 
             txt = f"Região: `{node.region.title()}`\n"
 
-            current_player = True if node.players.get(inter.guild.id) else False
+            try:
+                current_player = node.players[inter.guild.id]
+            except KeyError:
+                current_player = None
 
             if node.stats:
                 used = humanize.naturalsize(node.stats.memory_used)

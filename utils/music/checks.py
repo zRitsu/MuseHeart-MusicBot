@@ -9,11 +9,8 @@ def has_player():
     def predicate(inter):
 
         try:
-            inter.player
-        except AttributeError:
-            inter.player = inter.bot.music.players.get(inter.guild.id)
-
-        if not inter.player:
+            inter.bot.music.players[inter.guild.id]
+        except KeyError:
             raise NoPlayer()
 
         return True
@@ -49,20 +46,21 @@ def is_requester():
 
     async def predicate(inter):
 
-        inter.player = inter.bot.music.players.get(inter.guild.id)
-
-        if not inter.player:
+        try:
+            player = inter.bot.music.players[inter.guild.id]
+        except KeyError:
             raise NoPlayer()
 
-        if not inter.player.current:
+        if not player.current:
             raise NoSource()
 
-        if inter.player.current.requester == inter.author:
+        if player.current.requester == inter.author:
             return True
 
         try:
             if await has_perm(inter):
                 return True
+
         except NotDJorStaff:
             pass
 
@@ -75,14 +73,14 @@ def check_voice():
 
     def predicate(inter):
 
+        if not inter.author.voice:
+            raise NoVoice()
+
         try:
             if inter.author.voice.channel != inter.guild.me.voice.channel:
                 raise DiffVoiceChannel()
         except AttributeError:
             pass
-
-        if not inter.author.voice:
-            raise NoVoice()
 
         if not inter.guild.me.voice:
 
@@ -101,14 +99,11 @@ def has_source():
     def predicate(inter):
 
         try:
-            inter.player
-        except:
-            inter.player = inter.bot.music.players.get(inter.guild.id)
-
-        if not inter.player:
+            player = inter.bot.music.players[inter.guild.id]
+        except KeyError:
             raise NoPlayer()
 
-        if not inter.player.current:
+        if not player.current:
             raise NoSource()
 
         return True
@@ -133,12 +128,8 @@ def user_cooldown(rate: int, per: int):
 async def has_perm(inter):
 
     try:
-        player = inter.player
-    except AttributeError:
-        inter.player = inter.bot.music.players.get(inter.guild.id)
-        player = inter.player
-
-    if not player:
+        player = inter.bot.music.players[inter.guild.id]
+    except KeyError:
         return True
 
     if inter.author in player.dj:
