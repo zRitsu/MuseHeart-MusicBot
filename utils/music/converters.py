@@ -5,6 +5,7 @@ from fake_useragent import UserAgent
 import disnake
 import re
 import json
+from utils.music.errors import NoPlayer
 
 URL_REG = re.compile(r'https?://(?:www\.)?.+')
 YOUTUBE_VIDEO_REG = re.compile(r"(https?://)?(www\.)?youtube\.(com|nl)/watch\?v=([-\w]+)")
@@ -262,10 +263,14 @@ def percentage(part, whole):
   return int((part * whole) / 100.0)
 
 
-def get_track_index(ctx: disnake.ApplicationCommandInteraction, query: str):
+def get_track_index(inter: disnake.ApplicationCommandInteraction, query: str):
+
     index = None
 
-    player = ctx.player
+    try:
+        player = inter.bot.music.players[inter.guild.id]
+    except KeyError:
+        raise NoPlayer()
 
     for counter, track in enumerate(player.queue):
 
