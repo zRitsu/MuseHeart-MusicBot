@@ -1478,7 +1478,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     query = f"> fav: {select_interaction.data.values[0]}"
 
                     try:
-                        player: LavalinkPlayer = self.bot.music.player[interaction.guild.id]
+                        player: LavalinkPlayer = self.bot.music.players[interaction.guild.id]
                     except KeyError:
                         raise NoPlayer()
 
