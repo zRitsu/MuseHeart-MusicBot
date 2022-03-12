@@ -1642,11 +1642,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         try:
-            player: LavalinkPlayer = self.bot.music.players[message.guild.id]
+            player: Optional[LavalinkPlayer] = self.bot.music.players[message.guild.id]
             if player.text_channel == message.channel:
                 player.last_message_id = message.id
         except (AttributeError, KeyError):
-            pass
+            player: Optional[LavalinkPlayer] = None
 
         if player and isinstance(message.channel, disnake.Thread) and not player.static:
 
