@@ -64,7 +64,7 @@ class WavelinkVoiceClient(disnake.VoiceClient):
 
 class LavalinkTrack(wavelink.Track):
 
-    __slots__ = ('requester', 'playlist', 'track_loops', 'album')
+    __slots__ = ('requester', 'playlist', 'track_loops', 'album', 'single_title', 'authors_md', 'authors_string')
 
     def __init__(self, *args, **kwargs):
         self.requester = kwargs.pop('requester')
@@ -73,6 +73,9 @@ class LavalinkTrack(wavelink.Track):
         self.album = {}
         args[1]['title'] = fix_characters(args[1]['title'])
         super().__init__(*args, **kwargs)
+        self.single_title = self.title
+        self.authors_md = f"`{self.author}`"
+        self.authors_string = self.author
 
         if self.ytid:
             self.thumb = f"https://img.youtube.com/vi/{self.ytid}/mqdefault.jpg"
@@ -481,9 +484,9 @@ class LavalinkPlayer(wavelink.Player):
 
             stats["track"] = {
                 "thumb": track.thumb,
-                "title": track.title,
+                "title": track.single_title,
                 "url": track.uri,
-                "author": track.author,
+                "author": track.authors_string,
                 "duration": track.duration,
                 "stream": track.is_stream,
                 "position": self.position,

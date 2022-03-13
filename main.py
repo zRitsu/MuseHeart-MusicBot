@@ -1,3 +1,5 @@
+import traceback
+
 import disnake
 from disnake.ext import commands
 import asyncio
@@ -114,6 +116,12 @@ def load_bot(bot_name: str, token: str, main=False):
 
             bot.db = MongoDatabase(bot=bot, token=mongo_key, name=str(bot.user.id)) if mongo_key \
                 else LocalDatabase(bot, rename_db=main and path.isfile("./database.json"))
+
+            if spotify:
+                try:
+                    await bot.spotify.authorize()
+                except Exception:
+                    traceback.print_exc()
 
             bot.loop.create_task(bot.ws_client.ws_loop())
 

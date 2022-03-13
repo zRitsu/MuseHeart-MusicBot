@@ -6,10 +6,10 @@ import aiohttp
 from disnake.ext import commands
 import disnake
 from typing import Optional, Union
-from spotipy import Spotify
 from web_app import WSClient
 from .music.models import music_mode
 from utils.db import MongoDatabase, LocalDatabase
+from asyncspotify import Client as SpotifyClient
 import os
 import traceback
 
@@ -25,7 +25,7 @@ class BotCore(commands.AutoShardedBot):
         self.db: Optional[LocalDatabase, MongoDatabase] = None
         self.config = kwargs.pop('config', {})
         self.default_prefix = kwargs.pop("default_prefix", "!!!")
-        self.spotify: Spotify = kwargs.pop('spotify', None)
+        self.spotify: Optional[SpotifyClient] = kwargs.pop('spotify', None)
         self.music = music_mode(self)
         self.session = aiohttp.ClientSession()
         self.color = kwargs.pop("embed_color", None)

@@ -51,7 +51,6 @@ def load(player: LavalinkPlayer) -> dict:
         queue_text_size = 33
         queue_img = ""
         playlist_text_size = 20
-        uploader_text_size = 22
 
         try:
             vc_txt = f"\n> *️⃣ **⠂Canal de voz:** [`{player.guild.me.voice.channel.name}`](http://discordapp.com/channels/{player.guild.id}/{player.guild.me.voice.channel.id})"
@@ -63,11 +62,9 @@ def load(player: LavalinkPlayer) -> dict:
         queue_text_size = 31
         queue_img = "https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif"
         playlist_text_size = 13
-        uploader_text_size = 17
 
-
-    txt = f"[`{player.current.title}`]({player.current.uri})\n\n" \
-          f"> 💠 **⠂Por:** `{fix_characters(player.current.author, uploader_text_size)}`\n" \
+    txt = f"[`{player.current.single_title}`]({player.current.uri})\n\n" \
+          f"> 💠 **⠂Por:** {player.current.authors_md}\n" \
           f"> ✋ **⠂Pedido por:** {player.current.requester.mention}\n" \
           f"> 🔊 **⠂Volume:** `{player.volume}%`"
 
