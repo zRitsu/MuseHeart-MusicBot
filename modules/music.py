@@ -1170,7 +1170,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             user: disnake.Member = commands.Param(name='usuário', description="Incluir músicas pedidas pelo usuário selecionado.", default=None),
             playlist: str = commands.Param(description="Incluir nome que tiver na playlist.", autocomplete=queue_playlist, default=None),
             time_below: str = commands.Param(name="duração_abaixo_de", description="incluir músicas com duração abaixo do tempo definido (ex. 1:23).", default=None),
-            time_above: str = commands.Param(name="duração_acima_de", description="incluir músicas com duração acima do tempo definido (ex. 1:45).", default=None)
+            time_above: str = commands.Param(name="duração_acima_de", description="incluir músicas com duração acima do tempo definido (ex. 1:45).", default=None),
+            range_start: int = commands.Param(name="pos_inicial", description="incluir músicas da fila a partir de uma posição específica da fila.", min_value=1.0, max_value=500.0, default=None),
+            range_end: int = commands.Param(name="pos_final", description="incluir músicas da fila até uma posição específica da fila.", min_value=1.0, max_value=500.0, default=None)
     ):
 
         player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
@@ -1200,15 +1202,29 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             filters.append('time_above')
             time_above = string_to_seconds(time_above) * 1000
 
-        if not filters:
+        if not filters and not range_start and not range_end:
             player.queue.clear()
             txt = ['limpou a fila de música.', '**Fila limpa com sucesso.**']
 
         else:
 
+            if range_start and range_end:
+
+                if range_start >= range_end:
+                    raise GenericError("**A posição final deve ser maior que a posição inicial!**")
+
+                song_list = list(player.queue)[range_start-1: range_end-1]
+
+            elif range_start:
+                song_list = list(player.queue)[range_start-1:]
+            elif range_end:
+                song_list = list(player.queue)[:range_end-1]
+            else:
+                song_list = list(player.queue)
+
             deleted_tracks = 0
 
-            for t in list(player.queue):
+            for t in song_list:
 
                 temp_filter = list(filters)
 
