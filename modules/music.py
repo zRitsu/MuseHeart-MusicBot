@@ -1492,11 +1492,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                     query = f"> fav: {select_interaction.data.values[0]}"
 
-                    try:
-                        player: LavalinkPlayer = self.bot.music.players[interaction.guild.id]
-                    except KeyError:
-                        raise NoPlayer()
-
                     control = "play"
 
                     kwargs.update(
@@ -1511,6 +1506,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                             "server": None
                         }
                     )
+
+                player: Optional[LavalinkPlayer] = self.bot.music.players.get(interaction.guild.id)
 
             else:
 
