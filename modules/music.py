@@ -1013,7 +1013,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if player.static:
             await inter.send("este comando não pode ser usado no modo fixo do player.", ephemeral=True)
             return
-        
+
         if player.has_thread:
             embed = disnake.Embed(
                     color=self.bot.get_color(inter.guild.me),
@@ -1120,7 +1120,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.dynamic_cooldown(user_cooldown(1, 5), commands.BucketType.guild)
     @q.sub_command(description=f"{desc_prefix}Inverter a ordem das músicas na fila")
     async def reverse(self, inter: disnake.ApplicationCommandInteraction):
-        
+
         player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
 
         if len(player.queue) < 2:
@@ -1176,7 +1176,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     ):
 
         player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
-        
+
         if not player.queue:
             await inter.send("Não há musicas na fila.", ephemeral=True)
             return
@@ -1848,7 +1848,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         for m in list(sys.modules):
             if m.startswith("utils.music"):
                 del sys.modules[m]
-    
+
     async def cog_before_message_command_invoke(self, inter):
         await self.cog_before_slash_command_invoke(inter)
 
@@ -2021,11 +2021,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await player.destroy()
             return
 
-        if payload.code in [
-            4000, # internal error
+        if payload.code in (
+            4000,  # internal error
             1006,
-            4005 # Already authenticated.
-        ]:
+            1001,
+            4005  # Already authenticated.
+        ):
             await asyncio.sleep(3)
 
             await player.connect(player.channel_id)
