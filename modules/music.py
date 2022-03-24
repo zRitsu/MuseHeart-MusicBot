@@ -1429,11 +1429,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                     return
 
-                else: # enqueue_fav
+                else:  # enqueue_fav
 
                     try:
                         await self.player_interaction_concurrency.acquire(interaction)
-                    except:
+                    except Exception:
                         raise GenericError("**Você já tem uma interação em aberto...**")
 
                     await interaction.response.defer()
@@ -1584,7 +1584,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             )
 
         except Exception as e:
-            self.bot.dispatch('slash_command_error', interaction, e)
+            self.bot.dispatch('slash_command_error', interaction, e, edit=False)
 
 
     @commands.Cog.listener("on_modal_submit")
@@ -1620,7 +1620,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 subcmd="",
             )
         except Exception as e:
-            self.bot.dispatch('slash_command_error', inter, e)
+            self.bot.dispatch('slash_command_error', inter, e, edit=False)
 
 
     @commands.Cog.listener("on_message")

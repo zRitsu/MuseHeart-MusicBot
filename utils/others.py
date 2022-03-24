@@ -51,7 +51,8 @@ async def send_message(
         text=None,
         *,
         embed: disnake.Embed = None,
-        components: Optional = None,
+        components: Optional[list] = None,
+        edit: bool = True
 ):
 
     # correção temporária usando variavel kwargs.
@@ -60,7 +61,7 @@ async def send_message(
     if embed:
         kwargs["embed"] = embed
 
-    if inter.response.is_done():
+    if inter.response.is_done() and edit:
         await inter.edit_original_message(content=text, components=components, **kwargs)
     else:
 

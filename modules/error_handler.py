@@ -38,7 +38,7 @@ class ErrorHandler(commands.Cog):
     @commands.Cog.listener('on_user_command_error')
     @commands.Cog.listener('on_message_command_error')
     @commands.Cog.listener('on_slash_command_error')
-    async def on_interaction_command_error(self, inter: disnake.ApplicationCommandInteraction, error: Exception):
+    async def on_interaction_command_error(self, inter: disnake.AppCmdInter, error: Exception, **kwargs):
 
         embed = disnake.Embed(color=disnake.Colour.red())
 
@@ -53,7 +53,12 @@ class ErrorHandler(commands.Cog):
             components = None
             embed.description = error_msg
 
-        await send_message(inter, text=inter.author.mention, embed=embed, components=components)
+        try:
+            edit = kwargs["edit"]
+        except KeyError:
+            edit = True
+
+        await send_message(inter, text=inter.author.mention, embed=embed, components=components, edit=edit)
 
 
     @commands.Cog.listener("on_command_error")
