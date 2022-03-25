@@ -1584,7 +1584,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             )
 
         except Exception as e:
-            self.bot.dispatch('slash_command_error', interaction, e, edit=False)
+            self.bot.dispatch('interaction_player_error', interaction, e)
 
 
     @commands.Cog.listener("on_modal_submit")
@@ -1620,7 +1620,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 subcmd="",
             )
         except Exception as e:
-            self.bot.dispatch('slash_command_error', inter, e, edit=False)
+            self.bot.dispatch('interaction_player_error', inter, e)
 
 
     @commands.Cog.listener("on_message")
