@@ -1593,25 +1593,26 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if inter.custom_id != "modal_add_song":
             return
 
-        query = inter.text_values["song_input"]
-
         try:
-            player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
-        except KeyError:
-            raise NoPlayer()
 
-        kwargs = {
-            "query": query,
-            "position": 0,
-            "options": False,
-            "manual_selection": True,
-            "source": "ytsearch",
-            "repeat_amount": 0,
-            "hide_playlist": False,
-            "server": None
-        }
+            try:
+                player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+            except KeyError:
+                raise NoPlayer()
 
-        try:
+            query = inter.text_values["song_input"]
+
+            kwargs = {
+                "query": query,
+                "position": 0,
+                "options": False,
+                "manual_selection": True,
+                "source": "ytsearch",
+                "repeat_amount": 0,
+                "hide_playlist": False,
+                "server": None
+            }
+
             await self.process_player_interaction(
                 interaction = inter,
                 player = player,
