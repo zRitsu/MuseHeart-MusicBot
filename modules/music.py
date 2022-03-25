@@ -1360,7 +1360,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def process_player_interaction(
             self,
             interaction: Union[disnake.MessageInteraction, disnake.ModalInteraction],
-            player: LavalinkPlayer,
             control: str,
             subcmd: str,
             kwargs: dict
@@ -1371,11 +1370,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not cmd:
             raise GenericError(f"comando {control} não encontrado/implementado.")
 
-        try:
-            interaction.player = player
-        except:
-            pass
-
         await check_cmd(cmd, interaction)
 
         if subcmd:
@@ -1385,10 +1379,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await cmd(interaction, **kwargs)
 
         try:
+            player: LavalinkPlayer = self.bot.music.players[interaction.guild.id]
             player.interaction_cooldown = True
             await asyncio.sleep(1)
             player.interaction_cooldown = False
-        except AttributeError:
+        except (KeyError, AttributeError):
             pass
 
 
@@ -1507,8 +1502,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                         }
                     )
 
-                player: Optional[LavalinkPlayer] = self.bot.music.players.get(interaction.guild.id)
-
             else:
 
                 try:
@@ -1577,7 +1570,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             await self.process_player_interaction(
                 interaction = interaction,
-                player = player,
                 control = control,
                 subcmd = subcmd,
                 kwargs = kwargs
@@ -1595,11 +1587,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         try:
 
-            try:
-                player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
-            except KeyError:
-                raise NoPlayer()
-
             query = inter.text_values["song_input"]
 
             kwargs = {
@@ -1615,7 +1602,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             await self.process_player_interaction(
                 interaction = inter,
-                player = player,
                 control = "play",
                 kwargs=kwargs,
                 subcmd="",
