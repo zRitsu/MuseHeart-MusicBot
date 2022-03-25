@@ -57,9 +57,9 @@ def load_config():
         ##### {uptime} -> uptime do bot.                                                        #####
         #############################################################################################
 
-        "LISTENING_PRESENCES": "Músicas || /play",
-        "WATCHING_PRESENCES": "{users} usuário(s)",
-        "PLAYING_PRESENCES": "Em {guilds} servidor(es) || Estou online há: {uptime}",
+        "LISTENING_PRESENCES": "",
+        "WATCHING_PRESENCES": "",
+        "PLAYING_PRESENCES": "",
 
         ##############################
         ### Local lavalink stuffs: ###
