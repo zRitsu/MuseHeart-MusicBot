@@ -38,7 +38,7 @@ class ErrorHandler(commands.Cog):
     @commands.Cog.listener('on_interaction_player_error')
     async def on_inter_player_error(self, inter: disnake.AppCmdInter, error: Exception):
 
-        await self.process_interaction_error(inter=inter, error=error, edit=False)
+        await self.process_interaction_error(inter=inter, error=error)
 
 
     @commands.Cog.listener('on_user_command_error')
@@ -46,10 +46,10 @@ class ErrorHandler(commands.Cog):
     @commands.Cog.listener('on_slash_command_error')
     async def on_interaction_command_error(self, inter: disnake.AppCmdInter, error: Exception):
 
-        await self.process_interaction_error(inter=inter, error=error, edit=True)
+        await self.process_interaction_error(inter=inter, error=error)
 
 
-    async def process_interaction_error(self, inter: disnake.AppCmdInter, error: Exception, edit=True):
+    async def process_interaction_error(self, inter: disnake.AppCmdInter, error: Exception):
 
         embed = disnake.Embed(color=disnake.Colour.red())
 
@@ -64,7 +64,7 @@ class ErrorHandler(commands.Cog):
             components = None
             embed.description = error_msg
 
-        await send_message(inter, text=inter.author.mention, embed=embed, components=components, edit=edit)
+        await send_message(inter, text=inter.author.mention, embed=embed, components=components)
 
 
     @commands.Cog.listener("on_command_error")
