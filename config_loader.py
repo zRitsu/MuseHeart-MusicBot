@@ -30,7 +30,7 @@ def load_config():
         "OWNER_IDS": "", # ID de usuário pra lista de owner/dono do bot, caso use mais de 1 id separe por || (Qualquer id que for colocado na lista vai permitir o membro ter acesso total ao bot, tome cuidado!).
         "IDLE_TIMEOUT": 180, # Tempo em segundos pro bot aguardar por novas músicas no modo de espera.
         "COMMAND_LOG": False, # Ativar/Desativar log de comandos.
-        "RPC_SERVER": "ws://localhost:8080/ws", # Link do servidor RPC (pra status do membro), caso não tenha será usado localmente.
+        "RPC_SERVER": "ws://localhost:$PORT/ws", # Link do servidor RPC (pra status do membro), caso não tenha será usado localmente.
         "EMBED_COLOR": None, # cor da embed do player (caso não tenha será usado a cor do cargo do bot).
         "MAX_USER_FAVS": 10, # limiite de favoritos por membro (0 ou menor que isso = sem limites)
         "USER_FAV_MAX_NAME_LENGTH": 35,  # limite de caracteres no nome de playlists.
@@ -137,6 +137,8 @@ def load_config():
             CONFIGS[i] = bools[CONFIGS[i]]
         except KeyError:
             raise Exception(f"Você usou uma configuração inválida! {i}: {CONFIGS[i]}")
+
+    CONFIGS["RPC_SERVER"] = CONFIGS["RPC_SERVER"].replace("$PORT", environ.get("PORT", "8080"))
 
     if CONFIGS["PRESENCE_INTERVAL"] < 300:
         CONFIGS["PRESENCE_INTERVAL"] = 300

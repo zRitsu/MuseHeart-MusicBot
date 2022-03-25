@@ -239,7 +239,7 @@ class WSClient:
                             users.remove(i)
 
 
-def run_app(bots:list = None, ws_url = "http://localhost:8080/ws"):
+def run_app(bots:list = None, ws_url = f"http://localhost:{environ.get('PORT', 8080)}/ws"):
 
     try:
         # repl.it stuff
