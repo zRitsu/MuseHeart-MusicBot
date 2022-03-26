@@ -308,10 +308,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         tracks, node = await self.get_tracks(query, inter.user, node=node, track_loops=repeat_amount,
                                              hide_playlist=hide_playlist)
 
-        try:
-            skin = self.bot.check_skin(guild_data["player_controller"]["skin"])
-        except:
-            skin = self.bot.default_skin
+        skin = self.bot.check_skin(guild_data["player_controller"]["skin"])
 
         player: LavalinkPlayer = self.bot.music.get_player(
             guild_id=inter.guild.id,

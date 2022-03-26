@@ -69,8 +69,8 @@ class BotCore(commands.AutoShardedBot):
 
     def check_skin(self, skin: str):
 
-        if not skin in self.player_skins:
-            return "default"
+        if skin is None or skin == "default" or skin not in self.player_skins:
+            return self.default_skin
 
         return skin
 

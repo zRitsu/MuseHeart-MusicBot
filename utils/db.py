@@ -18,7 +18,7 @@ db_models = {
         "player_controller": {
             "channel": None,
             "message_id": None,
-            "skin": "default"
+            "skin": None
         },
         "check_other_bots_in_vc": False,
         "djroles": []
