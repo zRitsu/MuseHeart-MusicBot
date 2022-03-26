@@ -1,5 +1,5 @@
 disnake>=2.4.0
-git+https://github.com/zRitsu/Wavelink.git@c9456e3c2c3d9bf35afb508fe0593a3bdcd68596
+git+https://github.com/zRitsu/Wavelink.git@8c01e32
 python-dotenv
 git+https://github.com/Run1e/asyncspotify.git
 requests
