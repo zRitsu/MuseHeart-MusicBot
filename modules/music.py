@@ -1950,7 +1950,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 traceback.print_exc()
                 continue
 
-        print(f"{self.bot.user} - [{node.identifier}] Conexão perdida - reconectando em {backoff} segundos.")
+        print(f"{self.bot.user} - [{node.identifier}] Conexão perdida - reconectando em {int(backoff)} segundos.")
 
         await asyncio.sleep(backoff)
 
