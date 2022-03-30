@@ -1038,7 +1038,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def add_dj(
             self,
             inter: disnake.ApplicationCommandInteraction, *,
-            user: disnake.Member = commands.Param(name="membro", description="Membro a ser adicionado.")
+            user: disnake.User = commands.Param(name="membro", description="Membro a ser adicionado.")
     ):
 
         error_text = None
