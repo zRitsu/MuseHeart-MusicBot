@@ -308,7 +308,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         tracks, node = await self.get_tracks(query, inter.user, node=node, track_loops=repeat_amount,
                                              hide_playlist=hide_playlist)
 
-        skin = self.bot.check_skin(guild_data["player_controller"]["skin"])
+        #skin = self.bot.check_skin(guild_data["player_controller"]["skin"]) TODO: habilitar apenas quando o suporte a skin por servidor for totalmente finalizado.
+        skin = self.bot.default_skin
 
         player: LavalinkPlayer = self.bot.music.get_player(
             guild_id=inter.guild.id,
