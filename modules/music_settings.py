@@ -84,7 +84,7 @@ class MusicSettings(commands.Cog):
         }
 
         channel = await target.create_text_channel(
-            f"{inter.guild.me.name} player controller",
+            f"{self.bot.user.name} player controller",
             overwrites=perms
         )
 
