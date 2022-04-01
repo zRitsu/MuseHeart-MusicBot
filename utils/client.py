@@ -88,6 +88,17 @@ class BotCore(commands.AutoShardedBot):
         if not self.bot_ready:
             return
 
+        if not message.guild:
+            return
+
+        try:
+            if not message.channel.permissions_for(message.guild.me).send_messages:
+                print(f"Can't send message in: {message.channel.name} [{message.channel.id}] (Missing permissions)")
+                return
+
+        except AttributeError:
+            pass
+
         if message.content == f"<@{self.user.id}>" or message.content == f"<@!{self.user.id}>":
 
             embed = disnake.Embed(color=self.get_color(message.guild.me))
