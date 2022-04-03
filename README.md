@@ -7,7 +7,7 @@ Tutorial para hospedar seu próprio bot de música deste repositório sem coding
 
 Caso não queira criar um bot próprio, há um bot meu já feito e hospedado usando esta source, você pode adicioná-la [clicando aqui](https://discord.com/api/oauth2/authorize?client_id=784891594306093101&permissions=397564505200&scope=bot%20applications.commands).
 
-Servidor de suporte: Será adicionao link de um novo server em breve...
+Servidor de suporte: Será adicionado link de um novo server em breve...
 
 ### Algumas previews:
 
