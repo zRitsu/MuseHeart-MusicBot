@@ -1,5 +1,6 @@
-@echo off
+chcp 65001
 cd "%~dp0"
+@echo off
 if not exist "logs\" mkdir logs
 >logs\update.log (
   git reset --hard && git pull --allow-unrelated-histories -X theirs && pip3 install -r requirements.txt --force-reinstall
