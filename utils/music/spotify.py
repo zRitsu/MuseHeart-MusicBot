@@ -134,7 +134,8 @@ async def process_spotify(bot: BotCore, requester: disnake.Member, query: str, *
     playlist = {"name": result.name, "url": query} if not hide_playlist else {}
 
     if data["tracks"]:
-        return SpotifyPlaylist(data, requester=requester, playlist=playlist)
+        playlist = SpotifyPlaylist(data, requester=requester, playlist=playlist)
+        return playlist.tracks[0] if (url_type == "album" and len(playlist.tracks) <= 1) else playlist
 
 
 def spotify_client(config: dict) -> Optional[Client]:
