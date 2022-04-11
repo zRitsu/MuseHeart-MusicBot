@@ -135,7 +135,7 @@ async def process_spotify(bot: BotCore, requester: disnake.Member, query: str, *
 
     if data["tracks"]:
         playlist = SpotifyPlaylist(data, requester=requester, playlist=playlist)
-        return playlist.tracks[0] if (url_type == "album" and len(playlist.tracks) <= 1) else playlist
+        return [playlist.tracks[0]] if (url_type == "album" and len(playlist.tracks) <= 1) else playlist
 
 
 def spotify_client(config: dict) -> Optional[Client]:
