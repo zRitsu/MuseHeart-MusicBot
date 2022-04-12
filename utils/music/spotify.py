@@ -4,7 +4,7 @@ import re
 from .converters import fix_characters
 from wavelink import Node
 import traceback
-from .errors import MissingSpotifyClient
+from .errors import MissingSpotifyClient, GenericError
 from asyncspotify import Client, ClientCredentialsFlow
 from typing import Optional, TYPE_CHECKING
 if TYPE_CHECKING:
@@ -110,6 +110,20 @@ async def process_spotify(bot: BotCore, requester: disnake.Member, query: str, *
     if url_type == "album":
 
         result = await bot.spotify.get_album(url_id)
+
+        if len(result.tracks) < 2:
+
+            track = result.tracks[0]
+
+            return [SpotifyTrack(
+                uri=track.link,
+                authors=track.artists,
+                title=track.name,
+                thumb=result.images[0].url,
+                duration=track.duration.total_seconds() * 1000,
+                requester=requester
+            )]
+
         data["playlistInfo"]["name"] = result.name
 
         for t in result.tracks:
@@ -124,18 +138,20 @@ async def process_spotify(bot: BotCore, requester: disnake.Member, query: str, *
         data["playlistInfo"]["name"] = "As mais tocadas de: " + [a["name"] for a in result[0].artists if a.id == url_id][0]
         data["tracks"] = result
 
-    else: # playlist
+    elif url_type == "playlist":
 
         result = await bot.spotify.get_playlist(url_id)
 
         data["playlistInfo"]["name"] = result.name
         data["tracks"] = result.tracks
 
+    else:
+        raise GenericError(f"**Link do spotify não reconhecido/suportado:**\n{query}")
+
     playlist = {"name": result.name, "url": query} if not hide_playlist else {}
 
     if data["tracks"]:
-        playlist = SpotifyPlaylist(data, requester=requester, playlist=playlist)
-        return [playlist.tracks[0]] if (url_type == "album" and len(playlist.tracks) <= 1) else playlist
+        return SpotifyPlaylist(data, requester=requester, playlist=playlist)
 
 
 def spotify_client(config: dict) -> Optional[Client]:
