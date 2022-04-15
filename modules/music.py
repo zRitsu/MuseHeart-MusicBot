@@ -2082,7 +2082,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await player.destroy()
             return
 
-        await player.invoke_np(force=True if (not player.loop or not player.is_last_message()) else False, rpc_update=True)
+        await player.invoke_np(force=True if (player.static or not player.loop or not player.is_last_message()) else False, rpc_update=True)
 
 
     @wavelink.WavelinkMixin.listener()
