@@ -303,7 +303,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 if view.inter.response:
                     inter = view.inter
 
-        await inter.response.defer(ephemeral=hide_playlist or guild_data['player_controller']["channel"] == str(inter.channel.id))
+        await inter.response.defer(ephemeral=not (isinstance(inter.channel, disnake.Thread) and guild_data['player_controller']["channel"] == str(inter.channel.parent_id)))
 
         tracks, node = await self.get_tracks(query, inter.user, node=node, track_loops=repeat_amount,
                                              hide_playlist=hide_playlist)
