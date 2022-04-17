@@ -231,6 +231,11 @@ class GuildLog(commands.Cog):
 
         print(f"Removido do servidor: {guild.name} - [{guild.id}]")
 
+        try:
+            await self.bot.music.players[guild.id].destroy()
+        except:
+            pass
+
         if not self.hook_url:
             return
 
