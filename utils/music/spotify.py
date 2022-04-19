@@ -97,7 +97,7 @@ async def process_spotify(bot: BotCore, requester: disnake.Member, query: str, *
             title=result.name,
             thumb=result.album.images[0].url,
             duration=result.duration.total_seconds() * 1000,
-            album=result.album,
+            album=result.album if result.album.name != result.name else None,
             requester=requester
         )]
 
