@@ -37,11 +37,17 @@ class BotCore(commands.AutoShardedBot):
         self.remote_git_url = kwargs.get("remote_git_url", "")
         self.ws_client = WSClient(self.config["RPC_SERVER"], bot=self)
         self.uptime = disnake.utils.utcnow()
-        try:
-            self.env_owner_ids = set(int(i) for i in self.config["OWNER_IDS"].split("||"))
-        except ValueError:
-            print("Você usou uma configuração inválida na lista de OWNER_IDS.")
-            self.env_owner_ids = set()
+        self.env_owner_ids = set()
+
+        for i in self.config["OWNER_IDS"].split("||"):
+
+            if not i:
+                continue
+
+            try:
+                self.env_owner_ids.add(int(i))
+            except ValueError:
+                print(f"Owner_ID inválido: {i}")
 
 
     def load_skins(self):
