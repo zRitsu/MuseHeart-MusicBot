@@ -1765,7 +1765,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             guild=message.guild,
             channel=text_channel,
             static=True,
-            skin=data["player_controller"]["skin"] or self.bot.default_skin,
+            skin=data["player_controller"]["skin"],
             node_id=node.identifier
         )
 

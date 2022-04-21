@@ -99,7 +99,7 @@ class LavalinkPlayer(wavelink.Player):
         self.message: Optional[disnake.Message] = kwargs.pop('message', None)
         self.static: bool = kwargs.pop('static', False)
         self.request_channel: bool = kwargs.pop("request_channel", False)
-        self.skin = self.bot.player_skins[kwargs.pop("skin", self.bot.default_skin)]
+        self.skin = self.bot.player_skins[kwargs.pop("skin", None) or self.bot.default_skin]
         self.queue: deque = deque()
         self.played: deque = deque(maxlen=20)
         self.nightcore: bool = False
