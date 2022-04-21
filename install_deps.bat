@@ -1,4 +1,5 @@
 chcp 65001
+echo instalando/atualizando dependências...
 @echo off
 cd "%~dp0"
 if not exist ".logs\" mkdir .logs

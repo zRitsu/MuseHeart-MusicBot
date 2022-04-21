@@ -1,4 +1,5 @@
 chcp 65001
+echo atualizando bot...
 cd "%~dp0"
 @echo off
 if not exist ".logs\" mkdir .logs
