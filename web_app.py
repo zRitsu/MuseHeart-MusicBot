@@ -3,7 +3,7 @@ import asyncio
 import json
 import logging
 import traceback
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 from os import environ
 import aiohttp
 import disnake
@@ -239,7 +239,7 @@ class WSClient:
                             users.remove(i)
 
 
-def run_app(bots:list = None, ws_url = f"http://localhost:{environ.get('PORT', 8080)}/ws"):
+def run_app(bots: Optional[list] = None, ws_url = f"http://localhost:{environ.get('PORT', 8080)}/ws"):
 
     try:
         # repl.it stuff
@@ -257,6 +257,10 @@ def run_app(bots:list = None, ws_url = f"http://localhost:{environ.get('PORT', 8
     app.listen(8080)
 
 
-if __name__ == '__main__':
-    run_app()
+def start(bots: Optional[list] = None):
+    run_app(bots)
     tornado.ioloop.IOLoop.instance().start()
+
+
+if __name__ == '__main__':
+    start()

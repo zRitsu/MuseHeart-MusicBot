@@ -30,9 +30,10 @@ def load_config():
         "OWNER_IDS": "", # ID de usuário pra lista de owner/dono do bot, caso use mais de 1 id separe por || (Qualquer id que for colocado na lista vai permitir o membro ter acesso total ao bot, tome cuidado!).
         "IDLE_TIMEOUT": 180, # Tempo em segundos pro bot aguardar por novas músicas no modo de espera.
         "COMMAND_LOG": False, # Ativar/Desativar log de comandos.
+        "RUN_RPC_SERVER": True,  # Ativar/Desativar servidor RPC/Página WEB.
         "RPC_SERVER": "ws://localhost:$PORT/ws", # Link do servidor RPC (pra status do membro), caso não tenha será usado localmente.
         "EMBED_COLOR": None, # cor da embed do player (caso não tenha será usado a cor do cargo do bot).
-        "MAX_USER_FAVS": 10, # limiite de favoritos por membro (0 ou menor que isso = sem limites)
+        "MAX_USER_FAVS": 10, # limite de favoritos por membro (0 ou menor que isso = sem limites)
         "USER_FAV_MAX_NAME_LENGTH": 35,  # limite de caracteres no nome de playlists.
         "USER_FAV_MAX_URL_LENGTH": 90, # limite de caracteres no link de playlists.
         "BOT_ADD_REMOVE_LOG": '', # Link do webhook para envio de logs quando o bot for adicionado/removido de um server.

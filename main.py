@@ -1,5 +1,4 @@
 import traceback
-
 import disnake
 from disnake.ext import commands
 import asyncio
@@ -10,7 +9,7 @@ from utils.music.local_lavalink import run_lavalink
 from utils.client import BotCore
 from utils.db import MongoDatabase, LocalDatabase, guild_prefix
 from utils.music.spotify import spotify_client
-from web_app import run_app
+from web_app import start
 from config_loader import load_config
 #import logging
 #from logging.handlers import RotatingFileHandler
@@ -123,7 +122,10 @@ def load_bot(bot_name: str, token: str, main=False):
                 except Exception:
                     traceback.print_exc()
 
-            bot.loop.create_task(bot.ws_client.ws_loop())
+            if not CONFIGS["RUN_RPC_SERVER"] and CONFIGS["RPC_SERVER"] == "ws://localhost:$PORT/ws":
+                pass
+            else:
+                bot.loop.create_task(bot.ws_client.ws_loop())
 
             bot.bot_ready = True
 
@@ -153,8 +155,16 @@ async def start_bots():
         [asyncio.create_task(bot.start(bot.token)) for bot in bots]
     )
 
-run_app(bots)
 
 loop = asyncio.get_event_loop()
 
-loop.run_until_complete(start_bots())
+if CONFIGS["RUN_RPC_SERVER"]:
+
+    for bot in bots:
+        loop.create_task(bot.start(bot.token))
+
+    start(bots)
+
+else:
+
+    loop.run_until_complete(start_bots())
