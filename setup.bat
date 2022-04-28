@@ -4,10 +4,16 @@ echo instalando/atualizando dependências...
 cd "%~dp0"
 if not exist ".logs\" mkdir .logs
 >.logs\setup.log (
+  if not exist .git\ (
+    git init
+    git remote add origin https://github.com/zRitsu/disnake-LL-music-bot.git
+    git fetch origin
+    git checkout -b main -f --track origin/main
+  )
   py -3 -m venv venv
   call venv\Scripts\activate.bat
   pip install -r requirements.txt
 ) 2>&1
 
-type .logs\install_deps.log
+type .logs\setup.log
 pause
