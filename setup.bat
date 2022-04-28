@@ -6,6 +6,7 @@ if not exist ".logs\" mkdir .logs
 >.logs\setup.log (
   if not exist .git\ (
     git init
+    attrib -h .git/
     git remote add origin https://github.com/zRitsu/disnake-LL-music-bot.git
     git fetch origin
     git checkout -b main -f --track origin/main
