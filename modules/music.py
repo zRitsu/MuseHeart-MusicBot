@@ -300,8 +300,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 if view.selected == "music":
                     query = YOUTUBE_VIDEO_REG.match(query).group()
 
-                if view.inter.response:
-                    inter = view.inter
+                if not view.inter:
+                    await inter.edit_original_message(content="Tempo esgotado!", embed=None, view=None)
+                    return
+
+                inter = view.inter
 
         await inter.response.defer(ephemeral=not (isinstance(inter.channel, disnake.Thread) and guild_data['player_controller']["channel"] == str(inter.channel.parent_id)))
 
