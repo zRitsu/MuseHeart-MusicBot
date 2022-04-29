@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+import asyncio
 import datetime
 from importlib import import_module
 import aiohttp
@@ -38,6 +38,7 @@ class BotCore(commands.AutoShardedBot):
         self.ws_client = WSClient(self.config["RPC_SERVER"], bot=self)
         self.uptime = disnake.utils.utcnow()
         self.env_owner_ids = set()
+        self.dm_max_concurrency = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
         for i in self.config["OWNER_IDS"].split("||"):
 
@@ -89,6 +90,33 @@ class BotCore(commands.AutoShardedBot):
         return await super().is_owner(user)
 
 
+    async def stop_concurrency(self, message):
+        await asyncio.sleep(15)
+        await self.dm_max_concurrency.release(message)
+
+
+    async def can_send_message(self, message: disnake.Message):
+
+        if not message.channel.permissions_for(message.guild.me).send_messages:
+
+            try:
+                await self.dm_max_concurrency.acquire(message)
+            except commands.MaxConcurrencyReached:
+                return False
+
+            print(f"Can't send message in: {message.channel.name} [{message.channel.id}] (Missing permissions)")
+
+            try:
+                await message.author.send(f"Não tenho permissão para enviar mensagens no canal {message.channel.mention}...")
+            except disnake.HTTPException:
+                pass
+
+            self.loop.create_task(self.stop_concurrency(message))
+            return False
+
+        return True
+
+
     async def on_message(self, message: disnake.Message):
 
         if not self.bot_ready:
@@ -97,15 +125,10 @@ class BotCore(commands.AutoShardedBot):
         if not message.guild:
             return
 
-        try:
-            if not message.channel.permissions_for(message.guild.me).send_messages:
-                print(f"Can't send message in: {message.channel.name} [{message.channel.id}] (Missing permissions)")
+        if message.content in (f"<@{self.user.id}>",  f"<@!{self.user.id}>"):
+
+            if not await self.can_send_message(message):
                 return
-
-        except AttributeError:
-            pass
-
-        if message.content == f"<@{self.user.id}>" or message.content == f"<@!{self.user.id}>":
 
             embed = disnake.Embed(color=self.get_color(message.guild.me))
 
@@ -140,7 +163,15 @@ class BotCore(commands.AutoShardedBot):
             await message.reply(embed=embed, view=view)
             return
 
-        await super().on_message(message)
+        ctx: commands.Context = await self.get_context(message)
+
+        if not ctx.valid:
+            return
+
+        if not await self.can_send_message(message):
+            return
+
+        await self.invoke(ctx)
 
 
     def get_color(self, me: disnake.Member):
