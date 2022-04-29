@@ -38,7 +38,7 @@ class BotCore(commands.AutoShardedBot):
         self.ws_client = WSClient(self.config["RPC_SERVER"], bot=self)
         self.uptime = disnake.utils.utcnow()
         self.env_owner_ids = set()
-        self.dm_max_concurrency = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
+        self.dm_cooldown = commands.CooldownMapping.from_cooldown(rate=2, per=30, type=commands.BucketType.member)
 
         for i in self.config["OWNER_IDS"].split("||"):
 
@@ -94,21 +94,18 @@ class BotCore(commands.AutoShardedBot):
 
         if not message.channel.permissions_for(message.guild.me).send_messages:
 
-            try:
-                await self.dm_max_concurrency.acquire(message)
-            except commands.MaxConcurrencyReached:
-                return False
-
             print(f"Can't send message in: {message.channel.name} [{message.channel.id}] (Missing permissions)")
+
+            bucket = self.dm_cooldown.get_bucket(message)
+            retry_after = bucket.update_rate_limit()
+
+            if retry_after:
+                return
 
             try:
                 await message.author.send(f"Não tenho permissão para enviar mensagens no canal {message.channel.mention}...")
             except disnake.HTTPException:
                 pass
-
-            await asyncio.sleep(15) # evitar spam.
-            await self.dm_max_concurrency.release(message)
-            return False
 
         return True
 
