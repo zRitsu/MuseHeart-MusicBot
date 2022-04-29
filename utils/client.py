@@ -90,11 +90,6 @@ class BotCore(commands.AutoShardedBot):
         return await super().is_owner(user)
 
 
-    async def stop_concurrency(self, message):
-        await asyncio.sleep(15)
-        await self.dm_max_concurrency.release(message)
-
-
     async def can_send_message(self, message: disnake.Message):
 
         if not message.channel.permissions_for(message.guild.me).send_messages:
@@ -111,7 +106,8 @@ class BotCore(commands.AutoShardedBot):
             except disnake.HTTPException:
                 pass
 
-            self.loop.create_task(self.stop_concurrency(message))
+            await asyncio.sleep(15) # evitar spam.
+            await self.dm_max_concurrency.release(message)
             return False
 
         return True
