@@ -297,12 +297,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                 await view.wait()
 
-                if view.selected == "music":
-                    query = YOUTUBE_VIDEO_REG.match(query).group()
-
                 if not view.inter:
                     await inter.edit_original_message(content="Tempo esgotado!", embed=None, view=None)
                     return
+
+                if view.selected == "music":
+                    query = YOUTUBE_VIDEO_REG.match(query).group()
 
                 inter = view.inter
 
