@@ -4,7 +4,7 @@ echo iniciando bot (verifique se ele está online)...
 cd "%~dp0"
 if not exist ".logs\" mkdir .logs
 >.logs\run.log (
-  py -3 -m venv venv
+  where py >nul 2>&1 && py -3 -m venv venv || python3 -m venv venv
   call venv\Scripts\activate.bat
   python main.py
 ) 2>&1

@@ -7,13 +7,14 @@ if not exist ".logs\" mkdir .logs
 
   if not exist .git\ (
     git init
-    attrib -h .git/
+    timeout /t 2
+    attrib -h -s .git
     git remote add origin https://github.com/zRitsu/disnake-LL-music-bot.git
     git fetch origin
     git checkout -b main -f --track origin/main
   )
 
-  py -3 -m venv venv
+  where py >nul 2>&1 && py -3 -m venv venv || python3 -m venv venv
   call venv\Scripts\activate.bat
   pip install -r requirements.txt
 
