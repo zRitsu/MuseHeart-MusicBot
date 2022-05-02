@@ -7,7 +7,10 @@ if [ ! -d ".git" ]; then
   git checkout -b main -f --track origin/main
 fi
 
-python3 -m venv venv
+if [ ! -d "venv" ]; then
+  python3 -m venv venv
+fi
+
 source venv/Scripts/activate
 pip install -r ./requirements.txt
 

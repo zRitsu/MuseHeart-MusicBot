@@ -14,7 +14,10 @@ if not exist ".logs\" mkdir .logs
     git checkout -b main -f --track origin/main
   )
 
-  where py >nul 2>&1 && py -3 -m venv venv || python3 -m venv venv
+  if not exist "venv\" (
+    where py >nul 2>&1 && py -3 -m venv venv || python3 -m venv venv
+  )
+
   call venv\Scripts\activate.bat
   pip install -r requirements.txt
 

@@ -1,4 +1,8 @@
 #!/bin/bash
-python3 -m venv venv
+
+if [ ! -d "venv" ]; then
+  python3 -m venv venv
+fi
+
 source venv/Scripts/activate
 python main.py
