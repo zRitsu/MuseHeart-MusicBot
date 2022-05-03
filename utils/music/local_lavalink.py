@@ -60,8 +60,7 @@ def run_lavalink(
         else:
             jdk_url, jdk_filename = ["https://download.java.net/openjdk/jdk13/ri/openjdk-13+33_linux-x64_bin.tar.gz",
                                      "java.tar.gz"]
-            #download_file(jdk_url, jdk_filename)
-            subprocess.call(["wget", jdk_url, "-O", jdk_filename])
+            download_file(jdk_url, jdk_filename)
             os.makedirs("./.java")
             p = subprocess.Popen(["tar", "-zxvf", "java.tar.gz", "-C", "./.java"])
             p.wait()
