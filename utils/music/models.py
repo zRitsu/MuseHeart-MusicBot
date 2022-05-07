@@ -1,7 +1,9 @@
 from __future__ import annotations
 import datetime
+import os
 from functools import partial
 import disnake
+import ctypes.util
 import asyncio
 import wavelink
 from urllib import parse
@@ -21,7 +23,7 @@ audioformats = ["mp3", "ogg", "m4a", "webm", "mp4", "unknown_video"]
 
 YDL_OPTIONS = {
     'format': 'bestaudio/best',
-    'noplaylist': False,
+    'noplaylist': True,
     'nocheckcertificate': True,
     'ignoreerrors': False,
     'logtostderr': False,
@@ -30,6 +32,9 @@ YDL_OPTIONS = {
     'retries': 5,
     'extract_flat': 'in_playlist',
     'cachedir': False,
+    'skip_download': True,
+    'default_search': 'auto',
+    'source_address': '0.0.0.0',
     'extractor_args': {
         'youtube': {
             'skip': [
@@ -691,12 +696,14 @@ class BasePlayer:
 class YTDLManager:
 
     def __init__(self, *, bot: BotCore):
-        self.ytdl = YoutubeDL(YDL_OPTIONS)
         self.bot = bot
         self.players = {}
         self.nodes = {} # test
         self.identifier = "YoutubeDL"
         self.search = True
+
+        if os.name != "nt":
+            disnake.opus.load_opus(ctypes.util.find_library("opus"))
 
     def get_player(self, guild_id: int, *args, **kwargs):
 
@@ -723,16 +730,19 @@ class YTDLManager:
 
         url = track.info['url']
 
-        to_run = partial(self.ytdl.extract_info, url=url, download=False)
-        info = await self.bot.loop.run_in_executor(None, to_run)
+        with YoutubeDL(YDL_OPTIONS) as ytdl:
+
+            to_run = partial(ytdl.extract_info, url=url, download=False)
+            info = await self.bot.loop.run_in_executor(None, to_run)
 
         track.id = [f for f in info["formats"] if f["ext"] in audioformats][0]["url"]
         return track
 
     async def get_tracks(self, query: str):
 
-        to_run = partial(self.ytdl.extract_info, url=query, download=False)
-        info = await self.bot.loop.run_in_executor(None, to_run)
+        with YoutubeDL(YDL_OPTIONS) as ytdl:
+            to_run = partial(ytdl.extract_info, url=query, download=False)
+            info = await self.bot.loop.run_in_executor(None, to_run)
 
         if info.get('_type') == "playlist" and not info.get('extractor', '').endswith('search'):
 
@@ -786,7 +796,9 @@ class YTDLPlayer(BasePlayer):
         self.volume = 100
         self.start_time: Optional[datetime.datetime] = disnake.utils.utcnow()
         self.seek_time = None
+        self.is_stopping = False
         self.node = kwargs.pop('node')
+        self.is_closing = False
 
     def __str__(self) -> str:
         return "YT-DLP Player (Experimental)"
@@ -862,7 +874,7 @@ class YTDLPlayer(BasePlayer):
 
     async def destroy(self, force=True):
 
-        #self.exiting = True
+        self.is_closing = True
 
         try:
             await self.guild.voice_client.disconnect(force=True)
@@ -885,8 +897,8 @@ class YTDLPlayer(BasePlayer):
 
         self.event.clear()
 
-        #if self.exiting:
-        #    return
+        if self.is_closing:
+            return
 
         track: YTDLTrack = await super().process_next()
 
@@ -919,7 +931,8 @@ class YTDLPlayer(BasePlayer):
 
         FFMPEG_OPTIONS = {
             'before_options': '-nostdin'
-                              ' -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+                              ' -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 10'
+            ,
             'options': '-vn'
         }
 
@@ -944,11 +957,14 @@ class YTDLPlayer(BasePlayer):
 
         self.locked = False
 
-        self.command_log = ""
-
         self.is_previows_music = False
 
         await self.event.wait()
+
+        if self.is_stopping:
+            self.is_stopping = False
+        else:
+            self.command_log = ""
 
         self.current = None
 
@@ -957,6 +973,7 @@ class YTDLPlayer(BasePlayer):
         await self.process_next()
 
     async def stop(self):
+        self.is_stopping = True
         self.guild.voice_client.stop()
 
     async def process_next(self):
