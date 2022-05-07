@@ -451,7 +451,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await inter.edit_original_message(embed=embed, view=None)
 
         if not player.is_connected:
-            await self.connect(inter, channel=inter.author.voice.channel)
+            await self.bot.get_slash_command("connect")(inter, channel=inter.author.voice.channel)
 
         if not player.current:
             await player.process_next()

@@ -6,8 +6,9 @@ from wavelink import Node
 import traceback
 from .errors import MissingSpotifyClient, GenericError
 from asyncspotify import Client, ClientCredentialsFlow
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Union
 if TYPE_CHECKING:
+    from .models import YTDLManager
     from utils.client import BotCore
 
 
@@ -53,7 +54,7 @@ class SpotifyTrack:
         self.album = {"name": album.name, "url": album.link} if album else {}
         self.track_loops = track_loops
 
-    async def resolve(self, node: Node):
+    async def resolve(self, node: Union[Node, YTDLManager]):
 
         if self.id:
             return
@@ -64,9 +65,12 @@ class SpotifyTrack:
                 track = track[0]
             except:
                 track = track.tracks[0]
+
             track.info["sourceName"] = "spotify"
+
             self.info = track.info
             self.id = track.id
+
         except IndexError:
             return
         except Exception:

@@ -1,8 +1,6 @@
 from __future__ import annotations
-
 import datetime
 from functools import partial
-
 import disnake
 import asyncio
 import wavelink
@@ -259,21 +257,21 @@ class BasePlayer:
     async def process_next(self):
 
         if self.locked or self.is_closing:
-            return False
+            return
 
         if not self.is_connected:
             self.bot.loop.create_task(self.destroy(force=True))
-            return False
+            return
 
         try:
             track = self.queue.popleft()
         except Exception:
             self.last_track = None
             self.idle_task = self.bot.loop.create_task(self.idling_mode())
-            return False
+            return
 
         if not track:
-            return False
+            return
 
         try:
             self.idle_task.cancel()
@@ -289,7 +287,7 @@ class BasePlayer:
 
             self.locked = False
 
-            if not track.id:
+            if not track.id and isinstance(self, LavalinkPlayer):
                 return await self.process_next()
 
         self.last_track = track
@@ -373,6 +371,10 @@ class BasePlayer:
     async def invoke_np(self, force=False, interaction=None, rpc_update=False):
 
         if not self.current:
+            try:
+                await interaction.response.defer()
+            except:
+                pass
             return
 
         if rpc_update:
@@ -689,7 +691,7 @@ class BasePlayer:
 class YTDLManager:
 
     def __init__(self, *, bot: BotCore):
-        bot.ytdl = YoutubeDL(YDL_OPTIONS)
+        self.ytdl = YoutubeDL(YDL_OPTIONS)
         self.bot = bot
         self.players = {}
         self.nodes = {} # test
@@ -705,7 +707,7 @@ class YTDLManager:
         else:
             return player
 
-        player = YTDLPlayer(*args, **kwargs)
+        player = YTDLPlayer(node=self, *args, **kwargs)
         self.players[guild_id] = player
         return player
 
@@ -717,9 +719,19 @@ class YTDLManager:
     def get_node(self, *args, **kwargs):
         return self
 
+    async def renew_url(self, track: Union[YTDLTrack, SpotifyTrack]) -> Union[YTDLTrack, SpotifyTrack]:
+
+        url = track.info['url']
+
+        to_run = partial(self.ytdl.extract_info, url=url, download=False)
+        info = await self.bot.loop.run_in_executor(None, to_run)
+
+        track.id = [f for f in info["formats"] if f["ext"] in audioformats][0]["url"]
+        return track
+
     async def get_tracks(self, query: str):
 
-        to_run = partial(self.bot.ytdl.extract_info, url=query, download=False)
+        to_run = partial(self.ytdl.extract_info, url=query, download=False)
         info = await self.bot.loop.run_in_executor(None, to_run)
 
         if info.get('_type') == "playlist" and not info.get('extractor', '').endswith('search'):
@@ -774,6 +786,7 @@ class YTDLPlayer(BasePlayer):
         self.volume = 100
         self.start_time: Optional[datetime.datetime] = disnake.utils.utcnow()
         self.seek_time = None
+        self.node = kwargs.pop('node')
 
     def __str__(self) -> str:
         return "YT-DLP Player (Experimental)"
@@ -868,16 +881,6 @@ class YTDLPlayer(BasePlayer):
         except KeyError:
             pass
 
-    async def renew_url(self, track: Union[YTDLTrack, SpotifyTrack]) -> Union[YTDLTrack, SpotifyTrack]:
-
-        url = track.info['url']
-
-        to_run = partial(self.bot.ytdl.extract_info, url=url, download=False)
-        info = await self.bot.loop.run_in_executor(None, to_run)
-
-        track.id = [f for f in info["formats"] if f["ext"] in audioformats][0]["url"]
-        return track
-
     async def process_track(self):
 
         self.event.clear()
@@ -887,7 +890,7 @@ class YTDLPlayer(BasePlayer):
 
         track: YTDLTrack = await super().process_next()
 
-        if track is False or self.locked:
+        if not track or self.locked:
             return
 
         await self.bot.wait_until_ready()
@@ -897,7 +900,7 @@ class YTDLPlayer(BasePlayer):
         if not track.id:
 
             try:
-                track = await self.renew_url(track)
+                track = await self.node.renew_url(track)
             except Exception as e:
                 traceback.print_exc()
                 try:
@@ -960,11 +963,6 @@ class YTDLPlayer(BasePlayer):
 
     async def process_next(self):
         self.bot.loop.create_task(self.process_track())
-
-    # temp workaround for spotify
-    @property
-    def node(self):
-        return self
 
     async def get_tracks(self, query: str):
         return await self.bot.music.get_tracks(query)
