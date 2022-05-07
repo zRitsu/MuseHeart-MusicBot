@@ -11,10 +11,10 @@ from random import shuffle
 from typing import Literal, Optional, Union
 from urllib import parse
 from utils.client import BotCore
-from utils.music.errors import GenericError, MissingVoicePerms, NoPlayer
+from utils.music.errors import GenericError, MissingVoicePerms
 from utils.music.spotify import SpotifyPlaylist, process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, can_send_message
-from utils.music.models import LavalinkPlayer, LavalinkTrack
+from utils.music.models import LavalinkPlayer, LavalinkTrack, YTDLTrack, YTDLPlayer, YTDLManager
 from utils.music.converters import time_format, fix_characters, string_to_seconds, get_track_index, URL_REG, \
     YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist, \
     node_suggestions, fav_add_autocomplete, fav_list
@@ -56,7 +56,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @can_send_message()
     @commands.user_command(name="enqueue presence track")
-    async def user_play(self, inter: disnake.MessageInteraction):
+    async def user_play(self, inter: disnake.UserCommandInteraction):
 
         #inter.target.activities fica retornando None mesmo com intents.presences ativada.
         member = inter.guild.get_member(inter.target.id)
@@ -120,7 +120,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @can_send_message()
     @commands.message_command(name="add to queue")
-    async def message_play(self, inter: disnake.MessageInteraction):
+    async def message_play(self, inter: disnake.MessageCommandInteraction):
 
         if not inter.target.content:
             emb = disnake.Embed(description=f"Não há texto na [mensagem]({inter.target.jump_url}) selecionada...", color=disnake.Colour.red())
@@ -279,6 +279,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             if not URL_REG.match(query):
                 query = f"{source}:{query}"
 
+                if manual_selection and isinstance(self.bot.music, YTDLManager):
+                    source += "5"
+
             elif "&list=" in query:
 
                 view = SelectInteraction(
@@ -314,7 +317,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         #skin = self.bot.check_skin(guild_data["player_controller"]["skin"]) TODO: habilitar apenas quando o suporte a skin por servidor for totalmente finalizado.
         skin = self.bot.default_skin
 
-        player: LavalinkPlayer = self.bot.music.get_player(
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.get_player(
             guild_id=inter.guild.id,
             cls=LavalinkPlayer,
             requester=inter.author,
@@ -322,7 +325,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             channel=channel,
             node_id=node.identifier,
             static=bool(static_player['channel']),
-            skin=skin
+            skin=skin,
+            bot=self.bot
         )
 
         if static_player and not player.message:
@@ -463,7 +467,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.slash_command(description=f"{desc_prefix}Pular a música atual que está tocando.")
     async def skip(self, inter: disnake.ApplicationCommandInteraction):
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         if not len(player.queue):
             await send_message(inter, embed=disnake.Embed(description="**Não há músicas na fila...**", color=disnake.Colour.red()))
@@ -492,7 +496,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.slash_command(description=f"{desc_prefix}Voltar para a música anterior.")
     async def back(self, inter: disnake.ApplicationCommandInteraction):
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         if not len(player.played) and not len(player.queue):
 
@@ -529,7 +533,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.slash_command(description=f"{desc_prefix}Votar para pular a música atual.")
     async def voteskip(self, inter: disnake.ApplicationCommandInteraction):
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         embed = disnake.Embed()
 
@@ -567,7 +571,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             value: int = commands.Param(name="nível", description="nível entre 5 a 150", min_value=5.0, max_value=150.0)
     ):
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         embed = disnake.Embed(color=disnake.Colour.red())
 
@@ -604,7 +608,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.slash_command(description=f"{desc_prefix}Pausar a música.")
     async def pause(self, inter: disnake.ApplicationCommandInteraction):
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         embed = disnake.Embed(color=disnake.Colour.red())
 
@@ -626,7 +630,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.slash_command(description=f"{desc_prefix}Retomar/Despausar a música.")
     async def resume(self, inter: disnake.ApplicationCommandInteraction):
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         embed = disnake.Embed(color=disnake.Colour.red())
 
@@ -655,7 +659,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         embed = disnake.Embed(color=disnake.Colour.red())
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         if player.current.is_stream:
             embed.description = "Você não pode usar esse comando em uma livestream."
@@ -709,7 +713,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             )
     ):
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         if mode == player.loop:
             await self.interaction_message(inter, "Não teve alteração no modo de repetição atual.")
@@ -745,7 +749,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             value: int = commands.Param(name="valor", description="número de repetições.")
     ):
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         player.current.track_loops = value
 
@@ -781,7 +785,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await inter.send(embed=embed, ephemeral=True)
             return
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         track = player.queue[index]
 
@@ -806,7 +810,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.slash_command(description=f"{desc_prefix}Readicionar as músicas tocadas na fila.")
     async def readd(self, inter: disnake.ApplicationCommandInteraction):
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         embed = disnake.Embed(color=disnake.Colour.red())
 
@@ -862,7 +866,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await inter.send(embed=embed, ephemeral=True)
             return
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         track = player.queue[index]
 
@@ -914,7 +918,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await inter.send(embed=embed, ephemeral=True)
             return
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         track = player.queue[index]
 
@@ -955,7 +959,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await inter.send(embed=embed, ephemeral=True)
             return
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         track = player.queue[index]
 
@@ -985,7 +989,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.slash_command(description=f"{desc_prefix}Ativar/Desativar o efeito nightcore (Música acelerada com tom mais agudo).")
     async def nightcore(self, inter: disnake.ApplicationCommandInteraction):
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         player.nightcore = not player.nightcore
 
@@ -1009,7 +1013,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.slash_command(description=f"{desc_prefix}Reenvia a mensagem do player com a música atual.")
     async def nowplaying(self, inter: disnake.ApplicationCommandInteraction):
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         if player.static:
             await inter.send("este comando não pode ser usado no modo fixo do player.", ephemeral=True)
@@ -1047,7 +1051,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         error_text = None
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         if user == inter.author:
             error_text = "Você não pode adicionar a si mesmo na lista de DJ's."
@@ -1076,7 +1080,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.slash_command(description=f"{desc_prefix}Parar o player e me desconectar do canal de voz.")
     async def stop(self, inter: disnake.ApplicationCommandInteraction):
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         embed = disnake.Embed(color=disnake.Colour.red())
 
@@ -1100,7 +1104,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @q.sub_command(name="shuffle", description=f"{desc_prefix}Misturar as músicas da fila")
     async def shuffle_(self, inter: disnake.ApplicationCommandInteraction):
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         if len(player.queue) < 3:
             embed = disnake.Embed(color=disnake.Colour.red())
@@ -1122,7 +1126,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @q.sub_command(description=f"{desc_prefix}Inverter a ordem das músicas na fila")
     async def reverse(self, inter: disnake.ApplicationCommandInteraction):
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         if len(player.queue) < 2:
             embed = disnake.Embed(colour=disnake.Colour.red())
@@ -1140,7 +1144,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.max_concurrency(1, commands.BucketType.member)
     async def show(self, inter: disnake.ApplicationCommandInteraction):
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         if not player.queue:
             embedvc = disnake.Embed(
@@ -1176,7 +1180,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             range_end: int = commands.Param(name="pos_final", description="incluir músicas da fila até uma posição específica da fila.", min_value=1.0, max_value=500.0, default=None)
     ):
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         if not player.queue:
             await inter.send("Não há musicas na fila.", ephemeral=True)
@@ -1270,7 +1274,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.slash_command(description=f"{desc_prefix}Ativar/Desativar o modo interrupta do player (24/7).")
     async def nonstop(self, inter: disnake.ApplicationCommandInteraction):
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         player.nonstop = not player.nonstop
 
@@ -1302,6 +1306,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             node: str = commands.Param(name="servidor", description="Servidor de música", autocomplete=node_suggestions)
     ):
 
+        if isinstance(self.bot.music, YTDLManager):
+            raise GenericError("Este comando não é compatível com o modo YTDL ativado.")
+
         if not node in self.bot.music.nodes:
             raise GenericError(f"O servidor de música **{node}** não foi encontrado.")
 
@@ -1326,7 +1333,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         try:
 
-            player: LavalinkPlayer = self.bot.music.players[message.guild.id]
+            player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[message.guild.id]
 
             if message.id != player.message.id:
                 return
@@ -1348,7 +1355,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         for guild_id in list(self.bot.music.players):
             try:
-                player: LavalinkPlayer = self.bot.music.players[guild_id]
+                player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[guild_id]
 
                 if player.is_connected:
                     continue
@@ -1380,7 +1387,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await cmd(interaction, **kwargs)
 
         try:
-            player: LavalinkPlayer = self.bot.music.players[interaction.guild.id]
+            player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[interaction.guild.id]
             player.interaction_cooldown = True
             await asyncio.sleep(1)
             player.interaction_cooldown = False
@@ -1506,7 +1513,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             else:
 
                 try:
-                    player: LavalinkPlayer = self.bot.music.players[interaction.guild.id]
+                    player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[interaction.guild.id]
                 except KeyError:
                     return
 
@@ -1626,7 +1633,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 return
 
             try:
-                player: LavalinkPlayer = self.bot.music.players[message.guild.id]
+                player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[message.guild.id]
             except KeyError:
                 return
 
@@ -1642,11 +1649,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         try:
-            player: Optional[LavalinkPlayer] = self.bot.music.players[message.guild.id]
+            player: Union[LavalinkPlayer, YTDLPlayer, None] = self.bot.music.players[message.guild.id]
             if player.text_channel == message.channel:
                 player.last_message_id = message.id
         except (AttributeError, KeyError):
-            player: Optional[LavalinkPlayer] = None
+            player: Union[LavalinkPlayer, YTDLPlayer, None] = None
 
         if player and isinstance(message.channel, disnake.Thread) and not player.static:
 
@@ -1761,7 +1768,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         tracks, node = await self.get_tracks(message.content, message.author)
 
-        player: LavalinkPlayer = self.bot.music.get_player(
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.get_player(
             guild_id=message.guild.id,
             cls=LavalinkPlayer,
             requester=message.author,
@@ -1769,7 +1776,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             channel=text_channel,
             static=True,
             skin=data["player_controller"]["skin"],
-            node_id=node.identifier
+            node_id=node.identifier,
+            bot=self.bot
         )
 
         if not player.message:
@@ -1850,7 +1858,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         except:
             txt_ephemeral = False
 
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         component_interaction = isinstance(inter, disnake.MessageInteraction)
 
@@ -1870,6 +1878,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
     async def process_nodes(self):
 
+        if self.bot.config["YTDLMODE"]:
+            return
+
         await self.bot.wait_until_ready()
 
         for k,v in self.bot.config.items():
@@ -1881,46 +1892,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             except Exception as e:
                 print(f"Falha ao adicionar node: {k}, erro: {repr(e)}")
 
-        if self.bot.config['START_LOCAL_LAVALINK'] is True:
+        if self.bot.config['START_LOCAL_LAVALINK']:
             self.bot.loop.create_task(self.connect_local_lavalink())
-
-
-    async def connect_node(self, data: dict):
-
-        if data["identifier"] in self.bot.music.nodes:
-            return
-
-        data['rest_uri'] = ("https" if data.get('secure') else "http") + f"://{data['host']}:{data['port']}"
-        data['user_agent'] = UserAgent().random
-        search = data.pop("search", True)
-        max_retries = data.pop('retries', 0)
-        node_website = data.pop('website', '')
-
-        if max_retries:
-
-            backoff = 7
-            retries = 1
-
-            print(f"{self.bot.user} - Iniciando servidor de música: {data['identifier']}")
-
-            while not self.bot.is_closed():
-                if retries >= max_retries:
-                    print(f"{self.bot.user} - Todas as tentativas de conectar ao servidor [{data['identifier']}] falharam.")
-                    return
-                else:
-                    try:
-                        async with self.bot.session.get(data['rest_uri'], timeout=10) as r:
-                            break
-                    except Exception:
-                        backoff += 2
-                        #print(f'{self.bot.user} - Falha ao conectar no servidor [{data["identifier"]}], nova tentativa [{retries}/{max_retries}] em {backoff} segundos.')
-                        await asyncio.sleep(backoff)
-                        retries += 1
-                        continue
-
-        node = await self.bot.music.initiate_node(auto_reconnect=False, **data)
-        node.search = search
-        node.website = node_website
 
 
     @wavelink.WavelinkMixin.listener("on_node_connection_closed")
@@ -1984,7 +1957,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if payload.code == 1000:
             return
 
-        player: LavalinkPlayer = payload.player
+        player: Union[LavalinkPlayer, YTDLPlayer] = payload.player
 
         print(f"Erro no canal de voz! guild: {player.guild.name} | server: {payload.player.node.identifier} | reason: {payload.reason} | code: {payload.code}")
 
@@ -2114,6 +2087,44 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await player.process_next()
 
 
+    async def connect_node(self, data: dict):
+
+        if data["identifier"] in self.bot.music.nodes:
+            return
+
+        data['rest_uri'] = ("https" if data.get('secure') else "http") + f"://{data['host']}:{data['port']}"
+        data['user_agent'] = UserAgent().random
+        search = data.pop("search", True)
+        max_retries = data.pop('retries', 0)
+        node_website = data.pop('website', '')
+
+        if max_retries:
+
+            backoff = 7
+            retries = 1
+
+            print(f"{self.bot.user} - Iniciando servidor de música: {data['identifier']}")
+
+            while not self.bot.is_closed():
+                if retries >= max_retries:
+                    print(f"{self.bot.user} - Todas as tentativas de conectar ao servidor [{data['identifier']}] falharam.")
+                    return
+                else:
+                    try:
+                        async with self.bot.session.get(data['rest_uri'], timeout=10) as r:
+                            break
+                    except Exception:
+                        backoff += 2
+                        #print(f'{self.bot.user} - Falha ao conectar no servidor [{data["identifier"]}], nova tentativa [{retries}/{max_retries}] em {backoff} segundos.')
+                        await asyncio.sleep(backoff)
+                        retries += 1
+                        continue
+
+        node = await self.bot.music.initiate_node(auto_reconnect=False, **data)
+        node.search = search
+        node.website = node_website
+
+
     async def get_tracks(
             self, query: str, user: disnake.Member, node: wavelink.Node=None,
             track_loops=0, hide_playlist=False):
@@ -2146,6 +2157,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             if isinstance(tracks[0], wavelink.Track):
                 tracks = [LavalinkTrack(track.id, track.info, requester=user, track_loops=track_loops) for track in tracks]
 
+            elif isinstance(tracks[0], YTDLTrack):
+                for track in tracks:
+                    track.track_loops = track_loops
+                    track.requester = user
+
         else:
 
             if not isinstance(tracks, SpotifyPlaylist):
@@ -2161,7 +2177,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     "url": query
                 } if not hide_playlist else {}
 
-                tracks.tracks = [LavalinkTrack(t.id, t.info, requester=user, playlist=playlist) for t in tracks.tracks]
+                if self.bot.config.get('YTDLMODE') is True:
+                    for track in tracks.tracks:
+                        track.track_loops = track_loops
+                        track.requester = user
+
+                else:
+                    tracks.tracks = [LavalinkTrack(t.id, t.info, requester=user, playlist=playlist) for t in tracks.tracks]
 
             if (selected := tracks.data['playlistInfo']['selectedTrack']) > 0:
                 tracks.tracks = tracks.tracks[selected:] + tracks.tracks[:selected]
@@ -2190,7 +2212,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.Cog.listener("on_thread_delete")
     async def player_thread_delete(self, thread: disnake.Thread):
 
-        player: Optional[LavalinkPlayer] = None
+        player: Union[LavalinkPlayer, YTDLPlayer, None] = None
 
         if not player:
             return
@@ -2206,7 +2228,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def join_thread_request(self, thread: disnake.Thread):
 
         try:
-            player: LavalinkPlayer = self.bot.music.players[thread.guild.id]
+            player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[thread.guild.id]
         except KeyError:
             return
 
@@ -2237,7 +2259,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         try:
-            player: LavalinkPlayer = self.bot.music.players[member.guild.id]
+            player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[member.guild.id]
         except KeyError:
             return
 
@@ -2273,7 +2295,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         data['player_controller']['channel'] = None
         data['player_controller']['message_id'] = None
         try:
-            player: LavalinkPlayer = self.bot.music.players[guild_id]
+            player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[guild_id]
             player.static = False
             player.text_channel = inter.channel.parent if isinstance(inter.channel, disnake.Thread) else inter.channel
         except KeyError:

@@ -47,6 +47,8 @@ def load_config():
         "HIDE_SOURCE_OWNER": False,  # Ocultar link do meu repositório no comando /about. Caso altere isso, por favor considere de alguma forma fornecer crédito. :(
         "SUPPORT_SERVER": "", # invite do servidor de suporte (exibido no comando about e nos erros dos comandos).
 
+        "YTDLMODE": False, # Usar o modo YoutubeDL ao invés do lavalink
+
         #############################################################################################
         ##### Bot presences:                                                                    #####
         ##### Status pra exibir no bot, caso queira mais de 1 pra tipo específico separe com || #####
@@ -128,7 +130,8 @@ def load_config():
         "HIDE_SOURCE_OWNER",
         "INTERACTION_COMMAND_ONLY",
         "START_LOCAL_LAVALINK",
-        "COMMAND_LOG"
+        "COMMAND_LOG",
+        "YTDLMODE"
 
     ]:
         if CONFIGS[i] in (True, False, None):

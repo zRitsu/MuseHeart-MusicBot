@@ -26,7 +26,7 @@ CONFIGS = load_config()
 if not CONFIGS["DEFAULT_PREFIX"]:
     CONFIGS["DEFAULT_PREFIX"] = "!!!"
 
-if CONFIGS['START_LOCAL_LAVALINK'] is True:
+if CONFIGS['START_LOCAL_LAVALINK'] is True and CONFIGS['YTDLMODE'] is False:
     run_lavalink(
         lavalink_file_url=CONFIGS['LAVALINK_FILE_URL'],
         lavalink_initial_ram=CONFIGS['LAVALINK_INITIAL_RAM'],
