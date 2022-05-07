@@ -19,7 +19,7 @@ from yt_dlp import YoutubeDL
 if TYPE_CHECKING:
     from ..client import BotCore
 
-audioformats = ["mp3", "ogg", "m4a", "webm", "mp4"]
+audioformats = ["mp3", "ogg", "m4a", "webm", "mp4", "unknown_video"]
 
 YDL_OPTIONS = {
     'format': 'bestaudio/best',
