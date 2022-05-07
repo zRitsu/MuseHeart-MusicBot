@@ -688,6 +688,7 @@ class YTDLManager:
         bot.ytdl = YoutubeDL(YDL_OPTIONS)
         self.bot = bot
         self.players = {}
+        self.nodes = {} # test
         self.identifier = "YoutubeDL"
         self.search = True
 
