@@ -938,7 +938,7 @@ class YTDLPlayer(BasePlayer):
         self.start_time = disnake.utils.utcnow()
 
         try:
-            await self.invoke_np()
+            await self.invoke_np(rpc_update=True)
         except:
             traceback.print_exc()
 
