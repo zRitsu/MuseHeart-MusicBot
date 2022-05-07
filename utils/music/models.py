@@ -141,7 +141,7 @@ class YTDLTrack:
         self.is_stream = False
         self.info = data
         self.requester = kwargs.pop('requester', '')
-        self.playlist = kwargs.pop('playlist', {})
+        self.playlist = kwargs.pop('playlist', None)
         self.album = {}
         self.track_loops = kwargs.pop('track_loops', 0)
 
@@ -150,8 +150,12 @@ class YTDLTrack:
         self.authors_string = self.author
 
         if (data.get("ie_key") or data.get('extractor_key')) == "Youtube":
+            self.info["class"] = "YoutubeAudioTrack"
             self.thumb = f"https://img.youtube.com/vi/{data['id']}/mqdefault.jpg"
+            if self.playlist:
+                self.uri = f"{self.uri}&list={parse.parse_qs(parse.urlparse(self.playlist['url']).query)['list'][0]}"
         else:
+            self.info["class"] = data.pop("extractor_key", "")
             self.thumb = data.get('thumbnail', '')
 
 
@@ -866,7 +870,7 @@ class YTDLPlayer(BasePlayer):
 
     async def renew_url(self, track: Union[YTDLTrack, SpotifyTrack]) -> Union[YTDLTrack, SpotifyTrack]:
 
-        url = track.info['url'] if isinstance(track, SpotifyTrack) else track.uri
+        url = track.info['url']
 
         to_run = partial(self.bot.ytdl.extract_info, url=url, download=False)
         info = await self.bot.loop.run_in_executor(None, to_run)
