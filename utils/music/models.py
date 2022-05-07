@@ -950,8 +950,6 @@ class YTDLPlayer(BasePlayer):
 
         await self.event.wait()
 
-        source.cleanup()
-
         self.current = None
 
         await self.track_end()
