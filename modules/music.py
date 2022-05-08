@@ -1,4 +1,5 @@
 import disnake
+import union as union
 from disnake.embeds import Embed
 from disnake.ext import commands
 import traceback
@@ -174,20 +175,24 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             inter: disnake.ApplicationCommandInteraction,
             channel: Union[disnake.VoiceChannel, disnake.StageChannel] = commands.Param(name="canal", description="Canal para me conectar", default=None)
     ):
+        await self.do_connect(inter, channel)
 
-        player = self.bot.music.players[inter.guild.id]
+    async def do_connect(self, ctx: Union[disnake.AppCmdInter, commands.Context, disnake.Message],
+                         channel: Union[disnake.VoiceChannel, disnake.StageChannel]):
 
-        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+        player = self.bot.music.players[ctx.guild.id]
+
+        guild_data = await self.bot.db.get_data(ctx.guild.id, db_name="guilds")
 
         if not channel:
-            channel: Union[disnake.VoiceChannel, disnake.StageChannel] = inter.author.voice.channel
+            channel: Union[disnake.VoiceChannel, disnake.StageChannel] = ctx.author.voice.channel
 
-        if guild_data["check_other_bots_in_vc"] and any(m for m in channel.members if m.bot and m != inter.guild.me):
-            raise GenericError(f"**Há outro bot conectado no canal:** <#{inter.author.voice.channel.id}>")
+        if guild_data["check_other_bots_in_vc"] and any(m for m in channel.members if m.bot and m != ctx.guild.me):
+            raise GenericError(f"**Há outro bot conectado no canal:** <#{ctx.author.voice.channel.id}>")
 
-        if isinstance(inter, disnake.ApplicationCommandInteraction) and inter.application_command == self.connect:
+        if isinstance(ctx, disnake.AppCmdInter) and ctx.application_command == self.connect:
 
-            perms = channel.permissions_for(inter.guild.me)
+            perms = channel.permissions_for(ctx.guild.me)
 
             if not perms.connect or not perms.speak:
                 raise MissingVoicePerms(channel)
@@ -195,11 +200,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await player.connect(channel.id)
 
             txt = [
-                f"{'me moveu para o' if channel != inter.guild.me.voice and inter.guild.me.voice.channel else 'me reconectou no'}"
+                f"{'me moveu para o' if channel != ctx.guild.me.voice and ctx.guild.me.voice.channel else 'me reconectou no'}"
                 f" canal <#{channel.id}>",
                 f"**Conectei no canal** <#{channel.id}>."
             ]
-            await self.interaction_message(inter, txt, rpc_update=True)
+            await self.interaction_message(ctx, txt, rpc_update=True)
 
         else:
             await player.connect(channel.id)
@@ -211,25 +216,24 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if isinstance(channel, disnake.StageChannel):
 
-            while not inter.guild.me.voice:
+            while not ctx.guild.me.voice:
                 await asyncio.sleep(1)
 
-            stage_perms =  channel.permissions_for(inter.guild.me)
+            stage_perms = channel.permissions_for(ctx.guild.me)
 
             if stage_perms.manage_roles:
-                await inter.guild.me.edit(suppress=False)
+                await ctx.guild.me.edit(suppress=False)
             else:
 
-                embed = disnake.Embed(color=self.bot.get_color(inter.guild.me))
+                embed = disnake.Embed(color=self.bot.get_color(ctx.guild.me))
 
                 if stage_perms.request_to_speak:
-                    await inter.guild.me.request_to_speak()
+                    await ctx.guild.me.request_to_speak()
                     embed.description = f"Preciso que aceite minha solicitação pra falar no palco."
                 else:
                     embed.description = f"Não tenho autoridade de falar no palco automaticamente (preciso da permissão de um staff)"
 
-                await inter.channel.send(inter.author.mention, embed=embed, delete_after=13)
-
+                await ctx.channel.send(ctx.author.mention, embed=embed, delete_after=13)
 
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
@@ -451,7 +455,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await inter.edit_original_message(embed=embed, view=None)
 
         if not player.is_connected:
-            await self.bot.get_slash_command("connect")(inter, channel=inter.author.voice.channel)
+            await self.do_connect(inter, channel=inter.author.voice.channel)
 
         if not player.current:
             await player.process_next()
@@ -1827,7 +1831,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 player.command_log = f"{message.author.mention} adicionou [`{fix_characters(tracks[0].title, 20)}`]({tracks[0].uri}) `({duration})`."
 
         if not player.is_connected:
-            await self.connect(message, message.author.voice.channel)
+            await self.do_connect(message, channel=message.author.voice.channel)
 
         if not player.current:
             await player.process_next()
