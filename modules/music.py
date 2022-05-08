@@ -1,5 +1,4 @@
 import disnake
-import union as union
 from disnake.embeds import Embed
 from disnake.ext import commands
 import traceback
@@ -9,7 +8,7 @@ from fake_useragent import UserAgent
 import sys
 import json
 from random import shuffle
-from typing import Literal, Optional, Union
+from typing import Literal, Union
 from urllib import parse
 from utils.client import BotCore
 from utils.music.errors import GenericError, MissingVoicePerms
