@@ -54,7 +54,7 @@ YDL_OPTIONS = {
 }
 
 filters = {
-    'nightcore': 'aresample=48000,asetrate=48000*1.25'
+    'nightcore': 'aresample=48000,asetrate=48000*1.20'
 }
 
 
@@ -512,6 +512,9 @@ class BasePlayer:
 
     async def cleanup(self):
 
+        self.queue.clear()
+        self.played.clear()
+
         vc = self.bot.get_channel(self.channel_id)
 
         self.bot.loop.create_task(self.process_rpc(vc, close=True))
@@ -553,9 +556,6 @@ class BasePlayer:
         else:
 
             await self.destroy_message()
-
-        self.queue.clear()
-        self.played.clear()
 
     async def process_rpc(
             self,
@@ -731,7 +731,10 @@ class YTDLManager:
 
     async def renew_url(self, track: Union[YTDLTrack, SpotifyTrack]) -> Union[YTDLTrack, SpotifyTrack]:
 
-        url = track.info['url']
+        try:
+            url = track.info['url']
+        except KeyError:
+            url = track.info['webpage_url']
 
         to_run = partial(self.ytdl.extract_info, url=url, download=False)
         info = await self.bot.loop.run_in_executor(None, to_run)
@@ -946,7 +949,7 @@ class YTDLPlayer(BasePlayer):
         source = await YTDLSource.source(track.id, ffmpeg_opts=FFMPEG_OPTIONS)
         source.volume = self.volume / 100
 
-        self.guild.voice_client.play(source, after=lambda _: self.bot.loop.call_soon_threadsafe(self.event.set))
+        self.guild.voice_client.play(source, after=self.next)
 
         self.start_time = disnake.utils.utcnow()
 
@@ -971,6 +974,13 @@ class YTDLPlayer(BasePlayer):
         await self.track_end()
 
         await self.process_next()
+
+    def next(self, error=None):
+
+        if error:
+            print(f"Erro na reprodução: {self.guild.id} - {error}")
+
+        self.event.set()
 
     async def stop(self):
         self.is_stopping = True
