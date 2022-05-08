@@ -14,10 +14,12 @@ from .spotify import SpotifyTrack
 import traceback
 from collections import deque
 from typing import Optional, Union, TYPE_CHECKING, List
-from yt_dlp import YoutubeDL
+from yt_dlp import YoutubeDL, utils as ytdlp_utils
 
 if TYPE_CHECKING:
     from ..client import BotCore
+
+ytdlp_utils.bug_reports_message = lambda: ''
 
 audioformats = ["mp3", "ogg", "m4a", "webm", "mp4", "unknown_video"]
 
@@ -701,6 +703,7 @@ class YTDLManager:
         self.nodes = {} # test
         self.identifier = "YoutubeDL"
         self.search = True
+        self.ytdl = YoutubeDL(YDL_OPTIONS)
 
         if os.name != "nt":
             disnake.opus.load_opus(ctypes.util.find_library("opus"))
@@ -730,19 +733,16 @@ class YTDLManager:
 
         url = track.info['url']
 
-        with YoutubeDL(YDL_OPTIONS) as ytdl:
-
-            to_run = partial(ytdl.extract_info, url=url, download=False)
-            info = await self.bot.loop.run_in_executor(None, to_run)
+        to_run = partial(self.ytdl.extract_info, url=url, download=False)
+        info = await self.bot.loop.run_in_executor(None, to_run)
 
         track.id = [f for f in info["formats"] if f["ext"] in audioformats][0]["url"]
         return track
 
     async def get_tracks(self, query: str):
 
-        with YoutubeDL(YDL_OPTIONS) as ytdl:
-            to_run = partial(ytdl.extract_info, url=query, download=False)
-            info = await self.bot.loop.run_in_executor(None, to_run)
+        to_run = partial(self.ytdl.extract_info, url=query, download=False, process=False)
+        info = await self.bot.loop.run_in_executor(None, to_run)
 
         if info.get('_type') == "playlist" and not info.get('extractor', '').endswith('search'):
 
