@@ -8,6 +8,13 @@ if [ ! -d "venv" ]; then
   else
     python3 -m venv venv
   fi
+
+  if [ ! -d "venv" ]; then
+    echo "Pasta venv não foi criada! Verifique se instalou o python corretamente (e que esteja configurado no PATH/env)"
+    sleep 45
+    exit 1
+  fi
+
   source venv/Scripts/activate
   pip install -r requirements.txt
 else
