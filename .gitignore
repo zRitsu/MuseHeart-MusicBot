@@ -142,6 +142,7 @@ discloud.txt
 .classpath
 .project
 *.jar
+*.bat
 database.json
 /index.html
 /local_dbs/
