@@ -23,4 +23,4 @@ fi
 
 python main.py
 
-read -p "\n\nPressione ENTER para finalizar..."
+read -p "Pressione ENTER para finalizar..."

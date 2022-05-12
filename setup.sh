@@ -32,4 +32,4 @@ if [ ! -f ".env" ] && [ ! -f "config.json" ]; then
   echo 'Não esqueça de adicionar os tokens necessários no arquivo .env'
 fi
 
-read -p "\n\nPressione ENTER para finalizar..."
+read -p "Pressione ENTER para finalizar..."
