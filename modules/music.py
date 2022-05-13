@@ -1551,11 +1551,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     await interaction.response.send_message(embed=embed, ephemeral=True)
                     return
 
-                try:
-                    if not interaction.author.voice or interaction.author.voice.channel != vc:
-                        raise GenericError(f"Você deve estar no canal <#{vc.id}> para usar os botões do player.")
-                except AttributeError:
-                    pass
+                if not interaction.author.voice or interaction.author.voice.channel != vc:
+                    raise GenericError(f"Você deve estar no canal <#{vc.id}> para usar os botões do player.")
 
                 if control == "volume":
                     kwargs = {"value": None}
