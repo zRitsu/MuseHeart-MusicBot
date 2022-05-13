@@ -1552,7 +1552,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     return
 
                 try:
-                    if interaction.author.voice.channel != vc:
+                    if not interaction.author.voice or interaction.author.voice.channel != vc:
                         raise GenericError(f"Você deve estar no canal <#{vc.id}> para usar os botões do player.")
                 except AttributeError:
                     pass
