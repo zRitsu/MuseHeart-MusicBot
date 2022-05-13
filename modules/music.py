@@ -52,7 +52,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         self.player_interaction_concurrency = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
 
-    @check_voice()
+    """@check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @can_send_message()
     @commands.user_command(name="enqueue presence track")
@@ -113,7 +113,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             manual_selection=False,
             source="ytsearch",
             repeat_amount=0,
-        )
+        )"""
 
 
     @check_voice()

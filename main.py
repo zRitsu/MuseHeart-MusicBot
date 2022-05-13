@@ -34,7 +34,8 @@ if CONFIGS['START_LOCAL_LAVALINK'] is True and CONFIGS['YTDLMODE'] is False:
         lavalink_additional_sleep=int(CONFIGS['LAVALINK_ADDITIONAL_SLEEP']),
     )
 
-intents = disnake.Intents.all()
+intents = disnake.Intents.default()
+intents.message_content = True
 
 mongo_key = CONFIGS.get("MONGO")
 
