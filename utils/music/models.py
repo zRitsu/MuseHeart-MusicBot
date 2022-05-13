@@ -238,7 +238,10 @@ class BasePlayer:
         if not requester.guild_permissions.manage_channels:
             self.dj.add(requester)
 
-        print(f"Player Iniciado - Servidor: {self.guild.name} [{self.guild.id}]")
+        try:
+            print(f"Player Iniciado - Servidor: {self.guild.name} [{self.guild.id}]")
+        except:
+            print(f"Player Iniciado - Servidor: [{self.guild.id}]")
 
     def __repr__(self):
         return f"<volume={self.volume} " \
@@ -1045,9 +1048,12 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
 
         self.is_closing = True
 
-        print(f"Player Finalizado - Servidor: {self.guild.name} [{self.guild_id}]")
-
         await super().destroy(force=force)
+
+        try:
+            print(f"Player Finalizado - Servidor: {self.guild.name} [{self.guild_id}]")
+        except:
+            print(f"Player Finalizado - Servidor: [{self.guild_id}]")
 
     #######################
     #### Filter Stuffs ####
