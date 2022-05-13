@@ -128,6 +128,7 @@ class MongoDatabase(BaseDB):
         self._connect = AsyncIOMotorClient(token, connectTimeoutMS=30000)
         self._database = self._connect[name]
         self.name = name
+        print(f"{bot} - MongoDB conectado.")
 
     async def push_data(self, data, db_name: Literal['users', 'guilds']):
 
