@@ -24,7 +24,7 @@ bash update.sh
 `Obs: Caso esteja rodando a source diretamente de uma máquina com windows (e que tenha git instalado) apenas dê um duplo-click no arquivo update.sh`
 
 * Esta source foi criada com intuito para uso de bots privados (não está otimizado o suficiente pra lidar com alta demanda de servidores).
-* Usar a source da forma que se encontra, caso queira fazer modificações (e principalmente adicionar novas funcionalidades) é altamente recomendável que tenha conhecimento em python e disnake (e caso queira manter com updates em dias, é recomendável ter conhecimento em git também).
+* Usar a source da forma que se encontra, caso queira fazer modificações (e principalmente adicionar novas funcionalidades) é altamente recomendável que tenha conhecimento em python e disnake (e caso queira manter com updates em dias preservando suas modificações, é recomendável ter conhecimento em git também).
 
 
 ### Algumas previews:
