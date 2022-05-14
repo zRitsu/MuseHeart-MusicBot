@@ -9,8 +9,8 @@ Caso não queira criar um bot próprio, há um bot meu já feito e hospedado usa
 
 ### Requisitos:
 
-* Python 3.8 ou superior ([Site Oficial (Marque a opção de: Add Python to the PATH na instalação)](https://www.python.org/downloads/) / [Microsoft Store](https://apps.microsoft.com/store/detail/9PJPW5LDXLZ5?hl=pt-br&gl=BR))
-* [JDK 11 ou superior]((https://www.azul.com/downloads)) (Windows e Linux x64 é baixado automaticamente)
+* Python 3.8 ou superior: [Site Oficial (Marque a opção de: Add Python to the PATH na instalação)](https://www.python.org/downloads/) / [Microsoft Store](https://apps.microsoft.com/store/detail/9PJPW5LDXLZ5?hl=pt-br&gl=BR)
+* [JDK 11 ou superior](https://www.azul.com/downloads) (Windows e Linux x64 é baixado automaticamente)
 * [Git](https://git-scm.com/downloads) (Não escolha a versão portable)
 
 ### Notas:
