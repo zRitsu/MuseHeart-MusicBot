@@ -21,6 +21,8 @@ else
   source venv/Scripts/activate
 fi
 
+echo "Iniciando bot (Verifique se o mesmo está online)..."
+
 python main.py
 
 read -p "Pressione ENTER para finalizar..."
