@@ -11,15 +11,6 @@ from utils.db import MongoDatabase, LocalDatabase, guild_prefix
 from utils.music.spotify import spotify_client
 from web_app import start
 from config_loader import load_config
-#import logging
-#from logging.handlers import RotatingFileHandler
-
-#logger = logging.getLogger('disnake')
-#logger.setLevel(logging.DEBUG)
-#handler = RotatingFileHandler('disnake.log', maxBytes=4096, encoding='utf-8', mode='w')
-#handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-#logger.addHandler(handler)
-
 
 CONFIGS = load_config()
 
@@ -34,8 +25,26 @@ if CONFIGS['START_LOCAL_LAVALINK'] is True and CONFIGS['YTDLMODE'] is False:
         lavalink_additional_sleep=int(CONFIGS['LAVALINK_ADDITIONAL_SLEEP']),
     )
 
-intents = disnake.Intents.default()
-intents.message_content = True
+# intents necessárias para a source atual
+intents_dict = {
+    "guilds": True,
+    "emojis": True,
+    "webhooks": True,
+    "guild_messages": True,
+    "voice_states": True,
+
+    #privileged intents (caso esteja ativado não esqueça de ativar no developer portal)
+    "members": True,
+    "message_content": True
+}
+
+# adicionar intents
+intents_dict.update({i.lower(): True for i in CONFIGS["INTENTS"].split(" ") if i})
+
+# desativar intents
+intents_dict.update({i.lower(): False for i in CONFIGS["DISABLE_INTENTS"].split(" ") if i})
+
+intents = disnake.Intents(**intents_dict)
 
 mongo_key = CONFIGS.get("MONGO")
 
