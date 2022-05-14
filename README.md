@@ -28,12 +28,12 @@ Caso não queira criar um bot próprio, há um bot meu já feito e hospedado usa
 * dê clique-duplo no arquivo setup.sh (ou apenas setup caso o seu windows não esteja exibindo extensões de arquivo) e aguarde.</br>
 `Caso esteja usando linux use o comando no terminal: bash setup.sh`
 * Vai aparecer um arquivo com nome **.env**, edite ele e coloque o token do bot no campo apropriado (você também pode editar outras coisas deste mesmo arquivo caso queira fazer ajustes específicos no bot).</br>
-`Nota: Caso não tenha criado um bot, acesse este` [link](https://docs.disnake.dev/en/latest/discord.html) `com guia (em inglês) pra criar seu bot e obter o token necessário.` 
+`Nota: Caso não tenha criado uma conta de bot, acesse este` [link](https://docs.disnake.dev/en/latest/discord.html) `com guia (em inglês) pra criar seu bot e obter o token necessário.` 
 * Agora basta apenas abrir o arquivo run.sh para iniciar o bot (caso esteja usando linux use o comando: bash run.sh)
 
 ### Notas:
 
-* Para atualizar seu bot use o comando no shell/terminal:
+* Para atualizar seu bot dê um clique duplo no update.sh (windows), p/ Linux use o comando no shell/terminal:
 ```shell
 bash update.sh
 ```
