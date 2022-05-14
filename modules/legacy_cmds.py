@@ -139,12 +139,12 @@ class Owner(commands.Cog):
         elif "requirements.txt" in text:
             text += "\n`Nota: Será necessário atualizar as dependências.`"
 
-        txt = "`✅` **Atualização realizada com sucesso!**"
+        txt = f"`✅` **[Atualização realizada com sucesso!]({self.bot.remote_git_url}/commits/main)**"
 
         if git_log:
             txt += f"\n\n{self.format_log(git_log[:10])}"
 
-        txt += f"\n\n`📄` **Log:** ```py\n{out_git[:1000]}```{text}"
+        txt += f"\n\n`📄` **Log:** ```py\n{out_git[:1000]}```\n{text}"
 
         if isinstance(ctx, commands.Context):
             embed = disnake.Embed(
@@ -176,7 +176,7 @@ class Owner(commands.Cog):
             t = d.split("*****")
             git_log.append({"commit": t[0], "abbreviated_commit": t[1], "subject": t[2]})
 
-        txt = f"🔰 ** | Atualizações recentes:**\n\n" + self.format_log(git_log)
+        txt = f"🔰 ** | [Atualizações recentes:]({self.bot.remote_git_url}/commits/main)**\n\n" + self.format_log(git_log)
 
         if isinstance(ctx, commands.Context):
 
