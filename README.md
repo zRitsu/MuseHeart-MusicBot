@@ -9,9 +9,26 @@ Caso não queira criar um bot próprio, há um bot meu já feito e hospedado usa
 
 ### Requisitos:
 
-* Python 3.8 ou superior: [Site Oficial (Marque a opção de: Add Python to the PATH na instalação)](https://www.python.org/downloads/) / [Microsoft Store](https://apps.microsoft.com/store/detail/9PJPW5LDXLZ5?hl=pt-br&gl=BR)
-* [JDK 11 ou superior](https://www.azul.com/downloads) (Windows e Linux x64 é baixado automaticamente)
-* [Git](https://git-scm.com/downloads) (Não escolha a versão portable)
+* Python 3.8 ou superior:<br/>
+[Download pela Microsoft Store](https://apps.microsoft.com/store/detail/9PJPW5LDXLZ5?hl=pt-br&gl=BR) (Recomendável para usuários do windows 10/11).<br/>
+[Download direto do site oficial](https://www.python.org/downloads/) (Marque esta opção ao instalar: **Add python to the PATH**)
+* [Git](https://git-scm.com/downloads) (Não escolha a versão portable)</br>
+
+**Requisito para o modo Lavalink (Padrão):**
+* [JDK 11](https://www.azul.com/downloads) ou superior (Windows e Linux x64 é baixado automaticamente)</br>
+`Nota: este modo requer ter no mínimo 512mb de RAM (caso rode o Lavalink na mesma instância do bot).`
+
+**Requisito para o modo YTDL (FFMPEG):**
+* [FFMPEG](https://pt.wikihow.com/Instalar-o-FFmpeg-no-Windows)</br>
+`Nota: este modo requer no mínimo 200mb de RAM.`
+
+### Iniciar bot (guia rápido)
+
+* Baixe esta source como [zip](https://github.com/zRitsu/disnake-LL-music-bot/archive/refs/heads/main.zip) e extraia em seguida.
+* dê clique-duplo no arquivo setup.sh (ou apenas setup caso o seu windows não esteja exibindo extensões de arquivo) e aguarde.</br>
+`Caso esteja usando linux use o comando no terminal: bash setup.sh`
+* Vai aparecer um arquivo com nome **.env**, edite ele e coloque o token do bot no campo apropriado (você também pode editar outras coisas deste mesmo arquivo caso queira fazer ajustes específicos no bot).
+* Agora basta apenas abrir o arquivo run.sh para iniciar o bot (caso esteja usando linux use o comando: bash run.sh)
 
 ### Notas:
 
