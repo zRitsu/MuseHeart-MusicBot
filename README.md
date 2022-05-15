@@ -16,20 +16,30 @@ Caso não queira criar um bot próprio, há um bot meu já feito e hospedado usa
 
 **Requisito para o modo Lavalink (Padrão):**
 * [JDK 11](https://www.azul.com/downloads) ou superior (Windows e Linux x64 é baixado automaticamente)</br>
-`Nota: este modo requer ter no mínimo 512mb de RAM (caso rode o Lavalink na mesma instância do bot).`
+`Nota: este modo requer no mínimo 512mb de RAM (caso rode o Lavalink na mesma instância do bot).`
 
-**Requisito para o modo YTDL (FFMPEG):**
+**Requisito para o modo YTDL/FFMPEG (Experimental):**
 * [FFMPEG](https://pt.wikihow.com/Instalar-o-FFmpeg-no-Windows)</br>
-`Nota: este modo requer no mínimo 200mb de RAM.`
+`Nota: este modo requer no mínimo 200mb de RAM.`</br>
+`Para usar este modo, edite o arquivo .env e altere o valor do YTDLMODE de false para true.`
 
-### Iniciar bot (guia rápido)
+### Iniciar bot (guia rápido):
 
-* Baixe esta source como [zip](https://github.com/zRitsu/disnake-LL-music-bot/archive/refs/heads/main.zip) e extraia em seguida.
+* Baixe esta source como [zip](https://github.com/zRitsu/disnake-LL-music-bot/archive/refs/heads/main.zip) e extraia em seguida (Ou use o comando abaixo no terminal/cmd e abra a pasta em seguida):
+```shell
+git clone https://github.com/zRitsu/disnake-LL-music-bot.git
+```
 * dê clique-duplo no arquivo setup.sh (ou apenas setup caso o seu windows não esteja exibindo extensões de arquivo) e aguarde.</br>
-`Caso esteja usando linux use o comando no terminal: bash setup.sh`
+`Caso esteja usando linux use o comando no terminal:` 
+```shell
+bash setup.sh
+```
 * Vai aparecer um arquivo com nome **.env**, edite ele e coloque o token do bot no campo apropriado (você também pode editar outras coisas deste mesmo arquivo caso queira fazer ajustes específicos no bot).</br>
 `Nota: Caso não tenha criado uma conta de bot, acesse este` [link](https://docs.disnake.dev/en/latest/discord.html) `com guia (em inglês) pra criar seu bot e obter o token necessário.` 
-* Agora basta apenas abrir o arquivo run.sh para iniciar o bot (caso esteja usando linux use o comando: bash run.sh)
+* Agora basta apenas abrir o arquivo run.sh para iniciar o bot (caso esteja usando linux use o comando abaixo):
+```shell
+bash run.sh
+```
 
 ### Notas:
 
@@ -37,12 +47,12 @@ Caso não queira criar um bot próprio, há um bot meu já feito e hospedado usa
 ```shell
 bash update.sh
 ```
-`Ao atualizar, qualquer modificação no code pode ser descartada...`<br/>
+`Ao atualizar, há chance de qualquer alteração manual feita ser perdida (caso não seja um fork desta source)...`<br/>
 
 `Obs: Caso esteja rodando a source diretamente de uma máquina com windows (e que tenha git instalado) apenas dê um duplo-click no arquivo update.sh`
 
-* Esta source foi criada com intuito para uso de bots privados (não está otimizado o suficiente pra lidar com alta demanda de servidores).
-* Usar a source da forma que se encontra, caso queira fazer modificações (e principalmente adicionar novas funcionalidades) é altamente recomendável que tenha conhecimento em python e disnake (e caso queira manter com updates em dias preservando suas modificações, é recomendável ter conhecimento em git também).
+* Esta source foi criada com intuito para uso de bots privados (não está otimizado o suficiente pra lidar com alta demanda de servidores).</br></br>
+* Recomendo usar a source atual sem alterações no code que vá alem de textos. Caso queira fazer modificações (e principalmente adicionar novas funcionalidades) é altamente recomendável que tenha conhecimento em python e disnake. E caso queira manter sua source modificada com updates em dias usando a source base também recomendo ter conhecimento em git (pelo menos o necessário pra fazer um merge sem erros).
 
 
 ### Algumas previews:
