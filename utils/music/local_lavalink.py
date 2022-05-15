@@ -5,6 +5,7 @@ import re
 import os
 import time
 import zipfile
+import platform
 
 def download_file(url, filename):
     if os.path.isfile(filename):
@@ -48,6 +49,10 @@ def run_lavalink(
     }
 
     if download_java:
+
+        if platform.architecture()[0] != "64bit":
+            raise Exception("Você deve ter o JDK 11 ou superior instalado!")
+
         if os.name == "nt":
             jdk_url, jdk_filename = ["https://download.java.net/openjdk/jdk13/ri/openjdk-13+33_windows-x64_bin.zip",
                                      "java.zip"]
