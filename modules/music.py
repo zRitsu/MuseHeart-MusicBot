@@ -51,6 +51,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         self.player_interaction_concurrency = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
+        self.song_request_cooldown = commands.CooldownMapping.from_cooldown(rate=1, per=300, type=commands.BucketType.member)
+
 
     """@check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
@@ -1674,6 +1676,31 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             text_channel = self.bot.get_channel(int(channel_id))
 
             if not text_channel or not text_channel.permissions_for(message.guild.me).send_messages:
+                return
+
+            if not self.bot.intents.message_content:
+
+                try:
+                    await message.delete()
+                except:
+                    pass
+
+                bucket = self.song_request_cooldown.get_bucket(message)
+                retry_after = bucket.update_rate_limit()
+
+                if retry_after:
+                    return
+
+                await message.channel.send(
+                        message.author.mention,
+                        embed=disnake.Embed(
+                                description="Infelizmente não posso conferir o conteúdo de sua mensagem...\n"
+                                            "Tente adicionar música usando **/play** ou clicando no botão: **[🎶]**",
+                                color=self.bot.get_color(message.guild.me)
+                            ),
+                        delete_after=13
+                    )
+
                 return
 
         if not message.content:
