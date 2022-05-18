@@ -35,6 +35,9 @@ if CONFIGS['YTDLMODE'] is False:
             lavalink_additional_sleep=int(CONFIGS['LAVALINK_ADDITIONAL_SLEEP']),
         )
 
+else:
+    start_local = False
+
 # intents necessárias para a source atual
 intents_dict = {
     "guilds": True,
