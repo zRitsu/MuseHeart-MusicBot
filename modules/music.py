@@ -368,21 +368,22 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                 embed.description = f"**Selecione uma música abaixo:**"
 
-                components = [
-                    disnake.ui.Select(
-                        placeholder='Resultados:',
-                        custom_id=f"track_selection_{inter.id}",
-                        options=[
-                            disnake.SelectOption(
-                                label=t.title[:99],
-                                value=f"track_select_{n}",
-                                description=f"{t.author} [{time_format(t.duration)}]")
-                            for n, t in enumerate(tracks[:25])
-                        ]
-                    )
-                ]
-
-                await inter.edit_original_message(embed=embed, components=components)
+                await inter.edit_original_message(
+                    embed = embed,
+                    components = [
+                        disnake.ui.Select(
+                            placeholder='Resultados:',
+                            custom_id=f"track_selection_{inter.id}",
+                            options=[
+                                disnake.SelectOption(
+                                    label=t.title[:99],
+                                    value=f"track_select_{n}",
+                                    description=f"{t.author} [{time_format(t.duration)}]")
+                                for n, t in enumerate(tracks[:25])
+                            ]
+                        )
+                    ]
+                )
 
                 try:
                     select_interaction: disnake.MessageInteraction = await self.bot.wait_for(
@@ -1456,19 +1457,17 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                     opts.append(disnake.SelectOption(label="Cancelar", value="cancel", emoji="❌"))
 
-                    components = [
-                        disnake.ui.Select(
-                            custom_id=f"enqueue_fav_{interaction.id}",
-                            options=opts
-                        )
-                    ]
-
                     await interaction.send(
                         embed=disnake.Embed(
                             color=self.bot.get_color(interaction.guild.me),
                             description="**Selecione um favorito:**"
                         ).set_footer(text="Você tem apenas 45 segundos para escolher!"),
-                        components=components,
+                        components=[
+                            disnake.ui.Select(
+                                custom_id=f"enqueue_fav_{interaction.id}",
+                                options=opts
+                            )
+                        ],
                         ephemeral=True
                     )
 
@@ -1688,21 +1687,20 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 if self.song_request_cooldown.get_bucket(message).update_rate_limit():
                     return
 
-                components = [
-                    disnake.ui.Button(emoji="🎶", custom_id="musicplayer_add_song", label="Pedir uma música"),
-                    disnake.ui.Button(emoji="⭐", custom_id="musicplayer_enqueue_fav", label="Adicionar favorito na fila")
-                ]
-
                 await message.channel.send(
-                        message.author.mention,
-                        embed=disnake.Embed(
-                                description="Infelizmente não posso conferir o conteúdo de sua mensagem...\n"
-                                            "Tente adicionar música usando **/play** ou clique em um dos botões abaixo:",
-                                color=self.bot.get_color(message.guild.me)
-                            ),
-                        delete_after=20,
-                    components=components
-                    )
+                    message.author.mention,
+                    embed=disnake.Embed(
+                        description="Infelizmente não posso conferir o conteúdo de sua mensagem...\n"
+                                    "Tente adicionar música usando **/play** ou clique em um dos botões abaixo:",
+                        color=self.bot.get_color(message.guild.me)
+                    ),
+                    components=[
+                        disnake.ui.Button(emoji="🎶", custom_id="musicplayer_add_song", label="Pedir uma música"),
+                        disnake.ui.Button(emoji="⭐", custom_id="musicplayer_enqueue_fav",
+                                          label="Adicionar favorito na fila")
+                    ],
+                    delete_after=20
+                )
                 return
 
         if not message.content:
