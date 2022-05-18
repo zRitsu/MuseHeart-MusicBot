@@ -1685,22 +1685,24 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 except:
                     pass
 
-                bucket = self.song_request_cooldown.get_bucket(message)
-                retry_after = bucket.update_rate_limit()
-
-                if retry_after:
+                if self.song_request_cooldown.get_bucket(message).update_rate_limit():
                     return
+
+                components = [
+                    disnake.ui.Button(emoji="🎶", custom_id="musicplayer_add_song", label="Pedir uma música"),
+                    disnake.ui.Button(emoji="⭐", custom_id="musicplayer_enqueue_fav", label="Adicionar favorito na fila")
+                ]
 
                 await message.channel.send(
                         message.author.mention,
                         embed=disnake.Embed(
                                 description="Infelizmente não posso conferir o conteúdo de sua mensagem...\n"
-                                            "Tente adicionar música usando **/play** ou clicando no botão: **[🎶]**",
+                                            "Tente adicionar música usando **/play** ou clique em um dos botões abaixo:",
                                 color=self.bot.get_color(message.guild.me)
                             ),
-                        delete_after=13
+                        delete_after=20,
+                    components=components
                     )
-
                 return
 
         if not message.content:
