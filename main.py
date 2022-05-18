@@ -17,13 +17,23 @@ CONFIGS = load_config()
 if not CONFIGS["DEFAULT_PREFIX"]:
     CONFIGS["DEFAULT_PREFIX"] = "!!!"
 
-if CONFIGS['START_LOCAL_LAVALINK'] is True and CONFIGS['YTDLMODE'] is False:
-    run_lavalink(
-        lavalink_file_url=CONFIGS['LAVALINK_FILE_URL'],
-        lavalink_initial_ram=CONFIGS['LAVALINK_INITIAL_RAM'],
-        lavalink_ram_limit=CONFIGS['LAVALINK_RAM_LIMIT'],
-        lavalink_additional_sleep=int(CONFIGS['LAVALINK_ADDITIONAL_SLEEP']),
-    )
+
+LAVALINK_SERVERS = {}
+
+for key, value in CONFIGS.items():
+
+    if key.lower().startswith("lavalink_node_"):
+        LAVALINK_SERVERS[key] = value
+
+if CONFIGS['YTDLMODE'] is False:
+
+    if start_local := (not LAVALINK_SERVERS or CONFIGS['RUN_LOCAL_LAVALINK'] is True):
+        run_lavalink(
+            lavalink_file_url=CONFIGS['LAVALINK_FILE_URL'],
+            lavalink_initial_ram=CONFIGS['LAVALINK_INITIAL_RAM'],
+            lavalink_ram_limit=CONFIGS['LAVALINK_RAM_LIMIT'],
+            lavalink_additional_sleep=int(CONFIGS['LAVALINK_ADDITIONAL_SLEEP']),
+        )
 
 # intents necessárias para a source atual
 intents_dict = {
@@ -125,6 +135,12 @@ def load_bot(bot_name: str, token: str, main=False):
 
             bot.db = MongoDatabase(bot=bot, token=mongo_key, name=str(bot.user.id)) if mongo_key \
                 else LocalDatabase(bot, rename_db=main and path.isfile("./database.json"))
+
+
+            music_cog = bot.get_cog("Music")
+
+            if music_cog:
+                bot.loop.create_task(music_cog.process_nodes(data=LAVALINK_SERVERS, start_local=start_local))
 
             if spotify:
                 try:

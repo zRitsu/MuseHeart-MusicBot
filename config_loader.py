@@ -52,7 +52,7 @@ def load_config():
         ### Local lavalink stuffs: ###
         ##############################
 
-        "START_LOCAL_LAVALINK": True,
+        "RUN_LOCAL_LAVALINK": False,
         "LAVALINK_ADDITIONAL_SLEEP": 0,
         "LAVALINK_INITIAL_RAM": 30,
         "LAVALINK_RAM_LIMIT": 120,
@@ -67,9 +67,7 @@ def load_config():
             continue
 
     for env in environ:
-        if env.lower().startswith("token_bot_") or \
-                env.lower().startswith("lavalink_node_") or \
-                env.lower().startswith("test_guilds_"):
+        if env.lower().startswith(("token_bot_", "test_guilds_", "lavalink_node_")):
             CONFIGS[env] = environ[env]
 
     try:
@@ -113,7 +111,7 @@ def load_config():
         "EMBED_COLOR",
         "HIDE_SOURCE_OWNER",
         "INTERACTION_COMMAND_ONLY",
-        "START_LOCAL_LAVALINK",
+        "RUN_LOCAL_LAVALINK",
         "COMMAND_LOG",
         "YTDLMODE"
 

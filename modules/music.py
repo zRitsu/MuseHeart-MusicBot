@@ -45,8 +45,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         self.bot = bot
 
-        self.bot.loop.create_task(self.process_nodes())
-
         self.song_request_concurrency = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
         self.player_interaction_concurrency = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
@@ -1906,23 +1904,21 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 await inter.send(embed=embed, ephemeral=True)
 
 
-    async def process_nodes(self):
+    async def process_nodes(self, data: dict, start_local: bool = False):
 
         if self.bot.config["YTDLMODE"]:
             return
 
         await self.bot.wait_until_ready()
 
-        for k,v in self.bot.config.items():
+        for k,v in data.items():
 
-            if not k.lower().startswith("lavalink_node_"):
-                continue
             try:
                 self.bot.loop.create_task(self.connect_node(json.loads(v)))
             except Exception as e:
                 print(f"Falha ao adicionar node: {k}, erro: {repr(e)}")
 
-        if self.bot.config['START_LOCAL_LAVALINK']:
+        if start_local:
             self.bot.loop.create_task(self.connect_local_lavalink())
 
 
