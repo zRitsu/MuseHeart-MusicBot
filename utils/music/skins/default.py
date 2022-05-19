@@ -83,6 +83,9 @@ def load(player: LavalinkPlayer) -> dict:
     if player.nonstop:
         txt += "\n> ♾️ **⠂Modo interrupto:** `Ativado`"
 
+    if player.restrict_mode:
+        txt += f"\n> 🔒 **Modo restrito:** `Ativado`"
+
     txt += f"{vc_txt}\n"
 
     if player.command_log:
