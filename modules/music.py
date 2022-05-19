@@ -1,5 +1,3 @@
-import pprint
-
 import disnake
 from disnake.embeds import Embed
 from disnake.ext import commands
@@ -2141,7 +2139,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         data['rest_uri'] = ("https" if data.get('secure') else "http") + f"://{data['host']}:{data['port']}"
-        data['user_agent'] = ''
         search = data.pop("search", True)
         max_retries = data.pop('retries', 0)
         node_website = data.pop('website', '')
