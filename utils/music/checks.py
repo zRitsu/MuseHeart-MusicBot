@@ -22,6 +22,12 @@ def is_dj():
 
     async def predicate(inter):
 
+        try:
+            if inter.bot.music.players[inter.guild.id].restrict_mode:
+                return True
+        except KeyError:
+            return True
+
         if not await has_perm(inter):
             raise NotDJorStaff()
 
@@ -125,7 +131,7 @@ def user_cooldown(rate: int, per: int):
 #######################################################################
 
 
-async def has_perm(inter):
+async def has_perm(inter, auto_add_dj: bool = True):
 
     try:
         player = inter.bot.music.players[inter.guild.id]
@@ -150,7 +156,7 @@ async def has_perm(inter):
     if not vc and inter.author.voice:
         player.dj.add(inter.author)
 
-    elif inter.bot.intents.members and not [m for m in vc.members if
+    elif auto_add_dj and inter.bot.intents.members and not [m for m in vc.members if
                                         not m.bot and (m.guild_permissions.manage_channels or m in player.dj)]:
         player.dj.add(inter.author)
         await inter.channel.send(embed=disnake.Embed(

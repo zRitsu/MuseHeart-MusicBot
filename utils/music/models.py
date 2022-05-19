@@ -232,6 +232,7 @@ class BasePlayer:
         self.nonstop: bool = False
         self.update_player: bool = True
         self.message_updater_task: Optional[asyncio.Task] = None
+        self.restrict_mode = kwargs.pop('restrict_mode', False) # limitar apenas para dj's e staff's
 
         requester: disnake.Member = kwargs.pop('requester')
 
