@@ -87,8 +87,7 @@ async def search_suggestions(inter, query):
         return [query]
 
     async with inter.bot.session.get(
-            f"http://suggestqueries.google.com/complete/search?client=chrome&ds=yt&q={query}",
-            headers={'User-Agent': ua}) as r:
+            f"http://suggestqueries.google.com/complete/search?client=chrome&ds=yt&q={query}") as r:
         return json.loads(await r.text())[1][:20]
 
 
