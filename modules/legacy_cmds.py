@@ -90,8 +90,11 @@ class Owner(commands.Cog):
 
         if not os.path.isdir("./.git") or force:
 
-            if force:
-                shutil.rmtree("./.git")
+            try:
+                if force:
+                    shutil.rmtree("./.git")
+            except FileNotFoundError:
+                pass
 
             for c in self.git_init_cmds:
                 out_git += run_command(c) + "\n"
