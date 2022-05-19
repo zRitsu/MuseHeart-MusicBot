@@ -4,7 +4,6 @@ from disnake.ext import commands
 import traceback
 import wavelink
 import asyncio
-from fake_useragent import UserAgent
 import sys
 import json
 from random import shuffle
@@ -2140,7 +2139,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         data['rest_uri'] = ("https" if data.get('secure') else "http") + f"://{data['host']}:{data['port']}"
-        data['user_agent'] = UserAgent().random
         search = data.pop("search", True)
         max_retries = data.pop('retries', 0)
         node_website = data.pop('website', '')

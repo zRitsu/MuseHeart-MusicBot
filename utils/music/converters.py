@@ -1,14 +1,11 @@
 import datetime
 from typing import Union
-
-from fake_useragent import UserAgent
 import disnake
 import re
 import json
 
 URL_REG = re.compile(r'https?://(?:www\.)?.+')
 YOUTUBE_VIDEO_REG = re.compile(r"(https?://)?(www\.)?youtube\.(com|nl)/watch\?v=([-\w]+)")
-ua = UserAgent().random
 
 
 replaces = [
