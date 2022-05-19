@@ -1286,7 +1286,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         texts = ["ativou", "ativado"] if player.restrict_mode else ["desativou", "desativado"]
 
         text = [
-            f"{texts[0]} o modo restrito de comandos do player (quer requer DJ/Staff).",
+            f"{texts[0]} o modo restrito de comandos do player (que requer DJ/Staff).",
             f"**Modo restrito do player {texts[1]} com sucesso.**"
         ]
 
