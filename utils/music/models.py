@@ -126,7 +126,10 @@ class LavalinkTrack(wavelink.Track):
             self.thumb = self.info.get("artworkUrl", "")
 
         if self.info.get("sourceName") == "youtube" and self.playlist:
-            self.uri = f"{self.uri}&list={parse.parse_qs(parse.urlparse(self.playlist['url']).query)['list'][0]}"
+            try:
+                self.uri = f"{self.uri}&list={parse.parse_qs(parse.urlparse(self.playlist['url']).query)['list'][0]}"
+            except KeyError:
+                pass
 
 
 class YTDLTrack:
@@ -158,7 +161,10 @@ class YTDLTrack:
             self.info["class"] = "YoutubeAudioTrack"
             self.thumb = f"https://img.youtube.com/vi/{data['id']}/mqdefault.jpg"
             if self.playlist:
-                self.uri = f"{self.uri}&list={parse.parse_qs(parse.urlparse(self.playlist['url']).query)['list'][0]}"
+                try:
+                    self.uri = f"{self.uri}&list={parse.parse_qs(parse.urlparse(self.playlist['url']).query)['list'][0]}"
+                except KeyError:
+                    pass
         else:
             self.info["class"] = data.pop("extractor_key", "")
             self.thumb = data.get('thumbnail', '')
