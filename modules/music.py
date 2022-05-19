@@ -14,7 +14,7 @@ from utils.client import BotCore
 from utils.music.errors import GenericError, MissingVoicePerms
 from utils.music.spotify import SpotifyPlaylist, process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, \
-    can_send_message, has_perm
+    can_send_message
 from utils.music.models import LavalinkPlayer, LavalinkTrack, YTDLTrack, YTDLPlayer, YTDLManager
 from utils.music.converters import time_format, fix_characters, string_to_seconds, get_track_index, URL_REG, \
     YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist, \
@@ -1274,6 +1274,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
 
     @has_player()
+    @is_dj()
     @commands.cooldown(2, 5, commands.BucketType.member)
     @commands.slash_command(name="modo_restrito", description=f"{desc_prefix}Ativar/Desativar o modo restrito de comandos que requer DJ/Staff.")
     async def restrict_mode(self, inter: disnake.AppCmdInter):
@@ -1281,9 +1282,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         player.restrict_mode = not player.restrict_mode
-
-        if player.restrict_mode and not await has_perm(inter):
-            player.dj.add(inter.author)
 
         texts = ["ativou", "ativado"] if player.restrict_mode else ["desativou", "desativado"]
 

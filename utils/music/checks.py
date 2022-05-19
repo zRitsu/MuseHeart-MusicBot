@@ -131,7 +131,7 @@ def user_cooldown(rate: int, per: int):
 #######################################################################
 
 
-async def has_perm(inter, auto_add_dj: bool = True):
+async def has_perm(inter):
 
     try:
         player = inter.bot.music.players[inter.guild.id]
@@ -156,7 +156,7 @@ async def has_perm(inter, auto_add_dj: bool = True):
     if not vc and inter.author.voice:
         player.dj.add(inter.author)
 
-    elif auto_add_dj and inter.bot.intents.members and not [m for m in vc.members if
+    elif inter.bot.intents.members and not [m for m in vc.members if
                                         not m.bot and (m.guild_permissions.manage_channels or m in player.dj)]:
         player.dj.add(inter.author)
         await inter.channel.send(embed=disnake.Embed(
