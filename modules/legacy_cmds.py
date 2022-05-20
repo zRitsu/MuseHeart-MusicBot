@@ -17,7 +17,7 @@ from utils.music.errors import GenericError
 
 
 os_quote = "\"" if os.name == "nt" else "'"
-git_format = f"--pretty=format:{os_quote}%H*****%h*****%s{os_quote}"
+git_format = f"--pretty=format:{os_quote}%H*****%h*****%s*****%ct{os_quote}"
 
 def replaces(txt):
 
@@ -44,7 +44,8 @@ class Owner(commands.Cog):
 
     def format_log(self, data: list):
         return "\n".join( f"[`{c['abbreviated_commit']}`]({self.bot.remote_git_url}/commit/{c['commit']}) `- "
-                          f"{(c['subject'][:60] + '...') if len(c['subject']) > 59 else c['subject']}`" for c in data)
+                          f"{(c['subject'][:40] + '...') if len(c['subject']) > 39 else c['subject']}` "
+                          f"(<t:{c['timestamp']}:R>)" for c in data)
 
 
     @commands.is_owner()
@@ -132,7 +133,7 @@ class Owner(commands.Cog):
 
             for d in data:
                 t = d.split("*****")
-                git_log.append({"commit": t[0], "abbreviated_commit": t[1], "subject": t[2]})
+                git_log.append({"commit": t[0], "abbreviated_commit": t[1], "subject": t[2], "timestamp": t[3]})
 
         text = "`Reinicie o bot após as alterações.`"
 
@@ -177,7 +178,7 @@ class Owner(commands.Cog):
 
         for d in data:
             t = d.split("*****")
-            git_log.append({"commit": t[0], "abbreviated_commit": t[1], "subject": t[2]})
+            git_log.append({"commit": t[0], "abbreviated_commit": t[1], "subject": t[2], "timestamp": t[3]})
 
         txt = f"🔰 ** | [Atualizações recentes:]({self.bot.remote_git_url}/commits/main)**\n\n" + self.format_log(git_log)
 
