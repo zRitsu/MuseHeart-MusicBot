@@ -3,6 +3,7 @@ from typing import Union
 import disnake
 import re
 import json
+from user_agent import generate_user_agent
 
 URL_REG = re.compile(r'https?://(?:www\.)?.+')
 YOUTUBE_VIDEO_REG = re.compile(r"(https?://)?(www\.)?youtube\.(com|nl)/watch\?v=([-\w]+)")
@@ -59,6 +60,8 @@ perms_translations = {
 	"use_slash_commands": "Usar comandos de barra",
 }
 
+u_agent = generate_user_agent()
+
 
 async def node_suggestions(inter, query):
 
@@ -87,7 +90,8 @@ async def search_suggestions(inter, query):
         return [query]
 
     async with inter.bot.session.get(
-            f"http://suggestqueries.google.com/complete/search?client=chrome&ds=yt&q={query}") as r:
+            f"http://suggestqueries.google.com/complete/search?client=chrome&ds=yt&q={query}",
+            headers={'User-Agent': u_agent}) as r:
         return json.loads(await r.text())[1][:20]
 
 

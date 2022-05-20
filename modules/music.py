@@ -20,6 +20,7 @@ from utils.music.converters import time_format, fix_characters, string_to_second
     node_suggestions, fav_add_autocomplete, fav_list
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
 from utils.others import check_cmd, send_message, send_idle_embed
+from user_agent import generate_user_agent
 
 PlayOpts = commands.option_enum(
     {
@@ -34,6 +35,9 @@ SearchSource = commands.option_enum(
         "Soundcloud": "scsearch"
     }
 )
+
+
+u_agent = generate_user_agent()
 
 
 desc_prefix = "🎶 [Música] 🎶 | "
@@ -2137,7 +2141,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         data['rest_uri'] = ("https" if data.get('secure') else "http") + f"://{data['host']}:{data['port']}"
-        data['user_agent'] = ''
+        data['user_agent'] = u_agent
         search = data.pop("search", True)
         max_retries = data.pop('retries', 0)
         node_website = data.pop('website', '')

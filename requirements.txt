@@ -2,6 +2,7 @@ disnake==2.5.1
 git+https://github.com/zRitsu/Wavelink.git@28080c316acc739ed3c5f4daf802d7bcb194865e
 python-dotenv
 git+https://github.com/Run1e/asyncspotify.git
+user-agent
 requests
 humanize
 tornado
