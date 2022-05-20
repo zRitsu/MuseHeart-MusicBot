@@ -31,19 +31,6 @@ def load(player: LavalinkPlayer) -> dict:
         icon_url="https://cdn.discordapp.com/attachments/480195401543188483/907119505971486810/speaker-loud-speaker.gif"
     )
 
-    if player.current.is_stream:
-        duration = "```ini\n🔴 [Livestream]```"
-    else:
-
-        progress = ProgressBar(
-            player.position,
-            player.current.duration,
-            bar_count=10 if not player.static else (20 if player.current.info.get("sourceName") == "youtube" else 17)
-        )
-
-        duration = f"```ini\n[{time_format(player.position)}] {('='*progress.start)}🔴️{'='*progress.end} " \
-                   f"[{time_format(player.current.duration)}]```\n"
-
     vc_txt = ""
 
     if player.static:
@@ -63,7 +50,10 @@ def load(player: LavalinkPlayer) -> dict:
         queue_img = "https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif"
         playlist_text_size = 13
 
+    duration = "> 🔴 Duração: `Livestream`" if player.current.is_stream else f"> ⏰ **⠂Duração:** `{time_format(player.current.duration)}`"
+
     txt = f"[`{player.current.single_title}`]({player.current.uri})\n\n" \
+          f"{duration}\n" \
           f"> 💠 **⠂Por:** {player.current.authors_md}\n" \
           f"> ✋ **⠂Pedido por:** {player.current.requester.mention}\n" \
           f"> 🔊 **⠂Volume:** `{player.volume}%`"
@@ -90,8 +80,6 @@ def load(player: LavalinkPlayer) -> dict:
 
     if player.command_log:
         txt += f"> ✅ **⠂Última Interação:** {player.command_log}\n"
-
-    txt += duration
 
     if len(player.queue):
 

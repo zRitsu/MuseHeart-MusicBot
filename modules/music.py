@@ -1425,6 +1425,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not interaction.data.custom_id.startswith("musicplayer_"):
             return
 
+        if not self.bot.bot_ready:
+            await interaction.send("Ainda estou inicializando...", ephemeral=True)
+            return
+
         control = interaction.data.custom_id[12:]
 
         kwargs = {}
@@ -2114,12 +2118,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if player.locked:
             return
-
-        try:
-            player.message_updater_task.cancel()
-        except:
-            pass
-        player.message_updater_task = None
 
         if payload.reason == "FINISHED":
             player.command_log = ""

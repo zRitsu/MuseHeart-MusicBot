@@ -30,7 +30,6 @@ def load_config():
         "USER_FAV_MAX_URL_LENGTH": 90,
         "BOT_ADD_REMOVE_LOG": '',
         "ERROR_REPORT_WEBHOOK": '',
-        "PLAYER_MESSAGE_UPDATE_INTERVAL": 15,
         "SPOTIFY_CLIENT_ID": '',
         "SPOTIFY_CLIENT_SECRET": '',
         "INTERACTION_COMMAND_ONLY": False,
@@ -96,7 +95,6 @@ def load_config():
         "LAVALINK_CPU_CORES",
         "USER_FAV_MAX_NAME_LENGTH",
         "USER_FAV_MAX_URL_LENGTH",
-        "PLAYER_MESSAGE_UPDATE_INTERVAL",
         "PRESENCE_INTERVAL"
     ]:
         try:
@@ -131,8 +129,5 @@ def load_config():
 
     if CONFIGS["IDLE_TIMEOUT"] < 30:
         CONFIGS["IDLE_TIMEOUT"] = 30
-
-    if 10 < CONFIGS["PLAYER_MESSAGE_UPDATE_INTERVAL"] < 45:
-        CONFIGS["PLAYER_MESSAGE_UPDATE_INTERVAL"] = 15
 
     return CONFIGS

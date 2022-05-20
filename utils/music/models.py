@@ -232,12 +232,12 @@ class BasePlayer:
         self.members_timeout_task: Optional[asyncio.Task] = None
         self.idle_timeout = self.bot.config["IDLE_TIMEOUT"]
         self.command_log: str = ""
-        self.last_data: dict = {}
         self.is_closing: bool = False
         self.last_message_id: Optional[int] = None
         self.nonstop: bool = False
-        self.update_player: bool = True
-        self.message_updater_task: Optional[asyncio.Task] = None
+        self.update: bool = False
+        self.updating: bool = False
+        self.message_updater_task: Optional[asyncio.Task] = self.bot.loop.create_task(self.message_updater())
         self.restrict_mode = kwargs.pop('restrict_mode', False) # limitar apenas para dj's e staff's
 
         requester: disnake.Member = kwargs.pop('requester')
@@ -317,12 +317,6 @@ class BasePlayer:
 
     async def idling_mode(self):
 
-        try:
-            self.message_updater_task.cancel()
-        except:
-            pass
-        self.message_updater_task = None
-
         self.bot.loop.create_task(self.process_rpc(self.guild.me.voice.channel))
 
         buttons = []
@@ -387,7 +381,7 @@ class BasePlayer:
 
     async def invoke_np(self, force=False, interaction=None, rpc_update=False):
 
-        if not self.current:
+        if not self.current or self.updating:
             try:
                 await interaction.response.defer()
             except:
@@ -399,15 +393,7 @@ class BasePlayer:
 
         data = self.skin(self)
 
-        try:
-            if self.message and data == self.last_data and (self.has_thread or self.static or self.is_last_message()):
-                try:
-                    await interaction.response.defer()
-                except:
-                    pass
-                return
-        except:
-            pass
+        self.updating = True
 
         components = []
 
@@ -438,10 +424,8 @@ class BasePlayer:
                 style = disnake.ButtonStyle.grey
             components.append(disnake.ui.Button(emoji=button, custom_id=f"musicplayer_{control[0]}", style=style))
 
-        if not self.message_updater_task:
-            self.message_updater_task = self.bot.loop.create_task(self.message_updater())
-
         if self.message and (self.has_thread or self.static or not force or self.is_last_message()):
+
             try:
                 if interaction and not interaction.response.is_done():
                     await interaction.response.edit_message(components=components, **data)
@@ -455,24 +439,23 @@ class BasePlayer:
                     except:
                         if not self.bot.get_channel(self.text_channel.id):
                             await self.destroy(force=True)  # canal não existe mais no servidor...
+                            return
+
+                self.updating = False
                 return
             except:
                 traceback.print_exc()
-                pass
 
         await self.destroy_message()
 
-        self.last_data = data
+        try:
+            self.message = await self.text_channel.send(components=components, **data)
+        except:
+            traceback.print_exc()
 
-        self.message = await self.text_channel.send(components=components, **data)
+        self.updating = False
 
     async def set_pause(self, pause: bool) -> None:
-
-        try:
-            self.message_updater_task.cancel()
-        except:
-            pass
-        self.message_updater_task = None
         await super().set_pause(pause)
 
     async def destroy_message(self):
@@ -482,8 +465,6 @@ class BasePlayer:
                 await self.message.delete()
             except:
                 pass
-
-        self.last_data = None
 
         self.message = None
 
@@ -498,18 +479,18 @@ class BasePlayer:
 
         while True:
 
-            await asyncio.sleep(self.bot.config["PLAYER_MESSAGE_UPDATE_INTERVAL"])
+            await asyncio.sleep(10)
 
-            if self.update_player:
+            if self.update:
 
                 try:
                     await self.invoke_np()
                 except:
                     traceback.print_exc()
 
-            else:
+                self.update = False
 
-                self.update_player = True
+                await asyncio.sleep(5)
 
     async def update_message(self, interaction: disnake.Interaction = None, force=False, rpc_update=False):
 
@@ -517,8 +498,11 @@ class BasePlayer:
             self.bot.loop.create_task(self.process_rpc())
 
         if force or (interaction and not interaction.response.is_done()):
-            self.update_player = False
+            self.update = False
             await self.invoke_np(interaction=interaction)
+
+        else:
+            self.update = True
 
     async def cleanup(self):
 
