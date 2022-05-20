@@ -6,5 +6,7 @@ pip3 install -U -r requirements.txt
 clear
 python3 main.py"""
 
+hidden = ["venv", ".config", "**/__pycache__", "**/.mypy_cache", "**/*.pyc", "Lavalink.jar"]
+
 [packager]
-ignoredPackages=["discord.py", "discord"]
+ignoredPackages=["discord.py", "discord", "unit_tests"]
