@@ -2,7 +2,7 @@
 
 trap 'kill $(jobs -pr)' SIGINT SIGTERM EXIT
 
-if [ ! -d ".git" ]; then
+if [ ! -d ".git" ] || [ -z "$(git remote -v)" ]; then
   git init
   git remote add origin https://github.com/zRitsu/disnake-LL-music-bot.git
   git fetch origin

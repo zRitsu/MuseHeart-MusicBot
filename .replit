@@ -1,6 +1,14 @@
 language="python3"
 
 run = """[ -z "$IS_SOURCE" ] || { python3 preview.py; kill "$PPID"; exit 1; }
+
+if [ ! -d ".git" ] || [ -z "$(git remote -v)" ]; then
+  git init
+  git remote add origin https://github.com/zRitsu/disnake-LL-music-bot.git
+  git fetch origin
+  git checkout -b main -f --track origin/main
+fi
+
 [ -e pom.xml ] && rm pom.xml
 pip3 install -U -r requirements.txt
 clear
