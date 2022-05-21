@@ -1279,7 +1279,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @has_player()
     @is_dj()
     @commands.cooldown(2, 5, commands.BucketType.member)
-    @commands.slash_command(name="modo_restrito", description=f"{desc_prefix}Ativar/Desativar o modo restrito de comandos que requer DJ/Staff.")
+    @commands.slash_command(description=f"{desc_prefix}Ativar/Desativar o modo restrito de comandos que requer DJ/Staff.")
     async def restrict_mode(self, inter: disnake.AppCmdInter):
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
