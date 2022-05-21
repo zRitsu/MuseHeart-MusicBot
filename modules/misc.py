@@ -217,14 +217,14 @@ class GuildLog(commands.Cog):
 
     def __init__(self, bot: BotCore):
         self.bot = bot
+        self.hook_url: str = ""
 
-        if URL_REG.match(bot.config["BOT_ADD_REMOVE_LOG"]):
-            hook_url = bot.config["BOT_ADD_REMOVE_LOG"]
-        else:
-            print("URL do webhook inválido (para envio de logs ao adicionar/remover bot).")
-            hook_url = ""
+        if bot.config["BOT_ADD_REMOVE_LOG"]:
 
-        self.hook_url: str = hook_url
+            if URL_REG.match(bot.config["BOT_ADD_REMOVE_LOG"]):
+                self.hook_url = bot.config["BOT_ADD_REMOVE_LOG"]
+            else:
+                print("URL do webhook inválido (para envio de logs ao adicionar/remover bot).")
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: disnake.Guild):
