@@ -158,7 +158,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             server: str = commands.Param(name="server", desc="Usar um servidor de música específico na busca.", autocomplete=node_suggestions, default=None)
     ):
 
-        await self.play(
+        await self.bot.get_slash_command('play')(
             inter,
             query=query,
             position=position,
