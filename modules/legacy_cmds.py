@@ -4,7 +4,7 @@ import shutil
 import subprocess
 import json
 from io import BytesIO
-from typing import Union
+from typing import Union, Optional
 import disnake
 import wavelink
 from disnake.ext import commands
@@ -40,7 +40,7 @@ class Owner(commands.Cog):
             'git fetch origin',
             'git checkout -b main -f --track origin/main'
         ]
-        self.owner_view = PanelView(bot)
+        self.owner_view: Optional[PanelView] = None
 
 
     def format_log(self, data: list):
@@ -369,6 +369,9 @@ class Owner(commands.Cog):
             await asyncio.sleep(1.5)
 
         await player.process_next()
+
+    async def cog_load(self) -> None:
+        self.owner_view =  PanelView(self.bot)
 
 
 def setup(bot: BotCore):
