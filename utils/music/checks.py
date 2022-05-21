@@ -1,7 +1,10 @@
+from typing import Union
 import disnake
 from disnake.ext import commands
+from .converters import perms_translations
 from .errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, DiffVoiceChannel, GenericError, \
     MissingVoicePerms
+from .models import LavalinkPlayer, YTDLPlayer
 
 
 def has_player():
@@ -134,7 +137,7 @@ def user_cooldown(rate: int, per: int):
 async def has_perm(inter):
 
     try:
-        player = inter.bot.music.players[inter.guild.id]
+        player: Union[LavalinkPlayer, YTDLPlayer] = inter.bot.music.players[inter.guild.id]
     except KeyError:
         return True
 
@@ -143,6 +146,10 @@ async def has_perm(inter):
 
     if inter.author.guild_permissions.manage_channels:
         return True
+
+    elif player.nonstop:
+        raise GenericError(f"**Erro!** Apenas membros com a permissão de **{perms_translations('manage_channels')}** "
+                           "podem usar este comando/botão com o **modo 24/7 ativo**...")
 
     user_roles = [r.id for r in inter.author.roles]
 

@@ -1299,7 +1299,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @has_player()
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.has_guild_permissions(manage_guild=True)
-    @commands.slash_command(description=f"{desc_prefix}Ativar/Desativar o modo interrupta do player (24/7).")
+    @commands.slash_command(name="24_7", description=f"{desc_prefix}Ativar/Desativar o modo 24/7 do player (Em testes).")
     async def nonstop(self, inter: disnake.ApplicationCommandInteraction):
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
