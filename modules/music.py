@@ -109,7 +109,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not query:
             raise GenericError(f"{member.mention} não está com status do spotify, OSU! ou youtube.")
 
-        await self.play(
+        await self.bot.get_slash_command('play')(
             inter,
             query=query,
             position=0,
@@ -131,7 +131,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await inter.send(embed=emb, ephemeral=True)
             return
 
-        await self.play(
+        await self.bot.get_slash_command('play')(
             inter,
             query=inter.target.content,
             position=0,
