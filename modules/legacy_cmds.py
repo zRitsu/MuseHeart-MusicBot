@@ -12,7 +12,7 @@ from utils.client import BotCore
 from utils.music.checks import check_voice
 from utils.music.models import LavalinkPlayer
 from utils.others import sync_message
-from utils.owner_panel import panel_command
+from utils.owner_panel import panel_command, PanelView
 from utils.music.errors import GenericError
 
 
@@ -40,6 +40,7 @@ class Owner(commands.Cog):
             'git fetch origin',
             'git checkout -b main -f --track origin/main'
         ]
+        self.owner_view = PanelView(bot)
 
 
     def format_log(self, data: list):
@@ -71,7 +72,7 @@ class Owner(commands.Cog):
 
         if isinstance(ctx, commands.Context):
             embed = disnake.Embed(colour=self.bot.get_color(ctx.me), description=txt)
-            await ctx.send(embed=embed)
+            await ctx.send(embed=embed, view=self.owner_view)
         else:
             return txt
 
@@ -155,7 +156,7 @@ class Owner(commands.Cog):
                 description=txt,
                 color=self.bot.get_color(ctx.guild.me)
             )
-            await ctx.send(embed=embed)
+            await ctx.send(embed=embed, view=self.owner_view)
 
         else:
             return txt
@@ -189,7 +190,7 @@ class Owner(commands.Cog):
                 color=self.bot.get_color(ctx.guild.me)
             )
 
-            await ctx.send(embed=embed)
+            await ctx.send(embed=embed, view=self.owner_view)
 
         else:
             return txt
@@ -226,7 +227,7 @@ class Owner(commands.Cog):
                 description=txt
             )
 
-            await ctx.send(embed=embed)
+            await ctx.send(embed=embed, view=self.owner_view)
 
         else:
             return txt
