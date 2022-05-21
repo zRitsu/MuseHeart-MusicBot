@@ -26,7 +26,7 @@ def is_dj():
     async def predicate(inter):
 
         try:
-            if inter.bot.music.players[inter.guild.id].restrict_mode:
+            if not inter.bot.music.players[inter.guild.id].restrict_mode:
                 return True
         except KeyError:
             return True
