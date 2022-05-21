@@ -148,7 +148,7 @@ async def has_perm(inter):
         return True
 
     elif player.nonstop:
-        raise GenericError(f"**Erro!** Apenas membros com a permissão de **{perms_translations('manage_channels')}** "
+        raise GenericError(f"**Erro!** Apenas membros com a permissão de **{perms_translations['manage_channels']}** "
                            "podem usar este comando/botão com o **modo 24/7 ativo**...")
 
     user_roles = [r.id for r in inter.author.roles]
