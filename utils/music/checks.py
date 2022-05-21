@@ -56,14 +56,14 @@ def is_requester():
     async def predicate(inter):
 
         try:
-            player = inter.bot.music.players[inter.guild.id]
+            player: Union[LavalinkPlayer, YTDLPlayer] = inter.bot.music.players[inter.guild.id]
         except KeyError:
             raise NoPlayer()
 
         if not player.current:
             raise NoSource()
 
-        if player.current.requester == inter.author:
+        if player.current.requester == inter.author or not player.restrict_mode:
             return True
 
         try:
