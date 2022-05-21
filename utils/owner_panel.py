@@ -1,11 +1,8 @@
 from __future__ import annotations
-
-import pprint
-
 import disnake
 from disnake.ext import commands
 from utils.music.errors import parse_error
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from utils.client import BotCore

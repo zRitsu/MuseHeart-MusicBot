@@ -2,11 +2,11 @@ from __future__ import annotations
 import disnake
 import humanize
 from disnake.ext import commands
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 from utils.music.checks import user_cooldown
 from utils.music.converters import time_format
 from utils.others import send_idle_embed
-from utils.music.models import LavalinkPlayer
+from utils.music.models import LavalinkPlayer, YTDLPlayer
 
 if TYPE_CHECKING:
     from utils.client import BotCore
@@ -88,7 +88,7 @@ class MusicSettings(commands.Cog):
             overwrites=perms
         )
 
-        player: LavalinkPlayer = self.bot.music.players.get(inter.guild_id)
+        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players.get(inter.guild_id)
 
         if player:
             player.text_channel = channel
