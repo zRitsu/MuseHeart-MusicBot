@@ -159,6 +159,15 @@ async def process_spotify(bot: BotCore, requester: disnake.Member, query: str, *
 
 
 def spotify_client(config: dict) -> Optional[Client]:
+
+    if not config['SPOTIFY_CLIENT_ID']:
+        print(f"[IGNORADO] - Spotify Support: SPOTIFY_CLIENT_ID não foi configurado na ENV da host (ou no arquivo .env).\n{'-'*30}")
+        return
+
+    if not config['SPOTIFY_CLIENT_SECRET']:
+        print(F"[IGNORADO] - Spotify Support: SPOTIFY_CLIENT_SECRET não foi configurado nas ENV da host (ou no arquivo .env).\n{'-'*30}")
+        return
+
     try:
         return Client(
             ClientCredentialsFlow(
@@ -169,6 +178,6 @@ def spotify_client(config: dict) -> Optional[Client]:
 
     except Exception as e:
         print(
-            f"A APIKEY do spotify não foi configurada devidamente nas variáveis da host (ou no arquivo .env), "
+            f"A APIKEY do spotify não foi configurada devidamente na ENV da host (ou no arquivo .env), "
             f"verifique e tente novamente caso queira o suporte a músicas do spotify (Erro: {repr(e)}).\n{'-'*30}")
         return
