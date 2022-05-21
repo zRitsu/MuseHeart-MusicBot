@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 import datetime
 from importlib import import_module
 import aiohttp
@@ -10,10 +9,10 @@ from web_app import WSClient
 from .music.models import music_mode
 from utils.db import MongoDatabase, LocalDatabase
 from asyncspotify import Client as SpotifyClient
+from utils.others import sync_message
 import os
 import traceback
 
-from utils.others import sync_message
 from .owner_panel import PanelView
 
 
@@ -148,10 +147,9 @@ class BotCore(commands.AutoShardedBot):
 
             else:
 
-                view = PanelView(self)
                 embed.title = "PAINEL DE CONTROLE."
                 embed.set_footer(text="Clique em uma tarefa que deseja executar.")
-                view.embed = embed
+                view = PanelView(self)
 
             await message.reply(embed=embed, view=view)
             return

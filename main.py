@@ -9,6 +9,7 @@ from utils.music.local_lavalink import run_lavalink
 from utils.client import BotCore
 from utils.db import MongoDatabase, LocalDatabase, guild_prefix
 from utils.music.spotify import spotify_client
+from utils.owner_panel import PanelView
 from web_app import start
 from config_loader import load_config
 
@@ -142,7 +143,6 @@ def load_bot(bot_name: str, token: str, main=False):
             bot.db = MongoDatabase(bot=bot, token=mongo_key, name=str(bot.user.id)) if mongo_key \
                 else LocalDatabase(bot, rename_db=main and path.isfile("./database.json"))
 
-
             music_cog = bot.get_cog("Music")
 
             if music_cog:
@@ -153,6 +153,8 @@ def load_bot(bot_name: str, token: str, main=False):
                     await bot.spotify.authorize()
                 except Exception:
                     traceback.print_exc()
+
+            bot.add_view(PanelView(bot))
 
             if not CONFIGS["RUN_RPC_SERVER"] and CONFIGS["RPC_SERVER"] == "ws://localhost:$PORT/ws":
                 pass

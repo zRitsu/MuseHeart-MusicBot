@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+import pprint
+
 import disnake
 from disnake.ext import commands
 from utils.music.errors import parse_error
@@ -23,9 +26,8 @@ class PanelCommand(commands.Command):
 class PanelView(disnake.ui.View):
 
     def __init__(self, bot: BotCore):
-        super().__init__()
+        super().__init__(timeout=None)
         self.bot = bot
-        self.embed: Optional[disnake.Embed] = None
 
         opts = []
 
@@ -40,6 +42,7 @@ class PanelView(disnake.ui.View):
         select = disnake.ui.Select(
             placeholder="Selecione uma tarefa:",
             options=opts,
+            custom_id="onwer_panel_dropdown"
         )
 
         select.callback = self.opts_callback
@@ -50,8 +53,8 @@ class PanelView(disnake.ui.View):
 
         txt = await self.bot.get_command(interaction.data.values[0])(interaction)
 
-        self.embed.description = txt or "Comando executado com sucesso!"
-        await interaction.response.edit_message(embed=self.embed, view=self)
+        interaction.message.embeds[0].description = txt or "Comando executado com sucesso!"
+        await interaction.response.edit_message(embed=interaction.message.embeds[0], view=self)
 
     async def interaction_check(self, interaction: disnake.MessageInteraction):
 
@@ -63,7 +66,7 @@ class PanelView(disnake.ui.View):
 
 
     async def on_error(self, error: Exception, item: disnake.ui.Item, interaction: disnake.MessageInteraction):
-        self.embed.description = parse_error(interaction, error) or "**Ocorreu um erro:**\n" \
+        interaction.message.embeds[0].description = parse_error(interaction, error) or "**Ocorreu um erro:**\n" \
                                      f"```py\n{repr(error)[:2020].replace(self.bot.http.token, 'mytoken')}```"
 
-        await interaction.response.edit_message(embed=self.embed, view=self)
+        await interaction.response.edit_message(embed=interaction.message.embeds[0], view=self)

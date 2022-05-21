@@ -287,7 +287,7 @@ class Owner(commands.Cog):
 
 
     @commands.is_owner()
-    @panel_command(aliases=["export"], description="Exportar minhas configs/secrets/env pra um arquivo no DM.", emoji="🔐",
+    @panel_command(aliases=["export"], description="Exportar minhas configs/secrets/env para um arquivo.", emoji="🔐",
                    alt_name="Exportar env/config")
     async def exportenv(self, ctx: Union[commands.Context, disnake.MessageInteraction]):
 
