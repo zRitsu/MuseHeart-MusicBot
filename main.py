@@ -81,6 +81,7 @@ except:
 
 bots = []
 
+prefix = guild_prefix if intents_dict['message_content'] else commands.when_mentioned
 
 def load_bot(bot_name: str, token: str, main=False):
     try:
@@ -94,7 +95,7 @@ def load_bot(bot_name: str, token: str, main=False):
         test_guilds = None
 
     bot = BotCore(
-        command_prefix=guild_prefix,
+        command_prefix=prefix,
         case_insensitive=True,
         intents=intents,
         test_guilds=test_guilds,

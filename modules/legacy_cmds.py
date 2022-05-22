@@ -256,7 +256,7 @@ class Owner(commands.Cog):
                 embed.description += f" ```ldif\n{cmd.description}```"
 
             if cmd.usage:
-                embed.description += f" ```ldif\n{self.bot.default_prefix}{cmd.name} {cmd.usage}```"
+                embed.description += f" ```ldif\n{ctx.clean_prefix}{cmd.name} {cmd.usage}```"
 
             embed.description += "\n"
 
