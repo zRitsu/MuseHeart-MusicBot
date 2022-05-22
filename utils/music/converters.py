@@ -80,8 +80,8 @@ async def node_suggestions(inter, query: str):
 
 async def google_search(bot, query: str, *, max_entries: int = 20) -> list:
 
-    if not query or URL_REG.match(query):
-        return []
+    if URL_REG.match(query):
+        return [query]
 
     async with bot.session.get(
             f"http://suggestqueries.google.com/complete/search?client=chrome&ds=yt&q={query}",
@@ -135,9 +135,12 @@ async def fav_list(inter, query: str, *, prefix=""):
 
 async def fav_add_autocomplete(inter, query: str):
 
+    if not inter.author.voice:
+        return [query]
+
     favs: list = await fav_list(inter, query, prefix="> fav: ")
 
-    if (favs_size:=len(favs)) >= 20:
+    if not query or (favs_size:=len(favs)) >= 20:
         return favs
 
     return await google_search(inter.bot, query, max_entries=20-favs_size) + favs
