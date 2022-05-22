@@ -207,7 +207,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 f" canal <#{channel.id}>",
                 f"**Conectei no canal** <#{channel.id}>."
             ]
-            await self.interaction_message(ctx, txt, rpc_update=True)
+            await self.interaction_message(ctx, txt, emoji="🔈",rpc_update=True)
 
         else:
             await player.connect(channel.id)
@@ -418,6 +418,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             )
             embed.set_thumbnail(url=track.thumb)
             embed.description = f"`{fix_characters(track.author, 15)}`**┃**`{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}`**┃**{inter.author.mention}"
+            emoji = "🎵"
 
         else:
 
@@ -455,6 +456,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             )
             embed.set_thumbnail(url=tracks.tracks[0].thumb)
             embed.description = f"`{len(tracks.tracks)} música(s)`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
+            emoji = "🎶"
 
         await inter.edit_original_message(embed=embed, view=None)
 
@@ -464,7 +466,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not player.current:
             await player.process_next()
         else:
-            player.command_log = log_text
+            player.set_command_log(text=log_text, emoji=emoji)
             await player.update_message()
 
 
@@ -481,11 +483,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await send_message(inter, embed=disnake.Embed(description="**Não há músicas na fila...**", color=disnake.Colour.red()))
             return
 
+        player.set_command_log(text=f"{inter.author.mention} pulou a música.", emoji="⏭️")
+
         if inter.type.name != "application_command":
-            player.command_log = f"{inter.author.mention} pulou a música."
             await inter.response.defer()
         else:
-            player.command_log = f"{inter.author.mention} pulou a música."
             embed = disnake.Embed(description=f"⏭️** ┃ Música pulada:** [`{fix_characters(player.current.title, 30)}`]({player.current.uri})", color=self.bot.get_color(inter.guild.me))
             await inter.send(embed=embed, ephemeral=True)
 
@@ -509,7 +511,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not len(player.played) and not len(player.queue):
 
             await player.seek(0)
-            await self.interaction_message(inter, "voltou para o início da música.", rpc_update=True)
+            await self.interaction_message(inter, "voltou para o início da música.", emoji="⏪", rpc_update=True)
             return
 
         try:
@@ -520,12 +522,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             player.queue.appendleft(player.current)
         player.queue.appendleft(track)
 
+        player.set_command_log(text=f"{inter.author.mention} voltou para a música atual.", emoji="⏮️")
+
         if inter.type.name != "application_command":
-            player.command_log = f"{inter.author.mention} voltou para a música atual."
             await inter.response.defer()
         else:
-            player.command_log = f"{inter.author.mention} voltou para a música atual."
-            await inter.send("voltado com sucesso.", ephemeral=True)
+            await inter.send("⏮️ Música voltada com sucesso.", ephemeral=True)
 
         if player.loop == "current":
             player.loop = False
@@ -558,12 +560,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if len(player.votes) < self.bot.config.get('VOTE_SKIP_AMOUNT', 3):
             embed.description = txt
             player.votes.add(inter.author)
-            player.command_log = txt
+            player.set_command_log(text=txt, emoji="✋")
             await inter.send("voto adicionado!")
             await player.update_message()
             return
 
-        player.command_log = f"{txt}\n**A anterior foi pulada imediatamente.**"
+        player.set_command_log(text=f"{txt}\n**A anterior foi pulada imediatamente.**", emoji="⏭️")
         await inter.send("voto adicionado!", ephemeral=True)
         await player.stop()
 
@@ -606,7 +608,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await player.set_volume(value)
 
         txt = [f"ajustou o volume para **{value}%**", f"Volume ajustado para **{value}**"]
-        await self.interaction_message(inter, txt, update=update)
+        await self.interaction_message(inter, txt, update=update, emoji="🔊")
 
 
     @check_voice()
@@ -628,7 +630,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         txt = ["pausou a música.", "Musica pausada."]
 
-        await self.interaction_message(inter, txt, rpc_update=True)
+        await self.interaction_message(inter, txt, rpc_update=True, emoji="⏸️")
 
 
     @check_voice()
@@ -650,7 +652,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await player.set_pause(False)
 
         txt = ["retomou a música.", "Música retomada"]
-        await self.interaction_message(inter, txt, rpc_update=True)
+        await self.interaction_message(inter, txt, rpc_update=True, emoji="▶️")
 
 
     @check_voice()
@@ -698,11 +700,24 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await send_message(inter, embed=embed)
             return
 
-        txt = [
-            f"{'avançou' if milliseconds > player.position else 'voltou'} o tempo da música para: {time_format(milliseconds)}",
-            f"O tempo da música foi {'avançada' if milliseconds > player.position else 'retornada'} para: {time_format(milliseconds)}"
-        ]
-        await self.interaction_message(inter, txt)
+        if milliseconds > player.position:
+            txt = [
+                f"avançou o tempo da música para: {time_format(milliseconds)}",
+                f"O tempo da música foi avançada para: {time_format(milliseconds)}"
+            ]
+
+            emoji = "⏩"
+
+        else:
+
+            txt = [
+                f"voltou o tempo da música para: {time_format(milliseconds)}",
+                f"O tempo da música foi retomado para: {time_format(milliseconds)}"
+            ]
+
+            emoji = "⏪"
+
+        await self.interaction_message(inter, txt, emoji=emoji)
 
         await asyncio.sleep(2)
         self.bot.loop.create_task(player.process_rpc())
@@ -730,20 +745,23 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if mode == 'off':
             mode = False
             player.current.track_loops = 0
+            txt = ['desativou a repetição.', "Repetição desativada."]
+            emoji = "⭕"
 
         elif mode == "current":
             player.current.track_loops = 0
+            txt = [f"ativou a repetição da música atual.", f"Repetição da música atual foi ativada com sucesso."]
+            emoji = "🔂"
 
-        if mode:
-            txt = [f"ativou a repetição da {'música' if mode == 'current' else 'fila'}.", f"Repetição da {'música' if mode == 'current' else 'fila'} ativada com sucesso."]
-        else:
-            txt = ['desativou a repetição.', "Repetição desativada."]
+        else: # queue
+            txt = [f"ativou a repetição da fila.", f"Repetição da fila foi ativada com sucesso."]
+            emoji = "🔁"
 
         player.loop = mode
 
         self.bot.loop.create_task(player.process_rpc())
 
-        await self.interaction_message(inter, txt)
+        await self.interaction_message(inter, txt, emoji=emoji)
 
 
     @check_voice()
@@ -766,7 +784,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         txt = f"{inter.author.mention} definiu a quantidade de repetições da música " \
               f"[`{(fix_characters(player.current.title, 25))}`]({player.current.uri}) para **{value}**."
 
-        player.command_log = txt
+        player.set_command_log(text=txt, emoji="🔄")
         embed.description=f"**Quantidade de repetições [{value}] definida para a música:** [`{player.current.title}`]({player.current.uri})"
         embed.set_thumbnail(url=player.current.thumb)
         await inter.send(embed=embed, ephemeral=True)
@@ -801,9 +819,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         embed = disnake.Embed(color=disnake.Colour.green())
 
-        txt = f"{inter.author.mention} removeu a música [`{(fix_characters(track.title, 25))}`]({track.uri}) da fila."
-
-        player.command_log = txt
+        player.set_command_log(
+            text=f"{inter.author.mention} removeu a música [`{(fix_characters(track.title, 25))}`]({track.uri}) da fila.",
+            emoji="♻️"
+        )
         embed.description=f"**Música removida:** [`{track.title}`]({track.uri})"
         embed.set_thumbnail(url=track.thumb)
         await inter.send(embed=embed, ephemeral=True)
@@ -828,13 +847,15 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         embed.colour = disnake.Colour.green()
-        txt = f"{inter.author.mention} **readicionou [{(qsize:=len(player.played))}] música(s) tocada(s) na fila.**"
 
         player.played.reverse()
         player.queue.extend(player.played)
         player.played.clear()
 
-        player.command_log = txt
+        player.set_command_log(
+            text=f"{inter.author.mention} **readicionou [{(qsize:=len(player.played))}] música(s) tocada(s) na fila.**",
+            emoji="🎶"
+        )
         embed.description = f"**você readicionou {qsize} música(s).**"
         await inter.send(embed=embed, ephemeral=True)
         await player.update_message()
@@ -893,7 +914,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         embed.colour = disnake.Colour.green()
 
-        player.command_log = f"{inter.author.mention} pulou para a música atual"
+        player.set_command_log(text=f"{inter.author.mention} pulou para a música atual", emoji="⤵️")
         embed.description = f"**Você pulou para a música:** [`{track.title}`]({track.uri})"
         embed.set_thumbnail(track.thumb)
         await inter.send(embed=embed, ephemeral=True)
@@ -934,13 +955,17 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player.queue.insert(int(position) - 1, track)
 
-        txt = f"{inter.author.mention} moveu a música [`{fix_characters(track.title, limit=25)}`]({track.uri}) para a posição **[{position}]** da fila."
+        player.set_command_log(
+            text=f"{inter.author.mention} moveu a música [`{fix_characters(track.title, limit=25)}`]({track.uri}) para a"
+                 f" posição **[{position}]** da fila.",
+            emoji="↪️"
+        )
 
         embed = disnake.Embed(color=disnake.Colour.green())
 
-        embed.description = f"**A música foi movida para a posição {position} da fila:** [`{fix_characters(track.title)}`]({track.uri})"
+        embed.description = f"**A música foi movida para a posição {position} da fila:** " \
+                            f"[`{fix_characters(track.title)}`]({track.uri})"
         embed.set_thumbnail(url=track.thumb)
-        player.command_log = txt
         await inter.send(embed=embed, ephemeral=True)
 
         await player.update_message()
@@ -980,11 +1005,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         embed.colour = disnake.Colour.green()
 
-        txt = f"{inter.author.mention} rotacionou a fila para a música [`{(fix_characters(track.title, limit=25))}`]({track.uri})."
+        player.set_command_log(
+            text=f"{inter.author.mention} rotacionou a fila para a música [`{(fix_characters(track.title, limit=25))}`]({track.uri}).",
+            emoji="🔃"
+        )
 
         embed.description = f"**Fila rotacionada para a música:** [`{track.title}`]({track.uri})."
         embed.set_thumbnail(url=track.thumb)
-        player.command_log = txt
         await inter.send(embed=embed, ephemeral=True)
 
         await player.update_message()
@@ -1014,7 +1041,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         txt = [f"{txt[0]} o efeito nightcore.", f"Efeito nightcore {txt[1]}."]
 
-        await self.interaction_message(inter, txt, rpc_update=True)
+        await self.interaction_message(inter, txt, rpc_update=True, emoji="🇳")
 
 
     @has_source()
@@ -1038,7 +1065,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await player.destroy_message()
         await player.invoke_np()
 
-        await inter.send("Player reenviado com sucesso!", ephemeral=True)
+        await inter.send("**Player reenviado com sucesso!**", ephemeral=True)
 
 
     @has_player()
@@ -1079,7 +1106,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if (player.static and inter.channel == player.text_channel) or isinstance(inter.application_command, commands.InvokableApplicationCommand):
             await inter.send(f"{inter.target.mention} adicionado à lista de DJ's!")
 
-        await self.interaction_message(inter, txt=text, update=True)
+        await self.interaction_message(inter, txt=text, update=True, emoji="🇳")
 
 
     @check_voice()
@@ -1122,10 +1149,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         shuffle(player.queue)
 
-        txt = [f"misturou as músicas da fila.",
-               "músicas misturadas com sucesso."]
-
-        await self.interaction_message(inter, txt)
+        await self.interaction_message(
+            inter,
+            [f"misturou as músicas da fila.",
+             "músicas misturadas com sucesso."],
+            emoji="🔀"
+        )
 
 
     @check_voice()
@@ -1143,9 +1172,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         player.queue.reverse()
-
-        text = [f"inverteu a ordem das músicas na fila.", "Fila invertida com sucesso!"]
-        await self.interaction_message(inter, txt=text, update=True)
+        await self.interaction_message(
+            inter,
+            txt=[f"inverteu a ordem das músicas na fila.", "Fila invertida com sucesso!"],
+            update=True,
+            emoji="🔄"
+        )
 
 
     @q.sub_command(description=f"{desc_prefix}Exibir as músicas que estão na fila.")
@@ -1157,7 +1189,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not player.queue:
             embedvc = disnake.Embed(
                 colour=disnake.Colour.red(),
-                description='Não há músicas na fila no momento.'
+                description='**Não há músicas na fila no momento.**'
             )
             await send_message(inter, embed=embedvc)
             return
@@ -1273,7 +1305,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             txt = [f"removeu {deleted_tracks} música(s) da fila via clear.",
                    f"{deleted_tracks} música(s) removidas da fila com sucesso."]
 
-        await self.interaction_message(inter, txt)
+        await self.interaction_message(inter, txt, emoji="♻️")
 
 
     @has_player()
@@ -1286,14 +1318,14 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player.restrict_mode = not player.restrict_mode
 
-        texts = ["ativou", "ativado"] if player.restrict_mode else ["desativou", "desativado"]
+        msg = ["ativou", "ativado", "🔐"] if player.restrict_mode else ["desativou", "desativado", "🔓"]
 
         text = [
-            f"{texts[0]} o modo restrito de comandos do player (que requer DJ/Staff).",
-            f"**Modo restrito do player {texts[1]} com sucesso.**"
+            f"{msg[0]} o modo restrito de comandos do player (que requer DJ/Staff).",
+            f"**Modo restrito do player {msg[1]} com sucesso.**"
         ]
 
-        await self.interaction_message(inter, text)
+        await self.interaction_message(inter, text, emoji=msg[2])
 
 
     @has_player()
@@ -1306,16 +1338,16 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player.nonstop = not player.nonstop
 
-        texts = ["ativou", "ativado"] if player.nonstop else ["desativou", "desativado"]
+        msg = ["ativou", "ativado", "♾️"] if player.nonstop else ["desativou", "desativado", "❌"]
 
-        text = [f"{texts[0]} o modo interrupto do player.", f"Modo interrupto {texts[1]} com sucesso!"]
+        text = [f"{msg[0]} o modo interrupto do player.", f"Modo interrupto {msg[1]} com sucesso!"]
 
         if not len(player.queue):
             player.queue.extend(player.played)
             player.played.clear()
 
         if player.current:
-            await self.interaction_message(inter, txt=text, update=True)
+            await self.interaction_message(inter, txt=text, update=True, emoji=msg[2])
             return
 
         await self.interaction_message(inter, text)
@@ -1347,10 +1379,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await player.change_node(node)
 
-        txt = [f"Migrou o player para o servidor de música **{node}**",
-               f"**O player foi migrado para o servidor de música:** `{node}`"]
-
-        await self.interaction_message(inter, txt)
+        await self.interaction_message(
+            inter,
+            [f"Migrou o player para o servidor de música **{node}**",
+             f"**O player foi migrado para o servidor de música:** `{node}`"],
+            emoji="🌎"
+        )
 
 
     @commands.Cog.listener("on_message_delete")
@@ -1861,8 +1895,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     await message.channel.send(embed=embed)
 
             else:
-                player.command_log = f"{message.author.mention} adicionou a playlist " \
-                                     f"[`{fix_characters(tracks.data['playlistInfo']['name'], 20)}`]({tracks.tracks[0].playlist['url']}) `({len(tracks.tracks)})`."
+                player.set_command_log(
+                    text=f"{message.author.mention} adicionou a playlist [`{fix_characters(tracks.data['playlistInfo']['name'], 20)}`]"
+                         f"({tracks.tracks[0].playlist['url']}) `({len(tracks.tracks)})`.",
+                    emoji="🎶"
+                )
 
 
         except AttributeError:
@@ -1880,7 +1917,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             else:
                 duration = time_format(tracks[0].duration) if not tracks[0].is_stream else '🔴 Livestream'
-                player.command_log = f"{message.author.mention} adicionou [`{fix_characters(tracks[0].title, 20)}`]({tracks[0].uri}) `({duration})`."
+                player.set_command_log(
+                    text=f"{message.author.mention} adicionou [`{fix_characters(tracks[0].title, 20)}`]({tracks[0].uri}) `({duration})`.",
+                    emoji="🎵"
+                )
 
         if not player.is_connected:
             await self.do_connect(message, channel=message.author.voice.channel)
@@ -1907,7 +1947,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await self.cog_before_slash_command_invoke(inter)
 
 
-    async def interaction_message(self, inter: disnake.Interaction, txt, update=False, rpc_update=False):
+    async def interaction_message(self, inter: disnake.Interaction, txt, update=False, emoji="✅", rpc_update=False):
 
         try:
             txt, txt_ephemeral = txt
@@ -1918,7 +1958,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         component_interaction = isinstance(inter, disnake.MessageInteraction)
 
-        player.command_log = f"{inter.author.mention} {txt}"
+        player.set_command_log(text=f"{inter.author.mention} {txt}", emoji=emoji)
+
         await player.update_message(interaction=False if (update or not component_interaction) else inter, rpc_update=rpc_update)
 
         if not component_interaction:
@@ -2124,7 +2165,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         if payload.reason == "FINISHED":
-            player.command_log = ""
+            player.set_command_log()
         elif payload.reason == "STOPPED":
             pass
         else:

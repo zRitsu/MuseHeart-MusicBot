@@ -80,7 +80,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
     txt += f"{vc_txt}\n"
 
     if player.command_log:
-        txt += f"> ✅ **⠂Última Interação:** {player.command_log}\n"
+        txt += f"```ini\n[Última Interação]```**┕ {player.command_log_emoji} ⠂**{player.command_log}\n"
 
     if len(player.queue):
 

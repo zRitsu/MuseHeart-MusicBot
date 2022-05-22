@@ -232,6 +232,7 @@ class BasePlayer:
         self.members_timeout_task: Optional[asyncio.Task] = None
         self.idle_timeout = self.bot.config["IDLE_TIMEOUT"]
         self.command_log: str = ""
+        self.command_log_emoji: str = ""
         self.is_closing: bool = False
         self.last_message_id: Optional[int] = None
         self.nonstop: bool = False
@@ -378,6 +379,10 @@ class BasePlayer:
             self.bot.loop.create_task(self.text_channel.send(embed=embed))
 
         self.bot.loop.create_task(self.destroy())
+
+    def set_command_log(self, text="", emoji=""):
+        self.command_log = text
+        self.command_log_emoji = emoji
 
     async def invoke_np(self, force=False, interaction=None, rpc_update=False):
 
@@ -961,7 +966,7 @@ class YTDLPlayer(BasePlayer):
         if self.is_stopping:
             self.is_stopping = False
         else:
-            self.command_log = ""
+            self.set_command_log()
 
         self.current = None
 
