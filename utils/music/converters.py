@@ -63,7 +63,7 @@ perms_translations = {
 u_agent = generate_user_agent()
 
 
-async def node_suggestions(inter, query):
+async def node_suggestions(inter, query: str):
 
     try:
         node = inter.bot.music.players[inter.guild.id].node
@@ -78,24 +78,29 @@ async def node_suggestions(inter, query):
             and query.lower() in n.identifier.lower() and n.available and n.is_available]
 
 
-async def search_suggestions(inter, query):
-
-    if not query:
-        return
-
-    if not inter.author.voice:
-        return [query]
+async def google_search(bot, query: str, *, max_entries: int = 20) -> list:
 
     if not query or URL_REG.match(query):
-        return [query]
+        return []
 
-    async with inter.bot.session.get(
+    async with bot.session.get(
             f"http://suggestqueries.google.com/complete/search?client=chrome&ds=yt&q={query}",
             headers={'User-Agent': u_agent}) as r:
-        return json.loads(await r.text())[1][:20]
+        return json.loads(await r.text())[1][:max_entries]
 
 
-def queue_tracks(inter, query):
+async def search_suggestions(inter, query: str):
+
+    if not query:
+        return []
+
+    if not inter.author.voice:
+        return []
+
+    return await google_search(inter.bot, query)
+
+
+def queue_tracks(inter, query: str):
 
     if not inter.author.voice:
         return
@@ -108,7 +113,7 @@ def queue_tracks(inter, query):
     return [track.title for track in player.queue if query.lower() in track.title.lower()][:20]
 
 
-def queue_playlist(inter, query):
+def queue_playlist(inter, query: str):
 
     if not inter.author.voice:
         return
@@ -130,7 +135,12 @@ async def fav_list(inter, query: str, *, prefix=""):
 
 async def fav_add_autocomplete(inter, query: str):
 
-    return await fav_list(inter, query, prefix="> fav: ")
+    favs: list = await fav_list(inter, query, prefix="> fav: ")
+
+    if (favs_size:=len(favs)) >= 20:
+        return favs
+
+    return await google_search(inter.bot, query, max_entries=20-favs_size) + favs
 
 
 def queue_author(inter, query):
