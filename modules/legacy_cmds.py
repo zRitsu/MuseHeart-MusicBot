@@ -92,17 +92,7 @@ class Owner(commands.Cog):
 
         if not os.path.isdir("./.git") or force:
 
-            try:
-                if force:
-                    shutil.rmtree("./.git")
-            except FileNotFoundError:
-                pass
-
-            for c in self.git_init_cmds:
-                out_git += run_command(c) + "\n"
-
-            self.bot.commit = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
-            self.bot.remote_git_url = self.bot.config["SOURCE_REPO"][:-4]
+            out_git += self.cleanup_git(force=force)
 
         else:
 
@@ -118,7 +108,8 @@ class Owner(commands.Cog):
                     run_command(f"git reset --hard HEAD~1")
                     out_git += run_command("git pull --allow-unrelated-histories -X theirs")
                 except Exception as e:
-                    raise GenericError(f"Ocorreu um erro no git pull:\nCode: {e.returncode} | {e.output}")
+                    print(f"Ocorreu um erro no git pull:\nCode: {e.returncode} | {e.output}")
+                    out_git += self.cleanup_git(force=True)
 
             if "Already up to date" in out_git:
                 raise GenericError("Já estou com os ultimos updates instalados...")
@@ -161,6 +152,23 @@ class Owner(commands.Cog):
         else:
             return txt
 
+    def cleanup_git(self, force=False):
+
+        try:
+            if force:
+                shutil.rmtree("./.git")
+        except FileNotFoundError:
+            pass
+
+        out_git = ""
+
+        for c in self.git_init_cmds:
+            out_git += run_command(c) + "\n"
+
+        self.bot.commit = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+        self.bot.remote_git_url = self.bot.config["SOURCE_REPO"][:-4]
+
+        return out_git
 
     @commands.is_owner()
     @panel_command(aliases=["latest", "lastupdate"], description="Ver minhas atualizações mais recentes.", emoji="📈",
