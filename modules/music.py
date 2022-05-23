@@ -848,15 +848,17 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         embed.colour = disnake.Colour.green()
 
-        player.played.reverse()
-        player.queue.extend(player.played)
-        player.played.clear()
-
         player.set_command_log(
             text=f"{inter.author.mention} **readicionou [{(qsize:=len(player.played))}] música(s) tocada(s) na fila.**",
             emoji="🎶"
         )
+
         embed.description = f"**você readicionou {qsize} música(s).**"
+
+        player.played.reverse()
+        player.queue.extend(player.played)
+        player.played.clear()
+
         await inter.send(embed=embed, ephemeral=True)
         await player.update_message()
 
