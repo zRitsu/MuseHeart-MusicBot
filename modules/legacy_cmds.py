@@ -14,10 +14,24 @@ from utils.music.models import LavalinkPlayer, YTDLPlayer
 from utils.others import sync_message
 from utils.owner_panel import panel_command, PanelView
 from utils.music.errors import GenericError
-
+from jishaku.shell import ShellReader
 
 os_quote = "\"" if os.name == "nt" else "'"
 git_format = f"--pretty=format:{os_quote}%H*****%h*****%s*****%ct{os_quote}"
+
+
+def format_git_log(data_list: list):
+
+    data = []
+
+    for d in data_list:
+        if not d:
+            continue
+        t = d.split("*****")
+        data.append({"commit": t[0], "abbreviated_commit": t[1], "subject": t[2], "timestamp": t[3]})
+
+    return data
+
 
 def replaces(txt):
 
@@ -26,8 +40,19 @@ def replaces(txt):
 
     return txt.replace("\"", f"\\\"").replace("'", "\"")
 
-def run_command(cmd):
-    return subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
+
+async def run_command(cmd):
+
+    result = ""
+
+    with ShellReader(cmd) as reader:
+        async for x in reader:
+            result += f"{x}\n"
+
+    if "[stderr]" in result:
+        raise Exception(result)
+
+    return result
 
 
 class Owner(commands.Cog):
@@ -92,26 +117,28 @@ class Owner(commands.Cog):
 
         if not os.path.isdir("./.git") or force:
 
-            out_git += self.cleanup_git(force=force)
+            out_git += await self.cleanup_git(force=force)
 
         else:
 
-            try:
-                run_command("git reset --hard")
-            except Exception as e:
-                raise GenericError(f"Ocorreu um erro no git reset.\nCode: {e.returncode} | {e.output}")
+            error = ""
 
-            try:
-                out_git += run_command("git pull --allow-unrelated-histories -X theirs")
-            except:
+            for cmd in (
+                "git reset --hard; git pull --allow-unrelated-histories -X theirs",
+                "git reset --hard HEAD~1"
+            ):
                 try:
-                    run_command(f"git reset --hard HEAD~1")
-                    out_git += run_command("git pull --allow-unrelated-histories -X theirs")
+                    out_git += await run_command(cmd)
+                    break
                 except Exception as e:
-                    print(f"Ocorreu um erro no git pull:\nCode: {e.returncode} | {e.output}")
-                    out_git += self.cleanup_git(force=True)
+                    error += f"{e}\n"
 
-            if "Already up to date" in out_git:
+            if error:
+
+                out_git += error
+                out_git += await self.cleanup_git(force=True)
+
+            elif "Already up to date" in out_git:
                 raise GenericError("Já estou com os ultimos updates instalados...")
 
             commit = ""
@@ -121,19 +148,18 @@ class Owner(commands.Cog):
                     commit = l.replace("Updating ", "").replace("..", "...")
                     break
 
-            data = run_command(f"git log {commit} {git_format}").split("\n")
+            data = (await run_command(f"git log {commit} {git_format}")).split("\n")
 
-            for d in data:
-                t = d.split("*****")
-                git_log.append({"commit": t[0], "abbreviated_commit": t[1], "subject": t[2], "timestamp": t[3]})
+            git_log += format_git_log(data)
 
         text = "`Reinicie o bot após as alterações.`"
 
         if "--pip" in opts:
-            subprocess.check_output("pip3 install -U -r requirements.txt", shell=True, text=True)
+            await run_command("pip3 install -U -r requirements.txt")
 
         elif "requirements.txt" in text:
-            text += "\n`Nota: Será necessário atualizar as dependências.`"
+            text += "\n`Nota: Será necessário atualizar as dependências usando o comando abaixo`\n" \
+                    "```sh\npip3 install -U -r requirements.txt```"
 
         txt = f"`✅` **[Atualização realizada com sucesso!]({self.bot.remote_git_url}/commits/main)**"
 
@@ -152,7 +178,8 @@ class Owner(commands.Cog):
         else:
             return txt
 
-    def cleanup_git(self, force=False):
+
+    async def cleanup_git(self, force=False):
 
         try:
             if force:
@@ -163,12 +190,13 @@ class Owner(commands.Cog):
         out_git = ""
 
         for c in self.git_init_cmds:
-            out_git += run_command(c) + "\n"
+            out_git += await run_command(c) + "\n"
 
         self.bot.commit = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
         self.bot.remote_git_url = self.bot.config["SOURCE_REPO"][:-4]
 
         return out_git
+
 
     @commands.is_owner()
     @panel_command(aliases=["latest", "lastupdate"], description="Ver minhas atualizações mais recentes.", emoji="📈",
@@ -183,11 +211,9 @@ class Owner(commands.Cog):
 
         git_log = []
 
-        data = run_command(f"git log -{amount or 10} {git_format}").split("\n")
+        data = (await run_command(f"git log -{amount or 10} {git_format}")).split("\n")
 
-        for d in data:
-            t = d.split("*****")
-            git_log.append({"commit": t[0], "abbreviated_commit": t[1], "subject": t[2], "timestamp": t[3]})
+        git_log += format_git_log(data)
 
         txt = f"🔰 ** | [Atualizações recentes:]({self.bot.remote_git_url}/commits/main)**\n\n" + self.format_log(git_log)
 
@@ -202,6 +228,7 @@ class Owner(commands.Cog):
 
         else:
             return txt
+
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.command(description="Sincronizar/Registrar os comandos de barra no servidor.", hidden=True)
