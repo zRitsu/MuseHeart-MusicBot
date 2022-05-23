@@ -5,7 +5,11 @@
 Tutorial para hospedar seu próprio bot de música deste repositório (Não requer coding no processo): [clique aqui](https://github.com/zRitsu/disnake-LL-music-bot/wiki).
 <br/>
 
-Caso não queira criar um bot próprio, há um bot meu já feito e hospedado usando esta source, você pode adicioná-la [clicando aqui](https://discord.com/api/oauth2/authorize?client_id=784891594306093101&permissions=397564505200&scope=bot%20applications.commands).
+Caso não queira criar um bot próprio, há alguns bots meu já feito e hospedado usando esta source, você pode adicionar um dos meus bots abaixo: 
+
+| ![](https://cdn.discordapp.com/avatars/784891594306093101/bb5355bb0fd46eaca1b89a983d8f4c15.png?size=128)                            | ![](https://cdn.discordapp.com/avatars/825460549419794462/8259b8ec375691b26e964187130a3edf.png?size=128)                                |
+|-------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| [Muse Heart](https://discord.com/api/oauth2/authorize?client_id=784891594306093101&permissions=0&scope=bot%20applications.commands) | [Muse heart (2)](https://discord.com/api/oauth2/authorize?client_id=825460549419794462&permissions=0&scope=bot%20applications.commands) |
 
 ### Requisitos:
 
