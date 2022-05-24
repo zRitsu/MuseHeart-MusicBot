@@ -146,8 +146,8 @@ class Owner(commands.Cog):
                     raise GenericError("Já estou com os ultimos updates instalados...")
                 out_git += pull_log
 
-            except GenericError:
-                return
+            except GenericError as e:
+                return str(e)
 
             except Exception:
                 try:
