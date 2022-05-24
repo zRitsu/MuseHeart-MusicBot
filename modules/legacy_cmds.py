@@ -44,16 +44,18 @@ def replaces(txt):
 
 async def run_command(cmd):
 
-    result = ""
+    result = []
 
     with ShellReader(cmd) as reader:
         async for x in reader:
-            result += f"{x}\n"
+            result.append(x)
 
-    if "[stderr]" in result:
-        raise Exception(result)
+    result_txt = "\n".join(result)
 
-    return result
+    if "[stderr]" in result_txt:
+        raise Exception(result_txt)
+
+    return result_txt
 
 
 class Owner(commands.Cog):
@@ -233,9 +235,12 @@ class Owner(commands.Cog):
         out_git = ""
 
         for c in self.git_init_cmds:
-            out_git += await run_command(c) + "\n"
+            try:
+                out_git += await run_command(c) + "\n"
+            except Exception as e:
+                out_git += f"{e}\n"
 
-        self.bot.commit = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+        self.bot.commit = await run_command("git rev-parse --short HEAD")
         self.bot.remote_git_url = self.bot.config["SOURCE_REPO"][:-4]
 
         return out_git
