@@ -50,8 +50,12 @@ class PanelView(disnake.ui.View):
 
         txt = await self.bot.get_command(interaction.data.values[0])(interaction)
 
+        if interaction.is_expired():
+            edit = (await interaction.original_message()).edit
+        else:
+            edit = interaction.response.edit_message
         interaction.message.embeds[0].description = txt or "Comando executado com sucesso!"
-        await interaction.response.edit_message(embed=interaction.message.embeds[0], view=self)
+        await edit(embed=interaction.message.embeds[0], view=self)
 
     async def interaction_check(self, interaction: disnake.MessageInteraction):
 
@@ -66,4 +70,8 @@ class PanelView(disnake.ui.View):
         interaction.message.embeds[0].description = parse_error(interaction, error) or "**Ocorreu um erro:**\n" \
                                      f"```py\n{repr(error)[:2020].replace(self.bot.http.token, 'mytoken')}```"
 
-        await interaction.response.edit_message(embed=interaction.message.embeds[0], view=self)
+        if not interaction.is_expired():
+            edit = interaction.response.edit_message
+        else:
+            edit  = (await interaction.original_message()).edit
+        await edit(embed=interaction.message.embeds[0], view=self)

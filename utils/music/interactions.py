@@ -1,6 +1,7 @@
 import disnake
+from disnake.ext import commands
 from .converters import time_format, fix_characters
-from typing import List
+from typing import List, Union, Optional
 
 
 class VolumeInteraction(disnake.ui.View):
@@ -140,7 +141,36 @@ class SelectInteraction(disnake.ui.View):
 
         await interaction.send(f"Apenas {self.user} pode interagir aqui.", ephemeral = True)
 
-    async def callback(self, interaction: disnake.Interaction):
+    async def callback(self, interaction: disnake.MessageInteraction):
         self.selected = interaction.data.values[0]
         self.inter = interaction
+        self.stop()
+
+
+class AskView(disnake.ui.View):
+
+    def __init__(self, *, ctx: Union[commands.Context, disnake.Interaction], timeout=None):
+        super().__init__(timeout=timeout)
+        self.selected = None
+        self.ctx = ctx
+        self.interaction_resp: Optional[disnake.MessageInteraction] = None
+
+    async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
+
+        if interaction.user != self.ctx.author:
+            await interaction.send("Você não pode usar este botão!", ephemeral=True)
+            return False
+
+        return True
+
+    @disnake.ui.button(label="Sim", emoji="✅")
+    async def allow(self, button, interaction: disnake.MessageInteraction):
+        self.selected = True
+        self.interaction_resp = interaction
+        self.stop()
+
+    @disnake.ui.button(label="Não", emoji="❌")
+    async def deny(self, button, interaction: disnake.MessageInteraction):
+        self.selected = False
+        self.interaction_resp = interaction
         self.stop()

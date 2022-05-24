@@ -10,6 +10,7 @@ import wavelink
 from disnake.ext import commands
 from utils.client import BotCore
 from utils.music.checks import check_voice
+from utils.music.interactions import AskView
 from utils.music.models import LavalinkPlayer, YTDLPlayer
 from utils.others import sync_message
 from utils.owner_panel import panel_command, PanelView
@@ -115,6 +116,13 @@ class Owner(commands.Cog):
 
         force = "--force" in opts
 
+        requirements_old = ""
+        try:
+            with open("./requirements.txt") as f:
+                requirements_old = f.read()
+        except:
+            pass
+
         if not os.path.isdir("./.git") or force:
 
             out_git += await self.cleanup_git(force=force)
@@ -122,6 +130,11 @@ class Owner(commands.Cog):
         else:
 
             error = ""
+
+            try:
+                await ctx.response.defer()
+            except:
+                pass
 
             for cmd in (
                 "git reset --hard; git pull --allow-unrelated-histories -X theirs",
@@ -157,9 +170,39 @@ class Owner(commands.Cog):
         if "--pip" in opts:
             await run_command("pip3 install -U -r requirements.txt")
 
-        elif "requirements.txt" in text:
-            text += "\n`Nota: Será necessário atualizar as dependências usando o comando abaixo`\n" \
-                    "```sh\npip3 install -U -r requirements.txt```"
+        else:
+
+            with open("./requirements.txt") as f:
+                requirements_new = f.read()
+
+            if requirements_old != requirements_new:
+
+                view = AskView(timeout=45, ctx=ctx)
+
+                embed = disnake.Embed(
+                    description="**Será necessário atualizar as dependências, escolha sim para instalar.**\n\n"
+                                "Nota: Caso não tenha no mínimo 150mb de ram livre, escolha **Não**, mas dependendo "
+                                "da hospedagem você deverá usar o comando abaixo: ```sh\npip3 install -U -r requirements.txt``` "
+                                "(ou apenas upar o arquivo requirements.txt)",
+                    color=self.bot.get_color(ctx.guild.me)
+                )
+
+                try:
+                    await ctx.edit_original_message(embed=embed, view=view)
+                except AttributeError:
+                    await ctx.send(embed=embed, view=view)
+
+                await view.wait()
+
+                if view.selected:
+                    embed.description = "**Instalando dependências...**"
+                    await view.interaction_resp.response.edit_message(embed=embed)
+                    await run_command("pip3 install -U -r requirements.txt")
+
+                try:
+                    await (await view.interaction_resp.original_message()).delete()
+                except:
+                    pass
 
         txt = f"`✅` **[Atualização realizada com sucesso!]({self.bot.remote_git_url}/commits/main)**"
 
