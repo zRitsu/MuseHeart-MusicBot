@@ -138,18 +138,21 @@ class Owner(commands.Cog):
             except:
                 pass
 
-            for cmd in (
-                ["git reset --hard", False],
-                ["git pull --allow-unrelated-histories -X theirs", True],
-                ["git reset --hard HEAD~1", True]
+            for cmd_info in (
+                ["git reset --hard", False, False],
+                ["git pull --allow-unrelated-histories -X theirs", True, True],
+                ["git reset --hard HEAD~1", True, True]
             ):
+
+                cmd, addlog, break_loop = cmd_info
                 try:
-                    output = await run_command(cmd[0])
-                    if cmd[1]:
+                    output = await run_command(cmd)
+                    if addlog:
                         out_git += output
-                    break
+                    if break_loop:
+                        break
                 except Exception as e:
-                    if cmd[1]:
+                    if addlog:
                         error += f"{e}\n"
 
             if error:
