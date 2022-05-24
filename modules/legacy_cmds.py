@@ -139,14 +139,18 @@ class Owner(commands.Cog):
                 pass
 
             for cmd in (
-                "git reset --hard; git pull --allow-unrelated-histories -X theirs",
-                "git reset --hard HEAD~1"
+                ["git reset --hard", False],
+                ["git pull --allow-unrelated-histories -X theirs", True],
+                ["git reset --hard HEAD~1", True]
             ):
                 try:
-                    out_git += await run_command(cmd)
+                    output = await run_command(cmd[0])
+                    if cmd[1]:
+                        out_git += output
                     break
                 except Exception as e:
-                    error += f"{e}\n"
+                    if cmd[1]:
+                        error += f"{e}\n"
 
             if error:
 
@@ -226,11 +230,11 @@ class Owner(commands.Cog):
 
     async def cleanup_git(self, force=False):
 
-        try:
-            if force:
+        if force:
+            try:
                 shutil.rmtree("./.git")
-        except FileNotFoundError:
-            pass
+            except FileNotFoundError:
+                pass
 
         out_git = ""
 
@@ -238,7 +242,7 @@ class Owner(commands.Cog):
             try:
                 out_git += await run_command(c) + "\n"
             except Exception as e:
-                out_git += f"{e}\n"
+                print(f"Erro no comando git: {c}\n{e}")
 
         self.bot.commit = await run_command("git rev-parse --short HEAD")
         self.bot.remote_git_url = self.bot.config["SOURCE_REPO"][:-4]
