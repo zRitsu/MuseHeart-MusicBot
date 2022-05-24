@@ -149,7 +149,11 @@ class Owner(commands.Cog):
             except GenericError as e:
                 return str(e)
 
-            except Exception:
+            except Exception as e:
+
+                if "Already up to date" in str(e):
+                    raise GenericError("Já estou com os ultimos updates instalados...")
+
                 try:
                     await run_command("git reset --hard HEAD~1")
                 except Exception as e:
