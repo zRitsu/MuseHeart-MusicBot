@@ -131,36 +131,26 @@ class Owner(commands.Cog):
 
         else:
 
-            error = ""
-
             try:
                 await ctx.response.defer()
             except:
                 pass
 
-            for cmd_info in (
-                ["git reset --hard", False, False],
-                ["git pull --allow-unrelated-histories -X theirs", True, True],
-                ["git reset --hard HEAD~1", True, True]
-            ):
+            try:
+                await run_command("git reset --hard")
+            except:
+                pass
 
-                cmd, addlog, break_loop = cmd_info
+            try:
+                out_git += await run_command("git pull --allow-unrelated-histories -X theirs")
+            except:
                 try:
-                    output = await run_command(cmd)
-                    if addlog:
-                        out_git += output
-                    if break_loop:
-                        break
+                    await run_command("git reset --hard HEAD~1")
                 except Exception as e:
-                    if addlog:
-                        error += f"{e}\n"
+                    out_git += f"{e}\n"
+                    out_git += await self.cleanup_git(force=True)
 
-            if error:
-
-                out_git += error
-                out_git += await self.cleanup_git(force=True)
-
-            elif "Already up to date" in out_git:
+            if "Already up to date" in out_git:
                 raise GenericError("Já estou com os ultimos updates instalados...")
 
             commit = ""
