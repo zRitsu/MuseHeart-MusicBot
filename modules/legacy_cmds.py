@@ -2,6 +2,7 @@ import asyncio
 import os
 import shutil
 import json
+import subprocess
 from io import BytesIO
 from typing import Union, Optional
 import disnake
@@ -46,6 +47,7 @@ async def run_command(cmd):
     result = []
 
     with ShellReader(cmd) as reader:
+
         async for x in reader:
             result.append(x)
 
@@ -55,6 +57,10 @@ async def run_command(cmd):
         raise Exception(result_txt)
 
     return result_txt
+
+
+def run_command_old(cmd):
+    return subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
 
 
 class Owner(commands.Cog):
@@ -136,12 +142,12 @@ class Owner(commands.Cog):
                 pass
 
             try:
-                await run_command("git reset --hard")
+                run_command_old("git reset --hard")
             except:
                 pass
 
             try:
-                pull_log = await run_command("git pull --allow-unrelated-histories -X theirs")
+                pull_log = run_command_old("git pull --allow-unrelated-histories -X theirs")
                 if "Already up to date" in pull_log:
                     raise GenericError("Já estou com os ultimos updates instalados...")
                 out_git += pull_log
@@ -154,7 +160,8 @@ class Owner(commands.Cog):
                 if "Already up to date" in str(e):
                     raise GenericError("Já estou com os ultimos updates instalados...")
 
-                out_git += await self.cleanup_git(force=True)
+                elif not "Fast-forward" in str(e):
+                    out_git += await self.cleanup_git(force=True)
 
             commit = ""
 
@@ -163,14 +170,14 @@ class Owner(commands.Cog):
                     commit = l.replace("Updating ", "").replace("..", "...")
                     break
 
-            data = (await run_command(f"git log {commit} {git_format}")).split("\n")
+            data = (run_command_old(f"git log {commit} {git_format}")).split("\n")
 
             git_log += format_git_log(data)
 
         text = "`Reinicie o bot após as alterações.`"
 
         if "--pip" in opts:
-            await run_command("pip3 install -U -r requirements.txt")
+            run_command_old("pip3 install -U -r requirements.txt")
 
         else:
 
@@ -199,7 +206,7 @@ class Owner(commands.Cog):
                 if view.selected:
                     embed.description = "**Instalando dependências...**"
                     await view.interaction_resp.response.edit_message(embed=embed)
-                    await run_command("pip3 install -U -r requirements.txt")
+                    run_command_old("pip3 install -U -r requirements.txt")
 
                 try:
                     await (await view.interaction_resp.original_message()).delete()
@@ -236,11 +243,11 @@ class Owner(commands.Cog):
 
         for c in self.git_init_cmds:
             try:
-                out_git += await run_command(c) + "\n"
+                out_git += run_command_old(c) + "\n"
             except Exception as e:
                 out_git += f"{e}\n"
 
-        self.bot.commit = await run_command("git rev-parse --short HEAD")
+        self.bot.commit = run_command_old("git rev-parse --short HEAD")
         self.bot.remote_git_url = self.bot.config["SOURCE_REPO"][:-4]
 
         return out_git
@@ -259,7 +266,7 @@ class Owner(commands.Cog):
 
         git_log = []
 
-        data = (await run_command(f"git log -{amount or 10} {git_format}")).split("\n")
+        data = (run_command_old(f"git log -{amount or 10} {git_format}")).split("\n")
 
         git_log += format_git_log(data)
 
