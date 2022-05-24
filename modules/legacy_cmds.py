@@ -1,7 +1,6 @@
 import asyncio
 import os
 import shutil
-import subprocess
 import json
 from io import BytesIO
 from typing import Union, Optional
@@ -142,16 +141,20 @@ class Owner(commands.Cog):
                 pass
 
             try:
-                out_git += await run_command("git pull --allow-unrelated-histories -X theirs")
-            except:
+                pull_log = await run_command("git pull --allow-unrelated-histories -X theirs")
+                if "Already up to date" in pull_log:
+                    raise GenericError("Já estou com os ultimos updates instalados...")
+                out_git += pull_log
+
+            except GenericError:
+                return
+
+            except Exception:
                 try:
                     await run_command("git reset --hard HEAD~1")
                 except Exception as e:
                     out_git += f"{e}\n"
                     out_git += await self.cleanup_git(force=True)
-
-            if "Already up to date" in out_git:
-                raise GenericError("Já estou com os ultimos updates instalados...")
 
             commit = ""
 
