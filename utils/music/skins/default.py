@@ -1,3 +1,4 @@
+import datetime
 from typing import Union
 
 from ..models import LavalinkPlayer, YTDLPlayer
@@ -21,11 +22,13 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
             name="Tocando Agora:",
             icon_url="https://cdn.discordapp.com/attachments/480195401543188483/895862881105616947/music_equalizer.gif"
         )
+        position_txt = f"\n> ⏲️ **⠂Tempo restante:** <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration + 200)).timestamp())}:R>"
     else:
         embed.set_author(
             name="Em Pausa:",
             icon_url="https://cdn.discordapp.com/attachments/480195401543188483/896013933197013002/pause.png"
         )
+        position_txt = ""
 
     embed.set_footer(
         text=str(player),
@@ -51,7 +54,8 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
         queue_img = "https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif"
         playlist_text_size = 13
 
-    duration = "> 🔴 **⠂Duração:** `Livestream`" if player.current.is_stream else f"> ⏰ **⠂Duração:** `{time_format(player.current.duration)}`"
+    duration = "> 🔴 **⠂Duração:** `Livestream`" if player.current.is_stream else \
+        f"> ⏰ **⠂Duração:** `{time_format(player.current.duration)}`"
 
     txt = f"[`{player.current.single_title}`]({player.current.uri})\n\n" \
           f"{duration}\n" \
@@ -77,7 +81,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
     if player.restrict_mode:
         txt += f"\n> 🔒 **⠂Modo restrito:** `Ativado`"
 
-    txt += f"{vc_txt}\n"
+    txt += f"{vc_txt}{position_txt}\n"
 
     if player.command_log:
         txt += f"```ini\n[Última Interação]```**┕ {player.command_log_emoji} ⠂**{player.command_log}\n"
