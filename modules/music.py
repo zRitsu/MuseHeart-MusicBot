@@ -971,8 +971,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if (i_size:=len(indexes)) == 1:
             track = indexes[0][1]
-            txt = f"{inter.author.mention} moveu a música [`{fix_characters(track.title, limit=25)}`]({track.uri}) para "
-            f"a posição **[{position}]** da fila."
+            txt = f"{inter.author.mention} moveu a música [`{fix_characters(track.title, limit=25)}`]({track.uri}) para " \
+                  f"a posição **[{position}]** da fila."
 
             embed.description = f"**A música foi movida para a posição {position} da fila:** " \
                                 f"[`{fix_characters(track.title)}`]({track.uri})"
