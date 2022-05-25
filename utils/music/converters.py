@@ -110,7 +110,7 @@ def queue_tracks(inter, query: str):
     except KeyError:
         return
 
-    return [track.title for track in player.queue if query.lower() in track.title.lower()][:20]
+    return [f">pos {n+1} - {track.title}" for n, track in enumerate(player.queue) if query.lower() in track.title.lower()][:20]
 
 
 def queue_playlist(inter, query: str):
@@ -275,18 +275,20 @@ def percentage(part, whole):
   return int((part * whole) / 100.0)
 
 
-def get_track_index(inter: disnake.ApplicationCommandInteraction, query: str):
-
-    index = None
+def queue_track_index(inter: disnake.AppCmdInter, query: str, check_all: bool = False):
 
     player = inter.bot.music.players[inter.guild.id]
 
+    tracklist = []
+
     for counter, track in enumerate(player.queue):
 
-        if query.lower() == track.title.lower():
-        #if query.lower() in track.title.lower() or \
-        #        all(elem in track.title.lower().split() for elem in query.lower().split()):
-            index = counter
-            break
+        if query.lower() in track.title.lower() or \
+                all(elem in track.title.lower().split() for elem in query.lower().split()):
 
-    return index
+            if check_all:
+                tracklist.append((counter, track,))
+            else:
+                return counter
+
+    return tracklist

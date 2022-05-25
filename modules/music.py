@@ -15,9 +15,9 @@ from utils.music.spotify import SpotifyPlaylist, process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, \
     can_send_message
 from utils.music.models import LavalinkPlayer, LavalinkTrack, YTDLTrack, YTDLPlayer, YTDLManager
-from utils.music.converters import time_format, fix_characters, string_to_seconds, get_track_index, URL_REG, \
+from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist, \
-    node_suggestions, fav_add_autocomplete, fav_list
+    node_suggestions, fav_add_autocomplete, fav_list, queue_track_index
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
 from utils.others import check_cmd, send_message, send_idle_embed
 from user_agent import generate_user_agent
@@ -804,7 +804,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         embed = disnake.Embed(color=disnake.Colour.red())
 
-        index = get_track_index(inter, query)
+        if query.lower().startswith(">pos "):
+            index = int(query.split()[1]) - 1
+        else:
+            index = queue_track_index(inter, query)
 
         if index is None:
             embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
@@ -890,7 +893,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         embed = disnake.Embed(color=disnake.Colour.red())
 
-        index = get_track_index(inter, query)
+        if query.lower().startswith(">pos "):
+            index = int(query.split()[1]) - 1
+        else:
+            index = queue_track_index(inter, query)
 
         if index is None:
             embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
@@ -932,7 +938,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             self,
             inter: disnake.ApplicationCommandInteraction,
             query: str = commands.Param(name="nome", description="Nome da música completo.", autocomplete=queue_tracks),
-            position: int = commands.Param(name="posição", description="Posição de destino na fila.", default=1)
+            position: int = commands.Param(name="posição", description="Posição de destino na fila.", default=1),
+            search_all: bool = commands.Param(
+                name="mover_vários", default=False,
+                description="Incluir todas as músicas da fila com o nome especificado (não inclua o nome >pos no inicio do nome)"
+            )
     ):
 
         embed = disnake.Embed(colour=disnake.Colour.red())
@@ -942,32 +952,46 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await send_message(inter, embed=embed)
             return
 
-        index = get_track_index(inter, query)
+        indexes = queue_track_index(inter, query, check_all=search_all)
 
-        if index is None:
+        if not indexes:
             embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
             await inter.send(embed=embed, ephemeral=True)
             return
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
-        track = player.queue[index]
+        for index, track in reversed(indexes):
 
-        player.queue.remove(track)
+            player.queue.remove(track)
 
-        player.queue.insert(int(position) - 1, track)
-
-        player.set_command_log(
-            text=f"{inter.author.mention} moveu a música [`{fix_characters(track.title, limit=25)}`]({track.uri}) para a"
-                 f" posição **[{position}]** da fila.",
-            emoji="↪️"
-        )
+            player.queue.insert(int(position) - 1, track)
 
         embed = disnake.Embed(color=disnake.Colour.green())
 
-        embed.description = f"**A música foi movida para a posição {position} da fila:** " \
-                            f"[`{fix_characters(track.title)}`]({track.uri})"
-        embed.set_thumbnail(url=track.thumb)
+        if (i_size:=len(indexes)) == 1:
+            track = indexes[0][1]
+            txt = f"{inter.author.mention} moveu a música [`{fix_characters(track.title, limit=25)}`]({track.uri}) para "
+            f"a posição **[{position}]** da fila."
+
+            embed.description = f"**A música foi movida para a posição {position} da fila:** " \
+                                f"[`{fix_characters(track.title)}`]({track.uri})"
+            embed.set_thumbnail(url=track.thumb)
+
+        else:
+            txt = f"{inter.author.mention} moveu {i_size} músicas com o nome **{fix_characters(query, 25)}** para a " \
+                  f"posição **[{position}]** da fila. "
+
+            tracklist = "\n".join(f"[`{fix_characters(t.title, 45)}`]({t.uri})" for i, t in indexes[:10])
+
+            embed.description = f"**[{i_size}] músicas foram movidas para a posição {position} da fila:**\n\n{tracklist}"
+            embed.set_thumbnail(url=indexes[0][1].thumb)
+
+            if i_size > 20:
+                embed.description += f"\n\n`E mais {i_size} música(s).`"
+
+        player.set_command_log(text=txt, emoji="↪️")
+
         await inter.send(embed=embed, ephemeral=True)
 
         await player.update_message()
@@ -987,9 +1011,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         embed = disnake.Embed(colour=disnake.Colour.red())
 
-        index = get_track_index(inter, query)
+        index = queue_track_index(inter, query)
 
-        if index is None:
+        if not index:
             embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
             await inter.send(embed=embed, ephemeral=True)
             return
