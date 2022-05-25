@@ -51,7 +51,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
         queue_img = "https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif"
         playlist_text_size = 13
 
-    duration = "> 🔴 Duração: `Livestream`" if player.current.is_stream else f"> ⏰ **⠂Duração:** `{time_format(player.current.duration)}`"
+    duration = "> 🔴 **⠂Duração:** `Livestream`" if player.current.is_stream else f"> ⏰ **⠂Duração:** `{time_format(player.current.duration)}`"
 
     txt = f"[`{player.current.single_title}`]({player.current.uri})\n\n" \
           f"{duration}\n" \
