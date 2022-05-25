@@ -979,7 +979,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             embed.set_thumbnail(url=track.thumb)
 
         else:
-            txt = f"{inter.author.mention} moveu {i_size} músicas com o nome **{fix_characters(query, 25)}** para a " \
+            txt = f"{inter.author.mention} moveu **[{i_size}]** músicas com o nome **{fix_characters(query, 25)}** para a " \
                   f"posição **[{position}]** da fila. "
 
             tracklist = "\n".join(f"[`{fix_characters(t.title, 45)}`]({t.uri})" for i, t in indexes[:10])
@@ -988,7 +988,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             embed.set_thumbnail(url=indexes[0][1].thumb)
 
             if i_size > 20:
-                embed.description += f"\n\n`E mais {i_size} música(s).`"
+                embed.description += f"\n\n`E mais {i_size-20} música(s).`"
 
         player.set_command_log(text=txt, emoji="↪️")
 
