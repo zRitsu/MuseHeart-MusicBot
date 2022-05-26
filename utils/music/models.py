@@ -346,7 +346,7 @@ class BasePlayer:
 
         embed = disnake.Embed(
             description=f"**Não há músicas na fila. Adicione uma música ou use um dos botões abaixo**\n\n" +
-                        "\n".join(f"{b[0]} `= {b[2]}`" for b in buttons) + f"\n\n**Nota:** O Player será desligado automaticamente em "
+                        "\n".join(f"{b[0]} `= {b[2]}`" for b in buttons) + f"\n\n**Nota:** O Player será desligado automaticamente "
                         f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=self.idle_timeout)).timestamp())}:R> "
                         f"caso nenhuma ação seja executada...",
             color=self.bot.get_color(self.guild.me)
