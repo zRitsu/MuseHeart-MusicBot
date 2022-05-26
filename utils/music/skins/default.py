@@ -16,26 +16,28 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
 
     embed = disnake.Embed(color=player.bot.get_color(player.guild.me))
     embed_queue = None
+    position_txt = ""
+    vc_txt = ""
 
     if not player.paused:
         embed.set_author(
             name="Tocando Agora:",
             icon_url="https://cdn.discordapp.com/attachments/480195401543188483/895862881105616947/music_equalizer.gif"
         )
-        position_txt = f"\n> ⏲️ **⠂Tempo restante:** <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration + 200)).timestamp())}:R>"
+
+        if not player.current.is_stream:
+            position_txt = f"\n> ⏲️ **⠂Tempo restante:** " f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>"
+
     else:
         embed.set_author(
             name="Em Pausa:",
             icon_url="https://cdn.discordapp.com/attachments/480195401543188483/896013933197013002/pause.png"
         )
-        position_txt = ""
 
     embed.set_footer(
         text=str(player),
         icon_url="https://cdn.discordapp.com/attachments/480195401543188483/907119505971486810/speaker-loud-speaker.gif"
     )
-
-    vc_txt = ""
 
     if player.static:
         queue_size = 20
