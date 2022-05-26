@@ -809,7 +809,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         else:
             index = queue_track_index(inter, query)
 
-        if index is None:
+        if not index:
             embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
             await inter.send(embed=embed, ephemeral=True)
             return
@@ -898,7 +898,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         else:
             index = queue_track_index(inter, query)
 
-        if index is None:
+        if not index:
             embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
             await inter.send(embed=embed, ephemeral=True)
             return
