@@ -816,6 +816,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
+        index = index[0][0]
+
         track = player.queue[index]
 
         player.queue.remove(track)
@@ -905,6 +907,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
+        index = index[0][0]
+
         track = player.queue[index]
 
         player.queue.append(player.last_track)
@@ -952,14 +956,17 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await send_message(inter, embed=embed)
             return
 
-        indexes = queue_track_index(inter, query, check_all=search_all)
-
-        if not indexes:
-            embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
-            await inter.send(embed=embed, ephemeral=True)
-            return
-
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
+
+        if query.lower().startswith(">pos "):
+            indexes = [(0, player.queue[int(query.split()[1]) - 1],)]
+        else:
+            indexes = queue_track_index(inter, query, check_all=search_all)
+
+            if not indexes:
+                embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
+                await inter.send(embed=embed, ephemeral=True)
+                return
 
         for index, track in reversed(indexes):
 
@@ -1019,6 +1026,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
+
+        index = index[0][0]
 
         track = player.queue[index]
 

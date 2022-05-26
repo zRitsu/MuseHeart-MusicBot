@@ -110,7 +110,7 @@ def queue_tracks(inter, query: str):
     except KeyError:
         return
 
-    return [f">pos {n+1} - {track.title}" for n, track in enumerate(player.queue) if query.lower() in track.title.lower()][:20]
+    return [f">pos {n+1} - {track.title}"[:100] for n, track in enumerate(player.queue) if query.lower() in track.title.lower()][:20]
 
 
 def queue_playlist(inter, query: str):
@@ -286,9 +286,9 @@ def queue_track_index(inter: disnake.AppCmdInter, query: str, check_all: bool = 
         if query.lower() in track.title.lower() or \
                 all(elem in track.title.lower().split() for elem in query.lower().split()):
 
-            if check_all:
-                tracklist.append((counter, track,))
-            else:
-                return counter
+
+            tracklist.append((counter, track,))
+            if not check_all:
+                break
 
     return tracklist
