@@ -26,7 +26,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
         )
 
         if not player.current.is_stream:
-            position_txt = f"\n> ⏲️ **⠂Tempo restante:** " f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>"
+            position_txt = f"\n> ⏲️ **⠂Termina:** " f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>"
 
     else:
         embed.set_author(
@@ -86,7 +86,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
     txt += f"{vc_txt}{position_txt}\n"
 
     if player.command_log:
-        txt += f"```ini\n[Última Interação]```**┕ {player.command_log_emoji} ⠂**{player.command_log}\n"
+        txt += f"```ini\n [Última Interação]```**┕ {player.command_log_emoji} ⠂**{player.command_log}\n"
 
     if len(player.queue):
 
@@ -95,8 +95,16 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
             for n, t in (enumerate(itertools.islice(player.queue, queue_size)))
         )
 
+        queue_duration = 0
+
+        for t in player.queue:
+            if not t.is_stream:
+                queue_duration += t.duration
+
+        total_time = f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=queue_duration - player.position)).timestamp())}:R>"
+
         embed_queue = disnake.Embed(title=f"Músicas na fila: {len(player.queue)}", color=player.bot.get_color(player.guild.me),
-                                    description=f"\n{queue_txt}")
+                                    description=f"\n{queue_txt}\n`[ ⌛ Terminará` {total_time} `⌛ ]`")
         embed_queue.set_image(url=queue_img)
 
     embed.description = txt
