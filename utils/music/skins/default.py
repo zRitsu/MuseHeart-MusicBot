@@ -95,16 +95,19 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
             for n, t in (enumerate(itertools.islice(player.queue, queue_size)))
         )
 
-        queue_duration = 0
-
-        for t in player.queue:
-            if not t.is_stream:
-                queue_duration += t.duration
-
-        total_time = f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=queue_duration - player.position)).timestamp())}:R>"
-
         embed_queue = disnake.Embed(title=f"Músicas na fila: {len(player.queue)}", color=player.bot.get_color(player.guild.me),
-                                    description=f"\n{queue_txt}\n`[ ⌛ Terminará` {total_time} `⌛ ]`")
+                                    description=f"\n{queue_txt}")
+
+        if not player.nonstop:
+
+            queue_duration = 0
+
+            for t in player.queue:
+                if not t.is_stream:
+                    queue_duration += t.duration
+
+            embed_queue += f"\n`[ ⌛ Terminará` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=queue_duration - player.position)).timestamp())}:R> `⌛ ]`"
+
         embed_queue.set_image(url=queue_img)
 
     embed.description = txt
