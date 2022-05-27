@@ -807,16 +807,14 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if query.lower().startswith(">pos "):
             index = int(query.split()[1]) - 1
         else:
-            index = queue_track_index(inter, query)
-
-        if not index:
-            embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
-            await inter.send(embed=embed, ephemeral=True)
-            return
+            try:
+                index = queue_track_index(inter, query)[0][0]
+            except IndexError:
+                embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
+                await inter.send(embed=embed, ephemeral=True)
+                return
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
-
-        index = index[0][0]
 
         track = player.queue[index]
 
@@ -898,16 +896,14 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if query.lower().startswith(">pos "):
             index = int(query.split()[1]) - 1
         else:
-            index = queue_track_index(inter, query)
-
-        if not index:
-            embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
-            await inter.send(embed=embed, ephemeral=True)
-            return
+            try:
+                index = queue_track_index(inter, query)[0][0]
+            except IndexError:
+                embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
+                await inter.send(embed=embed, ephemeral=True)
+                return
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
-
-        index = index[0][0]
 
         track = player.queue[index]
 
