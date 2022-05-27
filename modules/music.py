@@ -2090,7 +2090,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if player.is_closing:
             return
 
-        """if payload.code == 4014:
+        if payload.code == 4014:
 
             await asyncio.sleep(3)
 
@@ -2104,7 +2104,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                                       color=self.bot.get_color(player.guild.me))
                 self.bot.loop.create_task(player.text_channel.send(embed=embed, delete_after=7))
             await player.destroy()
-            return"""
+            return
 
         if payload.code in (
             4000,  # internal error
