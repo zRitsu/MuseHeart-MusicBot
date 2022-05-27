@@ -106,7 +106,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
                 if not t.is_stream:
                     queue_duration += t.duration
 
-            embed_queue.description += f"\n`[ ⌛ Terminará` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=queue_duration - player.position)).timestamp())}:R> `⌛ ]`"
+            embed_queue.description += f"\n`[ ⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + player.current.duration) - player.position)).timestamp())}:R> `⌛ ]`"
 
         embed_queue.set_image(url=queue_img)
 
