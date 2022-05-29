@@ -1,5 +1,4 @@
 import disnake
-from disnake.embeds import Embed
 from disnake.ext import commands
 import traceback
 import wavelink
@@ -1207,7 +1206,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if len(player.queue) < 2:
             embed = disnake.Embed(colour=disnake.Colour.red())
             embed.description = "A fila tem que ter no mínimo 2 músicas para inverter a ordem."
-            await send_message(inter, embed=Embed)
+            await send_message(inter, embed=embed)
             return
 
         player.queue.reverse()
