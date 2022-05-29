@@ -62,17 +62,10 @@ class WavelinkVoiceClient(disnake.VoiceClient):
 
     # Esta classe é apenas um tapa-buraco pra versão 2.x do dpy ou outro fork atualizado.
 
-    def __call__(self, client: BotCore, channel: disnake.VoiceChannel):
+    def __init__(self, client: BotCore, channel: disnake.VoiceChannel):
         self.client = client
-        self.channel: disnake.VoiceChannel = channel
-        return self
-
-    def __init__(self, client: BotCore, channel: Union[disnake.VoiceChannel, disnake.StageChannel],
-                 player: wavelink.Player):
-        self.bot = client
         self.channel = channel
-        self.wavelink: wavelink.Client = self.bot.music
-        self.player = player
+        self.wavelink = client.music
 
     async def on_voice_server_update(self, data):
         lavalink_data = {
@@ -95,12 +88,15 @@ class WavelinkVoiceClient(disnake.VoiceClient):
         self._connected = True
 
     async def disconnect(self, *, force: bool) -> None:
-        if not force and not self.player.is_connected:
+
+        player = self.wavelink.players[self.channel.guild.id]
+
+        if not force and not player.is_connected:
             return
 
         await self.channel.guild.change_voice_state(channel=None)
 
-        self.player.channel_id = None
+        player.channel_id = None
         self.cleanup()
 
 
@@ -997,7 +993,6 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
 
     def __init__(self, *args, **kwargs):
         super(LavalinkPlayer, self).__init__(*args, **kwargs)
-        self.voice_client: Optional[WavelinkVoiceClient] = None
 
     def __str__(self) -> str:
         return f"Lavalink Player | Server: {self.node.identifier}"
@@ -1008,14 +1003,11 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
 
         channel = self.bot.get_channel(channel_id)
 
-        if not self.voice_client:
-            self.voice_client = WavelinkVoiceClient(self.bot, channel, self)
-
         if not self.guild.me.voice:
-            await channel.connect(cls=self.voice_client, reconnect=True)
+            await channel.connect(cls=WavelinkVoiceClient, reconnect=True)
 
         elif self.guild.me.voice.channel.id != channel_id:
-            await self.voice_client.move_to(channel)
+            await self.guild.voice_client.move_to(channel)
 
         await super().connect(channel_id, self_deaf)
 
@@ -1033,13 +1025,8 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
         await self.cleanup()
 
         try:
-            await self.voice_client.disconnect(force=True)
+            await self.guild.voice_client.disconnect(force=True)
         except:
-            pass
-
-        try:
-            self.voice_client.cleanup()
-        except Exception:
             pass
 
         self.is_closing = True
