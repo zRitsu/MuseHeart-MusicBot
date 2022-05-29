@@ -1014,16 +1014,24 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         embed = disnake.Embed(colour=disnake.Colour.red())
 
-        index = queue_track_index(inter, query)
+        if query.startswith(">pos "):
+            try:
+                index = int(query.split()[1]) - 1
+            except:
+                raise GenericError("**Você modificou o item dos resultados...**")
 
-        if not index:
-            embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
-            await inter.send(embed=embed, ephemeral=True)
-            return
+        else:
+
+            index = queue_track_index(inter, query)
+
+            if not index:
+                embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
+                await inter.send(embed=embed, ephemeral=True)
+                return
+
+            index = index[0][0]
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
-
-        index = index[0][0]
 
         track = player.queue[index]
 
