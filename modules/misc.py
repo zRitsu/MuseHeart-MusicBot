@@ -108,7 +108,7 @@ class Misc(commands.Cog):
     ):
 
         if not self.source_owner:
-            self.source_owner = await self.bot.get_or_fetch_user(815907450090946571)
+            self.source_owner = await self.bot.get_or_fetch_user(184889853102653440)
 
         ram_usage = humanize.naturalsize(psutil.Process(getpid()).memory_info().rss)
 
