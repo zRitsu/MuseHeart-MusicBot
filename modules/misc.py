@@ -4,6 +4,7 @@ import asyncio
 from typing import Optional
 from aiohttp import ClientSession
 from utils.client import BotCore
+from utils.music.checks import check_requester_channel
 from utils.music.converters import time_format, URL_REG
 import psutil
 import humanize
@@ -100,6 +101,11 @@ class Misc(commands.Cog):
         await guild.system_channel.send(embed=embed)
 
 
+    @commands.command(name="about", aliases=["sobre", "info", "botinfo"], description="Exibir informações sobre mim.")
+    async def about_legacy(self, ctx):
+        await self.about.callback(self=self, inter=ctx)
+
+
     @commands.slash_command(description=f"{desc_prefix}Exibir informações sobre mim.")
     async def about(
             self,
@@ -169,8 +175,13 @@ class Misc(commands.Cog):
         await inter.send(embed=embed, ephemeral=hidden)
 
 
+    @commands.command(name="invite", aliases=["convidar"], description="Exibir meu link de convite para você me adicionar no seu servidor.")
+    async def invite_legacy(self, ctx):
+        await self.invite.callback(self=self, inter=ctx)
+
+
     @commands.slash_command(description=f"{desc_prefix}Exibir meu link de convite para você me adicionar no seu servidor.")
-    async def invite(self, inter: disnake.ApplicationCommandInteraction):
+    async def invite(self, inter: disnake.AppCmdInter):
 
         await inter.send(
             embed = disnake.Embed(
@@ -204,6 +215,11 @@ class Misc(commands.Cog):
             embeds.append(embed)
 
         await inter.send(embeds=embeds, ephemeral=True)
+
+
+    async def cog_check(self, ctx):
+        return await check_requester_channel(ctx)
+
 
     def cog_unload(self):
 

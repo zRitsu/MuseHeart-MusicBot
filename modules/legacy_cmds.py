@@ -1,21 +1,24 @@
+from __future__ import annotations
 import asyncio
 import os
 import shutil
 import json
 import subprocess
 from io import BytesIO
-from typing import Union, Optional
+from typing import Union, Optional, TYPE_CHECKING
 import disnake
 import wavelink
 from disnake.ext import commands
 from utils.client import BotCore
-from utils.music.checks import check_voice
+from utils.music.checks import check_voice, check_requester_channel
 from utils.music.interactions import AskView
 from utils.music.models import LavalinkPlayer, YTDLPlayer
 from utils.others import sync_message
 from utils.owner_panel import panel_command, PanelView
 from utils.music.errors import GenericError
 from jishaku.shell import ShellReader
+if TYPE_CHECKING:
+    from utils.others import CustomContext
 
 os_quote = "\"" if os.name == "nt" else "'"
 git_format = f"--pretty=format:{os_quote}%H*****%h*****%s*****%ct{os_quote}"
@@ -327,7 +330,10 @@ class Owner(commands.Cog):
     @commands.cooldown(1, 3, commands.BucketType.guild)
     async def help_(self, ctx: commands.Context):
 
-        embed = disnake.Embed(color=self.bot.get_color(ctx.me), title="Meus comandos", description="")
+        embed = disnake.Embed(color=self.bot.get_color(ctx.me), title="Meus comandos:", description="")
+
+        if self.bot.slash_commands:
+            embed.description += "`Veja meus comandos de barra usando:` **/**"
 
         if ctx.me.avatar:
             embed.set_thumbnail(url=ctx.me.avatar.with_static_format("png").url)
@@ -349,9 +355,6 @@ class Owner(commands.Cog):
                 embed.description += f" ```ldif\n{ctx.clean_prefix}{cmd.name} {cmd.usage}```"
 
             embed.description += "\n"
-
-        if self.bot.slash_commands:
-            embed.description += "`Veja meus comandos de barra usando:` **/**"
 
         await ctx.reply(embed=embed)
 
@@ -459,6 +462,9 @@ class Owner(commands.Cog):
             await asyncio.sleep(1.5)
 
         await player.process_next()
+
+    async def cog_check(self, ctx: CustomContext) -> bool:
+        return await check_requester_channel(ctx)
 
     async def cog_load(self) -> None:
         self.owner_view =  PanelView(self.bot)

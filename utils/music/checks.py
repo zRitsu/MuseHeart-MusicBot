@@ -1,10 +1,25 @@
-from typing import Union
+from __future__ import annotations
+from typing import Union, TYPE_CHECKING
 import disnake
 from disnake.ext import commands
 from .converters import perms_translations
 from .errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, DiffVoiceChannel, GenericError, \
     MissingVoicePerms
 from .models import LavalinkPlayer, YTDLPlayer
+
+
+async def check_requester_channel(ctx):
+
+    guild_data = await ctx.bot.db.get_data(ctx.guild.id, db_name="guilds")
+
+    if guild_data['player_controller']["channel"] == ctx.channel.id:
+        try:
+            await ctx.message.delete()
+        except:
+            pass
+        raise GenericError("Não use comandos neste canal!", delete=30)
+
+    return True
 
 
 def has_player():

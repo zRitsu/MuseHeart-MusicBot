@@ -12,7 +12,7 @@ from utils.client import BotCore
 from utils.music.errors import GenericError, MissingVoicePerms
 from utils.music.spotify import SpotifyPlaylist, process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, \
-    can_send_message
+    can_send_message, check_requester_channel
 from utils.music.models import LavalinkPlayer, LavalinkTrack, YTDLTrack, YTDLPlayer, YTDLManager
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist, \
@@ -2340,17 +2340,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 del sys.modules[m]
 
     async def cog_check(self, ctx: CustomContext) -> bool:
+        return await check_requester_channel(ctx)
 
-        guild_data = await self.bot.db.get_data(ctx.guild.id, db_name="guilds")
-
-        if guild_data['player_controller']["channel"] == ctx.channel.id:
-            try:
-                await ctx.message.delete()
-            except:
-                pass
-            raise GenericError("Não use comandos neste canal!", delete=30)
-
-        return True
 
     async def cog_before_message_command_invoke(self, inter):
         await self.cog_before_slash_command_invoke(inter)
