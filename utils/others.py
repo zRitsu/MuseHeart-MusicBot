@@ -8,6 +8,45 @@ if TYPE_CHECKING:
     from utils.client import BotCore
 
 
+class Test:
+
+    def is_done(self):
+        return True
+
+class CustomContext(commands.Context):
+    bot: BotCore
+    def __init__(self, prefix, view, bot: BotCore, message):
+        super(CustomContext, self).__init__(prefix=prefix, view=view, bot=bot, message=message)
+        self.response = Test()
+        self.response.defer = self.defer
+        self.user = self.author
+        self.guild_id = self.guild.id
+        self.store_message = None
+
+    async def defer(self, ephemeral: bool = False):
+        return
+
+    async def send(self, *args, **kwargs):
+        try:
+            kwargs.pop("ephemeral")
+        except:
+            pass
+        if self.channel == self.message.channel:
+            kwargs['mention_author'] = False
+            return await super().reply(*args, **kwargs)
+        return await super().send(*args, **kwargs)
+
+    async def reply(self, *args, **kwargs):
+        try:
+            kwargs.pop("ephemeral")
+        except:
+            pass
+        if self.channel != self.message.channel or self.author.bot:
+            return await super().send(*args, **kwargs)
+        kwargs['mention_author'] = False
+        return await super().reply(*args, **kwargs)
+
+
 class ProgressBar:
 
     def __init__(
@@ -33,6 +72,11 @@ def sync_message(bot: BotCore):
 
 
 async def check_cmd(cmd, inter: Union[disnake.Interaction, disnake.ModalInteraction]):
+
+    try:
+        await cmd._max_concurrency.acquire(inter)
+    except AttributeError:
+        pass
 
     bucket = cmd._buckets.get_bucket(inter)  # type: ignore
     if bucket:

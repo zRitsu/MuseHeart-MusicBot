@@ -9,8 +9,9 @@ from utils.music.converters import perms_translations, time_format
 
 class GenericError(commands.CheckFailure):
 
-    def __init__(self, text: str):
+    def __init__(self, text: str, delete: int = None):
         self.text = text
+        self.delete = delete
 
 
 class MissingSpotifyClient(commands.CheckFailure):

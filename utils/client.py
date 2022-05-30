@@ -9,7 +9,7 @@ from web_app import WSClient
 from .music.models import music_mode
 from utils.db import MongoDatabase, LocalDatabase
 from asyncspotify import Client as SpotifyClient
-from utils.others import sync_message
+from utils.others import sync_message, CustomContext
 import os
 import traceback
 
@@ -117,6 +117,9 @@ class BotCore(commands.AutoShardedBot):
         if not message.guild:
             return
 
+        if message.author.bot:
+            return
+
         if message.content in (f"<@{self.user.id}>",  f"<@!{self.user.id}>"):
 
             if not await self.can_send_message(message):
@@ -154,7 +157,7 @@ class BotCore(commands.AutoShardedBot):
             await message.reply(embed=embed, view=view)
             return
 
-        ctx: commands.Context = await self.get_context(message)
+        ctx: CustomContext = await self.get_context(message, cls=CustomContext)
 
         if not ctx.valid:
             return

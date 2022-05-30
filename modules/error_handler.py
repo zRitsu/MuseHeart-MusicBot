@@ -86,7 +86,12 @@ class ErrorHandler(commands.Cog):
             components = None
             embed.description = error_msg
 
-        await ctx.send(ctx.author.mention, embed=embed, components=components)
+        try:
+            delete_time = error.delete
+        except AttributeError:
+            delete_time = None
+
+        await ctx.send(ctx.author.mention, embed=embed, components=components, delete_after=delete_time)
 
 
     @commands.Cog.listener("on_button_click")
