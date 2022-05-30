@@ -289,7 +289,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             node = self.bot.music.get_best_node()
 
         if not node:
-            raise GenericError("Não há servidores de música disponível.")
+            raise GenericError("**Não há servidores de música disponível.**")
 
         static_player = {}
 
@@ -2635,7 +2635,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             node = self.bot.music.get_best_node()
 
             if not node:
-                raise GenericError("Não há servidores de música disponível.")
+                raise GenericError("**Não há servidores de música disponível.**")
 
         tracks = await process_spotify(self.bot, user, query, hide_playlist=hide_playlist)
 
