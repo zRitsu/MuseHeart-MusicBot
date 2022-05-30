@@ -1501,10 +1501,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
-        embed = disnake.Embed(color=disnake.Colour.red())
+        embed = disnake.Embed(color=self.bot.get_color(inter.guild.me))
 
         player.command_log = f"{inter.author.mention} **parou o player!**"
-        embed.description = f"**{inter.author.mention} parou o player!**"
+        embed.description = f"🛑 **⠂{inter.author.mention} parou o player.**"
         await inter.send(embed=embed, ephemeral=player.static or player.has_thread)
 
         await player.destroy()
