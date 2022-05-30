@@ -12,7 +12,7 @@ async def check_requester_channel(ctx):
 
     guild_data = await ctx.bot.db.get_data(ctx.guild.id, db_name="guilds")
 
-    if guild_data['player_controller']["channel"] == ctx.channel.id:
+    if guild_data['player_controller']["channel"] == str(ctx.channel.id):
         try:
             await ctx.message.delete()
         except:
