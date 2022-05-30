@@ -177,7 +177,7 @@ class Owner(commands.Cog):
 
             git_log += format_git_log(data)
 
-        text = "`Reinicie o bot após as alterações.`"
+        text = "`Será necessário me reiniciar após as alterações.`"
 
         if "--pip" in opts:
             run_command_old("pip3 install -U -r requirements.txt")

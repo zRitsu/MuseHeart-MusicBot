@@ -195,7 +195,7 @@ class BotCore(commands.AutoShardedBot):
             return
 
         if not self.bot_ready:
-            await inter.send("O bot ainda não está pronto para uso.", ephemeral=True)
+            await inter.send("Ainda estou inicializando...\nPor favor aguarde mais um pouco...", ephemeral=True)
             return
 
         if self.config["COMMAND_LOG"]:
