@@ -312,8 +312,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     for f in (await fav_list(inter, ""))]
 
             if not opts:
-                raise GenericError("**Você não possui favoritos...\n"
-                                   "Adicione um usando o comando /fav add**")
+                raise GenericError("**Você não possui favoritos...**\n"
+                                   "`Adicione um usando o comando: /fav add.`\n"
+                                   "`Ou use este comando adicionando um nome ou link de uma música/vídeo.`")
 
             opts.append(disnake.SelectOption(label="Cancelar", value="cancel", emoji="❌"))
 
