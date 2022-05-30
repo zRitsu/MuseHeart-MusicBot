@@ -2579,6 +2579,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if payload.reason == "FINISHED":
             player.set_command_log()
         elif payload.reason == "STOPPED":
+            player.ignore_np_once = True
             pass
         else:
             return

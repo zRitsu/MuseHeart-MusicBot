@@ -236,6 +236,7 @@ class BasePlayer:
         self.updating: bool = False
         self.message_updater_task: Optional[asyncio.Task] = self.bot.loop.create_task(self.message_updater())
         self.restrict_mode = kwargs.pop('restrict_mode', False) # limitar apenas para dj's e staff's
+        self.ignore_np_once = False # não invocar player controller em determinadas situações
 
         requester: disnake.Member = kwargs.pop('requester')
 
@@ -425,7 +426,9 @@ class BasePlayer:
                 style = disnake.ButtonStyle.grey
             components.append(disnake.ui.Button(emoji=button, custom_id=f"musicplayer_{control[0]}", style=style))
 
-        if self.message and (self.has_thread or self.static or not force or self.is_last_message()):
+        if self.message and (self.ignore_np_once or self.has_thread or self.static or not force or self.is_last_message()):
+
+            self.ignore_np_once = False
 
             try:
                 if interaction and not interaction.response.is_done():
