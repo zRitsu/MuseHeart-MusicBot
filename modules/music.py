@@ -501,7 +501,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 def check_song_selection(i: Union[CustomContext, disnake.MessageInteraction]):
 
                     try:
-                        return i.data.custom_id == f"track_selection{inter.id}" and i.author == inter.author
+                        return i.data.custom_id == f"track_selection_{inter.id}" and i.author == inter.author
                     except AttributeError:
                         return i.author == inter.author and i.message.id == msg.id
 
