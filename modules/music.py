@@ -925,7 +925,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(3, 5), commands.BucketType.member)
     @commands.max_concurrency(1, commands.BucketType.member)
-    @commands.command(description=f"Selecionar modo de repetição entre: música atual / fila / desativar.")
+    @commands.command(description=f"Selecionar modo de repetição entre: música atual / fila / desativar / quantidade (usando números).")
     async def loop(self, ctx: CustomContext, mode: str = None):
 
         if not mode:
@@ -965,6 +965,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             mode = select.data.values[0]
             ctx.store_message = msg
+
+        if mode.isdigit():
+            await self.loop_amount.callback(self=self, inter=ctx, value=int(mode))
 
         if mode not in ('current', 'queue', 'off'):
             raise GenericError("Modo inválido! escolha entre: current/queue/off")
