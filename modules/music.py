@@ -1044,7 +1044,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
               f"[`{(fix_characters(player.current.title, 25))}`]({player.current.uri}) para **{value}**."
 
         player.set_command_log(text=txt, emoji="🔄")
-        embed.description=f"**Quantidade de repetições [{value}] definida para a música:** [`{player.current.title}`]({player.current.uri})"
+        embed.description=f"🔄 **⠂{inter.author.mention} definiu a quantidade de repetições da música atual para {value}:** [`{player.current.title}`]({player.current.uri})"
         embed.set_thumbnail(url=player.current.thumb)
         await inter.send(embed=embed, ephemeral=True)
 
