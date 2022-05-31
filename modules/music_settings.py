@@ -5,7 +5,7 @@ from disnake.ext import commands
 from typing import TYPE_CHECKING, Union
 from utils.music.checks import user_cooldown
 from utils.music.converters import time_format
-from utils.others import send_idle_embed
+from utils.others import send_idle_embed, CustomContext
 from utils.music.models import LavalinkPlayer, YTDLPlayer
 
 if TYPE_CHECKING:
@@ -53,7 +53,15 @@ class MusicSettings(commands.Cog):
 
     @commands.has_guild_permissions(administrator=True)
     @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
-    @commands.dynamic_cooldown(user_cooldown(1,30), commands.BucketType.guild)
+    @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
+    @commands.command(name="setup", aliases=["requestchannel"], description="Criar um canal dedicado para pedir músicas e deixar player fixado.")
+    async def setup_legacy(self, ctx: CustomContext):
+        await self.setup.callback(self=self, inter=ctx)
+
+
+    @commands.has_guild_permissions(administrator=True)
+    @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
+    @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
     @commands.slash_command(description=f"{desc_prefix}Criar um canal dedicado para pedir músicas e deixar player fixado.")
     async def setup(self, inter: disnake.AppCmdInter):
 
