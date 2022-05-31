@@ -968,7 +968,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if mode.isdigit():
 
-            if len(mode) < 2 or (amount:=int(mode)) < 10:
+            if len(mode) > 2 or (amount:=int(mode)) < 10:
                 raise GenericError(f"**Quantidade inválida: {mode}**\n"
                                    f"`Quantidade máxima permitida: 10`")
 
