@@ -3,7 +3,6 @@ from disnake.ext import commands
 import traceback
 import wavelink
 import asyncio
-import sys
 import json
 from random import shuffle
 from typing import Literal, Union, Optional
@@ -18,7 +17,7 @@ from utils.music.converters import time_format, fix_characters, string_to_second
     YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist, \
     node_suggestions, fav_add_autocomplete, fav_list, queue_track_index
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
-from utils.others import check_cmd, send_message, send_idle_embed, CustomContext
+from utils.others import check_cmd, send_idle_embed, CustomContext
 from user_agent import generate_user_agent
 
 PlayOpts = commands.option_enum(
@@ -243,7 +242,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.command(name="addposition", description="Adicionar música em uma posição especifica da fila.", aliases=["adp", "addpos"])
-    async def addpos_legacy(self, ctx: CustomContext, position: int, *, query: str):
+    async def addpos_legacy(self, ctx: CustomContext, position: Optional[int] = None, *, query: str = None):
+
+        if not position:
+            raise GenericError(f"{ctx.author.mention}**, você não informou uma posição válida.**")
+
+        if not query:
+            raise GenericError(f"{ctx.author.mention}**, você não adicionou um nome ou link de uma música.**")
 
         position -= 1
 
@@ -450,6 +455,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     message = await channel.fetch_message(int(static_player.get('message_id')))
                 except TypeError:
                     await self.reset_controller_db(inter.guild_id, guild_data, inter=inter)
+                    message = None
                 except:
                     message = await send_idle_embed(inter.channel, bot=self.bot)
                     guild_data['player_controller']['message_id'] = str(message.id)
@@ -599,6 +605,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             player.set_command_log(text=log_text, emoji=emoji)
             await player.update_message()
 
+
     @check_voice()
     @has_source()
     @is_requester()
@@ -606,6 +613,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.command(name="skip", aliases=["s", "pular"], description=f"Pular a música atual que está tocando.")
     async def skip_legacy(self, ctx: CustomContext):
         await self.skip.callback(self=self, inter=ctx)
+
 
     @check_voice()
     @has_source()
@@ -618,8 +626,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         if not len(player.queue):
-            await send_message(inter, embed=disnake.Embed(description="**Não há músicas na fila...**", color=disnake.Colour.red()))
-            return
+            raise GenericError("**Não há músicas na fila...**")
 
         player.set_command_log(text=f"{inter.author.mention} pulou a música.", emoji="⏭️")
 
@@ -647,6 +654,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.command(name="back", aliases=["b", "voltar"],description="Voltar para a música anterior.")
     async def back_legacy(self, ctx: CustomContext):
         await self.back.callback(self=self, inter=ctx)
+
 
     @check_voice()
     @has_player()
@@ -703,10 +711,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         embed = disnake.Embed()
 
         if inter.author in player.votes:
-            embed.colour = disnake.Colour.red()
-            embed.description = f"{inter.author.mention} **você já votou para pular a música atual.**"
-            await send_message(inter, embed=embed)
-            return
+            raise GenericError(f"{inter.author.mention} **você já votou para pular a música atual.**")
 
         embed.colour = self.bot.get_color(inter.guild.me)
 
@@ -730,9 +735,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(1, 5), commands.BucketType.member)
     @commands.command(name="volume",description="Ajustar volume da música.", aliases=["vol", "v"])
-    async def volume_legacy(self, ctx: CustomContext, level: str):
+    async def volume_legacy(self, ctx: CustomContext, level: str = None):
 
-        if not level.isdigit() or not (5 < (level:=int(level)) < 150):
+        if not level:
+            raise GenericError(f"{ctx.author.mention}**, você não informou o volume (entre 5-150).**")
+
+        if not level.isdigit() or len(level) > 3:
             raise GenericError("**Volume inválido! escolha entre 5 a 150**", self_delete=7)
 
         await self.volume.callback(self=self, inter=ctx, value=level)
@@ -770,8 +778,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             update = True
 
         elif not 4 < value < 151:
-            embed.description = "O volume deve estar entre **5** a **150**."
-            return await inter.send(embed=embed, ephemeral=True)
+            raise GenericError("O volume deve estar entre **5** a **150**.")
 
         await player.set_volume(value)
 
@@ -797,11 +804,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
-        embed = disnake.Embed(color=disnake.Colour.red())
-
         if player.paused:
-            await send_message(inter, embed=embed)
-            return
+            raise GenericError("**A música já está pausada.**")
 
         await player.set_pause(True)
 
@@ -828,12 +832,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
-        embed = disnake.Embed(color=disnake.Colour.red())
-
         if not player.paused:
-            embed.description = "A música não está pausada."
-            await send_message(inter, embed=embed)
-            return
+            raise GenericError("**A música não está pausada.**")
 
         await player.set_pause(False)
 
@@ -847,7 +847,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.member)
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.command(name="seek", aliases=["sk"], description="Avançar/Retomar a música para um tempo específico.")
-    async def seek_legacy(self, ctx: CustomContext, position: str):
+    async def seek_legacy(self, ctx: CustomContext, position: str = None):
+
+        if not position:
+            raise GenericError(f"{ctx.author.mention}**, você não informou o tempo para avançar/voltar (ex: 1:55 | 33 | 0:45).**")
+        
         await self.seek.callback(self=self, inter=ctx, position=position)
 
 
@@ -863,38 +867,27 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             position: str = commands.Param(name="tempo", description="Tempo para avançar/voltar (ex: 1:45 / 40 / 0:30)", autocomplete=seek_suggestions)
     ):
 
-        embed = disnake.Embed(color=disnake.Colour.red())
-
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         if player.current.is_stream:
-            embed.description = "Você não pode usar esse comando em uma livestream."
-            await send_message(inter, embed=embed)
-            return
+            raise GenericError("**Você não pode usar esse comando em uma livestream.**")
 
-        position = position.split(" | ")[0]
+        position = position.replace(" ", ":").split(" | ")[0]
 
         seconds = string_to_seconds(position)
 
         if seconds is None:
-            embed.description = "Você usou um tempo inválido! Use segundos (1 ou 2 digitos) ou no formato (minutos):(segundos)"
-            return await send_message(inter, embed=embed)
+            raise GenericError("**Você usou um tempo inválido! Use segundos (1 ou 2 digitos) ou no formato (minutos):(segundos)**")
 
         milliseconds = seconds * 1000
 
         if milliseconds < 0:
             milliseconds = 0
 
-        try:
-            await player.seek(milliseconds)
+        await player.seek(milliseconds)
 
-            if player.paused:
-                await player.set_pause(False)
-
-        except Exception as e:
-            embed.description = f"Ocorreu um erro no comando\n```py\n{repr(e)}```."
-            await send_message(inter, embed=embed)
-            return
+        if player.paused:
+            await player.set_pause(False)
 
         if milliseconds > player.position:
 
@@ -997,8 +990,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         if mode == player.loop:
-            await self.interaction_message(inter, "O modo de repetição selecionado já está ativo...")
-            return
+            raise GenericError("**O modo de repetição selecionado já está ativo...**")
 
         if mode == 'off':
             mode = False
@@ -1056,7 +1048,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @is_dj()
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.command(name="remove", aliases=["r", "del"], description="Remover uma música específica da fila.")
-    async def remove_legacy(self, ctx: CustomContext, *, query: str):
+    async def remove_legacy(self, ctx: CustomContext, *, query: str = None):
+
+        if not query:
+            raise GenericError(f"{ctx.author.mention}**, você não adicionou um nome ou posição de uma música.**")
 
         if query.isdigit() and len(query) <= 3:
             query = f">pos {query}"
@@ -1074,17 +1069,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             query: str = commands.Param(name="nome", description="Nome da música completo.", autocomplete=queue_tracks)
     ):
 
-        embed = disnake.Embed(color=disnake.Colour.red())
-
         if query.lower().startswith(">pos "):
             index = int(query.split()[1]) - 1
         else:
             try:
                 index = queue_track_index(inter, query)[0][0]
             except IndexError:
-                embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
-                await inter.send(embed=embed, ephemeral=True)
-                return
+                raise GenericError(f"{inter.author.mention} **não há músicas na fila com o nome: {query}**")
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
@@ -1124,25 +1115,22 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
-        embed = disnake.Embed(color=disnake.Colour.red())
-
         if not player.played:
-            embed.description = f"{inter.author.mention} **não há músicas tocadas.**"
-            await inter.send(embed=embed, ephemeral=True)
-            return
-
-        embed.colour = self.bot.get_color(inter.guild.me)
+            raise GenericError(f"{inter.author.mention} **não há músicas tocadas.**")
 
         player.set_command_log(
             text=f"{inter.author.mention} **readicionou [{(qsize:=len(player.played))}] música(s) tocada(s) na fila.**",
             emoji="🎶"
         )
 
-        embed.description = f"🎶 **⠂{inter.author.mention} readicionou {qsize} música(s) na fila.**"
-
         player.played.reverse()
         player.queue.extend(player.played)
         player.played.clear()
+
+        embed = disnake.Embed(
+            color=self.bot.get_color(inter.guild.me),
+            description=f"🎶 **⠂{inter.author.mention} readicionou {qsize} música(s) na fila.**"
+        )
 
         await inter.send(embed=embed, ephemeral=True)
         await player.update_message()
@@ -1158,7 +1146,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @is_dj()
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.command(name="skipto", aliases=["skt", "pularpara"], description="Pular para a música especificada.")
-    async def skipto_legacy(self, ctx: CustomContext, *, query: str):
+    async def skipto_legacy(self, ctx: CustomContext, *, query: str = None):
+
+        if not query:
+            raise GenericError(f"{ctx.author.mention}**, você não adicionou um nome ou posição de uma música.**")
 
         if query.isdigit() and len(query) <= 3:
             query = f">pos {query}"
@@ -1186,17 +1177,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             )
     ):
 
-        embed = disnake.Embed(color=disnake.Colour.red())
-
         if query.lower().startswith(">pos "):
             index = int(query.split()[1]) - 1
         else:
             try:
                 index = queue_track_index(inter, query)[0][0]
             except IndexError:
-                embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
-                await inter.send(embed=embed, ephemeral=True)
-                return
+                raise GenericError(f"{inter.author.mention} **não há músicas na fila com o nome: {query}**")
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
@@ -1215,10 +1202,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         elif index > 0:
             player.queue.rotate(0 - (index))
 
-        embed.colour = self.bot.get_color(inter.guild.me)
-
         player.set_command_log(text=f"{inter.author.mention} pulou para a música atual", emoji="⤵️")
-        embed.description = f"⤵️ **⠂{inter.author.mention} pulou para a música:** [`{track.title}`]({track.uri})"
+
+        embed = disnake.Embed(
+            color=self.bot.get_color(inter.guild.me),
+            description=f"⤵️ **⠂{inter.author.mention} pulou para a música:** [`{track.title}`]({track.uri})"
+        )
+
         embed.set_thumbnail(track.thumb)
         await inter.send(embed=embed, ephemeral=True)
 
@@ -1230,7 +1220,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @is_dj()
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.command(name="move", aliases=["mv", "mover"], description="Mover uma música para a posição especificada da fila.")
-    async def move_legacy(self, ctx: CustomContext, position: int, *, query: str):
+    async def move_legacy(self, ctx: CustomContext, position: Optional[int], *, query: str = None):
+
+        if not position:
+            raise GenericError(f"{ctx.author.mention}**, você não informou uma posição da fila.**")
+
+        if not query:
+            raise GenericError(f"{ctx.author.mention}**, você não adicionou o nome da música.**")
 
         if query.endswith(" --all"):
             query = query[:-5]
@@ -1256,12 +1252,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             )
     ):
 
-        embed = disnake.Embed(colour=disnake.Colour.red())
-
         if position < 1:
-            embed.description = f"{inter.author.mention}, {position} não é uma posição válida."
-            await send_message(inter, embed=embed)
-            return
+            raise GenericError(f"{inter.author.mention}, **{position}** não é uma posição válida.")
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
@@ -1271,9 +1263,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             indexes = queue_track_index(inter, query, check_all=search_all)
 
             if not indexes:
-                embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
-                await inter.send(embed=embed, ephemeral=True)
-                return
+                raise GenericError(f"{inter.author.mention} **não há músicas na fila com o nome: {query}**")
 
         for index, track in reversed(indexes):
 
@@ -1316,7 +1306,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @is_dj()
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.command(name="rotate", aliases=["rt", "rotacionar"], description="Rotacionar a fila para a música especificada.")
-    async def rotate_legacy(self, ctx: CustomContext, *, query: str):
+    async def rotate_legacy(self, ctx: CustomContext, *, query: str = None):
+
+        if not query:
+            raise GenericError(f"{ctx.author.mention}**, você não adicionou um nome ou posição de uma música.**")
 
         if query.isdigit() and len(query) <= 3:
             query = f">pos {query}"
@@ -1336,8 +1329,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 name="nome", description="Nome da música completo.", autocomplete=queue_tracks)
     ):
 
-        embed = disnake.Embed(colour=disnake.Colour.red())
-
         if query.startswith(">pos "):
             try:
                 index = int(query.split()[1]) - 1
@@ -1349,9 +1340,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             index = queue_track_index(inter, query)
 
             if not index:
-                embed.description = f"{inter.author.mention} **não há músicas na fila com o nome: {query}**"
-                await inter.send(embed=embed, ephemeral=True)
-                return
+                raise GenericError(f"{inter.author.mention} **não há músicas na fila com o nome: {query}**")
 
             index = index[0][0]
 
@@ -1360,21 +1349,20 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         track = player.queue[index]
 
         if index <= 0:
-            embed.description = f"{inter.author.mention} **a música **[`{track.title}`]({track.uri}) já é a próxima da fila."
-            await inter.send(embed=embed, ephemeral=True)
-            return
+            raise GenericError(f"{inter.author.mention} **a música **[`{track.title}`]({track.uri}) já é a próxima da fila.")
 
         player.queue.rotate(0 - (index))
-
-        embed.colour = self.bot.get_color(inter.guild.me)
 
         player.set_command_log(
             text=f"{inter.author.mention} rotacionou a fila para a música [`{(fix_characters(track.title, limit=25))}`]({track.uri}).",
             emoji="🔃"
         )
 
-        embed.description = f"🔃 **⠂{inter.author.mention} rotacionou a fila para a música:** [`{track.title}`]({track.uri})."
-        embed.set_thumbnail(url=track.thumb)
+        embed = disnake.Embed(
+            colour=self.bot.get_color(inter.guild.me),
+            description=f"🔃 **⠂{inter.author.mention} rotacionou a fila para a música:** [`{track.title}`]({track.uri})."
+        ).set_thumbnail(url=track.thumb)
+
         await inter.send(embed=embed, ephemeral=True)
 
         await player.update_message()
@@ -1432,16 +1420,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         if player.static:
-            await inter.send("Esse comando não pode ser usado no modo fixo do player.", ephemeral=True)
-            return
+            raise GenericError("Esse comando não pode ser usado no modo fixo do player.")
 
         if player.has_thread:
-            embed = disnake.Embed(
-                    color=self.bot.get_color(inter.guild.me),
-                    description=f"Esse comando não pode ser usado com uma conversa ativa na [mensagem]({player.message.jump_url}) do player."
-                )
-            await inter.send(embed=embed, ephemeral=True)
-            return
+            raise GenericError(f"**Esse comando não pode ser usado com uma conversa ativa na "
+                               f"[mensagem]({player.message.jump_url}) do player.**")
 
         await player.destroy_message()
         await player.invoke_np()
@@ -1460,7 +1443,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @has_player()
     @is_dj()
     @commands.command(name="adddj", aliases=["adj"], description="Adicionar um membro à lista de DJ's na sessão atual do player.")
-    async def add_dj_legacy(self, ctx: CustomContext, user: disnake.Member):
+    async def add_dj_legacy(self, ctx: CustomContext, user: Optional[disnake.Member] = None):
+
+        if not user:
+            raise GenericError(f"{ctx.author.mention}**, você não informou um membro (ID, menção, nome, etc).**")
+
         await self.add_dj.callback(self=self, inter=ctx, user=user)
 
 
@@ -1485,9 +1472,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             error_text = f"O membro {user.mention} já está na lista de DJ's"
 
         if error_text:
-            embed = disnake.Embed(color=disnake.Colour.red(), description=error_text)
-            await send_message(inter, embed=embed)
-            return
+            raise GenericError(error_text)
 
         player.dj.add(user)
         text = [f"adicionou {user.mention} à lista de DJ's.", f"{user.mention} foi adicionado à lista de DJ's."]
@@ -1548,10 +1533,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         if len(player.queue) < 3:
-            embed = disnake.Embed(color=disnake.Colour.red())
-            embed.description = "A fila tem que ter no mínimo 3 músicas para ser misturada."
-            await send_message(inter, embed=embed)
-            return
+            raise GenericError("**A fila tem que ter no mínimo 3 músicas para ser misturada.**")
 
         shuffle(player.queue)
 
@@ -1580,10 +1562,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         if len(player.queue) < 2:
-            embed = disnake.Embed(colour=disnake.Colour.red())
-            embed.description = "A fila tem que ter no mínimo 2 músicas para inverter a ordem."
-            await send_message(inter, embed=embed)
-            return
+            raise GenericError("**A fila tem que ter no mínimo 2 músicas para inverter a ordem.**")
 
         player.queue.reverse()
         await self.interaction_message(
@@ -1606,12 +1585,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         if not player.queue:
-            embedvc = disnake.Embed(
-                colour=disnake.Colour.red(),
-                description='**Não há músicas na fila no momento.**'
-            )
-            await send_message(inter, embed=embedvc)
-            return
+            raise GenericError("**Não há músicas na fila.**")
 
         view = QueueInteraction(player, inter.author)
         embed = view.embed
