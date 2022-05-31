@@ -1677,7 +1677,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if not filters and not range_start and not range_end:
             player.queue.clear()
-            txt = ['limpou a fila de música.', '**Fila limpa com sucesso.**']
+            txt = ['limpou a fila de música.', f'♻️ **⠂{inter.author.mention} limpou a fila de música.**']
 
         else:
 
