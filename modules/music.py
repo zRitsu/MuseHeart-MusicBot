@@ -973,6 +973,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                                    f"`Quantidade máxima permitida: 10`")
 
             await self.loop_amount.callback(self=self, inter=ctx, value=amount)
+            return
 
         if mode not in ('current', 'queue', 'off'):
             raise GenericError("Modo inválido! escolha entre: current/queue/off")
