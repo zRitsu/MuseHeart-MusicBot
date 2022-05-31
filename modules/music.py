@@ -1651,8 +1651,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
         if not player.queue:
-            await inter.send("Não há musicas na fila.", ephemeral=True)
-            return
+            raise GenericError("**Não há musicas na fila.**")
 
         filters = []
 
