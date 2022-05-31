@@ -1,17 +1,17 @@
 import sys
 import traceback
-from typing import Union
+from typing import Union, Optional
 import disnake
 from disnake.ext import commands
-
 from utils.music.converters import perms_translations, time_format
 
 
 class GenericError(commands.CheckFailure):
 
-    def __init__(self, text: str, delete: int = None):
+    def __init__(self, text: str, *, self_delete: int = None, delete_original: Optional[int] = None):
         self.text = text
-        self.delete = delete
+        self.self_delete = self_delete
+        self.delete_original = delete_original
 
 
 class MissingSpotifyClient(commands.CheckFailure):

@@ -626,7 +626,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if isinstance(inter, disnake.MessageInteraction):
             await inter.response.defer()
         else:
-            embed = disnake.Embed(description=f"⏭️ **⠂Música pulada:** [`{fix_characters(player.current.title, 30)}`]({player.current.uri})", color=self.bot.get_color(inter.guild.me))
+            embed = disnake.Embed(description=f"⏭️ **⠂{inter.author.mention} pulou a música:** "
+                                              f"[`{fix_characters(player.current.title)}`]({player.current.uri})",
+                                  color=self.bot.get_color(inter.guild.me)).set_thumbnail(url=player.current.thumb)
             await inter.send(embed=embed, ephemeral=True)
 
         if player.loop == "current":
@@ -677,8 +679,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         else:
             t = player.queue[0]
             embed = disnake.Embed(
-                description=f"⏮️ **⠂Música voltada para:** [`{fix_characters(t.title, 30)}`]({t.uri})",
-                color=self.bot.get_color(inter.guild.me))
+                description=f"⏮️ **⠂{inter.author.mention} voltou para a música:** "
+                            f"[`{fix_characters(t.title)}`]({t.uri})",
+                color=self.bot.get_color(inter.guild.me)).set_thumbnail(url=t.thumb)
             await inter.send(embed=embed, ephemeral=True)
 
         if player.loop == "current":
@@ -730,7 +733,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def volume_legacy(self, ctx: CustomContext, level: str):
 
         if not level.isdigit() or not (5 < (level:=int(level)) < 150):
-            raise GenericError("**Volume inválido! escolha entre 5 a 150**", delete=7)
+            raise GenericError("**Volume inválido! escolha entre 5 a 150**", self_delete=7)
 
         await self.volume.callback(self=self, inter=ctx, value=level)
 
@@ -2083,13 +2086,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             self.bot.dispatch('interaction_player_error', inter, e)
 
 
-    @commands.Cog.listener("on_message")
-    async def song_requests(self, message: disnake.Message):
+    @commands.Cog.listener("on_song_request")
+    async def song_requests(self, ctx: Optional[CustomContext], message: disnake.Message):
 
-        if not message.guild:
+        if not message.guild or message.is_system():
             return
 
-        if message.is_system():
+        if ctx.valid:
             return
 
         if message.author.bot:

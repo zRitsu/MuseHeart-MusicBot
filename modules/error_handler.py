@@ -4,7 +4,7 @@ from aiohttp import ClientSession
 from disnake.ext import commands
 from utils.music.converters import URL_REG
 from utils.music.errors import parse_error
-from utils.others import send_message
+from utils.others import send_message, CustomContext
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -68,7 +68,7 @@ class ErrorHandler(commands.Cog):
 
 
     @commands.Cog.listener("on_command_error")
-    async def on_legacy_command_error(self, ctx: commands.Context, error: Exception):
+    async def on_legacy_command_error(self, ctx: CustomContext, error: Exception):
 
         embed = disnake.Embed(color=disnake.Colour.red())
 
@@ -87,11 +87,20 @@ class ErrorHandler(commands.Cog):
             embed.description = error_msg
 
         try:
-            delete_time = error.delete
+            delete_time = error.delete_original
         except AttributeError:
             delete_time = None
 
-        await ctx.send(ctx.author.mention, embed=embed, components=components, delete_after=delete_time)
+        try:
+            if error.self_delete and ctx.channel.permissions_for(ctx.guild.me).manage_messages:
+                await ctx.message.delete()
+            else:
+                await ctx.reply(embed=embed, components=components, delete_after=delete_time, mention_author=False)
+                return
+        except AttributeError:
+            pass
+
+        await ctx.original_send(ctx.author.mention, embed=embed, components=components, delete_after=delete_time)
 
 
     @commands.Cog.listener("on_button_click")

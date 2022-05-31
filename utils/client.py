@@ -159,6 +159,8 @@ class BotCore(commands.AutoShardedBot):
 
         ctx: CustomContext = await self.get_context(message, cls=CustomContext)
 
+        self.dispatch("song_request", ctx, message)
+
         if not ctx.valid:
             return
 

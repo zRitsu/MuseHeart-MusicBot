@@ -13,11 +13,7 @@ async def check_requester_channel(ctx):
     guild_data = await ctx.bot.db.get_data(ctx.guild.id, db_name="guilds")
 
     if guild_data['player_controller']["channel"] == str(ctx.channel.id):
-        try:
-            await ctx.message.delete()
-        except:
-            pass
-        raise GenericError("Não use comandos neste canal!", delete=30)
+        raise GenericError("**Não use comandos neste canal!**", self_delete=True, delete_original=15)
 
     return True
 

@@ -26,23 +26,32 @@ class CustomContext(commands.Context):
     async def defer(self, ephemeral: bool = False):
         return
 
+    async def original_send(self, *args, **kwargs):
+        return await super().send(*args, **kwargs)
+
     async def send(self, *args, **kwargs):
+
         try:
             kwargs.pop("ephemeral")
         except:
             pass
+
         if self.channel == self.message.channel:
             kwargs['mention_author'] = False
             return await super().reply(*args, **kwargs)
+
         return await super().send(*args, **kwargs)
 
     async def reply(self, *args, **kwargs):
+
         try:
             kwargs.pop("ephemeral")
         except:
             pass
+
         if self.channel != self.message.channel or self.author.bot:
             return await super().send(*args, **kwargs)
+
         kwargs['mention_author'] = False
         return await super().reply(*args, **kwargs)
 
