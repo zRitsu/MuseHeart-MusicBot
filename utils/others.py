@@ -152,7 +152,7 @@ async def send_idle_embed(target: Union[disnake.Message, disnake.TextChannel, di
             emoji="⭐",
             custom_id="musicplayer_enqueue_fav",
             style=disnake.ButtonStyle.grey,
-            label="Adicionar/Tocar favorito."
+            label="Adicionar favorito."
         )
     ]
 
