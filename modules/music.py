@@ -968,11 +968,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if mode.isdigit():
 
-            if len(mode) > 2 or (amount:=int(mode)) > 10:
+            if len(mode) > 2 or int(mode) > 10:
                 raise GenericError(f"**Quantidade inválida: {mode}**\n"
                                    f"`Quantidade máxima permitida: 10`")
 
-            await self.loop_amount.callback(self=self, inter=ctx, value=amount)
+            await self.loop_amount.callback(self=self, inter=ctx, value=int(mode))
             return
 
         if mode not in ('current', 'queue', 'off'):
