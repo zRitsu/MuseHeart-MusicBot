@@ -2336,12 +2336,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await asyncio.sleep(1)
 
 
-    def cog_unload(self):
-
-        for m in list(sys.modules):
-            if m.startswith("utils.music"):
-                del sys.modules[m]
-
     async def cog_check(self, ctx: CustomContext) -> bool:
         return await check_requester_channel(ctx)
 
