@@ -1939,6 +1939,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                         }
                     )
 
+                control = "play"
+
             else:
 
                 try:
@@ -2004,13 +2006,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     else:
                         kwargs['mode'] = 'current'
 
-            if not cmd:
-                cmd = self.bot.get_slash_command(control)
-
             try:
                 await self.player_interaction_concurrency.acquire(interaction)
             except commands.MaxConcurrencyReached:
                 raise GenericError("**Você tem uma interação em aberto!**\n`Se for uma mensagem oculta, evite clicar em \"ignorar\".`")
+
+            if not cmd:
+                cmd = self.bot.get_slash_command(control)
 
             await self.process_player_interaction(
                 interaction = interaction,
