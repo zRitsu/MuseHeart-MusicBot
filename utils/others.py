@@ -71,9 +71,8 @@ def sync_message(bot: BotCore):
 
 async def check_cmd(cmd, inter: Union[disnake.Interaction, disnake.ModalInteraction, CustomContext]):
 
-    inter.application_command = cmd
-
     try:
+        inter.application_command = cmd
         await cmd._max_concurrency.acquire(inter)
     except AttributeError:
         pass
