@@ -366,14 +366,22 @@ class Owner(commands.Cog):
         description="Alterar o prefixo do servidor",
         usage="prefixo"
     )
-    async def setprefix(self, ctx: commands.Context, prefix: str):
+    async def setprefix(self, ctx: commands.Context, prefix: str = None):
+
+        if not prefix:
+            raise GenericError("**Você não informou um novo prefixo.**")
+
+        if " " in prefix or len(prefix) > 5:
+            raise GenericError("**O prefixo não pode conter espaços ou ter acima de 5 caracteres.**")
+
 
         data = await self.bot.db.get_data(ctx.guild.id, db_name="guilds")
+
         data["prefix"] = prefix
         await self.bot.db.update_data(ctx.guild.id, data, db_name="guilds")
 
         embed = disnake.Embed(
-            description=f"**Prefixo do servidor agora é:** {prefix}",
+            description=f"**O prefixo deste servidor agora é:** {disnake.utils.escape_markdown(prefix)}",
             color=self.bot.get_color(ctx.guild.me)
         )
 
