@@ -279,13 +279,24 @@ def queue_track_index(inter: disnake.AppCmdInter, query: str, check_all: bool = 
 
     player = inter.bot.music.players[inter.guild.id]
 
+    query_split = query.lower().split()
+
     tracklist = []
 
     for counter, track in enumerate(player.queue):
 
-        if query.lower() in track.title.lower() or \
-                all(elem in track.title.lower().split() for elem in query.lower().split()):
+        track_title = track.title.lower().split()
 
+        q_found = 0
+
+        for q in query_split:
+            for t in track_title:
+                if q in t:
+                    q_found += 1
+                    track_title.remove(t)
+                    break
+
+        if q_found == len(query_split):
 
             tracklist.append((counter, track,))
             if not check_all:
