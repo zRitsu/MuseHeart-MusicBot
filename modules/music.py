@@ -2066,10 +2066,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.Cog.listener("on_song_request")
     async def song_requests(self, ctx: Optional[CustomContext], message: disnake.Message):
 
-        if not message.guild or message.is_system():
-            return
-
-        if ctx.valid:
+        if ctx.command:
             return
 
         if message.author.bot:

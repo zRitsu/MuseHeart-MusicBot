@@ -117,10 +117,13 @@ class BotCore(commands.AutoShardedBot):
         if not message.guild:
             return
 
-        if message.author.bot:
+        if message.is_system():
             return
 
         if message.content in (f"<@{self.user.id}>",  f"<@!{self.user.id}>"):
+
+            if message.author.bot:
+                return
 
             if not await self.can_send_message(message):
                 return
@@ -160,6 +163,9 @@ class BotCore(commands.AutoShardedBot):
         ctx: CustomContext = await self.get_context(message, cls=CustomContext)
 
         self.dispatch("song_request", ctx, message)
+
+        if message.author.bot:
+            return
 
         if not ctx.valid:
             return
