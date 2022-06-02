@@ -873,7 +873,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if player.current.is_stream:
             raise GenericError("**Você não pode usar esse comando em uma livestream.**")
 
-        position = position.replace(" ", ":").split(" | ")[0]
+        position = position.split(" | ")[0].replace(" ", ":")
 
         seconds = string_to_seconds(position)
 
