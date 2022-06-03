@@ -59,12 +59,21 @@ class ProgressBar:
 
 class EmbedPaginator(disnake.ui.View):
 
-    def __init__(self, embeds: list[disnake.Embed], *,timeout=180):
+    def __init__(self, ctx: Union[CustomContext, disnake.MessageInteraction], embeds: list[disnake.Embed], *,timeout=180):
         super().__init__(timeout=timeout)
+        self.ctx = ctx
         self.embeds = embeds
         self.current = 0
         self.max_page = len(embeds) - 1
         self.message: Optional[disnake.Message] = None
+
+    async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
+
+        if interaction.author != self.ctx.author:
+            await interaction.send(f"O apenas o membro {self.ctx.author.mention} pode usar estes botões...")
+            return False
+
+        return True
 
     @disnake.ui.button(emoji='⬅️', style=disnake.ButtonStyle.grey)
     async def back(self, button, interaction: disnake.MessageInteraction):
