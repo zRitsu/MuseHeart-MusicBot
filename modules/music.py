@@ -848,7 +848,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.member)
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.command(name="seek", aliases=["sk"], description="Avançar/Retomar a música para um tempo específico.")
-    async def seek_legacy(self, ctx: CustomContext, position: str = None):
+    async def seek_legacy(self, ctx: CustomContext, *, position: str = None):
 
         if not position:
             raise GenericError("**Você não informou o tempo para avançar/voltar (ex: 1:55 | 33 | 0:45).**")
