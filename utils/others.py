@@ -128,11 +128,11 @@ def chunk_list(lst: list, amount: int):
 
 async def check_cmd(cmd, inter: Union[disnake.Interaction, disnake.ModalInteraction, CustomContext]):
 
-    try:
+    """try:
         inter.application_command = cmd
         await cmd._max_concurrency.acquire(inter)
     except AttributeError:
-        pass
+        pass"""
 
     bucket = cmd._buckets.get_bucket(inter)  # type: ignore
     if bucket:
@@ -149,7 +149,7 @@ async def check_cmd(cmd, inter: Union[disnake.Interaction, disnake.ModalInteract
         if not c:
             raise commands.CheckFailure()
 
-    try:
+    """try:
         chkcmd = list(cmd.children.values())[0]
     except (AttributeError, IndexError):
         try:
@@ -158,7 +158,7 @@ async def check_cmd(cmd, inter: Union[disnake.Interaction, disnake.ModalInteract
             chkcmd = None
 
     if chkcmd:
-        await check_cmd(chkcmd, inter)
+        await check_cmd(chkcmd, inter)"""
 
 
 

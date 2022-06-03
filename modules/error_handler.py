@@ -41,7 +41,7 @@ class ErrorHandler(commands.Cog):
         await self.process_interaction_error(inter=inter, error=error)
 
 
-    @commands.Cog.listener('on_user_command_completion')
+    """@commands.Cog.listener('on_user_command_completion')
     @commands.Cog.listener('on_message_command_completion')
     @commands.Cog.listener('on_slash_command_completion')
     async def interaction_command_completion(self, inter: disnake.AppCmdInter):
@@ -58,7 +58,7 @@ class ErrorHandler(commands.Cog):
         try:
             await ctx.command._max_concurrency.release(ctx.message)
         except:
-            pass
+            pass"""
 
 
     @commands.Cog.listener('on_user_command_error')
@@ -71,11 +71,11 @@ class ErrorHandler(commands.Cog):
 
     async def process_interaction_error(self, inter: disnake.AppCmdInter, error: Exception):
 
-        if not isinstance(error, commands.MaxConcurrencyReached):
+        """if not isinstance(error, commands.MaxConcurrencyReached):
             try:
                 await inter.application_command._max_concurrency.release(inter)
             except:
-                pass
+                pass"""
 
         embed = disnake.Embed(color=disnake.Colour.red())
 
@@ -95,11 +95,11 @@ class ErrorHandler(commands.Cog):
     @commands.Cog.listener("on_command_error")
     async def on_legacy_command_error(self, ctx: CustomContext, error: Exception):
 
-        if not isinstance(error, commands.MaxConcurrencyReached):
+        """if not isinstance(error, commands.MaxConcurrencyReached):
             try:
                 await ctx.command._max_concurrency.release(ctx.message)
             except:
-                pass
+                pass"""
 
         embed = disnake.Embed(color=disnake.Colour.red())
 
