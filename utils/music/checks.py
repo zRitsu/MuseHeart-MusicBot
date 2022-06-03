@@ -15,12 +15,7 @@ async def check_requester_channel(ctx: CustomContext):
 
     guild_data = await ctx.bot.db.get_data(ctx.guild.id, db_name="guilds")
 
-    try:
-        channel_id = ctx.channel.parent.id
-    except AttributeError:
-        channel_id = ctx.channel.id
-
-    if guild_data['player_controller']["channel"] == str(channel_id):
+    if guild_data['player_controller']["channel"] == str(ctx.channel.id):
         raise GenericError("**Não use comandos neste canal!**", self_delete=True, delete_original=15)
 
     return True
