@@ -13,7 +13,7 @@ from utils.client import BotCore
 from utils.music.checks import check_voice, check_requester_channel
 from utils.music.interactions import AskView
 from utils.music.models import LavalinkPlayer, YTDLPlayer
-from utils.others import sync_message
+from utils.others import sync_message, chunk_list, EmbedPaginator
 from utils.owner_panel import panel_command, PanelView
 from utils.music.errors import GenericError
 from jishaku.shell import ShellReader
@@ -327,36 +327,78 @@ class Owner(commands.Cog):
 
 
     @commands.command(name="help", aliases=["ajuda"], hidden=True)
-    @commands.cooldown(1, 3, commands.BucketType.guild)
-    async def help_(self, ctx: commands.Context):
+    @commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.max_concurrency(1, commands.BucketType.member)
+    async def help_(self, ctx: commands.Context, cmd_name: str = None):
 
-        embed = disnake.Embed(color=self.bot.get_color(ctx.me), title="Meus comandos:", description="")
+        if cmd_name:
 
-        if self.bot.slash_commands:
-            embed.description += "`Veja meus comandos de barra usando:` **/**"
+            cmd = self.bot.get_command(cmd_name)
 
-        if ctx.me.avatar:
-            embed.set_thumbnail(url=ctx.me.avatar.with_static_format("png").url)
+            if not cmd:
+                raise GenericError(f"O comando **{cmd_name}** não existe.")
 
-        for cmd in self.bot.commands:
-
-            if cmd.hidden:
-                continue
-
-            embed.description += f"**{cmd.name}**"
-
-            if cmd.aliases:
-                embed.description += f" [{', '.join(a for a in cmd.aliases)}]"
+            embed = disnake.Embed(
+                color=self.bot.get_color(ctx.guild.me),
+                title=f"**Informações do comando: {cmd.name}**"
+            )
 
             if cmd.description:
-                embed.description += f" ```ldif\n{cmd.description}```"
+                embed.add_field(name="Descrição:", value=f"```ldif\n{cmd.description}```", inline=False)
+
+            if cmd.aliases:
+                embed.add_field(name="Aliases/Sinônimos:", value="```ldif\n{}```".format(" | ".join(f"{ctx.clean_prefix}{a}" for a in cmd.aliases)), inline=False)
 
             if cmd.usage:
-                embed.description += f" ```ldif\n{ctx.clean_prefix}{cmd.name} {cmd.usage}```"
+                embed.add_field(name="Como usar:", value=f" ```ldif\n{ctx.clean_prefix}{cmd.name} {cmd.usage}```", inline=False)
 
-            embed.description += "\n"
+            await ctx.send(embed=embed)
+            return
 
-        await ctx.reply(embed=embed)
+        cmds = [c for c in self.bot.commands if not c.hidden]
+
+        cmds_final = []
+
+        for cmd in cmds:
+
+            txt = ""
+
+            prefix = ctx.prefix if ctx.guild.me.mention != ctx.prefix else ""
+
+            cmd_name = f"**{prefix}{cmd.name}**"
+
+            if cmd.aliases:
+                cmd_name += f" ({', '.join(a for a in cmd.aliases)})"
+
+            txt += f" ```ldif\n{cmd.description or 'Sem descrição...'}```"
+
+            txt += "\n"
+
+            cmds_final.append([cmd_name, txt])
+
+        embeds = []
+
+        slash_msg = "`Veja meus comandos de barra usando:` **/**\n\n" if self.bot.slash_commands else ""
+
+        txt_chunked = chunk_list(cmds_final, 9)
+
+        for c, txt_pages in enumerate(txt_chunked):
+
+            embed = disnake.Embed(color=self.bot.get_color(ctx.me), title=f"Meus comandos ({len(cmds)}):",
+                                  description=slash_msg)
+
+            embed.set_footer(text=f"Página: {c+1}/{len(txt_chunked)} | para ver informações detalhadas de um comando especifico use: {ctx.clean_prefix}{ctx.invoked_with} comando")
+
+            for cmd_name, cmd_desc in txt_pages:
+                embed.add_field(name=cmd_name, value=cmd_desc)
+
+            embeds.append(embed)
+
+        view = EmbedPaginator(embeds, timeout=60)
+
+        view.message = await ctx.reply(embed=embeds[0], view=view)
+
+        await view.wait()
 
 
     @commands.has_guild_permissions(administrator=True)

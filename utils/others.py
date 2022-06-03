@@ -57,6 +57,50 @@ class ProgressBar:
         self.end = int(bar_count - self.start) - 1
 
 
+class EmbedPaginator(disnake.ui.View):
+
+    def __init__(self, embeds: list[disnake.Embed], *,timeout=180):
+        super().__init__(timeout=timeout)
+        self.embeds = embeds
+        self.current = 0
+        self.max_page = len(embeds) - 1
+        self.message: Optional[disnake.Message] = None
+
+    @disnake.ui.button(emoji='⬅️', style=disnake.ButtonStyle.grey)
+    async def back(self, button, interaction: disnake.MessageInteraction):
+
+        if self.current == 0:
+            self.current = self.max_page
+        else:
+            self.current -= 1
+        await interaction.response.edit_message(embed=self.embeds[self.current])
+
+    @disnake.ui.button(emoji='➡️', style=disnake.ButtonStyle.grey)
+    async def next(self, button, interaction: disnake.MessageInteraction):
+
+        if self.current == self.max_page:
+            self.current = 0
+        else:
+            self.current += 1
+        await interaction.response.edit_message(embed=self.embeds[self.current])
+
+    @disnake.ui.button(emoji='➡️', style=disnake.ButtonStyle.red, label="Fechar")
+    async def close(self, button, interaction: disnake.MessageInteraction):
+
+        await interaction.message.delete()
+        self.stop()
+
+    async def on_timeout(self):
+
+        try:
+            await self.message.delete()
+        except:
+            pass
+
+        self.stop()
+
+
+
 def sync_message(bot: BotCore):
     app_commands_invite = f"https://discord.com/api/oauth2/authorize?client_id={bot.user.id}&scope=applications.commands"
     bot_invite = f"https://discord.com/api/oauth2/authorize?client_id={bot.user.id}&permissions=397287680080&scope=bot%" \
@@ -67,6 +111,10 @@ def sync_message(bot: BotCore):
            "`Nota: Em alguns casos os comandos de barra podem demorar até uma hora pra aparecer/atualizar em todos " \
            "os servidores. Caso queira usar os comandos de barra imediatamente no servidor você terá que " \
            f"me expulsar do servidor e em seguida me adicionar novamente através deste` [`link`]({bot_invite})..."
+
+
+def chunk_list(lst: list, amount: int):
+    return [lst[i:i + amount] for i in range(0, len(lst), amount)]
 
 
 async def check_cmd(cmd, inter: Union[disnake.Interaction, disnake.ModalInteraction, CustomContext]):
