@@ -3,6 +3,7 @@ import traceback
 from typing import Union, Optional
 import disnake
 from disnake.ext import commands
+from wavelink import WavelinkException
 from utils.music.converters import perms_translations, time_format
 
 
@@ -117,6 +118,10 @@ def parse_error(
 
         error_txt = f"{ctx.author.mention} **{txt[error.per]} e ainda não teve seu{'s' if error.number > 1 else ''} " \
                     f"uso{'s' if error.number > 1 else ''} finalizado{'s' if error.number > 1 else ''}!**"
+
+    elif isinstance(error, WavelinkException):
+        if str(error) == "Track not found...":
+            error_txt = "**Não houve resultados para sua busca...**"
 
     if not error_txt:
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
