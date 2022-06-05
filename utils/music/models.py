@@ -258,6 +258,13 @@ class BasePlayer:
     def has_thread(self):
         return self.message and self.message.thread
 
+    @property
+    def controller_link(self):
+        try:
+            return f" [`💠`]({self.message.jump_url})"
+        except AttributeError:
+            return ""
+
     async def members_timeout(self):
 
         await asyncio.sleep(self.idle_timeout)
