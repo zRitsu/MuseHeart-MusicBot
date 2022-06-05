@@ -1,7 +1,5 @@
 import datetime
-import random
 from typing import Union
-
 from ..models import LavalinkPlayer, YTDLPlayer
 import disnake
 from ..converters import fix_characters, time_format
