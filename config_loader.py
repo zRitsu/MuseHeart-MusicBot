@@ -13,50 +13,57 @@ bools = {
 def load_config():
 
     CONFIGS = {
-        "VOTE_SKIP_AMOUNT": 3,
         "DEFAULT_PREFIX": "!!!",
-        "DEFAULT_SKIN": "default",
         "AUTO_SYNC_COMMANDS": True,
         "OWNER_IDS": "",
         "INTENTS": "",
         "DISABLE_INTENTS": "",
-        "IDLE_TIMEOUT": 180,
         "COMMAND_LOG": False,
-        "RUN_RPC_SERVER": True,
-        "RPC_SERVER": "ws://localhost:$PORT/ws",
         "EMBED_COLOR": None,
-        "MAX_USER_FAVS": 10,
-        "USER_FAV_MAX_NAME_LENGTH": 35,
-        "USER_FAV_MAX_URL_LENGTH": 90,
         "BOT_ADD_REMOVE_LOG": '',
         "ERROR_REPORT_WEBHOOK": '',
-        "SPOTIFY_CLIENT_ID": '',
-        "SPOTIFY_CLIENT_SECRET": '',
         "INTERACTION_COMMAND_ONLY": False,
         "PRESENCE_INTERVAL": 900,
         "SOURCE_REPO": "https://github.com/zRitsu/disnake-LL-music-bot.git",
         "HIDE_SOURCE_OWNER": False,
         "SUPPORT_SERVER": "",
+
+        #########################
+        ### Sistema de música ###
+        #########################
+        "DEFAULT_SKIN": "default",
+        "VOTE_SKIP_AMOUNT": 3,
+        "IDLE_TIMEOUT": 180,
+        "RUN_RPC_SERVER": True,
+        "RPC_SERVER": "ws://localhost:$PORT/ws",
+        "MAX_USER_FAVS": 10,
+        "USER_FAV_MAX_NAME_LENGTH": 35,
+        "USER_FAV_MAX_URL_LENGTH": 90,
+        "HINT_RATE": 5,
         "YTDLMODE": False,
 
-        ##########################
-        ##### Bot presences: #####
-        ##########################
+        ##############################################
+        ### Sistema de música - Suporte ao spotify ###
+        ##############################################
+        "SPOTIFY_CLIENT_ID": '',
+        "SPOTIFY_CLIENT_SECRET": '',
 
-        "LISTENING_PRESENCES": "",
-        "WATCHING_PRESENCES": "",
-        "PLAYING_PRESENCES": "",
-
-        ##############################
-        ### Local lavalink stuffs: ###
-        ##############################
-
+        ##################################################
+        ### Sistema de música - Local lavalink stuffs: ###
+        ##################################################
         "RUN_LOCAL_LAVALINK": False,
         "LAVALINK_ADDITIONAL_SLEEP": 0,
         "LAVALINK_INITIAL_RAM": 30,
         "LAVALINK_RAM_LIMIT": 120,
         "LAVALINK_CPU_CORES": 2,
-        "LAVALINK_FILE_URL": "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/Lavalink.jar"
+        "LAVALINK_FILE_URL": "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/Lavalink.jar",
+
+        ##########################
+        ##### Bot presences: #####
+        ##########################
+        "LISTENING_PRESENCES": "",
+        "WATCHING_PRESENCES": "",
+        "PLAYING_PRESENCES": "",
     }
 
     for cfg in list(CONFIGS) + ["TOKEN", "MONGO"]:
@@ -95,7 +102,8 @@ def load_config():
         "LAVALINK_CPU_CORES",
         "USER_FAV_MAX_NAME_LENGTH",
         "USER_FAV_MAX_URL_LENGTH",
-        "PRESENCE_INTERVAL"
+        "PRESENCE_INTERVAL",
+        "HINT_RATE"
     ]:
         try:
             CONFIGS[i] = int(CONFIGS[i])

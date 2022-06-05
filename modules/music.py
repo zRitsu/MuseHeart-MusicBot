@@ -2539,6 +2539,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await player.destroy()
             return
 
+        player.process_hint()
+
         await player.invoke_np(force=True if (player.static or not player.loop or not player.is_last_message()) else False, rpc_update=True)
 
 
@@ -2715,7 +2717,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         embed = disnake.Embed(
-            description="**Essa conversa será usada temporariamente para pedir músicas apenas enviando "
+            description="**Esta conversa será usada temporariamente para pedir músicas apenas enviando "
                         "o nome/link sem necessidade de usar comando.**",
             color=self.bot.get_color(thread.guild.me)
         )

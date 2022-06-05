@@ -1,4 +1,5 @@
 import datetime
+import random
 from typing import Union
 
 from ..models import LavalinkPlayer, YTDLPlayer
@@ -34,10 +35,13 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
             icon_url="https://cdn.discordapp.com/attachments/480195401543188483/896013933197013002/pause.png"
         )
 
-    embed.set_footer(
-        text=str(player),
-        icon_url="https://cdn.discordapp.com/attachments/480195401543188483/907119505971486810/speaker-loud-speaker.gif"
-    )
+    if player.current_hint:
+        embed.set_footer(text=f"💡 Dica: {player.current_hint}")
+    else:
+        embed.set_footer(
+            text=str(player),
+            icon_url="https://cdn.discordapp.com/attachments/480195401543188483/907119505971486810/speaker-loud-speaker.gif"
+        )
 
     if player.static:
         queue_size = 20

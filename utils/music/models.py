@@ -1,7 +1,10 @@
 from __future__ import annotations
 import datetime
 import os
+import random
 from functools import partial
+from itertools import cycle
+
 import disnake
 import ctypes.util
 import asyncio
@@ -18,44 +21,6 @@ from yt_dlp import YoutubeDL, utils as ytdlp_utils
 
 if TYPE_CHECKING:
     from ..client import BotCore
-
-ytdlp_utils.bug_reports_message = lambda: ''
-
-audioformats = ["mp3", "ogg", "m4a", "webm", "mp4", "unknown_video"]
-
-YDL_OPTIONS = {
-    'format': 'bestaudio/best',
-    'noplaylist': True,
-    'nocheckcertificate': True,
-    'ignoreerrors': False,
-    'logtostderr': False,
-    'quiet': True,
-    'no_warnings': True,
-    'retries': 5,
-    'extract_flat': 'in_playlist',
-    'cachedir': False,
-    'skip_download': True,
-    'default_search': 'auto',
-    'source_address': '0.0.0.0',
-    'extractor_args': {
-        'youtube': {
-            'skip': [
-                'hls',
-                'dash'
-            ],
-            'player_skip': [
-                'js',
-                'configs',
-                'webpage'
-            ]
-        },
-        'youtubetab': ['webpage']
-    }
-}
-
-filters = {
-    'nightcore': 'aresample=48000,asetrate=48000*1.20'
-}
 
 
 class WavelinkVoiceClient(disnake.VoiceClient):
@@ -243,6 +208,10 @@ class BasePlayer:
         if not requester.guild_permissions.manage_channels:
             self.dj.add(requester)
 
+        self.hints: cycle = []
+        self.current_hint = ""
+        self.setup_hints()
+
         try:
             print(f"Player Iniciado - Servidor: {self.guild.name} [{self.guild.id}]")
         except:
@@ -264,6 +233,23 @@ class BasePlayer:
             return f" [`💠`]({self.message.jump_url})"
         except AttributeError:
             return ""
+
+    def process_hint(self):
+        if random.choice([x for x in range(3)]) == self.bot.config["HINT_RATE"]:
+            self.current_hint = next(self.hints)
+        else:
+            self.current_hint = ""
+
+    def setup_hints(self):
+
+        hints = []
+
+        if not self.static:
+            hints.append("Ao criar uma conversa/thread na mensagem do player, será ativado o modo de song-request "
+                              "nela (possibilitando pedir música apenas enviando o nome/link da música na conversa).")
+
+        random.shuffle(hints)
+        self.hints = cycle(hints)
 
     async def members_timeout(self):
 
@@ -703,15 +689,49 @@ class BasePlayer:
 class YTDLManager:
 
     def __init__(self, *, bot: BotCore):
+
+        ytdlp_utils.bug_reports_message = lambda: ''
+
+        if os.name != "nt":
+            disnake.opus.load_opus(ctypes.util.find_library("opus"))
+
         self.bot = bot
         self.players = {}
         self.nodes = {} # test
         self.identifier = "YoutubeDL"
         self.search = True
-        self.ytdl = YoutubeDL(YDL_OPTIONS)
-
-        if os.name != "nt":
-            disnake.opus.load_opus(ctypes.util.find_library("opus"))
+        self.audioformats = ["mp3", "ogg", "m4a", "webm", "mp4", "unknown_video"]
+        self.ytdl = YoutubeDL(
+            {
+                'format': 'bestaudio/best',
+                'noplaylist': True,
+                'nocheckcertificate': True,
+                'ignoreerrors': False,
+                'logtostderr': False,
+                'quiet': True,
+                'no_warnings': True,
+                'retries': 5,
+                'extract_flat': 'in_playlist',
+                'cachedir': False,
+                'skip_download': True,
+                'default_search': 'auto',
+                'source_address': '0.0.0.0',
+                'extractor_args': {
+                    'youtube': {
+                        'skip': [
+                            'hls',
+                            'dash'
+                        ],
+                        'player_skip': [
+                            'js',
+                            'configs',
+                            'webpage'
+                        ]
+                    },
+                    'youtubetab': ['webpage']
+                }
+            }
+        )
 
     def get_player(self, guild_id: int, *args, **kwargs):
 
@@ -744,7 +764,7 @@ class YTDLManager:
         to_run = partial(self.ytdl.extract_info, url=url, download=False)
         info = await self.bot.loop.run_in_executor(None, to_run)
 
-        track.id = [f for f in info["formats"] if f["ext"] in audioformats][0]["url"]
+        track.id = [f for f in info["formats"] if f["ext"] in self.audioformats][0]["url"]
         return track
 
     async def get_tracks(self, query: str):
@@ -807,6 +827,9 @@ class YTDLPlayer(BasePlayer):
         self.is_stopping = False
         self.node = kwargs.pop('node')
         self.is_closing = False
+        self.filters_dict = {
+            'nightcore': 'aresample=48000,asetrate=48000*1.20'
+        }
 
     def __str__(self) -> str:
         return "YT-DLP Player (Experimental)"
@@ -949,7 +972,7 @@ class YTDLPlayer(BasePlayer):
             self.seek_time = None
 
         if self.nightcore:
-            FFMPEG_OPTIONS['options'] += f" -af \"{filters['nightcore']}\""
+            FFMPEG_OPTIONS['options'] += f" -af \"{self.filters_dict['nightcore']}\""
 
         source = await YTDLSource.source(track.id, ffmpeg_opts=FFMPEG_OPTIONS)
         source.volume = self.volume / 100
