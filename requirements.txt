@@ -1,4 +1,4 @@
-git+https://github.com/DisnakeDev/disnake.git@c5f4456f0fe61f34f36cebdc50cc5c6269c65c39
+git+https://github.com/DisnakeDev/disnake.git@d1e88af8e7aef629466bb47986bfb9223bea0f64
 git+https://github.com/zRitsu/Wavelink.git@28080c316acc739ed3c5f4daf802d7bcb194865e
 python-dotenv
 git+https://github.com/Run1e/asyncspotify.git
