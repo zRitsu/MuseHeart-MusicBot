@@ -1904,6 +1904,17 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         try:
 
+            # readicionado por um tempo
+            if control == "enqueue_fav":
+                await interaction.send(
+                    "**Botão indisponível, use o botão abaixo:**",
+                    components=[
+                        disnake.ui.Button(label="Pedir uma música", custom_id="add_song", emoji="🎶")
+                    ]
+                )
+                return
+
+
             if control == "add_song":
 
                 if not interaction.user.voice:
