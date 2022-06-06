@@ -1924,7 +1924,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                 if favs:
 
-                    favs.append(disnake.SelectOption(label="Não usar", value="not_use", emoji="❌"))
+                    favs.append(disnake.SelectOption(label="Não usar favorito", value="not_use", emoji="❌", default=True))
                     components.append(disnake.ui.Select(placeholder="ou selecione um favorito (opcional)", options=favs, max_values=1))
 
                 await interaction.response.send_modal(
