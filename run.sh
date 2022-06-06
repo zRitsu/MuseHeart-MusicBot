@@ -23,6 +23,8 @@ fi
 
 echo "Iniciando bot (Verifique se o mesmo está online)..."
 
+touch "./.logs/run.log"
+
 python main.py 2>&1 | tee "./.logs/run.log"
 
 sleep 30s
