@@ -321,8 +321,7 @@ class BasePlayer:
         buttons.extend(
             [
                 ["🛑", "stop", "Parar o player"],
-                ["🎶", "add_song", "Pedir uma música"],
-                ["⭐", "enqueue_fav", "Adicionar favorito na fila"]
+                ["🎶", "add_song", "Pedir outra música"]
             ]
         )
 

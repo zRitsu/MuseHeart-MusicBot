@@ -1904,110 +1904,99 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         try:
 
-            if control in ("add_song", "enqueue_fav"):
+            if control == "add_song":
 
                 if not interaction.user.voice:
                     raise GenericError("**Você deve entrar em um canal de voz para usar esse botão.**")
 
-                if control == "add_song":
+                favs = [disnake.SelectOption(label=f, value=f, emoji="<:play:734221719774035968>") for f in (await fav_list(interaction, ""))]
 
-                    await interaction.response.send_modal(
-                        title="Pedir uma música",
-                        custom_id="modal_add_song",
-                        components=[
-                            disnake.ui.TextInput(
-                                style=disnake.TextInputStyle.short,
-                                label="Nome/link da música.",
-                                placeholder="Nome ou link do youtube/spotify/soundcloud etc.",
-                                custom_id="song_input",
-                                max_length=150,
-                            )
-                        ],
+                components = [
+                    disnake.ui.TextInput(
+                        style=disnake.TextInputStyle.short,
+                        label="Nome/link da música.",
+                        placeholder="Nome ou link do youtube/spotify/soundcloud etc.",
+                        custom_id="song_input",
+                        max_length=150,
+                        required=False if favs else True
                     )
+                ]
 
-                    return
+                if favs:
 
-                else:  # enqueue_fav
+                    favs.append(disnake.SelectOption(label="Não usar", value="not_use", emoji="❌"))
+                    components.append(disnake.ui.Select(placeholder="ou selecione um favorito (opcional)", options=favs, max_values=1))
 
-                    kwargs.update(
-                        {
-                            "query": "",
-                            "position": 0,
-                            "options": False,
-                            "manual_selection": True,
-                            "source": "ytsearch",
-                            "repeat_amount": 0,
-                            "hide_playlist": False,
-                            "server": None
-                        }
-                    )
+                await interaction.response.send_modal(
+                    title="Pedir uma música",
+                    custom_id="modal_add_song",
+                    components=components,
+                )
 
-                control = "play"
+                return
 
-            else:
+            try:
+                player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[interaction.guild.id]
+            except KeyError:
+                return
 
-                try:
-                    player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[interaction.guild.id]
-                except KeyError:
-                    return
+            if interaction.message != player.message:
+                return
 
-                if interaction.message != player.message:
-                    return
+            if player.interaction_cooldown:
+                raise GenericError("O player está em cooldown, tente novamente em instantes.")
 
-                if player.interaction_cooldown:
-                    raise GenericError("O player está em cooldown, tente novamente em instantes.")
+            vc = self.bot.get_channel(player.channel_id)
 
-                vc = self.bot.get_channel(player.channel_id)
+            if not vc:
+                self.bot.loop.create_task(player.destroy(force=True))
+                return
 
-                if not vc:
-                    self.bot.loop.create_task(player.destroy(force=True))
-                    return
+            if control == "help":
+                embed = disnake.Embed(
+                    description="📘 **IFORMAÇÕES SOBRE OS BOTÕES** 📘\n\n"
+                                "⏯️ `= Pausar/Retomar a música.`\n"
+                                "⏮️ `= Voltar para a música tocada anteriormente.`\n"
+                                "⏭️ `= Pular para a próxima música.`\n"
+                                "🔀 `= Misturar as músicas da fila.`\n"
+                                "🎶 `= Pedir uma música.`\n"
+                                # "🇳 `= Ativar/Desativar o efeito Nightcore`\n"
+                                "⏹️ `= Parar o player e me desconectar do canal.`\n"
+                                "🔊 `= Ajustar volume.`\n"
+                                "🔁 `= Ativar/Desativar repetição.`\n"
+                                "📑 `= Exibir a fila de música.`\n",
+                    color=self.bot.get_color(interaction.guild.me)
+                )
 
-                if control == "help":
-                    embed = disnake.Embed(
-                        description="📘 **IFORMAÇÕES SOBRE OS BOTÕES** 📘\n\n"
-                                    "⏯️ `= Pausar/Retomar a música.`\n"
-                                    "⏮️ `= Voltar para a música tocada anteriormente.`\n"
-                                    "⏭️ `= Pular para a próxima música.`\n"
-                                    "🔀 `= Misturar as músicas da fila.`\n"
-                                    "🎶 `= Pedir uma música.`\n"
-                                    # "🇳 `= Ativar/Desativar o efeito Nightcore`\n"
-                                    "⏹️ `= Parar o player e me desconectar do canal.`\n"
-                                    "🔊 `= Ajustar volume.`\n"
-                                    "🔁 `= Ativar/Desativar repetição.`\n"
-                                    "📑 `= Exibir a fila de música.`\n",
-                        color=self.bot.get_color(interaction.guild.me)
-                    )
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+                return
 
-                    await interaction.response.send_message(embed=embed, ephemeral=True)
-                    return
+            if not interaction.author.voice or interaction.author.voice.channel != vc:
+                raise GenericError(f"Você deve estar no canal <#{vc.id}> para usar os botões do player.")
 
-                if not interaction.author.voice or interaction.author.voice.channel != vc:
-                    raise GenericError(f"Você deve estar no canal <#{vc.id}> para usar os botões do player.")
+            if control == "volume":
+                kwargs = {"value": None}
 
-                if control == "volume":
-                    kwargs = {"value": None}
+            elif control == "queue":
+                cmd = self.bot.get_slash_command("queue").children.get("show")
 
-                elif control == "queue":
-                    cmd = self.bot.get_slash_command("queue").children.get("show")
+            elif control == "shuffle":
+                cmd = self.bot.get_slash_command("queue").children.get("shuffle")
 
-                elif control == "shuffle":
-                    cmd = self.bot.get_slash_command("queue").children.get("shuffle")
+            elif control == "seek":
+                kwargs = {"position": None}
 
-                elif control == "seek":
-                    kwargs = {"position": None}
+            elif control == "playpause":
+                control = "pause" if not player.paused else "resume"
 
-                elif control == "playpause":
-                    control = "pause" if not player.paused else "resume"
+            elif control == "loop_mode":
 
-                elif control == "loop_mode":
-
-                    if player.loop == "current":
-                        kwargs['mode'] = 'queue'
-                    elif player.loop == "queue":
-                        kwargs['mode'] = 'off'
-                    else:
-                        kwargs['mode'] = 'current'
+                if player.loop == "current":
+                    kwargs['mode'] = 'queue'
+                elif player.loop == "queue":
+                    kwargs['mode'] = 'off'
+                else:
+                    kwargs['mode'] = 'current'
 
             try:
                 await self.player_interaction_concurrency.acquire(interaction)
@@ -2045,6 +2034,18 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         try:
 
             query = inter.text_values["song_input"]
+
+            if not query:
+
+                try:
+                    query = inter.data['components'][1]['components'][0]['values']
+                    if not query:
+                        raise GenericError("Você deve adicionar o nome de uma música ou ter/escolher um favorito")
+
+                    query = f"> fav: {query[0]}"
+
+                except (KeyError, IndexError):
+                    pass
 
             kwargs = {
                 "query": query,
@@ -2136,9 +2137,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                         color=self.bot.get_color(message.guild.me)
                     ),
                     components=[
-                        disnake.ui.Button(emoji="🎶", custom_id="musicplayer_add_song", label="Pedir uma música"),
-                        disnake.ui.Button(emoji="⭐", custom_id="musicplayer_enqueue_fav",
-                                          label="Adicionar favorito na fila")
+                        disnake.ui.Button(emoji="🎶", custom_id="musicplayer_add_song", label="Pedir uma música")
                     ],
                     delete_after=20
                 )
