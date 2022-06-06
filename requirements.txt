@@ -1,4 +1,4 @@
-disnake==2.5.1
+git+https://github.com/DisnakeDev/disnake.git@c5f4456f0fe61f34f36cebdc50cc5c6269c65c39
 git+https://github.com/zRitsu/Wavelink.git@28080c316acc739ed3c5f4daf802d7bcb194865e
 python-dotenv
 git+https://github.com/Run1e/asyncspotify.git
