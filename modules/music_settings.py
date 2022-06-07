@@ -91,15 +91,14 @@ class MusicSettings(commands.Cog):
             )
         }
 
-        channel = await target.create_text_channel(
-            f"{self.bot.user.name} player controller",
-            overwrites=perms
-        )
+        channel = await target.create_text_channel(f"{self.bot.user.name} player controller", overwrites=perms)
+
+        message = await send_idle_embed(channel, bot=self.bot)
 
         try:
             player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild_id]
         except KeyError:
-            message = await send_idle_embed(channel, bot=self.bot)
+            pass
         else:
             try:
                 await player.message.delete()
@@ -108,9 +107,9 @@ class MusicSettings(commands.Cog):
                 pass
             player.static = True
             player.text_channel = channel
+            player.message = message
             player.process_hint()
             await player.invoke_np(force=True)
-            message = player.message
 
         await message.create_thread(name="song requests")
 
