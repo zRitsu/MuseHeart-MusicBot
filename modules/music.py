@@ -1990,7 +1990,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 kwargs = {"position": None}
 
             elif control == PlayerControls.pause_resume:
-                control = "pause" if not player.paused else "resume"
+                control = "musicplayer_pause" if not player.paused else "musicplayer_resume"
 
             elif control == PlayerControls.loop_mode:
 
