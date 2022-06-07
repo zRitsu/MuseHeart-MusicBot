@@ -57,6 +57,25 @@ class ProgressBar:
         self.end = int(bar_count - self.start) - 1
 
 
+class PlayerControls:
+    add_song = "musicplayer_add_song"
+    enqueue_fav = "musicplayer_enqueue_fav"
+    play = "musicplayer_play"
+    stop = "musicplayer_stop"
+    pause_resume = "musicplayer_playpause"
+    pause = "musicplayer_pause"
+    resume = "musicplayer_resume"
+    back = "musicplayer_back"
+    skip = "musicplayer_skip"
+    volume = "musicplayer_volume"
+    shuffle = "musicplayer_shuffle"
+    seek = "musicplayer_seek"
+    loop_mode = "musicplayer_loop_mode"
+    queue = "musicplayer_queue"
+    nightcore = "musicplayer_nightcore"
+    help_button = "musicplayer_help"
+
+
 class EmbedPaginator(disnake.ui.View):
 
     def __init__(self, ctx: Union[CustomContext, disnake.MessageInteraction], embeds: list[disnake.Embed], *,timeout=180):
@@ -207,7 +226,7 @@ async def send_idle_embed(target: Union[disnake.Message, disnake.TextChannel, di
     components = [
         disnake.ui.Button(
             emoji="🎶",
-            custom_id="musicplayer_add_song",
+            custom_id=PlayerControls.add_song,
             style=disnake.ButtonStyle.grey,
             label="Pedir uma música."
         )

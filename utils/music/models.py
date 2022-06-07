@@ -11,7 +11,7 @@ import wavelink
 from urllib import parse
 from .converters import fix_characters, time_format, get_button_style
 from .filters import AudioFilter
-from ..others import send_idle_embed
+from ..others import send_idle_embed, PlayerControls
 from .spotify import SpotifyTrack
 import traceback
 from collections import deque
@@ -20,23 +20,6 @@ from yt_dlp import YoutubeDL, utils as ytdlp_utils
 
 if TYPE_CHECKING:
     from ..client import BotCore
-
-
-class PlayerControls:
-    add_song = "musicplayer_add_song"
-    enqueue_fav = "musicplayer_enqueue_fav"
-    play = "musicplayer_play"
-    stop = "musicplayer_stop"
-    pause_resume = "musicplayer_playpause"
-    back = "musicplayer_back"
-    skip = "musicplayer_skip"
-    volume = "musicplayer_volume"
-    shuffle = "musicplayer_shuffle"
-    seek = "musicplayer_seek"
-    loop_mode = "musicplayer_loop_mode"
-    queue = "musicplayer_queue"
-    nightcore = "musicplayer_nightcore"
-    help_button = "musicplayer_help"
 
 
 class WavelinkVoiceClient(disnake.VoiceClient):

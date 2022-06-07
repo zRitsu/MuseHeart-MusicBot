@@ -12,12 +12,12 @@ from utils.music.errors import GenericError, MissingVoicePerms
 from utils.music.spotify import SpotifyPlaylist, process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, \
     can_send_message, check_requester_channel
-from utils.music.models import LavalinkPlayer, LavalinkTrack, YTDLTrack, YTDLPlayer, YTDLManager, PlayerControls
+from utils.music.models import LavalinkPlayer, LavalinkTrack, YTDLTrack, YTDLPlayer, YTDLManager
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist, \
     node_suggestions, fav_add_autocomplete, fav_list, queue_track_index
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
-from utils.others import check_cmd, send_idle_embed, CustomContext
+from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls
 from user_agent import generate_user_agent
 
 PlayOpts = commands.option_enum(
@@ -1990,7 +1990,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 kwargs = {"position": None}
 
             elif control == PlayerControls.pause_resume:
-                control = "musicplayer_pause" if not player.paused else "musicplayer_resume"
+                control = PlayerControls.pause if not player.paused else PlayerControls.resume
 
             elif control == PlayerControls.loop_mode:
 
