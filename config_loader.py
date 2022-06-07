@@ -32,7 +32,7 @@ def load_config():
         ### Sistema de música ###
         #########################
         "DEFAULT_SKIN": "default",
-        "VOTE_SKIP_AMOUNT": 5,
+        "VOTE_SKIP_AMOUNT": 3,
         "IDLE_TIMEOUT": 180,
         "RUN_RPC_SERVER": True,
         "RPC_SERVER": "ws://localhost:$PORT/ws",
