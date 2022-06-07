@@ -198,16 +198,11 @@ class ErrorHandler(commands.Cog):
 
         embed.add_field(name="Log:", value=inter.message.embeds[0].description)
 
-        try:
-            await inter.message.delete()
-        except:
-            pass
-
-        await inter.send(
+        await inter.response.edit_message(
             embed=disnake.Embed(
                 description="**Erro reportado com sucesso!**",
                 color=self.bot.get_color(inter.guild.me)
-            ), ephemeral=True
+            ), view=None
         )
 
         try:
