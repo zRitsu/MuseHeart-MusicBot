@@ -170,11 +170,11 @@ class ErrorHandler(commands.Cog):
             return
 
         if not inter.message.embeds:
-            await inter.send(
+            await inter.response.edit_message(
                 embed=disnake.Embed(
                     title="A embed da mensagem foi removida!",
                     description=inter.text_values["error_details"]
-                ), ephemeral=True
+                )
             )
             return
 
