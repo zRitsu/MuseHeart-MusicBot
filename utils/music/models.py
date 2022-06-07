@@ -383,7 +383,7 @@ class BasePlayer:
             self.command_log = msg
         else:
             embed = disnake.Embed(description=msg, color=self.bot.get_color(self.guild.me))
-            self.bot.loop.create_task(self.text_channel.send(embed=embed))
+            self.bot.loop.create_task(self.text_channel.send(embed=embed, delete_after=120))
 
         self.bot.loop.create_task(self.destroy())
 
