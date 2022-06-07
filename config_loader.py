@@ -32,14 +32,14 @@ def load_config():
         ### Sistema de música ###
         #########################
         "DEFAULT_SKIN": "default",
-        "VOTE_SKIP_AMOUNT": 3,
+        "VOTE_SKIP_AMOUNT": 5,
         "IDLE_TIMEOUT": 180,
         "RUN_RPC_SERVER": True,
         "RPC_SERVER": "ws://localhost:$PORT/ws",
         "MAX_USER_FAVS": 10,
         "USER_FAV_MAX_NAME_LENGTH": 35,
         "USER_FAV_MAX_URL_LENGTH": 90,
-        "HINT_RATE": 5,
+        "HINT_RATE": 4,
         "YTDLMODE": False,
 
         ##############################################

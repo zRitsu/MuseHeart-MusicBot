@@ -235,7 +235,7 @@ class BasePlayer:
             return ""
 
     def process_hint(self):
-        if random.choice([x for x in range(3)]) == self.bot.config["HINT_RATE"]:
+        if random.choice([x for x in range(self.bot.config["HINT_RATE"])]) == 0:
             self.current_hint = next(self.hints)
         else:
             self.current_hint = ""
@@ -243,7 +243,7 @@ class BasePlayer:
     def setup_hints(self):
 
         hints = [
-            "Clique no botão [🎶] para pedir uma música ou adicionar um link de música/playlist ou favorito na fila."
+            "Você também pode clicar no botão [🎶] para pedir uma música ou adicionar um link de música/playlist ou favorito na fila."
         ]
 
         if not self.static:
