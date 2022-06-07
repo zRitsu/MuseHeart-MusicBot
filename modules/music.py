@@ -1923,9 +1923,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 ]
 
                 if favs:
-
-                    favs.append(disnake.SelectOption(label="Não usar favorito", value="not_use", emoji="❌", default=True))
-                    components.append(disnake.ui.Select(placeholder="ou selecione um favorito (opcional)", options=favs, max_values=1))
+                    components.append(
+                        disnake.ui.Select(
+                            placeholder="ou selecione um favorito (opcional)",
+                            options=favs, min_values=0, max_values=1
+                        )
+                    )
 
                 await interaction.response.send_modal(
                     title="Pedir uma música",
@@ -2039,7 +2042,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                 try:
                     query = inter.data['components'][1]['components'][0]['values']
-                    if not query or query[0] == "not_use":
+                    if not query:
                         raise GenericError("Você deve adicionar o nome de uma música ou ter/escolher um favorito")
 
                     query = f"> fav: {query[0]}"
