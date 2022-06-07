@@ -242,7 +242,9 @@ class BasePlayer:
 
     def setup_hints(self):
 
-        hints = []
+        hints = [
+            "Clique no botão [🎶] para pedir uma música ou adicionar um link de música/playlist ou favorito na fila."
+        ]
 
         if not self.static:
             hints.append("Ao criar uma conversa/thread na mensagem do player, será ativado o modo de song-request "
