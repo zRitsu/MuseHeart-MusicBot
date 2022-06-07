@@ -2007,7 +2007,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 raise GenericError("**Você tem uma interação em aberto!**\n`Se for uma mensagem oculta, evite clicar em \"ignorar\".`")
 
             if not cmd:
-                cmd = self.bot.get_slash_command(control)
+                cmd = self.bot.get_slash_command(control[12:])
 
             await self.process_player_interaction(
                 interaction = interaction,
