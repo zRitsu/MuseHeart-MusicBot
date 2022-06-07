@@ -174,7 +174,7 @@ class ErrorHandler(commands.Cog):
                 embed=disnake.Embed(
                     title="A embed da mensagem foi removida!",
                     description=inter.text_values["error_details"]
-                )
+                ), view=None
             )
             return
 
