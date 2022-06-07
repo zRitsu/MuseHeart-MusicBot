@@ -169,13 +169,7 @@ class ErrorHandler(commands.Cog):
         if not inter.custom_id.startswith("error_report_submit"):
             return
 
-        try:
-            original_message = await inter.channel.fetch_message(int(inter.custom_id[20:]))
-        except (disnake.Forbidden, disnake.HTTPException):
-            await inter.send("A Mensagem original foi deletada ou está inacessível.", ephemeral=True)
-            return
-
-        if not original_message.embeds:
+        if not inter.message.embeds:
             await inter.send(
                 embed=disnake.Embed(
                     title="A embed da mensagem foi removida!",
@@ -202,9 +196,12 @@ class ErrorHandler(commands.Cog):
             title="Report de erro"
         )
 
-        embed.add_field(name="Log:", value=original_message.embeds[0].description)
+        embed.add_field(name="Log:", value=inter.message.embeds[0].description)
 
-        await original_message.delete()
+        try:
+            await inter.message.delete()
+        except:
+            pass
 
         await inter.send(
             embed=disnake.Embed(
