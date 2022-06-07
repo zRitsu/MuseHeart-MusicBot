@@ -4,7 +4,6 @@ import os
 import random
 from functools import partial
 from itertools import cycle
-
 import disnake
 import ctypes.util
 import asyncio
@@ -21,6 +20,23 @@ from yt_dlp import YoutubeDL, utils as ytdlp_utils
 
 if TYPE_CHECKING:
     from ..client import BotCore
+
+
+class PlayerControls:
+    add_song = "musicplayer_add_song"
+    enqueue_fav = "musicplayer_enqueue_fav"
+    play = "musicplayer_play"
+    stop = "musicplayer_stop"
+    pause_resume = "musicplayer_playpause"
+    back = "musicplayer_back"
+    skip = "musicplayer_skip"
+    volume = "musicplayer_volume"
+    shuffle = "musicplayer_shuffle"
+    seek = "musicplayer_seek"
+    loop_mode = "musicplayer_loop_mode"
+    queue = "musicplayer_queue"
+    nightcore = "musicplayer_nightcore"
+    help_button = "musicplayer_help"
 
 
 class WavelinkVoiceClient(disnake.VoiceClient):
@@ -322,15 +338,15 @@ class BasePlayer:
 
         buttons.extend(
             [
-                ["🛑", "stop", "Parar o player"],
-                ["🎶", "add_song", "Pedir outra música"]
+                ["🛑", PlayerControls.stop, "Parar o player"],
+                ["🎶", PlayerControls.add_song, "Pedir outra música"]
             ]
         )
 
         components = [
             disnake.ui.Button(
                 emoji=button[0],
-                custom_id=f"musicplayer_{button[1]}",
+                custom_id=button[1],
                 style=disnake.ButtonStyle.grey,
             ) for button in buttons
         ]
@@ -394,22 +410,22 @@ class BasePlayer:
         components = []
 
         controls = {
-            "⏯️": ("playpause", get_button_style(self.paused),),
-            "⏮️": ("back",),
-            "⏭️": ("skip",),
-            "🔀": ("shuffle",),
+            "⏯️": (PlayerControls.pause_resume, get_button_style(self.paused),),
+            "⏮️": (PlayerControls.back,),
+            "⏭️": (PlayerControls.skip,),
+            "🔀": (PlayerControls.shuffle,),
             # "🇳": ("nightcore", get_button_style(self.nightcore, red=False),),
-            "🎶": ("add_song",),
-            "⏹️": ("stop",),
+            "🎶": (PlayerControls.add_song,),
+            "⏹️": (PlayerControls.stop,),
             ("🔂" if self.loop == "current" else "🔁"): (
-                "loop_mode",
+                PlayerControls.loop_mode,
                 disnake.ButtonStyle.grey if not self.loop
                 else disnake.ButtonStyle.blurple
                 if self.loop == "current" else disnake.ButtonStyle.green,
             ),
-            "🔊": ("volume",),
-            "📑": ('queue',),
-            "<:help:947781412017279016>": ("help",)
+            "🔊": (PlayerControls.volume,),
+            "📑": (PlayerControls.queue,),
+            "<:help:947781412017279016>": (PlayerControls.help_button,)
         }
 
         for button, control in controls.items():
@@ -418,7 +434,7 @@ class BasePlayer:
                 style = control[1]
             except IndexError:
                 style = disnake.ButtonStyle.grey
-            components.append(disnake.ui.Button(emoji=button, custom_id=f"musicplayer_{control[0]}", style=style))
+            components.append(disnake.ui.Button(emoji=button, custom_id=control[0], style=style))
 
         if self.message and (self.ignore_np_once or self.has_thread or self.static or not force or self.is_last_message()):
 

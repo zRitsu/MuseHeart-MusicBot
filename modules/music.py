@@ -12,7 +12,7 @@ from utils.music.errors import GenericError, MissingVoicePerms
 from utils.music.spotify import SpotifyPlaylist, process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, \
     can_send_message, check_requester_channel
-from utils.music.models import LavalinkPlayer, LavalinkTrack, YTDLTrack, YTDLPlayer, YTDLManager
+from utils.music.models import LavalinkPlayer, LavalinkTrack, YTDLTrack, YTDLPlayer, YTDLManager, PlayerControls
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist, \
     node_suggestions, fav_add_autocomplete, fav_list, queue_track_index
@@ -1896,15 +1896,15 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await interaction.send("Ainda estou inicializando...", ephemeral=True)
             return
 
-        control = interaction.data.custom_id[12:]
-
         kwargs = {}
 
         cmd: Optional[disnake.AppCmdInter] = None
 
+        control = interaction.data.custom_id
+
         try:
 
-            if control in ("add_song", "enqueue_fav"):
+            if control in (PlayerControls.add_song, PlayerControls.enqueue_fav):
 
                 if not interaction.user.voice:
                     raise GenericError("**Você deve entrar em um canal de voz para usar esse botão.**")
@@ -1955,7 +1955,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 self.bot.loop.create_task(player.destroy(force=True))
                 return
 
-            if control == "help":
+            if control == PlayerControls.help_button:
                 embed = disnake.Embed(
                     description="📘 **IFORMAÇÕES SOBRE OS BOTÕES** 📘\n\n"
                                 "⏯️ `= Pausar/Retomar a música.`\n"
@@ -1977,22 +1977,22 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             if not interaction.author.voice or interaction.author.voice.channel != vc:
                 raise GenericError(f"Você deve estar no canal <#{vc.id}> para usar os botões do player.")
 
-            if control == "volume":
+            if control == PlayerControls.volume:
                 kwargs = {"value": None}
 
-            elif control == "queue":
+            elif control == PlayerControls.queue:
                 cmd = self.bot.get_slash_command("queue").children.get("show")
 
-            elif control == "shuffle":
+            elif control == PlayerControls.shuffle:
                 cmd = self.bot.get_slash_command("queue").children.get("shuffle")
 
-            elif control == "seek":
+            elif control == PlayerControls.seek:
                 kwargs = {"position": None}
 
-            elif control == "playpause":
+            elif control == PlayerControls.pause_resume:
                 control = "pause" if not player.paused else "resume"
 
-            elif control == "loop_mode":
+            elif control == PlayerControls.loop_mode:
 
                 if player.loop == "current":
                     kwargs['mode'] = 'queue'
@@ -2140,7 +2140,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                         color=self.bot.get_color(message.guild.me)
                     ),
                     components=[
-                        disnake.ui.Button(emoji="🎶", custom_id="musicplayer_add_song", label="Pedir uma música")
+                        disnake.ui.Button(emoji="🎶", custom_id=PlayerControls.add_song, label="Pedir uma música")
                     ],
                     delete_after=20
                 )
