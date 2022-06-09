@@ -1995,7 +1995,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                                for f in (await fav_list(interaction, ""))
                             ] or [
                                 disnake.SelectOption(
-                                    label="Você não possui favoritos...", value="no_fav",
+                                    label="Você não possui favoritos...", value="no_fav", emoji="⚠️",
                                     description="Adicione um usando o comando: /fav add"
                                 )
                             ], min_values=0, max_values=1
