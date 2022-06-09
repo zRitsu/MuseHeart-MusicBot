@@ -205,8 +205,8 @@ class Owner(commands.Cog):
 
                 if view.selected:
                     embed.description = "**Instalando dependências...**"
-                    await view.interaction_resp.response.edit_message(embed=embed)
-                    run_command_old("pip3 install -U -r requirements.txt")
+                    await view.interaction_resp.response.edit_message(embed=embed, view=None)
+                    await run_command("pip3 install -U -r requirements.txt")
 
                 try:
                     await (await view.interaction_resp.original_message()).delete()
