@@ -37,6 +37,9 @@ class FavManager(commands.Cog):
         if len(name) > (max_name_chars:=self.bot.config["USER_FAV_MAX_NAME_LENGTH"]):
             raise GenericError(f"**Quantidade máxima de caracteres permitidos no nome: {max_name_chars}**")
 
+        if "> fav:" in name.lower():
+            raise GenericError("Você não pode adicionar um favorito incluindo esse nome: **> fav:**")
+
         if len(url) > (max_url_chars:=self.bot.config["USER_FAV_MAX_URL_LENGTH"]):
             raise GenericError(f"**Quantidade máxima de caracteres permitidos no link: {max_url_chars}**")
 
@@ -75,6 +78,9 @@ class FavManager(commands.Cog):
 
         if not name and not url:
             raise GenericError("**Você não especificou nenhum dos itens opcionais: novo_nome e novo_link.**")
+
+        if "> fav:" in name.lower():
+            raise GenericError("Você não deve incluir esse nome no favorito: **> fav:**")
 
         if len(name) > (max_name_chars:=self.bot.config["USER_FAV_MAX_NAME_LENGTH"]):
             raise GenericError(f"**Quantidade máxima de caracteres permitidos no nome: {max_name_chars}**")
@@ -187,7 +193,6 @@ class FavManager(commands.Cog):
         if not file.filename.endswith(".json"):
             raise GenericError("**Tipo de arquivo inválido!**")
 
-
         await inter.response.defer(ephemeral=True)
 
         try:
@@ -197,7 +202,10 @@ class FavManager(commands.Cog):
             raise GenericError("**Ocorreu um erro ao ler o arquivo, por favor revise-o e use o comando novamente.**\n"
                                f"```py\n{repr(e)}```")
 
-        for url in json_data.values():
+        for name, url in json_data.items():
+
+            if "> fav:" in name.lower():
+                continue
 
             if len(url) > (max_url_chars := self.bot.config["USER_FAV_MAX_URL_LENGTH"]):
                 raise GenericError(f"**Um item de seu arquivo {url} ultrapassa a quantidade de caracteres permitido:{max_url_chars}**")

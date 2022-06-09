@@ -53,6 +53,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         self.song_request_cooldown = commands.CooldownMapping.from_cooldown(rate=1, per=300, type=commands.BucketType.member)
 
+        self.music_settings_cooldown = commands.CooldownMapping.from_cooldown(rate=3, per=15, type=commands.BucketType.guild)
+
 
     """@check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
@@ -1904,36 +1906,101 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         try:
 
-            if control in (PlayerControls.add_song, PlayerControls.enqueue_fav):
+            if control in (
+                PlayerControls.add_song,
+                PlayerControls.enqueue_fav,
+                PlayerControls.settings
+            ):
 
                 if not interaction.user.voice:
                     raise GenericError("**Você deve entrar em um canal de voz para usar esse botão.**")
 
-                favs = [disnake.SelectOption(label=f, value=f, emoji="<:play:734221719774035968>") for f in (await fav_list(interaction, ""))]
 
-                components = [
-                    disnake.ui.TextInput(
-                        style=disnake.TextInputStyle.short,
-                        label="Nome/link da música.",
-                        placeholder="Nome ou link do youtube/spotify/soundcloud etc.",
-                        custom_id="song_input",
-                        max_length=150,
-                        required=False if favs else True
-                    )
-                ]
+                if control == PlayerControls.settings:
 
-                if favs:
-                    components.append(
-                        disnake.ui.Select(
-                            placeholder="ou selecione um favorito (opcional)",
-                            options=favs, min_values=0, max_values=1
-                        )
+                    try:
+                        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[interaction.guild.id]
+                    except KeyError:
+                        await interaction.send("Não há player ativo no servidor...", ephemeral=True)
+                        return
+
+                    vol_opts = []
+
+                    for l in [5, 20, 40, 60, 80, 100, 120, 150]:
+                        if l == player.volume:
+                            continue
+                        if l > 100:
+                            description = "Acima de 100% o audio pode ficar bem ruim."
+                        else:
+                            description = None
+                        vol_opts.append(disnake.SelectOption(emoji="🔊", label=f"Volume: {l}%", value=f"vol_{l}", description=description))
+
+                    await interaction.response.send_modal(
+                        title="Ajustar Player",
+                        custom_id="musicplayer_settings",
+                        components=[
+                            disnake.ui.Select(
+                                placeholder="Volume:", options=vol_opts, min_values=0
+                            ),
+                            disnake.ui.Select(
+                                placeholder="Efeito Nightcore:", min_values=0,
+                                options=[
+                                    disnake.SelectOption(emoji="🇳", label="Nightcore: Ativar", value="nightcore_on"),
+                                    disnake.SelectOption(emoji="❌", label="Nightcore: Desativar", value="nightcore_off")
+                                ]
+                            ),
+                            disnake.ui.Select(
+                                placeholder="Loop/Repetição:", min_values=0,
+                                options=[
+                                    disnake.SelectOption(emoji="🔂", label="Loop: Música Atual", value="current"),
+                                    disnake.SelectOption(emoji="🔁", label="Loop: Fila", value="queue"),
+                                    disnake.SelectOption(emoji="❌", label="Loop: Desativar", value="off"),
+                                ]
+                            ),
+                            disnake.ui.Select(
+                                placeholder="Modo Restrito:", min_values=0,
+                                options=[
+                                    disnake.SelectOption(
+                                        emoji="🔐", label="Modo restrito: Ativar", value="restrict_on",
+                                        description="Apenas DJ's/Staff's podem usar comandos restritos."
+                                    ),
+                                    disnake.SelectOption(
+                                        emoji="🔓", label="Modo restrito: Desativar", value="restrict_off",
+                                        description="Membros podem usar comandos sem restrição."
+                                    )
+                                ]
+                            )
+                        ]
                     )
+
+                    return
 
                 await interaction.response.send_modal(
                     title="Pedir uma música",
                     custom_id="modal_add_song",
-                    components=components,
+                    components=[
+                        disnake.ui.TextInput(
+                            style=disnake.TextInputStyle.short,
+                            label="Nome/link da música.",
+                            placeholder="Nome ou link do youtube/spotify/soundcloud etc.",
+                            custom_id="song_input",
+                            max_length=150,
+                            required=False
+                        ),
+                        disnake.ui.Select(
+                            placeholder="ou selecione um favorito (opcional)",
+                            options=[
+                               disnake.SelectOption(
+                                   label=f, value=f"> fav: {f}", emoji="<:play:734221719774035968>")
+                               for f in (await fav_list(interaction, ""))
+                            ] or [
+                                disnake.SelectOption(
+                                    label="Você não possui favoritos...", value="no_fav",
+                                    description="Adicione um usando o comando: /fav add"
+                                )
+                            ], min_values=0, max_values=1
+                        )
+                    ]
                 )
 
                 return
@@ -1962,12 +2029,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                                 "⏮️ `= Voltar para a música tocada anteriormente.`\n"
                                 "⏭️ `= Pular para a próxima música.`\n"
                                 "🔀 `= Misturar as músicas da fila.`\n"
-                                "🎶 `= Pedir uma música.`\n"
-                                # "🇳 `= Ativar/Desativar o efeito Nightcore`\n"
+                                "🎶 `= Adicionar música/playlist/favorito.`\n"
                                 "⏹️ `= Parar o player e me desconectar do canal.`\n"
-                                "🔊 `= Ajustar volume.`\n"
-                                "🔁 `= Ativar/Desativar repetição.`\n"
-                                "📑 `= Exibir a fila de música.`\n",
+                                "📑 `= Exibir a fila de música.`\n"
+                                "🛠️ `= Alterar algumas configurações do player:`\n"
+                                "`volume / efeito nightcore / repetição / modo restrito.`\n",
                     color=self.bot.get_color(interaction.guild.me)
                 )
 
@@ -2031,43 +2097,121 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.Cog.listener("on_modal_submit")
     async def song_request_modal(self, inter: disnake.ModalInteraction):
 
-        if inter.custom_id != "modal_add_song":
-            return
+        if inter.custom_id == PlayerControls.settings:
 
-        try:
+            try:
+                player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
+            except KeyError:
+                await inter.send("Não há player ativo no momento...", ephemeral=True)
+                return
 
-            query = inter.text_values["song_input"]
+            retry_after = self.music_settings_cooldown.get_bucket(inter).update_rate_limit()
 
-            if not query:
+            if retry_after:
+                await inter.send(f"Você deve aguardar **{time_format(retry_after * 1000, use_names=True)}** "
+                                       "para usar este botão novamente...", ephemeral=True)
+                return
 
-                try:
+            txt = []
+
+            try:
+                volume = inter.data['components'][0]['components'][0]['values'][0]
+            except IndexError:
+                pass
+            else:
+                vol_int = int(volume[4:])
+                await player.set_volume(vol_int)
+                txt.append(f"`volume: {vol_int}%`")
+
+            try:
+                nightcore = inter.data['components'][1]['components'][0]['values'][0]
+            except IndexError:
+                pass
+            else:
+                if not player.nightcore and nightcore == "nightcore_on":
+                    await player.set_timescale(pitch=1.2, speed=1.1)
+                    player.nightcore = True
+                    txt.append("`ativou nightcore`")
+                elif player.nightcore and nightcore == "nightcore_off":
+                    try:
+                        del player.filters["timescale"]
+                    except:
+                        pass
+                    await player.update_filters()
+                    player.nightcore = False
+                    txt.append("`desativou nightcore`")
+
+            try:
+                loop = inter.data['components'][2]['components'][0]['values'][0]
+            except IndexError:
+                pass
+            else:
+                if loop == "off" and player.loop:
+                    player.loop = False
+                    txt.append("`desativou repetição`")
+                elif loop != player.loop:
+                    player.loop = loop
+                    txt.append("`repetição: música atual`" if loop == "current" else "`repetição: fila`")
+
+            try:
+                restrict_mode = inter.data['components'][3]['components'][0]['values'][0].endswith("_on")
+            except IndexError:
+                pass
+            else:
+                if player.restrict_mode != restrict_mode:
+                    player.restrict_mode = restrict_mode
+                    txt.append("`modo restrito: ativado`" if restrict_mode else "`modo restrito: desativado`")
+
+            if not txt:
+                await inter.send("Nenhum ajuste foi realizado.\n"
+                                 "`Nota: Talvez o player já esteja com as configurações selecionadas.`", ephemeral=True)
+                return
+
+            txt = " | ".join(t for t in txt)
+
+            player.set_command_log(text=f"{inter.author.mention} fez ajustes no player: {txt}", emoji="🛠️")
+
+            player.update = True
+
+            await inter.send(
+                embed=disnake.Embed(
+                    color=self.bot.get_color(inter.guild.me),
+                    description=f"**Ajustes realizados:**\n{txt}"
+                ), ephemeral=True)
+
+
+        elif inter.custom_id == "modal_add_song":
+
+            try:
+
+                query = inter.text_values["song_input"]
+
+                if not query:
+
                     query = inter.data['components'][1]['components'][0]['values']
-                    if not query:
+                    if not query or not query[0].startswith("> fav: "):
                         raise GenericError("Você deve adicionar o nome de uma música ou ter/escolher um favorito")
 
-                    query = f"> fav: {query[0]}"
+                    query = query[0]
 
-                except (KeyError, IndexError):
-                    pass
+                kwargs = {
+                    "query": query,
+                    "position": 0,
+                    "options": False,
+                    "manual_selection": True,
+                    "source": "ytsearch",
+                    "repeat_amount": 0,
+                    "hide_playlist": False,
+                    "server": None
+                }
 
-            kwargs = {
-                "query": query,
-                "position": 0,
-                "options": False,
-                "manual_selection": True,
-                "source": "ytsearch",
-                "repeat_amount": 0,
-                "hide_playlist": False,
-                "server": None
-            }
-
-            await self.process_player_interaction(
-                interaction=inter,
-                command=self.bot.get_slash_command("play"),
-                kwargs=kwargs,
-            )
-        except Exception as e:
-            self.bot.dispatch('interaction_player_error', inter, e)
+                await self.process_player_interaction(
+                    interaction=inter,
+                    command=self.bot.get_slash_command("play"),
+                    kwargs=kwargs,
+                )
+            except Exception as e:
+                self.bot.dispatch('interaction_player_error', inter, e)
 
 
     @commands.Cog.listener("on_song_request")

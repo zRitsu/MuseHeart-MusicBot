@@ -397,18 +397,10 @@ class BasePlayer:
             "⏮️": (PlayerControls.back,),
             "⏭️": (PlayerControls.skip,),
             "🔀": (PlayerControls.shuffle,),
-            # "🇳": ("nightcore", get_button_style(self.nightcore, red=False),),
             "🎶": (PlayerControls.add_song,),
             "⏹️": (PlayerControls.stop,),
-            ("🔂" if self.loop == "current" else "🔁"): (
-                PlayerControls.loop_mode,
-                disnake.ButtonStyle.grey if not self.loop
-                else disnake.ButtonStyle.blurple
-                if self.loop == "current" else disnake.ButtonStyle.green,
-            ),
-            "🔊": (PlayerControls.volume,),
             "📑": (PlayerControls.queue,),
-            "<:help:947781412017279016>": (PlayerControls.help_button,)
+            "🛠️": (PlayerControls.settings,)
         }
 
         for button, control in controls.items():
@@ -418,6 +410,14 @@ class BasePlayer:
             except IndexError:
                 style = disnake.ButtonStyle.grey
             components.append(disnake.ui.Button(emoji=button, custom_id=control[0], style=style))
+
+        components.append(
+            disnake.ui.Button(
+                emoji="<:help:947781412017279016>",
+                custom_id=PlayerControls.help_button,
+                label="menu de ajuda"
+            )
+        )
 
         if self.message and (self.ignore_np_once or self.has_thread or self.static or not force or self.is_last_message()):
 

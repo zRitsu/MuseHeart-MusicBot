@@ -73,6 +73,7 @@ class PlayerControls:
     loop_mode = "musicplayer_loop_mode"
     queue = "musicplayer_queue"
     nightcore = "musicplayer_nightcore"
+    settings = "musicplayer_settings"
     help_button = "musicplayer_help"
 
 
