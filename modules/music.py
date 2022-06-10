@@ -38,9 +38,6 @@ SearchSource = commands.option_enum(
 u_agent = generate_user_agent()
 
 
-desc_prefix = "🎶 [Música] 🎶 | "
-
-
 class Music(commands.Cog, wavelink.WavelinkMixin):
 
     def __init__(self, bot: BotCore):
@@ -54,6 +51,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         self.song_request_cooldown = commands.CooldownMapping.from_cooldown(rate=1, per=300, type=commands.BucketType.member)
 
         self.music_settings_cooldown = commands.CooldownMapping.from_cooldown(rate=3, per=15, type=commands.BucketType.guild)
+
+    desc_prefix = "🎶 [Música] 🎶 | "
 
 
     """@check_voice()

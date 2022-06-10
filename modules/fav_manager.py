@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 import disnake
 from disnake.ext import commands
 from typing import TYPE_CHECKING
@@ -11,13 +10,13 @@ import json
 if TYPE_CHECKING:
     from utils.client import BotCore
 
-desc_prefix = "⭐ [Favoritos] ⭐ | "
-
 
 class FavManager(commands.Cog):
 
     def __init__(self, bot: BotCore):
         self.bot = bot
+
+    desc_prefix = "⭐ [Favoritos] ⭐ | "
 
 
     @commands.max_concurrency(1, commands.BucketType.user)

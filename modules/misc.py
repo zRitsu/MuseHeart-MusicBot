@@ -13,8 +13,6 @@ from random import shuffle
 from os import getpid
 import platform
 
-desc_prefix = "🔰 [Outros] 🔰 | "
-
 
 class Misc(commands.Cog):
 
@@ -23,6 +21,9 @@ class Misc(commands.Cog):
         self.source_owner: Optional[disnake.User] = None
         self.activities = None
         self.task = self.bot.loop.create_task(self.presences())
+
+    desc_prefix = "🔰 [Outros] 🔰 | "
+
 
     def placeholders(self, text: str):
 

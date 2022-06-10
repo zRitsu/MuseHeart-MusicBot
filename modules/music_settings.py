@@ -19,13 +19,12 @@ other_bots_vc_opts = commands.option_enum(
 )
 
 
-desc_prefix = "🔧 [Configurações] 🔧 | "
-
-
 class MusicSettings(commands.Cog):
 
     def __init__(self, bot: BotCore):
         self.bot = bot
+
+    desc_prefix = "🔧 [Configurações] 🔧 | "
 
 
     # O nome desse comando está sujeito a alterações (tá ridiculo, mas não consegui pensar em um nome melhor no momento).
