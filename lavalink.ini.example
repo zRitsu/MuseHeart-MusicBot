@@ -1,0 +1,16 @@
+[lavalink_server_1]
+host=lava.link
+port=80
+password=youshallnotpass
+secure=false
+region=us_central
+#website=https://support.something.host/en/article/lavalink-hosting-okm26z/
+#search=true
+
+[lavalink_server_2]
+host=127.0.0.1
+port=2333
+password=youshallnotpass
+secure=false
+region=us_central
+#search=true
