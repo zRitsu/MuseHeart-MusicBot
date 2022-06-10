@@ -2513,10 +2513,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         for k,v in data.items():
 
-            try:
-                self.bot.loop.create_task(self.connect_node(json.loads(v)))
-            except Exception as e:
-                print(f"Falha ao adicionar node: {k}, erro: {repr(e)}")
+            self.bot.loop.create_task(self.connect_node(v))
 
         if start_local:
             self.bot.loop.create_task(self.connect_local_lavalink())

@@ -143,6 +143,7 @@ discloud.txt
 .project
 *.jar
 *.bat
+/lavalink.ini
 database.json
 /index.html
 /local_dbs/

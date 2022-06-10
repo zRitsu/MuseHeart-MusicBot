@@ -1,3 +1,4 @@
+import json
 import traceback
 import disnake
 from disnake.ext import commands
@@ -12,19 +13,14 @@ from utils.music.spotify import spotify_client
 from utils.owner_panel import PanelView
 from web_app import start
 from config_loader import load_config
+from configparser import ConfigParser
 
 CONFIGS = load_config()
 
 if not CONFIGS["DEFAULT_PREFIX"]:
     CONFIGS["DEFAULT_PREFIX"] = "!!!"
 
-
 LAVALINK_SERVERS = {}
-
-for key, value in CONFIGS.items():
-
-    if key.lower().startswith("lavalink_node_"):
-        LAVALINK_SERVERS[key] = value
 
 if CONFIGS['YTDLMODE'] is False:
 
@@ -35,6 +31,28 @@ if CONFIGS['YTDLMODE'] is False:
             lavalink_ram_limit=CONFIGS['LAVALINK_RAM_LIMIT'],
             lavalink_additional_sleep=int(CONFIGS['LAVALINK_ADDITIONAL_SLEEP']),
         )
+
+    for key, value in CONFIGS.items():
+
+        if key.lower().startswith("lavalink_node_"):
+            try:
+                LAVALINK_SERVERS[key] = json.loads(value)
+            except Exception as e:
+                print(f"Falha ao adicionar node: {key}, erro: {repr(e)}")
+
+    config = ConfigParser()
+    try:
+        config.read('lavalink.ini')
+    except FileNotFoundError:
+        pass
+    except Exception as e:
+        traceback.print_exc()
+    else:
+        for key, value in {section: dict(config.items(section)) for section in config.sections()}.items():
+            value["identifier"] = key.replace(" ", "_")
+            value["secure"] = value.get("secure") == "true"
+            value["search"] = value.get("search") != "false"
+            LAVALINK_SERVERS[key] = value
 
 else:
     start_local = False
