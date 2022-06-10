@@ -24,14 +24,6 @@ LAVALINK_SERVERS = {}
 
 if CONFIGS['YTDLMODE'] is False:
 
-    if start_local := (not LAVALINK_SERVERS or CONFIGS['RUN_LOCAL_LAVALINK'] is True):
-        run_lavalink(
-            lavalink_file_url=CONFIGS['LAVALINK_FILE_URL'],
-            lavalink_initial_ram=CONFIGS['LAVALINK_INITIAL_RAM'],
-            lavalink_ram_limit=CONFIGS['LAVALINK_RAM_LIMIT'],
-            lavalink_additional_sleep=int(CONFIGS['LAVALINK_ADDITIONAL_SLEEP']),
-        )
-
     for key, value in CONFIGS.items():
 
         if key.lower().startswith("lavalink_node_"):
@@ -53,6 +45,14 @@ if CONFIGS['YTDLMODE'] is False:
             value["secure"] = value.get("secure") == "true"
             value["search"] = value.get("search") != "false"
             LAVALINK_SERVERS[key] = value
+
+    if start_local := (CONFIGS['RUN_LOCAL_LAVALINK'] is True or not LAVALINK_SERVERS):
+        run_lavalink(
+            lavalink_file_url=CONFIGS['LAVALINK_FILE_URL'],
+            lavalink_initial_ram=CONFIGS['LAVALINK_INITIAL_RAM'],
+            lavalink_ram_limit=CONFIGS['LAVALINK_RAM_LIMIT'],
+            lavalink_additional_sleep=int(CONFIGS['LAVALINK_ADDITIONAL_SLEEP']),
+        )
 
 else:
     start_local = False
