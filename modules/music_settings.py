@@ -82,7 +82,7 @@ class MusicSettings(commands.Cog):
                 name="canal", default=None, description="Selecionar um canal existente"
             ),
             purge_messages: str = commands.Param(
-                name="limpar_mensagens", choices=["sim"],  default="não",
+                name="limpar_mensagens", choices=["sim", "não"],  default="não",
                 description="Limpar mensagens do canal selecionado (até 100 mensagens)",
             )
     ):
@@ -182,16 +182,29 @@ class MusicSettings(commands.Cog):
     @commands.has_guild_permissions(administrator=True)
     @commands.bot_has_guild_permissions(manage_channels=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
-    @commands.command(description=f"{desc_prefix}Resetar as configurações relacionadas ao canal de pedir música (song request).")
-    async def reset_legacy(self, ctx: CustomContext):
-        await self.reset.callback(self=self, inter=ctx)
+    @commands.command(
+        description="Resetar as configurações relacionadas ao canal de pedir música (song request).", usage="[--delete]"
+    )
+    async def reset_legacy(self, ctx: CustomContext, *, delete_channel: str = None):
+
+        if delete_channel == "--delete":
+            delete_channel = "sim"
+
+        await self.reset.callback(self=self, inter=ctx, delete_channel=delete_channel)
 
 
     @commands.has_guild_permissions(administrator=True)
     @commands.bot_has_guild_permissions(manage_channels=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
     @commands.slash_command(description=f"{desc_prefix}Resetar as configurações relacionadas ao canal de pedir música (song request).")
-    async def reset(self, inter: disnake.AppCmdInter):
+    async def reset(
+            self,
+            inter: disnake.AppCmdInter,
+            delete_channel: str = commands.Param(
+                name="deletar_canal",
+                description="reletar o canal do player controller", default=None, choices=["sim", "não"]
+            )
+    ):
 
         guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
 
@@ -203,13 +216,18 @@ class MusicSettings(commands.Cog):
         await inter.response.defer(ephemeral=True)
 
         try:
-            message = await channel.fetch_message(int(guild_data['player_controller']['message_id']))
 
-            await message.edit(
-                content=f"Canal de pedir música foi resetado pelo membro {inter.author.mention}.",
-                embed=None, view=None
-            )
-            await message.thread.edit(archived=True, reason=f"Player resetado por {inter.author}.")
+            if delete_channel == "sim":
+                await channel.delete(reason=f"Player resetado por: {inter.author}")
+
+            else:
+                message = await channel.fetch_message(int(guild_data['player_controller']['message_id']))
+
+                await message.edit(
+                    content=f"Canal de pedir música foi resetado pelo membro {inter.author.mention}.",
+                    embed=None, view=None
+                )
+                await message.thread.edit(archived=True, reason=f"Player resetado por {inter.author}.")
 
         except:
             pass
