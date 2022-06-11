@@ -267,7 +267,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
-    @commands.command(name="search", description="Tocar música em um canal de voz.", aliases=["sc"])
+    @commands.command(name="search", description="Buscar música e escolher uma entre os resultados para tocar.", aliases=["sc"])
     async def search_legacy(self, ctx: CustomContext, *, query: str):
 
         await self.play.callback(self=self, inter=ctx, query=query, position=0, options=False, manual_selection=True,
