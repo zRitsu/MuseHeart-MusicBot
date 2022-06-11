@@ -236,6 +236,7 @@ class MusicSettings(commands.Cog):
         player.static = None
         player.message = None
         player.text_channel = inter.channel
+        player.process_hint()
         await player.invoke_np(force=True)
 
 
