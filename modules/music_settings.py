@@ -202,7 +202,7 @@ class MusicSettings(commands.Cog):
             inter: disnake.AppCmdInter,
             delete_channel: str = commands.Param(
                 name="deletar_canal",
-                description="reletar o canal do player controller", default=None, choices=["sim", "não"]
+                description="deletar o canal do player controller", default=None, choices=["sim", "não"]
             )
     ):
 
