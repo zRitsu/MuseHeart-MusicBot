@@ -314,10 +314,10 @@ class BasePlayer:
         buttons = []
 
         if (played := len(self.played)) or self.last_track:
-            buttons.append(["⏮️", "back", "Tocar a música anterior"])
+            buttons.append(["⏮️", PlayerControls.back, "Tocar a música anterior"])
 
         if played > 1:
-            buttons.append(["↪️", "readd", f"Tocar todas as músicas novamente ({played})"])
+            buttons.append(["↪️", PlayerControls.readd, f"Tocar todas as músicas novamente ({played})"])
 
         buttons.extend(
             [
