@@ -70,7 +70,7 @@ class MusicSettings(commands.Cog):
                 name="canal", default=None, description="Selecionar um canal existente"
             ),
             purge_messages: str = commands.Param(
-                choices=["sim", "não"],  default="não",
+                name="limpar_mensagens", choices=["sim", "não"],  default="não",
                 description="Limpar mensagens do canal selecionado (até 100 mensagens)",
             )
     ):
