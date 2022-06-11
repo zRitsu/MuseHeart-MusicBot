@@ -54,9 +54,21 @@ class MusicSettings(commands.Cog):
     @commands.has_guild_permissions(administrator=True)
     @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
-    @commands.command(name="setup", aliases=["requestchannel"], description="Criar/escolher um canal dedicado para pedir músicas e deixar player fixado.")
-    async def setup_legacy(self, ctx: CustomContext):
-        await self.setup.callback(self=self, inter=ctx)
+    @commands.command(
+        name="setup", aliases=["requestchannel"], usage="[id do canal ou #canal] [--reset]",
+        description="Criar/escolher um canal dedicado para pedir músicas e deixar player fixado."
+    )
+    async def setup_legacy(
+            self,
+            ctx: CustomContext,
+            channel: Union[disnake.TextChannel, disnake.VoiceChannel] = None, *,
+            reset: str = None
+    ):
+
+        if reset == "--reset":
+            reset = "sim"
+
+        await self.setup.callback(self=self, inter=ctx, target=channel, purge_messages=reset)
 
 
     @commands.has_guild_permissions(administrator=True)
@@ -70,7 +82,7 @@ class MusicSettings(commands.Cog):
                 name="canal", default=None, description="Selecionar um canal existente"
             ),
             purge_messages: str = commands.Param(
-                name="limpar_mensagens", choices=["sim", "não"],  default="não",
+                name="limpar_mensagens", choices=["sim"],  default="não",
                 description="Limpar mensagens do canal selecionado (até 100 mensagens)",
             )
     ):
@@ -96,6 +108,8 @@ class MusicSettings(commands.Cog):
             )
         }
 
+        message = None
+
         if not target:
 
             if inter.channel.category and inter.channel.category.permissions_for(inter.guild.me).send_messages:
@@ -108,8 +122,15 @@ class MusicSettings(commands.Cog):
             msg = f"Canal para pedido de músicas criado: {channel.mention}"
 
         else:
+
             if purge_messages == "sim":
-                await target.purge(limit=100)
+                await target.purge(limit=100, check=lambda m: m.author != inter.guild.me or not m.thread)
+
+                async for m in target.history(limit=100):
+
+                    if m.author == inter.guild.me and m.thread:
+                        message = m
+                        break
 
             await target.edit(overwrites=perms)
 
@@ -117,7 +138,7 @@ class MusicSettings(commands.Cog):
 
             msg = f"Canal de pedido de músicas definido para: <#{channel.id}>"
 
-        message = await send_idle_embed(channel, bot=self.bot)
+        message = await send_idle_embed(message or channel, bot=self.bot)
 
         try:
             player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild_id]
@@ -136,7 +157,10 @@ class MusicSettings(commands.Cog):
             await player.invoke_np(force=True)
 
         if not isinstance(channel, disnake.VoiceChannel):
-            await message.create_thread(name="song requests")
+            if not message.thread:
+                await message.create_thread(name="song requests")
+            elif message.thread.archived:
+                await message.thread.edit(archived=False, reason=f"Song request reativado por: {inter.author}.")
 
         guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
 
