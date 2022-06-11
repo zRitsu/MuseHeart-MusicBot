@@ -5,6 +5,7 @@ from disnake.ext import commands
 from typing import TYPE_CHECKING, Union
 from utils.music.checks import user_cooldown
 from utils.music.converters import time_format
+from utils.music.errors import GenericError
 from utils.others import send_idle_embed, CustomContext
 from utils.music.models import LavalinkPlayer, YTDLPlayer
 
@@ -62,12 +63,17 @@ class MusicSettings(commands.Cog):
     @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
     @commands.slash_command(description=f"{desc_prefix}Criar um canal dedicado para pedir músicas e deixar player fixado.")
-    async def setup(self, inter: disnake.AppCmdInter):
-
-        if inter.channel.category and inter.channel.category.permissions_for(inter.guild.me).send_messages:
-            target = inter.channel.category
-        else:
-            target = inter.guild
+    async def setup(
+            self,
+            inter: disnake.AppCmdInter,
+            target: Union[disnake.TextChannel, disnake.VoiceChannel] = commands.Param(
+                name="canal", default=None, description="Selecionar um canal existente"
+            ),
+            purge_messages: str = commands.Param(
+                choices=["sim", "não"],  default="não",
+                description="Limpar mensagens do canal selecionado (até 100 mensagens)",
+            )
+    ):
 
         perms = {
             inter.guild.default_role: disnake.PermissionOverwrite(
@@ -90,7 +96,26 @@ class MusicSettings(commands.Cog):
             )
         }
 
-        channel = await target.create_text_channel(f"{self.bot.user.name} player controller", overwrites=perms)
+        if not target:
+
+            if inter.channel.category and inter.channel.category.permissions_for(inter.guild.me).send_messages:
+                target = inter.channel.category
+            else:
+                target = inter.guild
+
+            channel = await target.create_text_channel(f"{self.bot.user.name} player controller", overwrites=perms)
+
+            msg = f"Canal para pedido de músicas criado: {channel.mention}"
+
+        else:
+            if purge_messages == "sim":
+                await target.purge(limit=100)
+
+            await target.edit(overwrites=perms)
+
+            channel = target
+
+            msg = f"Canal de pedido de músicas definido para: <#{channel.id}>"
 
         message = await send_idle_embed(channel, bot=self.bot)
 
@@ -110,7 +135,8 @@ class MusicSettings(commands.Cog):
             player.process_hint()
             await player.invoke_np(force=True)
 
-        await message.create_thread(name="song requests")
+        if not isinstance(channel, disnake.VoiceChannel):
+            await message.create_thread(name="song requests")
 
         guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
 
@@ -118,8 +144,70 @@ class MusicSettings(commands.Cog):
         guild_data['player_controller']['message_id'] = str(message.id)
         await self.bot.db.update_data(inter.guild.id, guild_data, db_name='guilds')
 
-        embed = disnake.Embed(description=f"**Canal criado: {channel.mention}**\n\nObs: Caso queira reverter esta configuração, apenas delete o canal {channel.mention}", color=self.bot.get_color(inter.guild.me))
+        reset_txt = f"{inter.prefix}reset" if isinstance(inter, CustomContext) else "/reset"
+
+        embed = disnake.Embed(
+            description=f"**{msg}**\n\nObs: Caso queira reverter esta configuração, apenas use o comando {reset_txt} ou "
+                        f"delete o canal {channel.mention}",
+            color=self.bot.get_color(inter.guild.me)
+        )
+
         await inter.send(embed=embed, ephemeral=True)
+
+
+    @commands.has_guild_permissions(administrator=True)
+    @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
+    @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
+    @commands.command(description=f"{desc_prefix}Resetar as configurações relacionadas ao canal de pedir música (song request).")
+    async def reset_legacy(self, ctx: CustomContext):
+        await self.reset.callback(self=self, inter=ctx)
+
+
+    @commands.has_guild_permissions(administrator=True)
+    @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
+    @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
+    @commands.slash_command(description=f"{desc_prefix}Resetar as configurações relacionadas ao canal de pedir música (song request).")
+    async def reset(self, inter: disnake.AppCmdInter):
+
+        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+
+        channel = self.bot.get_channel(int(guild_data['player_controller']['channel'] or 0))
+
+        if not channel:
+            raise GenericError(f"**Não há canais de pedido de música configurado (ou o canal foi deletado).**")
+
+        await inter.response.defer(ephemeral=True)
+
+        try:
+            message = await channel.fetch_message(int(guild_data['player_controller']['message_id']))
+
+            await message.edit(
+                content=f"Canal de pedir música foi resetado pelo membro {inter.author.mention}.",
+                embed=None, view=None
+            )
+            await message.thread.edit(archived=True, reason=f"Player resetado por {inter.author}.")
+
+        except:
+            pass
+
+        await self.bot.db.update_data(inter.guild.id, guild_data, db_name='guilds')
+
+        await inter.edit_original_message(
+            embed=disnake.Embed(
+                color=self.bot.get_color(inter.guild.me),
+                description="**O Canal de pedir música foi resetado com sucesso.**"
+            )
+        )
+
+        try:
+            player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
+        except KeyError:
+            return
+
+        player.static = None
+        player.message = None
+        player.text_channel = inter.channel
+        await player.invoke_np(force=True)
 
 
     @commands.has_guild_permissions(administrator=True)
