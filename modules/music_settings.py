@@ -126,11 +126,11 @@ class MusicSettings(commands.Cog):
             if purge_messages == "sim":
                 await target.purge(limit=100, check=lambda m: m.author != inter.guild.me or not m.thread)
 
-                async for m in target.history(limit=100):
+            async for m in target.history(limit=100):
 
-                    if m.author == inter.guild.me and m.thread:
-                        message = m
-                        break
+                if m.author == inter.guild.me and m.thread:
+                    message = m
+                    break
 
             await target.edit(overwrites=perms)
 
