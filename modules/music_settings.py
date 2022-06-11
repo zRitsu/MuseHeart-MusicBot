@@ -190,6 +190,11 @@ class MusicSettings(commands.Cog):
         except:
             pass
 
+        guild_data["player_controller"].update({
+            "message_id": None,
+            "channel": None
+        })
+
         await self.bot.db.update_data(inter.guild.id, guild_data, db_name='guilds')
 
         await inter.edit_original_message(
