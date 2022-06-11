@@ -23,12 +23,6 @@ class CustomContext(commands.Context):
         self.guild_id = self.guild.id
         self.store_message = None
 
-    async def delete_original_message(self, *args, **kwargs):
-        return await self.message.delete(*args, **kwargs)
-
-    async def edit_original_message(self, *args, **kwargs):
-        return await self.message.edit(*args, **kwargs)
-
     async def defer(self, ephemeral: bool = False):
         await self.trigger_typing()
         return

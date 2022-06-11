@@ -180,7 +180,7 @@ class MusicSettings(commands.Cog):
 
 
     @commands.has_guild_permissions(administrator=True)
-    @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
+    @commands.bot_has_guild_permissions(manage_channels=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
     @commands.command(description=f"{desc_prefix}Resetar as configurações relacionadas ao canal de pedir música (song request).")
     async def reset_legacy(self, ctx: CustomContext):
@@ -188,7 +188,7 @@ class MusicSettings(commands.Cog):
 
 
     @commands.has_guild_permissions(administrator=True)
-    @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
+    @commands.bot_has_guild_permissions(manage_channels=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
     @commands.slash_command(description=f"{desc_prefix}Resetar as configurações relacionadas ao canal de pedir música (song request).")
     async def reset(self, inter: disnake.AppCmdInter):
@@ -221,7 +221,12 @@ class MusicSettings(commands.Cog):
 
         await self.bot.db.update_data(inter.guild.id, guild_data, db_name='guilds')
 
-        await inter.edit_original_message(
+        try:
+            func = inter.edit_original_message
+        except AttributeError:
+            func = inter.send
+
+        await func(
             embed=disnake.Embed(
                 color=self.bot.get_color(inter.guild.me),
                 description="**O Canal de pedir música foi resetado com sucesso.**"
