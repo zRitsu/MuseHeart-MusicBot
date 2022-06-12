@@ -1399,10 +1399,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await player.set_timescale(pitch=1.2, speed=1.1)
             txt = "ativou"
         else:
-            try:
-                del player.filters["timescale"]
-            except:
-                pass
+            await player.set_timescale(enabled=False)
             await player.update_filters()
             txt = "desativou"
 
@@ -2130,15 +2127,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 if not player.nightcore and nightcore == "nightcore_on":
                     await player.set_timescale(pitch=1.2, speed=1.1)
                     player.nightcore = True
-                    txt.append("`ativou nightcore`")
+                    txt.append("`Nightcore: ativado`")
                 elif player.nightcore and nightcore == "nightcore_off":
-                    try:
-                        del player.filters["timescale"]
-                    except:
-                        pass
-                    await player.update_filters()
+                    await player.set_timescale(enabled=False)
                     player.nightcore = False
-                    txt.append("`desativou nightcore`")
+                    txt.append("`Nightcore: desativado`")
 
             try:
                 loop = inter.data['components'][2]['components'][0]['values'][0]
