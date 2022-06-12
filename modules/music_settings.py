@@ -108,9 +108,32 @@ class MusicSettings(commands.Cog):
             )
         }
 
+        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+
+        try:
+            original_message = await self.bot.get_channel(int(guild_data["player_controller"]["channel"]))\
+                .fetch_message(int(guild_data["player_controller"]["message_id"]))
+        except:
+            original_message = None
+
         message = None
 
+        embed_archived = disnake.Embed(
+            description=f"**Este canal de pedir música foi reconfigurado pelo membro {inter.author.mention}.**",
+            color=self.bot.get_color(inter.guild.me)
+        )
+
         if not target:
+
+            if original_message:
+                try:
+                    await original_message.edit(content=None, embed=embed_archived, view=None)
+                except:
+                    pass
+                try:
+                    await original_message.thread.edit(archived=True, reason=f"Player reconfigurado por {inter.author}.")
+                except:
+                    pass
 
             if inter.channel.category and inter.channel.category.permissions_for(inter.guild.me).send_messages:
                 target = inter.channel.category
@@ -126,11 +149,29 @@ class MusicSettings(commands.Cog):
             if purge_messages == "sim":
                 await target.purge(limit=100, check=lambda m: m.author != inter.guild.me or not m.thread)
 
-            async for m in target.history(limit=100):
 
-                if m.author == inter.guild.me and m.thread:
-                    message = m
-                    break
+            if original_message:
+
+                if original_message.channel != target:
+                    try:
+                        await original_message.edit(content=None, embed=embed_archived, view=None)
+                    except:
+                        pass
+                    try:
+                        await original_message.thread.edit(archived=True, reason=f"Player reconfigurado por {inter.author}.")
+                    except:
+                        pass
+
+                else:
+                    message = original_message
+
+            if not message:
+
+                async for m in target.history(limit=100):
+
+                    if m.author == inter.guild.me and m.thread:
+                        message = m
+                        break
 
             await target.edit(overwrites=perms)
 
@@ -161,8 +202,6 @@ class MusicSettings(commands.Cog):
                 await message.create_thread(name="song requests")
             elif message.thread.archived:
                 await message.thread.edit(archived=False, reason=f"Song request reativado por: {inter.author}.")
-
-        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
 
         guild_data['player_controller']['channel'] = str(channel.id)
         guild_data['player_controller']['message_id'] = str(message.id)
