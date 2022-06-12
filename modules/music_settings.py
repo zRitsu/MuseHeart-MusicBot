@@ -304,6 +304,13 @@ class MusicSettings(commands.Cog):
 
     @commands.has_guild_permissions(administrator=True)
     @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
+    @commands.command(name="adddjrole",description="Adicionar um cargo para a lista de DJ's do servidor.", usage="[id / nome / @cargo]")
+    async def add_dj_role_legacy(self, ctx: CustomContext, *, role: disnake.Role):
+        await self.add_dj_role(ctx, inter=ctx, role=role)
+
+
+    @commands.has_guild_permissions(administrator=True)
+    @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
     @commands.slash_command(description=f"{desc_prefix}Adicionar um cargo para a lista de DJ's do servidor.")
     async def add_dj_role(
             self,
@@ -330,7 +337,14 @@ class MusicSettings(commands.Cog):
 
     @commands.has_guild_permissions(administrator=True)
     @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
-    @commands.slash_command(description=f"{desc_prefix}Remover um cargo para a lista de DJ's do servidor.")
+    @commands.command(description="Remover um cargo para a lista de DJ's do servidor.", usage="[id / nome / @cargo]")
+    async def remove_dj_role_legacy(self, ctx: CustomContext, *, role: disnake.Role):
+        await self.remove_dj_role(ctx, inter=ctx, role=role)
+
+
+    @commands.has_guild_permissions(administrator=True)
+    @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
+    @commands.slash_command(name="removedjrole",description=f"{desc_prefix}Remover um cargo para a lista de DJ's do servidor.")
     async def remove_dj_role(
             self,
             inter: disnake.ApplicationCommandInteraction,
@@ -359,8 +373,14 @@ class MusicSettings(commands.Cog):
 
 
     @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.command(name="nodeinfo", description="Ver informações dos servidores de música.")
+    async def nodeinfo_legacy(self, ctx: CustomContext):
+        await self.nodeinfo(ctx, inter=ctx)
+
+
+    @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.slash_command(description=f"{desc_prefix}Ver informações dos servidores de música.")
-    async def nodeinfo(self, inter: disnake.ApplicationCommandInteraction):
+    async def nodeinfo(self, inter: disnake.AppCmdInter):
 
         em = disnake.Embed(color=self.bot.get_color(inter.guild.me), title="Servidores de música:")
 
