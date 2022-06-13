@@ -1,3 +1,4 @@
+import datetime
 import disnake
 from disnake.ext import commands
 import traceback
@@ -335,8 +336,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 inter.author.mention,
                 embed=disnake.Embed(
                     color=self.bot.get_color(inter.guild.me),
-                    description="**Selecione um favorito:**"
-                ).set_footer(text="Você tem apenas 45 segundos para escolher!"),
+                    description="**Selecione um favorito Abaixo:**\n"
+                                f'Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para escolher!'
+                ),
                 components=[
                     disnake.ui.Select(
                         custom_id=f"enqueue_fav{add_id}",
@@ -412,7 +414,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     ], timeout=30)
 
                 embed = disnake.Embed(
-                    description="**O link contém vídeo com playlist.**\n`selecione uma opção em até 30 segundos para prosseguir.`",
+                    description='**O link contém vídeo com playlist.**\n'
+                                f'Selecione uma opção em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para prosseguir.',
                     color=self.bot.get_color(inter.guild.me)
                 )
 
@@ -2348,7 +2351,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     ], timeout=30)
 
                 embed = disnake.Embed(
-                    description="**O link contém vídeo com playlist.**\n`selecione uma opção em até 30 segundos para prosseguir.`",
+                    description="**O link contém vídeo com playlist.**\n"
+                                f'Selecione uma opção em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para prosseguir.',
                     color=self.bot.get_color(message.guild.me)
                 )
 
