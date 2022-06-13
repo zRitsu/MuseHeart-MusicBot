@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PYTHONIOENCODING=utf8
+
 trap 'kill $(jobs -pr)' SIGINT SIGTERM EXIT
 
 if [ ! -d ".git" ] || [ -z "$(git remote -v)" ]; then

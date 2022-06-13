@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/bin/bash --utf8
+
+export PYTHONIOENCODING=utf8
+
 
 trap 'kill $(jobs -pr)' SIGINT SIGTERM EXIT
 
