@@ -148,7 +148,6 @@ def load_bot(bot_name: str, token: str, main=False):
 
     @bot.listen()
     async def on_ready():
-        print(f'{bot.user} [{bot.user.id}] Online.')
 
         if not bot.bot_ready:
 
@@ -181,6 +180,8 @@ def load_bot(bot_name: str, token: str, main=False):
                 bot.loop.create_task(bot.ws_client.ws_loop())
 
             bot.bot_ready = True
+
+        print(f'{bot.user} [{bot.user.id}] Online.')
 
     bots.append(bot)
 
