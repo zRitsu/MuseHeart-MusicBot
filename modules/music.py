@@ -312,6 +312,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not channel.permissions_for(inter.guild.me).send_messages:
             raise GenericError(f"Não tenho permissão para enviar mensagens no canal: {channel.mention}")
 
+        is_pin = None
+
         if not query:
 
             opts = [disnake.SelectOption(label=f, value=f, emoji="<:play:734221719774035968>")
@@ -381,6 +383,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             inter.id = select_interaction.id
             inter.response = select_interaction.response
             query = f"> fav: {select_interaction.data.values[0]}"
+
+        if query.startswith("> pin: "):
+            is_pin = True
+            query = query[7:]
 
         if query.startswith("> fav:"):
             user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
@@ -586,17 +592,18 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             embed.description = f"`{len(tracks.tracks)} música(s)`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}{player.controller_link}"
             emoji = "🎶"
 
-        try:
-            func = inter.edit_original_message
-        except AttributeError:
-            if msg:
-                func = msg.edit
-            elif inter.message.author == inter.guild.me:
-                func = inter.message.edit
-            else:
-                func = inter.send
+        if not is_pin:
+            try:
+                func = inter.edit_original_message
+            except AttributeError:
+                if msg:
+                    func = msg.edit
+                elif inter.message.author == inter.guild.me:
+                    func = inter.message.edit
+                else:
+                    func = inter.send
 
-        await func(embed=embed, view=None)
+            await func(embed=embed, view=None)
 
         if not player.is_connected:
             await self.do_connect(inter, channel=inter.author.voice.channel)
@@ -1883,6 +1890,32 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await command._max_concurrency.release(interaction)
         except (KeyError, AttributeError):
             pass
+
+
+    @commands.Cog.listener("on_dropdown")
+    async def guild_pin(self, interaction: disnake.MessageInteraction):
+
+        if interaction.data.custom_id != "player_guild_pin":
+            return
+
+        guild_data = await self.bot.db.get_data(interaction.guild.id, db_name="guilds")
+
+        kwargs = {
+            "query":  "> pin: " + guild_data["player_controller"]["fav_links"][interaction.data.values[0]]['url'],
+            "position": 0,
+            "options": False,
+            "manual_selection": True,
+            "source": "ytsearch",
+            "repeat_amount": 0,
+            "hide_playlist": False,
+            "server": None
+        }
+
+        try:
+            await self.play.callback(self=self, inter=interaction, **kwargs)
+        except Exception as e:
+            self.bot.dispatch('interaction_player_error', interaction, e)
+
 
     @commands.Cog.listener("on_button_click")
     async def player_controller(self, interaction: disnake.MessageInteraction):

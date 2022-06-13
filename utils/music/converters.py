@@ -133,6 +133,12 @@ async def fav_list(inter, query: str, *, prefix=""):
             if not query or query.lower() in favname.lower()][:20]
 
 
+async def pin_list(inter, query: str, *, prefix=""):
+
+    return [f"{prefix}{pinname}" for pinname in (await inter.bot.db.get_data(inter.guild.id, db_name="guilds"))["player_controller"]["fav_links"]
+            if not query or query.lower() in pinname.lower()][:20]
+
+
 async def fav_add_autocomplete(inter, query: str):
 
     if not inter.author.voice:

@@ -13,15 +13,17 @@ if TYPE_CHECKING:
 
 db_models = {
       "guilds": {
-        "ver": 1.4,
-        "prefix": "",
-        "player_controller": {
-            "channel": None,
-            "message_id": None,
-            "skin": None
-        },
-        "check_other_bots_in_vc": False,
-        "djroles": []
+          "ver": 1.5,
+          "prefix": "",
+          "player_controller": {
+              "channel": None,
+              "message_id": None,
+              "skin": None,
+              "fav_links": {}
+          },
+          "check_other_bots_in_vc": False,
+          "enable_prefixed_commands": True,
+          "djroles": []
     },
     "users": {
         "ver": 1.0,

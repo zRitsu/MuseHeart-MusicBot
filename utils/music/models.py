@@ -273,6 +273,12 @@ class BasePlayer:
             return
 
         try:
+            self.idle_task.cancel()
+            self.idle_task = None
+        except:
+            pass
+
+        try:
             track = self.queue.popleft()
         except Exception:
             self.last_track = None
@@ -281,12 +287,6 @@ class BasePlayer:
 
         if not track:
             return
-
-        try:
-            self.idle_task.cancel()
-            self.idle_task = None
-        except:
-            pass
 
         if isinstance(track, SpotifyTrack):
 
@@ -307,9 +307,8 @@ class BasePlayer:
 
         return track
 
-    async def idling_mode(self):
 
-        self.bot.loop.create_task(self.process_rpc(self.guild.me.voice.channel))
+    async def process_idle_message(self):
 
         buttons = []
 
@@ -326,19 +325,38 @@ class BasePlayer:
             ]
         )
 
-        components = [
-            disnake.ui.Button(
-                emoji=button[0],
-                custom_id=button[1],
-                style=disnake.ButtonStyle.grey,
-            ) for button in buttons
-        ]
+        components = []
+
+        guild_data = await self.bot.db.get_data(self.guild.id, db_name="guilds")
+
+        opts = [disnake.SelectOption(label=k, value=k, description=v['description']) for k, v in
+                guild_data["player_controller"]["fav_links"].items()]
+
+        if opts:
+
+            components.append(
+                disnake.ui.Select(
+                    placeholder="Músicas/Playlists do servidor.",
+                    options=opts, custom_id="player_guild_pin"
+                )
+            )
+
+        components.extend(
+            [
+                disnake.ui.Button(
+                    emoji=button[0],
+                    custom_id=button[1],
+                    style=disnake.ButtonStyle.grey,
+                ) for button in buttons
+            ]
+        )
 
         embed = disnake.Embed(
             description=f"**Não há músicas na fila. Adicione uma música ou use um dos botões abaixo**\n\n" +
-                        "\n".join(f"{b[0]} `= {b[2]}`" for b in buttons) + f"\n\n**Nota:** O Player será desligado automaticamente "
-                        f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=self.idle_timeout)).timestamp())}:R> "
-                        f"caso nenhuma ação seja executada...",
+                        "\n".join(f"{b[0]} `= {b[2]}`" for b in
+                                  buttons) + f"\n\n**Nota:** O Player será desligado automaticamente "
+                                             f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=self.idle_timeout)).timestamp())}:R> "
+                                             f"caso nenhuma ação seja executada...",
             color=self.bot.get_color(self.guild.me)
         )
 
@@ -357,6 +375,13 @@ class BasePlayer:
             except:
                 pass
             self.message = await self.text_channel.send(embed=embed, components=components)
+
+
+    async def idling_mode(self):
+
+        self.bot.loop.create_task(self.process_rpc(self.guild.me.voice.channel))
+
+        await self.process_idle_message()
 
         await asyncio.sleep(self.idle_timeout)
 
@@ -512,6 +537,7 @@ class BasePlayer:
 
         try:
             self.idle_task.cancel()
+            self.idle_task = None
         except:
             pass
 

@@ -226,14 +226,28 @@ async def send_idle_embed(target: Union[disnake.Message, disnake.TextChannel, di
         avatar = target.guild.me.default_avatar.url
     embed.set_thumbnail(avatar)
 
-    components = [
+    guild_data = await bot.db.get_data(target.guild.id, db_name="guilds")
+
+    components = []
+
+    opts = [disnake.SelectOption(label=k, value=k, description=v['description']) for k, v in guild_data["player_controller"]["fav_links"].items()]
+
+    if opts:
+        components.append(
+            disnake.ui.Select(
+                placeholder="Músicas/Playlists do servidor.",
+                options=opts, custom_id="player_guild_pin"
+            )
+        )
+
+    components.append(
         disnake.ui.Button(
             emoji="🎶",
             custom_id=PlayerControls.add_song,
             style=disnake.ButtonStyle.grey,
             label="Pedir uma música."
         )
-    ]
+    )
 
     if isinstance(target, disnake.Message):
         if target.author == target.guild.me:
