@@ -1901,6 +1901,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if interaction.data.custom_id != "player_guild_pin":
             return
 
+        if not interaction.data.values:
+            await interaction.response.defer()
+            return
+
         if not interaction.user.voice:
             await interaction.send("Você deve entrar em um canal de voz para usar isto.", ephemeral=True)
             return

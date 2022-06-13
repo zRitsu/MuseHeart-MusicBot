@@ -236,7 +236,8 @@ async def send_idle_embed(target: Union[disnake.Message, disnake.TextChannel, di
         components.append(
             disnake.ui.Select(
                 placeholder="Músicas/Playlists do servidor.",
-                options=opts, custom_id="player_guild_pin"
+                options=opts, custom_id="player_guild_pin",
+                min_values=0, max_values=1
             )
         )
 
