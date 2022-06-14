@@ -174,7 +174,7 @@ def load_bot(bot_name: str, token: str, main=False):
 
             bot.add_view(PanelView(bot))
 
-            if not CONFIGS["RUN_RPC_SERVER"] and CONFIGS["RPC_SERVER"] == "ws://localhost:$PORT/ws":
+            if not CONFIGS["RUN_RPC_SERVER"] and not (CONFIGS["RPC_SERVER"] or CONFIGS["RPC_SERVER"] == "ws://localhost:8080/ws"):
                 pass
             else:
                 bot.loop.create_task(bot.ws_client.ws_loop())
