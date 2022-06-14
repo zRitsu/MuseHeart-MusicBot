@@ -1,5 +1,5 @@
 git+https://github.com/DisnakeDev/disnake.git@d1e88af8e7aef629466bb47986bfb9223bea0f64
-git+https://github.com/zRitsu/Wavelink.git@28080c316acc739ed3c5f4daf802d7bcb194865e
+git+https://github.com/zRitsu/Wavelink.git@1c4a115593faecb5e7c31253c50482b6bcba87fc
 python-dotenv
 git+https://github.com/Run1e/asyncspotify.git
 user-agent
