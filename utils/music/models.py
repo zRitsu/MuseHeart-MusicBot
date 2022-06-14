@@ -1068,8 +1068,6 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
         elif self.guild.me.voice.channel.id != channel_id:
             await self.guild.voice_client.move_to(channel)
 
-        await super().connect(channel_id, self_deaf)
-
     async def process_next(self):
 
         track: LavalinkTrack = await super().process_next()
