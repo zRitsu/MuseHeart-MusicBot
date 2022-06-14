@@ -119,6 +119,7 @@ def load_config():
         "INTERACTION_COMMAND_ONLY",
         "RUN_LOCAL_LAVALINK",
         "COMMAND_LOG",
+        "RUN_RPC_SERVER",
         "YTDLMODE"
 
     ]:
