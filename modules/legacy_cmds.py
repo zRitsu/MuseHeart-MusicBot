@@ -51,12 +51,7 @@ async def run_command(cmd):
         async for x in reader:
             result.append(x)
 
-    result_txt = "\n".join(result)
-
-    if "[stderr]" in result_txt:
-        raise Exception(result_txt)
-
-    return result_txt
+    return  "\n".join(result)
 
 
 def run_command_old(cmd):
