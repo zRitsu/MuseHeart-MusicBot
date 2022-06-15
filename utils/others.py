@@ -213,7 +213,7 @@ async def send_idle_embed(target: Union[disnake.Message, disnake.TextChannel, di
 
     embed = disnake.Embed(description="**Entre em um canal de voz e peça uma música aqui no canal ou na conversa abaixo "
                                       "(ou clique no botão abaixo)**\n\n"
-                                      "**FORMATOS SUPORTADOS (nome, link):**"
+                                      "**Você pode usar um nome ou um link suportado:**"
                                       " ```ini\n[Youtube, Soundcloud, Spotify, Twitch]```\n",
                           color=bot.get_color(target.guild.me))
 
