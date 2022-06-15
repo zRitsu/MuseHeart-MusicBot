@@ -219,10 +219,11 @@ class MusicSettings(commands.Cog):
 
 
     @commands.has_guild_permissions(administrator=True)
-    @commands.bot_has_guild_permissions(manage_channels=True)
+    @commands.bot_has_guild_permissions(manage_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
     @commands.command(
-        description="Resetar as configurações relacionadas ao canal de pedir música (song request).", usage="[--delete]"
+        name="reset", usage="[--delete]",
+        description="Resetar as configurações relacionadas ao canal de pedir música (song request)."
     )
     async def reset_legacy(self, ctx: CustomContext, *, delete_channel: str = None):
 
@@ -233,7 +234,7 @@ class MusicSettings(commands.Cog):
 
 
     @commands.has_guild_permissions(administrator=True)
-    @commands.bot_has_guild_permissions(manage_channels=True)
+    @commands.bot_has_guild_permissions(manage_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
     @commands.slash_command(description=f"{desc_prefix}Resetar as configurações relacionadas ao canal de pedir música (song request).")
     async def reset(
