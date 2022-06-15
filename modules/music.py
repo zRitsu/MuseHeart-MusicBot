@@ -2016,6 +2016,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                     return
 
+                user_favs = [
+                    disnake.SelectOption(label=f, value=f"> fav: {f}", emoji="<:play:734221719774035968>")
+                    for f in (await fav_list(interaction, ""))
+                ]
+
                 await interaction.response.send_modal(
                     title="Pedir uma música",
                     custom_id="modal_add_song",
@@ -2026,15 +2031,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                             placeholder="Nome ou link do youtube/spotify/soundcloud etc.",
                             custom_id="song_input",
                             max_length=150,
-                            required=False
+                            required=bool(not user_favs)
                         ),
                         disnake.ui.Select(
                             placeholder="ou selecione um favorito (opcional)",
-                            options=[
-                               disnake.SelectOption(
-                                   label=f, value=f"> fav: {f}", emoji="<:play:734221719774035968>")
-                               for f in (await fav_list(interaction, ""))
-                            ] or [
+                            options=user_favs or [
                                 disnake.SelectOption(
                                     label="Você não possui favoritos...", value="no_fav", emoji="⚠️",
                                     description="Adicione um usando o comando: /fav add"
