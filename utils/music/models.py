@@ -260,7 +260,11 @@ class BasePlayer:
         self.command_log = msg
         if not self.static and not self.has_thread:
             embed = disnake.Embed(description=msg, color=self.bot.get_color(self.guild.me))
-            self.bot.loop.create_task(self.text_channel.send(embed=embed))
+            try:
+                await self.text_channel.send(embed=embed)
+            except:
+                pass
+
         await self.destroy()
 
     async def process_next(self):
@@ -546,11 +550,6 @@ class BasePlayer:
         except:
             pass
 
-        try:
-            self.members_timeout_task.cancel()
-        except:
-            pass
-
         if self.static:
             try:
                 await send_idle_embed(self.message, self.command_log, bot=self.bot)
@@ -573,6 +572,11 @@ class BasePlayer:
         else:
 
             await self.destroy_message()
+
+        try:
+            self.members_timeout_task.cancel()
+        except:
+            pass
 
     async def process_rpc(
             self,
@@ -1081,6 +1085,10 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
 
         await self.cleanup()
 
+        self.is_closing = True
+
+        await super().destroy(force=force)
+
         try:
             await self.guild.voice_client.disconnect(force=True)
         except:
@@ -1090,11 +1098,6 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
             self.guild.voice_client.cleanup()
         except:
             pass
-
-        self.is_closing = True
-
-        await super().destroy(force=force)
-
         try:
             print(f"Player Finalizado - Servidor: {self.guild.name} [{self.guild_id}]")
         except:
