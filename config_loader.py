@@ -27,6 +27,7 @@ def load_config():
         "SOURCE_REPO": "https://github.com/zRitsu/disnake-LL-music-bot.git",
         "HIDE_SOURCE_OWNER": False,
         "SUPPORT_SERVER": "",
+        "ADDITIONAL_BOT_IDS": "",
 
         #########################
         ### Sistema de música ###

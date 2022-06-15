@@ -21,6 +21,8 @@ class Misc(commands.Cog):
         self.source_owner: Optional[disnake.User] = None
         self.activities = None
         self.task = self.bot.loop.create_task(self.presences())
+        self.extra_user_bots = []
+        self.extra_user_bots_ids = [int(i) for i in bot.config['ADDITIONAL_BOT_IDS'].split() if i.isdigit()]
 
     desc_prefix = "🔰 [Outros] 🔰 | "
 
@@ -184,14 +186,34 @@ class Misc(commands.Cog):
     @commands.slash_command(description=f"{desc_prefix}Exibir meu link de convite para você me adicionar no seu servidor.")
     async def invite(self, inter: disnake.AppCmdInter):
 
-        await inter.send(
-            embed = disnake.Embed(
+        await inter.response.defer(ephemeral=True)
+
+        if self.extra_user_bots_ids is not None:
+
+            for bot_id in self.extra_user_bots_ids:
+
+                if bot_id ==self.bot.user.id:
+                    continue
+
+                bot = await self.bot.get_or_fetch_user(bot_id)
+
+                if bot:
+                    self.extra_user_bots.append(bot)
+
+            self.extra_user_bots_ids = None
+
+        embed = disnake.Embed(
                 colour=self.bot.get_color(inter.guild.me),
                 description=f"[**Clique aqui**](https://discord.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=0&scope=bot%20applications.commands) "
                             f"para me adicionar no seu servidor."
-            ),
-            ephemeral=True
-        )
+            )
+
+        if self.extra_user_bots:
+            embed.description += "\n\n**Caso queira bots de música adicionais, você pode adicionar um dos bots abaixo:**\n\n" + \
+                                 "\n".join(f"`{bot}:` [`adicionar`]({disnake.utils.oauth_url(bot.id, permissions=disnake.Permissions(397287680080))})" for bot in self.extra_user_bots)
+
+        await inter.edit_original_message(embed = embed)
+
 
     @commands.user_command(name="avatar")
     async def avatar(self, inter: disnake.UserCommandInteraction):
