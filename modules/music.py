@@ -2227,7 +2227,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 if not query:
 
                     query = inter.data['components'][1]['components'][0]['values']
-                    if not query or not query[0].startswith("> fav: "):
+                    if not query:
                         raise GenericError("Você deve adicionar o nome de uma música ou ter/escolher um favorito")
 
                     query = query[0]
