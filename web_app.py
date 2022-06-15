@@ -42,7 +42,7 @@ class IndexHandler(tornado.web.RequestHandler):
 
             cells += f"<tr><td><img src=\"{avatar}\" width=128 weight=128></img></td>\n" \
                      f"<td style=\"padding-top: 10px ; padding-bottom: 10px; padding-left: 10px; padding-right: 10px\">" \
-                     f"Adicionar:<br><a href=\"{disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']))}\" " \
+                     f"Adicionar:<br><a href=\"{disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))}\" " \
                      f"target=\"_blank\">{bot.user}</a></td></tr>"
 
         if cells:
