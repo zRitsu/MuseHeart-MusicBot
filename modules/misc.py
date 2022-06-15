@@ -154,8 +154,7 @@ class Misc(commands.Cog):
         links = "[`[Source]`](https://github.com/zRitsu/disnake-LL-music-bot)"
 
         if (await self.bot.application_info()).bot_public:
-            links = f"[`[Invite]`](https://discord.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=" \
-                    f"8&scope=bot%20applications.commands) **|** {links}"
+            links = f"[`[Invite]`]({disnake.utils.oauth_url(self.bot.user.id, permissions=disnake.Permissions(self.bot.config['INVITE_PERMISSIONS']))} **|** {links}"
 
         if self.bot.config["SUPPORT_SERVER"]:
             links += f" **|** [`[Suporte]`]({self.bot.config['SUPPORT_SERVER']})"
@@ -204,13 +203,13 @@ class Misc(commands.Cog):
 
         embed = disnake.Embed(
                 colour=self.bot.get_color(inter.guild.me),
-                description=f"[**Clique aqui**](https://discord.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=0&scope=bot%20applications.commands) "
-                            f"para me adicionar no seu servidor."
+                description=f"[**Clique aqui**]({disnake.utils.oauth_url(self.bot.user.id, permissions=disnake.Permissions(self.bot.config['INVITE_PERMISSIONS']))}) "
+                            "para me adicionar no seu servidor."
             )
 
         if self.extra_user_bots:
             embed.description += "\n\n**Caso queira bots de música adicionais, você pode adicionar um dos bots abaixo:**\n\n" + \
-                                 "\n".join(f"`{bot}:` [`adicionar`]({disnake.utils.oauth_url(bot.id, permissions=disnake.Permissions(397287680080))})" for bot in self.extra_user_bots)
+                                 "\n".join(f"`{bot}:` [`adicionar`]({disnake.utils.oauth_url(bot.id, permissions=disnake.Permissions(self.bot.config['INVITE_PERMISSIONS']))})" for bot in self.extra_user_bots)
 
         await inter.edit_original_message(embed = embed)
 

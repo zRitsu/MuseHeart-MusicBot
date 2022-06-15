@@ -28,6 +28,7 @@ def load_config():
         "HIDE_SOURCE_OWNER": False,
         "SUPPORT_SERVER": "",
         "ADDITIONAL_BOT_IDS": "",
+        "INVITE_PERMISSIONS": 397287680080,
 
         #########################
         ### Sistema de música ###
@@ -104,7 +105,8 @@ def load_config():
         "USER_FAV_MAX_NAME_LENGTH",
         "USER_FAV_MAX_URL_LENGTH",
         "PRESENCE_INTERVAL",
-        "HINT_RATE"
+        "HINT_RATE",
+        "INVITE_PERMISSIONS"
     ]:
         try:
             CONFIGS[i] = int(CONFIGS[i])

@@ -42,9 +42,8 @@ class IndexHandler(tornado.web.RequestHandler):
 
             cells += f"<tr><td><img src=\"{avatar}\" width=128 weight=128></img></td>\n" \
                      f"<td style=\"padding-top: 10px ; padding-bottom: 10px; padding-left: 10px; padding-right: 10px\">" \
-                     f"Adicionar:<br><a href=\"https://discord.com/api/oauth2/authorize?client_id={bot.user.id}&" \
-                     f"permissions=397287680080&scope=bot%20applications.commands\" target=\"_blank\">{bot.user}" \
-                     f"</a></td></tr>"
+                     f"Adicionar:<br><a href=\"{disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']))}\" " \
+                     f"target=\"_blank\">{bot.user}</a></td></tr>"
 
         if cells:
 
