@@ -211,7 +211,10 @@ class Misc(commands.Cog):
             embed.description += "\n\n**Caso queira bots de música adicionais, você pode adicionar um dos bots abaixo:**\n\n" + \
                                  "\n".join(f"`{bot}:` [`adicionar`]({disnake.utils.oauth_url(bot.id, permissions=disnake.Permissions(self.bot.config['INVITE_PERMISSIONS']))})" for bot in self.extra_user_bots)
 
-        await inter.edit_original_message(embed = embed)
+        try:
+            await inter.edit_original_message(embed=embed)
+        except AttributeError:
+            await inter.send(embed=embed, ephemeral=True)
 
 
     @commands.user_command(name="avatar")
