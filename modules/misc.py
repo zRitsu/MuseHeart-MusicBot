@@ -154,7 +154,7 @@ class Misc(commands.Cog):
         links = "[`[Source]`](https://github.com/zRitsu/disnake-LL-music-bot)"
 
         if (await self.bot.application_info()).bot_public:
-            links = f"[`[Invite]`]({disnake.utils.oauth_url(self.bot.user.id, permissions=disnake.Permissions(self.bot.config['INVITE_PERMISSIONS']))} **|** {links}"
+            links = f"[`[Invite]`]({disnake.utils.oauth_url(self.bot.user.id, permissions=disnake.Permissions(self.bot.config['INVITE_PERMISSIONS']))}) **|** {links}"
 
         if self.bot.config["SUPPORT_SERVER"]:
             links += f" **|** [`[Suporte]`]({self.bot.config['SUPPORT_SERVER']})"
