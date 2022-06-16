@@ -250,6 +250,10 @@ async def send_idle_embed(target: Union[disnake.Message, disnake.TextChannel, di
     )
 
     if isinstance(target, disnake.Message):
+
+        if guild_data["player_controller"]["channel"] != str(target.channel.id):
+            return target
+
         if target.author == target.guild.me:
             await target.edit(embed=embed, content=None, components=components)
             message = target
