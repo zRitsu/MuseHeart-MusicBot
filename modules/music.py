@@ -1969,6 +1969,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[interaction.guild.id]
                     except KeyError:
                         await interaction.send("Não há player ativo no servidor...", ephemeral=True)
+                        await send_idle_embed(interaction.message, bot=self.bot)
                         return
 
                     vol_opts = []
@@ -2056,6 +2057,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             try:
                 player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[interaction.guild.id]
             except KeyError:
+                await interaction.send("Não há player ativo no servidor...", ephemeral=True)
+                await send_idle_embed(interaction.message, bot=self.bot)
                 return
 
             if interaction.message != player.message:
