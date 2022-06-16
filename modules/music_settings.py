@@ -110,6 +110,8 @@ class MusicSettings(commands.Cog):
 
         guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
 
+        await inter.response.defer(ephemeral=True)
+
         try:
             original_message = await self.bot.get_channel(int(guild_data["player_controller"]["channel"]))\
                 .fetch_message(int(guild_data["player_controller"]["message_id"]))
@@ -216,7 +218,10 @@ class MusicSettings(commands.Cog):
             color=self.bot.get_color(inter.guild.me)
         )
 
-        await inter.send(embed=embed, ephemeral=True)
+        try:
+            await inter.edit_original_message(embed=embed)
+        except AttributeError:
+            await inter.send(embed=embed, ephemeral=True)
 
 
     @commands.has_guild_permissions(administrator=True)
