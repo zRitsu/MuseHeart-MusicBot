@@ -1947,10 +1947,16 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         try:
 
+            if control == "musicplayer_request_channel":
+                cmd = self.bot.get_slash_command("setup")
+                kwargs = {"target": interaction.channel}
+                await self.process_player_interaction(interaction, cmd, kwargs)
+                return
+
             if control in (
                 PlayerControls.add_song,
                 PlayerControls.enqueue_fav,
-                PlayerControls.settings
+                PlayerControls.settings,
             ):
 
                 if not interaction.user.voice:

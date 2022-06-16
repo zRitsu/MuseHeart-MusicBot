@@ -265,7 +265,9 @@ class MusicSettings(commands.Cog):
 
                 await message.edit(
                     content=f"Canal de pedir música foi resetado pelo membro {inter.author.mention}.",
-                    embed=None, view=None
+                    embed=None, components=[
+                        disnake.ui.Button(label="Reconfigurar este canal", emoji="💠", custom_id="musicplayer_request_channel")
+                    ]
                 )
                 await message.thread.edit(archived=True, reason=f"Player resetado por {inter.author}.")
 
