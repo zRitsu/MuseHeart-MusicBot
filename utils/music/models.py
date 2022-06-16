@@ -248,6 +248,9 @@ class BasePlayer:
         if not self.static:
             hints.append("Ao criar uma conversa/thread na mensagem do player, será ativado o modo de song-request "
                               "nela (possibilitando pedir música apenas enviando o nome/link da música na conversa).")
+        else:
+            hints.append("Você pode fixar músicas/playlists no player quando tiver no modo de espera/oscioso para "
+                         "qualquer membro poder usá-las de forma facilitada. Experimente o comando: /pin add")
 
         random.shuffle(hints)
         self.hints = cycle(hints)
