@@ -580,7 +580,7 @@ class BasePlayer:
 
     async def process_rpc(
             self,
-            voice_channel: Optional[disnake.VoiceChannel, disnake.StageChannel] = None,
+            voice_channel: Union[disnake.VoiceChannel, disnake.StageChannel] = None,
             close=False,
             users: List[disnake.Member] = None
     ):
@@ -651,7 +651,7 @@ class BasePlayer:
 
         else:
 
-            track: Optional[LavalinkTrack, SpotifyTrack] = self.current
+            track: Union[LavalinkTrack, SpotifyTrack] = self.current
 
             stats["track"] = {
                 "thumb": track.thumb,
