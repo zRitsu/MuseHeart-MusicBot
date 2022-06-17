@@ -171,15 +171,38 @@ class Owner(commands.Cog):
 
         text = "`Será necessário me reiniciar após as alterações.`"
 
+        txt = f"`✅` **[Atualização realizada com sucesso!]({self.bot.remote_git_url}/commits/main)**"
+
+        if git_log:
+            txt += f"\n\n{self.format_log(git_log[:10])}"
+
+        txt += f"\n\n`📄` **Log:** ```py\n{out_git[:1000]}```\n{text}"
+
+        if isinstance(ctx, CustomContext):
+            embed = disnake.Embed(
+                description=txt,
+                color=self.bot.get_color(ctx.guild.me)
+            )
+            await ctx.send(embed=embed, view=self.owner_view)
+
+            self.bot.loop.create_task(self.update_deps(ctx, requirements_old, opts))
+
+        else:
+            self.bot.loop.create_task(self.update_deps(ctx, requirements_old, opts))
+            return txt
+
+
+    async def update_deps(self, ctx, original_reqs, opts):
+
         if "--pip" in opts:
-            run_command_old("pip3 install -U -r requirements.txt")
+            await run_command("pip3 install -U -r requirements.txt")
 
         else:
 
             with open("./requirements.txt") as f:
                 requirements_new = f.read()
 
-            if requirements_old != requirements_new:
+            if original_reqs != requirements_new:
 
                 view = AskView(timeout=45, ctx=ctx)
 
@@ -207,23 +230,6 @@ class Owner(commands.Cog):
                     await (await view.interaction_resp.original_message()).delete()
                 except:
                     pass
-
-        txt = f"`✅` **[Atualização realizada com sucesso!]({self.bot.remote_git_url}/commits/main)**"
-
-        if git_log:
-            txt += f"\n\n{self.format_log(git_log[:10])}"
-
-        txt += f"\n\n`📄` **Log:** ```py\n{out_git[:1000]}```\n{text}"
-
-        if isinstance(ctx, CustomContext):
-            embed = disnake.Embed(
-                description=txt,
-                color=self.bot.get_color(ctx.guild.me)
-            )
-            await ctx.send(embed=embed, view=self.owner_view)
-
-        else:
-            return txt
 
 
     async def cleanup_git(self, force=False):
