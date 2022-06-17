@@ -182,7 +182,7 @@ class MusicSettings(commands.Cog):
             msg = f"Canal de pedido de músicas definido para: <#{channel.id}>"
 
         if not message:
-            message = await channel.send("Carregando player controller...")
+            message = await send_idle_embed(channel, bot=self.bot, force=True)
 
         try:
             player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild_id]

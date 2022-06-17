@@ -1,4 +1,6 @@
 from __future__ import annotations
+from io import BytesIO
+import json
 import disnake
 from disnake.ext import commands
 from typing import TYPE_CHECKING, Union
@@ -16,7 +18,7 @@ class PinManager(commands.Cog):
     def __init__(self, bot: BotCore):
         self.bot = bot
 
-    desc_prefix = "📌 [Server playlist] 📌 | "
+    desc_prefix = "📌 [Server Playlist] 📌 | "
 
 
     async def process_idle_embed(self, guild: disnake.Guild):
@@ -76,7 +78,7 @@ class PinManager(commands.Cog):
         guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
 
         if len(guild_data["player_controller"]["fav_links"]) > 25:
-            raise GenericError(f"**Você excedeu a quantidade de favoritos permitido: 25.**")
+            raise GenericError(f"**Quantidade de links excedida! Permitido: 25.**")
 
         if not guild_data["player_controller"]["channel"] or not self.bot.get_channel(int(guild_data["player_controller"]["channel"])):
             raise GenericError("**Não há player configurado no servidor! Use o comando /setup**")
@@ -88,8 +90,8 @@ class PinManager(commands.Cog):
 
         await self.bot.db.update_data(inter.guild.id, guild_data, db_name="guilds")
 
-        await inter.edit_original_message(content="Link Salvo/Atualizado com sucesso nos fixos do player!\n"
-                         "Membros podem usá-lo diretamente no player-controller quando não estiver em uso.")
+        await inter.edit_original_message(embed=disnake.Embed(description="**Link adicionado/atualizado com sucesso nos fixos do player!\n"
+                         "Membros podem usá-lo diretamente no player-controller quando não estiver em uso.**"), color=self.bot.get_color(inter.guild.me))
 
         await self.process_idle_embed(inter.guild)
 
@@ -98,9 +100,9 @@ class PinManager(commands.Cog):
     async def edit(
             self,
             inter: disnake.AppCmdInter,
-            item: str = commands.Param(autocomplete=pin_list, description="item dos favoritos para editar."), *,
-            name: str = commands.Param(name="novo_nome", default="", description="Novo nome para o favorito."),
-            url: str = commands.Param(name="novo_link", default="", description="Novo link para o favorito."),
+            item: str = commands.Param(autocomplete=pin_list, description="item para editar."), *,
+            name: str = commands.Param(name="novo_nome", default="", description="Novo nome para link."),
+            url: str = commands.Param(name="novo_link", default="", description="Novo link para o item selecionado."),
             description: str = commands.Param(name="descrição", description="Descrição do link.", default="")
     ):
 
@@ -108,7 +110,7 @@ class PinManager(commands.Cog):
             raise GenericError("**Você não especificou nenhum dos itens opcionais...**")
 
         if "> fav:" in name.lower():
-            raise GenericError("Você não deve incluir esse nome no favorito: **> fav:**")
+            raise GenericError("Você não deve incluir esse nome: **> fav:**")
 
         if len(name) > 25:
             raise GenericError("**O nome não pode ultrapassar 25 caracteres.**")
@@ -143,7 +145,7 @@ class PinManager(commands.Cog):
 
         await self.bot.db.update_data(inter.guild.id, guild_data, db_name="guilds")
 
-        await inter.edit_original_message(content="Link fixo editado com sucesso!")
+        await inter.edit_original_message(embed=disnake.Embed(description="***Link fixo editado com sucesso!**"), color=self.bot.get_color(inter.guild.me))
 
         await self.process_idle_embed(inter.guild)
 
@@ -152,7 +154,7 @@ class PinManager(commands.Cog):
     async def remove(
             self,
             inter: disnake.AppCmdInter,
-            item: str = commands.Param(autocomplete=pin_list, description="Favorito para remover."),
+            item: str = commands.Param(autocomplete=pin_list, description="Item para remover."),
     ):
 
         await inter.response.defer(ephemeral=True)
@@ -162,13 +164,107 @@ class PinManager(commands.Cog):
         try:
             del guild_data["player_controller"]["fav_links"][item]
         except:
-            raise GenericError(f"**Não há favorito com o nome:** {item}")
+            raise GenericError(f"**Não há links da lista com o nome:** {item}")
 
         await self.bot.db.update_data(inter.guild.id, guild_data, db_name="guilds")
 
-        await inter.edit_original_message(content="Link removido com sucesso!")
+        await inter.edit_original_message(embed=disnake.Embed(description="**Link removido com sucesso!**", color=self.bot.get_color(inter.guild.me)))
 
         await self.process_idle_embed(inter.guild)
+
+
+    @commands.cooldown(1, 20, commands.BucketType.guild)
+    @pin.sub_command(name="import",description=f"{desc_prefix}Importar links de arq. json para a lista de links do servidor.")
+    async def import_(
+            self,
+            inter: disnake.ApplicationCommandInteraction,
+            file: disnake.Attachment = commands.Param(name="arquivo", description="arquivo em formato .json")
+    ):
+
+        if file.size > 2097152:
+            raise GenericError("**O tamanho do arquivo não pode ultrapassar 2Mb!**")
+
+        if not file.filename.endswith(".json"):
+            raise GenericError("**Tipo de arquivo inválido!**")
+
+        await inter.response.defer(ephemeral=True)
+
+        try:
+            data = (await file.read()).decode('utf-8')
+            json_data = json.loads(data)
+        except Exception as e:
+            raise GenericError("**Ocorreu um erro ao ler o arquivo, por favor revise-o e use o comando novamente.**\n"
+                               f"```py\n{repr(e)}```")
+
+        for name, data in json_data.items():
+
+            if "> fav:" in name.lower():
+                continue
+            
+            if len(data['description']) > 50:
+                raise GenericError(f"**Um item de seu arquivo ultrapassa a quantidade de caracteres permitido:{max_url_chars}\nDescrição:** {data['description']}")
+
+            if len(data['url']) > (max_url_chars := self.bot.config["USER_FAV_MAX_URL_LENGTH"]):
+                raise GenericError(f"**Um item de seu arquiv ultrapassa a quantidade de caracteres permitido:{max_url_chars}\nURL:** {data['url']}")
+
+            if not isinstance(data['url'], str) or not URL_REG.match(data['url']):
+                raise GenericError(f"O seu arquivo contém link inválido: ```ldif\n{data['url']}```")
+
+        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+        
+        if not guild_data["player_controller"]["channel"] or not self.bot.get_channel(int(guild_data["player_controller"]["channel"])):
+            raise GenericError("**Não há player configurado no servidor! Use o comando /setup**")
+
+        for name in json_data.keys():
+            if len(name) > (max_name_chars := 25):
+                raise GenericError(f"**Um item de seu arquivo ({name}) ultrapassa a quantidade de caracteres permitido:{max_name_chars}**")
+            try:
+                del guild_data["player_controller"]["fav_links"][name]
+            except KeyError:
+                continue
+
+        if (json_size:=len(json_data)) > 25:
+            raise GenericError(f"A quantidade de itens no no arquivo excede a quantidade máxima permitida (25).")
+
+        if (json_size + (user_favs:=len(guild_data["player_controller"]["fav_links"]))) > 25:
+            raise GenericError("A lista de músicas/playlist do servidor não possui espaço suficiente para adicionar todos os itens de seu arquivo...\n"
+                                f"Limite atual: 25\n"
+                                f"Quantidade de links salvos: {user_favs}\n"
+                                f"Você precisa de: {(json_size + user_favs)-25}")
+
+        guild_data["player_controller"]["fav_links"].update(json_data)
+
+        await self.bot.db.update_data(inter.guild.id, guild_data, db_name="guilds")
+
+        await inter.edit_original_message(
+            embed = disnake.Embed(
+                color=self.bot.get_color(inter.guild.me),
+                description = "**Os links foram importados com sucesso!**\n"
+                              "**Eles vão aparecer quando o player não tiver em uso ou em modo de espera.**",
+            )
+        )
+
+
+    @commands.cooldown(1, 20, commands.BucketType.guild)
+    @pin.sub_command(description=f"{desc_prefix}Exportar os links de músicas/playlists fixas do servidor em um arquivo json.")
+    async def export(self, inter: disnake.ApplicationCommandInteraction):
+
+        await inter.response.defer(ephemeral=True)
+
+        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+
+        if not guild_data["player_controller"]["fav_links"]:
+            raise GenericError(f"**Não há músicas/playlists fixadas no servidor..\n"
+                               f"Você pode adicionar usando o comando: /{self.pin.name} {self.add.name}**")
+
+        fp = BytesIO(bytes(json.dumps(guild_data["player_controller"]["fav_links"], indent=4), 'utf-8'))
+
+        embed = disnake.Embed(
+            description=f"**Os dados dos links de músicas/playlists fixas do servidor estão aqui.\n"
+                        f"Você pode importar usando o comando:** `/{self.pin.name} {self.add.name}`",
+            color=self.bot.get_color(inter.guild.me))
+
+        await inter.edit_original_message(embed=embed, file=disnake.File(fp=fp, filename="guild_favs.json"))
 
 
 def setup(bot: BotCore):

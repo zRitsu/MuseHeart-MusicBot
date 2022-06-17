@@ -62,8 +62,12 @@ class FavManager(commands.Cog):
 
         await self.bot.db.update_data(inter.author.id, user_data, db_name="users")
 
-        await inter.edit_original_message(content="Link Salvo/Atualizado com sucesso nos seus favoritos!\n"
-                         "Ele vai aparecer quando usar o comando /play (no preenchimento automático da busca).")
+        await inter.edit_original_message(embed=disnake.Embed(description="**Link salvo/atualizado com sucesso nos seus favoritos!\n"
+                         "Ele vai aparecer nas seguintes ocasições:**\n```\n"
+                         "- Ao usar o comando /play (no preenchimento automático da busca)"
+                         "- Ao clicar no botão de pedir música do player."
+                         "- Ao usar o comando play (prefixed) sem nome ou link.```",
+                         color=self.bot.get_color(inter.guild.me)))
 
 
     @fav.sub_command(description=f"{desc_prefix}Editar um item da sua lista de favoritos.")
@@ -105,7 +109,7 @@ class FavManager(commands.Cog):
 
         await self.bot.db.update_data(inter.author.id, user_data, db_name="users")
 
-        await inter.edit_original_message(content="Favorito editado com sucesso!")
+        await inter.edit_original_message(embed=disnake.Embed(description="**Favorito editado com sucesso!**", color=self.bot.get_color(inter.guild.me)))
 
 
     @fav.sub_command(description=f"{desc_prefix}Remover um link da sua lista de favoritos.")
@@ -126,7 +130,7 @@ class FavManager(commands.Cog):
 
         await self.bot.db.update_data(inter.author.id, user_data, db_name="users")
 
-        await inter.edit_original_message(content="Link removido com sucesso!")
+        await inter.edit_original_message(embed=disnake.Embed(description="**Link removido com sucesso!**", color=self.bot.get_color(inter.guild.me)))
 
 
     @fav.sub_command(name="clear", description=f"{desc_prefix}Limpar sua lista de favoritos.")
@@ -247,7 +251,7 @@ class FavManager(commands.Cog):
         )
 
 
-    @fav.sub_command(description=f"{desc_prefix}Exportar seus favoritos em um arquivo no seu DM.")
+    @fav.sub_command(description=f"{desc_prefix}Exportar seus favoritos em um arquivo json.")
     async def export(self, inter: disnake.ApplicationCommandInteraction):
 
         await inter.response.defer(ephemeral=True)
