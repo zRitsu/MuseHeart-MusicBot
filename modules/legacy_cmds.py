@@ -73,7 +73,7 @@ class Owner(commands.Cog):
 
     def format_log(self, data: list):
         return "\n".join( f"[`{c['abbreviated_commit']}`]({self.bot.remote_git_url}/commit/{c['commit']}) `- "
-                          f"{(disnake.utils.escape_markdown(c['subject'])[:40] + '...') if len(c['subject']) > 39 else c['subject']}` "
+                          f"{(c['subject'][:40].replace('`', '') + '...') if len(c['subject']) > 39 else c['subject']}` "
                           f"(<t:{c['timestamp']}:R>)" for c in data)
 
 
