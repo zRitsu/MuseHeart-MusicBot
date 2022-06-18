@@ -68,7 +68,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
           f"> 🔊 **⠂Volume:** `{player.volume}%`"
 
     if player.current.track_loops:
-        txt += f"\n> 🔂 **⠂Repetições da música atual:** `{player.current.track_loops}`"
+        txt += f"\n> 🔂 **⠂Repetições restante:** `{player.current.track_loops}`"
 
     if player.loop:
         if player.loop == 'current':
