@@ -1867,17 +1867,20 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 traceback.print_exc()
 
 
-    async def is_request_channel(self, ctx: Union[disnake.AppCmdInter, CustomContext], *,
-                                 data: dict = None, ignore_thread=False):
+    async def is_request_channel(self, ctx: Union[disnake.AppCmdInter, disnake.MessageInteraction, CustomContext], *,
+                                 data: dict = None, ignore_thread=False) -> bool:
 
         if isinstance(ctx, CustomContext):
-            return
+            return False
+
+        if isinstance(ctx, disnake.MessageInteraction):
+            return True
 
         try:
             player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[ctx.guild.id]
 
             if not player.static:
-                return
+                return False
 
             if isinstance(ctx.channel, disnake.Thread) and player.text_channel == ctx.channel.parent:
 
@@ -1895,7 +1898,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 channel = None
 
             if not channel:
-                return
+                return False
 
             if isinstance(ctx.channel, disnake.Thread) and channel == ctx.channel.parent:
                 return not ignore_thread
