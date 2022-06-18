@@ -195,7 +195,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if guild_data["check_other_bots_in_vc"] and any(m for m in channel.members if m.bot and m != ctx.guild.me):
             raise GenericError(f"**Há outro bot conectado no canal:** <#{ctx.author.voice.channel.id}>")
 
-        if isinstance(ctx, disnake.AppCmdInter) and ctx.application_command == self.connect:
+        if isinstance(ctx, disnake.AppCmdInter) and ctx.application_command.name == self.connect.name:
 
             perms = channel.permissions_for(ctx.guild.me)
 
