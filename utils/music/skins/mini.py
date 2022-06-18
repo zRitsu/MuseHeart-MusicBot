@@ -61,14 +61,15 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
         if queue_size:
             embed.description += f" `({queue_size})`"
         embed.set_thumbnail(url=player.current.thumb)
+        embed.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif")
 
     if player.current.is_stream:
-        embed.add_field(name="🔴 **⠂Duração:**", value="╚ `Livestream`", inline=True)
+        embed.add_field(name="**Duração:**", value="`🔴 Livestream`", inline=True)
     else:
-        embed.add_field(name="⏰ **⠂Duração:**", value=f"╚ `{time_format(player.current.duration)}`", inline=True)
+        embed.add_field(name="**Duração:**", value=f"`{time_format(player.current.duration)}`", inline=True)
 
-    embed.add_field(name="💠 **⠂Uploader:**", value=f"╚ {player.current.authors_md}", inline=True)
-    embed.add_field(name="✋ **⠂Pedido por:**", value=f"╚ {player.current.requester.mention}", inline=True)
+    embed.add_field(name="**Uploader:**", value=f"{player.current.authors_md}", inline=True)
+    embed.add_field(name="**Ped. por:**", value=f"{player.current.requester.mention}", inline=True)
 
     if player.current.track_loops:
         embed.description += f" `[🔂 {player.current.track_loops}]`"
