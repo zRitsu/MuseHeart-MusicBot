@@ -1876,7 +1876,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         try:
             player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[ctx.guild.id]
 
+            if not player.static:
+                return
+
             if isinstance(ctx.channel, disnake.Thread) and player.text_channel == ctx.channel.parent:
+
                 return not ignore_thread
 
             return player.text_channel == ctx.channel
