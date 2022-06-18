@@ -15,7 +15,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
 
     embed = disnake.Embed(
         color=player.bot.get_color(player.guild.me),
-        description=f"[**{player.current.single_title}**]({player.current.uri})"
+        description=f"[`{player.current.single_title}`]({player.current.uri})"
     )
     embed_queue = None
     queue_size = len(player.queue)
