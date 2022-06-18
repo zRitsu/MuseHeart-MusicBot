@@ -260,25 +260,6 @@ class MusicSettings(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        try:
-
-            if delete_channel == "sim":
-                await channel.delete(reason=f"Player resetado por: {inter.author}")
-
-            else:
-                message = await channel.fetch_message(int(guild_data['player_controller']['message_id']))
-
-                await message.edit(
-                    content=f"Canal de pedir música foi resetado pelo membro {inter.author.mention}.",
-                    embed=None, components=[
-                        disnake.ui.Button(label="Reconfigurar este canal", emoji="💠", custom_id="musicplayer_request_channel")
-                    ]
-                )
-                await message.thread.edit(archived=True, reason=f"Player resetado por {inter.author}.")
-
-        except:
-            pass
-
         guild_data["player_controller"].update({
             "message_id": None,
             "channel": None
@@ -303,11 +284,30 @@ class MusicSettings(commands.Cog):
         except KeyError:
             return
 
-        player.static = None
+        player.static = False
         player.message = None
         player.text_channel = inter.channel
         player.process_hint()
         await player.invoke_np(force=True)
+
+        try:
+            if delete_channel == "sim":
+                await channel.delete(reason=f"Player resetado por: {inter.author}")
+
+            else:
+                message = await channel.fetch_message(int(guild_data['player_controller']['message_id']))
+
+                await message.edit(
+                    content=f"Canal de pedir música foi resetado pelo membro {inter.author.mention}.",
+                    embed=None, components=[
+                        disnake.ui.Button(label="Reconfigurar este canal", emoji="💠",
+                                          custom_id="musicplayer_request_channel")
+                    ]
+                )
+                await message.thread.edit(archived=True, reason=f"Player resetado por {inter.author}.")
+
+        except:
+            pass
 
 
     @commands.has_guild_permissions(administrator=True)
