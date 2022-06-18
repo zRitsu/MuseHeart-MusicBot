@@ -260,6 +260,11 @@ class MusicSettings(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
+        try:
+            original_message = await channel.fetch_message(int(guild_data["player_controller"]["message_id"]))
+        except:
+            original_message = None
+
         guild_data["player_controller"].update({
             "message_id": None,
             "channel": None
@@ -295,16 +300,15 @@ class MusicSettings(commands.Cog):
                 await channel.delete(reason=f"Player resetado por: {inter.author}")
 
             else:
-                message = await channel.fetch_message(int(guild_data['player_controller']['message_id']))
 
-                await message.edit(
+                await original_message.edit(
                     content=f"Canal de pedir música foi resetado pelo membro {inter.author.mention}.",
                     embed=None, components=[
                         disnake.ui.Button(label="Reconfigurar este canal", emoji="💠",
                                           custom_id="musicplayer_request_channel")
                     ]
                 )
-                await message.thread.edit(archived=True, reason=f"Player resetado por {inter.author}.")
+                await original_message.thread.edit(archived=True, reason=f"Player resetado por {inter.author}.")
 
         except:
             pass
