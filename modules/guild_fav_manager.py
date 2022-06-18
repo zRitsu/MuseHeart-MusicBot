@@ -91,7 +91,7 @@ class PinManager(commands.Cog):
         await self.bot.db.update_data(inter.guild.id, guild_data, db_name="guilds")
 
         await inter.edit_original_message(embed=disnake.Embed(description="**Link adicionado/atualizado com sucesso nos fixos do player!\n"
-                         "Membros podem usá-lo diretamente no player-controller quando não estiver em uso.**"), color=self.bot.get_color(inter.guild.me))
+                         "Membros podem usá-lo diretamente no player-controller quando não estiver em uso.**", color=self.bot.get_color(inter.guild.me)))
 
         await self.process_idle_embed(inter.guild)
 
@@ -145,7 +145,7 @@ class PinManager(commands.Cog):
 
         await self.bot.db.update_data(inter.guild.id, guild_data, db_name="guilds")
 
-        await inter.edit_original_message(embed=disnake.Embed(description="***Link fixo editado com sucesso!**"), color=self.bot.get_color(inter.guild.me))
+        await inter.edit_original_message(embed=disnake.Embed(description="***Link fixo editado com sucesso!**", color=self.bot.get_color(inter.guild.me)))
 
         await self.process_idle_embed(inter.guild)
 
@@ -201,11 +201,11 @@ class PinManager(commands.Cog):
             if "> fav:" in name.lower():
                 continue
             
-            if len(data['description']) > 50:
-                raise GenericError(f"**Um item de seu arquivo ultrapassa a quantidade de caracteres permitido:{max_url_chars}\nDescrição:** {data['description']}")
-
             if len(data['url']) > (max_url_chars := self.bot.config["USER_FAV_MAX_URL_LENGTH"]):
                 raise GenericError(f"**Um item de seu arquiv ultrapassa a quantidade de caracteres permitido:{max_url_chars}\nURL:** {data['url']}")
+
+            if len(data['description']) > 50:
+                raise GenericError(f"**Um item de seu arquivo ultrapassa a quantidade de caracteres permitido:{max_url_chars}\nDescrição:** {data['description']}")
 
             if not isinstance(data['url'], str) or not URL_REG.match(data['url']):
                 raise GenericError(f"O seu arquivo contém link inválido: ```ldif\n{data['url']}```")
