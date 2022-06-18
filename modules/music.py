@@ -1509,7 +1509,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player.command_log = f"{inter.author.mention} **parou o player!**"
         embed.description = f"🛑 **⠂{inter.author.mention} parou o player.**"
-        await inter.send(embed=embed, ephemeral=await self.is_request_channel(inter))
+        await inter.send(embed=embed, ephemeral=player.static and player.text_channel == inter.channel)
 
         await player.destroy()
 
