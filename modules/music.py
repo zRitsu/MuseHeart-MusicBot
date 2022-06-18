@@ -1044,17 +1044,14 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player.current.track_loops = value
 
-        embed = disnake.Embed(color=self.bot.get_color(inter.guild.me))
+        txt = [
+            f"{inter.author.mention} definiu a quantidade de repetições da música "
+            f"[`{(fix_characters(player.current.title, 25))}`]({player.current.uri}) para **{value}**.",
+            f"🔄 **⠂{inter.author.mention} definiu a quantidade de repetições da música para [{value}]:**\n"
+            f"[`{player.current.title}`]({player.current.uri})"
+        ]
 
-        txt = f"{inter.author.mention} definiu a quantidade de repetições da música " \
-              f"[`{(fix_characters(player.current.title, 25))}`]({player.current.uri}) para **{value}**."
-
-        player.set_command_log(text=txt, emoji="🔄")
-        embed.description=f"🔄 **⠂{inter.author.mention} definiu a quantidade de repetições da música atual para {value}:** [`{player.current.title}`]({player.current.uri}){player.controller_link}"
-        embed.set_thumbnail(url=player.current.thumb)
-        await inter.send(embed=embed, ephemeral=await self.is_request_channel(inter))
-
-        await player.update_message(rpc_update=True)
+        await self.interaction_message(inter, txt, rpc_update=True, emoji="🔄")
 
 
     @check_voice()
@@ -1372,7 +1369,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         txt = [
             f"rotacionou a fila para a música [`{(fix_characters(track.title, limit=25))}`]({track.uri}).",
-            f"🔃 **⠂{inter.author.mention} rotacionou a fila para a música:** [`{track.title}`]({track.uri})."
+            f"🔃 **⠂{inter.author.mention} rotacionou a fila para a música:**\n[`{track.title}`]({track.uri})."
         ]
 
         await self.interaction_message(inter, txt, emoji="🔃")
