@@ -64,8 +64,8 @@ class FavManager(commands.Cog):
 
         await inter.edit_original_message(embed=disnake.Embed(description="**Link salvo/atualizado com sucesso nos seus favoritos!\n"
                          "Ele vai aparecer nas seguintes ocasições:** ```\n"
-                         "- Ao usar o comando /play (no preenchimento automático da busca)"
-                         "- Ao clicar no botão de pedir música do player."
+                         "- Ao usar o comando /play (no preenchimento automático da busca)\n"
+                         "- Ao clicar no botão de pedir música do player.\n"
                          "- Ao usar o comando play (prefixed) sem nome ou link.```",
                          color=self.bot.get_color(inter.guild.me)))
 
