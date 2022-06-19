@@ -245,14 +245,18 @@ class BasePlayer:
         hints = [
             "Você também pode clicar no botão [🎶] para pedir uma música ou adicionar um link de música/playlist "
             "ou favorito na fila.",
-            "Você pode alterar a skin/aparência do player usando o comando /change_skin.",
+
+            "Você pode alterar a skin/aparência do player usando o comando /change_skin (comando vísivel apenas membros "
+            "com perm de: gerenciar servidor).",
+
             "Crie favoritos para sempre ter fácil acesso de ouvir eles aqui dispensando ficar copiando e colando link, "
             "para isso use o comando: /fav add"
         ]
 
         if self.static:
             hints.append("Você pode fixar músicas/playlists na mensagem do player quando tiver no modo de espera/oscioso "
-                         "para qualquer membro poder usá-las de forma facilitada. Para isso use o comando: /pin add")
+                         "para qualquer membro poder usá-las de forma facilitada. Para isso use o comando: /pin add "
+                         "(comando vísivel apenas membros com perm de: gerenciar servidor)")
 
         elif self.bot.intents.message_content:
             hints.append("Ao criar uma conversa/thread na mensagem do player, será ativado o modo de song-request "
