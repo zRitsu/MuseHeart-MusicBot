@@ -397,6 +397,7 @@ class MusicSettings(commands.Cog):
 
 
     @commands.cooldown(1, 10, commands.BucketType.guild)
+    @commands.max_concurrency(1, commands.BucketType.guild)
     @commands.slash_command(
         description=f"{desc_prefix}Alterar aparência/skin do player.",
         default_member_permissions=disnake.Permissions(manage_guild=True)
@@ -407,9 +408,11 @@ class MusicSettings(commands.Cog):
 
         guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
 
+        selected = guild_data["player_controller"]["skin"] or self.bot.default_skin
+
         skin_list = [
-            disnake.SelectOption(emoji="🎨", label=s) for s in self.bot.player_skins if
-            s != guild_data["player_controller"]["skin"] and not s in self.bot.config["IGNORE_SKINS"].split()
+            disnake.SelectOption(emoji="🎨", label=s, default=selected == s) for s in self.bot.player_skins if
+            not s in self.bot.config["IGNORE_SKINS"].split()
         ]
 
         if not skin_list and not await self.bot.is_owner(inter.author):
@@ -424,7 +427,11 @@ class MusicSettings(commands.Cog):
         )
 
         try:
-            resp = await self.bot.wait_for("dropdown", check=lambda i: i.data.custom_id == f"skin_select_{inter.id}")
+            resp = await self.bot.wait_for(
+                "dropdown",
+                check=lambda i: i.data.custom_id == f"skin_select_{inter.id}",
+                timeout=35
+            )
         except asyncio.TimeoutError:
             msg = await inter.original_message()
             await msg.edit(view=None, embed=disnake.Embed(description="**Tempo esgotado!**", colour=self.bot.get_color(inter.guild.me)))
