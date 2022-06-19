@@ -2368,6 +2368,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 return
 
         if not message.content:
+
+            try:
+                if message.type.thread_starter_message:
+                    return
+            except AttributeError:
+                return
             await message.delete()
             await message.channel.send(f"{message.author.mention} você deve enviar um link/nome da música.", delete_after=9)
             return
@@ -2926,8 +2932,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
 
-    @commands.Cog.listener("on_thread_join")
-    async def join_thread_request(self, thread: disnake.Thread):
+    @commands.Cog.listener("on_thread_create")
+    async def thread_song_request(self, thread: disnake.Thread):
 
         try:
             player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[thread.guild.id]
@@ -2937,14 +2943,14 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if player.static or player.message.id != thread.id:
             return
 
-        if thread.guild.me.id in thread._members:
-            return
+        embed = disnake.Embed(color=self.bot.get_color(thread.guild.me))
 
-        embed = disnake.Embed(
-            description="**Esta conversa será usada temporariamente para pedir músicas apenas enviando "
-                        "o nome/link sem necessidade de usar comando.**",
-            color=self.bot.get_color(thread.guild.me)
-        )
+        if self.bot.intents.message_content:
+            embed.description = "**Esta conversa será usada temporariamente para pedir músicas apenas enviando " \
+                                "o nome/link sem necessidade de usar comando.**"
+        else:
+            embed.description = "**Aviso! Não estou com a intent de message_content ativada por meu desenvolvedor...\n" \
+                                "A funcionalidade de pedir música aqui pode não ter um resultado esperado...**"
 
         await thread.send(embed=embed)
 
