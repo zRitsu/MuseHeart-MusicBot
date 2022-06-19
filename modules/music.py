@@ -2771,6 +2771,15 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player.process_hint()
 
+        if not player.guild.me.voice:
+            try:
+                await self.bot.wait_for(
+                    "voice_state_update", check=lambda m, b, a: m == player.guild.me and m.voice, timeout=7
+                )
+            except asyncio.TimeoutError:
+                player.update = True
+                return
+
         await player.invoke_np(force=True if (player.static or not player.loop or not player.is_last_message()) else False, rpc_update=True)
 
 
