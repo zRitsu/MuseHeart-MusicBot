@@ -23,8 +23,12 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
         txt += f"\n⏰ **Duração:** `{time_format(player.current.duration)}`\n"
 
     txt += f"✋ **Pedido por:** {player.current.requester.mention}\n" \
-           f"🔊 **Volume:** `{player.volume}%`\n" \
-           f"*️⃣ **Canal de voz:** {player.guild.me.voice.channel.mention}\n"
+           f"🔊 **Volume:** `{player.volume}%`\n"
+
+    try:
+        txt += f"*️⃣ **Canal de voz:** {player.guild.me.voice.channel.mention}\n"
+    except AttributeError:
+        pass
 
     if player.current.track_loops:
         txt += f"🔂 **Repetições restantes:** `{player.current.track_loops}`\n"
