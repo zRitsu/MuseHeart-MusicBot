@@ -181,7 +181,7 @@ def load_bot(bot_name: str, token: str, main=False):
 
             bot.bot_ready = True
 
-        print(f'{bot.user} [{bot.user.id}] Online.')
+        print(f'{bot.user} - [{bot.user.id}] Online.')
 
     bots.append(bot)
 
