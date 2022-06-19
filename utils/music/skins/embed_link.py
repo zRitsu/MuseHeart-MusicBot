@@ -1,5 +1,4 @@
 from typing import Union
-import disnake
 import re
 from ..models import LavalinkPlayer, YTDLPlayer
 from ..converters import time_format
