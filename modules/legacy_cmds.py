@@ -398,7 +398,7 @@ class Owner(commands.Cog):
         await view.wait()
 
 
-    @commands.has_guild_permissions(administrator=True)
+    @commands.has_guild_permissions(manage_guild=True)
     @commands.cooldown(1, 10, commands.BucketType.guild)
     @commands.command(
         aliases=["mudarprefixo", "prefix", "changeprefix"],

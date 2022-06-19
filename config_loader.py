@@ -43,6 +43,7 @@ def load_config():
         "USER_FAV_MAX_URL_LENGTH": 90,
         "HINT_RATE": 4,
         "YTDLMODE": False,
+        "IGNORE_SKINS": '',
 
         ##############################################
         ### Sistema de música - Suporte ao spotify ###

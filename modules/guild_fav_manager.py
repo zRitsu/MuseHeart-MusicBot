@@ -43,8 +43,7 @@ class PinManager(commands.Cog):
 
 
     @commands.max_concurrency(1, commands.BucketType.user)
-    @commands.has_guild_permissions(manage_guild=True)
-    @commands.slash_command(name="pin")
+    @commands.slash_command(name="pin", default_member_permissions=disnake.Permissions(manage_guild=True))
     async def pin(self, inter: disnake.AppCmdInter):
         pass
 

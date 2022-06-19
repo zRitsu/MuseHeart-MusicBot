@@ -1,4 +1,5 @@
 from __future__ import annotations
+import asyncio
 import disnake
 import humanize
 from disnake.ext import commands
@@ -29,8 +30,11 @@ class MusicSettings(commands.Cog):
 
 
     # O nome desse comando está sujeito a alterações (tá ridiculo, mas não consegui pensar em um nome melhor no momento).
-    @commands.has_guild_permissions(administrator=True)
-    @commands.slash_command(description=f"{desc_prefix}Permitir/bloquear de me conectar em um canal onde há outros bots.")
+    @commands.cooldown(1, 5, commands.BucketType.guild)
+    @commands.slash_command(
+        description=f"{desc_prefix}Permitir/bloquear de me conectar em um canal onde há outros bots.",
+        default_member_permissions=disnake.Permissions(manage_guild=True)
+    )
     async def dont_connect_other_bot_vc(
             self, inter: disnake.ApplicationCommandInteraction,
             opt: str = commands.Param(choices=["Ativar", "Desativar"], description="Escolha: ativar ou desativar")
@@ -51,7 +55,7 @@ class MusicSettings(commands.Cog):
         await inter.send(embed=embed, ephemeral=True)
 
 
-    @commands.has_guild_permissions(administrator=True)
+    @commands.has_guild_permissions(manage_guild=True)
     @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
     @commands.command(
@@ -71,10 +75,12 @@ class MusicSettings(commands.Cog):
         await self.setup.callback(self=self, inter=ctx, target=channel, purge_messages=reset)
 
 
-    @commands.has_guild_permissions(administrator=True)
     @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
-    @commands.slash_command(description=f"{desc_prefix}Criar/escolher um canal dedicado para pedir músicas e deixar player fixado.")
+    @commands.slash_command(
+        description=f"{desc_prefix}Criar/escolher um canal dedicado para pedir músicas e deixar player fixado.",
+        default_member_permissions=disnake.Permissions(manage_guild=True)
+    )
     async def setup(
             self,
             inter: disnake.AppCmdInter,
@@ -223,7 +229,7 @@ class MusicSettings(commands.Cog):
             await inter.send(embed=embed, ephemeral=True)
 
 
-    @commands.has_guild_permissions(administrator=True)
+    @commands.has_guild_permissions(manage_guild=True)
     @commands.bot_has_guild_permissions(manage_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
     @commands.command(
@@ -238,10 +244,12 @@ class MusicSettings(commands.Cog):
         await self.reset.callback(self=self, inter=ctx, delete_channel=delete_channel)
 
 
-    @commands.has_guild_permissions(administrator=True)
     @commands.bot_has_guild_permissions(manage_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
-    @commands.slash_command(description=f"{desc_prefix}Resetar as configurações relacionadas ao canal de pedir música (song request).")
+    @commands.slash_command(
+        description=f"{desc_prefix}Resetar as configurações relacionadas ao canal de pedir música (song request).",
+        default_member_permissions=disnake.Permissions(manage_guild=True)
+    )
     async def reset(
             self,
             inter: disnake.AppCmdInter,
@@ -314,16 +322,18 @@ class MusicSettings(commands.Cog):
             pass
 
 
-    @commands.has_guild_permissions(administrator=True)
+    @commands.has_guild_permissions(manage_guild=True)
     @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
     @commands.command(name="adddjrole",description="Adicionar um cargo para a lista de DJ's do servidor.", usage="[id / nome / @cargo]")
     async def add_dj_role_legacy(self, ctx: CustomContext, *, role: disnake.Role):
         await self.add_dj_role(ctx, inter=ctx, role=role)
 
 
-    @commands.has_guild_permissions(administrator=True)
     @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
-    @commands.slash_command(description=f"{desc_prefix}Adicionar um cargo para a lista de DJ's do servidor.")
+    @commands.slash_command(
+        description=f"{desc_prefix}Adicionar um cargo para a lista de DJ's do servidor.",
+        default_member_permissions=disnake.Permissions(manage_guild=True)
+    )
     async def add_dj_role(
             self,
             inter: disnake.ApplicationCommandInteraction,
@@ -347,16 +357,18 @@ class MusicSettings(commands.Cog):
         await inter.send(f"O cargo {role.mention} foi adicionado à lista de DJ's", ephemeral=True)
 
 
-    @commands.has_guild_permissions(administrator=True)
+    @commands.has_guild_permissions(manage_guild=True)
     @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
     @commands.command(description="Remover um cargo para a lista de DJ's do servidor.", usage="[id / nome / @cargo]")
     async def remove_dj_role_legacy(self, ctx: CustomContext, *, role: disnake.Role):
         await self.remove_dj_role(ctx, inter=ctx, role=role)
 
 
-    @commands.has_guild_permissions(administrator=True)
     @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
-    @commands.slash_command(name="removedjrole",description=f"{desc_prefix}Remover um cargo para a lista de DJ's do servidor.")
+    @commands.slash_command(
+        name="removedjrole", description=f"{desc_prefix}Remover um cargo para a lista de DJ's do servidor.",
+        default_member_permissions=disnake.Permissions(manage_guild=True)
+    )
     async def remove_dj_role(
             self,
             inter: disnake.ApplicationCommandInteraction,
@@ -382,6 +394,67 @@ class MusicSettings(commands.Cog):
         await self.bot.db.update_data(inter.guild.id, guild_data, db_name="guilds")
 
         await inter.send(f"O cargo {role.mention} foi removido da lista de DJ's", ephemeral=True)
+
+
+    @commands.cooldown(1, 10, commands.BucketType.guild)
+    @commands.slash_command(
+        description=f"{desc_prefix}Alterar aparência/skin do player.",
+        default_member_permissions=disnake.Permissions(manage_guild=True)
+    )
+    async def change_skin(self, inter: disnake.AppCmdInter):
+
+        await inter.response.defer(ephemeral=True)
+
+        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+
+        skin_list = [
+            disnake.SelectOption(emoji="🎨", label=s) for s in self.bot.player_skins if
+            s != guild_data["player_controller"]["skin"] and not s in self.bot.config["IGNORE_SKINS"].split()
+        ]
+
+        if not skin_list and not await self.bot.is_owner(inter.author):
+            raise GenericError("**Não há novas skins disponíveis...**")
+
+        await inter.edit_original_message(
+            embed=disnake.Embed(
+                description="**Selecione uma skin abaixo:**",
+                colour=self.bot.get_color(inter.guild.me)
+            ),
+            components=[disnake.ui.Select(custom_id=f"skin_select_{inter.id}", options=skin_list)]
+        )
+
+        try:
+            resp = await self.bot.wait_for("dropdown", check=lambda i: i.data.custom_id == f"skin_select_{inter.id}")
+        except asyncio.TimeoutError:
+            msg = await inter.original_message()
+            await msg.edit(view=None, embed=disnake.Embed(description="**Tempo esgotado!**", colour=self.bot.get_color(inter.guild.me)))
+            return
+        else:
+            inter = resp
+            skin = resp.data.values[0]
+
+        await inter.response.defer(ephemeral=True)
+
+        guild_data["player_controller"]["skin"] = skin
+
+        await self.bot.db.update_data(inter.guild.id, guild_data, db_name="guilds")
+
+        await inter.edit_original_message(
+            embed=disnake.Embed(
+                description="**A skin do player do servidor foi alterado com sucesso!**",
+                color=self.bot.get_color(inter.guild.me)
+            ),
+            view=None
+        )
+
+        try:
+            player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
+        except KeyError:
+            pass
+        else:
+            player.skin = self.bot.player_skins[skin]
+            player.set_command_log(text=f"{inter.author.mention} alterou a skin do player para: **{skin}**", emoji="🎨")
+            await player.invoke_np(force=True)
 
 
     @commands.cooldown(1, 5, commands.BucketType.user)

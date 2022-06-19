@@ -10,7 +10,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
 
     data = {
         "content": None,
-        "embeds": None
+        "embeds": []
     }
 
     embed = disnake.Embed(color=player.bot.get_color(player.guild.me))
@@ -122,7 +122,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
     embed.description = txt
 
     if player.static:
-        embed.set_image(url=player.current.thumb)
+        embed.set_image(url=player.current.thumb or "https://media.discordapp.net/attachments/480195401543188483/987830071815471114/musicequalizer.gif")
     else:
         embed.set_image(
             url="https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif")

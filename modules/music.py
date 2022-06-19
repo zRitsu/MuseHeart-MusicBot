@@ -4,7 +4,6 @@ from disnake.ext import commands
 import traceback
 import wavelink
 import asyncio
-import json
 from random import shuffle
 from typing import Literal, Union, Optional
 from urllib import parse
@@ -439,8 +438,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         tracks, node = await self.get_tracks(query, inter.user, node=node, track_loops=repeat_amount,
                                              hide_playlist=hide_playlist)
 
-        #skin = self.bot.check_skin(guild_data["player_controller"]["skin"]) TODO: habilitar apenas quando o suporte a skin por servidor for totalmente finalizado.
-        skin = self.bot.default_skin
+        skin = self.bot.check_skin(guild_data["player_controller"]["skin"])
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.get_player(
             guild_id=inter.guild.id,
@@ -1754,18 +1752,19 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
 
     @has_player()
-    @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.has_guild_permissions(manage_guild=True)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command(name="247", aliases=["nonstop"], description="Ativar/Desativar o modo 24/7 do player (Em testes).")
     async def nonstop_legacy(self, ctx: CustomContext):
-
         await self.nonstop.callback(self=self, inter=ctx)
 
 
     @has_player()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.has_guild_permissions(manage_guild=True)
-    @commands.slash_command(name="24_7", description=f"{desc_prefix}Ativar/Desativar o modo 24/7 do player (Em testes).")
+    @commands.slash_command(
+        name="24_7", description=f"{desc_prefix}Ativar/Desativar o modo 24/7 do player (Em testes).",
+        default_member_permissions=disnake.Permissions(manage_guild=True)
+    )
     async def nonstop(self, inter: disnake.AppCmdInter):
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
@@ -1776,7 +1775,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         text = [
             f"{msg[0]} o modo interrupto do player.",
-            f"{msg[1]} **⠂{inter.author.mention} {msg[0]} o modo interrupto do player."
+            f"{msg[1]} **⠂{inter.author.mention} {msg[0]} o modo interrupto do player.**"
         ]
 
         if not len(player.queue):

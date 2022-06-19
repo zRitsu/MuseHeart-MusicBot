@@ -10,7 +10,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
 
     data = {
         "content": None,
-        "embeds": None
+        "embeds": []
     }
 
     embed = disnake.Embed(
@@ -34,7 +34,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
 
     if player.static:
 
-        embed.set_image(url=player.current.thumb)
+        embed.set_image(url=player.current.thumb or "https://media.discordapp.net/attachments/480195401543188483/987830071815471114/musicequalizer.gif")
 
         if queue_size:
 
@@ -69,7 +69,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
         embed.add_field(name="**Duração:**", value=f"`{time_format(player.current.duration)}`", inline=True)
 
     embed.add_field(name="**Uploader:**", value=f"{player.current.authors_md}", inline=True)
-    embed.add_field(name="**Ped. por:**", value=f"{player.current.requester.mention}", inline=True)
+    embed.add_field(name="**Adc. por:**", value=f"{player.current.requester.mention}", inline=True)
 
     if player.current.track_loops:
         embed.description += f" `[🔂 {player.current.track_loops}]`"
