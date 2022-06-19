@@ -1,5 +1,6 @@
 from typing import Union
 import re
+import disnake
 from ..models import LavalinkPlayer, YTDLPlayer
 from ..converters import time_format
 
@@ -38,7 +39,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
 
     if player.command_log:
 
-        log = re.sub(r"\[(.+)\]\(.+\)", r"\1", player.command_log) # remover links do command_log p/ evitar gerar mais de uma preview.
+        log = re.sub(r"\[(.+)\]\(.+\)", r"\1", disnake.utils.escape_mentions(player.command_log)) # remover links do command_log p/ evitar gerar mais de uma preview.
 
         txt += f"```ini\n" \
                f"[Última Interação]:``` " \
