@@ -1044,7 +1044,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player.current.track_loops = value
 
         txt = [
-            f"{inter.author.mention} definiu a quantidade de repetições da música "
+            f"definiu a quantidade de repetições da música "
             f"[`{(fix_characters(player.current.title, 25))}`]({player.current.uri}) para **{value}**.",
             f"🔄 **⠂{inter.author.mention} definiu a quantidade de repetições da música para [{value}]:**\n"
             f"[`{player.current.title}`]({player.current.uri})"

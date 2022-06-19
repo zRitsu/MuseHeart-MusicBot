@@ -201,6 +201,7 @@ class BasePlayer:
         self.message_updater_task: Optional[asyncio.Task] = self.bot.loop.create_task(self.message_updater())
         self.restrict_mode = kwargs.pop('restrict_mode', False) # limitar apenas para dj's e staff's
         self.ignore_np_once = False # não invocar player controller em determinadas situações
+        self.allowed_mentions = disnake.AllowedMentions(users=False, everyone=False, roles=False)
 
         requester: disnake.Member = kwargs.pop('requester')
 
@@ -269,7 +270,7 @@ class BasePlayer:
         if not self.static and not self.has_thread:
             embed = disnake.Embed(description=msg, color=self.bot.get_color(self.guild.me))
             try:
-                await self.text_channel.send(embed=embed)
+                await self.text_channel.send(embed=embed, allowed_mentions=self.allowed_mentions)
             except:
                 pass
 
@@ -374,7 +375,7 @@ class BasePlayer:
 
         try:
             if self.has_thread or self.static or self.text_channel.last_message_id == self.message.id:
-                await self.message.edit(embed=embed, content=None, components=components)
+                await self.message.edit(embed=embed, content=None, components=components, allowed_mentions=self.allowed_mentions)
                 send_message = False
             else:
                 send_message = True
@@ -386,7 +387,7 @@ class BasePlayer:
                 await self.message.delete()
             except:
                 pass
-            self.message = await self.text_channel.send(embed=embed, components=components)
+            self.message = await self.text_channel.send(embed=embed, components=components, allowed_mentions=self.allowed_mentions)
 
 
     async def idling_mode(self):
@@ -403,7 +404,7 @@ class BasePlayer:
             self.command_log = msg
         else:
             embed = disnake.Embed(description=msg, color=self.bot.get_color(self.guild.me))
-            self.bot.loop.create_task(self.text_channel.send(embed=embed, delete_after=120))
+            self.bot.loop.create_task(self.text_channel.send(embed=embed, delete_after=120, allowed_mentions=self.allowed_mentions))
 
         self.bot.loop.create_task(self.destroy())
 
@@ -462,14 +463,14 @@ class BasePlayer:
 
             try:
                 if interaction and not interaction.response.is_done():
-                    await interaction.response.edit_message(components=components, **data)
+                    await interaction.response.edit_message(components=components, allowed_mentions=self.allowed_mentions, **data)
                 else:
                     try:
                         await interaction.response.defer()
                     except:
                         pass
                     try:
-                        await self.message.edit(components=components, **data)
+                        await self.message.edit(components=components, allowed_mentions=self.allowed_mentions, **data)
                     except:
                         if not self.bot.get_channel(self.text_channel.id):
                             await self.destroy(force=True)  # canal não existe mais no servidor...
@@ -483,7 +484,7 @@ class BasePlayer:
         await self.destroy_message()
 
         try:
-            self.message = await self.text_channel.send(components=components, **data)
+            self.message = await self.text_channel.send(components=components, allowed_mentions=self.allowed_mentions, **data)
         except:
             traceback.print_exc()
 
@@ -570,7 +571,7 @@ class BasePlayer:
                     embed=disnake.Embed(
                         description=self.command_log,
                         color=self.bot.get_color(self.guild.me)
-                    ), view=None
+                    ), view=None, allowed_mentions=self.allowed_mentions
                 )
                 channel: disnake.Thread = self.bot.get_channel(self.message.id)
                 await channel.edit(archived=True, locked=True)
