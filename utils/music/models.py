@@ -242,7 +242,11 @@ class BasePlayer:
     def setup_hints(self):
 
         hints = [
-            "Você também pode clicar no botão [🎶] para pedir uma música ou adicionar um link de música/playlist ou favorito na fila."
+            "Você também pode clicar no botão [🎶] para pedir uma música ou adicionar um link de música/playlist "
+            "ou favorito na fila.",
+            "Você pode alterar a skin/aparência do player usando o comando /change_skin.",
+            "Crie favoritos para sempre ter fácil acesso de ouvir eles aqui dispensando ficar copiando e colando link, "
+            "para isso use o comando: /fav add"
         ]
 
         if self.static:
