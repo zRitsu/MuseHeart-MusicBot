@@ -1,4 +1,6 @@
 from typing import Union
+import disnake
+import re
 from ..models import LavalinkPlayer, YTDLPlayer
 from ..converters import time_format
 
@@ -36,9 +38,12 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
         txt += f"🎼 **Músicas na fila:** `({queue_size})`\n"
 
     if player.command_log:
+
+        log = re.sub(r"\[(.+)\]\(.+\)", r"\1", player.command_log) # remover links do command_log p/ evitar gerar mais de uma preview.
+
         txt += f"```ini\n" \
                f"[Última Interação]:``` " \
-               f"{player.command_log_emoji} {player.command_log}\n"
+               f"{player.command_log_emoji} {log}\n"
 
     if player.current_hint:
         txt += f"```ini\n[Dica]:``` `{player.current_hint}`"
