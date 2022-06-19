@@ -614,7 +614,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not player.current:
             await player.process_next()
         else:
-            player.set_command_log(text=log_text, emoji=emoji)
+            if ephemeral:
+                player.set_command_log(text=log_text, emoji=emoji)
             await player.update_message()
 
 
@@ -726,18 +727,18 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         embed.colour = self.bot.get_color(inter.guild.me)
 
-        txt = f"{inter.author.mention} **votou para pular a música atual (votos: {len(player.votes) + 1}/{self.bot.config.get('VOTE_SKIP_AMOUNT', 3)}).**"
+        txt = [
+            f"votou para pular a música atual (votos: {len(player.votes) + 1}/{self.bot.config['VOTE_SKIP_AMOUNT']}).",
+            f"{inter.author.mention} votou para pular a música atual (votos: {len(player.votes) + 1}/{self.bot.config['VOTE_SKIP_AMOUNT']}).",
+        ]
 
         if len(player.votes) < self.bot.config.get('VOTE_SKIP_AMOUNT', 3):
             embed.description = txt
             player.votes.add(inter.author)
-            player.set_command_log(text=txt, emoji="✋")
-            await inter.send("voto adicionado!")
-            await player.update_message()
+            await self.interaction_message(inter, txt, update=True, emoji="✋")
             return
 
-        player.set_command_log(text=f"{txt}\n**A anterior foi pulada imediatamente.**", emoji="⏭️")
-        await inter.send("voto adicionado!", ephemeral=await self.is_request_channel(inter))
+        await self.interaction_message(inter, txt, emoji="✋")
         await player.stop()
 
 
@@ -1126,11 +1127,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         qsize = len(player.played)
 
-        player.set_command_log(
-            text=f"{inter.author.mention} **readicionou [{qsize}] música(s) tocada(s) na fila.**",
-            emoji="🎶"
-        )
-
         player.played.reverse()
         player.queue.extend(player.played)
         player.played.clear()
@@ -1291,8 +1287,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await self.interaction_message(inter, txt, emoji="↪️")
 
         else:
-            txt = f"{inter.author.mention} moveu **[{i_size}]** músicas com o nome **{fix_characters(query, 25)}** para a " \
-                  f"posição **[{position}]** da fila. "
 
             tracklist = "\n".join(f"[`{fix_characters(t.title, 45)}`]({t.uri})" for i, t in indexes[:10])
 
@@ -1306,9 +1300,14 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             if player.controller_link:
                 embed.description += f" `|`{player.controller_link}"
 
-            player.set_command_log(text=txt, emoji="↪️")
+            ephemeral = await self.is_request_channel(inter)
 
-            await inter.send(embed=embed, ephemeral=await self.is_request_channel(inter))
+            if ephemeral:
+                player.set_command_log(
+                    text=f"{inter.author.mention} moveu **[{i_size}]** músicas com o nome **{fix_characters(query, 25)}"
+                         f"** para a posição **[{position}]** da fila.", emoji="↪️")
+
+            await inter.send(embed=embed, ephemeral=ephemeral)
 
         await player.update_message()
 
@@ -2562,7 +2561,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         component_interaction = isinstance(inter, disnake.MessageInteraction)
 
-        player.set_command_log(text=f"{inter.author.mention} {txt}", emoji=emoji)
+        ephemeral = await self.is_request_channel(inter)
+
+        if ephemeral:
+            player.set_command_log(text=f"{inter.author.mention} {txt}", emoji=emoji)
 
         await player.update_message(interaction=False if (update or not component_interaction) else inter, rpc_update=rpc_update)
 
@@ -2581,7 +2583,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 embed = disnake.Embed(color=self.bot.get_color(inter.guild.me),
                                       description=(txt_ephemeral or f"{inter.author.mention} **{txt}**") + player.controller_link)
 
-                await inter.send(embed=embed, ephemeral=await self.is_request_channel(inter))
+                await inter.send(embed=embed, ephemeral=ephemeral)
 
 
     async def process_nodes(self, data: dict, start_local: bool = False):
