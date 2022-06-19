@@ -20,8 +20,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
     else:
         txt += f"\n⏰ **Duração:** `{time_format(player.current.duration)}`\n"
 
-    txt += f"💠 **Uploader:** {player.current.authors_md}\n" \
-           f"✋ **Pedido por:** {player.current.requester.mention}\n" \
+    txt += f"✋ **Pedido por:** {player.current.requester.mention}\n" \
            f"🔊 **Volume:** `{player.volume}%`\n"
 
     if player.current.track_loops:
