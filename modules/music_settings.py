@@ -460,6 +460,7 @@ class MusicSettings(commands.Cog):
             pass
         else:
             player.skin = self.bot.player_skins[skin]
+            player.auto_update = False # linha temporária para resolver possíveis problemas com skins custom criadas por usuarios antes desse commit.
             player.set_command_log(text=f"{inter.author.mention} alterou a skin do player para: **{skin}**", emoji="🎨")
             await player.invoke_np(force=True)
 

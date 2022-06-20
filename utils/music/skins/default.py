@@ -128,6 +128,9 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
             url="https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif")
         embed.set_thumbnail(url=player.current.thumb)
 
+    if player.auto_update:
+        player.auto_update = False
+
     data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
 
     return data

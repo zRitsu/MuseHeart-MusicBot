@@ -42,6 +42,7 @@ def load_config():
         "USER_FAV_MAX_NAME_LENGTH": 35,
         "USER_FAV_MAX_URL_LENGTH": 90,
         "HINT_RATE": 4,
+        "PLAYER_MESSAGE_UPDATE_INTERVAL": 15,
         "YTDLMODE": False,
         "IGNORE_SKINS": '',
 
@@ -142,5 +143,8 @@ def load_config():
 
     if CONFIGS["IDLE_TIMEOUT"] < 30:
         CONFIGS["IDLE_TIMEOUT"] = 30
+
+    if 10 < CONFIGS["PLAYER_MESSAGE_UPDATE_INTERVAL"] < 45:
+        CONFIGS["PLAYER_MESSAGE_UPDATE_INTERVAL"] = 15
 
     return CONFIGS

@@ -53,4 +53,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
     if player.current_hint:
         txt += f"```ini\n[Dica]:``` `{player.current_hint}`"
 
+    if player.auto_update:
+        player.auto_update = False
+
     return {"content": txt, "embeds": []}
