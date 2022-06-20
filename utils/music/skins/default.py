@@ -129,7 +129,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
         embed.set_thumbnail(url=player.current.thumb)
 
     if player.auto_update:
-        player.auto_update = False
+        player.auto_update = 0
 
     data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
 

@@ -125,6 +125,6 @@ def load(player: LavalinkPlayer) -> dict:
     data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
 
     if not player.auto_update:
-        player.auto_update = True
+        player.auto_update = 15 # tempo em segundos para atualizar
 
     return data

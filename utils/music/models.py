@@ -198,7 +198,7 @@ class BasePlayer:
         self.nonstop: bool = False
         self.update: bool = False
         self.updating: bool = False
-        self.auto_update = False
+        self.auto_update: int = 0
         self.message_updater_task: Optional[asyncio.Task] = self.bot.loop.create_task(self.message_updater())
         self.restrict_mode = kwargs.pop('restrict_mode', False) # limitar apenas para dj's e staff's
         self.ignore_np_once = False # não invocar player controller em determinadas situações
@@ -521,7 +521,7 @@ class BasePlayer:
 
             if self.auto_update:
 
-                await asyncio.sleep(self.bot.config["PLAYER_MESSAGE_UPDATE_INTERVAL"])
+                await asyncio.sleep(self.auto_update)
 
                 try:
                     await self.invoke_np()
