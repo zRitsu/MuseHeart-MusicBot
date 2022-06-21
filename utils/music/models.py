@@ -433,34 +433,36 @@ class BasePlayer:
 
         self.updating = True
 
-        components = []
+        if data.get("components") is None:
 
-        controls = {
-            "⏯️": (PlayerControls.pause_resume, get_button_style(self.paused),),
-            "⏮️": (PlayerControls.back,),
-            "⏭️": (PlayerControls.skip,),
-            "🔀": (PlayerControls.shuffle,),
-            "🎶": (PlayerControls.add_song,),
-            "⏹️": (PlayerControls.stop,),
-            "📑": (PlayerControls.queue,),
-            "🛠️": (PlayerControls.settings,)
-        }
+            data["components"] = []
 
-        for button, control in controls.items():
+            controls = {
+                "⏯️": (PlayerControls.pause_resume, get_button_style(self.paused),),
+                "⏮️": (PlayerControls.back,),
+                "⏭️": (PlayerControls.skip,),
+                "🔀": (PlayerControls.shuffle,),
+                "🎶": (PlayerControls.add_song,),
+                "⏹️": (PlayerControls.stop,),
+                "📑": (PlayerControls.queue,),
+                "🛠️": (PlayerControls.settings,)
+            }
 
-            try:
-                style = control[1]
-            except IndexError:
-                style = disnake.ButtonStyle.grey
-            components.append(disnake.ui.Button(emoji=button, custom_id=control[0], style=style))
+            for button, control in controls.items():
 
-        components.append(
-            disnake.ui.Button(
-                emoji="<:help:947781412017279016>",
-                custom_id=PlayerControls.help_button,
-                label="menu de ajuda"
+                try:
+                    style = control[1]
+                except IndexError:
+                    style = disnake.ButtonStyle.grey
+                data["components"].append(disnake.ui.Button(emoji=button, custom_id=control[0], style=style))
+
+            data["components"].append(
+                disnake.ui.Button(
+                    emoji="<:help:947781412017279016>",
+                    custom_id=PlayerControls.help_button,
+                    label="menu de ajuda"
+                )
             )
-        )
 
         if self.message and (self.ignore_np_once or self.has_thread or self.static or not force or self.is_last_message()):
 
@@ -468,14 +470,14 @@ class BasePlayer:
 
             try:
                 if interaction and not interaction.response.is_done():
-                    await interaction.response.edit_message(components=components, allowed_mentions=self.allowed_mentions, **data)
+                    await interaction.response.edit_message(allowed_mentions=self.allowed_mentions, **data)
                 else:
                     try:
                         await interaction.response.defer()
                     except:
                         pass
                     try:
-                        await self.message.edit(components=components, allowed_mentions=self.allowed_mentions, **data)
+                        await self.message.edit(allowed_mentions=self.allowed_mentions, **data)
                     except:
                         if not self.bot.get_channel(self.text_channel.id):
                             await self.destroy(force=True)  # canal não existe mais no servidor...
@@ -489,7 +491,7 @@ class BasePlayer:
         await self.destroy_message()
 
         try:
-            self.message = await self.text_channel.send(components=components, allowed_mentions=self.allowed_mentions, **data)
+            self.message = await self.text_channel.send(allowed_mentions=self.allowed_mentions, **data)
         except:
             traceback.print_exc()
 
