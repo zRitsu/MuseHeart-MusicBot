@@ -623,7 +623,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @has_source()
     @is_requester()
     @commands.max_concurrency(1, commands.BucketType.member)
-    @commands.command(name="skip", aliases=["s", "pular"], description=f"Pular a música atual que está tocando.")
+    @commands.command(name="skip", aliases=["next", "n", "s", "pular"], description=f"Pular a música atual que está tocando.")
     async def skip_legacy(self, ctx: CustomContext):
         await self.skip.callback(self=self, inter=ctx)
 
