@@ -181,6 +181,9 @@ class MusicSettings(commands.Cog):
                         message = m
                         break
 
+            if not target.permissions_for(inter.guild.me).manage_permissions:
+                raise GenericError(f"**Não tenho permissão de gerenciar permissões no canal:** {target.mention}")
+
             await target.edit(overwrites=perms)
 
             channel = target
