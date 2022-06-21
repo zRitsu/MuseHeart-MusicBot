@@ -3,14 +3,16 @@ import itertools
 from typing import Union
 from ..models import LavalinkPlayer, YTDLPlayer
 import disnake
-from ..converters import time_format, fix_characters
+from ..converters import time_format, fix_characters, get_button_style
+from ...others import PlayerControls
 
 
 def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
 
     data = {
         "content": None,
-        "embeds": []
+        "embeds": [],
+        "components": []
     }
 
     embed = disnake.Embed(
@@ -90,5 +92,15 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
         player.auto_update = 0
 
     data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
+
+    data["components"].extend(
+        [
+            disnake.ui.Button(emoji="⏯️", custom_id=PlayerControls.pause_resume, style=get_button_style(player.paused)),
+            disnake.ui.Button(emoji="⏮️", custom_id=PlayerControls.back),
+            disnake.ui.Button(emoji="⏭️", custom_id=PlayerControls.skip),
+            disnake.ui.Button(emoji="⏹️", custom_id=PlayerControls.stop),
+            disnake.ui.Button(emoji="🎶", custom_id=PlayerControls.add_song)
+        ]
+    )
 
     return data
