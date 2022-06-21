@@ -97,8 +97,8 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
         [
             disnake.ui.Button(emoji="⏯️", custom_id=PlayerControls.pause_resume, style=get_button_style(player.paused)),
             disnake.ui.Button(emoji="⏮️", custom_id=PlayerControls.back),
-            disnake.ui.Button(emoji="⏭️", custom_id=PlayerControls.skip),
             disnake.ui.Button(emoji="⏹️", custom_id=PlayerControls.stop),
+            disnake.ui.Button(emoji="⏭️", custom_id=PlayerControls.skip),
             disnake.ui.Button(emoji="🎶", custom_id=PlayerControls.add_song)
         ]
     )
