@@ -210,7 +210,7 @@ class MusicSettings(commands.Cog):
 
         if not isinstance(channel, disnake.VoiceChannel):
             if not message.thread:
-                await message.create_thread(name="song requests")
+                await message.create_thread(name="song requests", auto_archive_duration=10080)
             elif message.thread.archived:
                 await message.thread.edit(archived=False, reason=f"Song request reativado por: {inter.author}.")
 
