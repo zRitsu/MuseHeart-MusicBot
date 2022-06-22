@@ -399,6 +399,15 @@ class MusicSettings(commands.Cog):
         await inter.send(f"O cargo {role.mention} foi removido da lista de DJ's", ephemeral=True)
 
 
+    @commands.has_guild_permissions(manage_guild=True)
+    @commands.cooldown(1, 10, commands.BucketType.guild)
+    @commands.max_concurrency(1, commands.BucketType.guild)
+    @commands.command(description="Alterar aparência/skin do player.", name="changeskin", aliases=["setskin", "skin"])
+    async def change_skin_legacy(self, ctx: CustomContext):
+
+        await self.change_skin(ctx, inter=ctx)
+
+
     @commands.cooldown(1, 10, commands.BucketType.guild)
     @commands.max_concurrency(1, commands.BucketType.guild)
     @commands.slash_command(
@@ -421,22 +430,40 @@ class MusicSettings(commands.Cog):
         if not skin_list and not await self.bot.is_owner(inter.author):
             raise GenericError("**Não há novas skins disponíveis...**")
 
-        await inter.edit_original_message(
+        try:
+            func = inter.edit_original_message
+        except AttributeError:
+            func = inter.send
+
+        try:
+            id_ = f"_{inter.id}"
+        except AttributeError:
+            id_ = ""
+
+        msg = await func(
             embed=disnake.Embed(
                 description="**Selecione uma skin abaixo:**",
                 colour=self.bot.get_color(inter.guild.me)
             ),
-            components=[disnake.ui.Select(custom_id=f"skin_select_{inter.id}", options=skin_list)]
+            components=[disnake.ui.Select(custom_id=f"skin_select{id_}", options=skin_list)]
         )
+
+        if hasattr(inter, "id"):
+            check = (lambda i: i.data.custom_id == f"skin_select_{inter.id}")
+        else:
+            check = (lambda i: i.message.id == msg.id and i.author.id == inter.author.id)
 
         try:
             resp = await self.bot.wait_for(
                 "dropdown",
-                check=lambda i: i.data.custom_id == f"skin_select_{inter.id}",
+                check=check,
                 timeout=35
             )
         except asyncio.TimeoutError:
-            msg = await inter.original_message()
+            try:
+                msg = await inter.original_message()
+            except AttributeError:
+                pass
             await msg.edit(view=None, embed=disnake.Embed(description="**Tempo esgotado!**", colour=self.bot.get_color(inter.guild.me)))
             return
         else:
@@ -449,9 +476,14 @@ class MusicSettings(commands.Cog):
 
         await self.bot.db.update_data(inter.guild.id, guild_data, db_name="guilds")
 
-        await inter.edit_original_message(
+        try:
+            func = inter.edit_original_message
+        except AttributeError:
+            func = msg.edit
+
+        await func(
             embed=disnake.Embed(
-                description="**A skin do player do servidor foi alterado com sucesso!**",
+                description=f"**A skin do player do servidor foi alterado com sucesso para:** `{skin}`",
                 color=self.bot.get_color(inter.guild.me)
             ),
             view=None
