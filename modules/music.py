@@ -270,6 +270,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.command(name="search", description="Buscar música e escolher uma entre os resultados para tocar.", aliases=["sc"])
     async def search_legacy(self, ctx: CustomContext, *, query: str):
 
+        if not query:
+            raise GenericError("**Você não adicionou um nome ou link para tocar.**")
+
         await self.play.callback(self=self, inter=ctx, query=query, position=0, options=False, manual_selection=True,
                                  source="ytsearch", repeat_amount=0, hide_playlist=False, server=None)
 
