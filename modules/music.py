@@ -755,7 +755,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not level.isdigit() or len(level) > 3:
             raise GenericError("**Volume inválido! escolha entre 5 a 150**", self_delete=7)
 
-        await self.volume.callback(self=self, inter=ctx, value=level)
+        await self.volume.callback(self=self, inter=ctx, value=int(level))
 
 
     @check_voice()
