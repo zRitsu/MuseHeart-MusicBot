@@ -268,7 +268,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.command(name="search", description="Buscar música e escolher uma entre os resultados para tocar.", aliases=["sc"])
-    async def search_legacy(self, ctx: CustomContext, *, query: str):
+    async def search_legacy(self, ctx: CustomContext, *, query: str = None):
 
         if not query:
             raise GenericError("**Você não adicionou um nome ou link para tocar.**")
