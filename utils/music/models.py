@@ -204,6 +204,16 @@ class BasePlayer:
         self.ignore_np_once = False # não invocar player controller em determinadas situações
         self.allowed_mentions = disnake.AllowedMentions(users=False, everyone=False, roles=False)
 
+        self.initial_hints = [
+            "Você pode usar o botão [🎶] para pedir músicas ou adicionar um link de música/playlist/favorito na fila.",
+
+            "Você pode alterar a skin/aparência do player usando o comando /change_skin (comando vísivel apenas membros"
+            " com perm de: gerenciar servidor).",
+
+            "Crie favoritos para ter fácil acesso de usar seus links favoritos aqui dispensando ter que copiar e colar "
+            "seus links nos comandos. Experimente usando o comando: /fav add.",
+        ]
+
         requester: disnake.Member = kwargs.pop('requester')
 
         if not requester.guild_permissions.manage_channels:
@@ -243,16 +253,7 @@ class BasePlayer:
 
     def setup_hints(self):
 
-        hints = [
-            "Você também pode clicar no botão [🎶] para pedir uma música ou adicionar um link de música/playlist "
-            "ou favorito na fila.",
-
-            "Você pode alterar a skin/aparência do player usando o comando /change_skin (comando vísivel apenas membros "
-            "com perm de: gerenciar servidor).",
-
-            "Crie favoritos para sempre ter fácil acesso de ouvir eles aqui dispensando ficar copiando e colando link, "
-            "para isso use o comando: /fav add"
-        ]
+        hints = list(self.initial_hints)
 
         if self.static:
             hints.append("Você pode fixar músicas/playlists na mensagem do player quando tiver no modo de espera/oscioso "
