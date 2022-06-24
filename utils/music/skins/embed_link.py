@@ -48,12 +48,10 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
 
         log = re.sub(r"\[(.+)]\(.+\)", r"\1", player.command_log.replace("`", "")) # remover links do command_log p/ evitar gerar mais de uma preview.
 
-        txt += f"```ini\n" \
-               f"[Última Interação]:``` " \
-               f"{player.command_log_emoji} {log}\n"
+        txt += f"`------------------`\n{player.command_log_emoji} **Última Interação:** {log}\n"
 
     if player.current_hint:
-        txt += f"```ini\n[Dica]:``` `{player.current_hint}`"
+        txt += f"`------------------`\n`💡 Dica: {player.current_hint}`"
 
     if player.auto_update:
         player.auto_update = 0
