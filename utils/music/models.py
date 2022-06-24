@@ -223,10 +223,7 @@ class BasePlayer:
         self.current_hint = ""
         self.setup_hints()
 
-        try:
-            print(f"Player Iniciado - Servidor: {self.guild.name} [{self.guild.id}]")
-        except:
-            print(f"Player Iniciado - Servidor: [{self.guild.id}]")
+        print(f"Player Iniciado - Servidor: {self.guild.name} [{self.guild.id}]")
 
     def __repr__(self):
         return f"<volume={self.volume} " \
@@ -1126,10 +1123,8 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
             self.guild.voice_client.cleanup()
         except:
             pass
-        try:
-            print(f"Player Finalizado - Servidor: {self.guild.name} [{self.guild_id}]")
-        except:
-            print(f"Player Finalizado - Servidor: [{self.guild_id}]")
+
+        print(f"Player Finalizado - Servidor: {self.guild.name} [{self.guild_id}]")
 
     #######################
     #### Filter Stuffs ####
