@@ -1504,14 +1504,20 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def stop(self, inter: disnake.AppCmdInter):
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
-
-        embed = disnake.Embed(color=self.bot.get_color(inter.guild.me))
-
         player.command_log = f"{inter.author.mention} **parou o player!**"
-        embed.description = f"🛑 **⠂{inter.author.mention} parou o player.**"
-        await inter.send(embed=embed, ephemeral=player.static and player.text_channel == inter.channel)
 
-        await player.destroy()
+        if isinstance(inter, disnake.MessageInteraction):
+            await player.destroy(inter=inter)
+        else:
+            await inter.send(
+                embed=disnake.Embed(
+                    color=self.bot.get_color(inter.guild.me),
+                    description=f"🛑 **⠂{inter.author.mention} parou o player.**"
+                ),
+                components=[disnake.ui.Button(label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song)],
+                ephemeral=player.static and player.text_channel == inter.channel
+            )
+            await player.destroy()
 
 
     @has_player()

@@ -555,7 +555,7 @@ class BasePlayer:
         else:
             self.update = True
 
-    async def cleanup(self):
+    async def cleanup(self, inter: disnake.MessageInteraction = None):
 
         self.queue.clear()
         self.played.clear()
@@ -593,6 +593,17 @@ class BasePlayer:
                 await channel.edit(archived=True, locked=True)
             except Exception:
                 print(f"Falha ao arquivar thread do servidor: {self.guild.name}\n{traceback.format_exc()}")
+
+        elif inter:
+
+            await inter.response.edit_message(
+                embed=disnake.Embed(
+                    description=f"🛑 ⠂{self.command_log}",
+                    color=self.bot.get_color(self.guild.me)),
+                components=[
+                    disnake.ui.Button(label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song)
+                ]
+            )
 
         else:
 
@@ -1106,9 +1117,9 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
 
         await self.play(track)
 
-    async def destroy(self, *, force: bool = False):
+    async def destroy(self, *, force: bool = False, inter: disnake.MessageInteraction = None):
 
-        await self.cleanup()
+        await self.cleanup(inter)
 
         self.is_closing = True
 
