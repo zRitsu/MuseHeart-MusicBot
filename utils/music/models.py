@@ -597,6 +597,7 @@ class BasePlayer:
         elif inter:
 
             await inter.response.edit_message(
+                content=None,
                 embed=disnake.Embed(
                     description=f"🛑 ⠂{self.command_log}",
                     color=self.bot.get_color(self.guild.me)),
