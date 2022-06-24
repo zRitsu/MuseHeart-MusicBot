@@ -431,36 +431,19 @@ class BasePlayer:
 
         self.updating = True
 
-        if data.get("components") is None:
+        if data.get("components") is None: # nenhum controle de botão foi definido na skin (será usado os botões padrões).
 
-            data["components"] = []
-
-            controls = {
-                "⏯️": (PlayerControls.pause_resume, get_button_style(self.paused),),
-                "⏮️": (PlayerControls.back,),
-                "⏭️": (PlayerControls.skip,),
-                "🔀": (PlayerControls.shuffle,),
-                "🎶": (PlayerControls.add_song,),
-                "⏹️": (PlayerControls.stop,),
-                "📑": (PlayerControls.queue,),
-                "🛠️": (PlayerControls.settings,)
-            }
-
-            for button, control in controls.items():
-
-                try:
-                    style = control[1]
-                except IndexError:
-                    style = disnake.ButtonStyle.grey
-                data["components"].append(disnake.ui.Button(emoji=button, custom_id=control[0], style=style))
-
-            data["components"].append(
-                disnake.ui.Button(
-                    emoji="<:help:947781412017279016>",
-                    custom_id=PlayerControls.help_button,
-                    label="menu de ajuda"
-                )
-            )
+            data["components"] = [
+                disnake.ui.Button(emoji="⏯️", custom_id=PlayerControls.pause_resume, style=get_button_style(self.paused)),
+                disnake.ui.Button(emoji="⏮️", custom_id=PlayerControls.back),
+                disnake.ui.Button(emoji="⏭️", custom_id=PlayerControls.skip),
+                disnake.ui.Button(emoji="🔀", custom_id=PlayerControls.shuffle),
+                disnake.ui.Button(emoji="🎶", custom_id=PlayerControls.add_song),
+                disnake.ui.Button(emoji="⏹️", custom_id=PlayerControls.stop),
+                disnake.ui.Button(emoji="📑", custom_id=PlayerControls.queue),
+                disnake.ui.Button(emoji="🛠️", custom_id=PlayerControls.settings),
+                disnake.ui.Button(emoji="<:help:947781412017279016>", custom_id=PlayerControls.help_button, label="menu de ajuda")
+            ]
 
         if self.message and (self.ignore_np_once or self.has_thread or self.static or not force or self.is_last_message()):
 
