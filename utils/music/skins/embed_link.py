@@ -33,7 +33,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
             txt += f"> 📑 **⠂Playlist:** `{fix_characters(player.current.playlist['name'])}`\n"
 
         try:
-            txt += f"> *️⃣ **⠂Canal de voz:** [{player.guild.me.voice.channel.mention}]\n"
+            txt += f"> *️⃣ **⠂Canal de voz:** {player.guild.me.voice.channel.mention}\n"
         except AttributeError:
             pass
 
