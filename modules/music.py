@@ -1640,7 +1640,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             time_below: str = commands.Param(name="duração_abaixo_de", description="incluir músicas com duração abaixo do tempo definido (ex. 1:23).", default=None),
             time_above: str = commands.Param(name="duração_acima_de", description="incluir músicas com duração acima do tempo definido (ex. 1:45).", default=None),
             range_start: int = commands.Param(name="pos_inicial", description="incluir músicas da fila a partir de uma posição específica da fila.", min_value=1.0, max_value=500.0, default=None),
-            range_end: int = commands.Param(name="pos_final", description="incluir músicas da fila até uma posição específica da fila.", min_value=1.0, max_value=500.0, default=None)
+            range_end: int = commands.Param(name="pos_final", description="incluir músicas da fila até uma posição específica da fila.", min_value=1.0, max_value=500.0, default=None),
+            absent_members: bool = commands.Param(name="membros_ausentes", description="Incluir músicas adicionads por membros fora do canal", default=False)
     ):
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
@@ -1658,6 +1659,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             filters.append('user')
         if playlist:
             filters.append('playlist')
+        if absent_members:
+            filters.append('absent_members')
 
         if time_below and time_above:
             raise GenericError("Você deve escolher apenas uma das opções: **duração_abaixo_de** ou **duração_acima_de**.")
@@ -1709,6 +1712,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                 if 'user' in temp_filter and user == t.requester:
                     temp_filter.remove('user')
+
+                elif 'absent_members' in temp_filter and t.requester.id not in player.guild.me.voice.channel.voice_states:
+                    temp_filter.remove('absent_members')
 
                 try:
                     if 'playlist' in temp_filter and playlist == t.playlist['name']:
