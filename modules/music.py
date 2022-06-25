@@ -1088,7 +1088,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             try:
                 index = queue_track_index(inter, query)[0][0]
             except IndexError:
-                raise GenericError("**Não há músicas na fila com o nome: {query}**")
+                raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
