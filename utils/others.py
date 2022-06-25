@@ -208,7 +208,10 @@ async def send_message(
         await inter.send(text, ephemeral=True, **kwargs)
 
 
-async def send_idle_embed(target: Union[disnake.Message, disnake.TextChannel, disnake.Thread], text="", *, bot: BotCore, force=False):
+async def send_idle_embed(
+        target: Union[disnake.Message, disnake.TextChannel, disnake.Thread, disnake.MessageInteraction],
+        text="", *, bot: BotCore, force=False
+):
 
     embed = disnake.Embed(description="**Entre em um canal de voz e peça uma música aqui no canal ou na conversa abaixo "
                                       "(ou clique no botão abaixo)**\n\n"
@@ -249,7 +252,11 @@ async def send_idle_embed(target: Union[disnake.Message, disnake.TextChannel, di
         )
     )
 
-    if isinstance(target, disnake.Message):
+    if isinstance(target, disnake.MessageInteraction):
+        await target.response.edit_message(embed=embed, content=None, components=components)
+        message = target.message
+
+    elif isinstance(target, disnake.Message):
 
         if guild_data["player_controller"]["channel"] != str(target.channel.id) and not force:
             return target

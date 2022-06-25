@@ -560,11 +560,12 @@ class BasePlayer:
 
         if self.static:
             try:
-                await send_idle_embed(self.message, self.command_log, bot=self.bot)
+                await send_idle_embed(inter or self.message, self.command_log, bot=self.bot)
             except:
                 pass
 
         elif self.has_thread:
+
             try:
                 await self.message.edit(
                     embed=disnake.Embed(
