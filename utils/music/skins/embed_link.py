@@ -16,14 +16,14 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
         duration_txt = f"\n⏰ **Duração:** `{time_format(player.current.duration)}`"
 
     if player.paused:
-        txt += f"⏸️ **Em Pausa:** {player.current.uri}\n{duration_txt}"
+        txt += f"⏸️ **Em Pausa:** {player.current.uri}{duration_txt}"
 
     else:
         txt += f"▶️ **Tocando Agora:** {player.current.uri}{duration_txt} `[`<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`"
 
     if not player.static:
 
-        txt += f" **|** {player.current.requester.mention}\n"
+        txt += f" {player.current.requester.mention}\n"
 
     else:
 
