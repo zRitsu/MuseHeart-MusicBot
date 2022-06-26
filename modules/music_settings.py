@@ -205,7 +205,7 @@ class MusicSettings(commands.Cog):
             player.static = True
             player.text_channel = channel
             player.message = message
-            player.process_hint()
+            player.setup_hints()
             await player.invoke_np(force=True)
 
         if not isinstance(channel, disnake.VoiceChannel):
