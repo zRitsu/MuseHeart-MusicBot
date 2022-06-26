@@ -2815,6 +2815,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         else:
             return
 
+        player.update = False
+
         await player.track_end()
 
         await player.process_next()
