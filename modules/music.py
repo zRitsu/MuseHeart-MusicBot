@@ -1623,7 +1623,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             range_end = None
 
         await self.clear.callback(self=self, inter=ctx, song_name=None, song_author=None, user=None, playlist=None,
-                                  time_below=None, time_above=None, range_start=range_start, range_end=range_end)
+                                  time_below=None, time_above=None, range_start=range_start, range_end=range_end,
+                                  absent_members=False)
 
     @has_player()
     @is_dj()
