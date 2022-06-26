@@ -223,7 +223,7 @@ class BasePlayer:
         self.current_hint = ""
         self.setup_hints()
 
-        print(f"Player Iniciado - Servidor: {self.guild.name} [{self.guild.id}]")
+        self.bot.dispatch("player_create", player=self)
 
     def __repr__(self):
         return f"<volume={self.volume} " \
@@ -1120,7 +1120,7 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
         except:
             pass
 
-        print(f"Player Finalizado - Servidor: {self.guild.name} [{self.guild_id}]")
+        self.bot.dispatch("player_destroy", player=self)
 
     #######################
     #### Filter Stuffs ####
