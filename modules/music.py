@@ -454,7 +454,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 await view.wait()
 
                 if not view.inter:
-                    await inter.edit_original_message(content="Tempo esgotado!", embed=None, view=None)
+                    await inter.edit_original_message(
+                        content=f"{inter.author.mention}, tempo esgotado!",
+                        embed=None, view=None
+                    )
                     return
 
                 if view.selected == "music":
@@ -2282,13 +2285,48 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                 query = inter.text_values["song_input"]
 
+                selected_dropdown = inter.data['components'][1]['components'][0]['values']
+
+                selected_fav = selected_dropdown[0] if (selected_dropdown and selected_dropdown[0] != "no_fav") else None
+
+                if not query and not selected_fav:
+                    raise GenericError("Você deve adicionar o nome de uma música ou ter/escolher um favorito")
+
                 if not query:
+                    query = selected_fav
 
-                    query = inter.data['components'][1]['components'][0]['values']
-                    if not query:
-                        raise GenericError("Você deve adicionar o nome de uma música ou ter/escolher um favorito")
+                elif selected_fav:
 
-                    query = query[0]
+                    view = SelectInteraction(
+                        user=inter.author,
+                        opts=[
+                            disnake.SelectOption(label="Nome/Link:", emoji="🔍",
+                                                 description=fix_characters(query, limit=45), value="music_query"),
+                            disnake.SelectOption(label="Favorito", emoji="⭐",
+                                                 description=fix_characters(selected_fav[6:], 45), value="music_fav"),
+                        ], timeout=30)
+
+                    embed = disnake.Embed(
+                        description="**Você usou dois itens na sua requisição...**\n"
+                                    f'Selecione uma opção para prosseguir (tempo limite: <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R>).',
+                        color=self.bot.get_color(inter.guild.me)
+                    )
+
+                    await inter.send(inter.author.mention, embed=embed, view=view, ephemeral=True)
+
+                    await view.wait()
+
+                    if not view.inter:
+                        await inter.edit_original_message(
+                            content=f"{inter.author.mention}, tempo esgotado!",
+                            embed=None, view=None
+                        )
+                        return
+
+                    inter = view.inter
+
+                    if view.selected == "music_fav":
+                        query = selected_fav
 
                 kwargs = {
                     "query": query,
