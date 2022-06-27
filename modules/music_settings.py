@@ -1,5 +1,6 @@
 from __future__ import annotations
 import asyncio
+import traceback
 import disnake
 import humanize
 from disnake.ext import commands
@@ -298,20 +299,19 @@ class MusicSettings(commands.Cog):
         try:
             player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
         except KeyError:
-            return
-
-        player.static = False
-        player.message = None
-        player.text_channel = inter.channel
-        player.process_hint()
-        await player.invoke_np(force=True)
+            pass
+        else:
+            player.static = False
+            player.message = None
+            player.text_channel = inter.channel
+            player.process_hint()
+            await player.invoke_np(force=True)
 
         try:
             if delete_channel == "sim":
                 await channel.delete(reason=f"Player resetado por: {inter.author}")
 
             else:
-
                 await original_message.edit(
                     content=f"Canal de pedir música foi resetado pelo membro {inter.author.mention}.",
                     embed=None, components=[
@@ -320,9 +320,12 @@ class MusicSettings(commands.Cog):
                     ]
                 )
                 await original_message.thread.edit(archived=True, reason=f"Player resetado por {inter.author}.")
-
-        except:
-            pass
+        except Exception as e:
+            traceback.print_exc()
+            raise GenericError(
+                "**O canal de pedir música foi resetado da base de dados mas ocorreu um erro no processo:** "
+                f"```py\n{repr(e)}```"
+            )
 
 
     @commands.has_guild_permissions(manage_guild=True)
