@@ -3,7 +3,8 @@ from typing import Union
 import re
 import disnake
 from ..models import LavalinkPlayer, YTDLPlayer
-from ..converters import time_format, fix_characters
+from ..converters import time_format, fix_characters, get_button_style
+from ...others import PlayerControls
 
 
 def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
@@ -58,7 +59,51 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
     if player.current_hint:
         txt += f"> `╔══════💡DICA💡══════╗`\n> `{player.current_hint}`"
 
+
+
     if player.auto_update:
         player.auto_update = 0
 
-    return {"content": txt, "embeds": []}
+    return {
+        "content": txt,
+        "embeds": [],
+        "components": [
+            disnake.ui.Button(emoji="⏯️", custom_id=PlayerControls.pause_resume, style=get_button_style(player.paused)),
+            disnake.ui.Button(emoji="⏮️", custom_id=PlayerControls.back),
+            disnake.ui.Button(emoji="⏭️", custom_id=PlayerControls.skip),
+            disnake.ui.Button(emoji="⏹️", custom_id=PlayerControls.stop),
+            disnake.ui.Button(emoji="🎶", custom_id=PlayerControls.add_song),
+            disnake.ui.Select(
+                placeholder="Mais opções:",
+                custom_id="musicplayer_dropdown_inter",
+                min_values=0, max_values=1,
+                options=[
+                    disnake.SelectOption(
+                        label="Tocar do inicio", emoji="⏪",
+                        value=PlayerControls.seek_to_start,
+                        description="Tocar a música desde o inicio."
+                    ),
+                    disnake.SelectOption(
+                        label="Misturar", emoji="🔀",
+                        value=PlayerControls.shuffle,
+                        description="Misturar as músicas da fila."
+                    ),
+                    disnake.SelectOption(
+                        label="Readicionar", emoji="<:add_music:588172015760965654>",
+                        value=PlayerControls.readd,
+                        description="Readicionar as músicas tocadas de volta na fila."
+                    ),
+                    disnake.SelectOption(
+                        label="Músicas na fila", emoji="📑",
+                        value=PlayerControls.queue,
+                        description="Listar as músicas que estão na fila."
+                    ),
+                    disnake.SelectOption(
+                        label="Player config.", emoji="🛠️",
+                        value=PlayerControls.settings,
+                        description="Alterar algumas configurações do player."
+                    ),
+                ]
+            ),
+        ]
+    }
