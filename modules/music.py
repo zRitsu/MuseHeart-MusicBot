@@ -1423,6 +1423,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def nowplaying_legacy(self, ctx: CustomContext):
         await self.nowplaying.callback(self=self, inter=ctx)
 
+    @check_voice()
     @has_source()
     @commands.cooldown(1, 10, commands.BucketType.member)
     @commands.slash_command(description=f"{desc_prefix}Reenvia a mensagem do player com a música atual.")
@@ -1437,11 +1438,36 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             raise GenericError("**Esse comando não pode ser usado com uma conversa ativa na "
                                f"[mensagem]({player.message.jump_url}) do player.**")
 
+        await inter.response.defer(ephemeral=True)
+
         await player.destroy_message()
+
+        if inter.channel != player.text_channel:
+
+            await is_dj().predicate(inter)
+
+            try:
+
+                player.set_command_log(
+                    text=f"{inter.author.mention} moveu o player-controller para o canal {inter.channel.mention}.",
+                    emoji="💠"
+                )
+
+                await player.text_channel.send(
+                    embed=disnake.Embed(
+                        description=f"💠 **⠂{inter.author.mention} moveu o player-controller para o canal:** {inter.channel.mention}",
+                        color=self.bot.get_color(inter.guild.me)
+                    )
+                )
+            except:
+                pass
+
+        player.text_channel = inter.channel
+
         await player.invoke_np()
 
         if not isinstance(inter, CustomContext):
-            await inter.send("**Player reenviado com sucesso!**", ephemeral=True)
+            await inter.edit_original_message("**Player reenviado com sucesso!**")
 
     @has_player()
     @is_dj()
