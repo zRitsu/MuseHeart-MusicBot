@@ -1440,8 +1440,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await inter.response.defer(ephemeral=True)
 
-        await player.destroy_message()
-
         if inter.channel != player.text_channel:
 
             await is_dj().predicate(inter)
@@ -1461,6 +1459,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 )
             except:
                 pass
+
+        await player.destroy_message()
 
         player.text_channel = inter.channel
 
