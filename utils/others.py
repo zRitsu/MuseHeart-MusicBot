@@ -70,7 +70,7 @@ class PlayerControls:
     skip = "musicplayer_skip"
     volume = "musicplayer_volume"
     shuffle = "musicplayer_shuffle"
-    seek = "musicplayer_seek"
+    seek_to_start = "musicplayer_seek_to_start"
     readd = "musicplayer_readd"
     loop_mode = "musicplayer_loop_mode"
     queue = "musicplayer_queue"

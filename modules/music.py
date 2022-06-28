@@ -2008,11 +2008,27 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         except Exception as e:
             self.bot.dispatch('interaction_player_error', interaction, e)
 
+    @commands.Cog.listener("on_dropdown")
+    async def player_dropdown_event(self, interaction: disnake.MessageInteraction):
+
+        if interaction.data.custom_id != "musicplayer_dropdown_inter":
+            return
+
+        if not interaction.values:
+            await interaction.response.defer()
+            return
+
+        await self.player_controller(interaction, interaction.values[0])
+
     @commands.Cog.listener("on_button_click")
-    async def player_controller(self, interaction: disnake.MessageInteraction):
+    async def player_button_event(self, interaction: disnake.MessageInteraction):
 
         if not interaction.data.custom_id.startswith("musicplayer_"):
             return
+
+        await self.player_controller(interaction, interaction.data.custom_id)
+
+    async def player_controller(self, interaction: disnake.MessageInteraction, control: str):
 
         if not self.bot.bot_ready:
             await interaction.send("Ainda estou inicializando...", ephemeral=True)
@@ -2021,8 +2037,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         kwargs = {}
 
         cmd: Optional[disnake.AppCmdInter] = None
-
-        control = interaction.data.custom_id
 
         try:
 
@@ -2182,8 +2196,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             elif control == PlayerControls.shuffle:
                 cmd = self.bot.get_slash_command("queue").children.get("shuffle")
 
-            elif control == PlayerControls.seek:
-                kwargs = {"position": None}
+            elif control == PlayerControls.seek_to_start:
+                cmd = self.bot.get_slash_command("seek")
+                kwargs = {"position": "0"}
 
             elif control == PlayerControls.pause_resume:
                 control = PlayerControls.pause if not player.paused else PlayerControls.resume
