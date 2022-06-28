@@ -2302,7 +2302,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                         opts=[
                             disnake.SelectOption(label="Nome/Link:", emoji="🔍",
                                                  description=fix_characters(query, limit=45), value="music_query"),
-                            disnake.SelectOption(label="Favorito", emoji="⭐",
+                            disnake.SelectOption(label="Favorito:", emoji="⭐",
                                                  description=fix_characters(selected_fav[6:], 45), value="music_fav"),
                         ], timeout=30)
 
