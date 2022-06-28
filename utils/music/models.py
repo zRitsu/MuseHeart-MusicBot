@@ -401,7 +401,7 @@ class BasePlayer:
 
         await asyncio.sleep(self.idle_timeout)
 
-        msg = "**O player foi desligado por inatividade...**"
+        msg = "💤 **⠂O player foi desligado por inatividade...**"
 
         if self.static or self.has_thread:
             self.command_log = msg
