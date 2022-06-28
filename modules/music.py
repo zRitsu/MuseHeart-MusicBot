@@ -2011,7 +2011,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.Cog.listener("on_dropdown")
     async def player_dropdown_event(self, interaction: disnake.MessageInteraction):
 
-        if interaction.data.custom_id != "musicplayer_dropdown_inter":
+        if not interaction.data.custom_id.startswith("musicplayer_dropdown_"):
             return
 
         if not interaction.values:
