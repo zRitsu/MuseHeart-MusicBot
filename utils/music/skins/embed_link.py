@@ -68,14 +68,15 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
         "content": txt,
         "embeds": [],
         "components": [
-            disnake.ui.Button(emoji="⏯️", custom_id=PlayerControls.pause_resume, style=get_button_style(player.paused)),
-            disnake.ui.Button(emoji="⏮️", custom_id=PlayerControls.back),
-            disnake.ui.Button(emoji="⏭️", custom_id=PlayerControls.skip),
-            disnake.ui.Button(emoji="⏹️", custom_id=PlayerControls.stop),
-            disnake.ui.Button(emoji="🎶", custom_id=PlayerControls.add_song),
+            disnake.ui.Button(emoji="⏸️", custom_id=PlayerControls.pause, label="Pausar") if not player.paused else
+            disnake.ui.Button(emoji="▶️", custom_id=PlayerControls.resume, label="retomar", style=disnake.ButtonStyle.red),
+            disnake.ui.Button(emoji="⏮️", custom_id=PlayerControls.back, label="Voltar"),
+            disnake.ui.Button(emoji="⏭️", custom_id=PlayerControls.skip, label="Pular"),
+            disnake.ui.Button(emoji="⏹️", custom_id=PlayerControls.stop, label="Parar"),
+            disnake.ui.Button(emoji="🎶", custom_id=PlayerControls.add_song, label="Adicionar"),
             disnake.ui.Select(
                 placeholder="Mais opções:",
-                custom_id="musicplayer_dropdown_inter",
+                custom_id="musicplayer_dropdown_1",
                 min_values=0, max_values=1,
                 options=[
                     disnake.SelectOption(
