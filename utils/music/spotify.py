@@ -7,10 +7,10 @@ import traceback
 from .errors import MissingSpotifyClient, GenericError
 from asyncspotify import Client, ClientCredentialsFlow
 from typing import Optional, TYPE_CHECKING, Union
+
 if TYPE_CHECKING:
     from .models import YTDLManager
     from utils.client import BotCore
-
 
 spotify_regex = re.compile("https://open.spotify.com?.+(album|playlist|artist|track)/([a-zA-Z0-9]+)")
 
@@ -36,7 +36,7 @@ class SpotifyPlaylist:
 
 class SpotifyTrack:
 
-    def __init__(self, *, uri, title, authors, thumb, duration, requester, playlist = None, album=None, track_loops=0):
+    def __init__(self, *, uri, title, authors, thumb, duration, requester, playlist=None, album=None, track_loops=0):
         self.author = fix_characters(authors[0].name)
         self.authors = [fix_characters(i.name) for i in authors]
         self.authors_md = ", ".join(f"[`{a.name}`]({a.link})" for a in authors)
@@ -60,16 +60,26 @@ class SpotifyTrack:
             return
 
         try:
-            track = (await node.get_tracks(f"ytsearch:{self.title}"))
+            tracks = (await node.get_tracks(f"ytsearch:{self.title}"))
             try:
-                track = track[0]
-            except:
-                track = track.tracks[0]
+                tracks = tracks.tracks
+            except AttributeError:
+                pass
 
-            track.info["sourceName"] = "spotify"
+            selected_track = None
 
-            self.info = track.info
-            self.id = track.id
+            for t in tracks:
+                if (t.duration - 10000) < self.duration < (t.duration + 10000):
+                    selected_track = t
+                    break
+
+            if not selected_track:
+                selected_track = tracks[0]
+
+            selected_track.info["sourceName"] = "spotify"
+
+            self.info = selected_track.info
+            self.id = selected_track.id
 
         except IndexError:
             return
@@ -82,7 +92,6 @@ def query_spotify_track(func, url_id: str):
 
 
 async def process_spotify(bot: BotCore, requester: disnake.Member, query: str, *, hide_playlist=False):
-
     if not (matches := spotify_regex.match(query)):
         return
 
@@ -92,7 +101,6 @@ async def process_spotify(bot: BotCore, requester: disnake.Member, query: str, *
     url_type, url_id = matches.groups()
 
     if url_type == "track":
-
         result = await bot.spotify.get_track(url_id)
 
         return [SpotifyTrack(
@@ -116,7 +124,6 @@ async def process_spotify(bot: BotCore, requester: disnake.Member, query: str, *
         result = await bot.spotify.get_album(url_id)
 
         if len(result.tracks) < 2:
-
             track = result.tracks[0]
 
             return [SpotifyTrack(
@@ -139,7 +146,8 @@ async def process_spotify(bot: BotCore, requester: disnake.Member, query: str, *
 
         result = await bot.spotify.get_artist_top_tracks(url_id)
 
-        data["playlistInfo"]["name"] = "As mais tocadas de: " + [a["name"] for a in result[0].artists if a.id == url_id][0]
+        data["playlistInfo"]["name"] = "As mais tocadas de: " + \
+                                       [a["name"] for a in result[0].artists if a.id == url_id][0]
         data["tracks"] = result
 
     elif url_type == "playlist":
@@ -159,13 +167,16 @@ async def process_spotify(bot: BotCore, requester: disnake.Member, query: str, *
 
 
 def spotify_client(config: dict) -> Optional[Client]:
-
     if not config['SPOTIFY_CLIENT_ID']:
-        print(f"[IGNORADO] - Spotify Support: SPOTIFY_CLIENT_ID não foi configurado na ENV da host (ou no arquivo .env).\n{'-'*30}")
+        print(
+            f"[IGNORADO] - Spotify Support: SPOTIFY_CLIENT_ID não foi configurado na ENV da host (ou no arquivo .env)."
+            f"\n{'-' * 30}")
         return
 
     if not config['SPOTIFY_CLIENT_SECRET']:
-        print(F"[IGNORADO] - Spotify Support: SPOTIFY_CLIENT_SECRET não foi configurado nas ENV da host (ou no arquivo .env).\n{'-'*30}")
+        print(
+            F"[IGNORADO] - Spotify Support: SPOTIFY_CLIENT_SECRET não foi configurado nas ENV da host "
+            F"(ou no arquivo .env).\n{'-' * 30}")
         return
 
     try:
@@ -179,5 +190,5 @@ def spotify_client(config: dict) -> Optional[Client]:
     except Exception as e:
         print(
             f"A APIKEY do spotify não foi configurada devidamente na ENV da host (ou no arquivo .env), "
-            f"verifique e tente novamente caso queira o suporte a músicas do spotify (Erro: {repr(e)}).\n{'-'*30}")
+            f"verifique e tente novamente caso queira o suporte a músicas do spotify (Erro: {repr(e)}).\n{'-' * 30}")
         return
