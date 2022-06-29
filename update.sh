@@ -28,6 +28,19 @@ if [ ! -d "venv" ]; then
   fi
 fi
 
-source venv/Scripts/activate
-pip install -r requirements.txt --force-reinstall
+if [[ $OSTYPE == "msys" ]]; then
+  VENV_PATH=venv/Scripts/activate
+else
+  VENV_PATH=venv/bin/activate
+fi
+
+source $VENV_PATH
+
+touch "./.logs/update.log"
+
+if [ ! -f requirements-bak.txt ] || [ ! cmp --silent -- requirements.txt requirements-bak.txt ]; then
+  pip install -r requirements.txt --force-reinstall 2>&1 | tee "./.logs/update.log"
+  cp requirements.txt requirements-bak.txt
+fi
+
 read -p "Pressione ENTER para finalizar..."

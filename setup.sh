@@ -26,12 +26,21 @@ if [ ! -d "venv" ]; then
 
 fi
 
-source venv/Scripts/activate
-pip install -r ./requirements.txt
+if [[ $OSTYPE == "msys" ]]; then
+  VENV_PATH=venv/Scripts/activate
+else
+  VENV_PATH=venv/bin/activate
+fi
+
+source $VENV_PATH
+
+mkdir -p ./.logs
+
+touch "./.logs/setup.log"
+
+pip install -r ./requirements.txt 2>&1 | tee "./.logs/setup.log"
 
 if [ ! -f ".env" ] && [ ! -f "config.json" ]; then
   cp .env-example .env
   echo 'Não esqueça de adicionar os tokens necessários no arquivo .env'
 fi
-
-read -p "Pressione ENTER para finalizar..."
