@@ -59,8 +59,6 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
     if player.current_hint:
         txt += f"> `╔══════💡DICA💡══════╗`\n> `{player.current_hint}`"
 
-
-
     if player.auto_update:
         player.auto_update = 0
 
@@ -69,7 +67,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
         "embeds": [],
         "components": [
             disnake.ui.Button(emoji="⏸️", custom_id=PlayerControls.pause, label="Pausar") if not player.paused else
-            disnake.ui.Button(emoji="▶️", custom_id=PlayerControls.resume, label="retomar", style=disnake.ButtonStyle.red),
+            disnake.ui.Button(emoji="▶️", custom_id=PlayerControls.resume, label="Retomar", style=disnake.ButtonStyle.red),
             disnake.ui.Button(emoji="⏮️", custom_id=PlayerControls.back, label="Voltar"),
             disnake.ui.Button(emoji="⏭️", custom_id=PlayerControls.skip, label="Pular"),
             disnake.ui.Button(emoji="⏹️", custom_id=PlayerControls.stop, label="Parar"),

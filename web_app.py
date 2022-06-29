@@ -203,7 +203,7 @@ class WSClient:
                 if isinstance(e, aiohttp.WSServerHandshakeError):
                     print(f"{self.bot.user} - Servidor offline, tentando conectar novamente ao server RPC em {int(self.backoff)} segundos.")
                 else:
-                    print(f"{self.bot.user} - Reconectando ao server RPC em {int(self.backoff)} segundos.")
+                    print(f"{self.bot.user} - Reconectando no servidor RPC em {int(self.backoff)} segundos.")
 
                 self.ready = False
                 await asyncio.sleep(self.backoff)

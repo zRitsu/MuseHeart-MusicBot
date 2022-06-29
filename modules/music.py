@@ -2117,8 +2117,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     return
 
                 user_favs = [
-                    disnake.SelectOption(label=f, value=f"> fav: {f}", emoji="<:play:734221719774035968>")
-                    for f in (await fav_list(interaction, ""))
+                    disnake.SelectOption(label=f, value=f"> fav: {f}") for f in (await fav_list(interaction, ""))
                 ]
 
                 await interaction.response.send_modal(
@@ -2755,7 +2754,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             backoff *= 1.5
             print(
-                f'{self.bot.user} - Falha ao reconectar no servidor [{node.identifier}] nova tentativa em {backoff} segundos. Erro: {error}')
+                f'{self.bot.user} - Falha ao reconectar no servidor [{node.identifier}] nova tentativa em {int(backoff)}'
+                f' segundos. Erro: {error}')
             await asyncio.sleep(backoff)
             retries += 1
             continue
