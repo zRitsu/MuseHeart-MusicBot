@@ -7,6 +7,7 @@ import time
 import zipfile
 import platform
 
+
 def download_file(url, filename):
     if os.path.isfile(filename):
         return
@@ -16,14 +17,14 @@ def download_file(url, filename):
         f.write(r.content)
     r.close()
 
-def run_lavalink(
-    lavalink_file_url: Optional[str] = None,
-    lavalink_initial_ram: int = 30,
-    lavalink_ram_limit: int = 100,
-    lavalink_additional_sleep: int = 0,
-    lavalink_cpu_cores: int = 1,
-):
 
+def run_lavalink(
+        lavalink_file_url: Optional[str] = None,
+        lavalink_initial_ram: int = 30,
+        lavalink_ram_limit: int = 100,
+        lavalink_additional_sleep: int = 0,
+        lavalink_cpu_cores: int = 1,
+):
     download_java = False
 
     if os.path.isdir("./.java"):
@@ -34,9 +35,9 @@ def run_lavalink(
             java_path = java_path.replace("\\", "/") + "/bin/"
 
     try:
-        javaInfo = subprocess.check_output(f'"{java_path}java"' + ' -version', shell=True, stderr=subprocess.STDOUT)
-        javaVersion = re.search(r'"[0-9._]*"', javaInfo.decode().split("\r")[0]).group().replace('"', '')
-        if (ver := int(javaVersion.split('.')[0])) < 11:
+        java_info = subprocess.check_output(f'"{java_path}java"' + ' -version', shell=True, stderr=subprocess.STDOUT)
+        java_version = re.search(r'"[\d._]*"', java_info.decode().split("\r")[0]).group().replace('"', '')
+        if (ver := int(java_version.split('.')[0])) < 11:
             print(f"A versão do java/jdk instalado/configurado é incompatível: {ver} (Versão mínima: 11)")
             download_java = True
     except Exception as e:
@@ -84,16 +85,16 @@ def run_lavalink(
     if lavalink_ram_limit > 10:
         cmd += f" -Xmx{lavalink_ram_limit}m"
 
-    if lavalink_initial_ram > 0 and lavalink_initial_ram < lavalink_ram_limit:
+    if 0 < lavalink_initial_ram < lavalink_ram_limit:
         cmd += f" -Xms{lavalink_ram_limit}m"
 
     cmd += " -jar Lavalink.jar"
 
     print(f"Iniciando o servidor Lavalink (dependendo da hospedagem o lavalink pode demorar iniciar, "
-          f"o que pode ocorrer falhas em algumas tentativas de conexão até ele iniciar totalmente).\n{'-'*30}")
+          f"o que pode ocorrer falhas em algumas tentativas de conexão até ele iniciar totalmente).\n{'-' * 30}")
 
     subprocess.Popen(cmd.split(), stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
 
     if lavalink_additional_sleep:
-        print(f"Aguarde {lavalink_additional_sleep} segundos...\n{'-'*30}")
+        print(f"Aguarde {lavalink_additional_sleep} segundos...\n{'-' * 30}")
         time.sleep(lavalink_additional_sleep)
