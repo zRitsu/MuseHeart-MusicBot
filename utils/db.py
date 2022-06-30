@@ -12,18 +12,18 @@ if TYPE_CHECKING:
 
 
 db_models = {
-      "guilds": {
-          "ver": 1.5,
-          "prefix": "",
-          "player_controller": {
-              "channel": None,
-              "message_id": None,
-              "skin": None,
-              "fav_links": {}
-          },
-          "check_other_bots_in_vc": False,
-          "enable_prefixed_commands": True,
-          "djroles": []
+    "guilds": {
+        "ver": 1.5,
+        "prefix": "",
+        "player_controller": {
+            "channel": None,
+            "message_id": None,
+            "skin": None,
+            "fav_links": {}
+        },
+        "check_other_bots_in_vc": False,
+        "enable_prefixed_commands": True,
+        "djroles": []
     },
     "users": {
         "ver": 1.0,
@@ -33,7 +33,6 @@ db_models = {
 
 
 async def guild_prefix(bot: BotCore, message: disnake.Message):
-
     if not message.guild:
         prefix = bot.default_prefix
 
@@ -88,7 +87,6 @@ class LocalDatabase(BaseDB):
         while True:
 
             if self.file_update != self.data_update:
-
                 with open(f'./local_dbs/{self.bot.user.id}.json', 'w') as f:
                     f.write(json.dumps(self.data))
 
@@ -106,14 +104,12 @@ class LocalDatabase(BaseDB):
             return dict(self.db_models[db_name])
 
         if data["ver"] < self.db_models[db_name]["ver"]:
-
             data = update_values(dict(self.db_models[db_name]), data)
             data["ver"] = self.db_models[db_name]["ver"]
 
             await self.update_data(id_, data, db_name=db_name)
 
         return data
-
 
     async def update_data(self, id_: int, data: dict, *, db_name: Literal['users', 'guilds']):
 
@@ -126,12 +122,18 @@ class LocalDatabase(BaseDB):
 
 class MongoDatabase(BaseDB):
 
-    def __init__(self, bot: BotCore, token: str, name: str):
+    def __init__(self, bot: BotCore, token: str, name):
         super().__init__(bot)
         self._connect = AsyncIOMotorClient(token, connectTimeoutMS=30000)
         self._database = self._connect[name]
         self.name = name
         print(f"{bot.user} - MongoDB conectado.")
+        if bot.config["MONGO_DB_INTERNAL_CACHE"]:
+            self.get_data = self.get_data_cached
+            self.update_data = self.update_cache
+        else:
+            self.get_data = self.fetch_data
+            self.update_data = self.update_data_
 
     async def push_data(self, data, db_name: Literal['users', 'guilds']):
 
@@ -153,42 +155,48 @@ class MongoDatabase(BaseDB):
                 if data == self.db_models["guilds"]:
                     continue
 
-                await self.update_data(id_=id_, data=data, db_name=db_name)
+                await self.update_data_(id_=id_, data=data, db_name=db_name)
 
-    async def get_data(self, id_: int, *, db_name: Literal['users', 'guilds']):
+    async def get_data_cached(self, id_: int, *, db_name: Literal['users', 'guilds']):
 
         id_ = str(id_)
 
         try:
             return self.data[db_name][id_]
-
         except KeyError:
+            return await self.fetch_data(id_, db_name=db_name)
 
-            data = await self._database[db_name].find_one({"_id": id_})
-
-            if not data:
-                return dict(self.db_models[db_name])
-
-            elif data["ver"] < self.db_models[db_name]["ver"]:
-                data = update_values(dict(self.db_models[db_name]), data)
-                data["ver"] = self.db_models[db_name]["ver"]
-
-                await self.update_data(id_, data, db_name=db_name)
-
-            self.data[db_name][id_] = data
-
-            return data
-
-
-    async def update_data(self, id_, data: dict, *, db_name: Literal['users', 'guilds']):
-
-        db = self._database[db_name]
+    async def fetch_data(self, id_: int, *, db_name: Literal['users', 'guilds']):
 
         id_ = str(id_)
 
-        d = await db.update_one({'_id': id_}, {'$set': data}, upsert=True)
+        data = await self._database[db_name].find_one({"_id": id_})
+
+        if not data:
+            return dict(self.db_models[db_name])
+
+        elif data["ver"] < self.db_models[db_name]["ver"]:
+            data = update_values(dict(self.db_models[db_name]), data)
+            data["ver"] = self.db_models[db_name]["ver"]
+
+            await self.update_data_(id_, data, db_name=db_name)
+
         self.data[db_name][id_] = data
+
+        return data
+
+    async def update_cache(self, id_, data: dict, *, db_name: Literal['users', 'guilds']):
+
+        id_ = str(id_)
+
+        d = await self.update_data_(id_, data, db_name=db_name)
+
+        self.data[db_name][id_] = data
+
         return d
+
+    async def update_data_(self, id_, data: dict, *, db_name: Literal['users', 'guilds']):
+        return await self._database[db_name].update_one({'_id': str(id_)}, {'$set': data}, upsert=True)
 
 
 def update_values(d, u):

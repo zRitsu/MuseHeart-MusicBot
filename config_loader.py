@@ -29,6 +29,7 @@ def load_config():
         "SUPPORT_SERVER": "",
         "ADDITIONAL_BOT_IDS": "",
         "INVITE_PERMISSIONS": 397287680080,
+        "MONGO_DB_INTERNAL_CACHE": True,
 
         #########################
         ### Sistema de música ###
@@ -124,7 +125,8 @@ def load_config():
         "RUN_LOCAL_LAVALINK",
         "COMMAND_LOG",
         "RUN_RPC_SERVER",
-        "YTDLMODE"
+        "YTDLMODE",
+        "MONGO_DB_INTERNAL_CACHE"
 
     ]:
         if CONFIGS[i] in (True, False, None):
