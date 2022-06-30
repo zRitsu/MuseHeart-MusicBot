@@ -57,7 +57,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
         txt += f"> {player.command_log_emoji} **⠂Última Interação:** {log}\n"
 
     if player.current_hint:
-        txt += f"> `╔══════💡DICA💡══════╗`\n> `{player.current_hint}`"
+        txt += f"> \n> `💡 Dica: {player.current_hint}`"
 
     if player.auto_update:
         player.auto_update = 0
@@ -71,16 +71,20 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
             disnake.ui.Button(emoji="⏮️", custom_id=PlayerControls.back, label="Voltar"),
             disnake.ui.Button(emoji="⏭️", custom_id=PlayerControls.skip, label="Pular"),
             disnake.ui.Button(emoji="⏹️", custom_id=PlayerControls.stop, label="Parar"),
-            disnake.ui.Button(emoji="🎶", custom_id=PlayerControls.add_song, label="Adicionar"),
             disnake.ui.Select(
                 placeholder="Mais opções:",
                 custom_id="musicplayer_dropdown_1",
                 min_values=0, max_values=1,
                 options=[
                     disnake.SelectOption(
-                        label="Tocar do inicio", emoji="⏪",
+                        label="Adicionar Música", emoji="🎶",
+                        value=PlayerControls.add_song,
+                        description="Adicionar uma música, playlist ou favorito na fila."
+                    ),
+                    disnake.SelectOption(
+                        label="Voltar do inicio", emoji="⏪",
                         value=PlayerControls.seek_to_start,
-                        description="Tocar a música desde o inicio."
+                        description="Voltar o tempo da música para o inicio."
                     ),
                     disnake.SelectOption(
                         label="Misturar", emoji="🔀",
