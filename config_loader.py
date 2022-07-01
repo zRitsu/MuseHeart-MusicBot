@@ -127,7 +127,6 @@ def load_config():
         "RUN_RPC_SERVER",
         "YTDLMODE",
         "MONGO_DB_INTERNAL_CACHE"
-
     ]:
         if CONFIGS[i] in (True, False, None):
             continue
