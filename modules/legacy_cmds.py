@@ -3,6 +3,7 @@ import os
 import shutil
 import json
 import subprocess
+from functools import partial
 from io import BytesIO
 from typing import Union, Optional
 import disnake
@@ -54,8 +55,10 @@ async def run_command(cmd):
     return  "\n".join(result)
 
 
-def run_command_old(cmd):
-    return subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
+async def run_command_old(bot: BotCore, cmd: str):
+
+    to_run = partial(subprocess.check_output, args=cmd, stdin=None, stderr=None)
+    return (await bot.loop.run_in_executor(None, to_run)).decode('utf-8').strip()
 
 
 class Owner(commands.Cog):
@@ -137,12 +140,12 @@ class Owner(commands.Cog):
                 pass
 
             try:
-                run_command_old("git reset --hard")
+                await run_command_old(self.bot, "git reset --hard")
             except:
                 pass
 
             try:
-                pull_log = run_command_old("git pull --allow-unrelated-histories -X theirs")
+                pull_log = await run_command_old(self.bot, "git pull --allow-unrelated-histories -X theirs")
                 if "Already up to date" in pull_log:
                     raise GenericError("Já estou com os ultimos updates instalados...")
                 out_git += pull_log
@@ -165,7 +168,7 @@ class Owner(commands.Cog):
                     commit = l.replace("Updating ", "").replace("..", "...")
                     break
 
-            data = (run_command_old(f"git log {commit} {git_format}")).split("\n")
+            data = (await run_command_old(self.bot, f"git log {commit} {git_format}")).split("\n")
 
             git_log += format_git_log(data)
 
@@ -244,11 +247,11 @@ class Owner(commands.Cog):
 
         for c in self.git_init_cmds:
             try:
-                out_git += run_command_old(c) + "\n"
+                out_git += (await run_command_old(self.bot, c)) + "\n"
             except Exception as e:
                 out_git += f"{e}\n"
 
-        self.bot.commit = run_command_old("git rev-parse --short HEAD")
+        self.bot.commit = await run_command_old(self.bot, "git rev-parse --short HEAD")
         self.bot.remote_git_url = self.bot.config["SOURCE_REPO"][:-4]
 
         return out_git
@@ -267,7 +270,7 @@ class Owner(commands.Cog):
 
         git_log = []
 
-        data = (run_command_old(f"git log -{amount or 10} {git_format}")).split("\n")
+        data = (await run_command_old(self.bot, f"git log -{amount or 10} {git_format}")).split("\n")
 
         git_log += format_git_log(data)
 
