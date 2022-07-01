@@ -326,22 +326,39 @@ class BasePlayer:
 
     async def process_idle_message(self):
 
-        buttons = []
+        controller_opts = []
 
         if (played := len(self.played)) or self.last_track:
-            buttons.append(["⏮️", PlayerControls.back, "Tocar a música anterior"])
+            controller_opts.append(
+                disnake.SelectOption(
+                    emoji="⏮️", value=PlayerControls.back, label="Voltar", description="Tocar a música anterior")
+            )
 
         if played > 1:
-            buttons.append(["↪️", PlayerControls.readd, f"Tocar todas as músicas novamente ({played})"])
+            controller_opts.append(
+                disnake.SelectOption(
+                    emoji="↪️", value=PlayerControls.readd, label="Tocar novamente",
+                    description=f"Tocar todas as músicas novamente ({played})"
+                )
+            )
 
-        buttons.extend(
-            [
-                ["🛑", PlayerControls.stop, "Parar o player"],
-                ["🎶", PlayerControls.add_song, "Pedir outra música"]
-            ]
-        )
+        controller_opts.extend([
+            disnake.SelectOption(
+                emoji="🛑", value=PlayerControls.stop, label="Finalizar",
+                description=f"Finalizar o player e me desconectar do canal."
+            ),
+            disnake.SelectOption(
+                emoji="🎶", value=PlayerControls.add_song, label="Adicionar",
+                description=f"Tocar nova música/playlist/favorito."
+            ),
+        ])
 
-        components = []
+        components = [
+            disnake.ui.Select(
+                placeholder="Executar uma ação:", options=controller_opts,
+                custom_id="musicplayer_dropdown_idle",
+            )
+        ]
 
         guild_data = await self.bot.db.get_data(self.guild.id, db_name="guilds")
 
@@ -352,27 +369,16 @@ class BasePlayer:
 
             components.append(
                 disnake.ui.Select(
-                    placeholder="Músicas/Playlists do servidor.",
+                    placeholder="Tocar música/playlist do servidor.",
                     options=opts, custom_id="player_guild_pin"
                 )
             )
 
-        components.extend(
-            [
-                disnake.ui.Button(
-                    emoji=button[0],
-                    custom_id=button[1],
-                    style=disnake.ButtonStyle.grey,
-                ) for button in buttons
-            ]
-        )
-
         embed = disnake.Embed(
-            description=f"**Não há músicas na fila. Adicione uma música ou use um dos botões abaixo**\n\n" +
-                        "\n".join(f"{b[0]} `= {b[2]}`" for b in
-                                  buttons) + f"\n\n**Nota:** O Player será desligado automaticamente "
-                                             f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=self.idle_timeout)).timestamp())}:R> "
-                                             f"caso nenhuma ação seja executada...",
+            description=f"**Não há músicas na fila. Adicione uma música ou use uma das opções abaixo.\n\n"
+                        f"Nota:** `O Player será desligado automaticamente` "
+                        f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=self.idle_timeout)).timestamp())}:R> "
+                        f"`caso nenhuma ação seja executada...`",
             color=self.bot.get_color(self.guild.me)
         )
 
