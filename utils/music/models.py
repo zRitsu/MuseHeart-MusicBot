@@ -22,48 +22,6 @@ if TYPE_CHECKING:
     from ..client import BotCore
 
 
-class WavelinkVoiceClient(disnake.VoiceClient):
-
-    # Esta classe é apenas um tapa-buraco pra versão 2.x do dpy ou outro fork atualizado.
-
-    def __init__(self, client: BotCore, channel: disnake.VoiceChannel):
-        self.client = client
-        self.channel = channel
-        self.wavelink = client.music
-
-    async def on_voice_server_update(self, data):
-        lavalink_data = {
-            't': 'VOICE_SERVER_UPDATE',
-            'd': data
-        }
-
-        await self.wavelink.update_handler(lavalink_data)
-
-    async def on_voice_state_update(self, data):
-        lavalink_data = {
-            't': 'VOICE_STATE_UPDATE',
-            'd': data
-        }
-
-        await self.wavelink.update_handler(lavalink_data)
-
-    async def connect(self, *, timeout: float, reconnect: bool) -> None:
-        await self.guild.change_voice_state(channel=self.channel)
-        self._connected = True
-
-    async def disconnect(self, *, force: bool) -> None:
-
-        player = self.wavelink.players[self.channel.guild.id]
-
-        if not force and not player.is_connected:
-            return
-
-        await self.channel.guild.change_voice_state(channel=None)
-
-        player.channel_id = None
-        self.cleanup()
-
-
 class LavalinkTrack(wavelink.Track):
     __slots__ = ('requester', 'playlist', 'track_loops', 'album', 'single_title', 'authors_md', 'authors_string')
 
@@ -1086,18 +1044,6 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
 
     def __str__(self) -> str:
         return f"Lavalink Player | Server: {self.node.identifier}"
-
-    async def connect(self, channel_id: int, self_deaf: bool = False):
-
-        self.channel_id = channel_id
-
-        channel = self.bot.get_channel(channel_id)
-
-        if not self.guild.me.voice:
-            await channel.connect(cls=WavelinkVoiceClient, reconnect=True)
-
-        elif self.guild.me.voice.channel.id != channel_id:
-            await self.guild.voice_client.move_to(channel)
 
     async def process_next(self):
 
