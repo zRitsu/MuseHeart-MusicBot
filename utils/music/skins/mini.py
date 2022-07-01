@@ -108,7 +108,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
                     disnake.SelectOption(
                         label="Tocar do inicio", emoji="⏪",
                         value=PlayerControls.seek_to_start,
-                        description="Tocar a música desde o inicio."
+                        description="Voltar o tempo da música atual para o inicio."
                     ),
                     disnake.SelectOption(
                         label="Misturar", emoji="🔀",
