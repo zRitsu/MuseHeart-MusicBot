@@ -57,7 +57,7 @@ async def run_command(cmd):
 
 async def run_command_old(bot: BotCore, cmd: str):
 
-    to_run = partial(subprocess.check_output, cmd, stdin=None, stderr=None)
+    to_run = partial(subprocess.check_output, cmd, shell=True, stdin=None, stderr=None)
     return (await bot.loop.run_in_executor(None, to_run)).decode('utf-8').strip()
 
 
