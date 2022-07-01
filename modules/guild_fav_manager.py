@@ -243,6 +243,8 @@ class PinManager(commands.Cog):
             )
         )
 
+        await self.process_idle_embed(inter.guild)
+
 
     @commands.cooldown(1, 20, commands.BucketType.guild)
     @pin.sub_command(description=f"{desc_prefix}Exportar os links de músicas/playlists fixas do servidor em um arquivo json.")
