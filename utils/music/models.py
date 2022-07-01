@@ -289,7 +289,9 @@ class BasePlayer:
         if (played := len(self.played)) or self.last_track:
             controller_opts.append(
                 disnake.SelectOption(
-                    emoji="⏮️", value=PlayerControls.back, label="Voltar", description="Tocar a música anterior")
+                    emoji="⏮️", value=PlayerControls.back, label="Voltar",
+                    description=f"Ouvir novamente: {self.played[0].title[:31]}"
+                )
             )
 
         if played > 1:
