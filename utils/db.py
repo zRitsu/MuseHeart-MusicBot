@@ -164,7 +164,9 @@ class MongoDatabase(BaseDB):
         try:
             return self.data[db_name][id_]
         except KeyError:
-            return await self.fetch_data(id_, db_name=db_name)
+            data = await self.fetch_data(id_, db_name=db_name)
+            self.data[db_name][id_] = data
+            return data
 
     async def fetch_data(self, id_: int, *, db_name: Literal['users', 'guilds']):
 
@@ -180,8 +182,6 @@ class MongoDatabase(BaseDB):
             data["ver"] = self.db_models[db_name]["ver"]
 
             await self.update_data_(id_, data, db_name=db_name)
-
-        self.data[db_name][id_] = data
 
         return data
 
