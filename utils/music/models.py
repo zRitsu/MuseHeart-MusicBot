@@ -290,7 +290,7 @@ class BasePlayer:
             controller_opts.append(
                 disnake.SelectOption(
                     emoji="⏮️", value=PlayerControls.back, label="Voltar",
-                    description=f"Ouvir novamente: {self.played[0].title[:31]}"
+                    description=f"Ouvir novamente: {self.played[-1].title[:31]}"
                 )
             )
 
