@@ -1062,16 +1062,6 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
 
         await super().destroy(force=force)
 
-        try:
-            await self.guild.voice_client.disconnect(force=True)
-        except:
-            pass
-
-        try:
-            self.guild.voice_client.cleanup()
-        except:
-            pass
-
         self.bot.dispatch("player_destroy", player=self)
 
     #######################
