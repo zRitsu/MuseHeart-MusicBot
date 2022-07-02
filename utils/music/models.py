@@ -115,11 +115,11 @@ class YTDLSource(disnake.PCMVolumeTransformer):
 class BasePlayer:
     volume: int
     node: wavelink.Node
-    vc: disnake.VoiceProtocol
     paused: bool
     position: int
     is_paused: bool
     channel_id: Optional[int]
+    current: Union[LavalinkTrack, YTDLTrack, SpotifyTrack]
 
     def __init__(self, *args, **kwargs):
 
@@ -569,11 +569,11 @@ class BasePlayer:
             self,
             voice_channel: Union[disnake.VoiceChannel, disnake.StageChannel] = None,
             close=False,
-            users: List[disnake.Member] = None
+            users: List[int] = None
     ):
 
         if not voice_channel:
-            voice_channel = self.bot.get_channel(self.channel_id)
+            voice_channel = self.bot.get_channel(self.channel_id) or self.guild.voice_client.channel
             if not voice_channel:
                 return
 
@@ -589,7 +589,7 @@ class BasePlayer:
                 "bot_id": self.bot.user.id,
                 "bot_name": str(self.bot.user),
                 "thumb": thumb,
-                "users": [u.id for u in users or voice_channel.members]
+                "users": [u for u in (users or voice_channel.voice_states) if u != self.bot.user.id]
             }
 
             try:
@@ -606,7 +606,7 @@ class BasePlayer:
             "track": None,
             "bot_id": self.bot.user.id,
             "bot_name": str(self.bot.user),
-            "users": [m.id for m in (users or voice_channel.members) if not m.bot],
+            "users": [m for m in (users or voice_channel.voice_states) if m != self.bot.user.id],
             "thumb": thumb,
             "info": {
                 "channel": {

@@ -3105,9 +3105,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             except AttributeError:
                 vc = before.channel
 
-            self.bot.loop.create_task(player.process_rpc(vc, users=[member], close=True))
+            self.bot.loop.create_task(player.process_rpc(vc, users=[member.id], close=True))
             self.bot.loop.create_task(
-                player.process_rpc(vc, users=[m for m in vc.members if m != member and not m.bot]))
+                player.process_rpc(vc, users=[m for m in vc.voice_states if (m != member.id or m != self.bot.user.id)]))
 
     async def reset_controller_db(self, guild_id: int, data: dict, inter: disnake.AppCmdInter = None):
 
