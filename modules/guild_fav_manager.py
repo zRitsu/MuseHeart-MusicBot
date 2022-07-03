@@ -129,9 +129,9 @@ class PinManager(commands.Cog):
 
         try:
             if name:
-                new_url = str(guild_data["player_controller"]["fav_links"][item])
+                new_url = str(guild_data["player_controller"]["fav_links"][item]["url"])
                 del guild_data["player_controller"]["fav_links"][item]
-                guild_data["player_controller"]["fav_links"][name]['url'] = url or new_url
+                guild_data["player_controller"]["fav_links"][name] = {'url': url or new_url}
 
             elif url:
                 guild_data["player_controller"]["fav_links"][item]['url'] = url
@@ -199,7 +199,7 @@ class PinManager(commands.Cog):
 
             if "> fav:" in name.lower():
                 continue
-            
+
             if len(data['url']) > (max_url_chars := self.bot.config["USER_FAV_MAX_URL_LENGTH"]):
                 raise GenericError(f"**Um item de seu arquiv ultrapassa a quantidade de caracteres permitido:{max_url_chars}\nURL:** {data['url']}")
 
@@ -210,7 +210,7 @@ class PinManager(commands.Cog):
                 raise GenericError(f"O seu arquivo contém link inválido: ```ldif\n{data['url']}```")
 
         guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
-        
+
         if not guild_data["player_controller"]["channel"] or not self.bot.get_channel(int(guild_data["player_controller"]["channel"])):
             raise GenericError("**Não há player configurado no servidor! Use o comando /setup**")
 
