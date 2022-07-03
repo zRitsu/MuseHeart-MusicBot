@@ -316,7 +316,7 @@ class BasePlayer:
         components = [
             disnake.ui.Select(
                 placeholder="Executar uma ação:", options=controller_opts,
-                custom_id="musicplayer_dropdown_idle",
+                custom_id="musicplayer_dropdown_idle", min_values=0, max_values=1
             )
         ]
 
