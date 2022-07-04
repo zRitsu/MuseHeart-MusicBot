@@ -61,7 +61,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
         txt += "🔒 **⠂Modo restrito: `ativado`\n"
 
     if player.command_log:
-        txt += f"📈 **⠂Última Interação:** {player.command_log}\n"
+        txt += f"{player.command_log_emoji} **⠂Última Interação:** {player.command_log}\n"
 
     if len(player.queue):
 
