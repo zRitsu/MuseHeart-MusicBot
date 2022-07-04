@@ -2776,15 +2776,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if payload.code == 4014:
 
-            await asyncio.sleep(3)
-
-            if player.guild.me.voice:
-                return
-
             if player.static:
-                player.command_log = "O player foi desligado por perca de conexão com o canal de voz."
+                player.command_log = "Desliguei o player por me desconectarem do canal de voz."
             else:
-                embed = disnake.Embed(description="**Desligando player por perca de conexão com o canal de voz.**",
+                embed = disnake.Embed(description="**Desliguei o player por me desconectarem do canal de voz.**",
                                       color=self.bot.get_color(player.guild.me))
                 self.bot.loop.create_task(player.text_channel.send(embed=embed, delete_after=7))
             await player.destroy()
@@ -3103,11 +3098,19 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             try:
                 vc = player.guild.me.voice.channel
             except AttributeError:
+
+                try:
+                    await player.destroy()
+                except:
+                    pass
+
                 vc = before.channel
 
-            self.bot.loop.create_task(player.process_rpc(vc, users=[member.id], close=True))
-            self.bot.loop.create_task(
-                player.process_rpc(vc, users=[m for m in vc.voice_states if (m != member.id or m != self.bot.user.id)]))
+            if vc:
+
+                self.bot.loop.create_task(player.process_rpc(vc, users=[member.id], close=True))
+                self.bot.loop.create_task(
+                    player.process_rpc(vc, users=[m for m in vc.voice_states if (m != member.id or m != self.bot.user.id)]))
 
     async def reset_controller_db(self, guild_id: int, data: dict, inter: disnake.AppCmdInter = None):
 
