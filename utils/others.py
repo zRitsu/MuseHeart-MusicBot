@@ -232,7 +232,7 @@ async def send_idle_embed(
 
     components = []
 
-    opts = [disnake.SelectOption(label=k, value=k, description=v['description']) for k, v in guild_data["player_controller"]["fav_links"].items()]
+    opts = [disnake.SelectOption(label=k, value=k, description=v.get('description')) for k, v in guild_data["player_controller"]["fav_links"].items()]
 
     if opts:
         components.append(

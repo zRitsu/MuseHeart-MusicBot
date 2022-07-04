@@ -133,7 +133,7 @@ class PinManager(commands.Cog):
                 del guild_data["player_controller"]["fav_links"][item]
                 guild_data["player_controller"]["fav_links"][name] = {
                     'url': url or old_data["url"],
-                    "description": description or old_data["description"]
+                    "description": description or old_data.get("description")
                 }
 
             elif url:
