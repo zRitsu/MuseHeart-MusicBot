@@ -129,9 +129,12 @@ class PinManager(commands.Cog):
 
         try:
             if name:
-                new_url = str(guild_data["player_controller"]["fav_links"][item]["url"])
+                old_data = dict(guild_data["player_controller"]["fav_links"][item]["url"])
                 del guild_data["player_controller"]["fav_links"][item]
-                guild_data["player_controller"]["fav_links"][name] = {'url': url or new_url}
+                guild_data["player_controller"]["fav_links"][name] = {
+                    'url': url or old_data["url"],
+                    "description": description or old_data["description"]
+                }
 
             elif url:
                 guild_data["player_controller"]["fav_links"][item]['url'] = url
