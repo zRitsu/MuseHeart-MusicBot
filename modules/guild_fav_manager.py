@@ -39,7 +39,7 @@ class PinManager(commands.Cog):
         except:
             return
 
-        await send_idle_embed(message or channel, bot=self.bot)
+        await send_idle_embed(message or channel, bot=self.bot, guild_data=guild_data)
 
 
     @commands.max_concurrency(1, commands.BucketType.user)

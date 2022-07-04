@@ -210,7 +210,7 @@ async def send_message(
 
 async def send_idle_embed(
         target: Union[disnake.Message, disnake.TextChannel, disnake.Thread, disnake.MessageInteraction],
-        text="", *, bot: BotCore, force=False
+        text="", *, bot: BotCore, force=False, guild_data: dict = None
 ):
 
     embed = disnake.Embed(description="**Entre em um canal de voz e peça uma música aqui no canal ou na conversa abaixo "
@@ -228,7 +228,8 @@ async def send_idle_embed(
         avatar = target.guild.me.default_avatar.url
     embed.set_thumbnail(avatar)
 
-    guild_data = await bot.db.get_data(target.guild.id, db_name="guilds")
+    if not guild_data:
+        guild_data = await bot.db.get_data(target.guild.id, db_name="guilds")
 
     components = []
 
