@@ -408,7 +408,7 @@ class MusicSettings(commands.Cog):
     @commands.command(description="Alterar aparência/skin do player.", name="changeskin", aliases=["setskin", "skin"])
     async def change_skin_legacy(self, ctx: CustomContext):
 
-        await self.change_skin(ctx, inter=ctx)
+        await self.change_skin(ctx, inter=ctx, skin=None)
 
 
     @commands.cooldown(1, 10, commands.BucketType.guild)
@@ -417,7 +417,19 @@ class MusicSettings(commands.Cog):
         description=f"{desc_prefix}Alterar aparência/skin do player.",
         default_member_permissions=disnake.Permissions(manage_guild=True)
     )
-    async def change_skin(self, inter: disnake.AppCmdInter):
+    async def change_skin(
+        self,
+        inter: disnake.AppCmdInter,
+        skin: str = commands.Param(description="escolha uma skin", default=None)
+    ):
+
+        skin_list = [s for s in self.bot.player_skins if s not in self.bot.config["IGNORE_SKINS"].split()]
+
+        if not skin_list:
+            if await self.bot.is_owner(inter.author) and skin in self.bot.player_skins:
+                pass
+            else:
+                raise GenericError("**Não há skins na lista com o nome especificado...**")
 
         await inter.response.defer(ephemeral=True)
 
@@ -425,72 +437,69 @@ class MusicSettings(commands.Cog):
 
         selected = guild_data["player_controller"]["skin"] or self.bot.default_skin
 
-        skin_list = [
-            disnake.SelectOption(emoji="🎨", label=s, default=selected == s) for s in self.bot.player_skins if
-            not s in self.bot.config["IGNORE_SKINS"].split()
-        ]
+        msg = None
 
-        if not skin_list and not await self.bot.is_owner(inter.author):
-            raise GenericError("**Não há novas skins disponíveis...**")
+        if not skin:
 
-        try:
-            func = inter.edit_original_message
-        except AttributeError:
-            func = inter.send
+            skins_opts = [disnake.SelectOption(emoji="🎨", label=s, default=selected == s) for s in skin_list]
 
-        try:
-            id_ = f"_{inter.id}"
-        except AttributeError:
-            id_ = ""
-
-        msg = await func(
-            embed=disnake.Embed(
-                description="**Selecione uma skin abaixo:**",
-                colour=self.bot.get_color(inter.guild.me)
-            ),
-            components=[disnake.ui.Select(custom_id=f"skin_select{id_}", options=skin_list)]
-        )
-
-        if hasattr(inter, "id"):
-            check = (lambda i: i.data.custom_id == f"skin_select_{inter.id}")
-        else:
-            check = (lambda i: i.message.id == msg.id and i.author.id == inter.author.id)
-
-        try:
-            resp = await self.bot.wait_for(
-                "dropdown",
-                check=check,
-                timeout=35
-            )
-        except asyncio.TimeoutError:
             try:
-                msg = await inter.original_message()
+                func = inter.edit_original_message
             except AttributeError:
-                pass
-            await msg.edit(view=None, embed=disnake.Embed(description="**Tempo esgotado!**", colour=self.bot.get_color(inter.guild.me)))
-            return
-        else:
-            inter = resp
-            skin = resp.data.values[0]
+                func = inter.send
 
-        await inter.response.defer(ephemeral=True)
+            try:
+                id_ = f"_{inter.id}"
+            except AttributeError:
+                id_ = ""
+
+            msg = await func(
+                embed=disnake.Embed(
+                    description="**Selecione uma skin abaixo:**",
+                    colour=self.bot.get_color(inter.guild.me)
+                ),
+                components=[disnake.ui.Select(custom_id=f"skin_select{id_}", options=skins_opts)]
+            )
+
+            if hasattr(inter, "id"):
+                check = (lambda i: i.data.custom_id == f"skin_select_{inter.id}")
+            else:
+                check = (lambda i: i.message.id == msg.id and i.author.id == inter.author.id)
+
+            try:
+                resp = await self.bot.wait_for(
+                    "dropdown",
+                    check=check,
+                    timeout=35
+                )
+            except asyncio.TimeoutError:
+                try:
+                    msg = await inter.original_message()
+                except AttributeError:
+                    pass
+                await msg.edit(view=None, embed=disnake.Embed(description="**Tempo esgotado!**", colour=self.bot.get_color(inter.guild.me)))
+                return
+            else:
+                inter = resp
+                skin = resp.data.values[0]
 
         guild_data["player_controller"]["skin"] = skin
 
         await self.bot.db.update_data(inter.guild.id, guild_data, db_name="guilds")
 
-        try:
-            func = inter.edit_original_message
-        except AttributeError:
-            func = msg.edit
-
-        await func(
-            embed=disnake.Embed(
+        kwargs = {
+            "embed": disnake.Embed(
                 description=f"**A skin do player do servidor foi alterado com sucesso para:** `{skin}`",
                 color=self.bot.get_color(inter.guild.me)
-            ),
-            view=None
-        )
+            )
+        }
+
+        if msg:
+            await msg.edit(view=None, **kwargs)
+        elif inter.response.is_done():
+            await inter.edit_original_message(view=None, **kwargs)
+        else:
+            await inter.send(ephemeral=True, **kwargs)
 
         try:
             player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
@@ -501,6 +510,12 @@ class MusicSettings(commands.Cog):
             player.auto_update = 0 # linha temporária para resolver possíveis problemas com skins custom criadas por usuarios antes desse commit.
             player.set_command_log(text=f"{inter.author.mention} alterou a skin do player para: **{skin}**", emoji="🎨")
             await player.invoke_np(force=True)
+
+
+    @change_skin.autocomplete("skin")
+    async def change_skin_autocomplete(self, inter: disnake.Interaction, current: str):
+
+        return [s for s in self.bot.player_skins if s not in self.bot.config["IGNORE_SKINS"].split()]
 
 
     @commands.cooldown(1, 5, commands.BucketType.user)
