@@ -1080,9 +1080,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not query:
             raise GenericError("**Você não adicionou um nome ou posição de uma música.**")
 
-        if query.isdigit() and len(query) <= 3:
-            query = f">pos {query}"
-
         await self.remove.callback(self=self, inter=ctx, query=query)
 
     @check_voice()
@@ -1095,13 +1092,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             query: str = commands.Param(name="nome", description="Nome da música completo.", autocomplete=queue_tracks)
     ):
 
-        if query.lower().startswith(">pos "):
-            index = int(query.split()[1]) - 1
-        else:
-            try:
-                index = queue_track_index(inter, query)[0][0]
-            except IndexError:
-                raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
+        try:
+            index = queue_track_index(inter, query)[0][0]
+        except IndexError:
+            raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
@@ -1170,9 +1164,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not query:
             raise GenericError("**Você não adicionou um nome ou posição de uma música.**")
 
-        if query.isdigit() and len(query) <= 3:
-            query = f">pos {query}"
-
         await self.skipto.callback(self=self, inter=ctx, query=query)
 
     @check_voice()
@@ -1195,13 +1186,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             )
     ):
 
-        if query.lower().startswith(">pos "):
-            index = int(query.split()[1]) - 1
-        else:
-            try:
-                index = queue_track_index(inter, query)[0][0]
-            except IndexError:
-                raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
+        try:
+            index = queue_track_index(inter, query)[0][0]
+        except IndexError:
+            raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
@@ -1262,7 +1250,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             position: int = commands.Param(name="posição", description="Posição de destino na fila.", default=1),
             search_all: bool = commands.Param(
                 name="mover_vários", default=False,
-                description="Incluir todas as músicas da fila com o nome especificado (não inclua o nome >pos no inicio do nome)"
+                description="Incluir todas as músicas da fila com o nome especificado."
             )
     ):
 
@@ -1271,13 +1259,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 
-        if query.lower().startswith(">pos "):
-            indexes = [(0, player.queue[int(query.split()[1]) - 1],)]
-        else:
-            indexes = queue_track_index(inter, query, check_all=search_all)
+        indexes = queue_track_index(inter, query, check_all=search_all)
 
-            if not indexes:
-                raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
+        if not indexes:
+            raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
 
         for index, track in reversed(indexes):
             player.queue.remove(track)
@@ -1333,9 +1318,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not query:
             raise GenericError("**Você não adicionou um nome ou posição de uma música.**")
 
-        if query.isdigit() and len(query) <= 3:
-            query = f">pos {query}"
-
         await self.rotate.callback(self=self, inter=ctx, query=query)
 
     @check_voice()
@@ -1350,20 +1332,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 name="nome", description="Nome da música completo.", autocomplete=queue_tracks)
     ):
 
-        if query.startswith(">pos "):
-            try:
-                index = int(query.split()[1]) - 1
-            except:
-                raise GenericError("**Você não pode modificar o item escolhido dos resultados...**")
+        index = queue_track_index(inter, query)
 
-        else:
+        if not index:
+            raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
 
-            index = queue_track_index(inter, query)
-
-            if not index:
-                raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
-
-            index = index[0][0]
+        index = index[0][0]
 
         player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
 

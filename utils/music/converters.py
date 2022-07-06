@@ -110,7 +110,7 @@ def queue_tracks(inter, query: str):
     except KeyError:
         return
 
-    return [f">pos {n+1} - {track.title}"[:100] for n, track in enumerate(player.queue) if query.lower() in track.title.lower()][:20]
+    return [f"{track.title}"[:100] for n, track in enumerate(player.queue) if query.lower() in track.title.lower()][:20]
 
 
 def queue_playlist(inter, query: str):
