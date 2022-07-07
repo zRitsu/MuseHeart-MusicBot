@@ -2,10 +2,25 @@
 name = "py-music-bot"
 version = "0.1.0"
 description = ""
-authors = ["xRitsu <you@example.com>"]
+authors = ["xRitsu <https://github.com/zRitsu>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.8.0,<3.9"
+disnake = {git = "https://github.com/DisnakeDev/disnake.git", rev = "d1e88af8e7aef629466bb47986bfb9223bea0f64"}
+wavelink = {git = "https://github.com/zRitsu/Wavelink.git", rev = "398af3fdfc73e789571ba600c7de27056cd2a88a"}
+python-dotenv = "^0.20.0"
+asyncspotify = {git = "https://github.com/Run1e/asyncspotify.git"}
+user-agent = "^0.1.10"
+requests = "^2.28.1"
+humanize = "^4.2.3"
+tornado = "^6.2"
+motor = "^3.0.0"
+dnspython = "^2.2.1"
+disnake-jishaku = "^2.6.5"
+psutil = "^5.9.1"
+yt-dlp = "^2022.6.29"
+PyNaCl = "^1.5.0"
+
 
 [tool.poetry.dev-dependencies]
 

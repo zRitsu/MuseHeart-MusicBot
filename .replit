@@ -10,8 +10,6 @@ if [ ! -d ".git" ] || [ -z "$(git remote -v)" ]; then
 fi
 
 [ -e pom.xml ] && rm pom.xml
-pip3 install -U -r requirements.txt
-clear
 python3 main.py"""
 
 hidden = ["venv", ".config", "**/__pycache__", "**/.mypy_cache", "**/*.pyc", "Lavalink.jar"]
