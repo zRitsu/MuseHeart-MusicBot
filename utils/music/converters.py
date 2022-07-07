@@ -129,14 +129,14 @@ def queue_playlist(inter, query: str):
 
 async def fav_list(inter, query: str, *, prefix=""):
 
-    return [f"{prefix}{favname}" for favname in (await inter.bot.db.get_data(inter.author.id, db_name="users"))["fav_links"]
-            if not query or query.lower() in favname.lower()][:20]
+    return sorted([f"{prefix}{favname}" for favname in (await inter.bot.db.get_data(inter.author.id, db_name="users"))["fav_links"]
+            if not query or query.lower() in favname.lower()][:20])
 
 
 async def pin_list(inter, query: str, *, prefix=""):
 
-    return [f"{prefix}{pinname}" for pinname in (await inter.bot.db.get_data(inter.guild.id, db_name="guilds"))["player_controller"]["fav_links"]
-            if not query or query.lower() in pinname.lower()][:20]
+    return sorted([f"{prefix}{pinname}" for pinname in (await inter.bot.db.get_data(inter.guild.id, db_name="guilds"))["player_controller"]["fav_links"]
+            if not query or query.lower() in pinname.lower()][:20])
 
 
 async def fav_add_autocomplete(inter, query: str):

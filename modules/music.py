@@ -2091,7 +2091,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     return
 
                 user_favs = [
-                    disnake.SelectOption(label=f, value=f"> fav: {f}") for f in (await fav_list(interaction, ""))
+                    disnake.SelectOption(label=f, value=f"> fav: {f}") for f in sorted(await fav_list(interaction, ""))
                 ]
 
                 await interaction.response.send_modal(
