@@ -53,9 +53,11 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
     txt = f"{duration}\n" \
           f"💠 **⠂Uploader**: `{player.current.author}`\n" \
           f"🎧 **⠂Pedido por:** {player.current.requester.mention}\n" \
-          f"🔊 **⠂Volume:** `{player.volume}%`"
 
-    txt += "\n"
+    if player.current.playlist:
+        txt += f"📑 **⠂Playlist:** [`{fix_characters(player.current.playlist['name'], limit=20)}`]({player.current.playlist['url']})\n"
+
+    txt += f"🔊 **⠂Volume:** `{player.volume}%`\n"
 
     if player.restrict_mode:
         txt += "🔒 **⠂Modo restrito: `ativado`\n"
