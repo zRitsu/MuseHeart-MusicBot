@@ -63,7 +63,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
     if player.command_log:
         txt += f"{player.command_log_emoji} **⠂Última Interação:** {player.command_log}\n"
 
-    if len(player.queue):
+    if qsize := len(player.queue):
 
         if player.static:
 
@@ -82,7 +82,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
                 f"[`{fix_characters(t.title, 31)}`]({t.uri})" for n, t in enumerate(itertools.islice(player.queue, 3))
             )
 
-            if (qsize := len(player.queue)) > 3:
+            if qsize > 3:
                 txt += f"\n`╚══════ E mais {qsize - 3} música(s) ══════╝`"
 
     embed.description += txt
