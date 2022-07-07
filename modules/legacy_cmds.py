@@ -17,6 +17,7 @@ from utils.others import sync_message, chunk_list, EmbedPaginator, CustomContext
 from utils.owner_panel import panel_command, PanelView
 from utils.music.errors import GenericError
 from jishaku.shell import ShellReader
+from aiohttp import ClientSession
 
 os_quote = "\"" if os.name == "nt" else "'"
 git_format = f"--pretty=format:{os_quote}%H*****%h*****%s*****%ct{os_quote}"
@@ -79,6 +80,24 @@ class Owner(commands.Cog):
                           f"{(c['subject'][:40].replace('`', '') + '...') if len(c['subject']) > 39 else c['subject']}` "
                           f"(<t:{c['timestamp']}:R>)" for c in data)
 
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    @commands.is_owner()
+    @commands.command(
+        hidden=True, aliases=["gls", "lavalink", "lllist", "lavalinkservers"],
+        description="Baixar um arquivo com lista de servidores lavalink para usá-lo no sistema de música,"
+    )
+    async def getlavaservers(self, ctx: CustomContext):
+
+        await ctx.defer()
+
+        async with ClientSession() as session:
+            async with session.get("https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/lavalink.ini") as r:
+                ini_file = await r.read()
+                with open("lavalink.ini", "wb") as f:
+                    f.write(ini_file)
+
+        await ctx.send(disnake.Embed(description="**O arquivo lavalink.ini foi baixado com sucesso!\n"
+                                                 "Será necessário me reiniciar para usar os servidores deste arquivo.**"))
 
     @commands.is_owner()
     @panel_command(aliases=["rd", "recarregar"], description="Recarregar os módulos.", emoji="🔄",
