@@ -143,6 +143,7 @@ discloud.txt
 .project
 *.jar
 *.bat
+/poetry.lock
 /lavalink.ini
 database.json
 /index.html
