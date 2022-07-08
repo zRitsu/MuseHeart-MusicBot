@@ -141,13 +141,10 @@ async def pin_list(inter, query: str, *, prefix=""):
 
 async def fav_add_autocomplete(inter, query: str):
 
-    if not inter.author.voice:
-        return [query]
-
     favs: list = await fav_list(inter, query, prefix="> fav: ")
 
-    if not query or (favs_size:=len(favs)) >= 20:
-        return favs
+    if not inter.author.voice or not query or (favs_size:=len(favs)) >= 20:
+        return favs[:20]
 
     return await google_search(inter.bot, query, max_entries=20-favs_size) + favs
 
