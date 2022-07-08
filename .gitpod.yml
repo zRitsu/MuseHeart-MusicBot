@@ -1,5 +1,5 @@
 tasks:
-  - init: cp .env-example .env && pip3 install -U -r requirements.txt
+  - init: cp -n .env-example .env && pip3 install -U -r requirements.txt
     command: python3 main.py
 ports:
   - port: 8080
