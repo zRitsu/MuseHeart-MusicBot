@@ -1,0 +1,6 @@
+tasks:
+  - init: pip3 install -U -r requirements.txt
+    command: python3 main.py
+ports:
+  - port: 8080
+    onOpen: open-preview
