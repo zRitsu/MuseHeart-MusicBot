@@ -319,6 +319,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                                          autocomplete=node_suggestions, default=None),
     ):
 
+        if not inter.guild.voice_client:
+            if inter.author.voice.channel.user_limit and \
+                    not inter.author.voice.channel.user_limit - len(inter.author.voice.channel.voice_states):
+                raise GenericError(f"**O canal {inter.author.voice.channel.mention} está lotado!**")
+
         node = self.bot.music.get_node(server)
 
         if not node:
@@ -467,11 +472,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     query = YOUTUBE_VIDEO_REG.match(query).group()
 
                 inter = view.inter
-
-        if not inter.guild.voice_client:
-            if inter.author.voice.channel.user_limit and \
-                    not inter.author.voice.channel.user_limit - len(inter.author.voice.channel.voice_states):
-                raise GenericError(f"**O canal {inter.author.voice.channel.mention} está lotado!**")
 
         await inter.response.defer(ephemeral=ephemeral)
 
