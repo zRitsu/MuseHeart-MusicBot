@@ -246,11 +246,14 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                 if stage_perms.request_to_speak:
                     await ctx.guild.me.request_to_speak()
-                    embed.description = "Preciso que aceite minha solicitação pra falar no palco."
+                    embed.description = f"**Preciso que aceite minha solicitação pra falar no palco: " \
+                                        f"[{channel.name}]({channel.jump_url}).**"
                 else:
-                    embed.description = "Não tenho autoridade de falar no palco automaticamente (preciso da permissão de um staff)"
+                    embed.description = f"**Não tenho autoridade de falar no palco " \
+                                        f"[{channel.name}]({channel.jump_url}) automaticamente (preciso da permissão " \
+                                        f"de um staff).**"
 
-                await ctx.channel.send(ctx.author.mention, embed=embed, delete_after=13)
+                await ctx.channel.send(ctx.author.mention, embed=embed, delete_after=45)
 
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
