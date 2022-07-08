@@ -20,7 +20,9 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
         txt += f"> ⏸️ **⠂Em Pausa:** {player.current.uri}{duration_txt}"
 
     else:
-        txt += f"> ▶️ **⠂Tocando Agora:** {player.current.uri}{duration_txt} `[`<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`"
+        txt += f"> ▶️ **⠂Tocando Agora:** {player.current.uri}{duration_txt}"
+        if not player.current.is_stream:
+            txt += f" `[`<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`"
 
     if not player.static:
 
