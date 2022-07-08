@@ -24,7 +24,6 @@ git_format = f"--pretty=format:{os_quote}%H*****%h*****%s*****%ct{os_quote}"
 
 
 def format_git_log(data_list: list):
-
     data = []
 
     for d in data_list:
@@ -37,7 +36,6 @@ def format_git_log(data_list: list):
 
 
 def replaces(txt):
-
     if os.name == "nt":
         return txt.replace("\"", f"\\'").replace("'", "\"")
 
@@ -45,19 +43,16 @@ def replaces(txt):
 
 
 async def run_command(cmd):
-
     result = []
 
     with ShellReader(cmd) as reader:
-
         async for x in reader:
             result.append(x)
 
-    return  "\n".join(result)
+    return "\n".join(result)
 
 
 async def run_command_old(bot: BotCore, cmd: str):
-
     to_run = partial(subprocess.check_output, cmd, shell=True, stdin=None, stderr=None)
     return (await bot.loop.run_in_executor(None, to_run)).decode('utf-8').strip()
 
@@ -74,17 +69,16 @@ class Owner(commands.Cog):
         ]
         self.owner_view: Optional[PanelView] = None
 
-
     def format_log(self, data: list):
-        return "\n".join( f"[`{c['abbreviated_commit']}`]({self.bot.remote_git_url}/commit/{c['commit']}) `- "
-                          f"{(c['subject'][:40].replace('`', '') + '...') if len(c['subject']) > 39 else c['subject']}` "
-                          f"(<t:{c['timestamp']}:R>)" for c in data)
+        return "\n".join(f"[`{c['abbreviated_commit']}`]({self.bot.remote_git_url}/commit/{c['commit']}) `- "
+                         f"{(c['subject'][:40].replace('`', '') + '...') if len(c['subject']) > 39 else c['subject']}` "
+                         f"(<t:{c['timestamp']}:R>)" for c in data)
 
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.is_owner()
     @commands.command(
         hidden=True, aliases=["gls", "lavalink", "lllist", "lavalinkservers"],
-        description="Baixar um arquivo com lista de servidores lavalink para usá-lo no sistema de música,"
+        description="Baixar um arquivo com lista de servidores lavalink para usá-los no sistema de música."
     )
     async def getlavaservers(self, ctx: CustomContext):
 
@@ -126,13 +120,12 @@ class Owner(commands.Cog):
         else:
             return txt
 
-
     @commands.is_owner()
     @commands.max_concurrency(1, commands.BucketType.default)
     @panel_command(aliases=["up", "atualizar"], description="Atualizar meu code usando o git.",
                    emoji="<:git:944873798166020116>", alt_name="Atualizar Bot")
     async def update(self, ctx: Union[CustomContext, disnake.MessageInteraction], *,
-                     opts: str = ""): #TODO: Rever se há alguma forma de usar commands.Flag sem um argumento obrigatório, ex: --pip.
+                     opts: str = ""):  # TODO: Rever se há alguma forma de usar commands.Flag sem um argumento obrigatório, ex: --pip.
 
         out_git = ""
 
@@ -213,7 +206,6 @@ class Owner(commands.Cog):
             self.bot.loop.create_task(self.update_deps(ctx, requirements_old, opts))
             return txt
 
-
     async def update_deps(self, ctx, original_reqs, opts):
 
         if "--pip" in opts:
@@ -253,7 +245,6 @@ class Owner(commands.Cog):
                 except:
                     pass
 
-
     async def cleanup_git(self, force=False):
 
         if force:
@@ -275,7 +266,6 @@ class Owner(commands.Cog):
 
         return out_git
 
-
     @commands.is_owner()
     @panel_command(aliases=["latest", "lastupdate"], description="Ver minhas atualizações mais recentes.", emoji="📈",
                    alt_name="Ultimas atualizações")
@@ -293,7 +283,8 @@ class Owner(commands.Cog):
 
         git_log += format_git_log(data)
 
-        txt = f"🔰 ** | [Atualizações recentes:]({self.bot.remote_git_url}/commits/main)**\n\n" + self.format_log(git_log)
+        txt = f"🔰 ** | [Atualizações recentes:]({self.bot.remote_git_url}/commits/main)**\n\n" + self.format_log(
+            git_log)
 
         if isinstance(ctx, CustomContext):
 
@@ -307,7 +298,6 @@ class Owner(commands.Cog):
         else:
             return txt
 
-
     @commands.has_guild_permissions(manage_guild=True)
     @commands.command(description="Sincronizar/Registrar os comandos de barra no servidor.", hidden=True)
     async def syncguild(self, ctx: Union[CustomContext, disnake.MessageInteraction]):
@@ -320,14 +310,15 @@ class Owner(commands.Cog):
 
         await ctx.send(embed=embed)
 
-
     @commands.is_owner()
-    @panel_command(aliases=["sync"], description="Sincronizar os comandos de barra manualmente.", emoji="<:slash:944875586839527444>",
+    @panel_command(aliases=["sync"], description="Sincronizar os comandos de barra manualmente.",
+                   emoji="<:slash:944875586839527444>",
                    alt_name="Sincronizar comandos manualmente.")
     async def synccmds(self, ctx: Union[CustomContext, disnake.MessageInteraction]):
 
         if self.bot.config["AUTO_SYNC_COMMANDS"] is True:
-            raise GenericError(f"**Isso não pode ser usado com a sincronização automática ativada...**\n\n{sync_message(self.bot)}")
+            raise GenericError(
+                f"**Isso não pode ser usado com a sincronização automática ativada...**\n\n{sync_message(self.bot)}")
 
         await self.bot._sync_application_commands()
 
@@ -344,7 +335,6 @@ class Owner(commands.Cog):
 
         else:
             return txt
-
 
     @commands.command(name="help", aliases=["ajuda"], hidden=True)
     @commands.cooldown(1, 3, commands.BucketType.member)
@@ -366,10 +356,12 @@ class Owner(commands.Cog):
                 embed.add_field(name="Descrição:", value=f"```ldif\n{cmd.description}```", inline=False)
 
             if cmd.aliases:
-                embed.add_field(name="Aliases/Sinônimos:", value="```ldif\n{}```".format(" | ".join(f"{ctx.clean_prefix}{a}" for a in cmd.aliases)), inline=False)
+                embed.add_field(name="Aliases/Sinônimos:", value="```ldif\n{}```".format(
+                    " | ".join(f"{ctx.clean_prefix}{a}" for a in cmd.aliases)), inline=False)
 
             if cmd.usage:
-                embed.add_field(name="Como usar:", value=f" ```ldif\n{ctx.clean_prefix}{cmd.name} {cmd.usage}```", inline=False)
+                embed.add_field(name="Como usar:", value=f" ```ldif\n{ctx.clean_prefix}{cmd.name} {cmd.usage}```",
+                                inline=False)
 
             await ctx.send(embed=embed)
             return
@@ -406,7 +398,8 @@ class Owner(commands.Cog):
             embed = disnake.Embed(color=self.bot.get_color(ctx.me), title=f"Meus comandos ({len(cmds)}):",
                                   description=slash_msg)
 
-            embed.set_footer(text=f"Página: {c+1}/{len(txt_chunked)} | para ver informações detalhadas de um comando especifico use: {ctx.clean_prefix}{ctx.invoked_with} comando")
+            embed.set_footer(
+                text=f"Página: {c + 1}/{len(txt_chunked)} | para ver informações detalhadas de um comando especifico use: {ctx.clean_prefix}{ctx.invoked_with} comando")
 
             for cmd_name, cmd_desc in txt_pages:
                 embed.add_field(name=cmd_name, value=cmd_desc)
@@ -418,7 +411,6 @@ class Owner(commands.Cog):
         view.message = await ctx.reply(embed=embeds[0], view=view)
 
         await view.wait()
-
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.cooldown(1, 10, commands.BucketType.guild)
@@ -435,7 +427,6 @@ class Owner(commands.Cog):
         if " " in prefix or len(prefix) > 5:
             raise GenericError("**O prefixo não pode conter espaços ou ter acima de 5 caracteres.**")
 
-
         data = await self.bot.db.get_data(ctx.guild.id, db_name="guilds")
 
         data["prefix"] = prefix
@@ -448,7 +439,6 @@ class Owner(commands.Cog):
 
         await ctx.send(embed=embed)
 
-
     @commands.is_owner()
     @panel_command(aliases=["export"], description="Exportar minhas configs/secrets/env para um arquivo.", emoji="🔐",
                    alt_name="Exportar env/config")
@@ -456,14 +446,14 @@ class Owner(commands.Cog):
 
         fp = BytesIO(bytes(json.dumps(self.bot.config, indent=4), 'utf-8'))
         try:
-            embed=disnake.Embed(
-                    description="**Não divulge/mostre esse arquivo pra ninguém e muito cuidado ao postar print's "
-                                "do conteudo dele e não adicione esse arquivo em locais públicos como github, repl.it, "
-                                "glitch.com, etc!**",
-                    color=self.bot.get_color(ctx.guild.me))
+            embed = disnake.Embed(
+                description="**Não divulge/mostre esse arquivo pra ninguém e muito cuidado ao postar print's "
+                            "do conteudo dele e não adicione esse arquivo em locais públicos como github, repl.it, "
+                            "glitch.com, etc!**",
+                color=self.bot.get_color(ctx.guild.me))
             embed.set_footer(text="Por medida de segurança, esta mensagem será deletada em 60 segundos.")
             await ctx.author.send(embed=embed,
-                file=disnake.File(fp=fp, filename="config.json"), delete_after=60)
+                                  file=disnake.File(fp=fp, filename="config.json"), delete_after=60)
 
         except disnake.Forbidden:
             raise GenericError("Seu DM está desativado!")
@@ -473,13 +463,12 @@ class Owner(commands.Cog):
         else:
             return "Arquivo de configuração enviado com sucesso no seu DM."
 
-
     @check_voice()
     @commands.command(description='inicializar um player no servidor.', aliases=["spawn", "sp", "spw", "smn"])
     async def summon(self, ctx: CustomContext):
 
         try:
-            self.bot.music.players[ctx.guild.id] #type ignore
+            self.bot.music.players[ctx.guild.id]  # type ignore
             raise GenericError("**Já há um player iniciado no servidor.**")
         except KeyError:
             pass
@@ -522,7 +511,7 @@ class Owner(commands.Cog):
 
         if isinstance(channel, disnake.StageChannel):
 
-            stage_perms =  channel.permissions_for(ctx.guild.me)
+            stage_perms = channel.permissions_for(ctx.guild.me)
             if stage_perms.manage_permissions:
                 await ctx.guild.me.edit(suppress=False)
             elif stage_perms.request_to_speak:
@@ -536,7 +525,7 @@ class Owner(commands.Cog):
         return await check_requester_channel(ctx)
 
     async def cog_load(self) -> None:
-        self.owner_view =  PanelView(self.bot)
+        self.owner_view = PanelView(self.bot)
 
 
 def setup(bot: BotCore):
