@@ -573,7 +573,10 @@ class BasePlayer:
     ):
 
         if not voice_channel:
-            voice_channel = self.bot.get_channel(self.channel_id) or self.guild.voice_client.channel
+            try:
+                voice_channel = self.bot.get_channel(self.channel_id) or self.guild.voice_client.channel
+            except AttributeError:
+                return #TODO: Investigar possível bug ao mover o bot de canal pelo discord.
             if not voice_channel:
                 return
 
