@@ -3,7 +3,8 @@ tasks:
       cp -n .env-example .env
       python -m venv venv
       source venv/bin/activate
-      pip install -U -r requirements.txt
+      pip install -U poetry
+      poetry install
     command: |
       source venv/bin/activate
       python main.py
