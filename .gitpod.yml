@@ -17,3 +17,6 @@ ports:
 vscode:
   extensions:
     - ms-python.python
+    - oderwat.indent-rainbow
+    - usernamehw.errorlens
+    - eamodio.gitlens
