@@ -5,9 +5,6 @@ tasks:
       source venv/bin/activate
       pip install -U poetry
       poetry install
-    command: |
-      source venv/bin/activate
-      python main.py
 
 ports:
   - port: 8080
