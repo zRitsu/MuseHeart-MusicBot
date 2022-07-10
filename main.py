@@ -1,4 +1,5 @@
 import json
+import os.path
 import traceback
 import disnake
 from disnake.ext import commands
@@ -15,6 +16,9 @@ from web_app import start
 from config_loader import load_config
 from configparser import ConfigParser
 import logging
+
+if not path.isdir("./.logs"):
+    os.makedirs("./.logs")
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
