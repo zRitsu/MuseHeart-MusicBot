@@ -9,11 +9,15 @@ Há alguns bots meus já feito e hospedado usando esta source, você pode adicio
 | [Muse Heart](https://dsc.gg/muse-heart-music) | [Muse Heart (2)](https://dsc.gg/muse-heart-music-2)|
 
 ## Comece a usar agora mesmo fazendo deploy em um dos serviços abaixo:
-[![Run on Repl.it](https://repl.it/badge/github/zRitsu/disnake-LL-music-bot.git)](https://repl.it/github/zRitsu/disnake-LL-music-bot.git)</br>
-`Vá em secrets (cadeado do painel à esquerda) e crie uma secret com nome TOKEN e no value coloque o token do seu bot (caso queira alterar outras configs, consulte o arquivo .env-example)`
+</br>
+
+[![Run on Repl.it](https://repl.it/badge/github/zRitsu/disnake-LL-music-bot.git)](https://replit.com/@xRitsu/Discord-Music-Bot-Disnake)</br>
+
+`Ao clicar no botão, clique em fork e aguarde. Depois vá em secrets (cadeado do painel à esquerda) e crie uma secret com nome TOKEN e no value coloque o token do seu bot (caso queira alterar outras configs, consulte o arquivo .env-example)`
 
 ---
 [![Heroku_Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/zRitsu/disnake-LL-music-bot)</br>
+
 `Após clicar no botão, apenas preencha os dados que vão ser requisitados na próxima página. Nota: após o deploy, caso queira alterar outras configs vá em settings e clique em Reveal Config Vars, crie a key e o valor desejado da config, consulte o arquivo .env-example para ver as configs disponíveis.`
 
 ---
