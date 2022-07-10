@@ -7,7 +7,7 @@ authors = ["xRitsu <https://github.com/zRitsu>"]
 [tool.poetry.dependencies]
 python = ">=3.8.0,<3.9"
 disnake = {git = "https://github.com/DisnakeDev/disnake.git", rev = "d1e88af8e7aef629466bb47986bfb9223bea0f64"}
-wavelink = {git = "https://github.com/zRitsu/Wavelink.git", rev = "398af3fdfc73e789571ba600c7de27056cd2a88a"}
+wavelink = {git = "https://github.com/zRitsu/Wavelink.git", rev = "e73906bc805d7fd81eed3c416c19a8d2bc625f16"}
 python-dotenv = "^0.20.0"
 asyncspotify = {git = "https://github.com/Run1e/asyncspotify.git"}
 user-agent = "^0.1.10"
