@@ -403,7 +403,8 @@ class BasePlayer:
 
         if not self.current or self.updating:
             try:
-                await interaction.response.defer()
+                if not interaction.response.is_done():
+                    await interaction.response.defer()
             except:
                 pass
             return
