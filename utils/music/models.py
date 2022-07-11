@@ -292,13 +292,14 @@ class BasePlayer:
             cmds = " | ".join(f"/{self.bot.get_slash_command(c).name}" for c in ['play', 'back', 'readd', 'stop'])
 
             embed = disnake.Embed(
-                description=f"**As músicas acabaram! Use um dos comandos abaixo para adicionar músicas ou parar o player.**\n\n`{cmds}`\n\n"
+                description=f"**As músicas acabaram... Use um dos comandos abaixo para adicionar músicas ou parar "
+                            f"o player.**\n\n`{cmds}`\n\n"
                             f"**Nota:** `O Player será desligado automaticamente` "
                             f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=self.idle_timeout)).timestamp())}:R> "
                             f"`caso nenhum comando seja usado...`",
                 color=self.bot.get_color(self.guild.me)
             )
-            await self.text_channel.send(embed=embed)
+            self.message = await self.text_channel.send(embed=embed)
             return
 
         controller_opts = []
@@ -352,7 +353,7 @@ class BasePlayer:
             )
 
         embed = disnake.Embed(
-            description=f"**Não há músicas na fila. Adicione uma música ou use uma das opções abaixo.\n\n"
+            description=f"**Não há músicas na fila... Adicione uma música ou use uma das opções abaixo.\n\n"
                         f"Nota:** `O Player será desligado automaticamente` "
                         f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=self.idle_timeout)).timestamp())}:R> "
                         f"`caso nenhuma ação seja executada...`",
@@ -414,7 +415,11 @@ class BasePlayer:
 
         self.updating = True
 
-        if self.controller_mode:
+        if not self.controller_mode:
+            self.message = None
+            await self.text_channel.send(allowed_mentions=self.allowed_mentions, **data)
+
+        else:
 
             if data.get("components") is None:  # nenhum controle de botão foi definido na skin (será usado os botões padrões).
 
@@ -459,10 +464,11 @@ class BasePlayer:
 
             await self.destroy_message()
 
-        try:
-            self.message = await self.text_channel.send(allowed_mentions=self.allowed_mentions, **data)
-        except:
-            traceback.print_exc()
+            try:
+                self.message = await self.text_channel.send(allowed_mentions=self.allowed_mentions, **data)
+            except:
+                traceback.print_exc()
+
 
         self.updating = False
 
@@ -471,7 +477,7 @@ class BasePlayer:
 
     async def destroy_message(self):
 
-        if not self.static and self.controller_mode:
+        if not self.static:
             try:
                 await self.message.delete()
             except:
