@@ -401,7 +401,7 @@ class BasePlayer:
 
     async def invoke_np(self, force=False, interaction=None, rpc_update=False):
 
-        if (not self.current or self.controller_mode) and self.updating:
+        if not self.current or self.updating:
             try:
                 await interaction.response.defer()
             except:
