@@ -21,7 +21,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
             time_format(player.current.duration)
 
         embed.description = f"**Tocando Agora:** [`{player.current.title}`]({player.current.uri})\n" \
-                            f"**Duração:** `{duration}` ┃ **Uploader:** `{fix_characters(player.current.author[:15])}`\n" \
+                            f"**Duração:** `{duration}` ┃ **Uploader:** `{fix_characters(player.current.author, 18)}`\n" \
                             f"**Pedido por:** {player.current.requester.mention}"
 
         if player.current.playlist:

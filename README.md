@@ -11,17 +11,17 @@ Há alguns bots meus já feito e hospedado usando esta source, você pode adicio
 ## Comece a usar agora mesmo fazendo deploy em um dos serviços abaixo:
 </br>
 
-[![Run on Repl.it](https://repl.it/badge/github/zRitsu/disnake-LL-music-bot.git)](https://replit.com/@xRitsu/Discord-Music-Bot-Disnake)</br>
+[![Run on Repl.it](https://repl.it/badge/github/zRitsu/disnake-LL-music-bot.git)](https://replit.com/@xRitsu/Discord-Music-Bot-Disnake)
 
 `Ao clicar no botão, clique em fork e aguarde. Depois vá em secrets (cadeado do painel à esquerda) e crie uma secret com nome TOKEN e no value coloque o token do seu bot (caso queira alterar outras configs, consulte o arquivo .env-example)`
 
 ---
-[![Heroku_Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/zRitsu/disnake-LL-music-bot)</br>
+[![Heroku_Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/zRitsu/disnake-LL-music-bot)
 
 `Após clicar no botão, preencha os dados que vão ser requisitados na próxima página e clique em deploy app e aguarde. após isso clique em Manage e depois em resources, desative o dyno web e ative o main e aguarde o bot logar (no canto superior clique em more e em view logs para acompanhar os logs). Nota: após o deploy, caso queira alterar outras configs vá em settings e clique em Reveal Config Vars, crie a key e o valor desejado da config, consulte o arquivo .env-example para ver as configs disponíveis.`
 
 ---
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/zRitsu/disnake-LL-music-bot)</br>
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/zRitsu/disnake-LL-music-bot)
 
 `Após o deploy, abra o arquivo .env e coloque o token do bot no campo apropriado. Nota: Assim que finalizar o deploy não esqueça de clicar em pin no workspace para evitar o mesmo ser deletado após 14 dias inativo.`
 
