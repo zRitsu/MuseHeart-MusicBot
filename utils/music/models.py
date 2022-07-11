@@ -159,8 +159,9 @@ class BasePlayer:
         self.auto_update: int = 0
         self.message_updater_task: Optional[asyncio.Task] = self.bot.loop.create_task(self.message_updater())
         self.restrict_mode = kwargs.pop('restrict_mode', False) # limitar apenas para dj's e staff's
-        self.ignore_np_once = False # não invocar player controller em determinadas situações
+        self.ignore_np_once = False  # não invocar player controller em determinadas situações
         self.allowed_mentions = disnake.AllowedMentions(users=False, everyone=False, roles=False)
+        self.controller_mode = True  # ativar/desativar modo controller (apenas para uso em skins)
 
         self.initial_hints = [
             "Você pode usar o botão [🎶] para pedir músicas ou adicionar um link de música/playlist/favorito na fila.",
@@ -196,9 +197,11 @@ class BasePlayer:
     @property
     def controller_link(self):
         try:
-            return f" [`💠`]({self.message.jump_url})"
+            if self.controller_mode:
+                return f" [`💠`]({self.message.jump_url})"
         except AttributeError:
-            return ""
+            pass
+        return ""
 
     def process_hint(self):
         if random.choice([x for x in range(self.bot.config["HINT_RATE"])]) == 0:
@@ -283,6 +286,20 @@ class BasePlayer:
 
 
     async def process_idle_message(self):
+
+        if not self.static and not self.controller_mode:
+
+            cmds = " | ".join(f"/{self.bot.get_slash_command(c).name}" for c in ['play', 'back', 'readd', 'stop'])
+
+            embed = disnake.Embed(
+                description=f"**As músicas acabaram! Use um dos comandos abaixo para adicionar músicas ou parar o player.**\n\n`{cmds}`\n\n"
+                            f"**Nota:** `O Player será desligado automaticamente` "
+                            f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=self.idle_timeout)).timestamp())}:R> "
+                            f"`caso nenhum comando seja usado...`",
+                color=self.bot.get_color(self.guild.me)
+            )
+            await self.text_channel.send(embed=embed)
+            return
 
         controller_opts = []
 
@@ -383,7 +400,7 @@ class BasePlayer:
 
     async def invoke_np(self, force=False, interaction=None, rpc_update=False):
 
-        if not self.current or self.updating:
+        if (not self.current or self.controller_mode) and self.updating:
             try:
                 await interaction.response.defer()
             except:
@@ -397,45 +414,50 @@ class BasePlayer:
 
         self.updating = True
 
-        if data.get("components") is None: # nenhum controle de botão foi definido na skin (será usado os botões padrões).
+        if self.controller_mode:
 
-            data["components"] = [
-                disnake.ui.Button(emoji="⏯️", custom_id=PlayerControls.pause_resume, style=get_button_style(self.paused)),
-                disnake.ui.Button(emoji="⏮️", custom_id=PlayerControls.back),
-                disnake.ui.Button(emoji="⏭️", custom_id=PlayerControls.skip),
-                disnake.ui.Button(emoji="🔀", custom_id=PlayerControls.shuffle),
-                disnake.ui.Button(emoji="🎶", custom_id=PlayerControls.add_song),
-                disnake.ui.Button(emoji="⏹️", custom_id=PlayerControls.stop),
-                disnake.ui.Button(emoji="📑", custom_id=PlayerControls.queue),
-                disnake.ui.Button(emoji="🛠️", custom_id=PlayerControls.settings),
-                disnake.ui.Button(emoji="<:help:947781412017279016>", custom_id=PlayerControls.help_button, label="menu de ajuda")
-            ]
+            if data.get("components") is None:  # nenhum controle de botão foi definido na skin (será usado os botões padrões).
 
-        if self.message and (self.ignore_np_once or self.has_thread or self.static or not force or self.is_last_message()):
+                data["components"] = [
+                    disnake.ui.Button(emoji="⏯️", custom_id=PlayerControls.pause_resume,
+                                      style=get_button_style(self.paused)),
+                    disnake.ui.Button(emoji="⏮️", custom_id=PlayerControls.back),
+                    disnake.ui.Button(emoji="⏭️", custom_id=PlayerControls.skip),
+                    disnake.ui.Button(emoji="🔀", custom_id=PlayerControls.shuffle),
+                    disnake.ui.Button(emoji="🎶", custom_id=PlayerControls.add_song),
+                    disnake.ui.Button(emoji="⏹️", custom_id=PlayerControls.stop),
+                    disnake.ui.Button(emoji="📑", custom_id=PlayerControls.queue),
+                    disnake.ui.Button(emoji="🛠️", custom_id=PlayerControls.settings),
+                    disnake.ui.Button(emoji="<:help:947781412017279016>", custom_id=PlayerControls.help_button,
+                                      label="menu de ajuda")
+                ]
 
-            self.ignore_np_once = False
 
-            try:
-                if interaction and not interaction.response.is_done():
-                    await interaction.response.edit_message(allowed_mentions=self.allowed_mentions, **data)
-                else:
-                    try:
-                        await interaction.response.defer()
-                    except:
-                        pass
-                    try:
-                        await self.message.edit(allowed_mentions=self.allowed_mentions, **data)
-                    except:
-                        if not self.bot.get_channel(self.text_channel.id):
-                            await self.destroy(force=True)  # canal não existe mais no servidor...
-                            return
+            if self.message and (self.ignore_np_once or self.has_thread or self.static or not force or self.is_last_message()):
 
-                self.updating = False
-                return
-            except:
-                traceback.print_exc()
+                self.ignore_np_once = False
 
-        await self.destroy_message()
+                try:
+                    if interaction and not interaction.response.is_done():
+                        await interaction.response.edit_message(allowed_mentions=self.allowed_mentions, **data)
+                    else:
+                        try:
+                            await interaction.response.defer()
+                        except:
+                            pass
+                        try:
+                            await self.message.edit(allowed_mentions=self.allowed_mentions, **data)
+                        except:
+                            if not self.bot.get_channel(self.text_channel.id):
+                                await self.destroy(force=True)  # canal não existe mais no servidor...
+                                return
+
+                    self.updating = False
+                    return
+                except:
+                    traceback.print_exc()
+
+            await self.destroy_message()
 
         try:
             self.message = await self.text_channel.send(allowed_mentions=self.allowed_mentions, **data)
@@ -449,7 +471,7 @@ class BasePlayer:
 
     async def destroy_message(self):
 
-        if not self.static:
+        if not self.static and self.controller_mode:
             try:
                 await self.message.delete()
             except:
@@ -468,7 +490,10 @@ class BasePlayer:
 
         while True:
 
-            if self.auto_update:
+            if not self.controller_mode:
+                pass
+
+            elif self.auto_update:
 
                 await asyncio.sleep(self.auto_update)
 
@@ -499,7 +524,8 @@ class BasePlayer:
 
         if force or (interaction and not interaction.response.is_done()):
             self.update = False
-            await self.invoke_np(interaction=interaction)
+            if self.controller_mode:
+                await self.invoke_np(interaction=interaction)
 
         else:
             self.update = True

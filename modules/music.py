@@ -2847,9 +2847,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 player.update = True
                 return
 
-        await player.invoke_np(
-            force=True if (player.static or not player.loop or not player.is_last_message()) else False,
-            rpc_update=True)
+        # TODO: rever essa parte caso adicione função de ativar track loops em músicas da fila
+        if player.loop != "current" or (player.current and player.current.track_loops == 0):
+            await player.invoke_np(
+                force=True if (player.static or not player.loop or not player.is_last_message()) else False,
+                rpc_update=True)
 
     @wavelink.WavelinkMixin.listener()
     async def on_track_end(self, node: wavelink.Node, payload: wavelink.TrackEnd):
