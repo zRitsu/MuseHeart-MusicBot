@@ -149,6 +149,7 @@ class BasePlayer:
         self.idle_task: Optional[asyncio.Task] = None
         self.members_timeout_task: Optional[asyncio.Task] = None
         self.idle_timeout = self.bot.config["IDLE_TIMEOUT"]
+        self.hint_rate = self.bot.config["HINT_RATE"]
         self.command_log: str = ""
         self.command_log_emoji: str = ""
         self.is_closing: bool = False
@@ -204,7 +205,7 @@ class BasePlayer:
         return ""
 
     def process_hint(self):
-        if random.choice([x for x in range(self.bot.config["HINT_RATE"])]) == 0:
+        if random.choice([x for x in range(self.hint_rate)]) == 0:
             self.current_hint = next(self.hints)
         else:
             self.current_hint = ""
