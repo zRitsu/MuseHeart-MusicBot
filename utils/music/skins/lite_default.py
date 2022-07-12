@@ -35,6 +35,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
         data["embeds"] = [embed]
 
         if player.controller_mode:
+            player.hint_rate = 9
             player.controller_mode = False
 
     else:
@@ -139,7 +140,6 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
             player.auto_update = 0
 
         if not player.controller_mode:
-            player.hint_rate = 9
             player.controller_mode = True
 
         data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
