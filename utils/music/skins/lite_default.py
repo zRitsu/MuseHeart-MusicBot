@@ -30,6 +30,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
         embed.set_thumbnail(url=player.current.thumb)
 
         if player.current_hint:
+            embed.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif")
             embed.set_footer(text=f"💡 Dica: {player.current_hint}")
 
         data["embeds"] = [embed]
