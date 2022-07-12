@@ -29,6 +29,9 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
 
         embed.set_thumbnail(url=player.current.thumb)
 
+        if player.current_hint:
+            embed.set_footer(text=f"💡 Dica: {player.current_hint}")
+
         data["embeds"] = [embed]
 
         if player.controller_mode:
@@ -136,6 +139,7 @@ def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
             player.auto_update = 0
 
         if not player.controller_mode:
+            player.hint_rate = 9
             player.controller_mode = True
 
         data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
