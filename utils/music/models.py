@@ -971,7 +971,7 @@ class YTDLPlayer(BasePlayer):
         except:
             pass
 
-        await self.cleanup()
+        await self.cleanup(inter=inter)
 
         try:
             del self.bot.music.players[self.guild.id]
