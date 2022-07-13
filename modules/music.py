@@ -1977,8 +1977,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         guild_data = await self.bot.db.get_data(interaction.guild.id, db_name="guilds")
 
+        try:
+            query = guild_data["player_controller"]["fav_links"][interaction.data.values[0]]['url']
+        except KeyError:
+            raise GenericError("**O item selecionado não foi encontrado base de dados...**")
+
         kwargs = {
-            "query": "> pin: " + guild_data["player_controller"]["fav_links"][interaction.data.values[0]]['url'],
+            "query": f"> pin: {query}",
             "position": 0,
             "options": False,
             "manual_selection": True,
