@@ -881,6 +881,7 @@ class YTDLPlayer(BasePlayer):
         self.is_stopping = False
         self.node = kwargs.pop('node')
         self.is_closing = False
+        self.source: Optional[YTDLSource] = None
         self.filters_dict = {
             'nightcore': 'aresample=48000,asetrate=48000*1.20'
         }
@@ -974,6 +975,11 @@ class YTDLPlayer(BasePlayer):
         await self.cleanup(inter=inter)
 
         try:
+            self.source.cleanup()
+        except:
+            pass
+
+        try:
             del self.bot.music.players[self.guild.id]
         except KeyError:
             pass
@@ -1028,10 +1034,10 @@ class YTDLPlayer(BasePlayer):
         if self.nightcore:
             FFMPEG_OPTIONS['options'] += f" -af \"{self.filters_dict['nightcore']}\""
 
-        source = await YTDLSource.source(track.id, ffmpeg_opts=FFMPEG_OPTIONS)
-        source.volume = self.volume / 100
+        self.source = await YTDLSource.source(track.id, ffmpeg_opts=FFMPEG_OPTIONS)
+        self.source.volume = self.volume / 100
 
-        self.guild.voice_client.play(source, after=self.next)
+        self.guild.voice_client.play(self.source, after=self.next)
 
         self.start_time = disnake.utils.utcnow()
 
@@ -1050,6 +1056,12 @@ class YTDLPlayer(BasePlayer):
             self.is_stopping = False
         else:
             self.set_command_log()
+
+        try:
+            self.source.cleanup()
+            self.source = None
+        except:
+            pass
 
         self.current = None
 
