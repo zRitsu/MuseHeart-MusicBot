@@ -957,7 +957,7 @@ class YTDLPlayer(BasePlayer):
     def is_paused(self) -> bool:
         return self.is_connected and self.guild.voice_client.is_paused()
 
-    async def destroy(self, force=True):
+    async def destroy(self, force=True, inter: disnake.MessageInteraction = None):
 
         self.is_closing = True
 
