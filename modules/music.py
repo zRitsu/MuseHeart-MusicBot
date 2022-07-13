@@ -1980,7 +1980,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         try:
             query = guild_data["player_controller"]["fav_links"][interaction.data.values[0]]['url']
         except KeyError:
-            raise GenericError("**O item selecionado não foi encontrado base de dados...**")
+            raise GenericError("**O item selecionado não foi encontrado na base de dados...**")
 
         kwargs = {
             "query": f"> pin: {query}",
