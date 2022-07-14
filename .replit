@@ -9,7 +9,7 @@ if [ ! -d ".git" ] || [ -z "$(git remote -v)" ]; then
   git checkout -b main -f --track origin/main
 fi
 
-pip3 install -r requirements.txt
+pip3 install -U -r requirements.txt
 clear
 
 python3 main.py"""
