@@ -8,7 +8,16 @@ if [ ! -d ".git" ] || [ -z "$(git remote -v)" ]; then
   git checkout -b main -f --track origin/main
 fi
 
-python3 main.py"""
+if [ ! -d "venv" ]; then
+  python3 -m venv venv
+  source venv/bin/activate
+  python -m pip install -U pip
+  pip3 install -r requirements.txt
+else
+  source venv/bin/activate
+fi
+
+python main.py"""
 # The primary language of the repl. There can be others, though!
 language = "python3"
 # The main file, which will be shown by default in the editor.
