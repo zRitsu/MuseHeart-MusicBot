@@ -2853,7 +2853,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 return
 
         # TODO: rever essa parte caso adicione função de ativar track loops em músicas da fila
-        if player.loop != "current" or (player.current and player.current.track_loops == 0):
+        if player.loop != "current" or (not player.controller_mode and player.current.track_loops == 0):
             await player.invoke_np(
                 force=True if (player.static or not player.loop or not player.is_last_message()) else False,
                 rpc_update=True)
