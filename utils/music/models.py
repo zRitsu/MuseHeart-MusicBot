@@ -756,7 +756,7 @@ class YTDLManager:
                 'no_warnings': True,
                 'retries': 5,
                 'extract_flat': 'in_playlist',
-                'cachedir': False,
+                # 'cachedir': False,
                 'skip_download': True,
                 'default_search': 'auto',
                 'source_address': '0.0.0.0',
