@@ -102,16 +102,6 @@ class YTDLPlaylist:
             ) for i in data['tracks'] if i.get('duration')]
 
 
-class YTDLSource(disnake.PCMVolumeTransformer):
-
-    def __init__(self, source):
-        super().__init__(source)
-
-    @classmethod
-    async def source(cls, url, *, ffmpeg_opts):
-        return cls(disnake.FFmpegPCMAudio(url, **ffmpeg_opts))
-
-
 class BasePlayer:
     volume: int
     node: wavelink.Node
@@ -757,7 +747,7 @@ class YTDLManager:
         self.audioformats = ["mp3", "ogg", "m4a", "webm", "mp4", "unknown_video"]
         self.ytdl = YoutubeDL(
             {
-                'format': 'bestaudio/best',
+                'format': 'webm[abr>0]/bestaudio/best',
                 'noplaylist': True,
                 'nocheckcertificate': True,
                 'ignoreerrors': False,
@@ -881,7 +871,6 @@ class YTDLPlayer(BasePlayer):
         self.is_stopping = False
         self.node = kwargs.pop('node')
         self.is_closing = False
-        self.source: Optional[YTDLSource] = None
         self.filters_dict = {
             'nightcore': 'aresample=48000,asetrate=48000*1.20'
         }
@@ -963,21 +952,16 @@ class YTDLPlayer(BasePlayer):
         self.is_closing = True
 
         try:
+            self.guild.voice_client.source.cleanup()
+        except:
+            pass
+
+        try:
             await self.guild.voice_client.disconnect(force=True)
         except AttributeError:
             pass
 
-        try:
-            self.guild.voice_client.cleanup()
-        except:
-            pass
-
         await self.cleanup(inter=inter)
-
-        try:
-            self.source.cleanup()
-        except:
-            pass
 
         try:
             del self.bot.music.players[self.guild.id]
@@ -1024,7 +1008,7 @@ class YTDLPlayer(BasePlayer):
             'before_options': '-nostdin'
                               ' -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 10'
             ,
-            'options': '-vn'
+            'options': '-vn -loglevel panic'
         }
 
         if self.seek_time:
@@ -1034,10 +1018,10 @@ class YTDLPlayer(BasePlayer):
         if self.nightcore:
             FFMPEG_OPTIONS['options'] += f" -af \"{self.filters_dict['nightcore']}\""
 
-        self.source = await YTDLSource.source(track.id, ffmpeg_opts=FFMPEG_OPTIONS)
-        self.source.volume = self.volume / 100
+        source = await disnake.FFmpegOpusAudio.from_probe(track.id, **FFMPEG_OPTIONS)
+        source.volume = self.volume / 100
 
-        self.guild.voice_client.play(self.source, after=self.next)
+        self.guild.voice_client.play(source, after=self.next)
 
         self.start_time = disnake.utils.utcnow()
 
@@ -1056,12 +1040,6 @@ class YTDLPlayer(BasePlayer):
             self.is_stopping = False
         else:
             self.set_command_log()
-
-        try:
-            self.source.cleanup()
-            self.source = None
-        except:
-            pass
 
         self.current = None
 
