@@ -9,8 +9,15 @@ if [ ! -d ".git" ] || [ -z "$(git remote -v)" ]; then
   git checkout -b main -f --track origin/main
 fi
 
-pip3 install -U -r requirements.txt
-clear
+if [ ! -d "venv" ]; then
+  python3 -m venv venv
+  . venv/bin/activate
+  python -m pip install -U pip
+  pip3 install -r requirements.txt
+  clear
+else
+  . venv/bin/activate
+fi
 
 python3 main.py"""
 
