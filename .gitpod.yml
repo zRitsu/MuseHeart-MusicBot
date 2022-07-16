@@ -10,6 +10,10 @@ tasks:
       tar -xf ./ffmpeg_temp/ffmpeg.tar.xz --strip-components 1 -C ./ffmpeg_temp
       mv ./ffmpeg_temp/ffmpeg ./venv/bin/ffmpeg
       rm -rf ./ffmpeg_temp
+      git clone https://gitlab.xiph.org/xiph/opus.git && cd opus && ./autogen.sh && ./configure && make && cd ..
+      mkdir ./venv/opus_lib
+      mv -v ./opus/.libs/ ./venv/opus_lib/
+      rm -rf ./opus
 
 ports:
   - port: 8080
