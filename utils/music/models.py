@@ -1107,6 +1107,10 @@ class LavalinkPlayer(BasePlayer, wavelink.Player):
         self.volume = max(min(vol, 1000), 0)
         await self.node._send(op='volume', guildId=str(self.guild_id), volume=self.volume)
 
+    async def seek(self, position: int = 0) -> None:
+        await super().seek(position=position)
+        self.last_position = position
+
     async def set_distortion(self, sin_offset: float = 0, sin_scale: float = 1.0, cos_offset: float = 0,
                              cos_scale: float = 1.0, tan_offset: float = 0, tan_scale: float = 1.0,
                              offset: float = 0, scale: float = 1.0, enabled: bool = True):
