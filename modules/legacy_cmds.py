@@ -5,6 +5,7 @@ import json
 import subprocess
 from functools import partial
 from typing import Union, Optional
+from zipfile import ZipFile
 import disnake
 import dotenv
 import wavelink
@@ -468,21 +469,20 @@ class Owner(commands.Cog):
         SECRETS.update(config_json)
         SECRETS.update(env_file)
 
-        if not os.path.isfile("./.env"):
-            shutil.copyfile("./.env-example", "./.env")
-            delete_after = True
-        else:
-            delete_after = False
+        if not os.path.isfile("./.env-temp"):
+            shutil.copyfile("./.env-example", "./.env-temp")
 
         for i in SECRETS:
             if not isinstance(SECRETS[i], str):
                 SECRETS[i] = str(SECRETS[i]).lower()
-            dotenv.set_key("./.env", i, SECRETS[i])
+            dotenv.set_key("./.env-temp", i, SECRETS[i])
 
-        await run_command_old(self.bot, "git archive --add-file .env --format=zip --output source.zip HEAD")
+        await run_command_old(self.bot, "git archive --format=zip --output source.zip HEAD")
 
-        if delete_after:
-            os.remove("./.env")
+        with ZipFile("./source.zip", 'a') as zipf:
+            zipf.write('./.env-temp', './.env')
+
+        os.remove("./.env-temp")
 
         try:
             embed = disnake.Embed(
