@@ -2766,6 +2766,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if payload.code == 4014:
 
+            if player.guild.me.voice:
+                return
+
             if player.static:
                 player.command_log = "Desliguei o player por me desconectarem do canal de voz."
             else:
