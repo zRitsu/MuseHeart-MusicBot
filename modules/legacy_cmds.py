@@ -447,7 +447,7 @@ class Owner(commands.Cog):
     async def exportsource(self, ctx:Union[CustomContext, disnake.MessageInteraction]):
 
         try:
-            env_file = dotenv.dotenv_values()
+            env_file = dotenv.dotenv_values("./.env")
         except:
             env_file = {}
 
@@ -459,6 +459,10 @@ class Owner(commands.Cog):
 
         SECRETS = dict(DEFAULT_CONFIG)
         SECRETS.update({"TOKEN": ""})
+
+        for env in os.environ:
+            if env.lower().startswith(("token_bot_", "test_guilds_", "lavalink_node_")):
+                SECRETS[env] = os.environ[env]
 
         for i in SECRETS:
             try:
@@ -482,6 +486,11 @@ class Owner(commands.Cog):
         with ZipFile("./source.zip", 'a') as zipf:
             zipf.write('./.env-temp', './.env')
 
+            if os.path.isdir("./local_dbs"):
+                for filedb in os.listdir("./local_dbs"):
+                    if filedb.endswith(".json"):
+                        zipf.write(f"./local_dbs/{filedb}", f"./local_dbs/{filedb}")
+
         os.remove("./.env-temp")
 
         try:
@@ -491,8 +500,11 @@ class Owner(commands.Cog):
                             "github, repl.it, glitch.com, etc.**",
                 color=self.bot.get_color(ctx.guild.me))
             embed.set_footer(text="Por medida de segurança, esta mensagem será deletada em 2 minutos.")
-            await ctx.author.send(embed=embed,
-                                  file=disnake.File("./source.zip"), delete_after=120)
+
+            async with ctx.typing():
+                await ctx.author.send(embed=embed,
+                                      file=disnake.File("./source.zip"), delete_after=120)
+
             os.remove("./source.zip")
 
         except disnake.Forbidden:
@@ -502,7 +514,7 @@ class Owner(commands.Cog):
         if isinstance(ctx, CustomContext):
             await ctx.message.add_reaction("👍")
         else:
-            return "Arquivo de configuração enviado com sucesso no seu DM."
+            return "Arquivo source.zip foi enviado com sucesso no seu DM."
 
     @check_voice()
     @commands.command(description='inicializar um player no servidor.', aliases=["spawn", "sp", "spw", "smn"])

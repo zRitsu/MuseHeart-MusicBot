@@ -27,6 +27,11 @@ DEFAULT_CONFIG = {
     "INVITE_PERMISSIONS": 397287680080,
     "MONGO_DB_INTERNAL_CACHE": True,
 
+    ################
+    ### Database ###
+    ################
+    "MONGO": "",
+
     #########################
     ### Sistema de música ###
     #########################
