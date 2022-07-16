@@ -2,98 +2,98 @@ from json import load
 from dotenv import dotenv_values
 from os import environ
 
-
 bools = {
     "true": True,
     "false": False,
     "none": None
 }
 
+DEFAULT_CONFIG = {
+    "DEFAULT_PREFIX": "!!!",
+    "AUTO_SYNC_COMMANDS": True,
+    "OWNER_IDS": "",
+    "INTENTS": "",
+    "DISABLE_INTENTS": "",
+    "COMMAND_LOG": False,
+    "EMBED_COLOR": None,
+    "BOT_ADD_REMOVE_LOG": '',
+    "ERROR_REPORT_WEBHOOK": '',
+    "INTERACTION_COMMAND_ONLY": False,
+    "PRESENCE_INTERVAL": 900,
+    "SOURCE_REPO": "https://github.com/zRitsu/disnake-LL-music-bot.git",
+    "HIDE_SOURCE_OWNER": False,
+    "SUPPORT_SERVER": "",
+    "ADDITIONAL_BOT_IDS": "",
+    "INVITE_PERMISSIONS": 397287680080,
+    "MONGO_DB_INTERNAL_CACHE": True,
+
+    #########################
+    ### Sistema de música ###
+    #########################
+    "DEFAULT_SKIN": "default",
+    "VOTE_SKIP_AMOUNT": 3,
+    "IDLE_TIMEOUT": 180,
+    "RUN_RPC_SERVER": True,
+    "RPC_SERVER": "ws://localhost:$PORT/ws",
+    "MAX_USER_FAVS": 10,
+    "USER_FAV_MAX_NAME_LENGTH": 35,
+    "USER_FAV_MAX_URL_LENGTH": 90,
+    "HINT_RATE": 4,
+    "YTDLMODE": False,
+    "IGNORE_SKINS": '',
+
+    ##############################################
+    ### Sistema de música - Suporte ao spotify ###
+    ##############################################
+    "SPOTIFY_CLIENT_ID": '',
+    "SPOTIFY_CLIENT_SECRET": '',
+
+    ##################################################
+    ### Sistema de música - Local lavalink stuffs: ###
+    ##################################################
+    "RUN_LOCAL_LAVALINK": False,
+    "LAVALINK_ADDITIONAL_SLEEP": 0,
+    "LAVALINK_INITIAL_RAM": 30,
+    "LAVALINK_RAM_LIMIT": 120,
+    "LAVALINK_CPU_CORES": 2,
+    "LAVALINK_FILE_URL": "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/Lavalink.jar",
+
+    ##########################
+    ##### Bot presences: #####
+    ##########################
+    "LISTENING_PRESENCES": "",
+    "WATCHING_PRESENCES": "",
+    "PLAYING_PRESENCES": "",
+}
+
 
 def load_config():
 
-    CONFIGS = {
-        "DEFAULT_PREFIX": "!!!",
-        "AUTO_SYNC_COMMANDS": True,
-        "OWNER_IDS": "",
-        "INTENTS": "",
-        "DISABLE_INTENTS": "",
-        "COMMAND_LOG": False,
-        "EMBED_COLOR": None,
-        "BOT_ADD_REMOVE_LOG": '',
-        "ERROR_REPORT_WEBHOOK": '',
-        "INTERACTION_COMMAND_ONLY": False,
-        "PRESENCE_INTERVAL": 900,
-        "SOURCE_REPO": "https://github.com/zRitsu/disnake-LL-music-bot.git",
-        "HIDE_SOURCE_OWNER": False,
-        "SUPPORT_SERVER": "",
-        "ADDITIONAL_BOT_IDS": "",
-        "INVITE_PERMISSIONS": 397287680080,
-        "MONGO_DB_INTERNAL_CACHE": True,
+    CONFIG = dict(DEFAULT_CONFIG)
 
-        #########################
-        ### Sistema de música ###
-        #########################
-        "DEFAULT_SKIN": "default",
-        "VOTE_SKIP_AMOUNT": 3,
-        "IDLE_TIMEOUT": 180,
-        "RUN_RPC_SERVER": True,
-        "RPC_SERVER": "ws://localhost:$PORT/ws",
-        "MAX_USER_FAVS": 10,
-        "USER_FAV_MAX_NAME_LENGTH": 35,
-        "USER_FAV_MAX_URL_LENGTH": 90,
-        "HINT_RATE": 4,
-        "YTDLMODE": False,
-        "IGNORE_SKINS": '',
-
-        ##############################################
-        ### Sistema de música - Suporte ao spotify ###
-        ##############################################
-        "SPOTIFY_CLIENT_ID": '',
-        "SPOTIFY_CLIENT_SECRET": '',
-
-        ##################################################
-        ### Sistema de música - Local lavalink stuffs: ###
-        ##################################################
-        "RUN_LOCAL_LAVALINK": False,
-        "LAVALINK_ADDITIONAL_SLEEP": 0,
-        "LAVALINK_INITIAL_RAM": 30,
-        "LAVALINK_RAM_LIMIT": 120,
-        "LAVALINK_CPU_CORES": 2,
-        "LAVALINK_FILE_URL": "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/Lavalink.jar",
-
-        ##########################
-        ##### Bot presences: #####
-        ##########################
-        "LISTENING_PRESENCES": "",
-        "WATCHING_PRESENCES": "",
-        "PLAYING_PRESENCES": "",
-    }
-
-    for cfg in list(CONFIGS) + ["TOKEN", "MONGO"]:
+    for cfg in list(CONFIG) + ["TOKEN", "MONGO"]:
         try:
-            CONFIGS[cfg] = environ[cfg]
+            CONFIG[cfg] = environ[cfg]
         except KeyError:
             continue
 
     for env in environ:
         if env.lower().startswith(("token_bot_", "test_guilds_", "lavalink_node_")):
-            CONFIGS[env] = environ[env]
+            CONFIG[env] = environ[env]
 
     try:
         with open("config.json") as f:
-            CONFIGS.update(load(f))
+            CONFIG.update(load(f))
     except FileNotFoundError:
         pass
 
     try:
-        CONFIGS.update(dotenv_values())
+        CONFIG.update(dotenv_values())
     except:
         pass
 
-    if CONFIGS["EMBED_COLOR"] is False:
-        CONFIGS["EMBED_COLOR"] = None
-
+    if CONFIG["EMBED_COLOR"] is False:
+        CONFIG["EMBED_COLOR"] = None
 
     # converter strings que requer número int.
     for i in [
@@ -111,10 +111,9 @@ def load_config():
         "INVITE_PERMISSIONS"
     ]:
         try:
-            CONFIGS[i] = int(CONFIGS[i])
+            CONFIG[i] = int(CONFIG[i])
         except ValueError:
-            raise Exception(f"Você usou uma configuração inválida! {i}: {CONFIGS[i]}")
-
+            raise Exception(f"Você usou uma configuração inválida! {i}: {CONFIG[i]}")
 
     # converter strings que requer valor bool/nulo.
     for i in [
@@ -128,20 +127,20 @@ def load_config():
         "YTDLMODE",
         "MONGO_DB_INTERNAL_CACHE"
     ]:
-        if CONFIGS[i] in (True, False, None):
+        if CONFIG[i] in (True, False, None):
             continue
 
         try:
-            CONFIGS[i] = bools[CONFIGS[i]]
+            CONFIG[i] = bools[CONFIG[i]]
         except KeyError:
-            raise Exception(f"Você usou uma configuração inválida! {i}: {CONFIGS[i]}")
+            raise Exception(f"Você usou uma configuração inválida! {i}: {CONFIG[i]}")
 
-    CONFIGS["RPC_SERVER"] = CONFIGS["RPC_SERVER"].replace("$PORT", environ.get("PORT", "8080"))
+    CONFIG["RPC_SERVER"] = CONFIG["RPC_SERVER"].replace("$PORT", environ.get("PORT", "8080"))
 
-    if CONFIGS["PRESENCE_INTERVAL"] < 300:
-        CONFIGS["PRESENCE_INTERVAL"] = 300
+    if CONFIG["PRESENCE_INTERVAL"] < 300:
+        CONFIG["PRESENCE_INTERVAL"] = 300
 
-    if CONFIGS["IDLE_TIMEOUT"] < 30:
-        CONFIGS["IDLE_TIMEOUT"] = 30
+    if CONFIG["IDLE_TIMEOUT"] < 30:
+        CONFIG["IDLE_TIMEOUT"] = 30
 
-    return CONFIGS
+    return CONFIG

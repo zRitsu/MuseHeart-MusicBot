@@ -4,9 +4,9 @@ import shutil
 import json
 import subprocess
 from functools import partial
-from io import BytesIO
 from typing import Union, Optional
 import disnake
+import dotenv
 import wavelink
 from disnake.ext import commands
 from utils.client import BotCore
@@ -18,6 +18,7 @@ from utils.owner_panel import panel_command, PanelView
 from utils.music.errors import GenericError
 from jishaku.shell import ShellReader
 from aiohttp import ClientSession
+from config_loader import DEFAULT_CONFIG
 
 os_quote = "\"" if os.name == "nt" else "'"
 git_format = f"--pretty=format:{os_quote}%H*****%h*****%s*****%ct{os_quote}"
@@ -440,22 +441,62 @@ class Owner(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.is_owner()
-    @panel_command(aliases=["export"], description="Exportar minhas configs/secrets/env para um arquivo.", emoji="🔐",
-                   alt_name="Exportar env/config")
-    async def exportenv(self, ctx: Union[CustomContext, disnake.MessageInteraction]):
+    @panel_command(aliases=["expsource"], description="Exportar minha source para um arquivo.", emoji="💾",
+                   alt_name="Exportar source/código-fonte.")
+    async def exportsource(self, ctx:Union[CustomContext, disnake.MessageInteraction]):
 
-        fp = BytesIO(bytes(json.dumps(self.bot.config, indent=4), 'utf-8'))
+        try:
+            env_file = dotenv.dotenv_values()
+        except:
+            env_file = {}
+
+        try:
+            with open("config.json") as f:
+                config_json = json.load(f)
+        except FileNotFoundError:
+            config_json = {}
+
+        SECRETS = dict(DEFAULT_CONFIG)
+        SECRETS.update({"TOKEN": ""})
+
+        for i in SECRETS:
+            try:
+                SECRETS[i] = os.environ[i]
+            except KeyError:
+                continue
+
+        SECRETS.update(config_json)
+        SECRETS.update(env_file)
+
+        if not os.path.isfile("./.env"):
+            shutil.copyfile("./.env-example", "./.env")
+            delete_after = True
+        else:
+            delete_after = False
+
+        for i in SECRETS:
+            if not isinstance(SECRETS[i], str):
+                SECRETS[i] = str(SECRETS[i]).lower()
+            dotenv.set_key("./.env", i, SECRETS[i])
+
+        await run_command_old(self.bot, "git archive --add-file .env --format=zip --output source.zip HEAD")
+
+        if delete_after:
+            os.remove("./.env")
+
         try:
             embed = disnake.Embed(
-                description="**Não divulge/mostre esse arquivo pra ninguém e muito cuidado ao postar print's "
-                            "do conteudo dele e não adicione esse arquivo em locais públicos como github, repl.it, "
-                            "glitch.com, etc!**",
+                description="**Não envie o arquivo source.zip ou o arquivo .env pra ninguém e muito cuidado ao postar "
+                            "print's do conteudo do arquivo .env e não adicione esse arquivo em locais públicos como "
+                            "github, repl.it, glitch.com, etc.**",
                 color=self.bot.get_color(ctx.guild.me))
-            embed.set_footer(text="Por medida de segurança, esta mensagem será deletada em 60 segundos.")
+            embed.set_footer(text="Por medida de segurança, esta mensagem será deletada em 2 minutos.")
             await ctx.author.send(embed=embed,
-                                  file=disnake.File(fp=fp, filename="config.json"), delete_after=60)
+                                  file=disnake.File("./source.zip"), delete_after=120)
+            os.remove("./source.zip")
 
         except disnake.Forbidden:
+            os.remove("./source.zip")
             raise GenericError("Seu DM está desativado!")
 
         if isinstance(ctx, CustomContext):
