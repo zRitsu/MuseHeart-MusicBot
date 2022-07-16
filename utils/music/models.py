@@ -738,7 +738,7 @@ class YTDLManager:
 
         if os.name != "nt" and not disnake.opus.is_loaded():
             full_dir = "./venv/lib_opus/" if os.path.isdir("./venv/opus_lib") else ""
-            disnake.opus.load_opus(f'{full_dir}{ctypes.util.find_library("opus")}')
+            disnake.opus.load_opus(f'{full_dir}{ctypes.util.find_library("opus") or "libopus.so.0"}')
 
         self.bot = bot
         self.players = {}
