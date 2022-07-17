@@ -59,6 +59,14 @@ async def run_command_old(bot: BotCore, cmd: str):
     return (await bot.loop.run_in_executor(None, to_run)).decode('utf-8').strip()
 
 
+async def download_lavalink_serverlist():
+    async with ClientSession() as session:
+        async with session.get("https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/lavalink.ini") as r:
+            ini_file = await r.read()
+            with open("lavalink.ini", "wb") as f:
+                f.write(ini_file)
+
+
 class Owner(commands.Cog):
 
     def __init__(self, bot: BotCore):
@@ -86,14 +94,14 @@ class Owner(commands.Cog):
 
         await ctx.defer()
 
-        async with ClientSession() as session:
-            async with session.get("https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/lavalink.ini") as r:
-                ini_file = await r.read()
-                with open("lavalink.ini", "wb") as f:
-                    f.write(ini_file)
+        await download_lavalink_serverlist()
 
-        await ctx.send(disnake.Embed(description="**O arquivo lavalink.ini foi baixado com sucesso!\n"
-                                                 "Será necessário me reiniciar para usar os servidores deste arquivo.**"))
+        await ctx.send(
+            embed=disnake.Embed(
+                description="**O arquivo lavalink.ini foi baixado com sucesso!\n"
+                            "Será necessário me reiniciar para usar os servidores deste arquivo.**"
+            )
+        )
 
     @commands.is_owner()
     @panel_command(aliases=["rd", "recarregar"], description="Recarregar os módulos.", emoji="🔄",
@@ -442,9 +450,9 @@ class Owner(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.is_owner()
-    @panel_command(aliases=["expsource"], description="Exportar minha source para um arquivo.", emoji="💾",
+    @panel_command(aliases=["expsource"], description="Exportar minha source para um arquivo zip.", emoji="💾",
                    alt_name="Exportar source/código-fonte.")
-    async def exportsource(self, ctx:Union[CustomContext, disnake.MessageInteraction]):
+    async def exportsource(self, ctx:Union[CustomContext, disnake.MessageInteraction], *, flags: str):
 
         try:
             env_file = dotenv.dotenv_values("./.env")
@@ -480,6 +488,9 @@ class Owner(commands.Cog):
             if not isinstance(SECRETS[i], str):
                 SECRETS[i] = str(SECRETS[i]).lower()
             dotenv.set_key("./.env-temp", i, SECRETS[i])
+
+        if flags.endswith(("--externalservers", "-externalservers", "--llservers", "-llservers", "--lls", "-lls")):
+            await download_lavalink_serverlist()
 
         await run_command_old(self.bot, "git archive --format=zip --output source.zip HEAD")
 
