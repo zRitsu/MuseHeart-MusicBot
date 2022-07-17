@@ -452,7 +452,7 @@ class Owner(commands.Cog):
     @commands.is_owner()
     @panel_command(aliases=["expsource"], description="Exportar minha source para um arquivo zip.", emoji="💾",
                    alt_name="Exportar source/código-fonte.")
-    async def exportsource(self, ctx:Union[CustomContext, disnake.MessageInteraction], *, flags: str):
+    async def exportsource(self, ctx:Union[CustomContext, disnake.MessageInteraction], *, flags: str = ""):
 
         try:
             env_file = dotenv.dotenv_values("./.env")
