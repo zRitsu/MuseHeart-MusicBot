@@ -1,2 +1,3 @@
-main: git init && git remote add origin https://github.com/zRitsu/disnake-LL-music-bot.git && git fetch origin && git checkout -b main -f --track origin/main && pip3 install -r requirements.txt && python main.py
+quickboot: python3 main.py
+autoupdate: python3 venv venv && bash quick_update.sh && source venv/bin/activate && pip3 install -r requirements.txt && python main.py
 web: python main.py
