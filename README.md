@@ -16,7 +16,7 @@ Há alguns bots meus já feito e hospedado usando esta source, você pode adicio
 `Ao clicar no botão, clique em fork e aguarde. Depois vá em secrets (cadeado do painel à esquerda) e crie uma secret com nome TOKEN e no value coloque o token do seu bot (caso queira alterar outras configs, consulte o arquivo .env-example)`
 
 ---
-[![Heroku_Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/zRitsu/disnake-LL-music-bot)
+[![Heroku_Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/zRitsu/disnake-LL-music-bot/tree/master)
 
 `Após clicar no botão, preencha os dados que vão ser requisitados na próxima página e clique em deploy app e aguarde. após isso clique em Manage e depois em resources, desative o dyno web e ative o main e aguarde o bot logar (no canto superior clique em more e em view logs para acompanhar os logs). Nota: após o deploy, caso queira alterar outras configs vá em settings e clique em Reveal Config Vars, crie a key e o valor desejado da config, consulte o arquivo .env-example para ver as configs disponíveis.`
 
