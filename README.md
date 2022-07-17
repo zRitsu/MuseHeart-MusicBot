@@ -8,22 +8,31 @@ Há alguns bots meus já feito e hospedado usando esta source, você pode adicio
 |---------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
 | [Muse Heart](https://dsc.gg/muse-heart-music) | [Muse Heart (2)](https://dsc.gg/muse-heart-music-2)|
 
-## Comece a usar agora mesmo fazendo deploy em um dos serviços abaixo:
+## Teste agora mesmo um bot próprio com esta source fazendo deploy em um dos serviços abaixo:
 </br>
 
 [![Run on Repl.it](https://repl.it/badge/github/zRitsu/disnake-LL-music-bot.git)](https://replit.com/@xRitsu/Discord-Music-Bot-Disnake)
 
-`Ao clicar no botão, clique em fork e aguarde. Depois vá em secrets (cadeado do painel à esquerda) e crie uma secret com nome TOKEN e no value coloque o token do seu bot (caso queira alterar outras configs, consulte o arquivo .env-example)`
+* 1 - Clique em **Fork Repl** e aguarde o processo.
+* 2 - Vá em secrets (cadeado do painel à esquerda) e crie uma secret com nome TOKEN e no value coloque o token do seu bot. `(caso queira alterar outras configs, consulte o arquivo .env-example)`
+* 3 - Clique em run (botão de **play**) e aguarde o bot instalar as dependências e iniciar.
 
 ---
 [![Heroku_Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/zRitsu/disnake-LL-music-bot/tree/main)
 
-`Após clicar no botão, preencha os dados que vão ser requisitados na próxima página e clique em deploy app e aguarde. após isso clique em Manage e depois em resources, desative o dyno web e ative o main e aguarde o bot logar (no canto superior clique em more e em view logs para acompanhar os logs). Nota: após o deploy, caso queira alterar outras configs vá em settings e clique em Reveal Config Vars, crie a key e o valor desejado da config, consulte o arquivo .env-example para ver as configs disponíveis.`
+* 1 - Preencha os dados que vão ser requisitados na próxima página
+* 2 - Clique em deploy app e aguarde (o processo pode demorar entre 2-5 minutos).
+* 3 - Clique em Manage e depois vá em resources.
+* 4 - Desative o dyno web e ative o autoupdate (ou o quickfix, não ative os 2 ao mesmo tempo!) e aguarde o bot logar. `(no canto superior clique em more e em view logs para acompanhar os logs)`
+* **Nota:** Caso queira alterar as configs usadas no passo 1, vá em settings e clique em Reveal Config Vars, crie/altere a key e o valor desejado da config, consulte o arquivo .env-example para ver todas as configs disponíveis.
 
 ---
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/zRitsu/disnake-LL-music-bot)
 
-`Após o deploy, abra o arquivo .env e coloque o token do bot no campo apropriado. Nota: Assim que finalizar o deploy não esqueça de clicar em pin no workspace para evitar o mesmo ser deletado após 14 dias inativo.`
+* 1 - Abra o arquivo .env e coloque o token do bot no campo apropriado. 
+* 2 - Clique com botão direito em cima do arquivo main.py e depois clique em: Run Python File in Terminal.
+* **Nota 1:** Não esqueça de ir na lista de [workspaces](https://gitpod.io/workspaces) e clicar nos 3 pontinhos do projeto e depois clicar em **pin**. `(isso evitará o worskpace ser deletado após 14 dias inativo)`
+* **Nota 2:** Não use o gitpod para hospedar/manter o bot online, pois o mesmo não funciona pra isso!
 
 ---
 
