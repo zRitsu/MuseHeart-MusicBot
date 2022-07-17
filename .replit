@@ -1,25 +1,6 @@
 language="python3"
 
-run = """[ -z "$IS_SOURCE" ] || { python3 preview.py; kill "$PPID"; exit 1; }
-
-if [ ! -d ".git" ] || [ -z "$(git remote -v)" ]; then
-  git init
-  git remote add origin https://github.com/zRitsu/disnake-LL-music-bot.git
-  git fetch origin
-  git checkout -b main -f --track origin/main
-fi
-
-if [ ! -d "venv" ]; then
-  python3 -m venv venv
-  . venv/bin/activate
-  python3 -m pip install -U pip
-  python3 -m pip install -r requirements.txt
-  clear
-else
-  . venv/bin/activate
-fi
-
-python3 main.py"""
+run = "bash ./deploy_handlers/replit.sh"
 
 hidden = ["venv", ".config", "**/__pycache__", "**/.mypy_cache", "**/*.pyc", "Lavalink.jar"]
 
