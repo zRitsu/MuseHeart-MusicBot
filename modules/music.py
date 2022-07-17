@@ -2767,6 +2767,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if payload.code == 4014:
 
             if player.guild.me.voice:
+                if player.controller_mode:
+                    player.update = True
                 return
 
             if player.static:
