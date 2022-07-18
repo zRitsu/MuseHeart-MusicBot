@@ -35,6 +35,8 @@ DEFAULT_CONFIG = {
     #########################
     ### Sistema de música ###
     #########################
+    "AUTO_DOWNLOAD_LAVALINK_SERVERLIST": False,
+    "LAVALINK_SERVER_LIST": "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/lavalink.ini",
     "DEFAULT_SKIN": "default",
     "VOTE_SKIP_AMOUNT": 3,
     "IDLE_TIMEOUT": 180,
@@ -130,7 +132,8 @@ def load_config():
         "COMMAND_LOG",
         "RUN_RPC_SERVER",
         "YTDLMODE",
-        "MONGO_DB_INTERNAL_CACHE"
+        "MONGO_DB_INTERNAL_CACHE",
+        "AUTO_DOWNLOAD_LAVALINK_SERVERLIST"
     ]:
         if CONFIG[i] in (True, False, None):
             continue

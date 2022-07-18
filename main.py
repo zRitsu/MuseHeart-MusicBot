@@ -2,6 +2,7 @@ import json
 import os.path
 import traceback
 import disnake
+import requests
 from disnake.ext import commands
 import asyncio
 from subprocess import check_output
@@ -34,6 +35,13 @@ if not CONFIGS["DEFAULT_PREFIX"]:
 LAVALINK_SERVERS = {}
 
 if CONFIGS['YTDLMODE'] is False:
+
+    if CONFIGS["AUTO_DOWNLOAD_LAVALINK_SERVERLIST"]:
+        print("Baixando lista de servidores lavalink (arquivo: lavalink.ini)")
+        r = requests.get(CONFIGS["LAVALINK_SERVER_LIST"], allow_redirects=True)
+        with open("lavalink.ini", 'wb') as f:
+            f.write(r.content)
+        r.close()
 
     for key, value in CONFIGS.items():
 

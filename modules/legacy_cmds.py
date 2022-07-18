@@ -59,14 +59,6 @@ async def run_command_old(bot: BotCore, cmd: str):
     return (await bot.loop.run_in_executor(None, to_run)).decode('utf-8').strip()
 
 
-async def download_lavalink_serverlist():
-    async with ClientSession() as session:
-        async with session.get("https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/lavalink.ini") as r:
-            ini_file = await r.read()
-            with open("lavalink.ini", "wb") as f:
-                f.write(ini_file)
-
-
 class Owner(commands.Cog):
 
     def __init__(self, bot: BotCore):
@@ -94,7 +86,7 @@ class Owner(commands.Cog):
 
         await ctx.defer()
 
-        await download_lavalink_serverlist()
+        await self.download_lavalink_serverlist()
 
         await ctx.send(
             embed=disnake.Embed(
@@ -490,7 +482,7 @@ class Owner(commands.Cog):
             dotenv.set_key("./.env-temp", i, SECRETS[i])
 
         if flags.endswith(("--externalservers", "-externalservers", "--llservers", "-llservers", "--lls", "-lls")):
-            await download_lavalink_serverlist()
+            await self.download_lavalink_serverlist()
 
         await run_command_old(self.bot, "git archive --format=zip --output source.zip HEAD")
 
@@ -590,6 +582,13 @@ class Owner(commands.Cog):
 
     async def cog_load(self) -> None:
         self.owner_view = PanelView(self.bot)
+
+    async def download_lavalink_serverlist(self):
+        async with ClientSession() as session:
+            async with session.get(self.bot.config["LAVALINK_SERVER_LIST"]) as r:
+                ini_file = await r.read()
+                with open("lavalink.ini", "wb") as f:
+                    f.write(ini_file)
 
 
 def setup(bot: BotCore):
