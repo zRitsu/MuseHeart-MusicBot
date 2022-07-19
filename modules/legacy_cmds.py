@@ -505,9 +505,7 @@ class Owner(commands.Cog):
                 color=self.bot.get_color(ctx.guild.me))
             embed.set_footer(text="Por medida de segurança, esta mensagem será deletada em 2 minutos.")
 
-            async with ctx.typing():
-                msg = await ctx.author.send(embed=embed,
-                                      file=disnake.File("./source.zip"), delete_after=120)
+            msg = await ctx.author.send(embed=embed,file=disnake.File("./source.zip"), delete_after=120)
 
             os.remove("./source.zip")
 
