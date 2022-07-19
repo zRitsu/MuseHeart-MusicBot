@@ -525,6 +525,30 @@ class Owner(commands.Cog):
         else:
             return f"Arquivo [source.zip]({msg.jump_url}) foi enviado com sucesso no seu DM."
 
+    @commands.is_owner()
+    @commands.command(hidden=True)
+    async def cleardm(self, ctx: CustomContext, amount: int = 20):
+
+        counter = 0
+
+        async with ctx.typing():
+
+            async for msg in ctx.author.history(limit=int(amount)):
+                if msg.author.id == self.bot.user.id:
+                    await msg.delete()
+                    await asyncio.sleep(0.5)
+                    counter += 1
+
+        if not counter:
+            raise GenericError(f"**Nenhuma mensagem foi deletada de {amount} verificada(s)...**")
+
+        if counter == 1:
+            txt = "**Uma mensagem foi deletada do seu DM.**"
+        else:
+            txt = f"**{counter} mensagens foram deletadas do seu DM.**"
+
+        await ctx.send(embed=disnake.Embed(description=txt, colour=self.bot.get_color(ctx.guild.me)))
+
     @check_voice()
     @commands.command(description='inicializar um player no servidor.', aliases=["spawn", "sp", "spw", "smn"])
     async def summon(self, ctx: CustomContext):
