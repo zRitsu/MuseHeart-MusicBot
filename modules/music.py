@@ -214,7 +214,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             if not perms.connect or not perms.speak:
                 raise MissingVoicePerms(channel)
 
-            await player.connect(channel.id)
+            await player.connect(channel.id, self_deaf=True)
 
             txt = [
                 f"{'me moveu para o' if channel != ctx.guild.me.voice and ctx.guild.me.voice.channel else 'me reconectou no'}"
@@ -224,7 +224,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await self.interaction_message(ctx, txt, emoji="🔈", rpc_update=True)
 
         else:
-            await player.connect(channel.id)
+            await player.connect(channel.id, self_deaf=True)
+
+            if ctx.guild.me.guild_permissions.deafen_members and not ctx.guild.me.voice.deaf:
+                try:
+                    await ctx.guild.me.edit(deafen=True)
+                except:
+                    traceback.print_exc()
 
         try:
             player.members_timeout_task.cancel()
