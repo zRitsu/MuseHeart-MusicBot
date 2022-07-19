@@ -442,7 +442,8 @@ class Owner(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.is_owner()
-    @panel_command(aliases=["expsource"], description="Exportar minha source para um arquivo zip.", emoji="💾",
+    @panel_command(aliases=["expsource", "export", "exs"],
+                   description="Exportar minha source para um arquivo zip.", emoji="💾",
                    alt_name="Exportar source/código-fonte.")
     async def exportsource(self, ctx:Union[CustomContext, disnake.MessageInteraction], *, flags: str = ""):
 
@@ -484,19 +485,15 @@ class Owner(commands.Cog):
         if flags.endswith(("--externalservers", "-externalservers", "--llservers", "-llservers", "--lls", "-lls")):
             await self.download_lavalink_serverlist()
 
-        await run_command_old(self.bot, "git archive --format=zip --output source.zip HEAD")
+        filelist = await run_command_old(self.bot, "git ls-files --others --exclude-standard --cached")
 
         with ZipFile("./source.zip", 'a') as zipf:
 
-            zipf.write('./.env-temp', './.env')
-
-            if os.path.isdir("./local_dbs"):
-                for filedb in os.listdir("./local_dbs"):
-                    if filedb.endswith(".json"):
-                        zipf.write(f"./local_dbs/{filedb}")
-
-            if os.path.isfile("./lavalink.ini"):
-                zipf.write("./lavalink.ini")
+            for f in filelist.split("\n"):
+                if f in ".env-temp":
+                    zipf.write('./.env-temp', './.env')
+                else:
+                    zipf.write(f"./{f}")
 
         os.remove("./.env-temp")
 
@@ -509,7 +506,7 @@ class Owner(commands.Cog):
             embed.set_footer(text="Por medida de segurança, esta mensagem será deletada em 2 minutos.")
 
             async with ctx.typing():
-                await ctx.author.send(embed=embed,
+                msg = await ctx.author.send(embed=embed,
                                       file=disnake.File("./source.zip"), delete_after=120)
 
             os.remove("./source.zip")
@@ -519,9 +516,14 @@ class Owner(commands.Cog):
             raise GenericError("Seu DM está desativado!")
 
         if isinstance(ctx, CustomContext):
-            await ctx.message.add_reaction("👍")
+            await ctx.send(
+                embed=disnake.Embed(
+                    description=f"**O arquivo [source.zip]({msg.jump_url}) foi enviado no seu privado.**",
+                    color=self.bot.get_color(ctx.guild.me)
+                )
+            )
         else:
-            return "Arquivo source.zip foi enviado com sucesso no seu DM."
+            return f"Arquivo [source.zip]({msg.jump_url}) foi enviado com sucesso no seu DM."
 
     @check_voice()
     @commands.command(description='inicializar um player no servidor.', aliases=["spawn", "sp", "spw", "smn"])
