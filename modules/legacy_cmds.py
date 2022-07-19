@@ -487,12 +487,16 @@ class Owner(commands.Cog):
         await run_command_old(self.bot, "git archive --format=zip --output source.zip HEAD")
 
         with ZipFile("./source.zip", 'a') as zipf:
+
             zipf.write('./.env-temp', './.env')
 
             if os.path.isdir("./local_dbs"):
                 for filedb in os.listdir("./local_dbs"):
                     if filedb.endswith(".json"):
-                        zipf.write(f"./local_dbs/{filedb}", f"./local_dbs/{filedb}")
+                        zipf.write(f"./local_dbs/{filedb}")
+
+            if os.path.isfile("./lavalink.ini"):
+                zipf.write("./lavalink.ini")
 
         os.remove("./.env-temp")
 
