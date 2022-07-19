@@ -160,6 +160,24 @@ def load_config():
         "MONGO_DB_INTERNAL_CACHE",
         "AUTO_DOWNLOAD_LAVALINK_SERVERLIST",
 
+        "BANS_INTENT",
+        "DM_MESSAGES_INTENT",
+        "DM_REACTIONS",
+        "DM_TYPING",
+        "GUILD_MESSAGES",
+        "GUILD_REACTIONS",
+        "GUILD_SCHEDULED_EVENTS",
+        "GUILD_TYPING",
+        "EMOJIS_AND_STICKERS",
+        "GUILDS",
+        "INTEGRATIONS",
+        "INVITES",
+        "VOICE_STATES",
+        "WEBHOOKS",
+
+        "MEMBERS",
+        "PRESENCES",
+        "MESSAGE_CONTENT",
     ]:
         if CONFIG[i] in (True, False, None):
             continue
