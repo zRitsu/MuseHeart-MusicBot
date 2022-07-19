@@ -487,6 +487,11 @@ class Owner(commands.Cog):
 
         filelist = await run_command_old(self.bot, "git ls-files --others --exclude-standard --cached")
 
+        try:
+            os.remove("./source.zip")
+        except:
+            pass
+
         with ZipFile("./source.zip", 'a') as zipf:
 
             for f in filelist.split("\n"):
@@ -505,7 +510,11 @@ class Owner(commands.Cog):
                 color=self.bot.get_color(ctx.guild.me))
             embed.set_footer(text="Por medida de segurança, esta mensagem será deletada em 2 minutos.")
 
-            msg = await ctx.author.send(embed=embed,file=disnake.File("./source.zip"), delete_after=120)
+            msg = await ctx.author.send(
+                embed=embed,
+                file=disnake.File("./source.zip", filename=f"{self.bot.user}_source.zip"),
+                delete_after=120
+            )
 
             os.remove("./source.zip")
 
