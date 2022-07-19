@@ -442,7 +442,7 @@ class Owner(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.is_owner()
-    @panel_command(aliases=["expsource"], description="Exportar minha source para um arquivo zip.", emoji="💾",
+    @panel_command(aliases=["expsource", "export"], description="Exportar minha source para um arquivo zip.", emoji="💾",
                    alt_name="Exportar source/código-fonte.")
     async def exportsource(self, ctx:Union[CustomContext, disnake.MessageInteraction], *, flags: str = ""):
 
@@ -484,7 +484,12 @@ class Owner(commands.Cog):
         if flags.endswith(("--externalservers", "-externalservers", "--llservers", "-llservers", "--lls", "-lls")):
             await self.download_lavalink_serverlist()
 
-        await run_command_old(self.bot, "git archive --format=zip --output source.zip HEAD")
+        await run_command_old(
+            self.bot,
+            "git -c user.name='Export Command' -c user.email='export@command.com' commit -m 'export commit' && "
+            "git archive --format=zip --output source.zip HEAD && "
+            "git reset HEAD~1"
+        )
 
         with ZipFile("./source.zip", 'a') as zipf:
 
