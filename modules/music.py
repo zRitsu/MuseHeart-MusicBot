@@ -226,11 +226,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         else:
             await player.connect(channel.id, self_deaf=True)
 
-            if ctx.guild.me.guild_permissions.deafen_members and not ctx.guild.me.voice.deaf:
-                try:
+            await asyncio.sleep(1)
+
+            try:
+                if ctx.guild.me.guild_permissions.deafen_members and not ctx.guild.me.voice.deaf:
                     await ctx.guild.me.edit(deafen=True)
-                except:
-                    traceback.print_exc()
+            except:
+                traceback.print_exc()
 
         try:
             player.members_timeout_task.cancel()
