@@ -76,26 +76,7 @@ if CONFIGS['YTDLMODE'] is False:
 else:
     start_local = False
 
-# intents necessárias para a source atual
-intents_dict = {
-    "guilds": True,
-    "emojis": True,
-    "webhooks": True,
-    "guild_messages": True,
-    "voice_states": True,
-
-    #privileged intents (caso esteja ativado não esqueça de ativar no developer portal)
-    "members": True,
-    "message_content": True
-}
-
-# adicionar intents
-intents_dict.update({i.lower(): True for i in CONFIGS["INTENTS"].split(" ") if i})
-
-# desativar intents
-intents_dict.update({i.lower(): False for i in CONFIGS["DISABLE_INTENTS"].split(" ") if i})
-
-intents = disnake.Intents(**intents_dict)
+intents = disnake.Intents(**{i[:-7].lower(): v for i, v in CONFIGS.items() if i.lower().endswith("_intent")})
 
 mongo_key = CONFIGS.get("MONGO")
 
@@ -118,7 +99,8 @@ except:
 
 bots = []
 
-prefix = guild_prefix if intents_dict['message_content'] else commands.when_mentioned
+prefix = guild_prefix if intents.message_content else commands.when_mentioned
+
 
 def load_bot(bot_name: str, token: str, main=False):
     try:

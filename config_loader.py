@@ -71,6 +71,31 @@ DEFAULT_CONFIG = {
     "LISTENING_PRESENCES": "",
     "WATCHING_PRESENCES": "",
     "PLAYING_PRESENCES": "",
+
+    ###############
+    ### Intents ###
+    ###############
+    "BANS_INTENT": False,
+    "DM_MESSAGES_INTENT": False,
+    "DM_REACTIONS_INTENT": False,
+    "DM_TYPING_INTENT": False,
+    "GUILD_MESSAGES_INTENT": True,
+    "GUILD_REACTIONS_INTENT": False,
+    "GUILD_SCHEDULED_EVENTS_INTENT": False,
+    "GUILD_TYPING_INTENT": False,
+    "EMOJIS_AND_STICKERS_INTENT": True,
+    "GUILDS_INTENT": True,
+    "INTEGRATIONS_INTENT": True,
+    "INVITES_INTENT": True,
+    "VOICE_STATES_INTENT": True,
+    "WEBHOOKS_INTENT": False,
+
+    ##########################
+    ### Privileged Intents ###
+    ##########################
+    "MEMBERS_INTENT": True,
+    "PRESENCES_INTENT": False,
+    "MESSAGE_CONTENT_INTENT": True,
 }
 
 
@@ -133,7 +158,8 @@ def load_config():
         "RUN_RPC_SERVER",
         "YTDLMODE",
         "MONGO_DB_INTERNAL_CACHE",
-        "AUTO_DOWNLOAD_LAVALINK_SERVERLIST"
+        "AUTO_DOWNLOAD_LAVALINK_SERVERLIST",
+
     ]:
         if CONFIG[i] in (True, False, None):
             continue
