@@ -36,8 +36,8 @@
         "required": false
       },
       "MONGO": {
-        "description": "URL do mongoDB (Obrigatório para preservar dados de alguns comandos/sistemas, pois se seu app aqui for reiniciado todos os dados serão perdidos). Veja como obter um: https://github.com/zRitsu/disnake-LL-music-bot/wiki/MongoDB-Tutorial",
-        "required": false
+        "description": "URL do mongoDB (para preservar dados de alguns comandos/sistemas). Veja como obter um: https://github.com/zRitsu/disnake-LL-music-bot/wiki/MongoDB-Tutorial",
+        "required": true
       }
   }
 }
