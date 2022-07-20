@@ -1,5 +1,5 @@
 # disnake-LL-music-bot
-### bot de música programado em python com player interativo, comandos barra/slash, etc. Utilizando as libs disnake e lavalink/YT-DLP.
+### bot de música programado em python com player interativo, comandos barra/slash, etc. Utilizando as libs disnake e wavelink/lavalink.
 <br/>
 
 Há alguns bots meus já feito e hospedado usando esta source, você pode adicionar um dos meus bots abaixo: 
@@ -48,14 +48,8 @@ Nota: há alguns guias um pouco mais completo [na wiki]((https://github.com/zRit
 [Download direto do site oficial](https://www.python.org/downloads/) (Marque esta opção ao instalar: **Add python to the PATH**)
 * [Git](https://git-scm.com/downloads) (Não escolha a versão portable)</br>
 
-**Requisito para o modo Lavalink (Padrão):**
 * [JDK 11](https://www.azul.com/downloads) ou superior (Windows e Linux x64 é baixado automaticamente)</br>
 `Nota: este modo requer no mínimo 512mb de RAM (caso rode o Lavalink na mesma instância do bot).`
-
-**Requisito para o modo YTDL/FFMPEG (Experimental):**
-* [FFMPEG](https://pt.wikihow.com/Instalar-o-FFmpeg-no-Windows)</br>
-`Nota: este modo requer no mínimo 200mb de RAM.`</br>
-`Para usar este modo, edite o arquivo .env e altere o valor do YTDLMODE de false para true.`
 
 ### Iniciar bot (guia rápido):
 
