@@ -49,7 +49,8 @@ Nota: há alguns guias um pouco mais completo [na wiki]((https://github.com/zRit
 * [Git](https://git-scm.com/downloads) (Não escolha a versão portable)</br>
 
 * [JDK 11](https://www.azul.com/downloads) ou superior (Windows e Linux x64 é baixado automaticamente)</br>
-`Nota: este modo requer no mínimo 512mb de RAM (caso rode o Lavalink na mesma instância do bot).`
+
+`Nota: esta source requer no mínimo 512mb de RAM E 1Ghz de CPU para rodar normalmente (caso rode o Lavalink na mesma instância do bot considerando que o bot seja privado).`
 
 ### Iniciar bot (guia rápido):
 
