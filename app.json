@@ -19,11 +19,11 @@
   ],
     "env": {
       "TOKEN": {
-        "description": "Token do seu bot aqui (caso não tenha, veja como obter/criar um bot account: https://www.youtube.com/watch?v=lfdmZQySTXE).",
+        "description": "Token do bot aqui (caso não tenha, veja como obter/criar um bot account: https://www.youtube.com/watch?v=lfdmZQySTXE).",
         "required": true
       },
       "DEFAULT_PREFIX": {
-        "description": "Prefixo do seu bot aqui. Nota: caso este passo seja ignorado, o prefixo padrão será: !!! (@mençãodobot também conta como prefixo). O prefixo só será usado apenas em comandos de configuração inicial, pois todos os demais comandos são de barra/slash.",
+        "description": "Prefixo do bot (@mençãodobot já funciona como prefixo).",
         "value": "!!!",
         "required": true
       },
