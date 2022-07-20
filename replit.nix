@@ -1,7 +1,6 @@
 { pkgs }: {
   deps = [
     pkgs.python38Full
-    pkgs.ffmpeg
     pkgs.jdk17_headless
   ];
   env = {
