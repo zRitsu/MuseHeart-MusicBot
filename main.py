@@ -34,47 +34,43 @@ if not CONFIGS["DEFAULT_PREFIX"]:
 
 LAVALINK_SERVERS = {}
 
-if CONFIGS['YTDLMODE'] is False:
 
-    if CONFIGS["AUTO_DOWNLOAD_LAVALINK_SERVERLIST"]:
-        print("Baixando lista de servidores lavalink (arquivo: lavalink.ini)")
-        r = requests.get(CONFIGS["LAVALINK_SERVER_LIST"], allow_redirects=True)
-        with open("lavalink.ini", 'wb') as f:
-            f.write(r.content)
-        r.close()
+if CONFIGS["AUTO_DOWNLOAD_LAVALINK_SERVERLIST"]:
+    print("Baixando lista de servidores lavalink (arquivo: lavalink.ini)")
+    r = requests.get(CONFIGS["LAVALINK_SERVER_LIST"], allow_redirects=True)
+    with open("lavalink.ini", 'wb') as f:
+        f.write(r.content)
+    r.close()
 
-    for key, value in CONFIGS.items():
+for key, value in CONFIGS.items():
 
-        if key.lower().startswith("lavalink_node_"):
-            try:
-                LAVALINK_SERVERS[key] = json.loads(value)
-            except Exception as e:
-                print(f"Falha ao adicionar node: {key}, erro: {repr(e)}")
+    if key.lower().startswith("lavalink_node_"):
+        try:
+            LAVALINK_SERVERS[key] = json.loads(value)
+        except Exception as e:
+            print(f"Falha ao adicionar node: {key}, erro: {repr(e)}")
 
-    config = ConfigParser()
-    try:
-        config.read('lavalink.ini')
-    except FileNotFoundError:
-        pass
-    except Exception as e:
-        traceback.print_exc()
-    else:
-        for key, value in {section: dict(config.items(section)) for section in config.sections()}.items():
-            value["identifier"] = key.replace(" ", "_")
-            value["secure"] = value.get("secure") == "true"
-            value["search"] = value.get("search") != "false"
-            LAVALINK_SERVERS[key] = value
-
-    if start_local := (CONFIGS['RUN_LOCAL_LAVALINK'] is True or not LAVALINK_SERVERS):
-        run_lavalink(
-            lavalink_file_url=CONFIGS['LAVALINK_FILE_URL'],
-            lavalink_initial_ram=CONFIGS['LAVALINK_INITIAL_RAM'],
-            lavalink_ram_limit=CONFIGS['LAVALINK_RAM_LIMIT'],
-            lavalink_additional_sleep=int(CONFIGS['LAVALINK_ADDITIONAL_SLEEP']),
-        )
-
+config = ConfigParser()
+try:
+    config.read('lavalink.ini')
+except FileNotFoundError:
+    pass
+except Exception as e:
+    traceback.print_exc()
 else:
-    start_local = False
+    for key, value in {section: dict(config.items(section)) for section in config.sections()}.items():
+        value["identifier"] = key.replace(" ", "_")
+        value["secure"] = value.get("secure") == "true"
+        value["search"] = value.get("search") != "false"
+        LAVALINK_SERVERS[key] = value
+
+if start_local := (CONFIGS['RUN_LOCAL_LAVALINK'] is True or not LAVALINK_SERVERS):
+    run_lavalink(
+        lavalink_file_url=CONFIGS['LAVALINK_FILE_URL'],
+        lavalink_initial_ram=CONFIGS['LAVALINK_INITIAL_RAM'],
+        lavalink_ram_limit=CONFIGS['LAVALINK_RAM_LIMIT'],
+        lavalink_additional_sleep=int(CONFIGS['LAVALINK_ADDITIONAL_SLEEP']),
+    )
 
 intents = disnake.Intents(**{i[:-7].lower(): v for i, v in CONFIGS.items() if i.lower().endswith("_intent")})
 

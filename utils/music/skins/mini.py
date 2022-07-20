@@ -1,13 +1,13 @@
 import datetime
 import itertools
 from typing import Union
-from ..models import LavalinkPlayer, YTDLPlayer
+from ..models import LavalinkPlayer
 import disnake
 from ..converters import time_format, fix_characters, get_button_style
 from ...others import PlayerControls
 
 
-def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
+def load(player: LavalinkPlayer) -> dict:
 
     data = {
         "content": None,

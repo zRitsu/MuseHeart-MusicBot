@@ -9,7 +9,7 @@ from utils.music.checks import user_cooldown
 from utils.music.converters import time_format
 from utils.music.errors import GenericError
 from utils.others import send_idle_embed, CustomContext
-from utils.music.models import LavalinkPlayer, YTDLPlayer
+from utils.music.models import LavalinkPlayer
 
 if TYPE_CHECKING:
     from utils.client import BotCore
@@ -194,7 +194,7 @@ class MusicSettings(commands.Cog):
         message = await send_idle_embed(message or channel, bot=self.bot, force=True)
 
         try:
-            player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild_id]
+            player: LavalinkPlayer = self.bot.music.players[inter.guild_id]
         except KeyError:
             pass
         else:
@@ -297,7 +297,7 @@ class MusicSettings(commands.Cog):
         )
 
         try:
-            player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
+            player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
         except KeyError:
             pass
         else:
@@ -502,7 +502,7 @@ class MusicSettings(commands.Cog):
             await inter.send(ephemeral=True, **kwargs)
 
         try:
-            player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[inter.guild.id]
+            player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
         except KeyError:
             pass
         else:

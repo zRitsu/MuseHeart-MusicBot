@@ -5,7 +5,7 @@ from disnake.ext import commands
 from .converters import perms_translations
 from .errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, DiffVoiceChannel, GenericError, \
     MissingVoicePerms
-from .models import LavalinkPlayer, YTDLPlayer
+from .models import LavalinkPlayer
 
 if TYPE_CHECKING:
     from ..others import CustomContext
@@ -70,7 +70,7 @@ def is_requester():
     async def predicate(inter):
 
         try:
-            player: Union[LavalinkPlayer, YTDLPlayer] = inter.bot.music.players[inter.guild.id]
+            player: LavalinkPlayer = inter.bot.music.players[inter.guild.id]
         except KeyError:
             raise NoPlayer()
 
@@ -151,7 +151,7 @@ def user_cooldown(rate: int, per: int):
 async def has_perm(inter):
 
     try:
-        player: Union[LavalinkPlayer, YTDLPlayer] = inter.bot.music.players[inter.guild.id]
+        player: LavalinkPlayer = inter.bot.music.players[inter.guild.id]
     except KeyError:
         return True
 

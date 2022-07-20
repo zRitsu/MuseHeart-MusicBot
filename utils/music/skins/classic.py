@@ -1,11 +1,11 @@
 from typing import Union
-from ..models import LavalinkPlayer, YTDLPlayer
+from ..models import LavalinkPlayer
 import disnake
 from ..converters import fix_characters, time_format
 import itertools
 
 
-def load(player: Union[LavalinkPlayer, YTDLPlayer]) -> dict:
+def load(player: LavalinkPlayer) -> dict:
 
     data = {
         "content": None,

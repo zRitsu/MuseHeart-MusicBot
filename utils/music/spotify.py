@@ -9,7 +9,6 @@ from asyncspotify import Client, ClientCredentialsFlow
 from typing import Optional, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
-    from .models import YTDLManager
     from utils.client import BotCore
 
 spotify_regex = re.compile("https://open.spotify.com?.+(album|playlist|artist|track)/([a-zA-Z0-9]+)")
@@ -54,7 +53,7 @@ class SpotifyTrack:
         self.album = {"name": album.name, "url": album.link} if album else {}
         self.track_loops = track_loops
 
-    async def resolve(self, node: Union[Node, YTDLManager]):
+    async def resolve(self, node: Node):
 
         if self.id:
             return

@@ -46,7 +46,6 @@ DEFAULT_CONFIG = {
     "USER_FAV_MAX_NAME_LENGTH": 35,
     "USER_FAV_MAX_URL_LENGTH": 90,
     "HINT_RATE": 4,
-    "YTDLMODE": False,
     "IGNORE_SKINS": '',
 
     ##############################################
@@ -156,7 +155,6 @@ def load_config():
         "RUN_LOCAL_LAVALINK",
         "COMMAND_LOG",
         "RUN_RPC_SERVER",
-        "YTDLMODE",
         "MONGO_DB_INTERNAL_CACHE",
         "AUTO_DOWNLOAD_LAVALINK_SERVERLIST",
 

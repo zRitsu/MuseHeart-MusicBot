@@ -13,7 +13,7 @@ from disnake.ext import commands
 from utils.client import BotCore
 from utils.music.checks import check_voice, check_requester_channel
 from utils.music.interactions import AskView
-from utils.music.models import LavalinkPlayer, YTDLPlayer
+from utils.music.models import LavalinkPlayer
 from utils.others import sync_message, chunk_list, EmbedPaginator, CustomContext
 from utils.owner_panel import panel_command, PanelView
 from utils.music.errors import GenericError
@@ -582,7 +582,7 @@ class Owner(commands.Cog):
             channel = ctx.channel
             message = None
 
-        player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.get_player(
+        player: LavalinkPlayer = self.bot.music.get_player(
             node_id=node.identifier,
             guild_id=ctx.guild.id,
             cls=LavalinkPlayer,

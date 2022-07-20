@@ -6,7 +6,7 @@ from disnake.ext import commands
 from typing import TYPE_CHECKING, Union
 from utils.music.converters import URL_REG, pin_list
 from utils.music.errors import GenericError
-from utils.music.models import YTDLPlayer, LavalinkPlayer
+from utils.music.models import LavalinkPlayer
 from utils.others import send_idle_embed
 
 if TYPE_CHECKING:
@@ -25,7 +25,7 @@ class PinManager(commands.Cog):
         guild_data = await self.bot.db.get_data(guild.id, db_name="guilds")
 
         try:
-            player: Union[LavalinkPlayer, YTDLPlayer] = self.bot.music.players[guild.id]
+            player: LavalinkPlayer = self.bot.music.players[guild.id]
             if not player.current:
                 await player.process_idle_message()
             return
