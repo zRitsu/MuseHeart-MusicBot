@@ -25,7 +25,7 @@
       "DEFAULT_PREFIX": {
         "description": "Prefixo do seu bot aqui. Nota: caso este passo seja ignorado, o prefixo padrão será: !!! (@mençãodobot também conta como prefixo). O prefixo só será usado apenas em comandos de configuração inicial, pois todos os demais comandos são de barra/slash.",
         "value": "!!!",
-        "required": false
+        "required": true
       },
       "SPOTIFY_CLIENT_ID": {
         "description": "Client ID do spotify (obrigatório caso queira suporte ao spotify, veja o tutorial para obter o client_id e client_secret: https://www.youtube.com/watch?v=ceKQjWiCyWE)",
