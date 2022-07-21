@@ -1,7 +1,7 @@
 { pkgs }: {
   deps = [
     pkgs.python38Full
-    pkgs.jdk17_headless
+    pkgs.adoptopenjdk-jre-bin
   ];
   env = {
     PYTHONBIN = "${pkgs.python38Full}/bin/python3.8";
