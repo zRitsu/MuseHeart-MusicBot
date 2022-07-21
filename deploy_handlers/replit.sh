@@ -4,7 +4,8 @@
 
 bash quick_update.sh
 
-if [ ! -d "venv" ]; then
+if [ ! -d "venv" ] || [ ! -f "venv/bin/python3" ]; then
+  rm -rf venv
   python3 -m venv venv
   . venv/bin/activate
   python3 -m pip config unset --user install.use-feature
