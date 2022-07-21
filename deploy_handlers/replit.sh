@@ -7,6 +7,7 @@ bash quick_update.sh
 if [ ! -d "venv" ]; then
   python3 -m venv venv
   . venv/bin/activate
+  python3 -m pip config unset --user install.use-feature
   python3 -m pip install -U pip
   python3 -m pip install -r requirements.txt
   clear
