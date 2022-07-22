@@ -21,11 +21,10 @@ def load(player: LavalinkPlayer) -> dict:
             time_format(player.current.duration)
 
         embed.description = f"**Tocando Agora:** [`{player.current.title}`]({player.current.uri})\n" \
-                            f"**Duração:** `{duration}` ┃ **Uploader:** `{fix_characters(player.current.author, 18)}`\n" \
-                            f"**Pedido por:** {player.current.requester.mention}"
+                            f"`{duration}`┃`{fix_characters(player.current.author, 18)}`┃{player.current.requester.mention}"
 
         if player.current.playlist:
-            embed.description += f" ┃ **Playlist:** [`{player.current.playlist['name']}`]({player.current.playlist['url']})"
+            embed.description += f"\n**Playlist:** [`{player.current.playlist['name']}`]({player.current.playlist['url']})"
 
         embed.set_thumbnail(url=player.current.thumb)
 
@@ -36,7 +35,7 @@ def load(player: LavalinkPlayer) -> dict:
         data["embeds"] = [embed]
 
         if player.controller_mode:
-            player.hint_rate = 9
+            player.hint_rate = 1
             player.controller_mode = False
 
     else:
