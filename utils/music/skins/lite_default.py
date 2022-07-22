@@ -30,13 +30,13 @@ def load(player: LavalinkPlayer) -> dict:
         embed.set_thumbnail(url=player.current.thumb)
 
         if player.current_hint:
-            embed.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif")
+            embed.set_image(url="https://cdn.discordapp.com/attachments/480195401543188483/1000000053982806086/rainbow_bar_large.gif")
             embed.set_footer(text=f"💡 Dica: {player.current_hint}")
 
         data["embeds"] = [embed]
 
         if player.controller_mode:
-            player.hint_rate = 9
+            player.hint_rate = 1
             player.controller_mode = False
 
     else:
