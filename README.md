@@ -11,7 +11,7 @@ Há alguns bots meus já feito e hospedado usando esta source, você pode adicio
 ## Teste agora mesmo um bot próprio com esta source fazendo deploy em um dos serviços abaixo:
 </br>
 
-[![Run on Repl.it](https://repl.it/badge/github/zRitsu/disnake-LL-music-bot.git)](https://replit.com/@xRitsu/Discord-Music-Bot-Disnake)
+[![Run on Repl.it](https://repl.it/badge/github/zRitsu/disnake-LL-music-bot)](https://repl.it/github/zRitsu/disnake-LL-music-bot)
 
 * 1 - Após clicar no botão acima, clique em "import from github" e aguarde carregar.
 * 2 - Vá em secrets (cadeado do painel à esquerda) e crie uma secret com nome TOKEN e no value coloque o token do seu bot. `(caso queira alterar outras configs, consulte o arquivo .env-example)`
