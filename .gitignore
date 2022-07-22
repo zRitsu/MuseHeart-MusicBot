@@ -142,7 +142,8 @@ discloud.txt
 .classpath
 .project
 *.jar
-*.bat
+update.bat
+setup.bat
 *.zip
 *.rar
 *.7z
