@@ -36,7 +36,7 @@ def load(player: LavalinkPlayer) -> dict:
         data["embeds"] = [embed]
 
         if player.controller_mode:
-            player.hint_rate = 1
+            player.hint_rate = 9
             player.controller_mode = False
 
     else:
