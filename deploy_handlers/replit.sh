@@ -2,9 +2,8 @@
 
 [ -z "$IS_SOURCE" ] || { python3 preview.py; kill "$PPID"; exit 1; }
 
-bash quick_update.sh
-
 if [ ! -d "venv" ] || [ ! -f "venv/bin/python3" ]; then
+  bash quick_update.sh
   rm -rf venv
   python3 -m venv venv
   . venv/bin/activate
