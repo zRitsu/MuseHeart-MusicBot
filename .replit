@@ -6,3 +6,6 @@ hidden = ["venv", ".config", "**/__pycache__", "**/.mypy_cache", "**/*.pyc", "La
 
 [packager]
 ignoredPackages=["discord.py", "discord", "unit_tests"]
+
+[nix]
+channel = "unstable"
