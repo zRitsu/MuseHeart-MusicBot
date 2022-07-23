@@ -25,6 +25,7 @@ DEFAULT_CONFIG = {
     "SUPPORT_SERVER": "",
     "ADDITIONAL_BOT_IDS": "",
     "INVITE_PERMISSIONS": 534735285328,
+    "ENABLE_LOGGER": False,
     "MONGO_DB_INTERNAL_CACHE": True,
 
     ################
