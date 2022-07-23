@@ -447,6 +447,9 @@ class Owner(commands.Cog):
                    alt_name="Exportar source/código-fonte.")
     async def exportsource(self, ctx:Union[CustomContext, disnake.MessageInteraction], *, flags: str = ""):
 
+        if not os.path.isdir("./.git"):
+            await self.cleanup_git(force=True)
+
         try:
             env_file = dotenv.dotenv_values("./.env")
         except:
