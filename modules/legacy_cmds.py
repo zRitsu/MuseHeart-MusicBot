@@ -55,7 +55,7 @@ async def run_command(cmd: str):
     r = ShellResult(p.returncode, stdout, stderr)
     if r.status != 0:
         raise GenericError(f"{r.stderr or r.stdout}\n\nStatus Code: {r.status}")
-    return f"{r.stdout}\n\nStatus: {r.status}"
+    return str(r.stdout)
 
 
 class ShellResult:
