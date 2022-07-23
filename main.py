@@ -67,12 +67,9 @@ else:
         LAVALINK_SERVERS[key] = value
 
 if start_local := (CONFIGS['RUN_LOCAL_LAVALINK'] is True or not LAVALINK_SERVERS):
-    run_lavalink(
-        lavalink_file_url=CONFIGS['LAVALINK_FILE_URL'],
-        lavalink_initial_ram=CONFIGS['LAVALINK_INITIAL_RAM'],
-        lavalink_ram_limit=CONFIGS['LAVALINK_RAM_LIMIT'],
-        lavalink_additional_sleep=int(CONFIGS['LAVALINK_ADDITIONAL_SLEEP']),
-    )
+    pass
+else:
+    start_local = False
 
 intents = disnake.Intents(**{i[:-7].lower(): v for i, v in CONFIGS.items() if i.lower().endswith("_intent")})
 
@@ -198,6 +195,14 @@ for k, v in CONFIGS.items():
 
 if not bots:
     raise Exception("O token do bot não foi configurado devidamente!")
+
+if start_local:
+    run_lavalink(
+        lavalink_file_url=CONFIGS['LAVALINK_FILE_URL'],
+        lavalink_initial_ram=CONFIGS['LAVALINK_INITIAL_RAM'],
+        lavalink_ram_limit=CONFIGS['LAVALINK_RAM_LIMIT'],
+        lavalink_additional_sleep=int(CONFIGS['LAVALINK_ADDITIONAL_SLEEP']),
+    )
 
 
 async def start_bots():
