@@ -91,7 +91,7 @@ except:
 
 try:
     remote_git_url = check_output(['git', 'remote', '-v']).decode(
-        'ascii').strip().split("\n")[0][7:].replace(".git (fetch)", "")
+        'ascii').strip().split("\n")[0][7:].replace(".git", "").replace(" (fetch)", "")
 except:
     remote_git_url = ""
 
