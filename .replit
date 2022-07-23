@@ -1,5 +1,6 @@
 language="python3"
-run = "bash ./deploy_handlers/replit.sh"
+
+run = 'sh -c "bash ./deploy_handlers/replit.sh"'
 
 hidden = ["venv", ".config", "**/__pycache__", "**/.mypy_cache", "**/*.pyc", "Lavalink.jar"]
 
