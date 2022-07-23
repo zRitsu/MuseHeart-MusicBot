@@ -8,5 +8,5 @@ humanize
 tornado
 motor
 dnspython
-disnake-jishaku
 psutil
+chardet

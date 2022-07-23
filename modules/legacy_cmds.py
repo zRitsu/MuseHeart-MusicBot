@@ -1,9 +1,10 @@
 import asyncio
+import chardet
 import os
 import shutil
 import json
-import subprocess
-from functools import partial
+import traceback
+from io import BytesIO
 from typing import Union, Optional
 from zipfile import ZipFile
 import disnake
@@ -17,7 +18,6 @@ from utils.music.models import LavalinkPlayer
 from utils.others import sync_message, chunk_list, EmbedPaginator, CustomContext
 from utils.owner_panel import panel_command, PanelView
 from utils.music.errors import GenericError
-from jishaku.shell import ShellReader
 from aiohttp import ClientSession
 from config_loader import DEFAULT_CONFIG
 
@@ -37,26 +37,35 @@ def format_git_log(data_list: list):
     return data
 
 
-def replaces(txt):
-    if os.name == "nt":
-        return txt.replace("\"", f"\\'").replace("'", "\"")
-
-    return txt.replace("\"", f"\\\"").replace("'", "\"")
-
-
-async def run_command(cmd):
-    result = []
-
-    with ShellReader(cmd) as reader:
-        async for x in reader:
-            result.append(x)
-
-    return "\n".join(result)
+def string_to_file(txt, filename="result.txt"):
+    if isinstance(txt, dict):
+        txt = json.dumps(txt, indent=4, ensure_ascii=False)
+    txt = BytesIO(bytes(str(txt), 'utf-8'))
+    return disnake.File(fp=txt, filename=filename or "result.txt")
 
 
-async def run_command_old(bot: BotCore, cmd: str):
-    to_run = partial(subprocess.check_output, cmd, shell=True, stdin=None, stderr=None)
-    return (await bot.loop.run_in_executor(None, to_run)).decode('utf-8').strip()
+async def run_command(cmd: str):
+
+    p = await asyncio.create_subprocess_shell(
+        cmd, stdin=asyncio.subprocess.PIPE,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.STDOUT,
+    )
+    stdout, stderr = await p.communicate()
+    r = ShellResult(p.returncode, stdout, stderr)
+    print(r.status, type(r.status))
+    if r.status != 0:
+        raise GenericError(f"{r.stderr or r.stdout}\n\nStatus Code: {r.status}")
+    return f"{r.stdout}\n\nStatus: {r.status}"
+
+
+class ShellResult:
+
+    def __init__(self, status: int, stdout: Optional[bytes], stderr: Optional[bytes]):
+        encoding = chardet.detect(stdout or stderr)['encoding']
+        self.status = status
+        self.stdout = stdout.decode(encoding=encoding) if stdout is not None else None
+        self.stderr = stderr.decode(encoding=encoding) if stderr is not None else None
 
 
 class Owner(commands.Cog):
@@ -154,12 +163,12 @@ class Owner(commands.Cog):
                 pass
 
             try:
-                await run_command_old(self.bot, "git reset --hard")
+                await run_command("git reset --hard")
             except:
                 pass
 
             try:
-                pull_log = await run_command_old(self.bot, "git pull --allow-unrelated-histories -X theirs")
+                pull_log = await run_command("git pull --allow-unrelated-histories -X theirs")
                 if "Already up to date" in pull_log:
                     raise GenericError("Já estou com os ultimos updates instalados...")
                 out_git += pull_log
@@ -182,7 +191,7 @@ class Owner(commands.Cog):
                     commit = l.replace("Updating ", "").replace("..", "...")
                     break
 
-            data = (await run_command_old(self.bot, f"git log {commit} {git_format}")).split("\n")
+            data = (await run_command(f"git log {commit} {git_format}")).split("\n")
 
             git_log += format_git_log(data)
 
@@ -232,8 +241,9 @@ class Owner(commands.Cog):
 
                 try:
                     await ctx.edit_original_message(embed=embed, view=view)
+                    msg = None
                 except AttributeError:
-                    await ctx.send(embed=embed, view=view)
+                    msg = await ctx.send(embed=embed, view=view)
 
                 await view.wait()
 
@@ -243,9 +253,12 @@ class Owner(commands.Cog):
                     await run_command("pip3 install -U -r requirements.txt")
 
                 try:
-                    await (await view.interaction_resp.original_message()).delete()
+                    await msg.delete()
                 except:
-                    pass
+                    try:
+                        await (await view.interaction_resp.original_message()).delete()
+                    except:
+                        pass
 
     async def cleanup_git(self, force=False):
 
@@ -259,11 +272,11 @@ class Owner(commands.Cog):
 
         for c in self.git_init_cmds:
             try:
-                out_git += (await run_command_old(self.bot, c)) + "\n"
+                out_git += (await run_command(c)) + "\n"
             except Exception as e:
                 out_git += f"{e}\n"
 
-        self.bot.commit = await run_command_old(self.bot, "git rev-parse --short HEAD")
+        self.bot.commit = await run_command("git rev-parse --short HEAD")
         self.bot.remote_git_url = self.bot.config["SOURCE_REPO"][:-4]
 
         return out_git
@@ -281,7 +294,7 @@ class Owner(commands.Cog):
 
         git_log = []
 
-        data = (await run_command_old(self.bot, f"git log -{amount or 10} {git_format}")).split("\n")
+        data = (await run_command(f"git log -{amount or 10} {git_format}")).split("\n")
 
         git_log += format_git_log(data)
 
@@ -488,7 +501,7 @@ class Owner(commands.Cog):
         if flags.endswith(("--externalservers", "-externalservers", "--llservers", "-llservers", "--lls", "-lls")):
             await self.download_lavalink_serverlist()
 
-        filelist = await run_command_old(self.bot, "git ls-files --others --exclude-standard --cached")
+        filelist = await run_command("git ls-files --others --exclude-standard --cached")
 
         try:
             os.remove("./source.zip")
@@ -558,6 +571,62 @@ class Owner(commands.Cog):
             txt = f"**{counter} mensagens foram deletadas do seu DM.**"
 
         await ctx.send(embed=disnake.Embed(description=txt, colour=self.bot.get_color(ctx.guild.me)))
+
+    @commands.Cog.listener("on_button_click")
+    async def close_shell_result(self, inter: disnake.MessageInteraction):
+
+        if inter.data.custom_id != "close_shell_result":
+            return
+
+        if not await self.bot.is_owner(inter.author):
+            return await inter.send("**Apenas meu dono pode usar este botão!**", ephemeral=True)
+
+        await inter.response.edit_message(
+            content="```ini\n🔒 - [Shell Fechado!] - 🔒```",
+            attachments=None,
+            view=None,
+            embed=None
+        )
+
+    @commands.is_owner()
+    @commands.command(aliases=["sh"], hidden=True)
+    async def shell(self, ctx: CustomContext, *, command: str):
+
+        try:
+            async with ctx.typing():
+                result = await run_command(command)
+        except GenericError as e:
+            kwargs = {}
+            if len(e.text) > 2000:
+                kwargs["file"] = string_to_file(e.text, filename="error.txt")
+            else:
+                kwargs["content"] = f"```py\n{e.text}```"
+
+            try:
+                await ctx.author.send(**kwargs)
+                await ctx.message.add_reaction("⚠️")
+            except disnake.Forbidden:
+                traceback.print_exc()
+                raise GenericError(
+                    "**Ocorreu um erro (verifique os logs/terminal ou libere seu DM para o próximo "
+                    "resultado ser enviado diretamente no seu DM).**"
+                )
+
+        else:
+
+            kwargs = {}
+            if len(result) > 2000:
+                kwargs["file"] = string_to_file(result, filename=f"shell_result_{ctx.message.id}.txt")
+            else:
+                kwargs["content"] = f"```py\n{result}```"
+
+            await ctx.reply(
+                components=[
+                    disnake.ui.Button(label="Fechar Shell", custom_id="close_shell_result", emoji="♻️")
+                ],
+                mention_author=False,
+                **kwargs
+            )
 
     @check_voice()
     @commands.command(description='inicializar um player no servidor.', aliases=["spawn", "sp", "spw", "smn"])
