@@ -61,7 +61,7 @@ async def run_command(cmd: str):
 class ShellResult:
 
     def __init__(self, status: int, stdout: Optional[bytes], stderr: Optional[bytes]):
-        encoding = chardet.detect(stdout or stderr)['encoding']
+        encoding = chardet.detect(stdout or stderr)['encoding'] or "utf-8"
         self.status = status
         self.stdout = stdout.decode(encoding=encoding) if stdout is not None else None
         self.stderr = stderr.decode(encoding=encoding) if stderr is not None else None
@@ -590,6 +590,15 @@ class Owner(commands.Cog):
     @commands.is_owner()
     @commands.command(aliases=["sh"], hidden=True)
     async def shell(self, ctx: CustomContext, *, command: str):
+
+        if command.startswith('```') and command.endswith('```'):
+            if command[4] != "\n":
+                command = f"```\n{command[3:]}"
+            if command[:-4] != "\n":
+                command = command[:-3] + "\n```"
+            command = '\n'.join(command.split('\n')[1:-1])
+        else:
+            command = command.strip('` \n')
 
         try:
             async with ctx.typing():
