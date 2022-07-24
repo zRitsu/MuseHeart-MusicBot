@@ -172,7 +172,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.command(hidden=True, aliases=["ec"])
     async def exportcache(self, ctx: CustomContext):
 
-        await ctx.send(file=disnake.File("./playlist_cache.db"))
+        await ctx.send(file=disnake.File("playlist_cache.json"))
 
     @commands.is_owner()
     @commands.command(hidden=True, aliases=["ic"])
@@ -182,7 +182,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             async with aiohttp.ClientSession() as session:
                 async with session.get(url) as r:
                     playlist_cache = await r.read()
-                    with open("./playlist_cache.db", "wb") as f:
+                    with open("./playlist_cache.json", "wb") as f:
                         f.write(playlist_cache)
 
         await self.update_cache()
