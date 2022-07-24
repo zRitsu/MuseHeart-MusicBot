@@ -37,6 +37,7 @@ class SpotifyTrack:
 
     def __init__(self, *, uri, title, authors, thumb, duration,
                  requester, playlist=None, album=None, track_loops=0, info: dict = None):
+
         self.info = info or {
             "author": fix_characters(authors[0].name),
             "id": "",
@@ -54,6 +55,7 @@ class SpotifyTrack:
                 "thumb": thumb
             }
         }
+
         self.author = self.info["author"]
         self.authors = self.info["extra"]["authors"]
         self.authors_md = self.info["extra"]["authors_md"]
@@ -135,8 +137,6 @@ class SpotifyTrack:
                 selected_track = tracks[0]
 
             selected_track.info["sourceName"] = "spotify"
-
-            self.info = selected_track.info
             self.id = selected_track.id
 
         except IndexError:
