@@ -1,6 +1,7 @@
 import datetime
 import json
 import aiofiles
+import aiohttp
 import disnake
 from disnake.ext import commands
 import traceback
@@ -82,7 +83,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await self.update_cache()
 
-        await ctx.message.add_reaction("✅")
+        await ctx.send("As músicas do link foram adicionadas com sucesso em cache.", delete_after=30)
 
     @commands.is_owner()
     @commands.cooldown(1, 300, commands.BucketType.default)
@@ -131,7 +132,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             embed = disnake.Embed(
                 description=txt, color=self.bot.get_color(ctx.guild.me),
-                title = f"Playlist verificadas: {counter}/{amount}"
+                title=f"Playlist verificadas: {counter}/{amount}"
             )
 
             if not msg:
@@ -152,7 +153,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await self.update_cache()
 
-        await ctx.message.add_reaction("✅")
+        await ctx.send("As músicas do link foram removidas com sucesso do cache.", delete_after=30)
 
     @commands.is_owner()
     @commands.command(hidden=True, aliases=["cc"])
@@ -165,8 +166,28 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await self.update_cache()
 
-        await ctx.message.add_reaction("✅")
+        await ctx.send("O cache de playlist foi limpo com sucesso.", delete_after=30)
 
+    @commands.is_owner()
+    @commands.command(hidden=True, aliases=["ec"])
+    async def exportcache(self, ctx: CustomContext):
+
+        await ctx.send(file=disnake.File("./playlist_cache.db"))
+
+    @commands.is_owner()
+    @commands.command(hidden=True, aliases=["ic"])
+    async def importcache(self, ctx: CustomContext, url: str):
+
+        async with ctx.typing():
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as r:
+                    playlist_cache = await r.read()
+                    with open("./playlist_cache.db", "wb") as f:
+                        f.write(playlist_cache)
+
+        await self.update_cache()
+
+        await ctx.send("O arquivo de cache foi importado com sucesso!", delete_after=30)
 
     """@check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
