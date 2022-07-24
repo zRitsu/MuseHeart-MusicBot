@@ -10,3 +10,4 @@ motor
 dnspython
 psutil
 chardet
+aiofiles

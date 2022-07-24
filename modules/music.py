@@ -1,15 +1,17 @@
 import datetime
+import json
+import aiofiles
 import disnake
 from disnake.ext import commands
 import traceback
 import wavelink
 import asyncio
 from random import shuffle
-from typing import Literal, Union, Optional
+from typing import Literal, Union, Optional, List
 from urllib import parse
 from utils.client import BotCore
 from utils.music.errors import GenericError, MissingVoicePerms
-from utils.music.spotify import SpotifyPlaylist, process_spotify
+from utils.music.spotify import SpotifyPlaylist, process_spotify, SpotifyTrack
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, \
     can_send_message, check_requester_channel
 from utils.music.models import LavalinkPlayer, LavalinkTrack
@@ -54,6 +56,123 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                                                                               type=commands.BucketType.guild)
 
     desc_prefix = "🎶 [Música] 🎶 | "
+
+    async def update_cache(self, user_id: int):
+
+        data = self.bot.user_playlist_cache[user_id]
+
+        async with aiofiles.open(f"./local_dbs/user_playlists/{user_id}.json", "w") as f:
+            await f.write(json.dumps(data))
+
+    @commands.is_owner()
+    @commands.command(hidden=True, aliases=["ac"])
+    async def addcache(self, ctx: CustomContext, url: str):
+
+        url = url.strip("<>")
+
+        async with ctx.typing():
+            tracks, node = await self.get_tracks(url, ctx.author, use_cache=False)
+
+        tracks = [
+            LavalinkTrack(
+                t.id, t.info,
+                requester=ctx.author,
+                playlist={"name": tracks.data['playlistInfo']['name'], "url": url}
+            ) for t in tracks.tracks]
+
+        try:
+            self.bot.user_playlist_cache[ctx.author.id][url] = [{"track": t.id, "info": t.info} for t in tracks]
+        except KeyError:
+            self.bot.user_playlist_cache[ctx.author.id] = {url: [{"track": t.id, "info": t.info} for t in tracks]}
+
+        await self.update_cache(ctx.author.id)
+
+        await ctx.message.add_reaction("✅")
+
+    @commands.is_owner()
+    @commands.cooldown(1, 300, commands.BucketType.default)
+    @commands.command(hidden=True, aliases=["uc"])
+    async def updatecache(self, ctx: CustomContext):
+
+        try:
+            if not self.bot.user_playlist_cache[ctx.author.id]:
+                raise GenericError("**Seu cache de playlist está vazio...**")
+        except KeyError:
+            raise GenericError(f"**Você ainda não usou o comando: {ctx.prefix}{self.addcache.name}**")
+
+        msg = None
+
+        counter = 0
+
+        amount = len(self.bot.user_playlist_cache[ctx.author.id])
+
+        txt = ""
+
+        for url in self.bot.user_playlist_cache[ctx.author.id]:
+
+            try:
+                async with ctx.typing():
+                    tracks, node = await self.get_tracks(url, ctx.author, use_cache=False)
+            except:
+                traceback.print_exc()
+                tracks = None
+
+            if not tracks:
+                txt += f"[`❌ Falha`]({url})\n"
+
+            else:
+                newtracks = [
+                    LavalinkTrack(
+                        t.id, t.info,
+                        requester=ctx.author,
+                        playlist={"name": tracks.data['playlistInfo']['name'], "url": url}
+                    ) for t in tracks.tracks]
+
+                self.bot.user_playlist_cache[ctx.author.id][url] = [{"track": t.id, "info": t.info} for t in newtracks]
+
+                txt += f"[`{tracks.data['playlistInfo']['name']}`]({url})\n"
+
+            counter += 1
+
+            embed = disnake.Embed(
+                description=txt, color=self.bot.get_color(ctx.guild.me),
+                title = f"Playlist verificadas: {counter}/{amount}"
+            )
+
+            if not msg:
+                msg = await ctx.send(embed=embed)
+            else:
+                await msg.edit(embed=embed)
+
+        await self.update_cache(ctx.author.id)
+
+
+    @commands.is_owner()
+    @commands.command(hidden=True, aliases=["rc"])
+    async def removecache(self, ctx: CustomContext, url: str):
+
+        try:
+            del self.bot.user_playlist_cache[ctx.author.id][url]
+        except KeyError:
+            raise GenericError("**Não há itens salvo em cache com a url informada...**")
+
+        await self.update_cache(ctx.author.id)
+
+        await ctx.message.add_reaction("✅")
+
+    @commands.is_owner()
+    @commands.command(hidden=True, aliases=["cc"])
+    async def clearcache(self, ctx: CustomContext):
+
+        try:
+            self.bot.user_playlist_cache[ctx.author.id].clear()
+        except KeyError:
+            raise GenericError("**Você não possui links de playlists salva em cache...**")
+
+        await self.update_cache(ctx.author.id)
+
+        await ctx.message.add_reaction("✅")
+
 
     """@check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
@@ -2923,7 +3042,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
     async def get_tracks(
             self, query: str, user: disnake.Member, node: wavelink.Node = None,
-            track_loops=0, hide_playlist=False):
+            track_loops=0, hide_playlist=False, use_cache=True):
 
         if not node:
             node = self.bot.music.get_best_node()
@@ -2935,18 +3054,38 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if not tracks:
 
-            if node.search:
-                node_search = node
-            else:
+            if use_cache:
                 try:
-                    node_search = \
-                        sorted(
-                            [n for n in self.bot.music.nodes.values() if n.search and n.available and n.is_available],
-                            key=lambda n: len(n.players))[0]
-                except IndexError:
-                    node_search = node
+                    cached_tracks = self.bot.user_playlist_cache[user.id][query]
+                except KeyError:
+                    traceback.print_exc()
+                    pass
+                else:
+                    tracks = wavelink.TrackPlaylist(
+                        {
+                            'loadType': 'PLAYLIST_LOADED',
+                            'playlistInfo': {
+                                'name': cached_tracks[0]["info"]["extra"]["playlist"]["name"],
+                                'selectedTrack': -1
+                            },
+                            'tracks': cached_tracks
+                        }
+                    )
 
-            tracks = await node_search.get_tracks(query)
+            if not tracks:
+
+                if node.search:
+                    node_search = node
+                else:
+                    try:
+                        node_search = \
+                            sorted(
+                                [n for n in self.bot.music.nodes.values() if n.search and n.available and n.is_available],
+                                key=lambda n: len(n.players))[0]
+                    except IndexError:
+                        node_search = node
+
+                tracks = await node_search.get_tracks(query)
 
         if not tracks:
             raise GenericError("Não houve resultados para sua busca.")

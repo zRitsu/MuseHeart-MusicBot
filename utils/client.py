@@ -1,5 +1,6 @@
 from __future__ import annotations
 import datetime
+import json
 from importlib import import_module
 import aiohttp
 from disnake.ext import commands
@@ -12,7 +13,6 @@ from asyncspotify import Client as SpotifyClient
 from utils.others import sync_message, CustomContext
 import os
 import traceback
-
 from .owner_panel import PanelView
 
 
@@ -39,6 +39,8 @@ class BotCore(commands.AutoShardedBot):
         self.env_owner_ids = set()
         self.dm_cooldown = commands.CooldownMapping.from_cooldown(rate=2, per=30, type=commands.BucketType.member)
 
+        self.user_playlist_cache = kwargs.pop("user_playlist_cache")
+
         for i in self.config["OWNER_IDS"].split("||"):
 
             if not i:
@@ -48,7 +50,6 @@ class BotCore(commands.AutoShardedBot):
                 self.env_owner_ids.add(int(i))
             except ValueError:
                 print(f"Owner_ID inválido: {i}")
-
 
     def load_skins(self):
 
@@ -72,7 +73,6 @@ class BotCore(commands.AutoShardedBot):
         if not self.default_skin in self.player_skins:
             self.default_skin = "default"
 
-
     def check_skin(self, skin: str):
 
         if skin is None or skin == "default" or skin not in self.player_skins:
@@ -80,14 +80,12 @@ class BotCore(commands.AutoShardedBot):
 
         return skin
 
-
     async def is_owner(self, user: Union[disnake.User, disnake.Member]) -> bool:
 
         if user.id in self.env_owner_ids:
             return True
 
         return await super().is_owner(user)
-
 
     async def can_send_message(self, message: disnake.Message):
 
@@ -107,7 +105,6 @@ class BotCore(commands.AutoShardedBot):
                 pass
 
         return True
-
 
     async def on_message(self, message: disnake.Message):
 
@@ -170,7 +167,6 @@ class BotCore(commands.AutoShardedBot):
 
         await self.invoke(ctx)
 
-
     def get_color(self, me: disnake.Member):
 
         if self.color:
@@ -181,14 +177,12 @@ class BotCore(commands.AutoShardedBot):
 
         return me.color
 
-
     async def on_application_command_autocomplete(self, inter: disnake.ApplicationCommandInteraction):
 
         if not self.bot_ready:
             return
 
         await super().on_application_command_autocomplete(inter)
-
 
     async def on_application_command(self, inter: disnake.ApplicationCommandInteraction):
 
@@ -207,7 +201,6 @@ class BotCore(commands.AutoShardedBot):
                   f"{datetime.datetime.utcnow().strftime('%d/%m/%Y - %H:%M:%S')} (UTC)\n" + ("-"*15))
 
         await super().on_application_command(inter)
-
 
     def load_modules(self, bot_name: str = None):
 

@@ -96,6 +96,22 @@ bots = []
 
 prefix = guild_prefix if intents.message_content else commands.when_mentioned
 
+try:
+    os.makedirs("./local_dbs/user_playlists")
+except:
+    pass
+
+
+user_playlist_cache = {}
+
+for f in os.listdir("./local_dbs/user_playlists"):
+
+    if not f.endswith(".json"):
+        continue
+
+    with open(f"./local_dbs/user_playlists/{f}") as file:
+        user_playlist_cache[int(f[:-5])] = json.load(file)
+
 
 def load_bot(bot_name: str, token: str, main=False):
     try:
@@ -121,6 +137,7 @@ def load_bot(bot_name: str, token: str, main=False):
         spotify=spotify,
         remote_git_url=remote_git_url,
         default_prefix=default_prefix,
+        user_playlist_cache=user_playlist_cache
     )
 
     bot.token = token
