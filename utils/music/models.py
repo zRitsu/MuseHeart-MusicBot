@@ -51,7 +51,7 @@ class LavalinkTrack(wavelink.Track):
 
         self.thumb = self.info["extra"]["thumb"]
 
-        if self.info.get("sourceName") == "youtube" and self.playlist_url:
+        if self.info.get("sourceName") == "youtube" and "list=" not in self.uri and self.playlist_url:
             try:
                 self.uri = f"{self.uri}&list={parse.parse_qs(parse.urlparse(self.playlist_url).query)['list'][0]}"
                 self.info["uri"] = self.uri
