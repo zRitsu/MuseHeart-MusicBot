@@ -20,19 +20,16 @@ def load(player: LavalinkPlayer) -> dict:
         duration = "`🔴 Livestream`" if player.current.is_stream else \
             time_format(player.current.duration)
 
-        embed.description = f"**Tocando Agora:** [`{player.current.title}`]({player.current.uri})\n" \
-                            f"`{duration}`┃`{fix_characters(player.current.author, 18)}`┃{player.current.requester.mention}"
+        embed.description = f"> ▶️ **┃**[`{fix_characters(player.current.title, 45)}`]({player.current.uri})\n" \
+                            f"> ℹ️ **┃**`{duration}`┃`{fix_characters(player.current.author, 18)}`┃{player.current.requester.mention}"
 
         if player.current.playlist_name:
-            embed.description += f"\n**Playlist:** [`{player.current.playlist_name}`]({player.current.playlist_url})"
+            embed.description += f"\n> 🎼 **┃ Playlist:** [`{player.current.playlist_name}`]({player.current.playlist_url})"
 
-        embed.set_thumbnail(url=player.current.thumb)
-
+        data["embeds"].append(embed)
+        
         if player.current_hint:
-            embed.set_image(url="https://cdn.discordapp.com/attachments/480195401543188483/1000000053982806086/rainbow_bar_large.gif")
-            embed.set_footer(text=f"💡 Dica: {player.current_hint}")
-
-        data["embeds"] = [embed]
+            data["embeds"].append(disnake.Embed(color=player.bot.get_color(player.guild.me)).set_footer(text=f"💡 Dica: {player.current_hint}"))
 
         if player.controller_mode:
             player.hint_rate = 9
