@@ -153,3 +153,4 @@ database.json
 /index.html
 /local_dbs/
 application.yml
+/playlist_cache.json

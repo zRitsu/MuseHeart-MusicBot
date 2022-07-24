@@ -7,11 +7,11 @@ import traceback
 import wavelink
 import asyncio
 from random import shuffle
-from typing import Literal, Union, Optional, List
+from typing import Literal, Union, Optional
 from urllib import parse
 from utils.client import BotCore
 from utils.music.errors import GenericError, MissingVoicePerms
-from utils.music.spotify import SpotifyPlaylist, process_spotify, SpotifyTrack
+from utils.music.spotify import SpotifyPlaylist, process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, \
     can_send_message, check_requester_channel
 from utils.music.models import LavalinkPlayer, LavalinkTrack
@@ -57,12 +57,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
     desc_prefix = "🎶 [Música] 🎶 | "
 
-    async def update_cache(self, user_id: int):
+    async def update_cache(self):
 
-        data = self.bot.user_playlist_cache[user_id]
-
-        async with aiofiles.open(f"./local_dbs/user_playlists/{user_id}.json", "w") as f:
-            await f.write(json.dumps(data))
+        async with aiofiles.open(f"./playlist_cache.json", "w") as f:
+            await f.write(json.dumps(self.bot.pool.user_playlist_cache))
 
     @commands.is_owner()
     @commands.command(hidden=True, aliases=["ac"])
@@ -80,12 +78,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 playlist={"name": tracks.data['playlistInfo']['name'], "url": url}
             ) for t in tracks.tracks]
 
-        try:
-            self.bot.user_playlist_cache[ctx.author.id][url] = [{"track": t.id, "info": t.info} for t in tracks]
-        except KeyError:
-            self.bot.user_playlist_cache[ctx.author.id] = {url: [{"track": t.id, "info": t.info} for t in tracks]}
+        self.bot.pool.user_playlist_cache[url] = [{"track": t.id, "info": t.info} for t in tracks]
 
-        await self.update_cache(ctx.author.id)
+        await self.update_cache()
 
         await ctx.message.add_reaction("✅")
 
@@ -95,7 +90,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def updatecache(self, ctx: CustomContext):
 
         try:
-            if not self.bot.user_playlist_cache[ctx.author.id]:
+            if not self.bot.pool.user_playlist_cache:
                 raise GenericError("**Seu cache de playlist está vazio...**")
         except KeyError:
             raise GenericError(f"**Você ainda não usou o comando: {ctx.prefix}{self.addcache.name}**")
@@ -104,11 +99,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         counter = 0
 
-        amount = len(self.bot.user_playlist_cache[ctx.author.id])
+        amount = len(self.bot.pool.user_playlist_cache)
 
         txt = ""
 
-        for url in self.bot.user_playlist_cache[ctx.author.id]:
+        for url in self.bot.pool.user_playlist_cache:
 
             try:
                 async with ctx.typing():
@@ -128,7 +123,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                         playlist={"name": tracks.data['playlistInfo']['name'], "url": url}
                     ) for t in tracks.tracks]
 
-                self.bot.user_playlist_cache[ctx.author.id][url] = [{"track": t.id, "info": t.info} for t in newtracks]
+                self.bot.pool.user_playlist_cache[url] = [{"track": t.id, "info": t.info} for t in newtracks]
 
                 txt += f"[`{tracks.data['playlistInfo']['name']}`]({url})\n"
 
@@ -144,19 +139,18 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             else:
                 await msg.edit(embed=embed)
 
-        await self.update_cache(ctx.author.id)
-
+        await self.update_cache()
 
     @commands.is_owner()
     @commands.command(hidden=True, aliases=["rc"])
     async def removecache(self, ctx: CustomContext, url: str):
 
         try:
-            del self.bot.user_playlist_cache[ctx.author.id][url]
+            del self.bot.pool.user_playlist_cache[url]
         except KeyError:
             raise GenericError("**Não há itens salvo em cache com a url informada...**")
 
-        await self.update_cache(ctx.author.id)
+        await self.update_cache()
 
         await ctx.message.add_reaction("✅")
 
@@ -165,11 +159,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def clearcache(self, ctx: CustomContext):
 
         try:
-            self.bot.user_playlist_cache[ctx.author.id].clear()
+            self.bot.pool.user_playlist_cache.clear()
         except KeyError:
             raise GenericError("**Você não possui links de playlists salva em cache...**")
 
-        await self.update_cache(ctx.author.id)
+        await self.update_cache()
 
         await ctx.message.add_reaction("✅")
 
@@ -1868,11 +1862,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 elif 'absent_members' in temp_filter and t.requester.id not in player.guild.me.voice.channel.voice_states:
                     temp_filter.remove('absent_members')
 
-                try:
-                    if 'playlist' in temp_filter and playlist == t.playlist['name']:
-                        temp_filter.remove('playlist')
-                except:
-                    pass
+                if 'playlist' in temp_filter and playlist == t.playlist_name:
+                    temp_filter.remove('playlist')
 
                 if not temp_filter:
                     player.queue.remove(t)
@@ -2083,6 +2074,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
     @commands.Cog.listener("on_dropdown")
     async def guild_pin(self, interaction: disnake.MessageInteraction):
+
+        if not self.bot.bot_ready:
+            await interaction.send("Ainda estou inicializando...\nPor favor aguarde mais um pouco...", ephemeral=True)
+            return
 
         if interaction.data.custom_id != "player_guild_pin":
             return
@@ -2719,7 +2714,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             else:
                 player.set_command_log(
                     text=f"{message.author.mention} adicionou a playlist [`{fix_characters(tracks.data['playlistInfo']['name'], 20)}`]"
-                         f"({tracks.tracks[0].playlist['url']}) `({len(tracks.tracks)})`.",
+                         f"({tracks.tracks[0].playlist_url}) `({len(tracks.tracks)})`.",
                     emoji="🎶"
                 )
 
@@ -3056,9 +3051,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             if use_cache:
                 try:
-                    cached_tracks = self.bot.user_playlist_cache[user.id][query]
+                    cached_tracks = self.bot.pool.user_playlist_cache[query]
                 except KeyError:
-                    traceback.print_exc()
                     pass
                 else:
                     tracks = wavelink.TrackPlaylist(
