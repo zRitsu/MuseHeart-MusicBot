@@ -35,23 +35,78 @@ class SpotifyPlaylist:
 
 class SpotifyTrack:
 
-    def __init__(self, *, uri, title, authors, thumb, duration, requester, playlist=None, album=None, track_loops=0):
-        self.author = fix_characters(authors[0].name)
-        self.authors = [fix_characters(i.name) for i in authors]
-        self.authors_md = ", ".join(f"[`{a.name}`]({a.link})" for a in authors)
-        self.authors_string = ", ".join(a.name for a in authors)
-        self.id = ""
-        self.single_title = fix_characters(title)
+    def __init__(self, *, uri, title, authors, thumb, duration,
+                 requester, playlist=None, album=None, track_loops=0, info: dict = None):
+        self.info = info or {
+            "author": fix_characters(authors[0].name),
+            "id": "",
+            "title": title,
+            "uri": uri,
+            "length": duration,
+            "isStream": False,
+            "isSeekable": True,
+            "sourceName": "spotify",
+            "extra": {
+                "authors": [fix_characters(i.name) for i in authors],
+                "authors_md": ", ".join(f"[`{a.name}`]({a.link})" for a in authors),
+                "authors_string": ", ".join(a.name for a in authors),
+                "single_title": fix_characters(title),
+                "thumb": thumb
+            }
+        }
+        self.author = self.info["author"]
+        self.authors = self.info["extra"]["authors"]
+        self.authors_md = self.info["extra"]["authors_md"]
+        self.authors_string = self.info["extra"]["authors_string"]
+        self.id = self.info["id"]
+        self.single_title = self.info["extra"]["single_title"]
         self.title = f"{self.author} - {self.single_title}"
-        self.thumb = thumb
-        self.uri = uri
-        self.duration = duration
-        self.is_stream = False
-        self.info = {}
+        self.uri = self.info["uri"]
+        self.duration = self.info["length"]
+        self.is_stream = self.info["isStream"]
         self.requester = requester
-        self.playlist = playlist or {}
-        self.album = {"name": album.name, "url": album.link} if album else {}
         self.track_loops = track_loops
+        self.thumb = self.info["extra"]["thumb"]
+
+        if album:
+            self.info["extra"]["album"] = {
+                "name": album.name,
+                "url": album.link
+            }
+
+        if playlist:
+            self.info["extra"]["playlist"] = {
+                "name": playlist["name"],
+                "url": playlist["url"]
+            }
+
+    @property
+    def album_name(self) -> str:
+        try:
+            return self.info["extra"]["album"]["name"]
+        except KeyError:
+            return ""
+
+    @property
+    def album_url(self) -> str:
+        try:
+            return self.info["extra"]["album"]["url"]
+        except KeyError:
+            return ""
+
+    @property
+    def playlist_name(self) -> str:
+        try:
+            return self.info["extra"]["playlist"]["name"]
+        except KeyError:
+            return ""
+
+    @property
+    def playlist_url(self) -> str:
+        try:
+            return self.info["extra"]["playlist"]["url"]
+        except KeyError:
+            return ""
 
     async def resolve(self, node: Node):
 
@@ -68,6 +123,10 @@ class SpotifyTrack:
             selected_track = None
 
             for t in tracks:
+
+                if t.is_stream:
+                    continue
+
                 if (t.duration - 10000) < self.duration < (t.duration + 10000):
                     selected_track = t
                     break

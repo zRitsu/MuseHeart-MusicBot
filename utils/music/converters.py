@@ -123,8 +123,8 @@ def queue_playlist(inter, query: str):
     except KeyError:
         return
 
-    return list(set([track.playlist['name'] for track in player.queue if track.playlist and
-                               query.lower() in track.playlist['name'].lower()]))[:20]
+    return list(set([track.playlist_name for track in player.queue if track.playlist_name and
+                               query.lower() in track.playlist_name.lower()]))[:20]
 
 
 async def fav_list(inter, query: str, *, prefix=""):

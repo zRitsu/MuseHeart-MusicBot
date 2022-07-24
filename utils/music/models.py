@@ -1,11 +1,8 @@
 from __future__ import annotations
 import datetime
-import os
 import random
-from functools import partial
 from itertools import cycle
 import disnake
-import ctypes.util
 import asyncio
 import wavelink
 from urllib import parse
@@ -22,11 +19,10 @@ if TYPE_CHECKING:
 
 
 class LavalinkTrack(wavelink.Track):
-    __slots__ = ('requester', 'playlist', 'track_loops', 'album', 'single_title', 'authors_md', 'authors_string')
+    __slots__ = ('requester', 'track_loops', 'album', 'single_title', 'authors_md', 'authors_string', 'extra')
 
     def __init__(self, *args, **kwargs):
         self.requester = kwargs.pop('requester')
-        self.playlist = kwargs.pop('playlist', None)
         self.track_loops = kwargs.pop('track_loops', 0)
         self.album = {}
         args[1]['title'] = fix_characters(args[1]['title'])
@@ -34,19 +30,43 @@ class LavalinkTrack(wavelink.Track):
         self.single_title = self.title
         self.authors_md = f"`{self.author}`"
         self.authors_string = self.author
+        self.info["extra"] = {}
+
+        if playlist := kwargs.pop("playlist", None):
+            self.info["extra"]["playlist"] = {
+                "name": playlist["name"],
+                "url": playlist["url"]
+            }
 
         if self.ytid:
-            self.thumb = f"https://img.youtube.com/vi/{self.ytid}/mqdefault.jpg"
+            self.info["extra"]["thumb"] = f"https://img.youtube.com/vi/{self.ytid}/mqdefault.jpg"
         elif "soundcloud.com" in self.uri:
-            self.thumb = self.info.get("artworkUrl", "").replace('large.jpg', 't500x500.jpg')
+            self.info["extra"]["thumb"] = self.info.get("artworkUrl", "").replace('large.jpg', 't500x500.jpg')
         else:
-            self.thumb = self.info.get("artworkUrl", "")
+            self.info["extra"]["thumb"] = self.info.get("artworkUrl", "")
 
-        if self.info.get("sourceName") == "youtube" and self.playlist:
+        self.thumb = self.info["extra"]["thumb"]
+
+        if self.info.get("sourceName") == "youtube" and self.playlist_url:
             try:
-                self.uri = f"{self.uri}&list={parse.parse_qs(parse.urlparse(self.playlist['url']).query)['list'][0]}"
+                self.uri = f"{self.uri}&list={parse.parse_qs(parse.urlparse(self.playlist_url).query)['list'][0]}"
+                self.info["uri"] = self.uri
             except KeyError:
                 pass
+
+    @property
+    def playlist_name(self) -> str:
+        try:
+            return self.info["extra"]["playlist"]["name"]
+        except KeyError:
+            return ""
+
+    @property
+    def playlist_url(self) -> str:
+        try:
+            return self.info["extra"]["playlist"]["url"]
+        except KeyError:
+            return ""
 
 
 class LavalinkPlayer(wavelink.Player):
@@ -617,19 +637,19 @@ class LavalinkPlayer(wavelink.Player):
                 "loop": self.current.track_loops or self.loop,
             }
 
-            if track.playlist:
+            if track.playlist_name:
                 stats["track"].update(
                     {
-                        "playlist_name": track.playlist['name'],
-                        "playlist_url": track.playlist['url'],
+                        "playlist_name": track.playlist_name,
+                        "playlist_url": track.playlist_url,
                     }
                 )
 
-            if track.album:
+            if track.album_name:
                 stats["track"].update(
                     {
-                        "album_name": track.album['name'],
-                        "album_url": track.album['url'],
+                        "album_name": track.album_name,
+                        "album_url": track.album_url,
                     }
                 )
 

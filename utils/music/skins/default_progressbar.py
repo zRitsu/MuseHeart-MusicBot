@@ -86,8 +86,8 @@ def load(player: LavalinkPlayer) -> dict:
     if player.current.album:
         txt += f"\n> 💽 **⠂Álbum:** [`{fix_characters(player.current.album['name'], limit=playlist_text_size)}`]({player.current.album['url']})"
 
-    if player.current.playlist:
-        txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist['name'], limit=playlist_text_size)}`]({player.current.playlist['url']})"
+    if player.current.playlist_name:
+        txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=playlist_text_size)}`]({player.current.playlist_url})"
 
     if player.nonstop:
         txt += "\n> ♾️ **⠂Modo interrupto:** `Ativado`"

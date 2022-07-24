@@ -35,8 +35,8 @@ def load(player: LavalinkPlayer) -> dict:
 
         txt += f"\n> ✋ **⠂Pedido por:** {player.current.requester.mention}\n"
 
-        if player.current.playlist:
-            txt += f"> 📑 **⠂Playlist:** `{fix_characters(player.current.playlist['name'])}`\n"
+        if player.current.playlist_name:
+            txt += f"> 📑 **⠂Playlist:** `{fix_characters(player.current.playlist_name)}`\n"
 
         try:
             txt += f"> *️⃣ **⠂Canal de voz:** {player.guild.me.voice.channel.mention}\n"

@@ -54,8 +54,8 @@ def load(player: LavalinkPlayer) -> dict:
           f"💠 **⠂Uploader**: `{player.current.author}`\n" \
           f"🎧 **⠂Pedido por:** {player.current.requester.mention}\n" \
 
-    if player.current.playlist:
-        txt += f"📑 **⠂Playlist:** [`{fix_characters(player.current.playlist['name'], limit=20)}`]({player.current.playlist['url']})\n"
+    if player.current.playlist_name:
+        txt += f"📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=20)}`]({player.current.playlist_url})\n"
 
     txt += f"🔊 **⠂Volume:** `{player.volume}%`\n"
 

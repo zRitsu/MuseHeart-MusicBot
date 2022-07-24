@@ -23,8 +23,8 @@ def load(player: LavalinkPlayer) -> dict:
         embed.description = f"**Tocando Agora:** [`{player.current.title}`]({player.current.uri})\n" \
                             f"`{duration}`┃`{fix_characters(player.current.author, 18)}`┃{player.current.requester.mention}"
 
-        if player.current.playlist:
-            embed.description += f"\n**Playlist:** [`{player.current.playlist['name']}`]({player.current.playlist['url']})"
+        if player.current.playlist_name:
+            embed.description += f"\n**Playlist:** [`{player.current.playlist_name}`]({player.current.playlist_url})"
 
         embed.set_thumbnail(url=player.current.thumb)
 
@@ -96,8 +96,8 @@ def load(player: LavalinkPlayer) -> dict:
         if player.current.album:
             txt += f"\n> 💽 **⠂Álbum:** [`{fix_characters(player.current.album['name'], limit=playlist_text_size)}`]({player.current.album['url']})"
 
-        if player.current.playlist:
-            txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist['name'], limit=playlist_text_size)}`]({player.current.playlist['url']})"
+        if player.current.playlist_name:
+            txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=playlist_text_size)}`]({player.current.playlist_url})"
 
         if player.nonstop:
             txt += "\n> ♾️ **⠂Modo interrupto:** `Ativado`"
