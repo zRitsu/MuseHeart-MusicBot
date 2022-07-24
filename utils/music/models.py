@@ -115,8 +115,6 @@ class LavalinkPlayer(wavelink.Player):
         self.controller_mode = True  # ativar/desativar modo controller (apenas para uso em skins)
 
         self.initial_hints = [
-            "Você pode usar o botão [🎶] para pedir músicas ou adicionar um link de música/playlist/favorito na fila.",
-
             "Você pode alterar a skin/aparência do player usando o comando /change_skin (comando vísivel apenas membros"
             " com perm de: gerenciar servidor).",
 
@@ -167,14 +165,17 @@ class LavalinkPlayer(wavelink.Player):
 
         hints = list(self.initial_hints)
 
+        if self.controller_mode:
+            hints.append("Você pode usar o botão [🎶] para pedir músicas ou adicionar um link de música/playlist/favorito na fila.")
+
         if self.static:
             hints.append("Você pode fixar músicas/playlists na mensagem do player quando tiver no modo de espera/oscioso "
                          "para qualquer membro poder usá-las de forma facilitada. Para isso use o comando: /pin add "
                          "(comando vísivel apenas membros com perm de: gerenciar servidor)")
 
-        elif self.bot.intents.message_content:
+        elif self.bot.intents.message_content and self.controller_mode:
             hints.append("Ao criar uma conversa/thread na mensagem do player, será ativado o modo de song-request "
-                         "nela (possibilitando pedir música apenas enviando o nome/link da música na conversa).")
+                        "nela (possibilitando pedir música apenas enviando o nome/link da música na conversa).")
 
         random.shuffle(hints)
         self.hints = cycle(hints)
