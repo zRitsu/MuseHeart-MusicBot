@@ -60,7 +60,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def update_cache(self):
 
         async with aiofiles.open(f"./playlist_cache.json", "w") as f:
-            await f.write(json.dumps(self.bot.pool.user_playlist_cache))
+            await f.write(json.dumps(self.bot.pool.playlist_cache))
 
     @commands.is_owner()
     @commands.command(hidden=True, aliases=["ac"])
@@ -78,7 +78,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 playlist={"name": tracks.data['playlistInfo']['name'], "url": url}
             ) for t in tracks.tracks]
 
-        self.bot.pool.user_playlist_cache[url] = [{"track": t.id, "info": t.info} for t in tracks]
+        self.bot.pool.playlist_cache[url] = [{"track": t.id, "info": t.info} for t in tracks]
 
         await self.update_cache()
 
@@ -90,7 +90,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def updatecache(self, ctx: CustomContext):
 
         try:
-            if not self.bot.pool.user_playlist_cache:
+            if not self.bot.pool.playlist_cache:
                 raise GenericError("**Seu cache de playlist está vazio...**")
         except KeyError:
             raise GenericError(f"**Você ainda não usou o comando: {ctx.prefix}{self.addcache.name}**")
@@ -99,11 +99,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         counter = 0
 
-        amount = len(self.bot.pool.user_playlist_cache)
+        amount = len(self.bot.pool.playlist_cache)
 
         txt = ""
 
-        for url in self.bot.pool.user_playlist_cache:
+        for url in self.bot.pool.playlist_cache:
 
             try:
                 async with ctx.typing():
@@ -123,7 +123,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                         playlist={"name": tracks.data['playlistInfo']['name'], "url": url}
                     ) for t in tracks.tracks]
 
-                self.bot.pool.user_playlist_cache[url] = [{"track": t.id, "info": t.info} for t in newtracks]
+                self.bot.pool.playlist_cache[url] = [{"track": t.id, "info": t.info} for t in newtracks]
 
                 txt += f"[`{tracks.data['playlistInfo']['name']}`]({url})\n"
 
@@ -146,7 +146,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def removecache(self, ctx: CustomContext, url: str):
 
         try:
-            del self.bot.pool.user_playlist_cache[url]
+            del self.bot.pool.playlist_cache[url]
         except KeyError:
             raise GenericError("**Não há itens salvo em cache com a url informada...**")
 
@@ -159,7 +159,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def clearcache(self, ctx: CustomContext):
 
         try:
-            self.bot.pool.user_playlist_cache.clear()
+            self.bot.pool.playlist_cache.clear()
         except KeyError:
             raise GenericError("**Você não possui links de playlists salva em cache...**")
 
@@ -3051,7 +3051,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             if use_cache:
                 try:
-                    cached_tracks = self.bot.pool.user_playlist_cache[query]
+                    cached_tracks = self.bot.pool.playlist_cache[query]
                 except KeyError:
                     pass
                 else:

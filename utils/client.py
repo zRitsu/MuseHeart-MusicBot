@@ -30,13 +30,13 @@ class BotPool:
     bots: List[BotCore] = []
 
     def __init__(self):
-        self.user_playlist_cache = {}
+        self.playlist_cache = {}
 
     def load_playlist_cache(self):
 
         try:
             with open(f"./playlist_cache.json") as file:
-                self.user_playlist_cache = json.load(file)
+                self.playlist_cache = json.load(file)
         except FileNotFoundError:
             return
 
