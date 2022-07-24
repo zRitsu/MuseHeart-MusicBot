@@ -19,18 +19,22 @@ if TYPE_CHECKING:
 
 
 class LavalinkTrack(wavelink.Track):
-    __slots__ = ('requester', 'track_loops', 'album', 'single_title', 'authors_md', 'authors_string', 'extra')
+    __slots__ = (
+        'requester', 'track_loops', 'album_name', 'album_url',
+        'single_title', 'authors_md', 'authors_string', 'extra'
+    )
 
     def __init__(self, *args, **kwargs):
         self.requester = kwargs.pop('requester')
         self.track_loops = kwargs.pop('track_loops', 0)
-        self.album = {}
         args[1]['title'] = fix_characters(args[1]['title'])
         super().__init__(*args, **kwargs)
         self.single_title = self.title
         self.authors_md = f"`{self.author}`"
         self.authors_string = self.author
         self.info["extra"] = {}
+        self.album_name = ""
+        self.album_url = ""
 
         if playlist := kwargs.pop("playlist", None):
             self.info["extra"]["playlist"] = {
