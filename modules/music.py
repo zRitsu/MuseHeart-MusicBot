@@ -825,7 +825,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await inter.response.defer()
         else:
             txt = ["pulou a música.", f"⏭️ **⠂{inter.author.mention} pulou a música:\n"
-                                      f"[`{fix_characters(player.current.title, 43)}`]({player.current.uri})**"]
+                                      f"╰[`{fix_characters(player.current.title, 43)}`]({player.current.uri})**"]
             await self.interaction_message(inter, txt, emoji="⏭️")
 
         if player.loop == "current":
@@ -875,7 +875,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             txt = [
                 "voltou para a música atual.",
-                f"⏮️ **⠂{inter.author.mention} voltou para a música:\n[`{fix_characters(t.title, 43)}`]({t.uri})**"
+                f"⏮️ **⠂{inter.author.mention} voltou para a música:\n╰[`{fix_characters(t.title, 43)}`]({t.uri})**"
             ]
 
             await self.interaction_message(inter, txt, emoji="⏮️")
@@ -1214,7 +1214,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             f"definiu a quantidade de repetições da música "
             f"[`{(fix_characters(player.current.title, 25))}`]({player.current.uri}) para **{value}**.",
             f"🔄 **⠂{inter.author.mention} definiu a quantidade de repetições da música para [{value}]:**\n"
-            f"[`{player.current.title}`]({player.current.uri})"
+            f"╰[`{player.current.title}`]({player.current.uri})"
         ]
 
         await self.interaction_message(inter, txt, rpc_update=True, emoji="🔄")
@@ -1254,7 +1254,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         txt = [
             f"removeu a música [`{(fix_characters(track.title, 25))}`]({track.uri}) da fila.",
-            f"♻️ **⠂{inter.author.mention} removeu a música da fila:**\n[`{track.title}`]({track.uri})"
+            f"♻️ **⠂{inter.author.mention} removeu a música da fila:**\n╰[`{track.title}`]({track.uri})"
         ]
 
         await self.interaction_message(inter, txt, emoji="♻️")
@@ -1359,7 +1359,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         txt = [
             "pulou para a música atual.",
-            f"⤵️ **⠂{inter.author.mention} pulou para a música:**\n[`{fix_characters(track.title, 43)}`]({track.uri})"
+            f"⤵️ **⠂{inter.author.mention} pulou para a música:**\n╰[`{fix_characters(track.title, 43)}`]({track.uri})"
         ]
 
         await self.interaction_message(inter, txt, emoji="⤵️")
@@ -1426,7 +1426,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             txt = [
                 f"moveu a música [`{fix_characters(track.title, limit=25)}`]({track.uri}) para a posição **[{position}]** da fila.",
                 f"↪️ **⠂{inter.author.mention} moveu uma música para a posição [{position}]:**\n"
-                f"[`{fix_characters(track.title, limit=43)}`]({track.uri})"
+                f"╰[`{fix_characters(track.title, limit=43)}`]({track.uri})"
             ]
 
             await self.interaction_message(inter, txt, emoji="↪️")
@@ -1499,7 +1499,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         txt = [
             f"rotacionou a fila para a música [`{(fix_characters(track.title, limit=25))}`]({track.uri}).",
-            f"🔃 **⠂{inter.author.mention} rotacionou a fila para a música:**\n[`{track.title}`]({track.uri})."
+            f"🔃 **⠂{inter.author.mention} rotacionou a fila para a música:**\n╰[`{track.title}`]({track.uri})."
         ]
 
         await self.interaction_message(inter, txt, emoji="🔃")
