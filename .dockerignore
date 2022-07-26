@@ -1,0 +1,5 @@
+venv
+.java
+.idea
+.logs
+.vscode
