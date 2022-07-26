@@ -494,7 +494,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         is_pin = None
 
-        ephemeral = await self.is_request_channel(inter, data=guild_data, ignore_thread=True)
+        ephemeral = hide_playlist or await self.is_request_channel(inter, data=guild_data, ignore_thread=True)
 
         if not query:
 
