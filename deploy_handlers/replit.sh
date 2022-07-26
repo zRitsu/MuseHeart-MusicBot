@@ -2,7 +2,7 @@
 
 [ -z "$IS_SOURCE" ] || { python3 preview.py; kill "$PPID"; exit 1; }
 
-if [ ! -d "venv" ] || [ ! -f "venv/bin/python3" ]; then
+if [ ! -d "venv" ] || [ ! -f "venv/bin/python310" ]; then
   bash quick_update.sh
   rm -rf venv
   python3 -m venv venv
