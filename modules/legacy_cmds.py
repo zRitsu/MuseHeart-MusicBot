@@ -510,7 +510,7 @@ class Owner(commands.Cog):
         with ZipFile("./source.zip", 'a') as zipf:
 
             for f in filelist.split("\n"):
-                if f in ".env-temp":
+                if f == ".env-temp":
                     zipf.write('./.env-temp', './.env')
                 else:
                     zipf.write(f"./{f}")
