@@ -68,7 +68,7 @@ class MusicSettings(commands.Cog):
             if not user_data["fav_links"]:
                 raise GenericError("**Você não possui favoritos na database antiga.**")
 
-            global_user_data["fav_links"].update(user_data["fav_links"])
+            global_user_data["fav_links"] = dict(user_data["fav_links"])
             await self.bot.update_global_data(ctx.author.id, global_user_data, db_name=DBModel.users)
 
             user_data["fav_links"].clear()
