@@ -5,6 +5,7 @@ import disnake
 import humanize
 from disnake.ext import commands
 from typing import TYPE_CHECKING, Union
+from utils.db import DBModel
 from utils.music.checks import user_cooldown
 from utils.music.converters import time_format
 from utils.music.errors import GenericError
@@ -41,11 +42,11 @@ class MusicSettings(commands.Cog):
             opt: str = commands.Param(choices=["Ativar", "Desativar"], description="Escolha: ativar ou desativar")
     ):
 
-        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
         guild_data["check_other_bots_in_vc"] = opt == "Ativar"
 
-        await self.bot.db.update_data(inter.guild.id, guild_data, db_name="guilds")
+        await self.bot.update_data(inter.guild.id, guild_data, db_name=DBModel.guilds)
 
         embed = disnake.Embed(
             color=self.bot.get_color(inter.guild.me),
@@ -55,6 +56,30 @@ class MusicSettings(commands.Cog):
 
         await inter.send(embed=embed, ephemeral=True)
 
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    @commands.command(aliases=["mgf", "migrarfavoritos", "migrate"],
+                      description="Migrar seus favoritos para database global (comando temporário).")
+    async def migratefav(self, ctx: CustomContext):
+
+        async with ctx.typing():
+            user_data = await self.bot.get_data(ctx.author.id, db_name=DBModel.users)
+            global_user_data = await self.bot.get_global_data(ctx.author.id, db_name=DBModel.users)
+
+            if not user_data["fav_links"]:
+                raise GenericError("**Você não possui favoritos na database antiga.**")
+
+            global_user_data["fav_links"].update(user_data["fav_links"])
+            await self.bot.update_global_data(ctx.author.id, global_user_data, db_name=DBModel.users)
+
+            user_data["fav_links"].clear()
+            await self.bot.update_data(ctx.author.id, user_data, db_name=DBModel.users)
+
+        await ctx.send(
+            embed=disnake.Embed(
+                description="**Os dados foram migrados com sucesso.**",
+                color=self.bot.get_color(ctx.guild.me)
+            )
+        )
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
@@ -115,7 +140,7 @@ class MusicSettings(commands.Cog):
             )
         }
 
-        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
         await inter.response.defer(ephemeral=True)
 
@@ -217,7 +242,7 @@ class MusicSettings(commands.Cog):
 
         guild_data['player_controller']['channel'] = str(channel.id)
         guild_data['player_controller']['message_id'] = str(message.id)
-        await self.bot.db.update_data(inter.guild.id, guild_data, db_name='guilds')
+        await self.bot.update_data(inter.guild.id, guild_data, db_name=DBModel.guilds)
 
         reset_txt = f"{inter.prefix}reset" if isinstance(inter, CustomContext) else "/reset"
 
@@ -263,7 +288,7 @@ class MusicSettings(commands.Cog):
             )
     ):
 
-        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
         channel = self.bot.get_channel(int(guild_data['player_controller']['channel'] or 0))
 
@@ -282,7 +307,7 @@ class MusicSettings(commands.Cog):
             "channel": None
         })
 
-        await self.bot.db.update_data(inter.guild.id, guild_data, db_name='guilds')
+        await self.bot.update_data(inter.guild.id, guild_data, db_name=DBModel.guilds)
 
         try:
             func = inter.edit_original_message
@@ -350,7 +375,7 @@ class MusicSettings(commands.Cog):
             await inter.send("Você não pode adicionar esse cargo.", ephemeral=True)
             return
 
-        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
         if str(role.id) in guild_data['djroles']:
             await inter.send(f"O cargo {role.mention} já está na lista de DJ's", ephemeral=True)
@@ -358,7 +383,7 @@ class MusicSettings(commands.Cog):
 
         guild_data['djroles'].append(str(role.id))
 
-        await self.bot.db.update_data(inter.guild.id, guild_data, db_name="guilds")
+        await self.bot.update_data(inter.guild.id, guild_data, db_name=DBModel.guilds)
 
         await inter.send(f"O cargo {role.mention} foi adicionado à lista de DJ's", ephemeral=True)
 
@@ -381,14 +406,14 @@ class MusicSettings(commands.Cog):
             role: disnake.Role = commands.Param(name="cargo", description="Cargo")
     ):
 
-        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
         if not guild_data['djroles']:
 
             await inter.send("Não há cargos na lista de DJ's.", ephemeral=True)
             return
 
-        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
         if str(role.id) not in guild_data['djroles']:
             await inter.send(f"O cargo {role.mention} não está na lista de DJ's\n\n" + "Cargos:\n" +
@@ -397,7 +422,7 @@ class MusicSettings(commands.Cog):
 
         guild_data['djroles'].remove(str(role.id))
 
-        await self.bot.db.update_data(inter.guild.id, guild_data, db_name="guilds")
+        await self.bot.update_data(inter.guild.id, guild_data, db_name=DBModel.guilds)
 
         await inter.send(f"O cargo {role.mention} foi removido da lista de DJ's", ephemeral=True)
 
@@ -433,7 +458,7 @@ class MusicSettings(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
         selected = guild_data["player_controller"]["skin"] or self.bot.default_skin
 
@@ -485,7 +510,7 @@ class MusicSettings(commands.Cog):
 
         guild_data["player_controller"]["skin"] = skin
 
-        await self.bot.db.update_data(inter.guild.id, guild_data, db_name="guilds")
+        await self.bot.update_data(inter.guild.id, guild_data, db_name=DBModel.guilds)
 
         kwargs = {
             "embed": disnake.Embed(

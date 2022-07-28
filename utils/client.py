@@ -18,7 +18,7 @@ from .music.local_lavalink import run_lavalink
 from .music.models import music_mode
 from .music.spotify import spotify_client
 from .owner_panel import PanelView
-from utils.db import MongoDatabase, LocalDatabase, guild_prefix
+from utils.db import MongoDatabase, LocalDatabase, guild_prefix, DBModel, global_db_models
 from asyncspotify import Client as SpotifyClient
 from utils.others import sync_message, CustomContext
 import os
@@ -31,6 +31,7 @@ class BotPool:
 
     def __init__(self):
         self.playlist_cache = {}
+        self.database: Union[MongoDatabase, LocalDatabase] = None
 
     def load_playlist_cache(self):
 
@@ -99,7 +100,10 @@ class BotPool:
         mongo_key = CONFIGS.get("MONGO")
 
         if not mongo_key:
-            print(f"Token do mongoDB não configurado! será usado um arquivo json para database.\n{'-' * 30}")
+            print(f"O token/link do mongoDB não foi configurado...\nSerá usado um arquivo json para database.\n{'-' * 30}")
+            self.database = LocalDatabase()
+        else:
+            self.database = MongoDatabase(token=mongo_key)
 
         spotify = spotify_client(CONFIGS)
 
@@ -179,9 +183,6 @@ class BotPool:
                         except AttributeError:
                             bot.owner = botowner.owner
 
-                    bot.db = MongoDatabase(bot=bot, token=mongo_key, name=str(bot.user.id)) if mongo_key \
-                        else LocalDatabase(bot, rename_db=main and os.path.isfile("./database.json"))
-
                     music_cog = bot.get_cog("Music")
 
                     if music_cog:
@@ -238,6 +239,8 @@ class BotPool:
             )
 
         loop = asyncio.get_event_loop()
+
+        self.database.start_task(loop)
 
         if CONFIGS["RUN_RPC_SERVER"]:
 
@@ -305,8 +308,20 @@ class BotCore(commands.AutoShardedBot):
             except Exception:
                 print(f"Falha ao carregar skin: {traceback.format_exc()}")
 
-        if not self.default_skin in self.player_skins:
+        if self.default_skin not in self.player_skins:
             self.default_skin = "default"
+
+    async def get_data(self, id_: int, *, db_name: Union[DBModel.guilds, DBModel.users]):
+        return await self.pool.database.get_data(id_=id_, db_name=db_name, collection=str(self.user.id))
+
+    async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users]):
+        return await self.pool.database.update_data(id_=id_, data=data, db_name=db_name, collection=str(self.user.id))
+
+    async def get_global_data(self, id_: int, *, db_name: Union[DBModel.guilds, DBModel.users]):
+        return await self.pool.database.get_data(id_=id_, db_name=db_name, collection="global", default_model=global_db_models)
+
+    async def update_global_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users]):
+        return await self.pool.database.update_data(id_=id_, data=data, db_name=db_name, collection="global")
 
     def check_skin(self, skin: str):
 

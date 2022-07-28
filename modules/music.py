@@ -11,6 +11,7 @@ from random import shuffle
 from typing import Literal, Union, Optional
 from urllib import parse
 from utils.client import BotCore
+from utils.db import DBModel
 from utils.music.errors import GenericError, MissingVoicePerms
 from utils.music.spotify import SpotifyPlaylist, process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, \
@@ -330,7 +331,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player = self.bot.music.players[ctx.guild.id]
 
-        guild_data = await self.bot.db.get_data(ctx.guild.id, db_name="guilds")
+        guild_data = await self.bot.get_data(ctx.guild.id, db_name=DBModel.guilds)
 
         if not channel:
             channel: Union[disnake.VoiceChannel, disnake.StageChannel] = ctx.author.voice.channel
@@ -481,7 +482,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         msg = None
 
-        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
         try:
             static_player = guild_data['player_controller']
@@ -572,7 +573,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             query = query[7:]
 
         if query.startswith("> fav:"):
-            user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
+            user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
             query = user_data["fav_links"][query[7:]]
 
         else:
@@ -651,7 +652,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 except:
                     message = await send_idle_embed(inter.channel, bot=self.bot)
                     guild_data['player_controller']['message_id'] = str(message.id)
-                    await self.bot.db.update_data(inter.guild.id, guild_data, db_name='guilds')
+                    await self.bot.update_data(inter.guild.id, guild_data, db_name=DBModel.guilds)
                 player.message = message
 
         pos_txt = ""
@@ -2055,7 +2056,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         except KeyError:
 
-            guild_data = data or await self.bot.db.get_data(ctx.guild.id, db_name="guilds")
+            guild_data = data or await self.bot.get_data(ctx.guild.id, db_name=DBModel.guilds)
 
             try:
                 channel = self.bot.get_channel(int(guild_data["player_controller"]["channel"]))
@@ -2111,7 +2112,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await interaction.send("Você deve entrar em um canal de voz para usar isto.", ephemeral=True)
             return
 
-        guild_data = await self.bot.db.get_data(interaction.guild.id, db_name="guilds")
+        guild_data = await self.bot.get_data(interaction.guild.id, db_name=DBModel.guilds)
 
         try:
             query = guild_data["player_controller"]["fav_links"][interaction.data.values[0]]['url']
@@ -2536,7 +2537,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
 
         try:
-            data = await self.bot.db.get_data(message.guild.id, db_name='guilds')
+            data = await self.bot.get_data(message.guild.id, db_name=DBModel.guilds)
         except AttributeError:
             return
 
@@ -2714,7 +2715,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             except:
                 cached_message = await send_idle_embed(message, bot=self.bot)
                 data['player_controller']['message_id'] = str(cached_message.id)
-                await self.bot.db.update_data(message.guild.id, data, db_name='guilds')
+                await self.bot.update_data(message.guild.id, data, db_name=DBModel.guilds)
 
             player.message = cached_message
 
@@ -3259,7 +3260,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             player.text_channel = inter.channel.parent if isinstance(inter.channel, disnake.Thread) else inter.channel
         except KeyError:
             pass
-        await self.bot.db.update_data(guild_id, data, db_name='guilds')
+        await self.bot.update_data(guild_id, data, db_name=DBModel.guilds)
 
 
 def setup(bot: BotCore):

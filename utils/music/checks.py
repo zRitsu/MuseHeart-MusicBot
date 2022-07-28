@@ -1,11 +1,12 @@
 from __future__ import annotations
-from typing import Union, TYPE_CHECKING
+from typing import TYPE_CHECKING
 import disnake
 from disnake.ext import commands
 from .converters import perms_translations
 from .errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, DiffVoiceChannel, GenericError, \
     MissingVoicePerms
 from .models import LavalinkPlayer
+from ..db import DBModel
 
 if TYPE_CHECKING:
     from ..others import CustomContext
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
 
 async def check_requester_channel(ctx: CustomContext):
 
-    guild_data = await ctx.bot.db.get_data(ctx.guild.id, db_name="guilds")
+    guild_data = await ctx.bot.get_data(ctx.guild.id, db_name=DBModel.guilds)
 
     if guild_data['player_controller']["channel"] == str(ctx.channel.id):
         raise GenericError("**Não use comandos neste canal!**", self_delete=True, delete_original=15)
@@ -167,7 +168,7 @@ async def has_perm(inter):
 
     user_roles = [r.id for r in inter.author.roles]
 
-    guild_data = await inter.bot.db.get_data(inter.guild.id, db_name="guilds")
+    guild_data = await inter.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
     if [r for r in guild_data['djroles'] if int(r) in user_roles]:
         return True

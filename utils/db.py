@@ -3,16 +3,24 @@ import asyncio
 import collections.abc
 import json
 import os
+import shutil
+import traceback
 import disnake
 from disnake.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
-from typing import Literal, TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
+
 if TYPE_CHECKING:
     from .client import BotCore
 
 
+class DBModel:
+    guilds = "guilds"
+    users = "users"
+
+
 db_models = {
-    "guilds": {
+    DBModel.guilds: {
         "ver": 1.5,
         "prefix": "",
         "player_controller": {
@@ -25,9 +33,16 @@ db_models = {
         "enable_prefixed_commands": True,
         "djroles": []
     },
-    "users": {
+    DBModel.users: {
         "ver": 1.0,
         "fav_links": {},
+    }
+}
+
+global_db_models = {
+    DBModel.users: {
+        "ver": 1.0,
+        "fav_links": {}
     }
 }
 
@@ -38,7 +53,7 @@ async def guild_prefix(bot: BotCore, message: disnake.Message):
 
     else:
 
-        data = await bot.db.get_data(message.guild.id, db_name="guilds")
+        data = await bot.get_data(message.guild.id, db_name=DBModel.guilds)
 
         prefix = data.get("prefix") or bot.default_prefix
 
@@ -47,156 +62,146 @@ async def guild_prefix(bot: BotCore, message: disnake.Message):
 
 class BaseDB:
 
-    def __init__(self, bot: BotCore):
-        self.bot = bot
-        self.db_models = dict(db_models)
-        self.db_models["prefix"] = bot.default_prefix
-        self.data = {
-            'guilds': {},
-            'users': {}
-        }
+    def get_default(self, collection: str, db_name: Union[DBModel.guilds, DBModel.users]):
+        if collection == "global":
+            return dict(global_db_models[db_name])
+        return dict(db_models[db_name])
+
+    def start_task(self, loop):
+        pass
 
 
 class LocalDatabase(BaseDB):
 
-    def __init__(self, bot: BotCore, rename_db: bool = False):
-        super().__init__(bot)
-
-        self.file_update = 0
-        self.data_update = 0
+    def __init__(self):
+        super().__init__()
+        self.data = {}
+        self.to_update = set()
 
         if not os.path.isdir("./local_dbs"):
             os.makedirs("local_dbs")
 
-        # Medida temporária para evitar perca de dados do método antigo durante a migração para a nova versão...
-        if rename_db:
-            os.rename("./database.json", f"./local_dbs/{bot.user.id}.json")
-
-        if not os.path.isfile(f'./local_dbs/{bot.user.id}.json'):
-            with open(f'./local_dbs/{bot.user.id}.json', 'w') as f:
-                json.dump(self.data, f)
-
         else:
-            with open(f'./local_dbs/{bot.user.id}.json') as f:
-                self.data = json.load(f)
+            for f in os.listdir(f"./local_dbs"):
 
-        self.json_task = self.bot.loop.create_task(self.write_json_task())
+                if not f.endswith(".json"):
+                    continue
+
+                with open(f'./local_dbs/{f}') as file:
+                    self.data[f[:-5]] = json.load(file)
+
+    def start_task(self, loop):
+        if not loop:
+            loop = asyncio.get_event_loop()
+        loop.create_task(self.write_json_task())
 
     async def write_json_task(self):
 
         while True:
 
-            if self.file_update != self.data_update:
-                with open(f'./local_dbs/{self.bot.user.id}.json', 'w') as f:
-                    f.write(json.dumps(self.data))
+            if self.to_update:
 
-                self.file_update += 1
+                for i in list(self.to_update):
+                    with open(f'./local_dbs/{i}.json', 'w') as f:
+                        f.write(json.dumps(self.data[i]))
+
+                    self.to_update.remove(i)
 
             await asyncio.sleep(3)
 
-    async def get_data(self, id_: int, *, db_name: Literal['users', 'guilds']):
+    async def get_data(self, id_: int, *, db_name: Union[DBModel.guilds, DBModel.users],
+                       collection: str, default_model: dict = None):
+
+        id_ = str(id_)
+
+        if not default_model:
+            default_model = db_models
+
+        try:
+            data = self.data[collection][db_name][id_]
+        except KeyError:
+            return dict(default_model[db_name])
+
+        if data["ver"] < default_model[db_name]["ver"]:
+            data = update_values(dict(default_model[db_name]), data)
+            data["ver"] = default_model[db_name]["ver"]
+
+            await self.update_data(id_, data, db_name=db_name, collection=collection)
+
+        return data
+
+    async def update_data(self, id_: int, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users],
+                          collection: str):
 
         id_ = str(id_)
 
         try:
-            data = self.data[db_name][id_]
+            self.data[collection][db_name][id_] = data
         except KeyError:
-            return dict(self.db_models[db_name])
+            self.data[collection] = dict(db_models) if db_name != "global" else dict(global_db_models)
+            self.data[collection][db_name][id_] = data
 
-        if data["ver"] < self.db_models[db_name]["ver"]:
-            data = update_values(dict(self.db_models[db_name]), data)
-            data["ver"] = self.db_models[db_name]["ver"]
-
-            await self.update_data(id_, data, db_name=db_name)
-
-        return data
-
-    async def update_data(self, id_: int, data: dict, *, db_name: Literal['users', 'guilds']):
-
-        id_ = str(id_)
-
-        self.data[db_name][id_] = data
-
-        self.data_update += 1
+        self.to_update.add(collection)
 
 
 class MongoDatabase(BaseDB):
 
-    def __init__(self, bot: BotCore, token: str, name):
-        super().__init__(bot)
+    def __init__(self, token: str):
+        super().__init__()
         self._connect = AsyncIOMotorClient(token, connectTimeoutMS=30000)
-        self._database = self._connect[name]
-        self.name = name
-        print(f"{bot.user} - MongoDB conectado.")
-        if bot.config["MONGO_DB_INTERNAL_CACHE"]:
-            self.get_data = self.get_data_cached
-            self.update_data = self.update_cache
-        else:
-            self.get_data = self.fetch_data
-            self.update_data = self.update_data_
 
-    async def push_data(self, data, db_name: Literal['users', 'guilds']):
-
-        db = self._database[db_name]
-        await db.insert_one(data)
+    async def push_data(self, data, *, db_name: Union[DBModel.guilds, DBModel.users], collection: str):
+        await self._connect[collection][db_name].insert_one(data)
 
     async def update_from_json(self):
 
-        with open(f"./local_dbs/{self.bot.user.id}.json") as f:
-            json_data = json.load(f)
+        if not os.path.isdir("./local_dbs/backups"):
+            os.makedirs("./local_dbs/backups")
 
-        for db_name, db_data in json_data.items():
+        for f in os.listdir("./local_dbs"):
 
-            if not db_data:
+            if not f.endswith(".json"):
                 continue
 
-            for id_, data in db_data.items():
+            with open(f'./local_dbs/{f}') as file:
+                data = json.load(file)
 
-                if data == self.db_models["guilds"]:
+            for db_name, db_data in data.items():
+
+                if not db_data:
                     continue
 
-                await self.update_data_(id_=id_, data=data, db_name=db_name)
+                for id_, data in db_data.items():
+                    await self.update_data(id_=id_, data=data, db_name=db_name, collection=f[:-5])
 
-    async def get_data_cached(self, id_: int, *, db_name: Literal['users', 'guilds']):
+                try:
+                    shutil.move(f"./local_dbs/{f}", f"./local_dbs/backups/{f}")
+                except:
+                    traceback.print_exc()
+
+    async def get_data(self, id_: int, *, db_name: Union[DBModel.guilds, DBModel.users],
+                       collection: str, default_model: dict = None):
+
+        if not default_model:
+            default_model = db_models
 
         id_ = str(id_)
 
-        try:
-            return self.data[db_name][id_]
-        except KeyError:
-            data = await self.fetch_data(id_, db_name=db_name)
-            self.data[db_name][id_] = data
-            return data
-
-    async def fetch_data(self, id_: int, *, db_name: Literal['users', 'guilds']):
-
-        id_ = str(id_)
-
-        data = await self._database[db_name].find_one({"_id": id_})
+        data = await self._connect[collection][db_name].find_one({"_id": id_})
 
         if not data:
-            return dict(self.db_models[db_name])
+            return dict(default_model[db_name])
 
-        elif data["ver"] < self.db_models[db_name]["ver"]:
-            data = update_values(dict(self.db_models[db_name]), data)
-            data["ver"] = self.db_models[db_name]["ver"]
+        elif data["ver"] < default_model[db_name]["ver"]:
+            data = update_values(dict(default_model[db_name]), data)
+            data["ver"] = default_model[db_name]["ver"]
 
-            await self.update_data_(id_, data, db_name=db_name)
+            await self.update_data(id_, data, db_name=db_name, collection=collection)
 
         return data
 
-    async def update_cache(self, id_, data: dict, *, db_name: Literal['users', 'guilds']):
-
-        id_ = str(id_)
-
-        d = await self.update_data_(id_, data, db_name=db_name)
-
-        self.data[db_name][id_] = data
-
-        return d
-
-    async def update_data_(self, id_, data: dict, *, db_name: Literal['users', 'guilds']):
-        return await self._database[db_name].update_one({'_id': str(id_)}, {'$set': data}, upsert=True)
+    async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users], collection: str):
+        return await self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data}, upsert=True)
 
 
 def update_values(d, u):

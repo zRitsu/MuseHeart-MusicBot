@@ -3,6 +3,7 @@ from inspect import iscoroutinefunction
 from typing import TYPE_CHECKING, Union, Optional
 import disnake
 from disnake.ext import commands
+from utils.db import DBModel
 
 if TYPE_CHECKING:
     from utils.client import BotCore
@@ -229,7 +230,7 @@ async def send_idle_embed(
     embed.set_thumbnail(avatar)
 
     if not guild_data:
-        guild_data = await bot.db.get_data(target.guild.id, db_name="guilds")
+        guild_data = await bot.get_data(target.guild.id, db_name=DBModel.guilds)
 
     components = []
 

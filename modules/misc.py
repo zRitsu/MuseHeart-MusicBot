@@ -4,6 +4,7 @@ import asyncio
 from typing import Optional
 from aiohttp import ClientSession
 from utils.client import BotCore
+from utils.db import DBModel
 from utils.music.checks import check_requester_channel
 from utils.music.converters import time_format, URL_REG
 import psutil
@@ -88,7 +89,7 @@ class Misc(commands.Cog):
         if not guild.system_channel or not guild.system_channel.permissions_for(guild.me).send_messages:
             return
 
-        prefix = (await self.bot.db.get_data(guild.id, db_name="guilds"))["prefix"] or self.bot.default_prefix
+        prefix = (await self.bot.get_data(guild.id, db_name=DBModel.guilds))["prefix"] or self.bot.default_prefix
 
         embed = disnake.Embed(
             description="Olá! Para ver todos os meus comandos use **/**\n\n",
@@ -144,7 +145,7 @@ class Misc(commands.Cog):
         except AttributeError:
             pass
 
-        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
         prefix = guild_data["prefix"] or self.bot.default_prefix
 

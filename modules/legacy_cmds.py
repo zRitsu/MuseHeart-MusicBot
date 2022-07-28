@@ -12,6 +12,7 @@ import dotenv
 import wavelink
 from disnake.ext import commands
 from utils.client import BotCore
+from utils.db import DBModel
 from utils.music.checks import check_voice, check_requester_channel
 from utils.music.interactions import AskView
 from utils.music.models import LavalinkPlayer
@@ -441,10 +442,10 @@ class Owner(commands.Cog):
         if " " in prefix or len(prefix) > 5:
             raise GenericError("**O prefixo não pode conter espaços ou ter acima de 5 caracteres.**")
 
-        data = await self.bot.db.get_data(ctx.guild.id, db_name="guilds")
+        data = await self.bot.get_data(ctx.guild.id, db_name=DBModel.guilds)
 
         data["prefix"] = prefix
-        await self.bot.db.update_data(ctx.guild.id, data, db_name="guilds")
+        await self.bot.update_data(ctx.guild.id, data, db_name=DBModel.guilds)
 
         embed = disnake.Embed(
             description=f"**O prefixo deste servidor agora é:** {disnake.utils.escape_markdown(prefix)}",
@@ -651,7 +652,7 @@ class Owner(commands.Cog):
         if not node:
             raise GenericError("**Não há servidores de música disponível!**")
 
-        guild_data = await self.bot.db.get_data(ctx.guild.id, db_name="guilds")
+        guild_data = await self.bot.get_data(ctx.guild.id, db_name=DBModel.guilds)
 
         static_player = guild_data['player_controller']
 

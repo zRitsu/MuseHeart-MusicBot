@@ -8,6 +8,7 @@ import wavelink
 from urllib import parse
 from .converters import fix_characters, time_format, get_button_style
 from .filters import AudioFilter
+from ..db import DBModel
 from ..others import send_idle_embed, PlayerControls
 from .spotify import SpotifyTrack
 import traceback
@@ -292,7 +293,7 @@ class LavalinkPlayer(wavelink.Player):
             )
         ]
 
-        guild_data = await self.bot.db.get_data(self.guild.id, db_name="guilds")
+        guild_data = await self.bot.get_data(self.guild.id, db_name=DBModel.guilds)
 
         opts = [disnake.SelectOption(label=k, value=k, description=v['description']) for k, v in
                 guild_data["player_controller"]["fav_links"].items()]

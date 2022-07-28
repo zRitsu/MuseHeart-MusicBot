@@ -8,6 +8,7 @@ from utils.music.converters import URL_REG, pin_list
 from utils.music.errors import GenericError
 from utils.music.models import LavalinkPlayer
 from utils.others import send_idle_embed
+from utils.db import DBModel
 
 if TYPE_CHECKING:
     from utils.client import BotCore
@@ -22,7 +23,7 @@ class PinManager(commands.Cog):
 
 
     async def process_idle_embed(self, guild: disnake.Guild):
-        guild_data = await self.bot.db.get_data(guild.id, db_name="guilds")
+        guild_data = await self.bot.get_data(guild.id, db_name=DBModel.guilds)
 
         try:
             player: LavalinkPlayer = self.bot.music.players[guild.id]
@@ -74,7 +75,7 @@ class PinManager(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
         if len(guild_data["player_controller"]["fav_links"]) > 25:
             raise GenericError(f"**Quantidade de links excedida! Permitido: 25.**")
@@ -87,7 +88,7 @@ class PinManager(commands.Cog):
             "description": description
         }
 
-        await self.bot.db.update_data(inter.guild.id, guild_data, db_name="guilds")
+        await self.bot.update_data(inter.guild.id, guild_data, db_name=DBModel.guilds)
 
         await inter.edit_original_message(embed=disnake.Embed(description="**Link adicionado/atualizado com sucesso nos fixos do player!\n"
                          "Membros podem usá-lo diretamente no player-controller quando não estiver em uso.**", color=self.bot.get_color(inter.guild.me)))
@@ -122,7 +123,7 @@ class PinManager(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
         if not guild_data["player_controller"]["channel"] or not self.bot.get_channel(int(guild_data["player_controller"]["channel"])):
             raise GenericError("**Não há player configurado no servidor! Use o comando /setup**")
@@ -145,7 +146,7 @@ class PinManager(commands.Cog):
         except KeyError:
             raise GenericError(f"**Não há link fixo com o nome:** {item}")
 
-        await self.bot.db.update_data(inter.guild.id, guild_data, db_name="guilds")
+        await self.bot.update_data(inter.guild.id, guild_data, db_name=DBModel.guilds)
 
         await inter.edit_original_message(embed=disnake.Embed(description="***Link fixo editado com sucesso!**", color=self.bot.get_color(inter.guild.me)))
 
@@ -161,14 +162,14 @@ class PinManager(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
         try:
             del guild_data["player_controller"]["fav_links"][item]
         except:
             raise GenericError(f"**Não há links da lista com o nome:** {item}")
 
-        await self.bot.db.update_data(inter.guild.id, guild_data, db_name="guilds")
+        await self.bot.update_data(inter.guild.id, guild_data, db_name=DBModel.guilds)
 
         await inter.edit_original_message(embed=disnake.Embed(description="**Link removido com sucesso!**", color=self.bot.get_color(inter.guild.me)))
 
@@ -212,7 +213,7 @@ class PinManager(commands.Cog):
             if not isinstance(data['url'], str) or not URL_REG.match(data['url']):
                 raise GenericError(f"O seu arquivo contém link inválido: ```ldif\n{data['url']}```")
 
-        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
         if not guild_data["player_controller"]["channel"] or not self.bot.get_channel(int(guild_data["player_controller"]["channel"])):
             raise GenericError("**Não há player configurado no servidor! Use o comando /setup**")
@@ -236,7 +237,7 @@ class PinManager(commands.Cog):
 
         guild_data["player_controller"]["fav_links"].update(json_data)
 
-        await self.bot.db.update_data(inter.guild.id, guild_data, db_name="guilds")
+        await self.bot.update_data(inter.guild.id, guild_data, db_name=DBModel.guilds)
 
         await inter.edit_original_message(
             embed = disnake.Embed(
@@ -255,7 +256,7 @@ class PinManager(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        guild_data = await self.bot.db.get_data(inter.guild.id, db_name="guilds")
+        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
         if not guild_data["player_controller"]["fav_links"]:
             raise GenericError(f"**Não há músicas/playlists fixadas no servidor..\n"

@@ -2,6 +2,7 @@ from __future__ import annotations
 import disnake
 from disnake.ext import commands
 from typing import TYPE_CHECKING
+from utils.db import DBModel
 from utils.music.converters import URL_REG, fav_list
 from utils.music.errors import GenericError
 from io import BytesIO
@@ -47,7 +48,7 @@ class FavManager(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
+        user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
         if len(user_data["fav_links"]) > (max_favs:=self.bot.config["MAX_USER_FAVS"]) and not \
                 (await self.bot.is_owner(inter.author)):
@@ -60,7 +61,7 @@ class FavManager(commands.Cog):
 
         user_data["fav_links"][name] = url
 
-        await self.bot.db.update_data(inter.author.id, user_data, db_name="users")
+        await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
 
         await inter.edit_original_message(embed=disnake.Embed(description="**Link salvo/atualizado com sucesso nos seus favoritos!\n"
                          "Ele vai aparecer nas seguintes ocasições:** ```\n"
@@ -93,7 +94,7 @@ class FavManager(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
+        user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
         try:
             if name:
@@ -107,7 +108,7 @@ class FavManager(commands.Cog):
         except KeyError:
             raise GenericError(f"**Não há favorito com o nome:** {item}")
 
-        await self.bot.db.update_data(inter.author.id, user_data, db_name="users")
+        await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
 
         await inter.edit_original_message(embed=disnake.Embed(description="**Favorito editado com sucesso!**", color=self.bot.get_color(inter.guild.me)))
 
@@ -121,14 +122,14 @@ class FavManager(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
+        user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
         try:
             del user_data["fav_links"][item]
         except:
             raise GenericError(f"**Não há favorito com o nome:** {item}")
 
-        await self.bot.db.update_data(inter.author.id, user_data, db_name="users")
+        await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
 
         await inter.edit_original_message(embed=disnake.Embed(description="**Link removido com sucesso!**", color=self.bot.get_color(inter.guild.me)))
 
@@ -138,14 +139,14 @@ class FavManager(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        data = await self.bot.db.get_data(inter.author.id, db_name="users")
+        data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
         if not data["fav_links"]:
             raise GenericError("**Você não possui links favoritos!**")
 
         data["fav_links"].clear()
 
-        await self.bot.db.update_data(inter.author.id, data, db_name="users")
+        await self.bot.update_global_data(inter.author.id, data, db_name=DBModel.users)
 
         embed = disnake.Embed(
             description="Sua lista de favoritos foi limpa com sucesso!",
@@ -166,7 +167,7 @@ class FavManager(commands.Cog):
 
         await inter.response.defer(ephemeral=hidden)
 
-        user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
+        user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
         if not user_data["fav_links"]:
             raise GenericError(f"**Você não possui links favoritos..\n"
@@ -216,7 +217,7 @@ class FavManager(commands.Cog):
             if not isinstance(url, str) or not URL_REG.match(url):
                 raise GenericError(f"O seu arquivo contém link inválido: ```ldif\n{url}```")
 
-        user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
+        user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
         for name in json_data.keys():
             if len(name) > (max_name_chars := self.bot.config["USER_FAV_MAX_NAME_LENGTH"]):
@@ -240,7 +241,7 @@ class FavManager(commands.Cog):
 
         user_data["fav_links"].update(json_data)
 
-        await self.bot.db.update_data(inter.author.id, user_data, db_name="users")
+        await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
 
         await inter.edit_original_message(
             embed = disnake.Embed(
@@ -256,7 +257,7 @@ class FavManager(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        user_data = await self.bot.db.get_data(inter.author.id, db_name="users")
+        user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
         if not user_data["fav_links"]:
             raise GenericError(f"**Você não possui links favoritos..\n"
