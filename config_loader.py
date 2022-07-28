@@ -26,7 +26,6 @@ DEFAULT_CONFIG = {
     "ADDITIONAL_BOT_IDS": "",
     "INVITE_PERMISSIONS": 534735285328,
     "ENABLE_LOGGER": False,
-    "MONGO_DB_INTERNAL_CACHE": True,
 
     ################
     ### Database ###
@@ -156,7 +155,6 @@ def load_config():
         "RUN_LOCAL_LAVALINK",
         "COMMAND_LOG",
         "RUN_RPC_SERVER",
-        "MONGO_DB_INTERNAL_CACHE",
         "AUTO_DOWNLOAD_LAVALINK_SERVERLIST",
 
         "BANS_INTENT",
