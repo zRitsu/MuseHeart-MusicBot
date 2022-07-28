@@ -318,10 +318,14 @@ class BotCore(commands.AutoShardedBot):
         return await self.pool.database.update_data(id_=id_, data=data, db_name=db_name, collection=str(self.user.id))
 
     async def get_global_data(self, id_: int, *, db_name: Union[DBModel.guilds, DBModel.users]):
-        return await self.pool.database.get_data(id_=id_, db_name=db_name, collection="global", default_model=global_db_models)
+        return await self.pool.database.get_data(
+            id_=id_, db_name=db_name, collection="global", default_model=global_db_models
+        )
 
     async def update_global_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users]):
-        return await self.pool.database.update_data(id_=id_, data=data, db_name=db_name, collection="global")
+        return await self.pool.database.update_data(
+            id_=id_, data=data, db_name=db_name, collection="global", default_model=global_db_models
+        )
 
     def check_skin(self, skin: str):
 

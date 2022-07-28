@@ -131,14 +131,17 @@ class LocalDatabase(BaseDB):
         return data
 
     async def update_data(self, id_: int, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users],
-                          collection: str):
+                          collection: str, default_model: dict = None):
+
+        if not default_model:
+            default_model = db_models
 
         id_ = str(id_)
 
         try:
             self.data[collection][db_name][id_] = data
         except KeyError:
-            self.data[collection] = dict(db_models) if collection != "global" else dict(global_db_models)
+            self.data[collection] = dict(default_model)
             self.data[collection][db_name][id_] = data
 
         self.to_update.add(collection)
@@ -200,7 +203,8 @@ class MongoDatabase(BaseDB):
 
         return data
 
-    async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users], collection: str):
+    async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users],
+                          collection: str, default_mode: dict = None):
         return await self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data}, upsert=True)
 
 
