@@ -138,7 +138,7 @@ class LocalDatabase(BaseDB):
         try:
             self.data[collection][db_name][id_] = data
         except KeyError:
-            self.data[collection] = dict(db_models) if db_name != "global" else dict(global_db_models)
+            self.data[collection] = dict(db_models) if collection != "global" else dict(global_db_models)
             self.data[collection][db_name][id_] = data
 
         self.to_update.add(collection)
