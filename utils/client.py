@@ -17,6 +17,7 @@ from .music.errors import GenericError
 from .music.local_lavalink import run_lavalink
 from .music.models import music_mode
 from .music.spotify import spotify_client
+from asyncspotify import Client
 from .owner_panel import PanelView
 from utils.db import MongoDatabase, LocalDatabase, guild_prefix, DBModel, global_db_models
 from asyncspotify import Client as SpotifyClient
@@ -32,6 +33,8 @@ class BotPool:
     def __init__(self):
         self.playlist_cache = {}
         self.database: Union[MongoDatabase, LocalDatabase] = None
+        self.ws_client: Optional[WSClient] = None
+        self.spotify: Optional[Client] = None
         self.config = {}
 
     def load_playlist_cache(self):
@@ -41,6 +44,18 @@ class BotPool:
                 self.playlist_cache = json.load(file)
         except FileNotFoundError:
             return
+
+    async def connect_spotify(self):
+        await self.bots[0].wait_until_ready()  # método temporário para contornar um problema de inicialização
+        await self.spotify.authorize()
+
+    async def connect_rpc_ws(self):
+
+        if not self.config["RUN_RPC_SERVER"] and (
+                not self.config["RPC_SERVER"] or self.config["RPC_SERVER"] == "ws://localhost:8080/ws"):
+            pass
+        else:
+            await self.ws_client.ws_loop()
 
     def setup(self):
 
@@ -106,8 +121,6 @@ class BotPool:
         else:
             self.database = MongoDatabase(token=mongo_key)
 
-        spotify = spotify_client(self.config)
-
         try:
             commit = check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
             print(f"Commit ver: {commit}\n{'-' * 30}")
@@ -128,6 +141,10 @@ class BotPool:
             pass
 
         self.load_playlist_cache()
+
+        self.ws_client = WSClient(self.config["RPC_SERVER"], pool=self)
+
+        self.spotify = spotify_client(self.config)
 
         def load_bot(bot_name: str, token: str, main=False):
 
@@ -150,7 +167,6 @@ class BotPool:
                 sync_commands_debug=True,
                 color=self.config["EMBED_COLOR"],
                 commit=commit,
-                spotify=spotify,
                 remote_git_url=remote_git_url,
                 default_prefix=default_prefix,
                 pool=self
@@ -188,19 +204,7 @@ class BotPool:
                     if music_cog:
                         bot.loop.create_task(music_cog.process_nodes(data=LAVALINK_SERVERS, start_local=start_local))
 
-                    if spotify:
-                        try:
-                            await bot.spotify.authorize()
-                        except Exception:
-                            traceback.print_exc()
-
                     bot.add_view(PanelView(bot))
-
-                    if not self.config["RUN_RPC_SERVER"] and (
-                            not self.config["RPC_SERVER"] or self.config["RPC_SERVER"] == "ws://localhost:8080/ws"):
-                        pass
-                    else:
-                        bot.loop.create_task(bot.ws_client.ws_loop())
 
                     bot.bot_ready = True
 
@@ -248,10 +252,15 @@ class BotPool:
                 loop.create_task(bot.start(bot.token))
                 del bot.token
 
+            loop.create_task(self.connect_rpc_ws())
+            loop.create_task(self.connect_spotify())
+
             start(self.bots)
 
         else:
 
+            loop.create_task(self.connect_rpc_ws())
+            loop.create_task(self.connect_spotify())
             loop.run_until_complete(start_bots())
 
 
@@ -264,9 +273,10 @@ class BotCore(commands.AutoShardedBot):
         self.pool: BotPool = kwargs.pop('pool')
         self.config = self.pool.config
         self.default_prefix = kwargs.pop("default_prefix", "!!!")
-        self.spotify: Optional[SpotifyClient] = kwargs.pop('spotify', None)
+        self.spotify: Optional[SpotifyClient] = self.pool.spotify
         self.music = music_mode(self)
         self.session = aiohttp.ClientSession()
+        self.ws_client = self.pool.ws_client
         self.color = kwargs.pop("embed_color", None)
         self.bot_ready = False
         self.player_skins = {}
@@ -274,7 +284,6 @@ class BotCore(commands.AutoShardedBot):
         self.load_skins()
         self.commit = kwargs.get("commit", "N/A")
         self.remote_git_url = kwargs.get("remote_git_url", "")
-        self.ws_client = WSClient(self.config["RPC_SERVER"], bot=self)
         self.uptime = disnake.utils.utcnow()
         self.env_owner_ids = set()
         self.dm_cooldown = commands.CooldownMapping.from_cooldown(rate=2, per=30, type=commands.BucketType.member)

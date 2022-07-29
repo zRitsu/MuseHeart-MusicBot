@@ -13,7 +13,7 @@ import tornado.websocket
 
 
 if TYPE_CHECKING:
-    from utils.client import BotCore
+    from utils.client import BotPool
 
 
 logging.getLogger('tornado.access').disabled = True
@@ -67,8 +67,8 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.user_ids = []
-        self.bot_id = None
+        self.user_ids: list = []
+        self.bot_ids: list = []
 
     def on_message(self, message):
 
@@ -96,7 +96,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
         if is_bot:
             print(f"Nova conexão - Bot: {ws_id} {self.request.remote_ip}")
-            self.bot_id = ws_id
+            self.bot_ids = ws_id
             bots_ws.append(self)
             return
 
@@ -108,7 +108,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             try:
                 w.write_message(json.dumps(data))
             except Exception as e:
-                print(f"Erro ao processar dados do rpc para o bot {w.bot_id}: {repr(e)}")
+                print(f"Erro ao processar dados do rpc para os bot's {w.bot_ids}: {repr(e)}")
 
         users_ws.append(self)
 
@@ -123,14 +123,14 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             users_ws.remove(self)
             return
 
-        if not self.bot_id:
+        if not self.bot_ids:
             print(f"Conexão Finalizada - IP: {self.request.remote_ip}")
 
         else:
 
-            print(f"Conexão Finalizada - Bot: {self.bot_id}")
+            print(f"Conexão Finalizada - Bot ID's: {self.bot_ids}")
 
-            data = {"op": "close", "bot_id": self.bot_id}
+            data = {"op": "close", "bot_id": self.bot_ids}
 
             for w in users_ws:
                 try:
@@ -143,34 +143,36 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
 class WSClient:
 
-    def __init__(self, url: str, bot: BotCore):
-        self.bot: BotCore = bot
+    def __init__(self, url: str, pool: BotPool):
         self.url: str = url
+        self.pool = pool
         self.connection = None
         self.backoff: int = 7
         self.ready: bool  = False
         self.data: dict = {}
+        self.session: Optional[aiohttp.ClientSession] = None
 
     async def connect(self):
 
         if self.ready:
             return
 
-        await self.bot.wait_until_ready()
+        if not self.session:
+            self.session = aiohttp.ClientSession()
 
-        if not self.bot.session:
-            self.bot.session = aiohttp.ClientSession()
-
-        self.connection = await self.bot.session.ws_connect(self.url, heartbeat=30)
+        self.connection = await self.session.ws_connect(self.url, heartbeat=30)
 
         self.backoff = 7
         #print(f"RPC client conectado: {self.bot.user} - {self.url}")
-        print(f"{self.bot.user} - RPC client conectado")
+        print("RPC client conectado, sincronizando rpc dos bots...")
 
-        await self.send({"user_ids": self.bot.user.id, "bot": True})
+        for bot in self.pool.bots:
 
-        for player in self.bot.music.players.values():
-            self.bot.loop.create_task(player.process_rpc(player.guild.me.voice.channel))
+            await bot.wait_until_ready()
+
+        await self.send({"user_ids": [b.user.id for b in self.pool.bots], "bot": True})
+
+        print("RPC client - Os dados de rpc dos bots foram sincronizados com sucesso.")
 
         self.ready = True
 
@@ -201,9 +203,9 @@ class WSClient:
 
             except Exception as e:
                 if isinstance(e, aiohttp.WSServerHandshakeError):
-                    print(f"{self.bot.user} - Servidor offline, tentando conectar novamente ao server RPC em {int(self.backoff)} segundos.")
+                    print(f"Falha ao conectar no servidor RPC, tentando novamente em {int(self.backoff)} segundo(s).")
                 else:
-                    print(f"{self.bot.user} - Reconectando no servidor RPC em {int(self.backoff)} segundos.")
+                    print(f"Conexão com servidor RPC perdida - Reconectando em {int(self.backoff)} segundo(s).")
 
                 self.ready = False
                 await asyncio.sleep(self.backoff)
@@ -213,7 +215,7 @@ class WSClient:
             message = await self.connection.receive()
 
             if message.type is aiohttp.WSMsgType.CLOSED:
-                print(f"{self.bot.user} - RPC Websocket Closed: {message.extra}")
+                print(f"RPC Websocket Closed: {message.extra}\nReconnecting in {self.backoff}s")
                 self.ready = False
                 await asyncio.sleep(self.backoff)
                 continue
@@ -229,13 +231,14 @@ class WSClient:
 
             if op == "rpc_update":
 
-                for player in self.bot.music.players.values():
-                    vc: disnake.VoiceChannel = player.bot.get_channel(player.channel_id)
-                    vc_user_ids = [m.id for m in vc.members if m.id in users]
-                    if vc_user_ids:
-                        self.bot.loop.create_task(player.process_rpc(vc))
-                        for i in vc_user_ids:
-                            users.remove(i)
+                for bot in self.pool.bots:
+                    for player in bot.music.players.values():
+                        vc: disnake.VoiceChannel = player.bot.get_channel(player.channel_id)
+                        vc_user_ids = [i for i in vc.voice_states if i in users]
+                        if vc_user_ids:
+                            bot.loop.create_task(player.process_rpc(vc))
+                            for i in vc_user_ids:
+                                users.remove(i)
 
 
 def run_app(bots: Optional[list] = None, ws_url = f"http://0.0.0.0:{environ.get('PORT', 8080)}/ws"):

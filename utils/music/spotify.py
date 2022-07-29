@@ -6,7 +6,7 @@ from wavelink import Node
 import traceback
 from .errors import MissingSpotifyClient, GenericError
 from asyncspotify import Client, ClientCredentialsFlow
-from typing import Optional, TYPE_CHECKING, Union
+from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from utils.client import BotCore
