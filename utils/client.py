@@ -32,6 +32,7 @@ class BotPool:
     def __init__(self):
         self.playlist_cache = {}
         self.database: Union[MongoDatabase, LocalDatabase] = None
+        self.config = {}
 
     def load_playlist_cache(self):
 
@@ -43,12 +44,12 @@ class BotPool:
 
     def setup(self):
 
-        CONFIGS = load_config()
+        self.config = load_config()
 
-        if not CONFIGS["DEFAULT_PREFIX"]:
-            CONFIGS["DEFAULT_PREFIX"] = "!!!"
+        if not self.config["DEFAULT_PREFIX"]:
+            self.config["DEFAULT_PREFIX"] = "!!!"
 
-        if CONFIGS['ENABLE_LOGGER']:
+        if self.config['ENABLE_LOGGER']:
 
             if not os.path.isdir("./.logs"):
                 os.makedirs("./.logs")
@@ -61,14 +62,14 @@ class BotPool:
 
         LAVALINK_SERVERS = {}
 
-        if CONFIGS["AUTO_DOWNLOAD_LAVALINK_SERVERLIST"]:
+        if self.config["AUTO_DOWNLOAD_LAVALINK_SERVERLIST"]:
             print("Baixando lista de servidores lavalink (arquivo: lavalink.ini)")
-            r = requests.get(CONFIGS["LAVALINK_SERVER_LIST"], allow_redirects=True)
+            r = requests.get(self.config["LAVALINK_SERVER_LIST"], allow_redirects=True)
             with open("lavalink.ini", 'wb') as f:
                 f.write(r.content)
             r.close()
 
-        for key, value in CONFIGS.items():
+        for key, value in self.config.items():
 
             if key.lower().startswith("lavalink_node_"):
                 try:
@@ -90,14 +91,14 @@ class BotPool:
                 value["search"] = value.get("search") != "false"
                 LAVALINK_SERVERS[key] = value
 
-        if start_local := (CONFIGS['RUN_LOCAL_LAVALINK'] is True or not LAVALINK_SERVERS):
+        if start_local := (self.config['RUN_LOCAL_LAVALINK'] is True or not LAVALINK_SERVERS):
             pass
         else:
             start_local = False
 
-        intents = disnake.Intents(**{i[:-7].lower(): v for i, v in CONFIGS.items() if i.lower().endswith("_intent")})
+        intents = disnake.Intents(**{i[:-7].lower(): v for i, v in self.config.items() if i.lower().endswith("_intent")})
 
-        mongo_key = CONFIGS.get("MONGO")
+        mongo_key = self.config.get("MONGO")
 
         if not mongo_key:
             print(f"O token/link do mongoDB não foi configurado...\nSerá usado um arquivo json para database.\n{'-' * 30}")
@@ -105,7 +106,7 @@ class BotPool:
         else:
             self.database = MongoDatabase(token=mongo_key)
 
-        spotify = spotify_client(CONFIGS)
+        spotify = spotify_client(self.config)
 
         try:
             commit = check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
@@ -133,10 +134,10 @@ class BotPool:
             try:
                 token, default_prefix = token.split()
             except:
-                default_prefix = CONFIGS["DEFAULT_PREFIX"]
+                default_prefix = self.config["DEFAULT_PREFIX"]
 
             try:
-                test_guilds = list([int(i) for i in CONFIGS[f"TEST_GUILDS_{bot_name}"].split("||")])
+                test_guilds = list([int(i) for i in self.config[f"TEST_GUILDS_{bot_name}"].split("||")])
             except:
                 test_guilds = None
 
@@ -145,10 +146,9 @@ class BotPool:
                 case_insensitive=True,
                 intents=intents,
                 test_guilds=test_guilds,
-                sync_commands=CONFIGS["AUTO_SYNC_COMMANDS"] is True,
+                sync_commands=self.config["AUTO_SYNC_COMMANDS"] is True,
                 sync_commands_debug=True,
-                config=CONFIGS,
-                color=CONFIGS["EMBED_COLOR"],
+                color=self.config["EMBED_COLOR"],
                 commit=commit,
                 spotify=spotify,
                 remote_git_url=remote_git_url,
@@ -196,8 +196,8 @@ class BotPool:
 
                     bot.add_view(PanelView(bot))
 
-                    if not CONFIGS["RUN_RPC_SERVER"] and (
-                            not CONFIGS["RPC_SERVER"] or CONFIGS["RPC_SERVER"] == "ws://localhost:8080/ws"):
+                    if not self.config["RUN_RPC_SERVER"] and (
+                            not self.config["RPC_SERVER"] or self.config["RPC_SERVER"] == "ws://localhost:8080/ws"):
                         pass
                     else:
                         bot.loop.create_task(bot.ws_client.ws_loop())
@@ -208,12 +208,12 @@ class BotPool:
 
             self.bots.append(bot)
 
-        main_token = CONFIGS.get("TOKEN")
+        main_token = self.config.get("TOKEN")
 
         if main_token:
             load_bot("Main Bot", main_token, main=True)
 
-        for k, v in CONFIGS.items():
+        for k, v in self.config.items():
 
             if not k.lower().startswith("token_bot_"):
                 continue
@@ -227,10 +227,10 @@ class BotPool:
 
         if start_local:
             run_lavalink(
-                lavalink_file_url=CONFIGS['LAVALINK_FILE_URL'],
-                lavalink_initial_ram=CONFIGS['LAVALINK_INITIAL_RAM'],
-                lavalink_ram_limit=CONFIGS['LAVALINK_RAM_LIMIT'],
-                lavalink_additional_sleep=int(CONFIGS['LAVALINK_ADDITIONAL_SLEEP']),
+                lavalink_file_url=self.config['LAVALINK_FILE_URL'],
+                lavalink_initial_ram=self.config['LAVALINK_INITIAL_RAM'],
+                lavalink_ram_limit=self.config['LAVALINK_RAM_LIMIT'],
+                lavalink_additional_sleep=int(self.config['LAVALINK_ADDITIONAL_SLEEP']),
             )
 
         async def start_bots():
@@ -242,7 +242,7 @@ class BotPool:
 
         self.database.start_task(loop)
 
-        if CONFIGS["RUN_RPC_SERVER"]:
+        if self.config["RUN_RPC_SERVER"]:
 
             for bot in self.bots:
                 loop.create_task(bot.start(bot.token))
@@ -261,7 +261,8 @@ class BotCore(commands.AutoShardedBot):
         super().__init__(*args, **kwargs)
         self.session: Optional[aiohttp.ClientError] = None
         self.db: Union[LocalDatabase, MongoDatabase] = None
-        self.config = kwargs.pop('config', {})
+        self.pool: BotPool = kwargs.pop('pool')
+        self.config = self.pool.config
         self.default_prefix = kwargs.pop("default_prefix", "!!!")
         self.spotify: Optional[SpotifyClient] = kwargs.pop('spotify', None)
         self.music = music_mode(self)
@@ -277,7 +278,6 @@ class BotCore(commands.AutoShardedBot):
         self.uptime = disnake.utils.utcnow()
         self.env_owner_ids = set()
         self.dm_cooldown = commands.CooldownMapping.from_cooldown(rate=2, per=30, type=commands.BucketType.member)
-        self.pool: BotPool = kwargs.pop('pool')
 
         for i in self.config["OWNER_IDS"].split("||"):
 
