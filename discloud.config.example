@@ -1,0 +1,7 @@
+ID=1234567890
+TYPE=bot
+MAIN=main.py
+RAM=100
+AUTORESTART=false
+VERSION=latest
+APT=git,java
