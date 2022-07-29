@@ -47,7 +47,8 @@ class BotPool:
 
     async def connect_spotify(self):
         await self.bots[0].wait_until_ready()  # método temporário para contornar um problema de inicialização
-        await self.spotify.authorize()
+        if self.spotify:
+            await self.spotify.authorize()
 
     async def connect_rpc_ws(self):
 
