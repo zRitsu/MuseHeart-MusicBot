@@ -1,5 +1,4 @@
 import asyncio
-import chardet
 import os
 import shutil
 import json
@@ -62,10 +61,9 @@ async def run_command(cmd: str):
 class ShellResult:
 
     def __init__(self, status: int, stdout: Optional[bytes], stderr: Optional[bytes]):
-        encoding = chardet.detect(stdout or stderr)['encoding'] or "utf-8"
         self.status = status
-        self.stdout = stdout.decode(encoding=encoding) if stdout is not None else None
-        self.stderr = stderr.decode(encoding=encoding) if stderr is not None else None
+        self.stdout = stdout.decode(encoding="ascii") if stdout is not None else None
+        self.stderr = stderr.decode(encoding="ascii") if stderr is not None else None
 
 
 class Owner(commands.Cog):

@@ -9,5 +9,4 @@ tornado
 motor
 dnspython
 psutil
-chardet
 aiofiles
