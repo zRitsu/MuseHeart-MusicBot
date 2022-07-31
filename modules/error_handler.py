@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 class ErrorHandler(commands.Cog):
-    
+
     def __init__(self, bot: BotCore):
         self.bot = bot
         self.components = []
@@ -34,12 +34,10 @@ class ErrorHandler(commands.Cog):
                 )
             )
 
-
     @commands.Cog.listener('on_interaction_player_error')
     async def on_inter_player_error(self, inter: disnake.AppCmdInter, error: Exception):
 
         await self.process_interaction_error(inter=inter, error=error)
-
 
     """@commands.Cog.listener('on_user_command_completion')
     @commands.Cog.listener('on_message_command_completion')
@@ -60,14 +58,12 @@ class ErrorHandler(commands.Cog):
         except:
             pass"""
 
-
     @commands.Cog.listener('on_user_command_error')
     @commands.Cog.listener('on_message_command_error')
     @commands.Cog.listener('on_slash_command_error')
     async def on_interaction_command_error(self, inter: disnake.AppCmdInter, error: Exception):
 
         await self.process_interaction_error(inter=inter, error=error)
-
 
     async def process_interaction_error(self, inter: disnake.AppCmdInter, error: Exception):
 
@@ -77,20 +73,37 @@ class ErrorHandler(commands.Cog):
             except:
                 pass"""
 
-        embed = disnake.Embed(color=disnake.Colour.red())
-
         error_msg = parse_error(inter, error)
 
-        if not error_msg:
-            components = self.components
-            embed.title = "Ocorreu um erro no comando:"
-            embed.description = f"```py\n{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
+        kwargs = {}
+
+        if inter.guild.me.guild_permissions.embed_links:
+
+            kwargs["embed"] = disnake.Embed(color=disnake.Colour.red())
+            kwargs["text"] = inter.author.mention
+
+            if not error_msg:
+                components = self.components
+                kwargs["embed"].title = "Ocorreu um erro no comando:"
+                kwargs["embed"].description = f"```py\n{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
+
+            else:
+                components = None
+                kwargs["embed"].description = error_msg
 
         else:
-            components = None
-            embed.description = error_msg
 
-        await send_message(inter, text=inter.author.mention, embed=embed, components=components)
+            kwargs["text"] = inter.author.mention
+
+            if not error_msg:
+                components = self.components
+                kwargs["text"] += " ocorreu um erro no comando: ```py\n" \
+                                  f"{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
+            else:
+                components = None
+                kwargs["text"] += f": {error}"
+
+        await send_message(inter, components=components, **kwargs)
 
     @commands.Cog.listener("on_command_error")
     async def on_legacy_command_error(self, ctx: CustomContext, error: Exception):
@@ -101,21 +114,38 @@ class ErrorHandler(commands.Cog):
             except:
                 pass"""
 
-        embed = disnake.Embed(color=disnake.Colour.red())
-
         if isinstance(error, commands.CommandNotFound):
             return
 
         error_msg = parse_error(ctx, error)
 
-        if not error_msg:
-            components = self.components
-            embed.title = "Ocorreu um erro no comando:"
-            embed.description = f"```py\n{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
+        kwargs = {}
+
+        if ctx.guild.me.guild_permissions.embed_links:
+
+            kwargs["embed"] = disnake.Embed(color=disnake.Colour.red())
+            kwargs["content"] = ctx.author.mention
+
+            if not error_msg:
+                components = self.components
+                kwargs["embed"].title = "Ocorreu um erro no comando:"
+                kwargs["embed"].description = f"```py\n{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
+
+            else:
+                components = None
+                kwargs["embed"].description = error_msg
 
         else:
-            components = None
-            embed.description = error_msg
+
+            kwargs["content"] = ctx.author.mention
+
+            if not error_msg:
+                components = self.components
+                kwargs["content"] += " ocorreu um erro no comando: ```py\n" \
+                                  f"{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
+            else:
+                components = None
+                kwargs["content"] += f": {error}"
 
         try:
             delete_time = error.delete_original
@@ -128,8 +158,7 @@ class ErrorHandler(commands.Cog):
         except:
             pass
 
-        await ctx.send(ctx.author.mention, embed=embed, components=components, delete_after=delete_time)
-
+        await ctx.send(components=components, delete_after=delete_time, **kwargs)
 
     @commands.Cog.listener("on_button_click")
     async def on_error_report(self, inter: disnake.MessageInteraction):
@@ -162,7 +191,6 @@ class ErrorHandler(commands.Cog):
             ]
         )
 
-
     @commands.Cog.listener("on_modal_submit")
     async def on_report_submit(self, inter: disnake.ModalInteraction):
 
@@ -181,7 +209,6 @@ class ErrorHandler(commands.Cog):
         image_url = inter.text_values["image_url"]
 
         if image_url and not URL_REG.match(image_url):
-
             await inter.send(
                 embed=disnake.Embed(
                     title="Link de imagem inválida!",
