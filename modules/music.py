@@ -182,9 +182,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         async with ctx.typing():
             async with aiohttp.ClientSession() as session:
                 async with session.get(url) as r:
-                    playlist_cache = await r.read()
-                    with open("./playlist_cache.json", "wb") as f:
-                        f.write(playlist_cache)
+                    self.bot.pool.playlist_cache.update(json.loads((await r.read()).decode('utf-8')))
 
         await self.update_cache()
 
