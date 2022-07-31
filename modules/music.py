@@ -61,7 +61,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
     async def update_cache(self):
 
-        async with aiofiles.open(f"./playlist_cache.json", "w") as f:
+        async with aiofiles.open("./playlist_cache.json", "w") as f:
             await f.write(json.dumps(self.bot.pool.playlist_cache))
 
     @commands.is_owner()
