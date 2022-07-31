@@ -218,7 +218,19 @@ class Owner(commands.Cog):
     async def update_deps(self, ctx, original_reqs, opts):
 
         if "--pip" in opts:
+
+            embed = disnake.Embed(
+                description="**Instalando as dependências.\nPor favor aguarde...**",
+                color=self.bot.get_color(ctx.guild.me)
+            )
+
+            msg = await ctx.channel.send(embed=embed)
+
             await run_command("pip3 install -U -r requirements.txt")
+
+            embed.description = "**As dependências foram instaladas com sucesso!**"
+
+            await msg.edit(embed=embed)
 
         else:
 
@@ -227,36 +239,26 @@ class Owner(commands.Cog):
 
             if original_reqs != requirements_new:
 
-                view = AskView(timeout=45, ctx=ctx)
+                txt = ""
 
-                embed = disnake.Embed(
-                    description="**Será necessário atualizar as dependências, escolha sim para instalar.**\n\n"
-                                "Nota: Caso não tenha no mínimo 150mb de ram livre, escolha **Não**, mas dependendo "
-                                "da hospedagem você deverá usar o comando abaixo: ```sh\npip3 install -U -r requirements.txt``` "
-                                "(ou apenas upar o arquivo requirements.txt)",
-                    color=self.bot.get_color(ctx.guild.me)
+                if venv:=os.getenv("VIRTUAL_ENV"):
+                    if os.name == "nt":
+                        txt += "call " + venv.split('\\')[-1] + " && "
+                    else:
+                        txt += ". ./" + venv.split('/')[-1] + " && "
+
+                await ctx.send(
+                    embed=disnake.Embed(
+                        description="**Será necessário atualizar as dependências usando o comando "
+                                    "abaixo no terminal/shell:**\n"
+                                    f"```sh\n{txt}pip3 install -U -r requirements.txt```\n"
+                                    f"ou usar usar o comando: ```\n{disnake.utils.escape_mentions(ctx.invoked_with)} "
+                                    f"update --force --pip``` \n"
+                                    f"**Nota:** Dependendo da hospedagem (ou que não tenha 150mb de RAM livre) você "
+                                    f"deve enviar o arquivo requirements.txt ao invés de usar uma das opções acima.",
+                        color=self.bot.get_color(ctx.guild.me)
+                    )
                 )
-
-                try:
-                    await ctx.edit_original_message(embed=embed, view=view)
-                    msg = None
-                except AttributeError:
-                    msg = await ctx.send(embed=embed, view=view)
-
-                await view.wait()
-
-                if view.selected:
-                    embed.description = "**Instalando dependências...**"
-                    await view.interaction_resp.response.edit_message(embed=embed, view=None)
-                    await run_command("pip3 install -U -r requirements.txt")
-
-                try:
-                    await msg.delete()
-                except:
-                    try:
-                        await (await view.interaction_resp.original_message()).delete()
-                    except:
-                        pass
 
     async def cleanup_git(self, force=False):
 
