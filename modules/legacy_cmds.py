@@ -252,7 +252,7 @@ class Owner(commands.Cog):
                         description="**Será necessário atualizar as dependências usando o comando "
                                     "abaixo no terminal/shell:**\n"
                                     f"```sh\n{txt}pip3 install -U -r requirements.txt```\n"
-                                    f"ou usar usar o comando: ```\n{disnake.utils.escape_mentions(ctx.invoked_with)} "
+                                    f"ou usar usar o comando: ```\n{disnake.utils.escape_mentions(ctx.prefix)}{ctx.invoked_with} "
                                     f"update --force --pip``` \n"
                                     f"**Nota:** Dependendo da hospedagem (ou que não tenha 150mb de RAM livre) você "
                                     f"deve enviar o arquivo requirements.txt ao invés de usar uma das opções acima.",
