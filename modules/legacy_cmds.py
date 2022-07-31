@@ -55,7 +55,7 @@ async def run_command(cmd: str):
     r = ShellResult(p.returncode, stdout, stderr)
     if r.status != 0:
         raise GenericError(f"{r.stderr or r.stdout}\n\nStatus Code: {r.status}")
-    return str(r.stdout) + f"\n\nStatus Code: {r.status}"
+    return str(r.stdout)
 
 
 class ShellResult:
@@ -200,7 +200,7 @@ class Owner(commands.Cog):
         if git_log:
             txt += f"\n\n{self.format_log(git_log[:10])}"
 
-        txt += f"\n\n`📄` **Log:** ```py\n{out_git[:1000]}```\n{text}"
+        txt += f"\n\n`📄` **Log:** ```py{out_git[:1000]}```\n{text}"
 
         if isinstance(ctx, CustomContext):
             embed = disnake.Embed(
@@ -274,7 +274,7 @@ class Owner(commands.Cog):
             except Exception as e:
                 out_git += f"{e}\n"
 
-        self.bot.commit = await run_command("git rev-parse --short HEAD")
+        self.bot.commit = await run_command("git rev-parse HEAD")
         self.bot.remote_git_url = self.bot.config["SOURCE_REPO"][:-4]
 
         return out_git

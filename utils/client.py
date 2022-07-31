@@ -288,7 +288,7 @@ class BotCore(commands.AutoShardedBot):
         self.player_skins = {}
         self.default_skin = self.config.get("DEFAULT_SKIN", "default")
         self.load_skins()
-        self.commit = kwargs.get("commit", "N/A")
+        self.commit = kwargs.get("commit")
         self.remote_git_url = kwargs.get("remote_git_url", "")
         self.uptime = disnake.utils.utcnow()
         self.env_owner_ids = set()

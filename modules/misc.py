@@ -132,7 +132,7 @@ class Misc(commands.Cog):
             embed.description += f"> **Players ativos:** `{len(self.bot.music.players)}`\n"
 
         if self.bot.commit:
-            embed.description += f"> **Commit atual:** [`{self.bot.commit}`]({self.bot.remote_git_url}/commit/{self.bot.commit})\n"
+            embed.description += f"> **Commit atual:** [`{self.bot.commit[:7]}`]({self.bot.remote_git_url}/commit/{self.bot.commit})\n"
 
         embed.description += f"> **Versão do Python:** `{platform.python_version()}`\n"\
                              f"> **Versão do Disnake:** `{disnake.__version__}`\n" \
