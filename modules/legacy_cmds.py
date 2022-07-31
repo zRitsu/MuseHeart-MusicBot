@@ -62,8 +62,8 @@ class ShellResult:
 
     def __init__(self, status: int, stdout: Optional[bytes], stderr: Optional[bytes]):
         self.status = status
-        self.stdout = stdout.decode(encoding="ascii") if stdout is not None else None
-        self.stderr = stderr.decode(encoding="ascii") if stderr is not None else None
+        self.stdout = stdout.decode(encoding="utf-8", errors="replace") if stdout is not None else None
+        self.stderr = stderr.decode(encoding="utf-8", errors="replace") if stderr is not None else None
 
 
 class Owner(commands.Cog):
