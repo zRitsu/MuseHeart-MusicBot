@@ -437,6 +437,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                                  source="ytsearch", repeat_amount=0, hide_playlist=False, server=None)
 
     @check_voice()
+    @commands.bot_has_guild_permissions(embed_links=True)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.slash_command(name="play", description=f"{desc_prefix}Tocar música em um canal de voz.")
     async def play(
@@ -652,6 +653,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     guild_data['player_controller']['message_id'] = str(message.id)
                     await self.bot.update_data(inter.guild.id, guild_data, db_name=DBModel.guilds)
                 player.message = message
+
+        if not channel.permissions_for(inter.guild.me).embed_links:
+            raise GenericError(f"**Não tenho permissão de inserir links no canal: {channel.mention}**")
 
         pos_txt = ""
 
