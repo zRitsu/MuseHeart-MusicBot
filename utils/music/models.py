@@ -699,6 +699,16 @@ class LavalinkPlayer(wavelink.Player):
 
         self.is_closing = True
 
+        try:
+            await self.guild.voice_client.disconnect(force=True)
+        except:
+            pass
+
+        try:
+            self.guild.voice_client.cleanup()
+        except:
+            pass
+
         await super().destroy(force=force)
 
         self.bot.dispatch("player_destroy", player=self)

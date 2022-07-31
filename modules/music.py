@@ -2915,7 +2915,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 4000,  # internal error
                 1006,
                 1001,
-                4005  # Already authenticated.
+                #4016,  # Connection started elsewhere
+                4005   # Already authenticated.
         ):
             await asyncio.sleep(3)
 
