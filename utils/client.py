@@ -175,6 +175,8 @@ class BotPool:
 
             bot.token = token
 
+            bot.load_extension("jishaku")
+            bot.get_command("jsk").hidden = True
             bot.load_modules(bot_name)
 
             if bot.config['INTERACTION_COMMAND_ONLY']:
