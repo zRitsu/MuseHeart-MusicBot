@@ -129,7 +129,18 @@ class Misc(commands.Cog):
         )
 
         if self.bot.music.players:
-            embed.description += f"> **Players ativos:** `{len(self.bot.music.players)}`\n"
+            embed.description += f"> **Players ativos (bot atual):** `{len(self.bot.music.players)}`\n"
+
+        active_players_other_bots = 0
+
+        for bot in self.bot.pool.bots:
+            if bot.user.id == self.bot.user.id:
+                continue
+            for player in bot.music.players:
+                active_players_other_bots += 1
+
+        if active_players_other_bots:
+            embed.description += f"> **Players ativos (outros bots):** `{active_players_other_bots}`\n"
 
         if self.bot.commit:
             embed.description += f"> **Commit atual:** [`{self.bot.commit[:7]}`]({self.bot.remote_git_url}/commit/{self.bot.commit})\n"
@@ -150,7 +161,7 @@ class Misc(commands.Cog):
         prefix = guild_data["prefix"] or self.bot.default_prefix
 
         if self.bot.default_prefix and not self.bot.config["INTERACTION_COMMAND_ONLY"]:
-            embed.description += f"> **Prefixo:** `{disnake.utils.escape_markdown(prefix)}`\n"
+            embed.description += f"> **Prefixo:** `{disnake.utils.escape_markdown(prefix, as_needed=True)}`\n"
 
         links = "[`[Source]`](https://github.com/zRitsu/disnake-LL-music-bot)"
 
