@@ -126,7 +126,7 @@ class BotPool:
             self.database = MongoDatabase(token=mongo_key)
 
         try:
-            commit = check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+            commit = check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
             print(f"Commit ver: {commit}\n{'-' * 30}")
         except:
             commit = None
