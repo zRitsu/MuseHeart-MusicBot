@@ -489,8 +489,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         except (KeyError, TypeError):
             channel = inter.channel
 
-        if not channel.permissions_for(inter.guild.me).send_messages:
-            raise GenericError(f"Não tenho permissão para enviar mensagens no canal: {channel.mention}")
+        try:
+            if not channel.permissions_for(inter.guild.me).send_messages:
+                raise GenericError(f"Não tenho permissão para enviar mensagens no canal: {channel.mention}")
+        except AttributeError:
+            pass
 
         is_pin = None
 
