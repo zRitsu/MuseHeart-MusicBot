@@ -644,6 +644,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             if not channel:
                 await self.reset_controller_db(inter.guild_id, guild_data, inter=inter)
+                channel = inter.channel
 
             else:
                 try:
