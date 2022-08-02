@@ -30,9 +30,16 @@ def run_lavalink(
 
     java_cmd = "java"
 
-    if not shutil.which("java"):
-        download_java = True
-        
+    if not shutil.which(java_cmd):
+        try:
+            if not os.path.isdir("./.java/jdk-13/bin"):
+                java_cmd = os.path.join(os.environ["JAVA_HOME"] + "bin/java")
+                if not shutil.which(java_cmd):
+                    download_java = True
+            else:
+                java_cmd = "./.java/jdk-13/bin/java"
+        except:
+            download_java = True
     else:
         try:
             java_info = subprocess.check_output(f'java -version', shell=True, stderr=subprocess.STDOUT)
