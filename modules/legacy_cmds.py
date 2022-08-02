@@ -79,7 +79,7 @@ class Owner(commands.Cog):
         self.owner_view: Optional[PanelView] = None
 
     def format_log(self, data: list):
-        return "\n".join(f"[`{c['abbreviated_commit']}`]({self.bot.remote_git_url}/commit/{c['commit']}) `- "
+        return "\n".join(f"[`{c['abbreviated_commit']}`]({self.bot.pool.remote_git_url}/commit/{c['commit']}) `- "
                          f"{(c['subject'][:40].replace('`', '') + '...') if len(c['subject']) > 39 else c['subject']}` "
                          f"(<t:{c['timestamp']}:R>)" for c in data)
 
@@ -200,7 +200,7 @@ class Owner(commands.Cog):
 
         text = "`Será necessário me reiniciar após as alterações.`"
 
-        txt = f"`✅` **[Atualização realizada com sucesso!]({self.bot.remote_git_url}/commits/main)**"
+        txt = f"`✅` **[Atualização realizada com sucesso!]({self.bot.pool.remote_git_url}/commits/main)**"
 
         if git_log:
             txt += f"\n\n{self.format_log(git_log[:10])}"
@@ -281,8 +281,8 @@ class Owner(commands.Cog):
             except Exception as e:
                 out_git += f"{e}\n"
 
-        self.bot.commit = await run_command("git rev-parse HEAD")
-        self.bot.remote_git_url = self.bot.config["SOURCE_REPO"][:-4]
+        self.bot.pool.commit = await run_command("git rev-parse HEAD")
+        self.bot.pool.remote_git_url = self.bot.config["SOURCE_REPO"][:-4]
 
         return out_git
 
@@ -294,8 +294,8 @@ class Owner(commands.Cog):
         if not os.path.isdir("./.git"):
             raise GenericError("Não há repositorio iniciado no diretório do bot...\nNota: Use o comando update.")
 
-        if not self.bot.remote_git_url:
-            self.bot.remote_git_url = self.bot.config["SOURCE_REPO"][:-4]
+        if not self.bot.pool.remote_git_url:
+            self.bot.pool.remote_git_url = self.bot.config["SOURCE_REPO"][:-4]
 
         git_log = []
 
@@ -303,7 +303,7 @@ class Owner(commands.Cog):
 
         git_log += format_git_log(data)
 
-        txt = f"🔰 ** | [Atualizações recentes:]({self.bot.remote_git_url}/commits/main)**\n\n" + self.format_log(
+        txt = f"🔰 ** | [Atualizações recentes:]({self.bot.pool.remote_git_url}/commits/main)**\n\n" + self.format_log(
             git_log)
 
         if isinstance(ctx, CustomContext):

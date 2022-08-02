@@ -36,6 +36,8 @@ class BotPool:
         self.ws_client: Optional[WSClient] = None
         self.spotify: Optional[Client] = None
         self.config = {}
+        self.commit = ""
+        self.remote_git_url = ""
 
     def load_playlist_cache(self):
 
@@ -126,16 +128,16 @@ class BotPool:
             self.database = MongoDatabase(token=mongo_key)
 
         try:
-            commit = check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
-            print(f"Commit ver: {commit}\n{'-' * 30}")
+            self.commit = check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
+            print(f"Commit ver: {self.commit}\n{'-' * 30}")
         except:
-            commit = None
+            self.commit = None
 
         try:
-            remote_git_url = check_output(['git', 'remote', '-v']).decode(
+            self.remote_git_url = check_output(['git', 'remote', '-v']).decode(
                 'ascii').strip().split("\n")[0][7:].replace(".git", "").replace(" (fetch)", "")
         except:
-            remote_git_url = ""
+            self.remote_git_url = ""
 
         prefix = guild_prefix if intents.message_content else commands.when_mentioned
 
@@ -170,8 +172,6 @@ class BotPool:
                 sync_commands=self.config["AUTO_SYNC_COMMANDS"] is True,
                 sync_commands_debug=True,
                 color=self.config["EMBED_COLOR"],
-                commit=commit,
-                remote_git_url=remote_git_url,
                 default_prefix=default_prefix,
                 pool=self
             )
@@ -288,8 +288,6 @@ class BotCore(commands.AutoShardedBot):
         self.player_skins = {}
         self.default_skin = self.config.get("DEFAULT_SKIN", "default")
         self.load_skins()
-        self.commit = kwargs.get("commit")
-        self.remote_git_url = kwargs.get("remote_git_url", "")
         self.uptime = disnake.utils.utcnow()
         self.env_owner_ids = set()
         self.dm_cooldown = commands.CooldownMapping.from_cooldown(rate=2, per=30, type=commands.BucketType.member)

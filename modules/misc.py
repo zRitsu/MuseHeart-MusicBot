@@ -142,8 +142,8 @@ class Misc(commands.Cog):
         if active_players_other_bots:
             embed.description += f"> **Players ativos (outros bots):** `{active_players_other_bots}`\n"
 
-        if self.bot.commit:
-            embed.description += f"> **Commit atual:** [`{self.bot.commit[:7]}`]({self.bot.remote_git_url}/commit/{self.bot.commit})\n"
+        if self.bot.pool.commit:
+            embed.description += f"> **Commit atual:** [`{self.bot.pool.commit[:7]}`]({self.bot.pool.remote_git_url}/commit/{self.bot.pool.commit})\n"
 
         embed.description += f"> **Versão do Python:** `{platform.python_version()}`\n"\
                              f"> **Versão do Disnake:** `{disnake.__version__}`\n" \
