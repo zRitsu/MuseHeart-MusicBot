@@ -82,6 +82,9 @@ class SpotifyTrack:
                 "url": playlist["url"]
             }
 
+    def __repr__(self):
+        return f"{self.info['sourceName']} - {self.duration} - {self.authors_string} - {self.title}"
+
     @property
     def album_name(self) -> str:
         try:

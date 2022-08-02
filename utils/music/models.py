@@ -43,6 +43,11 @@ class LavalinkTrack(wavelink.Track):
                 "url": playlist["url"]
             }
 
+        try:
+            self.info['sourceName']
+        except:
+            self.info['sourceName'] = 'LavalinkTrack'
+
         if self.ytid:
             self.info["extra"]["thumb"] = f"https://img.youtube.com/vi/{self.ytid}/mqdefault.jpg"
         elif "soundcloud.com" in self.uri:
@@ -52,12 +57,15 @@ class LavalinkTrack(wavelink.Track):
 
         self.thumb = self.info["extra"]["thumb"]
 
-        if self.info.get("sourceName") == "youtube" and "list=" not in self.uri and self.playlist_url:
+        if self.info["sourceName"] == "youtube" and "list=" not in self.uri and self.playlist_url:
             try:
                 self.uri = f"{self.uri}&list={parse.parse_qs(parse.urlparse(self.playlist_url).query)['list'][0]}"
                 self.info["uri"] = self.uri
             except KeyError:
                 pass
+
+    def __repr__(self):
+        return f"{self.info['sourceName']} - {self.duration if not self.is_stream else 'stream'} - {self.authors_string} - {self.title}"
 
     @property
     def playlist_name(self) -> str:
