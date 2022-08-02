@@ -1,6 +1,6 @@
 #!/bin/bash
 
-[ -z "$IS_SOURCE" ] || { python3 preview.py; kill "$PPID"; exit 1; }
+[ -z "$VIDEO_PREVIEW" ] || { python3 preview.py; kill "$PPID"; exit 1; }
 
 if [ ! -d "venv" ] || [ ! -f "./venv/.deployed" ]; then
   bash quick_update.sh
