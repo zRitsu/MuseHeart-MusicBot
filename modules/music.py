@@ -334,7 +334,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not channel:
             channel: Union[disnake.VoiceChannel, disnake.StageChannel] = ctx.author.voice.channel
 
-        if not ctx.guild.voice_client and channel.user_limit and not channel.user_limit - len(channel.voice_states):
+        if not ctx.guild.voice_client and channel.user_limit and (channel.user_limit - len(channel.voice_states)) < 1:
             raise GenericError(f"**O canal {ctx.channel.mention} está lotado!**")
 
         if guild_data["check_other_bots_in_vc"] and any(m for m in channel.members if m.bot and m != ctx.guild.me):
@@ -466,7 +466,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if not inter.guild.voice_client:
             if inter.author.voice.channel.user_limit and \
-                    not inter.author.voice.channel.user_limit - len(inter.author.voice.channel.voice_states):
+                    (inter.author.voice.channel.user_limit - len(inter.author.voice.channel.voice_states)) < 1:
                 raise GenericError(f"**O canal {inter.author.voice.channel.mention} está lotado!**")
 
         node = self.bot.music.get_node(server)
