@@ -168,11 +168,11 @@ class Owner(commands.Cog):
             try:
                 pull_log = await run_command("git pull --allow-unrelated-histories -X theirs")
                 if "Already up to date" in pull_log:
-                    raise GenericError("Já estou com os ultimos updates instalados...")
+                    raise GenericError("**Já estou com os ultimos updates instalados...**")
                 out_git += pull_log
 
             except GenericError as e:
-                return str(e)
+                raise e
 
             except Exception as e:
 
