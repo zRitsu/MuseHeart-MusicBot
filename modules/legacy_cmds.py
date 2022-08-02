@@ -109,6 +109,11 @@ class Owner(commands.Cog):
 
         data = self.bot.load_modules()
 
+        for bot in self.bot.pool.bots:
+
+            if bot.user.id != self.bot.user.id:
+                bot.load_modules()
+
         txt = ""
 
         if data["loaded"]:
