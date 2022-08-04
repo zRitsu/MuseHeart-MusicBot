@@ -204,7 +204,7 @@ class MongoDatabase(BaseDB):
         return data
 
     async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users],
-                          collection: str, default_mode: dict = None):
+                          collection: str, default_model: dict = None):
         return await self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data}, upsert=True)
 
 
