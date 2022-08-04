@@ -147,9 +147,16 @@ class Owner(commands.Cog):
 
         force = "--force" in opts
 
+        if shutil.which("poetry"):
+            file = "./pyproject.toml"
+            use_poetry = True
+        else:
+            file = "./requirements.txt"
+            use_poetry = False
+
         requirements_old = ""
         try:
-            with open("./requirements.txt") as f:
+            with open(file) as f:
                 requirements_old = f.read()
         except:
             pass
@@ -214,13 +221,20 @@ class Owner(commands.Cog):
             )
             await ctx.send(embed=embed, view=self.owner_view)
 
-            self.bot.loop.create_task(self.update_deps(ctx, requirements_old, opts))
+            self.bot.loop.create_task(self.update_deps(ctx, requirements_old, opts, use_poetry=use_poetry))
 
         else:
-            self.bot.loop.create_task(self.update_deps(ctx, requirements_old, opts))
+            self.bot.loop.create_task(self.update_deps(ctx, requirements_old, opts, use_poetry=use_poetry))
             return txt
 
-    async def update_deps(self, ctx, original_reqs, opts):
+    async def update_deps(self, ctx, original_reqs, opts, use_poetry=False):
+
+        if use_poetry:
+            cmd = "poetry install"
+            file = "./pyproject.toml"
+        else:
+            cmd = "pip3 install -U -r requirements.txt --no-cache-dir"
+            file = "./requirements.txt"
 
         if "--pip" in opts:
 
@@ -231,7 +245,7 @@ class Owner(commands.Cog):
 
             msg = await ctx.channel.send(embed=embed)
 
-            await run_command("pip3 install -U -r requirements.txt")
+            await run_command(cmd)
 
             embed.description = "**As dependências foram instaladas com sucesso!**"
 
@@ -239,7 +253,7 @@ class Owner(commands.Cog):
 
         else:
 
-            with open("./requirements.txt") as f:
+            with open(file) as f:
                 requirements_new = f.read()
 
             if original_reqs != requirements_new:
@@ -256,8 +270,8 @@ class Owner(commands.Cog):
                     embed=disnake.Embed(
                         description="**Será necessário atualizar as dependências usando o comando "
                                     "abaixo no terminal/shell:**\n"
-                                    f"```sh\n{txt}pip3 install -U -r requirements.txt```\n"
-                                    f"ou usar usar o comando: ```\n{disnake.utils.escape_mentions(ctx.prefix)}{ctx.invoked_with} "
+                                    f"```sh\n{txt}{cmd}```\nou usar usar o comando: "
+                                    f"```\n{disnake.utils.escape_mentions(ctx.prefix)}{ctx.invoked_with} "
                                     f"update --force --pip``` \n"
                                     f"**Nota:** Dependendo da hospedagem (ou que não tenha 150mb de RAM livre) você "
                                     f"deve enviar o arquivo requirements.txt ao invés de usar uma das opções acima.",
