@@ -1,12 +1,17 @@
-import os
+from os import getenv
+from tornado.web import RequestHandler, Application
+from tornado.ioloop import IOLoop
 
-from flask import Flask, render_template
 
-app = Flask(__name__)
+class MainHandler(RequestHandler):
 
-@app.route('/')
-def get_image():
-    return render_template('preview.html', video_preview=os.environ["VIDEO_PREVIEW"])
+    def get(self):
+        self.render('./templates/preview.html', video_preview=getenv("VIDEO_PREVIEW"))
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80)
+
+app = Application([
+    (r"/", MainHandler),
+])
+
+app.listen(80)
+IOLoop.current().start()
