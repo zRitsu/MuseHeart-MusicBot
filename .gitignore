@@ -147,6 +147,7 @@ setup.bat
 *.zip
 *.rar
 *.7z
+/.config
 /poetry.lock
 /lavalink.ini
 database.json

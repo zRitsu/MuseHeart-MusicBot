@@ -5,13 +5,15 @@
 if [ ! -d "venv" ] || [ ! -f "./venv/pyproject.toml" ]; then
   bash quick_update.sh
   rm -rf venv
+  rm -rf .config
+  rm -rf .cache
   rm poetry.lock
   echo "Inicializando virtual_env..."
   python3 -m venv venv
   . venv/bin/activate
   python3 -m pip config unset --user install.use-feature
   python3 -m pip install -U pip poetry
-  echo "Instalando dependências (isso pode demorar até 5 minutos)..."
+  echo "Instalando dependências (Esse processo pode demorar até 5 minutos)..."
   poetry install
   cp -r pyproject.toml ./venv/pyproject.toml
 else
