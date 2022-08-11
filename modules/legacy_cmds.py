@@ -132,6 +132,13 @@ class Owner(commands.Cog):
             except Exception:
                 traceback.print_exc()
 
+        await ctx.send(
+            embed=disnake.Embed(
+                description="**O arquivo Lavalink.jar foi atualizado com sucesso!**",
+                color=self.bot.get_color(ctx.guild.me)
+            )
+        )
+
     @commands.is_owner()
     @panel_command(aliases=["rd", "recarregar"], description="Recarregar os módulos.", emoji="🔄",
                    alt_name="Carregar/Recarregar módulos.")
