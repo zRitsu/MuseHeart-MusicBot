@@ -9,11 +9,12 @@ from zipfile import ZipFile
 import disnake
 import dotenv
 import wavelink
+import psutil
 from disnake.ext import commands
 from utils.client import BotCore
 from utils.db import DBModel
 from utils.music.checks import check_voice, check_requester_channel
-from utils.music.interactions import AskView
+from utils.music.local_lavalink import run_lavalink
 from utils.music.models import LavalinkPlayer
 from utils.others import sync_message, chunk_list, EmbedPaginator, CustomContext
 from utils.owner_panel import panel_command, PanelView
@@ -101,6 +102,35 @@ class Owner(commands.Cog):
                             "Será necessário me reiniciar para usar os servidores deste arquivo.**"
             )
         )
+
+    @commands.is_owner()
+    @commands.max_concurrency(1, commands.BucketType.user)
+    @commands.command(hidden=True, aliases=["ull", "updatell", "llupdate", "llu"])
+    async def updatelavalink(self, ctx: CustomContext):
+
+        async with ctx.typing():
+
+            async with ClientSession() as session:
+                async with session.get(self.bot.config["LAVALINK_FILE_URL"]) as r:
+                    lavalink_jar = await r.read()
+                    with open("./Lavalink.jar", "wb") as f:
+                        f.write(lavalink_jar)
+
+        for process in psutil.process_iter():
+            try:
+                if "Lavalink.jar" in process.cmdline():
+                    print(f"{ctx.invoked_with} - Reiniciando lavalink...")
+                    process.terminate()
+                    run_lavalink(
+                        lavalink_file_url=self.bot.config['LAVALINK_FILE_URL'],
+                        lavalink_initial_ram=self.bot.config['LAVALINK_INITIAL_RAM'],
+                        lavalink_ram_limit=self.bot.config['LAVALINK_RAM_LIMIT'],
+                        lavalink_additional_sleep=int(self.bot.config['LAVALINK_ADDITIONAL_SLEEP']),
+                    )
+            except (psutil.AccessDenied, PermissionError):
+                continue
+            except Exception:
+                traceback.print_exc()
 
     @commands.is_owner()
     @panel_command(aliases=["rd", "recarregar"], description="Recarregar os módulos.", emoji="🔄",
