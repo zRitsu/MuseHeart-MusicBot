@@ -241,7 +241,7 @@ class WSClient:
                                 users.remove(i)
 
 
-def run_app(bots: Optional[list] = None, ws_url = f"http://0.0.0.0:{environ.get('PORT', 9090)}/ws"):
+def run_app(bots: Optional[list] = None, ws_url = f"http://0.0.0.0:{environ.get('PORT', 8080)}/ws"):
 
     try:
         # repl.it stuff
@@ -256,7 +256,7 @@ def run_app(bots: Optional[list] = None, ws_url = f"http://0.0.0.0:{environ.get(
         (r'/ws', WebSocketHandler),
     ])
 
-    app.listen(environ.get("PORT", 9090))
+    app.listen(environ.get("PORT", 8080))
 
 
 def start(bots: Optional[list] = None):
