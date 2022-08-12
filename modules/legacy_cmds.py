@@ -416,6 +416,8 @@ class Owner(commands.Cog):
 
         is_owner = await ctx.bot.is_owner(ctx.author)
 
+        prefix = ctx.prefix if str(ctx.bot.user.id) not in ctx.prefix else ""
+
         if cmd_name:
 
             cmd = self.bot.get_command(cmd_name)
@@ -433,10 +435,10 @@ class Owner(commands.Cog):
 
             if cmd.aliases:
                 embed.add_field(name="Aliases/Sinônimos:", value="```ldif\n{}```".format(
-                    " | ".join(f"{ctx.clean_prefix}{a}" for a in cmd.aliases)), inline=False)
+                    " | ".join(f"{prefix}{a}" for a in cmd.aliases)), inline=False)
 
             if cmd.usage:
-                embed.add_field(name="Como usar:", value=f" ```ldif\n{ctx.clean_prefix}{cmd.name} {cmd.usage}```",
+                embed.add_field(name="Como usar:", value=f" ```ldif\n{prefix}{cmd.name} {cmd.usage}```",
                                 inline=False)
 
             await ctx.send(embed=embed)
@@ -449,8 +451,6 @@ class Owner(commands.Cog):
         for cmd in cmds:
 
             txt = ""
-
-            prefix = ctx.prefix if ctx.guild.me.mention != ctx.prefix else ""
 
             cmd_name = f"**{prefix}{cmd.name}**"
 
@@ -475,7 +475,7 @@ class Owner(commands.Cog):
                                   description=slash_msg)
 
             embed.set_footer(
-                text=f"Página: {c + 1}/{len(txt_chunked)} | para ver informações detalhadas de um comando especifico use: {ctx.clean_prefix}{ctx.invoked_with} comando")
+                text=f"Página: {c + 1}/{len(txt_chunked)} | para ver informações detalhadas de um comando especifico use: {prefix}{ctx.invoked_with} comando")
 
             for cmd_name, cmd_desc in txt_pages:
                 embed.add_field(name=cmd_name, value=cmd_desc)
