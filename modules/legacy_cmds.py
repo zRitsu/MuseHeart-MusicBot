@@ -106,7 +106,10 @@ class Owner(commands.Cog):
     @commands.is_owner()
     @commands.max_concurrency(1, commands.BucketType.user)
     @commands.command(hidden=True, aliases=["ull", "updatell", "llupdate", "llu"])
-    async def updatelavalink(self, ctx: CustomContext):
+    async def updatelavalink(self, ctx: CustomContext, *args: str):
+
+        if "LOCAL" not in ctx.bot.music.nodes and "--force" not in args:
+            raise GenericError("**O servidor LOCAL não está sendo usado!**")
 
         async with ctx.typing():
 
