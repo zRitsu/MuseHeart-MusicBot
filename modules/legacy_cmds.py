@@ -106,18 +106,24 @@ class Owner(commands.Cog):
     @commands.is_owner()
     @commands.max_concurrency(1, commands.BucketType.user)
     @commands.command(hidden=True, aliases=["ull", "updatell", "llupdate", "llu"])
-    async def updatelavalink(self, ctx: CustomContext, *, args: str = ""):
+    async def updatelavalink(self, ctx: CustomContext, *args):
 
         if "LOCAL" not in ctx.bot.music.nodes and "--force" not in args:
             raise GenericError("**O servidor LOCAL não está sendo usado!**")
 
+        download_urls = [self.bot.config["LAVALINK_FILE_URL"]]
+
+        if "--yml" in args:
+            download_urls.append("https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/application.yml")
+
         async with ctx.typing():
 
-            async with ClientSession() as session:
-                async with session.get(self.bot.config["LAVALINK_FILE_URL"]) as r:
-                    lavalink_jar = await r.read()
-                    with open("./Lavalink.jar", "wb") as f:
-                        f.write(lavalink_jar)
+            for url in download_urls:
+                async with ClientSession() as session:
+                    async with session.get(url) as r:
+                        lavalink_jar = await r.read()
+                        with open(url.split("/")[-1], "wb") as f:
+                            f.write(lavalink_jar)
 
         for process in psutil.process_iter():
             try:
