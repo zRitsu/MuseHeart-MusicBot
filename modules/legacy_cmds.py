@@ -414,11 +414,13 @@ class Owner(commands.Cog):
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def help_(self, ctx: CustomContext, cmd_name: str = None):
 
+        is_owner = await ctx.bot.is_owner(ctx.author)
+
         if cmd_name:
 
             cmd = self.bot.get_command(cmd_name)
 
-            if not cmd:
+            if not cmd or (cmd.hidden and not is_owner):
                 raise GenericError(f"O comando **{cmd_name}** não existe.")
 
             embed = disnake.Embed(
@@ -440,7 +442,7 @@ class Owner(commands.Cog):
             await ctx.send(embed=embed)
             return
 
-        cmds = [c for c in self.bot.commands if not c.hidden]
+        cmds = [c for c in self.bot.commands if not c.hidden] if not is_owner else [c for c in self.bot.commands]
 
         cmds_final = []
 
