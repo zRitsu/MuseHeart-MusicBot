@@ -2,16 +2,12 @@
 
 export PYTHONIOENCODING=utf8
 
-if [ ! -d ".git" ]; then
-  git init
-fi
-
-if [ -z "$(git remote -v)" ]; then
+if  [ ! -d ".git" ] || [ -z "$(git remote -v)" ]; then
 
   if [ -z "$SOURCE_REPO" ]; then
-    git remote add origin $SOURCE_REPO
-  else
     git remote add origin https://github.com/zRitsu/disnake-LL-music-bot.git
+  else
+    git remote add origin $SOURCE_REPO
   fi
   git fetch origin
   git checkout -b main -f --track origin/main
