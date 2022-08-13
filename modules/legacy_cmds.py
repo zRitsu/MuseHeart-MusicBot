@@ -312,18 +312,56 @@ class Owner(commands.Cog):
                     else:
                         txt += ". ./" + venv.split('/')[-1] + " && "
 
+                prefix = ctx.prefix if not str(ctx.guild.me.id) not in ctx.prefix else f"@{ctx.guild.me.name}"
+
                 await ctx.send(
                     embed=disnake.Embed(
                         description="**Será necessário atualizar as dependências usando o comando "
                                     "abaixo no terminal/shell:**\n"
                                     f"```sh\n{txt}{cmd}```\nou usar usar o comando: "
-                                    f"```\n{disnake.utils.escape_mentions(ctx.prefix)}{ctx.invoked_with} "
+                                    f"```\n{prefix}{ctx.invoked_with} "
                                     f"update --force --pip``` \n"
-                                    f"**Nota:** Dependendo da hospedagem (ou que não tenha 150mb de RAM livre) você "
-                                    f"deve enviar o arquivo requirements.txt ao invés de usar uma das opções acima.",
+                                    f"**Nota:** Dependendo da hospedagem (ou que não tenha 150mb de RAM livre "
+                                    f"e 0.5vCPU) você deve enviar o arquivo requirements.txt ao invés de "
+                                    f"usar uma das opções acima.",
                         color=self.bot.get_color(ctx.guild.me)
-                    )
+                    ),
+                    components=[
+                        disnake.ui.Button(label="Download requirements.txt", custom_id="updatecmd_requirements"),
+                        disnake.ui.Button(label="Atualizar dependências",
+                                          custom_id="updatecmd_installdeps_" + ("poetry" if use_poetry else "pip")),
+                    ]
                 )
+
+    @commands.Cog.listener("on_button_click")
+    async def update_buttons(self, inter: disnake.MessageInteraction):
+
+        if not inter.data.custom_id.startswith("updatecmd_"):
+            return
+
+        if inter.data.custom_id == "updatecmd_installdeps":
+            await inter.message.delete()
+            await self.update_deps(inter, "", "--pip", use_poetry=inter.data.custom_id.endswith("_poetry"))
+
+        elif inter.data.custom_id == "updatecmd_requirements":
+
+            try:
+                os.remove('./update_reqs.zip')
+            except FileNotFoundError:
+                pass
+
+            with ZipFile('update_reqs.zip', 'w') as zipObj:
+                zipObj.write("requirements.txt")
+
+            await inter.send(
+                embed=disnake.Embed(
+                    description="**Baixe o arquivo anexado e envie para sua hospedagem via commit etc.**",
+                    color=self.bot.get_color(inter.guild.me)
+                ),
+                file=disnake.File("update_reqs.zip")
+            )
+
+            os.remove("update_reqs.zip")
 
     async def cleanup_git(self, force=False):
 
