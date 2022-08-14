@@ -1,7 +1,6 @@
 git+https://github.com/zRitsu/Wavelink.git@4752c1625fe1391fe18b563c716ea65730eeb3e6
 asyncspotify==0.12.1
 disnake==2.5.2
-poetry
 python-dotenv
 user-agent
 requests
