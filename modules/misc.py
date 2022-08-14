@@ -304,7 +304,12 @@ class GuildLog(commands.Cog):
         except AttributeError:
             pass
 
-        await self.send_hook(self.bot.owner.mention, embed=embed)
+        try:
+            owner_mention = self.bot.owner.mention
+        except AttributeError:
+            owner_mention = ""
+
+        await self.send_hook(owner_mention, embed=embed)
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: disnake.Guild):
@@ -333,7 +338,12 @@ class GuildLog(commands.Cog):
         except AttributeError:
             pass
 
-        await self.send_hook(self.bot.owner.mention, embed=embed)
+        try:
+            owner_mention = self.bot.owner.mention
+        except AttributeError:
+            owner_mention = ""
+
+        await self.send_hook(owner_mention, embed=embed)
 
 
     async def send_hook(self, content="", *, embed: disnake.Embed=None):
