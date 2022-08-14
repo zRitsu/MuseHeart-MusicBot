@@ -343,7 +343,7 @@ class Owner(commands.Cog):
             await inter.message.delete()
             await self.update_deps(inter, "", "--pip", use_poetry=inter.data.custom_id.endswith("_poetry"))
 
-        elif inter.data.custom_id == "updatecmd_requirements":
+        elif inter.data.custom_id.startswith("updatecmd_requirements"):
 
             try:
                 os.remove('./update_reqs.zip')
