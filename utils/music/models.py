@@ -164,6 +164,9 @@ class LavalinkPlayer(wavelink.Player):
             pass
         return ""
 
+    async def connect(self, channel_id: int, self_mute: bool = False, self_deaf: bool = False):
+        await super().connect(channel_id, self_mute=self_mute, self_deaf=True)
+
     def process_hint(self):
         if random.choice([x for x in range(self.hint_rate)]) == 0:
             self.current_hint = next(self.hints)
