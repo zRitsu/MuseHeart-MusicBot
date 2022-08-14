@@ -10,11 +10,11 @@ name = "py-music-bot-disnake"
 version = "0.1.0"
 
 [tool.poetry.dependencies]
-python = "^3.8"
-disnake = {git = "https://github.com/DisnakeDev/disnake.git", rev = "d1e88af8e7aef629466bb47986bfb9223bea0f64"}
+python = "^3.9"
+disnake = "2.5.2"
 wavelink = {git = "https://github.com/zRitsu/Wavelink.git", rev = "7d939eef78b4203ba6afef6fe31dfae8d9c443bc"}
 python-dotenv = "^0.20.0"
-asyncspotify = {git = "https://github.com/Run1e/asyncspotify.git"}
+asyncspotify = "0.12.1"
 user-agent = "^0.1.10"
 requests = "^2.28.1"
 humanize = "^4.2.3"
