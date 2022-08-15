@@ -319,8 +319,7 @@ class Owner(commands.Cog):
                         description="**Será necessário atualizar as dependências usando o comando "
                                     "abaixo no terminal/shell:**\n"
                                     f"```sh\n{txt}{cmd}```\nou usar usar o comando: "
-                                    f"```\n{prefix}{ctx.invoked_with} "
-                                    f"update --force --pip``` \n"
+                                    f"```\n{prefix}{ctx.invoked_with} --force --pip``` \n"
                                     f"**Nota:** Dependendo da hospedagem (ou que não tenha 150mb de RAM livre "
                                     f"e 0.5vCPU) você deve enviar o arquivo requirements.txt ao invés de "
                                     f"usar uma das opções acima.",
