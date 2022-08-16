@@ -34,6 +34,11 @@ async def start_bot(bot: BotCore):
     del bot.token
 
 
+async def run_bots(bots: List[BotCore]):
+    await asyncio.wait(
+        [asyncio.create_task(start_bot(bot)) for bot in bots]
+    )
+
 class BotPool:
 
     bots: List[BotCore] = []
@@ -270,9 +275,7 @@ class BotPool:
             loop.create_task(self.connect_rpc_ws())
             loop.create_task(self.connect_spotify())
             loop.run_until_complete(
-                asyncio.wait(
-                    [asyncio.create_task(start_bot(bot)) for bot in self.bots]
-                )
+                run_bots(self.bots)
             )
 
 
