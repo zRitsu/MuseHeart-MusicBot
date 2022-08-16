@@ -26,6 +26,14 @@ import os
 import traceback
 
 
+async def start_bot(bot: BotCore):
+    try:
+        await bot.start(bot.token)
+    except:
+        traceback.print_exc()
+    del bot.token
+
+
 class BotPool:
 
     bots: List[BotCore] = []
@@ -243,11 +251,6 @@ class BotPool:
                 lavalink_additional_sleep=int(self.config['LAVALINK_ADDITIONAL_SLEEP']),
             )
 
-        async def start_bots():
-            await asyncio.wait(
-                [asyncio.create_task(bot.start(bot.token)) for bot in self.bots]
-            )
-
         loop = asyncio.get_event_loop()
 
         self.database.start_task(loop)
@@ -255,8 +258,7 @@ class BotPool:
         if self.config["RUN_RPC_SERVER"]:
 
             for bot in self.bots:
-                loop.create_task(bot.start(bot.token))
-                del bot.token
+                loop.create_task(start_bot(bot))
 
             loop.create_task(self.connect_rpc_ws())
             loop.create_task(self.connect_spotify())
@@ -267,7 +269,11 @@ class BotPool:
 
             loop.create_task(self.connect_rpc_ws())
             loop.create_task(self.connect_spotify())
-            loop.run_until_complete(start_bots())
+            loop.run_until_complete(
+                asyncio.wait(
+                    [asyncio.create_task(start_bot(bot)) for bot in self.bots]
+                )
+            )
 
 
 class BotCore(commands.AutoShardedBot):
