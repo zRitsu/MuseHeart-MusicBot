@@ -2459,9 +2459,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                 query = inter.text_values["song_input"]
 
-                selected_dropdown = inter.data['components'][1]['components'][0]['values']
+                #selected_dropdown = inter.data['components'][1]['components'][0]['values']
 
-                selected_fav = selected_dropdown[0] if (selected_dropdown and selected_dropdown[0] != "no_fav") else None
+                #selected_fav = selected_dropdown[0] if (selected_dropdown and selected_dropdown[0] != "no_fav") else None
+                selected_fav = None
 
                 if not query and not selected_fav:
                     raise GenericError("Você deve adicionar o nome de uma música ou ter/escolher um favorito")
