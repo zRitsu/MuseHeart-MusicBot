@@ -38,9 +38,9 @@ source $VENV_PATH
 
 touch "./.logs/update.log"
 
-if [ ! -f requirements-bak.txt ] || [ ! cmp --silent -- requirements.txt requirements-bak.txt ]; then
-  pip install -r requirements.txt --force-reinstall 2>&1 | tee "./.logs/update.log"
-  cp requirements.txt requirements-bak.txt
+if [ ! -f "./venv/requirements.txt" ]  || [ ! cmp --silent -- "./requirements.txt" "./venv/requirements.txt" ]; then
+  pip install -r requirements.txt --no-cache-dir 2>&1 | tee "./.logs/update.log"
+  cp -r requirements.txt ./venv/requirements.txt
 fi
 
 read -p "Pressione ENTER para finalizar..."
