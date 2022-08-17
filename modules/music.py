@@ -2263,17 +2263,18 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                             placeholder="Nome ou link do youtube/spotify/soundcloud etc.",
                             custom_id="song_input",
                             max_length=150,
-                            required=bool(not user_favs)
+                            #required=bool(not user_favs),
+                            required=True
                         ),
-                        disnake.ui.Select(
-                            placeholder="ou selecione um favorito (opcional)",
-                            options=user_favs or [
-                                disnake.SelectOption(
-                                    label="Você não possui favoritos...", value="no_fav", emoji="⚠️",
-                                    description="Adicione um usando o comando: /fav add"
-                                )
-                            ], min_values=0, max_values=1
-                        )
+                        #disnake.ui.Select(
+                        #    placeholder="ou selecione um favorito (opcional)",
+                        #    options=user_favs or [
+                        #        disnake.SelectOption(
+                        #            label="Você não possui favoritos...", value="no_fav", emoji="⚠️",
+                        #            description="Adicione um usando o comando: /fav add"
+                        #        )
+                        #    ], min_values=0, max_values=1
+                        #)
                     ]
                 )
 
