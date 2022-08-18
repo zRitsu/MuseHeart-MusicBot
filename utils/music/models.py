@@ -289,8 +289,12 @@ class LavalinkPlayer(wavelink.Player):
                 description=f"Finalizar o player e me desconectar do canal."
             ),
             disnake.SelectOption(
-                emoji="🎶", value=PlayerControls.add_song, label="Adicionar",
-                description=f"Tocar nova música/playlist/favorito."
+                emoji="🎶", value=PlayerControls.add_song, label="Adicionar música",
+                description=f"Tocar nova música/playlist."
+            ),
+            disnake.SelectOption(
+                emoji="⭐", value=PlayerControls.enqueue_fav, label="Adicionar favorito",
+                description=f"Adicionar favorito na fila."
             ),
         ])
 
