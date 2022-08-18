@@ -1673,7 +1673,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     color=self.bot.get_color(inter.guild.me),
                     description=f"🛑 **⠂{inter.author.mention} parou o player.**"
                 ),
-                components=[disnake.ui.Button(label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song)],
+                components=[
+                    disnake.ui.Button(label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song),
+                    disnake.ui.Button(label="Tocar favorito", emoji="⭐", custom_id=PlayerControls.enqueue_fav)
+                ],
                 ephemeral=player.static and player.text_channel == inter.channel
             )
             await player.destroy()
@@ -2179,79 +2182,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 await self.process_player_interaction(interaction, cmd, kwargs)
                 return
 
-            if control in (
-                    PlayerControls.add_song,
-                    PlayerControls.enqueue_fav,
-                    PlayerControls.settings,
-            ):
+            if control == PlayerControls.add_song:
 
                 if not interaction.user.voice:
                     raise GenericError("**Você deve entrar em um canal de voz para usar esse botão.**")
-
-                if control == PlayerControls.settings:
-
-                    try:
-                        player: LavalinkPlayer = self.bot.music.players[interaction.guild.id]
-                    except KeyError:
-                        await interaction.send("Não há player ativo no servidor...", ephemeral=True)
-                        await send_idle_embed(interaction.message, bot=self.bot)
-                        return
-
-                    vol_opts = []
-
-                    for l in [5, 20, 40, 60, 80, 100, 120, 150]:
-                        if l == player.volume:
-                            continue
-                        if l > 100:
-                            description = "Acima de 100% o audio pode ficar bem ruim."
-                        else:
-                            description = None
-                        vol_opts.append(disnake.SelectOption(emoji="🔊", label=f"Volume: {l}%", value=f"vol_{l}",
-                                                             description=description))
-
-                    await interaction.response.send_modal(
-                        title="Ajustar Player",
-                        custom_id="musicplayer_settings",
-                        components=[
-                            disnake.ui.Select(
-                                placeholder="Volume:", options=vol_opts, min_values=0
-                            ),
-                            disnake.ui.Select(
-                                placeholder="Efeito Nightcore:", min_values=0,
-                                options=[
-                                    disnake.SelectOption(emoji="🇳", label="Nightcore: Ativar", value="nightcore_on"),
-                                    disnake.SelectOption(emoji="❌", label="Nightcore: Desativar", value="nightcore_off")
-                                ]
-                            ),
-                            disnake.ui.Select(
-                                placeholder="Loop/Repetição:", min_values=0,
-                                options=[
-                                    disnake.SelectOption(emoji="🔂", label="Loop: Música Atual", value="current"),
-                                    disnake.SelectOption(emoji="🔁", label="Loop: Fila", value="queue"),
-                                    disnake.SelectOption(emoji="❌", label="Loop: Desativar", value="off"),
-                                ]
-                            ),
-                            disnake.ui.Select(
-                                placeholder="Modo Restrito:", min_values=0,
-                                options=[
-                                    disnake.SelectOption(
-                                        emoji="🔐", label="Modo restrito: Ativar", value="restrict_on",
-                                        description="Apenas DJ's/Staff's podem usar comandos restritos."
-                                    ),
-                                    disnake.SelectOption(
-                                        emoji="🔓", label="Modo restrito: Desativar", value="restrict_off",
-                                        description="Membros podem usar comandos sem restrição."
-                                    )
-                                ]
-                            )
-                        ]
-                    )
-
-                    return
-
-                user_favs = [
-                    disnake.SelectOption(label=f, value=f"> fav: {f}") for f in sorted(await fav_list(interaction, ""))
-                ]
 
                 await interaction.response.send_modal(
                     title="Pedir uma música",
@@ -2263,22 +2197,27 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                             placeholder="Nome ou link do youtube/spotify/soundcloud etc.",
                             custom_id="song_input",
                             max_length=150,
-                            #required=bool(not user_favs),
                             required=True
                         ),
-                        #disnake.ui.Select(
-                        #    placeholder="ou selecione um favorito (opcional)",
-                        #    options=user_favs or [
-                        #        disnake.SelectOption(
-                        #            label="Você não possui favoritos...", value="no_fav", emoji="⚠️",
-                        #            description="Adicione um usando o comando: /fav add"
-                        #        )
-                        #    ], min_values=0, max_values=1
-                        #)
                     ]
                 )
 
                 return
+
+            if control == PlayerControls.enqueue_fav:
+
+                kwargs = {
+                    "query": "",
+                    "position": 0,
+                    "options": False,
+                    "manual_selection": True,
+                    "source": "ytsearch",
+                    "repeat_amount": 0,
+                    "hide_playlist": False,
+                    "server": None
+                }
+
+                cmd = self.bot.get_slash_command("play")
 
             try:
                 player: LavalinkPlayer = self.bot.music.players[interaction.guild.id]
@@ -2375,133 +2314,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.Cog.listener("on_modal_submit")
     async def song_request_modal(self, inter: disnake.ModalInteraction):
 
-        if inter.custom_id == PlayerControls.settings:
-
-            try:
-                player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
-            except KeyError:
-                await inter.send("Não há player ativo no momento...", ephemeral=True)
-                return
-
-            retry_after = self.music_settings_cooldown.get_bucket(inter).update_rate_limit()
-
-            if retry_after:
-                await inter.send(f"Você deve aguardar **{time_format(retry_after * 1000, use_names=True)}** "
-                                 "para usar este botão novamente...", ephemeral=True)
-                return
-
-            txt = []
-
-            try:
-                volume = inter.data['components'][0]['components'][0]['values'][0]
-            except IndexError:
-                pass
-            else:
-                vol_int = int(volume[4:])
-                await player.set_volume(vol_int)
-                txt.append(f"`volume: {vol_int}%`")
-
-            try:
-                nightcore = inter.data['components'][1]['components'][0]['values'][0]
-            except IndexError:
-                pass
-            else:
-                if not player.nightcore and nightcore == "nightcore_on":
-                    await player.set_timescale(pitch=1.2, speed=1.1)
-                    player.nightcore = True
-                    txt.append("`Nightcore: ativado`")
-                elif player.nightcore and nightcore == "nightcore_off":
-                    await player.set_timescale(enabled=False)
-                    player.nightcore = False
-                    txt.append("`Nightcore: desativado`")
-
-            try:
-                loop = inter.data['components'][2]['components'][0]['values'][0]
-            except IndexError:
-                pass
-            else:
-                if loop == "off" and player.loop:
-                    player.loop = False
-                    txt.append("`desativou repetição`")
-                elif loop != player.loop:
-                    player.loop = loop
-                    txt.append("`repetição: música atual`" if loop == "current" else "`repetição: fila`")
-
-            try:
-                restrict_mode = inter.data['components'][3]['components'][0]['values'][0].endswith("_on")
-            except IndexError:
-                pass
-            else:
-                if player.restrict_mode != restrict_mode:
-                    player.restrict_mode = restrict_mode
-                    txt.append("`modo restrito: ativado`" if restrict_mode else "`modo restrito: desativado`")
-
-            if not txt:
-                await inter.send("Nenhum ajuste foi realizado.\n"
-                                 "`Nota: Talvez o player já esteja com as configurações selecionadas.`", ephemeral=True)
-                return
-
-            txt = " | ".join(t for t in txt)
-
-            player.set_command_log(text=f"{inter.author.mention} fez ajustes no player: {txt}", emoji="🛠️")
-
-            player.update = True
-
-            await inter.send(
-                embed=disnake.Embed(
-                    color=self.bot.get_color(inter.guild.me),
-                    description=f"**Ajustes realizados:**\n{txt}"
-                ), ephemeral=True)
-
-        elif inter.custom_id == "modal_add_song":
+        if inter.custom_id == "modal_add_song":
 
             try:
 
                 query = inter.text_values["song_input"]
-
-                #selected_dropdown = inter.data['components'][1]['components'][0]['values']
-
-                #selected_fav = selected_dropdown[0] if (selected_dropdown and selected_dropdown[0] != "no_fav") else None
-                selected_fav = None
-
-                if not query and not selected_fav:
-                    raise GenericError("Você deve adicionar o nome de uma música ou ter/escolher um favorito")
-
-                if not query:
-                    query = selected_fav
-
-                elif selected_fav:
-
-                    view = SelectInteraction(
-                        user=inter.author,
-                        opts=[
-                            disnake.SelectOption(label="Nome/Link:", emoji="🔍",
-                                                 description=fix_characters(query, limit=45), value="music_query"),
-                            disnake.SelectOption(label="Favorito:", emoji="⭐",
-                                                 description=fix_characters(selected_fav[6:], 45), value="music_fav"),
-                        ], timeout=30)
-
-                    embed = disnake.Embed(
-                        description="**Você usou dois itens na sua requisição...**\n"
-                                    f'Selecione uma opção para prosseguir (tempo limite: <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R>).',
-                        color=self.bot.get_color(inter.guild.me)
-                    )
-
-                    await inter.send(inter.author.mention, embed=embed, view=view, ephemeral=True)
-
-                    await view.wait()
-
-                    if not view.inter:
-                        await inter.edit_original_message(
-                            content=f"{inter.author.mention}, tempo esgotado!",
-                            embed=None, view=None
-                        )
-                        return
-
-                    inter = view.inter
-
-                    if view.selected == "music_fav":
-                        query = selected_fav
 
                 kwargs = {
                     "query": query,
@@ -2593,7 +2410,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                         color=self.bot.get_color(message.guild.me)
                     ),
                     components=[
-                        disnake.ui.Button(emoji="🎶", custom_id=PlayerControls.add_song, label="Pedir uma música")
+                        disnake.ui.Button(emoji="🎶", custom_id=PlayerControls.add_song, label="Pedir uma música"),
+                        disnake.ui.Button(emoji="⭐", custom_id=PlayerControls.enqueue_fav, label="Tocar favorito")
                     ],
                     delete_after=20
                 )

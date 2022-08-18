@@ -12,7 +12,6 @@ def load(player: LavalinkPlayer) -> dict:
     data = {
         "content": None,
         "embeds": [],
-        "components": []
     }
 
     embed = disnake.Embed(
@@ -92,47 +91,5 @@ def load(player: LavalinkPlayer) -> dict:
         player.auto_update = 0
 
     data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
-
-    data["components"].extend(
-        [
-            disnake.ui.Button(emoji="⏯️", custom_id=PlayerControls.pause_resume, style=get_button_style(player.paused)),
-            disnake.ui.Button(emoji="⏮️", custom_id=PlayerControls.back),
-            disnake.ui.Button(emoji="⏹️", custom_id=PlayerControls.stop),
-            disnake.ui.Button(emoji="⏭️", custom_id=PlayerControls.skip),
-            disnake.ui.Button(emoji="🎶", custom_id=PlayerControls.add_song),
-            disnake.ui.Select(
-                placeholder="Mais opções:",
-                custom_id="musicplayer_dropdown_inter",
-                min_values=0, max_values=1,
-                options=[
-                    disnake.SelectOption(
-                        label="Tocar do inicio", emoji="⏪",
-                        value=PlayerControls.seek_to_start,
-                        description="Voltar o tempo da música atual para o inicio."
-                    ),
-                    disnake.SelectOption(
-                        label="Misturar", emoji="🔀",
-                        value=PlayerControls.shuffle,
-                        description="Misturar as músicas da fila."
-                    ),
-                    disnake.SelectOption(
-                        label="Readicionar", emoji="<:add_music:588172015760965654>",
-                        value=PlayerControls.readd,
-                        description="Readicionar as músicas tocadas de volta na fila."
-                    ),
-                    disnake.SelectOption(
-                        label="Músicas na fila", emoji="📑",
-                        value=PlayerControls.queue,
-                        description="Listar as músicas que estão na fila."
-                    ),
-                    disnake.SelectOption(
-                        label="Player config.", emoji="🛠️",
-                        value=PlayerControls.settings,
-                        description="Alterar algumas configurações do player."
-                    ),
-                ]
-            ),
-        ]
-    )
 
     return data

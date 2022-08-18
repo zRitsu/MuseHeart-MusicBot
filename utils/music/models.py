@@ -177,9 +177,6 @@ class LavalinkPlayer(wavelink.Player):
 
         hints = list(self.initial_hints)
 
-        if self.controller_mode:
-            hints.append("Você pode usar o botão [🎶] para pedir músicas ou adicionar um link de música/playlist/favorito na fila.")
-
         if self.static:
             hints.append("Você pode fixar músicas/playlists na mensagem do player quando tiver no modo de espera/oscioso "
                          "para qualquer membro poder usá-las de forma facilitada. Para isso use o comando: /pin add "
@@ -391,19 +388,64 @@ class LavalinkPlayer(wavelink.Player):
             if data.get("components") is None:  # nenhum controle de botão foi definido na skin (será usado os botões padrões).
 
                 data["components"] = [
-                    disnake.ui.Button(emoji="⏯️", custom_id=PlayerControls.pause_resume,
-                                      style=get_button_style(self.paused)),
+                    disnake.ui.Button(emoji="⏯️", custom_id=PlayerControls.pause_resume, style=get_button_style(self.paused)),
                     disnake.ui.Button(emoji="⏮️", custom_id=PlayerControls.back),
-                    disnake.ui.Button(emoji="⏭️", custom_id=PlayerControls.skip),
-                    disnake.ui.Button(emoji="🔀", custom_id=PlayerControls.shuffle),
-                    disnake.ui.Button(emoji="🎶", custom_id=PlayerControls.add_song),
                     disnake.ui.Button(emoji="⏹️", custom_id=PlayerControls.stop),
+                    disnake.ui.Button(emoji="⏭️", custom_id=PlayerControls.skip),
                     disnake.ui.Button(emoji="📑", custom_id=PlayerControls.queue),
-                    disnake.ui.Button(emoji="🛠️", custom_id=PlayerControls.settings),
-                    disnake.ui.Button(emoji="<:help:947781412017279016>", custom_id=PlayerControls.help_button,
-                                      label="menu de ajuda")
+                    disnake.ui.Select(
+                        placeholder="Mais opções:",
+                        custom_id="musicplayer_dropdown_inter",
+                        min_values=0, max_values=1,
+                        options=[
+                            disnake.SelectOption(
+                                label="Adicionar música", emoji="<:add_music:588172015760965654>",
+                                value=PlayerControls.add_song,
+                                description="Adicionar uma música/playlist na fila."
+                            ),
+                            disnake.SelectOption(
+                                label="Adicionar favorito", emoji="⭐",
+                                value=PlayerControls.enqueue_fav,
+                                description="Adicionar um de seus favoritos na fila."
+                            ),
+                            disnake.SelectOption(
+                                label="Tocar do inicio", emoji="⏪",
+                                value=PlayerControls.seek_to_start,
+                                description="Voltar o tempo da música atual para o inicio."
+                            ),
+                            disnake.SelectOption(
+                                label="Volume", emoji="🔊",
+                                value=PlayerControls.volume,
+                                description="Ajustar volume."
+                            ),
+                            disnake.SelectOption(
+                                label="Misturar", emoji="🔀",
+                                value=PlayerControls.shuffle,
+                                description="Misturar as músicas da fila."
+                            ),
+                            disnake.SelectOption(
+                                label="Readicionar", emoji="🎶",
+                                value=PlayerControls.readd,
+                                description="Readicionar as músicas tocadas de volta na fila."
+                            ),
+                            disnake.SelectOption(
+                                label="Repetição", emoji="🔁",
+                                value=PlayerControls.loop_mode,
+                                description="Ativar/Desativar repetição da música/fila."
+                            ),
+                            disnake.SelectOption(
+                                label="Nightcore", emoji="🇳",
+                                value=PlayerControls.nightcore,
+                                description="Ativar/Desativar o efeito nightcore."
+                            ),
+                            disnake.SelectOption(
+                                label="Ativar/Desativar modo restrito", emoji="🔐",
+                                value=PlayerControls.restrict_mode,
+                                description="Apenas DJ's/Staff's podem usar comandos restritos."
+                            ),
+                        ]
+                    ),
                 ]
-
 
             if self.message and (self.ignore_np_once or self.has_thread or self.static or not force or self.is_last_message()):
 
@@ -551,7 +593,9 @@ class LavalinkPlayer(wavelink.Player):
                     description=f"🛑 ⠂{self.command_log}",
                     color=self.bot.get_color(self.guild.me)),
                 components=[
-                    disnake.ui.Button(label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song)
+                    disnake.ui.Button(label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song),
+                    disnake.ui.Button(label="Tocar favorito", emoji="⭐", custom_id=PlayerControls.enqueue_fav)
+
                 ]
             )
 

@@ -76,8 +76,8 @@ class PlayerControls:
     loop_mode = "musicplayer_loop_mode"
     queue = "musicplayer_queue"
     nightcore = "musicplayer_nightcore"
-    settings = "musicplayer_settings"
     help_button = "musicplayer_help"
+    restrict_mode = "musicplayer_restrict_mode"
 
 
 class EmbedPaginator(disnake.ui.View):
@@ -245,13 +245,19 @@ async def send_idle_embed(
             )
         )
 
-    components.append(
-        disnake.ui.Button(
-            emoji="🎶",
-            custom_id=PlayerControls.add_song,
-            style=disnake.ButtonStyle.grey,
-            label="Pedir uma música."
-        )
+    components.extend(
+        [
+            disnake.ui.Button(
+                emoji="🎶",
+                custom_id=PlayerControls.add_song,
+                label="Pedir uma música"
+            ),
+            disnake.ui.Button(
+                emoji="⭐",
+                custom_id=PlayerControls.enqueue_fav,
+                label="Tocar favorito"
+            ),
+        ]
     )
 
     if isinstance(target, disnake.MessageInteraction):
