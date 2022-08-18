@@ -2199,6 +2199,14 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                             max_length=150,
                             required=True
                         ),
+                        disnake.ui.TextInput(
+                            style=disnake.TextInputStyle.short,
+                            label="Posição da fila (número).",
+                            placeholder="Opcional, caso não seja usado será adicionada no final.",
+                            custom_id="song_position",
+                            max_length=3,
+                            required=False
+                        ),
                     ]
                 )
 
@@ -2321,10 +2329,16 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             try:
 
                 query = inter.text_values["song_input"]
+                position = inter.text_values["song_position"]
+
+                if position:
+                    if not position.isdigit():
+                        raise GenericError("**A posição da fila tem que ser um número.**")
+                    position = int(position) - 1
 
                 kwargs = {
                     "query": query,
-                    "position": 0,
+                    "position": position or 0,
                     "options": False,
                     "manual_selection": True,
                     "source": "ytsearch",
