@@ -2219,76 +2219,78 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
                 cmd = self.bot.get_slash_command("play")
 
-            try:
-                player: LavalinkPlayer = self.bot.music.players[interaction.guild.id]
-            except KeyError:
-                await interaction.send("Não há player ativo no servidor...", ephemeral=True)
-                await send_idle_embed(interaction.message, bot=self.bot)
-                return
+            else:
 
-            if interaction.message != player.message:
-                return
+                try:
+                    player: LavalinkPlayer = self.bot.music.players[interaction.guild.id]
+                except KeyError:
+                    await interaction.send("Não há player ativo no servidor...", ephemeral=True)
+                    await send_idle_embed(interaction.message, bot=self.bot)
+                    return
 
-            if player.interaction_cooldown:
-                raise GenericError("O player está em cooldown, tente novamente em instantes.")
+                if interaction.message != player.message:
+                    return
 
-            vc = self.bot.get_channel(player.channel_id)
+                if player.interaction_cooldown:
+                    raise GenericError("O player está em cooldown, tente novamente em instantes.")
 
-            if not vc:
-                self.bot.loop.create_task(player.destroy(force=True))
-                return
+                vc = self.bot.get_channel(player.channel_id)
 
-            if control == PlayerControls.help_button:
-                embed = disnake.Embed(
-                    description="📘 **IFORMAÇÕES SOBRE OS BOTÕES** 📘\n\n"
-                                "⏯️ `= Pausar/Retomar a música.`\n"
-                                "⏮️ `= Voltar para a música tocada anteriormente.`\n"
-                                "⏭️ `= Pular para a próxima música.`\n"
-                                "🔀 `= Misturar as músicas da fila.`\n"
-                                "🎶 `= Adicionar música/playlist/favorito.`\n"
-                                "⏹️ `= Parar o player e me desconectar do canal.`\n"
-                                "📑 `= Exibir a fila de música.`\n"
-                                "🛠️ `= Alterar algumas configurações do player:`\n"
-                                "`volume / efeito nightcore / repetição / modo restrito.`\n",
-                    color=self.bot.get_color(interaction.guild.me)
-                )
+                if not vc:
+                    self.bot.loop.create_task(player.destroy(force=True))
+                    return
 
-                await interaction.response.send_message(embed=embed, ephemeral=True)
-                return
+                if control == PlayerControls.help_button:
+                    embed = disnake.Embed(
+                        description="📘 **IFORMAÇÕES SOBRE OS BOTÕES** 📘\n\n"
+                                    "⏯️ `= Pausar/Retomar a música.`\n"
+                                    "⏮️ `= Voltar para a música tocada anteriormente.`\n"
+                                    "⏭️ `= Pular para a próxima música.`\n"
+                                    "🔀 `= Misturar as músicas da fila.`\n"
+                                    "🎶 `= Adicionar música/playlist/favorito.`\n"
+                                    "⏹️ `= Parar o player e me desconectar do canal.`\n"
+                                    "📑 `= Exibir a fila de música.`\n"
+                                    "🛠️ `= Alterar algumas configurações do player:`\n"
+                                    "`volume / efeito nightcore / repetição / modo restrito.`\n",
+                        color=self.bot.get_color(interaction.guild.me)
+                    )
 
-            if not interaction.author.voice or interaction.author.voice.channel != vc:
-                raise GenericError(f"Você deve estar no canal <#{vc.id}> para usar os botões do player.")
+                    await interaction.response.send_message(embed=embed, ephemeral=True)
+                    return
 
-            if control == PlayerControls.volume:
-                kwargs = {"value": None}
+                if not interaction.author.voice or interaction.author.voice.channel != vc:
+                    raise GenericError(f"Você deve estar no canal <#{vc.id}> para usar os botões do player.")
 
-            elif control == PlayerControls.queue:
-                cmd = self.bot.get_slash_command("queue").children.get("show")
+                if control == PlayerControls.volume:
+                    kwargs = {"value": None}
 
-            elif control == PlayerControls.shuffle:
-                cmd = self.bot.get_slash_command("queue").children.get("shuffle")
+                elif control == PlayerControls.queue:
+                    cmd = self.bot.get_slash_command("queue").children.get("show")
 
-            elif control == PlayerControls.seek_to_start:
-                cmd = self.bot.get_slash_command("seek")
-                kwargs = {"position": "0"}
+                elif control == PlayerControls.shuffle:
+                    cmd = self.bot.get_slash_command("queue").children.get("shuffle")
 
-            elif control == PlayerControls.pause_resume:
-                control = PlayerControls.pause if not player.paused else PlayerControls.resume
+                elif control == PlayerControls.seek_to_start:
+                    cmd = self.bot.get_slash_command("seek")
+                    kwargs = {"position": "0"}
 
-            elif control == PlayerControls.loop_mode:
+                elif control == PlayerControls.pause_resume:
+                    control = PlayerControls.pause if not player.paused else PlayerControls.resume
 
-                if player.loop == "current":
-                    kwargs['mode'] = 'queue'
-                elif player.loop == "queue":
-                    kwargs['mode'] = 'off'
-                else:
-                    kwargs['mode'] = 'current'
+                elif control == PlayerControls.loop_mode:
 
-            try:
-                await self.player_interaction_concurrency.acquire(interaction)
-            except commands.MaxConcurrencyReached:
-                raise GenericError(
-                    "**Você tem uma interação em aberto!**\n`Se for uma mensagem oculta, evite clicar em \"ignorar\".`")
+                    if player.loop == "current":
+                        kwargs['mode'] = 'queue'
+                    elif player.loop == "queue":
+                        kwargs['mode'] = 'off'
+                    else:
+                        kwargs['mode'] = 'current'
+
+                try:
+                    await self.player_interaction_concurrency.acquire(interaction)
+                except commands.MaxConcurrencyReached:
+                    raise GenericError(
+                        "**Você tem uma interação em aberto!**\n`Se for uma mensagem oculta, evite clicar em \"ignorar\".`")
 
             if not cmd:
                 cmd = self.bot.get_slash_command(control[12:])
