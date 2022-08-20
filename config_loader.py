@@ -154,6 +154,7 @@ def load_config():
         "COMMAND_LOG",
         "RUN_RPC_SERVER",
         "AUTO_DOWNLOAD_LAVALINK_SERVERLIST",
+        "ENABLE_LOGGER"
 
         "BANS_INTENT",
         "DM_MESSAGES_INTENT",
