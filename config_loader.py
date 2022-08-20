@@ -12,8 +12,6 @@ DEFAULT_CONFIG = {
     "DEFAULT_PREFIX": "!!!",
     "AUTO_SYNC_COMMANDS": True,
     "OWNER_IDS": "",
-    "INTENTS": "",
-    "DISABLE_INTENTS": "",
     "COMMAND_LOG": False,
     "EMBED_COLOR": None,
     "BOT_ADD_REMOVE_LOG": '',
