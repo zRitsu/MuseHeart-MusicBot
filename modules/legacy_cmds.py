@@ -312,7 +312,10 @@ class Owner(commands.Cog):
                     else:
                         txt += ". ./" + venv.split('/')[-1] + " && "
 
-                prefix = ctx.prefix if not str(ctx.guild.me.id) not in ctx.prefix else f"@{ctx.guild.me.name}"
+                try:
+                    prefix = ctx.prefix if not str(ctx.guild.me.id) not in ctx.prefix else f"@{ctx.guild.me.name}"
+                except AttributeError:
+                    prefix = f"@{ctx.guild.me.name}"
 
                 await ctx.send(
                     embed=disnake.Embed(
