@@ -4,6 +4,8 @@ export PYTHONIOENCODING=utf8
 
 if  [ ! -d ".git" ] || [ -z "$(git remote -v)" ]; then
 
+  git init
+
   if [ -z "$SOURCE_REPO" ]; then
     git remote add origin https://github.com/zRitsu/disnake-LL-music-bot.git
   else
