@@ -30,7 +30,6 @@ class MusicSettings(commands.Cog):
 
     desc_prefix = "🔧 [Configurações] 🔧 | "
 
-
     # O nome desse comando está sujeito a alterações (tá ridiculo, mas não consegui pensar em um nome melhor no momento).
     @commands.cooldown(1, 5, commands.BucketType.guild)
     @commands.slash_command(
@@ -100,10 +99,10 @@ class MusicSettings(commands.Cog):
 
         await self.setup.callback(self=self, inter=ctx, target=channel, purge_messages=reset)
 
-
     @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
     @commands.slash_command(
+        name=disnake.Localized("setup", data={disnake.Locale.pt_BR: "configurar_canal"}),
         description=f"{desc_prefix}Criar/escolher um canal dedicado para pedir músicas e deixar player fixado.",
         default_member_permissions=disnake.Permissions(manage_guild=True)
     )
@@ -183,7 +182,6 @@ class MusicSettings(commands.Cog):
             if purge_messages == "sim":
                 await target.purge(limit=100, check=lambda m: m.author != inter.guild.me or not m.thread)
 
-
             if original_message:
 
                 if original_message.channel != target:
@@ -257,7 +255,6 @@ class MusicSettings(commands.Cog):
         except AttributeError:
             await inter.send(embed=embed, ephemeral=True)
 
-
     @commands.has_guild_permissions(manage_guild=True)
     @commands.bot_has_guild_permissions(manage_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
@@ -272,10 +269,10 @@ class MusicSettings(commands.Cog):
 
         await self.reset.callback(self=self, inter=ctx, delete_channel=delete_channel)
 
-
     @commands.bot_has_guild_permissions(manage_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
     @commands.slash_command(
+        name=disnake.Localized("reset", data={disnake.Locale.pt_BR: "resetar_canal"}),
         description=f"{desc_prefix}Resetar as configurações relacionadas ao canal de pedir música (song request).",
         default_member_permissions=disnake.Permissions(manage_guild=True)
     )
@@ -352,16 +349,15 @@ class MusicSettings(commands.Cog):
                 f"```py\n{repr(e)}```"
             )
 
-
     @commands.has_guild_permissions(manage_guild=True)
     @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
     @commands.command(name="adddjrole",description="Adicionar um cargo para a lista de DJ's do servidor.", usage="[id / nome / @cargo]")
     async def add_dj_role_legacy(self, ctx: CustomContext, *, role: disnake.Role):
         await self.add_dj_role(ctx, inter=ctx, role=role)
 
-
     @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
     @commands.slash_command(
+        name=disnake.Localized("add_dj_role", data={disnake.Locale.pt_BR: "adicionar_cargo_dj"}),
         description=f"{desc_prefix}Adicionar um cargo para a lista de DJ's do servidor.",
         default_member_permissions=disnake.Permissions(manage_guild=True)
     )
@@ -387,17 +383,16 @@ class MusicSettings(commands.Cog):
 
         await inter.send(f"O cargo {role.mention} foi adicionado à lista de DJ's", ephemeral=True)
 
-
     @commands.has_guild_permissions(manage_guild=True)
     @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
     @commands.command(description="Remover um cargo para a lista de DJ's do servidor.", usage="[id / nome / @cargo]")
     async def remove_dj_role_legacy(self, ctx: CustomContext, *, role: disnake.Role):
         await self.remove_dj_role(ctx, inter=ctx, role=role)
 
-
     @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
     @commands.slash_command(
-        name="removedjrole", description=f"{desc_prefix}Remover um cargo para a lista de DJ's do servidor.",
+        name=disnake.Localized("removedjrole", data={disnake.Locale.pt_BR: "remover_cargo_dj"}),
+        description=f"{desc_prefix}Remover um cargo para a lista de DJ's do servidor.",
         default_member_permissions=disnake.Permissions(manage_guild=True)
     )
     async def remove_dj_role(
@@ -426,7 +421,6 @@ class MusicSettings(commands.Cog):
 
         await inter.send(f"O cargo {role.mention} foi removido da lista de DJ's", ephemeral=True)
 
-
     @commands.has_guild_permissions(manage_guild=True)
     @commands.cooldown(1, 10, commands.BucketType.guild)
     @commands.max_concurrency(1, commands.BucketType.guild)
@@ -435,10 +429,10 @@ class MusicSettings(commands.Cog):
 
         await self.change_skin(ctx, inter=ctx, skin=None)
 
-
     @commands.cooldown(1, 10, commands.BucketType.guild)
     @commands.max_concurrency(1, commands.BucketType.guild)
     @commands.slash_command(
+        name=disnake.Localized("change_skin", data={disnake.Locale.pt_BR: "mudar_aparência"}),
         description=f"{desc_prefix}Alterar aparência/skin do player.",
         default_member_permissions=disnake.Permissions(manage_guild=True)
     )
@@ -539,21 +533,21 @@ class MusicSettings(commands.Cog):
             player.set_command_log(text=f"{inter.author.mention} alterou a skin do player para: **{skin}**", emoji="🎨")
             await player.invoke_np(force=True)
 
-
     @change_skin.autocomplete("skin")
     async def change_skin_autocomplete(self, inter: disnake.Interaction, current: str):
 
         return [s for s in self.bot.player_skins if s not in self.bot.config["IGNORE_SKINS"].split()]
-
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command(name="nodeinfo", description="Ver informações dos servidores de música.")
     async def nodeinfo_legacy(self, ctx: CustomContext):
         await self.nodeinfo(ctx, inter=ctx)
 
-
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.slash_command(description=f"{desc_prefix}Ver informações dos servidores de música.")
+    @commands.slash_command(
+        name=disnake.Localized("nodeinfo", data={disnake.Locale.pt_BR: "info_server"}),
+        description=f"{desc_prefix}Ver informações dos servidores de música."
+    )
     async def nodeinfo(self, inter: disnake.AppCmdInter):
 
         em = disnake.Embed(color=self.bot.get_color(inter.guild.me), title="Servidores de música:")

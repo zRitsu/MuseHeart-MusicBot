@@ -42,14 +42,18 @@ class PinManager(commands.Cog):
 
         await send_idle_embed(message or channel, bot=self.bot, guild_data=guild_data)
 
-
     @commands.max_concurrency(1, commands.BucketType.user)
-    @commands.slash_command(name="pin", default_member_permissions=disnake.Permissions(manage_guild=True))
+    @commands.slash_command(
+        name=disnake.Localized("pin", data={disnake.Locale.pt_BR: "server_playlist"}),
+        default_member_permissions=disnake.Permissions(manage_guild=True)
+    )
     async def pin(self, inter: disnake.AppCmdInter):
         pass
 
-
-    @pin.sub_command(description=f"{desc_prefix}Adicionar um link para lista de fixos do player.")
+    @pin.sub_command(
+        name=disnake.Localized("add", data={disnake.Locale.pt_BR: "adicionar"}),
+        description=f"{desc_prefix}Adicionar um link para lista de fixos do player."
+    )
     async def add(
             self,
             inter: disnake.AppCmdInter,
@@ -95,8 +99,10 @@ class PinManager(commands.Cog):
 
         await self.process_idle_embed(inter.guild)
 
-
-    @pin.sub_command(description=f"{desc_prefix}Editar um item da lista de links fixos do servidor.")
+    @pin.sub_command(
+        name=disnake.Localized("edit", data={disnake.Locale.pt_BR: "editar"}),
+        description=f"{desc_prefix}Editar um item da lista de links fixos do servidor."
+    )
     async def edit(
             self,
             inter: disnake.AppCmdInter,
@@ -152,8 +158,10 @@ class PinManager(commands.Cog):
 
         await self.process_idle_embed(inter.guild)
 
-
-    @pin.sub_command(description=f"{desc_prefix}Remover um link da lista de links fixos do servidor.")
+    @pin.sub_command(
+        name=disnake.Localized("remove", data={disnake.Locale.pt_BR: "remover"}),
+        description=f"{desc_prefix}Remover um link da lista de links fixos do servidor."
+    )
     async def remove(
             self,
             inter: disnake.AppCmdInter,
@@ -175,9 +183,11 @@ class PinManager(commands.Cog):
 
         await self.process_idle_embed(inter.guild)
 
-
     @commands.cooldown(1, 20, commands.BucketType.guild)
-    @pin.sub_command(name="import",description=f"{desc_prefix}Importar links de arq. json para a lista de links do servidor.")
+    @pin.sub_command(
+        name=disnake.Localized("import", data={disnake.Locale.pt_BR: "importar"}),
+        description=f"{desc_prefix}Importar links de arq. json para a lista de links do servidor."
+    )
     async def import_(
             self,
             inter: disnake.ApplicationCommandInteraction,
@@ -249,9 +259,11 @@ class PinManager(commands.Cog):
 
         await self.process_idle_embed(inter.guild)
 
-
     @commands.cooldown(1, 20, commands.BucketType.guild)
-    @pin.sub_command(description=f"{desc_prefix}Exportar os links de músicas/playlists fixas do servidor em um arquivo json.")
+    @pin.sub_command(
+        name=disnake.Localized("export", data={disnake.Locale.pt_BR: "exportar"}),
+        description=f"{desc_prefix}Exportar os links de músicas/playlists fixas do servidor em um arquivo json."
+    )
     async def export(self, inter: disnake.ApplicationCommandInteraction):
 
         await inter.response.defer(ephemeral=True)

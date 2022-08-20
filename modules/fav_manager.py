@@ -19,14 +19,15 @@ class FavManager(commands.Cog):
 
     desc_prefix = "⭐ [Favoritos] ⭐ | "
 
-
     @commands.max_concurrency(1, commands.BucketType.user)
-    @commands.slash_command(name="fav")
+    @commands.slash_command(name=disnake.Localized("fav", data={disnake.Locale.pt_BR: "favoritos"}),)
     async def fav(self, inter: disnake.ApplicationCommandInteraction):
         pass
 
-
-    @fav.sub_command(description=f"{desc_prefix}Adicionar um link (recomendável: de playlist) para sua lista de favoritos.")
+    @fav.sub_command(
+        name=disnake.Localized("add", data={disnake.Locale.pt_BR: "adicionar"}),
+        description=f"{desc_prefix}Adicionar um link (recomendável: de playlist) para sua lista de favoritos."
+    )
     async def add(
             self,
             inter: disnake.ApplicationCommandInteraction,
@@ -70,8 +71,10 @@ class FavManager(commands.Cog):
                          "- Ao usar o comando play (prefixed) sem nome ou link.```",
                          color=self.bot.get_color(inter.guild.me)))
 
-
-    @fav.sub_command(description=f"{desc_prefix}Editar um item da sua lista de favoritos.")
+    @fav.sub_command(
+        name=disnake.Localized("edit", data={disnake.Locale.pt_BR: "editar"}),
+        description=f"{desc_prefix}Editar um item da sua lista de favoritos."
+    )
     async def edit(
             self,
             inter: disnake.ApplicationCommandInteraction,
@@ -112,8 +115,10 @@ class FavManager(commands.Cog):
 
         await inter.edit_original_message(embed=disnake.Embed(description="**Favorito editado com sucesso!**", color=self.bot.get_color(inter.guild.me)))
 
-
-    @fav.sub_command(description=f"{desc_prefix}Remover um link da sua lista de favoritos.")
+    @fav.sub_command(
+        name=disnake.Localized("remove", data={disnake.Locale.pt_BR: "remover"}),
+        description=f"{desc_prefix}Remover um link da sua lista de favoritos."
+    )
     async def remove(
             self,
             inter: disnake.ApplicationCommandInteraction,
@@ -133,8 +138,9 @@ class FavManager(commands.Cog):
 
         await inter.edit_original_message(embed=disnake.Embed(description="**Link removido com sucesso!**", color=self.bot.get_color(inter.guild.me)))
 
-
-    @fav.sub_command(name="clear", description=f"{desc_prefix}Limpar sua lista de favoritos.")
+    @fav.sub_command(
+        name=disnake.Localized("clear", data={disnake.Locale.pt_BR: "zerar"}),
+        description=f"{desc_prefix}Limpar sua lista de favoritos.")
     async def clear_(self, inter: disnake.ApplicationCommandInteraction):
 
         await inter.response.defer(ephemeral=True)
@@ -155,8 +161,10 @@ class FavManager(commands.Cog):
 
         await inter.edit_original_message(embed=embed)
 
-
-    @fav.sub_command(name="list", description=f"{desc_prefix}Exibir sua lista de favoritos.")
+    @fav.sub_command(
+        name=disnake.Localized("list", data={disnake.Locale.pt_BR: "exibir"}),
+        description=f"{desc_prefix}Exibir sua lista de favoritos."
+    )
     async def list_(
             self, inter: disnake.ApplicationCommandInteraction,
             hidden: bool = commands.Param(
@@ -183,8 +191,10 @@ class FavManager(commands.Cog):
 
         await inter.edit_original_message(embed=embed)
 
-
-    @fav.sub_command(name="import",description=f"{desc_prefix}Importar seus favoritos a partir de um arquivo.")
+    @fav.sub_command(
+        name=disnake.Localized("import", data={disnake.Locale.pt_BR: "importar"}),
+        description=f"{desc_prefix}Importar seus favoritos a partir de um arquivo."
+    )
     async def import_(
             self,
             inter: disnake.ApplicationCommandInteraction,
@@ -251,8 +261,10 @@ class FavManager(commands.Cog):
             )
         )
 
-
-    @fav.sub_command(description=f"{desc_prefix}Exportar seus favoritos em um arquivo json.")
+    @fav.sub_command(
+        name=disnake.Localized("export", data={disnake.Locale.pt_BR: "exportar"}),
+        description=f"{desc_prefix}Exportar seus favoritos em um arquivo json."
+    )
     async def export(self, inter: disnake.ApplicationCommandInteraction):
 
         await inter.response.defer(ephemeral=True)

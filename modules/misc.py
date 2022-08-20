@@ -110,7 +110,10 @@ class Misc(commands.Cog):
         await self.about.callback(self=self, inter=ctx)
 
 
-    @commands.slash_command(description=f"{desc_prefix}Exibir informações sobre mim.")
+    @commands.slash_command(
+        name=disnake.Localized("about", data={disnake.Locale.pt_BR: "sobre_mim"}),
+        description=f"{desc_prefix}Exibir informações sobre mim."
+    )
     async def about(
             self,
             inter: disnake.AppCmdInter,
@@ -194,7 +197,10 @@ class Misc(commands.Cog):
         await self.invite.callback(self=self, inter=ctx)
 
 
-    @commands.slash_command(description=f"{desc_prefix}Exibir meu link de convite para você me adicionar no seu servidor.")
+    @commands.slash_command(
+        name=disnake.Localized("invite", data={disnake.Locale.pt_BR: "convidar"}),
+        description=f"{desc_prefix}Exibir meu link de convite para você me adicionar no seu servidor."
+    )
     async def invite(self, inter: disnake.AppCmdInter):
 
         await inter.response.defer(ephemeral=True)
@@ -253,10 +259,8 @@ class Misc(commands.Cog):
 
         await inter.send(embeds=embeds, ephemeral=True)
 
-
     async def cog_check(self, ctx):
         return await check_requester_channel(ctx)
-
 
     def cog_unload(self):
 
@@ -344,7 +348,6 @@ class GuildLog(commands.Cog):
             owner_mention = ""
 
         await self.send_hook(owner_mention, embed=embed)
-
 
     async def send_hook(self, content="", *, embed: disnake.Embed=None):
 
