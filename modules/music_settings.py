@@ -143,13 +143,22 @@ class MusicSettings(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        try:
-            original_message = await self.bot.get_channel(int(guild_data["player_controller"]["channel"]))\
-                .fetch_message(int(guild_data["player_controller"]["message_id"]))
-        except:
-            original_message = None
-
+        original_message = None
         message = None
+
+        try:
+            player: LavalinkPlayer = self.bot.music.players[inter.guild_id]
+            if player.static:
+                original_message = player.message
+        except KeyError:
+            player = None
+
+        if not original_message:
+            try:
+                original_message = await self.bot.get_channel(int(guild_data["player_controller"]["channel"]))\
+                    .fetch_message(int(guild_data["player_controller"]["message_id"]))
+            except:
+                pass
 
         embed_archived = disnake.Embed(
             description=f"**Este canal de pedir música foi reconfigurado pelo membro {inter.author.mention}.**",
@@ -164,7 +173,10 @@ class MusicSettings(commands.Cog):
                 except:
                     pass
                 try:
-                    await original_message.thread.edit(archived=True, reason=f"Player reconfigurado por {inter.author}.")
+                    await original_message.thread.edit(
+                        archived=True,
+                        locked=True,
+                        reason=f"Player reconfigurado por {inter.author}.")
                 except:
                     pass
 
@@ -178,6 +190,9 @@ class MusicSettings(commands.Cog):
             msg = f"Canal para pedido de músicas criado: {channel.mention}"
 
         else:
+            
+            if not target.permissions_for(inter.guild.me).manage_permissions:
+                raise GenericError(f"**Não tenho permissão de gerenciar permissões no canal:** {target.mention}")
 
             if purge_messages == "sim":
                 await target.purge(limit=100, check=lambda m: m.author != inter.guild.me or not m.thread)
@@ -190,7 +205,11 @@ class MusicSettings(commands.Cog):
                     except:
                         pass
                     try:
-                        await original_message.thread.edit(archived=True, reason=f"Player reconfigurado por {inter.author}.")
+                        await original_message.thread.edit(
+                            archived=True,
+                            locked=True,
+                            reason=f"Player reconfigurado por {inter.author}."
+                        )
                     except:
                         pass
 
@@ -205,32 +224,36 @@ class MusicSettings(commands.Cog):
                         message = m
                         break
 
-            if not target.permissions_for(inter.guild.me).manage_permissions:
-                raise GenericError(f"**Não tenho permissão de gerenciar permissões no canal:** {target.mention}")
-
             await target.edit(overwrites=perms)
 
             channel = target
 
             msg = f"Canal de pedido de músicas definido para: <#{channel.id}>"
 
-        message = await send_idle_embed(message or channel, bot=self.bot, force=True)
-
-        try:
-            player: LavalinkPlayer = self.bot.music.players[inter.guild_id]
-        except KeyError:
-            pass
-        else:
-            try:
-                await player.message.delete()
-                player.message = None
-            except:
-                pass
+        if player and (not player.static or player.text_channel != target):
+            if player.static:
+                try:
+                    await player.message.thread.edit(
+                        archived=True,
+                        locked=True,
+                        reason=f"Player reconfigurado por {inter.author}."
+                    )
+                except:
+                    pass
+            else:
+                try:
+                    await player.message.delete()
+                except:
+                    pass
+            message = await send_idle_embed(message or channel, bot=self.bot, force=True)
+            player.message = message
             player.static = True
             player.text_channel = channel
-            player.message = message
             player.setup_hints()
             await player.invoke_np(force=True)
+
+        if not message:
+            message = await send_idle_embed(message or channel, bot=self.bot, force=True)
 
         if not isinstance(channel, disnake.VoiceChannel):
             if not message.thread:
