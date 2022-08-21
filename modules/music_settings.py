@@ -545,8 +545,8 @@ class MusicSettings(commands.Cog):
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.slash_command(
-        name=disnake.Localized("nodeinfo", data={disnake.Locale.pt_BR: "info_server"}),
-        description=f"{desc_prefix}Ver informações dos servidores de música."
+        name=disnake.Localized("lavalink_servers", data={disnake.Locale.pt_BR: "servidores_lavalink"}),
+        description=f"{desc_prefix}Ver informações dos servidores de música (lavalink servers)."
     )
     async def nodeinfo(self, inter: disnake.AppCmdInter):
 
@@ -568,7 +568,10 @@ class MusicSettings(commands.Cog):
             except KeyError:
                 current_player = None
 
-            if node.stats:
+            if not node.stats:
+                txt += "`Sem informações adicionais...`"
+
+            else:
                 used = humanize.naturalsize(node.stats.memory_used)
                 total = humanize.naturalsize(node.stats.memory_allocated)
                 free = humanize.naturalsize(node.stats.memory_free)
@@ -576,9 +579,8 @@ class MusicSettings(commands.Cog):
                 cpu_usage = f"{node.stats.lavalink_load * 100:.2f}"
                 started = node.stats.players
 
-                ram_txt = f'RAM: `{used}/{free} ({total})`'
-
-                txt += f'{ram_txt}\n' \
+                txt += f'RAM: `{used}/{free}`\n' \
+                       f'RAM Total: `{total}`\n' \
                        f'CPU Cores: `{cpu_cores}`\n' \
                        f'Uso de CPU: `{cpu_usage}%`\n' \
                        f'Uptime: `{time_format(node.stats.uptime)}\n`'
