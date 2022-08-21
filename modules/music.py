@@ -380,6 +380,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             stage_perms = channel.permissions_for(ctx.guild.me)
 
             if stage_perms.manage_roles:
+                await asyncio.sleep(1.5)
                 await ctx.guild.me.edit(suppress=False)
             else:
 
