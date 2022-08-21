@@ -3183,10 +3183,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
     def get_best_node(self):
 
-        return sorted(
-            [n for n in self.bot.music.nodes.values() if n.stats and n.is_available and n.available],
-            key=lambda n: n.stats.players
-        )[0]
+        try:
+            return sorted(
+                [n for n in self.bot.music.nodes.values() if n.stats and n.is_available and n.available],
+                key=lambda n: n.stats.players
+            )[0]
+        except IndexError:
+            raise wavelink.ZeroConnectedNodes()
 
 
 def setup(bot: BotCore):
