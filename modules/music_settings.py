@@ -539,7 +539,11 @@ class MusicSettings(commands.Cog):
         return [s for s in self.bot.player_skins if s not in self.bot.config["IGNORE_SKINS"].split()]
 
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.command(name="nodeinfo", description="Ver informações dos servidores de música.")
+    @commands.command(
+        name="nodeinfo",
+        aliases=["lavalinkservers", "llservers", "ll"],
+        description="Ver informações dos servidores de música."
+    )
     async def nodeinfo_legacy(self, ctx: CustomContext):
         await self.nodeinfo(ctx, inter=ctx)
 
