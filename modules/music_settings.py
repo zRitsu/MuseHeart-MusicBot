@@ -119,13 +119,6 @@ class MusicSettings(commands.Cog):
     ):
 
         perms = {
-            inter.guild.default_role: disnake.PermissionOverwrite(
-                embed_links=False,
-                send_messages=True,
-                send_messages_in_threads=True,
-                read_messages=True,
-                read_message_history=True
-            ),
             inter.guild.me: disnake.PermissionOverwrite(
                 embed_links=True,
                 send_messages=True,
@@ -184,6 +177,18 @@ class MusicSettings(commands.Cog):
                 target = inter.channel.category
             else:
                 target = inter.guild
+
+            perms.update(
+                {
+                    inter.guild.default_role: disnake.PermissionOverwrite(
+                        embed_links=False,
+                        send_messages=True,
+                        send_messages_in_threads=True,
+                        read_messages=True,
+                        read_message_history=True
+                    ),
+                }
+            )
 
             channel = await target.create_text_channel(f"{self.bot.user.name} player controller", overwrites=perms)
 
