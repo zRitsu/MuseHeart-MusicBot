@@ -474,7 +474,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         node = self.bot.music.get_node(server)
 
         if not node:
-            node = self.bot.music.get_best_node()
+            node = self.get_best_node()
 
         if not node:
             raise GenericError("**Não há servidores de música disponível.**")
@@ -2751,7 +2751,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             try:
 
-                new_node: wavelink.Node = self.bot.music.get_best_node()
+                new_node: wavelink.Node = self.get_best_node()
 
                 if not new_node:
 
@@ -2978,7 +2978,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             track_loops=0, hide_playlist=False, use_cache=True):
 
         if not node:
-            node = self.bot.music.get_best_node()
+            node = sorted(
+                [n for n in self.bot.music.nodes if n.stats and n.is_available and n.available],
+                key=lambda n: n.stats.players
+            )[0]
 
             if not node:
                 raise GenericError("**Não há servidores de música disponível.**")
@@ -3177,6 +3180,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         except KeyError:
             pass
         await self.bot.update_data(guild_id, data, db_name=DBModel.guilds)
+
+    def get_best_node(self):
+
+        return sorted(
+            [n for n in self.bot.music.nodes.values() if n.stats and n.is_available and n.available],
+            key=lambda n: n.stats.players
+        )[0]
 
 
 def setup(bot: BotCore):
