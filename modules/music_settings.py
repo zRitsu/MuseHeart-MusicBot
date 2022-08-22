@@ -597,6 +597,7 @@ class MusicSettings(commands.Cog):
             player.auto_update = 0 # linha temporária para resolver possíveis problemas com skins custom criadas por usuarios antes desse commit.
             player.controller_mode = True
             player.set_command_log(text=f"{inter.author.mention} alterou a skin do player para: **{skin}**", emoji="🎨")
+            player.process_hint()
             await player.invoke_np(force=True)
 
     @change_skin.autocomplete("skin")
