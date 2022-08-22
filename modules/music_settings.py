@@ -90,14 +90,28 @@ class MusicSettings(commands.Cog):
     async def setup_legacy(
             self,
             ctx: CustomContext,
-            channel: Union[disnake.TextChannel, disnake.VoiceChannel] = None, *,
-            reset: str = None
+            channel: Union[disnake.TextChannel, disnake.VoiceChannel, None] = None, *args
     ):
 
-        if reset == "--reset":
-            reset = "sim"
+        args = list(args)
 
-        await self.setup.callback(self=self, inter=ctx, target=channel, purge_messages=reset)
+        if "--reset" in args:
+            purge_messages = "yes"
+            args.remove("--reset")
+        else:
+            purge_messages = "no"
+
+        if "--voice" in args:
+            create_voice_channel = "yes"
+            args.remove("--voice")
+        else:
+            create_voice_channel = "no"
+
+        if args:
+            raise GenericError("**Opção inválida:** " + " ".join(args))
+
+        await self.setup.callback(self=self, inter=ctx, target=channel,
+                                  purge_messages=purge_messages, create_voice_channel=create_voice_channel)
 
     @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
@@ -112,9 +126,29 @@ class MusicSettings(commands.Cog):
             target: Union[disnake.TextChannel, disnake.VoiceChannel] = commands.Param(
                 name="canal", default=None, description="Selecionar um canal existente"
             ),
+            create_voice_channel: str = commands.Param(
+                name="criar_canal_de_voz", default="no",
+                description="Criar canal de voz ao invés de texto (quando um canal não for usado).",
+                choices=[
+                    disnake.OptionChoice(
+                        disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"
+                    ),
+                    disnake.OptionChoice(
+                        disnake.Localized("No", data={disnake.Locale.pt_BR: "Não"}), "no"
+                    )
+                ],
+            ),
             purge_messages: str = commands.Param(
-                name="limpar_mensagens", choices=["sim", "não"],  default="não",
+                name="limpar_mensagens", default="no",
                 description="Limpar mensagens do canal selecionado (até 100 mensagens)",
+                choices=[
+                    disnake.OptionChoice(
+                        disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"
+                    ),
+                    disnake.OptionChoice(
+                        disnake.Localized("No", data={disnake.Locale.pt_BR: "Não"}), "no"
+                    )
+                ],
             )
     ):
 
@@ -190,7 +224,9 @@ class MusicSettings(commands.Cog):
                 }
             )
 
-            channel = await target.create_text_channel(f"{self.bot.user.name} player controller", overwrites=perms)
+            create_func = target.create_voice_channel if create_voice_channel == "yes" else target.create_text_channel
+
+            channel = await create_func(f"{self.bot.user.name} player controller", overwrites=perms)
 
             msg = f"Canal para pedido de músicas criado: {channel.mention}"
 
@@ -199,7 +235,7 @@ class MusicSettings(commands.Cog):
             if not target.permissions_for(inter.guild.me).manage_permissions:
                 raise GenericError(f"**Não tenho permissão de gerenciar permissões no canal:** {target.mention}")
 
-            if purge_messages == "sim":
+            if purge_messages == "yes":
                 await target.purge(limit=100, check=lambda m: m.author != inter.guild.me or not m.thread)
 
             if original_message:
@@ -265,6 +301,8 @@ class MusicSettings(commands.Cog):
                 await message.create_thread(name="song requests", auto_archive_duration=10080)
             elif message.thread.archived:
                 await message.thread.edit(archived=False, reason=f"Song request reativado por: {inter.author}.")
+        elif player and player.guild.me.voice.channel != channel:
+            await player.connect(channel.id)
 
         guild_data['player_controller']['channel'] = str(channel.id)
         guild_data['player_controller']['message_id'] = str(message.id)
