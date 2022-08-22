@@ -252,7 +252,7 @@ class LavalinkPlayer(wavelink.Player):
 
         if not self.static and not self.controller_mode:
 
-            cmds = " | ".join(f"/{self.bot.get_slash_command(c).name}" for c in ['play', 'back', 'readd', 'stop'])
+            cmds = " | ".join(f"{self.bot.get_slash_command(c).name}" for c in ['play', 'back', 'readd', 'stop'])
 
             embed = disnake.Embed(
                 description=f"**As músicas acabaram... Use um dos comandos abaixo para adicionar músicas ou parar "
