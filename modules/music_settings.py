@@ -493,7 +493,7 @@ class MusicSettings(commands.Cog):
     @commands.command(description="Alterar aparência/skin do player.", name="changeskin", aliases=["setskin", "skin"])
     async def change_skin_legacy(self, ctx: CustomContext):
 
-        await self.change_skin(ctx, inter=ctx, skin=None)
+        await self.change_skin.callback(self=self, inter=ctx, skin=None)
 
     @commands.cooldown(1, 10, commands.BucketType.guild)
     @commands.max_concurrency(1, commands.BucketType.guild)
