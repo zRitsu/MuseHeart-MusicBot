@@ -13,7 +13,7 @@ Há alguns bots meus já feito e hospedado usando esta source, você pode adicio
 
 [![Run on Repl.it](https://replit.com/badge/github/zRitsu/disnake-LL-music-bot)](https://replit.com/new/github/zRitsu/disnake-LL-music-bot)
 
-* 1 - Após clicar no botão acima, clique em "import from github" e aguarde carregar.
+* 1 - Após clicar no botão acima, aguarde até o deploy ser concluído.
 * 2 - Vá em secrets (cadeado do painel à esquerda) e crie uma secret com nome TOKEN e no value coloque o token do seu bot. `(caso queira alterar outras configs, consulte o arquivo .env-example)`
 * 3 - Clique em run (botão de **play**) e aguarde o bot instalar as dependências e iniciar.
 
