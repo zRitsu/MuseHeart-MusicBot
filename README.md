@@ -4,14 +4,14 @@
 
 Há alguns bots meus já feito e hospedado usando esta source, você pode adicionar um dos meus bots abaixo: 
 
-| ![](https://cdn.discordapp.com/avatars/784891594306093101/bb5355bb0fd46eaca1b89a983d8f4c15.png) | ![](https://cdn.discordapp.com/avatars/825460549419794462/8259b8ec375691b26e964187130a3edf.png) |
+| ![](https://cdn.discordapp.com/avatars/784891594306093101/b8a201bff9f563e4d1d54e7a470a1d53.png) | ![](https://cdn.discordapp.com/avatars/825460549419794462/8259b8ec375691b26e964187130a3edf.png) |
 |---------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
 | [Muse Heart](https://dsc.gg/muse-heart-music) | [Muse Heart (2)](https://dsc.gg/muse-heart-music-2)|
 
 ## Teste agora mesmo um bot próprio com esta source fazendo deploy em um dos serviços abaixo:
 </br>
 
-[![Run on Repl.it](https://repl.it/badge/github/zRitsu/disnake-LL-music-bot)](https://repl.it/github/zRitsu/disnake-LL-music-bot)
+[![Run on Repl.it](https://replit.com/badge/github/zRitsu/disnake-LL-music-bot)](https://replit.com/new/github/zRitsu/disnake-LL-music-bot)
 
 * 1 - Após clicar no botão acima, clique em "import from github" e aguarde carregar.
 * 2 - Vá em secrets (cadeado do painel à esquerda) e crie uma secret com nome TOKEN e no value coloque o token do seu bot. `(caso queira alterar outras configs, consulte o arquivo .env-example)`
