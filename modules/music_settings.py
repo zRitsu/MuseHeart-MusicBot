@@ -212,18 +212,6 @@ class MusicSettings(commands.Cog):
             else:
                 target = inter.guild
 
-            perms.update(
-                {
-                    inter.guild.default_role: disnake.PermissionOverwrite(
-                        embed_links=False,
-                        send_messages=True,
-                        send_messages_in_threads=True,
-                        read_messages=True,
-                        read_message_history=True
-                    ),
-                }
-            )
-
             create_func = target.create_voice_channel if create_voice_channel == "yes" else target.create_text_channel
 
             channel = await create_func(f"{self.bot.user.name} player controller", overwrites=perms)
