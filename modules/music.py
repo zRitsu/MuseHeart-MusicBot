@@ -1378,10 +1378,18 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 description="Nome da música completo.",
                 autocomplete=queue_tracks
             ),
-            bump_only: str = commands.Param(
-                choices=["sim", "não"],
+            play_only: str = commands.Param(
+                name=disnake.Localized("play_only", data={disnake.Locale.pt_BR: "tocar_apenas"}),
+                choices=[
+                    disnake.OptionChoice(
+                        disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"
+                    ),
+                    disnake.OptionChoice(
+                        disnake.Localized("No", data={disnake.Locale.pt_BR: "Não"}), "no"
+                    )
+                ],
                 description="Apenas tocar a música imediatamente (sem rotacionar a flia)",
-                default="não"
+                default="no"
             )
     ):
 
@@ -1400,12 +1408,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if player.loop == "current":
             player.loop = False
 
-        if bump_only == "sim":
+        if play_only == "yes":
             del player.queue[index]
             player.queue.appendleft(track)
 
         elif index > 0:
-            player.queue.rotate(0 - (index))
+            player.queue.rotate(0 - index)
 
         txt = [
             "pulou para a música atual.",
