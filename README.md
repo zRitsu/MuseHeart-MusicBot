@@ -2,12 +2,6 @@
 ### bot de música programado em python com player interativo, comandos barra/slash, etc. Utilizando as libs disnake e wavelink/lavalink.
 <br/>
 
-Há alguns bots meus já feito e hospedado usando esta source, você pode adicionar um dos meus bots abaixo: 
-
-| ![](https://cdn.discordapp.com/avatars/784891594306093101/b8a201bff9f563e4d1d54e7a470a1d53.png) | ![](https://cdn.discordapp.com/avatars/825460549419794462/8259b8ec375691b26e964187130a3edf.png) |
-|---------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
-| [Muse Heart](https://dsc.gg/muse-heart-music) | [Muse Heart (2)](https://dsc.gg/muse-heart-music-2)|
-
 ## Teste agora mesmo um bot próprio com esta source fazendo deploy em um dos serviços abaixo:
 </br>
 
