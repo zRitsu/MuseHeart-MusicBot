@@ -3138,8 +3138,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         except AttributeError:
             pass
 
-        if not before.channel and after.channel and self.bot.config["GUILD_DEAFEN_WARN"] and \
-                not after.deaf and not member.guild.me.guild_permissions.deafen_members:
+        if self.bot.config["GUILD_DEAFEN_WARN"] and member.bot and not before.channel and \
+                after.channel and not after.deaf and not member.guild.me.guild_permissions.deafen_members:
 
             await player.text_channel.send(
                 embed=disnake.Embed(
