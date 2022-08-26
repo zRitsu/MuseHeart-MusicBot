@@ -45,7 +45,7 @@ DEFAULT_CONFIG = {
     "USER_FAV_MAX_URL_LENGTH": 90,
     "HINT_RATE": 4,
     "IGNORE_SKINS": '',
-    "GUILD_DEAFEN_WARN": False,
+    "GUILD_DEAFEN_WARN": True,
 
     ##############################################
     ### Sistema de música - Suporte ao spotify ###
