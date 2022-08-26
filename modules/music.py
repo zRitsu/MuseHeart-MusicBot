@@ -41,6 +41,18 @@ SearchSource = commands.option_enum(
 u_agent = generate_user_agent()
 
 
+async def check_deafen(ctx: Union[disnake.AppCmdInter, commands.Context, disnake.Message]):
+
+    if ctx.guild.me.voice.deaf:
+        return True
+    elif ctx.guild.me.guild_permissions.deafen_members:
+        try:
+            await ctx.guild.me.edit(deafen=True)
+            return True
+        except:
+            traceback.print_exc()
+
+
 class Music(commands.Cog, wavelink.WavelinkMixin):
 
     def __init__(self, bot: BotCore):
@@ -363,12 +375,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     f"**Conectei no canal** <#{channel.id}>"
                 ]
 
-                try:
-                    if ctx.guild.me.guild_permissions.deafen_members and not ctx.guild.me.voice.deaf:
-                        await ctx.guild.me.edit(deafen=True)
-                        deafen_warn = False
-                except:
-                    traceback.print_exc()
+                if await check_deafen(ctx):
+                    deafen_warn = False
 
             await self.interaction_message(ctx, txt, emoji="🔈", rpc_update=True)
 
@@ -377,12 +385,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             await asyncio.sleep(1)
 
-            try:
-                if ctx.guild.me.guild_permissions.deafen_members and not ctx.guild.me.voice.deaf:
-                    await ctx.guild.me.edit(deafen=True)
-                    deafen_warn = False
-            except:
-                traceback.print_exc()
+            if await check_deafen(ctx):
+                deafen_warn = False
 
         try:
             player.members_timeout_task.cancel()
@@ -397,7 +401,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     description="Para manter sua privacidade e me ajudar a economizar "
                                 "recursos, recomendo desativar meu áudio do canal clicando"
                                 "com botão direito sobre mim e em seguida marcar: desativar "
-                                "áudio no servidor."
+                                "áudio no servidor.",
+                    color=self.bot.get_color(ctx.guild.me),
                 ).set_image(
                     url="https://cdn.discordapp.com/attachments/554468640942981147/1012533546386210956/unknown.png"
                 ), delete_after=13
