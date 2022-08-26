@@ -405,7 +405,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     color=self.bot.get_color(ctx.guild.me),
                 ).set_image(
                     url="https://cdn.discordapp.com/attachments/554468640942981147/1012533546386210956/unknown.png"
-                ), delete_after=13
+                ), delete_after=20
             )
 
         if isinstance(channel, disnake.StageChannel):
