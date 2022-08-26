@@ -45,6 +45,7 @@ DEFAULT_CONFIG = {
     "USER_FAV_MAX_URL_LENGTH": 90,
     "HINT_RATE": 4,
     "IGNORE_SKINS": '',
+    "GUILD_DEAFEN_WARN": False,
 
     ##############################################
     ### Sistema de música - Suporte ao spotify ###
@@ -155,6 +156,7 @@ def load_config():
         "RUN_RPC_SERVER",
         "AUTO_DOWNLOAD_LAVALINK_SERVERLIST",
         "ENABLE_LOGGER",
+        "GUILD_DEAFEN_WARN",
 
         "BANS_INTENT",
         "DM_MESSAGES_INTENT",

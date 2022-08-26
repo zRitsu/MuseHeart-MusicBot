@@ -349,11 +349,18 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             await player.connect(channel.id, self_deaf=True)
 
-            txt = [
-                f"{'me moveu para o' if channel != ctx.guild.me.voice and ctx.guild.me.voice.channel else 'me reconectou no'}"
-                f" canal <#{channel.id}>",
-                f"**Conectei no canal** <#{channel.id}>."
-            ]
+            if channel != ctx.guild.me.voice and ctx.guild.me.voice.channel:
+                txt = [
+                    f"me moveu para o canal <#{channel.id}>",
+                    f"**Movido com sucesso para o canal** <#{channel.id}>"
+                ]
+
+            else:
+                txt = [
+                    f"me conectou no canal <#{channel.id}>",
+                    f"**Conectei no canal** <#{channel.id}>"
+                ]
+
             await self.interaction_message(ctx, txt, emoji="🔈", rpc_update=True)
 
         else:
@@ -3127,10 +3134,26 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         try:
             player.members_timeout_task.cancel()
-        except:
+            player.members_timeout_task = None
+        except AttributeError:
             pass
 
-        if not player.nonstop and player.guild.me.voice:
+        if not before.channel and after.channel and self.bot.config["GUILD_DEAFEN_WARN"] and \
+                not after.deaf and not member.guild.me.guild_permissions.deafen_members:
+
+            await player.text_channel.send(
+                embed=disnake.Embed(
+                    title="Aviso:",
+                    description="Para manter sua privacidade e me ajudar a economizar "
+                                "recursos, recomendo desativar meu áudio do canal clicando"
+                                "com botão direito sobre mim e em seguida marcar: desativar "
+                                "áudio no servidor."
+                ).set_image(
+                    url="https://cdn.discordapp.com/attachments/554468640942981147/1012533546386210956/unknown.png"
+                ), delete_after=13
+            )
+
+        if player.guild.me.voice and not player.nonstop:
 
             if self.bot.intents.members:
                 check = any(m for m in player.guild.me.voice.channel.members if not m.bot)
@@ -3139,11 +3162,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             if not check:
                 player.members_timeout_task = self.bot.loop.create_task(player.members_timeout())
-            else:
-                player.members_timeout_task = None
-
-        else:
-            player.members_timeout_task = None
 
         # rich presence stuff
 
