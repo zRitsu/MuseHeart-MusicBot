@@ -340,6 +340,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if guild_data["check_other_bots_in_vc"] and any(m for m in channel.members if m.bot and m != ctx.guild.me):
             raise GenericError(f"**Há outro bot conectado no canal:** <#{ctx.author.voice.channel.id}>")
 
+        deafen_warn = self.bot.config["GUILD_DEAFEN_WARN"]
+
         if isinstance(ctx, disnake.AppCmdInter) and ctx.application_command.name == self.connect.name:
 
             perms = channel.permissions_for(ctx.guild.me)
@@ -361,6 +363,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     f"**Conectei no canal** <#{channel.id}>"
                 ]
 
+                try:
+                    if ctx.guild.me.guild_permissions.deafen_members and not ctx.guild.me.voice.deaf:
+                        await ctx.guild.me.edit(deafen=True)
+                        deafen_warn = False
+                except:
+                    traceback.print_exc()
+
             await self.interaction_message(ctx, txt, emoji="🔈", rpc_update=True)
 
         else:
@@ -371,6 +380,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             try:
                 if ctx.guild.me.guild_permissions.deafen_members and not ctx.guild.me.voice.deaf:
                     await ctx.guild.me.edit(deafen=True)
+                    deafen_warn = False
             except:
                 traceback.print_exc()
 
@@ -378,6 +388,20 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             player.members_timeout_task.cancel()
         except:
             pass
+
+        if deafen_warn:
+
+            await player.text_channel.send(
+                embed=disnake.Embed(
+                    title="Aviso:",
+                    description="Para manter sua privacidade e me ajudar a economizar "
+                                "recursos, recomendo desativar meu áudio do canal clicando"
+                                "com botão direito sobre mim e em seguida marcar: desativar "
+                                "áudio no servidor."
+                ).set_image(
+                    url="https://cdn.discordapp.com/attachments/554468640942981147/1012533546386210956/unknown.png"
+                ), delete_after=13
+            )
 
         if isinstance(channel, disnake.StageChannel):
 
@@ -3137,21 +3161,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             player.members_timeout_task = None
         except AttributeError:
             pass
-
-        if self.bot.config["GUILD_DEAFEN_WARN"] and member.bot and not before.channel and \
-                after.channel and not after.deaf and not member.guild.me.guild_permissions.deafen_members:
-
-            await player.text_channel.send(
-                embed=disnake.Embed(
-                    title="Aviso:",
-                    description="Para manter sua privacidade e me ajudar a economizar "
-                                "recursos, recomendo desativar meu áudio do canal clicando"
-                                "com botão direito sobre mim e em seguida marcar: desativar "
-                                "áudio no servidor."
-                ).set_image(
-                    url="https://cdn.discordapp.com/attachments/554468640942981147/1012533546386210956/unknown.png"
-                ), delete_after=13
-            )
 
         if player.guild.me.voice and not player.nonstop:
 
