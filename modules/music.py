@@ -336,7 +336,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 embed=disnake.Embed(
                     title="Aviso:",
                     description="Para manter sua privacidade e me ajudar a economizar "
-                                "recursos, recomendo desativar meu áudio do canal clicando"
+                                "recursos, recomendo desativar meu áudio do canal clicando "
                                 "com botão direito sobre mim e em seguida marcar: desativar "
                                 "áudio no servidor.",
                     color=self.bot.get_color(ctx.guild.me),
