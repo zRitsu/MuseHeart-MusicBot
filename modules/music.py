@@ -200,69 +200,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await ctx.send("O arquivo de cache foi importado com sucesso!", delete_after=30)
 
-    """@check_voice()
-    @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
-    @can_send_message()
-    @commands.user_command(name="enqueue presence track")
-    async def user_play(self, inter: disnake.UserCommandInteraction):
-
-        #inter.target.activities fica retornando None mesmo com intents.presences ativada.
-        member = inter.guild.get_member(inter.target.id)
-
-        query = ""
-
-        for a in member.activities:
-            if isinstance(a, disnake.activity.Spotify):
-                query = f"{a.title} - {a.artists[0]}"
-                break
-
-            if not isinstance(a, disnake.Activity):
-                continue
-
-            ac = a.to_dict()
-
-            if a.application_id == 463097721130188830:
-
-                if not ac.get('buttons'):
-                    continue
-
-                query = a.details.split("|")[0]
-                break
-
-            if a.application_id == 367827983903490050:
-
-                state = ac.get('state')
-
-                detais = ac.get('details')
-
-                if not state:
-                    continue
-
-                if state.lower() in ['afk', 'idle', 'looking for a game']:
-                    raise GenericError(
-                        f"{member.mention} está jogando **OSU!** mas no momento não está com uma música ativa...")
-
-                if not detais:
-                    raise GenericError(
-                        f"{member.mention} está jogando **OSU!** mas no momento não está com uma música ativa...")
-
-                query = "[".join(detais.split("[")[:-1])
-
-                break
-
-        if not query:
-            raise GenericError(f"{member.mention} não está com status do spotify, OSU! ou youtube.")
-
-        await self.bot.get_slash_command('play')(
-            inter,
-            query=query,
-            position=0,
-            options="",
-            manual_selection=False,
-            source="ytsearch",
-            repeat_amount=0,
-        )"""
-
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @can_send_message()
