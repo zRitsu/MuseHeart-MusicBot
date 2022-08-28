@@ -1,5 +1,4 @@
 services:
-  # A Ruby web service
   - type: web
     name: disnake_music
     env: python
@@ -13,7 +12,6 @@ services:
         sync: false
       - key: DEFAULT_PREFIX
         value: !!!
-        sync: false
       - key: SPOTIFY_CLIENT_ID
         sync: false
       - key: SPOTIFY_CLIENT_SECRET
