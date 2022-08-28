@@ -9,7 +9,6 @@ from zipfile import ZipFile
 import disnake
 import dotenv
 import wavelink
-import psutil
 from disnake.ext import commands
 from utils.client import BotCore
 from utils.db import DBModel
@@ -125,21 +124,16 @@ class Owner(commands.Cog):
                         with open(url.split("/")[-1], "wb") as f:
                             f.write(lavalink_jar)
 
-        for process in psutil.process_iter():
-            try:
-                if "Lavalink.jar" in process.cmdline():
-                    print(f"{ctx.invoked_with} - Reiniciando lavalink...")
-                    process.terminate()
-                    run_lavalink(
-                        lavalink_file_url=self.bot.config['LAVALINK_FILE_URL'],
-                        lavalink_initial_ram=self.bot.config['LAVALINK_INITIAL_RAM'],
-                        lavalink_ram_limit=self.bot.config['LAVALINK_RAM_LIMIT'],
-                        lavalink_additional_sleep=int(self.bot.config['LAVALINK_ADDITIONAL_SLEEP']),
-                    )
-            except (psutil.AccessDenied, PermissionError):
-                continue
-            except Exception:
-                traceback.print_exc()
+        try:
+            self.bot.pool.lavalink_process.kill()
+            self.bot.pool.lavalink_process = run_lavalink(
+                lavalink_file_url=self.bot.config['LAVALINK_FILE_URL'],
+                lavalink_initial_ram=self.bot.config['LAVALINK_INITIAL_RAM'],
+                lavalink_ram_limit=self.bot.config['LAVALINK_RAM_LIMIT'],
+                lavalink_additional_sleep=int(self.bot.config['LAVALINK_ADDITIONAL_SLEEP']),
+            )
+        except AttributeError:
+            pass
 
         await ctx.send(
             embed=disnake.Embed(

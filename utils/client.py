@@ -3,6 +3,7 @@ import asyncio
 import datetime
 import json
 import logging
+import subprocess
 from configparser import ConfigParser
 from importlib import import_module
 from subprocess import check_output
@@ -48,6 +49,7 @@ class BotPool:
         self.database: Union[MongoDatabase, LocalDatabase] = None
         self.ws_client: Optional[WSClient] = None
         self.spotify: Optional[Client] = None
+        self.lavalink_process: Optional[subprocess.Popen] = None
         self.config = {}
         self.commit = ""
         self.remote_git_url = ""
@@ -249,7 +251,7 @@ class BotPool:
             raise Exception("O token do bot não foi configurado devidamente!")
 
         if start_local:
-            run_lavalink(
+            self.lavalink_process = run_lavalink(
                 lavalink_file_url=self.config['LAVALINK_FILE_URL'],
                 lavalink_initial_ram=self.config['LAVALINK_INITIAL_RAM'],
                 lavalink_ram_limit=self.config['LAVALINK_RAM_LIMIT'],
