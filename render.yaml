@@ -11,7 +11,7 @@ services:
       - key: TOKEN
         sync: false
       - key: DEFAULT_PREFIX
-        value: !!!
+        sync: false
       - key: SPOTIFY_CLIENT_ID
         sync: false
       - key: SPOTIFY_CLIENT_SECRET
