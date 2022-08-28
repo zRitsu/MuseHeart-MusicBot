@@ -2,7 +2,6 @@ services:
   - type: web
     name: disnake_music
     env: python
-    branch: experimental/render-deploy
     plan: free
     repo: https://github.com/zRitsu/disnake-LL-music-bot.git
     buildCommand: pip3 install -r requirements.txt --no-cache-dir
