@@ -1,6 +1,21 @@
 # disnake-LL-music-bot
-### bot de música programado em python com player interativo, comandos barra/slash, etc. Utilizando as libs disnake e wavelink/lavalink.
-<br/>
+## bot de música programado em python com player interativo, comandos barra/slash, etc. Utilizando as libs disnake e wavelink/lavalink.
+
+### Algumas previews:
+
+- Comandos de barra / Slash commands
+
+![](https://media.discordapp.net/attachments/554468640942981147/944942596814426122/unknown.png)
+
+- Player controller: modo normal/mini-player (skin: default_progressbar)
+
+![](https://media.discordapp.net/attachments/554468640942981147/944942948406153276/unknown.png)
+
+- Player controller: modo fixo/estendido com canal e conversa de song requests (skin: default_progressbar), configurável com o comando: /setup
+
+![](https://media.discordapp.net/attachments/554468640942981147/944945573834936340/unknown.png)
+
+* Há outras skins, consulte usando o comando /change_skin (você também pode criar outras, use os modelos padrões que estão na pasta [skins](utils/music/skins/) como referência, crie uma cópia com outro nome e modifique a seu gosto).
 
 ## Teste agora mesmo um bot próprio com esta source fazendo deploy em um dos serviços abaixo:
 </br>
@@ -10,6 +25,16 @@
 * 1 - Após clicar no botão acima, aguarde até o deploy ser concluído.
 * 2 - Vá em secrets (cadeado do painel à esquerda) e crie uma secret com nome TOKEN e no value coloque o token do seu bot. `(caso queira alterar outras configs, consulte o arquivo .env-example)`
 * 3 - Clique em run (botão de **play**) e aguarde o bot instalar as dependências e iniciar.
+
+---
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/zRitsu/disnake-LL-music-bot/tree/main)
+
+* 1 - No campo **TOKEN** coloque o token do bot **( [tutorial de como obter](https://www.youtube.com/watch?v=lfdmZQySTXE) )**.
+* 2 - No campo **DEFAULT_PREFIX** coloque um prefixo para o bot.
+* 3 - Nos campos **SPOTIFY_CLIENT_ID** e **SPOTIFY_CLIENT_SECRET** coloque as suas keys do spotify **( [tutorial de como obter](https://www.youtube.com/watch?v=ceKQjWiCyWE) )**.
+* 4 - No campo **MONGO** coloque o link da sua database do MongoDB **( [tutorial de como obter](https://www.youtube.com/watch?v=x1Gq5beRx9k) )**.
+* 5 - Em Apply e aguarde o processo de build até o bot iniciar (isso pode demorar bastante, no mínimo uns 7 minutos ou mais).
+
 
 ---
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/zRitsu/disnake-LL-music-bot)
@@ -60,7 +85,7 @@ git clone https://github.com/zRitsu/disnake-LL-music-bot.git
 bash setup.sh
 ```
 * Vai aparecer um arquivo com nome **.env**, edite ele e coloque o token do bot no campo apropriado (você também pode editar outras coisas deste mesmo arquivo caso queira fazer ajustes específicos no bot).</br>
-`Nota: Caso não tenha criado uma conta de bot, acesse este` [link](https://docs.disnake.dev/en/latest/discord.html) `com guia (em inglês) pra criar seu bot e obter o token necessário.` 
+`Nota: Caso não tenha criado uma conta de bot,` [veja este tutorial](https://www.youtube.com/watch?v=lfdmZQySTXE) `para criar seu bot e obter o token necessário.` 
 * Agora basta apenas abrir o arquivo run.sh para iniciar o bot (caso esteja usando linux use o comando abaixo):
 ```shell
 bash run.sh
@@ -81,21 +106,3 @@ bash update.sh
 * Recomendo usar a source atual sem alterações no code que vá alem de textos. Caso queira fazer modificações (e principalmente adicionar novas funcionalidades) é altamente recomendável que tenha conhecimento em python e disnake. E caso queira manter sua source modificada com updates em dias usando a source base também recomendo ter conhecimento em git (pelo menos o necessário pra fazer um merge sem erros).
 
 * Caso queira fazer algum vídeo/tutorial usando esta source, você está totalmente livre para usá-la pra essa finalidade desde que esteja de acordo com a [licença](/LICENSE) (e caso queira me ajudar, mantenha os créditos originais no code, aparece apenas no comando /about)
-
-
-
-### Algumas previews:
-
-- Comandos de barra / Slash commands
-
-![](https://media.discordapp.net/attachments/554468640942981147/944942596814426122/unknown.png)
-
-- Player controller: modo normal/mini-player (skin: default_progressbar)
-
-![](https://media.discordapp.net/attachments/554468640942981147/944942948406153276/unknown.png)
-
-- Player controller: modo fixo/estendido com canal e conversa de song requests (skin: default_progressbar), configurável com o comando: /setup
-
-![](https://media.discordapp.net/attachments/554468640942981147/944945573834936340/unknown.png)
-
-* Há outras skins, consulte usando o comando /change_skin (você também pode criar outras, use os modelos padrões que estão na pasta [skins](utils/music/skins/) como referência, crie uma cópia com outro nome e modifique a seu gosto).
