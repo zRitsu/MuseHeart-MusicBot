@@ -33,7 +33,7 @@
 * 2 - No campo **DEFAULT_PREFIX** coloque um prefixo para o bot.
 * 3 - Nos campos **SPOTIFY_CLIENT_ID** e **SPOTIFY_CLIENT_SECRET** coloque as suas keys do spotify **( [tutorial de como obter](https://www.youtube.com/watch?v=ceKQjWiCyWE) )**.
 * 4 - No campo **MONGO** coloque o link da sua database do MongoDB **( [tutorial de como obter](https://www.youtube.com/watch?v=x1Gq5beRx9k) )**.
-* 5 - Em Apply e aguarde o processo de build até o bot iniciar (isso pode demorar bastante, no mínimo uns 7 minutos ou mais).
+* 5 - Clique em Apply e aguarde o processo de build até o bot iniciar (isso pode demorar bastante, no mínimo uns 13 minutos ou mais para o deploy ser finalizado + bot iniciar + servidor lavalink iniciar).
 
 
 ---
