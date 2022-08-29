@@ -35,6 +35,11 @@
 * 4 - No campo **MONGO** coloque o link da sua database do MongoDB **( [tutorial de como obter](https://www.youtube.com/watch?v=x1Gq5beRx9k) )**.
 * 5 - Clique em Apply e aguarde o processo de build até o bot iniciar (isso pode demorar bastante, no mínimo uns 13 minutos ou mais para o deploy ser finalizado + bot iniciar + servidor lavalink iniciar).
 
+---
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template/WbAx7d?referralCode=JDUKpu)
+* 1 - Preencha os dados que vão ser requisitados na próxima página (os que tem asteríscos vermelhos são obrigatórios).
+* 2 - Clique no botão deploy e aguarde até o deploy ser concluído (Ficando com cor verde. Pode demorar alguns segundos antes de aparecer um deploy na lista).
+* **Nota:** Caso queira alterar as configs usadas no passo 1, clique em variables e crie/altere a key e o valor desejado da config, consulte o arquivo .env-example para ver todas as configs disponíveis.
 
 ---
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/zRitsu/disnake-LL-music-bot)
@@ -43,7 +48,6 @@
 * 2 - Clique com botão direito em cima do arquivo main.py e depois clique em: Run Python File in Terminal.
 * **Nota 1:** Não esqueça de ir na lista de [workspaces](https://gitpod.io/workspaces) e clicar nos 3 pontinhos do projeto e depois clicar em **pin**. `(isso evitará o worskpace ser deletado após 14 dias inativo)`
 * **Nota 2:** Não use o gitpod para hospedar/manter o bot online, pois o mesmo não funciona pra isso!
-
 
 ---
 [![Heroku_Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/zRitsu/disnake-LL-music-bot/tree/main)
