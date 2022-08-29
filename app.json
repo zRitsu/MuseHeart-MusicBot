@@ -17,27 +17,37 @@
       "url": "heroku/python"
     }
   ],
-    "env": {
-      "TOKEN": {
-        "description": "Token do bot aqui (caso não tenha, veja como obter/criar um bot account: https://www.youtube.com/watch?v=lfdmZQySTXE).",
-        "required": true
-      },
-      "DEFAULT_PREFIX": {
-        "description": "Prefixo do bot (@mençãodobot já funciona como prefixo).",
-        "value": "!!!",
-        "required": true
-      },
-      "SPOTIFY_CLIENT_ID": {
-        "description": "Client ID do spotify (obrigatório caso queira suporte ao spotify, veja o tutorial para obter o client_id e client_secret: https://www.youtube.com/watch?v=ceKQjWiCyWE)",
-        "required": false
-      },
-      "SPOTIFY_CLIENT_SECRET": {
-        "description": "Client SECRET do spotify (obrigatório caso queira suporte ao spotify, veja o tutorial para obter o client_id e client_secret: https://www.youtube.com/watch?v=ceKQjWiCyWE)",
-        "required": false
-      },
-      "MONGO": {
-        "description": "URL do mongoDB (para preservar dados de alguns comandos/sistemas). Veja como obter uma: https://www.youtube.com/watch?v=x1Gq5beRx9k",
-        "required": true
-      }
+  "env": {
+    "TOKEN": {
+      "description": "Token do bot aqui (caso não tenha, veja como obter/criar um bot account: https://www.youtube.com/watch?v=lfdmZQySTXE).",
+      "required": true
+    },
+    "DEFAULT_PREFIX": {
+      "description": "Prefixo do bot (@mençãodobot já funciona como prefixo).",
+      "value": "!!!",
+      "required": true
+    },
+    "SPOTIFY_CLIENT_ID": {
+      "description": "Client ID do spotify (obrigatório caso queira suporte ao spotify, veja o tutorial para obter o client_id e client_secret: https://www.youtube.com/watch?v=ceKQjWiCyWE)",
+      "required": false
+    },
+    "SPOTIFY_CLIENT_SECRET": {
+      "description": "Client SECRET do spotify (obrigatório caso queira suporte ao spotify, veja o tutorial para obter o client_id e client_secret: https://www.youtube.com/watch?v=ceKQjWiCyWE)",
+      "required": false
+    },
+    "MONGO": {
+      "description": "URL do mongoDB (para preservar dados de alguns comandos/sistemas). Veja como obter uma: https://www.youtube.com/watch?v=x1Gq5beRx9k",
+      "required": true
+    },
+    "SOURCE_AUTO_UPDATE": {
+      "description": "Atualizar automaticamente o code do bot ao iniciar (true ou false)",
+      "required": false,
+      "value": true
+    },
+    "SOURCE_REPO": {
+      "description": "Link da source para usar no auto-update (pode deixar vazio)",
+      "required": false,
+      "value": "https://github.com/zRitsu/disnake-LL-music-bot.git"
+    }
   }
 }
