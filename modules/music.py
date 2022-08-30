@@ -423,11 +423,20 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                                         autocomplete=fav_add_autocomplete), *,
             position: int = commands.Param(name="posição", description="Colocar a música em uma posição específica",
                                            default=0),
-            options: PlayOpts = commands.Param(name="opções", description="Opções para processar playlist",
-                                               default=False),
+            force_play: str = commands.Param(
+                name="tocar_agora",
+                description="Tocar a música imediatamente (ao invés de adicionar na fila).",
+                default="no",
+                choices=[
+                    disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
+                    disnake.OptionChoice(disnake.Localized("No", data={disnake.Locale.pt_BR: "Não"}), "no")
+                ]
+            ),
             manual_selection: bool = commands.Param(name="selecionar_manualmente",
                                                     description="Escolher uma música manualmente entre os resultados encontrados",
                                                     default=False),
+            options: PlayOpts = commands.Param(name="opções", description="Opções para processar playlist",
+                                               default=False),
             source: SearchSource = commands.Param(name="fonte",
                                                   description="Selecionar site para busca de músicas (não links)",
                                                   default="ytsearch"),
@@ -699,7 +708,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             else:
                 track = tracks[0]
 
-            if position < 0:
+            if force_play == "yes":
+                player.queue.insert(0, track)
+                pos_txt = " para tocar imediatamente."
+            elif position < 0:
                 player.queue.append(track)
             else:
                 player.queue.insert(position, track)
@@ -771,7 +783,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not player.is_connected:
             await self.do_connect(inter, channel=inter.author.voice.channel)
 
-        if not player.current:
+        if not player.current or (force_play == "yes" and len(player.queue)) > 0:
             await player.process_next()
         else:
             if ephemeral:
