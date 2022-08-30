@@ -221,6 +221,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             manual_selection=False,
             source="ytsearch",
             repeat_amount=0,
+            force_play="no",
         )
 
     @check_voice()
@@ -235,6 +236,15 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             *,
             position: int = commands.Param(name="posição", description="Colocar a música em uma posição específica",
                                            default=0),
+            force_play: str = commands.Param(
+                name="tocar_agora",
+                description="Tocar a música imediatamente (ao invés de adicionar na fila).",
+                default="no",
+                choices=[
+                    disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
+                    disnake.OptionChoice(disnake.Localized("No", data={disnake.Locale.pt_BR: "Não"}), "no")
+                ]
+            ),
             options: PlayOpts = commands.Param(name="opções", description="Opções para processar playlist",
                                                default=False),
             source: SearchSource = commands.Param(name="fonte",
@@ -253,6 +263,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             inter=inter,
             query=query,
             position=position,
+            force_play=force_play,
             options=options,
             manual_selection=True,
             source=source,
@@ -386,7 +397,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         position -= 1
 
         await self.play.callback(self=self, inter=ctx, query=query, position=position, options=False,
-                                 manual_selection=False,
+                                 force_play="no", manual_selection=False,
                                  source="ytsearch", repeat_amount=0, hide_playlist=False, server=None)
 
     @check_voice()
@@ -395,8 +406,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.command(name="play", description="Tocar música em um canal de voz.", aliases=["p"])
     async def play_legacy(self, ctx: CustomContext, *, query: str = ""):
 
-        await self.play.callback(self=self, inter=ctx, query=query, position=0, options=False, manual_selection=False,
-                                 source="ytsearch", repeat_amount=0, hide_playlist=False, server=None)
+        await self.play.callback(self=self, inter=ctx, query=query, position=0, options=False, force_play="no",
+                                 manual_selection=False, source="ytsearch", repeat_amount=0, hide_playlist=False,
+                                 server=None)
 
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
@@ -407,8 +419,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not query:
             raise GenericError("**Você não adicionou um nome ou link para tocar.**")
 
-        await self.play.callback(self=self, inter=ctx, query=query, position=0, options=False, manual_selection=True,
-                                 source="ytsearch", repeat_amount=0, hide_playlist=False, server=None)
+        await self.play.callback(self=self, inter=ctx, query=query, position=0, options=False, force_play="no",
+                                 manual_selection=True, source="ytsearch", repeat_amount=0, hide_playlist=False,
+                                 server=None)
 
     @check_voice()
     @commands.bot_has_guild_permissions(embed_links=True)
@@ -2200,7 +2213,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             "source": "ytsearch",
             "repeat_amount": 0,
             "hide_playlist": False,
-            "server": None
+            "server": None,
+            "force_play": "no"
         }
 
         try:
@@ -2286,7 +2300,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     "source": "ytsearch",
                     "repeat_amount": 0,
                     "hide_playlist": False,
-                    "server": None
+                    "server": None,
+                    "force_play": "no"
                 }
 
                 cmd = self.bot.get_slash_command("play")
@@ -2408,7 +2423,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     "source": "ytsearch",
                     "repeat_amount": 0,
                     "hide_playlist": False,
-                    "server": None
+                    "server": None,
+                    "force_play": "no",
                 }
 
                 await self.process_player_interaction(
