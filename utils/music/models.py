@@ -389,6 +389,11 @@ class LavalinkPlayer(wavelink.Player):
 
         else:
 
+            try:
+                self.message_updater_task.cancel()
+            except:
+                pass
+
             if data.get("components") is None:  # nenhum controle de botão foi definido na skin (será usado os botões padrões).
 
                 data["components"] = [
@@ -471,6 +476,7 @@ class LavalinkPlayer(wavelink.Player):
                                 return
 
                     self.updating = False
+                    self.message_updater_task = self.bot.loop.create_task(self.message_updater())
                     return
                 except:
                     traceback.print_exc()
@@ -479,6 +485,7 @@ class LavalinkPlayer(wavelink.Player):
 
             try:
                 self.message = await self.text_channel.send(allowed_mentions=self.allowed_mentions, **data)
+                self.message_updater_task = self.bot.loop.create_task(self.message_updater())
             except:
                 traceback.print_exc()
 
@@ -489,6 +496,11 @@ class LavalinkPlayer(wavelink.Player):
         await super().set_pause(pause)
 
     async def destroy_message(self):
+
+        try:
+            self.message_updater_task.cancel()
+        except:
+            pass
 
         if not self.static:
             try:
