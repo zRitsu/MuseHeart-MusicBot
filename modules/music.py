@@ -225,6 +225,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         )
 
     @check_voice()
+    @commands.bot_has_guild_permissions(embed_links=True, send_messages=True)
     @can_send_message()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.slash_command(name="search",
@@ -382,6 +383,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 await ctx.channel.send(ctx.author.mention, embed=embed, delete_after=45)
 
     @check_voice()
+    @commands.bot_has_guild_permissions(embed_links=True, send_messages=True)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.command(name="addposition", description="Adicionar música em uma posição especifica da fila.",
@@ -401,6 +403,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                                  source="ytsearch", repeat_amount=0, hide_playlist=False, server=None)
 
     @check_voice()
+    @commands.bot_has_guild_permissions(embed_links=True, send_messages=True)
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.command(name="play", description="Tocar música em um canal de voz.", aliases=["p"])
@@ -411,6 +414,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                                  server=None)
 
     @check_voice()
+    @commands.bot_has_guild_permissions(embed_links=True, send_messages=True)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.command(name="search", description="Buscar música e escolher uma entre os resultados para tocar.",
                       aliases=["sc"])
@@ -424,7 +428,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                                  server=None)
 
     @check_voice()
-    @commands.bot_has_guild_permissions(embed_links=True)
+    @commands.bot_has_guild_permissions(embed_links=True, send_messages=True)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.slash_command(
         name=disnake.Localized("play", data={disnake.Locale.pt_BR: "tocar"}),
@@ -472,16 +476,15 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not node:
             node = self.get_best_node()
 
-        static_player = {}
-
         msg = None
 
         guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
+        static_player = guild_data['player_controller']
+
         try:
-            static_player = guild_data['player_controller']
             channel = inter.guild.get_channel(int(static_player['channel'])) or inter.channel
-        except (KeyError, TypeError):
+        except TypeError:
             channel = inter.channel
 
         try:
@@ -631,7 +634,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             skin=skin
         )
 
-        if static_player and not player.message:
+        if static_player['channel'] and not player.message:
+
             try:
                 channel = inter.bot.get_channel(int(static_player['channel']))
             except TypeError:
@@ -652,6 +656,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     guild_data['player_controller']['message_id'] = str(message.id)
                     await self.bot.update_data(inter.guild.id, guild_data, db_name=DBModel.guilds)
                 player.message = message
+
+        if not inter.channel.permissions_for(inter.guild.me).send_messages:
+            raise GenericError(f"**Não tenho permissão de enviar mensagens no canal:** {inter, channel.mention}")
 
         if not channel.permissions_for(inter.guild.me).embed_links:
             raise GenericError(f"**Não tenho permissão de inserir links no canal: {channel.mention}**")
@@ -2813,8 +2820,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player: LavalinkPlayer = payload.player
 
-        print(f"Erro no canal de voz! guild: {player.guild.name} | server: {payload.player.node.identifier} | "
-              f"reason: {payload.reason} | code: {payload.code}")
+        print("-" * 15)
+        print(f"Erro no canal de voz!")
+        print(f"guild: {player.guild.name} | canal: {player.channel_id}")
+        print(f"server: {payload.player.node.identifier} | ")
+        print(f"reason: {payload.reason} | code: {payload.code}")
+        print("-" * 15)
 
         if player.is_closing:
             return
@@ -2828,11 +2839,15 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             if player.static:
                 player.command_log = "Desliguei o player por me desconectarem do canal de voz."
+                await player.destroy()
             else:
                 embed = disnake.Embed(description="**Desliguei o player por me desconectarem do canal de voz.**",
                                       color=self.bot.get_color(player.guild.me))
-                self.bot.loop.create_task(player.text_channel.send(embed=embed, delete_after=7))
-            await player.destroy()
+                try:
+                    self.bot.loop.create_task(player.text_channel.send(embed=embed, delete_after=7))
+                except:
+                    traceback.print_exc()
+                await player.destroy()
             return
 
         if payload.code in (
@@ -3173,7 +3188,14 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         try:
             player: LavalinkPlayer = self.bot.music.players[guild_id]
             player.static = False
-            player.text_channel = inter.channel.parent if isinstance(inter.channel, disnake.Thread) else inter.channel
+            try:
+                if isinstance(inter.channel.parent, disnake.TextChannel):
+                    player.text_channel = inter.channel.parent
+                else:
+                    player.text_channel = inter.channel
+            except AttributeError:
+                player.text_channel = inter.channel
+
         except KeyError:
             pass
         await self.bot.update_data(guild_id, data, db_name=DBModel.guilds)
