@@ -42,7 +42,7 @@
     "SOURCE_AUTO_UPDATE": {
       "description": "Atualizar automaticamente o code do bot ao iniciar (true ou false)",
       "required": false,
-      "value": true
+      "value": "true"
     },
     "SOURCE_REPO": {
       "description": "Link da source para usar no auto-update (pode deixar vazio)",
