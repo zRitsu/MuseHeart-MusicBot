@@ -1,13 +1,11 @@
 #!/bin/bash
 
+rm poetry.lock && rm pyproject.toml
+
 [ -z "$VIDEO_PREVIEW" ] || { . venv/bin/activate && python3 preview.py; kill "$PPID"; exit 1; }
 
 if [ ! -d "venv" ] || [ ! -f "./venv/bin/python3" ] || [ ! -f "./venv/requirements.txt" ]; then
-  bash quick_update.sh
-  rm -rf venv
-  rm -rf .config
-  rm -rf .cache
-  rm poetry.lock
+  bash quick_update.sh && rm -rf venv && rm -rf .config && rm -rf .cache
   echo "##################################"
   echo "## Inicializando virtual_env... ##"
   echo "##################################"
