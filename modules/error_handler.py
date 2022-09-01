@@ -89,15 +89,16 @@ class ErrorHandler(commands.Cog):
 
             if not error_msg:
 
+                kwargs["embed"].title = "Ocorreu um erro no comando:"
+                kwargs["embed"].description = f"```py\n{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
+
                 if self.bot.config["AUTO_ERROR_REPORT_WEBHOOK"]:
                     send_webhook = True
+                    kwargs["embed"].description += " `Meu desenvolvedor será notificado sobre o problema.`"
 
                 else:
 
                     components = self.components
-
-                kwargs["embed"].title = "Ocorreu um erro no comando:"
-                kwargs["embed"].description = f"```py\n{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
 
             else:
                 kwargs["embed"].description = error_msg
