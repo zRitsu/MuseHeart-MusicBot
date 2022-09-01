@@ -67,7 +67,7 @@ class PanelView(disnake.ui.View):
 
 
     async def on_error(self, error: Exception, item: disnake.ui.Item, interaction: disnake.MessageInteraction):
-        interaction.message.embeds[0].description = parse_error(interaction, error) or "**Ocorreu um erro:**\n" \
+        interaction.message.embeds[0].description = parse_error(interaction, error)[0] or "**Ocorreu um erro:**\n" \
                                      f"```py\n{repr(error)[:2020].replace(self.bot.http.token, 'mytoken')}```"
 
         if not interaction.response.is_done():
