@@ -3,7 +3,6 @@ import os
 import shutil
 import json
 import traceback
-from io import BytesIO
 from typing import Union, Optional
 from zipfile import ZipFile
 import disnake
@@ -15,7 +14,7 @@ from utils.db import DBModel
 from utils.music.checks import check_voice, check_requester_channel
 from utils.music.local_lavalink import run_lavalink
 from utils.music.models import LavalinkPlayer
-from utils.others import sync_message, chunk_list, EmbedPaginator, CustomContext
+from utils.others import sync_message, chunk_list, EmbedPaginator, CustomContext, string_to_file
 from utils.owner_panel import panel_command, PanelView
 from utils.music.errors import GenericError
 from aiohttp import ClientSession
@@ -35,13 +34,6 @@ def format_git_log(data_list: list):
         data.append({"commit": t[0], "abbreviated_commit": t[1], "subject": t[2], "timestamp": t[3]})
 
     return data
-
-
-def string_to_file(txt, filename="result.txt"):
-    if isinstance(txt, dict):
-        txt = json.dumps(txt, indent=4, ensure_ascii=False)
-    txt = BytesIO(bytes(str(txt), 'utf-8'))
-    return disnake.File(fp=txt, filename=filename or "result.txt")
 
 
 async def run_command(cmd: str):

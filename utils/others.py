@@ -1,5 +1,8 @@
 from __future__ import annotations
+
+import json
 from inspect import iscoroutinefunction
+from io import BytesIO
 from typing import TYPE_CHECKING, Union, Optional
 import disnake
 from disnake.ext import commands
@@ -278,3 +281,10 @@ async def send_idle_embed(
         message = await target.send(embed=embed, components=components)
 
     return message
+
+
+def string_to_file(txt, filename="result.txt"):
+    if isinstance(txt, dict):
+        txt = json.dumps(txt, indent=4, ensure_ascii=False)
+    txt = BytesIO(bytes(str(txt), 'utf-8'))
+    return disnake.File(fp=txt, filename=filename or "result.txt")

@@ -16,6 +16,7 @@ DEFAULT_CONFIG = {
     "EMBED_COLOR": None,
     "BOT_ADD_REMOVE_LOG": '',
     "ERROR_REPORT_WEBHOOK": '',
+    "AUTO_ERROR_REPORT_WEBHOOK": '',
     "INTERACTION_COMMAND_ONLY": False,
     "PRESENCE_INTERVAL": 900,
     "SOURCE_REPO": "https://github.com/zRitsu/disnake-LL-music-bot.git",

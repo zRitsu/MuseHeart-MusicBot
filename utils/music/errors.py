@@ -124,6 +124,9 @@ def parse_error(
             error_txt = "**Não houve resultados para sua busca...**"
 
     if not error_txt:
-        traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+        full_error_txt = "".join(traceback.format_exception(type(error), error, error.__traceback__))
+        print(full_error_txt)
+    else:
+        full_error_txt = ""
 
-    return error_txt
+    return error_txt, full_error_txt
