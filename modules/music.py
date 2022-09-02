@@ -2142,6 +2142,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             if not player.static:
                 return False
 
+            try:
+                if isinstance(ctx.channel.parent, disnake.ForumChannel):
+                    return True
+            except AttributeError:
+                pass
+
             if isinstance(ctx.channel, disnake.Thread) and player.text_channel == ctx.channel.parent:
                 return not ignore_thread
 
@@ -2583,7 +2589,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             await self.parse_song_request(message, text_channel, data, response=msg)
 
-            if not isinstance(message.channel, disnake.Thread):
+            if isinstance(message.channel, disnake.Thread) and \
+                    not isinstance(message.channel.parent, disnake.ForumChannel):
+                return
+            else:
                 await message.delete()
                 try:
                     await msg.delete()
@@ -2652,7 +2661,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         try:
             player.queue.extend(tracks.tracks)
-            if isinstance(message.channel, disnake.Thread):
+            if isinstance(message.channel, disnake.Thread) and not isinstance(message.channel.parent, disnake.ForumChannel):
                 embed.description = f"> 🎶 **┃ Playlist adicionada:** [`{tracks.data['playlistInfo']['name']}`]({message.content})\n" \
                                     f"> ✋ **┃ Pedido por:** {message.author.mention}\n" \
                                     f"> 🎼 **┃ Música(s):** `[{len(tracks.tracks)}]`"
@@ -2671,7 +2680,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         except AttributeError:
             player.queue.append(tracks[0])
-            if isinstance(message.channel, disnake.Thread):
+            if isinstance(message.channel, disnake.Thread) and not isinstance(message.channel.parent, disnake.ForumChannel):
                 embed.description = f"> 🎵 **┃ Adicionado:** [`{tracks[0].title}`]({tracks[0].uri})\n" \
                                     f"> 💠 **┃ Uploader:** `{tracks[0].author}`\n" \
                                     f"> ✋ **┃ Pedido por:** {message.author.mention}\n" \

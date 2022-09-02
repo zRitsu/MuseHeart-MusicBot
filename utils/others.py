@@ -217,8 +217,14 @@ async def send_idle_embed(
         text="", *, bot: BotCore, force=False, guild_data: dict = None
 ):
 
-    embed = disnake.Embed(description="**Entre em um canal de voz e peça uma música aqui no canal ou na conversa abaixo "
-                                      "(ou clique no botão abaixo)**\n\n"
+    if isinstance(target, disnake.Thread) and isinstance(target.parent, disnake.ForumChannel):
+        content = "Post para pedido de músicas."
+    else:
+        content = None
+
+    embed = disnake.Embed(description="**Entre em um canal de voz e peça uma música aqui " +
+                                      ("no post" if content else "no canal ou na conversa abaixo") +
+                                      " (ou clique no botão abaixo)**\n\n"
                                       "**Você pode usar um nome ou um link de site compatível:**"
                                       " ```ini\n[Youtube, Soundcloud, Spotify, Twitch]```\n",
                           color=bot.get_color(target.guild.me))
@@ -259,12 +265,12 @@ async def send_idle_embed(
                 emoji="⭐",
                 custom_id=PlayerControls.enqueue_fav,
                 label="Tocar favorito"
-            ),
+            )
         ]
     )
 
     if isinstance(target, disnake.MessageInteraction):
-        await target.response.edit_message(embed=embed, content=None, components=components)
+        await target.response.edit_message(embed=embed, content=content or None, components=components)
         message = target.message
 
     elif isinstance(target, disnake.Message):
@@ -278,6 +284,7 @@ async def send_idle_embed(
         else:
             message = await target.channel.send(embed=embed, components=components)
     else:
+
         message = await target.send(embed=embed, components=components)
 
     return message

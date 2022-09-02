@@ -9,7 +9,7 @@ from utils.db import DBModel
 from utils.music.checks import user_cooldown
 from utils.music.converters import time_format
 from utils.music.errors import GenericError
-from utils.others import send_idle_embed, CustomContext
+from utils.others import send_idle_embed, CustomContext, PlayerControls
 from utils.music.models import LavalinkPlayer
 
 if TYPE_CHECKING:
@@ -80,11 +80,57 @@ class MusicSettings(commands.Cog):
             )
         )
 
+    @commands.bot_has_guild_permissions(create_forum_threads=True)
+    @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
+    @commands.slash_command(
+        name=disnake.Localized("setup_songrequest_forum", data={disnake.Locale.pt_BR: "configurar_songrequest_forum"}),
+        description=f"{desc_prefix} (beta) Criar uma postagem dedicada para pedir músicas e deixar player fixado.",
+        default_member_permissions=disnake.Permissions(manage_guild=True)
+    )
+    async def setup_forum(
+            self, inter: disnake.AppCmdInter,
+            target: disnake.ForumChannel = commands.Param(
+                name="canal", description="Selecione um canal de forum."
+            ),
+    ):
+
+        try:
+            if self.bot.music.players[inter.guild.id]:
+                raise GenericError("**O player deve ser finalizado para usar este comando...**")
+        except KeyError:
+            pass
+
+        await inter.response.defer(ephemeral=True)
+
+        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
+
+        thread_wmessage = await target.create_thread(
+            name=f"{self.bot.user.name} song request",
+            content="Post para pedido de músicas.",
+            auto_archive_duration=10080,
+            slowmode_delay=5,
+        )
+
+        message = await send_idle_embed(target=thread_wmessage.message, bot=self.bot, force=True, guild_data=guild_data)
+
+        guild_data['player_controller']['channel'] = str(message.channel.id)
+        guild_data['player_controller']['message_id'] = str(message.id)
+
+        await self.bot.update_data(inter.guild.id, data=guild_data, db_name=DBModel.guilds)
+
+        await inter.edit_original_message(
+            embed=disnake.Embed(
+                color=self.bot.get_color(inter.guild.me),
+                description=f"**O [post]({message.jump_url}) para pedir música foi configurado com sucesso!**\n"
+                            f"Caso queira reverter essa configuração, apenas delete o [post]({message.jump_url})."
+            )
+        )
+
     @commands.has_guild_permissions(manage_guild=True)
     @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
     @commands.command(
-        name="setup", aliases=["requestchannel"], usage="[id do canal ou #canal] [--reset]",
+        name="setup", aliases=["songrequestchannel", "sgrc"], usage="[id do canal ou #canal] [--reset]",
         description="Criar/escolher um canal dedicado para pedir músicas e deixar player fixado."
     )
     async def setup_legacy(
@@ -116,7 +162,7 @@ class MusicSettings(commands.Cog):
     @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
     @commands.slash_command(
-        name=disnake.Localized("setup", data={disnake.Locale.pt_BR: "configurar_canal"}),
+        name=disnake.Localized("setup_songrequest_channel", data={disnake.Locale.pt_BR: "configurar_canal_de_música"}),
         description=f"{desc_prefix}Criar/escolher um canal dedicado para pedir músicas e deixar player fixado.",
         default_member_permissions=disnake.Permissions(manage_guild=True)
     )
@@ -347,6 +393,15 @@ class MusicSettings(commands.Cog):
             raise GenericError(f"**Não há canais de pedido de música configurado (ou o canal foi deletado).**")
 
         await inter.response.defer(ephemeral=True)
+
+        try:
+            if isinstance(channel.parent, disnake.ForumChannel):
+                await channel.delete(reason=f"{inter.author.id} resetou player")
+                if inter.channel != channel:
+                    await inter.edit_original_message("O post foi deletado com sucesso!")
+                return
+        except AttributeError:
+            pass
 
         try:
             original_message = await channel.fetch_message(int(guild_data["player_controller"]["message_id"]))
