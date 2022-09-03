@@ -2,16 +2,23 @@
 
 rm poetry.lock && rm pyproject.toml 2> /dev/null
 
-[ -z "$VIDEO_PREVIEW" ] || { . venv/bin/activate && python3 preview.py; kill "$PPID"; exit 1; }
-
-if [ ! -d "venv" ] || [ ! -f "./venv/bin/python3" ] || [ ! -f "./venv/requirements.txt" ]; then
-  bash quick_update.sh && rm -rf venv && rm -rf .config && rm -rf .cache
+if [ ! -d "venv" ] || [ ! -f "./venv/bin/python3" ]; then
+  rm -rf venv && rm -rf .config && rm -rf .cache
   echo "##################################"
   echo "## Inicializando virtual_env... ##"
   echo "##################################"
   python3 -m venv venv
   . venv/bin/activate
   python3 -m pip config unset --user install.use-feature 2> /dev/null
+fi
+
+if [ -n "${VIDEO_PREVIEW}" ]; then
+  python3 -m pip install tornado
+  python3 preview.py
+  kill "$PPID"
+  exit 1
+elif [ ! -f "./venv/requirements.txt" ]; then
+  bash quick_update.sh
   python3 -m pip install -U pip
   echo "#################################################"
   echo "## Instalando dependências...                  ##"
