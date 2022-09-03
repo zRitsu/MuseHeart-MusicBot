@@ -501,7 +501,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
-        self.can_connect(inter, check_other_bots_in_vc=guild_data["check_other_bots_in_vc"])
+        if not inter.guild.me.voice:
+            self.can_connect(inter, check_other_bots_in_vc=guild_data["check_other_bots_in_vc"])
 
         static_player = guild_data['player_controller']
 
