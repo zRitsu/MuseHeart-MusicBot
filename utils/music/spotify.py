@@ -24,7 +24,7 @@ class SpotifyPlaylist:
                 uri=track.link,
                 authors=track.artists,
                 title=track.name,
-                thumb=track.album.images[0].url,
+                thumb=track.album.images[0].url if track.album.images else "",
                 duration=track.duration.total_seconds() * 1000,
                 requester=requester,
                 playlist=playlist,
