@@ -285,21 +285,42 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     ):
         await self.do_connect(inter, channel)
 
-    async def do_connect(self, ctx: Union[disnake.AppCmdInter, commands.Context, disnake.Message],
-                         channel: Union[disnake.VoiceChannel, disnake.StageChannel]):
-
-        player = self.bot.music.players[ctx.guild.id]
-
-        guild_data = await self.bot.get_data(ctx.guild.id, db_name=DBModel.guilds)
-
+    def can_connect(
+            self,
+            ctx: Union[disnake.AppCmdInter, commands.Context, disnake.Message],
+            channel: Union[disnake.VoiceChannel, disnake.StageChannel] = None,
+            check_other_bots_in_vc: bool = False
+    ):
         if not channel:
             channel: Union[disnake.VoiceChannel, disnake.StageChannel] = ctx.author.voice.channel
+
+        perms = channel.permissions_for(ctx.guild.me)
+
+        if not perms.connect:
+            raise GenericError(f"**Não tenho permissão para conectar no canal {channel.mention}**")
+
+        if not perms.speak:
+            raise GenericError(f"**Não tenho permissão para falar no canal {channel.mention}**")
 
         if not ctx.guild.voice_client and channel.user_limit and (channel.user_limit - len(channel.voice_states)) < 1:
             raise GenericError(f"**O canal {ctx.channel.mention} está lotado!**")
 
-        if guild_data["check_other_bots_in_vc"] and any(m for m in channel.members if m.bot and m != ctx.guild.me):
+        if check_other_bots_in_vc and any(m for m in channel.members if m.bot and m != ctx.guild.me):
             raise GenericError(f"**Há outro bot conectado no canal:** <#{ctx.author.voice.channel.id}>")
+
+    async def do_connect(
+            self,
+            ctx: Union[disnake.AppCmdInter, commands.Context, disnake.Message],
+            channel: Union[disnake.VoiceChannel, disnake.StageChannel] = None,
+            check_other_bots_in_vc: bool = False
+    ):
+
+        if not channel:
+            channel: Union[disnake.VoiceChannel, disnake.StageChannel] = ctx.author.voice.channel
+
+        player = self.bot.music.players[ctx.guild.id]
+
+        self.can_connect(ctx, channel, check_other_bots_in_vc)
 
         deafen_warn = self.bot.config["GUILD_DEAFEN_WARN"]
 
@@ -479,6 +500,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         msg = None
 
         guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
+
+        self.can_connect(inter, check_other_bots_in_vc=guild_data["check_other_bots_in_vc"])
 
         static_player = guild_data['player_controller']
 
@@ -801,7 +824,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await func(embed=embed, view=None)
 
         if not player.is_connected:
-            await self.do_connect(inter, channel=inter.author.voice.channel)
+            await self.do_connect(
+                inter, channel=inter.author.voice.channel,
+                check_other_bots_in_vc=guild_data["check_other_bots_in_vc"]
+            )
 
         if not player.current or (force_play == "yes" and len(player.queue)) > 0:
             await player.process_next()
@@ -2621,11 +2647,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not message.author.voice:
             raise GenericError("Você deve entrar em um canal de voz para pedir uma música.")
 
-        if not message.author.voice.channel.permissions_for(message.guild.me).connect:
-            raise GenericError(f"Não tenho permissão para conectar no canal <{message.author.voice.channel.id}>")
-
-        if not message.author.voice.channel.permissions_for(message.guild.me).speak:
-            raise GenericError(f"Não tenho permissão para falar no canal <{message.author.voice.channel.id}>")
+        self.can_connect(
+            message,
+            channel=message.author.voice.channel,
+            check_other_bots_in_vc=data["check_other_bots_in_vc"]
+        )
 
         try:
             if message.guild.me.voice.channel != message.author.voice.channel:
@@ -2699,7 +2725,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 )
 
         if not player.is_connected:
-            await self.do_connect(message, channel=message.author.voice.channel)
+            await self.do_connect(
+                message,
+                channel=message.author.voice.channel,
+                check_other_bots_in_vc=data["check_other_bots_in_vc"]
+            )
 
         if not player.current:
             await player.process_next()
