@@ -154,10 +154,7 @@ class Misc(commands.Cog):
                              f"> **Uso de RAM:** `{ram_usage}`\n" \
                              f"> **Uptime:** `{time_format((disnake.utils.utcnow() - self.bot.uptime).total_seconds()*1000)}`\n"
 
-        try:
-            embed.set_thumbnail(url=self.bot.user.avatar.with_static_format("png").url)
-        except AttributeError:
-            pass
+        embed.set_thumbnail(url=self.bot.user.display_avatar.replace(size=256, static_format="png").url)
 
         guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
@@ -356,7 +353,7 @@ class GuildLog(commands.Cog):
             await webhook.send(
                 content=content,
                 username=self.bot.user.name,
-                avatar_url=self.bot.user.avatar.replace(static_format='png').url,
+                avatar_url=self.bot.user.display_avatar.replace(size=256, static_format="png").url,
                 embed=embed
             )
 

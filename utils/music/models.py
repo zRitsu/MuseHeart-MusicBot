@@ -640,10 +640,7 @@ class LavalinkPlayer(wavelink.Player):
             if not voice_channel:
                 return
 
-        try:
-            thumb = self.bot.user.avatar.with_format("png").url
-        except AttributeError:
-            thumb = self.bot.user.default_avatar.with_format("png").url
+        thumb = self.bot.user.display_avatar.replace(size=512, static_format="png").url
 
         if close:
 

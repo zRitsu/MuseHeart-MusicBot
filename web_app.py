@@ -35,10 +35,7 @@ class IndexHandler(tornado.web.RequestHandler):
 
         for bot in self.bots:
             await bot.wait_until_ready()
-            try:
-                avatar = bot.user.avatar.with_static_format("png").url
-            except AttributeError:
-                avatar = bot.user.default_avatar.with_static_format("png").url
+            avatar = bot.user.display_avatar.replace(size=256, static_format="png").url
 
             cells += f"<tr><td><img src=\"{avatar}\" width=128 weight=128></img></td>\n" \
                      f"<td style=\"padding-top: 10px ; padding-bottom: 10px; padding-left: 10px; padding-right: 10px\">" \
