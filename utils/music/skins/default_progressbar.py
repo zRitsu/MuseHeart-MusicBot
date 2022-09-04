@@ -59,7 +59,7 @@ def load(player: LavalinkPlayer) -> dict:
 
     else:
         queue_size = 3
-        queue_text_size = 31
+        queue_text_size = 30
         queue_img = "https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif"
         playlist_text_size = 13
 
@@ -105,7 +105,7 @@ def load(player: LavalinkPlayer) -> dict:
     if len(player.queue):
 
         queue_txt = "\n".join(
-            f"`{n + 1}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, queue_text_size)}`]({t.uri})"
+            f"`{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, queue_text_size)}`]({t.uri})"
             for n, t in (enumerate(itertools.islice(player.queue, queue_size)))
         )
 

@@ -80,7 +80,7 @@ def load(player: LavalinkPlayer) -> dict:
 
         else:
             txt += "```ldif\nPróximas Músicas:```" + "\n".join(
-                f"`{n + 1}) [{time_format(t.duration) if t.duration else '🔴 Livestream'}]` "
+                f"`{(n + 1):02}) [{time_format(t.duration) if t.duration else '🔴 Livestream'}]` "
                 f"[`{fix_characters(t.title, 31)}`]({t.uri})" for n, t in enumerate(itertools.islice(player.queue, 3))
             )
 

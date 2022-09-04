@@ -40,7 +40,7 @@ def load(player: LavalinkPlayer) -> dict:
         if queue_size:
 
             queue_txt = "\n".join(
-                f"`{n + 1}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 29)}`]({t.uri})"
+                f"`{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 28)}`]({t.uri})"
                 for n, t in (enumerate(itertools.islice(player.queue, 15)))
             )
 
