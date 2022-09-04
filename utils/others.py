@@ -232,11 +232,7 @@ async def send_idle_embed(
     if text:
         embed.description += f"**ÚLTIMA AÇÃO:** {text.replace('**', '')}\n"
 
-    try:
-        avatar = target.guild.me.avatar.url
-    except:
-        avatar = target.guild.me.default_avatar.url
-    embed.set_thumbnail(avatar)
+    embed.set_thumbnail(target.guild.me.display_avatar.replace(size=256).url)
 
     if not guild_data:
         guild_data = await bot.get_data(target.guild.id, db_name=DBModel.guilds)
