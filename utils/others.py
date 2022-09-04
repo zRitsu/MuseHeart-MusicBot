@@ -226,7 +226,7 @@ async def send_idle_embed(
                                       ("no post" if content else "no canal ou na conversa abaixo") +
                                       " (ou clique no botão abaixo)**\n\n"
                                       "**Você pode usar um nome ou um link de site compatível:**"
-                                      " ```ini\n[Youtube, Soundcloud, Spotify, Twitch]```\n",
+                                      " ```ansi\n[31;1mYoutube[0m, [33;1mSoundcloud[0m, [32;1mSpotify[0m, [34;1mTwitch[0m```\n",
                           color=bot.get_color(target.guild.me))
 
     if text:

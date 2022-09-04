@@ -94,7 +94,7 @@ def load(player: LavalinkPlayer) -> dict:
     txt += f"{vc_txt}{position_txt}\n"
 
     if player.command_log:
-        txt += f"```ini\n [Última Interação]```**┕ {player.command_log_emoji} ⠂**{player.command_log}\n"
+        txt += f"```\n [34;1mÚltima Interação[0m```**┕ {player.command_log_emoji} ⠂**{player.command_log}\n"
 
     if len(player.queue):
 
