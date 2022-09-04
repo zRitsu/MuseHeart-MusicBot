@@ -299,11 +299,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not perms.connect:
             raise GenericError(f"**Não tenho permissão para conectar no canal {channel.mention}**")
 
-        if not perms.speak:
-            raise GenericError(f"**Não tenho permissão para falar no canal {channel.mention}**")
+        if not isinstance(channel, disnake.StageChannel):
 
-        if not ctx.guild.voice_client and channel.user_limit and (channel.user_limit - len(channel.voice_states)) < 1:
-            raise GenericError(f"**O canal {ctx.channel.mention} está lotado!**")
+            if not perms.speak:
+                raise GenericError(f"**Não tenho permissão para falar no canal {channel.mention}**")
+
+            if not ctx.guild.voice_client and channel.user_limit and (channel.user_limit - len(channel.voice_states)) < 1:
+                raise GenericError(f"**O canal {channel.mention} está lotado!**")
 
         if check_other_bots_in_vc and any(m for m in channel.members if m.bot and m != ctx.guild.me):
             raise GenericError(f"**Há outro bot conectado no canal:** <#{ctx.author.voice.channel.id}>")
