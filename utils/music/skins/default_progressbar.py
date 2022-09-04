@@ -73,10 +73,10 @@ def load(player: LavalinkPlayer) -> dict:
 
     if player.loop:
         if player.loop == 'current':
-            e = '🔂';
+            e = '🔂'
             m = 'Música atual'
         else:
-            e = '🔁';
+            e = '🔁'
             m = 'Fila'
         txt += f"\n> {e} **⠂Modo de repetição:** `{m}`"
 

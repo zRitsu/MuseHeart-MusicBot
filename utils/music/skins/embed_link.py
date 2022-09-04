@@ -1,10 +1,8 @@
 import datetime
-from typing import Union
 import re
 import disnake
 from ..models import LavalinkPlayer
-from ..converters import time_format, fix_characters, get_button_style
-from ...others import PlayerControls
+from ..converters import time_format, fix_characters
 
 
 def load(player: LavalinkPlayer) -> dict:

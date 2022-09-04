@@ -1,5 +1,4 @@
 import datetime
-from typing import Union
 from ..models import LavalinkPlayer
 import disnake
 from ..converters import fix_characters, time_format
