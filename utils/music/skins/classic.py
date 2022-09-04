@@ -30,7 +30,7 @@ def load(player: LavalinkPlayer) -> dict:
 
     else:
         embed.description = f"[**{player.current.title}**]({player.current.uri})\n\n"
-        embed.set_image(url=player.current.thumb.replace("mqdefault.jpg", "hqdefault.jpg"))
+        embed.set_image(url=player.current.thumb)
         embed_top = None
 
     if not player.paused:
@@ -68,17 +68,17 @@ def load(player: LavalinkPlayer) -> dict:
 
         if player.static:
 
-            data["content"] = "**Músicas na fila:**\n```ini\n" + \
-                              "\n".join(f"{n+1}) [{time_format(t.duration) if not t.is_stream else '🔴 stream'}] - {fix_characters(t.title, 45)}" for n, t in enumerate(
-                                  itertools.islice(player.queue, 30)))
+            data["content"] = "**Músicas na fila:**\n```ansi\n" + \
+                              "\n".join(f"[0;33m{(n+1):02}[0m [0;34m[{time_format(t.duration) if not t.is_stream else '🔴 stream'}][0m [0;36m{fix_characters(t.title, 45)}[0m" for n, t in enumerate(
+                                  itertools.islice(player.queue, 15)))
 
             if (qsize := len(player.queue)) > 30:
-                data["content"] += f"\n\nE mais [{qsize}] músicas(s)."
+                data["content"] += f"\n\n[0;37mE mais[0m [0;35m{qsize}[0m [0;37mmúsicas(s).[0m"
 
             data["content"] += "```"
 
         else:
-            txt += "```ldif\nPróximas Músicas:```" + "\n".join(
+            txt += "```ansi\n[0;33mPróximas Músicas:[0m```" + "\n".join(
                 f"`{(n + 1):02}) [{time_format(t.duration) if t.duration else '🔴 Livestream'}]` "
                 f"[`{fix_characters(t.title, 31)}`]({t.uri})" for n, t in enumerate(itertools.islice(player.queue, 3))
             )
