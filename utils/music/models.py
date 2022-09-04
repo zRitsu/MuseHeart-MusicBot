@@ -489,7 +489,7 @@ class LavalinkPlayer(wavelink.Player):
                 self.message_updater_task = self.bot.loop.create_task(self.message_updater())
             except:
                 traceback.print_exc()
-
+                print(self.text_channel)
 
         self.updating = False
 

@@ -7,15 +7,15 @@ from disnake.ext import commands
 import traceback
 import wavelink
 import asyncio
+from typing import Union, Optional
 from random import shuffle
-from typing import Literal, Union, Optional
 from urllib import parse
 from utils.client import BotCore
 from utils.db import DBModel
 from utils.music.errors import GenericError, MissingVoicePerms
 from utils.music.spotify import SpotifyPlaylist, process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, \
-    can_send_message, check_requester_channel
+    can_send_message_check, check_requester_channel, can_send_message
 from utils.music.models import LavalinkPlayer, LavalinkTrack
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist, \
@@ -201,8 +201,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await ctx.send("O arquivo de cache foi importado com sucesso!", delete_after=30)
 
     @check_voice()
+    @can_send_message_check()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
-    @can_send_message()
     @commands.message_command(name="add to queue")
     async def message_play(self, inter: disnake.MessageCommandInteraction):
 
@@ -225,8 +225,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         )
 
     @check_voice()
+    @can_send_message_check()
     @commands.bot_has_guild_permissions(embed_links=True, send_messages=True)
-    @can_send_message()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.slash_command(name="search",
                             description=f"{desc_prefix}Buscar música e escolher uma entre os resultados para tocar.")
@@ -274,6 +274,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         )
 
     @has_player()
+    @can_send_message_check()
     @is_dj()
     @commands.slash_command(description=f"{desc_prefix}Me conectar em um canal de voz (ou me mover para um).")
     async def connect(
@@ -406,6 +407,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 await ctx.channel.send(ctx.author.mention, embed=embed, delete_after=45)
 
     @check_voice()
+    @can_send_message_check()
     @commands.bot_has_guild_permissions(embed_links=True, send_messages=True)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.max_concurrency(1, commands.BucketType.member)
@@ -426,6 +428,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                                  source="ytsearch", repeat_amount=0, hide_playlist=False, server=None)
 
     @check_voice()
+    @can_send_message_check()
     @commands.bot_has_guild_permissions(embed_links=True, send_messages=True)
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
@@ -437,6 +440,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                                  server=None)
 
     @check_voice()
+    @can_send_message_check()
     @commands.bot_has_guild_permissions(embed_links=True, send_messages=True)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.command(name="search", description="Buscar música e escolher uma entre os resultados para tocar.",
@@ -451,6 +455,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                                  server=None)
 
     @check_voice()
+    @can_send_message_check()
     @commands.bot_has_guild_permissions(embed_links=True, send_messages=True)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.slash_command(
@@ -508,16 +513,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         static_player = guild_data['player_controller']
 
-        try:
-            channel = inter.guild.get_channel(int(static_player['channel'])) or inter.channel
-        except TypeError:
-            channel = inter.channel
+        channel = inter.channel
 
-        try:
-            if not channel.permissions_for(inter.guild.me).send_messages:
-                raise GenericError(f"Não tenho permissão para enviar mensagens no canal: {channel.mention}")
-        except AttributeError:
-            pass
+        if static_player['channel']:
+            if not (channel := inter.guild.get_channel(int(static_player['channel']))):
+                await self.reset_controller_db(inter.guild.id, guild_data, inter)
+            else:
+                can_send_message(channel)
 
         is_pin = None
 
@@ -663,31 +665,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if static_player['channel'] and not player.message:
 
             try:
-                channel = inter.bot.get_channel(int(static_player['channel']))
+                message = await channel.fetch_message(int(static_player['message_id']))
             except TypeError:
-                channel = None
-
-            if not channel:
-                await self.reset_controller_db(inter.guild_id, guild_data, inter=inter)
-                channel = inter.channel
-
-            else:
-                try:
-                    message = await channel.fetch_message(int(static_player.get('message_id')))
-                except TypeError:
-                    await self.reset_controller_db(inter.guild_id, guild_data, inter=inter)
-                    message = None
-                except:
-                    message = await send_idle_embed(inter.channel, bot=self.bot)
-                    guild_data['player_controller']['message_id'] = str(message.id)
-                    await self.bot.update_data(inter.guild.id, guild_data, db_name=DBModel.guilds)
-                player.message = message
-
-        if not inter.channel.permissions_for(inter.guild.me).send_messages:
-            raise GenericError(f"**Não tenho permissão de enviar mensagens no canal:** {inter, channel.mention}")
-
-        if not channel.permissions_for(inter.guild.me).embed_links:
-            raise GenericError(f"**Não tenho permissão de inserir links no canal: {channel.mention}**")
+                message = None
+            except:
+                message = await send_idle_embed(inter.channel, bot=self.bot)
+            player.message = message
 
         pos_txt = ""
 

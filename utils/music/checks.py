@@ -12,8 +12,17 @@ if TYPE_CHECKING:
     from ..others import CustomContext
 
 
-async def check_requester_channel(ctx: CustomContext):
+def can_send_message(channel: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.Thread]):
+    if not channel.permissions_for(channel.guild.me).send_messages:
+        raise GenericError(f"**Não tenho permissão de enviar mensagens no canal:** {channel.mention}")
 
+    if not channel.permissions_for(channel.guild.me).embed_links:
+        raise GenericError(f"**Não tenho permissão de inserir links no canal: {channel.mention}**")
+
+    return True
+
+
+async def check_requester_channel(ctx: CustomContext):
     guild_data = await ctx.bot.get_data(ctx.guild.id, db_name=DBModel.guilds)
 
     if guild_data['player_controller']["channel"] == str(ctx.channel.id):
@@ -23,7 +32,6 @@ async def check_requester_channel(ctx: CustomContext):
 
 
 def has_player():
-
     def predicate(inter):
 
         try:
@@ -37,7 +45,6 @@ def has_player():
 
 
 def is_dj():
-
     async def predicate(inter):
 
         try:
@@ -54,20 +61,15 @@ def is_dj():
     return commands.check(predicate)
 
 
-def can_send_message():
-
+def can_send_message_check():
     async def predicate(inter):
-
-        if not inter.channel.permissions_for(inter.guild.me).send_messages:
-            raise GenericError("Não tenho permissão de enviar mensagens no canal atual.")
-
+        can_send_message(inter.channel)
         return True
 
     return commands.check(predicate)
 
 
 def is_requester():
-
     async def predicate(inter):
 
         try:
@@ -94,7 +96,6 @@ def is_requester():
 
 
 def check_voice():
-
     def predicate(inter):
 
         if not inter.author.voice:
@@ -119,7 +120,6 @@ def check_voice():
 
 
 def has_source():
-
     def predicate(inter):
 
         try:
@@ -136,9 +136,8 @@ def has_source():
 
 
 def user_cooldown(rate: int, per: int):
-
     def custom_cooldown(inter: disnake.Interaction):
-        #if (await inter.bot.is_owner(inter.author)):
+        # if (await inter.bot.is_owner(inter.author)):
         #   return None  # sem cooldown
 
         return commands.Cooldown(rate, per)
@@ -150,7 +149,6 @@ def user_cooldown(rate: int, per: int):
 
 
 async def has_perm(inter):
-
     try:
         player: LavalinkPlayer = inter.bot.music.players[inter.guild.id]
     except KeyError:
@@ -179,7 +177,7 @@ async def has_perm(inter):
         player.dj.add(inter.author)
 
     elif inter.bot.intents.members and not [m for m in vc.members if
-                                        not m.bot and (m.guild_permissions.manage_channels or m in player.dj)]:
+                                            not m.bot and (m.guild_permissions.manage_channels or m in player.dj)]:
         player.dj.add(inter.author)
         await inter.channel.send(embed=disnake.Embed(
             description=f"{inter.author.mention} foi adicionado à lista de DJ's por não haver um no canal <#{vc.id}>.",
