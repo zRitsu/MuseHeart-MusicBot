@@ -262,7 +262,7 @@ class LavalinkPlayer(wavelink.Player):
                             f"`caso nenhum comando seja usado...`",
                 color=self.bot.get_color(self.guild.me)
             )
-            embed.set_thumbnail(self.guild.me.avatar.replace(size=256).url)
+            embed.set_thumbnail(self.guild.me.display_avatar.replace(size=256).url)
             self.message = await self.text_channel.send(embed=embed)
             return
 
