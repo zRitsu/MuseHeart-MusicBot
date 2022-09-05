@@ -120,8 +120,10 @@ def parse_error(
                     f"uso{'s' if error.number > 1 else ''} finalizado{'s' if error.number > 1 else ''}!**"
 
     elif isinstance(error, WavelinkException):
-        if str(error) == "Track not found...":
+        if (wave_error := str(error)) == "Track not found...":
             error_txt = "**Não houve resultados para sua busca...**"
+        elif "The playlist does not exist" in wave_error:
+            error_txt = "**A playlist não existe (ou está privada).**"
 
     if not error_txt:
         full_error_txt = "".join(traceback.format_exception(type(error), error, error.__traceback__))
