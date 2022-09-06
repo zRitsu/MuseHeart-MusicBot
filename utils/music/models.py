@@ -143,7 +143,7 @@ class LavalinkPlayer(wavelink.Player):
         self.bot.dispatch("player_create", player=self)
 
     def __str__(self) -> str:
-        return f"Lavalink Player | Server: {self.node.identifier}"
+        return f"Servidor de música atual: {self.node.identifier}"
 
     def __repr__(self):
         return f"<volume={self.volume} " \
