@@ -604,6 +604,8 @@ class Owner(commands.Cog):
         with ZipFile("./source.zip", 'a') as zipf:
 
             for f in filelist.split("\n"):
+                if not f:
+                    continue
                 if f == ".env-temp":
                     zipf.write('./.env-temp', './.env')
                 else:
