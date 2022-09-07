@@ -513,13 +513,15 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         static_player = guild_data['player_controller']
 
-        channel = inter.channel
-
         if static_player['channel']:
             if not (channel := inter.guild.get_channel(int(static_player['channel']))):
                 await self.reset_controller_db(inter.guild.id, guild_data, inter)
-            else:
-                can_send_message(channel)
+                channel = inter.channel
+
+        else:
+            channel = inter.channel
+
+        can_send_message(channel)
 
         is_pin = None
 
