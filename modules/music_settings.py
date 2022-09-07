@@ -81,6 +81,73 @@ class MusicSettings(commands.Cog):
         )
 
     @commands.has_guild_permissions(manage_guild=True)
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.command(name="keepvoice", aliases=["manterconectado", "keepconnected"],
+                      description="Manter o bot conectado no canal de voz (alpha).")
+    async def keep_connected_legacy(self, ctx: CustomContext):
+        await self.keep_connected.callback(self=self, inter=ctx)
+
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.slash_command(
+        name=disnake.Localized("keep_connected", data={disnake.Locale.pt_BR: "manter_conectado"}),
+        description=f"{desc_prefix}Manter o bot conectado no canal de voz (alpha).",
+        default_member_permissions=disnake.Permissions(manage_guild=True)
+    )
+    async def keep_connected(self, inter: disnake.AppCmdInter):
+
+        await inter.response.defer(ephemeral=True)
+
+        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
+
+        guild_data["keep_connected"] = not guild_data["keep_connected"]
+
+        await self.bot.update_data(inter.guild.id, guild_data, db_name=DBModel.guilds)
+
+        if guild_data["keep_connected"]:
+            await inter.edit_original_message(
+                embed=disnake.Embed(
+                    description="**Você ativou a minha permanência no canal de voz.**\n\n"
+                                "`Não irei mais desconectar do canal de voz automaticamente "
+                                "caso não tenha alguém conectado no canal.`",
+                    color=self.bot.get_color(inter.guild.me)
+                ).set_footer(text="Nota: este é um recurso experimental e está sujeito a não "
+                                  "funcionar corretamente devido a reinicializações periódicas.")
+            )
+
+        else:
+
+            await inter.edit_original_message(
+                embed=disnake.Embed(
+                    description="**Você desativou a minha permanência canal de voz.**\n\n"
+                                "`Agora irei desconectar automáticamente do canal de voz "
+                                "quando não tiver alguém conectado no canal.`",
+                    color=self.bot.get_color(inter.guild.me)
+                )
+            )
+
+        try:
+            player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
+        except KeyError:
+            return
+
+        player.keep_connected = guild_data["keep_connected"]
+
+        try:
+            player.members_timeout_task.cancel()
+        except:
+            pass
+
+        if not player.keep_connected:
+
+            if self.bot.intents.members:
+                check = any(m for m in player.guild.me.voice.channel.members if not m.bot)
+            else:
+                check = any(m for m in player.guild.me.voice.channel.voice_states if m != self.bot.user.id)
+
+            if not check:
+                player.members_timeout_task = player.members_timeout()
+
+    @commands.has_guild_permissions(manage_guild=True)
     @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
     @commands.command(

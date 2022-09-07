@@ -113,7 +113,7 @@ class LavalinkPlayer(wavelink.Player):
         self.command_log_emoji: str = ""
         self.is_closing: bool = False
         self.last_message_id: Optional[int] = None
-        self.nonstop: bool = False
+        self.keep_connected: bool = kwargs.pop("keep_connected", False)
         self.update: bool = False
         self.updating: bool = False
         self.auto_update: int = 0
@@ -149,7 +149,7 @@ class LavalinkPlayer(wavelink.Player):
         return f"<volume={self.volume} " \
                f"current_position={time_format(self.position) if self.position else 'Idling'} " \
                f"queue={len(self.queue)} loop={self.loop} EQ=\"{self.eq}\" guild=\"{self.guild.name}\" " \
-               f"node=\"{self.node.identifier}\" 24/7=\"{self.nonstop}\">"
+               f"node=\"{self.node.identifier}\" keep_connected=\"{self.keep_connected}\">"
 
     @property
     def has_thread(self):
@@ -192,8 +192,8 @@ class LavalinkPlayer(wavelink.Player):
     async def members_timeout(self):
 
         await asyncio.sleep(self.idle_timeout)
-        msg = f"O player foi desligado por falta de membros no canal" + (f"<#{self.guild.me.voice.channel.id}>"
-                                                                         if self.guild.me.voice else '') + "..."
+        msg = f"**O player foi desligado por falta de membros no canal" + (f"<#{self.guild.me.voice.channel.id}>"
+                                                                         if self.guild.me.voice else '') + "...**"
         self.command_log = msg
         if not self.static and not self.has_thread:
             embed = disnake.Embed(description=msg, color=self.bot.get_color(self.guild.me))
@@ -748,7 +748,7 @@ class LavalinkPlayer(wavelink.Player):
             elif self.last_track.track_loops:
                 self.last_track.track_loops -= 1
                 self.queue.insert(0, self.last_track)
-            elif self.loop == "queue" or self.nonstop:
+            elif self.loop == "queue": # or self.keep_connected:
                 if self.is_previows_music:
                     self.queue.insert(1, self.last_track)
                     self.is_previows_music = False

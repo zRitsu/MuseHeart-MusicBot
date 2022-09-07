@@ -659,6 +659,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             requester=inter.author,
             guild=inter.guild,
             channel=channel,
+            keep_connected=guild_data["keep_connected"],
             node_id=node.identifier,
             static=bool(static_player['channel']),
             skin=skin
@@ -2032,46 +2033,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await self.interaction_message(inter, text, emoji=msg[1])
 
-    @has_player()
-    @commands.has_guild_permissions(manage_guild=True)
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.command(name="247", aliases=["nonstop"],
-                      description="Ativar/Desativar o modo 24/7 do player (Em testes).")
-    async def nonstop_legacy(self, ctx: CustomContext):
-        await self.nonstop.callback(self=self, inter=ctx)
-
-    @has_player()
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.slash_command(
-        name="24_7",
-        description=f"{desc_prefix}Ativar/Desativar o modo 24/7 do player (Em testes).",
-        default_member_permissions=disnake.Permissions(manage_guild=True)
-    )
-    async def nonstop(self, inter: disnake.AppCmdInter):
-
-        player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
-
-        player.nonstop = not player.nonstop
-
-        msg = ["ativou", "♾️"] if player.nonstop else ["desativou", "❌"]
-
-        text = [
-            f"{msg[0]} o modo interrupto do player.",
-            f"{msg[1]} **⠂{inter.author.mention} {msg[0]} o modo interrupto do player.**"
-        ]
-
-        if not len(player.queue):
-            player.queue.extend(player.played)
-            player.played.clear()
-
-        if player.current:
-            await self.interaction_message(inter, txt=text, update=True, emoji=msg[1])
-            return
-
-        await self.interaction_message(inter, text)
-
-        await player.process_next()
-
     @check_voice()
     @has_player()
     @is_dj()
@@ -2656,6 +2617,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             requester=message.author,
             guild=message.guild,
             channel=text_channel,
+            keep_connected=data["keep_connected"],
             static=True,
             skin=data["player_controller"]["skin"],
             node_id=node.identifier
@@ -3174,7 +3136,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         except AttributeError:
             pass
 
-        if player.guild.me.voice and not player.nonstop:
+        if player.guild.me.voice and not player.keep_connected:
 
             if self.bot.intents.members:
                 check = any(m for m in player.guild.me.voice.channel.members if not m.bot)

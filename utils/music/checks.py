@@ -160,7 +160,7 @@ async def has_perm(inter):
     if inter.author.guild_permissions.manage_channels:
         return True
 
-    elif player.nonstop:
+    elif player.keep_connected:
         raise GenericError(f"**Erro!** Apenas membros com a permissão de **{perms_translations['manage_channels']}** "
                            "podem usar este comando/botão com o **modo 24/7 ativo**...")
 

@@ -46,7 +46,7 @@ def load(player: LavalinkPlayer) -> dict:
                                         color=player.bot.get_color(player.guild.me),
                                         description=f"\n{queue_txt}")
 
-            if not player.nonstop:
+            if not player.loop:
 
                 queue_duration = 0
 

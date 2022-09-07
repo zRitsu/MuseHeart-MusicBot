@@ -21,7 +21,7 @@ class DBModel:
 
 db_models = {
     DBModel.guilds: {
-        "ver": 1.5,
+        "ver": 1.6,
         "prefix": "",
         "player_controller": {
             "channel": None,
@@ -31,6 +31,7 @@ db_models = {
         },
         "check_other_bots_in_vc": False,
         "enable_prefixed_commands": True,
+        "keep_connected": False,
         "djroles": []
     },
     DBModel.users: {
