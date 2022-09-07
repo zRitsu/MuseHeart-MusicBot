@@ -80,52 +80,6 @@ class MusicSettings(commands.Cog):
             )
         )
 
-    @commands.bot_has_guild_permissions(create_forum_threads=True)
-    @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
-    @commands.slash_command(
-        name=disnake.Localized("setup_songrequest_forum", data={disnake.Locale.pt_BR: "configurar_songrequest_forum"}),
-        description=f"{desc_prefix} (beta) Criar uma postagem dedicada para pedir músicas e deixar player fixado.",
-        default_member_permissions=disnake.Permissions(manage_guild=True)
-    )
-    async def setup_forum(
-            self, inter: disnake.AppCmdInter,
-            target: disnake.ForumChannel = commands.Param(
-                name="canal", description="Selecione um canal de forum."
-            ),
-    ):
-
-        try:
-            if self.bot.music.players[inter.guild.id]:
-                raise GenericError("**O player deve ser finalizado para usar este comando...**")
-        except KeyError:
-            pass
-
-        await inter.response.defer(ephemeral=True)
-
-        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
-
-        thread_wmessage = await target.create_thread(
-            name=f"{self.bot.user.name} song request",
-            content="Post para pedido de músicas.",
-            auto_archive_duration=10080,
-            slowmode_delay=5,
-        )
-
-        message = await send_idle_embed(target=thread_wmessage.message, bot=self.bot, force=True, guild_data=guild_data)
-
-        guild_data['player_controller']['channel'] = str(message.channel.id)
-        guild_data['player_controller']['message_id'] = str(message.id)
-
-        await self.bot.update_data(inter.guild.id, data=guild_data, db_name=DBModel.guilds)
-
-        await inter.edit_original_message(
-            embed=disnake.Embed(
-                color=self.bot.get_color(inter.guild.me),
-                description=f"**O [post]({message.jump_url}) para pedir música foi configurado com sucesso!**\n"
-                            f"Caso queira reverter essa configuração, apenas delete o [post]({message.jump_url})."
-            )
-        )
-
     @commands.has_guild_permissions(manage_guild=True)
     @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
@@ -136,7 +90,7 @@ class MusicSettings(commands.Cog):
     async def setup_legacy(
             self,
             ctx: CustomContext,
-            channel: Union[disnake.TextChannel, disnake.VoiceChannel, None] = None, *args
+            channel: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.ForumChannel, None] = None, *args
     ):
 
         args = list(args)
@@ -147,17 +101,11 @@ class MusicSettings(commands.Cog):
         else:
             purge_messages = "no"
 
-        if "--voice" in args:
-            create_voice_channel = "yes"
-            args.remove("--voice")
-        else:
-            create_voice_channel = "no"
-
         if args:
             raise GenericError("**Opção inválida:** " + " ".join(args))
 
         await self.setup.callback(self=self, inter=ctx, target=channel,
-                                  purge_messages=purge_messages, create_voice_channel=create_voice_channel)
+                                  purge_messages=purge_messages)
 
     @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
@@ -172,21 +120,9 @@ class MusicSettings(commands.Cog):
             target: Union[disnake.TextChannel, disnake.VoiceChannel] = commands.Param(
                 name="canal", default=None, description="Selecionar um canal existente"
             ),
-            create_voice_channel: str = commands.Param(
-                name="criar_canal_de_voz", default="no",
-                description="Criar canal de voz ao invés de texto (quando um canal não for usado).",
-                choices=[
-                    disnake.OptionChoice(
-                        disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"
-                    ),
-                    disnake.OptionChoice(
-                        disnake.Localized("No", data={disnake.Locale.pt_BR: "Não"}), "no"
-                    )
-                ],
-            ),
             purge_messages: str = commands.Param(
                 name="limpar_mensagens", default="no",
-                description="Limpar mensagens do canal selecionado (até 100 mensagens)",
+                description="Limpar mensagens do canal selecionado (até 100 mensagens, não efetivo em forum).",
                 choices=[
                     disnake.OptionChoice(
                         disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"
@@ -240,6 +176,53 @@ class MusicSettings(commands.Cog):
 
         if not target:
 
+            try:
+                id_ = inter.id
+            except AttributeError:
+                id_ = ""
+
+            msg_select = await inter.send(
+                embed=disnake.Embed(
+                    description="**Qual tipo de canal para pedir música você quer criar?**",
+                    color=self.bot.get_color(inter.guild.me)
+                ).set_footer(text="Você tem apenas 30 segundos para clicar em um botão."),
+                components=[
+                    disnake.ui.Button(label="Canal de texto", custom_id=f"text_channel_{id_}", emoji="💬"),
+                    disnake.ui.Button(label="Canal de voz", custom_id=f"voice_channel_{id_}", emoji="🔊")
+                ],
+                ephemeral=True
+            )
+
+            def check(i: disnake.MessageInteraction):
+
+                try:
+                    return i.data.custom_id.endswith(f"_{inter.id}") and i.author == inter.author
+                except AttributeError:
+                    return i.message.id == msg_select.message.id and i.author == inter.author
+
+            try:
+                inter = await self.bot.wait_for("button_click", check=check, timeout=30)
+                await inter.response.defer()
+            except asyncio.TimeoutError:
+                try:
+                    inter.application_command.reset_cooldown(inter)
+                except AttributeError:
+                    inter.command.reset_cooldown(inter)
+
+                if msg_select:
+                    func = msg_select.edit
+                else:
+                    func = (await inter.original_message()).edit
+
+                await func(
+                    embed=disnake.Embed(
+                        description="**Tempo esgotado!**",
+                        color=disnake.Color.red()
+                    ),
+                    components=None
+                )
+                return
+
             if original_message:
                 try:
                     await original_message.edit(content=None, embed=embed_archived, view=None)
@@ -258,46 +241,63 @@ class MusicSettings(commands.Cog):
             else:
                 target = inter.guild
 
-            create_func = target.create_voice_channel if create_voice_channel == "yes" else target.create_text_channel
+            create_func = target.create_voice_channel if \
+                inter.data.custom_id.startswith("voice_channel_") else target.create_text_channel
 
             channel = await create_func(f"{self.bot.user.name} player controller", overwrites=perms)
 
             msg = f"Canal para pedido de músicas criado: {channel.mention}"
 
         else:
-            
-            if not target.permissions_for(inter.guild.me).manage_permissions:
-                raise GenericError(f"**Não tenho permissão de gerenciar permissões no canal:** {target.mention}")
 
-            if purge_messages == "yes":
-                await target.purge(limit=100, check=lambda m: m.author != inter.guild.me or not m.thread)
+            if isinstance(target, disnake.ForumChannel):
 
-            if original_message:
+                thread_wmessage = await target.create_thread(
+                    name=f"{self.bot.user.name} song request",
+                    content="Post para pedido de músicas.",
+                    auto_archive_duration=10080,
+                    slowmode_delay=5,
+                )
 
-                if original_message.channel != target:
-                    try:
-                        await original_message.edit(content=None, embed=embed_archived, view=None)
-                    except:
-                        pass
-                    try:
-                        await original_message.thread.edit(
-                            archived=True,
-                            locked=True,
-                            reason=f"Player reconfigurado por {inter.author}."
-                        )
-                    except:
-                        pass
+                message = await send_idle_embed(target=thread_wmessage.message, bot=self.bot, force=True,
+                                                guild_data=guild_data)
 
-                else:
-                    message = original_message
+                target = message.channel
 
-            if not message:
+            else:
 
-                async for m in target.history(limit=100):
+                if not target.permissions_for(inter.guild.me).manage_permissions:
+                    raise GenericError(f"**Não tenho permissão de gerenciar permissões no canal:** {target.mention}")
 
-                    if m.author == inter.guild.me and m.thread:
-                        message = m
-                        break
+                if purge_messages == "yes":
+                    await target.purge(limit=100, check=lambda m: m.author != inter.guild.me or not m.thread)
+
+                if original_message:
+
+                    if original_message.channel != target:
+                        try:
+                            await original_message.edit(content=None, embed=embed_archived, view=None)
+                        except:
+                            pass
+                        try:
+                            await original_message.thread.edit(
+                                archived=True,
+                                locked=True,
+                                reason=f"Player reconfigurado por {inter.author}."
+                            )
+                        except:
+                            pass
+
+                    else:
+                        message = original_message
+
+                if not message:
+
+                    async for m in target.history(limit=100):
+
+                        if m.author == inter.guild.me and m.thread:
+                            message = m
+                            break
 
             await target.edit(overwrites=perms)
 
@@ -346,12 +346,11 @@ class MusicSettings(commands.Cog):
 
         embed = disnake.Embed(
             description=f"**{msg}**\n\nObs: Caso queira reverter esta configuração, apenas use o comando {reset_txt} ou "
-                        f"delete o canal {channel.mention}",
+                        f"delete o canal/post {channel.mention}",
             color=self.bot.get_color(inter.guild.me)
         )
-
         try:
-            await inter.edit_original_message(embed=embed)
+            await inter.edit_original_message(embed=embed, components=None)
         except AttributeError:
             await inter.send(embed=embed, ephemeral=True)
 
