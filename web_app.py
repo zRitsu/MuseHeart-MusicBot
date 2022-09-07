@@ -34,7 +34,10 @@ class IndexHandler(tornado.web.RequestHandler):
         cells = ""
 
         for bot in self.bots:
-            await bot.wait_until_ready()
+
+            if not bot.bot_ready:
+                continue
+
             avatar = bot.user.display_avatar.replace(size=256, static_format="png").url
 
             cells += f"<tr><td><img src=\"{avatar}\" width=128 weight=128></img></td>\n" \
@@ -42,7 +45,11 @@ class IndexHandler(tornado.web.RequestHandler):
                      f"Adicionar:<br><a href=\"{disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))}\" " \
                      f"target=\"_blank\">{bot.user}</a></td></tr>"
 
-        if cells:
+
+        if not cells:
+            self.text = '<h1 style=\"font-size:5vw\">Não há bots disponíveis no momento...</h1>'
+
+        else:
 
             style = """<style>
             table, th, td {
@@ -54,7 +61,7 @@ class IndexHandler(tornado.web.RequestHandler):
             self.text = f"<p style=\"font-size:30px\">Bots Disponíveis:</p>{style}\n<table>{cells}</table>"
 
     def get(self):
-        self.write(f"{self.text or 'olá :]'}<br><p><a href=\"https://github.com/zRitsu/DC-MusicBot-RPC/releases\" "
+        self.write(f"{self.text}<p><a href=\"https://github.com/zRitsu/DC-MusicBot-RPC/releases\" "
                    f"target=\"_blank\">Baixe o app de rich presence aqui.</a></p><br>Link para adicionar no app de RPC "
                    f"abaixo:<p style=\"color:blue\">{self.ws_url}</p><br>")
         # self.render("index.html") #será implementado futuramente...
