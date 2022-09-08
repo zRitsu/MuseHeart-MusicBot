@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 import disnake
 from disnake.ext import commands
 from .converters import perms_translations
@@ -160,16 +160,16 @@ async def has_perm(inter):
     if inter.author.guild_permissions.manage_channels:
         return True
 
-    elif player.keep_connected:
-        raise GenericError(f"**Erro!** Apenas membros com a permissão de **{perms_translations['manage_channels']}** "
-                           "podem usar este comando/botão com o **modo 24/7 ativo**...")
-
     user_roles = [r.id for r in inter.author.roles]
 
     guild_data = await inter.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
     if [r for r in guild_data['djroles'] if int(r) in user_roles]:
         return True
+
+    elif player.restrict_mode:
+        raise GenericError(f"**Erro!** Apenas DJ's e membros com a permissão de **{perms_translations['manage_channels']}** "
+                           "podem usar este comando/botão com o **modo restrito ativo**...")
 
     vc = inter.bot.get_channel(player.channel_id)
 
