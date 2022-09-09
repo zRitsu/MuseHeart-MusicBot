@@ -72,7 +72,7 @@ def load(player: LavalinkPlayer) -> dict:
                               "\n".join(f"[0;33m{(n+1):02}[0m [0;34m[{time_format(t.duration) if not t.is_stream else '🔴 stream'}][0m [0;36m{fix_characters(t.title, 45)}[0m" for n, t in enumerate(
                                   itertools.islice(player.queue, 15)))
 
-            if (qsize := len(player.queue)) > 30:
+            if (qsize := len(player.queue)) > 15:
                 data["content"] += f"\n\n[0;37mE mais[0m [0;35m{qsize}[0m [0;37mmúsicas(s).[0m"
 
             data["content"] += "```"
