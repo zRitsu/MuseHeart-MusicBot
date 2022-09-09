@@ -81,19 +81,9 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         ws_id = data.get("user_ids")
         bot_id = data.get("bot_id")
 
-        if not ws_id:
-
-            if not bot_id:
-                print(f"desconectando: por falta de id de usuario {self.request.remote_ip}\nDados: {data}")
-                self.close(code=1005, reason="Desconectando: por falta de ids de usuario")
-                return
-
-            for ws in users_ws:
-                try:
-                    ws.write_message(json.dumps(data))
-                except Exception as e:
-                    print(f"Erro ao processar dados do rpc para os users [{', '.join(ws.user_ids)}]: {repr(e)}")
-
+        if not ws_id and not bot_id:
+            print(f"desconectando: por falta de id de usuario {self.request.remote_ip}\nDados: {data}")
+            self.close(code=1005, reason="Desconectando: por falta de ids de usuario")
             return
 
         is_bot = data.pop("bot", False)
@@ -102,6 +92,12 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             print(f"Nova conexão - Bot: {ws_id} {self.request.remote_ip}")
             self.bot_ids = ws_id
             bots_ws.append(self)
+
+            for ws in users_ws:
+                try:
+                    ws.write_message(json.dumps(data))
+                except Exception as e:
+                    print(f"Erro ao processar dados do rpc para os users [{', '.join(ws.user_ids)}]: {repr(e)}")
             return
 
         self.user_ids = ws_id
