@@ -186,7 +186,7 @@ class BotPool:
                 test_guilds=test_guilds,
                 sync_commands=self.config["AUTO_SYNC_COMMANDS"] is True,
                 sync_commands_debug=True,
-                color=self.config["EMBED_COLOR"],
+                embed_color=self.config["EMBED_COLOR"],
                 default_prefix=default_prefix,
                 pool=self
             )
@@ -284,14 +284,12 @@ class BotPool:
 class BotCore(commands.AutoShardedBot):
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         self.session: Optional[aiohttp.ClientError] = None
         self.db: Union[LocalDatabase, MongoDatabase] = None
         self.pool: BotPool = kwargs.pop('pool')
         self.config = self.pool.config
         self.default_prefix = kwargs.pop("default_prefix", "!!!")
         self.spotify: Optional[SpotifyClient] = self.pool.spotify
-        self.music = music_mode(self)
         self.session = aiohttp.ClientSession()
         self.ws_client = self.pool.ws_client
         self.color = kwargs.pop("embed_color", None)
@@ -302,6 +300,8 @@ class BotCore(commands.AutoShardedBot):
         self.uptime = disnake.utils.utcnow()
         self.env_owner_ids = set()
         self.dm_cooldown = commands.CooldownMapping.from_cooldown(rate=2, per=30, type=commands.BucketType.member)
+        super().__init__(*args, **kwargs)
+        self.music = music_mode(self)
 
         for i in self.config["OWNER_IDS"].split("||"):
 
