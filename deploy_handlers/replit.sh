@@ -2,7 +2,15 @@
 
 rm poetry.lock && rm pyproject.toml 2> /dev/null
 
-if [ ! -d "venv" ] || [ ! -f "./venv/bin/python3" ]; then
+if [ -n "${VIDEO_PREVIEW}" ]; then
+  . venv/bin/activate
+  python3 -m pip install tornado
+  python3 preview.py
+  kill "$PPID"
+  exit 1
+fi
+
+if [ ! -d "venv" ] || [ ! -f "./venv/bin/.venv_created" ]; then
   rm -rf venv && rm -rf .config && rm -rf .cache
   echo "##################################"
   echo "## Inicializando virtual_env... ##"
@@ -10,16 +18,12 @@ if [ ! -d "venv" ] || [ ! -f "./venv/bin/python3" ]; then
   python3 -m venv venv
   . venv/bin/activate
   python3 -m pip config unset --user install.use-feature 2> /dev/null
+  touch ./venv/bin/.venv_created
 else
   . venv/bin/activate
 fi
 
-if [ -n "${VIDEO_PREVIEW}" ]; then
-  python3 -m pip install tornado
-  python3 preview.py
-  kill "$PPID"
-  exit 1
-elif [ ! -f "./venv/requirements.txt" ]; then
+if [ ! -f "./venv/requirements.txt" ]; then
   bash quick_update.sh
   python3 -m pip install -U pip
   echo "#################################################"
