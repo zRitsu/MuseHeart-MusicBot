@@ -327,11 +327,7 @@ class Owner(commands.Cog):
         if not inter.data.custom_id.startswith("updatecmd_"):
             return
 
-        if inter.data.custom_id == "updatecmd_installdeps":
-            await inter.message.delete()
-            await self.update_deps(inter, "", "--pip", use_poetry=inter.data.custom_id.endswith("_poetry"))
-
-        elif inter.data.custom_id.startswith("updatecmd_requirements"):
+        if inter.data.custom_id.startswith("updatecmd_requirements"):
 
             try:
                 os.remove('./update_reqs.zip')
@@ -350,6 +346,11 @@ class Owner(commands.Cog):
             )
 
             os.remove("update_reqs.zip")
+
+        # install installdeps
+        else:
+            await inter.message.delete()
+            await self.update_deps(inter, "", "--pip", use_poetry=inter.data.custom_id.endswith("_poetry"))
 
     async def cleanup_git(self, force=False):
 
