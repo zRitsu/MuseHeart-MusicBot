@@ -299,7 +299,7 @@ class Owner(commands.Cog):
                         txt += ". ./" + venv.split('/')[-1] + " && "
 
                 try:
-                    prefix = ctx.prefix if not str(ctx.guild.me.id) not in ctx.prefix else f"@{ctx.guild.me.name}"
+                    prefix = ctx.prefix if (not str(ctx.guild.me.id) in ctx.prefix) else f"@{ctx.guild.me.name}"
                 except AttributeError:
                     prefix = self.bot.default_prefix if self.bot.intents.message_content else f"@{ctx.guild.me.name}"
 
@@ -308,7 +308,7 @@ class Owner(commands.Cog):
                         description="**Será necessário atualizar as dependências usando o comando "
                                     "abaixo no terminal/shell:**\n"
                                     f"```sh\n{txt}{cmd}```\nou usar usar o comando: "
-                                    f"```\n{prefix}{ctx.invoked_with} --force --pip``` \n"
+                                    f"```ansi\n[34;1m{prefix}update --force --pip[0m``` \n"
                                     f"**Nota:** Dependendo da hospedagem (ou que não tenha 150mb de RAM livre "
                                     f"e 0.5vCPU) você deve enviar o arquivo requirements.txt ao invés de "
                                     f"usar uma das opções acima.",
