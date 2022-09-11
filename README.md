@@ -109,7 +109,7 @@ Hospedando no seu próprio PC/VPS (windows/linux)
 </summary>
 <br>
 
-## Ou caso queira hospedar no seu próprio pc ou VPS veja os requisitos abaixo:
+### Requisitos:
 
 * Python 3.8 ou superior:<br/>
 [Download pela Microsoft Store](https://apps.microsoft.com/store/detail/9PJPW5LDXLZ5?hl=pt-br&gl=BR) (Recomendável para usuários do windows 10/11).<br/>
