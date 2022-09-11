@@ -151,13 +151,13 @@ class WSClient:
         self.pool = pool
         self.connection = None
         self.backoff: int = 7
-        self.ready: bool  = False
+        self.event = asyncio.Event()
         self.data: dict = {}
         self.session: Optional[aiohttp.ClientSession] = None
 
     async def connect(self):
 
-        if self.ready:
+        if self.event.is_set():
             return
 
         if not self.session:
@@ -173,27 +173,41 @@ class WSClient:
 
             await bot.wait_until_ready()
 
-        await self.send({"user_ids": [b.user.id for b in self.pool.bots], "bot": True})
+        await self.send({"user_ids": [b.user.id for b in self.pool.bots], "bot": True}, force=True)
+
+        await asyncio.sleep(1)
+
+        for bot in self.pool.bots:
+            for player in bot.music.players.values():
+                vc: disnake.VoiceChannel = player.bot.get_channel(player.channel_id)
+                if vc.voice_states:
+                    bot.loop.create_task(player.process_rpc(vc))
 
         print("RPC client - Os dados de rpc dos bots foram sincronizados com sucesso.")
 
-        self.ready = True
+        self.event.set()
 
     @property
     def is_connected(self):
         return self.connection and not self.connection.closed
 
-    async def send(self, data: dict):
-
-        self.data = data
+    async def send(self, data: dict, force=False):
 
         if not self.is_connected:
             return
 
-        try:
-            await self.connection.send_json(self.data)
-        except Exception:
-            traceback.print_exc()
+        for t in range(5):
+
+            if not force:
+                await self.event.wait()
+
+            try:
+                await self.connection.send_json(data)
+                return
+            except Exception as e:
+                print(f"Falha ao enviar dados de rpc | Erro: {repr(e)}\n"
+                      f"Tentativa {t+1} | Dados: {data}")
+                await asyncio.sleep(3*t)
 
     async def ws_loop(self):
 
@@ -210,7 +224,7 @@ class WSClient:
                 else:
                     print(f"Conexão com servidor RPC perdida - Reconectando em {int(self.backoff)} segundo(s).")
 
-                self.ready = False
+                self.event.clear()
                 await asyncio.sleep(self.backoff)
                 self.backoff *= 2.5
                 continue
@@ -219,7 +233,7 @@ class WSClient:
 
             if message.type in (aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR):
                 print(f"RPC Websocket Closed: {message.extra}\nReconnecting in {self.backoff}s")
-                self.ready = False
+                self.event.clear()
                 await asyncio.sleep(self.backoff)
                 continue
 
