@@ -196,18 +196,10 @@ class WSClient:
         if not self.is_connected:
             return
 
-        for t in range(5):
+        if not force:
+            await self.event.wait()
 
-            if not force:
-                await self.event.wait()
-
-            try:
-                await self.connection.send_json(data)
-                return
-            except Exception as e:
-                print(f"Falha ao enviar dados de rpc | Erro: {repr(e)}\n"
-                      f"Tentativa {t+1} | Dados: {data}")
-                await asyncio.sleep(3*t)
+        await self.connection.send_json(data)
 
     async def ws_loop(self):
 
