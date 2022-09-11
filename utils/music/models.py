@@ -20,28 +20,26 @@ if TYPE_CHECKING:
 
 
 class LavalinkTrack(wavelink.Track):
-    __slots__ = (
-        'requester', 'track_loops', 'album_name', 'album_url',
-        'single_title', 'authors_md', 'authors_string', 'extra'
-    )
+    __slots__ = ('requester', 'track_loops', 'extra')
 
     def __init__(self, *args, **kwargs):
         self.requester = kwargs.pop('requester')
         self.track_loops = kwargs.pop('track_loops', 0)
         args[1]['title'] = fix_characters(args[1]['title'])
         super().__init__(*args, **kwargs)
-        self.single_title = self.title
-        self.authors_md = f"`{self.author}`"
-        self.authors_string = self.author
-        self.info["extra"] = {}
-        self.album_name = ""
-        self.album_url = ""
 
-        if playlist := kwargs.pop("playlist", None):
+        try:
+            self.info["extra"]
+        except KeyError:
+            self.info["extra"] = {}
+
+        try:
             self.info["extra"]["playlist"] = {
-                "name": playlist["name"],
-                "url": playlist["url"]
+                "name": kwargs["playist"]["name"],
+                "url": kwargs["playist"]["url"]
             }
+        except KeyError:
+            pass
 
         try:
             self.info['sourceName']
@@ -66,6 +64,32 @@ class LavalinkTrack(wavelink.Track):
 
     def __repr__(self):
         return f"{self.info['sourceName']} - {self.duration if not self.is_stream else 'stream'} - {self.authors_string} - {self.title}"
+
+    @property
+    def single_title(self) -> str:
+        return self.title
+
+    @property
+    def authors_md(self) -> str:
+        return f"`{self.author}`"
+
+    @property
+    def authors_string(self) -> str:
+        return f"`{self.author}`"
+
+    @property
+    def album_name(self) -> str:
+        try:
+            return self.info["extra"]["album"]["name"]
+        except KeyError:
+            return ""
+
+    @property
+    def album_url(self) -> str:
+        try:
+            return self.info["extra"]["album"]["url"]
+        except KeyError:
+            return ""
 
     @property
     def playlist_name(self) -> str:

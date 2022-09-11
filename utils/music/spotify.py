@@ -56,9 +56,6 @@ class SpotifyTrack:
             }
         }
 
-        self.author = self.info["author"]
-        self.authors = self.info["extra"]["authors"]
-        self.authors_md = self.info["extra"]["authors_md"]
         self.authors_string = self.info["extra"]["authors_string"]
         self.id = self.info["id"]
         self.single_title = self.info["extra"]["single_title"]
@@ -84,6 +81,18 @@ class SpotifyTrack:
 
     def __repr__(self):
         return f"{self.info['sourceName']} - {self.duration} - {self.authors_string} - {self.title}"
+
+    @property
+    def author(self) -> str:
+        return self.info["author"]
+
+    @property
+    def authors_md(self) -> str:
+        return self.info["extra"]["authors_md"]
+
+    @property
+    def authors(self) -> str:
+        return self.info["extra"]["authors"]
 
     @property
     def album_name(self) -> str:
