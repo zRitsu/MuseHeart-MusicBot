@@ -35,8 +35,8 @@ class LavalinkTrack(wavelink.Track):
 
         try:
             self.info["extra"]["playlist"] = {
-                "name": kwargs["playist"]["name"],
-                "url": kwargs["playist"]["url"]
+                "name": kwargs["playlist"]["name"],
+                "url": kwargs["playlist"]["url"]
             }
         except KeyError:
             pass
