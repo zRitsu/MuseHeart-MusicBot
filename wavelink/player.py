@@ -193,6 +193,7 @@ class Player:
         self.last_update = None
         self.last_position = None
         self.position_timestamp = None
+        self.ping = None
 
         self._voice_state = {}
 
@@ -254,6 +255,7 @@ class Player:
         self.last_update = time.time() * 1000
         self.last_position = state.get('position', 0)
         self.position_timestamp = state.get('time', 0)
+        self.ping = state.get('ping', None)
 
     async def _voice_server_update(self, data) -> None:
         self._voice_state.update({

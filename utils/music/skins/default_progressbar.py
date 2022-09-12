@@ -92,6 +92,9 @@ def load(player: LavalinkPlayer) -> dict:
     if player.restrict_mode:
         txt += f"\n> 🔒 **⠂Modo restrito:** `Ativado`"
 
+    if player.ping:
+        txt += f"\n> 📶 **⠂Latência:** `{player.ping}ms`"
+
     txt += f"{vc_txt}\n"
 
     if player.command_log:
