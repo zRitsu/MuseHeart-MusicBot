@@ -290,7 +290,16 @@ class LavalinkPlayer(wavelink.Player):
             self.message = await self.text_channel.send(embed=embed)
             return
 
-        controller_opts = []
+        controller_opts = [
+            disnake.SelectOption(
+                emoji="<:add_music:588172015760965654>", value=PlayerControls.add_song, label="Adicionar música",
+                description=f"Tocar nova música/playlist."
+            ),
+            disnake.SelectOption(
+                emoji="⭐", value=PlayerControls.enqueue_fav, label="Adicionar favorito",
+                description=f"Adicionar favorito na fila."
+            ),
+        ]
 
         if (played := len(self.played)) or self.last_track:
             controller_opts.append(
@@ -308,20 +317,12 @@ class LavalinkPlayer(wavelink.Player):
                 )
             )
 
-        controller_opts.extend([
+        controller_opts.append(
             disnake.SelectOption(
                 emoji="🛑", value=PlayerControls.stop, label="Finalizar",
                 description=f"Finalizar o player e me desconectar do canal."
             ),
-            disnake.SelectOption(
-                emoji="🎶", value=PlayerControls.add_song, label="Adicionar música",
-                description=f"Tocar nova música/playlist."
-            ),
-            disnake.SelectOption(
-                emoji="⭐", value=PlayerControls.enqueue_fav, label="Adicionar favorito",
-                description=f"Adicionar favorito na fila."
-            ),
-        ])
+        )
 
         components = [
             disnake.ui.Select(
