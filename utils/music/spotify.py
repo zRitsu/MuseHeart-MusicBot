@@ -168,6 +168,7 @@ class SpotifyTrack:
 
             selected_track.info["sourceName"] = "spotify"
             self.id = selected_track.id
+            self.info["length"] = selected_track.duration
 
         except IndexError:
             return
