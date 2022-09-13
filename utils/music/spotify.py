@@ -56,13 +56,7 @@ class SpotifyTrack:
             }
         }
 
-        self.authors_string = self.info["extra"]["authors_string"]
         self.id = self.info["id"]
-        self.single_title = self.info["extra"]["single_title"]
-        self.title = f"{self.author} - {self.single_title}"
-        self.uri = self.info["uri"]
-        self.duration = self.info["length"]
-        self.is_stream = self.info["isStream"]
         self.requester = requester
         self.track_loops = track_loops
         self.thumb = self.info["extra"]["thumb"]
@@ -83,8 +77,24 @@ class SpotifyTrack:
         return f"{self.info['sourceName']} - {self.duration} - {self.authors_string} - {self.title}"
 
     @property
+    def uri(self) -> str:
+        return self.info["uri"]
+
+    @property
+    def title(self) -> str:
+        return f"{self.author} - {self.single_title}"
+
+    @property
+    def single_title(self) -> str:
+        return self.info["extra"]["single_title"]
+
+    @property
     def author(self) -> str:
         return self.info["author"]
+
+    @property
+    def authors_string(self) -> str:
+        return self.info["extra"]["authors_string"]
 
     @property
     def authors_md(self) -> str:
@@ -93,6 +103,14 @@ class SpotifyTrack:
     @property
     def authors(self) -> str:
         return self.info["extra"]["authors"]
+
+    @property
+    def is_stream(self) -> bool:
+        return self.info["isStream"]
+
+    @property
+    def duration(self) -> int:
+        return self.info["length"]
 
     @property
     def album_name(self) -> str:
