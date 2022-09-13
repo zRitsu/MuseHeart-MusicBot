@@ -75,7 +75,7 @@ class LavalinkTrack(wavelink.Track):
 
     @property
     def authors_string(self) -> str:
-        return f"`{self.author}`"
+        return f"{self.author}"
 
     @property
     def album_name(self) -> str:
