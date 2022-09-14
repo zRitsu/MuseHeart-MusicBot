@@ -36,7 +36,7 @@ class SpotifyPlaylist:
 class SpotifyTrack:
 
     def __init__(self, *, uri, title, authors, thumb, duration,
-                 requester, playlist=None, album=None, track_loops=0, info: dict = None):
+                 requester="", playlist=None, album=None, track_loops=0, info: dict = None):
 
         self.info = info or {
             "author": fix_characters(authors[0].name),
@@ -52,13 +52,13 @@ class SpotifyTrack:
                 "authors_md": ", ".join(f"[`{a.name}`]({a.link})" for a in authors),
                 "authors_string": ", ".join(a.name for a in authors),
                 "single_title": fix_characters(title),
+                "requester": requester,
+                "track_loops": track_loops,
                 "thumb": thumb
             }
         }
 
         self.id = self.info["id"]
-        self.requester = requester
-        self.track_loops = track_loops
         self.thumb = self.info["extra"]["thumb"]
 
         if album:
@@ -103,6 +103,14 @@ class SpotifyTrack:
     @property
     def authors(self) -> str:
         return self.info["extra"]["authors"]
+
+    @property
+    def requester(self) -> int:
+        return self.info["extra"]["requester"]
+
+    @property
+    def track_loops(self) -> int:
+        return self.info["extra"]["track_loops"]
 
     @property
     def is_stream(self) -> bool:

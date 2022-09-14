@@ -88,7 +88,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         tracks = [
             LavalinkTrack(
                 t.id, t.info,
-                requester=ctx.author,
+                requester=ctx.author.id,
                 playlist={"name": tracks.data['playlistInfo']['name'], "url": url}
             ) for t in tracks.tracks]
 
@@ -133,7 +133,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 newtracks = [
                     LavalinkTrack(
                         t.id, t.info,
-                        requester=ctx.author,
+                        requester=ctx.author.id,
                         playlist={"name": tracks.data['playlistInfo']['name'], "url": url}
                     ) for t in tracks.tracks]
 
@@ -656,7 +656,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player: LavalinkPlayer = self.bot.music.get_player(
             guild_id=inter.guild.id,
             cls=LavalinkPlayer,
-            requester=inter.author,
+            player_creator=inter.author,
             guild=inter.guild,
             channel=channel,
             keep_connected=guild_data["keep_connected"],
@@ -861,7 +861,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if player.loop == "current":
             player.loop = False
 
-        player.current.track_loops = 0
+        player.current.info["extra"]["track_loops"] = 0
 
         await player.stop()
 
@@ -1233,12 +1233,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if mode == 'off':
             mode = False
-            player.current.track_loops = 0
+            player.current.info["extra"]["track_loops"] = 0
             emoji = "⭕"
             txt = ['desativou a repetição.', f"{emoji} **⠂{inter.author.mention}desativou a repetição.**"]
 
         elif mode == "current":
-            player.current.track_loops = 0
+            player.current.info["extra"]["track_loops"] = 0
             emoji = "🔂"
             txt = ["ativou a repetição da música atual.",
                    f"{emoji} **⠂{inter.author.mention} ativou a repetição da música atual.**"]
@@ -1269,7 +1269,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
 
-        player.current.track_loops = value
+        player.current.info["extra"]["track_loops"] = value
 
         txt = [
             f"definiu a quantidade de repetições da música "
@@ -1981,10 +1981,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 if 'song_author' in temp_filter and song_author.lower() in t.author.lower():
                     temp_filter.remove('song_author')
 
-                if 'user' in temp_filter and user == t.requester:
+                if 'user' in temp_filter and user.id == t.requester:
                     temp_filter.remove('user')
 
-                elif 'absent_members' in temp_filter and t.requester.id not in player.guild.me.voice.channel.voice_states:
+                elif 'absent_members' in temp_filter and t.requester not in player.guild.me.voice.channel.voice_states:
                     temp_filter.remove('absent_members')
 
                 if 'playlist' in temp_filter and playlist == t.playlist_name:
@@ -2614,7 +2614,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player: LavalinkPlayer = self.bot.music.get_player(
             guild_id=message.guild.id,
             cls=LavalinkPlayer,
-            requester=message.author,
+            player_creator=message.author,
             guild=message.guild,
             channel=text_channel,
             keep_connected=data["keep_connected"],
@@ -3033,7 +3033,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if isinstance(tracks, list):
 
             if isinstance(tracks[0], wavelink.Track):
-                tracks = [LavalinkTrack(track.id, track.info, requester=user, track_loops=track_loops) for track in
+                tracks = [LavalinkTrack(track.id, track.info, requester=user.id, track_loops=track_loops) for track in
                           tracks]
 
         else:
@@ -3052,7 +3052,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     "url": query
                 } if not hide_playlist else {}
 
-                tracks.tracks = [LavalinkTrack(t.id, t.info, requester=user, playlist=playlist) for t in
+                tracks.tracks = [LavalinkTrack(t.id, t.info, requester=user.id, playlist=playlist) for t in
                                  tracks.tracks]
 
             if (selected := tracks.data['playlistInfo']['selectedTrack']) > 0:

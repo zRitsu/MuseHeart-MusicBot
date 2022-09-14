@@ -21,7 +21,7 @@ def load(player: LavalinkPlayer) -> dict:
             time_format(player.current.duration)
 
         embed.description = f"> ▶️ **┃**[`{fix_characters(player.current.title, 45)}`]({player.current.uri})\n" \
-                            f"> ℹ️ **┃**`{duration}`┃`{fix_characters(player.current.author, 18)}`┃{player.current.requester.mention}"
+                            f"> ℹ️ **┃**`{duration}`┃`{fix_characters(player.current.author, 18)}`┃<@{player.current.requester}>"
 
         if player.current.playlist_name:
             embed.description += f"\n> 🎼 **┃ Playlist:** [`{player.current.playlist_name}`]({player.current.playlist_url})"
@@ -74,7 +74,7 @@ def load(player: LavalinkPlayer) -> dict:
         txt = f"[`{player.current.single_title}`]({player.current.uri})\n\n" \
               f"{duration}\n" \
               f"> 💠 **⠂Por:** {player.current.authors_md}\n" \
-              f"> ✋ **⠂Pedido por:** {player.current.requester.mention}\n" \
+              f"> ✋ **⠂Pedido por:** <@{player.current.requester}>\n" \
               f"> 🔊 **⠂Volume:** `{player.volume}%`"
 
         if player.current.track_loops:

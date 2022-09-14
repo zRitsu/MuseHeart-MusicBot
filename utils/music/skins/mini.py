@@ -68,7 +68,7 @@ def load(player: LavalinkPlayer) -> dict:
         embed.add_field(name="**Duração:**", value=f"`{time_format(player.current.duration)}`", inline=True)
 
     embed.add_field(name="**Uploader:**", value=f"{player.current.authors_md}", inline=True)
-    embed.add_field(name="**Adc. por:**", value=f"{player.current.requester.mention}", inline=True)
+    embed.add_field(name="**Adc. por:**", value=f"<@{player.current.requester}>", inline=True)
 
     if player.current.track_loops:
         embed.description += f" `[🔂 {player.current.track_loops}]`"

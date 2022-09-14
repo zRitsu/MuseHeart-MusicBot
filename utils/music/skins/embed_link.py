@@ -28,11 +28,11 @@ def load(player: LavalinkPlayer) -> dict:
 
     if not player.static:
 
-        txt += f" {player.current.requester.mention}\n"
+        txt += f" <@{player.current.requester}>\n"
 
     else:
 
-        txt += f"\n> ✋ **⠂Pedido por:** {player.current.requester.mention}\n"
+        txt += f"\n> ✋ **⠂Pedido por:** <@{player.current.requester}>\n"
 
         if player.current.playlist_name:
             txt += f"> 📑 **⠂Playlist:** `{fix_characters(player.current.playlist_name)}`\n"

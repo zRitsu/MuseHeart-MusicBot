@@ -80,7 +80,7 @@ def is_requester():
         if not player.current:
             raise NoSource()
 
-        if player.current.requester == inter.author or not player.restrict_mode:
+        if player.current.requester == inter.author.id or not player.restrict_mode:
             return True
 
         try:

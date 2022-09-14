@@ -20,13 +20,17 @@ if TYPE_CHECKING:
 
 
 class LavalinkTrack(wavelink.Track):
-    __slots__ = ('requester', 'track_loops', 'extra')
+
+    __slots__ = ('extra')
 
     def __init__(self, *args, **kwargs):
-        self.requester = kwargs.pop('requester')
-        self.track_loops = kwargs.pop('track_loops', 0)
         args[1]['title'] = fix_characters(args[1]['title'])
         super().__init__(*args, **kwargs)
+
+        if (info:=kwargs.pop("info", None)):
+            self.info = info
+            self.thumb = info["extra"]["thumb"]
+            return
 
         try:
             self.info["extra"]
@@ -40,6 +44,9 @@ class LavalinkTrack(wavelink.Track):
             }
         except KeyError:
             pass
+
+        self.info["extra"]["track_loops"] = kwargs.pop('track_loops', 0)
+        self.info["extra"]["requester"] = kwargs.pop('requester', '')
 
         try:
             self.info['sourceName']
@@ -90,6 +97,14 @@ class LavalinkTrack(wavelink.Track):
             return self.info["extra"]["album"]["url"]
         except KeyError:
             return ""
+
+    @property
+    def requester(self) -> int:
+        return self.info["extra"]["requester"]
+
+    @property
+    def track_loops(self) -> int:
+        return self.info["extra"]["track_loops"]
 
     @property
     def playlist_name(self) -> str:
@@ -155,10 +170,10 @@ class LavalinkPlayer(wavelink.Player):
             "seus links nos comandos. Experimente usando o comando: /fav add.",
         ]
 
-        requester: disnake.Member = kwargs.pop('requester')
+        player_creator: disnake.Member = kwargs.pop('player_creator')
 
-        if not requester.guild_permissions.manage_channels:
-            self.dj.add(requester)
+        if not player_creator.guild_permissions.manage_channels:
+            self.dj.add(player_creator)
 
         self.hints: cycle = []
         self.current_hint = ""
@@ -772,7 +787,7 @@ class LavalinkPlayer(wavelink.Player):
                 self.queue.insert(1, self.last_track)
                 self.is_previows_music = False
             elif self.last_track.track_loops:
-                self.last_track.track_loops -= 1
+                self.last_track.info["extra"]["track_loops"] -= 1
                 self.queue.insert(0, self.last_track)
             elif self.loop == "queue": # or self.keep_connected:
                 if self.is_previows_music:
