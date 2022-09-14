@@ -1713,13 +1713,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             error_text = "Você não pode adicionar a si mesmo na lista de DJ's."
         elif user.guild_permissions.manage_channels:
             error_text = f"você não pode adicionar o membro {user.mention} na lista de DJ's (ele(a) possui permissão de **gerenciar canais**)."
-        elif user in player.dj:
+        elif user.id in player.dj:
             error_text = f"O membro {user.mention} já está na lista de DJ's"
 
         if error_text:
             raise GenericError(error_text)
 
-        player.dj.add(user)
+        player.dj.add(user.id)
         text = [f"adicionou {user.mention} à lista de DJ's.", f"{user.mention} foi adicionado à lista de DJ's."]
 
         if (player.static and inter.channel == player.text_channel) or isinstance(inter.application_command,
