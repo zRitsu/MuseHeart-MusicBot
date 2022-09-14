@@ -184,7 +184,7 @@ class MusicSettings(commands.Cog):
     async def setup(
             self,
             inter: disnake.AppCmdInter,
-            target: Union[disnake.TextChannel, disnake.VoiceChannel] = commands.Param(
+            target: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.ForumChannel] = commands.Param(
                 name="canal", default=None, description="Selecionar um canal existente"
             ),
             purge_messages: str = commands.Param(
@@ -201,18 +201,20 @@ class MusicSettings(commands.Cog):
             )
     ):
 
-        perms = {
-            inter.guild.me: disnake.PermissionOverwrite(
-                embed_links=True,
-                send_messages=True,
-                send_messages_in_threads=True,
-                read_messages=True,
-                create_public_threads=True,
-                read_message_history=True,
-                manage_messages=True,
-                manage_channels=True,
-                attach_files=True,
-            )
+        kwargs = {
+            "overwrites": {
+                inter.guild.me: disnake.PermissionOverwrite(
+                    embed_links=True,
+                    send_messages=True,
+                    send_messages_in_threads=True,
+                    read_messages=True,
+                    create_public_threads=True,
+                    read_message_history=True,
+                    manage_messages=True,
+                    manage_channels=True,
+                    attach_files=True,
+                )
+            }
         }
 
         guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
@@ -311,13 +313,15 @@ class MusicSettings(commands.Cog):
             create_func = target.create_voice_channel if \
                 inter.data.custom_id.startswith("voice_channel_") else target.create_text_channel
 
-            channel = await create_func(f"{self.bot.user.name} player controller", overwrites=perms)
+            channel = await create_func(f"{self.bot.user.name} player controller", **kwargs)
 
             msg = f"Canal para pedido de músicas criado: {channel.mention}"
 
         else:
 
             if isinstance(target, disnake.ForumChannel):
+
+                kwargs.clear()
 
                 thread_wmessage = await target.create_thread(
                     name=f"{self.bot.user.name} song request",
@@ -366,7 +370,7 @@ class MusicSettings(commands.Cog):
                             message = m
                             break
 
-            await target.edit(overwrites=perms)
+            await target.edit(**kwargs)
 
             channel = target
 
