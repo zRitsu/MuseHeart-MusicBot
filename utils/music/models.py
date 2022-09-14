@@ -175,7 +175,7 @@ class LavalinkPlayer(wavelink.Player):
         player_creator: disnake.Member = kwargs.pop('player_creator', None)
 
         if player_creator and not player_creator.guild_permissions.manage_channels:
-            self.dj.add(player_creator)
+            self.dj.add(player_creator.id)
 
         self.hints: cycle = []
         self.current_hint = ""
