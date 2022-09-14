@@ -3,6 +3,7 @@
 
 import os.path
 import shutil
+import disnake
 from disnake.ext import commands
 from utils.client import BotCore
 import json
@@ -96,6 +97,15 @@ class PlayerSession(commands.Cog):
                     player.queue.append(t)
 
                 await player.connect(voice_channel.id)
+
+                if isinstance(voice_channel, disnake.StageChannel):
+
+                    while not guild.me.voice:
+                        await asyncio.sleep(1)
+
+                    if voice_channel.permissions_for(guild.me).manage_roles:
+                        await asyncio.sleep(1.5)
+                        await guild.me.edit(suppress=False)
 
                 await player.process_next(start_position=data["position"])
 
