@@ -1,4 +1,5 @@
 from __future__ import annotations
+import traceback
 from typing import TYPE_CHECKING, Union
 import disnake
 from disnake.ext import commands
@@ -205,3 +206,15 @@ def can_connect(
 
     if check_other_bots_in_vc and any(m for m in channel.members if m.bot and m != channel.guild.me):
         raise GenericError(f"**Há outro bot conectado no canal:** <#{channel.id}>")
+
+
+async def check_deafen(guild: disnake.Guild):
+
+    if guild.me.voice.deaf:
+        return True
+    elif guild.me.guild_permissions.deafen_members:
+        try:
+            await guild.me.edit(deafen=True)
+            return True
+        except:
+            traceback.print_exc()

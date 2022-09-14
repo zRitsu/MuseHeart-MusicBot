@@ -15,7 +15,7 @@ from utils.db import DBModel
 from utils.music.errors import GenericError, MissingVoicePerms
 from utils.music.spotify import SpotifyPlaylist, process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, \
-    can_send_message_check, check_requester_channel, can_send_message, can_connect
+    can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen
 from utils.music.models import LavalinkPlayer, LavalinkTrack
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist, \
@@ -39,18 +39,6 @@ SearchSource = commands.option_enum(
 )
 
 u_agent = generate_user_agent()
-
-
-async def check_deafen(ctx: Union[disnake.AppCmdInter, commands.Context, disnake.Message]):
-
-    if ctx.guild.me.voice.deaf:
-        return True
-    elif ctx.guild.me.guild_permissions.deafen_members:
-        try:
-            await ctx.guild.me.edit(deafen=True)
-            return True
-        except:
-            traceback.print_exc()
 
 
 class Music(commands.Cog, wavelink.WavelinkMixin):
@@ -323,7 +311,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     f"**Conectei no canal** <#{channel.id}>"
                 ]
 
-                if await check_deafen(ctx):
+                if await check_deafen(ctx.guild):
                     deafen_warn = False
 
             await self.interaction_message(ctx, txt, emoji="🔈", rpc_update=True)
@@ -333,7 +321,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             await asyncio.sleep(1)
 
-            if await check_deafen(ctx):
+            if await check_deafen(ctx.guild):
                 deafen_warn = False
 
         try:
