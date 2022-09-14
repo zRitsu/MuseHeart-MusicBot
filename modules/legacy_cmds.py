@@ -753,7 +753,7 @@ class Owner(commands.Cog):
         static_player = guild_data['player_controller']
 
         try:
-            channel = ctx.guild.get_channel(int(static_player['channel'])) or ctx.channel
+            channel = self.bot.get_channel(int(static_player['channel'])) or ctx.channel
             message = await channel.fetch_message(int(static_player.get('message_id')))
         except (KeyError, TypeError):
             channel = ctx.channel

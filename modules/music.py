@@ -489,7 +489,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         static_player = guild_data['player_controller']
 
         if static_player['channel']:
-            if not (channel := inter.guild.get_channel(int(static_player['channel']))):
+            if not (channel := self.bot.get_channel(int(static_player['channel']))):
                 await self.reset_controller_db(inter.guild.id, guild_data, inter)
                 channel = inter.channel
 
