@@ -285,7 +285,6 @@ class BotCore(commands.AutoShardedBot):
 
     def __init__(self, *args, **kwargs):
         self.session: Optional[aiohttp.ClientError] = None
-        self.db: Union[LocalDatabase, MongoDatabase] = None
         self.pool: BotPool = kwargs.pop('pool')
         self.config = self.pool.config
         self.default_prefix = kwargs.pop("default_prefix", "!!!")
