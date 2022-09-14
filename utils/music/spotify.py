@@ -16,7 +16,7 @@ spotify_regex = re.compile("https://open.spotify.com?.+(album|playlist|artist|tr
 
 class SpotifyPlaylist:
 
-    def __init__(self, data: dict, requester: disnake.Member, *, playlist):
+    def __init__(self, data: dict, requester: str, *, playlist):
         self.data = data
 
         self.tracks = [
@@ -35,8 +35,8 @@ class SpotifyPlaylist:
 
 class SpotifyTrack:
 
-    def __init__(self, *, uri="", title="", authors=None, thumb="", duration=0,
-                 requester="", playlist=None, album=None, track_loops=0, info: dict = None):
+    def __init__(self, *, uri: str = "", title: str = "", authors=None, thumb: str = "", duration: int = 0,
+                 requester: int = "", playlist: dict = None, album = None, track_loops: int = 0, info: dict = None):
 
         self.info = info or {
             "author": fix_characters(authors[0].name),
@@ -187,7 +187,7 @@ def query_spotify_track(func, url_id: str):
     return func(url_id)
 
 
-async def process_spotify(bot: BotCore, requester: disnake.Member, query: str, *, hide_playlist=False):
+async def process_spotify(bot: BotCore, requester: int, query: str, *, hide_playlist=False):
     if not (matches := spotify_regex.match(query)):
         return
 

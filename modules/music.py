@@ -2965,7 +2965,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not node:
             node = self.get_best_node()
 
-        tracks = await process_spotify(self.bot, user, query, hide_playlist=hide_playlist)
+        tracks = await process_spotify(self.bot, user.id, query, hide_playlist=hide_playlist)
 
         if not tracks:
 
