@@ -319,7 +319,7 @@ class Player:
 
         channel = self.bot.get_channel(channel_id)
 
-        if not guild.me.voice:
+        if not guild.voice_client:
             await channel.connect(cls=WavelinkVoiceClient, reconnect=True)
 
         elif guild.me.voice.channel.id != channel_id:
