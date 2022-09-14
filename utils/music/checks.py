@@ -183,3 +183,25 @@ async def has_perm(inter):
             description=f"{inter.author.mention} foi adicionado à lista de DJ's por não haver um no canal <#{vc.id}>.",
             color=player.bot.get_color(inter.guild.me)), delete_after=10)
         return True
+
+
+def can_connect(
+        channel: Union[disnake.VoiceChannel, disnake.StageChannel],
+        check_other_bots_in_vc: bool = False
+):
+
+    perms = channel.permissions_for(channel.guild.me)
+
+    if not perms.connect:
+        raise GenericError(f"**Não tenho permissão para conectar no canal {channel.mention}**")
+
+    if not isinstance(channel, disnake.StageChannel):
+
+        if not perms.speak:
+            raise GenericError(f"**Não tenho permissão para falar no canal {channel.mention}**")
+
+        if not channel.guild.voice_client and channel.user_limit and (channel.user_limit - len(channel.voice_states)) < 1:
+            raise GenericError(f"**O canal {channel.mention} está lotado!**")
+
+    if check_other_bots_in_vc and any(m for m in channel.members if m.bot and m != channel.guild.me):
+        raise GenericError(f"**Há outro bot conectado no canal:** <#{channel.id}>")

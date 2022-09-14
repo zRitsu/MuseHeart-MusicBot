@@ -380,7 +380,7 @@ class Player:
                    'guildId': str(self.guild_id),
                    'track': track.id,
                    'noReplace': no_replace,
-                   'startTime': str(start)
+                   'startTime': start
                    }
         if end > 0:
             payload['endTime'] = str(end)

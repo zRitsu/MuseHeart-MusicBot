@@ -24,7 +24,10 @@ class LavalinkTrack(wavelink.Track):
     __slots__ = ('extra')
 
     def __init__(self, *args, **kwargs):
-        args[1]['title'] = fix_characters(args[1]['title'])
+        try:
+            args[1]['title'] = fix_characters(args[1]['title'])
+        except IndexError:
+            pass
         super().__init__(*args, **kwargs)
 
         if (info:=kwargs.pop("info", None)):
@@ -169,9 +172,9 @@ class LavalinkPlayer(wavelink.Player):
             "seus links nos comandos. Experimente usando o comando: /fav add.",
         ]
 
-        player_creator: disnake.Member = kwargs.pop('player_creator')
+        player_creator: disnake.Member = kwargs.pop('player_creator', None)
 
-        if not player_creator.guild_permissions.manage_channels:
+        if player_creator and not player_creator.guild_permissions.manage_channels:
             self.dj.add(player_creator)
 
         self.hints: cycle = []
@@ -242,7 +245,7 @@ class LavalinkPlayer(wavelink.Player):
 
         await self.destroy()
 
-    async def process_next(self):
+    async def process_next(self, start_position: int = 0):
 
         if self.locked or self.is_closing:
             return
@@ -284,7 +287,7 @@ class LavalinkPlayer(wavelink.Player):
 
         self.locked = False
 
-        await self.play(track)
+        await self.play(track, start=start_position)
 
     async def process_idle_message(self):
 

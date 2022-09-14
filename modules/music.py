@@ -15,7 +15,7 @@ from utils.db import DBModel
 from utils.music.errors import GenericError, MissingVoicePerms
 from utils.music.spotify import SpotifyPlaylist, process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, \
-    can_send_message_check, check_requester_channel, can_send_message
+    can_send_message_check, check_requester_channel, can_send_message, can_connect
 from utils.music.models import LavalinkPlayer, LavalinkTrack
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist, \
@@ -286,31 +286,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     ):
         await self.do_connect(inter, channel)
 
-    def can_connect(
-            self,
-            ctx: Union[disnake.AppCmdInter, commands.Context, disnake.Message],
-            channel: Union[disnake.VoiceChannel, disnake.StageChannel] = None,
-            check_other_bots_in_vc: bool = False
-    ):
-        if not channel:
-            channel: Union[disnake.VoiceChannel, disnake.StageChannel] = ctx.author.voice.channel
-
-        perms = channel.permissions_for(ctx.guild.me)
-
-        if not perms.connect:
-            raise GenericError(f"**Não tenho permissão para conectar no canal {channel.mention}**")
-
-        if not isinstance(channel, disnake.StageChannel):
-
-            if not perms.speak:
-                raise GenericError(f"**Não tenho permissão para falar no canal {channel.mention}**")
-
-            if not ctx.guild.voice_client and channel.user_limit and (channel.user_limit - len(channel.voice_states)) < 1:
-                raise GenericError(f"**O canal {channel.mention} está lotado!**")
-
-        if check_other_bots_in_vc and any(m for m in channel.members if m.bot and m != ctx.guild.me):
-            raise GenericError(f"**Há outro bot conectado no canal:** <#{ctx.author.voice.channel.id}>")
-
     async def do_connect(
             self,
             ctx: Union[disnake.AppCmdInter, commands.Context, disnake.Message],
@@ -323,7 +298,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         player = self.bot.music.players[ctx.guild.id]
 
-        self.can_connect(ctx, channel, check_other_bots_in_vc)
+        can_connect(channel, check_other_bots_in_vc)
 
         deafen_warn = self.bot.config["GUILD_DEAFEN_WARN"]
 
@@ -509,7 +484,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
         if not inter.guild.me.voice:
-            self.can_connect(inter, check_other_bots_in_vc=guild_data["check_other_bots_in_vc"])
+            can_connect(inter.author.voice.channel, check_other_bots_in_vc=guild_data["check_other_bots_in_vc"])
 
         static_player = guild_data['player_controller']
 
@@ -2596,8 +2571,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not message.author.voice:
             raise GenericError("Você deve entrar em um canal de voz para pedir uma música.")
 
-        self.can_connect(
-            message,
+        can_connect(
             channel=message.author.voice.channel,
             check_other_bots_in_vc=data["check_other_bots_in_vc"]
         )

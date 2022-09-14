@@ -35,12 +35,11 @@ class SpotifyPlaylist:
 
 class SpotifyTrack:
 
-    def __init__(self, *, uri, title, authors, thumb, duration,
+    def __init__(self, *, uri="", title="", authors=None, thumb="", duration=0,
                  requester="", playlist=None, album=None, track_loops=0, info: dict = None):
 
         self.info = info or {
             "author": fix_characters(authors[0].name),
-            "id": "",
             "title": title,
             "uri": uri,
             "length": duration,
@@ -58,7 +57,7 @@ class SpotifyTrack:
             }
         }
 
-        self.id = self.info["id"]
+        self.id = ""
         self.thumb = self.info["extra"]["thumb"]
 
         if album:
