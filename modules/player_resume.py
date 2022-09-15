@@ -129,31 +129,31 @@ class PlayerSession(commands.Cog):
                     os.makedirs(f"./.player_sessions/{bot.user.id}")
 
                 for player in bot.music.players.values():
+
+                    player.current.info["id"] = player.current.id
+
+                    for t in player.queue:
+                        t.info["id"] = t.id
+
+                    data = json.dumps(
+                        {
+                            "volume": player.volume,
+                            "position": player.position,
+                            "voice_channel": player.channel_id,
+                            "dj": list(player.dj),
+                            "static": player.static,
+                            "text_channel": player.text_channel.id,
+                            "keep_connected": player.keep_connected,
+                            "message": player.message.id,
+                            "loop": player.loop,
+                            "restrict_mode": player.restrict_mode,
+                            "tracks": [player.current.info] +
+                                      [t.info for t in player.queue]
+                        }, indent=4
+                    )
+
                     with open(f"./.player_sessions/{bot.user.id}/{player.guild_id}.json", "w") as f:
-
-                        player.current.info["id"] = player.current.id
-
-                        for t in player.queue:
-                            t.info["id"] = t.id
-
-                        f.write(
-                            json.dumps(
-                                {
-                                    "volume": player.volume,
-                                    "position": player.position,
-                                    "voice_channel": player.channel_id,
-                                    "dj": list(player.dj),
-                                    "static": player.static,
-                                    "text_channel": player.text_channel.id,
-                                    "keep_connected": player.keep_connected,
-                                    "message": player.message.id,
-                                    "loop": player.loop,
-                                    "restrict_mode": player.restrict_mode,
-                                    "tracks": [player.current.info] +
-                                              [t.info for t in player.queue]
-                                }, indent=4
-                            )
-                        )
+                        f.write(data)
 
                     await player.destroy(force=True)
 
