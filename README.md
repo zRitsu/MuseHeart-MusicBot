@@ -15,7 +15,11 @@
 
 ![](https://media.discordapp.net/attachments/554468640942981147/944945573834936340/unknown.png)
 
-* Há outras skins, consulte usando o comando /change_skin (você também pode criar outras, use os modelos padrões que estão na pasta [skins](utils/music/skins/) como referência, crie uma cópia com outro nome e modifique a seu gosto).
+- Player controller: song-request em canal de forum (múltiplos bots) e skin embed_link.
+
+![](https://media.discordapp.net/attachments/554468640942981147/1019806568134475786/forum_song_request.png)
+
+* Há diversas outras skins, veja todas usando o comando /change_skin (você também pode criar outras, use os modelos padrões que estão na pasta [skins](utils/music/skins/) como referência, crie uma cópia com outro nome e modifique a seu gosto).
 
 ## Teste agora mesmo um bot próprio com esta source fazendo deploy em um dos serviços abaixo:
 
