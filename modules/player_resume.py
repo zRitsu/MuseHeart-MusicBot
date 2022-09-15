@@ -107,6 +107,11 @@ class PlayerSession(commands.Cog):
                         await asyncio.sleep(1.5)
                         await guild.me.edit(suppress=False)
 
+                player.set_command_log(
+                    text="O player foi restaurado com sucesso!",
+                    emoji="🔰"
+                )
+
                 await player.process_next(start_position=data["position"])
 
                 print(f"{self.bot.user} - Player Retomado: {guild.name} [{guild.id}]")
@@ -154,6 +159,20 @@ class PlayerSession(commands.Cog):
 
                     with open(f"./.player_sessions/{bot.user.id}/{player.guild_id}.json", "w") as f:
                         f.write(data)
+
+                    txt = "O player foi desligado para uma rápida manutenção/reinicialização e será restaurado logo."
+
+                    if player.static:
+                        player.set_command_log(text=txt, emoji="🛠️")
+                    else:
+                        self.bot.loop.create_task(
+                            player.text_channel.send(
+                                embed=disnake.Embed(
+                                    color=self.bot.get_color(player.guild.me),
+                                    description=f"🛠️ **⠂{txt}**"
+                                )
+                            )
+                        )
 
                     await player.destroy(force=True)
 
