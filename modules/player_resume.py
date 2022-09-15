@@ -8,6 +8,7 @@ from disnake.ext import commands
 from utils.client import BotCore
 import json
 import asyncio
+from utils.db import DBModel
 from utils.music.spotify import SpotifyTrack
 from utils.music.checks import can_connect
 from utils.music.models import LavalinkPlayer, LavalinkTrack
@@ -68,6 +69,10 @@ class PlayerSession(commands.Cog):
                 if not text_channel:
                     continue
 
+                if not data.get("skin"):
+                    # tempfix
+                    data["skin"] = (await self.bot.get_data(guild.id, db_name=DBModel.guilds))["player_controller"]["skin"]
+
                 message = await text_channel.fetch_message(data["message"])
 
                 player: LavalinkPlayer = self.bot.music.get_player(
@@ -77,6 +82,7 @@ class PlayerSession(commands.Cog):
                     guild=guild,
                     channel=text_channel,
                     message=message,
+                    skin=data["skin"],
                     keep_connected=data["keep_connected"],
                     static=data['static'],
                 )
@@ -151,6 +157,7 @@ class PlayerSession(commands.Cog):
                             "keep_connected": player.keep_connected,
                             "message": player.message.id,
                             "loop": player.loop,
+                            "skin": player.skin,
                             "restrict_mode": player.restrict_mode,
                             "tracks": [player.current.info] +
                                       [t.info for t in player.queue]
