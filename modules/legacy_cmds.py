@@ -99,7 +99,9 @@ class Owner(commands.Cog):
     @commands.command(hidden=True, aliases=["ull", "updatell", "llupdate", "llu"])
     async def updatelavalink(self, ctx: CustomContext, *args):
 
-        if "LOCAL" not in ctx.bot.music.nodes and "--force" not in args:
+        node: Optional[wavelink.Node] = self.bot.music.nodes.get("LOCAL")
+
+        if not node and "--force" not in args:
             raise GenericError("**O servidor LOCAL não está sendo usado!**")
 
         download_urls = [self.bot.config["LAVALINK_FILE_URL"]]
@@ -115,6 +117,23 @@ class Owner(commands.Cog):
                         lavalink_jar = await r.read()
                         with open(url.split("/")[-1], "wb") as f:
                             f.write(lavalink_jar)
+
+        node.restarting = True
+
+        for player in node.players.values():
+            txt = "O servidor de música está reiniciando e a música será retomada em alguns segundos (Por favor aguarde)..."
+            if player.static:
+                player.set_command_log(text=txt, emoji="🛠️")
+                player.update = True
+            else:
+                self.bot.loop.create_task(
+                    player.text_channel.send(
+                        embed=disnake.Embed(
+                            color=self.bot.get_color(player.guild.me),
+                            description=f"🛠️ **⠂{txt}**"
+                        )
+                    )
+                )
 
         try:
             self.bot.pool.lavalink_process.kill()

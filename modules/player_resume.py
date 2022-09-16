@@ -29,12 +29,7 @@ class PlayerSession(commands.Cog):
 
         await self.bot.wait_until_ready()
 
-        while True:
-            node = self.bot.music.get_best_node()
-            if not node:
-                await asyncio.sleep(3)
-                continue
-            break
+        node = self.bot.music.get_best_node() or await self.bot.wait_for("wavelink_node_ready")
 
         try:
 

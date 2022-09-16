@@ -41,7 +41,7 @@ SearchSource = commands.option_enum(
 u_agent = generate_user_agent()
 
 
-class Music(commands.Cog, wavelink.WavelinkMixin):
+class Music(commands.Cog):
 
     def __init__(self, bot: BotCore):
 
@@ -2706,37 +2706,38 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if start_local:
             self.bot.loop.create_task(self.connect_local_lavalink())
 
-    @wavelink.WavelinkMixin.listener("on_node_connection_closed")
+    @commands.Cog.listener("on_wavelink_node_connection_closed")
     async def node_connection_closed(self, node: wavelink.Node):
 
         retries = 0
         backoff = 7
 
-        for player in list(node.players.values()):
+        if not node.restarting:
 
-            try:
+            for player in list(node.players.values()):
 
-                new_node: wavelink.Node = self.get_best_node()
-
-                if not new_node:
+                try:
 
                     try:
-                        await player.text_channel.send("O player foi finalizado por falta de servidores de música...",
-                                                       delete_after=11)
+                        new_node: wavelink.Node = self.get_best_node()
                     except:
-                        pass
-                    await player.destroy()
+                        try:
+                            await player.text_channel.send("O player foi finalizado por falta de servidores de música...",
+                                                           delete_after=11)
+                        except:
+                            pass
+                        await player.destroy()
+                        continue
+
+                    await player.change_node(new_node.identifier)
+                    await player.update_message()
+
+                except:
+                    traceback.print_exc()
                     continue
 
-                await player.change_node(new_node.identifier)
-                await player.update_message()
-
-            except:
-
-                traceback.print_exc()
-                continue
-
-        print(f"{self.bot.user} - [{node.identifier}] Conexão perdida - reconectando em {int(backoff)} segundos.")
+        if not node.restarting:
+            print(f"{self.bot.user} - [{node.identifier}] Conexão perdida - reconectando em {int(backoff)} segundos.")
 
         await asyncio.sleep(backoff)
 
@@ -2763,7 +2764,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             retries += 1
             continue
 
-    @wavelink.WavelinkMixin.listener("on_websocket_closed")
+    @commands.Cog.listener("on_wavelink_websocket_closed")
     async def node_ws_voice_closed(self, node, payload: wavelink.events.WebsocketClosed):
 
         if payload.code == 1000:
@@ -2813,7 +2814,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await player.connect(player.channel_id)
             return
 
-    @wavelink.WavelinkMixin.listener('on_track_exception')
+    @commands.Cog.listener('on_wavelink_track_exception')
     async def wavelink_track_error(self, node, payload: wavelink.TrackException):
         player: LavalinkPlayer = payload.player
         track = player.last_track
@@ -2850,11 +2851,27 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player.locked = False
         await player.process_next()
 
-    @wavelink.WavelinkMixin.listener()
-    async def on_node_ready(self, node: wavelink.Node):
+    @commands.Cog.listener("on_wavelink_node_ready")
+    async def node_ready(self, node: wavelink.Node):
         print(f'{self.bot.user} - Servidor de música: [{node.identifier}] está pronto para uso!')
 
-    @wavelink.WavelinkMixin.listener('on_track_start')
+        if node.restarting:
+            node.restarting = False
+
+            for guild_id in list(node.players):
+                try:
+                    player = node.players[guild_id]
+                    await player.change_node(node.identifier, force=True)
+                    player.set_command_log(
+                        text="O servidor de música foi reconectado com sucesso!",
+                        emoji="🔰"
+                    )
+                    await player.invoke_np()
+                except:
+                    traceback.print_exc()
+                    continue
+
+    @commands.Cog.listener('on_wavelink_track_start')
     async def track_start(self, node, payload: wavelink.TrackStart):
 
         player: LavalinkPlayer = payload.player
@@ -2885,8 +2902,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 force=True if (player.static or not player.loop or not player.is_last_message()) else False,
                 rpc_update=True)
 
-    @wavelink.WavelinkMixin.listener()
-    async def on_track_end(self, node: wavelink.Node, payload: wavelink.TrackEnd):
+    @commands.Cog.listener("on_wavelink_track_end")
+    async def track_end(self, node: wavelink.Node, payload: wavelink.TrackEnd):
 
         player: LavalinkPlayer = payload.player
 

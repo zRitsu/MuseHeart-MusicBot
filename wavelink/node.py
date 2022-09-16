@@ -104,6 +104,7 @@ class Node:
 
         self.hook = None
         self.available = True
+        self.restarting = False
 
         self.stats = None
 

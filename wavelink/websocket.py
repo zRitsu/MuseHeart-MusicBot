@@ -98,7 +98,7 @@ class WebSocket:
         self._node.available = True
 
         if self.is_connected:
-            await self.client._dispatch_listeners('on_node_ready', self._node)
+            self.bot.dispatch('wavelink_node_ready', self._node)
             __log__.debug('WEBSOCKET | Connection established...%s', self._node.__repr__())
 
     async def _listen(self):
@@ -112,7 +112,7 @@ class WebSocket:
                 self._closed = True
 
                 if not self.auto_reconnect:
-                    await self.client._dispatch_listeners('on_node_connection_closed', self._node)
+                    self.bot.dispatch('wavelink_node_connection_closed', self._node)
                     try:
                         self._task.cancel()
                     except:
@@ -152,12 +152,9 @@ class WebSocket:
 
             # Dispatch node event/player hooks
             try:
-                await self._node.on_event(payload)
+                self.bot.dispatch(listener, self._node, payload)
             except Exception as e:
                 traceback.print_exception(type(e), e, e.__traceback__, file=sys.stderr)
-
-            # Dispatch listeners
-            await self.client._dispatch_listeners(listener, self._node, payload)
 
         elif op == 'playerUpdate':
             __log__.debug(f'WEBSOCKET | op: playerUpdate:: {data}')
@@ -168,15 +165,15 @@ class WebSocket:
 
     def _get_event_payload(self, name: str, data):
         if name == 'TrackEndEvent':
-            return 'on_track_end', TrackEnd(data)
+            return 'wavelink_track_end', TrackEnd(data)
         elif name == 'TrackStartEvent':
-            return 'on_track_start', TrackStart(data)
+            return 'wavelink_track_start', TrackStart(data)
         elif name == 'TrackExceptionEvent':
-            return 'on_track_exception', TrackException(data)
+            return 'wavelink_track_exception', TrackException(data)
         elif name == 'TrackStuckEvent':
-            return 'on_track_stuck', TrackStuck(data)
+            return 'wavelink_track_stuck', TrackStuck(data)
         elif name == 'WebSocketClosedEvent':
-            return 'on_websocket_closed', WebsocketClosed(data)
+            return 'wavelink_websocket_closed', WebsocketClosed(data)
 
     async def _send(self, **data):
         if self.is_connected:

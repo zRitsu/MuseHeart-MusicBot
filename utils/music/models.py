@@ -829,8 +829,8 @@ class LavalinkPlayer(wavelink.Player):
     #### Filter Stuffs ####
     #######################
 
-    async def change_node(self, identifier: str = None):
-        await super().change_node(identifier=identifier)
+    async def change_node(self, identifier: str = None, force: bool = False):
+        await super().change_node(identifier=identifier, force=force)
         await self.node._send(op="filters", **self.filters, guildId=str(self.guild_id))
 
     async def set_volume(self, vol: int) -> None:
