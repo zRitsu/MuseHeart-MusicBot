@@ -232,7 +232,24 @@ class LavalinkPlayer(wavelink.Player):
 
     async def members_timeout(self):
 
-        await asyncio.sleep(self.idle_timeout)
+        await asyncio.sleep(5)
+
+        if not self.paused:
+            await self.set_pause(True)
+
+        self.set_command_log(
+            text=f"A música foi pausada por falta de membros no canal: <#{self.channel_id}>",
+        )
+
+        try:
+            await self.invoke_np()
+        except:
+            traceback.print_exc()
+
+        if self.keep_connected:
+            return
+
+        await asyncio.sleep(self.idle_timeout-5)
         msg = f"**O player foi desligado por falta de membros no canal" + (f"<#{self.guild.me.voice.channel.id}>"
                                                                          if self.guild.me.voice else '') + "...**"
         self.command_log = msg
