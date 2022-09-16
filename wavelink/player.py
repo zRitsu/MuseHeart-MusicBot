@@ -344,7 +344,7 @@ class Player:
         self.channel_id = None
         await self._get_shard_socket(guild.shard_id).voice_state(self.guild_id, None)
 
-    async def play(self, track: Track, *, replace: bool = True, start: int = 0, end: int = 0) -> None:
+    async def play(self, track: Track, *, replace: bool = True, start: int = 0, end: int = 0, **kwargs) -> None:
         """|coro|
 
         Play a WaveLink Track.
@@ -376,16 +376,20 @@ class Player:
 
         self.current = track
 
-        payload = {'op': 'play',
-                   'guildId': str(self.guild_id),
-                   'track': track.id,
-                   'noReplace': no_replace,
-                   'startTime': start
-                   }
+        payload = {
+            'op': 'play',
+            'guildId': str(self.guild_id),
+            'track': track.id,
+            'noReplace': no_replace,
+            'startTime': start,
+        }
+
+        payload.update(kwargs)
+
         if end > 0:
             payload['endTime'] = str(end)
 
-        await self.node._send(**payload)
+        await self.node._send(**payload, **kwargs)
 
         __log__.debug(f'PLAYER | Started playing track:: {str(track)} ({self.channel_id})')
 
