@@ -43,7 +43,6 @@ def run_lavalink(
             [
                 "~/.jabba/jdk/zulu@1.17.0-0/bin/java",
                 "./.java/jdk-13/bin/java",
-                "./.java/jdk-13/bin/java"
             ]
         )
 
