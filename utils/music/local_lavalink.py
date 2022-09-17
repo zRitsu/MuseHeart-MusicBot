@@ -21,7 +21,7 @@ def download_file(url, filename):
 def validate_java(cmd: str, debug: bool = False):
     try:
         java_info = subprocess.check_output(f'{cmd} -version', shell=True, stderr=subprocess.STDOUT)
-        java_version = re.search(r'"[\d._]*"', java_info.decode().split("\r")[0]).group().replace('"', '')
+        java_version = re.search(r'\d+', java_info.decode().split("\r")[0]).group().replace('"', '')
         if int(java_version.split('.')[0]) >= 11:
             return cmd
     except Exception as e:
@@ -58,42 +58,42 @@ def run_lavalink(
                 java_cmd = cmd
                 break
 
-    if not java_cmd:
+        if not java_cmd:
 
-        if os.name == "nt":
+            if os.name == "nt":
 
-            try:
-                shutil.rmtree("./.java")
-            except:
-                pass
+                try:
+                    shutil.rmtree("./.java")
+                except:
+                    pass
 
-            if platform.architecture()[0] != "64bit":
-                jdk_url = "https://cdn.azul.com/zulu/bin/zulu11.58.25-ca-jdk11.0.16.1-win_i686.zip"
+                if platform.architecture()[0] != "64bit":
+                    jdk_url = "https://cdn.azul.com/zulu/bin/zulu11.58.25-ca-jdk11.0.16.1-win_i686.zip"
+                else:
+                    jdk_url = "https://download.java.net/openjdk/jdk13/ri/openjdk-13+33_windows-x64_bin.zip"
+
+                jdk_filename = "java.zip"
+
+                download_file(jdk_url, jdk_filename)
+
+                with zipfile.ZipFile(jdk_filename, 'r') as zip_ref:
+                    zip_ref.extractall("./.java")
+
+                os.remove(jdk_filename)
+
+                java_cmd = "./.java/jdk-13/bin/java"
+
             else:
-                jdk_url = "https://download.java.net/openjdk/jdk13/ri/openjdk-13+33_windows-x64_bin.zip"
+                
+                try:
+                    shutil.rmtree("~/.jabba/jdk/zulu@1.17.0-0")
+                except:
+                    pass
 
-            jdk_filename = "java.zip"
-
-            download_file(jdk_url, jdk_filename)
-
-            with zipfile.ZipFile(jdk_filename, 'r') as zip_ref:
-                zip_ref.extractall("./.java")
-
-            os.remove(jdk_filename)
-
-            java_cmd = "./.java/jdk-13/bin/java"
-
-        else:
-
-            try:
-                shutil.rmtree("~/.jabba/jdk/zulu@1.17.0-0")
-            except:
-                pass
-
-            download_file("https://github.com/shyiko/jabba/raw/master/install.sh", "install_jabba.sh")
-            subprocess.call("bash install_jabba.sh && ~/.jabba/bin/jabba install zulu@1.17.0-0", shell=True)
-            os.remove("install_jabba.sh")
-            java_cmd = "~/.jabba/jdk/zulu@1.17.0-0/bin/java"
+                download_file("https://github.com/shyiko/jabba/raw/master/install.sh", "install_jabba.sh")
+                subprocess.call("bash install_jabba.sh && ~/.jabba/bin/jabba install zulu@1.17.0-0", shell=True)
+                os.remove("install_jabba.sh")
+                java_cmd = "~/.jabba/jdk/zulu@1.17.0-0/bin/java"
 
     for filename, url in (
         ("Lavalink.jar", lavalink_file_url),
