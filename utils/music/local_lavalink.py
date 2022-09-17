@@ -18,19 +18,26 @@ def download_file(url, filename):
         f.write(r.content)
     r.close()
 
+def validate_java(cmd: str, debug: bool = False):
+    try:
+        java_info = subprocess.check_output(f'{cmd} -version', shell=True, stderr=subprocess.STDOUT)
+        java_version = re.search(r'"[\d._]*"', java_info.decode().split("\r")[0]).group().replace('"', '')
+        if int(java_version.split('.')[0]) >= 11:
+            return cmd
+    except Exception as e:
+        if debug:
+            print(f"\nFalha ao obter versão do java...\n"
+                  f"Path: {cmd} | Erro: {repr(e)}\n")
 
 def run_lavalink(
-        lavalink_file_url: Optional[str] = None,
+        lavalink_file_url: str = None,
         lavalink_initial_ram: int = 30,
         lavalink_ram_limit: int = 100,
         lavalink_additional_sleep: int = 0,
         lavalink_cpu_cores: int = 1,
 ):
-    download_java = False
 
-    java_cmd = None
-
-    if not shutil.which("java"):
+    if not (java_cmd := validate_java("java")):
 
         dirs = []
 
@@ -41,41 +48,24 @@ def run_lavalink(
 
         dirs.extend(
             [
-                "~/.jabba/jdk/zulu@1.17.0-0/bin/java",
                 "./.java/jdk-13/bin/java",
+                "~/.jabba/jdk/zulu@1.17.0-0/bin/java",
             ]
         )
 
-        for d in dirs:
-            if shutil.which(d):
-                java_cmd = d
+        for cmd in dirs:
+            if validate_java(cmd):
+                java_cmd = cmd
                 break
 
-        if not java_cmd:
-            java_cmd = "java"
-
-    else:
-
-        java_cmd = "java"
-
-        try:
-            java_info = subprocess.check_output(f'java -version', shell=True, stderr=subprocess.STDOUT)
-            java_version = re.search(r'"[\d._]*"', java_info.decode().split("\r")[0]).group().replace('"', '')
-            if (ver := int(java_version.split('.')[0])) < 11:
-                print(f"A versão do java/jdk instalado/configurado é incompatível: {ver} (Versão mínima: 11)")
-                download_java = True
-        except Exception as e:
-            print(f"Erro ao obter versão do java: {repr(e)}")
-            download_java = True
-
-    downloads = {
-        "Lavalink.jar": lavalink_file_url,
-        "application.yml": "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/application.yml"
-    }
-
-    if download_java:
+    if not java_cmd:
 
         if os.name == "nt":
+
+            try:
+                shutil.rmtree("./.java")
+            except:
+                pass
 
             if platform.architecture()[0] != "64bit":
                 jdk_url = "https://cdn.azul.com/zulu/bin/zulu11.58.25-ca-jdk11.0.16.1-win_i686.zip"
@@ -94,12 +84,21 @@ def run_lavalink(
             java_cmd = "./.java/jdk-13/bin/java"
 
         else:
+
+            try:
+                shutil.rmtree("~/.jabba/jdk/zulu@1.17.0-0")
+            except:
+                pass
+
             download_file("https://github.com/shyiko/jabba/raw/master/install.sh", "install_jabba.sh")
-            subprocess.call(["bash", "install_jabba.sh", "&&", "~/.jabba/bin/jabba", "install", "zulu@1.17.0-0"])
+            subprocess.call("bash install_jabba.sh && ~/.jabba/bin/jabba install zulu@1.17.0-0", shell=True)
             os.remove("install_jabba.sh")
             java_cmd = "~/.jabba/jdk/zulu@1.17.0-0/bin/java"
 
-    for filename, url in downloads.items():
+    for filename, url in (
+        ("Lavalink.jar", lavalink_file_url),
+        ("application.yml", "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/application.yml")
+    ):
         download_file(url, filename)
 
     if lavalink_cpu_cores >= 1:
@@ -116,7 +115,7 @@ def run_lavalink(
     print(f"Iniciando o servidor Lavalink (dependendo da hospedagem o lavalink pode demorar iniciar, "
           f"o que pode ocorrer falhas em algumas tentativas de conexão até ele iniciar totalmente).\n{'-' * 30}")
 
-    lavalink_process = subprocess.Popen(java_cmd.split(), stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+    lavalink_process = subprocess.Popen(java_cmd, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL, shell=True)
 
     if lavalink_additional_sleep:
         print(f"Aguarde {lavalink_additional_sleep} segundos...\n{'-' * 30}")
