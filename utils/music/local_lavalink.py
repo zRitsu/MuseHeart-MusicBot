@@ -28,19 +28,37 @@ def run_lavalink(
 ):
     download_java = False
 
-    java_cmd = "java"
+    java_cmd = None
 
-    if not shutil.which(java_cmd):
+    if not shutil.which("java"):
+
+        dirs = []
+
         try:
-            if not os.path.isdir("./.java/jdk-13/bin"):
-                java_cmd = os.path.join(os.environ["JAVA_HOME"] + "bin/java")
-                if not shutil.which(java_cmd):
-                    download_java = True
-            else:
-                java_cmd = "./.java/jdk-13/bin/java"
-        except:
-            download_java = True
+            dirs.append(os.path.join(os.environ["JAVA_HOME"] + "bin/java"))
+        except KeyError:
+            pass
+
+        dirs.extend(
+            [
+                "~/.jabba/jdk/zulu@1.17.0-0/bin/java",
+                "./.java/jdk-13/bin/java",
+                "./.java/jdk-13/bin/java"
+            ]
+        )
+
+        for d in dirs:
+            if shutil.which(d):
+                java_cmd = d
+                break
+
+        if not java_cmd:
+            java_cmd = "java"
+
     else:
+
+        java_cmd = "java"
+
         try:
             java_info = subprocess.check_output(f'java -version', shell=True, stderr=subprocess.STDOUT)
             java_version = re.search(r'"[\d._]*"', java_info.decode().split("\r")[0]).group().replace('"', '')
@@ -58,28 +76,29 @@ def run_lavalink(
 
     if download_java:
 
-        if platform.architecture()[0] != "64bit":
-            raise Exception("Você deve ter o JDK 11 ou superior instalado!")
-
         if os.name == "nt":
-            jdk_url, jdk_filename = ["https://download.java.net/openjdk/jdk13/ri/openjdk-13+33_windows-x64_bin.zip",
-                                     "java.zip"]
+
+            if platform.architecture()[0] != "64bit":
+                jdk_url = "https://cdn.azul.com/zulu/bin/zulu11.58.25-ca-jdk11.0.16.1-win_i686.zip"
+            else:
+                jdk_url = "https://download.java.net/openjdk/jdk13/ri/openjdk-13+33_windows-x64_bin.zip"
+
+            jdk_filename = "java.zip"
+
             download_file(jdk_url, jdk_filename)
+
             with zipfile.ZipFile(jdk_filename, 'r') as zip_ref:
                 zip_ref.extractall("./.java")
 
             os.remove(jdk_filename)
 
-        else:
-            jdk_url, jdk_filename = ["https://download.java.net/openjdk/jdk13/ri/openjdk-13+33_linux-x64_bin.tar.gz",
-                                     "java.tar.gz"]
-            download_file(jdk_url, jdk_filename)
-            os.makedirs("./.java")
-            p = subprocess.Popen(["tar", "-zxvf", "java.tar.gz", "-C", "./.java"])
-            p.wait()
-            os.remove(f"./{jdk_filename}")
+            java_cmd = "./.java/jdk-13/bin/java"
 
-        java_cmd = "./.java/jdk-13/bin/java"
+        else:
+            download_file("https://github.com/shyiko/jabba/raw/master/install.sh", "install_jabba.sh")
+            subprocess.call(["bash", "install_jabba.sh", "&&", "~/.jabba/bin/jabba", "install", "zulu@1.17.0-0"])
+            os.remove("install_jabba.sh")
+            java_cmd = "~/.jabba/jdk/zulu@1.17.0-0/bin/java"
 
     for filename, url in downloads.items():
         download_file(url, filename)
