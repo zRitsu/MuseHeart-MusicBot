@@ -139,10 +139,15 @@ class PlayerSession(commands.Cog):
 
                 for player in bot.music.players.values():
 
-                    player.current.info["id"] = player.current.id
+                    tracks = []
+
+                    if player.current:
+                        player.current.info["id"] = player.current.id
+                        tracks.append(player.current)
 
                     for t in player.queue:
                         t.info["id"] = t.id
+                        tracks.append(t)
 
                     data = json.dumps(
                         {
@@ -157,8 +162,7 @@ class PlayerSession(commands.Cog):
                             "loop": player.loop,
                             "skin": player.skin,
                             "restrict_mode": player.restrict_mode,
-                            "tracks": [player.current.info] +
-                                      [t.info for t in player.queue]
+                            "tracks": tracks
                         }, indent=4
                     )
 
