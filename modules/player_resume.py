@@ -68,7 +68,10 @@ class PlayerSession(commands.Cog):
                     # tempfix
                     data["skin"] = (await self.bot.get_data(guild.id, db_name=DBModel.guilds))["player_controller"]["skin"]
 
-                message = await text_channel.fetch_message(data["message"])
+                try:
+                    message = await text_channel.fetch_message(data["message"])
+                except disnake.NotFound:
+                    message = None
 
                 player: LavalinkPlayer = self.bot.music.get_player(
                     node_id=node.identifier,
