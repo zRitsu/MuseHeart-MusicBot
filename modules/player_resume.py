@@ -143,11 +143,11 @@ class PlayerSession(commands.Cog):
 
                     if player.current:
                         player.current.info["id"] = player.current.id
-                        tracks.append(player.current)
+                        tracks.append(player.current.info)
 
                     for t in player.queue:
                         t.info["id"] = t.id
-                        tracks.append(t)
+                        tracks.append(t.info)
 
                     data = json.dumps(
                         {
