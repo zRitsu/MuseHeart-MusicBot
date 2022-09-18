@@ -48,6 +48,11 @@ class TrackEnd:
         self.player = data.get('player')
         self.reason = data.get('reason')
 
+        try:
+            self.player.current = None
+        except AttributeError:
+            pass
+
     def __str__(self):
         return 'TrackEndEvent'
 

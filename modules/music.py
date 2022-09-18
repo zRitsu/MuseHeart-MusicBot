@@ -878,10 +878,10 @@ class Music(commands.Cog):
 
         if player.loop == "current":
             player.loop = False
-        player.is_previows_music = True
         if not player.current:
             await player.process_next()
         else:
+            player.is_previows_music = True
             await player.stop()
 
     @check_voice()
