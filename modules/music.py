@@ -3125,7 +3125,7 @@ class Music(commands.Cog):
             if not check:
                 player.members_timeout_task = self.bot.loop.create_task(player.members_timeout())
             elif not player.can_process_next:
-                player.can_process_nex = True
+                player.can_process_next = True
                 await player.process_next()
 
         # rich presence stuff
