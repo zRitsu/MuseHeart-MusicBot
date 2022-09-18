@@ -14,7 +14,6 @@ def load(player: LavalinkPlayer) -> dict:
 
     embed = disnake.Embed(color=player.bot.get_color(player.guild.me))
     embed_queue = None
-    position_txt = ""
     vc_txt = ""
 
     if not player.paused:
@@ -22,9 +21,6 @@ def load(player: LavalinkPlayer) -> dict:
             name="Tocando Agora:",
             icon_url="https://cdn.discordapp.com/attachments/480195401543188483/895862881105616947/music_equalizer.gif"
         )
-
-        if not player.current.is_stream:
-            position_txt = f"\n> ⏲️ **⠂Termina:** " f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>"
 
     else:
         embed.set_author(
@@ -58,7 +54,8 @@ def load(player: LavalinkPlayer) -> dict:
         playlist_text_size = 13
 
     duration = "> 🔴 **⠂Duração:** `Livestream`" if player.current.is_stream else \
-        f"> ⏰ **⠂Duração:** `{time_format(player.current.duration)}`"
+        f"> ⏰ **⠂Duração:** `{time_format(player.current.duration)} [`" + \
+        f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`"
 
     txt = f"[`{player.current.single_title}`]({player.current.uri})\n\n" \
           f"{duration}\n" \
@@ -88,7 +85,7 @@ def load(player: LavalinkPlayer) -> dict:
     if player.restrict_mode:
         txt += f"\n> 🔒 **⠂Modo restrito:** `Ativado`"
 
-    txt += f"{vc_txt}{position_txt}\n"
+    txt += f"{vc_txt}\n"
 
     if player.command_log:
         txt += f"```ansi\n [34;1mÚltima Interação[0m```**┕ {player.command_log_emoji} ⠂**{player.command_log}\n"
