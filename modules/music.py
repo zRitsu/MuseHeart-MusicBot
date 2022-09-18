@@ -3124,13 +3124,9 @@ class Music(commands.Cog):
 
             if not check:
                 player.members_timeout_task = self.bot.loop.create_task(player.members_timeout())
-            elif player.paused:
-                await player.set_pause(False)
-                player.set_command_log("", "")
-                try:
-                    await player.invoke_np()
-                except Exception:
-                    traceback.print_exc()
+            elif not player.can_process_next:
+                player.can_process_nex = True
+                await player.process_next()
 
         # rich presence stuff
 
