@@ -284,7 +284,7 @@ class LavalinkPlayer(wavelink.Player):
 
             self.locked = False
 
-            if not track.id and isinstance(self, LavalinkPlayer):
+            if not track.id:
                 return await self.process_next()
 
         self.last_track = track
