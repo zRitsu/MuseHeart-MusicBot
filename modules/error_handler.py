@@ -113,7 +113,7 @@ class ErrorHandler(commands.Cog):
                                   f"{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
             else:
                 components = None
-                kwargs["text"] += f": {error}"
+                kwargs["text"] += f"\n{error_msg}"
 
         await send_message(inter, components=components, **kwargs)
 
@@ -183,7 +183,7 @@ class ErrorHandler(commands.Cog):
                     components = self.components
             else:
                 components = None
-                kwargs["content"] += f": {error}"
+                kwargs["content"] += f"\n{error_msg}"
 
         try:
             delete_time = error.delete_original
