@@ -214,7 +214,7 @@ class Music(commands.Cog):
 
     @check_voice()
     @can_send_message_check()
-    @commands.bot_has_guild_permissions(embed_links=True, send_messages=True)
+    @commands.bot_has_guild_permissions(send_messages=True)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.slash_command(name="search",
                             description=f"{desc_prefix}Buscar música e escolher uma entre os resultados para tocar.")
@@ -371,7 +371,7 @@ class Music(commands.Cog):
 
     @check_voice()
     @can_send_message_check()
-    @commands.bot_has_guild_permissions(embed_links=True, send_messages=True)
+    @commands.bot_has_guild_permissions(send_messages=True)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.command(name="addposition", description="Adicionar música em uma posição especifica da fila.",
@@ -392,7 +392,7 @@ class Music(commands.Cog):
 
     @check_voice()
     @can_send_message_check()
-    @commands.bot_has_guild_permissions(embed_links=True, send_messages=True)
+    @commands.bot_has_guild_permissions(send_messages=True)
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.command(name="play", description="Tocar música em um canal de voz.", aliases=["p"])
@@ -404,7 +404,7 @@ class Music(commands.Cog):
 
     @check_voice()
     @can_send_message_check()
-    @commands.bot_has_guild_permissions(embed_links=True, send_messages=True)
+    @commands.bot_has_guild_permissions(send_messages=True)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.command(name="search", description="Buscar música e escolher uma entre os resultados para tocar.",
                       aliases=["sc"])
@@ -419,7 +419,7 @@ class Music(commands.Cog):
 
     @check_voice()
     @can_send_message_check()
-    @commands.bot_has_guild_permissions(embed_links=True, send_messages=True)
+    @commands.bot_has_guild_permissions(send_messages=True)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.slash_command(
         name=disnake.Localized("play", data={disnake.Locale.pt_BR: "tocar"}),
