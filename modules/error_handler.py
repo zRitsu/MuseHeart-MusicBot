@@ -82,38 +82,24 @@ class ErrorHandler(commands.Cog):
         components = None
         send_webhook = False
 
-        if inter.guild.me.guild_permissions.embed_links:
+        kwargs["embed"] = disnake.Embed(color=disnake.Colour.red())
+        kwargs["text"] = inter.author.mention
 
-            kwargs["embed"] = disnake.Embed(color=disnake.Colour.red())
-            kwargs["text"] = inter.author.mention
+        if not error_msg:
 
-            if not error_msg:
+            kwargs["embed"].title = "Ocorreu um erro no comando:"
+            kwargs["embed"].description = f"```py\n{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
 
-                kwargs["embed"].title = "Ocorreu um erro no comando:"
-                kwargs["embed"].description = f"```py\n{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
-
-                if self.bot.config["AUTO_ERROR_REPORT_WEBHOOK"]:
-                    send_webhook = True
-                    kwargs["embed"].description += " `Meu desenvolvedor será notificado sobre o problema.`"
-
-                else:
-
-                    components = self.components
+            if self.bot.config["AUTO_ERROR_REPORT_WEBHOOK"]:
+                send_webhook = True
+                kwargs["embed"].description += " `Meu desenvolvedor será notificado sobre o problema.`"
 
             else:
-                kwargs["embed"].description = error_msg
+
+                components = self.components
 
         else:
-
-            kwargs["text"] = inter.author.mention
-
-            if not error_msg:
-                components = self.components
-                kwargs["text"] += " ocorreu um erro no comando: ```py\n" \
-                                  f"{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
-            else:
-                components = None
-                kwargs["text"] += f"\n{error_msg}"
+            kwargs["embed"].description = error_msg
 
         await send_message(inter, components=components, **kwargs)
 
@@ -152,38 +138,20 @@ class ErrorHandler(commands.Cog):
         send_webhook = False
         components = None
 
-        if ctx.guild.me.guild_permissions.embed_links:
+        kwargs["embed"] = disnake.Embed(color=disnake.Colour.red())
+        kwargs["content"] = ctx.author.mention
 
-            kwargs["embed"] = disnake.Embed(color=disnake.Colour.red())
-            kwargs["content"] = ctx.author.mention
-
-            if not error_msg:
-                kwargs["embed"].title = "Ocorreu um erro no comando:"
-                kwargs["embed"].description = f"```py\n{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
-                if self.bot.config["AUTO_ERROR_REPORT_WEBHOOK"]:
-                    send_webhook = True
-                    kwargs["embed"].description += " `Meu desenvolvedor será notificado sobre o problema.`"
-                else:
-                    components = self.components
-
+        if not error_msg:
+            kwargs["embed"].title = "Ocorreu um erro no comando:"
+            kwargs["embed"].description = f"```py\n{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
+            if self.bot.config["AUTO_ERROR_REPORT_WEBHOOK"]:
+                send_webhook = True
+                kwargs["embed"].description += " `Meu desenvolvedor será notificado sobre o problema.`"
             else:
-                kwargs["embed"].description = error_msg
+                components = self.components
 
         else:
-
-            kwargs["content"] = ctx.author.mention
-
-            if not error_msg:
-                kwargs["content"] += " ocorreu um erro no comando: ```py\n" \
-                                     f"{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
-                if self.bot.config["AUTO_ERROR_REPORT_WEBHOOK"]:
-                    send_webhook = True
-                    kwargs["content"] += " `Meu desenvolvedor será notificado sobre o problema.`"
-                else:
-                    components = self.components
-            else:
-                components = None
-                kwargs["content"] += f"\n{error_msg}"
+            kwargs["embed"].description = error_msg
 
         try:
             delete_time = error.delete_original
