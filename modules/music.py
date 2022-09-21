@@ -480,11 +480,10 @@ class Music(commands.Cog):
             if not (channel := self.bot.get_channel(int(static_player['channel']))):
                 await self.reset_controller_db(inter.guild.id, guild_data, inter)
                 channel = inter.channel
-
+            elif channel != inter.channel:
+                can_send_message(channel)
         else:
             channel = inter.channel
-
-        can_send_message(channel)
 
         is_pin = None
 
