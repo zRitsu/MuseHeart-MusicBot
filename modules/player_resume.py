@@ -118,9 +118,10 @@ class PlayerSession(commands.Cog):
 
                 await player.process_next(start_position=data["position"])
 
-                if player.current and data.get("paused"):
+                if data.get("paused"):
                     await asyncio.sleep(1.5)
-                    await player.set_pause(True)
+                    if player.current:
+                        await player.set_pause(True)
 
                 print(f"{self.bot.user} - Player Retomado: {guild.name} [{guild.id}]")
 
