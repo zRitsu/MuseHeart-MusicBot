@@ -118,6 +118,10 @@ class PlayerSession(commands.Cog):
 
                 await player.process_next(start_position=data["position"])
 
+                if player.current and data.get("paused"):
+                    await asyncio.sleep(1.5)
+                    await player.set_pause(True)
+
                 print(f"{self.bot.user} - Player Retomado: {guild.name} [{guild.id}]")
 
             shutil.rmtree(f"./.player_sessions/{self.bot.user.id}")
@@ -156,6 +160,7 @@ class PlayerSession(commands.Cog):
                             "voice_channel": player.channel_id,
                             "dj": list(player.dj),
                             "static": player.static,
+                            "paused": player.paused,
                             "text_channel": player.text_channel.id,
                             "keep_connected": player.keep_connected,
                             "message": player.message.id,
