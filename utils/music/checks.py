@@ -33,7 +33,7 @@ async def check_requester_channel(ctx: CustomContext):
     return True
 
 
-def check_pool_bots(inter, check_player: bool = False, check_self=False):
+def check_pool_bots(inter, check_player: bool = False):
 
     try:
         inter.music_bot
@@ -41,9 +41,14 @@ def check_pool_bots(inter, check_player: bool = False, check_self=False):
     except AttributeError:
         pass
 
+    if not inter.guild.voice_client:
+        inter.music_bot = inter.bot
+        inter.music_guild = inter.guild
+        return
+
     for bot in inter.bot.pool.bots:
 
-        if bot.user == inter.bot and not check_self:
+        if bot.user == inter.bot:
             continue
 
         if check_player:
@@ -55,13 +60,11 @@ def check_pool_bots(inter, check_player: bool = False, check_self=False):
         if not (guild := bot.get_guild(inter.guild.id)):
             continue
 
-        if guild.voice_client and inter.author.id not in guild.me.voice.channel.voice_states:
-            continue
+        if not guild.voice_client or inter.author.id in guild.me.voice.channel.voice_states:
+            inter.music_bot = bot
+            inter.music_guild = guild
 
-        inter.music_bot = bot
-        inter.music_guild = guild
-
-        return True
+            return True
 
     raise GenericError("**Todos os bots estão em uso no momento...**")
 
@@ -72,7 +75,7 @@ def has_player(check_all_bots: bool = False):
         if check_all_bots:
 
             try:
-                check_pool_bots(inter, check_self=True)
+                check_pool_bots(inter)
                 bot = inter.music_bot
             except TypeError:
                 raise GenericError("Não há player ativo no momento...")
