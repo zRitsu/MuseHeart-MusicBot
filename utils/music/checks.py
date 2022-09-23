@@ -41,7 +41,7 @@ def check_pool_bots(inter, check_player: bool = False):
     except AttributeError:
         pass
 
-    if not inter.guild.voice_client:
+    if not inter.guild.voice_client or inter.author.id in inter.guild.me.voice.channel.voice_states:
         inter.music_bot = inter.bot
         inter.music_guild = inter.guild
         return
