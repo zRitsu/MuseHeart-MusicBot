@@ -203,7 +203,7 @@ def has_source():
             bot = inter.music_bot
         except AttributeError:
             try:
-                check_pool_bots(inter, check_player=True)
+                check_pool_bots(inter, only_voiced=True)
                 bot = inter.music_bot
             except TypeError:
                 bot = inter.bot
@@ -316,5 +316,3 @@ async def check_deafen(me: disnake.Member = None):
             return True
         except:
             traceback.print_exc()
-
-
