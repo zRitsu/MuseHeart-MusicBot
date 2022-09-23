@@ -1826,7 +1826,7 @@ class Music(commands.Cog):
 
         try:
             bot = inter.music_bot
-            inter_destroy = None
+            inter_destroy = inter if bot.user.id == self.bot.user.id else None
         except AttributeError:
             bot = inter.bot
             inter_destroy = inter
@@ -2823,8 +2823,10 @@ class Music(commands.Cog):
 
         try:
             bot = inter.music_bot
+            use_interaction = False
         except AttributeError:
             bot = inter.bot
+            use_interaction = True
 
         player: LavalinkPlayer = bot.music.players[inter.guild.id]
 
@@ -2835,7 +2837,7 @@ class Music(commands.Cog):
         if ephemeral:
             player.set_command_log(text=f"{inter.author.mention} {txt}", emoji=emoji)
 
-        await player.update_message(interaction=False if (update or not component_interaction) else inter,
+        await player.update_message(interaction=False if (not use_interaction and not component_interaction and update) else inter,
                                     rpc_update=rpc_update)
 
         if isinstance(inter, CustomContext):
