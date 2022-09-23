@@ -806,7 +806,7 @@ class Music(commands.Cog):
                 player.set_command_log(text=log_text, emoji=emoji)
             await player.update_message()
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_source()
     @is_requester()
     @commands.max_concurrency(1, commands.BucketType.member)
@@ -815,7 +815,7 @@ class Music(commands.Cog):
     async def skip_legacy(self, ctx: CustomContext):
         await self.skip.callback(self=self, inter=ctx)
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_source()
     @is_requester()
     @commands.dynamic_cooldown(user_cooldown(2, 8), commands.BucketType.guild)
@@ -851,7 +851,7 @@ class Music(commands.Cog):
 
         await player.stop()
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_player()
     @is_dj()
     @commands.max_concurrency(1, commands.BucketType.member)
@@ -860,7 +860,7 @@ class Music(commands.Cog):
     async def back_legacy(self, ctx: CustomContext):
         await self.back.callback(self=self, inter=ctx)
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_player()
     @is_dj()
     @commands.max_concurrency(1, commands.BucketType.member)
@@ -912,7 +912,7 @@ class Music(commands.Cog):
             player.is_previows_music = True
             await player.stop()
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_source()
     @commands.slash_command(
         name=disnake.Localized("voteskip", data={disnake.Locale.pt_BR: "votar"}),
@@ -948,7 +948,7 @@ class Music(commands.Cog):
         await self.interaction_message(inter, txt, emoji="✋")
         await player.stop()
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_source()
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(1, 5), commands.BucketType.member)
@@ -963,7 +963,7 @@ class Music(commands.Cog):
 
         await self.volume.callback(self=self, inter=ctx, value=int(level))
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_source()
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(1, 5), commands.BucketType.member)
@@ -1007,7 +1007,7 @@ class Music(commands.Cog):
         txt = [f"ajustou o volume para **{value}%**", f"🔊 **⠂{inter.author.mention} ajustou o volume para {value}%**"]
         await self.interaction_message(inter, txt, update=update, emoji="🔊")
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_source()
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.member)
@@ -1015,7 +1015,7 @@ class Music(commands.Cog):
     async def pause_legacy(self, ctx: CustomContext):
         await self.pause.callback(self=self, inter=ctx)
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_source()
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.member)
@@ -1041,7 +1041,7 @@ class Music(commands.Cog):
 
         await self.interaction_message(inter, txt, rpc_update=True, emoji="⏸️")
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_source()
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.member)
@@ -1049,7 +1049,7 @@ class Music(commands.Cog):
     async def resume_legacy(self, ctx: CustomContext):
         await self.resume.callback(self=self, inter=ctx)
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_source()
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.member)
@@ -1074,7 +1074,7 @@ class Music(commands.Cog):
         txt = ["retomou a música.", f"▶️ **⠂{inter.author.mention} despausou a música.**"]
         await self.interaction_message(inter, txt, rpc_update=True, emoji="▶️")
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_source()
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.member)
@@ -1087,7 +1087,7 @@ class Music(commands.Cog):
 
         await self.seek.callback(self=self, inter=ctx, position=position)
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_source()
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.member)
@@ -1154,7 +1154,7 @@ class Music(commands.Cog):
         await asyncio.sleep(2)
         self.bot.loop.create_task(player.process_rpc())
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_source()
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(3, 5), commands.BucketType.member)
@@ -1215,7 +1215,7 @@ class Music(commands.Cog):
 
         await self.loop_mode.callback(self=self, inter=ctx, mode=mode)
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_source()
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(3, 5), commands.BucketType.member)
@@ -1274,7 +1274,7 @@ class Music(commands.Cog):
 
         await self.interaction_message(inter, txt, emoji=emoji)
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_source()
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(3, 5), commands.BucketType.member)
@@ -1306,7 +1306,7 @@ class Music(commands.Cog):
 
         await self.interaction_message(inter, txt, rpc_update=True, emoji="🔄")
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_player()
     @is_dj()
     @commands.max_concurrency(1, commands.BucketType.member)
@@ -1318,7 +1318,7 @@ class Music(commands.Cog):
 
         await self.remove.callback(self=self, inter=ctx, query=query)
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_player()
     @is_dj()
     @commands.slash_command(
@@ -1356,7 +1356,7 @@ class Music(commands.Cog):
 
         await player.update_message()
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_player()
     @is_dj()
     @commands.max_concurrency(1, commands.BucketType.member)
@@ -1366,7 +1366,7 @@ class Music(commands.Cog):
     async def readd_legacy(self, ctx: CustomContext):
         await self.readd.callback(self=self, inter=ctx)
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_player()
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.guild)
@@ -1406,7 +1406,7 @@ class Music(commands.Cog):
         else:
             await player.update_message()
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_player()
     @is_dj()
     @commands.max_concurrency(1, commands.BucketType.member)
@@ -1418,7 +1418,7 @@ class Music(commands.Cog):
 
         await self.skipto.callback(self=self, inter=ctx, query=query)
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_source()
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(2, 8), commands.BucketType.guild)
@@ -1485,7 +1485,7 @@ class Music(commands.Cog):
 
         await player.stop()
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_player()
     @is_dj()
     @commands.max_concurrency(1, commands.BucketType.member)
@@ -1507,7 +1507,7 @@ class Music(commands.Cog):
 
         await self.move.callback(self=self, inter=ctx, position=position, query=query, search_all=search_all)
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_source()
     @is_dj()
     @commands.slash_command(
@@ -1585,7 +1585,7 @@ class Music(commands.Cog):
 
         await player.update_message()
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_player()
     @is_dj()
     @commands.max_concurrency(1, commands.BucketType.member)
@@ -1598,7 +1598,7 @@ class Music(commands.Cog):
 
         await self.rotate.callback(self=self, inter=ctx, query=query)
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_source()
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.guild)
@@ -1643,7 +1643,7 @@ class Music(commands.Cog):
 
         await player.update_message()
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_player()
     @is_dj()
     @commands.max_concurrency(1, commands.BucketType.member)
@@ -1653,7 +1653,7 @@ class Music(commands.Cog):
 
         await self.nightcore.callback(self=self, inter=ctx)
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_source()
     @is_dj()
     @commands.cooldown(1, 5, commands.BucketType.guild)
@@ -1688,7 +1688,7 @@ class Music(commands.Cog):
     async def nowplaying_legacy(self, ctx: CustomContext):
         await self.nowplaying.callback(self=self, inter=ctx)
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_source()
     @commands.cooldown(1, 10, commands.BucketType.member)
     @commands.slash_command(description=f"{desc_prefix}Reenvia a mensagem do player com a música atual.")
@@ -1743,14 +1743,14 @@ class Music(commands.Cog):
         if not isinstance(inter, CustomContext):
             await inter.edit_original_message("**Player reenviado com sucesso!**")
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_player()
     @is_dj()
     @commands.user_command(name=disnake.Localized("Add DJ", data={disnake.Locale.pt_BR: "Adicionar DJ"}))
     async def adddj_u(self, inter: disnake.UserCommandInteraction):
         await self.add_dj(inter, user=inter.target)
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_player()
     @is_dj()
     @commands.command(name="adddj", aliases=["adj"],
@@ -1762,7 +1762,7 @@ class Music(commands.Cog):
 
         await self.add_dj.callback(self=self, inter=ctx, user=user)
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_player()
     @is_dj()
     @commands.slash_command(
@@ -1807,7 +1807,7 @@ class Music(commands.Cog):
 
         await self.interaction_message(inter, txt=text, update=True, emoji="🇳")
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_player()
     @is_dj()
     @commands.command(name="stop", aliases=["leave", "parar"],
@@ -1815,7 +1815,7 @@ class Music(commands.Cog):
     async def stop_legacy(self, ctx: CustomContext):
         await self.stop.callback(self=self, inter=ctx)
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_player()
     @is_dj()
     @commands.slash_command(
@@ -1855,7 +1855,7 @@ class Music(commands.Cog):
     async def q(self, inter):
         pass
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_player()
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(3, 5), commands.BucketType.member)
@@ -1864,7 +1864,7 @@ class Music(commands.Cog):
     async def shuffle_legacy(self, ctx: CustomContext):
         await self.shuffle_.callback(self, inter=ctx)
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_player()
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(3, 5), commands.BucketType.member)
@@ -1892,7 +1892,7 @@ class Music(commands.Cog):
             emoji="🔀"
         )
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(1, 5), commands.BucketType.guild)
     @commands.command(name="reverse", aliases=["invert", "inverter", "rv"],
@@ -1900,7 +1900,7 @@ class Music(commands.Cog):
     async def reverse_legacy(self, ctx: CustomContext):
         await self.reverse.callback(self=self, inter=ctx)
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(1, 5), commands.BucketType.guild)
     @q.sub_command(
@@ -2146,7 +2146,7 @@ class Music(commands.Cog):
 
         await self.interaction_message(inter, text, emoji=msg[1], update=True)
 
-    @check_voice()
+    @check_voice(bot_is_connected=True)
     @has_player()
     @is_dj()
     @commands.cooldown(1, 10, commands.BucketType.guild)

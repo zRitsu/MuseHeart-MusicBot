@@ -32,7 +32,7 @@ async def check_requester_channel(ctx: CustomContext):
     return True
 
 
-def check_pool_bots(inter, check_player: bool = False):
+def check_pool_bots(inter, only_voiced: bool = False):
 
     try:
         inter.music_bot
@@ -40,29 +40,22 @@ def check_pool_bots(inter, check_player: bool = False):
     except AttributeError:
         pass
 
-    if not inter.guild.voice_client or inter.author.id in inter.guild.me.voice.channel.voice_states:
-        inter.music_bot = inter.bot
-        inter.music_guild = inter.guild
-        return
-
     for bot in inter.bot.pool.bots:
 
-        if bot.user == inter.bot:
-            continue
+        if bot.user.id in inter.author.voice.channel.voice_states:
+            inter.music_bot = bot
+            inter.music_guild = bot.get_guild(inter.guild.id)
+            return True
 
-        if check_player:
-            try:
-                bot.music.players[inter.guild.id]
-            except KeyError:
-                continue
+        if only_voiced:
+            continue
 
         if not (guild := bot.get_guild(inter.guild.id)):
             continue
 
-        if not guild.voice_client or inter.author.id in guild.me.voice.channel.voice_states:
+        if not guild.voice_client:
             inter.music_bot = bot
             inter.music_guild = guild
-
             return True
 
     raise GenericError("**Todos os bots estão em uso no momento...**")
@@ -74,7 +67,7 @@ def has_player(check_all_bots: bool = False):
         if check_all_bots:
 
             try:
-                check_pool_bots(inter)
+                check_pool_bots(inter, only_voiced=True)
                 bot = inter.music_bot
             except TypeError:
                 raise GenericError("Não há player ativo no momento...")
@@ -103,7 +96,11 @@ def is_dj():
         try:
             bot = inter.music_bot
         except AttributeError:
-            bot = inter.bot
+            try:
+                check_pool_bots(inter, only_voiced=True)
+                bot = inter.music_bot
+            except TypeError:
+                bot = inter.bot
 
         try:
             if not bot.music.players[inter.guild.id].restrict_mode:
@@ -137,7 +134,7 @@ def is_requester():
             bot = inter.music_bot
         except AttributeError:
             try:
-                check_pool_bots(inter, check_player=True)
+                check_pool_bots(inter, only_voiced=True)
                 bot = inter.music_bot
             except TypeError:
                 bot = inter.bot
@@ -165,7 +162,7 @@ def is_requester():
     return commands.check(predicate)
 
 
-def check_voice():
+def check_voice(bot_is_connected=False):
 
     def predicate(inter):
 
@@ -180,7 +177,7 @@ def check_voice():
         try:
             if inter.author.voice.channel != guild.me.voice.channel:
 
-                if check_pool_bots(inter):
+                if check_pool_bots(inter, only_voiced=bot_is_connected):
                     return True
 
         except AttributeError:

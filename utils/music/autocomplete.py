@@ -20,15 +20,11 @@ def queue_tracks(inter, query: str):
     if not inter.author.voice:
         return
 
-    check_pool_bots(inter, check_player=True)
+    if not check_pool_bots(inter, only_voiced=True):
+        return
 
     try:
-        bot = inter.music_bot
-    except AttributeError:
-        bot = inter.bot
-
-    try:
-        player = bot.music.players[inter.guild.id]
+        player = inter.music_bot.music.players[inter.guild.id]
     except KeyError:
         return
 
@@ -36,10 +32,11 @@ def queue_tracks(inter, query: str):
 
 
 def queue_playlist(inter, query: str):
+
     if not inter.author.voice:
         return
 
-    check_pool_bots(inter, check_player=True)
+    check_pool_bots(inter, only_voiced=True)
 
     try:
         bot = inter.music_bot
@@ -77,6 +74,7 @@ async def fav_add_autocomplete(inter, query: str):
 
 
 def queue_author(inter, query):
+
     if not query:
         return
 
@@ -96,6 +94,7 @@ def queue_author(inter, query):
 
 
 def seek_suggestions(inter, query):
+
     if query:
         return
 
