@@ -54,7 +54,7 @@ class PlayerSession(commands.Cog):
                     continue
 
                 try:
-                    can_connect(voice_channel)
+                    can_connect(voice_channel, guild=guild)
                 except Exception as e:
                     print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\n{repr(e)}")
                     continue

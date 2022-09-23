@@ -295,7 +295,7 @@ class Music(commands.Cog):
 
         player = bot.music.players[ctx.guild.id]
 
-        can_connect(channel, check_other_bots_in_vc)
+        can_connect(channel, me.guild, check_other_bots_in_vc)
 
         deafen_warn = bot.config["GUILD_DEAFEN_WARN"]
 
@@ -476,9 +476,9 @@ class Music(commands.Cog):
             channel = inter.channel
             author = inter.author
 
-        if not guild.me.guild.voice_client:
-            if inter.author.voice.channel.user_limit and \
-                    (inter.author.voice.channel.user_limit - len(inter.author.voice.channel.voice_states)) < 1:
+        if not guild.me.guild.voice_client and inter.author.voice.channel.user_limit and (
+                    guild.me.id not in inter.author.voice.channel.voice_states and
+                    ((inter.author.voice.channel.user_limit - len(inter.author.voice.channel.voice_states)) < 1)):
                 raise GenericError(f"**O canal {inter.author.voice.channel.mention} está lotado!**")
 
         node = bot.music.get_node(server)
@@ -491,7 +491,7 @@ class Music(commands.Cog):
         guild_data = await bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
         if not guild.me.voice:
-            can_connect(inter.author.voice.channel, check_other_bots_in_vc=guild_data["check_other_bots_in_vc"])
+            can_connect(inter.author.voice.channel, guild, check_other_bots_in_vc=guild_data["check_other_bots_in_vc"])
 
         static_player = guild_data['player_controller']
 
@@ -2721,6 +2721,7 @@ class Music(commands.Cog):
 
         can_connect(
             channel=message.author.voice.channel,
+            guild=message.guild,
             check_other_bots_in_vc=data["check_other_bots_in_vc"]
         )
 
