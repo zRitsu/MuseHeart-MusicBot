@@ -136,10 +136,10 @@ class SelectInteraction(disnake.ui.View):
 
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
 
-        if interaction.user == self.user:
+        if interaction.user.id == self.user.id:
             return True
 
-        await interaction.send(f"Apenas {self.user} pode interagir aqui.", ephemeral = True)
+        await interaction.send(f"Apenas {self.user.mention} pode interagir aqui.", ephemeral = True)
 
     async def callback(self, interaction: disnake.MessageInteraction):
         self.selected = interaction.data.values[0]

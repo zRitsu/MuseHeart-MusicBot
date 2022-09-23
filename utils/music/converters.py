@@ -1,10 +1,14 @@
+from __future__ import annotations
 import datetime
-from typing import Union
+from typing import Union, TYPE_CHECKING
 import disnake
 import re
 import json
 from user_agent import generate_user_agent
 from utils.db import DBModel
+
+if TYPE_CHECKING:
+    from utils.client import BotCore
 
 URL_REG = re.compile(r'https?://(?:www\.)?.+')
 YOUTUBE_VIDEO_REG = re.compile(r"(https?://)?(www\.)?youtube\.(com|nl)/watch\?v=([-\w]+)")
@@ -275,8 +279,9 @@ def percentage(part, whole):
     return int((part * whole) / 100.0)
 
 
-def queue_track_index(inter: disnake.AppCmdInter, query: str, check_all: bool = False):
-    player = inter.bot.music.players[inter.guild.id]
+def queue_track_index(inter: disnake.AppCmdInter, bot: BotCore, query: str, check_all: bool = False):
+
+    player = bot.music.players[inter.guild.id]
 
     query_split = query.lower().split()
 

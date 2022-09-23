@@ -605,6 +605,12 @@ class LavalinkPlayer(wavelink.Player):
         if force or (interaction and not interaction.response.is_done()):
             self.update = False
             if self.controller_mode:
+                try:
+                    interaction.music_guild
+                    await interaction.response.defer()
+                    interaction = None
+                except AttributeError:
+                    pass
                 await self.invoke_np(interaction=interaction)
 
         else:

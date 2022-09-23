@@ -156,3 +156,4 @@ database.json
 application.yml
 /playlist_cache.json
 .local/
+.player_sessions/

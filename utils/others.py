@@ -281,7 +281,7 @@ async def send_idle_embed(
             message = await target.channel.send(embed=embed, components=components)
     else:
 
-        message = await target.send(embed=embed, components=components)
+        message = await bot.get_channel(target.id).send(embed=embed, components=components)
 
     return message
 
