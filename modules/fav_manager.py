@@ -3,7 +3,8 @@ import disnake
 from disnake.ext import commands
 from typing import TYPE_CHECKING
 from utils.db import DBModel
-from utils.music.converters import URL_REG, fav_list
+from utils.music.converters import URL_REG
+from utils.music.autocomplete import fav_list
 from utils.music.errors import GenericError
 from io import BytesIO
 import json

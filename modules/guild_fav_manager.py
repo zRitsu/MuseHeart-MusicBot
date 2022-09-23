@@ -4,7 +4,8 @@ import json
 import disnake
 from disnake.ext import commands
 from typing import TYPE_CHECKING, Union
-from utils.music.converters import URL_REG, pin_list
+from utils.music.converters import URL_REG
+from utils.music.autocomplete import pin_list
 from utils.music.errors import GenericError
 from utils.music.models import LavalinkPlayer
 from utils.others import send_idle_embed

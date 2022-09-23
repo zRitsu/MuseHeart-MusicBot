@@ -4,7 +4,7 @@ from typing import Union, Optional
 import disnake
 from disnake.ext import commands
 from wavelink import WavelinkException
-from utils.music.converters import perms_translations, time_format
+from utils.music.converters import time_format, perms_translations
 
 
 class GenericError(commands.CheckFailure):

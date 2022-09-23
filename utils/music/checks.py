@@ -3,8 +3,7 @@ import traceback
 from typing import TYPE_CHECKING, Union
 import disnake
 from disnake.ext import commands
-from .converters import perms_translations
-from .errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, DiffVoiceChannel, GenericError, \
+from .errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, GenericError, \
     MissingVoicePerms
 from .models import LavalinkPlayer
 from ..db import DBModel
@@ -270,7 +269,7 @@ async def has_perm(inter):
         return True
 
     elif player.restrict_mode:
-        raise GenericError(f"**Erro!** Apenas DJ's e membros com a permissão de **{perms_translations['manage_channels']}** "
+        raise GenericError(f"**Erro!** Apenas DJ's e membros com a permissão de **gerenciar servidor** "
                            "podem usar este comando/botão com o **modo restrito ativo**...")
 
     vc = bot.get_channel(player.channel_id)
@@ -319,3 +318,5 @@ async def check_deafen(me: disnake.Member = None):
             return True
         except:
             traceback.print_exc()
+
+

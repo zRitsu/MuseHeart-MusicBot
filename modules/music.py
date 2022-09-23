@@ -18,8 +18,9 @@ from utils.music.checks import check_voice, user_cooldown, has_player, has_sourc
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen
 from utils.music.models import LavalinkPlayer, LavalinkTrack
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
-    YOUTUBE_VIDEO_REG, search_suggestions, queue_tracks, seek_suggestions, queue_author, queue_playlist, \
-    node_suggestions, fav_add_autocomplete, fav_list, queue_track_index
+    YOUTUBE_VIDEO_REG, node_suggestions
+from utils.music.autocomplete import search_suggestions, queue_tracks, queue_playlist, fav_list, fav_add_autocomplete, \
+    queue_author, seek_suggestions, queue_track_index
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls
 from user_agent import generate_user_agent
