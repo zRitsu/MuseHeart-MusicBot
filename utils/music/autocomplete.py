@@ -33,9 +33,6 @@ def queue_tracks(inter, query: str):
     except KeyError:
         return
 
-    if inter.author.voice.channel != player.guild.me.voice.channel:
-        return
-
     return [f"{track.title}"[:100] for n, track in enumerate(player.queue) if query.lower() in track.title.lower()][:20]
 
 
@@ -57,9 +54,6 @@ def queue_playlist(inter, query: str):
     try:
         player = bot.music.players[inter.guild.id]
     except KeyError:
-        return
-
-    if inter.author.voice.channel != player.guild.me.voice.channel:
         return
 
     return list(set([track.playlist_name for track in player.queue if track.playlist_name and
@@ -104,19 +98,16 @@ def queue_author(inter, query):
 
     player = bot.music.players[inter.guild.id]
 
-    if inter.author.voice.channel != player.guild.me.voice.channel:
-        return
-
     return list(set([track.author for track in player.queue if query.lower() in track.author.lower()]))[:20]
 
 
-def seek_suggestions(inter, query):
+async def seek_suggestions(inter, query):
 
     if query or not inter.author.voice:
         return
 
     if inter.bot.intents.members:
-        check_pool_bots(inter, only_voiced=True)
+        await check_pool_bots(inter, only_voiced=True)
         try:
             bot = inter.music_bot
         except:
@@ -130,9 +121,6 @@ def seek_suggestions(inter, query):
         return
 
     if not player.current or player.current.is_stream:
-        return
-
-    if inter.author.voice.channel != player.guild.me.voice.channel:
         return
 
     seeks = []
