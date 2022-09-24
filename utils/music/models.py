@@ -163,7 +163,6 @@ class LavalinkPlayer(wavelink.Player):
         self.ignore_np_once = False  # não invocar player controller em determinadas situações
         self.allowed_mentions = disnake.AllowedMentions(users=False, everyone=False, roles=False)
         self.controller_mode = True  # ativar/desativar modo controller (apenas para uso em skins)
-        self.can_process_next = True
 
         self.initial_hints = [
             "Você pode alterar a skin/aparência do player usando o comando /change_skin (comando vísivel apenas membros"
@@ -233,8 +232,6 @@ class LavalinkPlayer(wavelink.Player):
 
     async def members_timeout(self):
 
-        self.can_process_next = False
-
         if self.keep_connected:
             return
 
@@ -253,7 +250,7 @@ class LavalinkPlayer(wavelink.Player):
 
     async def process_next(self, start_position: int = 0):
 
-        if self.locked or self.is_closing or not self.can_process_next:
+        if self.locked or self.is_closing:
             return
 
         if not self.is_connected:
