@@ -70,8 +70,7 @@ async def check_pool_bots(inter, only_voiced: bool = False):
             if bot.user == inter.bot.user or not bot.public:
                 continue
 
-            extra_bots_invite.append(f"[`{disnake.utils.escape_markdown(str(bot.user)).replace(' ', '_')}`]"
-                                     f"({({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})})")
+            extra_bots_invite.append(f"[`{disnake.utils.escape_markdown(str(bot.user)).replace(' ', '_')}`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})")
 
         txt += " | ".join(extra_bots_invite)
 
