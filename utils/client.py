@@ -184,7 +184,7 @@ class BotPool:
                 case_insensitive=True,
                 intents=intents,
                 test_guilds=test_guilds,
-                sync_commands=self.config["AUTO_SYNC_COMMANDS"] is True,
+                sync_commands=False,
                 sync_commands_debug=True,
                 embed_color=self.config["EMBED_COLOR"],
                 default_prefix=default_prefix,
@@ -212,6 +212,9 @@ class BotPool:
             async def on_ready():
 
                 if not bot.bot_ready:
+
+                    if bot.config["AUTO_SYNC_COMMANDS"]:
+                        await bot.sync_app_commands()
 
                     if not bot.owner:
                         botowner = (await bot.application_info())
@@ -366,6 +369,11 @@ class BotCore(commands.AutoShardedBot):
 
         return await super().is_owner(user)
 
+    async def sync_app_commands(self):
+        self._sync_commands = True
+        await self._sync_application_commands()
+        self._sync_commands = False
+
     async def can_send_message(self, message: disnake.Message):
 
         if not message.channel.permissions_for(message.guild.me).send_messages:
@@ -487,8 +495,7 @@ class BotCore(commands.AutoShardedBot):
 
         load_status = {
             "reloaded": [],
-            "loaded": [],
-            "error": []
+            "loaded": []
         }
 
         if not bot_name:
@@ -508,14 +515,12 @@ class BotCore(commands.AutoShardedBot):
                         self.load_extension(module_filename)
                         print(f"{'=' * 48}\n[OK] {bot_name} - {filename}.py Carregado.")
                         load_status["loaded"].append(f"{filename}.py")
-                    except Exception:
-                        print((f"{'=' * 48}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename} | Erro:"
-                               f"\n{traceback.format_exc()}"))
-                        load_status["error"].append(f"{filename}.py")
-                except Exception:
-                    print((f"{'=' * 48}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename} | Erro:"
-                      f"\n{traceback.format_exc()}"))
-                    load_status["error"].append(f"{filename}.py")
+                    except Exception as e:
+                        print(f"{'=' * 48}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename}")
+                        raise e
+                except Exception as e:
+                    print(f"{'=' * 48}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename}")
+                    raise e
 
         print(f"{'=' * 48}")
 

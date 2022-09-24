@@ -159,11 +159,13 @@ class Owner(commands.Cog):
     async def reload(self, ctx: Union[CustomContext, disnake.MessageInteraction]):
 
         data = self.bot.load_modules()
+        await self.bot.sync_app_commands()
 
         for bot in self.bot.pool.bots:
 
             if bot.user.id != self.bot.user.id:
                 bot.load_modules()
+                await bot.sync_app_commands()
 
         txt = ""
 
@@ -172,9 +174,6 @@ class Owner(commands.Cog):
 
         if data["reloaded"]:
             txt += f'**Módulos recarregados:** ```ansi\n[0;32m{" [0;37m| [0;32m".join(data["reloaded"])}```\n'
-
-        if data["error"]:
-            txt += f'**Módulos que falharam:** ```ansi\n[0;31m{" [0;37m| [0;31m".join(data["error"])}```\n'
 
         if not txt:
             txt = "**Nenhum módulo encontrado...**"
