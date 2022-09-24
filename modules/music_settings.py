@@ -246,6 +246,17 @@ class MusicSettings(commands.Cog):
         async def get_message(original_message):
 
             if original_message.channel != target:
+
+                try:
+                    if isinstance(original_message.channel.parent, disnake.ForumChannel):
+                        await original_message.thread.delete(reason=f"Player reconfigurado por {inter.author}.")
+                        return
+                except AttributeError:
+                    pass
+                except Exception:
+                    traceback.print_exc()
+                    return
+
                 try:
                     await original_message.edit(content=None, embed=embed_archived, view=None)
                 except:
