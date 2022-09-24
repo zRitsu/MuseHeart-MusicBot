@@ -84,7 +84,7 @@ def has_player(check_all_bots: bool = False):
 
     async def predicate(inter):
 
-        if check_all_bots:
+        if check_all_bots and inter.bot.intents.members:
 
             try:
                 await check_pool_bots(inter, only_voiced=True)
@@ -115,12 +115,18 @@ def is_dj():
 
         try:
             bot = inter.music_bot
+
         except AttributeError:
-            try:
-                await check_pool_bots(inter, only_voiced=True)
-                bot = inter.music_bot
-            except TypeError:
+
+            if not inter.bot.intents.members:
                 bot = inter.bot
+
+            else:
+                try:
+                    await check_pool_bots(inter, only_voiced=True)
+                    bot = inter.music_bot
+                except TypeError:
+                    bot = inter.bot
 
         try:
             if not bot.music.players[inter.guild.id].restrict_mode:
@@ -153,11 +159,14 @@ def is_requester():
         try:
             bot = inter.music_bot
         except AttributeError:
-            try:
-                await check_pool_bots(inter, only_voiced=True)
-                bot = inter.music_bot
-            except TypeError:
+            if not inter.bot.intents.members:
                 bot = inter.bot
+            else:
+                try:
+                    await check_pool_bots(inter, only_voiced=True)
+                    bot = inter.music_bot
+                except TypeError:
+                    bot = inter.bot
 
         try:
             player: LavalinkPlayer = bot.music.players[inter.guild.id]
@@ -194,14 +203,16 @@ def check_voice(bot_is_connected=False):
         except AttributeError:
             guild = inter.guild
 
-        try:
-            if inter.author.voice.channel != guild.me.voice.channel:
+        if inter.bot.intents.members:
 
-                if await check_pool_bots(inter, only_voiced=bot_is_connected):
-                    return True
+            try:
+                if inter.author.voice.channel != guild.me.voice.channel:
 
-        except AttributeError:
-            pass
+                    if await check_pool_bots(inter, only_voiced=bot_is_connected):
+                        return True
+
+            except AttributeError:
+                pass
 
         if not guild.me.voice:
 
@@ -222,11 +233,14 @@ def has_source():
         try:
             bot = inter.music_bot
         except AttributeError:
-            try:
-                await check_pool_bots(inter, only_voiced=True)
-                bot = inter.music_bot
-            except TypeError:
+            if not inter.bot.intents.members:
                 bot = inter.bot
+            else:
+                try:
+                    await check_pool_bots(inter, only_voiced=True)
+                    bot = inter.music_bot
+                except TypeError:
+                    bot = inter.bot
 
         try:
             player = bot.music.players[inter.guild.id]

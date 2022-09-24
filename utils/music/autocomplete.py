@@ -4,6 +4,7 @@ from utils.client import BotCore
 from utils.db import DBModel
 from utils.music.checks import check_pool_bots
 from utils.music.converters import google_search, percentage, time_format
+from utils.music.models import LavalinkPlayer
 
 
 async def search_suggestions(inter, query: str):
@@ -17,15 +18,22 @@ async def search_suggestions(inter, query: str):
 
 
 def queue_tracks(inter, query: str):
+
     if not inter.author.voice:
         return
 
-    if not check_pool_bots(inter, only_voiced=True):
-        return
+    if inter.bot.intents.members:
+        if not check_pool_bots(inter, only_voiced=True):
+            return
+    else:
+        inter.music_bot = inter.bot
 
     try:
         player = inter.music_bot.music.players[inter.guild.id]
     except KeyError:
+        return
+
+    if inter.author.voice.channel != player.guild.me.voice.channel:
         return
 
     return [f"{track.title}"[:100] for n, track in enumerate(player.queue) if query.lower() in track.title.lower()][:20]
@@ -36,16 +44,22 @@ def queue_playlist(inter, query: str):
     if not inter.author.voice:
         return
 
-    check_pool_bots(inter, only_voiced=True)
+    if inter.bot.intents.members:
+        check_pool_bots(inter, only_voiced=True)
+        try:
+            bot = inter.music_bot
+        except AttributeError:
+            return
 
-    try:
-        bot = inter.music_bot
-    except AttributeError:
-        return
+    else:
+        bot = inter.bot
 
     try:
         player = bot.music.players[inter.guild.id]
     except KeyError:
+        return
+
+    if inter.author.voice.channel != player.guild.me.voice.channel:
         return
 
     return list(set([track.playlist_name for track in player.queue if track.playlist_name and
@@ -75,39 +89,50 @@ async def fav_add_autocomplete(inter, query: str):
 
 def queue_author(inter, query):
 
-    if not query:
+    if not query or not inter.author.voice:
         return
 
-    if not inter.author.voice:
-        return
+    if inter.bot.intents.members:
+        check_pool_bots(inter, only_voiced=True)
+        try:
+            bot = inter.music_bot
+        except AttributeError:
+            return
 
-    check_pool_bots(inter, check_player=True)
-
-    try:
-        bot = inter.music_bot
-    except AttributeError:
-        return
+    else:
+        bot = inter.bot
 
     player = bot.music.players[inter.guild.id]
+
+    if inter.author.voice.channel != player.guild.me.voice.channel:
+        return
 
     return list(set([track.author for track in player.queue if query.lower() in track.author.lower()]))[:20]
 
 
 def seek_suggestions(inter, query):
 
-    if query:
+    if query or not inter.author.voice:
         return
 
-    check_pool_bots(inter, check_player=True)
+    if inter.bot.intents.members:
+        check_pool_bots(inter, only_voiced=True)
+        try:
+            bot = inter.music_bot
+        except:
+            return
+    else:
+        bot = inter.bot
 
     try:
-        bot = inter.music_bot
-    except:
+        player: LavalinkPlayer = bot.music.players[inter.guild.id]
+    except KeyError:
         return
 
-    player = bot.music.players[inter.guild.id]
-
     if not player.current or player.current.is_stream:
+        return
+
+    if inter.author.voice.channel != player.guild.me.voice.channel:
         return
 
     seeks = []
