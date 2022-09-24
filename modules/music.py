@@ -809,8 +809,8 @@ class Music(commands.Cog):
         if not player.current or (force_play == "yes" and len(player.queue)) > 0:
             await player.process_next()
         else:
+            player.set_command_log(text=log_text, emoji=emoji)
             if ephemeral:
-                player.set_command_log(text=log_text, emoji=emoji)
                 await player.update_message()
             else:
                 player.update = True
@@ -2846,7 +2846,8 @@ class Music(commands.Cog):
         if ephemeral:
             player.set_command_log(text=f"{inter.author.mention} {txt}", emoji=emoji)
 
-        await player.update_message(interaction=False if (bot.user.id != self.bot.user.id or (not component_interaction and not update)) else inter,
+        await player.update_message(interaction=False if (
+                    bot.user.id != self.bot.user.id or (not component_interaction and not update)) else inter,
                                     rpc_update=rpc_update)
 
         if isinstance(inter, CustomContext):

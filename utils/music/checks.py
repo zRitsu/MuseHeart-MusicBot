@@ -41,6 +41,9 @@ async def check_pool_bots(inter, only_voiced: bool = False):
     except AttributeError:
         pass
 
+    if isinstance(inter, disnake.ModalInteraction):
+        return False
+
     free_bot = None
 
     for bot in inter.bot.pool.bots:
@@ -50,6 +53,9 @@ async def check_pool_bots(inter, only_voiced: bool = False):
             inter.music_guild = bot.get_guild(inter.guild.id)
             return True
 
+        if inter.bot.user.id == bot.user.id:
+            continue
+
         if only_voiced:
             continue
 
@@ -58,6 +64,11 @@ async def check_pool_bots(inter, only_voiced: bool = False):
 
         if not guild.voice_client:
             free_bot = bot, guild
+
+    if not inter.guild.voice_client:
+        inter.music_bot = inter.bot
+        inter.music_guild = inter.guild
+        return True
 
     if free_bot:
         inter.music_bot, inter.music_guild = free_bot
