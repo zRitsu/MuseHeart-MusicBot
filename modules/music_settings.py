@@ -9,7 +9,7 @@ from utils.db import DBModel
 from utils.music.checks import user_cooldown
 from utils.music.converters import time_format
 from utils.music.errors import GenericError
-from utils.others import send_idle_embed, CustomContext, PlayerControls
+from utils.others import send_idle_embed, CustomContext
 from utils.music.models import LavalinkPlayer
 
 if TYPE_CHECKING:
@@ -225,7 +225,7 @@ class MusicSettings(commands.Cog):
         message = None
 
         try:
-            player: LavalinkPlayer = self.bot.music.players[inter.guild_id]
+            player: LavalinkPlayer = self.bot.music.players[inter.guild.id]
             if player.static:
                 original_message = player.message
         except KeyError:
@@ -242,6 +242,25 @@ class MusicSettings(commands.Cog):
             description=f"**Este canal de pedir música foi reconfigurado pelo membro {inter.author.mention}.**",
             color=self.bot.get_color(inter.guild.me)
         )
+
+        async def get_message(original_message):
+
+            if original_message.channel != target:
+                try:
+                    await original_message.edit(content=None, embed=embed_archived, view=None)
+                except:
+                    pass
+                try:
+                    await original_message.thread.edit(
+                        archived=True,
+                        locked=True,
+                        reason=f"Player reconfigurado por {inter.author}."
+                    )
+                except:
+                    pass
+
+            else:
+                return original_message
 
         if not target:
 
@@ -293,15 +312,17 @@ class MusicSettings(commands.Cog):
                 return
 
             if original_message:
+
                 try:
                     await original_message.edit(content=None, embed=embed_archived, view=None)
                 except:
                     pass
                 try:
-                    await original_message.thread.edit(
-                        archived=True,
-                        locked=True,
-                        reason=f"Player reconfigurado por {inter.author}.")
+                    if original_message.thread:
+                        await original_message.thread.edit(
+                            archived=True,
+                            locked=True,
+                            reason=f"Player reconfigurado por {inter.author}.")
                 except:
                     pass
 
@@ -330,6 +351,8 @@ class MusicSettings(commands.Cog):
                     slowmode_delay=5,
                 )
 
+                await get_message(original_message)
+
                 message = await send_idle_embed(target=thread_wmessage.message, bot=self.bot, force=True,
                                                 guild_data=guild_data)
 
@@ -345,22 +368,7 @@ class MusicSettings(commands.Cog):
 
                 if original_message:
 
-                    if original_message.channel != target:
-                        try:
-                            await original_message.edit(content=None, embed=embed_archived, view=None)
-                        except:
-                            pass
-                        try:
-                            await original_message.thread.edit(
-                                archived=True,
-                                locked=True,
-                                reason=f"Player reconfigurado por {inter.author}."
-                            )
-                        except:
-                            pass
-
-                    else:
-                        message = original_message
+                    message = await get_message(original_message)
 
                 if not message:
 
