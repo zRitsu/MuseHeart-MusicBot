@@ -20,7 +20,7 @@ class ErrorHandler(commands.Cog):
         self.components = []
         self.webhook_max_concurrency = commands.MaxConcurrency(1, per=commands.BucketType.guild, wait=True)
 
-        if self.bot.config["ERROR_REPORT_WEBHOOK"]:
+        if not self.bot.config["AUTO_ERROR_REPORT_WEBHOOK"] and self.bot.config["ERROR_REPORT_WEBHOOK"]:
             self.components.append(
                 disnake.ui.Button(
                     label="Reporte esse erro",
@@ -33,7 +33,8 @@ class ErrorHandler(commands.Cog):
             self.components.append(
                 disnake.ui.Button(
                     label="Servidor de suporte",
-                    url=self.bot.config["SUPPORT_SERVER"]
+                    url=self.bot.config["SUPPORT_SERVER"],
+                    emoji="💻"
                 )
             )
 
@@ -79,7 +80,6 @@ class ErrorHandler(commands.Cog):
         error_msg, full_error_msg = parse_error(inter, error)
 
         kwargs = {}
-        components = None
         send_webhook = False
 
         kwargs["embed"] = disnake.Embed(color=disnake.Colour.red())
@@ -94,14 +94,10 @@ class ErrorHandler(commands.Cog):
                 send_webhook = True
                 kwargs["embed"].description += " `Meu desenvolvedor será notificado sobre o problema.`"
 
-            else:
-
-                components = self.components
-
         else:
             kwargs["embed"].description = error_msg
 
-        await send_message(inter, components=components, **kwargs)
+        await send_message(inter, components=self.components, **kwargs)
 
         if not send_webhook:
             return
@@ -136,7 +132,6 @@ class ErrorHandler(commands.Cog):
         error_msg, full_error_msg = parse_error(ctx, error)
         kwargs = {}
         send_webhook = False
-        components = None
 
         kwargs["embed"] = disnake.Embed(color=disnake.Colour.red())
         kwargs["content"] = ctx.author.mention
@@ -147,8 +142,6 @@ class ErrorHandler(commands.Cog):
             if self.bot.config["AUTO_ERROR_REPORT_WEBHOOK"]:
                 send_webhook = True
                 kwargs["embed"].description += " `Meu desenvolvedor será notificado sobre o problema.`"
-            else:
-                components = self.components
 
         else:
             kwargs["embed"].description = error_msg
@@ -164,7 +157,7 @@ class ErrorHandler(commands.Cog):
         except:
             pass
 
-        await ctx.send(components=components, delete_after=delete_time, **kwargs)
+        await ctx.send(components=self.components, delete_after=delete_time, **kwargs)
 
         if not send_webhook:
             return
