@@ -295,7 +295,7 @@ class Music(commands.Cog):
 
         player = bot.music.players[ctx.guild.id]
 
-        can_connect(channel, me.guild, check_other_bots_in_vc)
+        can_connect(channel, me.guild, bot, check_other_bots_in_vc)
 
         deafen_warn = bot.config["GUILD_DEAFEN_WARN"]
 
@@ -491,7 +491,7 @@ class Music(commands.Cog):
         guild_data = await bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
         if not guild.me.voice:
-            can_connect(inter.author.voice.channel, guild, check_other_bots_in_vc=guild_data["check_other_bots_in_vc"])
+            can_connect(inter.author.voice.channel, guild, bot, check_other_bots_in_vc=guild_data["check_other_bots_in_vc"])
 
         static_player = guild_data['player_controller']
 
@@ -2722,7 +2722,8 @@ class Music(commands.Cog):
         can_connect(
             channel=message.author.voice.channel,
             guild=message.guild,
-            check_other_bots_in_vc=data["check_other_bots_in_vc"]
+            check_other_bots_in_vc=data["check_other_bots_in_vc"],
+            bot=self.bot,
         )
 
         try:
