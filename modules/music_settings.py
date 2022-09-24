@@ -245,7 +245,7 @@ class MusicSettings(commands.Cog):
 
         async def get_message(original_message):
 
-            if original_message.channel != target:
+            if original_message and original_message.channel != target:
 
                 try:
                     if isinstance(original_message.channel.parent, disnake.ForumChannel):
