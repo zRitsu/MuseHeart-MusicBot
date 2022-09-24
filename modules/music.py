@@ -811,7 +811,9 @@ class Music(commands.Cog):
         else:
             if ephemeral:
                 player.set_command_log(text=log_text, emoji=emoji)
-            await player.update_message()
+                await player.update_message()
+            else:
+                player.update = True
 
     @check_voice(bot_is_connected=True)
     @has_source()
