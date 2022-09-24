@@ -324,7 +324,8 @@ def can_connect(
         channel: Union[disnake.VoiceChannel, disnake.StageChannel],
         guild: disnake.Guild,
         bot: BotCore,
-        check_other_bots_in_vc: bool = False
+        check_other_bots_in_vc: bool = False,
+        check_pool: bool = False
 ):
 
     perms = channel.permissions_for(guild.me)
@@ -343,13 +344,15 @@ def can_connect(
     if check_other_bots_in_vc and any(m for m in channel.members if m.bot and m.id != guild.me.id):
         raise GenericError(f"**Há outro bot conectado no canal:** <#{channel.id}>")
 
-    for b in bot.pool.bots:
+    if check_pool:
 
-        if b.user.id == bot.user.id:
-            continue
+        for b in bot.pool.bots:
 
-        if b.user.id in channel.voice_states:
-            raise GenericError(f"**<@{b.user.id}> já está em uso no canal:** <#{channel.id}>")
+            if b.user.id == bot.user.id:
+                continue
+
+            if b.user.id in channel.voice_states:
+                raise GenericError(f"**<@{b.user.id}> já está em uso no canal** <#{channel.id}>")
 
 async def check_deafen(me: disnake.Member = None):
 

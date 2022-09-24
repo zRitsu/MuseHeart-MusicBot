@@ -281,7 +281,8 @@ class Music(commands.Cog):
             channel: Union[disnake.VoiceChannel, disnake.StageChannel] = None,
             check_other_bots_in_vc: bool = False,
             bot: BotCore = None,
-            me: disnake.Member = None
+            me: disnake.Member = None,
+            check_pool: bool = True
     ):
 
         if not channel:
@@ -295,7 +296,7 @@ class Music(commands.Cog):
 
         player = bot.music.players[ctx.guild.id]
 
-        can_connect(channel, me.guild, bot, check_other_bots_in_vc)
+        can_connect(channel, me.guild, bot, check_other_bots_in_vc, check_pool)
 
         deafen_warn = bot.config["GUILD_DEAFEN_WARN"]
 
@@ -490,8 +491,14 @@ class Music(commands.Cog):
 
         guild_data = await bot.get_data(inter.guild.id, db_name=DBModel.guilds)
 
+        check_pool = isinstance(inter, disnake.MessageInteraction)
+
         if not guild.me.voice:
-            can_connect(inter.author.voice.channel, guild, bot, check_other_bots_in_vc=guild_data["check_other_bots_in_vc"])
+            can_connect(
+                inter.author.voice.channel, guild, bot,
+                check_other_bots_in_vc=guild_data["check_other_bots_in_vc"],
+                check_pool=check_pool
+            )
 
         static_player = guild_data['player_controller']
 
@@ -796,7 +803,7 @@ class Music(commands.Cog):
             await self.do_connect(
                 inter, channel=inter.author.voice.channel,
                 check_other_bots_in_vc=guild_data["check_other_bots_in_vc"],
-                bot=bot, me=guild.me
+                bot=bot, me=guild.me, check_pool=check_pool
             )
 
         if not player.current or (force_play == "yes" and len(player.queue)) > 0:
