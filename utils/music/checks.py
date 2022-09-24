@@ -32,7 +32,7 @@ async def check_requester_channel(ctx: CustomContext):
     return True
 
 
-def check_pool_bots(inter, only_voiced: bool = False):
+async def check_pool_bots(inter, only_voiced: bool = False):
 
     try:
         inter.music_bot
@@ -58,16 +58,35 @@ def check_pool_bots(inter, only_voiced: bool = False):
             inter.music_guild = guild
             return True
 
-    raise GenericError("**Todos os bots estão em uso no momento...**")
+    txt = ""
+
+    if inter.author.guild_permissions.manage_guild:
+
+        extra_bots_invite = []
+
+        for bot in inter.bot.pool.bots:
+
+            if bot.user == inter.bot.user or not bot.public:
+                continue
+
+            extra_bots_invite.append(f"[`{disnake.utils.escape_markdown(str(bot.user)).replace(' ', '_')}`]"
+                                     f"({({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})})")
+
+        txt += " | ".join(extra_bots_invite)
+
+    if txt:
+        txt = f"\n\nVocê pode convidar bots adicionais no seu servidor através dos links abaixo:\n{txt}"
+
+    raise GenericError(f"**Não há bots livres no momento...**{txt}")
 
 def has_player(check_all_bots: bool = False):
 
-    def predicate(inter):
+    async def predicate(inter):
 
         if check_all_bots:
 
             try:
-                check_pool_bots(inter, only_voiced=True)
+                await check_pool_bots(inter, only_voiced=True)
                 bot = inter.music_bot
             except TypeError:
                 raise GenericError("Não há player ativo no momento...")
@@ -97,7 +116,7 @@ def is_dj():
             bot = inter.music_bot
         except AttributeError:
             try:
-                check_pool_bots(inter, only_voiced=True)
+                await check_pool_bots(inter, only_voiced=True)
                 bot = inter.music_bot
             except TypeError:
                 bot = inter.bot
@@ -134,7 +153,7 @@ def is_requester():
             bot = inter.music_bot
         except AttributeError:
             try:
-                check_pool_bots(inter, only_voiced=True)
+                await check_pool_bots(inter, only_voiced=True)
                 bot = inter.music_bot
             except TypeError:
                 bot = inter.bot
@@ -164,7 +183,7 @@ def is_requester():
 
 def check_voice(bot_is_connected=False):
 
-    def predicate(inter):
+    async def predicate(inter):
 
         if not inter.author.voice:
             raise NoVoice()
@@ -177,7 +196,7 @@ def check_voice(bot_is_connected=False):
         try:
             if inter.author.voice.channel != guild.me.voice.channel:
 
-                if check_pool_bots(inter, only_voiced=bot_is_connected):
+                if await check_pool_bots(inter, only_voiced=bot_is_connected):
                     return True
 
         except AttributeError:
@@ -197,13 +216,13 @@ def check_voice(bot_is_connected=False):
 
 def has_source():
 
-    def predicate(inter):
+    async def predicate(inter):
 
         try:
             bot = inter.music_bot
         except AttributeError:
             try:
-                check_pool_bots(inter, only_voiced=True)
+                await check_pool_bots(inter, only_voiced=True)
                 bot = inter.music_bot
             except TypeError:
                 bot = inter.bot

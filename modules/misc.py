@@ -139,8 +139,7 @@ class Misc(commands.Cog):
         for bot in self.bot.pool.bots:
             if bot.user.id == self.bot.user.id:
                 continue
-            for player in bot.music.players:
-                active_players_other_bots += 1
+            active_players_other_bots += len(bot.music.players)
 
         if active_players_other_bots:
             embed.description += f"> **Players ativos (outros bots):** `{active_players_other_bots}`\n"
@@ -165,7 +164,7 @@ class Misc(commands.Cog):
 
         links = "[`[Source]`](https://github.com/zRitsu/disnake-LL-music-bot)"
 
-        if (await self.bot.application_info()).bot_public:
+        if self.bot.public:
             links = f"[`[Invite]`]({disnake.utils.oauth_url(self.bot.user.id, permissions=disnake.Permissions(self.bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))}) **|** {links}"
 
         if self.bot.config["SUPPORT_SERVER"]:

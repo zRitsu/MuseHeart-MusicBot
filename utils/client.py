@@ -167,7 +167,7 @@ class BotPool:
 
         self.spotify = spotify_client(self.config)
 
-        def load_bot(bot_name: str, token: str, main=False):
+        def load_bot(bot_name: str, token: str):
 
             try:
                 token, default_prefix = token.split()
@@ -219,6 +219,7 @@ class BotPool:
                             bot.owner = botowner.team.members[0]
                         except AttributeError:
                             bot.owner = botowner.owner
+                        bot.public = botowner.bot_public
 
                     music_cog = bot.get_cog("Music")
 
@@ -236,7 +237,7 @@ class BotPool:
         main_token = self.config.get("TOKEN")
 
         if main_token:
-            load_bot("Main Bot", main_token, main=True)
+            load_bot("Main Bot", main_token)
 
         for k, v in self.config.items():
 
@@ -301,6 +302,7 @@ class BotCore(commands.AutoShardedBot):
         self.dm_cooldown = commands.CooldownMapping.from_cooldown(rate=2, per=30, type=commands.BucketType.member)
         super().__init__(*args, **kwargs)
         self.music = music_mode(self)
+        self.public = None
 
         for i in self.config["OWNER_IDS"].split("||"):
 
