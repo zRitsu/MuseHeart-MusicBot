@@ -135,6 +135,9 @@ class PlayerSession(commands.Cog):
     @commands.command(hidden=True, aliases=["savep"])
     async def saveplayers(self, ctx: CustomContext):
 
+        saved_players = 0
+        ignored_players = 0
+
         async with ctx.typing():
 
             for bot in self.bot.pool.bots:
@@ -153,6 +156,11 @@ class PlayerSession(commands.Cog):
                     for t in player.queue:
                         t.info["id"] = t.id
                         tracks.append(t.info)
+
+                    if not tracks:
+                        await player.destroy(force=True)
+                        ignored_players += 1
+                        continue
 
                     data = json.dumps(
                         {
@@ -190,9 +198,20 @@ class PlayerSession(commands.Cog):
                         )
 
                     await player.destroy(force=True)
+                    saved_players += 1
+
+        txt = ""
+
+        if saved_players:
+            txt += f"**Players salvos: {saved_players}**\n"
+        if ignored_players:
+            txt += f"**Players ignorados: {ignored_players}**\n"
+
+        if not txt:
+            txt = "**Nenhum player ativo no momento...**"
 
         self.resumed = True
-        await ctx.send("as sessões dos players foram salvas com sucesso!")
+        await ctx.send(embed=disnake.Embed(color=self.bot.get_color(ctx.guild.me), description=txt))
 
 def setup(bot: BotCore):
     bot.add_cog(PlayerSession(bot))
