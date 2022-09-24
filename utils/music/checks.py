@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Union
 import disnake
 from disnake.ext import commands
 from .errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, GenericError, \
-    MissingVoicePerms
+    MissingVoicePerms, DiffVoiceChannel
 from .models import LavalinkPlayer
 from ..db import DBModel
 
@@ -220,6 +220,12 @@ def check_voice(bot_is_connected=False):
 
             if not perms.connect:
                 raise MissingVoicePerms(inter.author.voice.channel)
+
+        try:
+            if inter.author.id not in guild.me.voice.channel.voice_states:
+                raise DiffVoiceChannel()
+        except AttributeError:
+            pass
 
         return True
 
