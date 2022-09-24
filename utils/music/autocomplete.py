@@ -8,6 +8,7 @@ from utils.music.models import LavalinkPlayer
 
 
 async def search_suggestions(inter, query: str):
+
     if not query:
         return []
 
@@ -17,13 +18,13 @@ async def search_suggestions(inter, query: str):
     return await google_search(inter.bot, query)
 
 
-def queue_tracks(inter, query: str):
+async def queue_tracks(inter, query: str):
 
     if not inter.author.voice:
         return
 
     if inter.bot.intents.members:
-        if not check_pool_bots(inter, only_voiced=True):
+        if not await check_pool_bots(inter, only_voiced=True):
             return
     else:
         inter.music_bot = inter.bot
@@ -36,13 +37,13 @@ def queue_tracks(inter, query: str):
     return [f"{track.title}"[:100] for n, track in enumerate(player.queue) if query.lower() in track.title.lower()][:20]
 
 
-def queue_playlist(inter, query: str):
+async def queue_playlist(inter, query: str):
 
     if not inter.author.voice:
         return
 
     if inter.bot.intents.members:
-        check_pool_bots(inter, only_voiced=True)
+        await check_pool_bots(inter, only_voiced=True)
         try:
             bot = inter.music_bot
         except AttributeError:
@@ -81,13 +82,13 @@ async def fav_add_autocomplete(inter, query: str):
     return await google_search(inter.bot, query, max_entries=20 - favs_size) + favs
 
 
-def queue_author(inter, query):
+async def queue_author(inter, query):
 
     if not query or not inter.author.voice:
         return
 
     if inter.bot.intents.members:
-        check_pool_bots(inter, only_voiced=True)
+        await check_pool_bots(inter, only_voiced=True)
         try:
             bot = inter.music_bot
         except AttributeError:
