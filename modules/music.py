@@ -2794,7 +2794,6 @@ class Music(commands.Cog):
             player_creator=message.author,
             guild=message.guild,
             channel=text_channel,
-            keep_connected=data["keep_connected"],
             static=True,
             skin=data["player_controller"]["skin"],
             node_id=node.identifier
