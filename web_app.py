@@ -63,9 +63,11 @@ class IndexHandler(tornado.web.RequestHandler):
             self.text = f"<p style=\"font-size:30px\">Bots Disponíveis:</p>{style}\n<table>{cells}</table>"
 
     def get(self):
-        self.write(f"{self.text}<p><a href=\"https://github.com/zRitsu/DC-MusicBot-RPC/releases\" "
-                   f"target=\"_blank\">Baixe o app de rich presence aqui.</a></p><br>Link para adicionar no app de RPC "
-                   f"abaixo:<p style=\"color:blue\">{self.ws_url}</p><br>")
+        self.write(f"{self.text}<br>(se o seu bot não apareceu na lista, tente recarregar a página, se o erro persistir "
+                   f"verifique se não apareceu algo escrito com \"429: too many requests\" no console/terminal)<p>"
+                   f"<a href=\"https://github.com/zRitsu/DC-MusicBot-RPC/releases\" target=\"_blank\">Baixe o app de "
+                   f"rich presence aqui.</a></p><br>Link para adicionar no app de RPC abaixo:<p style=\"color:blue\">"
+                   f"{self.ws_url}</p><br>")
         # self.render("index.html") #será implementado futuramente...
 
 
