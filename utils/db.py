@@ -31,7 +31,6 @@ db_models = {
         },
         "check_other_bots_in_vc": False,
         "enable_prefixed_commands": True,
-        "keep_connected": False,
         "djroles": []
     },
     DBModel.users: {
