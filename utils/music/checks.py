@@ -41,7 +41,7 @@ async def check_pool_bots(inter, only_voiced: bool = False):
     except AttributeError:
         pass
 
-    if isinstance(inter, disnake.ModalInteraction):
+    if isinstance(inter, (disnake.MessageInteraction, disnake.ModalInteraction)):
         return False
 
     free_bot = None
@@ -101,7 +101,7 @@ def has_player(check_all_bots: bool = False):
             try:
                 await check_pool_bots(inter, only_voiced=True)
                 bot = inter.music_bot
-            except TypeError:
+            except AttributeError:
                 raise GenericError("Não há player ativo no momento...")
 
         else:
@@ -137,7 +137,7 @@ def is_dj():
                 try:
                     await check_pool_bots(inter, only_voiced=True)
                     bot = inter.music_bot
-                except TypeError:
+                except AttributeError:
                     bot = inter.bot
 
         try:
@@ -177,7 +177,7 @@ def is_requester():
                 try:
                     await check_pool_bots(inter, only_voiced=True)
                     bot = inter.music_bot
-                except TypeError:
+                except AttributeError:
                     bot = inter.bot
 
         try:
@@ -251,7 +251,7 @@ def has_source():
                 try:
                     await check_pool_bots(inter, only_voiced=True)
                     bot = inter.music_bot
-                except TypeError:
+                except AttributeError:
                     bot = inter.bot
 
         try:
