@@ -90,7 +90,7 @@ def load(player: LavalinkPlayer) -> dict:
         txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=playlist_text_size)}`]({player.current.playlist_url})"
 
     if player.keep_connected:
-        txt += "\n> ♾️ **⠂Modo interrupto:** `Ativado`"
+        txt += "\n> ♾️ **⠂Modo 24/7:** `Ativado`"
 
     elif player.restrict_mode:
         txt += f"\n> 🔒 **⠂Modo restrito:** `Ativado`"

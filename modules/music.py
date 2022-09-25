@@ -2184,8 +2184,8 @@ class Music(commands.Cog):
         msg = ["ativou", "♾️"] if player.keep_connected else ["desativou", "❌"]
 
         text = [
-            f"{msg[0]} o modo interrupto do player.",
-            f"{msg[1]} **⠂{inter.author.mention} {msg[0]} o modo interrupto do player.**"
+            f"{msg[0]} o modo 24/7 (interrupto) do player.",
+            f"{msg[1]} **⠂{inter.author.mention} {msg[0]} o modo 24/7 (interrupto) do player.**"
         ]
 
         if not len(player.queue):
