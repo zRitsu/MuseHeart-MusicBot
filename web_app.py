@@ -38,7 +38,7 @@ class IndexHandler(tornado.web.RequestHandler):
                 async with timeout(7):
                     await bot.wait_until_ready()
             except asyncio.TimeoutError:
-                pass
+                continue
 
             avatar = bot.user.display_avatar.replace(size=256, static_format="png").url
 
