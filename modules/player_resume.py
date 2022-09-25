@@ -69,6 +69,11 @@ class PlayerSession(commands.Cog):
                     data["skin"] = (await self.bot.get_data(guild.id, db_name=DBModel.guilds))["player_controller"]["skin"]
 
                 try:
+                    creator = data["player_creator"]
+                except KeyError:
+                    creator = None
+
+                try:
                     message = await text_channel.fetch_message(data["message"])
                 except disnake.NotFound:
                     message = None
@@ -81,7 +86,8 @@ class PlayerSession(commands.Cog):
                     channel=text_channel,
                     message=message,
                     skin=data["skin"],
-                    keep_connected=data["keep_connected"],
+                    player_creator=data["player_creator"],
+                    keep_connected=creator,
                     static=data['static'],
                 )
 
@@ -168,6 +174,7 @@ class PlayerSession(commands.Cog):
                             "position": player.position,
                             "voice_channel": player.channel_id,
                             "dj": list(player.dj),
+                            "player_creator": player.player_creator,
                             "static": player.static,
                             "paused": player.paused,
                             "text_channel": player.text_channel.id,

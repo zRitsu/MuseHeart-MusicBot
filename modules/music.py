@@ -643,7 +643,7 @@ class Music(commands.Cog):
         player: LavalinkPlayer = bot.music.get_player(
             guild_id=inter.guild.id,
             cls=LavalinkPlayer,
-            player_creator=author,
+            player_creator=author.id,
             guild=guild,
             channel=channel,
             node_id=node.identifier,
@@ -1797,23 +1797,73 @@ class Music(commands.Cog):
         player: LavalinkPlayer = bot.music.players[guild.id]
 
         if user == inter.author:
-            error_text = "Você não pode adicionar a si mesmo na lista de DJ's."
+            error_text = "**Você não pode adicionar a si mesmo na lista de DJ's.**"
         elif user.guild_permissions.manage_channels:
             error_text = f"você não pode adicionar o membro {user.mention} na lista de DJ's (ele(a) possui permissão de **gerenciar canais**)."
+        elif user.id == player.player_creator:
+            error_text = f"**O membro {user.mention} é o criador do player...**"
         elif user.id in player.dj:
-            error_text = f"O membro {user.mention} já está na lista de DJ's"
+            error_text = f"**O membro {user.mention} já está na lista de DJ's**"
 
         if error_text:
             raise GenericError(error_text)
 
         player.dj.add(user.id)
-        text = [f"adicionou {user.mention} à lista de DJ's.", f"{user.mention} foi adicionado à lista de DJ's."]
+
+        text = [f"adicionou {user.mention} à lista de DJ's.",
+                f"🎧 **⠂{inter.author.mention} adicionou {user.mention} na lista de DJ's.**"]
 
         if (player.static and channel == player.text_channel) or isinstance(inter.application_command,
                                                                             commands.InvokableApplicationCommand):
-            await inter.send(f"{inter.target.mention} adicionado à lista de DJ's!{player.controller_link}")
+            await inter.send(f"{user.mention} adicionado à lista de DJ's!{player.controller_link}")
 
         await self.interaction_message(inter, txt=text, update=True, emoji="🇳")
+
+    @check_voice(bot_is_connected=True)
+    @has_player()
+    @is_dj()
+    @commands.slash_command(
+        name=disnake.Localized("remove_dj", data={disnake.Locale.pt_BR: "remover_dj"}),
+        description=f"{desc_prefix}Remover um membro da lista de DJ's na sessão atual do player."
+    )
+    async def remove_dj(
+            self,
+            inter: disnake.AppCmdInter, *,
+            user: disnake.User = commands.Param(name="membro", description="Membro a ser adicionado.")
+    ):
+
+        try:
+            bot = inter.music_bot
+            guild = inter.music_guild
+            channel = guild.get_channel(inter.channel.id)
+        except AttributeError:
+            bot = inter.bot
+            guild = inter.guild
+            channel = inter.channel
+
+        player: LavalinkPlayer = bot.music.players[guild.id]
+
+        if user.id == player.player_creator:
+            if inter.author.guild_permissions.manage_guild:
+                player.player_creator = None
+            else:
+                raise GenericError(f"**O membro {user.mention} é o criador do player.**")
+
+        elif user.id not in player.dj:
+            GenericError(f"O membro {user.mention} não está na lista de DJ's")
+
+        else:
+            player.dj.remove(user.id)
+
+        text = [f"removeu {user.mention} da lista de DJ's.",
+                f"🎧 **⠂{inter.author.mention} removeu {user.mention} da lista de DJ's.**"]
+
+        if (player.static and channel == player.text_channel) or isinstance(inter.application_command,
+                                                                            commands.InvokableApplicationCommand):
+            await inter.send(f"{user.mention} adicionado à lista de DJ's!{player.controller_link}")
+
+        await self.interaction_message(inter, txt=text, update=True, emoji="🇳")
+
 
     @check_voice(bot_is_connected=True)
     @has_player()
@@ -2791,7 +2841,7 @@ class Music(commands.Cog):
         player: LavalinkPlayer = self.bot.music.get_player(
             guild_id=message.guild.id,
             cls=LavalinkPlayer,
-            player_creator=message.author,
+            player_creator=message.author.id,
             guild=message.guild,
             channel=text_channel,
             static=True,

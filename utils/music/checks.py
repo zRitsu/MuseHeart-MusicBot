@@ -170,7 +170,7 @@ def is_requester():
         if not player.current:
             raise NoSource()
 
-        if player.current.requester == inter.author.id or not (player.keep_connected or player.restrict_mode):
+        if player.current.requester == inter.author.id:
             return True
 
         try:
@@ -280,7 +280,7 @@ async def has_perm(inter):
     except KeyError:
         return True
 
-    if author.id in player.dj:
+    if author.id == player.player_creator or author.id in player.dj:
         return True
 
     if author.guild_permissions.manage_channels:
@@ -307,7 +307,8 @@ async def has_perm(inter):
         player.dj.add(author.id)
 
     elif bot.intents.members and not [m for m in vc.members if
-                                            not m.bot and (m.guild_permissions.manage_channels or m.id in player.dj)]:
+                                            not m.bot and (m.guild_permissions.manage_channels or m.id in player.dj
+                                                           or m.id == player.player_creator)]:
         player.dj.add(author.id)
         await channel.send(embed=disnake.Embed(
             description=f"{author.mention} foi adicionado à lista de DJ's por não haver um no canal <#{vc.id}>.",

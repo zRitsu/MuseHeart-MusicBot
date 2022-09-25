@@ -781,7 +781,7 @@ class Owner(commands.Cog):
             node_id=node.identifier,
             guild_id=ctx.guild.id,
             cls=LavalinkPlayer,
-            player_creator=ctx.author,
+            player_creator=ctx.author.id,
             guild=ctx.guild,
             channel=channel,
             message=message,

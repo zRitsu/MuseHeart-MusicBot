@@ -145,6 +145,7 @@ class LavalinkPlayer(wavelink.Player):
         self.interaction_cooldown: bool = False
         self.votes: set = set()
         self.dj: set = set()
+        self.player_creator: Optional[int] = kwargs.pop('player_creator', None)
         self.filters: dict = {}
         self.idle_task: Optional[asyncio.Task] = None
         self.members_timeout_task: Optional[asyncio.Task] = None
@@ -171,11 +172,6 @@ class LavalinkPlayer(wavelink.Player):
             "Crie favoritos para ter fácil acesso de usar seus links favoritos aqui dispensando ter que copiar e colar "
             "seus links nos comandos. Experimente usando o comando: /fav add.",
         ]
-
-        player_creator: disnake.Member = kwargs.pop('player_creator', None)
-
-        if player_creator and not player_creator.guild_permissions.manage_channels:
-            self.dj.add(player_creator.id)
 
         self.hints: cycle = []
         self.current_hint = ""
