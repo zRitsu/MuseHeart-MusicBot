@@ -678,7 +678,7 @@ class MusicSettings(commands.Cog):
         description="Ver informações dos servidores de música."
     )
     async def nodeinfo_legacy(self, ctx: CustomContext):
-        await self.nodeinfo(ctx, inter=ctx)
+        await self.nodeinfo.callback(self=self, inter=ctx)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.slash_command(
