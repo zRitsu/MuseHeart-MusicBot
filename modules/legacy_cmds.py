@@ -785,7 +785,6 @@ class Owner(commands.Cog):
             guild=ctx.guild,
             channel=channel,
             message=message,
-            keep_connected=guild_data["keep_connected"],
             static=bool(static_player['channel'])
         )
 

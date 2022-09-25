@@ -646,7 +646,6 @@ class Music(commands.Cog):
             player_creator=author,
             guild=guild,
             channel=channel,
-            keep_connected=guild_data["keep_connected"],
             node_id=node.identifier,
             static=bool(static_player['channel']),
             skin=skin
