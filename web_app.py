@@ -2,7 +2,6 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-import traceback
 from typing import TYPE_CHECKING, Optional
 from os import environ
 import aiohttp
@@ -10,7 +9,7 @@ import disnake
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
-
+from async_timeout import timeout
 
 if TYPE_CHECKING:
     from utils.client import BotPool
@@ -35,8 +34,11 @@ class IndexHandler(tornado.web.RequestHandler):
 
         for bot in self.bots:
 
-            if not bot.bot_ready:
-                continue
+            try:
+                async with timeout(7):
+                    await bot.wait_until_ready()
+            except asyncio.TimeoutError:
+                pass
 
             avatar = bot.user.display_avatar.replace(size=256, static_format="png").url
 
