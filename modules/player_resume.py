@@ -86,8 +86,8 @@ class PlayerSession(commands.Cog):
                     channel=text_channel,
                     message=message,
                     skin=data["skin"],
-                    player_creator=data["player_creator"],
-                    keep_connected=creator,
+                    player_creator=creator,
+                    keep_connected=data["keep_connected"],
                     static=data['static'],
                 )
 
