@@ -720,7 +720,7 @@ class MusicSettings(commands.Cog):
                        f'RAM Total: `{total}`\n' \
                        f'CPU Cores: `{cpu_cores}`\n' \
                        f'Uso de CPU: `{cpu_usage}%`\n' \
-                       f'Uptime: <t:{int((self.bot.uptime - datetime.timedelta(microseconds=node.stats.uptime)).timestamp())}:R>\n'
+                       f'Uptime: <t:{int((disnake.utils.utcnow() - datetime.timedelta(milliseconds=node.stats.uptime)).timestamp())}:R>\n'
 
                 if started:
                     txt += "Players: "
