@@ -524,8 +524,12 @@ class LavalinkPlayer(wavelink.Player):
                     self.updating = False
                     self.message_updater_task = self.bot.loop.create_task(self.message_updater())
                     return
-                except:
+                except Exception as e:
                     traceback.print_exc()
+                    if self.static or self.has_thread:
+                        self.set_command_log(f"{(interaction.author.mention + ' ') if interaction else ''}houve um erro na interação: {repr(e)}", "⚠️")
+                        self.update = True
+                        return
 
             await self.destroy_message()
 
