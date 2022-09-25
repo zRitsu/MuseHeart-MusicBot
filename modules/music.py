@@ -2890,7 +2890,7 @@ class Music(commands.Cog):
             player.set_command_log(text=f"{inter.author.mention} {txt}", emoji=emoji)
 
         await player.update_message(interaction=False if (
-                    bot.user.id != self.bot.user.id or (not component_interaction and not update)) else inter,
+                    bot.user.id != self.bot.user.id or (not component_interaction or not update)) else inter,
                                     rpc_update=rpc_update)
 
         if isinstance(inter, CustomContext):
