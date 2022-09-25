@@ -151,7 +151,7 @@ class Misc(commands.Cog):
                              f"> **Versão do Disnake:** `{disnake.__version__}`\n" \
                              f"> **Latencia:** `{round(self.bot.latency * 1000)}ms`\n" \
                              f"> **Uso de RAM:** `{ram_usage}`\n" \
-                             f"> **Uptime:** `{time_format((disnake.utils.utcnow() - self.bot.uptime).total_seconds()*1000)}`\n"
+                             f"> **Uptime:** <t:{int(self.bot.uptime.timestamp())}:R>\n"
 
         embed.set_thumbnail(url=self.bot.user.display_avatar.replace(size=256, static_format="png").url)
 

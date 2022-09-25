@@ -1,5 +1,6 @@
 from __future__ import annotations
 import asyncio
+import datetime
 import traceback
 import disnake
 import humanize
@@ -719,7 +720,7 @@ class MusicSettings(commands.Cog):
                        f'RAM Total: `{total}`\n' \
                        f'CPU Cores: `{cpu_cores}`\n' \
                        f'Uso de CPU: `{cpu_usage}%`\n' \
-                       f'Uptime: `{time_format(node.stats.uptime)}\n`'
+                       f'Uptime: <t:{int((self.bot.uptime - datetime.timedelta(microseconds=node.stats.uptime)).timestamp())}:R>\n'
 
                 if started:
                     txt += "Players: "
