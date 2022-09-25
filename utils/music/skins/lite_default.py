@@ -27,7 +27,7 @@ def load(player: LavalinkPlayer) -> dict:
             embed.description += f"\n> 🎼 **┃ Playlist:** [`{player.current.playlist_name}`]({player.current.playlist_url})"
 
         data["embeds"].append(embed)
-        
+
         if player.current_hint:
             data["embeds"].append(disnake.Embed(color=player.bot.get_color(player.guild.me)).set_footer(text=f"💡 Dica: {player.current_hint}"))
 
@@ -96,7 +96,10 @@ def load(player: LavalinkPlayer) -> dict:
         if player.current.playlist_name:
             txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=playlist_text_size)}`]({player.current.playlist_url})"
 
-        if player.restrict_mode:
+        if player.keep_connected:
+            txt += "\n> ♾️ **⠂Modo interrupto:** `Ativado`"
+
+        elif player.restrict_mode:
             txt += f"\n> 🔒 **⠂Modo restrito:** `Ativado`"
 
         txt += f"{vc_txt}{position_txt}\n"
@@ -114,7 +117,7 @@ def load(player: LavalinkPlayer) -> dict:
             embed_queue = disnake.Embed(title=f"Músicas na fila: {len(player.queue)}", color=player.bot.get_color(player.guild.me),
                                         description=f"\n{queue_txt}")
 
-            if not player.loop:
+            if not player.loop and not player.keep_connected:
 
                 queue_duration = 0
 

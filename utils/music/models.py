@@ -154,7 +154,7 @@ class LavalinkPlayer(wavelink.Player):
         self.command_log_emoji: str = ""
         self.is_closing: bool = False
         self.last_message_id: Optional[int] = None
-        self.keep_connected: bool = kwargs.pop("keep_connected", False)
+        self.keep_connected: bool = False
         self.update: bool = False
         self.updating: bool = False
         self.auto_update: int = 0
@@ -794,7 +794,7 @@ class LavalinkPlayer(wavelink.Player):
             elif self.last_track.track_loops:
                 self.last_track.info["extra"]["track_loops"] -= 1
                 self.queue.insert(0, self.last_track)
-            elif self.loop == "queue": # or self.keep_connected:
+            elif self.loop == "queue" or self.keep_connected:
                 if self.is_previows_music:
                     self.queue.insert(1, self.last_track)
                     self.is_previows_music = False

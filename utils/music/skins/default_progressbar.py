@@ -89,7 +89,10 @@ def load(player: LavalinkPlayer) -> dict:
     if player.current.playlist_name:
         txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=playlist_text_size)}`]({player.current.playlist_url})"
 
-    if player.restrict_mode:
+    if player.keep_connected:
+        txt += "\n> ♾️ **⠂Modo interrupto:** `Ativado`"
+
+    elif player.restrict_mode:
         txt += f"\n> 🔒 **⠂Modo restrito:** `Ativado`"
 
     if player.ping:
@@ -111,6 +114,17 @@ def load(player: LavalinkPlayer) -> dict:
 
         embed_queue = disnake.Embed(title=f"Músicas na fila: {len(player.queue)}", color=player.bot.get_color(player.guild.me),
                                     description=f"\n{queue_txt}")
+
+        if not player.loop and not player.keep_connected:
+
+            queue_duration = 0
+
+            for t in player.queue:
+                if not t.is_stream:
+                    queue_duration += t.duration
+
+            embed_queue.description += f"\n`[⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + player.current.duration) - player.position)).timestamp())}:R> `⌛]`"
+
         embed_queue.set_image(url=queue_img)
 
     embed.description = txt

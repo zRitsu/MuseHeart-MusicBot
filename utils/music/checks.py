@@ -188,7 +188,7 @@ def is_requester():
         if not player.current:
             raise NoSource()
 
-        if player.current.requester == inter.author.id or not player.restrict_mode:
+        if player.current.requester == inter.author.id or not (player.keep_connected or player.restrict_mode):
             return True
 
         try:
@@ -296,13 +296,20 @@ async def has_perm(inter):
     try:
         player: LavalinkPlayer = bot.music.players[inter.guild.id]
     except KeyError:
+        print("aaaaaaaa")
         return True
 
     if author.id in player.dj:
+        print("bbbbbb")
         return True
 
     if author.guild_permissions.manage_channels:
+        print("cccccc")
         return True
+
+    if player.keep_connected:
+        raise GenericError(f"**Erro!** Apenas membros com a permissão de **gerenciar servidor** "
+                           "podem usar este comando/botão com o **modo 24/7 ativo**...")
 
     user_roles = [r.id for r in author.roles]
 
@@ -311,8 +318,8 @@ async def has_perm(inter):
     if [r for r in guild_data['djroles'] if int(r) in user_roles]:
         return True
 
-    elif player.restrict_mode:
-        raise GenericError(f"**Erro!** Apenas DJ's e membros com a permissão de **gerenciar servidor** "
+    if player.restrict_mode:
+        raise GenericError(f"**Erro!** Apenas DJ's ou membros com a permissão de **gerenciar servidor** "
                            "podem usar este comando/botão com o **modo restrito ativo**...")
 
     vc = bot.get_channel(player.channel_id)

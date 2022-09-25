@@ -2155,6 +2155,51 @@ class Music(commands.Cog):
 
         await self.interaction_message(inter, text, emoji=msg[1], update=True)
 
+    @has_player(check_all_bots=True)
+    @commands.has_guild_permissions(manage_guild=True)
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.command(name="247", aliases=["nonstop"],
+                      description="Ativar/Desativar o modo 24/7 do player (Em testes).")
+    async def nonstop_legacy(self, ctx: CustomContext):
+        await self.nonstop.callback(self=self, inter=ctx)
+
+    @has_player(check_all_bots=True)
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.slash_command(
+        name="247",
+        description=f"{desc_prefix}Ativar/Desativar o modo 24/7 do player (Em testes).",
+        default_member_permissions=disnake.Permissions(manage_guild=True)
+    )
+    async def nonstop(self, inter: disnake.AppCmdInter):
+
+        try:
+            bot = inter.music_bot
+        except AttributeError:
+            bot = inter.bot
+
+        player: LavalinkPlayer = bot.music.players[inter.guild.id]
+
+        player.keep_connected = not player.keep_connected
+
+        msg = ["ativou", "♾️"] if player.keep_connected else ["desativou", "❌"]
+
+        text = [
+            f"{msg[0]} o modo interrupto do player.",
+            f"{msg[1]} **⠂{inter.author.mention} {msg[0]} o modo interrupto do player.**"
+        ]
+
+        if not len(player.queue):
+            player.queue.extend(player.played)
+            player.played.clear()
+
+        if player.current:
+            await self.interaction_message(inter, txt=text, update=True, emoji=msg[1])
+            return
+
+        await self.interaction_message(inter, text)
+
+        await player.process_next()
+
     @check_voice(bot_is_connected=True)
     @has_player()
     @is_dj()
