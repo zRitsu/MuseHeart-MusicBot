@@ -125,26 +125,8 @@ def is_dj():
 
     async def predicate(inter):
 
-        try:
-            bot = inter.music_bot
-
-        except AttributeError:
-
-            if not inter.bot.intents.members:
-                bot = inter.bot
-
-            else:
-                try:
-                    await check_pool_bots(inter, only_voiced=True)
-                    bot = inter.music_bot
-                except AttributeError:
-                    bot = inter.bot
-
-        try:
-            if not bot.music.players[inter.guild.id].restrict_mode:
-                return True
-        except KeyError:
-            return True
+        if inter.bot.intents.members:
+            await check_pool_bots(inter, only_voiced=True)
 
         if not await has_perm(inter):
             raise NotDJorStaff()
@@ -296,15 +278,12 @@ async def has_perm(inter):
     try:
         player: LavalinkPlayer = bot.music.players[inter.guild.id]
     except KeyError:
-        print("aaaaaaaa")
         return True
 
     if author.id in player.dj:
-        print("bbbbbb")
         return True
 
     if author.guild_permissions.manage_channels:
-        print("cccccc")
         return True
 
     if player.keep_connected:
