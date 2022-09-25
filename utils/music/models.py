@@ -154,7 +154,7 @@ class LavalinkPlayer(wavelink.Player):
         self.command_log_emoji: str = ""
         self.is_closing: bool = False
         self.last_message_id: Optional[int] = None
-        self.keep_connected: bool = False
+        self.keep_connected: bool = kwargs.pop("keep_connected", False)
         self.update: bool = False
         self.updating: bool = False
         self.auto_update: int = 0
