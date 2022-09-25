@@ -598,13 +598,12 @@ class LavalinkPlayer(wavelink.Player):
 
             await asyncio.sleep(10)
 
-    async def update_message(self, interaction: disnake.Interaction = None, force=False, rpc_update=False):
+    async def update_message(self, interaction: disnake.Interaction = None, force=False, rpc_update=False, update=False):
 
         if rpc_update:
             self.bot.loop.create_task(self.process_rpc())
 
-        if force or (interaction and not interaction.response.is_done()):
-            self.update = False
+        if force or (not update and interaction and not interaction.response.is_done()):
             if self.controller_mode:
                 await self.invoke_np(interaction=interaction)
 

@@ -2889,9 +2889,8 @@ class Music(commands.Cog):
         if ephemeral:
             player.set_command_log(text=f"{inter.author.mention} {txt}", emoji=emoji)
 
-        await player.update_message(interaction=False if (
-                    bot.user.id != self.bot.user.id or (not component_interaction or not update)) else inter,
-                                    rpc_update=rpc_update)
+        await player.update_message(interaction=False if (bot.user.id != self.bot.user.id or not component_interaction) \
+            else inter, rpc_update=rpc_update, update=update)
 
         if isinstance(inter, CustomContext):
             embed = disnake.Embed(color=self.bot.get_color(inter.guild.me),
