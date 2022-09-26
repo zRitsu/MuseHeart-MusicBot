@@ -950,7 +950,7 @@ class Music(commands.Cog):
         if len(player.votes) < self.bot.config.get('VOTE_SKIP_AMOUNT', 3):
             embed.description = txt
             player.votes.add(inter.author.id)
-            await self.interaction_message(inter, txt, update=True, emoji="✋")
+            await self.interaction_message(inter, txt, emoji="✋")
             return
 
         await self.interaction_message(inter, txt, emoji="✋")
@@ -1013,7 +1013,7 @@ class Music(commands.Cog):
         await player.set_volume(value)
 
         txt = [f"ajustou o volume para **{value}%**", f"🔊 **⠂{inter.author.mention} ajustou o volume para {value}%**"]
-        await self.interaction_message(inter, txt, update=update, emoji="🔊")
+        await self.interaction_message(inter, txt, emoji="🔊")
 
     @check_voice(bot_is_connected=True)
     @has_source()
@@ -1817,7 +1817,7 @@ class Music(commands.Cog):
                                                                             commands.InvokableApplicationCommand):
             await inter.send(f"{user.mention} adicionado à lista de DJ's!{player.controller_link}")
 
-        await self.interaction_message(inter, txt=text, update=True, emoji="🇳")
+        await self.interaction_message(inter, txt=text, emoji="🇳")
 
     @check_voice(bot_is_connected=True)
     @has_player()
@@ -1862,7 +1862,7 @@ class Music(commands.Cog):
                                                                             commands.InvokableApplicationCommand):
             await inter.send(f"{user.mention} adicionado à lista de DJ's!{player.controller_link}")
 
-        await self.interaction_message(inter, txt=text, update=True, emoji="🇳")
+        await self.interaction_message(inter, txt=text, emoji="🇳")
 
 
     @check_voice(bot_is_connected=True)
@@ -1982,7 +1982,6 @@ class Music(commands.Cog):
             inter,
             txt=["inverteu a ordem das músicas na fila.",
                  f"🔄 **⠂{inter.author.mention} inverteu a ordem das músicas na fila.**"],
-            update=True,
             emoji="🔄"
         )
 
@@ -2202,7 +2201,7 @@ class Music(commands.Cog):
             f"{msg[1]} **⠂{inter.author.mention} {msg[0]} o modo restrito de comandos do player (que requer DJ/Staff).**"
         ]
 
-        await self.interaction_message(inter, text, emoji=msg[1], update=True)
+        await self.interaction_message(inter, text, emoji=msg[1])
 
     @has_player(check_all_bots=True)
     @commands.has_guild_permissions(manage_guild=True)
@@ -2242,7 +2241,7 @@ class Music(commands.Cog):
             player.played.clear()
 
         if player.current:
-            await self.interaction_message(inter, txt=text, update=True, emoji=msg[1])
+            await self.interaction_message(inter, txt=text, emoji=msg[1])
             return
 
         await self.interaction_message(inter, text)
@@ -2917,8 +2916,8 @@ class Music(commands.Cog):
     async def cog_check(self, ctx: CustomContext) -> bool:
         return await check_requester_channel(ctx)
 
-    async def interaction_message(self, inter: Union[disnake.Interaction, CustomContext], txt, update: bool = False,
-                                  emoji: str = "✅", rpc_update: bool = False, data:dict = None):
+    async def interaction_message(self, inter: Union[disnake.Interaction, CustomContext], txt, emoji: str = "✅",
+                                  rpc_update: bool = False, data:dict = None):
 
         try:
             txt, txt_ephemeral = txt
@@ -2939,8 +2938,8 @@ class Music(commands.Cog):
         if ephemeral:
             player.set_command_log(text=f"{inter.author.mention} {txt}", emoji=emoji)
 
-        await player.update_message(interaction=False if (bot.user.id != self.bot.user.id or not component_interaction) \
-            else inter, rpc_update=rpc_update, update=update)
+        await player.update_message(interaction=inter if (bot.user.id == self.bot.user.id and component_interaction) \
+            else False, rpc_update=rpc_update)
 
         if isinstance(inter, CustomContext):
             embed = disnake.Embed(color=self.bot.get_color(inter.guild.me),
@@ -2953,9 +2952,10 @@ class Music(commands.Cog):
         elif not component_interaction:
 
             if not inter.response.is_done():
-                embed = disnake.Embed(color=self.bot.get_color(inter.guild.me),
-                                      description=(
-                                                          txt_ephemeral or f"{inter.author.mention} **{txt}**") + player.controller_link)
+                embed = disnake.Embed(
+                    color=self.bot.get_color(inter.guild.me),
+                    description=(txt_ephemeral or f"{inter.author.mention} **{txt}**") + player.controller_link
+                )
 
                 await inter.send(embed=embed, ephemeral=ephemeral)
 
@@ -3046,6 +3046,8 @@ class Music(commands.Cog):
             return
 
         if payload.code == 4014:
+
+            await asyncio.sleep(1.5)
 
             if player.guild.me.voice:
                 if player.controller_mode:
@@ -3161,9 +3163,17 @@ class Music(commands.Cog):
 
         # TODO: rever essa parte caso adicione função de ativar track loops em músicas da fila
         if player.loop != "current" or (not player.controller_mode and player.current.track_loops == 0):
+
             await player.invoke_np(
                 force=True if (player.static or not player.loop or not player.is_last_message()) else False,
                 rpc_update=True)
+
+            try:
+                player.message_updater_task.cancel()
+            except:
+                pass
+
+            self.bot.loop.create_task(player.message_updater())
 
     @commands.Cog.listener("on_wavelink_track_end")
     async def track_end(self, node: wavelink.Node, payload: wavelink.TrackEnd):
@@ -3184,6 +3194,11 @@ class Music(commands.Cog):
         player.update = False
 
         await player.track_end()
+
+        try:
+            player.message_updater_task.cancel()
+        except:
+            pass
 
         await player.process_next()
 

@@ -159,7 +159,7 @@ class LavalinkPlayer(wavelink.Player):
         self.update: bool = False
         self.updating: bool = False
         self.auto_update: int = 0
-        self.message_updater_task: Optional[asyncio.Task] = self.bot.loop.create_task(self.message_updater())
+        self.message_updater_task: Optional[asyncio.Task] = None
         self.restrict_mode = kwargs.pop('restrict_mode', False) # limitar apenas para dj's e staff's
         self.ignore_np_once = False  # não invocar player controller em determinadas situações
         self.allowed_mentions = disnake.AllowedMentions(users=False, everyone=False, roles=False)
@@ -431,11 +431,6 @@ class LavalinkPlayer(wavelink.Player):
 
         else:
 
-            try:
-                self.message_updater_task.cancel()
-            except:
-                pass
-
             if data.get("components") is None:  # nenhum controle de botão foi definido na skin (será usado os botões padrões).
 
                 data["components"] = [
@@ -518,7 +513,7 @@ class LavalinkPlayer(wavelink.Player):
                                 return
 
                     self.updating = False
-                    self.message_updater_task = self.bot.loop.create_task(self.message_updater())
+                    #self.message_updater_task = self.bot.loop.create_task(self.message_updater())
                     return
                 except Exception as e:
                     traceback.print_exc()
@@ -531,7 +526,6 @@ class LavalinkPlayer(wavelink.Player):
 
             try:
                 self.message = await self.text_channel.send(allowed_mentions=self.allowed_mentions, **data)
-                self.message_updater_task = self.bot.loop.create_task(self.message_updater())
             except:
                 traceback.print_exc()
                 print(self.text_channel)
@@ -594,12 +588,12 @@ class LavalinkPlayer(wavelink.Player):
 
             await asyncio.sleep(10)
 
-    async def update_message(self, interaction: disnake.Interaction = None, force=False, rpc_update=False, update=False):
+    async def update_message(self, interaction: disnake.Interaction = None, force=False, rpc_update=False):
 
         if rpc_update:
             self.bot.loop.create_task(self.process_rpc())
 
-        if force or (not update and interaction and not interaction.response.is_done()):
+        if force or (interaction and not interaction.response.is_done()):
             if self.controller_mode:
                 await self.invoke_np(interaction=interaction)
 
