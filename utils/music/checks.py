@@ -97,19 +97,12 @@ def has_player(check_all_bots: bool = False):
     async def predicate(inter):
 
         if check_all_bots and inter.bot.intents.members:
+            await check_pool_bots(inter, only_voiced=True)
 
-            try:
-                await check_pool_bots(inter, only_voiced=True)
-                bot = inter.music_bot
-            except AttributeError:
-                raise GenericError("Não há player ativo no momento...")
-
-        else:
-
-            try:
-                bot = inter.music_bot
-            except AttributeError:
-                bot = inter.bot
+        try:
+            bot = inter.music_bot
+        except AttributeError:
+            bot = inter.bot
 
         try:
             bot.music.players[inter.guild.id]
