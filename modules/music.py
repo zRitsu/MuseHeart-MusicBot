@@ -1941,7 +1941,7 @@ class Music(commands.Cog):
             )
             await player.destroy()
 
-    @has_player(check_all_bots=True)
+    @check_voice(bot_is_connected=True)
     @commands.slash_command(name=disnake.Localized("queue", data={disnake.Locale.pt_BR: "fila"}),)
     async def q(self, inter):
         pass
@@ -1955,8 +1955,6 @@ class Music(commands.Cog):
     async def shuffle_legacy(self, ctx: CustomContext):
         await self.shuffle_.callback(self, inter=ctx)
 
-    @check_voice(bot_is_connected=True)
-    @has_player()
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(3, 5), commands.BucketType.member)
     @q.sub_command(
@@ -1991,7 +1989,6 @@ class Music(commands.Cog):
     async def reverse_legacy(self, ctx: CustomContext):
         await self.reverse.callback(self=self, inter=ctx)
 
-    @check_voice(bot_is_connected=True)
     @is_dj()
     @commands.dynamic_cooldown(user_cooldown(1, 5), commands.BucketType.guild)
     @q.sub_command(
@@ -2018,10 +2015,12 @@ class Music(commands.Cog):
             emoji="🔄"
         )
 
+    @check_voice(bot_is_connected=True)
     @commands.command(name="queue", aliases=["q", "fila"], description="Exibir as músicas que estão na fila.")
     @commands.max_concurrency(1, commands.BucketType.member)
     async def queue_show_legacy(self, ctx: CustomContext):
         await self.show.callback(self=self, inter=ctx)
+
 
     @commands.max_concurrency(1, commands.BucketType.member)
     @q.sub_command(
