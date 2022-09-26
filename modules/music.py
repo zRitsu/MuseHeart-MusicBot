@@ -531,20 +531,23 @@ class Music(commands.Cog):
             except AttributeError:
                 add_id = ""
 
+            embed = disnake.Embed(
+                color=self.bot.get_color(inter.guild.me),
+                description="**Selecione um favorito Abaixo:**\n"
+                            f'Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para escolher!'
+            )
+
+            if bot.user.id != self.bot.user.id:
+                embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+
             msg = await inter.send(
-                inter.author.mention,
-                embed=disnake.Embed(
-                    color=self.bot.get_color(inter.guild.me),
-                    description="**Selecione um favorito Abaixo:**\n"
-                                f'Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para escolher!'
-                ),
+                inter.author.mention, embed=embed, ephemeral=True,
                 components=[
                     disnake.ui.Select(
                         custom_id=f"enqueue_fav{add_id}",
                         options=opts
                     )
-                ],
-                ephemeral=ephemeral
+                ]
             )
 
             def check_fav_selection(i: Union[CustomContext, disnake.MessageInteraction]):
@@ -616,6 +619,9 @@ class Music(commands.Cog):
                                 f'Selecione uma opção em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para prosseguir.',
                     color=self.bot.get_color(inter.guild.me)
                 )
+
+                if bot.user.id != self.bot.user.id:
+                    embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
 
                 await inter.send(embed=embed, view=view, ephemeral=ephemeral)
 
@@ -795,6 +801,9 @@ class Music(commands.Cog):
                     func = inter.message.edit
                 else:
                     func = inter.send
+
+            if bot.user.id != self.bot.user.id:
+                embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
 
             await func(embed=embed, view=None)
 
@@ -991,21 +1000,22 @@ class Music(commands.Cog):
 
         embed = disnake.Embed(color=disnake.Colour.red())
 
-        update = False
-
         if value is None:
 
             view = VolumeInteraction(inter)
 
             embed.colour = self.bot.get_color(inter.guild.me)
             embed.description = "**Selecione o nível do volume abaixo:**"
+
+            if bot.user.id != self.bot.user.id:
+                embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+
             await inter.send(embed=embed, ephemeral=await self.is_request_channel(inter), view=view)
             await view.wait()
             if view.volume is None:
                 return
 
             value = view.volume
-            update = True
 
         elif not 4 < value < 151:
             raise GenericError("O volume deve estar entre **5** a **150**.")
@@ -1170,12 +1180,20 @@ class Music(commands.Cog):
     @commands.command(description=f"Selecionar modo de repetição entre: música atual / fila / desativar / quantidade (usando números).")
     async def loop(self, ctx: CustomContext, mode: str = None):
 
+        try:
+            bot = ctx.music_bot
+        except AttributeError:
+            bot = ctx.bot
+
         if not mode:
 
             embed = disnake.Embed(
                 description="**Selecione um modo de repetição:**",
                 color=self.bot.get_color(ctx.guild.me)
             )
+
+            if bot.user.id != self.bot.user.id:
+                embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
 
             msg = await ctx.send(
                 ctx.author.mention,
@@ -1555,8 +1573,6 @@ class Music(commands.Cog):
 
             player.queue.insert(int(position) - 1, track)
 
-        embed = disnake.Embed(color=self.bot.get_color(guild.me))
-
         if (i_size := len(indexes)) == 1:
             track = indexes[0][1]
 
@@ -1572,8 +1588,12 @@ class Music(commands.Cog):
 
             tracklist = "\n".join(f"[`{fix_characters(t.title, 45)}`]({t.uri})" for i, t in indexes[:10])
 
-            embed.description = f"↪️ **⠂{inter.author.mention} moveu [{i_size}] músicas com o nome \"{query}\" para " \
-                                f"a posição [{position}] da fila:**\n\n{tracklist}"
+            embed = disnake.Embed(
+                color=self.bot.get_color(guild.me),
+                description = f"↪️ **⠂{inter.author.mention} moveu [{i_size}] músicas com o nome \"{query}\" para " \
+                           f"a posição [{position}] da fila:**\n\n{tracklist}"
+            )
+
             embed.set_thumbnail(url=indexes[0][1].thumb)
 
             if i_size > 20:
@@ -1588,6 +1608,9 @@ class Music(commands.Cog):
                 player.set_command_log(
                     text=f"{inter.author.mention} moveu **[{i_size}]** músicas com o nome **{fix_characters(query, 25)}"
                          f"** para a posição **[{position}]** da fila.", emoji="↪️")
+
+            if bot.user.id != self.bot.user.id:
+                embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
 
             await inter.send(embed=embed, ephemeral=ephemeral)
 
@@ -1733,12 +1756,16 @@ class Music(commands.Cog):
                     emoji="💠"
                 )
 
-                await player.text_channel.send(
-                    embed=disnake.Embed(
-                        description=f"💠 **⠂{inter.author.mention} moveu o player-controller para o canal:** {channel.mention}",
-                        color=self.bot.get_color(inter.guild.me)
-                    )
+                embed = disnake.Embed(
+                    description=f"💠 **⠂{inter.author.mention} moveu o player-controller para o canal:** {channel.mention}",
+                    color=self.bot.get_color(inter.guild.me)
                 )
+
+                if bot.user.id != self.bot.user.id:
+                    embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+
+                await player.text_channel.send(embed=embed)
+
             except:
                 pass
 
@@ -1895,11 +1922,17 @@ class Music(commands.Cog):
         if isinstance(inter, disnake.MessageInteraction):
             await player.destroy(inter=inter_destroy)
         else:
+
+            embed = disnake.Embed(
+                color=self.bot.get_color(inter.guild.me),
+                description=f"🛑 **⠂{inter.author.mention} parou o player.**"
+            )
+
+            if bot.user.id != self.bot.user.id:
+                embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+
             await inter.send(
-                embed=disnake.Embed(
-                    color=self.bot.get_color(inter.guild.me),
-                    description=f"🛑 **⠂{inter.author.mention} parou o player.**"
-                ),
+                embed=embed,
                 components=[
                     disnake.ui.Button(label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song),
                     disnake.ui.Button(label="Tocar favorito", emoji="⭐", custom_id=PlayerControls.enqueue_fav)
@@ -2011,6 +2044,8 @@ class Music(commands.Cog):
 
         view = QueueInteraction(player, author)
         embed = view.embed
+        if bot.user.id != self.bot.user.id:
+            embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
 
         await inter.send(embed=embed, view=view, ephemeral=await self.is_request_channel(inter))
 
@@ -2944,6 +2979,10 @@ class Music(commands.Cog):
         if isinstance(inter, CustomContext):
             embed = disnake.Embed(color=self.bot.get_color(inter.guild.me),
                                   description=f"{txt_ephemeral or txt}{player.controller_link}")
+
+            if bot.user.id != self.bot.user.id:
+                embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+
             try:
                 await inter.store_message.edit(embed=embed, view=None, content=None)
             except AttributeError:
@@ -2956,6 +2995,9 @@ class Music(commands.Cog):
                     color=self.bot.get_color(inter.guild.me),
                     description=(txt_ephemeral or f"{inter.author.mention} **{txt}**") + player.controller_link
                 )
+
+                if bot.user.id != self.bot.user.id:
+                    embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
 
                 await inter.send(embed=embed, ephemeral=ephemeral)
 
