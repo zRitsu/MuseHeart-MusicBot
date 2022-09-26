@@ -1,3 +1,4 @@
+from datetime import timedelta
 from ..models import LavalinkPlayer
 import disnake
 from ..converters import fix_characters, time_format
@@ -123,7 +124,7 @@ def load(player: LavalinkPlayer) -> dict:
                 if not t.is_stream:
                     queue_duration += t.duration
 
-            embed_queue.description += f"\n`[⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + player.current.duration) - player.position)).timestamp())}:R> `⌛]`"
+            embed_queue.description += f"\n`[⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + timedelta(milliseconds=(queue_duration + player.current.duration) - player.position)).timestamp())}:R> `⌛]`"
 
         embed_queue.set_image(url=queue_img)
 
