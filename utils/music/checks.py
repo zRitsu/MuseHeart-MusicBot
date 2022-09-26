@@ -58,13 +58,13 @@ async def check_pool_bots(inter, only_voiced: bool = False):
             inter.music_guild = bot.get_guild(inter.guild.id)
             return True
 
+        if bot.user.id == inter.bot.user.id:
+            continue
+
         if only_voiced:
             continue
 
-        if bot.user.id == inter.bot.user.id:
-            guild = inter.guild
-
-        elif not (guild := bot.get_guild(inter.guild.id)):
+        if not (guild := bot.get_guild(inter.guild.id)):
             continue
 
         if not guild.voice_client:
