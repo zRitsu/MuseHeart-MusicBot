@@ -3,6 +3,7 @@ import json
 import aiofiles
 import aiohttp
 import disnake
+from async_timeout import timeout
 from disnake.ext import commands
 import traceback
 import wavelink
@@ -321,18 +322,32 @@ class Music(commands.Cog):
                     f"**Conectei no canal** <#{channel.id}>"
                 ]
 
-                if await check_deafen(ctx.guild.me):
-                    deafen_warn = False
+                try:
+                    async with timeout(5):
+                        await self.bot.wait_for(
+                            "voice_state_update", check=lambda m, b, a: m == player.guild.me and m.voice
+                        )
+                except asyncio.TimeoutError:
+                    pass
+                else:
+                    if await check_deafen(me):
+                        deafen_warn = False
 
             await self.interaction_message(ctx, txt, emoji="🔈", rpc_update=True)
 
         else:
             await player.connect(channel.id, self_deaf=True)
 
-            await asyncio.sleep(1)
-
-            if await check_deafen(me):
-                deafen_warn = False
+            try:
+                async with timeout(5):
+                    await self.bot.wait_for(
+                        "voice_state_update", check=lambda m, b, a: m == player.guild.me and m.voice
+                    )
+            except asyncio.TimeoutError:
+                pass
+            else:
+                if await check_deafen(me):
+                    deafen_warn = False
 
         try:
             player.members_timeout_task.cancel()
@@ -3195,9 +3210,10 @@ class Music(commands.Cog):
 
         if not player.guild.me.voice:
             try:
-                await self.bot.wait_for(
-                    "voice_state_update", check=lambda m, b, a: m == player.guild.me and m.voice, timeout=7
-                )
+                async with timeout(7):
+                    await self.bot.wait_for(
+                        "voice_state_update", check=lambda m, b, a: m == player.guild.me and m.voice
+                    )
             except asyncio.TimeoutError:
                 player.update = True
                 return
