@@ -3,7 +3,6 @@ import json
 import aiofiles
 import aiohttp
 import disnake
-from async_timeout import timeout
 from disnake.ext import commands
 import traceback
 import wavelink
@@ -323,10 +322,11 @@ class Music(commands.Cog):
                 ]
 
                 try:
-                    async with timeout(5):
-                        await self.bot.wait_for(
-                            "voice_state_update", check=lambda m, b, a: m == player.guild.me and m.voice
-                        )
+                    await self.bot.wait_for(
+                        "voice_state_update",
+                        check=lambda m, b, a: m == m.guild.id == channel.guild.id and me.voice,
+                        timeout=5
+                    )
                 except asyncio.TimeoutError:
                     pass
                 else:
@@ -339,10 +339,11 @@ class Music(commands.Cog):
             await player.connect(channel.id, self_deaf=True)
 
             try:
-                async with timeout(5):
-                    await self.bot.wait_for(
-                        "voice_state_update", check=lambda m, b, a: m == player.guild.me and m.voice
-                    )
+                await self.bot.wait_for(
+                    "voice_state_update",
+                    check=lambda m, b, a: m == m.guild.id == channel.guild.id and me.voice,
+                    timeout=5
+                )
             except asyncio.TimeoutError:
                 pass
             else:
@@ -3210,10 +3211,9 @@ class Music(commands.Cog):
 
         if not player.guild.me.voice:
             try:
-                async with timeout(7):
-                    await self.bot.wait_for(
-                        "voice_state_update", check=lambda m, b, a: m == player.guild.me and m.voice
-                    )
+                await self.bot.wait_for(
+                    "voice_state_update", check=lambda m, b, a: m == player.guild.me and m.voice, timeout=7
+                )
             except asyncio.TimeoutError:
                 player.update = True
                 return
