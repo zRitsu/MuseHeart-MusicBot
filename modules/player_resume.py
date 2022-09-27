@@ -106,6 +106,14 @@ class PlayerSession(commands.Cog):
                     del t.info["id"]
                     player.queue.append(t)
 
+                for info in data["played"]:
+                    if info["sourceName"] == "spotify":
+                        t = SpotifyTrack(info=info)
+                    else:
+                        t = LavalinkTrack(id_=info["id"], info=info)
+                    del t.info["id"]
+                    player.played.append(t)
+
                 await player.connect(voice_channel.id)
 
                 if isinstance(voice_channel, disnake.StageChannel):
@@ -154,6 +162,7 @@ class PlayerSession(commands.Cog):
                 for player in bot.music.players.values():
 
                     tracks = []
+                    played = []
 
                     if player.current:
                         player.current.info["id"] = player.current.id
@@ -163,7 +172,11 @@ class PlayerSession(commands.Cog):
                         t.info["id"] = t.id
                         tracks.append(t.info)
 
-                    if not tracks:
+                    for t in player.played:
+                        t.info["id"] = t.id
+                        played.append(t.info)
+
+                    if not tracks and not played:
                         await player.destroy(force=True)
                         ignored_players += 1
                         continue
@@ -179,7 +192,8 @@ class PlayerSession(commands.Cog):
                             "paused": player.paused,
                             "text_channel": player.text_channel.id,
                             "keep_connected": player.keep_connected,
-                            "message": player.message.id,
+                            "message": player.message.id if player.message else None,
+                            "played": played,
                             "loop": player.loop,
                             "skin": player.skin,
                             "restrict_mode": player.restrict_mode,
