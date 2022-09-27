@@ -329,7 +329,7 @@ class MusicSettings(commands.Cog):
 
             msg = f"Canal de pedido de músicas definido para: <#{channel.id}>"
 
-        if player and (not player.static or player.text_channel != target):
+        if player and player.text_channel != target:
             if player.static:
                 try:
                     await player.message.thread.edit(
@@ -344,15 +344,16 @@ class MusicSettings(commands.Cog):
                     await player.message.delete()
                 except:
                     pass
-            message = await send_idle_embed(message or channel, bot=self.bot, force=True)
+            if not message or message.channel.id != channel.id:
+                message = await send_idle_embed(channel, bot=self.bot, force=True)
             player.message = message
             player.static = True
             player.text_channel = channel
             player.setup_hints()
             await player.invoke_np(force=True)
 
-        if not message:
-            message = await send_idle_embed(message or channel, bot=self.bot, force=True)
+        elif not message or message.channel.id != channel.id:
+            message = await send_idle_embed(channel, bot=self.bot, force=True)
 
         if not isinstance(channel, disnake.VoiceChannel):
             if not message.thread:
