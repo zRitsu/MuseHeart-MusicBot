@@ -324,7 +324,7 @@ class Music(commands.Cog):
                 try:
                     await self.bot.wait_for(
                         "voice_state_update",
-                        check=lambda m, b, a: m == m.guild.id == channel.guild.id and me.voice,
+                        check=lambda m, b, a: m.guild.id == channel.guild.id and me.voice,
                         timeout=5
                     )
                 except asyncio.TimeoutError:
@@ -341,7 +341,7 @@ class Music(commands.Cog):
             try:
                 await self.bot.wait_for(
                     "voice_state_update",
-                    check=lambda m, b, a: m == m.guild.id == channel.guild.id and me.voice,
+                    check=lambda m, b, a: m.guild.id == channel.guild.id and me.voice,
                     timeout=5
                 )
             except asyncio.TimeoutError:
