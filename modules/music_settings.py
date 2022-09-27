@@ -296,6 +296,8 @@ class MusicSettings(commands.Cog):
                     slowmode_delay=5,
                 )
 
+                await thread_wmessage.thread.edit(pinned=True)
+
                 await get_message(original_message)
 
                 message = await send_idle_embed(target=thread_wmessage.message, bot=self.bot, force=True,
