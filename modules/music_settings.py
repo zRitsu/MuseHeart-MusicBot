@@ -465,7 +465,7 @@ class MusicSettings(commands.Cog):
             if delete_channel == "sim":
                 await channel.delete(reason=f"Player resetado por: {inter.author}")
 
-            else:
+            elif original_message:
                 await original_message.edit(
                     content=f"Canal de pedir música foi resetado pelo membro {inter.author.mention}.",
                     embed=None, components=[
