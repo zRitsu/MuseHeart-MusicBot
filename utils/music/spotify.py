@@ -16,7 +16,7 @@ spotify_regex = re.compile("https://open.spotify.com?.+(album|playlist|artist|tr
 
 class SpotifyPlaylist:
 
-    def __init__(self, data: dict, requester: str, *, playlist):
+    def __init__(self, data: dict, requester: int, *, playlist):
         self.data = data
 
         self.tracks = [
@@ -36,7 +36,7 @@ class SpotifyPlaylist:
 class SpotifyTrack:
 
     def __init__(self, *, uri: str = "", title: str = "", authors=None, thumb: str = "", duration: int = 0,
-                 requester: int = "", playlist: dict = None, album = None, track_loops: int = 0, info: dict = None):
+                 requester: int = 0, playlist: dict = None, album = None, track_loops: int = 0, info: dict = None):
 
         self.info = info or {
             "author": fix_characters(authors[0].name),
@@ -49,8 +49,6 @@ class SpotifyTrack:
             "extra": {
                 "authors": [fix_characters(i.name) for i in authors],
                 "authors_md": ", ".join(f"[`{a.name}`]({a.link})" for a in authors),
-                "authors_string": ", ".join(a.name for a in authors),
-                "single_title": fix_characters(title),
                 "requester": requester,
                 "track_loops": track_loops,
                 "thumb": thumb
@@ -85,7 +83,7 @@ class SpotifyTrack:
 
     @property
     def single_title(self) -> str:
-        return self.info["extra"]["single_title"]
+        return self.info["title"]
 
     @property
     def author(self) -> str:
@@ -93,7 +91,7 @@ class SpotifyTrack:
 
     @property
     def authors_string(self) -> str:
-        return self.info["extra"]["authors_string"]
+        return ", ".join(self.info["extra"]["authors"])
 
     @property
     def authors_md(self) -> str:
@@ -146,41 +144,6 @@ class SpotifyTrack:
             return self.info["extra"]["playlist"]["url"]
         except KeyError:
             return ""
-
-    async def resolve(self, node: Node):
-
-        if self.id:
-            return
-
-        try:
-            tracks = (await node.get_tracks(f"ytsearch:{self.title}"))
-            try:
-                tracks = tracks.tracks
-            except AttributeError:
-                pass
-
-            selected_track = None
-
-            for t in tracks:
-
-                if t.is_stream:
-                    continue
-
-                if (t.duration - 10000) < self.duration < (t.duration + 10000):
-                    selected_track = t
-                    break
-
-            if not selected_track:
-                selected_track = tracks[0]
-
-            selected_track.info["sourceName"] = "spotify"
-            self.id = selected_track.id
-            self.info["length"] = selected_track.duration
-
-        except IndexError:
-            return
-        except Exception:
-            traceback.print_exc()
 
 
 def query_spotify_track(func, url_id: str):

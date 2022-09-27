@@ -273,11 +273,11 @@ class LavalinkPlayer(wavelink.Player):
 
             self.locked = True
 
-            await track.resolve(self.node)
+            track = await self.resolve_track(track)
 
             self.locked = False
 
-            if not track.id:
+            if not track:
                 return await self.process_next()
 
         self.last_track = track
@@ -662,6 +662,43 @@ class LavalinkPlayer(wavelink.Player):
             self.members_timeout_task.cancel()
         except:
             pass
+
+    async def resolve_track(self, track: SpotifyTrack):
+
+        if track.id:
+            return
+
+        try:
+            tracks = (await self.node.get_tracks(f"ytsearch:{track.single_title} - {track.authors_string}"))
+            try:
+                tracks = tracks.tracks
+            except AttributeError:
+                pass
+
+            selected_track = None
+
+            for t in tracks:
+
+                if t.is_stream:
+                    continue
+
+                if (t.duration - 10000) < track.duration < (t.duration + 10000):
+                    selected_track = t
+                    break
+
+            if not selected_track:
+                selected_track = tracks[0]
+
+            selected_track.info["sourceName"] = "spotify"
+            track.id = selected_track.id
+            track.info["length"] = selected_track.duration
+
+        except IndexError:
+            return
+        except Exception:
+            traceback.print_exc()
+
+        return track
 
     async def process_rpc(
             self,
