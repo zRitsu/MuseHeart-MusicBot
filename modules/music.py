@@ -830,8 +830,10 @@ class Music(commands.Cog):
                 bot=bot, me=guild.me, check_pool=check_pool
             )
 
-        if not player.current or (force_play == "yes" and len(player.queue)) > 0:
+        if not player.current:
             await player.process_next()
+        elif force_play == "yes":
+            await player.stop()
         else:
             player.set_command_log(text=log_text, emoji=emoji)
             if ephemeral:
