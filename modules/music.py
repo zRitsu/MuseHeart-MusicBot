@@ -750,7 +750,6 @@ class Music(commands.Cog):
 
             if force_play == "yes":
                 player.queue.insert(0, track)
-                pos_txt = " para tocar imediatamente."
             elif position < 0:
                 player.queue.append(track)
             else:
@@ -833,6 +832,10 @@ class Music(commands.Cog):
         if not player.current:
             await player.process_next()
         elif force_play == "yes":
+            player.set_command_log(
+                emoji="▶️",
+                text=f"{inter.author.mention} adicionou a música atual para tocar imediatamente."
+            )
             await player.stop()
         else:
             player.set_command_log(text=log_text, emoji=emoji)
