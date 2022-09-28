@@ -39,7 +39,14 @@ Repl.it
 [![Run on Repl.it](https://replit.com/badge/github/zRitsu/disnake-LL-music-bot)](https://replit.com/new/github/zRitsu/disnake-LL-music-bot)
 
 * 1 - Após clicar no botão acima, aguarde até o deploy ser concluído.
-* 2 - Vá em secrets (cadeado do painel à esquerda) e crie uma secret com nome TOKEN e no value coloque o token do bot (caso não tenha, veja como obter com este tutorial [tutorial](https://www.youtube.com/watch?v=lfdmZQySTXE)).
+* 2 - Vá em secrets (cadeado do painel à esquerda) e crie uma secret com nome TOKEN_BOT_MAIN e no value coloque o token do bot + espaço + prefixo (que não seja / )
+ficando assim: `token prefixo`<br>
+ex:<br>
+`MZ1yGvKTjE0rY0cV8i47CjAa.uRHQPq.Xb1Mk2nEhe-4iUcrGOuegj57zMC ==
+` <br>
+caso não tenha o token do bot, veja como obter com este [tutorial](https://www.youtube.com/watch?v=lfdmZQySTXE).<BR>
+Obs: Você pode adicionar mais bots pra rodar junto repetindo esse passo, mas apenas alterando o nome MAIN que está no TOKEN_BOT_**MAIN** (pode ser qualquer nome mas com apenas letras e números sem acentos)
+e adicionar o token de outro bot no value.
 * 3 - Também altamente recomendo usar mongodb para database ao invés de json, pra isso crie uma key com nome MONGO e no value coloque o link de sua url do mongodb (caso não tenha, veja como obter por este [tutorial](https://www.youtube.com/watch?v=x1Gq5beRx9k)). </br>
 `se desejar, você pode alterar outras configs, consulte o arquivo .env-example`
 * 4 - Clique em run (botão de **play**) e aguarde o bot instalar as dependências e iniciar.
