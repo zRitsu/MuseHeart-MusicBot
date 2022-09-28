@@ -1,6 +1,11 @@
 # disnake-LL-music-bot
 ## bot de música programado em python com player interativo, comandos barra/slash, etc. Utilizando as libs disnake e wavelink/lavalink.
 
+### Bots de exemplo usando esta source:
+| ![](https://cdn.discordapp.com/avatars/784891594306093101/b8a201bff9f563e4d1d54e7a470a1d53.png?size=128) | ![](https://cdn.discordapp.com/avatars/825460549419794462/383711d4d254ed3e0988ebc5d1393a83.png?size=128) | ![](https://cdn.discordapp.com/avatars/611914625683816478/237f52ef59d848bed74bc890026d6cfc.png?size=128) | ![](https://cdn.discordapp.com/avatars/908029891583299604/a6a4dd5a1079cdcaf2b308357940aa68.png?size=128) | ![](https://cdn.discordapp.com/avatars/919730161786712164/f33f153b13ba7f602ca577f8f3cea889.png?size=128) |
+|---|---|---|---|---|
+| **Muse Heart 1**<br>[Adicionar](https://discord.com/oauth2/authorize?client_id=784891594306093101&scope=bot+applications.commands&permissions=397287680080) | **Muse Heart 2**<br>[Adicionar](https://discord.com/oauth2/authorize?client_id=825460549419794462&scope=bot+applications.commands&permissions=397287680080) | **Muse Heart 3**<br>[Adicionar](https://discord.com/oauth2/authorize?client_id=611914625683816478&scope=bot+applications.commands&permissions=397287680080) | **Muse Heart 4**<br>[Adicionar](https://discord.com/oauth2/authorize?client_id=908029891583299604&scope=bot+applications.commands&permissions=397287680080) | **Muse Heart 5**<br>[Adicionar](https://discord.com/oauth2/authorize?client_id=919730161786712164&scope=bot+applications.commands&permissions=397287680080) |
+
 ### Algumas previews:
 
 - Comandos de barra / Slash commands
@@ -166,3 +171,5 @@ Nota: há mais alguns guias na [wiki]((https://github.com/zRitsu/disnake-LL-musi
 * Recomendo usar a source atual sem alterações no code que vá alem de textos. Caso queira fazer modificações (e principalmente adicionar novas funcionalidades) é altamente recomendável que tenha conhecimento em python e disnake. E caso queira manter sua source modificada com updates em dias usando a source base também recomendo ter conhecimento em git (pelo menos o necessário pra fazer um merge sem erros).
 
 * Caso queira fazer algum vídeo/tutorial usando esta source, você está totalmente livre para usá-la pra essa finalidade desde que esteja de acordo com a [licença](/LICENSE) (e caso queira me ajudar, mantenha os créditos originais no code, aparece apenas no comando /about)
+
+### Caso tenha mais alguma dúvida, entre no servidor de suporte: https://discord.gg/R7BPG8fZTr
