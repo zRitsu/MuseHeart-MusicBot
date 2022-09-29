@@ -298,7 +298,7 @@ class Music(commands.Cog):
 
         can_connect(channel, me.guild, bot, check_other_bots_in_vc, check_pool)
 
-        deafen_warn = bot.config["GUILD_DEAFEN_WARN"]
+        deafen_check = True
 
         if isinstance(ctx, disnake.AppCmdInter) and ctx.application_command.name == self.connect.name:
 
@@ -315,60 +315,51 @@ class Music(commands.Cog):
                     f"**Movido com sucesso para o canal** <#{channel.id}>"
                 ]
 
+                deafen_check = False
+
+
             else:
                 txt = [
                     f"me conectou no canal <#{channel.id}>",
                     f"**Conectei no canal** <#{channel.id}>"
                 ]
 
-                try:
-                    await self.bot.wait_for(
-                        "voice_state_update",
-                        check=lambda m, b, a: m.guild.id == channel.guild.id and me.voice,
-                        timeout=5
-                    )
-                except asyncio.TimeoutError:
-                    pass
-                else:
-                    if await check_deafen(me):
-                        deafen_warn = False
-
             await self.interaction_message(ctx, txt, emoji="🔈", rpc_update=True)
 
         else:
             await player.connect(channel.id, self_deaf=True)
-
-            try:
-                await self.bot.wait_for(
-                    "voice_state_update",
-                    check=lambda m, b, a: m.guild.id == channel.guild.id and me.voice,
-                    timeout=5
-                )
-            except asyncio.TimeoutError:
-                pass
-            else:
-                if await check_deafen(me):
-                    deafen_warn = False
 
         try:
             player.members_timeout_task.cancel()
         except:
             pass
 
-        if deafen_warn:
+        if deafen_check and bot.config["GUILD_DEAFEN_WARN"]:
 
-            await player.text_channel.send(
-                embed=disnake.Embed(
-                    title="Aviso:",
-                    description="Para manter sua privacidade e me ajudar a economizar "
-                                "recursos, recomendo desativar meu áudio do canal clicando "
-                                "com botão direito sobre mim e em seguida marcar: desativar "
-                                "áudio no servidor.",
-                    color=self.bot.get_color(me),
-                ).set_image(
-                    url="https://cdn.discordapp.com/attachments/554468640942981147/1012533546386210956/unknown.png"
-                ), delete_after=20
-            )
+            retries = 0
+
+            while retries < 5:
+
+                if me.voice:
+                    break
+
+                await asyncio.sleep(1)
+                retries += 0
+
+            if not await check_deafen(me):
+
+                await player.text_channel.send(
+                    embed=disnake.Embed(
+                        title="Aviso:",
+                        description="Para manter sua privacidade e me ajudar a economizar "
+                                    "recursos, recomendo desativar meu áudio do canal clicando "
+                                    "com botão direito sobre mim e em seguida marcar: desativar "
+                                    "áudio no servidor.",
+                        color=self.bot.get_color(me),
+                    ).set_image(
+                        url="https://cdn.discordapp.com/attachments/554468640942981147/1012533546386210956/unknown.png"
+                    ), delete_after=20
+                )
 
         if isinstance(channel, disnake.StageChannel):
 
