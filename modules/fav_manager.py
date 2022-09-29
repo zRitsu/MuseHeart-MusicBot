@@ -174,6 +174,9 @@ class FavManager(commands.Cog):
                 default=False)
     ):
 
+        if hidden is False and not self.bot.check_bot_forum_post(inter.channel):
+            hidden = True
+
         await inter.response.defer(ephemeral=hidden)
 
         user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)

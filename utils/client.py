@@ -197,16 +197,23 @@ class BotPool:
             bot.get_command("jsk").hidden = True
             bot.load_modules(bot_name)
 
+            @bot.check
+            async def forum_check(ctx: CustomContext):
+
+                bot.check_bot_forum_post(ctx.channel, raise_error=True)
+                return True
+
             if bot.config['INTERACTION_COMMAND_ONLY']:
 
                 @bot.check
-                async def check_commands(ctx: commands.Context):
+                async def check_commands(ctx: CustomContext):
 
                     if not (await bot.is_owner(ctx.author)):
                         raise GenericError("**Os comandos de texto estão desativados!\n"
-                                           "Use os comandos de barra /**")
+                                           "Use os comandos de barra /**", self_delete=True, delete_original=True)
 
                     return True
+
 
             @bot.listen()
             async def on_ready():
@@ -453,6 +460,34 @@ class BotCore(commands.AutoShardedBot):
             return
 
         await self.invoke(ctx)
+
+    def check_bot_forum_post(
+            self,
+            channel: Union[disnake.ForumChannel, disnake.TextChannel, disnake.VoiceChannel, disnake.Thread],
+            raise_error=False,
+    ):
+
+        try:
+            if isinstance(channel.parent, disnake.ForumChannel):
+                if self.intents.members and channel.owner.bot:
+
+                    if raise_error is False:
+                        return False
+
+                    raise GenericError("**Você não pode usar comandos prefixed em postagens de bots.**\n"
+                                       "`Use comando de barra (/) aqui.`", self_delete=True)
+
+                if channel.owner_id in (bot.user.id for bot in self.pool.bots):
+
+                    if raise_error is False:
+                        return False
+
+                    raise GenericError("**Você não pode usar comandos prefixed na postagem atual...**\n"
+                                       "`Use comando de barra (/) aqui.`", self_delete=True)
+        except AttributeError:
+            pass
+
+        return True
 
     def get_color(self, me: disnake.Member):
 

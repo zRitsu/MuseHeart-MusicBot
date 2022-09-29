@@ -131,7 +131,7 @@ class LavalinkPlayer(wavelink.Player):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.guild: disnake.Guild = kwargs.pop('guild')
-        self.text_channel: disnake.TextChannel = kwargs.pop('channel')
+        self.text_channel: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.Thread] = kwargs.pop('channel')
         self.message: Optional[disnake.Message] = kwargs.pop('message', None)
         self.static: bool = kwargs.pop('static', False)
         self.skin: str = kwargs.pop("skin", None) or self.bot.default_skin
@@ -164,6 +164,7 @@ class LavalinkPlayer(wavelink.Player):
         self.ignore_np_once = False  # não invocar player controller em determinadas situações
         self.allowed_mentions = disnake.AllowedMentions(users=False, everyone=False, roles=False)
         self.controller_mode = True  # ativar/desativar modo controller (apenas para uso em skins)
+        self.bot.loop.create_task(self.channel_cleanup())
 
         self.initial_hints = [
             "Você pode alterar a skin/aparência do player usando o comando /change_skin (comando vísivel apenas membros"
@@ -200,6 +201,19 @@ class LavalinkPlayer(wavelink.Player):
         except AttributeError:
             pass
         return ""
+
+    async def channel_cleanup(self):
+
+        try:
+            if not isinstance(self.text_channel.parent, disnake.ForumChannel):
+                return
+        except AttributeError:
+            return
+
+        if self.text_channel.owner_id != self.bot.user.id or self.text_channel.message_count < 1:
+            return
+
+        await self.text_channel.purge(check=lambda m: m.channel.id != m.id)
 
     async def connect(self, channel_id: int, self_mute: bool = False, self_deaf: bool = False):
         await super().connect(channel_id, self_mute=self_mute, self_deaf=True)

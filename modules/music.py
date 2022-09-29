@@ -2380,10 +2380,7 @@ class Music(commands.Cog):
     async def is_request_channel(self, ctx: Union[disnake.AppCmdInter, disnake.MessageInteraction, CustomContext], *,
                                  data: dict = None, ignore_thread=False) -> bool:
 
-        if isinstance(ctx, CustomContext):
-            return False
-
-        if isinstance(ctx, disnake.MessageInteraction):
+        if isinstance(ctx, (CustomContext, disnake.MessageInteraction)):
             return True
 
         try:
@@ -2391,17 +2388,14 @@ class Music(commands.Cog):
         except AttributeError:
             bot = ctx.bot
 
+        if not self.bot.check_bot_forum_post(ctx.channel):
+            return True
+
         try:
             player: LavalinkPlayer = bot.music.players[ctx.guild.id]
 
             if not player.static:
                 return False
-
-            try:
-                if isinstance(ctx.channel.parent, disnake.ForumChannel):
-                    return True
-            except AttributeError:
-                pass
 
             if isinstance(ctx.channel, disnake.Thread) and player.text_channel == ctx.channel.parent:
                 return not ignore_thread
@@ -2709,6 +2703,9 @@ class Music(commands.Cog):
         if ctx.command:
             return
 
+        if not self.bot.check_bot_forum_post(ctx.channel):
+            return
+
         if message.author.bot:
 
             if message.flags.ephemeral:
@@ -2969,6 +2966,7 @@ class Music(commands.Cog):
         await asyncio.sleep(1)
 
     async def cog_check(self, ctx: CustomContext) -> bool:
+
         return await check_requester_channel(ctx)
 
     async def interaction_message(self, inter: Union[disnake.Interaction, CustomContext], txt, emoji: str = "✅",

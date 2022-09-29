@@ -185,6 +185,9 @@ class Misc(commands.Cog):
         if self.bot.config["HIDE_SOURCE_OWNER"] is not False and self.bot.owner.id == self.source_owner.id:
             embed.footer.text += f" | Source by: {self.source_owner}"
 
+        if hidden is False and not self.bot.check_bot_forum_post(inter.channel):
+            hidden = True
+
         await inter.send(embed=embed, ephemeral=hidden)
 
 
