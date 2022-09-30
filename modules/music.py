@@ -25,19 +25,17 @@ from utils.music.interactions import VolumeInteraction, QueueInteraction, Select
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls
 from user_agent import generate_user_agent
 
-PlayOpts = commands.option_enum(
-    {
-        "Misturar Playlist": "shuffle",
-        "Inverter Playlist": "reversed",
-    }
-)
 
-SearchSource = commands.option_enum(
-    {
-        "Youtube": "ytsearch",
-        "Soundcloud": "scsearch"
-    }
-)
+search_sources_opts = [
+    disnake.OptionChoice("Youtube", "ytsearch"),
+    disnake.OptionChoice("Youtube Music", "ytmsearch"),
+    disnake.OptionChoice("Soundcloud", "scsearch"),
+]
+
+playlist_opts = [
+    disnake.OptionChoice("Misturar Playlist", "shuffle"),
+    disnake.OptionChoice("Inverter Playlist", "reversed"),
+]
 
 u_agent = generate_user_agent()
 
@@ -235,11 +233,12 @@ class Music(commands.Cog):
                     disnake.OptionChoice(disnake.Localized("No", data={disnake.Locale.pt_BR: "Não"}), "no")
                 ]
             ),
-            options: PlayOpts = commands.Param(name="opções", description="Opções para processar playlist",
-                                               default=False),
-            source: SearchSource = commands.Param(name="fonte",
-                                                  description="Selecionar site para busca de músicas (não links)",
-                                                  default="ytsearch"),
+            options: str = commands.Param(name="opções", description="Opções para processar playlist",
+                                          choices=playlist_opts, default=False),
+            source: str = commands.Param(name="fonte",
+                                         description="Selecionar site para busca de músicas (não links)",
+                                         choices=search_sources_opts,
+                                         default="ytsearch"),
             repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.",
                                                 default=0),
             hide_playlist: bool = commands.Param(description="Não incluir detalhes da playlist nas músicas.",
@@ -459,11 +458,12 @@ class Music(commands.Cog):
             manual_selection: bool = commands.Param(name="selecionar_manualmente",
                                                     description="Escolher uma música manualmente entre os resultados encontrados",
                                                     default=False),
-            options: PlayOpts = commands.Param(name="opções", description="Opções para processar playlist",
-                                               default=False),
-            source: SearchSource = commands.Param(name="fonte",
-                                                  description="Selecionar site para busca de músicas (não links)",
-                                                  default="ytsearch"),
+            options: str = commands.Param(name="opções", description="Opções para processar playlist",
+                                          choices=playlist_opts, default=False),
+            source: str = commands.Param(name="fonte",
+                                         description="Selecionar site para busca de músicas (não links)",
+                                         choices=search_sources_opts,
+                                         default="ytsearch"),
             repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.",
                                                 default=0),
             hide_playlist: bool = commands.Param(name="esconder_playlist",
