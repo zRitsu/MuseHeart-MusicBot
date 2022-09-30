@@ -1,5 +1,5 @@
 asyncspotify==0.12.1
-disnake==2.5.2
+disnake==2.6.0
 python-dotenv
 user-agent
 requests
