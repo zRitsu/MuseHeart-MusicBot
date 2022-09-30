@@ -46,7 +46,7 @@ ex:<br>
 ` <br>
 caso não tenha o token do bot, veja como obter com este [tutorial](https://www.youtube.com/watch?v=lfdmZQySTXE).<BR>
 Obs: Você pode adicionar mais bots pra rodar junto repetindo esse passo, mas apenas alterando o nome MAIN que está no TOKEN_BOT_**MAIN** (pode ser qualquer nome mas com apenas letras e números sem acentos)
-e adicionar o token de outro bot no value.
+e adicionar o token de outro bot  + prefixo (diferente) no value.
 * 3 - Também altamente recomendo usar mongodb para database ao invés de json, pra isso crie uma key com nome MONGO e no value coloque o link de sua url do mongodb (caso não tenha, veja como obter por este [tutorial](https://www.youtube.com/watch?v=x1Gq5beRx9k)). </br>
 `se desejar, você pode alterar outras configs, consulte o arquivo .env-example`
 * 4 - Clique em run (botão de **play**) e aguarde o bot instalar as dependências e iniciar.
