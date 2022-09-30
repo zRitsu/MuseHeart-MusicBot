@@ -329,13 +329,15 @@ class Owner(commands.Cog):
                                     f"```ansi\n[34;1m{prefix}update --force --pip[0m``` \n"
                                     f"**Nota:** Dependendo da hospedagem (ou que não tenha 150mb de RAM livre "
                                     f"e 0.5vCPU) você deve enviar o arquivo requirements.txt ao invés de "
-                                    f"usar uma das opções acima.",
+                                    f"usar uma das opções acima ou os botões de instalar dependências abaixo...",
                         color=self.bot.get_color(ctx.guild.me)
                     ),
                     components=[
                         disnake.ui.Button(label="Download requirements.txt", custom_id="updatecmd_requirements"),
                         disnake.ui.Button(label="Atualizar dependências",
                                           custom_id="updatecmd_installdeps_" + ("poetry" if use_poetry else "pip")),
+                        disnake.ui.Button(label="Atualizar dependências (force)",
+                                          custom_id="updatecmd_installdeps_force_" + ("poetry" if use_poetry else "pip")),
                     ]
                 )
 
@@ -364,11 +366,15 @@ class Owner(commands.Cog):
             )
 
             os.remove("update_reqs.zip")
+            return
 
         # install installdeps
-        else:
-            await inter.message.delete()
-            await self.update_deps(inter, "", "--pip", use_poetry=inter.data.custom_id.endswith("_poetry"))
+
+        if inter.data.custom_id.startswith("updatecmd_installdeps_force_"):
+            await self.cleanup_git(force=True)
+
+        await inter.message.delete()
+        await self.update_deps(inter, "", "--pip", use_poetry=inter.data.custom_id.endswith("_poetry"))
 
     async def cleanup_git(self, force=False):
 
