@@ -1,4 +1,3 @@
-import sys
 import traceback
 from typing import Union, Optional
 import disnake

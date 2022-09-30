@@ -1,9 +1,6 @@
 from __future__ import annotations
-import disnake
 import re
 from .converters import fix_characters
-from wavelink import Node
-import traceback
 from .errors import MissingSpotifyClient, GenericError
 from asyncspotify import Client, ClientCredentialsFlow
 from typing import Optional, TYPE_CHECKING
