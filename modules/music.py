@@ -1727,15 +1727,15 @@ class Music(commands.Cog):
 
     @has_source()
     @commands.cooldown(1, 10, commands.BucketType.member)
-    @commands.command(name="nowplaying", aliases=["np"], description="Reenvia a mensagem do player com a música atual.")
+    @commands.command(name="controller", aliases=["np", "ctl"], description="Enviar player controller para um canal específico/atual.")
     async def nowplaying_legacy(self, ctx: CustomContext):
-        await self.nowplaying.callback(self=self, inter=ctx)
+        await self.controller.callback(self=self, inter=ctx)
 
     @check_voice(bot_is_connected=True)
     @has_source()
     @commands.cooldown(1, 10, commands.BucketType.member)
-    @commands.slash_command(description=f"{desc_prefix}Reenvia a mensagem do player com a música atual.")
-    async def nowplaying(self, inter: disnake.AppCmdInter):
+    @commands.slash_command(description=f"{desc_prefix}Enviar player controller para um canal específico/atual.")
+    async def controller(self, inter: disnake.AppCmdInter):
 
         try:
             bot = inter.music_bot
