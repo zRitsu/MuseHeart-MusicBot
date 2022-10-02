@@ -272,38 +272,52 @@ class ErrorHandler(commands.Cog):
 
         embed = disnake.Embed(
             title="Ocorreu um erro em um servidor:",
-            color=self.bot.get_color(ctx.guild.me),
             timestamp=disnake.utils.utcnow()
         )
+
+        if ctx.guild:
+            embed.colour = ctx.bot.get_color(ctx.guild.me)
+            embed.add_field(
+                name="Servidor:", inline=False,
+                value=f"```\n{disnake.utils.escape_markdown(ctx.guild.name)}\nID: {ctx.guild.id}```"
+            )
+            if vc := ctx.author.voice:
+                embed.add_field(
+                    name="Canal de voz (user):", inline=False,
+                    value=f"```\n{disnake.utils.escape_markdown(vc.channel.name)}" +
+                          (f" ({len(vc.channel.voice_states)}/{vc.channel.user_limit})"
+                           if vc.channel.user_limit else "") + f"\nID: {vc.channel.id}```"
+                )
+
+            if vcbot := ctx.guild.me.voice:
+                if vcbot.channel != vc.channel:
+                    embed.add_field(
+                        name="Canal de voz (bot):", inline=False,
+                        value=f"{vc.channel.name}" +
+                              (f" ({len(vc.channel.voice_states)}/{vc.channel.user_limit})"
+                               if vc.channel.user_limit else "") + f"\nID: {vc.channel.id}```"
+                    )
+            if ctx.guild.icon:
+                embed.set_thumbnail(url=ctx.guild.icon.with_static_format("png").url)
+
+        else:
+            embed.colour = 0x2F3136
+            embed.add_field(
+                name="Servidor [ID]:", inline=False,
+                value=f"```\n{ctx.guild_id}```"
+            )
+
+
         embed.set_footer(
             text=f"{ctx.author} [{ctx.author.id}]",
             icon_url=ctx.author.display_avatar.with_static_format("png").url
         )
-        embed.add_field(
-            name="Servidor:", inline=False,
-            value=f"```\n{disnake.utils.escape_markdown(ctx.guild.name)}\nID: {ctx.guild.id}```"
-        )
+
+
         embed.add_field(
             name="Canal de texto:", inline=False,
             value=f"```\n{disnake.utils.escape_markdown(ctx.channel.name)}\nID: {ctx.channel.id}```"
         )
-
-        if vc := ctx.author.voice:
-            embed.add_field(
-                name="Canal de voz (user):", inline=False,
-                value=f"```\n{disnake.utils.escape_markdown(vc.channel.name)}" +
-                      (f" ({len(vc.channel.voice_states)}/{vc.channel.user_limit})"
-                       if vc.channel.user_limit else "") + f"\nID: {vc.channel.id}```"
-            )
-
-        if vcbot := ctx.guild.me.voice:
-            if vcbot.channel != vc.channel:
-                embed.add_field(
-                    name="Canal de voz (bot):", inline=False,
-                    value=f"{vc.channel.name}" +
-                          (f" ({len(vc.channel.voice_states)}/{vc.channel.user_limit})"
-                           if vc.channel.user_limit else "") + f"\nID: {vc.channel.id}```"
-                )
 
         try:
 
@@ -317,11 +331,8 @@ class ErrorHandler(commands.Cog):
         except AttributeError:
             if self.bot.intents.message_content and not ctx.author.bot:
                 embed.description = f"**Commando:**```\n" \
-                                    f"{ctx.message.content.replace(str(self.bot.user.mention), f'@{ctx.guild.me.display_name}')}" \
+                                    f"{ctx.message.content.replace(str(ctx.bot.user.mention), f'@{ctx.guild.me.display_name}')}" \
                                     f"```"
-
-        if ctx.guild.icon:
-            embed.set_thumbnail(url=ctx.guild.icon.with_static_format("png").url)
 
         return embed
 

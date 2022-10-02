@@ -221,7 +221,12 @@ class BotPool:
                 if not bot.bot_ready:
 
                     if bot.config["AUTO_SYNC_COMMANDS"]:
-                        await bot.sync_app_commands()
+
+                        if not bot.config["INTERACTION_BOTS"] or str(bot.user.id) in bot.config["INTERACTION_BOTS"]:
+                            self._sync_commands = True
+                            await bot.sync_app_commands()
+                        else:
+                            self._sync_commands = False
 
                     if not bot.owner:
                         botowner = (await bot.application_info())
@@ -435,6 +440,21 @@ class BotCore(commands.Bot):
                     embed.description += f"\n\nTambém tenho comandos de texto por prefixo.\n" \
                                         f"Para ver todos os meus comandos de texto use **{prefix}help**\n"
 
+                if not self._sync_commands and self.config["INTERACTION_BOTS"]:
+
+                    interaction_invites = ""
+
+                    for b in self.pool.bots:
+
+                        if str(b.user.id) not in self.config["INTERACTION_BOTS"]:
+                            continue
+
+                        interaction_invites += f"[`{disnake.utils.escape_markdown(str(b.user)).replace(' ', '_')}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) "
+
+                    if interaction_invites:
+                        embed.description += f"Caso os comandos de barra (/) não apareçam, você terá que integrar um dos " \
+                                             f"seguintes bots no servidor: {interaction_invites}"
+
                 view = None
 
             else:
@@ -501,14 +521,14 @@ class BotCore(commands.Bot):
 
     async def on_application_command_autocomplete(self, inter: disnake.ApplicationCommandInteraction):
 
-        if not self.bot_ready:
+        if not self.bot_ready or not inter.guild_id:
             return
 
         await super().on_application_command_autocomplete(inter)
 
     async def on_application_command(self, inter: disnake.ApplicationCommandInteraction):
 
-        if not inter.guild:
+        if not inter.guild_id:
             await inter.send("Meus comandos não podem ser usados no DM.\n"
                              "Use em algum servidor que estou presente.")
             return
@@ -517,7 +537,7 @@ class BotCore(commands.Bot):
             await inter.send("Ainda estou inicializando...\nPor favor aguarde mais um pouco...", ephemeral=True)
             return
 
-        if self.config["COMMAND_LOG"]:
+        if self.config["COMMAND_LOG"] and inter.guild:
             print(f"cmd log: [user: {inter.author} - {inter.author.id}] - [guild: {inter.guild.name} - {inter.guild.id}]"
                   f" - [cmd: {inter.data.name}] "
                   f"{datetime.datetime.utcnow().strftime('%d/%m/%Y - %H:%M:%S')} (UTC)\n" + ("-"*15))

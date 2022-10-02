@@ -30,19 +30,6 @@ replaces = [
 u_agent = generate_user_agent()
 
 
-async def node_suggestions(inter, query: str):
-    try:
-        node = inter.bot.music.players[inter.guild.id].node
-    except KeyError:
-        node = None
-
-    if not query:
-        return [n.identifier for n in inter.bot.music.nodes.values() if n != node and n.available and n.is_available]
-
-    return [n.identifier for n in inter.bot.music.nodes.values() if n != node
-            and query.lower() in n.identifier.lower() and n.available and n.is_available]
-
-
 async def google_search(bot, query: str, *, max_entries: int = 20) -> list:
     if URL_REG.match(query):
         return [query]
@@ -180,3 +167,5 @@ perms_translations = {
     "view_channel": "Ver canal",
     "view_guild_insights": "Ver análises do servidor"
 }
+
+

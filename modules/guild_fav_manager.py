@@ -5,10 +5,9 @@ import disnake
 from disnake.ext import commands
 from typing import TYPE_CHECKING, Union
 from utils.music.converters import URL_REG
-from utils.music.autocomplete import pin_list
 from utils.music.errors import GenericError
 from utils.music.models import LavalinkPlayer
-from utils.others import send_idle_embed
+from utils.others import send_idle_embed, pin_list, select_bot_pool
 from utils.db import DBModel
 
 if TYPE_CHECKING:
@@ -75,17 +74,22 @@ class PinManager(commands.Cog):
         if len(description) > 50:
             raise GenericError("**A descrição não pode ultrapassar 50 caracteres.**")
 
-        if len(url) > (max_url_chars:=self.bot.config["USER_FAV_MAX_URL_LENGTH"]):
+        bot = await select_bot_pool(inter)
+
+        if not bot:
+            return
+
+        if len(url) > (max_url_chars:=bot.config["USER_FAV_MAX_URL_LENGTH"]):
             raise GenericError(f"**Quantidade máxima de caracteres permitidos no link: {max_url_chars}**")
 
         await inter.response.defer(ephemeral=True)
 
-        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
+        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         if len(guild_data["player_controller"]["fav_links"]) > 25:
             raise GenericError(f"**Quantidade de links excedida! Permitido: 25.**")
 
-        if not guild_data["player_controller"]["channel"] or not self.bot.get_channel(int(guild_data["player_controller"]["channel"])):
+        if not guild_data["player_controller"]["channel"] or not bot.get_channel(int(guild_data["player_controller"]["channel"])):
             raise GenericError("**Não há player configurado no servidor! Use o comando /setup**")
 
         guild_data["player_controller"]["fav_links"][name] = {
@@ -93,12 +97,14 @@ class PinManager(commands.Cog):
             "description": description
         }
 
-        await self.bot.update_data(inter.guild.id, guild_data, db_name=DBModel.guilds)
+        await bot.update_data(inter.guild_id, guild_data, db_name=DBModel.guilds)
+
+        guild = bot.get_guild(inter.guild_id)
 
         await inter.edit_original_message(embed=disnake.Embed(description="**Link adicionado/atualizado com sucesso nos fixos do player!\n"
-                         "Membros podem usá-lo diretamente no player-controller quando não estiver em uso.**", color=self.bot.get_color(inter.guild.me)))
+                         "Membros podem usá-lo diretamente no player-controller quando não estiver em uso.**", color=bot.get_color(guild.me)))
 
-        await self.process_idle_embed(inter.guild)
+        await self.process_idle_embed(guild)
 
     @pin.sub_command(
         name=disnake.Localized("edit", data={disnake.Locale.pt_BR: "editar"}),
@@ -125,14 +131,19 @@ class PinManager(commands.Cog):
         if len(description) > 50:
             raise GenericError("**A descrição não pode ultrapassar 50 caracteres.**")
 
-        if len(url) > (max_url_chars:=self.bot.config["USER_FAV_MAX_URL_LENGTH"]):
+        bot = await select_bot_pool(inter)
+
+        if not bot:
+            return
+
+        if len(url) > (max_url_chars:=bot.config["USER_FAV_MAX_URL_LENGTH"]):
             raise GenericError(f"**Quantidade máxima de caracteres permitidos no link: {max_url_chars}**")
 
         await inter.response.defer(ephemeral=True)
 
-        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
+        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
-        if not guild_data["player_controller"]["channel"] or not self.bot.get_channel(int(guild_data["player_controller"]["channel"])):
+        if not guild_data["player_controller"]["channel"] or not bot.get_channel(int(guild_data["player_controller"]["channel"])):
             raise GenericError("**Não há player configurado no servidor! Use o comando /setup**")
 
         try:
@@ -153,11 +164,13 @@ class PinManager(commands.Cog):
         except KeyError:
             raise GenericError(f"**Não há link fixo com o nome:** {item}")
 
-        await self.bot.update_data(inter.guild.id, guild_data, db_name=DBModel.guilds)
+        await bot.update_data(inter.guild_id, guild_data, db_name=DBModel.guilds)
 
-        await inter.edit_original_message(embed=disnake.Embed(description="***Link fixo editado com sucesso!**", color=self.bot.get_color(inter.guild.me)))
+        guild = bot.get_guild(inter.guild_id)
 
-        await self.process_idle_embed(inter.guild)
+        await inter.edit_original_message(embed=disnake.Embed(description="***Link fixo editado com sucesso!**", color=self.bot.get_color(guild.me)))
+
+        await self.process_idle_embed(guild)
 
     @pin.sub_command(
         name=disnake.Localized("remove", data={disnake.Locale.pt_BR: "remover"}),
@@ -169,20 +182,27 @@ class PinManager(commands.Cog):
             item: str = commands.Param(autocomplete=pin_list, description="Item para remover."),
     ):
 
+        bot = await select_bot_pool(inter)
+
+        if not bot:
+            return
+
         await inter.response.defer(ephemeral=True)
 
-        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
+        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         try:
             del guild_data["player_controller"]["fav_links"][item]
         except:
             raise GenericError(f"**Não há links da lista com o nome:** {item}")
 
-        await self.bot.update_data(inter.guild.id, guild_data, db_name=DBModel.guilds)
+        await bot.update_data(inter.guild_id, guild_data, db_name=DBModel.guilds)
 
-        await inter.edit_original_message(embed=disnake.Embed(description="**Link removido com sucesso!**", color=self.bot.get_color(inter.guild.me)))
+        guild = bot.get_guild(inter.guild_id)
 
-        await self.process_idle_embed(inter.guild)
+        await inter.edit_original_message(embed=disnake.Embed(description="**Link removido com sucesso!**", color=self.bot.get_color(guild.me)))
+
+        await self.process_idle_embed(guild)
 
     @commands.cooldown(1, 20, commands.BucketType.guild)
     @pin.sub_command(
@@ -201,6 +221,11 @@ class PinManager(commands.Cog):
         if not file.filename.endswith(".json"):
             raise GenericError("**Tipo de arquivo inválido!**")
 
+        bot = await select_bot_pool(inter)
+
+        if not bot:
+            return
+
         await inter.response.defer(ephemeral=True)
 
         try:
@@ -215,7 +240,7 @@ class PinManager(commands.Cog):
             if "> fav:" in name.lower():
                 continue
 
-            if len(data['url']) > (max_url_chars := self.bot.config["USER_FAV_MAX_URL_LENGTH"]):
+            if len(data['url']) > (max_url_chars := bot.config["USER_FAV_MAX_URL_LENGTH"]):
                 raise GenericError(f"**Um item de seu arquiv ultrapassa a quantidade de caracteres permitido:{max_url_chars}\nURL:** {data['url']}")
 
             if len(data['description']) > 50:
@@ -224,9 +249,9 @@ class PinManager(commands.Cog):
             if not isinstance(data['url'], str) or not URL_REG.match(data['url']):
                 raise GenericError(f"O seu arquivo contém link inválido: ```ldif\n{data['url']}```")
 
-        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
+        guild_data = await self.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
-        if not guild_data["player_controller"]["channel"] or not self.bot.get_channel(int(guild_data["player_controller"]["channel"])):
+        if not guild_data["player_controller"]["channel"] or not bot.get_channel(int(guild_data["player_controller"]["channel"])):
             raise GenericError("**Não há player configurado no servidor! Use o comando /setup**")
 
         for name in json_data.keys():
@@ -248,17 +273,19 @@ class PinManager(commands.Cog):
 
         guild_data["player_controller"]["fav_links"].update(json_data)
 
-        await self.bot.update_data(inter.guild.id, guild_data, db_name=DBModel.guilds)
+        await self.bot.update_data(inter.guild_id, guild_data, db_name=DBModel.guilds)
+
+        guild = bot.get_guild(inter.guild_id)
 
         await inter.edit_original_message(
             embed = disnake.Embed(
-                color=self.bot.get_color(inter.guild.me),
+                color=self.bot.get_color(guild.me),
                 description = "**Os links foram importados com sucesso!**\n"
                               "**Eles vão aparecer quando o player não tiver em uso ou em modo de espera.**",
             )
         )
 
-        await self.process_idle_embed(inter.guild)
+        await self.process_idle_embed(guild)
 
     @commands.cooldown(1, 20, commands.BucketType.guild)
     @pin.sub_command(
@@ -267,9 +294,14 @@ class PinManager(commands.Cog):
     )
     async def export(self, inter: disnake.ApplicationCommandInteraction):
 
+        bot = await select_bot_pool(inter)
+
+        if not bot:
+            return
+
         await inter.response.defer(ephemeral=True)
 
-        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
+        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         if not guild_data["player_controller"]["fav_links"]:
             raise GenericError(f"**Não há músicas/playlists fixadas no servidor..\n"
@@ -277,10 +309,12 @@ class PinManager(commands.Cog):
 
         fp = BytesIO(bytes(json.dumps(guild_data["player_controller"]["fav_links"], indent=4), 'utf-8'))
 
+        guild = bot.get_guild(inter.guild_id)
+
         embed = disnake.Embed(
             description=f"**Os dados dos links de músicas/playlists fixas do servidor estão aqui.\n"
                         f"Você pode importar usando o comando:** `/{self.pin.name} {self.add.name}`",
-            color=self.bot.get_color(inter.guild.me))
+            color=self.bot.get_color(guild.me))
 
         await inter.edit_original_message(embed=embed, file=disnake.File(fp=fp, filename="guild_favs.json"))
 

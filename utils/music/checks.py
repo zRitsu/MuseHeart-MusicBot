@@ -25,7 +25,7 @@ def can_send_message(channel: Union[disnake.TextChannel, disnake.VoiceChannel, d
 
 async def check_requester_channel(ctx: CustomContext):
 
-    guild_data = await ctx.bot.get_data(ctx.guild.id, db_name=DBModel.guilds)
+    guild_data = await ctx.bot.get_data(ctx.guild_id, db_name=DBModel.guilds)
 
     if guild_data['player_controller']["channel"] == str(ctx.channel.id):
         raise GenericError("**Não use comandos neste canal!**", self_delete=True, delete_original=15)
@@ -41,21 +41,33 @@ async def check_pool_bots(inter, only_voiced: bool = False):
     except AttributeError:
         pass
 
+    if not inter.guild_id:
+        return
+
     if isinstance(inter, (disnake.MessageInteraction, disnake.ModalInteraction)):
         return False
 
-    if inter.bot.user.id in inter.author.voice.channel.voice_states:
-        inter.music_bot = inter.bot
-        inter.music_guild = inter.guild
-        return True
+    try:
+        if inter.bot and inter.bot.user.id in inter.author.voice.channel.voice_states:
+            inter.music_bot = inter.bot
+            inter.music_guild = inter.guild
+            return True
+    except AttributeError:
+        pass
 
     free_bot = None
 
     for bot in inter.bot.pool.bots:
 
-        if bot.user.id in inter.author.voice.channel.voice_states:
+        if not (guild := bot.get_guild(inter.guild_id)):
+            continue
+
+        if not (author := guild.get_member(inter.author.id)):
+            continue
+
+        if bot.user.id in author.voice.channel.voice_states:
             inter.music_bot = bot
-            inter.music_guild = bot.get_guild(inter.guild.id)
+            inter.music_guild = bot.get_guild(inter.guild_id)
             return True
 
         if bot.user.id == inter.bot.user.id:
@@ -64,16 +76,18 @@ async def check_pool_bots(inter, only_voiced: bool = False):
         if only_voiced:
             continue
 
-        if not (guild := bot.get_guild(inter.guild.id)):
-            continue
-
         if not guild.voice_client:
+            if not inter.guild:
+                inter.author = author
             free_bot = bot, guild
 
-    if not inter.guild.voice_client:
-        inter.music_bot = inter.bot
-        inter.music_guild = inter.guild
-        return True
+    try:
+        if not inter.guild.voice_client:
+            inter.music_bot = inter.bot
+            inter.music_guild = inter.guild
+            return True
+    except AttributeError:
+        pass
 
     if free_bot:
         inter.music_bot, inter.music_guild = free_bot
@@ -85,7 +99,7 @@ async def check_pool_bots(inter, only_voiced: bool = False):
 
     for bot in inter.bot.pool.bots:
 
-        if bot.user == inter.bot.user or not bot.public or bot.get_guild(inter.guild.id):
+        if bot.user == inter.bot.user or not bot.public or bot.get_guild(inter.guild_id):
             continue
 
         extra_bots_invite.append(f"[`{disnake.utils.escape_markdown(str(bot.user)).replace(' ', '_')}`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})")
@@ -110,7 +124,7 @@ def has_player(check_all_bots: bool = False):
             bot = inter.bot
 
         try:
-            bot.music.players[inter.guild.id]
+            bot.music.players[inter.guild_id]
         except KeyError:
             raise NoPlayer()
 
@@ -138,6 +152,14 @@ def can_send_message_check():
 
     async def predicate(inter):
         # adaptar pra checkar outros bots
+
+        if not inter.guild:
+
+            if inter.guild_id:
+                return True
+
+            return
+
         can_send_message(inter.channel, inter.guild.me)
         return True
 
@@ -161,7 +183,7 @@ def is_requester():
                     bot = inter.bot
 
         try:
-            player: LavalinkPlayer = bot.music.players[inter.guild.id]
+            player: LavalinkPlayer = bot.music.players[inter.guild_id]
         except KeyError:
             raise NoPlayer()
 
@@ -187,13 +209,22 @@ def check_voice(bot_is_connected=False):
 
     async def predicate(inter):
 
-        if not inter.author.voice:
-            raise NoVoice()
-
         try:
+
+            if not inter.guild and inter.guild_id:
+                await check_pool_bots(inter, only_voiced=bot_is_connected)
+
             guild = inter.music_guild
-        except AttributeError:
+            author = guild.get_member(inter.author.id)
+        except:
+            if not inter.guild_id:
+                return
+
             guild = inter.guild
+            author = inter.author
+
+        if not author.voice:
+            raise NoVoice()
 
         if inter.bot.intents.members:
 
@@ -202,13 +233,13 @@ def check_voice(bot_is_connected=False):
 
         if not guild.me.voice:
 
-            perms = inter.author.voice.channel.permissions_for(guild.me)
+            perms = author.voice.channel.permissions_for(guild.me)
 
             if not perms.connect:
-                raise MissingVoicePerms(inter.author.voice.channel)
+                raise MissingVoicePerms(author.voice.channel)
 
         try:
-            if inter.author.id not in guild.me.voice.channel.voice_states:
+            if author.id not in guild.me.voice.channel.voice_states:
                 raise DiffVoiceChannel()
         except AttributeError:
             pass
@@ -235,7 +266,7 @@ def has_source():
                     bot = inter.bot
 
         try:
-            player = bot.music.players[inter.guild.id]
+            player = bot.music.players[inter.guild_id]
         except KeyError:
             raise NoPlayer()
 
@@ -274,7 +305,7 @@ async def has_perm(inter):
         author = inter.author
 
     try:
-        player: LavalinkPlayer = bot.music.players[inter.guild.id]
+        player: LavalinkPlayer = bot.music.players[inter.guild_id]
     except KeyError:
         return True
 

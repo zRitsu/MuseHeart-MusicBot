@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+import datetime
 import json
 from inspect import iscoroutinefunction
 from io import BytesIO
@@ -7,6 +9,7 @@ from typing import TYPE_CHECKING, Union, Optional
 import disnake
 from disnake.ext import commands
 from utils.db import DBModel
+from utils.music.errors import GenericError
 
 if TYPE_CHECKING:
     from utils.client import BotCore
@@ -295,3 +298,134 @@ def string_to_file(txt, filename="result.txt"):
         txt = json.dumps(txt, indent=4, ensure_ascii=False)
     txt = BytesIO(bytes(str(txt), 'utf-8'))
     return disnake.File(fp=txt, filename=filename or "result.txt")
+
+
+async def fav_list(inter, query: str, *, prefix=""):
+    return sorted([f"{prefix}{favname}" for favname in
+                   (await inter.bot.get_global_data(inter.author.id, db_name=DBModel.users))["fav_links"]
+                   if not query or query.lower() in favname.lower()][:20])
+
+
+async def pin_list(inter, query: str, *, prefix=""):
+    return sorted([f"{prefix}{pinname}" for pinname in
+                   (await inter.bot.get_data(inter.guild.id, db_name=DBModel.guilds))["player_controller"]["fav_links"]
+                   if not query or query.lower() in pinname.lower()][:20])
+
+
+async def select_bot_pool(inter):
+
+    if isinstance(inter, CustomContext):
+        return inter.bot
+
+    bots = {}
+
+    for pb in inter.bot.pool.bots:
+
+        # if not b.public:
+        #    continue
+
+        if pb.get_guild(inter.guild_id):
+            bots[pb.user.id] = pb
+
+    if not bots:
+        bot_invites = "\n".join(
+            f"[`{disnake.utils.escape_markdown(str(b.user)).replace(' ', '_')}`]({disnake.utils.oauth_url(b.user.id, permissions=disnake.Permissions(b.config['INVITE_PERMISSIONS']), scopes=('bot'))})"
+            for b in inter.bot.pool.bots if b.public)
+        raise GenericError(f"**Você precisa adicionar pelo menos um desses bots no servidor:**\n{bot_invites}")
+
+    if len(bots) == 1:
+        return bots.values()[0]
+    else:
+        opts = [disnake.SelectOption(label=f"{b.user}", value=f"{b.user.id}", emoji="🎶") for b in bots.values()]
+
+        opts.append(disnake.SelectOption(label="Cancelar", value="cancel", emoji="❌"))
+
+        try:
+            add_id = f"_{inter.id}"
+        except AttributeError:
+            add_id = ""
+
+        embed = disnake.Embed(
+            color=0x2F3136,
+            description="**Selecione um bot abaixo:**\n"
+                        f'Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para escolher!'
+        )
+
+        msg = await inter.send(
+            inter.author.mention, embed=embed, ephemeral=True,
+            components=[
+                disnake.ui.Select(
+                    custom_id=f"select_bot{add_id}",
+                    options=opts
+                )
+            ]
+        )
+
+        def check_bot_selection(i: Union[CustomContext, disnake.MessageInteraction]):
+
+            try:
+                return i.data.custom_id == f"select_bot_{inter.id}" and i.author == inter.author
+            except AttributeError:
+                return i.author == inter.author and i.message.id == msg.id
+
+        try:
+            select_interaction: disnake.MessageInteraction = await inter.bot.wait_for(
+                "dropdown", timeout=45, check=check_bot_selection
+            )
+        except asyncio.TimeoutError:
+            try:
+                await msg.edit(conent="Tempo de seleção esgotado!", embed=None, view=None)
+            except:
+                pass
+            return
+
+        try:
+            func = select_interaction.response.edit_message
+        except AttributeError:
+            func = msg.edit
+
+        if select_interaction.data.values[0] == "cancel":
+            await func(
+                embed=disnake.Embed(
+                    description="**Seleção cancelada!**",
+                    color=0x2F3136
+                ),
+                components=None
+            )
+            return
+
+        inter.response = select_interaction.response
+
+        try:
+            return bots[int(select_interaction.data.values[0])]
+        except KeyError:
+            raise GenericError("**O bot selecionado foi removido do servidor antes de sua seleção...**")
+
+def queue_track_index(inter: disnake.AppCmdInter, bot: BotCore, query: str, check_all: bool = False):
+
+    player = bot.music.players[inter.guild_id]
+
+    query_split = query.lower().split()
+
+    tracklist = []
+
+    for counter, track in enumerate(player.queue):
+
+        track_title = track.title.lower().split()
+
+        q_found = 0
+
+        for q in query_split:
+            for t in track_title:
+                if q in t:
+                    q_found += 1
+                    track_title.remove(t)
+                    break
+
+        if q_found == len(query_split):
+
+            tracklist.append((counter, track,))
+            if not check_all:
+                break
+
+    return tracklist

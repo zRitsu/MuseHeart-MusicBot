@@ -14,6 +14,8 @@ from random import shuffle
 from os import getpid
 import platform
 
+from utils.others import select_bot_pool
+
 
 class Misc(commands.Cog):
 
@@ -89,18 +91,29 @@ class Misc(commands.Cog):
         if not guild.system_channel or not guild.system_channel.permissions_for(guild.me).send_messages:
             return
 
-        prefix = (await self.bot.get_data(guild.id, db_name=DBModel.guilds))["prefix"] or self.bot.default_prefix
-
         embed = disnake.Embed(
             description="Olá! Para ver todos os meus comandos use **/**\n\n",
             color=self.bot.get_color(guild.me)
         )
 
-        if cmd:=self.bot.get_slash_command("setup"):
+        if cmd:=self.bot.get_command("setup"):
             embed.description += f"Caso queira, use o comando **/{cmd.name}** para criar um canal dedicado para pedir " \
-                                 "músicas sem comandos e deixar o music player fixo no canal.\n\n"
+                                 "músicas sem comandos e deixar o music player fixo em um canal dedicado.\n\n"
 
-        embed.description += f"Caso os comandos de barra (/) não apareçam, use o comando:\n{prefix}syncguild"
+        if not self.bot._sync_commands and self.bot.config["INTERACTION_BOTS"]:
+
+            interaction_invites = ""
+
+            for b in self.bot.pool.bots:
+
+                if str(b.user.id) not in self.bot.config["INTERACTION_BOTS"]:
+                    continue
+
+                interaction_invites += f"[`{disnake.utils.escape_markdown(str(b.user)).replace(' ', '_')}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) "
+
+            if interaction_invites:
+                embed.description += f"Caso os comandos de barra (/) não apareçam, você terá que integrar um dos " \
+                                     f"seguintes bots no servidor: {interaction_invites}"
 
         await guild.system_channel.send(embed=embed)
 
@@ -120,75 +133,85 @@ class Misc(commands.Cog):
             hidden: bool = commands.Param(name="modo_oculto", description="Não exibir a mensagem do comando", default=False)
     ):
 
+        bot = await select_bot_pool(inter)
+
+        if not bot:
+            return
+
         if not self.source_owner:
-            self.source_owner = await self.bot.get_or_fetch_user(184889853102653440)
+            self.source_owner = await bot.get_or_fetch_user(184889853102653440)
 
         ram_usage = humanize.naturalsize(psutil.Process(getpid()).memory_info().rss)
 
+        guild = bot.get_guild(inter.guild_id)
+
         embed = disnake.Embed(
             description=f"**Sobre mim:**\n\n"
-                        f"> **Estou em:** `{len(self.bot.guilds)} servidor(es)`\n",
-            color=self.bot.get_color(inter.guild.me)
+                        f"> **Estou em:** `{len(bot.guilds)} servidor(es)`\n",
+            color=self.bot.get_color(guild.me)
         )
 
         if self.bot.music.players:
-            embed.description += f"> **Players ativos (bot atual):** `{len(self.bot.music.players)}`\n"
+            embed.description += f"> **Players ativos (bot atual):** `{len(bot.music.players)}`\n"
 
         active_players_other_bots = 0
 
-        for bot in self.bot.pool.bots:
-            if bot.user.id == self.bot.user.id:
+        for b in self.bot.pool.bots:
+            if b.user.id == bot.user.id:
                 continue
-            active_players_other_bots += len(bot.music.players)
+            active_players_other_bots += len(b.music.players)
 
         if active_players_other_bots:
             embed.description += f"> **Players ativos (outros bots):** `{active_players_other_bots}`\n"
 
         if self.bot.pool.commit:
-            embed.description += f"> **Commit atual:** [`{self.bot.pool.commit[:7]}`]({self.bot.pool.remote_git_url}/commit/{self.bot.pool.commit})\n"
+            embed.description += f"> **Commit atual:** [`{bot.pool.commit[:7]}`]({bot.pool.remote_git_url}/commit/{bot.pool.commit})\n"
 
         embed.description += f"> **Versão do Python:** `{platform.python_version()}`\n"\
                              f"> **Versão do Disnake:** `{disnake.__version__}`\n" \
-                             f"> **Latencia:** `{round(self.bot.latency * 1000)}ms`\n" \
+                             f"> **Latencia:** `{round(bot.latency * 1000)}ms`\n" \
                              f"> **Uso de RAM:** `{ram_usage}`\n" \
-                             f"> **Uptime:** <t:{int(self.bot.uptime.timestamp())}:R>\n"
+                             f"> **Uptime:** <t:{int(bot.uptime.timestamp())}:R>\n"
 
-        embed.set_thumbnail(url=self.bot.user.display_avatar.replace(size=256, static_format="png").url)
+        embed.set_thumbnail(url=bot.user.display_avatar.replace(size=256, static_format="png").url)
 
-        guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
+        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
-        prefix = guild_data["prefix"] or self.bot.default_prefix
+        prefix = guild_data["prefix"] or bot.default_prefix
 
-        if self.bot.default_prefix and not self.bot.config["INTERACTION_COMMAND_ONLY"]:
+        if bot.default_prefix and not bot.config["INTERACTION_COMMAND_ONLY"]:
             embed.description += f"> **Prefixo:** `{disnake.utils.escape_markdown(prefix, as_needed=True)}`\n"
 
         links = "[`[Source]`](https://github.com/zRitsu/disnake-LL-music-bot)"
 
-        if self.bot.public:
-            links = f"[`[Invite]`]({disnake.utils.oauth_url(self.bot.user.id, permissions=disnake.Permissions(self.bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))}) **|** {links}"
+        if bot.public:
+            links = f"[`[Invite]`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))}) **|** {links}"
 
-        if self.bot.config["SUPPORT_SERVER"]:
-            links += f" **|** [`[Suporte]`]({self.bot.config['SUPPORT_SERVER']})"
+        if bot.config["SUPPORT_SERVER"]:
+            links += f" **|** [`[Suporte]`]({bot.config['SUPPORT_SERVER']})"
 
         embed.description += f">  {links}\n"
 
         try:
-            avatar = self.bot.owner.avatar.with_static_format("png").url
+            avatar = bot.owner.avatar.with_static_format("png").url
         except AttributeError:
-            avatar = self.bot.owner.default_avatar.with_static_format("png").url
+            avatar = bot.owner.default_avatar.with_static_format("png").url
 
         embed.set_footer(
             icon_url=avatar,
-            text=f"Dono(a): {self.bot.owner}"
+            text=f"Dono(a): {bot.owner}"
         )
 
-        if self.bot.config["HIDE_SOURCE_OWNER"] is not False and self.bot.owner.id == self.source_owner.id:
+        if bot.config["HIDE_SOURCE_OWNER"] is not False and bot.owner.id == self.source_owner.id:
             embed.footer.text += f" | Source by: {self.source_owner}"
 
-        if hidden is False and not self.bot.check_bot_forum_post(inter.channel):
+        if hidden is False and not bot.check_bot_forum_post(inter.channel):
             hidden = True
 
-        await inter.send(embed=embed, ephemeral=hidden)
+        try:
+            await inter.response.edit_message(embed=embed, components=None)
+        except AttributeError:
+            await inter.send(embed=embed, ephemeral=hidden)
 
 
     @commands.command(name="invite", aliases=["convidar"], description="Exibir meu link de convite para você me adicionar no seu servidor.")

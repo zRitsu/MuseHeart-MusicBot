@@ -25,6 +25,7 @@ DEFAULT_CONFIG = {
     "ADDITIONAL_BOT_IDS": "",
     "INVITE_PERMISSIONS": 534735285328,
     "ENABLE_LOGGER": False,
+    "INTERACTION_BOTS": "",
 
     ################
     ### Database ###
