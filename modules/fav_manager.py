@@ -137,7 +137,7 @@ class FavManager(commands.Cog):
 
         await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
 
-        await inter.edit_original_message(embed=disnake.Embed(description="**Link removido com sucesso!**", color=self.bot.get_color(inter.guild.me)))
+        await inter.edit_original_message(embed=disnake.Embed(description="**Link removido com sucesso!**", color=0x2F3136))
 
     @fav.sub_command(
         name=disnake.Localized("clear", data={disnake.Locale.pt_BR: "zerar"}),
@@ -157,7 +157,7 @@ class FavManager(commands.Cog):
 
         embed = disnake.Embed(
             description="Sua lista de favoritos foi limpa com sucesso!",
-            color=self.bot.get_color(inter.guild.me)
+            color=0x2F3136
         )
 
         await inter.edit_original_message(embed=embed)
@@ -186,7 +186,7 @@ class FavManager(commands.Cog):
                                f"Você pode adicionar usando o comando: /{self.fav.name} {self.add.name}**")
 
         embed = disnake.Embed(
-            color=self.bot.get_color(inter.guild.me),
+            color=0x2F3136,
             title="Seus Links Favoritos:",
             description="\n".join(f"{n+1}) [`{f[0]}`]({f[1]})" for n, f in enumerate(user_data["fav_links"].items()))
         )
@@ -259,7 +259,7 @@ class FavManager(commands.Cog):
 
         await inter.edit_original_message(
             embed = disnake.Embed(
-                color=self.bot.get_color(inter.guild.me),
+                color=0x2F3136,
                 description = "**Os links foram importados com sucesso!**\n"
                               "**Eles vão aparecer quando usar o comando /play (no preenchimento automático da busca).**",
             )
@@ -283,7 +283,7 @@ class FavManager(commands.Cog):
 
         embed = disnake.Embed(
             description=f"Seus favoritos estão aqui.\nVocê pode importar usando o comando: `/{self.import_.name}`",
-            color=self.bot.get_color(inter.guild.me))
+            color=0x2F3136)
 
         await inter.edit_original_message(embed=embed, file=disnake.File(fp=fp, filename="favoritos.json"))
 
