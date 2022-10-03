@@ -384,6 +384,10 @@ class BotCore(commands.Bot):
         return await super().is_owner(user)
 
     async def sync_app_commands(self):
+
+        if not self._sync_commands:
+            return
+
         self._sync_commands = True
         await self._sync_application_commands()
         self._sync_commands = False
