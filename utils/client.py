@@ -224,10 +224,10 @@ class BotPool:
                         if not bot.config["INTERACTION_BOTS"] or str(bot.user.id) in bot.config["INTERACTION_BOTS"]:
                             self._sync_commands = True
                             bot.load_modules(bot_name)
-                            await bot.sync_app_commands()
+                            await bot.sync_app_commands(force=True)
                         else:
                             self._sync_commands = False
-                            await bot.sync_app_commands()
+                            await bot.sync_app_commands(force=True)
                             bot.load_modules(bot_name)
 
                     if not bot.owner:
@@ -383,9 +383,9 @@ class BotCore(commands.Bot):
 
         return await super().is_owner(user)
 
-    async def sync_app_commands(self):
+    async def sync_app_commands(self, force=False):
 
-        if not self._sync_commands:
+        if not self._sync_commands and not force:
             return
 
         self._sync_commands = True
