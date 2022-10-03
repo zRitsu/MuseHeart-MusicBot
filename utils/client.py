@@ -458,7 +458,7 @@ class BotCore(commands.Bot):
                         interaction_invites += f"[`{disnake.utils.escape_markdown(str(b.user)).replace(' ', '_')}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) "
 
                     if interaction_invites:
-                        embed.description += f"Caso os comandos de barra (/) não apareçam, você terá que integrar um dos " \
+                        embed.description += f"Se os comandos de barra (/) não apareçam, você terá que integrar um dos " \
                                              f"seguintes bots no servidor: {interaction_invites}"
 
                 view = None
