@@ -321,9 +321,6 @@ async def select_bot_pool(inter):
 
     for pb in inter.bot.pool.bots:
 
-        # if not b.public:
-        #    continue
-
         if pb.get_guild(inter.guild_id):
             bots[pb.user.id] = pb
 
@@ -334,7 +331,7 @@ async def select_bot_pool(inter):
         raise GenericError(f"**Você precisa adicionar pelo menos um desses bots no servidor:**\n{bot_invites}")
 
     if len(bots) == 1:
-        return bots.values()[0]
+        return list(bots.values())[0]
     else:
         opts = [disnake.SelectOption(label=f"{b.user}", value=f"{b.user.id}", emoji="🎶") for b in bots.values()]
 
