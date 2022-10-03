@@ -227,6 +227,8 @@ def check_voice(bot_is_connected=False):
 
             guild = inter.music_guild
             author = guild.get_member(inter.author.id)
+        except GenericError as e:
+            raise e
         except:
             if not inter.guild_id:
                 return
