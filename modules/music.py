@@ -273,9 +273,9 @@ class Music(commands.Cog):
         try:
             await check_pool_bots(inter, only_voiced=True)
             bot = inter.music_bot
+        except GenericError:
+            return
         except:
-            if not inter.bot:
-                return
             bot = inter.bot
 
         return await google_search(bot, current)
@@ -862,7 +862,10 @@ class Music(commands.Cog):
         favs: list = await fav_list(inter, query, prefix="> fav: ")
 
         if not inter.guild:
-            await check_pool_bots(inter)
+            try:
+                await check_pool_bots(inter)
+            except:
+                return
             author = inter.music_guild.get_member(inter.author.id)
         else:
             author = inter.author
@@ -1234,8 +1237,8 @@ class Music(commands.Cog):
             pass
 
         if inter.bot.intents.members:
-            await check_pool_bots(inter, only_voiced=True)
             try:
+                await check_pool_bots(inter, only_voiced=True)
                 bot = inter.music_bot
             except:
                 return
@@ -1777,7 +1780,10 @@ class Music(commands.Cog):
             pass
 
         if inter.bot.intents.members:
-            if not await check_pool_bots(inter, only_voiced=True):
+            try:
+                if not await check_pool_bots(inter, only_voiced=True):
+                    return
+            except:
                 return
         else:
             inter.music_bot = inter.bot
@@ -2325,10 +2331,10 @@ class Music(commands.Cog):
             return
 
         if inter.bot.intents.members:
-            await check_pool_bots(inter, only_voiced=True)
             try:
                 bot = inter.music_bot
-            except AttributeError:
+                await check_pool_bots(inter, only_voiced=True)
+            except:
                 return
 
         else:
@@ -2349,10 +2355,10 @@ class Music(commands.Cog):
             return
 
         if inter.bot.intents.members:
-            await check_pool_bots(inter, only_voiced=True)
             try:
+                await check_pool_bots(inter, only_voiced=True)
                 bot = inter.music_bot
-            except AttributeError:
+            except:
                 return
 
         else:
@@ -2489,9 +2495,9 @@ class Music(commands.Cog):
         try:
             await check_pool_bots(inter, only_voiced=True)
             bot = inter.music_bot
+        except GenericError:
+            return
         except:
-            if not inter.bot:
-                return
             bot = inter.bot
 
         try:
