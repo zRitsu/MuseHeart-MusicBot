@@ -195,7 +195,6 @@ class BotPool:
 
             bot.load_extension("jishaku")
             bot.get_command("jsk").hidden = True
-            bot.load_modules(bot_name)
 
             @bot.check
             async def forum_check(ctx: CustomContext):
@@ -224,9 +223,12 @@ class BotPool:
 
                         if not bot.config["INTERACTION_BOTS"] or str(bot.user.id) in bot.config["INTERACTION_BOTS"]:
                             self._sync_commands = True
+                            bot.load_modules(bot_name)
                             await bot.sync_app_commands()
                         else:
                             self._sync_commands = False
+                            await bot.sync_app_commands()
+                            bot.load_modules(bot_name)
 
                     if not bot.owner:
                         botowner = (await bot.application_info())
