@@ -281,6 +281,12 @@ class ErrorHandler(commands.Cog):
                 name="Servidor:", inline=False,
                 value=f"```\n{disnake.utils.escape_markdown(ctx.guild.name)}\nID: {ctx.guild.id}```"
             )
+
+            embed.add_field(
+                name="Canal de texto:", inline=False,
+                value=f"```\n{disnake.utils.escape_markdown(ctx.channel.name)}\nID: {ctx.channel.id}```"
+            )
+
             if vc := ctx.author.voice:
                 embed.add_field(
                     name="Canal de voz (user):", inline=False,
@@ -311,12 +317,6 @@ class ErrorHandler(commands.Cog):
         embed.set_footer(
             text=f"{ctx.author} [{ctx.author.id}]",
             icon_url=ctx.author.display_avatar.with_static_format("png").url
-        )
-
-
-        embed.add_field(
-            name="Canal de texto:", inline=False,
-            value=f"```\n{disnake.utils.escape_markdown(ctx.channel.name)}\nID: {ctx.channel.id}```"
         )
 
         try:
