@@ -123,6 +123,7 @@ class Misc(commands.Cog):
         await self.about.callback(self=self, inter=ctx)
 
 
+    @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.slash_command(
         name=disnake.Localized("about", data={disnake.Locale.pt_BR: "sobre_mim"}),
         description=f"{desc_prefix}Exibir informações sobre mim."
@@ -210,7 +211,7 @@ class Misc(commands.Cog):
 
         try:
             await inter.response.edit_message(embed=embed, components=None)
-        except AttributeError:
+        except (AttributeError, disnake.InteractionNotEditable):
             await inter.send(embed=embed, ephemeral=hidden)
 
 
