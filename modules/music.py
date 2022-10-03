@@ -1227,8 +1227,11 @@ class Music(commands.Cog):
     @seek.autocomplete("tempo")
     async def seek_suggestions(self, inter: disnake.Interaction, query: str):
 
-        if query or not inter.author.voice:
-            return
+        try:
+            if query or not inter.author.voice:
+                return
+        except AttributeError:
+            pass
 
         if inter.bot.intents.members:
             await check_pool_bots(inter, only_voiced=True)
@@ -1957,7 +1960,7 @@ class Music(commands.Cog):
                                                                             commands.InvokableApplicationCommand):
             await inter.send(f"{user.mention} adicionado à lista de DJ's!{player.controller_link}")
 
-        await self.interaction_message(inter, txt=text, emoji="🇳")
+        await self.interaction_message(inter, txt=text, emoji="🎧")
 
     @check_voice(bot_is_connected=True)
     @has_player()
@@ -2002,7 +2005,7 @@ class Music(commands.Cog):
                                                                             commands.InvokableApplicationCommand):
             await inter.send(f"{user.mention} adicionado à lista de DJ's!{player.controller_link}")
 
-        await self.interaction_message(inter, txt=text, emoji="🇳")
+        await self.interaction_message(inter, txt=text, emoji="🎧")
 
 
     @check_voice(bot_is_connected=True)
@@ -2549,10 +2552,12 @@ class Music(commands.Cog):
 
         try:
             bot = ctx.music_bot
+            channel_ctx = bot.get_channel(ctx.channel.id)
         except AttributeError:
             bot = ctx.bot
+            channel_ctx = ctx.channel
 
-        if not self.bot.check_bot_forum_post(ctx.channel):
+        if not self.bot.check_bot_forum_post(channel_ctx):
             return True
 
         try:
@@ -2561,10 +2566,10 @@ class Music(commands.Cog):
             if not player.static:
                 return False
 
-            if isinstance(ctx.channel, disnake.Thread) and player.text_channel == ctx.channel.parent:
+            if isinstance(channel_ctx, disnake.Thread) and player.text_channel == channel_ctx.parent:
                 return not ignore_thread
 
-            return player.text_channel == ctx.channel
+            return player.text_channel == channel_ctx
 
         except KeyError:
 
@@ -2578,10 +2583,10 @@ class Music(commands.Cog):
             if not channel:
                 return False
 
-            if isinstance(ctx.channel, disnake.Thread) and channel == ctx.channel.parent:
+            if isinstance(channel_ctx, disnake.Thread) and channel == channel_ctx.parent:
                 return not ignore_thread
 
-            return channel.id == ctx.channel.id
+            return channel.id == channel_ctx.id
 
     async def process_player_interaction(
             self,
@@ -3156,6 +3161,7 @@ class Music(commands.Cog):
 
         if ephemeral:
             player.set_command_log(text=f"{inter.author.mention} {txt}", emoji=emoji)
+            player.update = True
 
         await player.update_message(interaction=inter if (bot.user.id == self.bot.user.id and component_interaction) \
             else False, rpc_update=rpc_update)
