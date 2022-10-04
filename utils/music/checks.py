@@ -15,10 +15,10 @@ if TYPE_CHECKING:
 
 def can_send_message(channel: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.Thread], bot: disnake.Member):
     if not channel.permissions_for(bot).send_messages:
-        raise GenericError(f"**Não tenho permissão de enviar mensagens no canal:** {channel.mention}")
+        raise GenericError(f"**{bot.mention} não possui permissão de enviar mensagens no canal:** {channel.mention}")
 
     if not channel.permissions_for(bot).embed_links:
-        raise GenericError(f"**Não tenho permissão de inserir links no canal: {channel.mention}**")
+        raise GenericError(f"**{bot.mention} não possui permissão de inserir links no canal: {channel.mention}**")
 
     return True
 
