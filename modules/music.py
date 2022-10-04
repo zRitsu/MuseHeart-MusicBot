@@ -851,8 +851,8 @@ class Music(commands.Cog):
             )
             await player.stop()
         else:
-            player.set_command_log(text=log_text, emoji=emoji)
             if ephemeral:
+                player.set_command_log(text=log_text, emoji=emoji)
                 player.update = True
 
     @play.autocomplete("busca")
