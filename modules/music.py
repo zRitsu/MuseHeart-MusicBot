@@ -850,8 +850,9 @@ class Music(commands.Cog):
                 text=f"{inter.author.mention} adicionou a música atual para tocar imediatamente."
             )
             await player.stop()
-        elif ephemeral:
-            player.set_command_log(text=log_text, emoji=emoji)
+        else:
+            if ephemeral:
+                player.set_command_log(text=log_text, emoji=emoji)
             player.update = True
 
     @play.autocomplete("busca")
