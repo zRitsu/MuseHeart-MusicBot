@@ -850,10 +850,9 @@ class Music(commands.Cog):
                 text=f"{inter.author.mention} adicionou a música atual para tocar imediatamente."
             )
             await player.stop()
-        else:
-            if ephemeral:
-                player.set_command_log(text=log_text, emoji=emoji)
-                player.update = True
+        elif ephemeral:
+            player.set_command_log(text=log_text, emoji=emoji)
+            player.update = True
 
     @play.autocomplete("busca")
     async def fav_add_autocomplete(self, inter: disnake.Interaction, query: str):
