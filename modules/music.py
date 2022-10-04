@@ -503,8 +503,7 @@ class Music(commands.Cog):
             channel = inter.channel
             author = inter.author
 
-        if not guild.me.guild_permissions.send_messages:
-            raise commands.MissingPermissions(["send_messages"])
+        can_send_message(channel, bot)
 
         if not guild.me.guild.voice_client and inter.author.voice.channel.user_limit and (
                     guild.me.id not in inter.author.voice.channel.voice_states and

@@ -133,18 +133,29 @@ class ErrorHandler(commands.Cog):
         kwargs = {}
         send_webhook = False
 
-        kwargs["embed"] = disnake.Embed(color=disnake.Colour.red())
         kwargs["content"] = ctx.author.mention
 
         if not error_msg:
-            kwargs["embed"].title = "Ocorreu um erro no comando:"
-            kwargs["embed"].description = f"```py\n{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
-            if self.bot.config["AUTO_ERROR_REPORT_WEBHOOK"]:
-                send_webhook = True
-                kwargs["embed"].description += " `Meu desenvolvedor será notificado sobre o problema.`"
+
+            if ctx.channel.permissions_for(ctx.guild.me).embed_links:
+                kwargs["embed"] = disnake.Embed(
+                    color=disnake.Colour.red(),
+                    title="Ocorreu um erro no comando:",
+                    description=f"```py\n{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
+                )
+                if self.bot.config["AUTO_ERROR_REPORT_WEBHOOK"]:
+                    send_webhook = True
+                    kwargs["embed"].description += " `Meu desenvolvedor será notificado sobre o problema.`"
+
+            else:
+                kwargs["content"] += "**. Ocorreu um erro no comando:**\n" \
+                                     "```py\n{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
 
         else:
-            kwargs["embed"].description = error_msg
+            if ctx.channel.permissions_for(ctx.guild.me).embed_links:
+                kwargs["embed"] = disnake.Embed(color=disnake.Colour.red(), description=error_msg)
+            else:
+                kwargs["content"] += f"\n{error_msg}"
 
         try:
             delete_time = error.delete_original
