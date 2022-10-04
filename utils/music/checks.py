@@ -56,7 +56,6 @@ async def check_pool_bots(inter, only_voiced: bool = False):
         pass
 
     free_bot = None
-    missing_bot = False
 
     for bot in inter.bot.pool.bots:
 
@@ -100,25 +99,20 @@ async def check_pool_bots(inter, only_voiced: bool = False):
 
     for bot in inter.bot.pool.bots:
 
-        if bot.user == inter.bot.user or not bot.public or bot.get_guild(inter.guild_id):
-
-            if not isinstance(inter.channel, disnake.PartialMessageable):
-                continue
-            else:
-                missing_bot = True
+        if (bot.user.id == inter.bot.user.id and inter.guild) or not bot.public or bot.get_guild(inter.guild_id):
+            continue
 
         extra_bots_invite.append(f"[`{disnake.utils.escape_markdown(str(bot.user)).replace(' ', '_')}`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})")
 
     txt += " | ".join(extra_bots_invite)
 
-    if missing_bot:
-        msg = "**Não há bots de música compatível no servidor!**"
-        if txt:
-            msg += f"\n\nVocê deve adicionar pelo menos um dos bots abaixo no seu servidor:\n{txt}"
+    if len(extra_bots_invite) == len(inter.bot.pool.bots):
+        msg = "**Não há bots de música compatível no servidor!**\n" \
+              f"Você deve adicionar pelo menos um dos bots abaixo no seu servidor:\n{txt}"
     else:
         msg = "**Não há bots disponíveis no momento...**"
         if txt:
-            msg += f"\n\nVocê pode convidar bots adicionais no seu servidor através dos links abaixo:\n{txt}"
+            msg += f"\nVocê pode convidar bots adicionais no seu servidor através dos links abaixo:\n{txt}"
 
     raise GenericError(msg)
 
