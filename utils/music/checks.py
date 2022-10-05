@@ -70,9 +70,6 @@ async def check_pool_bots(inter, only_voiced: bool = False):
             inter.music_guild = bot.get_guild(inter.guild_id)
             return True
 
-        if bot.user.id == inter.bot.user.id:
-            continue
-
         if only_voiced:
             continue
 
@@ -92,6 +89,9 @@ async def check_pool_bots(inter, only_voiced: bool = False):
     if free_bot:
         inter.music_bot, inter.music_guild = free_bot
         return True
+
+    if only_voiced:
+        raise NoPlayer()
 
     txt = ""
 
@@ -143,7 +143,7 @@ def is_dj():
     async def predicate(inter):
 
         if inter.bot.intents.members:
-            await check_pool_bots(inter, only_voiced=True)
+            await check_pool_bots(inter)
 
         if not await has_perm(inter):
             raise NotDJorStaff()
@@ -215,18 +215,11 @@ def check_voice(bot_is_connected=False):
     async def predicate(inter):
 
         try:
-
             if not inter.guild and inter.guild_id:
                 await check_pool_bots(inter, only_voiced=bot_is_connected)
-
             guild = inter.music_guild
             author = guild.get_member(inter.author.id)
-        except GenericError as e:
-            raise e
-        except:
-            if not inter.guild_id:
-                return
-
+        except AttributeError:
             guild = inter.guild
             author = inter.author
 
