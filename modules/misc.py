@@ -152,7 +152,7 @@ class Misc(commands.Cog):
             color=self.bot.get_color(guild.me)
         )
 
-        if self.bot.music.players:
+        if bot.music.players:
             embed.description += f"> **Players ativos (bot atual):** `{len(bot.music.players)}`\n"
 
         active_players_other_bots = 0
