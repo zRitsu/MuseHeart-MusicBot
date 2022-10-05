@@ -92,7 +92,10 @@ def parse_error(
         error_txt = "**Você deve entrar em um canal de voz para usar esse comando.**"
 
     elif isinstance(error, NoPlayer):
-        error_txt = "**Não há player inicializado no servidor.**"
+        try:
+            error_txt = f"**Não há player ativo no canal {ctx.author.voice.channel.mention}.**"
+        except AttributeError:
+            error_txt = "**Não há player inicializado no servidor.**"
 
     elif isinstance(error, MissingSpotifyClient):
         error_txt = "**Não há suporte a links do spotify no momento.**"

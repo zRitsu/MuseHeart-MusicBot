@@ -65,6 +65,9 @@ async def check_pool_bots(inter, only_voiced: bool = False):
         if not (author := guild.get_member(inter.author.id)):
             continue
 
+        if not author.voice:
+            raise NoVoice()
+
         if bot.user.id in author.voice.channel.voice_states:
             inter.music_bot = bot
             inter.music_guild = bot.get_guild(inter.guild_id)
