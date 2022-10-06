@@ -151,7 +151,7 @@ class MusicSettings(commands.Cog):
         guild = bot.get_guild(inter.guild_id)
 
         if not guild.me.guild_permissions.manage_channels or not guild.me.guild_permissions.create_public_threads:
-            raise commands.MissingPermissions(["manage_channels", "create_public_threads"])
+            raise commands.BotMissingPermissions(["manage_channels", "create_public_threads"])
 
         channel = bot.get_channel(inter.channel.id)
         try:
@@ -440,7 +440,7 @@ class MusicSettings(commands.Cog):
         guild = bot.get_guild(inter.guild_id)
 
         if not guild.me.guild_permissions.manage_threads:
-            raise commands.MissingPermissions(["manage_threads"])
+            raise commands.BotMissingPermissions(["manage_threads"])
 
         channel_inter = bot.get_channel(inter.channel.id)
 
