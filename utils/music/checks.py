@@ -124,8 +124,8 @@ async def check_pool_bots(inter, only_voiced: bool = False):
 def ensure_bot_instance(only_voiced=False):
 
     async def predicate(inter):
-
-        return await check_pool_bots(inter, only_voiced=only_voiced)
+        await check_pool_bots(inter, only_voiced=only_voiced)
+        return True
 
     return commands.check(predicate)
 
