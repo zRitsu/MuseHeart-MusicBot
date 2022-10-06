@@ -65,6 +65,8 @@ async def check_pool_bots(inter, only_voiced: bool = False):
         if not (author := guild.get_member(inter.author.id)):
             continue
 
+        inter.author = author
+
         if not author.voice:
             raise NoVoice()
 
@@ -119,12 +121,17 @@ async def check_pool_bots(inter, only_voiced: bool = False):
 
     raise GenericError(msg)
 
-def has_player(check_all_bots: bool = False):
+def ensure_bot_instance(only_voiced=False):
 
     async def predicate(inter):
 
-        if check_all_bots and inter.bot.intents.members:
-            await check_pool_bots(inter, only_voiced=True)
+        return await check_pool_bots(inter, only_voiced=only_voiced)
+
+    return commands.check(predicate)
+
+def has_player():
+
+    async def predicate(inter):
 
         try:
             bot = inter.music_bot
@@ -144,9 +151,6 @@ def has_player(check_all_bots: bool = False):
 def is_dj():
 
     async def predicate(inter):
-
-        if inter.bot.intents.members:
-            await check_pool_bots(inter)
 
         if not await has_perm(inter):
             raise NotDJorStaff()
@@ -181,14 +185,7 @@ def is_requester():
         try:
             bot = inter.music_bot
         except AttributeError:
-            if not inter.bot.intents.members:
-                bot = inter.bot
-            else:
-                try:
-                    await check_pool_bots(inter, only_voiced=True)
-                    bot = inter.music_bot
-                except AttributeError:
-                    bot = inter.bot
+            bot = inter.bot
 
         try:
             player: LavalinkPlayer = bot.music.players[inter.guild_id]
@@ -213,13 +210,11 @@ def is_requester():
     return commands.check(predicate)
 
 
-def check_voice(bot_is_connected=False):
+def check_voice():
 
     async def predicate(inter):
 
         try:
-            if not inter.guild and inter.guild_id:
-                await check_pool_bots(inter, only_voiced=bot_is_connected)
             guild = inter.music_guild
             author = guild.get_member(inter.author.id)
         except AttributeError:
@@ -228,11 +223,6 @@ def check_voice(bot_is_connected=False):
 
         if not author.voice:
             raise NoVoice()
-
-        if inter.bot.intents.members:
-
-            if await check_pool_bots(inter, only_voiced=bot_is_connected):
-                return True
 
         if not guild.me.voice:
 
@@ -259,14 +249,7 @@ def has_source():
         try:
             bot = inter.music_bot
         except AttributeError:
-            if not inter.bot.intents.members:
-                bot = inter.bot
-            else:
-                try:
-                    await check_pool_bots(inter, only_voiced=True)
-                    bot = inter.music_bot
-                except AttributeError:
-                    bot = inter.bot
+            bot = inter.bot
 
         try:
             player = bot.music.players[inter.guild_id]
