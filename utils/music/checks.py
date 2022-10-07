@@ -79,8 +79,6 @@ async def check_pool_bots(inter, only_voiced: bool = False):
             continue
 
         if not guild.voice_client:
-            if not inter.guild:
-                inter.author = author
             free_bot = bot, guild
 
     try:
@@ -216,23 +214,21 @@ def check_voice():
 
         try:
             guild = inter.music_guild
-            author = guild.get_member(inter.author.id)
         except AttributeError:
             guild = inter.guild
-            author = inter.author
 
-        if not author.voice:
+        if not inter.author.voice:
             raise NoVoice()
 
         if not guild.me.voice:
 
-            perms = author.voice.channel.permissions_for(guild.me)
+            perms = inter.author.voice.channel.permissions_for(guild.me)
 
             if not perms.connect:
-                raise MissingVoicePerms(author.voice.channel)
+                raise MissingVoicePerms(inter.author.voice.channel)
 
         try:
-            if author.id not in guild.me.voice.channel.voice_states:
+            if inter.author.id not in guild.me.voice.channel.voice_states:
                 raise DiffVoiceChannel()
         except AttributeError:
             pass
@@ -282,30 +278,28 @@ async def has_perm(inter):
     try:
         bot = inter.music_bot
         guild = inter.music_guild
-        channel = guild.get_channel(inter.channel.id)
-        author = guild.get_member(inter.author.id)
+        channel = bot.get_channel(inter.channel.id)
     except AttributeError:
         bot = inter.bot
         guild = inter.guild
         channel = inter.channel
-        author = inter.author
 
     try:
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
     except KeyError:
         return True
 
-    if author.id == player.player_creator or author.id in player.dj:
+    if inter.author.id == player.player_creator or inter.author.id in player.dj:
         return True
 
-    if author.guild_permissions.manage_channels:
+    if inter.author.guild_permissions.manage_channels:
         return True
 
     if player.keep_connected:
         raise GenericError(f"**Erro!** Apenas membros com a permissão de **gerenciar servidor** "
                            "podem usar este comando/botão com o **modo 24/7 ativo**...")
 
-    user_roles = [r.id for r in author.roles]
+    user_roles = [r.id for r in inter.author.roles]
 
     guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
 
@@ -318,15 +312,15 @@ async def has_perm(inter):
 
     vc = bot.get_channel(player.channel_id)
 
-    if not vc and author.voice:
-        player.dj.add(author.id)
+    if not vc and inter.author.voice:
+        player.dj.add(inter.author.id)
 
     elif bot.intents.members and not [m for m in vc.members if
                                             not m.bot and (m.guild_permissions.manage_channels or m.id in player.dj
                                                            or m.id == player.player_creator)]:
-        player.dj.add(author.id)
+        player.dj.add(inter.author.id)
         await channel.send(embed=disnake.Embed(
-            description=f"{author.mention} foi adicionado à lista de DJ's por não haver um no canal <#{vc.id}>.",
+            description=f"{inter.author.mention} foi adicionado à lista de DJ's por não haver um no canal <#{vc.id}>.",
             color=player.bot.get_color(guild.me)), delete_after=10)
         return True
 

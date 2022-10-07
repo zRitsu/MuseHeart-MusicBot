@@ -502,13 +502,11 @@ class Music(commands.Cog):
         try:
             bot = inter.music_bot
             guild = inter.music_guild
-            channel = guild.get_channel(inter.channel.id)
+            channel = bot.get_channel(inter.channel.id)
         except AttributeError:
             bot = inter.bot
             guild = inter.guild
             channel = inter.channel
-
-        author = inter.author
 
         can_send_message(channel, bot)
 
@@ -684,7 +682,7 @@ class Music(commands.Cog):
         player: LavalinkPlayer = bot.music.get_player(
             guild_id=inter.guild_id,
             cls=LavalinkPlayer,
-            player_creator=author.id,
+            player_creator=inter.author.id,
             guild=guild,
             channel=channel,
             node_id=node.identifier,
@@ -871,9 +869,7 @@ class Music(commands.Cog):
             except:
                 return
 
-        author = inter.author
-
-        if not author.voice or not query or (favs_size := len(favs)) >= 20:
+        if not inter.author.voice or not query or (favs_size := len(favs)) >= 20:
             return favs[:20]
 
         return await google_search(self.bot, query, max_entries=20 - favs_size) + favs
@@ -2207,14 +2203,12 @@ class Music(commands.Cog):
         except AttributeError:
             bot = inter.bot
 
-        author = inter.author
-
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         if not player.queue:
             raise GenericError("**Não há músicas na fila.**")
 
-        view = QueueInteraction(player, author)
+        view = QueueInteraction(player, inter.author)
         embed = view.embed
         if bot.user.id != self.bot.user.id:
             embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
