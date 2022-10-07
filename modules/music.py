@@ -875,7 +875,6 @@ class Music(commands.Cog):
         return await google_search(self.bot, query, max_entries=20 - favs_size) + favs
 
     @is_requester()
-    @has_source()
     @check_voice()
     @ensure_bot_instance(only_voiced=True)
     @commands.max_concurrency(1, commands.BucketType.member)
@@ -885,7 +884,6 @@ class Music(commands.Cog):
         await self.skip.callback(self=self, inter=ctx)
 
     @is_requester()
-    @has_source()
     @check_voice()
     @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(2, 8), commands.BucketType.guild)
