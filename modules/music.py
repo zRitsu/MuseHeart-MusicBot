@@ -1880,7 +1880,7 @@ class Music(commands.Cog):
         try:
             bot = inter.music_bot
             guild = inter.music_guild
-            channel = guild.get_channel(inter.channel.id)
+            channel = bot.get_channel(inter.channel.id)
         except AttributeError:
             bot = inter.bot
             guild = inter.guild
@@ -1970,7 +1970,7 @@ class Music(commands.Cog):
         try:
             bot = inter.music_bot
             guild = inter.music_guild
-            channel = guild.get_channel(inter.channel.id)
+            channel = bot.get_channel(inter.channel.id)
         except AttributeError:
             bot = inter.bot
             guild = inter.guild
@@ -2018,7 +2018,7 @@ class Music(commands.Cog):
         try:
             bot = inter.music_bot
             guild = inter.music_guild
-            channel = guild.get_channel(inter.channel.id)
+            channel = bot.get_channel(inter.channel.id)
         except AttributeError:
             bot = inter.bot
             guild = inter.guild
