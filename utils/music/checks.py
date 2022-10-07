@@ -113,7 +113,7 @@ async def check_pool_bots(inter, only_voiced: bool = False):
         msg = "**Não há bots de música compatível no servidor!**\n" \
               f"Você deve adicionar pelo menos um dos bots abaixo no seu servidor:\n{txt}"
     else:
-        msg = "**Não há bots disponíveis no momento...**"
+        msg = "**Não há mais bots disponíveis no servidor...**"
         if txt:
             msg += f"\nVocê pode convidar bots adicionais no seu servidor através dos links abaixo:\n{txt}"
 
