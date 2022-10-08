@@ -536,7 +536,7 @@ class Music(commands.Cog):
         static_player = guild_data['player_controller']
 
         if static_player['channel']:
-            if not (channel_db := bot.get_channel(int(static_player['channel'])) or bot.fetch_channel(int(static_player['channel']))):
+            if not (channel_db := bot.get_channel(int(static_player['channel'])) or await bot.fetch_channel(int(static_player['channel']))):
                 await self.reset_controller_db(inter.guild_id, guild_data, inter)
             else:
                 if channel_db != channel:
