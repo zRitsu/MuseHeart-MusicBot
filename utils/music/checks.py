@@ -105,7 +105,7 @@ async def check_pool_bots(inter, only_voiced: bool = False):
         if (bot.user.id == inter.bot.user.id and inter.guild) or not bot.public or bot.get_guild(inter.guild_id):
             continue
 
-        extra_bots_invite.append(f"[`{disnake.utils.escape_markdown(str(bot.user)).replace(' ', '_')}`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})")
+        extra_bots_invite.append(f"[`{disnake.utils.escape_markdown(str(bot.user.name))}`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})")
 
     txt += " | ".join(extra_bots_invite)
 
