@@ -538,9 +538,23 @@ class Music(commands.Cog):
         if static_player['channel']:
             if not (channel_db := bot.get_channel(int(static_player['channel'])) or await bot.fetch_channel(int(static_player['channel']))):
                 await self.reset_controller_db(inter.guild_id, guild_data, inter)
+
             else:
+
                 if channel_db != channel:
+
+                    try:
+                        if isinstance(channel_db, disnake.Thread) and (channel_db.archived or channel_db.locked):
+                            if not channel_db.parent.permissions_for(guild.me).manage_threads:
+                                raise GenericError(
+                                    f"**{bot.user.mention} não possui permissão de gerenciar tópicos para "
+                                    f"desarquivar/destrancar o tópico: {channel_db.mention}**")
+                            await channel_db.edit(archived=False, locked=False)
+                    except AttributeError:
+                        pass
+
                     can_send_message(channel_db, guild.me)
+
                 channel = channel_db
 
         is_pin = None
