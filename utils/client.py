@@ -495,25 +495,24 @@ class BotCore(commands.Bot):
 
         try:
             if isinstance(channel.parent, disnake.ForumChannel):
-
-                try:
-                    if self.intents.members and channel.owner.bot:
-
-                        if raise_error is False:
-                            return False
-
-                        raise GenericError("**Você não pode usar comandos prefixed em postagens de bots.**\n"
-                                           "`Use comando de barra (/) aqui.`", self_delete=True)
-                except AttributeError:
-                    pass
-
-                if channel.owner_id in (bot.user.id for bot in self.pool.bots):
+                if self.intents.members and channel.owner.bot:
 
                     if raise_error is False:
                         return False
 
-                    raise GenericError("**Você não pode usar comandos prefixed na postagem atual...**\n"
+                    raise GenericError("**Você não pode usar comandos prefixed em postagens de bots.**\n"
                                        "`Use comando de barra (/) aqui.`", self_delete=True)
+        except AttributeError:
+            pass
+
+        try:
+            if channel.owner_id in (bot.user.id for bot in self.pool.bots):
+
+                if raise_error is False:
+                    return False
+
+                raise GenericError("**Você não pode usar comandos prefixed na postagem atual...**\n"
+                                   "`Use comando de barra (/) aqui.`", self_delete=True)
         except AttributeError:
             pass
 
