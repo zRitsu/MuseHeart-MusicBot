@@ -317,7 +317,12 @@ class Music(commands.Cog):
         if not me:
             me = ctx.guild.me
 
-        player = bot.music.players[ctx.guild_id]
+        try:
+            guild_id = ctx.guild_id
+        except AttributeError:
+            guild_id = ctx.guild.id
+
+        player = bot.music.players[guild_id]
 
         can_connect(channel, me.guild, bot, check_other_bots_in_vc, check_pool)
 
@@ -2109,7 +2114,7 @@ class Music(commands.Cog):
                     disnake.ui.Button(label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song),
                     disnake.ui.Button(label="Tocar favorito", emoji="⭐", custom_id=PlayerControls.enqueue_fav)
                 ],
-                ephemeral=player.static and player.text_channel == inter.channel
+                ephemeral=player.static and player.text_channel.id == inter.channel_id
             )
             await player.destroy()
 
@@ -2942,7 +2947,7 @@ class Music(commands.Cog):
     @commands.Cog.listener("on_song_request")
     async def song_requests(self, ctx: Optional[CustomContext], message: disnake.Message):
 
-        if ctx.command:
+        if ctx.command or message.mentions:
             return
 
         if not self.bot.check_bot_forum_post(ctx.channel):
@@ -3194,6 +3199,7 @@ class Music(commands.Cog):
                 )
 
         if not player.is_connected:
+
             await self.do_connect(
                 message,
                 channel=message.author.voice.channel,
