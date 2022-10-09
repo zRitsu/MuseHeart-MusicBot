@@ -253,7 +253,7 @@ class MusicSettings(commands.Cog):
                 try:
                     return i.data.custom_id.endswith(f"_{inter.id}") and i.author == inter.author
                 except AttributeError:
-                    return i.message.id == msg_select.message.id and i.author == inter.author
+                    return i.message.id == msg_select.id and i.author == inter.author
 
             try:
                 inter = await self.bot.wait_for("button_click", check=check, timeout=30)
