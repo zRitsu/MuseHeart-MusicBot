@@ -272,7 +272,7 @@ async def send_idle_embed(
     )
 
     if isinstance(target, disnake.MessageInteraction):
-        await target.response.edit_message(embed=embed, components=components)
+        await target.response.edit_message(embed=embed, components=components, content=None)
         message = target.message
 
     elif isinstance(target, disnake.Message):
