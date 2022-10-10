@@ -903,6 +903,7 @@ class Music(commands.Cog):
         await self.skip.callback(self=self, inter=ctx)
 
     @is_requester()
+    @has_source()
     @check_voice()
     @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(2, 8), commands.BucketType.guild)
