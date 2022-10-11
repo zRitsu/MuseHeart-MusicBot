@@ -186,9 +186,9 @@ class Music(commands.Cog):
 
         await ctx.send("O arquivo de cache foi importado com sucesso!", delete_after=30)
 
-    @ensure_bot_instance()
     @check_voice()
     @can_send_message_check()
+    @ensure_bot_instance()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.message_command(name="add to queue")
     async def message_play(self, inter: disnake.MessageCommandInteraction):
@@ -211,9 +211,9 @@ class Music(commands.Cog):
             force_play="no",
         )
 
-    @ensure_bot_instance()
     @check_voice()
     @can_send_message_check()
+    @ensure_bot_instance()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.slash_command(name="search",
                             description=f"{desc_prefix}Buscar música e escolher uma entre os resultados para tocar.")
