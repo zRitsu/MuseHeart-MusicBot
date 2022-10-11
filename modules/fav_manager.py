@@ -70,7 +70,7 @@ class FavManager(commands.Cog):
                          "- Ao usar o comando /play (no preenchimento automático da busca)\n"
                          "- Ao clicar no botão de pedir música do player.\n"
                          "- Ao usar o comando play (prefixed) sem nome ou link.```",
-                         color=self.bot.get_color(inter.guild.me)))
+                         color=0x2F3136))
 
     @fav.sub_command(
         name=disnake.Localized("edit", data={disnake.Locale.pt_BR: "editar"}),
@@ -114,7 +114,7 @@ class FavManager(commands.Cog):
 
         await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
 
-        await inter.edit_original_message(embed=disnake.Embed(description="**Favorito editado com sucesso!**", color=self.bot.get_color(inter.guild.me)))
+        await inter.edit_original_message(embed=disnake.Embed(description="**Favorito editado com sucesso!**", color=0x2F3136))
 
     @fav.sub_command(
         name=disnake.Localized("remove", data={disnake.Locale.pt_BR: "remover"}),
