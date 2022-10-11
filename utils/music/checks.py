@@ -217,8 +217,11 @@ def check_voice():
         except AttributeError:
             guild = inter.guild
 
-        if not inter.author.voice:
-            raise NoVoice()
+        try:
+            if not inter.author.voice:
+                raise NoVoice()
+        except AttributeError:
+            pass
 
         if not guild.me.voice:
 
