@@ -87,6 +87,8 @@ class ErrorHandler(commands.Cog):
 
         if not error_msg:
 
+            components = None
+
             kwargs["embed"].title = "Ocorreu um erro no comando:"
             kwargs["embed"].description = f"```py\n{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
 
@@ -95,9 +97,12 @@ class ErrorHandler(commands.Cog):
                 kwargs["embed"].description += " `Meu desenvolvedor será notificado sobre o problema.`"
 
         else:
+
+            components = self.components
+
             kwargs["embed"].description = error_msg
 
-        await send_message(inter, components=self.components, **kwargs)
+        await send_message(inter, components=components, **kwargs)
 
         if not send_webhook:
             return
@@ -137,6 +142,8 @@ class ErrorHandler(commands.Cog):
 
         if not error_msg:
 
+            components = None
+
             if ctx.channel.permissions_for(ctx.guild.me).embed_links:
                 kwargs["embed"] = disnake.Embed(
                     color=disnake.Colour.red(),
@@ -152,6 +159,9 @@ class ErrorHandler(commands.Cog):
                                      "```py\n{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
 
         else:
+
+            components = self.components
+
             if ctx.channel.permissions_for(ctx.guild.me).embed_links:
                 kwargs["embed"] = disnake.Embed(color=disnake.Colour.red(), description=error_msg)
             else:
@@ -168,7 +178,7 @@ class ErrorHandler(commands.Cog):
         except:
             pass
 
-        await ctx.send(components=self.components, delete_after=delete_time, **kwargs)
+        await ctx.send(components=components, delete_after=delete_time, **kwargs)
 
         if not send_webhook:
             return
