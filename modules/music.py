@@ -284,9 +284,9 @@ class Music(commands.Cog):
         return await google_search(bot, current)
 
 
-
-    @can_send_message_check()
     @is_dj()
+    @has_player()
+    @can_send_message_check()
     @ensure_bot_instance(only_voiced=True)
     @commands.slash_command(description=f"{desc_prefix}Me conectar em um canal de voz (ou me mover para um).")
     async def connect(

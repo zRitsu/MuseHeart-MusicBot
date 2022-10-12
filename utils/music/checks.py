@@ -168,7 +168,7 @@ def can_send_message_check():
             if inter.guild_id:
                 return True
 
-            return
+            raise GenericError("**Este comando deve ser usado em um servidor...**")
 
         can_send_message(inter.channel, inter.guild.me)
         return True
