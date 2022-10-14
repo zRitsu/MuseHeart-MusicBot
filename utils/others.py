@@ -327,7 +327,7 @@ async def pin_list(inter, query: str, *, prefix=""):
 
 async def select_bot_pool(inter):
 
-    if isinstance(inter, CustomContext):
+    if isinstance(inter, CustomContext) or not inter.bot.config["INTERACTION_BOTS"]:
         return inter.bot
 
     bots = {}
