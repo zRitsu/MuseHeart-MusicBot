@@ -2961,9 +2961,6 @@ class Music(commands.Cog):
         if ctx.command or message.mentions:
             return
 
-        if not self.bot.check_bot_forum_post(ctx.channel):
-            return
-
         if message.author.bot:
 
             if message.flags.ephemeral:
@@ -3103,7 +3100,13 @@ class Music(commands.Cog):
                     not isinstance(message.channel.parent, disnake.ForumChannel):
                 return
             else:
-                await message.delete()
+
+                try:
+                    if not isinstance(message.channel.parent, disnake.ForumChannel):
+                        await message.delete()
+                except AttributeError:
+                    pass
+
                 try:
                     await msg.delete()
                 except:
