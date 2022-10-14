@@ -118,22 +118,24 @@ class Owner(commands.Cog):
                         with open(url.split("/")[-1], "wb") as f:
                             f.write(lavalink_jar)
 
-        node.restarting = True
+        if node:
 
-        for player in node.players.values():
-            txt = "O servidor de música está reiniciando e a música será retomada em alguns segundos (Por favor aguarde)..."
-            if player.static:
-                player.set_command_log(text=txt, emoji="🛠️")
-                player.update = True
-            else:
-                self.bot.loop.create_task(
-                    player.text_channel.send(
-                        embed=disnake.Embed(
-                            color=self.bot.get_color(player.guild.me),
-                            description=f"🛠️ **⠂{txt}**"
+            node.restarting = True
+
+            for player in node.players.values():
+                txt = "O servidor de música está reiniciando e a música será retomada em alguns segundos (Por favor aguarde)..."
+                if player.static:
+                    player.set_command_log(text=txt, emoji="🛠️")
+                    player.update = True
+                else:
+                    self.bot.loop.create_task(
+                        player.text_channel.send(
+                            embed=disnake.Embed(
+                                color=self.bot.get_color(player.guild.me),
+                                description=f"🛠️ **⠂{txt}**"
+                            )
                         )
                     )
-                )
 
         try:
             self.bot.pool.lavalink_process.kill()
