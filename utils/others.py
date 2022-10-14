@@ -212,6 +212,20 @@ async def send_message(
         if components:
             kwargs["components"] = components
 
+        try:
+
+            try:
+                channel = inter.music_bot.get_channel(inter.channel_id)
+            except AttributeError:
+                channel = inter.channel
+
+            if isinstance(channel.parent, disnake.ForumChannel) and (channel.archived or channel.locked) and \
+                    channel.guild.me.guild_permissions.manage_threads:
+                await channel.edit(archived=False, locked=False)
+
+        except AttributeError:
+            pass
+
         await inter.send(text, ephemeral=True, **kwargs)
 
 
