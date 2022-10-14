@@ -102,7 +102,7 @@ class PinManager(commands.Cog):
         guild = bot.get_guild(inter.guild_id)
 
         await inter.edit_original_message(embed=disnake.Embed(description="**Link adicionado/atualizado com sucesso nos fixos do player!\n"
-                         "Membros podem usá-lo diretamente no player-controller quando não estiver em uso.**", color=bot.get_color(guild.me)))
+                         "Membros podem usá-lo diretamente no player-controller quando não estiver em uso.**", color=bot.get_color(guild.me)), view=None)
 
         await self.process_idle_embed(guild)
 
@@ -168,7 +168,7 @@ class PinManager(commands.Cog):
 
         guild = bot.get_guild(inter.guild_id)
 
-        await inter.edit_original_message(embed=disnake.Embed(description="***Link fixo editado com sucesso!**", color=self.bot.get_color(guild.me)))
+        await inter.edit_original_message(embed=disnake.Embed(description="**Link fixo editado com sucesso!**", color=self.bot.get_color(guild.me)), view=None)
 
         await self.process_idle_embed(guild)
 
@@ -200,7 +200,7 @@ class PinManager(commands.Cog):
 
         guild = bot.get_guild(inter.guild_id)
 
-        await inter.edit_original_message(embed=disnake.Embed(description="**Link removido com sucesso!**", color=self.bot.get_color(guild.me)))
+        await inter.edit_original_message(embed=disnake.Embed(description="**Link removido com sucesso!**", color=self.bot.get_color(guild.me)), view=None)
 
         await self.process_idle_embed(guild)
 
@@ -282,7 +282,7 @@ class PinManager(commands.Cog):
                 color=self.bot.get_color(guild.me),
                 description = "**Os links foram importados com sucesso!**\n"
                               "**Eles vão aparecer quando o player não tiver em uso ou em modo de espera.**",
-            )
+            ), view=None
         )
 
         await self.process_idle_embed(guild)
@@ -316,7 +316,7 @@ class PinManager(commands.Cog):
                         f"Você pode importar usando o comando:** `/{self.pin.name} {self.add.name}`",
             color=self.bot.get_color(guild.me))
 
-        await inter.edit_original_message(embed=embed, file=disnake.File(fp=fp, filename="guild_favs.json"))
+        await inter.edit_original_message(embed=embed, file=disnake.File(fp=fp, filename="guild_favs.json"), view=None)
 
 
 def setup(bot: BotCore):
