@@ -46,12 +46,15 @@ def run_lavalink(
         except KeyError:
             pass
 
-        dirs.extend(
-            [
-                "./.java/jdk-13/bin/java",
-                "~/.jabba/jdk/zulu@1.17.0-0/bin/java",
-            ]
-        )
+        if os.name == "nt":
+            dirs.append(".java\\jdk-13\\bin\\java")
+        else:
+            dirs.extend(
+                [
+                    "./.java/jdk-13/bin/java",
+                    "~/.jabba/jdk/zulu@1.17.0-0/bin/java",
+                ]
+            )
 
         for cmd in dirs:
             if validate_java(cmd):
