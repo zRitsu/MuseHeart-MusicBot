@@ -292,10 +292,16 @@ class Music(commands.Cog):
     async def connect(
             self,
             inter: disnake.AppCmdInter,
-            channel: Union[disnake.VoiceChannel, disnake.StageChannel] = commands.Param(name="canal",
-                                                                                        description="Canal para me conectar",
-                                                                                        default=None)
+            channel: Union[disnake.VoiceChannel, disnake.StageChannel] = commands.Param(
+                name="canal",
+                description="Canal para me conectar"
+            )
     ):
+        try:
+            channel = inter.music_bot.get_channel(channel.id)
+        except AttributeError:
+            channel = channel
+
         await self.do_connect(inter, channel)
 
     async def do_connect(
@@ -309,23 +315,29 @@ class Music(commands.Cog):
     ):
 
         if not channel:
-            channel: Union[disnake.VoiceChannel, disnake.StageChannel] = ctx.author.voice.channel
+            try:
+                channel = ctx.music_bot.get_channel(ctx.author.voice.channel.id)
+            except AttributeError:
+                channel = ctx.author.voice.channel
 
         if not bot:
-            bot = self.bot
+            try:
+                bot = ctx.music_bot
+            except AttributeError:
+                bot = self.bot
 
         if not me:
-            me = ctx.guild.me
+            try:
+                me = ctx.music_guild.me
+            except AttributeError:
+                me = ctx.guild.me
 
         try:
             guild_id = ctx.guild_id
         except AttributeError:
             guild_id = ctx.guild.id
 
-        try:
-            player = bot.music.players[guild_id]
-        except KeyError:
-            raise NoPlayer()
+        player = bot.music.players[guild_id]
 
         can_connect(channel, me.guild, bot, check_other_bots_in_vc, check_pool)
 

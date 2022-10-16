@@ -72,7 +72,7 @@ async def check_pool_bots(inter, only_voiced: bool = False):
 
         if bot.user.id in author.voice.channel.voice_states:
             inter.music_bot = bot
-            inter.music_guild = bot.get_guild(inter.guild_id)
+            inter.music_guild = guild
             return True
 
         if only_voiced:
@@ -83,18 +83,20 @@ async def check_pool_bots(inter, only_voiced: bool = False):
 
     try:
         if not inter.guild.voice_client:
+
+            if only_voiced:
+                raise NoPlayer()
+
             inter.music_bot = inter.bot
             inter.music_guild = inter.guild
             return True
+
     except AttributeError:
         pass
 
     if free_bot:
         inter.music_bot, inter.music_guild = free_bot
         return True
-
-    if only_voiced:
-        raise NoPlayer()
 
     txt = ""
 
