@@ -3022,11 +3022,6 @@ class Music(commands.Cog):
 
             if not self.bot.intents.message_content:
 
-                try:
-                    await message.delete()
-                except:
-                    pass
-
                 if self.song_request_cooldown.get_bucket(message).update_rate_limit():
                     return
 
@@ -3045,6 +3040,12 @@ class Music(commands.Cog):
                 )
                 return
 
+        try:
+            if isinstance(message.channel, disnake.Thread) and isinstance(message.channel.parent, disnake.ForumChannel):
+                await message.delete()
+        except AttributeError:
+            await message.delete()
+
         if not message.content:
 
             try:
@@ -3052,7 +3053,7 @@ class Music(commands.Cog):
                     return
             except AttributeError:
                 return
-            await message.delete()
+
             await message.channel.send(f"{message.author.mention} você deve enviar um link/nome da música.",
                                        delete_after=9)
             return
@@ -3060,7 +3061,6 @@ class Music(commands.Cog):
         try:
             await self.song_request_concurrency.acquire(message)
         except:
-            await message.delete()
             await message.channel.send(
                 f"{message.author.mention} você deve aguardar seu pedido de música anterior carregar...",
                 delete_after=10)
@@ -3108,21 +3108,10 @@ class Music(commands.Cog):
 
             await self.parse_song_request(message, text_channel, data, response=msg)
 
-            if isinstance(message.channel, disnake.Thread) and \
-                    not isinstance(message.channel.parent, disnake.ForumChannel):
-                return
-            else:
-
-                try:
-                    if not isinstance(message.channel.parent, disnake.ForumChannel):
-                        await message.delete()
-                except AttributeError:
-                    pass
-
-                try:
-                    await msg.delete()
-                except:
-                    pass
+            try:
+                await msg.delete()
+            except:
+                pass
 
         except GenericError as e:
             error = f"{message.author.mention}. {e}"
@@ -3133,11 +3122,13 @@ class Music(commands.Cog):
 
         if error:
 
-            if msg:
-                await msg.edit(content=error, embed=None, view=None, delete_after=7)
-            else:
-                await message.channel.send(error, delete_after=7)
-            await message.delete()
+            try:
+                if msg:
+                    await msg.edit(content=error, embed=None, view=None, delete_after=7)
+                else:
+                    await message.channel.send(error, delete_after=7)
+            except:
+                traceback.print_exc()
 
         await self.song_request_concurrency.release(message)
 
