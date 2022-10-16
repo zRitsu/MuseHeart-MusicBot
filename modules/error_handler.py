@@ -346,7 +346,7 @@ class ErrorHandler(commands.Cog):
 
             if ctx.filled_options:
                 embed.description += "**Options**```\n" + \
-                                     "\n".join(f"{k} -> {disnake.utils.escape_markdown(v)}"
+                                     "\n".join(f"{k} -> {disnake.utils.escape_markdown(str(v))}"
                                                for k, v in ctx.filled_options.items()) + "```"
 
         except AttributeError:
