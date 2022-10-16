@@ -231,21 +231,25 @@ class BotPool:
 
                             self._sync_commands = False
 
-                            interaction_invites = ""
-
-                            for b in self.bots:
-
-                                if str(b.user.id) not in self.config["INTERACTION_BOTS"]:
-                                    continue
-
-                                interaction_invites += f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) "
-
-                            if interaction_invites:
+                            if self.config["INTERACTION_BOTS"]:
 
                                 @bot.slash_command(description="Use este comando caso tenha problemas de outros comandos"
                                                                " de barra (/) não estarem disponíveis.",
                                                    default_member_permissions=disnake.Permissions(manage_guild=True))
                                 async def info(inter: disnake.AppCmdInter):
+
+                                    interaction_invites = ""
+
+                                    for b in self.bots:
+
+                                        try:
+                                            if str(b.user.id) not in self.config["INTERACTION_BOTS"]:
+                                                continue
+                                        except:
+                                            continue
+
+                                        interaction_invites += f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) "
+
                                     embed = disnake.Embed(
                                         description="Aviso: para usar todos os meus comandos de barra (/) será necessário "
                                                     "ter os comandos de barra de uma das integrações listadas abaixo no seu servidor:\n"
