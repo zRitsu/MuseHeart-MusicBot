@@ -726,6 +726,7 @@ class Music(commands.Cog):
             player_creator=inter.author.id,
             guild=guild,
             channel=channel,
+            last_message_id=guild_data['player_controller']['message_id'],
             node_id=node.identifier,
             static=bool(static_player['channel']),
             skin=skin
@@ -3159,6 +3160,7 @@ class Music(commands.Cog):
             player_creator=message.author.id,
             guild=message.guild,
             channel=text_channel,
+            last_message_id=data['player_controller']['message_id'],
             static=True,
             skin=data["player_controller"]["skin"],
             node_id=node.identifier

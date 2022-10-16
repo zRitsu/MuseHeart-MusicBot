@@ -154,7 +154,7 @@ class LavalinkPlayer(wavelink.Player):
         self.command_log: str = ""
         self.command_log_emoji: str = ""
         self.is_closing: bool = False
-        self.last_message_id: Optional[int] = None
+        self.last_message_id: Optional[int] = kwargs.pop("last_message_id", None)
         self.keep_connected: bool = kwargs.pop("keep_connected", False)
         self.update: bool = False
         self.updating: bool = False
@@ -205,15 +205,19 @@ class LavalinkPlayer(wavelink.Player):
     async def channel_cleanup(self):
 
         try:
-            if not isinstance(self.text_channel.parent, disnake.ForumChannel):
-                return
+            if isinstance(self.text_channel.parent, disnake.ForumChannel) and \
+                    self.text_channel.owner_id == self.bot.user.id and self.text_channel.message_count > 1:
+                await self.text_channel.purge(check=lambda m: m.channel.id != m.id)
         except AttributeError:
+            pass
+
+        try:
+            self.last_message_id = int(self.last_message_id)
+        except TypeError:
             return
 
-        if self.text_channel.owner_id != self.bot.user.id or self.text_channel.message_count < 1:
-            return
-
-        await self.text_channel.purge(check=lambda m: m.channel.id != m.id)
+        if self.static and self.last_message_id != self.text_channel.last_message_id:
+            await self.text_channel.purge(check=lambda m: m.id != self.last_message_id)
 
     async def connect(self, channel_id: int, self_mute: bool = False, self_deaf: bool = False):
         await super().connect(channel_id, self_mute=self_mute, self_deaf=True)
