@@ -300,7 +300,7 @@ class Music(commands.Cog):
         try:
             channel = inter.music_bot.get_channel(channel.id)
         except AttributeError:
-            channel = channel
+            pass
 
         await self.do_connect(inter, channel)
 
