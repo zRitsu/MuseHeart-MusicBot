@@ -3042,7 +3042,10 @@ class Music(commands.Cog):
                 return
 
         try:
-            if isinstance(message.channel, disnake.Thread) and isinstance(message.channel.parent, disnake.ForumChannel):
+            if isinstance(message.channel, disnake.Thread):
+                if isinstance(message.channel.parent, disnake.ForumChannel):
+                    await message.delete()
+            else:
                 await message.delete()
         except AttributeError:
             await message.delete()
