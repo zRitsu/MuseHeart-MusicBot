@@ -593,6 +593,13 @@ class Music(commands.Cog):
 
         is_pin = None
 
+        try:
+            if inter.channel.archived:
+                await inter.response.defer(ephemeral=True)
+                await inter.channel.edit(archived=False)
+        except AttributeError:
+            traceback.print_exc()
+
         ephemeral = hide_playlist or await self.is_request_channel(inter, data=guild_data, ignore_thread=True)
 
         if not query:
@@ -720,7 +727,8 @@ class Music(commands.Cog):
 
                 inter = view.inter
 
-        await inter.response.defer(ephemeral=ephemeral)
+        if not inter.response.is_done():
+            await inter.response.defer(ephemeral=ephemeral)
 
         tracks, node = await self.get_tracks(query, inter.user, node=node, track_loops=repeat_amount,
                                              hide_playlist=hide_playlist)

@@ -175,7 +175,10 @@ def can_send_message_check():
         # TODO: tempfix para canal de forum (thread arquyivada)
         if isinstance(inter.channel, disnake.PartialMessageable):
             try:
-                inter.channel = inter.bot.get_channel(inter.channel.id)
+                await inter.response.defer(ephemeral=True)
+                inter.channel = await inter.bot.fetch_channel(inter.channel_id)
+                if inter.channel.archived:
+                    await inter.channel.edit(archived=False)
             except:
                 pass
 
