@@ -243,7 +243,7 @@ class Misc(commands.Cog):
             self.extra_user_bots_ids = None
 
         embed = disnake.Embed(
-                colour=self.bot.get_color(inter.guild.me),
+                colour=0x2F3136,
                 description=f"[**Clique aqui**]({disnake.utils.oauth_url(self.bot.user.id, permissions=disnake.Permissions(self.bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))}) "
                             "para me adicionar no seu servidor."
             )
@@ -251,6 +251,21 @@ class Misc(commands.Cog):
         if self.extra_user_bots:
             embed.description += "\n\n**Caso queira bots de música adicionais, você pode adicionar um dos bots abaixo:**\n\n" + \
                                  "\n".join(f"`{bot}:` [`adicionar`]({disnake.utils.oauth_url(bot.id, permissions=disnake.Permissions(self.bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})" for bot in self.extra_user_bots)
+
+        elif self.bot.config["INTERACTION_BOTS"]:
+
+            bots_invites = []
+
+            for bot in self.bot.pool.bots:
+
+                if not bot.public or bot.user.id == self.bot.user.id:
+                    continue
+
+                bots_invites.append(f"[`{disnake.utils.escape_markdown(str(bot.user.name))}`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})")
+
+            if bots_invites:
+                embed.description += "\n\n**Bots de música extras:**\n" + " | ".join(bots_invites)
+
 
         try:
             await inter.edit_original_message(embed=embed)
