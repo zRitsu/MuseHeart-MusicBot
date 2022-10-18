@@ -172,6 +172,13 @@ def can_send_message_check():
 
             raise GenericError("**Este comando deve ser usado em um servidor...**")
 
+        # TODO: tempfix para canal de forum (thread arquyivada)
+        if isinstance(inter.channel, disnake.PartialMessageable):
+            try:
+                inter.channel = inter.bot.get_channel(inter.channel.id)
+            except:
+                pass
+
         can_send_message(inter.channel, inter.guild.me)
         return True
 
