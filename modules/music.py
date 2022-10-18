@@ -430,7 +430,7 @@ class Music(commands.Cog):
                                         f"[{channel.name}]({channel.jump_url}) automaticamente (preciso da permissão " \
                                         f"de um staff).**"
 
-                embed.set_footer(text="Dica: para permitir eu falar no palco automaticamente será necessário me conceder "
+                embed.set_footer(text="Dica: para me permitir falar no palco automaticamente será necessário me conceder "
                                       "permissão de silenciar membros (no servidor ou apenas no canal de palco escolhido).")
 
                 await text_channel.send(ctx.author.mention, embed=embed, delete_after=45)
