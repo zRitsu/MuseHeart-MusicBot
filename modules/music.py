@@ -411,8 +411,7 @@ class Music(commands.Cog):
 
             stage_perms = channel.permissions_for(me)
 
-            if stage_perms.manage_roles:
-                await asyncio.sleep(1.5)
+            if stage_perms.mute_members:
                 await me.edit(suppress=False)
             else:
                 embed = disnake.Embed(color=self.bot.get_color(me))
@@ -426,6 +425,8 @@ class Music(commands.Cog):
                                         f"[{channel.name}]({channel.jump_url}) automaticamente (preciso da permissão " \
                                         f"de um staff).**"
 
+                embed.set_footer(text="Dica: para permitir eu falar no palco automaticamente será necessário me conceder "
+                                      "permissão de silenciar membros (no servidor ou apenas no canal de palco escolhido).")
                 await ctx.channel.send(ctx.author.mention, embed=embed, delete_after=45)
 
     @can_send_message_check()
