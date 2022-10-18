@@ -337,6 +337,11 @@ class Music(commands.Cog):
         except AttributeError:
             guild_id = ctx.guild.id
 
+        try:
+            text_channel = ctx.music_bot.get_channel(ctx.channel.id)
+        except AttributeError:
+            text_channel = ctx.channel
+
         player = bot.music.players[guild_id]
 
         can_connect(channel, me.guild, bot, check_other_bots_in_vc, check_pool)
@@ -391,7 +396,7 @@ class Music(commands.Cog):
 
             if not await check_deafen(me):
 
-                await player.text_channel.send(
+                await text_channel.send(
                     embed=disnake.Embed(
                         title="Aviso:",
                         description="Para manter sua privacidade e me ajudar a economizar "
@@ -427,7 +432,8 @@ class Music(commands.Cog):
 
                 embed.set_footer(text="Dica: para permitir eu falar no palco automaticamente será necessário me conceder "
                                       "permissão de silenciar membros (no servidor ou apenas no canal de palco escolhido).")
-                await ctx.channel.send(ctx.author.mention, embed=embed, delete_after=45)
+
+                await text_channel.send(ctx.author.mention, embed=embed, delete_after=45)
 
     @can_send_message_check()
     @check_voice()
@@ -2655,7 +2661,7 @@ class Music(commands.Cog):
 
         try:
             bot = ctx.music_bot
-            channel_ctx = bot.get_channel(ctx.channel.id)
+            channel_ctx = bot.get_channel(ctx.channel_id)
         except AttributeError:
             bot = ctx.bot
             channel_ctx = ctx.channel
