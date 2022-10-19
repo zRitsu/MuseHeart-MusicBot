@@ -2419,18 +2419,18 @@ class Music(commands.Cog):
     @clear.autocomplete("playlist")
     async def queue_playlist(self, inter: disnake.Interaction, query: str):
 
-        if not inter.author.voice:
-            return
-
-        if inter.bot.intents.members:
-            try:
-                bot = inter.music_bot
-                await check_pool_bots(inter, only_voiced=True)
-            except:
+        try:
+            if not inter.author.voice:
                 return
+        except:
+            pass
 
-        else:
-            bot = inter.bot
+        try:
+            await check_pool_bots(inter, only_voiced=True)
+            bot = inter.music_bot
+        except:
+            traceback.print_exc()
+            return
 
         try:
             player = bot.music.players[inter.guild_id]
