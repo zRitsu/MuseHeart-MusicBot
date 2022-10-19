@@ -1951,7 +1951,8 @@ class Music(commands.Cog):
             raise GenericError("**Esse comando não pode ser usado com uma conversa ativa na "
                                f"[mensagem]({player.message.jump_url}) do player.**")
 
-        await inter.response.defer(ephemeral=True)
+        if not inter.response.is_done():
+            await inter.response.defer(ephemeral=True)
 
         if channel != player.text_channel:
 
