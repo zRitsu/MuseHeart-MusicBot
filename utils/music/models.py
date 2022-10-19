@@ -25,7 +25,7 @@ class LavalinkTrack(wavelink.Track):
 
     def __init__(self, *args, **kwargs):
         try:
-            args[1]['title'] = fix_characters(args[1]['title'])
+            args[1]['title'] = fix_characters(args[1]['title'])[:97]
         except IndexError:
             pass
         super().__init__(*args, **kwargs)
@@ -42,7 +42,7 @@ class LavalinkTrack(wavelink.Track):
 
         try:
             self.info["extra"]["playlist"] = {
-                "name": kwargs["playlist"]["name"],
+                "name": kwargs["playlist"]["name"][:97],
                 "url": kwargs["playlist"]["url"]
             }
         except KeyError:

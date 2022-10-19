@@ -36,8 +36,8 @@ class SpotifyTrack:
                  requester: int = 0, playlist: dict = None, album = None, track_loops: int = 0, info: dict = None):
 
         self.info = info or {
-            "author": fix_characters(authors[0].name),
-            "title": title,
+            "author": fix_characters(authors[0].name)[:97],
+            "title": title[:97],
             "uri": uri,
             "length": duration,
             "isStream": False,
@@ -57,13 +57,13 @@ class SpotifyTrack:
 
         if album:
             self.info["extra"]["album"] = {
-                "name": album.name,
+                "name": album.name[:97],
                 "url": album.link
             }
 
         if playlist:
             self.info["extra"]["playlist"] = {
-                "name": playlist["name"],
+                "name": playlist["name"][:97],
                 "url": playlist["url"]
             }
 
