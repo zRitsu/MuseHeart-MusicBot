@@ -421,16 +421,11 @@ class Music(commands.Cog):
             else:
                 embed = disnake.Embed(color=self.bot.get_color(me))
 
-                if stage_perms.request_to_speak:
-                    await me.request_to_speak()
-                    embed.description = f"**Preciso que aceite minha solicitação pra falar no palco: " \
-                                        f"[{channel.name}]({channel.jump_url}).**"
-                else:
-                    embed.description = f"**Não tenho autoridade de falar no palco " \
-                                        f"[{channel.name}]({channel.jump_url}) automaticamente (preciso da permissão " \
-                                        f"de um staff).**"
+                embed.description = f"**Preciso que algum staff me convide para falar no palco: " \
+                                    f"[{channel.name}]({channel.jump_url}).**"
 
-                embed.set_footer(text="Dica: para me permitir falar no palco automaticamente será necessário me conceder "
+
+                embed.set_footer(text="💡 Dica: para me permitir falar no palco automaticamente será necessário me conceder "
                                       "permissão de silenciar membros (no servidor ou apenas no canal de palco escolhido).")
 
                 await text_channel.send(ctx.author.mention, embed=embed, delete_after=45)
@@ -592,13 +587,6 @@ class Music(commands.Cog):
                 channel = channel_db
 
         is_pin = None
-
-        try:
-            if inter.channel.archived:
-                await inter.response.defer(ephemeral=True)
-                await inter.channel.edit(archived=False)
-        except AttributeError:
-            traceback.print_exc()
 
         ephemeral = hide_playlist or await self.is_request_channel(inter, data=guild_data, ignore_thread=True)
 

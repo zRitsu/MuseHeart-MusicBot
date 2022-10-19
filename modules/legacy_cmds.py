@@ -810,8 +810,6 @@ class Owner(commands.Cog):
             stage_perms = channel.permissions_for(ctx.guild.me)
             if stage_perms.manage_permissions:
                 await ctx.guild.me.edit(suppress=False)
-            elif stage_perms.request_to_speak:
-                await ctx.guild.me.request_to_speak()
 
             await asyncio.sleep(1.5)
 
