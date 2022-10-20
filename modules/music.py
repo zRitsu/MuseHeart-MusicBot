@@ -699,7 +699,7 @@ class Music(commands.Cog):
                 if bot.user.id != self.bot.user.id:
                     embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
 
-                await inter.send(embed=embed, view=view, ephemeral=ephemeral)
+                msg = await inter.send(embed=embed, view=view, ephemeral=ephemeral)
 
                 await view.wait()
 
