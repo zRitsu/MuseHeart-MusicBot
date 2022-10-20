@@ -171,7 +171,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str, *, hide_play
 
     data = {
         'loadType': 'PLAYLIST_LOADED',
-        'playlistInfo': {'name': '', 'selectedTrack': -1},
+        'playlistInfo': {'name': '', 'selectedTrack': -1, 'url': query},
         'tracks': []
     }
 

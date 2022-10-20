@@ -713,7 +713,9 @@ class Music(commands.Cog):
                 if view.selected == "music":
                     query = YOUTUBE_VIDEO_REG.match(query).group()
 
-                inter = view.inter
+                inter.token = view.inter.token
+                inter.id = view.inter.id
+                inter.response = view.inter.response
 
         if not inter.response.is_done():
             await inter.response.defer(ephemeral=ephemeral)
@@ -852,7 +854,7 @@ class Music(commands.Cog):
             if hide_playlist:
                 log_text = f"Adicionou uma playlist com {len(tracks.tracks)} música(s) {pos_txt}."
             else:
-                log_text = f"{inter.author.mention} adicionou a playlist [`{fix_characters(tracks.data['playlistInfo']['name'], 20)}`]({query}){pos_txt} `({len(tracks.tracks)})`."
+                log_text = f"{inter.author.mention} adicionou a playlist [`{fix_characters(tracks.data['playlistInfo']['name'], 20)}`]({tracks.data['playlistInfo']['url']}){pos_txt} `({len(tracks.tracks)})`."
 
             total_duration = 0
 
@@ -862,7 +864,7 @@ class Music(commands.Cog):
 
             embed.set_author(
                 name=fix_characters(tracks.data['playlistInfo']['name'], 35),
-                url=query
+                url=tracks.data['playlistInfo']['url']
             )
             embed.set_thumbnail(url=tracks.tracks[0].thumb)
             embed.description = f"`{len(tracks.tracks)} música(s)`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}{player.controller_link}"
@@ -3635,7 +3637,7 @@ class Music(commands.Cog):
             if not isinstance(tracks, SpotifyPlaylist):
 
                 try:
-                    if tracks.tracks[0].info.get("class") == "YoutubeAudioTrack":
+                    if tracks.tracks[0].info.get("sourceName") == "youtube":
                         query = "https://www.youtube.com/playlist?list=" \
                                 f"{parse.parse_qs(parse.urlparse(query).query)['list'][0]}"
                 except IndexError:
@@ -3645,6 +3647,8 @@ class Music(commands.Cog):
                     "name": tracks.data['playlistInfo']['name'],
                     "url": query
                 } if not hide_playlist else {}
+
+                tracks.data['playlistInfo']["url"] = query
 
                 tracks.tracks = [LavalinkTrack(t.id, t.info, requester=user.id, playlist=playlist) for t in
                                  tracks.tracks]
