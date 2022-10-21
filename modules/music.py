@@ -713,9 +713,12 @@ class Music(commands.Cog):
                 if view.selected == "music":
                     query = YOUTUBE_VIDEO_REG.match(query).group()
 
-                inter.token = view.inter.token
-                inter.id = view.inter.id
-                inter.response = view.inter.response
+                if not isinstance(inter, disnake.ModalInteraction):
+                    inter.token = view.inter.token
+                    inter.id = view.inter.id
+                    inter.response = view.inter.response
+                else:
+                    inter = view.inter
 
         if not inter.response.is_done():
             await inter.response.defer(ephemeral=ephemeral)
