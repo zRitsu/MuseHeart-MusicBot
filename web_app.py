@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 logging.getLogger('tornado.access').disabled = True
 
-users_ws = []
+users_ws = {}
 bots_ws = []
 
 
@@ -92,11 +92,12 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                 self.close(code=1005, reason="Desconectando: por falta de ids de usuario")
                 return
 
-            for ws in users_ws:
-                try:
-                    ws.write_message(json.dumps(data))
-                except Exception as e:
-                    print(f"Erro ao processar dados do rpc para os users [{', '.join(ws.user_ids)}]: {repr(e)}")
+            try:
+                users_ws[data["user"]].write_message(json.dumps(data))
+            except KeyError:
+                pass
+            except Exception as e:
+                print(f"Erro ao processar dados do rpc para o user [{data['user']}]: {repr(e)}")
             return
 
         is_bot = data.pop("bot", False)
@@ -107,18 +108,26 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             bots_ws.append(self)
             return
 
+        if len(ws_id) > 3:
+            self.close(code=403, reason="Você está tentando conectar mais de 3 usuários consecutivamente...")
+            return
+
         self.user_ids = ws_id
 
         print("\n".join(f"Nova conexão - User: {u} | {data}" for u in self.user_ids))
+
+        for u_id in ws_id:
+            try:
+                users_ws[u_id].close(code=403, reason="Nova sessão iniciada...")
+            except:
+                pass
+            users_ws[u_id] = self
 
         for w in bots_ws:
             try:
                 w.write_message(json.dumps(data))
             except Exception as e:
                 print(f"Erro ao processar dados do rpc para os bot's {w.bot_ids}: {repr(e)}")
-
-        users_ws.append(self)
-
 
     def check_origin(self, origin: str):
         return True
@@ -127,7 +136,11 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
         if self.user_ids:
             print("\n".join(f"Conexão Finalizada - User: {u}" for u in self.user_ids))
-            users_ws.remove(self)
+            for u_id in self.user_ids:
+                try:
+                    del users_ws[u_id]
+                except KeyError:
+                    continue
             return
 
         if not self.bot_ids:

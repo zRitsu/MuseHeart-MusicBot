@@ -735,6 +735,8 @@ class LavalinkPlayer(wavelink.Player):
 
         thumb = self.bot.user.display_avatar.replace(size=512, static_format="png").url
 
+        users = [u for u in (users or voice_channel.voice_states) if u != self.bot.user.id]
+
         if close:
 
             stats = {
@@ -742,13 +744,17 @@ class LavalinkPlayer(wavelink.Player):
                 "bot_id": self.bot.user.id,
                 "bot_name": str(self.bot.user),
                 "thumb": thumb,
-                "users": [u for u in (users or voice_channel.voice_states) if u != self.bot.user.id]
             }
 
-            try:
-                await self.bot.ws_client.send(stats)
-            except Exception:
-                traceback.print_exc()
+            for u in users:
+
+                stats["user"] = u
+
+                try:
+                    await self.bot.ws_client.send(stats)
+                except Exception:
+                    traceback.print_exc()
+
             return
 
         if self.is_closing:
@@ -759,7 +765,6 @@ class LavalinkPlayer(wavelink.Player):
             "track": None,
             "bot_id": self.bot.user.id,
             "bot_name": str(self.bot.user),
-            "users": [m for m in (users or voice_channel.voice_states) if m != self.bot.user.id],
             "thumb": thumb,
             "info": {
                 "channel": {
@@ -769,7 +774,8 @@ class LavalinkPlayer(wavelink.Player):
                 "guild": {
                     "name": voice_channel.guild.name,
                     "id": voice_channel.guild.id,
-                }
+                },
+                "members": len(users)
             }
         }
 
@@ -822,7 +828,14 @@ class LavalinkPlayer(wavelink.Player):
                     }
                 )
 
-        await self.bot.ws_client.send(stats)
+        for u in users:
+
+            stats["user"] = u
+
+            try:
+                await self.bot.ws_client.send(stats)
+            except Exception:
+                traceback.print_exc()
 
     async def track_end(self):
 
