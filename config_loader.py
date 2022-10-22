@@ -54,6 +54,7 @@ DEFAULT_CONFIG = {
     ##############################################
     "SPOTIFY_CLIENT_ID": '',
     "SPOTIFY_CLIENT_SECRET": '',
+    "SEARCH_PROVIDER": "ytsearch",
 
     ##################################################
     ### Sistema de música - Local lavalink stuffs: ###

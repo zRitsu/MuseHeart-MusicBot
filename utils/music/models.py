@@ -687,7 +687,9 @@ class LavalinkPlayer(wavelink.Player):
             return
 
         try:
-            tracks = (await self.node.get_tracks(f"ytsearch:{track.single_title} - {track.authors_string}"))
+            tracks = (await self.node.get_tracks(
+                f"{self.bot.config['SEARCH_PROVIDER']}:{track.single_title} - {track.authors_string}"
+            ))
             try:
                 tracks = tracks.tracks
             except AttributeError:
@@ -715,6 +717,7 @@ class LavalinkPlayer(wavelink.Player):
             return
         except Exception:
             traceback.print_exc()
+            return
 
         return track
 
