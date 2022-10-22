@@ -21,7 +21,7 @@ class SpotifyPlaylist:
                 uri=track.link,
                 authors=track.artists,
                 title=track.name,
-                thumb=track.album.images[0].url if track.album.images else "",
+                thumb=track.album.images[1].url if track.album.images else "",
                 duration=track.duration.total_seconds() * 1000,
                 requester=requester,
                 playlist=playlist,
@@ -163,7 +163,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str, *, hide_play
             uri=result.link,
             authors=result.artists,
             title=result.name,
-            thumb=result.album.images[0].url,
+            thumb=result.album.images[1].url,
             duration=result.duration.total_seconds() * 1000,
             album=result.album if result.album.name != result.name else None,
             requester=requester
@@ -186,7 +186,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str, *, hide_play
                 uri=track.link,
                 authors=track.artists,
                 title=track.name,
-                thumb=result.images[0].url,
+                thumb=result.images[1].url,
                 duration=track.duration.total_seconds() * 1000,
                 requester=requester
             )]
