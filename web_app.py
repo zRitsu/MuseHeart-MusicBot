@@ -259,7 +259,9 @@ class WSClient:
 
                 for bot in self.pool.bots:
                     for player in bot.music.players.values():
-                        vc: disnake.VoiceChannel = player.bot.get_channel(player.channel_id)
+                        vc: disnake.VoiceChannel = bot.get_channel(player.channel_id)
+                        if not vc:
+                            continue
                         vc_user_ids = [i for i in vc.voice_states if i in users]
                         if vc_user_ids:
                             bot.loop.create_task(player.process_rpc(vc))
