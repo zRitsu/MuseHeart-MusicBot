@@ -2598,7 +2598,7 @@ class Music(commands.Cog):
     async def node_suggestions(self, inter: disnake.Interaction, query: str):
 
         try:
-            await check_pool_bots(inter, only_voiced=True)
+            await check_pool_bots(inter)
             bot = inter.music_bot
         except GenericError:
             return
