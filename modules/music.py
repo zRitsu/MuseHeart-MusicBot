@@ -562,6 +562,10 @@ class Music(commands.Cog):
             try:
                 channel_db = bot.get_channel(int(static_player['channel'])) or await bot.fetch_channel(
                     int(static_player['channel']))
+            except disnake.Forbidden:
+                raise GenericError(f"**Não tenho permissão para acessar o canal <#{static_player['channel']}>**\n"
+                                   f"Caso queira resetar a configuração do canal de pedir música, use o comando /reset "
+                                   f"ou /setup novamente...")
             except (TypeError, disnake.NotFound):
                 channel_db = None
 
