@@ -124,6 +124,10 @@ def parse_error(
     elif isinstance(error, WavelinkException):
         if (wave_error := str(error)) == "Track not found...":
             error_txt = "**Não houve resultados para sua busca...**"
+        elif "Unknown file format" in wave_error:
+            error_txt = "**Não há suporte para o link especificado...**"
+        elif "This video is not available" in wave_error:
+            error_txt = "**Este vídeo está indisponível ou privado...**"
         elif "The playlist does not exist" in wave_error:
             error_txt = "**A playlist não existe (ou está privada).**"
 
