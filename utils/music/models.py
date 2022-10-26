@@ -233,9 +233,10 @@ class LavalinkPlayer(wavelink.Player):
         hints = list(self.initial_hints)
 
         if self.static:
-            hints.append("Você pode fixar músicas/playlists na mensagem do player quando tiver no modo de espera/oscioso "
-                         "para qualquer membro poder usá-las de forma facilitada. Para isso use o comando: /pin add "
-                         "(comando vísivel apenas membros com perm de: gerenciar servidor)")
+            hints.append("Você pode fixar músicas/playlists na mensagem do player quando tiver no modo de "
+                         "espera/oscioso para qualquer membro poder usá-las de forma facilitada. Para isso use o "
+                         "comando: /server_playlist add (comando vísivel apenas membros com perm de: gerenciar "
+                         "servidor)")
 
         elif self.bot.intents.message_content and self.controller_mode:
             hints.append("Ao criar uma conversa/thread na mensagem do player, será ativado o modo de song-request "

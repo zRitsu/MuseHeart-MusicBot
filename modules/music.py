@@ -486,7 +486,6 @@ class Music(commands.Cog):
     @ensure_bot_instance()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.slash_command(
-        name=disnake.Localized("play", data={disnake.Locale.pt_BR: "tocar"}),
         description=f"{desc_prefix}Tocar música em um canal de voz.")
     async def play(
             self,
@@ -944,7 +943,6 @@ class Music(commands.Cog):
     @commands.dynamic_cooldown(user_cooldown(2, 8), commands.BucketType.guild)
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.slash_command(
-        name=disnake.Localized("skip", data={disnake.Locale.pt_BR: "pular"}),
         description=f"{desc_prefix}Pular a música atual que está tocando."
     )
     async def skip(self, inter: disnake.AppCmdInter):
@@ -991,7 +989,6 @@ class Music(commands.Cog):
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.dynamic_cooldown(user_cooldown(2, 8), commands.BucketType.guild)
     @commands.slash_command(
-        name=disnake.Localized("back", data={disnake.Locale.pt_BR: "voltar"}),
         description=f"{desc_prefix}Voltar para a música anterior."
     )
     async def back(self, inter: disnake.AppCmdInter):
@@ -1041,7 +1038,6 @@ class Music(commands.Cog):
     @check_voice()
     @ensure_bot_instance(only_voiced=True)
     @commands.slash_command(
-        name=disnake.Localized("voteskip", data={disnake.Locale.pt_BR: "votar"}),
         description=f"{desc_prefix}Votar para pular a música atual."
     )
     async def voteskip(self, inter: disnake.AppCmdInter):
@@ -1155,7 +1151,6 @@ class Music(commands.Cog):
     @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.member)
     @commands.slash_command(
-        name=disnake.Localized("pause", data={disnake.Locale.pt_BR: "pausar"}),
         description=f"{desc_prefix}Pausar a música."
     )
     async def pause(self, inter: disnake.AppCmdInter):
@@ -1191,7 +1186,6 @@ class Music(commands.Cog):
     @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.member)
     @commands.slash_command(
-        name=disnake.Localized("resume", data={disnake.Locale.pt_BR: "despausar"}),
         description=f"{desc_prefix}Retomar/Despausar a música."
     )
     async def resume(self, inter: disnake.AppCmdInter):
@@ -1232,7 +1226,6 @@ class Music(commands.Cog):
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.member)
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.slash_command(
-        name=disnake.Localized("seek", data={disnake.Locale.pt_BR: "avançar"}),
         description=f"{desc_prefix}Avançar/Retomar a música para um tempo específico."
     )
     async def seek(
@@ -1407,7 +1400,6 @@ class Music(commands.Cog):
     @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(3, 5), commands.BucketType.member)
     @commands.slash_command(
-        name=disnake.Localized("loop_mode", data={disnake.Locale.pt_BR: "repetição"}),
         description=f"{desc_prefix}Selecionar modo de repetição entre: atual / fila ou desativar."
     )
     async def loop_mode(
@@ -1467,7 +1459,6 @@ class Music(commands.Cog):
     @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(3, 5), commands.BucketType.member)
     @commands.slash_command(
-        name=disnake.Localized("loop_amount", data={disnake.Locale.pt_BR: "repetição_quantidade"}),
         description=f"{desc_prefix}Definir quantidade de repetições da música atual."
     )
     async def loop_amount(
@@ -1512,7 +1503,6 @@ class Music(commands.Cog):
     @check_voice()
     @ensure_bot_instance(only_voiced=True)
     @commands.slash_command(
-        name=disnake.Localized("remove", data={disnake.Locale.pt_BR: "remover"}),
         description=f"{desc_prefix}Remover uma música específica da fila."
     )
     async def remove(
@@ -1563,10 +1553,9 @@ class Music(commands.Cog):
     @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.guild)
     @commands.slash_command(
-        name=disnake.Localized("readd", data={disnake.Locale.pt_BR: "readicionar"}),
         description=f"{desc_prefix}Readicionar as músicas tocadas na fila."
     )
-    async def readd(self, inter: disnake.AppCmdInter):
+    async def readd_songs(self, inter: disnake.AppCmdInter):
 
         try:
             bot = inter.music_bot
@@ -1617,7 +1606,6 @@ class Music(commands.Cog):
     @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(2, 8), commands.BucketType.guild)
     @commands.slash_command(
-        name=disnake.Localized("skipto", data={disnake.Locale.pt_BR: "pular_para"}),
         description=f"{desc_prefix}Pular para a música especificada."
     )
     async def skipto(
@@ -1706,17 +1694,25 @@ class Music(commands.Cog):
     @check_voice()
     @ensure_bot_instance(only_voiced=True)
     @commands.slash_command(
-        name=disnake.Localized("move", data={disnake.Locale.pt_BR: "mover"}),
         description=f"{desc_prefix}Mover uma música para a posição especificada da fila."
     )
     async def move(
             self,
             inter: disnake.AppCmdInter,
-            query: str = commands.Param(name="nome", description="Nome da música completo."),
+            query: str = commands.Param(name="nome", description="Nome da música."),
             position: int = commands.Param(name="posição", description="Posição de destino na fila.", default=1),
-            search_all: bool = commands.Param(
-                name="mover_vários", default=False,
-                description="Incluir todas as músicas da fila com o nome especificado."
+            search_all: str = commands.Param(
+                name="mover_vários",
+                description="Incluir todas as músicas da fila com o nome especificado.",
+                choices=[
+                    disnake.OptionChoice(
+                        disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"
+                    ),
+                    disnake.OptionChoice(
+                        disnake.Localized("No", data={disnake.Locale.pt_BR: "Não"}), "no"
+                    )
+                ],
+                default="no"
             )
     ):
 
@@ -1732,7 +1728,7 @@ class Music(commands.Cog):
 
         player: LavalinkPlayer = bot.music.players[guild.id]
 
-        indexes = queue_track_index(inter, bot, query, check_all=search_all)
+        indexes = queue_track_index(inter, bot, query, check_all=search_all == "yes")
 
         if not indexes:
             raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
@@ -1805,7 +1801,6 @@ class Music(commands.Cog):
     @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.guild)
     @commands.slash_command(
-        name=disnake.Localized("rotate", data={disnake.Locale.pt_BR: "rotacionar"}),
         description=f"{desc_prefix}Rotacionar a fila para a música especificada."
     )
     async def rotate(
@@ -2060,7 +2055,6 @@ class Music(commands.Cog):
     @check_voice()
     @ensure_bot_instance(only_voiced=True)
     @commands.slash_command(
-        name=disnake.Localized("remove_dj", data={disnake.Locale.pt_BR: "remover_dj"}),
         description=f"{desc_prefix}Remover um membro da lista de DJ's na sessão atual do player."
     )
     async def remove_dj(
@@ -2116,7 +2110,6 @@ class Music(commands.Cog):
     @check_voice()
     @ensure_bot_instance(only_voiced=True)
     @commands.slash_command(
-        name=disnake.Localized("stop", data={disnake.Locale.pt_BR: "parar"}),
         description=f"{desc_prefix}Parar o player e me desconectar do canal de voz."
     )
     async def stop(self, inter: disnake.AppCmdInter):
@@ -2158,7 +2151,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @ensure_bot_instance(only_voiced=True)
-    @commands.slash_command(name=disnake.Localized("queue", data={disnake.Locale.pt_BR: "fila"}),)
+    @commands.slash_command(name="queue")
     async def q(self, inter):
         pass
 
@@ -2176,7 +2169,7 @@ class Music(commands.Cog):
     @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(3, 5), commands.BucketType.member)
     @q.sub_command(
-        name=disnake.Localized("shuffle", data={disnake.Locale.pt_BR: "misturar"}),
+        name="shuffle",
         description=f"{desc_prefix}Misturar as músicas da fila")
     async def shuffle_(self, inter: disnake.AppCmdInter):
 
@@ -2213,7 +2206,6 @@ class Music(commands.Cog):
     @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(1, 5), commands.BucketType.guild)
     @q.sub_command(
-        name=disnake.Localized("reverse", data={disnake.Locale.pt_BR: "inverter"}),
         description=f"{desc_prefix}Inverter a ordem das músicas na fila"
     )
     async def reverse(self, inter: disnake.AppCmdInter):
@@ -2247,7 +2239,6 @@ class Music(commands.Cog):
 
     @commands.max_concurrency(1, commands.BucketType.member)
     @q.sub_command(
-        name=disnake.Localized("show", data={disnake.Locale.pt_BR: "mostrar"}),
         description=f"{desc_prefix}Exibir as músicas que estão na fila."
     )
     async def show(self, inter: disnake.AppCmdInter):
@@ -2299,7 +2290,7 @@ class Music(commands.Cog):
     @commands.max_concurrency(1, commands.BucketType.guild)
     @commands.cooldown(1, 5, commands.BucketType.member)
     @commands.slash_command(
-        name=disnake.Localized("clear_queue", data={disnake.Locale.pt_BR: "limpar_fila"}),
+        name="clear_queue",
         description=f"{desc_prefix}Limpar a fila de música."
     )
     async def clear(
@@ -2489,7 +2480,6 @@ class Music(commands.Cog):
     @ensure_bot_instance(only_voiced=True)
     @commands.cooldown(2, 5, commands.BucketType.member)
     @commands.slash_command(
-        name=disnake.Localized("restrict_mode", data={disnake.Locale.pt_BR: "modo_restrito"}),
         description=f"{desc_prefix}Ativar/Desativar o modo restrito de comandos que requer DJ/Staff.")
     async def restrict_mode(self, inter: disnake.AppCmdInter):
 
@@ -2565,7 +2555,6 @@ class Music(commands.Cog):
     @is_dj()
     @commands.cooldown(1, 10, commands.BucketType.guild)
     @commands.slash_command(
-        name=disnake.Localized("change_node", data={disnake.Locale.pt_BR: "mudar_server"}),
         description=f"{desc_prefix}Migrar o player para outro servidor de música."
     )
     async def change_node(

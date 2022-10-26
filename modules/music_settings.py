@@ -117,7 +117,6 @@ class MusicSettings(commands.Cog):
 
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
     @commands.slash_command(
-        name=disnake.Localized("setup_songrequest_channel", data={disnake.Locale.pt_BR: "configurar_canal_de_música"}),
         description=f"{desc_prefix}Criar/escolher um canal dedicado para pedir músicas e deixar player fixado.",
         default_member_permissions=disnake.Permissions(manage_guild=True)
     )
@@ -417,7 +416,6 @@ class MusicSettings(commands.Cog):
 
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
     @commands.slash_command(
-        name=disnake.Localized("reset", data={disnake.Locale.pt_BR: "resetar_canal"}),
         description=f"{desc_prefix}Resetar as configurações relacionadas ao canal de pedir música (song request).",
         default_member_permissions=disnake.Permissions(manage_guild=True)
     )
@@ -523,7 +521,6 @@ class MusicSettings(commands.Cog):
 
     @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
     @commands.slash_command(
-        name=disnake.Localized("add_dj_role", data={disnake.Locale.pt_BR: "adicionar_cargo_dj"}),
         description=f"{desc_prefix}Adicionar um cargo para a lista de DJ's do servidor.",
         default_member_permissions=disnake.Permissions(manage_guild=True)
     )
@@ -561,7 +558,6 @@ class MusicSettings(commands.Cog):
 
     @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
     @commands.slash_command(
-        name=disnake.Localized("removedjrole", data={disnake.Locale.pt_BR: "remover_cargo_dj"}),
         description=f"{desc_prefix}Remover um cargo para a lista de DJ's do servidor.",
         default_member_permissions=disnake.Permissions(manage_guild=True)
     )
@@ -608,7 +604,6 @@ class MusicSettings(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.guild)
     @commands.max_concurrency(1, commands.BucketType.guild)
     @commands.slash_command(
-        name=disnake.Localized("change_skin", data={disnake.Locale.pt_BR: "mudar_aparência"}),
         description=f"{desc_prefix}Alterar aparência/skin do player.",
         default_member_permissions=disnake.Permissions(manage_guild=True)
     )
@@ -733,7 +728,6 @@ class MusicSettings(commands.Cog):
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.slash_command(
-        name=disnake.Localized("lavalink_servers", data={disnake.Locale.pt_BR: "servidores_lavalink"}),
         description=f"{desc_prefix}Ver informações dos servidores de música (lavalink servers)."
     )
     async def nodeinfo(self, inter: disnake.AppCmdInter):

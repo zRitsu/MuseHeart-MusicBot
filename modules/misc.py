@@ -125,7 +125,6 @@ class Misc(commands.Cog):
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.slash_command(
-        name=disnake.Localized("about", data={disnake.Locale.pt_BR: "sobre_mim"}),
         description=f"{desc_prefix}Exibir informações sobre mim."
     )
     async def about(
@@ -221,7 +220,6 @@ class Misc(commands.Cog):
 
 
     @commands.slash_command(
-        name=disnake.Localized("invite", data={disnake.Locale.pt_BR: "convidar"}),
         description=f"{desc_prefix}Exibir meu link de convite para você me adicionar no seu servidor."
     )
     async def invite(self, inter: disnake.AppCmdInter):
