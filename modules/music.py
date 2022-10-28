@@ -13,11 +13,11 @@ from urllib import parse
 from utils.client import BotCore
 from utils.db import DBModel
 from utils.music.errors import GenericError, MissingVoicePerms, NoPlayer
-from utils.music.spotify import SpotifyPlaylist, process_spotify
+from utils.music.spotify import process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, \
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen, check_pool_bots, \
     ensure_bot_instance
-from utils.music.models import LavalinkPlayer, LavalinkTrack
+from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialPlaylist
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, google_search, percentage
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
@@ -3630,7 +3630,7 @@ class Music(commands.Cog):
 
         else:
 
-            if not isinstance(tracks, SpotifyPlaylist):
+            if not isinstance(tracks, PartialPlaylist):
 
                 try:
                     if tracks.tracks[0].info.get("sourceName") == "youtube":

@@ -9,9 +9,8 @@ from utils.client import BotCore
 import json
 import asyncio
 from utils.db import DBModel
-from utils.music.spotify import SpotifyTrack
 from utils.music.checks import can_connect
-from utils.music.models import LavalinkPlayer, LavalinkTrack
+from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialTrack
 from utils.others import CustomContext
 
 
@@ -100,7 +99,7 @@ class PlayerSession(commands.Cog):
 
                 for info in data["tracks"]:
                     if info["sourceName"] == "spotify":
-                        t = SpotifyTrack(info=info)
+                        t = PartialTrack(info=info)
                     else:
                         t = LavalinkTrack(id_=info["id"], info=info)
                     del t.info["id"]
@@ -108,7 +107,7 @@ class PlayerSession(commands.Cog):
 
                 for info in data["played"]:
                     if info["sourceName"] == "spotify":
-                        t = SpotifyTrack(info=info)
+                        t = PartialTrack(info=info)
                     else:
                         t = LavalinkTrack(id_=info["id"], info=info)
                     del t.info["id"]

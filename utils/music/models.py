@@ -10,7 +10,6 @@ from .converters import fix_characters, time_format, get_button_style
 from .filters import AudioFilter
 from ..db import DBModel
 from ..others import send_idle_embed, PlayerControls
-from .spotify import SpotifyTrack
 import traceback
 from collections import deque
 from typing import Optional, Union, TYPE_CHECKING, List
@@ -18,6 +17,137 @@ from typing import Optional, Union, TYPE_CHECKING, List
 if TYPE_CHECKING:
     from ..client import BotCore
 
+
+class PartialPlaylist:
+
+    def __init__(self, data: dict):
+        self.data = data
+
+    @property
+    def tracks(self):
+        return self.data["tracks"]
+
+    @property
+    def name(self):
+        try:
+            return self.data["playlistInfo"]["name"]
+        except KeyError:
+            return
+
+    @property
+    def url(self):
+        try:
+            return self.data["playlistInfo"]["url"]
+        except KeyError:
+            return
+
+
+class PartialTrack:
+
+    def __init__(self, *, uri: str = "", title: str = "", author="", thumb: str = "", duration: int = 0,
+                 requester: int = 0, track_loops: int = 0, source_name: str = "", info: dict = None):
+
+        self.info = info or {
+            "author": fix_characters(author)[:97],
+            "title": title[:97],
+            "uri": uri,
+            "length": duration,
+            "isStream": False,
+            "isSeekable": True,
+            "sourceName": source_name,
+            "extra": {
+                "requester": requester,
+                "track_loops": track_loops,
+                "thumb": thumb
+            }
+        }
+
+        self.id = ""
+        self.thumb = self.info["extra"]["thumb"]
+
+    def __repr__(self):
+        return f"{self.info['sourceName']} - {self.duration} - {self.authors_string} - {self.title}"
+
+    @property
+    def uri(self) -> str:
+        return self.info["uri"]
+
+    @property
+    def title(self) -> str:
+        return f"{self.author} - {self.single_title}"
+
+    @property
+    def single_title(self) -> str:
+        return self.info["title"]
+
+    @property
+    def author(self) -> str:
+        return self.info["author"]
+
+    @property
+    def authors_string(self) -> str:
+        try:
+            return ", ".join(self.info["extra"]["authors"])
+        except KeyError:
+            return self.author
+
+    @property
+    def authors_md(self) -> str:
+        try:
+            return self.info["extra"]["authors_md"]
+        except KeyError:
+            return ""
+
+    @property
+    def authors(self) -> List[str]:
+        try:
+            return self.info["extra"]["authors"]
+        except KeyError:
+            return [self.author]
+
+    @property
+    def requester(self) -> int:
+        return self.info["extra"]["requester"]
+
+    @property
+    def track_loops(self) -> int:
+        return self.info["extra"]["track_loops"]
+
+    @property
+    def is_stream(self) -> bool:
+        return self.info["isStream"]
+
+    @property
+    def duration(self) -> int:
+        return self.info["length"]
+
+    @property
+    def album_name(self) -> str:
+        try:
+            return self.info["extra"]["album"]["name"]
+        except KeyError:
+            return ""
+
+    @property
+    def album_url(self) -> str:
+        try:
+            return self.info["extra"]["album"]["url"]
+        except KeyError:
+            return ""
+
+    @property
+    def playlist_name(self) -> str:
+        try:
+            return self.info["extra"]["playlist"]["name"]
+        except KeyError:
+            return ""
+
+    @property
+    def playlist_url(self) -> str:
+        try:
+            return self.info["extra"]["playlist"]["url"]
+        except KeyError:
+            return ""
 
 class LavalinkTrack(wavelink.Track):
 
@@ -288,7 +418,7 @@ class LavalinkPlayer(wavelink.Player):
         if not track:
             return
 
-        if isinstance(track, SpotifyTrack):
+        if isinstance(track, PartialTrack):
 
             self.locked = True
 
@@ -682,7 +812,7 @@ class LavalinkPlayer(wavelink.Player):
         except:
             pass
 
-    async def resolve_track(self, track: SpotifyTrack):
+    async def resolve_track(self, track: PartialTrack):
 
         if track.id:
             return
@@ -802,7 +932,7 @@ class LavalinkPlayer(wavelink.Player):
 
         else:
 
-            track: Union[LavalinkTrack, SpotifyTrack] = self.current
+            track: Union[LavalinkTrack, PartialTrack] = self.current
 
             stats["track"] = {
                 "source": track.info["sourceName"],
