@@ -29,6 +29,8 @@ from yt_dlp import list_extractors
 
 extractors = list_extractors()
 
+exclude_extractors = ["youtube", "soundcloud", "deezer", "applemusic"]
+
 search_sources_opts = [
     disnake.OptionChoice("Youtube", "ytsearch"),
     disnake.OptionChoice("Youtube Music", "ytmsearch"),
@@ -3611,8 +3613,6 @@ class Music(commands.Cog):
                     )
 
             if not tracks:
-
-                exclude_extractors = ["youtube", "soundcloud", "deezer", "applemusic"]
 
                 for e in extractors:
 
