@@ -815,12 +815,17 @@ class LavalinkPlayer(wavelink.Player):
     async def resolve_track(self, track: PartialTrack):
 
         if track.id:
-            return
+            return track
 
         try:
-            tracks = (await self.node.get_tracks(
-                f"{self.bot.config['SEARCH_PROVIDER']}:{track.single_title} - {track.authors_string}"
-            ))
+
+            try:
+                to_search = track.info["search_uri"]
+            except KeyError:
+                to_search = f"{self.bot.config['SEARCH_PROVIDER']}:{track.single_title} - {track.authors_string}"
+
+            tracks = (await self.node.get_tracks(to_search))
+
             try:
                 tracks = tracks.tracks
             except AttributeError:
@@ -936,7 +941,7 @@ class LavalinkPlayer(wavelink.Player):
 
             stats["track"] = {
                 "source": track.info["sourceName"],
-                "thumb": track.thumb,
+                "thumb": track.thumb if len(track.thumb) < 257 else "",
                 "title": track.single_title,
                 "url": track.uri,
                 "author": track.authors_string,

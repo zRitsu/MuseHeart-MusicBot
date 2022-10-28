@@ -1,5 +1,6 @@
 import datetime
 import json
+import re
 import aiofiles
 import aiohttp
 import disnake
@@ -12,18 +13,21 @@ from random import shuffle
 from urllib import parse
 from utils.client import BotCore
 from utils.db import DBModel
-from utils.music.errors import GenericError, MissingVoicePerms, NoPlayer
+from utils.music.errors import GenericError, MissingVoicePerms
 from utils.music.spotify import process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, \
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen, check_pool_bots, \
     ensure_bot_instance
-from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialPlaylist
+from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialPlaylist, PartialTrack
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, google_search, percentage
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
+from utils.music.ytdl_tools import YTDLTools
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, fav_list, queue_track_index
 from user_agent import generate_user_agent
+from yt_dlp import list_extractors
 
+extractors = list_extractors()
 
 search_sources_opts = [
     disnake.OptionChoice("Youtube", "ytsearch"),
@@ -44,6 +48,8 @@ class Music(commands.Cog):
     def __init__(self, bot: BotCore):
 
         self.bot = bot
+
+        self.ytdl = YTDLTools(bot)
 
         self.song_request_concurrency = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
@@ -3606,18 +3612,72 @@ class Music(commands.Cog):
 
             if not tracks:
 
-                if node.search:
-                    node_search = node
-                else:
-                    try:
-                        node_search = \
-                            sorted(
-                                [n for n in self.bot.music.nodes.values() if n.search and n.available and n.is_available],
-                                key=lambda n: len(n.players))[0]
-                    except IndexError:
-                        node_search = node
+                exclude_extractors = ["youtube", "soundcloud", "deezer", "applemusic"]
 
-                tracks = await node_search.get_tracks(query)
+                for e in extractors:
+
+                    if not e._VALID_URL:
+                        continue
+
+                    if not (matches := re.compile(e._VALID_URL).match(query)):
+                        continue
+
+                    if not matches.groups():
+                        continue
+
+                    if any(ee in type(e).__name__.lower() for ee in exclude_extractors):
+                        continue
+
+                    data = await self.ytdl.extract_info(query)
+
+                    try:
+                        if data["_type"] == "playlist":
+                            raise GenericError("**No momento não há suporte para playlists com o link fornecido...**")
+                    except KeyError:
+                        pass
+
+                    try:
+                        entrie = data["entries"][0]
+                    except KeyError:
+                        entrie = data
+
+                    try:
+                        if entrie["age_limit"] > 17:
+                            raise GenericError("**Este link contém conteúdo para maiores de 18 anos!**")
+                    except KeyError:
+                        pass
+
+                    t = PartialTrack(
+                        uri=entrie.get("webpage_url") or query,
+                        title=entrie["title"],
+                        author=entrie["uploader"],
+                        thumb=entrie["thumbnail"],
+                        duration=entrie["duration"] * 1000,
+                        requester=user.id,
+                        source_name=entrie["extractor"],
+                    )
+
+                    t.info.update({
+                        "search_uri": entrie["url"],
+                        "authors": entrie["uploader"]
+                    })
+
+                    tracks = [t]
+
+                if not tracks:
+
+                    if node.search:
+                        node_search = node
+                    else:
+                        try:
+                            node_search = \
+                                sorted(
+                                    [n for n in self.bot.music.nodes.values() if n.search and n.available and n.is_available],
+                                    key=lambda n: len(n.players))[0]
+                        except IndexError:
+                            node_search = node
+
+                    tracks = await node_search.get_tracks(query)
 
         if not tracks:
             raise GenericError("Não houve resultados para sua busca.")

@@ -10,3 +10,4 @@ dnspython
 psutil
 aiofiles
 disnake-jishaku
+yt-dlp
