@@ -1,7 +1,6 @@
-from functools import partial
 from yt_dlp import YoutubeDL
 
-YDL_OPTIONS = {
+YTDL_OPTS = {
     'format': 'bestaudio/best',
     'noplaylist': True,
     'nocheckcertificate': True,
@@ -32,10 +31,11 @@ class YTDLTools:
 
     def __init__(self, bot):
         self.bot = bot
-        self.ytdl = YoutubeDL(YDL_OPTIONS)
 
-    async def extract_info(self, url: str):
+    def extract_info(self, url: str):
 
-        to_run = partial(self.ytdl.extract_info, url=url, download=False)
-        info = await self.bot.loop.run_in_executor(None, to_run)
-        return info
+        with YoutubeDL(YTDL_OPTS) as ytdl:
+            return ytdl.extract_info(url=url, download=False)
+
+    async def get_track_info(self, url: str):
+        return await self.bot.loop.run_in_executor(None, self.extract_info, url)

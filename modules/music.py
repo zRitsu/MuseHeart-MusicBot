@@ -3631,7 +3631,7 @@ class Music(commands.Cog):
                     if any(ee in type(e).__name__.lower() for ee in exclude_extractors):
                         continue
 
-                    data = await self.ytdl.extract_info(query)
+                    data = await self.ytdl.get_track_info(query)
 
                     try:
                         if data["_type"] == "playlist":
