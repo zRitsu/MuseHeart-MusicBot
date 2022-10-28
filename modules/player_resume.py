@@ -151,7 +151,7 @@ class PlayerSession(commands.Cog):
         saved_players = 0
         ignored_players = 0
 
-        reset_ids  = any(a in args for a in ("--reset", "--resetids", "-reset", "--resetids"))
+        reset_ids  = any(a in args for a in ("--reset", "--resetids", "-reset", "-resetids"))
 
         async with ctx.typing():
 
