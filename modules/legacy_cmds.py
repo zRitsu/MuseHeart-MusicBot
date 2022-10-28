@@ -122,8 +122,23 @@ class Owner(commands.Cog):
 
             node.restarting = True
 
+            reset_ids = any(a in args for a in ("--reset", "--resetids", "-reset", "--resetids"))
+
             for player in node.players.values():
                 txt = "O servidor de música está reiniciando e a música será retomada em alguns segundos (Por favor aguarde)..."
+
+                if reset_ids:
+
+                    if player.current:
+                        player.queue.appendleft(player.current)
+                        player.current = None
+
+                    for t in player.queue:
+                        t.id = ""
+
+                    for t in player.played:
+                        t.id = ""
+
                 if player.static:
                     player.set_command_log(text=txt, emoji="🛠️")
                     player.update = True

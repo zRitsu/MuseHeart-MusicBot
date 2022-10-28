@@ -146,10 +146,12 @@ class PlayerSession(commands.Cog):
     @commands.max_concurrency(1, commands.BucketType.default)
     @commands.is_owner()
     @commands.command(hidden=True, aliases=["savep"])
-    async def saveplayers(self, ctx: CustomContext):
+    async def saveplayers(self, ctx: CustomContext, *args):
 
         saved_players = 0
         ignored_players = 0
+
+        reset_ids  = any(a in args for a in ("--reset", "--resetids", "-reset", "--resetids"))
 
         async with ctx.typing():
 
@@ -164,15 +166,15 @@ class PlayerSession(commands.Cog):
                     played = []
 
                     if player.current:
-                        player.current.info["id"] = player.current.id
+                        player.current.info["id"] = player.current.id if not reset_ids else ""
                         tracks.append(player.current.info)
 
                     for t in player.queue:
-                        t.info["id"] = t.id
+                        t.info["id"] = t.id if not reset_ids else ""
                         tracks.append(t.info)
 
                     for t in player.played:
-                        t.info["id"] = t.id
+                        t.info["id"] = t.id if not reset_ids else ""
                         played.append(t.info)
 
                     if not tracks and not played:

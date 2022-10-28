@@ -3474,7 +3474,10 @@ class Music(commands.Cog):
                         text="O servidor de música foi reconectado com sucesso!",
                         emoji="🔰"
                     )
-                    await player.invoke_np()
+                    if not player.current and len(player.queue) > 0:
+                        await player.process_next()
+                    else:
+                        await player.invoke_np()
                 except:
                     traceback.print_exc()
                     continue

@@ -422,12 +422,57 @@ class LavalinkPlayer(wavelink.Player):
 
             self.locked = True
 
-            track = await self.resolve_track(track)
+            if not track.id:
+                try:
+                    track = await self.resolve_track(track)
+                except Exception as e:
+                    try:
+                        await self.text_channel.send(
+                            embed=disnake.Embed(
+                                description=f"Houve um problema ao tentar processar a música [{track.title}]({track.uri})... "
+                                            f"```py\n{repr(e)}```",
+                                color=0x2F3136
+                            )
+                        )
+                    except:
+                        traceback.print_exc()
+                    await self.process_next()
+                    return
 
             self.locked = False
 
             if not track:
-                return await self.process_next()
+                try:
+                    await self.text_channel.send(
+                        embed=disnake.Embed(
+                            description=f"A música [{track.title}]({track.uri}) não está disponível...\n"
+                                        f"Pulando para a próxima música...",
+                            color=0x2F3136
+                        )
+                    )
+                except:
+                    traceback.print_exc()
+                await self.process_next()
+                return
+
+        elif not track.id:
+            t = await self.node.get_tracks(track.uri)
+
+            if not t:
+                try:
+                    await self.text_channel.send(
+                        embed=disnake.Embed(
+                            description=f"A música [{track.title}]({track.uri}) não está disponível...\n"
+                                        f"Pulando para a próxima música...",
+                            color=0x2F3136
+                        )
+                    )
+                except:
+                    traceback.print_exc()
+                await self.process_next()
+                return
+
+            track.id = t[0].id
 
         self.last_track = track
 
