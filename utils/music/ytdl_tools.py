@@ -58,11 +58,11 @@ class YTDLTools:
             if not matches.groups():
                 continue
 
-            if e.age_limit > 17 and e.ie_key() != "Twitter":
-                raise GenericError("**Este link contém conteúdo para maiores de 18 anos!**")
-
             if any(ee in type(e).__name__.lower() for ee in exclude_extractors):
                 continue
+
+            if e.age_limit > 17 and e.ie_key() != "Twitter":
+                raise GenericError("**Este link contém conteúdo para maiores de 18 anos!**")
 
             data = await self.bot.loop.run_in_executor(None, self.extract_info, url)
 
