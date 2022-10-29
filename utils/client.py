@@ -184,7 +184,7 @@ class BotPool:
                 case_insensitive=True,
                 intents=intents,
                 test_guilds=test_guilds,
-                command_sync_flags=commands.CommandSyncFlags.all(),
+                command_sync_flags=commands.CommandSyncFlags.none(),
                 embed_color=self.config["EMBED_COLOR"],
                 default_prefix=default_prefix,
                 pool=self
