@@ -20,9 +20,10 @@
 
 ![](https://media.discordapp.net/attachments/554468640942981147/944945573834936340/unknown.png)
 
-- Player controller: song-request em canal de forum (múltiplos bots) e skin embed_link.
+- Player controller: song-request em canal de forum (múltiplos bots) e skin default.
 
-![](https://media.discordapp.net/attachments/554468640942981147/1019806568134475786/forum_song_request.png)
+https://user-images.githubusercontent.com/74823568/198839619-a90cf199-fca2-4432-a379-c99145f3d640.mp4
+
 
 * Há diversas outras skins, veja todas usando o comando /change_skin (você também pode criar outras, use os modelos padrões que estão na pasta [skins](utils/music/skins/) como referência, crie uma cópia com outro nome e modifique a seu gosto).
 
