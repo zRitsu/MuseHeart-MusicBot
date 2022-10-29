@@ -100,7 +100,7 @@ class Misc(commands.Cog):
             embed.description += f"Caso queira, use o comando **/{cmd.name}** para criar um canal dedicado para pedir " \
                                  "músicas sem comandos e deixar o music player fixo em um canal dedicado.\n\n"
 
-        if not self.bot._sync_commands and self.bot.config["INTERACTION_BOTS"]:
+        if not self.bot.command_sync_flags.sync_commands and self.bot.config["INTERACTION_BOTS"]:
 
             interaction_invites = ""
 

@@ -184,8 +184,7 @@ class BotPool:
                 case_insensitive=True,
                 intents=intents,
                 test_guilds=test_guilds,
-                sync_commands=False,
-                sync_commands_debug=True,
+                command_sync_flags=commands.CommandSyncFlags.all(),
                 embed_color=self.config["EMBED_COLOR"],
                 default_prefix=default_prefix,
                 pool=self
@@ -223,13 +222,13 @@ class BotPool:
 
                         if not bot.config["INTERACTION_BOTS"] or str(bot.user.id) in bot.config["INTERACTION_BOTS"]:
 
-                            self._sync_commands = True
+                            self._command_sync_flags = commands.CommandSyncFlags.all()
                             bot.load_modules(bot_name)
                             await bot.sync_app_commands(force=True)
 
                         else:
 
-                            self._sync_commands = False
+                            self._command_sync_flags = commands.CommandSyncFlags.none()
 
                             if self.config["INTERACTION_BOTS"]:
 
@@ -419,12 +418,12 @@ class BotCore(commands.Bot):
 
     async def sync_app_commands(self, force=False):
 
-        if not self._sync_commands and not force:
+        if not self.command_sync_flags.sync_commands and not force:
             return
 
-        self._sync_commands = True
+        self._command_sync_flags = commands.CommandSyncFlags.all()
         await self._sync_application_commands()
-        self._sync_commands = False
+        self._command_sync_flags = commands.CommandSyncFlags.none()
 
     async def can_send_message(self, message: disnake.Message):
 
@@ -480,7 +479,7 @@ class BotCore(commands.Bot):
                     embed.description += f"\n\nTambém tenho comandos de texto por prefixo.\n" \
                                         f"Para ver todos os meus comandos de texto use **{prefix}help**\n"
 
-                if not self._sync_commands and self.config["INTERACTION_BOTS"]:
+                if not self.command_sync_flags.sync_commands and self.config["INTERACTION_BOTS"]:
 
                     interaction_invites = ""
 
