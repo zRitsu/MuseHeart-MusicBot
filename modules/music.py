@@ -25,11 +25,6 @@ from utils.music.interactions import VolumeInteraction, QueueInteraction, Select
 from utils.music.ytdl_tools import YTDLTools
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, fav_list, queue_track_index
 from user_agent import generate_user_agent
-from yt_dlp import list_extractors
-
-extractors = list_extractors()
-
-exclude_extractors = ["youtube", "soundcloud", "deezer", "applemusic"]
 
 search_sources_opts = [
     disnake.OptionChoice("Youtube", "ytsearch"),
@@ -3617,55 +3612,7 @@ class Music(commands.Cog):
 
             if not tracks:
 
-                for e in extractors:
-
-                    if not e._VALID_URL:
-                        continue
-
-                    if not (matches := re.compile(e._VALID_URL).match(query)):
-                        continue
-
-                    if not matches.groups():
-                        continue
-
-                    if any(ee in type(e).__name__.lower() for ee in exclude_extractors):
-                        continue
-
-                    data = await self.ytdl.get_track_info(query)
-
-                    try:
-                        if data["_type"] == "playlist":
-                            raise GenericError("**No momento não há suporte para playlists com o link fornecido...**")
-                    except KeyError:
-                        pass
-
-                    try:
-                        entrie = data["entries"][0]
-                    except KeyError:
-                        entrie = data
-
-                    try:
-                        if entrie["age_limit"] > 17:
-                            raise GenericError("**Este link contém conteúdo para maiores de 18 anos!**")
-                    except KeyError:
-                        pass
-
-                    t = PartialTrack(
-                        uri=entrie.get("webpage_url") or query,
-                        title=entrie["title"],
-                        author=entrie["uploader"],
-                        thumb=entrie["thumbnail"],
-                        duration=entrie["duration"] * 1000,
-                        requester=user.id,
-                        source_name=entrie["extractor"],
-                    )
-
-                    t.info.update({
-                        "search_uri": entrie["url"],
-                        "authors": entrie["uploader"]
-                    })
-
-                    tracks = [t]
+                tracks = await self.ytdl.get_track_info(query, user)
 
                 if not tracks:
 
