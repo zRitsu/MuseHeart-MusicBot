@@ -7,6 +7,7 @@ from typing import Union, Optional
 from zipfile import ZipFile
 import disnake
 import dotenv
+import psutil
 import wavelink
 from disnake.ext import commands
 from utils.client import BotCore
@@ -152,16 +153,21 @@ class Owner(commands.Cog):
                         )
                     )
 
-        try:
-            self.bot.pool.lavalink_process.kill()
-            self.bot.pool.lavalink_process = run_lavalink(
-                lavalink_file_url=self.bot.config['LAVALINK_FILE_URL'],
-                lavalink_initial_ram=self.bot.config['LAVALINK_INITIAL_RAM'],
-                lavalink_ram_limit=self.bot.config['LAVALINK_RAM_LIMIT'],
-                lavalink_additional_sleep=int(self.bot.config['LAVALINK_ADDITIONAL_SLEEP']),
-            )
-        except AttributeError:
-            pass
+        for process in psutil.process_iter():
+            try:
+                if "Lavalink.jar" in process.cmdline():
+                    print(f"{ctx.invoked_with} - Reiniciando lavalink...")
+                    process.terminate()
+                    run_lavalink(
+                        lavalink_file_url=self.bot.config['LAVALINK_FILE_URL'],
+                        lavalink_initial_ram=self.bot.config['LAVALINK_INITIAL_RAM'],
+                        lavalink_ram_limit=self.bot.config['LAVALINK_RAM_LIMIT'],
+                        lavalink_additional_sleep=int(self.bot.config['LAVALINK_ADDITIONAL_SLEEP']),
+                    )
+            except (psutil.AccessDenied, PermissionError):
+                continue
+            except Exception:
+                traceback.print_exc()
 
         await ctx.send(
             embed=disnake.Embed(
