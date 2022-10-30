@@ -2146,7 +2146,7 @@ class Music(commands.Cog):
                 components=[
                     disnake.ui.Button(label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song),
                     disnake.ui.Button(label="Tocar favorito", emoji="⭐", custom_id=PlayerControls.enqueue_fav)
-                ] if inter.guild else None,
+                ] if inter.guild else [],
                 ephemeral=player.static and player.text_channel.id == inter.channel_id
             )
             await player.destroy()
