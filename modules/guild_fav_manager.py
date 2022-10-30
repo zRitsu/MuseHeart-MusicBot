@@ -97,7 +97,7 @@ class PinManager(commands.Cog):
 
         await bot.update_data(inter.guild_id, guild_data, db_name=DBModel.guilds)
 
-        guild = bot.get_guild(inter.guild_id)
+        guild = bot.get_guild(inter.guild_id) or inter.guild
 
         await inter.edit_original_message(embed=disnake.Embed(description="**Link adicionado/atualizado com sucesso nos fixos do player!\n"
                          "Membros podem usá-lo diretamente no player-controller quando não estiver em uso.**", color=bot.get_color(guild.me)), view=None)
@@ -163,7 +163,7 @@ class PinManager(commands.Cog):
 
         await bot.update_data(inter.guild_id, guild_data, db_name=DBModel.guilds)
 
-        guild = bot.get_guild(inter.guild_id)
+        guild = bot.get_guild(inter.guild_id) or inter.guild
 
         await inter.edit_original_message(embed=disnake.Embed(description="**Link fixo editado com sucesso!**", color=self.bot.get_color(guild.me)), view=None)
 
@@ -194,7 +194,7 @@ class PinManager(commands.Cog):
 
         await bot.update_data(inter.guild_id, guild_data, db_name=DBModel.guilds)
 
-        guild = bot.get_guild(inter.guild_id)
+        guild = bot.get_guild(inter.guild_id) or inter.guild
 
         await inter.edit_original_message(embed=disnake.Embed(description="**Link removido com sucesso!**", color=self.bot.get_color(guild.me)), view=None)
 
@@ -270,7 +270,7 @@ class PinManager(commands.Cog):
 
         await self.bot.update_data(inter.guild_id, guild_data, db_name=DBModel.guilds)
 
-        guild = bot.get_guild(inter.guild_id)
+        guild = bot.get_guild(inter.guild_id) or inter.guild
 
         await inter.edit_original_message(
             embed = disnake.Embed(
@@ -303,7 +303,7 @@ class PinManager(commands.Cog):
 
         fp = BytesIO(bytes(json.dumps(guild_data["player_controller"]["fav_links"], indent=4), 'utf-8'))
 
-        guild = bot.get_guild(inter.guild_id)
+        guild = bot.get_guild(inter.guild_id) or inter.guild
 
         embed = disnake.Embed(
             description=f"**Os dados dos links de músicas/playlists fixas do servidor estão aqui.\n"

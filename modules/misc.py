@@ -143,7 +143,7 @@ class Misc(commands.Cog):
 
         ram_usage = humanize.naturalsize(psutil.Process(getpid()).memory_info().rss)
 
-        guild = bot.get_guild(inter.guild_id)
+        guild = bot.get_guild(inter.guild_id) or inter.guild
 
         embed = disnake.Embed(
             description=f"**Sobre mim:**\n\n"

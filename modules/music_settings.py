@@ -53,7 +53,7 @@ class MusicSettings(commands.Cog):
 
         await bot.update_data(inter.guild_id, guild_data, db_name=DBModel.guilds)
 
-        guild = bot.get_guild(inter.guild_id)
+        guild = bot.get_guild(inter.guild_id) or inter.guild
 
         embed = disnake.Embed(
             color=self.bot.get_color(guild.me),
@@ -147,7 +147,7 @@ class MusicSettings(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        guild = bot.get_guild(inter.guild_id)
+        guild = bot.get_guild(inter.guild_id) or inter.guild
 
         if not guild.me.guild_permissions.manage_channels or not guild.me.guild_permissions.create_public_threads:
             raise commands.BotMissingPermissions(["manage_channels", "create_public_threads"])
@@ -435,7 +435,7 @@ class MusicSettings(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        guild = bot.get_guild(inter.guild_id)
+        guild = bot.get_guild(inter.guild_id) or inter.guild
 
         if not guild.me.guild_permissions.manage_threads:
             raise commands.BotMissingPermissions(["manage_threads"])
@@ -531,7 +531,7 @@ class MusicSettings(commands.Cog):
     ):
 
         bot = await select_bot_pool(inter)
-        guild = bot.get_guild(inter.guild_id)
+        guild = bot.get_guild(inter.guild_id) or inter.guild
         role = guild.get_role(role.id)
 
         if role == guild.default_role:
@@ -579,7 +579,7 @@ class MusicSettings(commands.Cog):
             await inter.send("Não há cargos na lista de DJ's.", ephemeral=True)
             return
 
-        guild = bot.get_guild(inter.guild_id)
+        guild = bot.get_guild(inter.guild_id) or inter.guild
         role = guild.get_role(role.id)
 
         if str(role.id) not in guild_data['djroles']:
@@ -628,7 +628,7 @@ class MusicSettings(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        guild = bot.get_guild(inter.guild_id)
+        guild = bot.get_guild(inter.guild_id) or inter.guild
 
         guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
 
@@ -737,7 +737,7 @@ class MusicSettings(commands.Cog):
         if not bot:
             return
 
-        guild = bot.get_guild(inter.guild_id)
+        guild = bot.get_guild(inter.guild_id) or inter.guild
 
         em = disnake.Embed(color=bot.get_color(guild.me), title="Servidores de música:")
 
