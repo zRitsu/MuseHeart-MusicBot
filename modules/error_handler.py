@@ -87,7 +87,7 @@ class ErrorHandler(commands.Cog):
 
         if not error_msg:
 
-            components = None
+            components = self.components
 
             kwargs["embed"].title = "Ocorreu um erro no comando:"
             kwargs["embed"].description = f"```py\n{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
@@ -98,7 +98,7 @@ class ErrorHandler(commands.Cog):
 
         else:
 
-            components = self.components
+            components = None
 
             kwargs["embed"].description = error_msg
 
@@ -142,7 +142,7 @@ class ErrorHandler(commands.Cog):
 
         if not error_msg:
 
-            components = None
+            components = self.components
 
             if ctx.channel.permissions_for(ctx.guild.me).embed_links:
                 kwargs["embed"] = disnake.Embed(
@@ -160,7 +160,7 @@ class ErrorHandler(commands.Cog):
 
         else:
 
-            components = self.components
+            components = None
 
             if ctx.channel.permissions_for(ctx.guild.me).embed_links:
                 kwargs["embed"] = disnake.Embed(color=disnake.Colour.red(), description=error_msg)
