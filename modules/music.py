@@ -2146,7 +2146,7 @@ class Music(commands.Cog):
                 components=[
                     disnake.ui.Button(label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song),
                     disnake.ui.Button(label="Tocar favorito", emoji="⭐", custom_id=PlayerControls.enqueue_fav)
-                ],
+                ] if inter.guild else None,
                 ephemeral=player.static and player.text_channel.id == inter.channel_id
             )
             await player.destroy()
@@ -2784,6 +2784,10 @@ class Music(commands.Cog):
 
         if not self.bot.bot_ready:
             await interaction.send("Ainda estou inicializando...", ephemeral=True)
+            return
+
+        if not interaction.guild:
+            await interaction.response.edit_message(components=None)
             return
 
         kwargs = {}
