@@ -28,6 +28,7 @@ class CustomContext(commands.Context):
         self.response.defer = self.defer
         self.user = self.author
         self.guild_id = self.guild.id
+        self.channel_id = self.channel.id
         self.store_message = None
 
     async def defer(self, ephemeral: bool = False):
