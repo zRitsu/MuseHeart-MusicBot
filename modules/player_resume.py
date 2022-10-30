@@ -63,10 +63,6 @@ class PlayerSession(commands.Cog):
                 if not text_channel:
                     continue
 
-                if not data.get("skin"):
-                    # tempfix
-                    data["skin"] = (await self.bot.get_data(guild.id, db_name=DBModel.guilds))["player_controller"]["skin"]
-
                 try:
                     creator = data["player_creator"]
                 except KeyError:
@@ -74,7 +70,7 @@ class PlayerSession(commands.Cog):
 
                 try:
                     message = await text_channel.fetch_message(data["message"])
-                except disnake.NotFound:
+                except:
                     message = None
 
                 player: LavalinkPlayer = self.bot.music.get_player(
