@@ -41,17 +41,16 @@ async def check_pool_bots(inter, only_voiced: bool = False):
     except AttributeError:
         pass
 
+    if isinstance(inter, (disnake.MessageInteraction, disnake.ModalInteraction)):
+        return
+
     if not inter.guild_id:
         return
 
     try:
         if inter.bot.user.id in inter.author.voice.channel.voice_states:
-            try:
-                inter.music_bot = inter.bot
-                inter.music_guild = inter.guild
-            except AttributeError:
-                inter.message.music_bot = inter.bot
-                inter.message.music_guild = inter.guild
+            inter.music_bot = inter.bot
+            inter.music_guild = inter.guild
             return True
     except AttributeError:
         pass
@@ -72,12 +71,8 @@ async def check_pool_bots(inter, only_voiced: bool = False):
             raise NoVoice()
 
         if bot.user.id in author.voice.channel.voice_states:
-            try:
-                inter.music_bot = bot
-                inter.music_guild = guild
-            except AttributeError:
-                inter.message.music_bot = bot
-                inter.message.music_guild = guild
+            inter.music_bot = bot
+            inter.music_guild = guild
             return True
 
         if only_voiced:
@@ -100,10 +95,7 @@ async def check_pool_bots(inter, only_voiced: bool = False):
         pass
 
     if free_bot:
-        try:
-            inter.music_bot, inter.music_guild = free_bot
-        except AttributeError:
-            inter.message.music_bot, inter.message.music_guild = free_bot
+        inter.music_bot, inter.music_guild = free_bot
         return True
 
     txt = ""
@@ -235,10 +227,7 @@ def check_voice():
         try:
             guild = inter.music_guild
         except AttributeError:
-            try:
-                guild = inter.message.music_guild
-            except AttributeError:
-                guild = inter.guild
+            guild = inter.guild
 
         try:
             if not inter.author.voice:
