@@ -271,18 +271,18 @@ class Music(commands.Cog):
             return []
 
         try:
-            if not inter.author.voice:
-                return []
-        except AttributeError:
-            return [current[:100]]
-
-        try:
             await check_pool_bots(inter, only_voiced=True)
             bot = inter.music_bot
         except GenericError:
-            return
+            return [current[:99]]
         except:
             bot = inter.bot
+
+        try:
+            if not inter.author.voice:
+                return []
+        except AttributeError:
+            return [current[:99]]
 
         return await google_search(bot, current)
 
