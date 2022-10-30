@@ -424,7 +424,7 @@ class LavalinkPlayer(wavelink.Player):
 
             if not track.id:
                 try:
-                    track = await self.resolve_track(track)
+                    await self.resolve_track(track)
                 except Exception as e:
                     try:
                         await self.text_channel.send(
@@ -441,7 +441,7 @@ class LavalinkPlayer(wavelink.Player):
 
             self.locked = False
 
-            if not track:
+            if not track.id:
                 try:
                     await self.text_channel.send(
                         embed=disnake.Embed(
@@ -860,14 +860,16 @@ class LavalinkPlayer(wavelink.Player):
     async def resolve_track(self, track: PartialTrack):
 
         if track.id:
-            return track
+            return
 
         try:
 
             try:
                 to_search = track.info["search_uri"]
+                check_duration = False
             except KeyError:
                 to_search = f"{self.bot.config['SEARCH_PROVIDER']}:{track.single_title} - {track.authors_string}"
+                check_duration = self.bot.config['SEARCH_PROVIDER'].lower() in ("ytsearch", "scsearch", "ytmsearch")
 
             tracks = (await self.node.get_tracks(to_search))
 
@@ -883,14 +885,13 @@ class LavalinkPlayer(wavelink.Player):
                 if t.is_stream:
                     continue
 
-                if (t.duration - 10000) < track.duration < (t.duration + 10000):
+                if check_duration and ((t.duration - 10000) < track.duration < (t.duration + 10000)):
                     selected_track = t
                     break
 
             if not selected_track:
                 selected_track = tracks[0]
 
-            selected_track.info["sourceName"] = "spotify"
             track.id = selected_track.id
             track.info["length"] = selected_track.duration
 
@@ -900,7 +901,7 @@ class LavalinkPlayer(wavelink.Player):
             traceback.print_exc()
             return
 
-        return track
+        return
 
     async def process_rpc(
             self,
