@@ -337,7 +337,7 @@ async def select_bot_pool(inter):
 
             invite = disnake.utils.oauth_url(inter.bot.user.id, permissions=disnake.Permissions(inter.bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))
 
-            raise GenericError("**Esta interação não está disponível sem eu estar adicionada no servidor como bot...\n\n"
+            raise GenericError("**Esta interação está indisponível sem eu estar no servidor como bot...\n\n"
                                f"[Clique aqui]({invite}) para me adicionar.**")
         return inter.bot
 
