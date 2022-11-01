@@ -334,7 +334,6 @@ class ErrorHandler(commands.Cog):
                 value=f"```\n{ctx.guild_id}```"
             )
 
-
         embed.set_footer(
             text=f"{ctx.author} [{ctx.author.id}]",
             icon_url=ctx.author.display_avatar.with_static_format("png").url

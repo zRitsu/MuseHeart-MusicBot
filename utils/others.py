@@ -227,7 +227,10 @@ async def send_message(
         except AttributeError:
             pass
 
-        await inter.send(text, ephemeral=True, **kwargs)
+        try:
+            await inter.send(text, ephemeral=True, **kwargs)
+        except disnake.InteractionTimedOut:
+            await inter.channel.send(text, **kwargs)
 
 
 async def send_idle_embed(

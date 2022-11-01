@@ -625,15 +625,21 @@ class Music(commands.Cog):
             if bot.user.id != self.bot.user.id:
                 embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
 
-            msg = await inter.send(
-                inter.author.mention, embed=embed, ephemeral=True,
-                components=[
+            kwargs = {
+                "content": inter.author.mention,
+                "components": [
                     disnake.ui.Select(
                         custom_id=f"enqueue_fav{add_id}",
                         options=opts
                     )
-                ]
-            )
+                ],
+                "embed": embed
+            }
+
+            try:
+                msg = await inter.send(ephemeral=ephemeral, **kwargs)
+            except disnake.InteractionTimedOut:
+                msg = await inter.channel.send(**kwargs)
 
             def check_fav_selection(i: Union[CustomContext, disnake.MessageInteraction]):
 
