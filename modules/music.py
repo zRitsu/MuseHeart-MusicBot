@@ -18,13 +18,16 @@ from utils.music.spotify import process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, \
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen, check_pool_bots, \
     ensure_bot_instance
-from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialPlaylist, PartialTrack
+from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialPlaylist
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, google_search, percentage
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
-from utils.music.ytdl_tools import YTDLTools
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, fav_list, queue_track_index
 from user_agent import generate_user_agent
+try:
+    from utils.music.ytdl_tools import YTDLTools
+except:
+    YTDLTools = None
 
 search_sources_opts = [
     disnake.OptionChoice("Youtube", "ytsearch"),
@@ -46,7 +49,7 @@ class Music(commands.Cog):
 
         self.bot = bot
 
-        self.ytdl = YTDLTools(bot)
+        self.ytdl = YTDLTools(bot) if YTDLTools else None
 
         self.song_request_concurrency = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
@@ -3586,7 +3589,8 @@ class Music(commands.Cog):
 
             if not tracks:
 
-                tracks = await self.ytdl.get_track_info(query, user)
+                if self.ytdl:
+                    tracks = await self.ytdl.get_track_info(query, user)
 
                 if not tracks:
 
