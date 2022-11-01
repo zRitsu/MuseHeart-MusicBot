@@ -936,8 +936,8 @@ class Music(commands.Cog):
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.command(name="skip", aliases=["next", "n", "s", "pular"],
                       description=f"Pular a música atual que está tocando.")
-    async def skip_legacy(self, ctx: CustomContext):
-        await self.skip.callback(self=self, inter=ctx)
+    async def skip_legacy(self, ctx: CustomContext, *, query: str = None):
+        await self.skip.callback(self=self, inter=ctx, query=query)
 
     @is_requester()
     @has_source()
@@ -948,7 +948,27 @@ class Music(commands.Cog):
     @commands.slash_command(
         description=f"{desc_prefix}Pular a música atual que está tocando."
     )
-    async def skip(self, inter: disnake.AppCmdInter):
+    async def skip(
+            self,
+            inter: disnake.AppCmdInter, *,
+            query: str = commands.Param(
+                name="nome",
+                description="Nome da música (completa ou parte dela).",
+                default=None,
+            ),
+            play_only: str = commands.Param(
+                name=disnake.Localized("play_only", data={disnake.Locale.pt_BR: "tocar_apenas"}),
+                choices=[
+                    disnake.OptionChoice(
+                        disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"
+                    ),
+                    disnake.OptionChoice(
+                        disnake.Localized("No", data={disnake.Locale.pt_BR: "Não"}), "no"
+                    )
+                ],
+                description="Apenas tocar a música imediatamente (sem rotacionar a flia)",
+                default="no"
+            )):
 
         try:
             bot = inter.music_bot
@@ -957,21 +977,47 @@ class Music(commands.Cog):
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
-        if not len(player.queue):
-            raise GenericError("**Não há músicas na fila...**")
+        if query:
 
-        if isinstance(inter, disnake.MessageInteraction):
-            player.set_command_log(text=f"{inter.author.mention} pulou a música.", emoji="⏭️")
-            await inter.response.defer()
+            try:
+                index = queue_track_index(inter, bot, query)[0][0]
+            except IndexError:
+                raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
+
+            track = player.queue[index]
+
+            player.queue.append(player.last_track)
+            player.last_track = None
+
+            if player.loop == "current":
+                player.loop = False
+
+            if play_only == "yes":
+                del player.queue[index]
+                player.queue.appendleft(track)
+
+            elif index > 0:
+                player.queue.rotate(0 - index)
+
+            txt = [
+                "pulou para a música atual.",
+                f"⤵️ **⠂{inter.author.mention} pulou para a música:**\n╰[`{fix_characters(track.title, 43)}`]({track.uri})"
+            ]
+
+            await self.interaction_message(inter, txt, emoji="⤵️")
+
         else:
-            txt = ["pulou a música.", f"⏭️ **⠂{inter.author.mention} pulou a música:\n"
-                                      f"╰[`{fix_characters(player.current.title, 43)}`]({player.current.uri})**"]
-            await self.interaction_message(inter, txt, emoji="⏭️")
 
-        if player.loop == "current":
-            player.loop = False
+            if isinstance(inter, disnake.MessageInteraction):
+                player.set_command_log(text=f"{inter.author.mention} pulou a música.", emoji="⏭️")
+                await inter.response.defer()
+            else:
+                txt = ["pulou a música.", f"⏭️ **⠂{inter.author.mention} pulou a música:\n"
+                                          f"╰[`{fix_characters(player.current.title, 43)}`]({player.current.uri})**"]
+                await self.interaction_message(inter, txt, emoji="⏭️")
 
-        player.current.info["extra"]["track_loops"] = 0
+            if player.loop == "current":
+                player.loop = False
 
         await player.stop()
 
@@ -1595,85 +1641,6 @@ class Music(commands.Cog):
     @check_voice()
     @ensure_bot_instance(only_voiced=True)
     @commands.max_concurrency(1, commands.BucketType.member)
-    @commands.command(name="skipto", aliases=["skt", "pularpara"], description="Pular para a música especificada.")
-    async def skipto_legacy(self, ctx: CustomContext, *, query: str = None):
-
-        if not query:
-            raise GenericError("**Você não adicionou um nome ou posição de uma música.**")
-
-        await self.skipto.callback(self=self, inter=ctx, query=query)
-
-    @is_dj()
-    @has_player()
-    @check_voice()
-    @ensure_bot_instance(only_voiced=True)
-    @commands.dynamic_cooldown(user_cooldown(2, 8), commands.BucketType.guild)
-    @commands.slash_command(
-        description=f"{desc_prefix}Pular para a música especificada."
-    )
-    async def skipto(
-            self,
-            inter: disnake.AppCmdInter, *,
-            query: str = commands.Param(
-                name="nome",
-                description="Nome da música completo."
-            ),
-            play_only: str = commands.Param(
-                name=disnake.Localized("play_only", data={disnake.Locale.pt_BR: "tocar_apenas"}),
-                choices=[
-                    disnake.OptionChoice(
-                        disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"
-                    ),
-                    disnake.OptionChoice(
-                        disnake.Localized("No", data={disnake.Locale.pt_BR: "Não"}), "no"
-                    )
-                ],
-                description="Apenas tocar a música imediatamente (sem rotacionar a flia)",
-                default="no"
-            )
-    ):
-
-        try:
-            bot = inter.music_bot
-        except AttributeError:
-            bot = inter.bot
-
-        try:
-            index = queue_track_index(inter, bot, query)[0][0]
-        except IndexError:
-            raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
-
-        player: LavalinkPlayer = bot.music.players[inter.guild_id]
-
-        track = player.queue[index]
-
-        player.queue.append(player.last_track)
-        player.last_track = None
-
-        if player.loop == "current":
-            player.loop = False
-
-        if play_only == "yes":
-            del player.queue[index]
-            player.queue.appendleft(track)
-
-        elif index > 0:
-            player.queue.rotate(0 - index)
-
-        txt = [
-            "pulou para a música atual.",
-            f"⤵️ **⠂{inter.author.mention} pulou para a música:**\n╰[`{fix_characters(track.title, 43)}`]({track.uri})"
-        ]
-
-        await self.interaction_message(inter, txt, emoji="⤵️")
-
-        await player.stop()
-
-    @is_dj()
-    @has_player()
-    @check_voice()
-    @ensure_bot_instance(only_voiced=True)
-    @commands.max_concurrency(1, commands.BucketType.member)
     @commands.command(name="move", aliases=["mv", "mover"],
                       description="Mover uma música para a posição especificada da fila.")
     async def move_legacy(self, ctx: CustomContext, position: Optional[int], *, query: str = None):
@@ -1845,7 +1812,7 @@ class Music(commands.Cog):
 
     @rotate.autocomplete("nome")
     @move.autocomplete("nome")
-    @skipto.autocomplete("nome")
+    @skip.autocomplete("nome")
     @remove.autocomplete("nome")
     async def queue_tracks(self, inter: disnake.AppCmdInter, query: str):
 
@@ -2914,6 +2881,9 @@ class Music(commands.Cog):
                         kwargs['mode'] = 'off'
                     else:
                         kwargs['mode'] = 'current'
+
+                elif control == PlayerControls.skip:
+                    kwargs = {"query": None, "play_only": "no"}
 
                 try:
                     await self.player_interaction_concurrency.acquire(interaction)
