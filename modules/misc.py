@@ -129,9 +129,10 @@ class Misc(commands.Cog):
     )
     async def about(
             self,
-            inter: disnake.AppCmdInter,
-            hidden: bool = commands.Param(name="modo_oculto", description="Não exibir a mensagem do comando", default=False)
+            inter: disnake.AppCmdInter
     ):
+
+        await inter.response.defer(ephemeral=True)
 
         bot = await select_bot_pool(inter)
 
@@ -205,13 +206,10 @@ class Misc(commands.Cog):
         if bot.config["HIDE_SOURCE_OWNER"] is not False and bot.owner.id == self.source_owner.id:
             embed.footer.text += f" | Source by: {self.source_owner}"
 
-        if hidden is False and not bot.check_bot_forum_post(inter.channel):
-            hidden = True
-
         try:
-            await inter.response.edit_message(embed=embed, components=None)
+            await inter.edit_original_message(embed=embed, components=None)
         except (AttributeError, disnake.InteractionNotEditable):
-            await inter.send(embed=embed, ephemeral=hidden)
+            await inter.send(embed=embed, ephemeral=True)
 
 
     @commands.command(name="invite", aliases=["convidar"], description="Exibir meu link de convite para você me adicionar no seu servidor.")
