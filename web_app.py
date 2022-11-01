@@ -64,10 +64,12 @@ class IndexHandler(tornado.web.RequestHandler):
 
     def get(self):
         self.write(f"{self.text}<br>(se o seu bot não apareceu na lista, tente recarregar a página, se o erro persistir "
-                   f"verifique se apareceu algo escrito com \"429: too many requests\" no console/terminal)<p>"
-                   f"<a href=\"https://github.com/zRitsu/DC-MusicBot-RPC/releases\" target=\"_blank\">Baixe o app de "
-                   f"rich presence aqui.</a></p><br>Link para adicionar no app de RPC abaixo:<p style=\"color:blue\">"
-                   f"{self.ws_url}</p><br>")
+                   "verifique se apareceu algo escrito com \"429: too many requests\" no console/terminal)<p>"
+                   "<a href=\"https://github.com/zRitsu/DC-MusicBot-RPC/releases\" target=\"_blank\">Baixe o app de "
+                   "rich presence aqui.</a></p><br>Link para adicionar no app de RPC abaixo:<p style=\"color:blue\">"
+                   "<Body onLoad=\" rpcUrl()\" ><p id=\"url\"></p><script>function rpcUrl(){document."
+                   "getElementById(\"url\").innerHTML = window.location.href.replace(\"http\", \"ws\")"
+                   ".replace(\"https\", \"wss\") + \"ws\"}</script></body> </p><br>")
         # self.render("index.html") #será implementado futuramente...
 
 
@@ -284,7 +286,7 @@ def run_app(bots: Optional[list] = None, ws_url = f"http://0.0.0.0:{environ.get(
         (r'/ws', WebSocketHandler),
     ])
 
-    app.listen(environ.get("PORT", 8080))
+    app.listen(port=environ.get("PORT", 80))
 
 
 def start(bots: Optional[list] = None):
