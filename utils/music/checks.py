@@ -33,7 +33,7 @@ async def check_requester_channel(ctx: CustomContext):
     return True
 
 
-async def check_pool_bots(inter, only_voiced: bool = False):
+async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool = True):
 
     try:
         inter.music_bot
@@ -98,6 +98,9 @@ async def check_pool_bots(inter, only_voiced: bool = False):
         inter.music_bot, inter.music_guild = free_bot
         return True
 
+    elif check_player:
+        raise NoPlayer()
+
     txt = ""
 
     extra_bots_invite = []
@@ -121,10 +124,10 @@ async def check_pool_bots(inter, only_voiced: bool = False):
 
     raise GenericError(msg)
 
-def ensure_bot_instance(only_voiced=False):
+def ensure_bot_instance(only_voiced=False, check_player=True):
 
     async def predicate(inter):
-        await check_pool_bots(inter, only_voiced=only_voiced)
+        await check_pool_bots(inter, only_voiced=only_voiced, check_player=check_player)
         return True
 
     return commands.check(predicate)

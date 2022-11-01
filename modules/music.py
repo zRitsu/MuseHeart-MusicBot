@@ -191,7 +191,7 @@ class Music(commands.Cog):
 
     @check_voice()
     @can_send_message_check()
-    @ensure_bot_instance()
+    @ensure_bot_instance(check_player=False)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.message_command(name="add to queue")
     async def message_play(self, inter: disnake.MessageCommandInteraction):
@@ -216,7 +216,7 @@ class Music(commands.Cog):
 
     @check_voice()
     @can_send_message_check()
-    @ensure_bot_instance()
+    @ensure_bot_instance(check_player=False)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.slash_command(name="search",
                             description=f"{desc_prefix}Buscar música e escolher uma entre os resultados para tocar.")
@@ -290,7 +290,7 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @can_send_message_check()
-    @ensure_bot_instance(only_voiced=True)
+    @ensure_bot_instance(only_voiced=True, check_player=False)
     @commands.slash_command(description=f"{desc_prefix}Me conectar em um canal de voz (ou me mover para um).")
     async def connect(
             self,
@@ -435,7 +435,7 @@ class Music(commands.Cog):
 
     @can_send_message_check()
     @check_voice()
-    @ensure_bot_instance()
+    @ensure_bot_instance(check_player=False)
     @commands.bot_has_guild_permissions(send_messages=True)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.max_concurrency(1, commands.BucketType.member)
@@ -457,7 +457,7 @@ class Music(commands.Cog):
 
     @can_send_message_check()
     @check_voice()
-    @ensure_bot_instance()
+    @ensure_bot_instance(check_player=False)
     @commands.bot_has_guild_permissions(send_messages=True)
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
@@ -470,7 +470,7 @@ class Music(commands.Cog):
 
     @can_send_message_check()
     @check_voice()
-    @ensure_bot_instance()
+    @ensure_bot_instance(check_player=False)
     @commands.bot_has_guild_permissions(send_messages=True)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.command(name="search", description="Buscar música e escolher uma entre os resultados para tocar.",
@@ -486,7 +486,7 @@ class Music(commands.Cog):
 
     @can_send_message_check()
     @check_voice()
-    @ensure_bot_instance()
+    @ensure_bot_instance(check_player=False)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.slash_command(
         description=f"{desc_prefix}Tocar música em um canal de voz.")
