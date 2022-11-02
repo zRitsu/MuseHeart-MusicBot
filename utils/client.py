@@ -3,7 +3,6 @@ import asyncio
 import datetime
 import json
 import logging
-import subprocess
 from configparser import ConfigParser
 from importlib import import_module
 from subprocess import check_output
@@ -66,7 +65,6 @@ class BotPool:
         if not self.spotify:
             return
 
-        await self.bots[0].wait_until_ready()  # método temporário para contornar um problema de inicialização
         await self.spotify.authorize()
 
     async def connect_rpc_ws(self):
