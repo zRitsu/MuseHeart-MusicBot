@@ -2334,9 +2334,11 @@ class Music(commands.Cog):
         if time_below:
             filters.append('time_below')
             time_below = string_to_seconds(time_below) * 1000
+            txt.append(f"**Com duração mínima:** `{time_below}`")
         if time_above:
             filters.append('time_above')
             time_above = string_to_seconds(time_above) * 1000
+            txt.append(f"**Com duração máxima:** `{time_above}`")
         if absent_members:
             filters.append('absent_members')
 
