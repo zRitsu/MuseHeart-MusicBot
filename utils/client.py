@@ -217,50 +217,53 @@ class BotPool:
 
                 if not bot.bot_ready:
 
-                    if bot.config["AUTO_SYNC_COMMANDS"]:
+                    if not bot.config["INTERACTION_BOTS"] or str(bot.user.id) in bot.config["INTERACTION_BOTS"]:
 
-                        if not bot.config["INTERACTION_BOTS"] or str(bot.user.id) in bot.config["INTERACTION_BOTS"]:
+                        self._command_sync_flags = commands.CommandSyncFlags.all()
 
-                            self._command_sync_flags = commands.CommandSyncFlags.all()
-                            bot.load_modules(bot_name)
+                        bot.load_modules(bot_name)
+
+                        if bot.config["AUTO_SYNC_COMMANDS"]:
                             await bot.sync_app_commands(force=True)
 
-                        else:
+                    else:
 
-                            self._command_sync_flags = commands.CommandSyncFlags.none()
+                        self._command_sync_flags = commands.CommandSyncFlags.none()
 
-                            if self.config["INTERACTION_BOTS"]:
+                        if self.config["INTERACTION_BOTS"]:
 
-                                @bot.slash_command(description="Use este comando caso tenha problemas de outros comandos"
-                                                               " de barra (/) não estarem disponíveis.",
-                                                   default_member_permissions=disnake.Permissions(manage_guild=True))
-                                async def info(inter: disnake.AppCmdInter):
+                            @bot.slash_command(description="Use este comando caso tenha problemas de outros comandos"
+                                                           " de barra (/) não estarem disponíveis.",
+                                               default_member_permissions=disnake.Permissions(manage_guild=True))
+                            async def info(inter: disnake.AppCmdInter):
 
-                                    interaction_invites = ""
+                                interaction_invites = ""
 
-                                    for b in self.bots:
+                                for b in self.bots:
 
-                                        try:
-                                            if str(b.user.id) not in self.config["INTERACTION_BOTS"]:
-                                                continue
-                                        except:
+                                    try:
+                                        if str(b.user.id) not in self.config["INTERACTION_BOTS"]:
                                             continue
+                                    except:
+                                        continue
 
-                                        interaction_invites += f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) "
+                                    interaction_invites += f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) "
 
-                                    embed = disnake.Embed(
-                                        description="Aviso: para usar todos os meus comandos de barra (/) será necessário "
-                                                    "ter os comandos de barra de uma das integrações listadas abaixo no seu servidor:\n"
-                                                    f"{interaction_invites}\n\n"
-                                                    "Se aparecer nenhum comando das integrações citadas acima, "
-                                                    "clique em uma delas para adicioná-la no seu servidor.",
-                                        color=0x2F3136
-                                    )
+                                embed = disnake.Embed(
+                                    description="Aviso: para usar todos os meus comandos de barra (/) será necessário "
+                                                "ter os comandos de barra de uma das integrações listadas abaixo no seu servidor:\n"
+                                                f"{interaction_invites}\n\n"
+                                                "Se aparecer nenhum comando das integrações citadas acima, "
+                                                "clique em uma delas para adicioná-la no seu servidor.",
+                                    color=0x2F3136
+                                )
 
-                                    await inter.send(embed=embed, ephemeral=True)
+                                await inter.send(embed=embed, ephemeral=True)
 
+                        if bot.config["AUTO_SYNC_COMMANDS"]:
                             await bot.sync_app_commands(force=True)
-                            bot.load_modules(bot_name)
+
+                        bot.load_modules(bot_name)
 
                     if not bot.owner:
                         botowner = (await bot.application_info())
