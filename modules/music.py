@@ -2302,6 +2302,9 @@ class Music(commands.Cog):
                                                   default=False)
     ):
 
+        if time_below and time_above:
+            raise GenericError("Você deve escolher apenas uma das opções: **duração_abaixo_de** ou **duração_acima_de**.")
+
         try:
             bot = inter.music_bot
         except AttributeError:
@@ -2314,27 +2317,28 @@ class Music(commands.Cog):
 
         filters = []
 
+        txt = []
+
         if song_name:
             filters.append('song_name')
+            txt.append(f"**Com nome:** `{fix_characters(song_name)}`")
         if song_author:
             filters.append('song_author')
+            txt.append(f"**Do uploader/artista:** `{fix_characters(song_author)}`")
         if user:
             filters.append('user')
+            txt.append(f"**Pedido pelo membro:** {user.mention}")
         if playlist:
             filters.append('playlist')
-        if absent_members:
-            filters.append('absent_members')
-
-        if time_below and time_above:
-            raise GenericError(
-                "Você deve escolher apenas uma das opções: **duração_abaixo_de** ou **duração_acima_de**.")
-
+            txt.append(f"**Da playlist:** `{fix_characters(playlist)}`")
         if time_below:
             filters.append('time_below')
             time_below = string_to_seconds(time_below) * 1000
         if time_above:
             filters.append('time_above')
             time_above = string_to_seconds(time_above) * 1000
+        if absent_members:
+            filters.append('absent_members')
 
         if not filters and not range_start and not range_end:
             player.queue.clear()
@@ -2348,13 +2352,20 @@ class Music(commands.Cog):
                     raise GenericError("**A posição final deve ser maior que a posição inicial!**")
 
                 song_list = list(player.queue)[range_start - 1: range_end - 1]
+                txt.append(f"**Posição inicial da fila:** `{range_start}`\n"
+                           f"**Posição final da fila:** `{range_end}`")
 
             elif range_start:
                 song_list = list(player.queue)[range_start - 1:]
+                txt.append(f"**Posição inicial da fila:** `{range_start}`")
             elif range_end:
                 song_list = list(player.queue)[:range_end - 1]
+                txt.append(f"**Posição final da fila:** `{range_end}`")
             else:
                 song_list = list(player.queue)
+
+            if absent_members:
+                txt.append("`Músicas pedidas por membros que saíram do canal.`")
 
             deleted_tracks = 0
 
@@ -2392,7 +2403,8 @@ class Music(commands.Cog):
                 return
 
             txt = [f"removeu {deleted_tracks} música(s) da fila via clear.",
-                   f"♻️ **⠂{inter.author.mention} removeu {deleted_tracks} música(s) da fila.**"]
+                   f"♻️ **⠂{inter.author.mention} removeu {deleted_tracks} música(s) da fila usando os seguintes "
+                   f"filtros:**\n\n" + '\n'.join(txt)]
 
         await self.interaction_message(inter, txt, emoji="♻️")
 
@@ -2423,7 +2435,7 @@ class Music(commands.Cog):
     @clear.autocomplete("nome_do_autor")
     async def queue_author(self, inter: disnake.Interaction, query: str):
 
-        if not query or not inter.author.voice:
+        if not query:
             return
 
         if inter.bot.intents.members:
@@ -2435,6 +2447,9 @@ class Music(commands.Cog):
 
         else:
             bot = inter.bot
+
+        if not inter.author.voice:
+            return
 
         try:
             player = bot.music.players[inter.guild_id]
