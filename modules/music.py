@@ -926,13 +926,14 @@ class Music(commands.Cog):
 
     @play.autocomplete("busca")
     async def fav_add_autocomplete(self, inter: disnake.Interaction, query: str):
+
         favs: list = await fav_list(inter, query, prefix="> fav: ")
 
         if not inter.guild:
             try:
                 await check_pool_bots(inter)
             except:
-                return
+                pass
 
         if not inter.author.voice or not query or (favs_size := len(favs)) >= 20:
             return favs[:20]
