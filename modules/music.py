@@ -2284,11 +2284,11 @@ class Music(commands.Cog):
                                                   description="Incluir músicas pedidas pelo usuário selecionado.",
                                                   default=None),
             playlist: str = commands.Param(description="Incluir nome que tiver na playlist.", default=None),
-            time_below: str = commands.Param(name="duração_abaixo_de",
-                                             description="incluir músicas com duração abaixo do tempo definido (ex. 1:23).",
+            time_below: str = commands.Param(name="duração_mínima",
+                                             description="incluir músicas com duração mínima especificada (ex. 1:23).",
                                              default=None),
-            time_above: str = commands.Param(name="duração_acima_de",
-                                             description="incluir músicas com duração acima do tempo definido (ex. 1:45).",
+            time_above: str = commands.Param(name="duração_máxima",
+                                             description="incluir músicas com duração máxima especificada (ex. 1:45).",
                                              default=None),
             range_start: int = commands.Param(name="pos_inicial",
                                               description="incluir músicas da fila a partir de uma posição específica "
@@ -2333,12 +2333,12 @@ class Music(commands.Cog):
             txt.append(f"**Da playlist:** `{fix_characters(playlist)}`")
         if time_below:
             filters.append('time_below')
-            time_below = string_to_seconds(time_below) * 1000
             txt.append(f"**Com duração mínima:** `{time_below}`")
+            time_below = string_to_seconds(time_below) * 1000
         if time_above:
             filters.append('time_above')
-            time_above = string_to_seconds(time_above) * 1000
             txt.append(f"**Com duração máxima:** `{time_above}`")
+            time_above = string_to_seconds(time_above) * 1000
         if absent_members:
             filters.append('absent_members')
 
