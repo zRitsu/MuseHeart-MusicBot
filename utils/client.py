@@ -578,9 +578,12 @@ class BotCore(commands.Bot):
             return
 
         if self.config["COMMAND_LOG"] and inter.guild:
-            print(f"cmd log: [user: {inter.author} - {inter.author.id}] - [guild: {inter.guild.name} - {inter.guild.id}]"
-                  f" - [cmd: {inter.data.name}] "
-                  f"{datetime.datetime.utcnow().strftime('%d/%m/%Y - %H:%M:%S')} (UTC)\n" + ("-"*15))
+            try:
+                print(f"cmd log: [user: {inter.author} - {inter.author.id}] - [guild: {inter.guild.name} - {inter.guild.id}]"
+                      f" - [cmd: {inter.data.name}] {inter.filled_options}"
+                      f"{datetime.datetime.utcnow().strftime('%d/%m/%Y - %H:%M:%S')} (UTC)\n" + ("-"*15))
+            except:
+                traceback.print_exc()
 
         await super().on_application_command(inter)
 
