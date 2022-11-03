@@ -542,62 +542,71 @@ class Music(commands.Cog):
                     ((inter.author.voice.channel.user_limit - len(inter.author.voice.channel.voice_states)) < 1)):
                 raise GenericError(f"**O canal {inter.author.voice.channel.mention} está lotado!**")
 
-        node = bot.music.get_node(server)
-
-        if not node:
-            node = self.get_best_node(bot)
-
         msg = None
-
-        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         check_pool = isinstance(inter, disnake.MessageInteraction)
 
-        if not guild.me.voice:
-            can_connect(
-                inter.author.voice.channel, guild, bot,
-                check_other_bots_in_vc=guild_data["check_other_bots_in_vc"],
-                check_pool=check_pool
-            )
+        try:
+            player = bot.music.players[guild.id]
+            node = player.node
+            guild_data = {}
 
-        static_player = guild_data['player_controller']
+        except KeyError:
 
-        if static_player['channel']:
+            node = bot.music.get_node(server)
 
-            try:
-                channel_db = bot.get_channel(int(static_player['channel'])) or await bot.fetch_channel(
-                    int(static_player['channel']))
-            except disnake.Forbidden:
-                raise GenericError(f"**Não tenho permissão para acessar o canal <#{static_player['channel']}>**\n"
-                                   f"Caso queira resetar a configuração do canal de pedir música, use o comando /reset "
-                                   f"ou /setup novamente...")
-            except (TypeError, disnake.NotFound):
-                channel_db = None
+            if not node:
+                node = self.get_best_node(bot)
 
-            if not channel_db:
-                await self.reset_controller_db(inter.guild_id, guild_data, inter)
+            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
-            else:
+            if not guild.me.voice:
+                can_connect(
+                    inter.author.voice.channel, guild, bot,
+                    check_other_bots_in_vc=guild_data["check_other_bots_in_vc"],
+                    check_pool=check_pool
+                )
 
-                if channel_db != channel:
+            static_player = guild_data['player_controller']
 
-                    try:
-                        if isinstance(channel_db, disnake.Thread) and (channel_db.archived or channel_db.locked):
-                            if not channel_db.parent.permissions_for(guild.me).manage_threads:
-                                raise GenericError(
-                                    f"**{bot.user.mention} não possui permissão de gerenciar tópicos para "
-                                    f"desarquivar/destrancar o tópico: {channel_db.mention}**")
-                            await channel_db.edit(archived=False, locked=False)
-                    except AttributeError:
-                        pass
+            if static_player['channel']:
 
-                    can_send_message(channel_db, guild.me)
+                try:
+                    channel_db = bot.get_channel(int(static_player['channel'])) or await bot.fetch_channel(
+                        int(static_player['channel']))
+                except disnake.Forbidden:
+                    raise GenericError(f"**Não tenho permissão para acessar o canal <#{static_player['channel']}>**\n"
+                                       f"Caso queira resetar a configuração do canal de pedir música, use o comando /reset "
+                                       f"ou /setup novamente...")
+                except (TypeError, disnake.NotFound):
+                    channel_db = None
 
-                channel = channel_db
+                if not channel_db or channel_db.guild.id != guild.id:
+                    await self.reset_controller_db(inter.guild_id, guild_data, inter)
 
-        is_pin = None
+                else:
+
+                    if channel_db != channel:
+
+                        try:
+                            if isinstance(channel_db, disnake.Thread) and (channel_db.archived or channel_db.locked):
+                                if not channel_db.parent.permissions_for(guild.me).manage_threads:
+                                    raise GenericError(
+                                        f"**{bot.user.mention} não possui permissão de gerenciar tópicos para "
+                                        f"desarquivar/destrancar o tópico: {channel_db.mention}**")
+                                await channel_db.edit(archived=False, locked=False)
+                        except AttributeError:
+                            pass
+
+                        can_send_message(channel_db, guild.me)
+
+                    channel = channel_db
+
+            player: Optional[LavalinkPlayer] = None
 
         ephemeral = hide_playlist or await self.is_request_channel(inter, data=guild_data, ignore_thread=True)
+
+        is_pin = None
 
         if not query:
 
@@ -741,29 +750,32 @@ class Music(commands.Cog):
         tracks, node = await self.get_tracks(query, inter.user, node=node, track_loops=repeat_amount,
                                              hide_playlist=hide_playlist)
 
-        skin = bot.check_skin(guild_data["player_controller"]["skin"])
+        if not player:
 
-        player: LavalinkPlayer = bot.music.get_player(
-            guild_id=inter.guild_id,
-            cls=LavalinkPlayer,
-            player_creator=inter.author.id,
-            guild=guild,
-            channel=channel,
-            last_message_id=guild_data['player_controller']['message_id'],
-            node_id=node.identifier,
-            static=bool(static_player['channel']),
-            skin=skin
-        )
+            skin = bot.check_skin(guild_data["player_controller"]["skin"])
 
-        if static_player['channel'] and not player.message:
+            player: LavalinkPlayer = bot.music.get_player(
+                guild_id=inter.guild_id,
+                cls=LavalinkPlayer,
+                player_creator=inter.author.id,
+                guild=guild,
+                channel=channel,
+                last_message_id=guild_data['player_controller']['message_id'],
+                node_id=node.identifier,
+                static=bool(static_player['channel']),
+                skin=skin
+            )
 
-            try:
-                message = await channel.fetch_message(int(static_player['message_id']))
-            except TypeError:
-                message = None
-            except:
-                message = await send_idle_embed(channel, bot=bot)
-            player.message = message
+            if static_player['channel']:
+
+                try:
+                    message = await channel.fetch_message(int(static_player['message_id']))
+                except TypeError:
+                    message = None
+                except:
+                    message = await send_idle_embed(channel, bot=bot)
+
+                player.message = message
 
         pos_txt = ""
 
