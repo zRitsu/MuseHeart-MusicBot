@@ -1,10 +1,11 @@
+import traceback
 import disnake
 from disnake.ext import commands
 import asyncio
 from typing import Optional
 from aiohttp import ClientSession
 from utils.client import BotCore
-from utils.db import DBModel
+from utils.db import DBModel, db_models
 from utils.music.checks import check_requester_channel
 from utils.music.converters import time_format, URL_REG
 import psutil
@@ -338,6 +339,13 @@ class GuildLog(commands.Cog):
         )
 
         try:
+            guild_data = await self.bot.get_data(guild.id, db_name=DBModel.guilds)
+            guild_data["player_Controller"] = db_models[DBModel.guilds]["player_controller"]
+            await self.bot.update_data(guild.id, guild_data, db_name=DBModel.guilds)
+        except:
+            traceback.print_exc()
+
+        try:
             embed.set_thumbnail(url=guild.icon.replace(static_format="png").url)
         except AttributeError:
             pass
@@ -353,6 +361,13 @@ class GuildLog(commands.Cog):
     async def on_guild_join(self, guild: disnake.Guild):
 
         print(f"Novo servidor: {guild.name} - [{guild.id}]")
+
+        try:
+            guild_data = await self.bot.get_data(guild.id, db_name=DBModel.guilds)
+            guild_data["player_Controller"] = db_models[DBModel.guilds]["player_controller"]
+            await self.bot.update_data(guild.id, guild_data, db_name=DBModel.guilds)
+        except:
+            traceback.print_exc()
 
         if not self.hook_url:
             return
