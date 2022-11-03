@@ -130,10 +130,11 @@ def parse_error(
             error_txt = "**Este vídeo está indisponível ou privado...**"
         elif "The playlist does not exist" in wave_error:
             error_txt = "**A playlist não existe (ou está privada).**"
+        elif "not made this video available in your country" in wave_error.lower():
+            error_txt = "**O conteúdo deste link não está disponível na região no qual estou funcionando...**"
 
     if not error_txt:
         full_error_txt = "".join(traceback.format_exception(type(error), error, error.__traceback__))
-        print(full_error_txt)
     else:
         full_error_txt = ""
 
