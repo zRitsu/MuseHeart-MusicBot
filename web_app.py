@@ -191,20 +191,29 @@ class WSClient:
     def is_connected(self):
         return self.connection and not self.connection.closed
 
-    async def connect_bot_rpc(self, bot: BotCore):
+    async def connect_bot_rpc(self):
 
-        await bot.wait_until_ready()
+        bot_ids = []
 
-        await self.send({"user_ids": [bot.user.id], "bot": True})
+        for bot in self.pool.bots:
+
+            try:
+                bot_ids.append(bot.user.id)
+            except:
+                await bot.wait_until_ready()
+                bot_ids.append(bot.user.id)
+
+        await self.send({"user_ids": bot_ids, "bot": True})
 
         await asyncio.sleep(1)
 
-        for player in bot.music.players.values():
-            vc: disnake.VoiceChannel = player.bot.get_channel(player.channel_id)
-            if vc.voice_states:
-                bot.loop.create_task(player.process_rpc(vc))
+        for bot in self.pool.bots:
+            for player in bot.music.players.values():
+                vc: disnake.VoiceChannel = player.bot.get_channel(player.channel_id)
+                if vc.voice_states:
+                    bot.loop.create_task(player.process_rpc(vc))
 
-        print(f"{bot.user} [RPC client] Os dados de rpc foram sincronizados com sucesso.")
+        print(f"[RPC client] - Os dados de rpc foram sincronizados com sucesso.")
 
     async def send(self, data: dict):
 
