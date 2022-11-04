@@ -235,7 +235,14 @@ class MusicSettings(commands.Cog):
             except AttributeError:
                 id_ = ""
 
-            msg_select = await inter.send(
+            try:
+                func = inter.edit_original_message
+                kwargs = {"ephemeral": True}
+            except:
+                func = inter.send
+                kwargs = {}
+
+            msg_select = await func(
                 embed=disnake.Embed(
                     description="**Qual tipo de canal para pedir música você quer criar?**",
                     color=self.bot.get_color(guild.me)
@@ -244,7 +251,7 @@ class MusicSettings(commands.Cog):
                     disnake.ui.Button(label="Canal de texto", custom_id=f"text_channel_{id_}", emoji="💬"),
                     disnake.ui.Button(label="Canal de voz", custom_id=f"voice_channel_{id_}", emoji="🔊")
                 ],
-                ephemeral=True
+                **kwargs
             )
 
             def check(i: disnake.MessageInteraction):
@@ -444,9 +451,13 @@ class MusicSettings(commands.Cog):
 
         guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
 
-        channel = bot.get_channel(int(guild_data['player_controller']['channel'] or 0))
+        try:
+            channel = bot.get_channel(int(guild_data['player_controller']['channel'])) or \
+                      bot.fetch_channel(int(guild_data['player_controller']['channel']))
+        except:
+            channel = None
 
-        if not channel:
+        if not channel or channel.guild.id != inter.guild_id:
             raise GenericError(f"**Não há canais de pedido de música configurado (ou o canal foi deletado).**")
 
         try:
