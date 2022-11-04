@@ -237,10 +237,10 @@ class MusicSettings(commands.Cog):
 
             try:
                 func = inter.edit_original_message
-                kwargs = {"ephemeral": True}
+                kwargs = {}
             except:
                 func = inter.send
-                kwargs = {}
+                kwargs = {"ephemeral": True}
 
             msg_select = await func(
                 embed=disnake.Embed(
