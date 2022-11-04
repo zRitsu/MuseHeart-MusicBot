@@ -2,6 +2,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+from traceback import print_exc
 from typing import TYPE_CHECKING, Optional
 from os import environ
 import aiohttp
@@ -12,8 +13,7 @@ import tornado.websocket
 from async_timeout import timeout
 
 if TYPE_CHECKING:
-    from utils.client import BotPool
-
+    from utils.client import BotPool, BotCore
 
 logging.getLogger('tornado.access').disabled = True
 
@@ -170,14 +170,10 @@ class WSClient:
         self.pool = pool
         self.connection = None
         self.backoff: int = 7
-        self.event = asyncio.Event()
         self.data: dict = {}
         self.session: Optional[aiohttp.ClientSession] = None
 
     async def connect(self):
-
-        if self.event.is_set():
-            return
 
         if not self.session:
             self.session = aiohttp.ClientSession()
@@ -189,36 +185,38 @@ class WSClient:
         print("RPC client conectado, sincronizando rpc dos bots...")
 
         for bot in self.pool.bots:
-
-            await bot.wait_until_ready()
-
-        await self.send({"user_ids": [b.user.id for b in self.pool.bots], "bot": True}, force=True)
-
-        await asyncio.sleep(1)
-
-        for bot in self.pool.bots:
-            for player in bot.music.players.values():
-                vc: disnake.VoiceChannel = player.bot.get_channel(player.channel_id)
-                if vc.voice_states:
-                    bot.loop.create_task(player.process_rpc(vc))
+            bot.loop.create_task(self.connect_bot_rpc(bot))
 
         print("RPC client - Os dados de rpc dos bots foram sincronizados com sucesso.")
-
-        self.event.set()
 
     @property
     def is_connected(self):
         return self.connection and not self.connection.closed
 
-    async def send(self, data: dict, force=False):
+    async def connect_bot_rpc(self, bot: BotCore):
+
+        await bot.wait_until_ready()
+
+        await self.send({"user_ids": [bot.user.id], "bot": True})
+
+        await asyncio.sleep(1)
+
+        for player in bot.music.players.values():
+            vc: disnake.VoiceChannel = player.bot.get_channel(player.channel_id)
+            if vc.voice_states:
+                bot.loop.create_task(player.process_rpc(vc))
+
+        print(f"{bot.user} [RPC client] Os dados de rpc foram sincronizados com sucesso.")
+
+    async def send(self, data: dict):
 
         if not self.is_connected:
             return
 
-        if not force:
-            await self.event.wait()
-
-        await self.connection.send_json(data)
+        try:
+            await self.connection.send_json(data)
+        except:
+            print_exc()
 
     async def ws_loop(self):
 
@@ -235,7 +233,6 @@ class WSClient:
                 else:
                     print(f"Conexão com servidor RPC perdida - Reconectando em {int(self.backoff)} segundo(s).")
 
-                self.event.clear()
                 await asyncio.sleep(self.backoff)
                 self.backoff *= 2.5
                 continue
@@ -244,7 +241,6 @@ class WSClient:
 
             if message.type in (aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR):
                 print(f"RPC Websocket Closed: {message.extra}\nReconnecting in {self.backoff}s")
-                self.event.clear()
                 await asyncio.sleep(self.backoff)
                 continue
 
