@@ -448,7 +448,7 @@ class LavalinkPlayer(wavelink.Player):
                             description=f"A música [{track.title}]({track.uri}) não está disponível...\n"
                                         f"Pulando para a próxima música...",
                             color=0x2F3136
-                        )
+                        ), delete_after=30
                     )
                 except:
                     traceback.print_exc()
@@ -465,7 +465,7 @@ class LavalinkPlayer(wavelink.Player):
                             description=f"A música [{track.title}]({track.uri}) não está disponível...\n"
                                         f"Pulando para a próxima música...",
                             color=0x2F3136
-                        )
+                        ), delete_after=30
                     )
                 except:
                     traceback.print_exc()
