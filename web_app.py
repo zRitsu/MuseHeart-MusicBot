@@ -172,6 +172,7 @@ class WSClient:
         self.backoff: int = 7
         self.data: dict = {}
         self.session: Optional[aiohttp.ClientSession] = None
+        self.connect_task = []
 
     async def connect(self):
 
@@ -184,10 +185,7 @@ class WSClient:
         #print(f"RPC client conectado: {self.bot.user} - {self.url}")
         print("RPC client conectado, sincronizando rpc dos bots...")
 
-        for bot in self.pool.bots:
-            bot.loop.create_task(self.connect_bot_rpc(bot))
-
-        print("RPC client - Os dados de rpc dos bots foram sincronizados com sucesso.")
+        self.connect_task = [bot.loop.create_task(self.connect_bot_rpc(bot)) for bot in self.pool.bots]
 
     @property
     def is_connected(self):
@@ -218,6 +216,16 @@ class WSClient:
         except:
             print_exc()
 
+    def clear_tasks(self):
+
+        for t in self.connect_task:
+            try:
+                t.cancel()
+            except:
+                continue
+
+        self.connect_task.clear()
+
     async def ws_loop(self):
 
         while True:
@@ -225,6 +233,7 @@ class WSClient:
             try:
 
                 if not self.is_connected:
+                    self.clear_tasks()
                     await self.connect()
 
             except Exception as e:
