@@ -40,7 +40,8 @@ async def process_spotify(bot: BotCore, requester: int, query: str, *, hide_play
             requester=requester
         )
 
-        t.info["extra"]["authors"] = [fix_characters(i.name) for i in result.artists]
+        t.info["extra"]["authors"] = [fix_characters(i.name) for i in result.artists if f"feat. {i.name.lower()}"
+                                      not in result.name.lower()]
 
         t.info["extra"]["authors_md"] = ", ".join(f"[`{a.name}`]({a.link})" for a in result.artists)
 
@@ -132,7 +133,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str, *, hide_play
 
         track.info["extra"]["playlist"] = data["playlistInfo"]
 
-        track.info["extra"]["authors"] = [fix_characters(i.name) for i in t.artists]
+        track.info["extra"]["authors"] = [fix_characters(i.name) for i in t.artists if f"feat. {i.name.lower()}" not in t.name.lower()]
 
         track.info["extra"]["authors_md"] = ", ".join(f"[`{a.name}`]({a.link})" for a in t.artists)
 
