@@ -535,7 +535,7 @@ class Music(commands.Cog):
             guild = inter.guild
             channel = inter.channel
 
-        can_send_message(channel, bot)
+        can_send_message(channel, bot.user)
 
         if not guild.me.guild.voice_client and inter.author.voice.channel.user_limit and (
                     guild.me.id not in inter.author.voice.channel.voice_states and

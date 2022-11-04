@@ -13,12 +13,16 @@ if TYPE_CHECKING:
     from ..others import CustomContext
 
 
-def can_send_message(channel: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.Thread], bot: disnake.Member):
+def can_send_message(
+        channel: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.Thread],
+        bot: Union[disnake.ClientUser, disnake.Member]
+):
+
     if not channel.permissions_for(channel.guild.me).send_messages:
-        raise GenericError(f"**{bot.user.mention} não possui permissão de enviar mensagens no canal:** {channel.mention}")
+        raise GenericError(f"**{bot.mention} não possui permissão de enviar mensagens no canal:** {channel.mention}")
 
     if not channel.permissions_for(channel.guild.me).embed_links:
-        raise GenericError(f"**{bot.user.mention} não possui permissão de inserir links no canal: {channel.mention}**")
+        raise GenericError(f"**{bot.mention} não possui permissão de inserir links no canal: {channel.mention}**")
 
     return True
 
