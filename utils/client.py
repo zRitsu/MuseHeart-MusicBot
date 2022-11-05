@@ -404,7 +404,7 @@ class BotCore(commands.Bot):
 
     def check_skin(self, skin: str):
 
-        if skin is None or skin == "default" or skin not in self.player_skins:
+        if skin is None or skin not in self.player_skins:
             return self.default_skin
 
         return skin

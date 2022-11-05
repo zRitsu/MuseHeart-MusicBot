@@ -752,8 +752,6 @@ class Music(commands.Cog):
 
         if not player:
 
-            skin = bot.check_skin(guild_data["player_controller"]["skin"])
-
             player: LavalinkPlayer = bot.music.get_player(
                 guild_id=inter.guild_id,
                 cls=LavalinkPlayer,
@@ -763,7 +761,7 @@ class Music(commands.Cog):
                 last_message_id=guild_data['player_controller']['message_id'],
                 node_id=node.identifier,
                 static=bool(static_player['channel']),
-                skin=skin
+                skin=bot.check_skin(guild_data["player_controller"]["skin"])
             )
 
             if static_player['channel']:
