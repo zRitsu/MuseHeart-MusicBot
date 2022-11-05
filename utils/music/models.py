@@ -870,7 +870,7 @@ class LavalinkPlayer(wavelink.Player):
                 check_duration = False
             except KeyError:
                 to_search = f"{self.bot.config['SEARCH_PROVIDER']}:{track.single_title} - {track.authors_string}"
-                check_duration = self.bot.config['SEARCH_PROVIDER'].lower() in ("ytsearch", "scsearch", "ytmsearch")
+                check_duration = True
 
             tracks = (await self.node.get_tracks(to_search))
 
