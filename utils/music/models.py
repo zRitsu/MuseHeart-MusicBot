@@ -17,6 +17,7 @@ from typing import Optional, Union, TYPE_CHECKING, List
 if TYPE_CHECKING:
     from ..client import BotCore
 
+exclude_tags = ("remix", "edit", "extended", "extend")
 
 class PartialPlaylist:
 
@@ -883,6 +884,9 @@ class LavalinkPlayer(wavelink.Player):
             for t in tracks:
 
                 if t.is_stream:
+                    continue
+
+                if any(i in t.title.lower() and not i in track.single_title.lower() for i in exclude_tags):
                     continue
 
                 if check_duration and ((t.duration - 10000) < track.duration < (t.duration + 10000)):
