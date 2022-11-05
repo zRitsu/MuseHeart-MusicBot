@@ -1,9 +1,7 @@
 # disnake-LL-music-bot
 ## bot de música programado em python com player interativo, comandos barra/slash, etc. Utilizando as libs disnake e wavelink/lavalink.
-</br>
 
 ## Bots de exemplo usando esta source: [clique aqui](https://gist.github.com/zRitsu/4875008554a00c3c372b2df6dcdf437f#file-muse_heart_invites-md).
-</br>
 
 ### Algumas previews:
 
