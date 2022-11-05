@@ -79,7 +79,7 @@ class PlayerControls:
     volume = "musicplayer_volume"
     shuffle = "musicplayer_shuffle"
     seek_to_start = "musicplayer_seek_to_start"
-    readd = "musicplayer_readd"
+    readd = "musicplayer_readd_songs"
     loop_mode = "musicplayer_loop_mode"
     queue = "musicplayer_queue"
     nightcore = "musicplayer_nightcore"

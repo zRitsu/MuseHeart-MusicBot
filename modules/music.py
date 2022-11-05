@@ -1616,7 +1616,7 @@ class Music(commands.Cog):
     @commands.command(name="readd", aliases=["readicionar", "rdd"],
                       description="Readicionar as músicas tocadas na fila.")
     async def readd_legacy(self, ctx: CustomContext):
-        await self.readd.callback(self=self, inter=ctx)
+        await self.readd_songs.callback(self=self, inter=ctx)
 
     @is_dj()
     @has_player()
