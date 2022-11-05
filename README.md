@@ -1,10 +1,9 @@
 # disnake-LL-music-bot
 ## bot de música programado em python com player interativo, comandos barra/slash, etc. Utilizando as libs disnake e wavelink/lavalink.
+</br>
 
-### Bots de exemplo usando esta source:
-| ![](https://cdn.discordapp.com/avatars/784891594306093101/b8a201bff9f563e4d1d54e7a470a1d53.png?size=128) | ![](https://cdn.discordapp.com/avatars/825460549419794462/383711d4d254ed3e0988ebc5d1393a83.png?size=128) | ![](https://cdn.discordapp.com/avatars/611914625683816478/237f52ef59d848bed74bc890026d6cfc.png?size=128) | ![](https://cdn.discordapp.com/avatars/908029891583299604/a6a4dd5a1079cdcaf2b308357940aa68.png?size=128) | ![](https://cdn.discordapp.com/avatars/919730161786712164/f33f153b13ba7f602ca577f8f3cea889.png?size=128) |
-|---|---|---|---|---|
-| **Muse Heart 1**<br>[Adicionar](https://discord.com/oauth2/authorize?client_id=784891594306093101&scope=bot+applications.commands&permissions=397287680080) | **Muse Heart 2**<br>[Adicionar](https://discord.com/oauth2/authorize?client_id=825460549419794462&scope=bot+applications.commands&permissions=397287680080) | **Muse Heart 3**<br>[Adicionar](https://discord.com/oauth2/authorize?client_id=611914625683816478&scope=bot+applications.commands&permissions=397287680080) | **Muse Heart 4**<br>[Adicionar](https://discord.com/oauth2/authorize?client_id=908029891583299604&scope=bot+applications.commands&permissions=397287680080) | **Muse Heart 5**<br>[Adicionar](https://discord.com/oauth2/authorize?client_id=919730161786712164&scope=bot+applications.commands&permissions=397287680080) |
+## Bots de exemplo usando esta source: [clique aqui](https://gist.github.com/zRitsu/4875008554a00c3c372b2df6dcdf437f#file-muse_heart_invites-md).
+</br>
 
 ### Algumas previews:
 
