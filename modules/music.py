@@ -589,23 +589,24 @@ class Music(commands.Cog):
                     if channel_db != channel:
 
                         try:
-                            if isinstance(channel_db, disnake.Thread) and (channel_db.archived or channel_db.locked):
-                                if not channel_db.parent.permissions_for(guild.me).manage_threads:
-                                    raise GenericError(
-                                        f"**{bot.user.mention} não possui permissão de gerenciar tópicos para "
-                                        f"desarquivar/destrancar o tópico: {channel_db.mention}**")
-                                await channel_db.edit(archived=False, locked=False)
+                            if isinstance(channel_db, disnake.Thread):
+
+                                if not channel_db.parent:
+                                    await self.reset_controller_db(inter.guild_id, guild_data, inter)
+                                    channel_db = None
+
+                                else:
+
+                                    if (channel_db.archived or channel_db.locked) and not channel_db.parent.permissions_for(guild.me).manage_threads:
+                                        raise GenericError(
+                                            f"**{bot.user.mention} não possui permissão de gerenciar tópicos para "
+                                            f"desarquivar/destrancar o tópico: {channel_db.mention}**")
+
+                                    await channel_db.edit(archived=False, locked=False)
                         except AttributeError:
                             pass
 
-                        try:
-                            if not channel_db.parent:
-                                await self.reset_controller_db(inter.guild_id, guild_data, inter)
-                            else:
-                                can_send_message(channel_db, guild.me)
-                                channel = channel_db
-                        except AttributeError:
-                            can_send_message(channel_db, guild.me)
+                        if channel_db:
                             channel = channel_db
 
             player: Optional[LavalinkPlayer] = None
