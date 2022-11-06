@@ -598,9 +598,15 @@ class Music(commands.Cog):
                         except AttributeError:
                             pass
 
-                        can_send_message(channel_db, guild.me)
-
-                    channel = channel_db
+                        try:
+                            if not channel_db.parent:
+                                await self.reset_controller_db(inter.guild_id, guild_data, inter)
+                            else:
+                                can_send_message(channel_db, guild.me)
+                                channel = channel_db
+                        except AttributeError:
+                            can_send_message(channel_db, guild.me)
+                            channel = channel_db
 
             player: Optional[LavalinkPlayer] = None
 
