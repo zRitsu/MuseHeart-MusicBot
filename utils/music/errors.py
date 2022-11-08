@@ -135,6 +135,7 @@ def parse_error(
 
     if not error_txt:
         full_error_txt = "".join(traceback.format_exception(type(error), error, error.__traceback__))
+        print(full_error_txt)
     else:
         full_error_txt = ""
 
