@@ -624,14 +624,14 @@ class Music(commands.Cog):
 
                             if not channel_db_perms.send_messages:
                                 raise GenericError(
-                                    f"**Não tenho permissão para enviar mensagens no canal <#{static_player['channel']}>**\n"
+                                    f"**{bot.user.mention} não possui permissão para enviar mensagens no canal <#{static_player['channel']}>**\n"
                                     "Caso queira resetar a configuração do canal de pedir música, use o comando /reset ou /setup "
                                     "novamente..."
                                 )
 
                             if not channel_db_perms.embed_links:
                                 raise GenericError(
-                                    f"**Não tenho permissão para anexar links/embeds no canal <#{static_player['channel']}>**\n"
+                                    f"**{bot.user.mention} não possui permissão para anexar links/embeds no canal <#{static_player['channel']}>**\n"
                                     "Caso queira resetar a configuração do canal de pedir música, use o comando /reset ou /setup "
                                     "novamente..."
                                 )
