@@ -663,15 +663,7 @@ class Owner(commands.Cog):
         except:
             pass
 
-        with ZipFile("./source.zip", 'a') as zipf:
-
-            for f in filelist.split("\n"):
-                if not f:
-                    continue
-                if f == ".env-temp":
-                    zipf.write('./.env-temp', './.env')
-                else:
-                    zipf.write(f"./{f}")
+        await self.bot.loop.run_in_executor(None, self.zip_dir, filelist.split("\n"))
 
         os.remove("./.env-temp")
 
@@ -704,6 +696,18 @@ class Owner(commands.Cog):
             )
         else:
             return f"Arquivo [source.zip]({msg.jump_url}) foi enviado com sucesso no seu DM."
+
+    def zip_dir(self, filelist: list):
+
+        with ZipFile("./source.zip", 'a') as zipf:
+
+            for f in filelist:
+                if not f:
+                    continue
+                if f == ".env-temp":
+                    zipf.write('./.env-temp', './.env')
+                else:
+                    zipf.write(f"./{f}")
 
     @commands.is_owner()
     @commands.command(hidden=True)
