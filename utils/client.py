@@ -13,7 +13,7 @@ import disnake
 from typing import Optional, Union, List
 from config_loader import load_config
 from web_app import WSClient, start
-from .music.errors import GenericError
+from .music.errors import GenericError, PoolException
 from .music.local_lavalink import run_lavalink
 from .music.models import music_mode
 from .music.spotify import spotify_client
@@ -51,6 +51,8 @@ class BotPool:
         self.config = {}
         self.commit = ""
         self.remote_git_url = ""
+        self.max_counter: int = 0
+        self.message_ids: set = set()
 
     def load_playlist_cache(self):
 
@@ -80,7 +82,7 @@ class BotPool:
         self.config = load_config()
 
         if not self.config["DEFAULT_PREFIX"]:
-            self.config["DEFAULT_PREFIX"] = "!!!"
+            self.config["DEFAULT_PREFIX"] = "!!"
 
         if self.config['ENABLE_LOGGER']:
 
@@ -184,13 +186,16 @@ class BotPool:
                 command_sync_flags=commands.CommandSyncFlags.none(),
                 embed_color=self.config["EMBED_COLOR"],
                 default_prefix=default_prefix,
-                pool=self
+                pool=self,
+                number=int(self.max_counter)
             )
 
             bot.token = token
 
             bot.load_extension("jishaku")
             bot.get_command("jsk").hidden = True
+
+            self.max_counter += 1
 
             @bot.check
             async def forum_check(ctx: CustomContext):
@@ -209,6 +214,15 @@ class BotPool:
 
                     return True
 
+            if bot.config["INTERACTION_BOTS"]:
+
+                @bot.listen("on_command_completion")
+                async def message_id_cleanup(ctx: CustomContext):
+
+                    try:
+                        ctx.bot.pool.message_ids.remove(f"{ctx.guild.id}-{ctx.channel.id}-{ctx.message.id}")
+                    except:
+                        pass
 
             @bot.listen()
             async def on_ready():
@@ -294,7 +308,7 @@ class BotPool:
             if not k.lower().startswith("token_bot_"):
                 continue
 
-            bot_name = k[10:] or "Sec. Bot"
+            bot_name = k[10:] or f"Bot_{self.max_counter}"
 
             load_bot(bot_name, v)
 
@@ -338,7 +352,7 @@ class BotCore(commands.Bot):
         self.session: Optional[aiohttp.ClientError] = None
         self.pool: BotPool = kwargs.pop('pool')
         self.config = self.pool.config
-        self.default_prefix = kwargs.pop("default_prefix", "!!!")
+        self.default_prefix = kwargs.pop("default_prefix", "!!")
         self.spotify: Optional[SpotifyClient] = self.pool.spotify
         self.session = aiohttp.ClientSession()
         self.ws_client = self.pool.ws_client
@@ -350,6 +364,7 @@ class BotCore(commands.Bot):
         self.uptime = disnake.utils.utcnow()
         self.env_owner_ids = set()
         self.dm_cooldown = commands.CooldownMapping.from_cooldown(rate=2, per=30, type=commands.BucketType.member)
+        self.number = kwargs.pop("number", 0)
         super().__init__(*args, **kwargs)
         self.music = music_mode(self)
         self.public = None

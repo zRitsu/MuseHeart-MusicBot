@@ -1,16 +1,17 @@
 from __future__ import annotations
+import asyncio
 import traceback
 from typing import TYPE_CHECKING, Union
 import disnake
 from disnake.ext import commands
 from .errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, GenericError, \
-    MissingVoicePerms, DiffVoiceChannel
+    MissingVoicePerms, DiffVoiceChannel, PoolException
 from .models import LavalinkPlayer
 from ..db import DBModel
+from ..others import CustomContext
 
 if TYPE_CHECKING:
     from ..client import BotCore
-    from ..others import CustomContext
 
 
 def can_send_message(
@@ -36,8 +37,7 @@ async def check_requester_channel(ctx: CustomContext):
 
     return True
 
-
-async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool = True):
+async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool = True, return_first=False):
 
     try:
         inter.music_bot
@@ -59,6 +59,43 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
     except AttributeError:
         pass
 
+    if isinstance(inter, CustomContext):
+
+        if inter.prefix in (f"<@{inter.bot.user.id}> ", f"<@!{inter.bot.user.id}> "):
+            inter.music_bot = inter.bot
+            inter.music_guild = inter.guild
+            return True
+
+        msg_id = f"{inter.guild.id}-{inter.channel.id}-{inter.message.id}"
+
+        if msg_id in inter.bot.pool.message_ids:
+
+            def check(ctx, b_id):
+                try:
+                    return f"{ctx.guild_id}-{ctx.channel.id}-{ctx.message.id}" == msg_id
+                except AttributeError:
+                    return
+
+            inter.bot.dispatch("pool_payload_ready", inter)
+
+            try:
+                ctx, bot_id = await inter.bot.wait_for("pool_dispatch", check=check, timeout=4)
+            except asyncio.TimeoutError:
+                raise PoolException()
+            if not bot_id or bot_id != inter.bot.user.id:
+                raise PoolException()
+            inter.music_bot = inter.bot
+            inter.music_guild = inter.guild
+            return True
+
+        inter.bot.pool.message_ids.add(msg_id)
+
+        if return_first:
+            inter.music_bot = inter.bot
+            inter.music_guild = inter.guild
+            inter.bot.dispatch("pool_dispatch", inter, None)
+            return True
+
     free_bot = None
 
     for bot in inter.bot.pool.bots:
@@ -72,11 +109,22 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         inter.author = author
 
         if not author.voice:
+            inter.bot.dispatch("pool_dispatch", inter, None)
             raise NoVoice()
 
         if bot.user.id in author.voice.channel.voice_states:
             inter.music_bot = bot
             inter.music_guild = guild
+            if isinstance(inter, CustomContext) and inter.music_bot.user.id != inter.bot.user.id:
+                try:
+                    await inter.music_bot.wait_for(
+                        "pool_payload_ready", timeout=4,
+                        check=lambda ctx: f"{ctx.guild_id}-{ctx.channel.id}-{ctx.message.id}" == msg_id
+                    )
+                except asyncio.TimeoutError:
+                    pass
+                inter.music_bot.dispatch("pool_dispatch", inter, bot.user.id)
+                raise PoolException()
             return True
 
         if only_voiced:
@@ -89,10 +137,12 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         if not inter.guild.voice_client:
 
             if only_voiced:
+                inter.bot.dispatch("pool_dispatch", None)
                 raise NoPlayer()
 
             inter.music_bot = inter.bot
             inter.music_guild = inter.guild
+            inter.bot.dispatch("pool_dispatch", inter, None)
             return True
 
     except AttributeError:
@@ -100,9 +150,20 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
     if free_bot:
         inter.music_bot, inter.music_guild = free_bot
+        if isinstance(inter, CustomContext) and inter.music_bot.user.id != inter.bot.user.id:
+            try:
+                await inter.music_bot.wait_for(
+                    "pool_payload_ready", timeout=4,
+                    check=lambda ctx: f"{ctx.guild_id}-{ctx.channel.id}-{ctx.message.id}" == msg_id
+                )
+            except asyncio.TimeoutError:
+                pass
+            inter.music_bot.dispatch("pool_dispatch", inter, inter.music_bot.user.id)
+            raise PoolException()
         return True
 
     elif check_player:
+        inter.bot.dispatch("pool_dispatch", inter, None)
         raise NoPlayer()
 
     txt = ""
@@ -126,12 +187,14 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         if txt:
             msg += f"\nVocê pode convidar bots adicionais no seu servidor através dos links abaixo:\n{txt}"
 
+    inter.bot.dispatch("pool_dispatch", inter, None)
+
     raise GenericError(msg)
 
-def ensure_bot_instance(only_voiced=False, check_player=True):
+def ensure_bot_instance(only_voiced=False, check_player=True, return_first=False):
 
     async def predicate(inter):
-        await check_pool_bots(inter, only_voiced=only_voiced, check_player=check_player)
+        await check_pool_bots(inter, only_voiced=only_voiced, check_player=check_player, return_first=return_first)
         return True
 
     return commands.check(predicate)

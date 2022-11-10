@@ -6,7 +6,7 @@ from typing import Optional
 from aiohttp import ClientSession
 from utils.client import BotCore
 from utils.db import DBModel, db_models
-from utils.music.checks import check_requester_channel
+from utils.music.checks import check_requester_channel, ensure_bot_instance
 from utils.music.converters import time_format, URL_REG
 import psutil
 import humanize
@@ -120,6 +120,7 @@ class Misc(commands.Cog):
 
 
     @commands.command(name="about", aliases=["sobre", "info", "botinfo"], description="Exibir informações sobre mim.")
+    @ensure_bot_instance(return_first=True)
     async def about_legacy(self, ctx):
         await self.about.callback(self=self, inter=ctx)
 
@@ -214,6 +215,7 @@ class Misc(commands.Cog):
 
 
     @commands.command(name="invite", aliases=["convidar"], description="Exibir meu link de convite para você me adicionar no seu servidor.")
+    @ensure_bot_instance(return_first=True)
     async def invite_legacy(self, ctx):
         await self.invite.callback(self=self, inter=ctx)
 

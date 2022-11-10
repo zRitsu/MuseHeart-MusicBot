@@ -9,7 +9,7 @@ bools = {
 }
 
 DEFAULT_CONFIG = {
-    "DEFAULT_PREFIX": "!!!",
+    "DEFAULT_PREFIX": "!!",
     "AUTO_SYNC_COMMANDS": True,
     "OWNER_IDS": "",
     "COMMAND_LOG": False,

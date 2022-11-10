@@ -7,7 +7,7 @@ import humanize
 from disnake.ext import commands
 from typing import TYPE_CHECKING, Union
 from utils.db import DBModel
-from utils.music.checks import user_cooldown
+from utils.music.checks import user_cooldown, ensure_bot_instance
 from utils.music.converters import time_format
 from utils.music.errors import GenericError
 from utils.others import send_idle_embed, CustomContext, select_bot_pool
@@ -64,8 +64,10 @@ class MusicSettings(commands.Cog):
         await inter.send(embed=embed, ephemeral=True)
 
     @commands.cooldown(1, 10, commands.BucketType.user)
+    @ensure_bot_instance(return_first=True)
     @commands.command(aliases=["mgf", "migrarfavoritos", "migrate"],
                       description="Migrar seus favoritos para database global (comando temporário).")
+    @ensure_bot_instance()
     async def migratefav(self, ctx: CustomContext):
 
         async with ctx.typing():
@@ -91,6 +93,7 @@ class MusicSettings(commands.Cog):
     @commands.has_guild_permissions(manage_guild=True)
     @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
+    @ensure_bot_instance(return_first=True)
     @commands.command(
         name="setup", aliases=["songrequestchannel", "sgrc"], usage="[id do canal ou #canal] [--reset]",
         description="Criar/escolher um canal dedicado para pedir músicas e deixar player fixado."
@@ -410,6 +413,7 @@ class MusicSettings(commands.Cog):
     @commands.has_guild_permissions(manage_guild=True)
     @commands.bot_has_guild_permissions(manage_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
+    @ensure_bot_instance(return_first=True)
     @commands.command(
         name="reset", usage="[--delete]",
         description="Resetar as configurações relacionadas ao canal de pedir música (song request)."
@@ -526,6 +530,7 @@ class MusicSettings(commands.Cog):
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
+    @ensure_bot_instance(return_first=True)
     @commands.command(name="adddjrole",description="Adicionar um cargo para a lista de DJ's do servidor.", usage="[id / nome / @cargo]")
     async def add_dj_role_legacy(self, ctx: CustomContext, *, role: disnake.Role):
         await self.add_dj_role(ctx, inter=ctx, role=role)
@@ -563,6 +568,7 @@ class MusicSettings(commands.Cog):
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
+    @ensure_bot_instance(return_first=True)
     @commands.command(description="Remover um cargo para a lista de DJ's do servidor.", usage="[id / nome / @cargo]")
     async def remove_dj_role_legacy(self, ctx: CustomContext, *, role: disnake.Role):
         await self.remove_dj_role(ctx, inter=ctx, role=role)
@@ -607,6 +613,7 @@ class MusicSettings(commands.Cog):
     @commands.has_guild_permissions(manage_guild=True)
     @commands.cooldown(1, 10, commands.BucketType.guild)
     @commands.max_concurrency(1, commands.BucketType.guild)
+    @ensure_bot_instance(return_first=True)
     @commands.command(description="Alterar aparência/skin do player.", name="changeskin", aliases=["setskin", "skin"])
     async def change_skin_legacy(self, ctx: CustomContext):
 
@@ -728,7 +735,9 @@ class MusicSettings(commands.Cog):
 
         return [s for s in self.bot.player_skins if s not in self.bot.config["IGNORE_SKINS"].split()]
 
+    @ensure_bot_instance()
     @commands.cooldown(1, 5, commands.BucketType.user)
+    @ensure_bot_instance(return_first=True)
     @commands.command(
         name="nodeinfo",
         aliases=["llservers", "ll"],

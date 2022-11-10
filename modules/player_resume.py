@@ -9,7 +9,7 @@ from utils.client import BotCore
 import json
 import asyncio
 from utils.db import DBModel
-from utils.music.checks import can_connect
+from utils.music.checks import can_connect, ensure_bot_instance
 from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialTrack
 from utils.others import CustomContext
 
@@ -139,8 +139,10 @@ class PlayerSession(commands.Cog):
         except FileNotFoundError:
             return
 
+
     @commands.max_concurrency(1, commands.BucketType.default)
     @commands.is_owner()
+    @ensure_bot_instance(return_first=True)
     @commands.command(hidden=True, aliases=["savep"])
     async def saveplayers(self, ctx: CustomContext, *args):
 

@@ -12,7 +12,7 @@ import wavelink
 from disnake.ext import commands
 from utils.client import BotCore
 from utils.db import DBModel
-from utils.music.checks import check_voice, check_requester_channel
+from utils.music.checks import check_voice, check_requester_channel, ensure_bot_instance
 from utils.music.local_lavalink import run_lavalink
 from utils.music.models import LavalinkPlayer
 from utils.others import sync_message, chunk_list, EmbedPaginator, CustomContext, string_to_file
@@ -78,6 +78,7 @@ class Owner(commands.Cog):
 
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.is_owner()
+    @ensure_bot_instance(return_first=True)
     @commands.command(
         hidden=True, aliases=["gls", "lavalink", "lllist", "lavalinkservers"],
         description="Baixar um arquivo com lista de servidores lavalink para usá-los no sistema de música."
@@ -97,6 +98,7 @@ class Owner(commands.Cog):
 
     @commands.is_owner()
     @commands.max_concurrency(1, commands.BucketType.user)
+    @ensure_bot_instance(return_first=True)
     @commands.command(hidden=True, aliases=["ull", "updatell", "llupdate", "llu"])
     async def updatelavalink(self, ctx: CustomContext, *args):
 
@@ -176,6 +178,7 @@ class Owner(commands.Cog):
             )
         )
 
+    @ensure_bot_instance(return_first=True)
     @commands.is_owner()
     @panel_command(aliases=["rd", "recarregar"], description="Recarregar os módulos.", emoji="🔄",
                    alt_name="Carregar/Recarregar módulos.")
@@ -207,6 +210,7 @@ class Owner(commands.Cog):
         else:
             return txt
 
+    @ensure_bot_instance(return_first=True)
     @commands.is_owner()
     @commands.max_concurrency(1, commands.BucketType.default)
     @panel_command(aliases=["up", "atualizar"], description="Atualizar meu code usando o git.",
@@ -420,6 +424,7 @@ class Owner(commands.Cog):
 
         return out_git
 
+    @ensure_bot_instance(return_first=True)
     @commands.is_owner()
     @panel_command(aliases=["latest", "lastupdate"], description="Ver minhas atualizações mais recentes.", emoji="📈",
                    alt_name="Ultimas atualizações")
@@ -453,6 +458,7 @@ class Owner(commands.Cog):
             return txt
 
     @commands.has_guild_permissions(manage_guild=True)
+    @ensure_bot_instance(return_first=True)
     @commands.command(description="Sincronizar/Registrar os comandos de barra no servidor.", hidden=True)
     async def syncguild(self, ctx: Union[CustomContext, disnake.MessageInteraction]):
 
@@ -464,6 +470,7 @@ class Owner(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    @ensure_bot_instance(return_first=True)
     @commands.is_owner()
     @panel_command(aliases=["sync"], description="Sincronizar os comandos de barra manualmente.",
                    emoji="<:slash:944875586839527444>",
@@ -492,6 +499,7 @@ class Owner(commands.Cog):
 
     @commands.command(name="help", aliases=["ajuda"], hidden=True)
     @commands.cooldown(1, 3, commands.BucketType.member)
+    @ensure_bot_instance(return_first=True)
     async def help_(self, ctx: CustomContext, cmd_name: str = None):
 
         is_owner = await ctx.bot.is_owner(ctx.author)
@@ -570,6 +578,7 @@ class Owner(commands.Cog):
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.cooldown(1, 10, commands.BucketType.guild)
+    @ensure_bot_instance(return_first=True)
     @commands.command(
         aliases=["mudarprefixo", "prefix", "changeprefix"],
         description="Alterar o prefixo do servidor",
@@ -583,10 +592,14 @@ class Owner(commands.Cog):
         if " " in prefix or len(prefix) > 5:
             raise GenericError("**O prefixo não pode conter espaços ou ter acima de 5 caracteres.**")
 
-        data = await self.bot.get_data(ctx.guild.id, db_name=DBModel.guilds)
-
-        data["prefix"] = prefix
-        await self.bot.update_data(ctx.guild.id, data, db_name=DBModel.guilds)
+        if self.bot.config["INTERACTION_BOTS"]:
+            data = await self.bot.get_global_data(ctx.guild.id, db_name=DBModel.guilds)
+            data["prefix"] = prefix
+            await self.bot.update_global_data(ctx.guild.id, data, db_name=DBModel.guild)
+        else:
+            data = await self.bot.get_data(ctx.guild.id, db_name=DBModel.guilds)
+            data["prefix"] = prefix
+            await self.bot.update_data(ctx.guild.id, data, db_name=DBModel.guilds)
 
         embed = disnake.Embed(
             description=f"**O prefixo deste servidor agora é:** {disnake.utils.escape_markdown(prefix)}",
@@ -595,6 +608,7 @@ class Owner(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    @ensure_bot_instance(return_first=True)
     @commands.is_owner()
     @panel_command(aliases=["expsource", "export", "exs"],
                    description="Exportar minha source para um arquivo zip.", emoji="💾",
@@ -693,6 +707,7 @@ class Owner(commands.Cog):
 
     @commands.is_owner()
     @commands.command(hidden=True)
+    @ensure_bot_instance(return_first=True)
     async def cleardm(self, ctx: CustomContext, amount: int = 20):
 
         counter = 0
@@ -733,6 +748,7 @@ class Owner(commands.Cog):
 
     @commands.is_owner()
     @commands.command(aliases=["sh"], hidden=True)
+    @ensure_bot_instance(return_first=True)
     async def shell(self, ctx: CustomContext, *, command: str):
 
         if command.startswith('```') and command.endswith('```'):
@@ -782,6 +798,7 @@ class Owner(commands.Cog):
 
     @check_voice()
     @commands.command(description='inicializar um player no servidor.', aliases=["spawn", "sp", "spw", "smn"])
+    @ensure_bot_instance(return_first=True)
     async def summon(self, ctx: CustomContext):
 
         try:

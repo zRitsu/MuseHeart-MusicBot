@@ -43,21 +43,31 @@ global_db_models = {
     DBModel.users: {
         "ver": 1.0,
         "fav_links": {}
+    },
+    DBModel.guilds: {
+        "ver": 1.0,
+        "prefix": ""
     }
 }
 
 
 async def guild_prefix(bot: BotCore, message: disnake.Message):
+
     if not message.guild:
-        prefix = bot.default_prefix
+        return commands.when_mentioned_or(bot.default_prefix)
 
+    if str(message.content).startswith((f"<@!{bot.user.id}> ", f"<@{bot.user.id}> ")):
+        return commands.when_mentioned(bot, message)
+
+    if bot.config["INTERACTION_BOTS"]:
+        data = await bot.get_global_data(message.guild.id, db_name=DBModel.guilds)
+        prefix = data.get("prefix") or bot.config.get("DEFAULT_PREFIX") or "!!"
     else:
-
         data = await bot.get_data(message.guild.id, db_name=DBModel.guilds)
-
         prefix = data.get("prefix") or bot.default_prefix
 
-    return commands.when_mentioned_or(*(prefix, ))(bot, message)
+    return prefix
+    #return commands.when_mentioned_or(*(prefix, ))(bot, message)
 
 
 class BaseDB:

@@ -1,6 +1,6 @@
 import datetime
 import json
-import re
+import pprint
 import aiofiles
 import aiohttp
 import disnake
@@ -70,6 +70,7 @@ class Music(commands.Cog):
 
     @commands.is_owner()
     @commands.command(hidden=True, aliases=["ac"])
+    @ensure_bot_instance(return_first=True)
     async def addcache(self, ctx: CustomContext, url: str):
 
         url = url.strip("<>")
@@ -92,8 +93,13 @@ class Music(commands.Cog):
 
     @commands.is_owner()
     @commands.cooldown(1, 300, commands.BucketType.default)
+    @ensure_bot_instance(return_first=True)
     @commands.command(hidden=True, aliases=["uc"])
-    async def updatecache(self, ctx: CustomContext):
+    async def updatecache(self, ctx: CustomContext, *args):
+
+        if "-fav" in args:
+            data = await self.bot.get_global_data(ctx.author.id, db_name=DBModel.users)
+            self.bot.pool.playlist_cache.update({url:[] for url in data["fav_links"].values()})
 
         try:
             if not self.bot.pool.playlist_cache:
@@ -109,7 +115,7 @@ class Music(commands.Cog):
 
         txt = ""
 
-        for url in self.bot.pool.playlist_cache:
+        for url in list(self.bot.pool.playlist_cache):
 
             try:
                 async with ctx.typing():
@@ -117,6 +123,10 @@ class Music(commands.Cog):
             except:
                 traceback.print_exc()
                 tracks = None
+                try:
+                    del self.bot.pool.playlist_cache[url]
+                except:
+                    pass
 
             if not tracks:
                 txt += f"[`❌ Falha`]({url})\n"
@@ -148,6 +158,7 @@ class Music(commands.Cog):
         await self.update_cache()
 
     @commands.is_owner()
+    @ensure_bot_instance(return_first=True)
     @commands.command(hidden=True, aliases=["rc"])
     async def removecache(self, ctx: CustomContext, url: str):
 
@@ -161,6 +172,7 @@ class Music(commands.Cog):
         await ctx.send("As músicas do link foram removidas com sucesso do cache.", delete_after=30)
 
     @commands.is_owner()
+    @ensure_bot_instance(return_first=True)
     @commands.command(hidden=True, aliases=["cc"])
     async def clearcache(self, ctx: CustomContext):
 
@@ -174,12 +186,14 @@ class Music(commands.Cog):
         await ctx.send("O cache de playlist foi limpo com sucesso.", delete_after=30)
 
     @commands.is_owner()
+    @ensure_bot_instance(return_first=True)
     @commands.command(hidden=True, aliases=["ec"])
     async def exportcache(self, ctx: CustomContext):
 
         await ctx.send(file=disnake.File("playlist_cache.json"))
 
     @commands.is_owner()
+    @ensure_bot_instance(return_first=True)
     @commands.command(hidden=True, aliases=["ic"])
     async def importcache(self, ctx: CustomContext, url: str):
 
@@ -442,6 +456,7 @@ class Music(commands.Cog):
     @commands.bot_has_guild_permissions(send_messages=True)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.max_concurrency(1, commands.BucketType.member)
+    @ensure_bot_instance()
     @commands.command(name="addposition", description="Adicionar música em uma posição especifica da fila.",
                       aliases=["adp", "addpos"])
     async def addpos_legacy(self, ctx: CustomContext, position: Optional[int] = None, *, query: str = None):
@@ -962,9 +977,13 @@ class Music(commands.Cog):
     @check_voice()
     @ensure_bot_instance(only_voiced=True)
     @commands.max_concurrency(1, commands.BucketType.member)
-    @commands.command(name="skip", aliases=["next", "n", "s", "pular"],
+    @commands.command(name="skip", aliases=["next", "n", "s", "pular", "skipto"],
                       description=f"Pular a música atual que está tocando.")
     async def skip_legacy(self, ctx: CustomContext, *, query: str = None):
+
+        if ctx.invoked_with == "skipto" and not query:
+            raise GenericError("**Você deve adicionar um nome para usar o skipto.**")
+
         await self.skip.callback(self=self, inter=ctx, query=query)
 
     @is_requester()

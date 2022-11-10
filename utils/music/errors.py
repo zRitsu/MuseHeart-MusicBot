@@ -6,6 +6,9 @@ from wavelink import WavelinkException
 from utils.music.converters import time_format, perms_translations
 
 
+class PoolException(commands.CheckFailure):
+    pass
+
 class GenericError(commands.CheckFailure):
 
     def __init__(self, text: str, *, self_delete: int = None, delete_original: Optional[int] = None):

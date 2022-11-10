@@ -5,7 +5,7 @@ from aiohttp import ClientSession
 import asyncio
 import traceback
 from utils.music.converters import URL_REG
-from utils.music.errors import parse_error
+from utils.music.errors import parse_error, PoolException
 from utils.others import send_message, CustomContext, string_to_file
 from typing import TYPE_CHECKING, Optional
 
@@ -77,6 +77,9 @@ class ErrorHandler(commands.Cog):
             except:
                 pass"""
 
+        if isinstance(error, PoolException):
+            return
+
         error_msg, full_error_msg = parse_error(inter, error)
 
         kwargs = {}
@@ -131,7 +134,7 @@ class ErrorHandler(commands.Cog):
             except:
                 pass"""
 
-        if isinstance(error, commands.CommandNotFound):
+        if isinstance(error, (commands.CommandNotFound, PoolException)):
             return
 
         error_msg, full_error_msg = parse_error(ctx, error)
