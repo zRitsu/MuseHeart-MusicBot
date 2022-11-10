@@ -590,11 +590,7 @@ class Music(commands.Cog):
                 try:
                     channel_db = bot.get_channel(int(static_player['channel'])) or await bot.fetch_channel(
                         int(static_player['channel']))
-                except disnake.Forbidden:
-                    raise GenericError(f"**Não tenho permissão para acessar o canal <#{static_player['channel']}>**\n"
-                                       f"Caso queira resetar a configuração do canal de pedir música, use o comando /reset "
-                                       f"ou /setup novamente...")
-                except (TypeError, disnake.NotFound):
+                except (TypeError, disnake.NotFound, disnake.Forbidden):
                     channel_db = None
 
                 if not channel_db or channel_db.guild.id != guild.id:
@@ -623,6 +619,23 @@ class Music(commands.Cog):
                             pass
 
                         if channel_db:
+
+                            channel_db_perms = channel_db.permissions_for(guild.me)
+
+                            if not channel_db_perms.send_messages:
+                                raise GenericError(
+                                    f"**Não tenho permissão para enviar mensagens no canal <#{static_player['channel']}>**\n"
+                                    "Caso queira resetar a configuração do canal de pedir música, use o comando /reset ou /setup "
+                                    "novamente..."
+                                )
+
+                            if not channel_db_perms.embed_links:
+                                raise GenericError(
+                                    f"**Não tenho permissão para anexar links/embeds no canal <#{static_player['channel']}>**\n"
+                                    "Caso queira resetar a configuração do canal de pedir música, use o comando /reset ou /setup "
+                                    "novamente..."
+                                )
+
                             channel = channel_db
 
             player: Optional[LavalinkPlayer] = None
