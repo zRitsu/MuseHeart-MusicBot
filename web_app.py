@@ -182,10 +182,10 @@ class WSClient:
         self.connection = await self.session.ws_connect(self.url, heartbeat=30)
 
         self.backoff = 7
-        #print(f"RPC client conectado: {self.bot.user} - {self.url}")
+
         print("RPC client conectado, sincronizando rpc dos bots...")
 
-        self.connect_task = [bot.loop.create_task(self.connect_bot_rpc(bot)) for bot in self.pool.bots]
+        self.connect_task = [asyncio.create_task(self.connect_bot_rpc())]
 
     @property
     def is_connected(self):
