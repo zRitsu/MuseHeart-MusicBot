@@ -8,7 +8,6 @@ from disnake.ext import commands
 from typing import TYPE_CHECKING, Union
 from utils.db import DBModel
 from utils.music.checks import user_cooldown, ensure_bot_instance
-from utils.music.converters import time_format
 from utils.music.errors import GenericError
 from utils.others import send_idle_embed, CustomContext, select_bot_pool
 from utils.music.models import LavalinkPlayer
@@ -203,7 +202,7 @@ class MusicSettings(commands.Cog):
 
         async def get_message(original_message):
 
-            if original_message and original_message.channel != target and original_message.guild.id != target.guild.id:
+            if original_message and original_message.channel != target and original_message.guild.id == target.guild.id:
 
                 try:
                     if isinstance(original_message.channel.parent, disnake.ForumChannel):
@@ -287,7 +286,7 @@ class MusicSettings(commands.Cog):
                 )
                 return
 
-            if original_message and original_message.guild.id != inter.guild_id:
+            if original_message and original_message.guild.id == inter.guild_id:
 
                 try:
                     await original_message.edit(content=None, embed=embed_archived, view=None)

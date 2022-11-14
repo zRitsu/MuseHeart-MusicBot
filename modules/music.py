@@ -593,7 +593,7 @@ class Music(commands.Cog):
                 except (TypeError, disnake.NotFound, disnake.Forbidden):
                     channel_db = None
 
-                if not channel_db or channel_db.guild.id != guild.id:
+                if not channel_db or channel_db.guild.id != inter.guild_id:
                     await self.reset_controller_db(inter.guild_id, guild_data, inter)
 
                 else:

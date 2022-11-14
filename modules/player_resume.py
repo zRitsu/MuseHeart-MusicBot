@@ -8,7 +8,6 @@ from disnake.ext import commands
 from utils.client import BotCore
 import json
 import asyncio
-from utils.db import DBModel
 from utils.music.checks import can_connect, ensure_bot_instance
 from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialTrack
 from utils.others import CustomContext

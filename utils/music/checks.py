@@ -19,10 +19,12 @@ def can_send_message(
         bot: Union[disnake.ClientUser, disnake.Member]
 ):
 
-    if not channel.permissions_for(channel.guild.me).send_messages:
+    perms = channel.permissions_for(channel.guild.me)
+
+    if not perms.send_messages:
         raise GenericError(f"**{bot.mention} não possui permissão de enviar mensagens no canal:** {channel.mention}")
 
-    if not channel.permissions_for(channel.guild.me).embed_links:
+    if not perms.embed_links:
         raise GenericError(f"**{bot.mention} não possui permissão de inserir links no canal: {channel.mention}**")
 
     return True
