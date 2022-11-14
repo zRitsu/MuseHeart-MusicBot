@@ -3621,6 +3621,7 @@ class Music(commands.Cog):
         search = data.pop("search", True)
         max_retries = data.pop('retries', 0)
         node_website = data.pop('website', '')
+        region = data.pop('region', 'us_central')
 
         if max_retries:
 
@@ -3646,7 +3647,7 @@ class Music(commands.Cog):
                         retries += 1
                         continue
 
-        node = await self.bot.music.initiate_node(auto_reconnect=False, **data)
+        node = await self.bot.music.initiate_node(auto_reconnect=False, region=region, **data)
         node.search = search
         node.website = node_website
 
