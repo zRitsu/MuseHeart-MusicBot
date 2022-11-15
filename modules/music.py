@@ -3714,6 +3714,7 @@ class Music(commands.Cog):
                                 break
                             except ClientConnectorCertificateError:
                                 n.available = False
+                                continue
 
                         if not node_search:
                             raise GenericError("**Não há servidores de música disponível.**")
