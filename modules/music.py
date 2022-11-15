@@ -3710,10 +3710,12 @@ class Music(commands.Cog):
 
                             try:
                                 tracks = await n.get_tracks(query)
+                                node_search = n
+                                break
                             except ClientConnectorCertificateError:
                                 n.available = False
 
-                        if not tracks:
+                        if not node_search:
                             raise GenericError("**Não há servidores de música disponível.**")
 
         if not tracks:
