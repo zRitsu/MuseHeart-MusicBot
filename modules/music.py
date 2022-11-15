@@ -1724,9 +1724,9 @@ class Music(commands.Cog):
 
         if query.endswith(" --all"):
             query = query[:-5]
-            search_all = True
+            search_all = "yes"
         else:
-            search_all = False
+            search_all = "no"
 
         await self.move.callback(self=self, inter=ctx, position=position, query=query, search_all=search_all)
 
