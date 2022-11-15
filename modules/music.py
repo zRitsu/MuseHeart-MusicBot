@@ -4,6 +4,7 @@ import pprint
 import aiofiles
 import aiohttp
 import disnake
+from aiohttp import ClientConnectorCertificateError
 from disnake.ext import commands
 import traceback
 import wavelink
@@ -3697,7 +3698,23 @@ class Music(commands.Cog):
                         except IndexError:
                             node_search = node
 
-                    tracks = await node_search.get_tracks(query)
+                    try:
+                        tracks = await node_search.get_tracks(query)
+                    except ClientConnectorCertificateError:
+                        node_search.available = False
+
+                        for n in self.bot.music.nodes.values():
+
+                            if not n.available or not n.is_available:
+                                continue
+
+                            try:
+                                tracks = await n.get_tracks(query)
+                            except ClientConnectorCertificateError:
+                                n.available = False
+
+                        if not tracks:
+                            raise GenericError("**Não há servidores de música disponível.**")
 
         if not tracks:
             raise GenericError("Não houve resultados para sua busca.")
