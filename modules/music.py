@@ -952,6 +952,12 @@ class Music(commands.Cog):
             await func(embed=embed, view=None)
 
         if not player.is_connected:
+
+            try:
+                guild_data["check_other_bots_in_vc"]
+            except KeyError:
+                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+
             await self.do_connect(
                 inter, channel=inter.author.voice.channel,
                 check_other_bots_in_vc=guild_data["check_other_bots_in_vc"],
