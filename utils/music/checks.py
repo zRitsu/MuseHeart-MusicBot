@@ -92,12 +92,6 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
         inter.bot.pool.message_ids.add(msg_id)
 
-        if return_first:
-            inter.music_bot = inter.bot
-            inter.music_guild = inter.guild
-            inter.bot.dispatch("pool_dispatch", inter, None)
-            return True
-
     free_bot = None
 
     for bot in inter.bot.pool.bots:
@@ -165,7 +159,14 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         return True
 
     elif check_player:
+
         inter.bot.dispatch("pool_dispatch", inter, None)
+
+        if return_first:
+            inter.music_bot = inter.bot
+            inter.music_guild = inter.guild
+            return True
+
         raise NoPlayer()
 
     txt = ""
