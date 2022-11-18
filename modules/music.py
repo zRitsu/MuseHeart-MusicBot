@@ -2962,7 +2962,7 @@ class Music(commands.Cog):
                     kwargs = {"value": None}
 
                 elif control == PlayerControls.queue:
-                    cmd = self.bot.get_slash_command("queue").children.get("show")
+                    cmd = self.bot.get_slash_command("queue").children.get("display")
 
                 elif control == PlayerControls.shuffle:
                     cmd = self.bot.get_slash_command("queue").children.get("shuffle")
