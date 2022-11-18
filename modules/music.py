@@ -563,6 +563,8 @@ class Music(commands.Cog):
 
         check_pool = isinstance(inter, disnake.MessageInteraction)
 
+        ephemeral = None
+
         try:
             player = bot.music.players[guild.id]
             node = player.node
@@ -585,6 +587,10 @@ class Music(commands.Cog):
                 )
 
             static_player = guild_data['player_controller']
+
+            if not inter.response.is_done():
+                ephemeral = hide_playlist or await self.is_request_channel(inter, data=guild_data, ignore_thread=True)
+                await inter.response.defer(ephemeral=ephemeral)
 
             if static_player['channel']:
 
@@ -641,7 +647,8 @@ class Music(commands.Cog):
 
             player: Optional[LavalinkPlayer] = None
 
-        ephemeral = hide_playlist or await self.is_request_channel(inter, data=guild_data, ignore_thread=True)
+        if ephemeral is None:
+            ephemeral = hide_playlist or await self.is_request_channel(inter, data=guild_data, ignore_thread=True)
 
         is_pin = None
 
