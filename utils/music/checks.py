@@ -105,7 +105,14 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         inter.author = author
 
         if not author.voice:
+
             inter.bot.dispatch("pool_dispatch", inter, None)
+
+            if return_first:
+                inter.music_bot = inter.bot
+                inter.music_guild = inter.guild
+                return True
+
             raise NoVoice()
 
         if bot.user.id in author.voice.channel.voice_states:
