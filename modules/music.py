@@ -288,6 +288,9 @@ class Music(commands.Cog):
         if not current:
             return []
 
+        if URL_REG.match(current):
+            return [current] if len(current) < 100 else []
+
         try:
             await check_pool_bots(inter, only_voiced=True)
             bot = inter.music_bot
@@ -986,6 +989,9 @@ class Music(commands.Cog):
 
     @play.autocomplete("busca")
     async def fav_add_autocomplete(self, inter: disnake.Interaction, query: str):
+
+        if URL_REG.match(query):
+            return [query] if len(query) < 100 else []
 
         favs: list = await fav_list(inter, query, prefix="> fav: ")
 

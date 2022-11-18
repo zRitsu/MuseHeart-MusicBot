@@ -31,8 +31,6 @@ u_agent = generate_user_agent()
 
 
 async def google_search(bot, query: str, *, max_entries: int = 20) -> list:
-    if URL_REG.match(query):
-        return [query] if len(query) < 100 else []
 
     async with bot.session.get(
             f"http://suggestqueries.google.com/complete/search?client=chrome&ds=yt&q={query}",
