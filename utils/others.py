@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 class Test:
 
     def is_done(self):
-        return True
+        return False
 
 class CustomContext(commands.Context):
     bot: BotCore
