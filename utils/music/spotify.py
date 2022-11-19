@@ -68,13 +68,19 @@ async def process_spotify(bot: BotCore, requester: int, query: str, *, hide_play
         result = await bot.spotify.get_album(url_id)
 
         if len(result.tracks) < 2:
+
             track = result.tracks[0]
+
+            try:
+                thumb = result.images[1].url
+            except IndexError:
+                thumb = ""
 
             return [PartialTrack(
                 uri=track.link,
-                author=track.artists[0].name,
+                author=track.artists[0].name or "Unknown Artist",
                 title=track.name,
-                thumb=result.images[1].url,
+                thumb=thumb,
                 duration=track.duration.total_seconds() * 1000,
                 requester=requester
             )]
@@ -113,11 +119,16 @@ async def process_spotify(bot: BotCore, requester: int, query: str, *, hide_play
 
     for t in tracks:
 
+        try:
+            thumb = t.album.images[1].url
+        except IndexError:
+            thumb = ""
+
         track = PartialTrack(
             uri=t.link,
-            author=t.artists[0].name,
+            author=t.artists[0].name or "Unknown Artist",
             title=t.name,
-            thumb=t.album.images[1].url,
+            thumb=thumb,
             duration=t.duration.total_seconds() * 1000,
             source_name="spotify",
             requester=requester
@@ -133,9 +144,12 @@ async def process_spotify(bot: BotCore, requester: int, query: str, *, hide_play
 
         track.info["extra"]["playlist"] = data["playlistInfo"]
 
-        track.info["extra"]["authors"] = [fix_characters(i.name) for i in t.artists if f"feat. {i.name.lower()}" not in t.name.lower()]
-
-        track.info["extra"]["authors_md"] = ", ".join(f"[`{a.name}`]({a.link})" for a in t.artists)
+        if t.artists[0].name:
+            track.info["extra"]["authors"] = [fix_characters(i.name) for i in t.artists if f"feat. {i.name.lower()}" not in t.name.lower()]
+            track.info["extra"]["authors_md"] = ", ".join(f"[`{a.name}`]({a.link})" for a in t.artists)
+        else:
+            track.info["extra"]["authors"] = ["Unknown Artist"]
+            track.info["extra"]["authors_md"] = "`Unknown Artist`"
 
         data["tracks"].append(track)
 
