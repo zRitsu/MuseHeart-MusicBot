@@ -50,8 +50,8 @@ def load(player: LavalinkPlayer) -> dict:
                     value=f"```ansi\n[34;1m{fix_characters(player.current.author, 18)}[0m\n```")
 
     if player.command_log:
-        embed.add_field(name=f"> {player.command_log_emoji} **⠂Última Interação:**",
-                        value=f"> {player.command_log}", inline=False)
+        embed.add_field(name=f"{player.command_log_emoji} **⠂Última Interação:**",
+                        value=f"{player.command_log}", inline=False)
 
     if player.static:
 
