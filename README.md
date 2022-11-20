@@ -46,7 +46,7 @@ caso não tenha o token do bot, veja como obter com este [tutorial](https://www.
 Obs: Você pode adicionar mais bots pra rodar junto repetindo esse passo, mas apenas alterando o nome MAIN que está no TOKEN_BOT_**MAIN** (pode ser qualquer nome mas com apenas letras e números sem acentos)
 e adicionar o token de outro bot  + prefixo (diferente) no value.
 * 3 - Também altamente recomendo usar mongodb para database ao invés de json, pra isso crie uma key com nome MONGO e no value coloque o link de sua url do mongodb (caso não tenha, veja como obter por este [tutorial](https://www.youtube.com/watch?v=x1Gq5beRx9k)). </br>
-`se desejar, você pode alterar outras configs, consulte o arquivo example.env`
+`se desejar, você pode alterar outras configs, consulte o arquivo .example.env`
 * 4 - Clique em run (botão de **play**) e aguarde o bot instalar as dependências e iniciar.
 </details>
 
@@ -79,7 +79,7 @@ Railway
 * 1 - Preencha os dados que vão ser requisitados na próxima página (os que tem asteríscos vermelhos são obrigatórios).
 * 2 - Clique no botão deploy e aguarde até o deploy ser concluído (Ficando com cor verde. Pode demorar alguns segundos antes de aparecer um deploy na lista).
 * **Nota 1:** Requer uma conta do github com um bom tempo de criado ou um cartão de crédito para ter uma conta verificada.
-* **Nota 2:** Caso queira alterar as configs usadas no passo 1, clique em variables e crie/altere a key e o valor desejado da config, consulte o arquivo example.env para ver todas as configs disponíveis.
+* **Nota 2:** Caso queira alterar as configs usadas no passo 1, clique em variables e crie/altere a key e o valor desejado da config, consulte o arquivo .example.env para ver todas as configs disponíveis.
 </details>
 
 ---
@@ -114,7 +114,7 @@ Heroku
 * 2 - Clique em deploy app e aguarde (o processo pode demorar entre 2-5 minutos).
 * 3 - Clique em Manage e depois vá em resources.
 * 4 - Desative o dyno web e ative o autoupdate (ou o quickfix, não ative os 2 ao mesmo tempo!) e aguarde o bot logar. `(no canto superior clique em more e em view logs para acompanhar os logs)`
-* **Nota:** Caso queira alterar as configs usadas no passo 1, vá em settings e clique em Reveal Config Vars, crie/altere a key e o valor desejado da config, consulte o arquivo example.env para ver todas as configs disponíveis.
+* **Nota:** Caso queira alterar as configs usadas no passo 1, vá em settings e clique em Reveal Config Vars, crie/altere a key e o valor desejado da config, consulte o arquivo .example.env para ver todas as configs disponíveis.
 </details>
 
 ---

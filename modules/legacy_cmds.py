@@ -646,7 +646,7 @@ class Owner(commands.Cog):
         SECRETS.update(env_file)
 
         if not os.path.isfile("./.env-temp"):
-            shutil.copyfile("./example.env", "./.env-temp")
+            shutil.copyfile("./.example.env", "./.env-temp")
 
         for i in SECRETS:
             if not isinstance(SECRETS[i], str):
