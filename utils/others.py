@@ -423,6 +423,9 @@ async def select_bot_pool(inter):
 
         inter.response = select_interaction.response
 
+        if msg:
+            inter.store_message = msg
+
         try:
             return bots[int(select_interaction.data.values[0])]
         except KeyError:

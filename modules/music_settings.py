@@ -153,20 +153,19 @@ class MusicSettings(commands.Cog):
         if not bot:
             return
 
-        await inter.response.defer(ephemeral=True)
-
         guild = bot.get_guild(inter.guild_id) or inter.guild
 
         if not guild.me.guild_permissions.manage_channels or not guild.me.guild_permissions.create_public_threads:
             raise commands.BotMissingPermissions(["manage_channels", "create_public_threads"])
 
         channel = bot.get_channel(inter.channel.id)
+
         try:
             target = bot.get_channel(target.id)
         except AttributeError:
             pass
 
-        kwargs = {
+        channel_kwargs = {
             "overwrites": {
                 guild.me: disnake.PermissionOverwrite(
                     embed_links=True,
@@ -181,6 +180,8 @@ class MusicSettings(commands.Cog):
                 )
             }
         }
+
+        await inter.response.defer(ephemeral=True)
 
         guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
 
@@ -243,21 +244,34 @@ class MusicSettings(commands.Cog):
             except AttributeError:
                 id_ = ""
 
+            kwargs = {}
             try:
                 func = inter.edit_original_message
-                kwargs = {}
             except:
-                func = inter.send
-                kwargs = {"ephemeral": True}
+                try:
+                    func = inter.store_message.edit
+                except:
+                    try:
+                        func = inter.response.edit_message
+                    except:
+                        func = inter.send
+                        kwargs = {"ephemeral": True}
+
+            if isinstance(inter, CustomContext):
+                txt = "mencionando um canal de forum existente"
+            else:
+                txt = "usando um canal de forum na opção \"canal\" deste mesmo comando"
 
             msg_select = await func(
                 embed=disnake.Embed(
-                    description="**Qual tipo de canal para pedir música você quer criar?**",
+                    description="**Qual tipo de canal para pedir música você quer criar?**\n"
+                                f"`Nota: para canal de forum, cancele e use o comando novamente {txt}.`",
                     color=self.bot.get_color(guild.me)
                 ).set_footer(text="Você tem apenas 30 segundos para clicar em um botão."),
                 components=[
                     disnake.ui.Button(label="Canal de texto", custom_id=f"text_channel_{id_}", emoji="💬"),
-                    disnake.ui.Button(label="Canal de voz", custom_id=f"voice_channel_{id_}", emoji="🔊")
+                    disnake.ui.Button(label="Canal de voz", custom_id=f"voice_channel_{id_}", emoji="🔊"),
+                    disnake.ui.Button(label="Cancelar", custom_id="voice_channel_cancel", emoji="❌")
                 ],
                 **kwargs
             )
@@ -271,7 +285,6 @@ class MusicSettings(commands.Cog):
 
             try:
                 inter = await self.bot.wait_for("button_click", check=check, timeout=30)
-                await inter.response.defer()
             except asyncio.TimeoutError:
                 try:
                     inter.application_command.reset_cooldown(inter)
@@ -281,7 +294,10 @@ class MusicSettings(commands.Cog):
                 if msg_select:
                     func = msg_select.edit
                 else:
-                    func = (await inter.original_message()).edit
+                    try:
+                        func = (await inter.original_message()).edit
+                    except:
+                        func = inter.message.edit
 
                 await func(
                     embed=disnake.Embed(
@@ -291,6 +307,17 @@ class MusicSettings(commands.Cog):
                     components=None
                 )
                 return
+
+            if inter.data.custom_id == "voice_channel_cancel":
+                await inter.response.edit_message(
+                    embed=disnake.Embed(
+                        description="**Operação cancelada...**",
+                        color=self.bot.get_color(guild.me),
+                    ), components=None
+                )
+                return
+
+            await inter.response.defer()
 
             if original_message and original_message.guild.id == inter.guild_id:
 
@@ -323,7 +350,7 @@ class MusicSettings(commands.Cog):
 
             if isinstance(target, disnake.ForumChannel):
 
-                kwargs.clear()
+                channel_kwargs.clear()
 
                 thread_wmessage = await target.create_thread(
                     name=f"{bot.user.name} song request",
@@ -359,7 +386,7 @@ class MusicSettings(commands.Cog):
                             message = m
                             break
 
-            await target.edit(**kwargs)
+            await target.edit(**channel_kwargs)
 
             channel = target
 
