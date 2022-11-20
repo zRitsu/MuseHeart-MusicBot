@@ -937,10 +937,15 @@ class Music(commands.Cog):
                 if not t.is_stream:
                     total_duration += t.duration
 
-            embed.set_author(
-                name=fix_characters(tracks.data['playlistInfo']['name'], 35),
-                url=tracks.data['playlistInfo']['url']
-            )
+            try:
+                embed.set_author(
+                    name=fix_characters(tracks.data['playlistInfo']['name'], 35),
+                    url=tracks.data['playlistInfo']['url']
+                )
+            except KeyError:
+                embed.set_author(
+                    name="Spotify Playlist",
+                )
             embed.set_thumbnail(url=tracks.tracks[0].thumb)
             embed.description = f"`{len(tracks.tracks)} música(s)`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}{player.controller_link}"
             emoji = "🎶"
