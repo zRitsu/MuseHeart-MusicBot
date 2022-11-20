@@ -592,7 +592,7 @@ class Owner(commands.Cog):
         if " " in prefix or len(prefix) > 5:
             raise GenericError("**O prefixo não pode conter espaços ou ter acima de 5 caracteres.**")
 
-        if self.bot.config["INTERACTION_BOTS"]:
+        if self.bot.config["GLOBAL_PREFIX"]:
             data = await self.bot.get_global_data(ctx.guild.id, db_name=DBModel.guilds)
             data["prefix"] = prefix
             await self.bot.update_global_data(ctx.guild.id, data, db_name=DBModel.guild)

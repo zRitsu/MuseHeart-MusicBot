@@ -214,7 +214,7 @@ class BotPool:
 
                     return True
 
-            if bot.config["INTERACTION_BOTS"]:
+            if bot.config["GLOBAL_PREFIX"]:
 
                 @bot.listen("on_command_completion")
                 async def message_id_cleanup(ctx: CustomContext):
@@ -242,7 +242,7 @@ class BotPool:
 
                         self._command_sync_flags = commands.CommandSyncFlags.none()
 
-                        if self.config["INTERACTION_BOTS"]:
+                        if self.config["INTERACTION_BOTS"] and self.config["GLOBAL_PREFIX"]:
 
                             @bot.slash_command(description="Use este comando caso tenha problemas de outros comandos"
                                                            " de barra (/) não estarem disponíveis.",

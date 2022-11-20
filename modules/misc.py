@@ -251,7 +251,7 @@ class Misc(commands.Cog):
             embed.description += "\n\n**Caso queira bots de música adicionais, você pode adicionar um dos bots abaixo:**\n\n" + \
                                  "\n".join(f"`{bot}:` [`adicionar`]({disnake.utils.oauth_url(bot.id, permissions=disnake.Permissions(self.bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})" for bot in self.extra_user_bots)
 
-        elif self.bot.config["INTERACTION_BOTS"]:
+        elif self.bot.config["GLOBAL_PREFIX"]:
 
             bots_invites = []
 

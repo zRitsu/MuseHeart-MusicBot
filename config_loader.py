@@ -26,6 +26,7 @@ DEFAULT_CONFIG = {
     "INVITE_PERMISSIONS": 534735285328,
     "ENABLE_LOGGER": False,
     "INTERACTION_BOTS": "",
+    "GLOBAL_PREFIX": True,
 
     ################
     ### Database ###
@@ -160,6 +161,7 @@ def load_config():
         "AUTO_DOWNLOAD_LAVALINK_SERVERLIST",
         "ENABLE_LOGGER",
         "GUILD_DEAFEN_WARN",
+        "GLOBAL_PREFIX",
 
         "BANS_INTENT",
         "DM_MESSAGES_INTENT",
