@@ -60,7 +60,13 @@ class MusicSettings(commands.Cog):
                         f"Agora {'não ' if opt == 'Ativar' else ''}irei me conectar em canais onde há outros bots.**"
         )
 
-        await inter.send(embed=embed, ephemeral=True)
+        try:
+            await inter.edit_original_message(embed=embed, components=None)
+        except (AttributeError, disnake.InteractionNotEditable):
+            try:
+                await inter.response.edit_message(embed=embed, components=None)
+            except:
+                await inter.send(embed=embed, ephemeral=True)
 
     @commands.cooldown(1, 10, commands.BucketType.user)
     @ensure_bot_instance(return_first=True)
@@ -406,8 +412,11 @@ class MusicSettings(commands.Cog):
         )
         try:
             await inter.edit_original_message(embed=embed, components=None)
-        except AttributeError:
-            await inter.send(embed=embed, ephemeral=True)
+        except (AttributeError, disnake.InteractionNotEditable):
+            try:
+                await inter.response.edit_message(embed=embed, components=None)
+            except:
+                await inter.send(embed=embed, ephemeral=True)
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.bot_has_guild_permissions(manage_threads=True)
@@ -487,7 +496,10 @@ class MusicSettings(commands.Cog):
         try:
             func = inter.edit_original_message
         except AttributeError:
-            func = inter.send
+            try:
+                func = inter.response.edit_message
+            except AttributeError:
+                func = inter.send
 
         await func(
             embed=disnake.Embed(

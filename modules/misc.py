@@ -211,7 +211,10 @@ class Misc(commands.Cog):
         try:
             await inter.edit_original_message(embed=embed, components=None)
         except (AttributeError, disnake.InteractionNotEditable):
-            await inter.send(embed=embed, ephemeral=True)
+            try:
+                await inter.response.edit_message(embed=embed, components=None)
+            except:
+                await inter.send(embed=embed, ephemeral=True)
 
 
     @commands.command(name="invite", aliases=["convidar"], description="Exibir meu link de convite para você me adicionar no seu servidor.")

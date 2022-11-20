@@ -335,15 +335,17 @@ async def select_bot_pool(inter):
         if not inter.bot.config["GLOBAL_PREFIX"]:
             return inter.bot
 
-    if not inter.bot.config["INTERACTION_BOTS"]:
+    elif not inter.guild:
 
-        if not inter.guild:
+        if not inter.bot.config["INTERACTION_BOTS"]:
+            raise GenericError("**Não há bots compatíveis com este comando no servidor...**")
 
-            invite = disnake.utils.oauth_url(inter.bot.user.id, permissions=disnake.Permissions(inter.bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))
+        invite = disnake.utils.oauth_url(inter.bot.user.id,
+                                         permissions=disnake.Permissions(inter.bot.config['INVITE_PERMISSIONS']),
+                                         scopes=('bot', 'applications.commands'))
 
-            raise GenericError("**Esta interação está indisponível sem eu estar no servidor como bot...\n\n"
-                               f"[Clique aqui]({invite}) para me adicionar.**")
-        return inter.bot
+        raise GenericError("**Esta interação está indisponível sem eu estar no servidor como bot...\n\n"
+                           f"[Clique aqui]({invite}) para me adicionar.**")
 
     bots = {}
 
