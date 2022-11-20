@@ -332,9 +332,10 @@ async def pin_list(inter, query: str, *, prefix=""):
 async def select_bot_pool(inter):
 
     if isinstance(inter, CustomContext):
-        return inter.bot
+        if not inter.bot.config["GLOBAL_PREFIX"]:
+            return inter.bot
 
-    elif not inter.bot.config["INTERACTION_BOTS"]:
+    if not inter.bot.config["INTERACTION_BOTS"]:
 
         if not inter.guild:
 
