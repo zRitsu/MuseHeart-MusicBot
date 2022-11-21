@@ -133,7 +133,8 @@ def parse_error(
             error_txt = "**Este vídeo está indisponível ou privado...**"
         elif "The playlist does not exist" in wave_error:
             error_txt = "**A playlist não existe (ou está privada).**"
-        elif "not made this video available in your country" in wave_error.lower():
+        elif "not made this video available in your country" in wave_error.lower() or \
+                "who has blocked it in your country on copyright grounds" in wave_error.lower():
             error_txt = "**O conteúdo deste link não está disponível na região no qual estou funcionando...**"
 
     if not error_txt:
