@@ -97,7 +97,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str, *, hide_play
         result = await bot.spotify.get_artist_top_tracks(url_id)
 
         data["playlistInfo"]["name"] = "As mais tocadas de: " + \
-                                       [a["name"] for a in result[0].artists if a.id == url_id][0]
+                                       [a.name for a in result[0].artists if a.id == url_id][0]
         tracks = result
 
     elif url_type == "playlist":
