@@ -182,20 +182,30 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
     for bot in inter.bot.pool.bots:
 
-        if (bot.user.id == inter.bot.user.id and inter.guild) or not bot.public or bot.get_guild(inter.guild_id):
+        if not bot.appinfo.bot_public:
             continue
 
-        extra_bots_invite.append(f"[`{disnake.utils.escape_markdown(str(bot.user.name))}`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})")
+        if (bot.user.id == inter.bot.user.id and inter.guild):
+            continue
 
-    txt += " | ".join(extra_bots_invite)
+        if bot.get_guild(inter.guild_id):
+            continue
+
+        extra_bots_invite.append(
+            f"[`{disnake.utils.escape_markdown(str(bot.user.name))}`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})" +
+            " (sem vagas)" if bot.appinfo.flags.verification_pending_guild_limit else ""
+        )
+
+    for i in disnake.utils.as_chunks(extra_bots_invite, 3):
+        txt += " | ".join(i)
 
     if len(extra_bots_invite) == len(inter.bot.pool.bots):
         msg = "**Não há bots de música compatível no servidor!**\n" \
-              f"Você deve adicionar pelo menos um dos bots abaixo no seu servidor:\n{txt}"
+              f"Será necessário ter pelo menos um dos bots abaixo no servidor:\n{txt}"
     else:
         msg = "**Não há mais bots disponíveis no servidor...**"
         if txt:
-            msg += f"\nVocê pode convidar bots adicionais no seu servidor através dos links abaixo:\n{txt}"
+            msg += f"\nÉ possível adicionar bots de música extras no servidor através dos links abaixo:\n{txt}"
 
     inter.bot.dispatch("pool_dispatch", inter, None)
 

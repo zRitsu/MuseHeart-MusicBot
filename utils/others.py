@@ -357,7 +357,7 @@ async def select_bot_pool(inter):
     if not bots:
         bot_invites = "\n".join(
             f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, permissions=disnake.Permissions(b.config['INVITE_PERMISSIONS']), scopes=('bot'))})"
-            for b in inter.bot.pool.bots if b.public)
+            for b in inter.bot.pool.bots if b.appinfo.bot_public)
         raise GenericError(f"**Você precisa adicionar pelo menos um desses bots no servidor:**\n{bot_invites}")
 
     if len(bots) == 1:

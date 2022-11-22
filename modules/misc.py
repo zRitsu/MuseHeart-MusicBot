@@ -116,7 +116,12 @@ class Misc(commands.Cog):
                 embed.description += f"Se os comandos de barra (/) não aparecerem, você terá que integrar um dos " \
                                      f"seguintes bots no servidor: {interaction_invites}"
 
-        await guild.system_channel.send(embed=embed)
+        try:
+            await guild.system_channel.send(embed=embed)
+        except:
+            traceback.print_exc()
+
+        await self.bot.update_appinfo()
 
 
     @commands.command(name="about", aliases=["sobre", "info", "botinfo"], description="Exibir informações sobre mim.")
@@ -187,7 +192,7 @@ class Misc(commands.Cog):
 
         links = "[`[Source]`](https://github.com/zRitsu/disnake-LL-music-bot)"
 
-        if bot.public:
+        if bot.appinfo.bot_public:
             links = f"[`[Invite]`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))}) **|** {links}"
 
         if bot.config["SUPPORT_SERVER"]:
@@ -247,7 +252,7 @@ class Misc(commands.Cog):
         embed = disnake.Embed(
                 colour=0x2F3136,
                 description=f"[**Clique aqui**]({disnake.utils.oauth_url(self.bot.user.id, permissions=disnake.Permissions(self.bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))}) "
-                            "para me adicionar no seu servidor."
+                            "para me adicionar no seu servidor." + "\n\n`Nota: No momento não será possivel me adicionar devio ao limite de servidores atingido.`" if self.bot.appinfo.flags.verification_pending_guild_limit else ""
             )
 
         if self.extra_user_bots:
@@ -260,14 +265,23 @@ class Misc(commands.Cog):
 
             for bot in self.bot.pool.bots:
 
-                if not bot.public or bot.user.id == self.bot.user.id:
+                if not bot.appinfo.bot_public:
                     continue
 
-                bots_invites.append(f"[`{disnake.utils.escape_markdown(str(bot.user.name))}`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})")
+                if bot.user.id == self.bot.user.id:
+                    continue
+
+                bots_invites.append(f"[`{disnake.utils.escape_markdown(str(bot.user.name))}`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})" +
+                                    " (sem vagas)" if bot.appinfo.flags.verification_pending_guild_limit else "")
 
             if bots_invites:
-                embed.description += "\n\n**Bots de música extras:**\n" + " | ".join(bots_invites)
 
+                txt = ""
+
+                for i in disnake.utils.as_chunks(bots_invites, 3):
+                    txt += " | ".join(i)
+
+                embed.description += "\n\n**Bots de música adicionais:**\n" + txt
 
         try:
             await inter.edit_original_message(embed=embed)
@@ -360,7 +374,12 @@ class GuildLog(commands.Cog):
         except AttributeError:
             owner_mention = ""
 
-        await self.send_hook(owner_mention, embed=embed)
+        try:
+            await self.send_hook(owner_mention, embed=embed)
+        except:
+            traceback.print_exc()
+
+        await self.bot.update_appinfo()
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: disnake.Guild):

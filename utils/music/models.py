@@ -373,7 +373,7 @@ class LavalinkPlayer(wavelink.Player):
             hints.append("Ao criar uma conversa/thread na mensagem do player, será ativado o modo de song-request "
                         "nela (possibilitando pedir música apenas enviando o nome/link da música na conversa).")
 
-        if self.bot.config["GLOBAL_PREFIX"] and len([b for b in self.bot.pool.bots if b.public]) > 1:
+        if self.bot.config["GLOBAL_PREFIX"] and len([b for b in self.bot.pool.bots if b.appinfo.bot_public]) > 1:
             hints.append("Você pode ter bots de música extras no servidor, compartilhando todos os seus favoritos "
                          "e funcionando com um único prefixo e comando slash de apenas um bot, use o comando /invite")
 
@@ -985,7 +985,7 @@ class LavalinkPlayer(wavelink.Player):
                     "bot_id": self.bot.user.id,
                     "invite_permissions": self.bot.config["INVITE_PERMISSIONS"],
                     "bot_name": str(self.bot.user),
-                    "public": self.bot.public
+                    "public": self.bot.appinfo.bot_public
                 }
             )
 

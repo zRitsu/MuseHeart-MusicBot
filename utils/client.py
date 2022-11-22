@@ -277,13 +277,8 @@ class BotPool:
 
                         bot.load_modules(bot_name)
 
-                    if not bot.owner:
-                        botowner = (await bot.application_info())
-                        try:
-                            bot.owner = botowner.team.members[0]
-                        except AttributeError:
-                            bot.owner = botowner.owner
-                        bot.public = botowner.bot_public
+                    if not bot.appinfo:
+                        await bot.update_appinfo()
 
                     music_cog = bot.get_cog("Music")
 
@@ -357,6 +352,7 @@ class BotCore(commands.Bot):
         self.session = aiohttp.ClientSession()
         self.ws_client = self.pool.ws_client
         self.color = kwargs.pop("embed_color", None)
+        self.appinfo: Optional[disnake.AppInfo] = None
         self.bot_ready = False
         self.player_skins = {}
         self.default_skin = self.config.get("DEFAULT_SKIN", "default")
@@ -367,7 +363,6 @@ class BotCore(commands.Bot):
         self.number = kwargs.pop("number", 0)
         super().__init__(*args, **kwargs)
         self.music = music_mode(self)
-        self.public = None
 
         for i in self.config["OWNER_IDS"].split("||"):
 
@@ -573,6 +568,15 @@ class BotCore(commands.Bot):
             return 0x2F3136
 
         return me.color
+
+    async def update_appinfo(self):
+
+        self.appinfo = (await self.application_info())
+
+        try:
+            self.owner = self.appinfo.team.members[0]
+        except AttributeError:
+            self.owner = self.appinfo.owner
 
     async def on_application_command_autocomplete(self, inter: disnake.ApplicationCommandInteraction):
 
