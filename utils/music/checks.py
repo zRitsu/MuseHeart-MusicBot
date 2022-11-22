@@ -197,7 +197,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         )
 
     for i in disnake.utils.as_chunks(extra_bots_invite, 3):
-        txt += " | ".join(i)
+        txt += " | ".join(i) + "\n"
 
     if len(extra_bots_invite) == len(inter.bot.pool.bots):
         msg = "**Não há bots de música compatível no servidor!**\n" \

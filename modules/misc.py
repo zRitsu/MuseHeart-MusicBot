@@ -279,7 +279,7 @@ class Misc(commands.Cog):
                 txt = ""
 
                 for i in disnake.utils.as_chunks(bots_invites, 3):
-                    txt += " | ".join(i)
+                    txt += " | ".join(i) + "\n"
 
                 embed.description += "\n\n**Bots de música adicionais:**\n" + txt
 
