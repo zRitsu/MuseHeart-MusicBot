@@ -374,7 +374,7 @@ class LavalinkPlayer(wavelink.Player):
                         "nela (possibilitando pedir música apenas enviando o nome/link da música na conversa).")
 
         if self.bot.config["GLOBAL_PREFIX"] and len([b for b in self.bot.pool.bots if b.appinfo.bot_public]) > 1:
-            hints.append("Você pode ter bots de música extras no servidor, compartilhando todos os seus favoritos "
+            hints.append("É possível ter bots de música adicionais no servidor compartilhando todos os seus favoritos "
                          "e funcionando com um único prefixo e comando slash de apenas um bot, use o comando /invite")
 
         random.shuffle(hints)

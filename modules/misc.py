@@ -252,7 +252,7 @@ class Misc(commands.Cog):
         embed = disnake.Embed(
                 colour=0x2F3136,
                 description=f"[**Clique aqui**]({disnake.utils.oauth_url(self.bot.user.id, permissions=disnake.Permissions(self.bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))}) "
-                            "para me adicionar no seu servidor." + "\n\n`Nota: No momento não será possivel me adicionar devio ao limite de servidores atingido.`" if self.bot.appinfo.flags.verification_pending_guild_limit else ""
+                "para me adicionar no seu servidor." + ("\n\n`Nota: No momento não será possivel me adicionar devio ao limite de servidores atingido.`" if self.bot.appinfo.flags.verification_pending_guild_limit else "")
             )
 
         if self.extra_user_bots:
@@ -272,7 +272,7 @@ class Misc(commands.Cog):
                     continue
 
                 bots_invites.append(f"[`{disnake.utils.escape_markdown(str(bot.user.name))}`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})" +
-                                    " (sem vagas)" if bot.appinfo.flags.verification_pending_guild_limit else "")
+                                    (" (sem vagas)" if bot.appinfo.flags.verification_pending_guild_limit else ""))
 
             if bots_invites:
 
