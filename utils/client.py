@@ -180,6 +180,10 @@ class BotPool:
                 except:
                     default_prefix = None
 
+            if not token:
+                print(f"{bot_name} Ignorado (token não informado)...")
+                return
+
             try:
                 test_guilds = list([int(i) for i in self.config[f"TEST_GUILDS_{bot_name}"].split("||")])
             except:
