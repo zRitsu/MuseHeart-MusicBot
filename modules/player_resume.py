@@ -3,6 +3,7 @@
 
 import os.path
 import shutil
+import traceback
 import disnake
 from disnake.ext import commands
 from utils.client import BotCore
@@ -17,8 +18,8 @@ class PlayerSession(commands.Cog):
 
     def __init__(self, bot: BotCore):
         self.bot = bot
-        bot.loop.create_task(self.resume_players())
         self.resumed = False
+        self.resume_task = bot.loop.create_task(self.resume_players())
 
     async def resume_players(self):
 
@@ -72,18 +73,22 @@ class PlayerSession(commands.Cog):
                 except:
                     message = None
 
-                player: LavalinkPlayer = self.bot.music.get_player(
-                    node_id=node.identifier,
-                    guild_id=guild.id,
-                    cls=LavalinkPlayer,
-                    guild=guild,
-                    channel=text_channel,
-                    message=message,
-                    skin=data["skin"],
-                    player_creator=creator,
-                    keep_connected=data["keep_connected"],
-                    static=data['static'],
-                )
+                try:
+                    player: LavalinkPlayer = self.bot.music.get_player(
+                        node_id=node.identifier,
+                        guild_id=guild.id,
+                        cls=LavalinkPlayer,
+                        guild=guild,
+                        channel=text_channel,
+                        message=message,
+                        skin=data["skin"],
+                        player_creator=creator,
+                        keep_connected=data["keep_connected"],
+                        static=data['static'],
+                    )
+                except Exception:
+                    print(f"{self.bot.user} - Falha ao criar player: {guild.name} [{guild.id}]\n{traceback.format_exc()}")
+                    continue
 
                 player.dj = set(data["dj"])
                 player.restrict_mode = data["restrict_mode"]
@@ -137,6 +142,9 @@ class PlayerSession(commands.Cog):
 
         except FileNotFoundError:
             return
+
+        except Exception:
+            print(f"{self.bot.user} - Falha Crítica ao retomar players:\n{traceback.format_exc()}")
 
 
     @commands.max_concurrency(1, commands.BucketType.default)
@@ -231,6 +239,12 @@ class PlayerSession(commands.Cog):
 
         self.resumed = True
         await ctx.send(embed=disnake.Embed(color=self.bot.get_color(ctx.guild.me), description=txt))
+
+    async def cog_unload(self):
+        try:
+            self.resume_task.cancel()
+        except:
+            pass
 
 def setup(bot: BotCore):
     bot.add_cog(PlayerSession(bot))
