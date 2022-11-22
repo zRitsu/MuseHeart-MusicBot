@@ -169,6 +169,10 @@ class BotPool:
         def load_bot(bot_name: str, token: str):
 
             if self.config["GLOBAL_PREFIX"]:
+                try:
+                    token = token.split()[1]
+                except:
+                    pass
                 default_prefix = self.config["DEFAULT_PREFIX"]
             else:
                 try:
