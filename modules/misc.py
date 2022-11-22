@@ -183,7 +183,10 @@ class Misc(commands.Cog):
 
         embed.set_thumbnail(url=bot.user.display_avatar.replace(size=256, static_format="png").url)
 
-        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+        if bot.config["GLOBAL_PREFIX"]:
+            guild_data = await bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
+        else:
+            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         prefix = guild_data["prefix"] or bot.default_prefix
 
