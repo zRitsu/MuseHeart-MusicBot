@@ -244,7 +244,7 @@ class BotPool:
 
                         self._command_sync_flags = commands.CommandSyncFlags.all()
 
-                        bot.load_modules(bot_name)
+                        bot.load_modules(str(bot.user))
 
                         if bot.config["AUTO_SYNC_COMMANDS"]:
                             await bot.sync_app_commands(force=True)
@@ -286,7 +286,7 @@ class BotPool:
                         if bot.config["AUTO_SYNC_COMMANDS"]:
                             await bot.sync_app_commands(force=True)
 
-                        bot.load_modules(bot_name)
+                        bot.load_modules(str(bot.user))
 
                     if not bot.appinfo:
                         await bot.update_appinfo()
