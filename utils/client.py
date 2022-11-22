@@ -170,7 +170,7 @@ class BotPool:
 
             if self.config["GLOBAL_PREFIX"]:
                 try:
-                    token = token.split()[1]
+                    token = token.split()[0]
                 except:
                     pass
                 default_prefix = self.config["DEFAULT_PREFIX"]
