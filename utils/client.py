@@ -169,12 +169,12 @@ class BotPool:
         def load_bot(bot_name: str, token: str):
 
             if self.config["GLOBAL_PREFIX"]:
-                token = self.config["DEFAULT_PREFIX"]
+                default_prefix = self.config["DEFAULT_PREFIX"]
             else:
                 try:
                     token, default_prefix = token.split()
                 except:
-                    default_prefix = self.config["DEFAULT_PREFIX"]
+                    default_prefix = None
 
             try:
                 test_guilds = list([int(i) for i in self.config[f"TEST_GUILDS_{bot_name}"].split("||")])
