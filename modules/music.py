@@ -750,46 +750,51 @@ class Music(commands.Cog):
             if not URL_REG.match(query):
                 query = f"{source}:{query}"
 
-            elif "&list=" in query:
+            else:
 
-                view = SelectInteraction(
-                    user=inter.author,
-                    opts=[
-                        disnake.SelectOption(label="Música", emoji="🎵",
-                                             description="Carregar apenas a música do link.", value="music"),
-                        disnake.SelectOption(label="Playlist", emoji="🎶",
-                                             description="Carregar playlist com a música atual.", value="playlist"),
-                    ], timeout=30)
+                query = query.split("&ab_channel=")[0]
 
-                embed = disnake.Embed(
-                    description='**O link contém vídeo com playlist.**\n'
-                                f'Selecione uma opção em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para prosseguir.',
-                    color=self.bot.get_color(guild.me)
-                )
+                if "&list=" in query:
 
-                if bot.user.id != self.bot.user.id:
-                    embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+                    view = SelectInteraction(
+                        user=inter.author,
+                        opts=[
+                            disnake.SelectOption(label="Música", emoji="🎵",
+                                                 description="Carregar apenas a música do link.", value="music"),
+                            disnake.SelectOption(label="Playlist", emoji="🎶",
+                                                 description="Carregar playlist com a música atual.", value="playlist"),
+                        ], timeout=30)
 
-                msg = await inter.send(embed=embed, view=view, ephemeral=ephemeral)
-
-                await view.wait()
-
-                if not view.inter:
-                    await inter.edit_original_message(
-                        content=f"{inter.author.mention}, tempo esgotado!",
-                        embed=None, view=None
+                    embed = disnake.Embed(
+                        description='**O link contém vídeo com playlist.**\n'
+                                    f'Selecione uma opção em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para prosseguir.',
+                        color=self.bot.get_color(guild.me)
                     )
-                    return
 
-                if view.selected == "music":
-                    query = YOUTUBE_VIDEO_REG.match(query).group()
+                    if bot.user.id != self.bot.user.id:
+                        embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
 
-                if not isinstance(inter, disnake.ModalInteraction):
-                    inter.token = view.inter.token
-                    inter.id = view.inter.id
-                    inter.response = view.inter.response
-                else:
-                    inter = view.inter
+                    msg = await inter.send(embed=embed, view=view, ephemeral=ephemeral)
+
+                    await view.wait()
+
+                    if not view.inter:
+                        await inter.edit_original_message(
+                            content=f"{inter.author.mention}, tempo esgotado!",
+                            embed=None, view=None
+                        )
+                        return
+
+                    if view.selected == "music":
+                        query = YOUTUBE_VIDEO_REG.match(query).group()
+
+                    if not isinstance(inter, disnake.ModalInteraction):
+                        inter.token = view.inter.token
+                        inter.id = view.inter.id
+                        inter.response = view.inter.response
+                    else:
+                        inter = view.inter
+
 
         if not inter.response.is_done():
             await inter.response.defer(ephemeral=ephemeral)
