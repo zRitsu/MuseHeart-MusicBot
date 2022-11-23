@@ -27,6 +27,7 @@ DEFAULT_CONFIG = {
     "ENABLE_LOGGER": False,
     "INTERACTION_BOTS": "",
     "GLOBAL_PREFIX": True,
+    "KILL_ON_429": True,
 
     ################
     ### Database ###

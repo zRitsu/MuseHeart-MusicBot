@@ -26,22 +26,10 @@ import os
 import traceback
 
 
-async def start_bot(bot: BotCore):
-    try:
-        await bot.start(bot.token)
-    except:
-        traceback.print_exc()
-    del bot.token
-
-
-async def run_bots(bots: List[BotCore]):
-    await asyncio.wait(
-        [asyncio.create_task(start_bot(bot)) for bot in bots]
-    )
-
 class BotPool:
 
     bots: List[BotCore] = []
+    killing_state = False
 
     def __init__(self):
         self.playlist_cache = {}
@@ -53,6 +41,41 @@ class BotPool:
         self.remote_git_url = ""
         self.max_counter: int = 0
         self.message_ids: set = set()
+
+    async def start_bot(self, bot: BotCore):
+        try:
+            await bot.start(bot.token)
+        except disnake.HTTPException as e:
+
+            if e.status == 429 and self.config["KILL_ON_429"]:
+
+                if self.killing_state is True:
+                    return
+
+                print(
+                    "Aplicação com ratelimit do discord!\n"
+                    "Finalizando/Reiniciando o processo em 30 segundos..."
+                )
+
+                self.killing_state = True
+
+                await asyncio.sleep(30)
+
+                await asyncio.create_subprocess_shell("kill 1")
+
+                return
+
+            traceback.print_exc()
+
+        except Exception:
+            traceback.print_exc()
+
+        del bot.token
+
+    async def run_bots(self, bots: List[BotCore]):
+        await asyncio.wait(
+            [asyncio.create_task(self.start_bot(bot)) for bot in bots]
+        )
 
     def load_playlist_cache(self):
 
@@ -336,7 +359,7 @@ class BotPool:
         if self.config["RUN_RPC_SERVER"]:
 
             for bot in self.bots:
-                loop.create_task(start_bot(bot))
+                loop.create_task(self.start_bot(bot))
 
             loop.create_task(self.connect_rpc_ws())
             loop.create_task(self.connect_spotify())
@@ -348,7 +371,7 @@ class BotPool:
             loop.create_task(self.connect_rpc_ws())
             loop.create_task(self.connect_spotify())
             loop.run_until_complete(
-                run_bots(self.bots)
+                self.run_bots(self.bots)
             )
 
 
