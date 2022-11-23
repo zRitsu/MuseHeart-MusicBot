@@ -47,7 +47,16 @@ class BotPool:
             await bot.start(bot.token)
         except disnake.HTTPException as e:
 
-            if e.status == 429 and self.config["KILL_ON_429"]:
+            if e.status == 429:
+
+                if not self.config["KILL_ON_429"]:
+
+                    if self.killing_state == "ratelimit":
+                        return
+
+                    self.killing_state = "ratelimit"
+                    print("Aplicação com ratelimit do discord!")
+                    return
 
                 if self.killing_state is True:
                     return

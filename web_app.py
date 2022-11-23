@@ -48,10 +48,11 @@ class IndexHandler(tornado.web.RequestHandler):
 
         if not cells:
 
-            if self.bots[0].pool.killing_state:
+            if self.bots[0].pool.killing_state is True:
                 self.text = '<h1 style=\"font-size:5vw\">A aplicação será reiniciada em breve...</h1>'
             else:
-                self.text = '<h1 style=\"font-size:5vw\">Não há bots disponíveis no momento...</h1>'
+                self.text = '<h1 style=\"font-size:5vw\">Não há bots disponíveis no momento...</h1>\n' \
+                            '<br>(se o seu bot não apareceu na lista, verifique o erro que apareceu no terminal/console \"'
 
         else:
 
@@ -75,8 +76,7 @@ class IndexHandler(tornado.web.RequestHandler):
                      ".replace(\"https\", \"wss\") + \"ws\"}</script></body>"
 
 
-        self.write(f"{self.text}<br>(se o seu bot não apareceu na lista, verifique se apareceu algo escrito com \""
-                   f"429: too many requests\" no console/terminal)<p><a href=\"https://github.com/zRitsu/DC-MusicBot-RPC"
+        self.write(f"{self.text}<p><a href=\"https://github.com/zRitsu/DC-MusicBot-RPC"
                    f"/releases\" target=\"_blank\">Baixe o app de rich presence aqui.</a></p>Link para adicionar no app "
                    f"de RPC abaixo: {ws_url}")
         # self.render("index.html") #será implementado futuramente...
