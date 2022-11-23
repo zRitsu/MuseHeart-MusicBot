@@ -14,7 +14,7 @@ from random import shuffle
 from urllib import parse
 from utils.client import BotCore
 from utils.db import DBModel
-from utils.music.errors import GenericError, MissingVoicePerms
+from utils.music.errors import GenericError, MissingVoicePerms, NoVoice
 from utils.music.spotify import process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, \
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen, check_pool_bots, \
@@ -977,6 +977,9 @@ class Music(commands.Cog):
                 guild_data["check_other_bots_in_vc"]
             except KeyError:
                 guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+
+            if not inter.author.voice:
+                raise NoVoice()
 
             await self.do_connect(
                 inter, channel=inter.author.voice.channel,
