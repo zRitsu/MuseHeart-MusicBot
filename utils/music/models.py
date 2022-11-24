@@ -699,7 +699,7 @@ class LavalinkPlayer(wavelink.Player):
                         disnake.SelectOption(
                             label="Mini-fila do player", emoji="<:music_queue:703761160679194734>",
                             value=PlayerControls.miniqueue,
-                            description="Ativar/Desativar o mini-fila do player."
+                            description="Ativar/Desativar a mini-fila do player."
                         )
                     )
 
