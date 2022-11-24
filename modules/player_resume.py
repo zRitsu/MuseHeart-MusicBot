@@ -90,6 +90,11 @@ class PlayerSession(commands.Cog):
                     print(f"{self.bot.user} - Falha ao criar player: {guild.name} [{guild.id}]\n{traceback.format_exc()}")
                     continue
 
+                try:
+                    player.mini_queue_enabled = data["mini_queue_enabled"]
+                except:
+                    pass
+
                 player.dj = set(data["dj"])
                 player.restrict_mode = data["restrict_mode"]
                 player.loop = data["loop"]
@@ -203,6 +208,7 @@ class PlayerSession(commands.Cog):
                             "loop": player.loop,
                             "skin": player.skin,
                             "restrict_mode": player.restrict_mode,
+                            "mini_queue_enabled": player.mini_queue_enabled,
                             "tracks": tracks
                         }, indent=4
                     )
