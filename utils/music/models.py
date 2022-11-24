@@ -296,6 +296,8 @@ class LavalinkPlayer(wavelink.Player):
         self.allowed_mentions = disnake.AllowedMentions(users=False, everyone=False, roles=False)
         self.controller_mode = True  # ativar/desativar modo controller (apenas para uso em skins)
         self.bot.loop.create_task(self.channel_cleanup())
+        self.mini_queue_feature = False
+        self.mini_queue_enabled = False
 
         self.initial_hints = [
             "Você pode alterar a skin/aparência do player usando o comando /change_skin (comando vísivel apenas membros"
@@ -691,6 +693,15 @@ class LavalinkPlayer(wavelink.Player):
                         ]
                     ),
                 ]
+
+                if self.mini_queue_feature:
+                    data["components"][5].options.append(
+                        disnake.SelectOption(
+                            label="Mini-fila do player", emoji="<:music_queue:703761160679194734>",
+                            value=PlayerControls.miniqueue,
+                            description="Ativar/Desativar o mini-fila do player."
+                        )
+                    )
 
             if self.message and (self.ignore_np_once or self.has_thread or self.static or not force or self.is_last_message()):
 

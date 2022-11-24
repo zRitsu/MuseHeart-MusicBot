@@ -41,6 +41,8 @@ def load(player: LavalinkPlayer) -> dict:
         queue_text_size = 33
         queue_img = ""
         playlist_text_size = 20
+        player.mini_queue_feature = False
+        player.mini_queue_enabled = True
 
         try:
             vc_txt = f"\n> *️⃣ **⠂Canal de voz:** [`{player.guild.me.voice.channel.name}`](http://discordapp.com/channels/{player.guild.id}/{player.guild.me.voice.channel.id})"
@@ -52,6 +54,7 @@ def load(player: LavalinkPlayer) -> dict:
         queue_text_size = 31
         queue_img = "https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif"
         playlist_text_size = 13
+        player.mini_queue_feature = True
 
     duration = "> 🔴 **⠂Duração:** `Livestream`" if player.current.is_stream else \
         f"> ⏰ **⠂Duração:** `{time_format(player.current.duration)} [`" + \
@@ -82,6 +85,9 @@ def load(player: LavalinkPlayer) -> dict:
     if player.current.playlist_name:
         txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=playlist_text_size)}`]({player.current.playlist_url})"
 
+    if (qlenght:=len(player.queue)) and not player.mini_queue_enabled:
+        txt += f"\n> 🎶 **⠂Músicas na fila:** `{qlenght}`"
+
     if player.keep_connected:
         txt += "\n> ♾️ **⠂Modo 24/7:** `Ativado`"
 
@@ -93,14 +99,14 @@ def load(player: LavalinkPlayer) -> dict:
     if player.command_log:
         txt += f"```ansi\n [34;1mÚltima Interação[0m```**┕ {player.command_log_emoji} ⠂**{player.command_log}\n"
 
-    if len(player.queue):
+    if len(player.queue) and player.mini_queue_enabled:
 
         queue_txt = "\n".join(
             f"`{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, queue_text_size)}`]({t.uri})"
             for n, t in (enumerate(itertools.islice(player.queue, queue_size)))
         )
 
-        embed_queue = disnake.Embed(title=f"Músicas na fila: {len(player.queue)}", color=player.bot.get_color(player.guild.me),
+        embed_queue = disnake.Embed(title=f"Músicas na fila: {qlenght}", color=player.bot.get_color(player.guild.me),
                                     description=f"\n{queue_txt}")
 
         if not player.loop and not player.keep_connected:

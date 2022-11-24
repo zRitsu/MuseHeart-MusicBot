@@ -13,6 +13,8 @@ def load(player: LavalinkPlayer) -> dict:
 
     embed = disnake.Embed(color=player.bot.get_color(player.guild.me), description="")
 
+    queue_txt = ""
+
     if not player.static:
         embed_top = disnake.Embed(
             color=player.bot.get_color(player.guild.me),
@@ -27,11 +29,14 @@ def load(player: LavalinkPlayer) -> dict:
         )
 
         embed_top.set_thumbnail(url=player.current.thumb)
+        player.mini_queue_feature = True
 
     else:
         embed.description = f"[**{player.current.title}**]({player.current.uri})\n\n"
         embed.set_image(url=player.current.thumb)
         embed_top = None
+        player.mini_queue_feature = False
+        player.mini_queue_enabled = True
 
     if not player.paused:
         (embed_top or embed).set_author(
@@ -50,7 +55,7 @@ def load(player: LavalinkPlayer) -> dict:
         duration = f"⏰ **⠂Duração:** `{time_format(player.current.duration)}`"
 
     txt = f"{duration}\n" \
-          f"💠 **⠂Uploader**: `{player.current.author}`\n" \
+          f"💠 **⠂Uploader:** `{player.current.author}`\n" \
           f"🎧 **⠂Pedido por:** <@{player.current.requester}>\n" \
 
     if player.current.playlist_name:
@@ -59,10 +64,7 @@ def load(player: LavalinkPlayer) -> dict:
     txt += f"🔊 **⠂Volume:** `{player.volume}%`\n"
 
     if player.restrict_mode:
-        txt += "🔒 **⠂Modo restrito: `ativado`\n"
-
-    if player.command_log:
-        txt += f"{player.command_log_emoji} **⠂Última Interação:** {player.command_log}\n"
+        txt += "🔒 **⠂Modo restrito:** `ativado`\n"
 
     if qsize := len(player.queue):
 
@@ -78,15 +80,22 @@ def load(player: LavalinkPlayer) -> dict:
             data["content"] += "```"
 
         else:
-            txt += "```ansi\n[0;33mPróximas Músicas:[0m```" + "\n".join(
-                f"`{(n + 1):02}) [{time_format(t.duration) if t.duration else '🔴 Livestream'}]` "
-                f"[`{fix_characters(t.title, 31)}`]({t.uri})" for n, t in enumerate(itertools.islice(player.queue, 3))
-            )
 
-            if qsize > 3:
-                txt += f"\n`╚══════ E mais {qsize - 3} música(s) ══════╝`"
+            if not player.mini_queue_enabled:
+                txt += f"🎶 **⠂Músicas na fila:** `{qsize}`\n"
+            else:
+                queue_txt += "```ansi\n[0;33mPróximas Músicas:[0m```" + "\n".join(
+                    f"`{(n + 1):02}) [{time_format(t.duration) if t.duration else '🔴 Livestream'}]` "
+                    f"[`{fix_characters(t.title, 31)}`]({t.uri})" for n, t in enumerate(itertools.islice(player.queue, 3))
+                )
 
-    embed.description += txt
+                if qsize > 3:
+                    queue_txt += f"\n`╚══════ E mais {qsize - 3} música(s) ══════╝`"
+
+    if player.command_log:
+        txt += f"{player.command_log_emoji} **⠂Última Interação:** {player.command_log}\n"
+
+    embed.description += txt + queue_txt
 
     if player.current_hint:
         embed.set_footer(text=f"💡 Dica: {player.current_hint}")

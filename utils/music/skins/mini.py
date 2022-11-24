@@ -12,8 +12,10 @@ def load(player: LavalinkPlayer) -> dict:
         "embeds": [],
     }
 
+    embed_color = player.bot.get_color(player.guild.me)
+
     embed = disnake.Embed(
-        color=player.bot.get_color(player.guild.me),
+        color=embed_color,
         description=f"[`{player.current.single_title}`]({player.current.uri})"
     )
     embed_queue = None
@@ -55,6 +57,9 @@ def load(player: LavalinkPlayer) -> dict:
 
     if player.static:
 
+        player.mini_queue_feature = False
+        player.mini_queue_enabled = True
+
         embed.set_image(url=player.current.thumb or "https://media.discordapp.net/attachments/480195401543188483/987830071815471114/musicequalizer.gif")
 
         if queue_size:
@@ -82,13 +87,27 @@ def load(player: LavalinkPlayer) -> dict:
             embed.set_footer(text=f"💡 Dica: {player.current_hint}")
 
     else:
-        if queue_size:
-            embed.description += f" `({queue_size})`"
-        embed.set_thumbnail(url=player.current.thumb)
-        if player.current_hint:
-            embed.set_image(url="https://cdn.discordapp.com/attachments/480195401543188483/795080813678559273/rainbow_bar2.gif")
-            embed.set_footer(text=f"💡 Dica: {player.current_hint}")
 
+        player.mini_queue_feature = True
+
+        if queue_size:
+
+            embed.description += f" `({queue_size})`"
+
+            if player.mini_queue_enabled:
+                embed_queue = disnake.Embed(
+                    color=embed_color,
+                    description="\n".join(
+                        f"`{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 38)}`]({t.uri})"
+                        for n, t in (enumerate(itertools.islice(player.queue, 5)))
+                    )
+                )
+                embed_queue.set_image(url="https://cdn.discordapp.com/attachments/480195401543188483/795080813678559273/rainbow_bar2.gif")
+
+        embed.set_thumbnail(url=player.current.thumb)
+        embed.set_image(url="https://cdn.discordapp.com/attachments/480195401543188483/795080813678559273/rainbow_bar2.gif")
+        if player.current_hint:
+            embed.set_footer(text=f"💡 Dica: {player.current_hint}")
 
     if player.auto_update:
         player.auto_update = 0

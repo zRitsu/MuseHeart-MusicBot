@@ -2984,6 +2984,17 @@ class Music(commands.Cog):
                 if not interaction.author.voice or interaction.author.voice.channel != vc:
                     raise GenericError(f"Você deve estar no canal <#{vc.id}> para usar os botões do player.")
 
+                if control == PlayerControls.miniqueue:
+                    await is_dj().predicate(interaction)
+                    player.mini_queue_enabled = not player.mini_queue_enabled
+                    player.set_command_log(
+                        emoji="📑",
+                        text=f"{interaction.author.mention} {'ativou' if player.mini_queue_enabled else 'desativou'} "
+                             f"a mini-fila do player."
+                    )
+                    await player.invoke_np(interaction=interaction)
+                    return
+
                 if control == PlayerControls.volume:
                     kwargs = {"value": None}
 
