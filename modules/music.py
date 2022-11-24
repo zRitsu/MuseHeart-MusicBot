@@ -564,8 +564,6 @@ class Music(commands.Cog):
 
         msg = None
 
-        check_pool = isinstance(inter, disnake.MessageInteraction)
-
         ephemeral = None
 
         try:
@@ -586,7 +584,7 @@ class Music(commands.Cog):
                 can_connect(
                     inter.author.voice.channel, guild, bot,
                     check_other_bots_in_vc=guild_data["check_other_bots_in_vc"],
-                    check_pool=check_pool
+                    check_pool=True
                 )
 
             static_player = guild_data['player_controller']
@@ -984,7 +982,7 @@ class Music(commands.Cog):
             await self.do_connect(
                 inter, channel=inter.author.voice.channel,
                 check_other_bots_in_vc=guild_data["check_other_bots_in_vc"],
-                bot=bot, me=guild.me, check_pool=check_pool
+                bot=bot, me=guild.me, check_pool=True
             )
 
         if not player.current:

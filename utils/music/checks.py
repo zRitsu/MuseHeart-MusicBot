@@ -461,8 +461,11 @@ def can_connect(
             if b.user.id == bot.user.id:
                 continue
 
-            if b.user.id in channel.voice_states:
-                raise GenericError(f"**<@{b.user.id}> já está em uso no canal** <#{channel.id}>")
+            try:
+                if b.user.id in channel.voice_states:
+                    raise GenericError(f"**<@{b.user.id}> já está em uso no canal** <#{channel.id}>")
+            except AttributeError:
+                continue
 
 async def check_deafen(me: disnake.Member = None):
 
