@@ -330,7 +330,7 @@ async def pin_list(inter, query: str, *, prefix=""):
                    if not query or query.lower() in pinname.lower()][:20])
 
 
-async def select_bot_pool(inter):
+async def select_bot_pool(inter, first=False):
 
     if isinstance(inter, CustomContext):
         if not inter.bot.config["GLOBAL_PREFIX"]:
@@ -349,7 +349,7 @@ async def select_bot_pool(inter):
             for b in inter.bot.pool.bots if b.appinfo.bot_public)
         raise GenericError(f"**Você precisa adicionar pelo menos um desses bots no servidor:**\n{bot_invites}")
 
-    if len(bots) == 1:
+    if len(bots) == 1 or first:
         return list(bots.values())[0]
     else:
         opts = [disnake.SelectOption(label=f"{b.user}", value=f"{b.user.id}", emoji="🎶") for b in bots.values()]

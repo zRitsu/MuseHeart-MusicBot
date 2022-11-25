@@ -141,7 +141,7 @@ class Misc(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        bot = await select_bot_pool(inter)
+        bot = await select_bot_pool(inter, first=self.bot.config["GLOBAL_PREFIX"])
 
         if not bot:
             return
@@ -154,38 +154,46 @@ class Misc(commands.Cog):
         guild = bot.get_guild(inter.guild_id) or inter.guild
 
         embed = disnake.Embed(
-            description=f"**Sobre mim:**\n\n"
-                        f"> **Estou em:** `{len(bot.guilds)} servidor(es)`\n",
-            color=self.bot.get_color(guild.me)
+            description=f"**Sobre mim:**\n\n",
+            color=bot.get_color(guild.me)
         )
-
-        if bot.music.players:
-            embed.description += f"> **Players ativos (bot atual):** `{len(bot.music.players)}`\n"
 
         active_players_other_bots = 0
 
-        for b in self.bot.pool.bots:
-            if b.user.id == bot.user.id:
-                continue
-            active_players_other_bots += len(b.music.players)
+        if self.bot.config["GLOBAL_PREFIX"]:
 
-        if active_players_other_bots:
-            embed.description += f"> **Players ativos (outros bots):** `{active_players_other_bots}`\n"
+            for b in bot.pool.bots:
+                active_players_other_bots += len(b.music.players)
 
-        if self.bot.pool.commit:
+            if active_players_other_bots:
+                embed.description += f"> **Players ativos (todos os bots):** `{active_players_other_bots}`\n"
+
+        else:
+
+            if bot.music.players:
+                embed.description += f"> **Players ativos (bot atual):** `{len(bot.music.players)}`\n"
+
+            for b in self.bot.pool.bots:
+                if b.user.id == bot.user.id:
+                    continue
+                active_players_other_bots += len(b.music.players)
+
+            if active_players_other_bots:
+                embed.description += f"> **Players ativos (outros bots):** `{active_players_other_bots}`\n"
+
+        if bot.pool.commit:
             embed.description += f"> **Commit atual:** [`{bot.pool.commit[:7]}`]({bot.pool.remote_git_url}/commit/{bot.pool.commit})\n"
 
-        embed.description += f"> **Versão do Python:** `{platform.python_version()}`\n"\
+        embed.description += f"> **Versão do Python:** `{platform.python_version()}`\n" \
                              f"> **Versão do Disnake:** `{disnake.__version__}`\n" \
                              f"> **Latencia:** `{round(bot.latency * 1000)}ms`\n" \
                              f"> **Uso de RAM:** `{ram_usage}`\n" \
                              f"> **Uptime:** <t:{int(bot.uptime.timestamp())}:R>\n"
 
-        embed.set_thumbnail(url=bot.user.display_avatar.replace(size=256, static_format="png").url)
-
         if bot.config["GLOBAL_PREFIX"]:
             guild_data = await bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
         else:
+            embed.set_thumbnail(url=bot.user.display_avatar.replace(size=256, static_format="png").url)
             guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         prefix = guild_data["prefix"] or bot.default_prefix
@@ -194,9 +202,6 @@ class Misc(commands.Cog):
             embed.description += f"> **Prefixo:** `{disnake.utils.escape_markdown(prefix, as_needed=True)}`\n"
 
         links = "[`[Source]`](https://github.com/zRitsu/disnake-LL-music-bot)"
-
-        if bot.appinfo.bot_public:
-            links = f"[`[Invite]`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))}) **|** {links}"
 
         if bot.config["SUPPORT_SERVER"]:
             links += f" **|** [`[Suporte]`]({bot.config['SUPPORT_SERVER']})"
@@ -216,13 +221,55 @@ class Misc(commands.Cog):
         if bot.config["HIDE_SOURCE_OWNER"] is not False and bot.owner.id == self.source_owner.id:
             embed.footer.text += f" | Source by: {self.source_owner}"
 
+        components = [disnake.ui.Button(custom_id="bot_invite", label="Me adicione no seu servidor")] if [b for b in bot.pool.bots if b.appinfo and b.appinfo.bot_public] else None
+
         try:
-            await inter.edit_original_message(embed=embed, components=None)
+            await inter.edit_original_message(embed=embed, components=components)
         except (AttributeError, disnake.InteractionNotEditable):
             try:
-                await inter.response.edit_message(embed=embed, components=None)
+                await inter.response.edit_message(embed=embed, components=components)
             except:
-                await inter.send(embed=embed, ephemeral=True)
+                await inter.send(embed=embed, ephemeral=True, components=components)
+
+
+    @commands.Cog.listener("on_button_click")
+    async def invite_button(self, inter: disnake.MessageInteraction):
+
+        if inter.data.custom_id != "bot_invite":
+            return
+
+        bots_invites = []
+
+        for bot in self.bot.pool.bots:
+
+            if not bot.appinfo.bot_public:
+                continue
+
+            bots_invites.append(
+                f"[`{disnake.utils.escape_markdown(str(bot.user.name))}`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})" +
+                (
+                    f" ({len(bot.guilds)}/100)" if bot.appinfo.flags.gateway_message_content_limited else f" ({len(bot.guilds)})"))
+
+        if not bots_invites:
+            await inter.send(
+                embed=disnake.Embed(
+                    colour=0x2F3136,
+                    title="**Não há bots públicos disponível...**",
+                ), ephemeral=True
+            )
+
+        txt = ""
+
+        for i in disnake.utils.as_chunks(bots_invites, 3):
+            txt += " | ".join(i) + "\n"
+
+        await inter.send(
+            embed=disnake.Embed(
+                colour=0x2F3136,
+                title="**Bots disponíveis:**",
+                description=txt
+            ), ephemeral=True
+        )
 
 
     @commands.command(name="invite", aliases=["convidar"], description="Exibir meu link de convite para você me adicionar no seu servidor.")
@@ -255,7 +302,7 @@ class Misc(commands.Cog):
         embed = disnake.Embed(
                 colour=0x2F3136,
                 description=f"[**Clique aqui**]({disnake.utils.oauth_url(self.bot.user.id, permissions=disnake.Permissions(self.bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))}) "
-                "para me adicionar no seu servidor." + ("\n\n`Nota: No momento não será possivel me adicionar devio ao limite de servidores atingido.`" if self.bot.appinfo.flags.verification_pending_guild_limit else "")
+                "para me adicionar no seu servidor." + ("\n\n`Nota: No momento não será possivel me adicionar devio ao limite de servidores atingido.`" if self.bot.appinfo.flags.gateway_message_content_limited else "")
             )
 
         if self.extra_user_bots:
@@ -275,7 +322,7 @@ class Misc(commands.Cog):
                     continue
 
                 bots_invites.append(f"[`{disnake.utils.escape_markdown(str(bot.user.name))}`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})" +
-                                    (" (sem vagas)" if bot.appinfo.flags.verification_pending_guild_limit else ""))
+                                    (f" ({len(bot.guilds)}/100)" if bot.appinfo.flags.gateway_message_content_limited else ""))
 
             if bots_invites:
 
@@ -290,7 +337,6 @@ class Misc(commands.Cog):
             await inter.edit_original_message(embed=embed)
         except AttributeError:
             await inter.send(embed=embed, ephemeral=True)
-
 
     @commands.user_command(name="avatar")
     async def avatar(self, inter: disnake.UserCommandInteraction):
