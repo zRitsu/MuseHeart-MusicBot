@@ -260,7 +260,7 @@ class Misc(commands.Cog):
 
         txt = ""
 
-        for i in disnake.utils.as_chunks(bots_invites, 3):
+        for i in disnake.utils.as_chunks(bots_invites, 2):
             txt += " | ".join(i) + "\n"
 
         await inter.send(
@@ -328,7 +328,7 @@ class Misc(commands.Cog):
 
                 txt = ""
 
-                for i in disnake.utils.as_chunks(bots_invites, 3):
+                for i in disnake.utils.as_chunks(bots_invites, 2):
                     txt += " | ".join(i) + "\n"
 
                 embed.description += "\n\n**Bots de música adicionais:**\n" + txt

@@ -193,10 +193,10 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
         extra_bots_invite.append(
             f"[`{disnake.utils.escape_markdown(str(bot.user.name))}`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})" +
-            (" (sem vagas)" if bot.appinfo.flags.gateway_message_content_limited else "")
+            (f" ({len(bot.guilds)}/100)" if bot.appinfo.flags.gateway_message_content_limited else f" ({len(bot.guilds)})")
         )
 
-    for i in disnake.utils.as_chunks(extra_bots_invite, 3):
+    for i in disnake.utils.as_chunks(extra_bots_invite, 2):
         txt += " | ".join(i) + "\n"
 
     if len(extra_bots_invite) == len(inter.bot.pool.bots):
