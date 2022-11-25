@@ -302,7 +302,7 @@ class Misc(commands.Cog):
         embed = disnake.Embed(
                 colour=0x2F3136,
                 description=f"[**Clique aqui**]({disnake.utils.oauth_url(self.bot.user.id, permissions=disnake.Permissions(self.bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))}) "
-                "para me adicionar no seu servidor." + ("\n\n`Nota: No momento não será possivel me adicionar devio ao limite de servidores atingido.`" if self.bot.appinfo.flags.gateway_message_content_limited else "")
+                "para me adicionar no seu servidor." + ("\n\n`Nota: No momento não será possivel me adicionar devido ao limite de servidores atingido.`" if self.bot.appinfo.flags.verification_pending_guild_limit else "")
             )
 
         if self.extra_user_bots:
