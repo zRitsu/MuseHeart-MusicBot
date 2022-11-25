@@ -63,12 +63,12 @@ class BotPool:
 
                 print(
                     "Aplicação com ratelimit do discord!\n"
-                    "Finalizando/Reiniciando o processo em 15 segundos..."
+                    "Finalizando/Reiniciando o processo em 5 segundos..."
                 )
 
                 self.killing_state = True
 
-                await asyncio.sleep(15)
+                await asyncio.sleep(5)
 
                 await asyncio.create_subprocess_shell("kill 1")
 
@@ -321,7 +321,7 @@ class BotPool:
                         bot.load_modules(str(bot.user))
 
                     if not bot.appinfo:
-                        await bot.update_appinfo()
+                        bot.loop.create_task(bot.update_appinfo())
 
                     music_cog = bot.get_cog("Music")
 
