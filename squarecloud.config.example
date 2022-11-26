@@ -4,7 +4,7 @@
 ### alterar a RAM para 256 (ou acima caso tenha RAM livre no plano) e no arquivo .env onde tem            ###
 ### AUTO_DOWNLOAD_LAVALINK_SERVERLIST mude de false para true.                                            ###
 ###                                                                                                       ###
-### Caso queira, você pode alterar o DISPLAY_NAME e link do AVATAR.                                               ###
+### Caso queira, você pode alterar o DISPLAY_NAME e link do AVATAR.                                       ###
 #############################################################################################################
 
 DISPLAY_NAME=Disnake LL Music Bot
