@@ -92,6 +92,11 @@ class Misc(commands.Cog):
         if not guild.system_channel or not guild.system_channel.permissions_for(guild.me).send_messages:
             return
 
+        if self.bot.config["GLOBAL_PREFIX"]:
+            components = [disnake.ui.Button(custom_id="bot_invite", label="Bot invites")] if [b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public] else None
+        else:
+            components = None
+
         embed = disnake.Embed(
             description="Olá! Para ver todos os meus comandos use **/**\n\n",
             color=self.bot.get_color(guild.me)
@@ -114,10 +119,13 @@ class Misc(commands.Cog):
 
             if interaction_invites:
                 embed.description += f"Se os comandos de barra (/) não aparecerem, você terá que integrar um dos " \
-                                     f"seguintes bots no servidor: {interaction_invites}"
+                                     f"seguintes bots no servidor: {interaction_invites}\n\n"
+
+        if components:
+            embed.description += "Precisa de mais bots de música? Clique no botão abaixo para adicionar meus bots extras."
 
         try:
-            await guild.system_channel.send(embed=embed)
+            await guild.system_channel.send(embed=embed, components=components)
         except:
             traceback.print_exc()
 
