@@ -351,8 +351,11 @@ class BotPool:
             load_bot(bot_name, v)
 
         if not self.bots:
-            raise Exception("O token do bot não foi configurado devidamente!\n"
-                            "Confira se o token foi configurado na na ENV/ENVIROMENT/SECRETS ou no arquivo .env")
+            os.system('cls' if os.name == 'nt' else 'clear')
+            raise Exception(
+                "O token do bot não foi configurado devidamente!\n"
+                "Confira se o token foi configurado na ENV/ENVIROMENT/SECRETS ou no arquivo .env"
+            )
 
         if start_local:
             run_lavalink(
