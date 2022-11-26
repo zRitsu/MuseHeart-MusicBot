@@ -351,7 +351,8 @@ class BotPool:
             load_bot(bot_name, v)
 
         if not self.bots:
-            raise Exception("O token do bot não foi configurado devidamente!")
+            raise Exception("O token do bot não foi configurado devidamente!\n"
+                            "Confira se o token foi configurado na na ENV/ENVIROMENT/SECRETS ou no arquivo .env")
 
         if start_local:
             run_lavalink(
@@ -520,7 +521,10 @@ class BotCore(commands.Bot):
 
             if not (await self.is_owner(message.author)):
 
-                prefix = (await self.get_prefix(message))[-1]
+                prefix = (await self.get_prefix(message))
+
+                if not isinstance(prefix, str):
+                    prefix = prefix[-1]
 
                 embed.description = f"**Olá {message.author.mention}.\n" \
                                     f"Para ver todos os meus comandos use: /**"
