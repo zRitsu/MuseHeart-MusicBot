@@ -157,3 +157,4 @@ application.yml
 /playlist_cache.json
 .local/
 .player_sessions/
+.jabba/
