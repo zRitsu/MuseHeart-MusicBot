@@ -24,6 +24,20 @@ from config_loader import DEFAULT_CONFIG
 os_quote = "\"" if os.name == "nt" else "'"
 git_format = f"--pretty=format:{os_quote}%H*****%h*****%s*****%ct{os_quote}"
 
+extra_files = [
+    "./playlist_cache.json",
+]
+
+additional_files = [
+    "./lavalink.ini",
+    "./application.yml",
+]
+
+extra_dirs = [
+    "local_dbs",
+    ".player_sessions"
+]
+
 
 def format_git_log(data_list: list):
     data = []
@@ -653,15 +667,23 @@ class Owner(commands.Cog):
                 SECRETS[i] = str(SECRETS[i]).lower()
             dotenv.set_key("./.env-temp", i, SECRETS[i])
 
-        if flags.endswith(("--externalservers", "-externalservers", "--llservers", "-llservers", "--lls", "-lls")):
+        if any(f in flags.lower() for f in ("--externalservers", "-externalservers", "--llservers", "-llservers", "--lls", "-lls")):
             await self.download_lavalink_serverlist()
 
         filelist = await run_command("git ls-files --others --exclude-standard --cached")
 
-        try:
-            os.remove("./source.zip")
-        except:
-            pass
+        if any(f in flags.lower() for f in ("--extradirs", "-extradirs", "--ed", "-ed", "--extrafiles", "-extrafiles", "--ef", "-ef")):
+            for extra_dir in extra_dirs:
+                for dir_path, dir_names, filenames in os.walk(extra_dir):
+                    filelist += "\n" + "\n".join(os.path.join(dir_path, file) for file in filenames)
+
+            for file in extra_files:
+                if os.path.isfile(file):
+                    filelist += "\n" + file
+
+        for file in additional_files:
+            if os.path.isfile(file):
+                filelist += "\n" + file
 
         await self.bot.loop.run_in_executor(None, self.zip_dir, filelist.split("\n"))
 
