@@ -1,5 +1,14 @@
-DISPLAY_NAME=Disnake LL Music
-DESCRIPTION=Source de música criada por: xRitsu [184889853102653440]
+#############################################################################################################
+### Atenção: A RAM você pode alterar de acordo com o plano contratado (ou quantidade desejada).           ###
+### Caso use o free (ou qualquer plano que tenha vCPU abaixo de 1.0 e ram abaixo de 512mb) você terá que  ###
+### alterar a RAM para 256 (ou acima caso tenha RAM livre no plano) e no arquivo .env onde tem            ###
+### AUTO_DOWNLOAD_LAVALINK_SERVERLIST mude de false para true.                                            ###
+###                                                                                                       ###
+### Caso queira, você pode alterar o DISPLAY_NAME e link do AVATAR.                                               ###
+#############################################################################################################
+
+DISPLAY_NAME=Disnake LL Music Bot
+DESCRIPTION=Source de música criada por [`xRitsu [184889853102653440]`](https://github.com/zRitsu/disnake-LL-music-bot)
 MAIN=main.py
 MEMORY=2048
 VERSION=recommended

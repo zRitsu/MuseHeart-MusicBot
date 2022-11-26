@@ -112,7 +112,7 @@ def load(player: LavalinkPlayer) -> dict:
 
     txt += duration
 
-    if len(player.queue) and player.mini_queue_enabled:
+    if qlenght and player.mini_queue_enabled:
 
         queue_txt = "\n".join(
             f"`{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, queue_text_size)}`]({t.uri})"
