@@ -106,7 +106,7 @@ class BotPool:
 
         while True:
 
-            await asyncio.sleep(180)
+            await asyncio.sleep(self.config["MONGO_CACHE_CLEANUP_INTERVAL"])
 
             try:
                 self.database.data_cache.clear()

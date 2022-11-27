@@ -33,6 +33,7 @@ DEFAULT_CONFIG = {
     ### Database ###
     ################
     "MONGO": "",
+    "MONGO_CACHE_CLEANUP_INTERVAL": 300,
 
     #########################
     ### Sistema de música ###
@@ -143,7 +144,8 @@ def load_config():
         "USER_FAV_MAX_URL_LENGTH",
         "PRESENCE_INTERVAL",
         "HINT_RATE",
-        "INVITE_PERMISSIONS"
+        "INVITE_PERMISSIONS",
+        "MONGO_CACHE_CLEANUP_INTERVAL",
     ]:
         try:
             CONFIG[i] = int(CONFIG[i])
@@ -195,6 +197,9 @@ def load_config():
 
     if CONFIG["PRESENCE_INTERVAL"] < 300:
         CONFIG["PRESENCE_INTERVAL"] = 300
+
+    if CONFIG["MONGO_CACHE_CLEANUP_INTERVAL"] < 30:
+        CONFIG["MONGO_CACHE_CLEANUP_INTERVAL"] = 30
 
     if CONFIG["IDLE_TIMEOUT"] < 30:
         CONFIG["IDLE_TIMEOUT"] = 30
