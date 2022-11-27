@@ -67,7 +67,6 @@ async def guild_prefix(bot: BotCore, message: disnake.Message):
         prefix = data.get("prefix") or bot.default_prefix
 
     return prefix
-    #return commands.when_mentioned_or(*(prefix, ))(bot, message)
 
 
 class BaseDB:
@@ -162,6 +161,7 @@ class MongoDatabase(BaseDB):
     def __init__(self, token: str):
         super().__init__()
         self._connect = AsyncIOMotorClient(token, connectTimeoutMS=30000)
+        self.data_cache = {}
 
     async def push_data(self, data, *, db_name: Union[DBModel.guilds, DBModel.users], collection: str):
         await self._connect[collection][db_name].insert_one(data)
@@ -200,21 +200,39 @@ class MongoDatabase(BaseDB):
 
         id_ = str(id_)
 
+        try:
+            self.data_cache[collection]
+        except KeyError:
+            self.data_cache[collection] = {
+                "users": {},
+                "guilds": {}
+            }
+
+        try:
+            return dict(self.data_cache[collection][db_name][id_])
+        except:
+            pass
+
         data = await self._connect[collection][db_name].find_one({"_id": id_})
 
         if not data:
-            return dict(default_model[db_name])
+            data = dict(default_model[db_name])
+            self.data_cache[collection][db_name][id_] = data
+            return data
 
         elif data["ver"] < default_model[db_name]["ver"]:
             data = update_values(dict(default_model[db_name]), data)
             data["ver"] = default_model[db_name]["ver"]
 
             await self.update_data(id_, data, db_name=db_name, collection=collection)
+            self.data_cache[collection][db_name][id_] = data
 
         return data
 
     async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users],
-                          collection: str, default_model: dict = None):
+                          collection: str):
+
+        self.data_cache[collection][db_name][id_] = data
         return await self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data}, upsert=True)
 
 

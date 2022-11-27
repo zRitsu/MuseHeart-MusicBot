@@ -41,6 +41,7 @@ class BotPool:
         self.remote_git_url = ""
         self.max_counter: int = 0
         self.message_ids: set = set()
+        self.db_cache_cleanup_task = None
 
     async def start_bot(self, bot: BotCore):
         try:
@@ -100,6 +101,19 @@ class BotPool:
             return
 
         await self.spotify.authorize()
+
+    async def db_cache_cleanup(self):
+
+        while True:
+
+            await asyncio.sleep(180)
+
+            try:
+                self.database.data_cache.clear()
+            except AttributeError:
+                return
+            except:
+                continue
 
     async def connect_rpc_ws(self):
 
@@ -368,6 +382,7 @@ class BotPool:
         loop = asyncio.get_event_loop()
 
         self.database.start_task(loop)
+        self.db_cache_cleanup_task = loop.create_task(self.db_cache_cleanup())
 
         if self.config["RUN_RPC_SERVER"]:
 
