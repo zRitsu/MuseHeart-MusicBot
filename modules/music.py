@@ -556,7 +556,7 @@ class Music(commands.Cog):
 
         can_send_message(channel, bot.user)
 
-        if not check_channel_limit(guild.me, inter.author.voice.channel):
+        if not guild.voice_client and not check_channel_limit(guild.me, inter.author.voice.channel):
             raise GenericError(f"**O canal {inter.author.voice.channel.mention} está lotado!**")
 
         msg = None
