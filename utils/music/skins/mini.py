@@ -44,7 +44,7 @@ def load(player: LavalinkPlayer) -> dict:
 
     embed.description += f" `[`<@{player.current.requester}>`]`"
 
-    duration = "`🔴 Livestream`" if player.current.is_stream else \
+    duration = "🔴 Livestream" if player.current.is_stream else \
         time_format(player.current.duration)
 
     embed.add_field(name="⏰ **⠂Duração:**", value=f"```ansi\n[34;1m{duration}[0m\n```")
