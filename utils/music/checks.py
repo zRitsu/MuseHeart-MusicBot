@@ -448,7 +448,7 @@ def can_connect(
         if not perms.speak:
             raise GenericError(f"**Não tenho permissão para falar no canal {channel.mention}**")
 
-        if not guild.voice_client and channel.user_limit and (guild.me.id not in channel.voice_states and (channel.user_limit - len(channel.voice_states)) < 1):
+        if not guild.voice_client and (channel.user_limit and not guild.me.guild_permissions.move_members and (guild.me.id not in channel.voice_states and (channel.user_limit - len(channel.voice_states)) < 1)):
             raise GenericError(f"**O canal {channel.mention} está lotado!**")
 
     if check_other_bots_in_vc and any(m for m in channel.members if m.bot and m.id != guild.me.id):
