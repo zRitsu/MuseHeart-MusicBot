@@ -1,6 +1,5 @@
 import datetime
 import json
-import pprint
 import aiofiles
 import aiohttp
 import disnake
@@ -18,7 +17,7 @@ from utils.music.errors import GenericError, MissingVoicePerms, NoVoice
 from utils.music.spotify import process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, \
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen, check_pool_bots, \
-    ensure_bot_instance
+    ensure_bot_instance, check_channel_limit
 from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialPlaylist
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, google_search, percentage
@@ -557,10 +556,8 @@ class Music(commands.Cog):
 
         can_send_message(channel, bot.user)
 
-        if not guild.me.guild.voice_client and inter.author.voice.channel.user_limit and (
-                    guild.me.id not in inter.author.voice.channel.voice_states and
-                    ((inter.author.voice.channel.user_limit - len(inter.author.voice.channel.voice_states)) < 1)):
-                raise GenericError(f"**O canal {inter.author.voice.channel.mention} está lotado!**")
+        if not check_channel_limit(guild.me, inter.author.voice.channel):
+            raise GenericError(f"**O canal {inter.author.voice.channel.mention} está lotado!**")
 
         msg = None
 

@@ -429,6 +429,20 @@ async def has_perm(inter):
             color=player.bot.get_color(guild.me)), delete_after=10)
         return True
 
+def check_channel_limit(member: disnake.Member, channel: Union[disnake.VoiceChannel, disnake.StageChannel]):
+
+    if not channel.user_limit:
+        return True
+
+    if member.guild_permissions.move_members:
+        return True
+
+    if member.id in channel.voice_states:
+        return True
+
+    if (channel.user_limit - len(channel.voice_states)) > 0:
+        return True
+
 
 def can_connect(
         channel: Union[disnake.VoiceChannel, disnake.StageChannel],
@@ -448,7 +462,7 @@ def can_connect(
         if not perms.speak:
             raise GenericError(f"**Não tenho permissão para falar no canal {channel.mention}**")
 
-        if not guild.voice_client and (channel.user_limit and not guild.me.guild_permissions.move_members and (guild.me.id not in channel.voice_states and (channel.user_limit - len(channel.voice_states)) < 1)):
+        if not guild.voice_client and not check_channel_limit(guild.me, channel):
             raise GenericError(f"**O canal {channel.mention} está lotado!**")
 
     if check_other_bots_in_vc and any(m for m in channel.members if m.bot and m.id != guild.me.id):
