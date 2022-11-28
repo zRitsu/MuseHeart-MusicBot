@@ -163,7 +163,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
             data = {"op": "close", "bot_id": self.bot_ids}
 
-            for w in users_ws:
+            for w in users_ws.values():
                 try:
                     w.write_message(data)
                 except Exception as e:
