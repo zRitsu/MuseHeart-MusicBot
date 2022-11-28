@@ -6,7 +6,7 @@ from utils.music.models import PartialTrack
 
 extractors = list_extractors()
 
-exclude_extractors = ["youtube", "soundcloud", "deezer", "applemusic"]
+exclude_extractors = ["youtube", "soundcloud", "deezer", "applemusic", "twitch"]
 
 YTDL_OPTS = {
     'format': 'bestaudio/best',
