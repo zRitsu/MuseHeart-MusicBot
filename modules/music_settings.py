@@ -5,7 +5,7 @@ import traceback
 import disnake
 import humanize
 from disnake.ext import commands
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Union, Optional
 from utils.db import DBModel
 from utils.music.checks import user_cooldown, ensure_bot_instance
 from utils.music.errors import GenericError
@@ -21,6 +21,56 @@ other_bots_vc_opts = commands.option_enum(
         "Desativar": "disable",
     }
 )
+
+
+class SkinSelector(disnake.ui.View):
+
+    def __init__(self, ctx: Union[disnake.AppCmdInter, CustomContext], select_opts: list, static_select_opts: list):
+        super().__init__(timeout=60)
+        self.ctx = ctx
+        self.interaction: Optional[disnake.MessageInteraction] = None
+        self.skin_selected = "default"
+        self.static_skin_selected = "default"
+
+        select_opts = disnake.ui.Select(options=select_opts, min_values=1, max_values=1)
+        select_opts.callback = self.skin_callback
+        self.add_item(select_opts)
+
+        static_select_opts = disnake.ui.Select(options=static_select_opts, min_values=1, max_values=1)
+        static_select_opts.callback = self.static_skin_callback
+        self.add_item(static_select_opts)
+
+        confirm_button = disnake.ui.Button(label="Salvar Alterações", emoji="💾")
+        confirm_button.callback = self.confirm_callback
+        self.add_item(confirm_button)
+
+        cancel_button = disnake.ui.Button(label="Cancelar", emoji="❌")
+        cancel_button.callback = self.stop_callback
+        self.add_item(cancel_button)
+
+    async def interaction_check(self, inter: disnake.MessageInteraction) -> bool:
+
+        if inter.author.id == self.ctx.author.id:
+            return True
+
+        await inter.send(f"Apenas {self.ctx.author.mention} pode interagir aqui!", ephemeral=True)
+
+    async def skin_callback(self, inter: disnake.MessageInteraction):
+        self.skin_selected = inter.data.values[0]
+        await inter.response.defer()
+
+    async def static_skin_callback(self, inter: disnake.MessageInteraction):
+        self.static_skin_selected = inter.data.values[0]
+        await inter.response.defer()
+
+    async def confirm_callback(self, inter: disnake.MessageInteraction):
+        self.interaction = inter
+        self.stop()
+
+    async def stop_callback(self, inter: disnake.MessageInteraction):
+        self.interaction = inter
+        self.skin_selected = None
+        self.stop()
 
 
 class MusicSettings(commands.Cog):
@@ -663,11 +713,7 @@ class MusicSettings(commands.Cog):
         description=f"{desc_prefix}Alterar aparência/skin do player.",
         default_member_permissions=disnake.Permissions(manage_guild=True)
     )
-    async def change_skin(
-        self,
-        inter: disnake.AppCmdInter,
-        skin: str = commands.Param(description="escolha uma skin", default=None)
-    ):
+    async def change_skin(self, inter: disnake.AppCmdInter):
 
         bot = await select_bot_pool(inter)
 
@@ -675,12 +721,7 @@ class MusicSettings(commands.Cog):
             return
 
         skin_list = [s for s in bot.player_skins if s not in bot.config["IGNORE_SKINS"].split()]
-
-        if not skin_list:
-            if await bot.is_owner(inter.author) and skin in bot.player_skins:
-                pass
-            else:
-                raise GenericError("**Não há skins na lista com o nome especificado...**")
+        static_skin_list = [s for s in bot.player_static_skins if s not in bot.config["IGNORE_STATIC_SKINS"].split()]
 
         await inter.response.defer(ephemeral=True)
 
@@ -689,60 +730,57 @@ class MusicSettings(commands.Cog):
         guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
 
         selected = guild_data["player_controller"]["skin"] or bot.default_skin
+        static_selected = guild_data["player_controller"]["static_skin"] or bot.default_static_skin
 
-        msg = None
+        skins_opts = [disnake.SelectOption(emoji="🎨", label=f"Modo normal: {s}", value=s, default=selected == s) for s in skin_list]
+        static_skins_opts = [disnake.SelectOption(emoji="🎨", label=f"Song-Request: {s}", value=s, default=static_selected == s) for s in static_skin_list]
 
-        if not skin:
+        select_view = SkinSelector(inter, skins_opts, static_skins_opts)
+        select_view.skin_selected = selected
+        select_view.static_skin_selected = static_selected
 
-            skins_opts = [disnake.SelectOption(emoji="🎨", label=s, default=selected == s) for s in skin_list]
+        try:
+            func = inter.edit_original_message
+        except AttributeError:
+            func = inter.send
 
-            try:
-                func = inter.edit_original_message
-            except AttributeError:
-                func = inter.send
+        msg = await func(
+            embed=disnake.Embed(
+                description="**Selecione uma skin abaixo:**",
+                colour=bot.get_color(guild.me)
+            ),
+            view=select_view
+        )
 
-            try:
-                id_ = f"_{inter.id}"
-            except AttributeError:
-                id_ = ""
+        await select_view.wait()
 
-            msg = await func(
-                embed=disnake.Embed(
-                    description="**Selecione uma skin abaixo:**",
-                    colour=bot.get_color(guild.me)
-                ),
-                components=[disnake.ui.Select(custom_id=f"skin_select{id_}", options=skins_opts)]
+        if select_view.skin_selected is None:
+            await select_view.interaction.response.edit_message(
+                view=None,
+                embed=disnake.Embed(description="**Solicitação cancelada.**", colour=bot.get_color(guild.me))
             )
+            return
 
-            if hasattr(inter, "id"):
-                check = (lambda i: i.data.custom_id == f"skin_select_{inter.id}")
-            else:
-                check = (lambda i: i.message.id == msg.id and i.author.id == inter.author.id)
-
+        if not select_view.interaction:
             try:
-                resp = await self.bot.wait_for(
-                    "dropdown",
-                    check=check,
-                    timeout=35
-                )
-            except asyncio.TimeoutError:
-                try:
-                    msg = await inter.original_message()
-                except AttributeError:
-                    pass
-                await msg.edit(view=None, embed=disnake.Embed(description="**Tempo esgotado!**", colour=bot.get_color(guild.me)))
-                return
-            else:
-                inter = resp
-                skin = resp.data.values[0]
+                msg = await inter.original_message()
+            except AttributeError:
+                pass
+            await msg.edit(view=None, embed=disnake.Embed(description="**Tempo esgotado!**", colour=bot.get_color(guild.me)))
+            return
 
-        guild_data["player_controller"]["skin"] = skin
+        inter = select_view.interaction
+
+        guild_data["player_controller"]["skin"] = select_view.skin_selected
+        guild_data["player_controller"]["static_skin"] = select_view.static_skin_selected
 
         await bot.update_data(inter.guild_id, guild_data, db_name=DBModel.guilds)
 
         kwargs = {
             "embed": disnake.Embed(
-                description=f"**A skin do player do servidor foi alterado com sucesso para:** `{skin}`",
+                description=f"**A skin do player do servidor foi alterado com sucesso.**\n"
+                            f"Modo normal: `{select_view.skin_selected}`\n"
+                            f"Modo fixo (song-request): `{select_view.static_skin_selected}`",
                 color=bot.get_color(guild.me)
             ).set_footer(text=f"{bot.user} - [{bot.user.id}]", icon_url=bot.user.display_avatar.with_format("png").url)
         }
@@ -761,18 +799,16 @@ class MusicSettings(commands.Cog):
         else:
             if not player.static:
                 await player.destroy_message()
-            player.skin = skin
+            player.skin = select_view.skin_selected
+            player.skin_static = select_view.static_skin_selected
             player.mini_queue_feature = False
             player.auto_update = 0 # linha temporária para resolver possíveis problemas com skins custom criadas por usuarios antes desse commit.
             player.controller_mode = True
-            player.set_command_log(text=f"{inter.author.mention} alterou a skin do player para: **{skin}**", emoji="🎨")
+            player.set_command_log(text=f"{inter.author.mention} alterou a skin do player para: "
+                                        f"**{select_view.skin_selected} / {select_view.static_skin_selected}**",
+                                   emoji="🎨")
             player.process_hint()
             await player.invoke_np(force=True)
-
-    @change_skin.autocomplete("skin")
-    async def change_skin_autocomplete(self, inter: disnake.Interaction, current: str):
-
-        return [s for s in self.bot.player_skins if s not in self.bot.config["IGNORE_SKINS"].split()]
 
     @ensure_bot_instance()
     @commands.cooldown(1, 5, commands.BucketType.user)

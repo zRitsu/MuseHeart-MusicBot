@@ -266,6 +266,7 @@ class LavalinkPlayer(wavelink.Player):
         self.message: Optional[disnake.Message] = kwargs.pop('message', None)
         self.static: bool = kwargs.pop('static', False)
         self.skin: str = kwargs.pop("skin", None) or self.bot.default_skin
+        self.skin_static: str = kwargs.pop("skin_static", None) or self.bot.default_static_skin
         self.queue: deque = deque()
         self.played: deque = deque(maxlen=20)
         self.nightcore: bool = False
@@ -622,7 +623,7 @@ class LavalinkPlayer(wavelink.Player):
         if rpc_update:
             self.bot.loop.create_task(self.process_rpc())
 
-        data = self.bot.player_skins[self.skin](self)
+        data = (self.bot.player_static_skins[self.skin_static] if self.static else self.bot.player_skins[self.skin])(self)
 
         self.updating = True
 

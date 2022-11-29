@@ -808,7 +808,8 @@ class Music(commands.Cog):
                 last_message_id=guild_data['player_controller']['message_id'],
                 node_id=node.identifier,
                 static=bool(static_player['channel']),
-                skin=bot.check_skin(guild_data["player_controller"]["skin"])
+                skin=bot.check_skin(guild_data["player_controller"]["skin"]),
+                skin_static=bot.check_static_skin(guild_data["player_controller"]["static_skin"])
             )
 
             if static_player['channel']:

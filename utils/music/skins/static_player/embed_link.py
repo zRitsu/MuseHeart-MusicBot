@@ -2,8 +2,8 @@ import datetime
 import itertools
 import re
 import disnake
-from ..models import LavalinkPlayer
-from ..converters import time_format, fix_characters
+from utils.music.models import LavalinkPlayer
+from utils.music.converters import time_format, fix_characters
 
 
 def load(player: LavalinkPlayer) -> dict:
@@ -26,30 +26,24 @@ def load(player: LavalinkPlayer) -> dict:
         if not player.current.is_stream:
             txt += f" `[`<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`"
 
-    if not player.static:
+    txt += f"\n> ✋ **⠂Pedido por:** <@{player.current.requester}>\n"
 
-        txt += f" <@{player.current.requester}>\n"
+    if player.current.playlist_name:
+        txt += f"> 📑 **⠂Playlist:** `{fix_characters(player.current.playlist_name)}`\n"
 
-    else:
+    try:
+        txt += f"> *️⃣ **⠂Canal de voz:** {player.guild.me.voice.channel.mention}\n"
+    except AttributeError:
+        pass
 
-        txt += f"\n> ✋ **⠂Pedido por:** <@{player.current.requester}>\n"
+    if player.current.track_loops:
+        txt += f"> 🔂 **⠂Repetições restantes:** `{player.current.track_loops}`\n"
 
-        if player.current.playlist_name:
-            txt += f"> 📑 **⠂Playlist:** `{fix_characters(player.current.playlist_name)}`\n"
-
-        try:
-            txt += f"> *️⃣ **⠂Canal de voz:** {player.guild.me.voice.channel.mention}\n"
-        except AttributeError:
-            pass
-
-        if player.current.track_loops:
-            txt += f"> 🔂 **⠂Repetições restantes:** `{player.current.track_loops}`\n"
-
-        elif player.loop:
-            if player.loop == 'current':
-                txt += '> 🔂 **⠂Repetição:** `música atual`\n'
-            else:
-                txt += '> 🔁 **⠂Repetição:** `fila`\n'
+    elif player.loop:
+        if player.loop == 'current':
+            txt += '> 🔂 **⠂Repetição:** `música atual`\n'
+        else:
+            txt += '> 🔁 **⠂Repetição:** `fila`\n'
 
     if player.command_log:
 

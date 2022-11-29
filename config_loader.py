@@ -41,6 +41,8 @@ DEFAULT_CONFIG = {
     "AUTO_DOWNLOAD_LAVALINK_SERVERLIST": False,
     "LAVALINK_SERVER_LIST": "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/lavalink.ini",
     "DEFAULT_SKIN": "default",
+    "DEFAULT_STATIC_SKIN": "default",
+    "DEFAULT_IDLING_SKIN": "default",
     "VOTE_SKIP_AMOUNT": 3,
     "IDLE_TIMEOUT": 180,
     "RUN_RPC_SERVER": True,
@@ -50,6 +52,7 @@ DEFAULT_CONFIG = {
     "USER_FAV_MAX_URL_LENGTH": 90,
     "HINT_RATE": 4,
     "IGNORE_SKINS": '',
+    "IGNORE_STATIC_SKINS": '',
     "GUILD_DEAFEN_WARN": True,
 
     ##############################################

@@ -3,7 +3,7 @@ from io import BytesIO
 import json
 import disnake
 from disnake.ext import commands
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 from utils.music.converters import URL_REG
 from utils.music.errors import GenericError
 from utils.music.models import LavalinkPlayer

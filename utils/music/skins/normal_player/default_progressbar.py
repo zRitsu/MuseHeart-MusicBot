@@ -1,9 +1,9 @@
 import datetime
-from ..models import LavalinkPlayer
+from utils.music.models import LavalinkPlayer
 import disnake
-from ..converters import fix_characters, time_format
+from utils.music.converters import fix_characters, time_format
 import itertools
-from ...others import ProgressBar
+from utils.others import ProgressBar
 
 
 def load(player: LavalinkPlayer) -> dict:
@@ -39,33 +39,14 @@ def load(player: LavalinkPlayer) -> dict:
         progress = ProgressBar(
             player.position,
             player.current.duration,
-            bar_count=8 if not player.static else 17
+            bar_count=8
         )
 
         duration = f"```ansi\n[34;1m[{time_format(player.position)}] {('='*progress.start)}[0m🔴️[36;1m{'-'*progress.end} " \
                    f"[{time_format(player.current.duration)}][0m```\n"
 
     vc_txt = ""
-
-    if player.static:
-        queue_size = 20
-        queue_text_size = 33
-        queue_img = ""
-        playlist_text_size = 20
-        player.mini_queue_feature = False
-        player.mini_queue_enabled = True
-
-        try:
-            vc_txt = f"\n> *️⃣ **⠂Canal de voz:** [`{player.guild.me.voice.channel.name}`](http://discordapp.com/channels/{player.guild.id}/{player.guild.me.voice.channel.id})"
-        except AttributeError:
-            pass
-
-    else:
-        queue_size = 3
-        queue_text_size = 30
-        queue_img = "https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif"
-        playlist_text_size = 13
-        player.mini_queue_feature = True
+    player.mini_queue_feature = True
 
     txt = f"[`{player.current.single_title}`]({player.current.uri})\n\n" \
           f"> 💠 **⠂Por:** {player.current.authors_md}\n" \
@@ -88,10 +69,10 @@ def load(player: LavalinkPlayer) -> dict:
         txt += f"\n> 🇳 **⠂Efeito nightcore:** `ativado`"
 
     if player.current.album_name:
-        txt += f"\n> 💽 **⠂Álbum:** [`{fix_characters(player.current.album_name, limit=playlist_text_size)}`]({player.current.album_url})"
+        txt += f"\n> 💽 **⠂Álbum:** [`{fix_characters(player.current.album_name, limit=13)}`]({player.current.album_url})"
 
     if player.current.playlist_name:
-        txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=playlist_text_size)}`]({player.current.playlist_url})"
+        txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=13)}`]({player.current.playlist_url})"
 
     if (qlenght:=len(player.queue)) and not player.mini_queue_enabled:
         txt += f"\n> 🎶 **⠂Músicas na fila:** `{qlenght}`"
@@ -115,8 +96,8 @@ def load(player: LavalinkPlayer) -> dict:
     if qlenght and player.mini_queue_enabled:
 
         queue_txt = "\n".join(
-            f"`{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, queue_text_size)}`]({t.uri})"
-            for n, t in (enumerate(itertools.islice(player.queue, queue_size)))
+            f"`{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 30)}`]({t.uri})"
+            for n, t in (enumerate(itertools.islice(player.queue, 3)))
         )
 
         embed_queue = disnake.Embed(title=f"Músicas na fila: {qlenght}", color=player.bot.get_color(player.guild.me),
@@ -132,20 +113,14 @@ def load(player: LavalinkPlayer) -> dict:
 
             embed_queue.description += f"\n`[⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + (player.current.duration if not player.current.is_stream else 0)) - player.position)).timestamp())}:R> `⌛]`"
 
-        embed_queue.set_image(url=queue_img)
+        embed_queue.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif")
 
     embed.description = txt
-
-    if player.static:
-        embed.set_image(url=player.current.thumb)
-    else:
-        embed.set_image(
-            url="https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif")
-        embed.set_thumbnail(url=player.current.thumb)
+    embed.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif")
+    embed.set_thumbnail(url=player.current.thumb)
 
     data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
 
-    if not player.auto_update:
-        player.auto_update = 15 # tempo em segundos para atualizar
+    player.auto_update = 15 # tempo em segundos para atualizar
 
     return data

@@ -1,7 +1,7 @@
 import datetime
-from ..models import LavalinkPlayer
+from utils.music.models import LavalinkPlayer
 import disnake
-from ..converters import fix_characters, time_format
+from utils.music.converters import fix_characters, time_format
 import itertools
 
 
@@ -36,25 +36,14 @@ def load(player: LavalinkPlayer) -> dict:
             icon_url="https://cdn.discordapp.com/attachments/480195401543188483/907119505971486810/speaker-loud-speaker.gif"
         )
 
-    if player.static:
-        queue_size = 20
-        queue_text_size = 33
-        queue_img = ""
-        playlist_text_size = 20
-        player.mini_queue_feature = False
-        player.mini_queue_enabled = True
+    queue_img = ""
+    player.mini_queue_feature = False
+    player.mini_queue_enabled = True
 
-        try:
-            vc_txt = f"\n> *️⃣ **⠂Canal de voz:** [`{player.guild.me.voice.channel.name}`](http://discordapp.com/channels/{player.guild.id}/{player.guild.me.voice.channel.id})"
-        except AttributeError:
-            pass
-
-    else:
-        queue_size = 3
-        queue_text_size = 31
-        queue_img = "https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif"
-        playlist_text_size = 13
-        player.mini_queue_feature = True
+    try:
+        vc_txt = f"\n> *️⃣ **⠂Canal de voz:** [`{player.guild.me.voice.channel.name}`](http://discordapp.com/channels/{player.guild.id}/{player.guild.me.voice.channel.id})"
+    except AttributeError:
+        pass
 
     duration = "> 🔴 **⠂Duração:** `Livestream`" if player.current.is_stream else \
         f"> ⏰ **⠂Duração:** `{time_format(player.current.duration)} [`" + \
@@ -80,10 +69,10 @@ def load(player: LavalinkPlayer) -> dict:
         txt += f"\n> 🇳 **⠂Efeito nightcore:** `ativado`"
 
     if player.current.album_name:
-        txt += f"\n> 💽 **⠂Álbum:** [`{fix_characters(player.current.album_name, limit=playlist_text_size)}`]({player.current.album_url})"
+        txt += f"\n> 💽 **⠂Álbum:** [`{fix_characters(player.current.album_name, limit=20)}`]({player.current.album_url})"
 
     if player.current.playlist_name:
-        txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=playlist_text_size)}`]({player.current.playlist_url})"
+        txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=20)}`]({player.current.playlist_url})"
 
     if (qlenght:=len(player.queue)) and not player.mini_queue_enabled:
         txt += f"\n> 🎶 **⠂Músicas na fila:** `{qlenght}`"
@@ -102,8 +91,8 @@ def load(player: LavalinkPlayer) -> dict:
     if len(player.queue) and player.mini_queue_enabled:
 
         queue_txt = "\n".join(
-            f"`{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, queue_text_size)}`]({t.uri})"
-            for n, t in (enumerate(itertools.islice(player.queue, queue_size)))
+            f"`{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 33)}`]({t.uri})"
+            for n, t in (enumerate(itertools.islice(player.queue, 20)))
         )
 
         embed_queue = disnake.Embed(title=f"Músicas na fila: {qlenght}", color=player.bot.get_color(player.guild.me),
@@ -123,15 +112,9 @@ def load(player: LavalinkPlayer) -> dict:
 
     embed.description = txt
 
-    if player.static:
-        embed.set_image(url=player.current.thumb or "https://media.discordapp.net/attachments/480195401543188483/987830071815471114/musicequalizer.gif")
-    else:
-        embed.set_image(
-            url="https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif")
-        embed.set_thumbnail(url=player.current.thumb)
+    embed.set_image(url=player.current.thumb or "https://media.discordapp.net/attachments/480195401543188483/987830071815471114/musicequalizer.gif")
 
-    if player.auto_update:
-        player.auto_update = 0
+    player.auto_update = 0
 
     data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
 

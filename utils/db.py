@@ -21,12 +21,13 @@ class DBModel:
 
 db_models = {
     DBModel.guilds: {
-        "ver": 1.6,
+        "ver": 1.7,
         "prefix": "",
         "player_controller": {
             "channel": None,
             "message_id": None,
             "skin": None,
+            "static_skin": None,
             "fav_links": {}
         },
         "check_other_bots_in_vc": False,
