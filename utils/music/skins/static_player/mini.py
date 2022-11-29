@@ -5,87 +5,98 @@ import disnake
 from utils.music.converters import time_format, fix_characters
 
 
-def load(player: LavalinkPlayer) -> dict:
+class MiniStaticSkin:
 
-    data = {
-        "content": None,
-        "embeds": [],
-    }
+    __slots__ = ("name", "preview")
 
-    embed_color = player.bot.get_color(player.guild.me)
+    def __init__(self):
+        self.name = "mini_static"
+        self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1047187413702807552/mini_static_skin.png"
 
-    embed = disnake.Embed(
-        color=embed_color,
-        description=f"[`{player.current.single_title}`]({player.current.uri})"
-    )
-    embed_queue = None
-    queue_size = len(player.queue)
+    def load(self, player: LavalinkPlayer) -> dict:
 
-    if not player.paused:
-        embed.set_author(
-            name="Tocando Agora:",
-            icon_url="https://media.discordapp.net/attachments/480195401543188483/987633257178882108/Equalizer.gif",
+        data = {
+            "content": None,
+            "embeds": [],
+        }
+
+        embed_color = player.bot.get_color(player.guild.me)
+
+        embed = disnake.Embed(
+            color=embed_color,
+            description=f"[`{player.current.single_title}`]({player.current.uri})"
         )
+        embed_queue = None
+        queue_size = len(player.queue)
 
-    else:
-        embed.set_author(
-            name="Em Pausa:",
-            icon_url="https://cdn.discordapp.com/attachments/480195401543188483/896013933197013002/pause.png"
-        )
+        if not player.paused:
+            embed.set_author(
+                name="Tocando Agora:",
+                icon_url="https://media.discordapp.net/attachments/480195401543188483/987633257178882108/Equalizer.gif",
+            )
 
-    if player.current.track_loops:
-        embed.description += f" `[🔂 {player.current.track_loops}]`"
-
-    elif player.loop:
-        if player.loop == 'current':
-            embed.description += ' `[🔂 música atual]`'
         else:
-            embed.description += ' `[🔁 fila]`'
+            embed.set_author(
+                name="Em Pausa:",
+                icon_url="https://cdn.discordapp.com/attachments/480195401543188483/896013933197013002/pause.png"
+            )
 
-    embed.description += f" `[`<@{player.current.requester}>`]`"
+        if player.current.track_loops:
+            embed.description += f" `[🔂 {player.current.track_loops}]`"
 
-    duration = "🔴 Livestream" if player.current.is_stream else \
-        time_format(player.current.duration)
+        elif player.loop:
+            if player.loop == 'current':
+                embed.description += ' `[🔂 música atual]`'
+            else:
+                embed.description += ' `[🔁 fila]`'
 
-    embed.add_field(name="⏰ **⠂Duração:**", value=f"```ansi\n[34;1m{duration}[0m\n```")
-    embed.add_field(name="💠 **⠂Uploader/Artista:**",
-                    value=f"```ansi\n[34;1m{fix_characters(player.current.author, 18)}[0m\n```")
+        embed.description += f" `[`<@{player.current.requester}>`]`"
 
-    if player.command_log:
-        embed.add_field(name=f"{player.command_log_emoji} **⠂Última Interação:**",
-                        value=f"{player.command_log}", inline=False)
+        duration = "🔴 Livestream" if player.current.is_stream else \
+            time_format(player.current.duration)
 
-    player.mini_queue_feature = False
-    player.mini_queue_enabled = True
+        embed.add_field(name="⏰ **⠂Duração:**", value=f"```ansi\n[34;1m{duration}[0m\n```")
+        embed.add_field(name="💠 **⠂Uploader/Artista:**",
+                        value=f"```ansi\n[34;1m{fix_characters(player.current.author, 18)}[0m\n```")
 
-    embed.set_image(url=player.current.thumb or "https://media.discordapp.net/attachments/480195401543188483/987830071815471114/musicequalizer.gif")
+        if player.command_log:
+            embed.add_field(name=f"{player.command_log_emoji} **⠂Última Interação:**",
+                            value=f"{player.command_log}", inline=False)
 
-    if queue_size:
+        player.mini_queue_feature = False
+        player.mini_queue_enabled = True
 
-        queue_txt = "\n".join(
-            f"`{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 28)}`]({t.uri})"
-            for n, t in (enumerate(itertools.islice(player.queue, 15)))
-        )
+        embed.set_image(url=player.current.thumb or "https://media.discordapp.net/attachments/480195401543188483/987830071815471114/musicequalizer.gif")
 
-        embed_queue = disnake.Embed(title=f"Músicas na fila: {len(player.queue)}",
-                                    color=player.bot.get_color(player.guild.me),
-                                    description=f"\n{queue_txt}")
+        if queue_size:
 
-        if not player.loop:
+            queue_txt = "\n".join(
+                f"`{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 28)}`]({t.uri})"
+                for n, t in (enumerate(itertools.islice(player.queue, 15)))
+            )
 
-            queue_duration = 0
+            embed_queue = disnake.Embed(title=f"Músicas na fila: {len(player.queue)}",
+                                        color=player.bot.get_color(player.guild.me),
+                                        description=f"\n{queue_txt}")
 
-            for t in player.queue:
-                if not t.is_stream:
-                    queue_duration += t.duration
+            if not player.loop:
 
-            embed_queue.description += f"\n`[⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + (player.current.duration if not player.current.is_stream else 0)) - player.position)).timestamp())}:R> `⌛]`"
+                queue_duration = 0
 
-    if player.current_hint:
-        embed.set_footer(text=f"💡 Dica: {player.current_hint}")
+                for t in player.queue:
+                    if not t.is_stream:
+                        queue_duration += t.duration
 
-    player.auto_update = 0
+                embed_queue.description += f"\n`[⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + (player.current.duration if not player.current.is_stream else 0)) - player.position)).timestamp())}:R> `⌛]`"
 
-    data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
+        if player.current_hint:
+            embed.set_footer(text=f"💡 Dica: {player.current_hint}")
 
-    return data
+        player.auto_update = 0
+
+        data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
+
+        return data
+
+def load():
+    return MiniStaticSkin()

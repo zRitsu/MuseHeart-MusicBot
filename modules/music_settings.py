@@ -747,11 +747,15 @@ class MusicSettings(commands.Cog):
             except AttributeError:
                 func = inter.send
 
+        embed = disnake.Embed(
+            description="**Selecione as skins disponíveis abaixo:**\n\n"
+                        "**Modo Normal:**\n\n" + "\n".join(f"`{s}` [`(visualizar)`]({bot.player_skins[s].preview})" for s in skin_list) + "\n\n" 
+                        "**Modo fixo (song-request):**\n\n" + "\n".join(f"`{s}` [`(visualizar)`]({bot.player_static_skins[s].preview})" for s in static_skin_list),
+            colour=bot.get_color(guild.me)
+        )
+
         msg = await func(
-            embed=disnake.Embed(
-                description="**Selecione uma skin abaixo:**",
-                colour=bot.get_color(guild.me)
-            ),
+            embed=embed,
             view=select_view
         )
 

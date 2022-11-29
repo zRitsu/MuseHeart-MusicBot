@@ -623,7 +623,7 @@ class LavalinkPlayer(wavelink.Player):
         if rpc_update:
             self.bot.loop.create_task(self.process_rpc())
 
-        data = (self.bot.player_static_skins[self.skin_static] if self.static else self.bot.player_skins[self.skin])(self)
+        data = (self.bot.player_static_skins[self.skin_static] if self.static else self.bot.player_skins[self.skin]).load(self)
 
         self.updating = True
 

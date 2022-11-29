@@ -6,121 +6,132 @@ import itertools
 from utils.others import ProgressBar
 
 
-def load(player: LavalinkPlayer) -> dict:
+class DefaultProgressbarSkin:
 
-    data = {
-        "content": None,
-        "embeds": []
-    }
+    __slots__ = ("name", "preview")
 
-    embed = disnake.Embed(color=player.bot.get_color(player.guild.me))
-    embed_queue = None
+    def __init__(self):
+        self.name = "default_progressbar"
+        self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1047184550230495272/skin_progressbar.png"
 
-    if not player.paused:
-        embed.set_author(
-            name="Tocando Agora:",
-            icon_url="https://cdn.discordapp.com/attachments/480195401543188483/895862881105616947/music_equalizer.gif"
-        )
-    else:
-        embed.set_author(
-            name="Em Pausa:",
-            icon_url="https://cdn.discordapp.com/attachments/480195401543188483/896013933197013002/pause.png"
-        )
+    def load(self, player: LavalinkPlayer) -> dict:
 
-    embed.set_footer(
-        text=str(player),
-        icon_url="https://cdn.discordapp.com/attachments/480195401543188483/907119505971486810/speaker-loud-speaker.gif"
-    )
+        data = {
+            "content": None,
+            "embeds": []
+        }
 
-    if player.current.is_stream:
-        duration = "```ansi\n🔴 [31;1m Livestream[0m```"
-    else:
+        embed = disnake.Embed(color=player.bot.get_color(player.guild.me))
+        embed_queue = None
 
-        progress = ProgressBar(
-            player.position,
-            player.current.duration,
-            bar_count=8
-        )
-
-        duration = f"```ansi\n[34;1m[{time_format(player.position)}] {('='*progress.start)}[0m🔴️[36;1m{'-'*progress.end} " \
-                   f"[{time_format(player.current.duration)}][0m```\n"
-
-    vc_txt = ""
-    player.mini_queue_feature = True
-
-    txt = f"[`{player.current.single_title}`]({player.current.uri})\n\n" \
-          f"> 💠 **⠂Por:** {player.current.authors_md}\n" \
-          f"> ✋ **⠂Pedido por:** <@{player.current.requester}>\n" \
-          f"> 🔊 **⠂Volume:** `{player.volume}%`"
-
-    if player.current.track_loops:
-        txt += f"\n> 🔂 **⠂Repetições restante:** `{player.current.track_loops}`"
-
-    if player.loop:
-        if player.loop == 'current':
-            e = '🔂'
-            m = 'Música atual'
+        if not player.paused:
+            embed.set_author(
+                name="Tocando Agora:",
+                icon_url="https://cdn.discordapp.com/attachments/480195401543188483/895862881105616947/music_equalizer.gif"
+            )
         else:
-            e = '🔁'
-            m = 'Fila'
-        txt += f"\n> {e} **⠂Modo de repetição:** `{m}`"
+            embed.set_author(
+                name="Em Pausa:",
+                icon_url="https://cdn.discordapp.com/attachments/480195401543188483/896013933197013002/pause.png"
+            )
 
-    if player.nightcore:
-        txt += f"\n> 🇳 **⠂Efeito nightcore:** `ativado`"
-
-    if player.current.album_name:
-        txt += f"\n> 💽 **⠂Álbum:** [`{fix_characters(player.current.album_name, limit=13)}`]({player.current.album_url})"
-
-    if player.current.playlist_name:
-        txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=13)}`]({player.current.playlist_url})"
-
-    if (qlenght:=len(player.queue)) and not player.mini_queue_enabled:
-        txt += f"\n> 🎶 **⠂Músicas na fila:** `{qlenght}`"
-
-    if player.keep_connected:
-        txt += "\n> ♾️ **⠂Modo 24/7:** `Ativado`"
-
-    elif player.restrict_mode:
-        txt += f"\n> 🔒 **⠂Modo restrito:** `Ativado`"
-
-    if player.ping:
-        txt += f"\n> 📶 **⠂Latência:** `{player.ping}ms`"
-
-    txt += f"{vc_txt}\n"
-
-    if player.command_log:
-        txt += f"> {player.command_log_emoji} **⠂Última Interação:** {player.command_log}\n"
-
-    txt += duration
-
-    if qlenght and player.mini_queue_enabled:
-
-        queue_txt = "\n".join(
-            f"`{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 30)}`]({t.uri})"
-            for n, t in (enumerate(itertools.islice(player.queue, 3)))
+        embed.set_footer(
+            text=str(player),
+            icon_url="https://cdn.discordapp.com/attachments/480195401543188483/907119505971486810/speaker-loud-speaker.gif"
         )
 
-        embed_queue = disnake.Embed(title=f"Músicas na fila: {qlenght}", color=player.bot.get_color(player.guild.me),
-                                    description=f"\n{queue_txt}")
+        if player.current.is_stream:
+            duration = "```ansi\n🔴 [31;1m Livestream[0m```"
+        else:
 
-        if not player.loop and not player.keep_connected:
+            progress = ProgressBar(
+                player.position,
+                player.current.duration,
+                bar_count=8
+            )
 
-            queue_duration = 0
+            duration = f"```ansi\n[34;1m[{time_format(player.position)}] {('='*progress.start)}[0m🔴️[36;1m{'-'*progress.end} " \
+                       f"[{time_format(player.current.duration)}][0m```\n"
 
-            for t in player.queue:
-                if not t.is_stream:
-                    queue_duration += t.duration
+        vc_txt = ""
+        player.mini_queue_feature = True
 
-            embed_queue.description += f"\n`[⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + (player.current.duration if not player.current.is_stream else 0)) - player.position)).timestamp())}:R> `⌛]`"
+        txt = f"[`{player.current.single_title}`]({player.current.uri})\n\n" \
+              f"> 💠 **⠂Por:** {player.current.authors_md}\n" \
+              f"> ✋ **⠂Pedido por:** <@{player.current.requester}>\n" \
+              f"> 🔊 **⠂Volume:** `{player.volume}%`"
 
-        embed_queue.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif")
+        if player.current.track_loops:
+            txt += f"\n> 🔂 **⠂Repetições restante:** `{player.current.track_loops}`"
 
-    embed.description = txt
-    embed.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif")
-    embed.set_thumbnail(url=player.current.thumb)
+        if player.loop:
+            if player.loop == 'current':
+                e = '🔂'
+                m = 'Música atual'
+            else:
+                e = '🔁'
+                m = 'Fila'
+            txt += f"\n> {e} **⠂Modo de repetição:** `{m}`"
 
-    data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
+        if player.nightcore:
+            txt += f"\n> 🇳 **⠂Efeito nightcore:** `ativado`"
 
-    player.auto_update = 15 # tempo em segundos para atualizar
+        if player.current.album_name:
+            txt += f"\n> 💽 **⠂Álbum:** [`{fix_characters(player.current.album_name, limit=13)}`]({player.current.album_url})"
 
-    return data
+        if player.current.playlist_name:
+            txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=13)}`]({player.current.playlist_url})"
+
+        if (qlenght:=len(player.queue)) and not player.mini_queue_enabled:
+            txt += f"\n> 🎶 **⠂Músicas na fila:** `{qlenght}`"
+
+        if player.keep_connected:
+            txt += "\n> ♾️ **⠂Modo 24/7:** `Ativado`"
+
+        elif player.restrict_mode:
+            txt += f"\n> 🔒 **⠂Modo restrito:** `Ativado`"
+
+        if player.ping:
+            txt += f"\n> 📶 **⠂Latência:** `{player.ping}ms`"
+
+        txt += f"{vc_txt}\n"
+
+        if player.command_log:
+            txt += f"> {player.command_log_emoji} **⠂Última Interação:** {player.command_log}\n"
+
+        txt += duration
+
+        if qlenght and player.mini_queue_enabled:
+
+            queue_txt = "\n".join(
+                f"`{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 30)}`]({t.uri})"
+                for n, t in (enumerate(itertools.islice(player.queue, 3)))
+            )
+
+            embed_queue = disnake.Embed(title=f"Músicas na fila: {qlenght}", color=player.bot.get_color(player.guild.me),
+                                        description=f"\n{queue_txt}")
+
+            if not player.loop and not player.keep_connected:
+
+                queue_duration = 0
+
+                for t in player.queue:
+                    if not t.is_stream:
+                        queue_duration += t.duration
+
+                embed_queue.description += f"\n`[⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + (player.current.duration if not player.current.is_stream else 0)) - player.position)).timestamp())}:R> `⌛]`"
+
+            embed_queue.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif")
+
+        embed.description = txt
+        embed.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif")
+        embed.set_thumbnail(url=player.current.thumb)
+
+        data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
+
+        player.auto_update = 15 # tempo em segundos para atualizar
+
+        return data
+
+def load():
+    return DefaultProgressbarSkin()

@@ -450,7 +450,7 @@ class BotCore(commands.Bot):
                 if not hasattr(skin_file, "load"):
                     print(f"Skin ignorada: {skin} | Função load() não configurada/encontrada...")
                     continue
-                self.player_skins[skin[:-3]] = skin_file.load
+                self.player_skins[skin[:-3]] = skin_file.load()
             except Exception:
                 print(f"Falha ao carregar skin [normal_player]: {traceback.format_exc()}")
         if self.default_skin not in self.player_skins:
@@ -464,7 +464,7 @@ class BotCore(commands.Bot):
                 if not hasattr(skin_file, "load"):
                     print(f"Skin ignorada: {skin} | Função load() não configurada/encontrada...")
                     continue
-                self.player_static_skins[skin[:-3]] = skin_file.load
+                self.player_static_skins[skin[:-3]] = skin_file.load()
             except Exception:
                 print(f"Falha ao carregar skin [static_player]: {traceback.format_exc()}")
         if self.default_static_skin not in self.player_static_skins:
