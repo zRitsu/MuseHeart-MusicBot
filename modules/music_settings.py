@@ -294,7 +294,7 @@ class MusicSettings(commands.Cog):
             except AttributeError:
                 id_ = ""
 
-            kwargs = {}
+            kwargs_msg = {}
             try:
                 func = inter.edit_original_message
             except:
@@ -305,7 +305,7 @@ class MusicSettings(commands.Cog):
                         func = inter.response.edit_message
                     except:
                         func = inter.send
-                        kwargs = {"ephemeral": True}
+                        kwargs_msg = {"ephemeral": True}
 
             if isinstance(inter, CustomContext):
                 txt = "mencionando um canal de forum existente"
@@ -323,7 +323,7 @@ class MusicSettings(commands.Cog):
                     disnake.ui.Button(label="Canal de voz", custom_id=f"voice_channel_{id_}", emoji="🔊"),
                     disnake.ui.Button(label="Cancelar", custom_id="voice_channel_cancel", emoji="❌")
                 ],
-                **kwargs
+                **kwargs_msg
             )
 
             def check(i: disnake.MessageInteraction):
@@ -392,7 +392,7 @@ class MusicSettings(commands.Cog):
             create_func = target.create_voice_channel if \
                 inter.data.custom_id.startswith("voice_channel_") else target.create_text_channel
 
-            channel = await create_func(f"{bot.user.name} player controller", **kwargs)
+            channel = await create_func(f"{bot.user.name} player controller", **channel_kwargs)
 
             msg = f"Canal para pedido de músicas criado: {channel.mention}"
 
