@@ -82,6 +82,7 @@ class PlayerSession(commands.Cog):
                         channel=text_channel,
                         message=message,
                         skin=data["skin"],
+                        skin_static=data["skin_static"],
                         player_creator=creator,
                         keep_connected=data["keep_connected"],
                         static=data['static'],
@@ -207,6 +208,7 @@ class PlayerSession(commands.Cog):
                             "played": played,
                             "loop": player.loop,
                             "skin": player.skin,
+                            "skin_static": player.skin_static,
                             "restrict_mode": player.restrict_mode,
                             "mini_queue_enabled": player.mini_queue_enabled,
                             "tracks": tracks
