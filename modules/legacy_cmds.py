@@ -31,6 +31,9 @@ extra_files = [
 additional_files = [
     "./lavalink.ini",
     "./application.yml",
+    "./squarecloud.config",
+    "./squarecloud.app",
+    "./discloud.config",
 ]
 
 extra_dirs = [

@@ -32,7 +32,7 @@ if [ ! -f "./venv/requirements.txt" ]; then
   echo "#################################################"
   pip3 install -U -r requirements.txt --no-cache-dir
   cp -r requirements.txt ./venv/requirements.txt
-elif  ! cmp --silent -- "./requirements.txt" "./venv/requirements.txt"; then
+elif ! cmp --silent -- "./requirements.txt" "./venv/requirements.txt"; then
   echo "############################################"
   echo "## Instalando/Atualizando dependências... ##"
   echo "############################################"
