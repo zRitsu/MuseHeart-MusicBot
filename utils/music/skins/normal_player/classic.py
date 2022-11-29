@@ -10,7 +10,7 @@ class ClassicSkin:
 
     def __init__(self):
         self.name = "classic"
-        self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1047184546136850522/skin_classic.png"
+        self.preview = "https://media.discordapp.net/attachments/554468640942981147/1047214854622162994/skin_classic.png"
 
     def load(self, player: LavalinkPlayer) -> dict:
 
@@ -23,11 +23,20 @@ class ClassicSkin:
 
         queue_txt = ""
 
-        embed.description = f"[**{player.current.title}**]({player.current.uri})\n\n"
-        embed.set_image(url=player.current.thumb)
-        embed_top = None
-        player.mini_queue_feature = False
-        player.mini_queue_enabled = True
+        embed_top = disnake.Embed(
+            color=player.bot.get_color(player.guild.me),
+            description=f"> [**{player.current.title}**]({player.current.uri})"
+        )
+        embed.set_image(
+            url="https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif"
+        )
+
+        embed_top.set_image(
+            url="https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif"
+        )
+
+        embed_top.set_thumbnail(url=player.current.thumb)
+        player.mini_queue_feature = True
 
         if not player.paused:
             (embed_top or embed).set_author(
