@@ -35,6 +35,7 @@ class LiteSkin:
 
         player.hint_rate = 9
         player.controller_mode = False
+        player.mini_queue_feature = False
 
         return data
 

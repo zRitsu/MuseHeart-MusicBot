@@ -27,7 +27,6 @@ class ClassicStaticSkin:
         embed.set_image(url=player.current.thumb)
         embed_top = None
         player.mini_queue_feature = False
-        player.mini_queue_enabled = True
 
         if not player.paused:
             (embed_top or embed).set_author(

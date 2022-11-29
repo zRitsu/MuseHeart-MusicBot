@@ -64,7 +64,6 @@ class MiniStaticSkin:
                             value=f"{player.command_log}", inline=False)
 
         player.mini_queue_feature = False
-        player.mini_queue_enabled = True
 
         embed.set_image(url=player.current.thumb or "https://media.discordapp.net/attachments/480195401543188483/987830071815471114/musicequalizer.gif")
 

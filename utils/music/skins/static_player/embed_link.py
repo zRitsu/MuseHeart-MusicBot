@@ -71,8 +71,8 @@ class EmbedLinkStaticSkin:
 
             txt = qtext + "```\n" + txt
 
-        if player.auto_update:
-            player.auto_update = 0
+        player.auto_update = 0
+        player.mini_queue_feature = False
 
         return {
             "content": txt,

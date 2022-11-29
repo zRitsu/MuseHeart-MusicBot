@@ -56,7 +56,6 @@ class DefaultProgressbarStaticSkin:
         vc_txt = ""
         queue_img = ""
         player.mini_queue_feature = False
-        player.mini_queue_enabled = True
 
         try:
             vc_txt = f"\n> *️⃣ **⠂Canal de voz:** [`{player.guild.me.voice.channel.name}`](http://discordapp.com/channels/{player.guild.id}/{player.guild.me.voice.channel.id})"

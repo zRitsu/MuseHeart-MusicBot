@@ -808,7 +808,6 @@ class MusicSettings(commands.Cog):
                 await player.destroy_message()
             player.skin = select_view.skin_selected
             player.skin_static = select_view.static_skin_selected
-            player.mini_queue_feature = False
             player.auto_update = 0 # linha temporária para resolver possíveis problemas com skins custom criadas por usuarios antes desse commit.
             player.controller_mode = True
             player.set_command_log(text=f"{inter.author.mention} alterou a skin do player para: "
