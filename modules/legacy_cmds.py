@@ -609,7 +609,7 @@ class Owner(commands.Cog):
         if self.bot.config["GLOBAL_PREFIX"]:
             data = await self.bot.get_global_data(ctx.guild.id, db_name=DBModel.guilds)
             data["prefix"] = prefix
-            await self.bot.update_global_data(ctx.guild.id, data, db_name=DBModel.guild)
+            await self.bot.update_global_data(ctx.guild.id, data, db_name=DBModel.guilds)
         else:
             data = await self.bot.get_data(ctx.guild.id, db_name=DBModel.guilds)
             data["prefix"] = prefix
