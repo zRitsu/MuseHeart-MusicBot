@@ -26,7 +26,7 @@ other_bots_vc_opts = commands.option_enum(
 class SkinSelector(disnake.ui.View):
 
     def __init__(self, ctx: Union[disnake.AppCmdInter, CustomContext], select_opts: list, static_select_opts: list):
-        super().__init__(timeout=60)
+        super().__init__(timeout=180)
         self.ctx = ctx
         self.interaction: Optional[disnake.MessageInteraction] = None
         self.skin_selected = "default"
