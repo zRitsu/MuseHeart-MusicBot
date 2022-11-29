@@ -217,7 +217,10 @@ class MongoDatabase(BaseDB):
 
         if not data:
             data = dict(default_model[db_name])
-            self.data_cache[collection][db_name][id_] = data
+            try:
+                self.data_cache[collection][db_name][id_] = data
+            except KeyError:
+                pass
             return data
 
         elif data["ver"] < default_model[db_name]["ver"]:
@@ -225,14 +228,21 @@ class MongoDatabase(BaseDB):
             data["ver"] = default_model[db_name]["ver"]
 
             await self.update_data(id_, data, db_name=db_name, collection=collection)
-            self.data_cache[collection][db_name][id_] = data
+
+            try:
+                self.data_cache[collection][db_name][id_] = data
+            except KeyError:
+                pass
 
         return data
 
     async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users],
                           collection: str):
 
-        self.data_cache[collection][db_name][id_] = data
+        try:
+            self.data_cache[collection][db_name][id_] = data
+        except KeyError:
+            pass
         return await self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data}, upsert=True)
 
 
