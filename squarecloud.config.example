@@ -1,3 +1,7 @@
+######################################################################
+### Aviso: Caso use este arquivo, renomeie para squarecloud.config ###
+######################################################################
+
 #############################################################################################################
 ### Atenção: A RAM você pode alterar de acordo com o plano contratado (ou quantidade desejada).           ###
 ### Caso use o free (ou qualquer plano que tenha vCPU abaixo de 1.0 e ram abaixo de 512mb) você terá que  ###
@@ -6,7 +10,7 @@
 ### externos/públicos, mas o mesmo podem apresentar instabilidades/problemas. Portanto recomendo um plano ###
 ### pago com o requisito mínimo apresentado acima para evitar esse problema).                             ###
 ###                                                                                                       ###
-### Caso queira, você pode alterar o DISPLAY_NAME e link do AVATAR.                                       ###
+### Caso queira, você pode alterar o DISPLAY_NAME, DESCRIPTION e link do AVATAR.                          ###
 #############################################################################################################
 
 DISPLAY_NAME=Disnake LL Music Bot
