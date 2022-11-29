@@ -248,7 +248,7 @@ class PlayerSession(commands.Cog):
         self.resumed = True
         await ctx.send(embed=disnake.Embed(color=self.bot.get_color(ctx.guild.me), description=txt))
 
-    async def cog_unload(self):
+    def cog_unload(self):
         try:
             self.resume_task.cancel()
         except:
