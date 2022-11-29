@@ -342,7 +342,7 @@ class MusicSettings(commands.Cog):
             create_func = target.create_voice_channel if \
                 inter.data.custom_id.startswith("voice_channel_") else target.create_text_channel
 
-            channel = await create_func(f"{bot.user.name} player controller", **kwargs)
+            channel = await create_func(f"{bot.user.name} player controller", **channel_kwargs)
 
             msg = f"Canal para pedido de músicas criado: {channel.mention}"
 
