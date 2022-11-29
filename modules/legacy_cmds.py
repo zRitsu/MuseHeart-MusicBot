@@ -667,6 +667,9 @@ class Owner(commands.Cog):
                 SECRETS[i] = str(SECRETS[i]).lower()
             dotenv.set_key("./.env-temp", i, SECRETS[i])
 
+        if any(f in flags.lower() for f in ("-autodll", "--autodll")):
+            SECRETS["AUTO_DOWNLOAD_LAVALINK_SERVERLIST"] = True
+
         if any(f in flags.lower() for f in ("--externalservers", "-externalservers", "--llservers", "-llservers", "--lls", "-lls")):
             await self.download_lavalink_serverlist()
 
