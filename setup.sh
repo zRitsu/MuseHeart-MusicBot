@@ -32,6 +32,8 @@ mkdir -p ./.logs
 
 touch "./.logs/setup.log"
 
+python -m pip install -U pip
+
 pip install -r ./requirements.txt 2>&1 | tee "./.logs/setup.log"
 
 if [ ! -f ".env" ] && [ ! -f "config.json" ]; then
