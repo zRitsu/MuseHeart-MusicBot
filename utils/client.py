@@ -372,7 +372,8 @@ class BotPool:
             os.system('cls' if os.name == 'nt' else 'clear')
             raise Exception(
                 "O token do bot não foi configurado devidamente!\n"
-                "Confira se o token foi configurado na ENV/ENVIROMENT/SECRETS ou no arquivo .env"
+                "Confira se o token foi configurado na ENV/ENVIRONMENT/SECRETS ou no arquivo .env\n"
+                "Caso ainda tenha dúvidas, entre no servidor de suporte: https://discord.gg/R7BPG8fZTr"
             )
 
         if start_local:
