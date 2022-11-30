@@ -68,7 +68,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
     if isinstance(inter, CustomContext):
 
-        msg_id = f"{inter.guild.id}-{inter.channel.id}-{inter.message.id}"
+        msg_id = f"{inter.guild_id}-{inter.channel.id}-{inter.message.id}"
 
         if msg_id in inter.bot.pool.message_ids:
 
@@ -111,6 +111,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
             if return_first:
                 inter.music_bot = inter.bot
                 inter.music_guild = inter.guild
+                print("aaaaaaaaa")
                 return True
 
             raise NoVoice()

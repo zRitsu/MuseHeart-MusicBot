@@ -280,6 +280,8 @@ class BotPool:
                 @bot.listen("on_command_completion")
                 async def message_id_cleanup(ctx: CustomContext):
 
+                    await asyncio.sleep(4)
+
                     try:
                         ctx.bot.pool.message_ids.remove(f"{ctx.guild.id}-{ctx.channel.id}-{ctx.message.id}")
                     except:
