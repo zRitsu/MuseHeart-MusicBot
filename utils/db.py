@@ -238,7 +238,7 @@ class MongoDatabase(BaseDB):
         return data
 
     async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users],
-                          collection: str):
+                          collection: str, default_model: dict = None):
 
         try:
             self.data_cache[collection][db_name][id_] = data
