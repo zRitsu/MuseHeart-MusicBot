@@ -12,3 +12,6 @@ if not exist "venv\" (
 call venv\Scripts\activate.bat
 @echo on
 python main.py 2> .logs\run.log
+type .logs\run.log
+@echo off
+timeout /t 30
