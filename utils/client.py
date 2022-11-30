@@ -13,7 +13,8 @@ import disnake
 from typing import Optional, Union, List
 from config_loader import load_config
 from web_app import WSClient, start
-from .music.errors import GenericError, PoolException
+from .music.checks import ensure_bot_instance
+from .music.errors import GenericError
 from .music.local_lavalink import run_lavalink
 from .music.models import music_mode
 from .music.spotify import spotify_client
@@ -250,7 +251,10 @@ class BotPool:
             bot.token = token
 
             bot.load_extension("jishaku")
-            bot.get_command("jsk").hidden = True
+
+            jsk = bot.get_command("jsk")
+            jsk.hidden = True
+            jsk.add_check(ensure_bot_instance(return_first=True))
 
             self.max_counter += 1
 
