@@ -309,7 +309,8 @@ class LavalinkPlayer(wavelink.Player):
         ]
 
         self.hints: cycle = []
-        self.current_hint = ""
+        self.current_hint: str = ""
+        self.last_data: dict = {}
         self.setup_hints()
 
         self.bot.dispatch("player_create", player=self)
@@ -625,17 +626,28 @@ class LavalinkPlayer(wavelink.Player):
 
         data = (self.bot.player_static_skins[self.skin_static] if self.static else self.bot.player_skins[self.skin]).load(self)
 
+        if data == self.last_data:
+
+            try:
+                if not interaction.response.is_done():
+                    await interaction.response.defer()
+            except:
+                pass
+            return
+
+        self.last_data = data
+
         self.updating = True
 
         if not self.controller_mode:
             self.message = None
-            await self.text_channel.send(allowed_mentions=self.allowed_mentions, **data)
+            await self.text_channel.send(allowed_mentions=self.allowed_mentions, **self.last_data)
 
         else:
 
-            if data.get("components") is None:  # nenhum controle de botão foi definido na skin (será usado os botões padrões).
+            if self.last_data.get("components") is None:  # nenhum controle de botão foi definido na skin (será usado os botões padrões).
 
-                data["components"] = [
+                self.last_data["components"] = [
                     disnake.ui.Button(emoji="⏯️", custom_id=PlayerControls.pause_resume, style=get_button_style(self.paused)),
                     disnake.ui.Button(emoji="⏮️", custom_id=PlayerControls.back),
                     disnake.ui.Button(emoji="⏹️", custom_id=PlayerControls.stop),
@@ -696,7 +708,7 @@ class LavalinkPlayer(wavelink.Player):
                 ]
 
                 if self.mini_queue_feature:
-                    data["components"][5].options.append(
+                    self.last_data["components"][5].options.append(
                         disnake.SelectOption(
                             label="Mini-fila do player", emoji="<:music_queue:703761160679194734>",
                             value=PlayerControls.miniqueue,
@@ -710,14 +722,14 @@ class LavalinkPlayer(wavelink.Player):
 
                 try:
                     if interaction and not interaction.response.is_done():
-                        await interaction.response.edit_message(allowed_mentions=self.allowed_mentions, **data)
+                        await interaction.response.edit_message(allowed_mentions=self.allowed_mentions, **self.last_data)
                     else:
                         try:
                             await interaction.response.defer()
                         except:
                             pass
                         try:
-                            await self.message.edit(allowed_mentions=self.allowed_mentions, **data)
+                            await self.message.edit(allowed_mentions=self.allowed_mentions, **self.last_data)
                         except:
                             if not self.bot.get_channel(self.text_channel.id):
                                 await self.destroy(force=True)  # canal não existe mais no servidor...
@@ -736,7 +748,7 @@ class LavalinkPlayer(wavelink.Player):
             await self.destroy_message()
 
             try:
-                self.message = await self.text_channel.send(allowed_mentions=self.allowed_mentions, **data)
+                self.message = await self.text_channel.send(allowed_mentions=self.allowed_mentions, **self.last_data)
             except:
                 traceback.print_exc()
                 print(self.text_channel)
