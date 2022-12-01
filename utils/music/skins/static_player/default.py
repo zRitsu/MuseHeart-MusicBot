@@ -80,9 +80,6 @@ class DefaultStaticSkin:
         if player.current.playlist_name:
             txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=20)}`]({player.current.playlist_url})"
 
-        if (qlenght:=len(player.queue)) and not player.mini_queue_enabled:
-            txt += f"\n> 🎶 **⠂Músicas na fila:** `{qlenght}`"
-
         if player.keep_connected:
             txt += "\n> ♾️ **⠂Modo 24/7:** `Ativado`"
 
@@ -94,7 +91,7 @@ class DefaultStaticSkin:
         if player.command_log:
             txt += f"```ansi\n [34;1mÚltima Interação[0m```**┕ {player.command_log_emoji} ⠂**{player.command_log}\n"
 
-        if len(player.queue) and player.mini_queue_enabled:
+        if qlenght:=len(player.queue):
 
             queue_txt = "\n".join(
                 f"`{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 33)}`]({t.uri})"
