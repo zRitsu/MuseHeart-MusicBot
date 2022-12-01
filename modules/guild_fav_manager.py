@@ -223,7 +223,8 @@ class PinManager(commands.Cog):
 
         await send_idle_embed(message or channel, bot=self.bot, guild_data=guild_data)
 
-    @commands.max_concurrency(1, commands.BucketType.user)
+    @commands.max_concurrency(1, commands.BucketType.guild)
+    @commands.cooldown(1, 30, commands.BucketType.guild)
     @commands.slash_command(
         default_member_permissions=disnake.Permissions(manage_guild=True)
     )
@@ -231,7 +232,8 @@ class PinManager(commands.Cog):
         pass
 
     @ensure_bot_instance(return_first=True)
-    @commands.max_concurrency(1, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.guild)
+    @commands.max_concurrency(1, commands.BucketType.guild)
     @commands.command(name="serverplaylist", aliases=["spl", "svp", "svpl"],
                       description="Gerenciar playlists/favoritos do servidor.")
     async def serverplaylist_legacy(self, ctx: CustomContext):

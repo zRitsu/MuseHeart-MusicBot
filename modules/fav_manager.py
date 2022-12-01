@@ -217,12 +217,14 @@ class FavManager(commands.Cog):
     desc_prefix = "⭐ [Favoritos] ⭐ | "
 
     @commands.max_concurrency(1, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     @commands.slash_command()
     async def fav(self, inter: disnake.ApplicationCommandInteraction):
         pass
 
     @ensure_bot_instance(return_first=True)
     @commands.max_concurrency(1, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     @commands.command(name="favmanager", aliases=["favs", "favoritos", "fvmgr"],
                       description="Gerenciar suas playlists/favoritos.")
     async def serverplaylist_legacy(self, ctx: CustomContext):
