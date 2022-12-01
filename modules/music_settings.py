@@ -542,7 +542,7 @@ class MusicSettings(commands.Cog):
 
         try:
             channel = bot.get_channel(int(guild_data['player_controller']['channel'])) or \
-                      bot.fetch_channel(int(guild_data['player_controller']['channel']))
+                      await bot.fetch_channel(int(guild_data['player_controller']['channel']))
         except:
             channel = None
 
