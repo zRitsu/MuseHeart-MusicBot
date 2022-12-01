@@ -111,7 +111,6 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
             if return_first:
                 inter.music_bot = inter.bot
                 inter.music_guild = inter.guild
-                print("aaaaaaaaa")
                 return True
 
             raise NoVoice()
