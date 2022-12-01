@@ -49,7 +49,7 @@ class BotPool:
             await bot.start(bot.token)
         except disnake.HTTPException as e:
 
-            if e.status == 429:
+            if e.status == 429 or "429 Too Many Requests" in str(e):
 
                 if not self.config["KILL_ON_429"]:
 
