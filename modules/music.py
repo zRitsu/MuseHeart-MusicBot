@@ -814,6 +814,42 @@ class Music(commands.Cog):
 
             if static_player['channel']:
 
+                if isinstance(player.text_channel, disnake.Thread):
+                    channel_check = player.text_channel.parent
+                else:
+                    channel_check = player.text_channel
+
+                bot_perms = channel_check.permissions_for(guild.me)
+
+                if not bot_perms.read_message_history:
+
+                    if not bot_perms.manage_permissions:
+
+                        player.set_command_log(
+                            emoji="⚠️",
+                            text=f"Não tenho permissão de ver historico de mensagens no canal: {channel_check.mention} "
+                                 f"(e nem permissão de gerenciar permissões para corrigir isso automaticamente), o "
+                                 f"player funcionará da forma padrão..."
+                        )
+
+                    else:
+
+                        overwrites = {
+                            guild.me: disnake.PermissionOverwrite(
+                                embed_links=True,
+                                send_messages=True,
+                                send_messages_in_threads=True,
+                                read_messages=True,
+                                create_public_threads=True,
+                                read_message_history=True,
+                                manage_messages=True,
+                                manage_channels=True,
+                                attach_files=True,
+                            )
+                        }
+
+                        await channel_check.edit(overwrites=overwrites)
+
                 try:
                     message = await channel.fetch_message(int(static_player['message_id']))
                 except TypeError:
