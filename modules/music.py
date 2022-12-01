@@ -832,6 +832,8 @@ class Music(commands.Cog):
                                  f"player funcionará da forma padrão..."
                         )
 
+                        player.static = False
+
                     else:
 
                         overwrites = {
