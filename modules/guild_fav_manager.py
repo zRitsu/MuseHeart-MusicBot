@@ -25,7 +25,7 @@ class GuildFavModal(disnake.ui.Modal):
         super().__init__(
             title="Adicionar/Editar playlist/favorito",
             custom_id="guild_fav_edit",
-            timeout=120,
+            timeout=180,
             components=[
                 disnake.ui.TextInput(
                     label="Nome do favorito/playlist:",
