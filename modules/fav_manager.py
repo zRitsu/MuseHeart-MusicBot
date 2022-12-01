@@ -227,7 +227,7 @@ class FavManager(commands.Cog):
     @commands.cooldown(1, 30, commands.BucketType.user)
     @commands.command(name="favmanager", aliases=["favs", "favoritos", "fvmgr"],
                       description="Gerenciar suas playlists/favoritos.")
-    async def serverplaylist_legacy(self, ctx: CustomContext):
+    async def favmanager_legacy(self, ctx: CustomContext):
         await self.manager.callback(self=self, inter=ctx)
 
     @fav.sub_command(
