@@ -305,7 +305,7 @@ class LavalinkPlayer(wavelink.Player):
             " com perm de: gerenciar servidor).",
 
             "Crie favoritos para ter fácil acesso de usar seus links favoritos aqui dispensando ter que copiar e colar "
-            "seus links nos comandos. Experimente usando o comando: /fav add.",
+            "seus links nos comandos. Experimente usando o comando: /fav manager.",
         ]
 
         self.hints: cycle = []
@@ -370,7 +370,7 @@ class LavalinkPlayer(wavelink.Player):
         if self.static:
             hints.append("Você pode fixar músicas/playlists na mensagem do player quando tiver no modo de "
                          "espera/oscioso para qualquer membro poder usá-las de forma facilitada. Para isso use o "
-                         "comando: /server_playlist add (comando vísivel apenas membros com perm de: gerenciar "
+                         "comando: /server_playlist manager (comando vísivel apenas membros com perm de: gerenciar "
                          "servidor)")
 
         elif self.bot.intents.message_content and self.controller_mode:

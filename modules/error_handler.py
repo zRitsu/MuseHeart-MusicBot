@@ -181,7 +181,12 @@ class ErrorHandler(commands.Cog):
         except:
             pass
 
-        await ctx.send(components=components, delete_after=delete_time, **kwargs)
+        try:
+            func = ctx.store_message.edit
+        except:
+            func = ctx.send
+
+        await func(components=components, delete_after=delete_time, **kwargs)
 
         if not send_webhook:
             return
