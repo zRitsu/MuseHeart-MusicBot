@@ -103,6 +103,7 @@ class GuildFavView(disnake.ui.View):
         self.ctx = ctx
         self.current = None
         self.data = data
+        self.message = None
 
         if data["player_controller"]["fav_links"]:
 
@@ -129,6 +130,23 @@ class GuildFavView(disnake.ui.View):
         cancel_button = disnake.ui.Button(label="Cancelar", emoji="❌")
         cancel_button.callback = self.cancel_callback
         self.add_item(cancel_button)
+
+    async def on_timeout(self):
+
+        if isinstance(self.ctx, CustomContext):
+            try:
+                await self.message.edit(
+                    embed=disnake.Embed(description="**Tempo esgotado...**", color=0x2F3136), view=None
+                )
+            except:
+                pass
+
+        else:
+            await self.ctx.edit_original_message(
+                embed=disnake.Embed(description="**Tempo esgotado...**", color=0x2F3136), view=None
+            )
+
+        self.stop()
 
     async def favadd_callback(self, inter: disnake.MessageInteraction):
         await inter.response.send_modal(GuildFavModal(bot=self.bot, name="", url="", description=""))
@@ -262,9 +280,10 @@ class PinManager(commands.Cog):
 
         if isinstance(inter, CustomContext):
             try:
+                view.message = inter.store_message
                 await inter.store_message.edit(embed=embed, view=view)
             except:
-                await inter.send(embed=embed, view=view)
+                view.message = await inter.send(embed=embed, view=view)
         else:
             try:
                 await inter.edit_original_message(embed=embed, view=view)
