@@ -1044,11 +1044,16 @@ class Music(commands.Cog):
 
         if not inter.guild:
             try:
-                await check_pool_bots(inter)
+                await check_pool_bots(inter, return_first=True)
             except:
-                pass
+                return [query] if len(query) < 100 else []
 
-        if not inter.author.voice or not query or (favs_size := len(favs)) >= 20:
+        try:
+            vc = inter.author.voice
+        except AttributeError:
+            vc = True
+
+        if not vc or not query or (favs_size := len(favs)) >= 20:
             return favs[:20]
 
         return await google_search(self.bot, query, max_entries=20 - favs_size) + favs
