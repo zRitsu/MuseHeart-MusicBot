@@ -116,7 +116,7 @@ class UserFavView(disnake.ui.View):
             remove_button.callback = self.remove_callback
             self.add_item(remove_button)
 
-            clear_button = disnake.ui.Button(label="Remover", emoji="🚮")
+            clear_button = disnake.ui.Button(label="Limpar favoritos", emoji="🚮")
             clear_button.callback = self.clear_callback
             self.add_item(clear_button)
 
