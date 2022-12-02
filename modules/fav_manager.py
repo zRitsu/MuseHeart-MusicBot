@@ -304,7 +304,7 @@ class FavManager(commands.Cog):
 
         if not user_data["fav_links"]:
             raise GenericError(f"**Você não possui links favoritos..\n"
-                               f"Você pode adicionar usando o comando: /{self.fav.name} {self.add.name}**")
+                               f"Você pode adicionar usando o comando: /{self.fav.name} {self.manager.name}**")
 
         embed = disnake.Embed(
             color=0x2F3136,
@@ -399,7 +399,7 @@ class FavManager(commands.Cog):
 
         if not user_data["fav_links"]:
             raise GenericError(f"**Você não possui links favoritos..\n"
-                               f"Você pode adicionar usando o comando: /{self.fav.name} {self.add.name}**")
+                               f"Você pode adicionar usando o comando: /{self.fav.name} {self.manager.name}**")
 
         fp = BytesIO(bytes(json.dumps(user_data["fav_links"], indent=4), 'utf-8'))
 
