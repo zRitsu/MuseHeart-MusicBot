@@ -37,7 +37,7 @@ elif ! cmp --silent -- "./requirements.txt" "./venv/requirements.txt"; then
   pip3 install -U -r requirements.txt --no-cache-dir
   cp -r requirements.txt ./venv/requirements.txt
 fi
-rm poetry.lock 2>&1 /dev/null
-rm pyproject.toml 2>&1 /dev/null
+
+rm -f poetry.lock && rm -f pyproject.toml
 
 python3 main.py
