@@ -167,7 +167,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                 try:
                     w.write_message(data)
                 except Exception as e:
-                    print(f"Erro ao processar dados do rpc para os usuários: [{', '.join(w.user_ids)}]: {repr(e)}")
+                    print(f"Erro ao processar dados do rpc para os usuários: [{', '.join(str(i) for i in w.user_ids)}]: {repr(e)}")
 
         bots_ws.remove(self)
 
