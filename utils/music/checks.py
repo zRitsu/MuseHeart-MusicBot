@@ -176,9 +176,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
         raise NoPlayer()
 
-    txt = ""
-
-    extra_bots_invite = []
+    extra_bots_counter = 0
 
     for bot in inter.bot.pool.bots:
 
@@ -191,14 +189,11 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         if bot.get_guild(inter.guild_id):
             continue
 
-        extra_bots_invite.append(
-            f"[`{disnake.utils.escape_markdown(str(bot.user.name))}`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})" +
-            (f" ({len(bot.guilds)}/100)" if bot.appinfo.flags.gateway_message_content_limited else f" ({len(bot.guilds)})")
-        )
+        extra_bots_counter += 1
 
     components = None
 
-    if len(extra_bots_invite) == len(inter.bot.pool.bots):
+    if extra_bots_counter == len(inter.bot.pool.bots):
 
         msg = "**Não há bots de música compatível no servidor...**"
 
@@ -216,7 +211,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
     else:
         msg = "**Todos os bots estão em uso nomento...**"
-        if txt:
+        if extra_bots_counter:
             msg += f"\nPrecisa de mais bots de música neste servidor? Clique no botão abaixo para adicionar mais bots de música no servidor."
             components = [disnake.ui.Button(custom_id="bot_invite", label="adicionar bots extras")]
 
