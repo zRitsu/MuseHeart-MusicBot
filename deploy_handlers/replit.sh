@@ -1,7 +1,5 @@
 #!/bin/bash
 
-rm poetry.lock && rm pyproject.toml 2> /dev/null
-
 if [ -n "${VIDEO_PREVIEW}" ]; then
   . venv/bin/activate
   python3 -m pip install tornado
@@ -39,5 +37,7 @@ elif ! cmp --silent -- "./requirements.txt" "./venv/requirements.txt"; then
   pip3 install -U -r requirements.txt --no-cache-dir
   cp -r requirements.txt ./venv/requirements.txt
 fi
+rm poetry.lock 2>&1 /dev/null
+rm pyproject.toml 2>&1 /dev/null
 
 python3 main.py
