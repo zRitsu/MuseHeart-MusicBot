@@ -25,6 +25,7 @@ if [ ! -d "venv" ] || [ ! -f "./venv/requirements.txt" ]; then
   cp -r requirements.txt ./venv/requirements.txt
 
 elif ! cmp --silent -- "./requirements.txt" "./venv/requirements.txt"; then
+  . venv/bin/activate
   echo "############################################"
   echo "## Instalando/Atualizando dependências... ##"
   echo "############################################"
