@@ -418,7 +418,7 @@ class MusicSettings(commands.Cog):
 
             else:
 
-                if not guild.me.guild_permissions.manage_channels or not target.permissions_for(guild.me).manage_permissions:
+                if not guild.me.guild_permissions.manage_permissions or not target.permissions_for(guild.me).manage_permissions:
                     raise GenericError(f"**{guild.me.mention} não pode gerenciar permissões no canal:** {target.mention}")
 
                 if purge_messages == "yes":
