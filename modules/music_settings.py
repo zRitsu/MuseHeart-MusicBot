@@ -8,6 +8,7 @@ from disnake.ext import commands
 from typing import TYPE_CHECKING, Union, Optional
 from utils.db import DBModel
 from utils.music.checks import user_cooldown, ensure_bot_instance
+from utils.music.converters import perms_translations
 from utils.music.errors import GenericError
 from utils.others import send_idle_embed, CustomContext, select_bot_pool
 from utils.music.models import LavalinkPlayer
@@ -203,10 +204,11 @@ class MusicSettings(commands.Cog):
         if not bot:
             return
 
-        guild = bot.get_guild(inter.guild_id) or inter.guild
+        guild = bot.get_guild(inter.guild_id)
 
         if not guild.me.guild_permissions.manage_channels or not guild.me.guild_permissions.create_public_threads:
-            raise commands.BotMissingPermissions(["manage_channels", "create_public_threads"])
+            raise GenericError(f"Não tenho permissão de **{perms_translations['manage_threads']}** e "
+                               f"**{perms_translations['create_public_threads']}** no servidor.")
 
         channel = bot.get_channel(inter.channel.id)
 
@@ -227,6 +229,7 @@ class MusicSettings(commands.Cog):
                     manage_messages=True,
                     manage_channels=True,
                     attach_files=True,
+                    manage_permissions=True,
                 )
             }
         }
@@ -398,6 +401,8 @@ class MusicSettings(commands.Cog):
 
         else:
 
+            target = bot.get_channel(target.id)
+
             if isinstance(target, disnake.ForumChannel):
 
                 channel_kwargs.clear()
@@ -418,8 +423,12 @@ class MusicSettings(commands.Cog):
 
             else:
 
-                if not guild.me.guild_permissions.manage_permissions or not target.permissions_for(guild.me).manage_permissions:
-                    raise GenericError(f"**{guild.me.mention} não pode gerenciar permissões no canal:** {target.mention}")
+                if not guild.me.guild_permissions.manage_roles and not target.permissions_for(guild.me).manage_permissions:
+                    raise GenericError(f"**{guild.me.mention} não possui permissão de gerenciar cargos do servidor ou "
+                                       f"de gerenciar permissões do canal {target.mention} para editar as permissões "
+                                       f"necessárias para o sistem de pedir música funcionar devidamente.**\n\n"
+                                       f"Caso não queira fornecer essas permissões, reuse o comando sem selecionar um "
+                                       f"canal de destino.")
 
                 if purge_messages == "yes":
                     await target.purge(limit=100, check=lambda m: m.author != guild.me or not m.thread)
@@ -534,7 +543,7 @@ class MusicSettings(commands.Cog):
         guild = bot.get_guild(inter.guild_id) or inter.guild
 
         if not guild.me.guild_permissions.manage_threads:
-            raise commands.BotMissingPermissions(["manage_threads"])
+            raise GenericError(f"Não tenho permissão de **{perms_translations['manage_threads']}** no servidor.")
 
         channel_inter = bot.get_channel(inter.channel.id)
 
