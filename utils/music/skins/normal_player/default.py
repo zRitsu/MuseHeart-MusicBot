@@ -1,8 +1,9 @@
 import datetime
 from utils.music.models import LavalinkPlayer
 import disnake
-from utils.music.converters import fix_characters, time_format
+from utils.music.converters import fix_characters, time_format, get_button_style
 import itertools
+from utils.others import PlayerControls
 
 
 class DefaultSkin:
@@ -118,6 +119,75 @@ class DefaultSkin:
         player.auto_update = 0
 
         data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
+
+        data["components"] = [
+            disnake.ui.Button(emoji="⏯️", custom_id=PlayerControls.pause_resume, style=get_button_style(self.paused)),
+            disnake.ui.Button(emoji="⏮️", custom_id=PlayerControls.back),
+            disnake.ui.Button(emoji="⏹️", custom_id=PlayerControls.stop),
+            disnake.ui.Button(emoji="⏭️", custom_id=PlayerControls.skip),
+            disnake.ui.Button(emoji="📑", custom_id=PlayerControls.queue),
+            disnake.ui.Select(
+                placeholder="Mais opções:",
+                custom_id="musicplayer_dropdown_inter",
+                min_values=0, max_values=1,
+                options=[
+                    disnake.SelectOption(
+                        label="Adicionar música", emoji="<:add_music:588172015760965654>",
+                        value=PlayerControls.add_song,
+                        description="Adicionar uma música/playlist na fila."
+                    ),
+                    disnake.SelectOption(
+                        label="Adicionar favorito", emoji="⭐",
+                        value=PlayerControls.enqueue_fav,
+                        description="Adicionar um de seus favoritos na fila."
+                    ),
+                    disnake.SelectOption(
+                        label="Tocar do inicio", emoji="⏪",
+                        value=PlayerControls.seek_to_start,
+                        description="Voltar o tempo da música atual para o inicio."
+                    ),
+                    disnake.SelectOption(
+                        label="Volume", emoji="🔊",
+                        value=PlayerControls.volume,
+                        description="Ajustar volume."
+                    ),
+                    disnake.SelectOption(
+                        label="Misturar", emoji="🔀",
+                        value=PlayerControls.shuffle,
+                        description="Misturar as músicas da fila."
+                    ),
+                    disnake.SelectOption(
+                        label="Readicionar", emoji="🎶",
+                        value=PlayerControls.readd,
+                        description="Readicionar as músicas tocadas de volta na fila."
+                    ),
+                    disnake.SelectOption(
+                        label="Repetição", emoji="🔁",
+                        value=PlayerControls.loop_mode,
+                        description="Ativar/Desativar repetição da música/fila."
+                    ),
+                    disnake.SelectOption(
+                        label="Nightcore", emoji="🇳",
+                        value=PlayerControls.nightcore,
+                        description="Ativar/Desativar o efeito nightcore."
+                    ),
+                    disnake.SelectOption(
+                        label="Ativar/Desativar modo restrito", emoji="🔐",
+                        value=PlayerControls.restrict_mode,
+                        description="Apenas DJ's/Staff's podem usar comandos restritos."
+                    ),
+                ]
+            ),
+        ]
+
+        if player.mini_queue_feature:
+            data["components"][5].options.append(
+                disnake.SelectOption(
+                    label="Mini-fila do player", emoji="<:music_queue:703761160679194734>",
+                    value=PlayerControls.miniqueue,
+                    description="Ativar/Desativar a mini-fila do player."
+                )
+            )
 
         return data
 

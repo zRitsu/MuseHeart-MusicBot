@@ -647,6 +647,10 @@ class LavalinkPlayer(wavelink.Player):
 
             if self.last_data.get("components") is None:  # nenhum controle de botão foi definido na skin (será usado os botões padrões).
 
+                # Aviso: Não modifique os components abaixo, prefira copiar uma das skins da pasta utils -> music -> skins
+                # e deixá-la com outro nome (sem acentos, espaços, caracteres especiais) e modifique-as a seu gosto.
+                # Caso queira deixar uma skin customizada por padrão adicione/modifique a config DEFAULT_SKIN="tuaskin"
+
                 self.last_data["components"] = [
                     disnake.ui.Button(emoji="⏯️", custom_id=PlayerControls.pause_resume, style=get_button_style(self.paused)),
                     disnake.ui.Button(emoji="⏮️", custom_id=PlayerControls.back),
