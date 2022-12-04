@@ -1,5 +1,7 @@
 #!/bin/bash
 
+rm -f poetry.lock && rm -f pyproject.toml
+
 if [ -n "${VIDEO_PREVIEW}" ]; then
   . venv/bin/activate
   python3 -m pip install tornado
@@ -9,8 +11,9 @@ if [ -n "${VIDEO_PREVIEW}" ]; then
 fi
 
 if [ ! -d "venv" ] || [ ! -f "./venv/requirements.txt" ]; then
-  rm -rf venv && rm -rf .config && rm -rf .cache
+  rm -rf venv && rm -rf .config && rm -rf .cache && rm -rf .git
   bash quick_update.sh
+  rm -f poetry.lock && rm -f pyproject.toml
   echo "##################################"
   echo "## Inicializando virtual_env... ##"
   echo "##################################"
@@ -25,10 +28,10 @@ if [ ! -d "venv" ] || [ ! -f "./venv/requirements.txt" ]; then
   cp -r requirements.txt ./venv/requirements.txt
 
 elif ! cmp --silent -- "./requirements.txt" "./venv/requirements.txt"; then
-  . venv/bin/activate
   echo "############################################"
   echo "## Instalando/Atualizando dependências... ##"
   echo "############################################"
+  . venv/bin/activate
   pip3 install -U -r requirements.txt --no-cache-dir
   cp -r requirements.txt ./venv/requirements.txt
 
@@ -36,7 +39,5 @@ else
   . venv/bin/activate
 
 fi
-
-rm -f poetry.lock && rm -f pyproject.toml
 
 python3 main.py
