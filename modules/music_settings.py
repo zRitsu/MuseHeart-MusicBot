@@ -427,8 +427,9 @@ class MusicSettings(commands.Cog):
                     raise GenericError(f"**{guild.me.mention} não possui permissão de administrador ou permissão de "
                                        f"gerenciar permissões do canal {target.mention}** para editar as permissões "
                                        f"necessárias para o sistema de pedir música funcionar devidamente.\n\n"
-                                       f"Caso não queira fornecer essas permissões reuse o comando sem selecionar um "
-                                       f"canal de destino.")
+                                       f"Caso não queira fornecer a permissão de administrador ou editar as permissões do"
+                                       f" canal {target.mention} para me permitir gerenciar permissões, reuse o comando "
+                                       f"sem selecionar um canal de destino.")
 
                 if purge_messages == "yes":
                     await target.purge(limit=100, check=lambda m: m.author != guild.me or not m.thread)
