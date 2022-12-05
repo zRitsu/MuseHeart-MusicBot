@@ -129,14 +129,14 @@ class UserFavView(disnake.ui.View):
         if isinstance(self.ctx, CustomContext):
             try:
                 await self.message.edit(
-                    embed=disnake.Embed(description="**Tempo esgotado...**", color=0x2F3136), view=None
+                    embed=disnake.Embed(description="**Tempo esgotado...**", color=self.bot.get_color()), view=None
                 )
             except:
                 pass
 
         else:
             await self.ctx.edit_original_message(
-                embed=disnake.Embed(description="**Tempo esgotado...**", color=0x2F3136), view=None
+                embed=disnake.Embed(description="**Tempo esgotado...**", color=self.bot.get_color()), view=None
             )
 
         self.stop()
@@ -208,7 +208,7 @@ class UserFavView(disnake.ui.View):
 
         embed = disnake.Embed(
             description="Sua lista de favoritos foi limpa com sucesso!",
-            color=0x2F3136
+            color=self.bot.get_color()
         )
 
         await inter.edit_original_message(embed=embed)
@@ -217,7 +217,7 @@ class UserFavView(disnake.ui.View):
         await inter.response.edit_message(
             embed=disnake.Embed(
                 description="**Operação com favoritos cancelada...**",
-                color=0x2F3136,
+                color=self.bot.get_color(),
             ), view=None
         )
         self.stop()
@@ -261,7 +261,7 @@ class FavManager(commands.Cog):
 
         embed = disnake.Embed(
             description="**Gerenciador de favoritos do usuário.**",
-            colour=0x2F3136,
+            colour=self.bot.get_color(),
         )
 
         if isinstance(inter, CustomContext):
@@ -307,7 +307,7 @@ class FavManager(commands.Cog):
                                f"Você pode adicionar usando o comando: /{self.fav.name} {self.manager.name}**")
 
         embed = disnake.Embed(
-            color=0x2F3136,
+            color=self.bot.get_color(),
             title="Seus Links Favoritos:",
             description="\n".join(f"{n+1}) [`{f[0]}`]({f[1]})" for n, f in enumerate(user_data["fav_links"].items()))
         )
@@ -382,7 +382,7 @@ class FavManager(commands.Cog):
 
         await inter.edit_original_message(
             embed = disnake.Embed(
-                color=0x2F3136,
+                color=self.bot.get_color(),
                 description = "**Os links foram importados com sucesso!**\n"
                               "**Eles vão aparecer quando usar o comando /play (no preenchimento automático da busca).**",
             )
@@ -405,7 +405,7 @@ class FavManager(commands.Cog):
 
         embed = disnake.Embed(
             description=f"Seus favoritos estão aqui.\nVocê pode importar usando o comando: `/{self.import_.name}`",
-            color=0x2F3136)
+            color=self.bot.get_color())
 
         await inter.edit_original_message(embed=embed, file=disnake.File(fp=fp, filename="favoritos.json"))
 

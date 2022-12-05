@@ -330,7 +330,7 @@ class BotPool:
                                                 f"{interaction_invites}\n\n"
                                                 "Se aparecer nenhum comando das integrações citadas acima, "
                                                 "clique em uma delas para adicioná-la no seu servidor.",
-                                    color=0x2F3136
+                                    color=bot.get_color()
                                 )
 
                                 await inter.send(embed=embed, ephemeral=True)
@@ -650,7 +650,10 @@ class BotCore(commands.Bot):
 
         return True
 
-    def get_color(self, me: disnake.Member):
+    def get_color(self, me: Optional[disnake.Member] = None):
+
+        if not me:
+            return self.color or 0x2F3136
 
         if self.color:
             return self.color

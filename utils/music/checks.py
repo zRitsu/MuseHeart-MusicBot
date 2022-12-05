@@ -217,7 +217,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
     inter.bot.dispatch("pool_dispatch", inter, None)
 
-    await inter.send(embed=disnake.Embed(description=msg, color=0x2F3136), components=components)
+    await inter.send(embed=disnake.Embed(description=msg, color=inter.bot.get_color()), components=components)
 
     raise PoolException()
 

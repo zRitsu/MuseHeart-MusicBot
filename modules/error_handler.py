@@ -336,7 +336,7 @@ class ErrorHandler(commands.Cog):
                 embed.set_thumbnail(url=ctx.guild.icon.with_static_format("png").url)
 
         else:
-            embed.colour = 0x2F3136
+            embed.colour = self.bot.get_color()
             embed.add_field(
                 name="Servidor [ID]:", inline=False,
                 value=f"```\n{ctx.guild_id}```"

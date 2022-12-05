@@ -136,14 +136,14 @@ class GuildFavView(disnake.ui.View):
         if isinstance(self.ctx, CustomContext):
             try:
                 await self.message.edit(
-                    embed=disnake.Embed(description="**Tempo esgotado...**", color=0x2F3136), view=None
+                    embed=disnake.Embed(description="**Tempo esgotado...**", color=self.bot.get_color()), view=None
                 )
             except:
                 pass
 
         else:
             await self.ctx.edit_original_message(
-                embed=disnake.Embed(description="**Tempo esgotado...**", color=0x2F3136), view=None
+                embed=disnake.Embed(description="**Tempo esgotado...**", color=self.bot.get_color()), view=None
             )
 
         self.stop()
@@ -204,7 +204,7 @@ class GuildFavView(disnake.ui.View):
         await inter.response.edit_message(
             embed=disnake.Embed(
                 description="**Operação com favoritos do servidor cancelada...**",
-                color=0x2F3136,
+                color=self.bot.get_color(),
             ), view=None
         )
         self.stop()
@@ -276,7 +276,7 @@ class PinManager(commands.Cog):
 
         embed = disnake.Embed(
             description="**Gerenciador de favoritos do servidor.**",
-            colour=0x2F3136,
+            colour=self.bot.get_color(),
         )
 
         if isinstance(inter, CustomContext):

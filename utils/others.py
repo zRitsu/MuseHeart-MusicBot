@@ -362,7 +362,7 @@ async def select_bot_pool(inter, first=False):
             add_id = ""
 
         embed = disnake.Embed(
-            color=0x2F3136,
+            color=inter.bot.get_color(),
             description="**Selecione um bot abaixo:**\n"
                         f'Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para escolher!'
         )
@@ -404,7 +404,7 @@ async def select_bot_pool(inter, first=False):
             await func(
                 embed=disnake.Embed(
                     description="**Seleção cancelada!**",
-                    color=0x2F3136
+                    color=inter.bot.get_color()
                 ),
                 components=None
             )

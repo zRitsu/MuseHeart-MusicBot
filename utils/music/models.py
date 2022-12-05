@@ -440,7 +440,7 @@ class LavalinkPlayer(wavelink.Player):
                             embed=disnake.Embed(
                                 description=f"Houve um problema ao tentar processar a música [{track.title}]({track.uri})... "
                                             f"```py\n{repr(e)}```",
-                                color=0x2F3136
+                                color=self.bot.get_color()
                             )
                         )
                     except:
@@ -456,7 +456,7 @@ class LavalinkPlayer(wavelink.Player):
                         embed=disnake.Embed(
                             description=f"A música [{track.title}]({track.uri}) não está disponível...\n"
                                         f"Pulando para a próxima música...",
-                            color=0x2F3136
+                            color=self.bot.get_color()
                         ), delete_after=30
                     )
                 except:
@@ -473,7 +473,7 @@ class LavalinkPlayer(wavelink.Player):
                         embed=disnake.Embed(
                             description=f"A música [{track.title}]({track.uri}) não está disponível...\n"
                                         f"Pulando para a próxima música...",
-                            color=0x2F3136
+                            color=self.bot.get_color()
                         ), delete_after=30
                     )
                 except:
