@@ -2,7 +2,7 @@ language="python3"
 
 run = ["bash", "./deploy_handlers/replit.sh"]
 
-hidden = ["venv", ".config", "**/__pycache__", "**/.mypy_cache", "**/*.pyc", "Lavalink.jar"]
+hidden = ["venv", ".config", "**/__pycache__", "**/.mypy_cache", "**/*.pyc", "Lavalink.jar", ".deployed"]
 
 [packager]
 ignoredPackages=["discord.py", "discord", "unit_tests"]

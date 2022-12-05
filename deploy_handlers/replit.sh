@@ -10,7 +10,7 @@ if [ -n "${VIDEO_PREVIEW}" ]; then
   exit 1
 fi
 
-if [ ! -d "venv" ] || [ ! -f "./venv/bin/requirements.txt" ]; then
+if [ ! -d "venv" ] || [ -f ".deployed" ] || [ ! -f "./venv/bin/requirements.txt" ]; then
   rm -rf venv && rm -rf .config && rm -rf .cache && rm -rf .git
   bash quick_update.sh
   rm -f poetry.lock && rm -f pyproject.toml
@@ -26,6 +26,7 @@ if [ ! -d "venv" ] || [ ! -f "./venv/bin/requirements.txt" ]; then
   echo "#################################################"
   pip install -U -r requirements.txt --no-cache-dir
   cp -r requirements.txt ./venv/bin/requirements.txt
+  rm -f .deployed
 
 elif ! cmp --silent -- "./requirements.txt" "./venv/bin/requirements.txt"; then
   echo "############################################"
