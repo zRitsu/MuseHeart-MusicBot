@@ -250,7 +250,7 @@ class Misc(commands.Cog):
 
         for bot in self.bot.pool.bots:
 
-            if not bot.appinfo.bot_public:
+            if bot.appinfo and not bot.appinfo.bot_public:
                 continue
 
             bots_invites.append(
@@ -265,6 +265,7 @@ class Misc(commands.Cog):
                     title="**Não há bots públicos disponível...**",
                 ), ephemeral=True
             )
+            return
 
         txt = ""
 
