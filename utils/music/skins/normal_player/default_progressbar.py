@@ -111,7 +111,7 @@ class DefaultProgressbarSkin:
             embed_queue = disnake.Embed(title=f"Músicas na fila: {qlenght}", color=player.bot.get_color(player.guild.me),
                                         description=f"\n{queue_txt}")
 
-            if not player.loop and not player.keep_connected:
+            if not player.loop and not player.keep_connected and not player.paused and not player.current.is_stream:
 
                 queue_duration = 0
 
@@ -119,7 +119,8 @@ class DefaultProgressbarSkin:
                     if not t.is_stream:
                         queue_duration += t.duration
 
-                embed_queue.description += f"\n`[⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + (player.current.duration if not player.current.is_stream else 0)) - player.position)).timestamp())}:R> `⌛]`"
+                if queue_duration:
+                    embed_queue.description += f"\n`[⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + (player.current.duration if not player.current.is_stream else 0)) - player.position)).timestamp())}:R> `⌛]`"
 
             embed_queue.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif")
 

@@ -31,7 +31,7 @@ class EmbedLinkStaticSkin:
 
         else:
             txt += f"> ▶️ **⠂Tocando Agora:** {player.current.uri}{duration_txt}"
-            if not player.current.is_stream:
+            if not player.current.is_stream and not player.paused:
                 txt += f" `[`<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`"
 
         txt += f"\n> ✋ **⠂Pedido por:** <@{player.current.requester}>\n"

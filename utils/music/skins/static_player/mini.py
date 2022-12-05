@@ -79,7 +79,7 @@ class MiniStaticSkin:
                                         color=player.bot.get_color(player.guild.me),
                                         description=f"\n{queue_txt}")
 
-            if not player.loop:
+            if not player.loop and not player.paused and not player.current.is_stream:
 
                 queue_duration = 0
 

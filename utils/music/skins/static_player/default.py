@@ -53,8 +53,9 @@ class DefaultStaticSkin:
             pass
 
         duration = "> 🔴 **⠂Duração:** `Livestream`" if player.current.is_stream else \
-            f"> ⏰ **⠂Duração:** `{time_format(player.current.duration)} [`" + \
+            (f"> ⏰ **⠂Duração:** `{time_format(player.current.duration)} [`" +
             f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`"
+            if not player.paused else '')
 
         txt = f"[`{player.current.single_title}`]({player.current.uri})\n\n" \
               f"{duration}\n" \
@@ -102,7 +103,7 @@ class DefaultStaticSkin:
             embed_queue = disnake.Embed(title=f"Músicas na fila: {qlenght}", color=player.bot.get_color(player.guild.me),
                                         description=f"\n{queue_txt}")
 
-            if not player.loop and not player.keep_connected:
+            if not player.loop and not player.keep_connected and not player.paused and not player.current.is_stream:
 
                 queue_duration = 0
 

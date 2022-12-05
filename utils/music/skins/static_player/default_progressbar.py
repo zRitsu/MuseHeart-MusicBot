@@ -114,7 +114,7 @@ class DefaultProgressbarStaticSkin:
             embed_queue = disnake.Embed(title=f"Músicas na fila: {qlenght}", color=player.bot.get_color(player.guild.me),
                                         description=f"\n{queue_txt}")
 
-            if not player.loop and not player.keep_connected:
+            if not player.loop and not player.keep_connected and not player.paused and not player.current.is_stream:
 
                 queue_duration = 0
 
