@@ -217,43 +217,27 @@ class MusicSettings(commands.Cog):
         except AttributeError:
             pass
 
+        perms_dict = {
+            "embed_links": True,
+            "send_messages": True,
+            "send_messages_in_threads": True,
+            "read_messages": True,
+            "create_public_threads": True,
+            "read_message_history": True,
+            "manage_messages": True,
+            "manage_channels": True,
+            "attach_files": True,
+            "manage_permissions": True,
+        }
+
         if guild.me.guild_permissions.administrator:
+            perms_dict["manage_permissions"] = True
 
-            channel_kwargs = {
-                "overwrites": {
-                    guild.me: disnake.PermissionOverwrite(
-                        embed_links=True,
-                        send_messages=True,
-                        send_messages_in_threads=True,
-                        read_messages=True,
-                        create_public_threads=True,
-                        read_message_history=True,
-                        manage_messages=True,
-                        manage_channels=True,
-                        attach_files=True,
-                        manage_permissions=True,
-                    )
-                }
+        channel_kwargs = {
+            "overwrites": {
+                guild.me: disnake.PermissionOverwrite(**perms_dict)
             }
-
-
-        else:
-
-            channel_kwargs = {
-                "overwrites": {
-                    guild.me: disnake.PermissionOverwrite(
-                        embed_links=True,
-                        send_messages=True,
-                        send_messages_in_threads=True,
-                        read_messages=True,
-                        create_public_threads=True,
-                        read_message_history=True,
-                        manage_messages=True,
-                        manage_channels=True,
-                        attach_files=True,
-                    )
-                }
-            }
+        }
 
         await inter.response.defer(ephemeral=True)
 
