@@ -404,8 +404,6 @@ class MusicSettings(commands.Cog):
 
         else:
 
-            target = bot.get_channel(target.id)
-
             if isinstance(target, disnake.ForumChannel):
 
                 channel_kwargs.clear()
@@ -471,7 +469,7 @@ class MusicSettings(commands.Cog):
                 except:
                     pass
             if not message or message.channel.id != channel.id:
-                message = await send_idle_embed(channel, bot=bot, force=True)
+                message = await send_idle_embed(channel, bot=bot, force=True, guild_data=guild_data)
             player.message = message
             player.static = True
             player.text_channel = channel
@@ -479,7 +477,7 @@ class MusicSettings(commands.Cog):
             await player.invoke_np(force=True)
 
         elif not message or message.channel.id != channel.id:
-            message = await send_idle_embed(channel, bot=bot, force=True)
+            message = await send_idle_embed(channel, bot=bot, force=True, guild_data=guild_data)
 
         if not isinstance(channel, disnake.VoiceChannel):
             if not message.thread:
