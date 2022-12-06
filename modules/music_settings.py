@@ -249,9 +249,11 @@ class MusicSettings(commands.Cog):
             player = None
 
         if not original_message:
+
             try:
-                original_message = await bot.get_channel(int(guild_data["player_controller"]["channel"]))\
-                    .fetch_message(int(guild_data["player_controller"]["message_id"]))
+                channel_db = bot.get_channel(int(guild_data["player_controller"]["channel"])) or \
+                             await bot.fetch_channel(int(guild_data["player_controller"]["channel"]))
+                original_message = await channel_db.fetch_message(int(guild_data["player_controller"]["message_id"]))
             except:
                 pass
 
@@ -278,6 +280,7 @@ class MusicSettings(commands.Cog):
                     await original_message.edit(content=None, embed=embed_archived, view=None)
                 except:
                     pass
+
                 try:
                     await original_message.thread.edit(
                         archived=True,
