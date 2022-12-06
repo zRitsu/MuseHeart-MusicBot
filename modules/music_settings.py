@@ -227,7 +227,6 @@ class MusicSettings(commands.Cog):
             "manage_messages": True,
             "manage_channels": True,
             "attach_files": True,
-            "manage_permissions": True,
         }
 
         if guild.me.guild_permissions.administrator:
