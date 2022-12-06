@@ -563,6 +563,8 @@ class Music(commands.Cog):
 
         ephemeral = None
 
+        warn_message = None
+
         try:
             player = bot.music.players[guild.id]
             node = player.node
@@ -595,8 +597,12 @@ class Music(commands.Cog):
                 try:
                     channel_db = bot.get_channel(int(static_player['channel'])) or await bot.fetch_channel(
                         int(static_player['channel']))
-                except (TypeError, disnake.NotFound, disnake.Forbidden):
+                except (TypeError, disnake.NotFound):
                     channel_db = None
+                except disnake.Forbidden:
+                    channel_db = bot.get_channel(inter.channel_id)
+                    warn_message = f"Não tenho permissão de acessar o canal <#{static_player['channel']}>, o player será usado no modo tradicional."
+                    static_player["channel"] = None
 
                 if not channel_db or channel_db.guild.id != inter.guild_id:
                     await self.reset_controller_db(inter.guild_id, guild_data, inter)
@@ -1022,6 +1028,8 @@ class Music(commands.Cog):
             )
 
         if not player.current:
+            if warn_message:
+                player.set_command_log(emoji="⚠️", text=warn_message)
             await player.process_next()
         elif force_play == "yes":
             player.set_command_log(

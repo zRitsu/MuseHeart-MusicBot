@@ -258,11 +258,11 @@ class BotPool:
 
             self.max_counter += 1
 
-            @bot.check
+            """@bot.check
             async def forum_check(ctx: CustomContext):
 
                 bot.check_bot_forum_post(ctx.channel, raise_error=True)
-                return True
+                return True"""
 
             if bot.config['INTERACTION_COMMAND_ONLY']:
 
@@ -271,7 +271,7 @@ class BotPool:
 
                     if not (await bot.is_owner(ctx.author)):
                         raise GenericError("**Os comandos de texto estão desativados!\n"
-                                           "Use os comandos de barra /**", self_delete=True, delete_original=True)
+                                           "Use os comandos de barra /**", self_delete=True, delete_original=15)
 
                     return True
 

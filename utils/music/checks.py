@@ -35,7 +35,14 @@ async def check_requester_channel(ctx: CustomContext):
     guild_data = await ctx.bot.get_data(ctx.guild_id, db_name=DBModel.guilds)
 
     if guild_data['player_controller']["channel"] == str(ctx.channel.id):
-        raise GenericError("**Não use comandos neste canal!**", self_delete=True, delete_original=15)
+
+        if isinstance(ctx.channel.parent, disnake.ForumChannel):
+            if ctx.channel.owner_id != ctx.bot.user.id:
+                raise PoolException()
+            else:
+                return True
+
+        raise GenericError("**Use apenas comandos de barra (/) neste canal!**", self_delete=True, delete_original=15)
 
     return True
 
@@ -57,6 +64,14 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
     if not inter.guild_id:
         return
+
+    if not inter.bot.check_bot_forum_post(inter.channel, raise_error=False):
+        if inter.channel.owner_id == inter.bot.user.id:
+            inter.music_bot = inter.bot
+            inter.music_guild = inter.guild
+            return True
+        else:
+            raise PoolException()
 
     try:
         if inter.bot.user.id in inter.author.voice.channel.voice_states:
