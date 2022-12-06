@@ -162,7 +162,6 @@ class MongoDatabase(BaseDB):
     def __init__(self, token: str):
         super().__init__()
         self._connect = AsyncIOMotorClient(token, connectTimeoutMS=30000)
-        self.data_cache = {}
 
     async def push_data(self, data, *, db_name: Union[DBModel.guilds, DBModel.users], collection: str):
         await self._connect[collection][db_name].insert_one(data)
@@ -201,28 +200,10 @@ class MongoDatabase(BaseDB):
 
         id_ = str(id_)
 
-        try:
-            self.data_cache[collection]
-        except KeyError:
-            self.data_cache[collection] = {
-                "users": {},
-                "guilds": {}
-            }
-
-        try:
-            return dict(self.data_cache[collection][db_name][id_])
-        except:
-            pass
-
         data = await self._connect[collection][db_name].find_one({"_id": id_})
 
         if not data:
-            data = dict(default_model[db_name])
-            try:
-                self.data_cache[collection][db_name][id_] = data
-            except KeyError:
-                pass
-            return data
+            return dict(default_model[db_name])
 
         elif data["ver"] < default_model[db_name]["ver"]:
             data = update_values(dict(default_model[db_name]), data)
@@ -230,20 +211,11 @@ class MongoDatabase(BaseDB):
 
             await self.update_data(id_, data, db_name=db_name, collection=collection)
 
-            try:
-                self.data_cache[collection][db_name][id_] = data
-            except KeyError:
-                pass
-
         return data
 
     async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users],
                           collection: str, default_model: dict = None):
 
-        try:
-            self.data_cache[collection][db_name][id_] = data
-        except KeyError:
-            pass
         return await self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data}, upsert=True)
 
 

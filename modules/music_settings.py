@@ -404,6 +404,8 @@ class MusicSettings(commands.Cog):
 
         else:
 
+            target = bot.get_channel(target.id)
+
             if isinstance(target, disnake.ForumChannel):
 
                 channel_kwargs.clear()
@@ -423,8 +425,6 @@ class MusicSettings(commands.Cog):
                 target = message.channel
 
             else:
-
-                target = bot.get_channel(target.id)
 
                 if not guild.me.guild_permissions.administrator and not target.permissions_for(guild.me).manage_permissions:
                     raise GenericError(f"**{guild.me.mention} não possui permissão de administrador ou permissão de "

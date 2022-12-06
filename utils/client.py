@@ -478,10 +478,14 @@ class BotCore(commands.Bot):
             self.default_static_skin = "default"
 
     async def get_data(self, id_: int, *, db_name: Union[DBModel.guilds, DBModel.users]):
-        return await self.pool.database.get_data(id_=id_, db_name=db_name, collection=str(self.user.id))
+        return await self.pool.database.get_data(
+            id_=id_, db_name=db_name, collection=str(self.user.id)
+        )
 
     async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users]):
-        return await self.pool.database.update_data(id_=id_, data=data, db_name=db_name, collection=str(self.user.id))
+        return await self.pool.database.update_data(
+            id_=id_, data=data, db_name=db_name, collection=str(self.user.id)
+        )
 
     async def get_global_data(self, id_: int, *, db_name: Union[DBModel.guilds, DBModel.users]):
         return await self.pool.database.get_data(
