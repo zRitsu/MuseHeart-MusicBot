@@ -198,7 +198,7 @@ class GuildFavView(disnake.ui.View):
             embed=disnake.Embed(description="**Link removido com sucesso!**", color=self.bot.get_color(guild.me)),
             view=None)
 
-        await self.ctx.cog.process_idle_embed(guild)
+        await self.bot.get_cog("PinManager").process_idle_embed(guild)
 
     async def cancel_callback(self, inter: disnake.MessageInteraction):
         await inter.response.edit_message(
