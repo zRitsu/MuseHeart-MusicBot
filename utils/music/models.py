@@ -21,12 +21,10 @@ exclude_tags = ["remix", "edit", "extend"]
 
 class PartialPlaylist:
 
-    def __init__(self, data: dict):
+    def __init__(self, data: dict, url: str):
         self.data = data
-
-    @property
-    def tracks(self):
-        return self.data["tracks"]
+        self.url = url
+        self.tracks = []
 
     @property
     def name(self):
@@ -35,18 +33,12 @@ class PartialPlaylist:
         except KeyError:
             return
 
-    @property
-    def url(self):
-        try:
-            return self.data["playlistInfo"]["url"]
-        except KeyError:
-            return
-
 
 class PartialTrack:
 
     def __init__(self, *, uri: str = "", title: str = "", author="", thumb: str = "", duration: int = 0,
-                 requester: int = 0, track_loops: int = 0, source_name: str = "", info: dict = None):
+                 requester: int = 0, track_loops: int = 0, source_name: str = "", info: dict = None,
+                 playlist: PartialPlaylist = None):
 
         self.info = info or {
             "author": fix_characters(author)[:97],
@@ -65,6 +57,7 @@ class PartialTrack:
 
         self.id = ""
         self.thumb = self.info["extra"]["thumb"]
+        self.playlist: Optional[PartialPlaylist] = playlist
 
     def __repr__(self):
         return f"{self.info['sourceName']} - {self.duration} - {self.authors_string} - {self.title}"
@@ -139,20 +132,37 @@ class PartialTrack:
     @property
     def playlist_name(self) -> str:
         try:
-            return self.info["extra"]["playlist"]["name"]
-        except KeyError:
+            return self.playlist.name[:97]
+        except AttributeError:
             return ""
 
     @property
     def playlist_url(self) -> str:
         try:
-            return self.info["extra"]["playlist"]["url"]
-        except KeyError:
+            return self.playlist.url
+        except AttributeError:
             return ""
+
+class LavalinkPlaylist:
+
+    def __init__(self, data: dict, **kwargs):
+        self.data = data
+        self.url = kwargs.pop("url")
+        try:
+            if self.data['tracks'][0]['info'].get("sourceName") == "youtube":
+                self.url = f"https://www.youtube.com/playlist?list={parse.parse_qs(parse.urlparse(self.url).query)['list'][0]}"
+        except IndexError:
+            pass
+        self.tracks = [LavalinkTrack(id_=track['track'], info=track['info'], playlist=self) for track in data['tracks']]
+
+    @property
+    def name(self):
+        return self.data["playlistInfo"]["name"]
+
 
 class LavalinkTrack(wavelink.Track):
 
-    __slots__ = ('extra')
+    __slots__ = ('extra', 'playlist')
 
     def __init__(self, *args, **kwargs):
         try:
@@ -160,6 +170,8 @@ class LavalinkTrack(wavelink.Track):
         except IndexError:
             pass
         super().__init__(*args, **kwargs)
+
+        self.playlist: Optional[LavalinkPlaylist] = kwargs.pop("playlist", None)
 
         if (info:=kwargs.pop("info", None)):
             self.info = info
@@ -170,14 +182,6 @@ class LavalinkTrack(wavelink.Track):
             self.info["extra"]
         except KeyError:
             self.info["extra"] = {}
-
-        try:
-            self.info["extra"]["playlist"] = {
-                "name": kwargs["playlist"]["name"][:97],
-                "url": kwargs["playlist"]["url"]
-            }
-        except KeyError:
-            pass
 
         self.info["extra"]["track_loops"] = kwargs.pop('track_loops', 0)
         self.info["extra"]["requester"] = kwargs.pop('requester', '')
@@ -243,15 +247,15 @@ class LavalinkTrack(wavelink.Track):
     @property
     def playlist_name(self) -> str:
         try:
-            return self.info["extra"]["playlist"]["name"]
-        except KeyError:
+            return self.playlist.name[:97]
+        except AttributeError:
             return ""
 
     @property
     def playlist_url(self) -> str:
         try:
-            return self.info["extra"]["playlist"]["url"]
-        except KeyError:
+            return self.playlist.url
+        except AttributeError:
             return ""
 
 

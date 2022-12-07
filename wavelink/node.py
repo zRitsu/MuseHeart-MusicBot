@@ -224,8 +224,7 @@ class Node:
 
                 if loadtype == 'PLAYLIST_LOADED':
                     playlist_cls = kwargs.pop('playlist_cls', TrackPlaylist)
-
-                    return playlist_cls(data=data, **kwargs)
+                    return playlist_cls(data=data, url=query, **kwargs)
 
                 track_cls = kwargs.pop('track_cls', Track)
 

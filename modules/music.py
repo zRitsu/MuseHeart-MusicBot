@@ -18,7 +18,7 @@ from utils.music.spotify import process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, \
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen, check_pool_bots, \
     ensure_bot_instance, check_channel_limit
-from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialPlaylist
+from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialPlaylist, LavalinkPlaylist
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, google_search, percentage
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
@@ -77,13 +77,6 @@ class Music(commands.Cog):
 
         async with ctx.typing():
             tracks, node = await self.get_tracks(url, ctx.author, use_cache=False)
-
-        tracks = [
-            LavalinkTrack(
-                t.id, t.info,
-                requester=ctx.author.id,
-                playlist={"name": tracks.data['playlistInfo']['name'], "url": url}
-            ) for t in tracks.tracks]
 
         self.bot.pool.playlist_cache[url] = [{"track": t.id, "info": t.info} for t in tracks]
 
@@ -974,7 +967,7 @@ class Music(commands.Cog):
             if hide_playlist:
                 log_text = f"Adicionou uma playlist com {len(tracks.tracks)} música(s) {pos_txt}."
             else:
-                log_text = f"{inter.author.mention} adicionou a playlist [`{fix_characters(tracks.data['playlistInfo']['name'], 20)}`]({tracks.data['playlistInfo']['url']}){pos_txt} `({len(tracks.tracks)})`."
+                log_text = f"{inter.author.mention} adicionou a playlist [`{fix_characters(tracks.name, 20)}`]({tracks.url}){pos_txt} `({len(tracks.tracks)})`."
 
             total_duration = 0
 
@@ -983,10 +976,7 @@ class Music(commands.Cog):
                     total_duration += t.duration
 
             try:
-                embed.set_author(
-                    name=fix_characters(tracks.data['playlistInfo']['name'], 35),
-                    url=tracks.data['playlistInfo']['url']
-                )
+                embed.set_author(name=fix_characters(tracks.name, 35), url=tracks.url)
             except KeyError:
                 embed.set_author(
                     name="Spotify Playlist",
@@ -3759,7 +3749,8 @@ class Music(commands.Cog):
                 except KeyError:
                     pass
                 else:
-                    tracks = wavelink.TrackPlaylist(
+
+                    tracks = LavalinkPlaylist(
                         {
                             'loadType': 'PLAYLIST_LOADED',
                             'playlistInfo': {
@@ -3767,7 +3758,9 @@ class Music(commands.Cog):
                                 'selectedTrack': -1
                             },
                             'tracks': cached_tracks
-                        }
+                        },
+                        requester=user.id,
+                        url=cached_tracks[0]["info"]["extra"]["playlist"]["url"]
                     )
 
             if not tracks:
@@ -3789,7 +3782,9 @@ class Music(commands.Cog):
                             node_search = node
 
                     try:
-                        tracks = await node_search.get_tracks(query)
+                        tracks = await node_search.get_tracks(
+                            query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
+                        )
                     except ClientConnectorCertificateError:
                         node_search.available = False
 
@@ -3799,7 +3794,9 @@ class Music(commands.Cog):
                                 continue
 
                             try:
-                                tracks = await n.get_tracks(query)
+                                tracks = await n.get_tracks(
+                                    query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
+                                )
                                 node_search = n
                                 break
                             except ClientConnectorCertificateError:
@@ -3813,31 +3810,9 @@ class Music(commands.Cog):
             raise GenericError("Não houve resultados para sua busca.")
 
         if isinstance(tracks, list):
-
-            if isinstance(tracks[0], wavelink.Track):
-                tracks = [LavalinkTrack(track.id, track.info, requester=user.id, track_loops=track_loops) for track in
-                          tracks]
+            pass
 
         else:
-
-            if not isinstance(tracks, PartialPlaylist):
-
-                try:
-                    if tracks.tracks[0].info.get("sourceName") == "youtube":
-                        query = "https://www.youtube.com/playlist?list=" \
-                                f"{parse.parse_qs(parse.urlparse(query).query)['list'][0]}"
-                except IndexError:
-                    pass
-
-                playlist = {
-                    "name": tracks.data['playlistInfo']['name'],
-                    "url": query
-                } if not hide_playlist else {}
-
-                tracks.data['playlistInfo']["url"] = query
-
-                tracks.tracks = [LavalinkTrack(t.id, t.info, requester=user.id, playlist=playlist) for t in
-                                 tracks.tracks]
 
             if (selected := tracks.data['playlistInfo']['selectedTrack']) > 0:
                 tracks.tracks = tracks.tracks[selected:] + tracks.tracks[:selected]

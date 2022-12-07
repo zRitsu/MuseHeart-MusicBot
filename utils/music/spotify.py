@@ -58,9 +58,9 @@ async def process_spotify(bot: BotCore, requester: int, query: str, *, hide_play
 
     data = {
         'loadType': 'PLAYLIST_LOADED',
-        'playlistInfo': {'name': '', 'url': query},
+        'playlistInfo': {'name': ''},
         'sourceName': "spotify",
-        'tracks': []
+        'tracks_data': []
     }
 
     if url_type == "album":
@@ -90,7 +90,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str, *, hide_play
         for t in result.tracks:
             t.album = result
 
-        tracks = result.tracks
+        tracks_data = result.tracks
 
     elif url_type == "artist":
 
@@ -98,26 +98,24 @@ async def process_spotify(bot: BotCore, requester: int, query: str, *, hide_play
 
         data["playlistInfo"]["name"] = "As mais tocadas de: " + \
                                        [a.name for a in result[0].artists if a.id == url_id][0]
-        tracks = result
+        tracks_data = result
 
     elif url_type == "playlist":
-
         result = await bot.spotify.get_playlist(url_id)
-
-        if hide_playlist:
-            data["playlistInfo"].clear()
-        else:
-            data["playlistInfo"]["name"] = result.name
-
-        tracks = result.tracks
+        data["playlistInfo"]["name"] = result.name
+        tracks_data = result.tracks
 
     else:
         raise GenericError(f"**Link do spotify não reconhecido/suportado:**\n{query}")
 
-    if not tracks:
+    if not tracks_data:
         raise GenericError(f"**Não houve resultados no link do spotify informado...**")
 
-    for t in tracks:
+    data["playlistInfo"]["selectedTrack"] = -1
+
+    playlist = PartialPlaylist(data, url=query)
+
+    for t in tracks_data:
 
         try:
             thumb = t.album.images[1].url
@@ -131,18 +129,17 @@ async def process_spotify(bot: BotCore, requester: int, query: str, *, hide_play
             thumb=thumb,
             duration=t.duration.total_seconds() * 1000,
             source_name="spotify",
-            requester=requester
+            requester=requester,
+            playlist=playlist
         )
 
         try:
             track.info["extra"]["album"] = {
                 "name": t.album.name,
-                "url": t.album.uri
+                "url": t.album.external_urls["spotify"]
             }
         except (AttributeError, KeyError):
             pass
-
-        track.info["extra"]["playlist"] = data["playlistInfo"]
 
         if t.artists[0].name:
             track.info["extra"]["authors"] = [fix_characters(i.name) for i in t.artists if f"feat. {i.name.lower()}" not in t.name.lower()]
@@ -151,11 +148,9 @@ async def process_spotify(bot: BotCore, requester: int, query: str, *, hide_play
             track.info["extra"]["authors"] = ["Unknown Artist"]
             track.info["extra"]["authors_md"] = "`Unknown Artist`"
 
-        data["tracks"].append(track)
+        playlist.tracks.append(track)
 
-    data["playlistInfo"]["selectedTrack"] = -1
-
-    return PartialPlaylist(data)
+    return playlist
 
 
 def spotify_client(config: dict) -> Optional[Client]:

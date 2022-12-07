@@ -10,7 +10,7 @@ from utils.client import BotCore
 import json
 import asyncio
 from utils.music.checks import can_connect, ensure_bot_instance
-from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialTrack
+from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialTrack, PartialPlaylist, LavalinkPlaylist
 from utils.others import CustomContext
 
 
@@ -103,13 +103,53 @@ class PlayerSession(commands.Cog):
                 if data["volume"] != 100:
                     await player.set_volume(data["volume"])
 
+                playlists = {}
+
                 for info in data["tracks"]:
+
                     if info["sourceName"] == "spotify":
-                        t = PartialTrack(info=info)
+
+                        if playlist:=info.pop("playlist", None):
+
+                            try:
+                                playlist = playlists[playlist["url"]]
+                            except KeyError:
+                                playlist = PartialPlaylist(
+                                    {
+                                        'loadType': 'PLAYLIST_LOADED',
+                                        'playlistInfo': {
+                                            'name': playlist["name"],
+                                            'selectedTrack': -1
+                                        },
+                                        'tracks': []
+                                    }, url = playlist["url"]
+                                )
+
+                        t = PartialTrack(info=info, playlist=playlist)
+
                     else:
-                        t = LavalinkTrack(id_=info["id"], info=info)
+
+                        if playlist := info.pop("playlist", None):
+
+                            try:
+                                playlist = playlists[playlist["url"]]
+                            except KeyError:
+                                playlist = LavalinkPlaylist(
+                                    {
+                                        'loadType': 'PLAYLIST_LOADED',
+                                        'playlistInfo': {
+                                            'name': playlist["name"],
+                                            'selectedTrack': -1
+                                        },
+                                        'tracks': []
+                                    }, url=playlist["url"]
+                                )
+
+                        t = LavalinkTrack(id_=info["id"], info=info, playlist=playlist)
                     del t.info["id"]
                     player.queue.append(t)
+
+                playlists.clear()
 
                 for info in data["played"]:
                     if info["sourceName"] == "spotify":
@@ -178,14 +218,20 @@ class PlayerSession(commands.Cog):
 
                     if player.current:
                         player.current.info["id"] = player.current.id if not reset_ids else ""
+                        if player.current.playlist:
+                            player.current.info["playlist"] = {"name": player.current.playlist.name, "url": player.current.playlist.url}
                         tracks.append(player.current.info)
 
                     for t in player.queue:
                         t.info["id"] = t.id if not reset_ids else ""
+                        if t.playlist:
+                            t.info["playlist"] = {"name": t.playlist.name, "url": t.playlist.url}
                         tracks.append(t.info)
 
                     for t in player.played:
                         t.info["id"] = t.id if not reset_ids else ""
+                        if t.playlist:
+                            t.info["playlist"] = {"name": t.playlist.name, "url": t.playlist.url}
                         played.append(t.info)
 
                     if not tracks and not played:
