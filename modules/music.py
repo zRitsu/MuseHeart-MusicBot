@@ -254,8 +254,6 @@ class Music(commands.Cog):
                                          default="ytsearch"),
             repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.",
                                                 default=0),
-            hide_playlist: bool = commands.Param(description="Não incluir detalhes da playlist nas músicas.",
-                                                 default=False),
             server: str = commands.Param(name="server", desc="Usar um servidor de música específico na busca.",
                                          default=None)
     ):
@@ -270,7 +268,6 @@ class Music(commands.Cog):
             manual_selection=True,
             source=source,
             repeat_amount=repeat_amount,
-            hide_playlist=hide_playlist,
             server=server
         )
 
@@ -467,7 +464,7 @@ class Music(commands.Cog):
 
         await self.play.callback(self=self, inter=ctx, query=query, position=position, options=False,
                                  force_play="no", manual_selection=False,
-                                 source="ytsearch", repeat_amount=0, hide_playlist=False, server=None)
+                                 source="ytsearch", repeat_amount=0, server=None)
 
     @can_send_message_check()
     @check_voice()
@@ -479,8 +476,7 @@ class Music(commands.Cog):
     async def play_legacy(self, ctx: CustomContext, *, query: str = ""):
 
         await self.play.callback(self=self, inter=ctx, query=query, position=0, options=False, force_play="no",
-                                 manual_selection=False, source="ytsearch", repeat_amount=0, hide_playlist=False,
-                                 server=None)
+                                 manual_selection=False, source="ytsearch", repeat_amount=0, server=None)
 
     @can_send_message_check()
     @check_voice()
@@ -495,8 +491,7 @@ class Music(commands.Cog):
             raise GenericError("**Você não adicionou um nome ou link para tocar.**")
 
         await self.play.callback(self=self, inter=ctx, query=query, position=0, options=False, force_play="no",
-                                 manual_selection=True, source="ytsearch", repeat_amount=0, hide_playlist=False,
-                                 server=None)
+                                 manual_selection=True, source="ytsearch", repeat_amount=0, server=None)
 
     @can_send_message_check()
     @check_voice()
@@ -531,9 +526,6 @@ class Music(commands.Cog):
                                          default="ytsearch"),
             repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.",
                                                 default=0),
-            hide_playlist: bool = commands.Param(name="esconder_playlist",
-                                                 description="Não incluir detalhes da playlist nas músicas.",
-                                                 default=False),
             server: str = commands.Param(name="server", desc="Usar um servidor de música específico na busca.",
                                          default=None),
     ):
@@ -582,7 +574,7 @@ class Music(commands.Cog):
             static_player = guild_data['player_controller']
 
             if not inter.response.is_done():
-                ephemeral = hide_playlist or await self.is_request_channel(inter, data=guild_data, ignore_thread=True)
+                ephemeral = await self.is_request_channel(inter, data=guild_data, ignore_thread=True)
                 await inter.response.defer(ephemeral=ephemeral)
 
             if static_player['channel']:
@@ -645,7 +637,7 @@ class Music(commands.Cog):
             player: Optional[LavalinkPlayer] = None
 
         if ephemeral is None:
-            ephemeral = hide_playlist or await self.is_request_channel(inter, data=guild_data, ignore_thread=True)
+            ephemeral = await self.is_request_channel(inter, data=guild_data, ignore_thread=True)
 
         is_pin = None
 
@@ -793,8 +785,7 @@ class Music(commands.Cog):
         if not inter.response.is_done():
             await inter.response.defer(ephemeral=ephemeral)
 
-        tracks, node = await self.get_tracks(query, inter.user, node=node, track_loops=repeat_amount,
-                                             hide_playlist=hide_playlist)
+        tracks, node = await self.get_tracks(query, inter.user, node=node, track_loops=repeat_amount)
 
         if not player:
 
@@ -964,10 +955,7 @@ class Music(commands.Cog):
 
                 pos_txt = f" (Pos. {position + 1})"
 
-            if hide_playlist:
-                log_text = f"Adicionou uma playlist com {len(tracks.tracks)} música(s) {pos_txt}."
-            else:
-                log_text = f"{inter.author.mention} adicionou a playlist [`{fix_characters(tracks.name, 20)}`]({tracks.url}){pos_txt} `({len(tracks.tracks)})`."
+            log_text = f"{inter.author.mention} adicionou a playlist [`{fix_characters(tracks.name, 20)}`]({tracks.url}){pos_txt} `({len(tracks.tracks)})`."
 
             total_duration = 0
 
@@ -2881,7 +2869,6 @@ class Music(commands.Cog):
             "manual_selection": True,
             "source": "ytsearch",
             "repeat_amount": 0,
-            "hide_playlist": False,
             "server": None,
             "force_play": "no"
         }
@@ -2972,7 +2959,6 @@ class Music(commands.Cog):
                     "manual_selection": True,
                     "source": "ytsearch",
                     "repeat_amount": 0,
-                    "hide_playlist": False,
                     "server": None,
                     "force_play": "no"
                 }
@@ -3109,7 +3095,6 @@ class Music(commands.Cog):
                     "manual_selection": True,
                     "source": "ytsearch",
                     "repeat_amount": 0,
-                    "hide_playlist": False,
                     "server": None,
                     "force_play": "no",
                 }
@@ -3734,12 +3719,12 @@ class Music(commands.Cog):
 
     async def get_tracks(
             self, query: str, user: disnake.Member, node: wavelink.Node = None,
-            track_loops=0, hide_playlist=False, use_cache=True):
+            track_loops=0, use_cache=True):
 
         if not node:
             node = self.get_best_node()
 
-        tracks = await process_spotify(self.bot, user.id, query, hide_playlist=hide_playlist)
+        tracks = await process_spotify(self.bot, user.id, query)
 
         if not tracks:
 

@@ -17,7 +17,7 @@ def query_spotify_track(func, url_id: str):
     return func(url_id)
 
 
-async def process_spotify(bot: BotCore, requester: int, query: str, *, hide_playlist=False):
+async def process_spotify(bot: BotCore, requester: int, query: str):
 
     if not (matches := spotify_regex.match(query)):
         return
