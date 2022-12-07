@@ -170,6 +170,7 @@ class LavalinkTrack(wavelink.Track):
         except IndexError:
             pass
         super().__init__(*args, **kwargs)
+        self.title = fix_characters(self.title)
 
         try:
             self.info['sourceName']
