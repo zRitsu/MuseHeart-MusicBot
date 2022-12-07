@@ -18,7 +18,7 @@ from utils.music.spotify import process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, \
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen, check_pool_bots, \
     ensure_bot_instance, check_channel_limit
-from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialPlaylist, LavalinkPlaylist
+from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, google_search, percentage
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
@@ -457,10 +457,11 @@ class Music(commands.Cog):
         if not position:
             raise GenericError("Você não informou uma posição válida.**")
 
+        if position < 1:
+            raise GenericError("**Número da posição da fila tem que ser 1 ou superior.**")
+
         if not query:
             raise GenericError("Você não adicionou um nome ou link de uma música.**")
-
-        position -= 1
 
         await self.play.callback(self=self, inter=ctx, query=query, position=position, options=False,
                                  force_play="no", manual_selection=False,
@@ -3086,7 +3087,10 @@ class Music(commands.Cog):
                 if position:
                     if not position.isdigit():
                         raise GenericError("**A posição da fila tem que ser um número.**")
-                    position = int(position) - 1
+                    position = int(position)
+
+                    if position < 1:
+                        raise GenericError("**Número da posição da fila tem que ser 1 ou superior.**")
 
                 kwargs = {
                     "query": query,

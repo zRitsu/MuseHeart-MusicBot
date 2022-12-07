@@ -153,7 +153,7 @@ class LavalinkPlaylist:
                 self.url = f"https://www.youtube.com/playlist?list={parse.parse_qs(parse.urlparse(self.url).query)['list'][0]}"
         except IndexError:
             pass
-        self.tracks = [LavalinkTrack(id_=track['track'], info=track['info'], playlist=self) for track in data['tracks']]
+        self.tracks = [LavalinkTrack(id_=track['track'], info=track['info'], playlist=self, **kwargs) for track in data['tracks']]
 
     @property
     def name(self):
@@ -171,25 +171,21 @@ class LavalinkTrack(wavelink.Track):
             pass
         super().__init__(*args, **kwargs)
 
-        self.playlist: Optional[LavalinkPlaylist] = kwargs.pop("playlist", None)
-
-        if (info:=kwargs.pop("info", None)):
-            self.info = info
-            self.thumb = info["extra"]["thumb"]
-            return
-
-        try:
-            self.info["extra"]
-        except KeyError:
-            self.info["extra"] = {}
-
-        self.info["extra"]["track_loops"] = kwargs.pop('track_loops', 0)
-        self.info["extra"]["requester"] = kwargs.pop('requester', '')
-
         try:
             self.info['sourceName']
         except:
             self.info['sourceName'] = 'LavalinkTrack'
+
+        try:
+            self.info["extra"]
+        except KeyError:
+            self.info["extra"] = {
+                "track_loops": kwargs.pop('track_loops', 0),
+                "requester": kwargs.pop('requester', '')
+
+            }
+
+        self.playlist: Optional[LavalinkPlaylist] = kwargs.pop("playlist", None)
 
         if self.ytid:
             self.info["extra"]["thumb"] = f"https://img.youtube.com/vi/{self.ytid}/mqdefault.jpg"
