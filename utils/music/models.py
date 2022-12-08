@@ -366,6 +366,12 @@ class LavalinkPlayer(wavelink.Player):
 
     def setup_hints(self):
 
+        try:
+            (self.bot.player_static_skins[self.skin_static] if self.static else self.bot.player_skins[self.skin]).setup_features(self)
+        except:
+            self.auto_update = 0 # linha temporária para resolver possíveis problemas com skins custom criadas por usuarios antes desse commit.
+            self.controller_mode = True
+
         hints = list(self.initial_hints)
 
         if self.static:

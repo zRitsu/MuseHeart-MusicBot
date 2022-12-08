@@ -13,6 +13,13 @@ class DefaultStaticSkin:
         self.name = "default_static"
         self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1047187412666810448/default_static_skin.png"
 
+    def setup_features(self, player: LavalinkPlayer):
+        player.mini_queue_feature = False
+        player.controller_mode = True
+        player.auto_update = 0
+        player.hint_rate = player.bot.config["HINT_RATE"]
+        player.static = True
+
     def load(self, player: LavalinkPlayer) -> dict:
 
         data = {
@@ -45,7 +52,6 @@ class DefaultStaticSkin:
             )
 
         queue_img = ""
-        player.mini_queue_feature = False
 
         try:
             vc_txt = f"\n> *️⃣ **⠂Canal de voz:** [`{player.guild.me.voice.channel.name}`](http://discordapp.com/channels/{player.guild.id}/{player.guild.me.voice.channel.id})"
@@ -118,8 +124,6 @@ class DefaultStaticSkin:
         embed.description = txt
 
         embed.set_image(url=player.current.thumb or "https://media.discordapp.net/attachments/480195401543188483/987830071815471114/musicequalizer.gif")
-
-        player.auto_update = 0
 
         data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
 

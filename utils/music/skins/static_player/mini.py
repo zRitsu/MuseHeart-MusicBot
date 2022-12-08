@@ -14,6 +14,13 @@ class MiniStaticSkin:
         self.name = "mini_static"
         self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1047187413702807552/mini_static_skin.png"
 
+    def setup_features(self, player: LavalinkPlayer):
+        player.mini_queue_feature = False
+        player.controller_mode = True
+        player.auto_update = 0
+        player.hint_rate = player.bot.config["HINT_RATE"]
+        player.static = True
+
     def load(self, player: LavalinkPlayer) -> dict:
 
         data = {
@@ -64,8 +71,6 @@ class MiniStaticSkin:
             embed.add_field(name=f"{player.command_log_emoji} **⠂Última Interação:**",
                             value=f"{player.command_log}", inline=False)
 
-        player.mini_queue_feature = False
-
         embed.set_image(url=player.current.thumb or "https://media.discordapp.net/attachments/480195401543188483/987830071815471114/musicequalizer.gif")
 
         if queue_size:
@@ -91,8 +96,6 @@ class MiniStaticSkin:
 
         if player.current_hint:
             embed.set_footer(text=f"💡 Dica: {player.current_hint}")
-
-        player.auto_update = 0
 
         data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
 

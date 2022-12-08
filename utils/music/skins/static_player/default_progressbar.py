@@ -14,6 +14,13 @@ class DefaultProgressbarStaticSkin:
         self.name = "default_progressbar_static"
         self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1047187414176759860/progressbar_static_skin.png"
 
+    def setup_features(self, player: LavalinkPlayer):
+        player.mini_queue_feature = False
+        player.controller_mode = True
+        player.auto_update = 15
+        player.hint_rate = player.bot.config["HINT_RATE"]
+        player.static = True
+
     def load(self, player: LavalinkPlayer) -> dict:
 
         data = {
@@ -55,7 +62,6 @@ class DefaultProgressbarStaticSkin:
 
         vc_txt = ""
         queue_img = ""
-        player.mini_queue_feature = False
 
         try:
             vc_txt = f"\n> *️⃣ **⠂Canal de voz:** [`{player.guild.me.voice.channel.name}`](http://discordapp.com/channels/{player.guild.id}/{player.guild.me.voice.channel.id})"
@@ -130,8 +136,6 @@ class DefaultProgressbarStaticSkin:
         embed.set_image(url=player.current.thumb)
 
         data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
-
-        player.auto_update = 15 # tempo em segundos para atualizar
 
         data["components"] = [
             disnake.ui.Button(emoji="⏯️", custom_id=PlayerControls.pause_resume, style=get_button_style(player.paused)),

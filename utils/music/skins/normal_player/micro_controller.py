@@ -12,6 +12,13 @@ class MicroController:
         self.name = "micro_controller"
         self.preview = "https://media.discordapp.net/attachments/554468640942981147/1050285454186000464/micro_controller.png"
 
+    def setup_features(self, player: LavalinkPlayer):
+        player.mini_queue_feature = False
+        player.controller_mode = True
+        player.auto_update = 0
+        player.hint_rate = player.bot.config["HINT_RATE"]
+        player.static = False
+
     def load(self, player: LavalinkPlayer) -> dict:
 
         data = {

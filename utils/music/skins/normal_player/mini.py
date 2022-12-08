@@ -13,6 +13,13 @@ class MiniSkin:
         self.name = "mini"
         self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1047184549790101574/skin_mini.png"
 
+    def setup_features(self, player: LavalinkPlayer):
+        player.mini_queue_feature = True
+        player.controller_mode = True
+        player.auto_update = 0
+        player.hint_rate = player.bot.config["HINT_RATE"]
+        player.static = False
+
     def load(self, player: LavalinkPlayer) -> dict:
 
         data = {
@@ -63,8 +70,6 @@ class MiniSkin:
             embed.add_field(name=f"{player.command_log_emoji} **⠂Última Interação:**",
                             value=f"{player.command_log}", inline=False)
 
-        player.mini_queue_feature = True
-
         if queue_size:
 
             embed.description += f" `({queue_size})`"
@@ -84,8 +89,6 @@ class MiniSkin:
 
         if player.current_hint:
             embed.set_footer(text=f"💡 Dica: {player.current_hint}")
-
-        player.auto_update = 0
 
         data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
 

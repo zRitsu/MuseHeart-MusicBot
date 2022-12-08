@@ -14,6 +14,13 @@ class EmbedLinkStaticSkin:
         self.name = "embed_link_static"
         self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1047187413325324319/embed_link_static_skin.png"
 
+    def setup_features(self, player: LavalinkPlayer):
+        player.mini_queue_feature = False
+        player.controller_mode = True
+        player.auto_update = 0
+        player.hint_rate = player.bot.config["HINT_RATE"]
+        player.static = True
+
     def load(self, player: LavalinkPlayer) -> dict:
 
         txt = ""
@@ -71,9 +78,6 @@ class EmbedLinkStaticSkin:
                 qtext += f"\n╚═ [0;37mE mais[0m [0;35m{qsize}[0m [0;37mmúsicas(s).[0m"
 
             txt = qtext + "```\n" + txt
-
-        player.auto_update = 0
-        player.mini_queue_feature = False
 
         return {
             "content": txt,

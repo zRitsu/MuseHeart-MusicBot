@@ -10,6 +10,13 @@ class LiteSkin:
         self.name = "lite"
         self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1047184549425184888/skin_lite.png"
 
+    def setup_features(self, player: LavalinkPlayer):
+        player.mini_queue_feature = False
+        player.controller_mode = False
+        player.auto_update = 0
+        player.hint_rate = 9
+        player.static = False
+
     def load(self, player: LavalinkPlayer) -> dict:
 
         data = {
@@ -32,10 +39,6 @@ class LiteSkin:
 
         if player.current_hint:
             data["embeds"].append(disnake.Embed(color=player.bot.get_color(player.guild.me)).set_footer(text=f"💡 Dica: {player.current_hint}"))
-
-        player.hint_rate = 9
-        player.controller_mode = False
-        player.mini_queue_feature = False
 
         return data
 

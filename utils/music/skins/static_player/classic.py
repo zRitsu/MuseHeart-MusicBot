@@ -13,6 +13,13 @@ class ClassicStaticSkin:
         self.name = "classic_static"
         self.preview = "https://media.discordapp.net/attachments/554468640942981147/1047187412343853146/classic_static_skin.png"
 
+    def setup_features(self, player: LavalinkPlayer):
+        player.mini_queue_feature = False
+        player.controller_mode = True
+        player.auto_update = 0
+        player.hint_rate = player.bot.config["HINT_RATE"]
+        player.static = True
+
     def load(self, player: LavalinkPlayer) -> dict:
 
         data = {
@@ -27,7 +34,6 @@ class ClassicStaticSkin:
         embed.description = f"[**{player.current.title}**]({player.current.uri})\n\n"
         embed.set_image(url=player.current.thumb)
         embed_top = None
-        player.mini_queue_feature = False
 
         if not player.paused:
             (embed_top or embed).set_author(
