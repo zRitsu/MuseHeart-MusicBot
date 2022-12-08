@@ -36,7 +36,9 @@ class MicroController:
             embed.description += f"\n\n{player.command_log_emoji} ⠂**Última Interação:** {player.command_log}"
 
         if player.current_hint:
-            embed.set_footer(text=f"💡 Dica: {player.current_hint}")
+            embed_hint = disnake.Embed(colour=embed_color)
+            embed_hint.set_footer(text=f"💡 Dica: {player.current_hint}")
+            data["embeds"].append(embed_hint)
 
         player.auto_update = 0
         player.mini_queue_feature = False
