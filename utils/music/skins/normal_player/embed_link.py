@@ -14,7 +14,7 @@ class EmbedLinkSkin:
     def __init__(self):
 
         self.name = "embed_link"
-        self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1047184546883440721/skin_embed.png"
+        self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1050297414986252308/embed_link.png"
 
     def load(self, player: LavalinkPlayer) -> dict:
 
