@@ -39,6 +39,7 @@ class MicroController:
             embed.set_footer(text=f"💡 Dica: {player.current_hint}")
 
         player.auto_update = 0
+        player.mini_queue_feature = False
 
         data["embeds"].append(embed)
 
