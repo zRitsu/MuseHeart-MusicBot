@@ -103,7 +103,7 @@ class Misc(commands.Cog):
         )
 
         if cmd:=self.bot.get_command("setup"):
-            embed.description += f"Caso queira, use o comando **/{cmd.name}** para criar um canal dedicado para pedir " \
+            embed.description += f"Se desejar, use o comando **/{cmd.name}** para criar um canal dedicado para pedir " \
                                  "músicas sem comandos e deixar o music player fixo em um canal dedicado.\n\n"
 
         if not self.bot.command_sync_flags.sync_commands and self.bot.config["INTERACTION_BOTS"]:
@@ -122,7 +122,7 @@ class Misc(commands.Cog):
                                      f"seguintes bots no servidor: {interaction_invites}\n\n"
 
         if components:
-            embed.description += "Precisa de mais bots de música? Clique no botão abaixo para adicionar meus bots extras."
+            embed.description += "Precisa de mais bots de música? Clique no botão abaixo para adicionar mais bots extras."
 
         try:
             await guild.system_channel.send(embed=embed, components=components)

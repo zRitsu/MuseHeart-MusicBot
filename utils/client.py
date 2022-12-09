@@ -325,11 +325,11 @@ class BotPool:
                                     interaction_invites += f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) "
 
                                 embed = disnake.Embed(
-                                    description="Aviso: para usar todos os meus comandos de barra (/) será necessário "
-                                                "ter os comandos de barra de uma das integrações listadas abaixo no seu servidor:\n"
-                                                f"{interaction_invites}\n\n"
-                                                "Se aparecer nenhum comando das integrações citadas acima, "
-                                                "clique em uma delas para adicioná-la no seu servidor.",
+                                    description="Aviso: todos os meus comandos de barra (/) funcionam através dos "
+                                                f"comandos de barra do bot abaixo:\n{interaction_invites}\n\n"
+                                                "Caso os comandos do bot acima não sejam exibidos ao digitar barra (/), "
+                                                "clique no nome do bot acima para integrar os comandos de barra no seu "
+                                                "servidor.",
                                     color=bot.get_color()
                                 )
 
