@@ -400,7 +400,7 @@ class PinManager(commands.Cog):
 
         embed = disnake.Embed(
             description=f"**Os dados dos links de músicas/playlists fixas do servidor estão aqui.\n"
-                        f"Você pode importar usando o comando:** `/{self.server_playlist.name} {self.manager.name}`",
+                        f"Você pode importar usando o comando:** `/{self.server_playlist.name} {self.import_.name}`",
             color=self.bot.get_color(guild.me))
 
         await inter.edit_original_message(embed=embed, file=disnake.File(fp=fp, filename="guild_favs.json"), view=None)
