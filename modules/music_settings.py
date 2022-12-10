@@ -920,11 +920,20 @@ class MusicSettings(commands.Cog):
                         continue
 
                     if global_mode:
-                        player.skin = select_view.global_skin_selected
-                        player.skin_static = select_view.global_static_skin_selected
+                        skin = select_view.global_skin_selected
+                        skin_static = select_view.global_static_skin_selected
                     else:
-                        player.skin = select_view.skin_selected
-                        player.skin_static = select_view.static_skin_selected
+                        skin = select_view.skin_selected
+                        skin_static = select_view.static_skin_selected
+
+                    if player.static and skin_static == player.skin_static:
+                        continue
+
+                    elif skin == player.skin:
+                        continue
+
+                    player.skin = skin
+                    player.skin_static = skin_static
                     player.setup_hints()
                     player.process_hint()
                     player.set_command_log(text=f"{inter.author.mention} alterou a skin do player.", emoji="🎨")
