@@ -810,8 +810,6 @@ class Music(commands.Cog):
 
             global_data = await self.bot.get_global_data(guild.id, db_name=DBModel.guilds)
 
-            pprint.pprint(global_data)
-
             if global_data["global_skin"]:
                 skin = global_data["player_skin"] or guild_data["player_controller"]["skin"]
                 static_skin = global_data["player_skin_static"] or guild_data["player_controller"]["static_skin"]
