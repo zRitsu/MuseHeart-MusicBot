@@ -32,13 +32,14 @@ class SkinSelector(disnake.ui.View):
             select_opts: list,
             static_select_opts: list,
             global_select_opts: list = None,
-            global_static_select_opts: list = None
+            global_static_select_opts: list = None,
+            global_mode=None
     ):
         super().__init__(timeout=180)
         self.ctx = ctx
         self.interaction: Optional[disnake.MessageInteraction] = None
         self.skin_selected = None
-        self.global_mode = None
+        self.global_mode = global_mode
         self.static_skin_selected = None
         self.global_skin_selected = None
         self.global_static_skin_selected = None
@@ -802,12 +803,11 @@ class MusicSettings(commands.Cog):
             global_skins_opts = []
             global_static_skins_opts = []
 
-        select_view = SkinSelector(inter, skins_opts, static_skins_opts, global_skins_opts, global_static_skins_opts)
+        select_view = SkinSelector(inter, skins_opts, static_skins_opts, global_skins_opts, global_static_skins_opts, global_mode)
         select_view.skin_selected = selected
         select_view.static_skin_selected = static_selected
         select_view.global_skin_selected = global_selected
         select_view.global_static_skin_selected = global_static_selected
-        select_view.global_mode = global_mode
 
         try:
             func = inter.store_message.edit
