@@ -856,7 +856,7 @@ class MusicSettings(commands.Cog):
 
         await bot.update_data(inter.guild_id, guild_data, db_name=DBModel.guilds)
 
-        if global_data and global_mode != select_view.global_mode:
+        if global_data:
             global_data.update(
                 {
                     "global_skin": select_view.global_mode,
