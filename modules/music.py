@@ -808,14 +808,16 @@ class Music(commands.Cog):
 
         if not player:
 
-            global_data = await self.bot.get_global_data(guild.id, db_name=DBModel.guilds)
+            skin = guild_data["player_controller"]["skin"]
+            static_skin = guild_data["player_controller"]["static_skin"]
 
-            if global_data["global_skin"]:
-                skin = global_data["player_skin"] or guild_data["player_controller"]["skin"]
-                static_skin = global_data["player_skin_static"] or guild_data["player_controller"]["static_skin"]
-            else:
-                skin = guild_data["player_controller"]["skin"]
-                static_skin = guild_data["player_controller"]["static_skin"]
+            if self.bot.config["GLOBAL_PREFIX"]:
+
+                global_data = await self.bot.get_global_data(guild.id, db_name=DBModel.guilds)
+
+                if global_data["global_skin"]:
+                    skin = global_data["player_skin"] or guild_data["player_controller"]["skin"]
+                    static_skin = global_data["player_skin_static"] or guild_data["player_controller"]["static_skin"]
 
             player: LavalinkPlayer = bot.music.get_player(
                 guild_id=inter.guild_id,
@@ -3331,14 +3333,16 @@ class Music(commands.Cog):
             player = self.bot.music.players[message.guild.id]
         except KeyError:
 
-            global_data = await self.bot.get_global_data(message.guild.id, db_name=DBModel.guilds)
+            skin = data["player_controller"]["skin"]
+            static_skin = data["player_controller"]["static_skin"]
 
-            if global_data["global_skin"]:
-                skin = global_data["player_skin"] or data["player_controller"]["skin"]
-                static_skin = global_data["player_skin_static"] or data["player_controller"]["static_skin"]
-            else:
-                skin = data["player_controller"]["skin"]
-                static_skin = data["player_controller"]["static_skin"]
+            if self.bot.config["GLOBAL_PREFIX"]:
+
+                global_data = await self.bot.get_global_data(message.guild.id, db_name=DBModel.guilds)
+
+                if global_data["global_skin"]:
+                    skin = global_data["player_skin"] or data["player_controller"]["skin"]
+                    static_skin = global_data["player_skin_static"] or data["player_controller"]["static_skin"]
 
             player: LavalinkPlayer = self.bot.music.get_player(
                 guild_id=message.guild.id,
