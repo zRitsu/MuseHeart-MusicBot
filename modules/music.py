@@ -78,7 +78,20 @@ class Music(commands.Cog):
         async with ctx.typing():
             tracks, node = await self.get_tracks(url, ctx.author, use_cache=False)
 
-        self.bot.pool.playlist_cache[url] = [{"track": t.id, "info": t.info} for t in tracks]
+        tracks_info = []
+
+        try:
+            tracks = tracks.tracks
+        except AttributeError:
+            pass
+
+        for t in tracks:
+
+            tinfo = {"track": t.id, "info": t.info}
+            tinfo["info"]["extra"]["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
+            tracks_info.append(tinfo)
+
+        self.bot.pool.playlist_cache[url] = tracks_info
 
         await self.update_cache()
 
@@ -125,16 +138,22 @@ class Music(commands.Cog):
                 txt += f"[`❌ Falha`]({url})\n"
 
             else:
-                newtracks = [
-                    LavalinkTrack(
-                        t.id, t.info,
-                        requester=ctx.author.id,
-                        playlist={"name": tracks.data['playlistInfo']['name'], "url": url}
-                    ) for t in tracks.tracks]
 
-                self.bot.pool.playlist_cache[url] = [{"track": t.id, "info": t.info} for t in newtracks]
+                tracks_info = []
 
-                txt += f"[`{tracks.data['playlistInfo']['name']}`]({url})\n"
+                try:
+                    tracks = tracks.tracks
+                except AttributeError:
+                    pass
+
+                for t in tracks:
+                    tinfo = {"track": t.id, "info": t.info}
+                    tinfo["info"]["extra"]["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
+                    tracks_info.append(tinfo)
+
+                self.bot.pool.playlist_cache[url] = tracks_info
+
+                txt += f"[`{tracks_info[0]['info']['extra']['playlist']['name']}`]({url})\n"
 
             counter += 1
 
