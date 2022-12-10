@@ -392,7 +392,7 @@ class PinManager(commands.Cog):
 
         if not guild_data["player_controller"]["fav_links"]:
             raise GenericError(f"**Não há músicas/playlists fixadas no servidor..\n"
-                               f"Você pode adicionar usando o comando: /{self.pin.name} {self.add.name}**")
+                               f"Você pode adicionar usando o comando: /{self.server_playlist.name} {self.export.name}**")
 
         fp = BytesIO(bytes(json.dumps(guild_data["player_controller"]["fav_links"], indent=4), 'utf-8'))
 
@@ -400,7 +400,7 @@ class PinManager(commands.Cog):
 
         embed = disnake.Embed(
             description=f"**Os dados dos links de músicas/playlists fixas do servidor estão aqui.\n"
-                        f"Você pode importar usando o comando:** `/{self.pin.name} {self.add.name}`",
+                        f"Você pode importar usando o comando:** `/{self.server_playlist.name} {self.manager.name}`",
             color=self.bot.get_color(guild.me))
 
         await inter.edit_original_message(embed=embed, file=disnake.File(fp=fp, filename="guild_favs.json"), view=None)
