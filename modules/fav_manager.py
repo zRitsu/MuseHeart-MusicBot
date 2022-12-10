@@ -240,9 +240,9 @@ class FavManager(commands.Cog):
     async def fav(self, inter: disnake.ApplicationCommandInteraction):
         pass
 
-    @ensure_bot_instance(return_first=True)
     @commands.max_concurrency(1, commands.BucketType.user)
     @commands.cooldown(3, 30, commands.BucketType.user)
+    @ensure_bot_instance(return_first=True)
     @commands.command(name="favmanager", aliases=["favs", "favoritos", "fvmgr"],
                       description="Gerenciar suas playlists/favoritos.")
     async def favmanager_legacy(self, ctx: CustomContext):

@@ -195,8 +195,8 @@ class Owner(commands.Cog):
             )
         )
 
-    @ensure_bot_instance(return_first=True)
     @commands.is_owner()
+    @ensure_bot_instance(return_first=True)
     @panel_command(aliases=["rd", "recarregar"], description="Recarregar os módulos.", emoji="🔄",
                    alt_name="Carregar/Recarregar módulos.")
     async def reload(self, ctx: Union[CustomContext, disnake.MessageInteraction]):
@@ -227,9 +227,9 @@ class Owner(commands.Cog):
         else:
             return txt
 
-    @ensure_bot_instance(return_first=True)
     @commands.is_owner()
     @commands.max_concurrency(1, commands.BucketType.default)
+    @ensure_bot_instance(return_first=True)
     @panel_command(aliases=["up", "atualizar"], description="Atualizar meu code usando o git.",
                    emoji="<:git:944873798166020116>", alt_name="Atualizar Bot")
     async def update(self, ctx: Union[CustomContext, disnake.MessageInteraction], *,
@@ -441,8 +441,8 @@ class Owner(commands.Cog):
 
         return out_git
 
-    @ensure_bot_instance(return_first=True)
     @commands.is_owner()
+    @ensure_bot_instance(return_first=True)
     @panel_command(aliases=["latest", "lastupdate"], description="Ver minhas atualizações mais recentes.", emoji="📈",
                    alt_name="Ultimas atualizações")
     async def updatelog(self, ctx: Union[CustomContext, disnake.MessageInteraction], amount: int = 10):
@@ -487,8 +487,8 @@ class Owner(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @ensure_bot_instance(return_first=True)
     @commands.is_owner()
+    @ensure_bot_instance(return_first=True)
     @panel_command(aliases=["sync"], description="Sincronizar os comandos de barra manualmente.",
                    emoji="<:slash:944875586839527444>",
                    alt_name="Sincronizar comandos manualmente.")
@@ -625,8 +625,8 @@ class Owner(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @ensure_bot_instance(return_first=True)
     @commands.is_owner()
+    @ensure_bot_instance(return_first=True)
     @panel_command(aliases=["expsource", "export", "exs"],
                    description="Exportar minha source para um arquivo zip.", emoji="💾",
                    alt_name="Exportar source/código-fonte.")
