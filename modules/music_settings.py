@@ -26,12 +26,22 @@ other_bots_vc_opts = commands.option_enum(
 
 class SkinSelector(disnake.ui.View):
 
-    def __init__(self, ctx: Union[disnake.AppCmdInter, CustomContext], select_opts: list, static_select_opts: list):
+    def __init__(
+            self,
+            ctx: Union[disnake.AppCmdInter, CustomContext],
+            select_opts: list,
+            static_select_opts: list,
+            global_select_opts: list = None,
+            global_static_select_opts: list = None
+    ):
         super().__init__(timeout=180)
         self.ctx = ctx
         self.interaction: Optional[disnake.MessageInteraction] = None
-        self.skin_selected = "default"
-        self.static_skin_selected = "default"
+        self.skin_selected = None
+        self.global_mode = None
+        self.static_skin_selected = None
+        self.global_skin_selected = None
+        self.global_static_skin_selected = None
 
         select_opts = disnake.ui.Select(options=select_opts, min_values=1, max_values=1)
         select_opts.callback = self.skin_callback
@@ -41,7 +51,21 @@ class SkinSelector(disnake.ui.View):
         static_select_opts.callback = self.static_skin_callback
         self.add_item(static_select_opts)
 
-        confirm_button = disnake.ui.Button(label="Salvar Alterações", emoji="💾")
+        if global_select_opts:
+
+            global_select_opts = disnake.ui.Select(options=global_select_opts, min_values=1, max_values=1)
+            global_select_opts.callback = self.global_skin_callback
+            self.add_item(global_select_opts)
+
+            global_static_select_opts = disnake.ui.Select(options=global_static_select_opts, min_values=1, max_values=1)
+            global_static_select_opts.callback = self.global_static_skin_callback
+            self.add_item(global_static_select_opts)
+
+            global_mode = disnake.ui.Button(label=("Desativar" if self.global_mode else "Ativar") + " modo Global ", emoji="🌐")
+            global_mode.callback = self.mode_callback
+            self.add_item(global_mode)
+
+        confirm_button = disnake.ui.Button(label="Salvar", emoji="💾")
         confirm_button.callback = self.confirm_callback
         self.add_item(confirm_button)
 
@@ -63,6 +87,19 @@ class SkinSelector(disnake.ui.View):
     async def static_skin_callback(self, inter: disnake.MessageInteraction):
         self.static_skin_selected = inter.data.values[0]
         await inter.response.defer()
+
+    async def global_skin_callback(self, inter: disnake.MessageInteraction):
+        self.global_skin_selected = inter.data.values[0]
+        await inter.response.defer()
+
+    async def global_static_skin_callback(self, inter: disnake.MessageInteraction):
+        self.global_static_skin_selected = inter.data.values[0]
+        await inter.response.defer()
+
+    async def mode_callback(self, inter: disnake.MessageInteraction):
+        self.global_mode = not self.global_mode
+        self.children[4].label = ("Desativar" if self.global_mode else "Ativar") + " modo global"
+        await inter.response.edit_message(view=self)
 
     async def confirm_callback(self, inter: disnake.MessageInteraction):
         self.interaction = inter
@@ -123,7 +160,6 @@ class MusicSettings(commands.Cog):
     @ensure_bot_instance(return_first=True)
     @commands.command(aliases=["mgf", "migrarfavoritos", "migrate"],
                       description="Migrar seus favoritos para database global (comando temporário).")
-    @ensure_bot_instance()
     async def migratefav(self, ctx: CustomContext):
 
         async with ctx.typing():
@@ -747,12 +783,31 @@ class MusicSettings(commands.Cog):
         selected = guild_data["player_controller"]["skin"] or bot.default_skin
         static_selected = guild_data["player_controller"]["static_skin"] or bot.default_static_skin
 
-        skins_opts = [disnake.SelectOption(emoji="🎨", label=f"Modo normal: {s}", value=s, default=selected == s) for s in skin_list]
-        static_skins_opts = [disnake.SelectOption(emoji="🎨", label=f"Song-Request: {s}", value=s, default=static_selected == s) for s in static_skin_list]
+        skins_opts = [disnake.SelectOption(emoji="🎨", label=f"Modo normal: {s}", value=s, **{"default": True, "description": "skin atual"} if selected == s else {}) for s in skin_list]
+        static_skins_opts = [disnake.SelectOption(emoji="🎨", label=f"Song-Request: {s}", value=s, **{"default": True, "description": "skin atual"} if static_selected == s else {}) for s in static_skin_list]
 
-        select_view = SkinSelector(inter, skins_opts, static_skins_opts)
+        if self.bot.config["GLOBAL_PREFIX"]:
+            global_data = await bot.get_global_data(guild.id, db_name=DBModel.guilds)
+            global_selected = global_data["player_skin"] or bot.default_skin
+            global_static_selected = global_data["player_skin_static"] or bot.default_static_skin
+            global_mode = global_data["global_skin"]
+            global_skins_opts = [disnake.SelectOption(emoji="🎨", label=f"Global Modo Normal: {s}", value=s, **{"default": True, "description": "skin atual"} if global_selected == s else {}) for s in skin_list]
+            global_static_skins_opts = [disnake.SelectOption(emoji="🎨", label=f"Global Song-Request: {s}", value=s, **{"default": True, "description": "skin atual"} if global_static_selected == s else {}) for s in static_skin_list]
+
+        else:
+            global_data = {}
+            global_selected = None
+            global_static_selected = None
+            global_mode = None
+            global_skins_opts = []
+            global_static_skins_opts = []
+
+        select_view = SkinSelector(inter, skins_opts, static_skins_opts, global_skins_opts, global_static_skins_opts)
         select_view.skin_selected = selected
         select_view.static_skin_selected = static_selected
+        select_view.global_skin_selected = global_selected
+        select_view.global_static_skin_selected = global_static_selected
+        select_view.global_mode = global_mode
 
         try:
             func = inter.store_message.edit
@@ -768,6 +823,9 @@ class MusicSettings(commands.Cog):
                         "**Modo fixo (song-request):**\n\n" + "\n".join(f"`{s}` [`(visualizar)`]({bot.player_static_skins[s].preview})" for s in static_skin_list),
             colour=bot.get_color(guild.me)
         )
+
+        if bot.user.id != self.bot.user.id:
+            embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
 
         msg = await func(
             embed=embed,
@@ -798,11 +856,41 @@ class MusicSettings(commands.Cog):
 
         await bot.update_data(inter.guild_id, guild_data, db_name=DBModel.guilds)
 
+        if global_data and global_mode != select_view.global_mode:
+            global_data.update(
+                {
+                    "global_skin": select_view.global_mode,
+                    "player_skin": select_view.global_skin_selected,
+                    "player_skin_static": select_view.global_static_skin_selected
+                }
+            )
+            await bot.update_global_data(inter.guild_id, global_data, db_name=DBModel.guilds)
+
+        changed_skins_txt = ""
+
+        if selected != select_view.skin_selected:
+            changed_skins_txt += f"Modo Normal: `{select_view.skin_selected}`\n"
+
+        if static_selected != select_view.static_skin_selected:
+            changed_skins_txt += f"Song Request: `{select_view.static_skin_selected}`\n"
+
+        if global_selected != select_view.global_skin_selected:
+            changed_skins_txt += f"Global - Modo Normal: `{select_view.global_skin_selected}`\n"
+
+        if global_static_selected != select_view.global_static_skin_selected:
+            changed_skins_txt += f"Global - Song Request: `{select_view.global_static_skin_selected}`\n"
+
+        if global_mode != select_view.global_mode:
+            changed_skins_txt += "Skin Global: `" + ("Ativado" if select_view.global_mode else "Desativado") + "`\n"
+
+        if not changed_skins_txt:
+            txt = "**Não houve alterações nas configurações de skin...**"
+        else:
+            txt = f"**A skin do player do servidor foi alterado com sucesso.**\n{changed_skins_txt}"
+
         kwargs = {
             "embed": disnake.Embed(
-                description=f"**A skin do player do servidor foi alterado com sucesso.**\n"
-                            f"Modo normal: `{select_view.skin_selected}`\n"
-                            f"Modo fixo (song-request): `{select_view.static_skin_selected}`",
+                description=txt,
                 color=bot.get_color(guild.me)
             ).set_footer(text=f"{bot.user} - [{bot.user.id}]", icon_url=bot.user.display_avatar.with_format("png").url)
         }
@@ -825,12 +913,9 @@ class MusicSettings(commands.Cog):
             player.skin_static = select_view.static_skin_selected
             player.setup_hints()
             player.process_hint()
-            player.set_command_log(text=f"{inter.author.mention} alterou a skin do player para: "
-                                        f"**{select_view.skin_selected} / {select_view.static_skin_selected}**",
-                                   emoji="🎨")
+            player.set_command_log(text=f"{inter.author.mention} alterou a skin do player.", emoji="🎨")
             await player.invoke_np(force=True)
 
-    @ensure_bot_instance()
     @commands.cooldown(1, 5, commands.BucketType.user)
     @ensure_bot_instance(return_first=True)
     @commands.command(
