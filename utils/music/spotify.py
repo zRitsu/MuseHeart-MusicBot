@@ -1,5 +1,6 @@
 from __future__ import annotations
 import re
+import asyncspotify
 from .converters import fix_characters
 from .errors import MissingSpotifyClient, GenericError
 from asyncspotify import Client, ClientCredentialsFlow
@@ -101,7 +102,10 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
         tracks_data = result
 
     elif url_type == "playlist":
-        result = await bot.spotify.get_playlist(url_id)
+        try:
+            result = await bot.spotify.get_playlist(url_id)
+        except asyncspotify.NotFound:
+            raise GenericError("**Playlist não encontrada (ou está disponível apenas em contas logadas na plataforma).**")
         data["playlistInfo"]["name"] = result.name
         tracks_data = result.tracks
 
