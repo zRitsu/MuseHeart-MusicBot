@@ -201,8 +201,8 @@ class Music(commands.Cog):
 
     @check_voice()
     @can_send_message_check()
-    @ensure_bot_instance(check_player=False)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
+    @ensure_bot_instance(check_player=False)
     @commands.message_command(name="add to queue")
     async def message_play(self, inter: disnake.MessageCommandInteraction):
 
@@ -226,8 +226,8 @@ class Music(commands.Cog):
 
     @check_voice()
     @can_send_message_check()
-    @ensure_bot_instance(check_player=False)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
+    @ensure_bot_instance(check_player=False)
     @commands.slash_command(name="search",
                             description=f"{desc_prefix}Buscar música e escolher uma entre os resultados para tocar.")
     async def search(
@@ -445,11 +445,10 @@ class Music(commands.Cog):
 
     @can_send_message_check()
     @check_voice()
-    @ensure_bot_instance(check_player=False)
     @commands.bot_has_guild_permissions(send_messages=True)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.max_concurrency(1, commands.BucketType.member)
-    @ensure_bot_instance()
+    @ensure_bot_instance(check_player=False)
     @commands.command(name="addposition", description="Adicionar música em uma posição especifica da fila.",
                       aliases=["adp", "addpos"])
     async def addpos_legacy(self, ctx: CustomContext, position: Optional[int] = None, *, query: str = None):
@@ -469,10 +468,10 @@ class Music(commands.Cog):
 
     @can_send_message_check()
     @check_voice()
-    @ensure_bot_instance(check_player=False)
     @commands.bot_has_guild_permissions(send_messages=True)
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
+    @ensure_bot_instance(check_player=False)
     @commands.command(name="play", description="Tocar música em um canal de voz.", aliases=["p"])
     async def play_legacy(self, ctx: CustomContext, *, query: str = ""):
 
@@ -481,9 +480,9 @@ class Music(commands.Cog):
 
     @can_send_message_check()
     @check_voice()
-    @ensure_bot_instance(check_player=False)
     @commands.bot_has_guild_permissions(send_messages=True)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
+    @ensure_bot_instance(check_player=False)
     @commands.command(name="search", description="Pesquisar por músicas e escolher uma entre os resultados para tocar.",
                       aliases=["sc"])
     async def search_legacy(self, ctx: CustomContext, *, query: str = None):
@@ -496,8 +495,8 @@ class Music(commands.Cog):
 
     @can_send_message_check()
     @check_voice()
-    @ensure_bot_instance(check_player=False)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
+    @ensure_bot_instance(check_player=False)
     @commands.slash_command(
         name=disnake.Localized("play", data={disnake.Locale.pt_BR: "tocar"}),
         description=f"{desc_prefix}Tocar música em um canal de voz.")
@@ -595,7 +594,7 @@ class Music(commands.Cog):
 
                 else:
 
-                    if channel_db != channel:
+                    if channel_db.id != channel.id:
 
                         try:
                             if isinstance(channel_db, disnake.Thread):
@@ -790,6 +789,15 @@ class Music(commands.Cog):
 
         if not player:
 
+            global_data = await self.bot.get_global_data(guild.id, db_name=DBModel.guilds)
+
+            if global_data["global_skin"]:
+                skin = global_data["player_skin"] or guild_data["player_controller"]["skin"]
+                static_skin = global_data["player_skin_static"] or guild_data["player_controller"]["static_skin"]
+            else:
+                skin = guild_data["player_controller"]["skin"]
+                static_skin = guild_data["player_controller"]["static_skin"]
+
             player: LavalinkPlayer = bot.music.get_player(
                 guild_id=inter.guild_id,
                 cls=LavalinkPlayer,
@@ -799,8 +807,8 @@ class Music(commands.Cog):
                 last_message_id=guild_data['player_controller']['message_id'],
                 node_id=node.identifier,
                 static=bool(static_player['channel']),
-                skin=bot.check_skin(guild_data["player_controller"]["skin"]),
-                skin_static=bot.check_static_skin(guild_data["player_controller"]["static_skin"])
+                skin=bot.check_skin(skin),
+                skin_static=bot.check_static_skin(static_skin)
             )
 
             if static_player['channel']:
@@ -1047,8 +1055,8 @@ class Music(commands.Cog):
 
     @is_requester()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.max_concurrency(1, commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.command(name="skip", aliases=["next", "n", "s", "pular", "skipto"],
                       description=f"Pular a música atual que está tocando.")
     async def skip_legacy(self, ctx: CustomContext, *, query: str = None):
@@ -1061,9 +1069,9 @@ class Music(commands.Cog):
     @is_requester()
     @has_source()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(2, 8), commands.BucketType.guild)
     @commands.max_concurrency(1, commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.slash_command(
         name=disnake.Localized("skip", data={disnake.Locale.pt_BR: "pular"}),
         description=f"{desc_prefix}Pular a música atual que está tocando."
@@ -1144,9 +1152,9 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.dynamic_cooldown(user_cooldown(2, 8), commands.BucketType.guild)
+    @ensure_bot_instance(only_voiced=True)
     @commands.command(name="back", aliases=["b", "voltar"], description="Voltar para a música anterior.")
     async def back_legacy(self, ctx: CustomContext):
         await self.back.callback(self=self, inter=ctx)
@@ -1154,9 +1162,9 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.dynamic_cooldown(user_cooldown(2, 8), commands.BucketType.guild)
+    @ensure_bot_instance(only_voiced=True)
     @commands.slash_command(
         name=disnake.Localized("back", data={disnake.Locale.pt_BR: "voltar"}),
         description=f"{desc_prefix}Voltar para a música anterior."
@@ -1246,8 +1254,8 @@ class Music(commands.Cog):
     @is_dj()
     @has_source()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(1, 5), commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.command(name="volume", description="Ajustar volume da música.", aliases=["vol", "v"])
     async def volume_legacy(self, ctx: CustomContext, level: str = None):
 
@@ -1262,8 +1270,8 @@ class Music(commands.Cog):
     @is_dj()
     @has_source()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(1, 5), commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.slash_command(description=f"{desc_prefix}Ajustar volume da música.")
     async def volume(
             self,
@@ -1310,8 +1318,8 @@ class Music(commands.Cog):
     @is_dj()
     @has_source()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.command(name="pause", aliases=["pausar"], description="Pausar a música.")
     async def pause_legacy(self, ctx: CustomContext):
         await self.pause.callback(self=self, inter=ctx)
@@ -1319,8 +1327,8 @@ class Music(commands.Cog):
     @is_dj()
     @has_source()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.slash_command(
         name=disnake.Localized("pause", data={disnake.Locale.pt_BR: "pausar"}),
         description=f"{desc_prefix}Pausar a música."
@@ -1346,8 +1354,8 @@ class Music(commands.Cog):
     @is_dj()
     @has_source()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.command(name="resume", aliases=["unpause"], description="Retomar/Despausar a música.")
     async def resume_legacy(self, ctx: CustomContext):
         await self.resume.callback(self=self, inter=ctx)
@@ -1355,8 +1363,8 @@ class Music(commands.Cog):
     @is_dj()
     @has_source()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.slash_command(
         name=disnake.Localized("resume", data={disnake.Locale.pt_BR: "despausar"}),
         description=f"{desc_prefix}Retomar/Despausar a música."
@@ -1381,9 +1389,9 @@ class Music(commands.Cog):
     @is_dj()
     @has_source()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.member)
     @commands.max_concurrency(1, commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.command(name="seek", aliases=["sk"], description="Avançar/Retomar a música para um tempo específico.")
     async def seek_legacy(self, ctx: CustomContext, *, position: str = None):
 
@@ -1395,9 +1403,9 @@ class Music(commands.Cog):
     @is_dj()
     @has_source()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.member)
     @commands.max_concurrency(1, commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.slash_command(
         name=disnake.Localized("seek", data={disnake.Locale.pt_BR: "avançar"}),
         description=f"{desc_prefix}Avançar/Retomar a música para um tempo específico."
@@ -1501,9 +1509,9 @@ class Music(commands.Cog):
     @is_dj()
     @has_source()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(3, 5), commands.BucketType.member)
     @commands.max_concurrency(1, commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.command(description=f"Selecionar modo de repetição entre: música atual / fila / desativar / quantidade (usando números).")
     async def loop(self, ctx: CustomContext, mode: str = None):
 
@@ -1571,8 +1579,8 @@ class Music(commands.Cog):
     @is_dj()
     @has_source()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(3, 5), commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.slash_command(
         name=disnake.Localized("loop_mode", data={disnake.Locale.pt_BR: "modo_repetição"}),
         description=f"{desc_prefix}Selecionar modo de repetição entre: atual / fila ou desativar."
@@ -1631,8 +1639,8 @@ class Music(commands.Cog):
     @is_dj()
     @has_source()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(3, 5), commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.slash_command(
         name=disnake.Localized("loop_amount", data={disnake.Locale.pt_BR: "quantidade_repetição"}),
         description=f"{desc_prefix}Definir quantidade de repetições da música atual."
@@ -1664,8 +1672,8 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.max_concurrency(1, commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.command(name="remove", aliases=["r", "del"], description="Remover uma música específica da fila.")
     async def remove_legacy(self, ctx: CustomContext, *, query: str = None):
 
@@ -1716,9 +1724,9 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.guild)
+    @ensure_bot_instance(only_voiced=True)
     @commands.command(name="readd", aliases=["readicionar", "rdd"],
                       description="Readicionar as músicas tocadas na fila.")
     async def readd_legacy(self, ctx: CustomContext):
@@ -1727,8 +1735,8 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.guild)
+    @ensure_bot_instance(only_voiced=True)
     @commands.slash_command(
         name=disnake.Localized("readd_songs", data={disnake.Locale.pt_BR: "readicionar_músicas"}),
         description=f"{desc_prefix}Readicionar as músicas tocadas na fila."
@@ -1768,8 +1776,8 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.max_concurrency(1, commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.command(name="move", aliases=["mv", "mover"],
                       description="Mover uma música para a posição especificada da fila.")
     async def move_legacy(self, ctx: CustomContext, position: Optional[int], *, query: str = None):
@@ -1884,8 +1892,8 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.max_concurrency(1, commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.command(name="rotate", aliases=["rt", "rotacionar"],
                       description="Rotacionar a fila para a música especificada.")
     async def rotate_legacy(self, ctx: CustomContext, *, query: str = None):
@@ -1898,8 +1906,8 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.guild)
+    @ensure_bot_instance(only_voiced=True)
     @commands.slash_command(
         name=disnake.Localized("rotate", data={disnake.Locale.pt_BR: "rotacionar_fila"}),
         description=f"{desc_prefix}Rotacionar a fila para a música especificada."
@@ -1973,8 +1981,8 @@ class Music(commands.Cog):
     @is_dj()
     @has_source()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.max_concurrency(1, commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.command(name="nightcore", aliases=["nc"],
                       description="Ativar/Desativar o efeito nightcore (Música acelerada com tom mais agudo).")
     async def nightcore_legacy(self, ctx: CustomContext):
@@ -1984,8 +1992,8 @@ class Music(commands.Cog):
     @is_dj()
     @has_source()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.cooldown(1, 5, commands.BucketType.guild)
+    @ensure_bot_instance(only_voiced=True)
     @commands.slash_command(
         description=f"{desc_prefix}Ativar/Desativar o efeito nightcore (Música acelerada com tom mais agudo).")
     async def nightcore(self, inter: disnake.AppCmdInter):
@@ -2013,16 +2021,16 @@ class Music(commands.Cog):
 
     @has_source()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.cooldown(1, 10, commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.command(name="controller", aliases=["np", "ctl"], description="Enviar player controller para um canal específico/atual.")
     async def controller_legacy(self, ctx: CustomContext):
         await self.controller.callback(self=self, inter=ctx)
 
     @has_source()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.cooldown(1, 10, commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.slash_command(description=f"{desc_prefix}Enviar player controller para um canal específico/atual.")
     async def controller(self, inter: disnake.AppCmdInter):
 
@@ -2261,16 +2269,16 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(3, 5), commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.command(name="shuffle", aliases=["sf", "shf", "sff", "misturar"],
                       description="Misturar as músicas da fila")
     async def shuffle_legacy(self, ctx: CustomContext):
         await self.shuffle_.callback(self, inter=ctx)
 
     @is_dj()
-    @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(3, 5), commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @q.sub_command(
         name=disnake.Localized("shuffle", data={disnake.Locale.pt_BR: "misturar"}),
         description=f"{desc_prefix}Misturar as músicas da fila")
@@ -2298,16 +2306,16 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(1, 5), commands.BucketType.guild)
+    @ensure_bot_instance(only_voiced=True)
     @commands.command(name="reverse", aliases=["invert", "inverter", "rv"],
                       description="Inverter a ordem das músicas na fila")
     async def reverse_legacy(self, ctx: CustomContext):
         await self.reverse.callback(self=self, inter=ctx)
 
     @is_dj()
-    @ensure_bot_instance(only_voiced=True)
     @commands.dynamic_cooldown(user_cooldown(1, 5), commands.BucketType.guild)
+    @ensure_bot_instance(only_voiced=True)
     @q.sub_command(
         name=disnake.Localized("reverse", data={disnake.Locale.pt_BR: "inverter"}),
         description=f"{desc_prefix}Inverter a ordem das músicas na fila"
@@ -2335,9 +2343,9 @@ class Music(commands.Cog):
     @check_voice()
     @has_player()
     @check_voice()
+    @commands.max_concurrency(1, commands.BucketType.member)
     @ensure_bot_instance(only_voiced=True)
     @commands.command(name="queue", aliases=["q", "fila"], description="Exibir as músicas que estão na fila.")
-    @commands.max_concurrency(1, commands.BucketType.member)
     async def queue_show_legacy(self, ctx: CustomContext):
         await self.display.callback(self=self, inter=ctx)
 
@@ -2370,9 +2378,9 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.max_concurrency(1, commands.BucketType.guild)
     @commands.cooldown(1, 5, commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.command(name="clear", aliases=["limpar"], description="Limpar a fila de música.")
     async def clear_legacy(self, ctx: CustomContext, *, range_track: str = None):
 
@@ -2391,9 +2399,9 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.max_concurrency(1, commands.BucketType.guild)
     @commands.cooldown(1, 5, commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.slash_command(
         name=disnake.Localized("clear_queue", data={disnake.Locale.pt_BR: "limpar_fila"}),
         description=f"{desc_prefix}Limpar a fila de música."
@@ -2588,8 +2596,8 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.cooldown(2, 5, commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.command(name="restrict", aliases=["rstc", "restrito"],
                       description="Ativar/Desativar o modo restrito de comandos que requer DJ/Staff.")
     async def restrict_mode_legacy(self, ctx: CustomContext):
@@ -2599,8 +2607,8 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.cooldown(2, 5, commands.BucketType.member)
+    @ensure_bot_instance(only_voiced=True)
     @commands.slash_command(
         name=disnake.Localized("restrict_mode", data={disnake.Locale.pt_BR: "modo_restrito"}),
         description=f"{desc_prefix}Ativar/Desativar o modo restrito de comandos que requer DJ/Staff.")
@@ -2626,9 +2634,9 @@ class Music(commands.Cog):
 
     @has_player()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.has_guild_permissions(manage_guild=True)
     @commands.cooldown(1, 5, commands.BucketType.user)
+    @ensure_bot_instance(only_voiced=True)
     @commands.command(name="247", aliases=["nonstop"],
                       description="Ativar/Desativar o modo 24/7 do player (Em testes).")
     async def nonstop_legacy(self, ctx: CustomContext):
@@ -2636,8 +2644,8 @@ class Music(commands.Cog):
 
     @has_player()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
     @commands.cooldown(1, 5, commands.BucketType.user)
+    @ensure_bot_instance(only_voiced=True)
     @commands.slash_command(
         name="247",
         description=f"{desc_prefix}Ativar/Desativar o modo 24/7 do player (Em testes).",
@@ -3300,17 +3308,31 @@ class Music(commands.Cog):
 
         tracks, node = await self.get_tracks(message.content, message.author)
 
-        player: LavalinkPlayer = self.bot.music.get_player(
-            guild_id=message.guild.id,
-            cls=LavalinkPlayer,
-            player_creator=message.author.id,
-            guild=message.guild,
-            channel=text_channel,
-            last_message_id=data['player_controller']['message_id'],
-            static=True,
-            skin=data["player_controller"]["skin"],
-            node_id=node.identifier
-        )
+        try:
+            player = self.bot.music.players[message.guild.id]
+        except KeyError:
+
+            global_data = await self.bot.get_global_data(message.guild.id, db_name=DBModel.guilds)
+
+            if global_data["global_skin"]:
+                skin = global_data["player_skin"] or data["player_controller"]["skin"]
+                static_skin = global_data["player_skin_static"] or data["player_controller"]["static_skin"]
+            else:
+                skin = data["player_controller"]["skin"]
+                static_skin = global_data["player_controller"]["static_skin"]
+
+            player: LavalinkPlayer = self.bot.music.get_player(
+                guild_id=message.guild.id,
+                cls=LavalinkPlayer,
+                player_creator=message.author.id,
+                guild=message.guild,
+                channel=text_channel,
+                last_message_id=data['player_controller']['message_id'],
+                static=True,
+                skin=self.bot.check_skin(skin),
+                skin_static=self.bot.check_static_skin(static_skin),
+                node_id=node.identifier
+            )
 
         if not player.message:
             try:
