@@ -910,20 +910,27 @@ class MusicSettings(commands.Cog):
             if not player.static:
                 await player.destroy_message()
 
-            if global_mode:
+            if global_mode != select_view.global_mode:
 
                 for bot in self.bot.pool.bots:
+
                     try:
                         player = bot.music.players[inter.guild_id]
                     except:
                         continue
-                    player.skin = select_view.global_skin_selected
-                    player.skin_static = select_view.global_static_skin_selected
+
+                    if global_mode:
+                        player.skin = select_view.global_skin_selected
+                        player.skin_static = select_view.global_static_skin_selected
+                    else:
+                        player.skin = select_view.skin_selected
+                        player.skin_static = select_view.static_skin_selected
                     player.setup_hints()
                     player.process_hint()
                     player.set_command_log(text=f"{inter.author.mention} alterou a skin do player.", emoji="🎨")
                     await player.invoke_np(force=True)
                     await asyncio.sleep(1.5)
+
             else:
                 player.skin = select_view.skin_selected
                 player.skin_static = select_view.static_skin_selected
