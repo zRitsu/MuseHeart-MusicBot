@@ -3216,6 +3216,10 @@ class Music(commands.Cog):
         try:
             if isinstance(message.channel, disnake.Thread):
                 if isinstance(message.channel.parent, disnake.ForumChannel):
+
+                    if message.channel.owner_id != self.bot.user.id:
+                        return
+
                     await message.delete()
             else:
                 await message.delete()

@@ -158,7 +158,7 @@ class ErrorHandler(commands.Cog):
                     kwargs["embed"].description += " `Meu desenvolvedor será notificado sobre o problema.`"
 
             else:
-                kwargs["content"] += "**. Ocorreu um erro no comando:**\n" \
+                kwargs["content"] += "\n**. Ocorreu um erro no comando:**\n" \
                                      "```py\n{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
 
         else:
