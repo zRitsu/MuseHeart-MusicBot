@@ -11,7 +11,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
-    from .client import BotCore
+    from utils.client import BotCore
 
 
 class DBModel:

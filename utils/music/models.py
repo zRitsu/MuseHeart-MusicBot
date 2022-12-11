@@ -6,16 +6,16 @@ import disnake
 import asyncio
 import wavelink
 from urllib import parse
-from .converters import fix_characters, time_format, get_button_style
-from .filters import AudioFilter
-from ..db import DBModel
-from ..others import send_idle_embed, PlayerControls
+from utils.music.converters import fix_characters, time_format, get_button_style
+from utils.music.filters import AudioFilter
+from utils.db import DBModel
+from utils.others import send_idle_embed, PlayerControls
 import traceback
 from collections import deque
 from typing import Optional, Union, TYPE_CHECKING, List
 
 if TYPE_CHECKING:
-    from ..client import BotCore
+    from utils.client import BotCore
 
 exclude_tags = ["remix", "edit", "extend"]
 

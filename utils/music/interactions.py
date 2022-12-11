@@ -1,6 +1,6 @@
 import disnake
 from disnake.ext import commands
-from .converters import time_format, fix_characters
+from utils.music.converters import time_format, fix_characters
 from typing import List, Union, Optional
 
 

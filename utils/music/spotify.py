@@ -1,12 +1,11 @@
 from __future__ import annotations
 import re
 import asyncspotify
-from .converters import fix_characters
-from .errors import MissingSpotifyClient, GenericError
+from utils.music.converters import fix_characters
+from utils.music.errors import MissingSpotifyClient, GenericError
 from asyncspotify import Client, ClientCredentialsFlow
+from utils.music.models import PartialPlaylist, PartialTrack
 from typing import Optional, TYPE_CHECKING
-
-from .models import PartialPlaylist, PartialTrack
 
 if TYPE_CHECKING:
     from utils.client import BotCore

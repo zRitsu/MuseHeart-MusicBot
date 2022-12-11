@@ -4,14 +4,14 @@ import traceback
 from typing import TYPE_CHECKING, Union
 import disnake
 from disnake.ext import commands
-from .errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, GenericError, \
-    MissingVoicePerms, DiffVoiceChannel, PoolException
-from .models import LavalinkPlayer
-from ..db import DBModel
-from ..others import CustomContext
+from utils.music.errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, \
+    GenericError, MissingVoicePerms, DiffVoiceChannel, PoolException
+from utils.music.models import LavalinkPlayer
+from utils.db import DBModel
+from utils.others import CustomContext
 
 if TYPE_CHECKING:
-    from ..client import BotCore
+    from utils.client import BotCore
 
 
 def can_send_message(

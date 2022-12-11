@@ -80,6 +80,7 @@ class SkinSelector(disnake.ui.View):
             return True
 
         await inter.send(f"Apenas {self.ctx.author.mention} pode interagir aqui!", ephemeral=True)
+        return False
 
     async def skin_callback(self, inter: disnake.MessageInteraction):
         self.skin_selected = inter.data.values[0]

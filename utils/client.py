@@ -13,13 +13,13 @@ import disnake
 from typing import Optional, Union, List
 from config_loader import load_config
 from web_app import WSClient, start
-from .music.checks import ensure_bot_instance
-from .music.errors import GenericError
-from .music.local_lavalink import run_lavalink
-from .music.models import music_mode
-from .music.spotify import spotify_client
+from utils.music.checks import ensure_bot_instance
+from utils.music.errors import GenericError
+from utils.music.local_lavalink import run_lavalink
+from utils.music.models import music_mode
+from utils.music.spotify import spotify_client
 from asyncspotify import Client
-from .owner_panel import PanelView
+from utils.owner_panel import PanelView
 from utils.db import MongoDatabase, LocalDatabase, guild_prefix, DBModel, global_db_models
 from asyncspotify import Client as SpotifyClient
 from utils.others import sync_message, CustomContext
