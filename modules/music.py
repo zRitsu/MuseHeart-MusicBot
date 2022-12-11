@@ -343,7 +343,6 @@ class Music(commands.Cog):
             bot: BotCore = None,
             me: disnake.Member = None,
             check_pool: bool = True,
-            player: Optional[LavalinkPlayer] = None
     ):
 
         if not channel:
@@ -374,12 +373,14 @@ class Music(commands.Cog):
         except AttributeError:
             text_channel = ctx.channel
 
-
-        if not player:
-            try:
-                player = bot.music.players[guild_id]
-            except KeyError:
-                raise NoPlayer()
+        try:
+            player = bot.music.players[guild_id]
+        except KeyError:
+            print(f"Player debug test 20: {bot.user} | {self.bot.user}")
+            raise GenericError(
+                f"**O player do bot {bot.user.mention} foi finalizado antes de conectar no canal de voz "
+                f"(ou o player não foi inicializado)...\nPor via das dúvidas tente novamente.**"
+            )
 
         can_connect(channel, me.guild, bot, check_other_bots_in_vc, check_pool)
 
@@ -1037,7 +1038,7 @@ class Music(commands.Cog):
             await self.do_connect(
                 inter, channel=inter.author.voice.channel,
                 check_other_bots_in_vc=guild_data["check_other_bots_in_vc"],
-                bot=bot, me=guild.me, check_pool=True, player=player
+                bot=bot, me=guild.me, check_pool=True
             )
 
         if not player.current:
