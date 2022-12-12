@@ -314,6 +314,7 @@ class LavalinkPlayer(wavelink.Player):
         self.hints: cycle = []
         self.current_hint: str = ""
         self.last_data: dict = {}
+        self.setup_features()
         self.setup_hints()
 
         self.bot.dispatch("player_create", player=self)
