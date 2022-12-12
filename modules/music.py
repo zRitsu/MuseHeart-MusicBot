@@ -1159,7 +1159,7 @@ class Music(commands.Cog):
                 f"⤵️ **⠂{inter.author.mention} pulou para a música:**\n╰[`{fix_characters(track.title, 43)}`]({track.uri})"
             ]
 
-            await self.interaction_message(inter, txt, emoji="⤵️")
+            await self.interaction_message(inter, txt, emoji="⤵️", store_embed=True)
 
         else:
 
