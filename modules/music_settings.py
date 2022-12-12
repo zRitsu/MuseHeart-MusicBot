@@ -903,51 +903,62 @@ class MusicSettings(commands.Cog):
         else:
             await inter.send(ephemeral=True, **kwargs)
 
-        try:
-            player: LavalinkPlayer = bot.music.players[inter.guild_id]
-        except KeyError:
-            pass
-        else:
-            if not player.static:
-                await player.destroy_message()
+        if global_mode:
 
-            if global_mode != select_view.global_mode:
+            for bot in self.bot.pool.bots:
 
-                for bot in self.bot.pool.bots:
+                try:
+                    player = bot.music.players[inter.guild_id]
+                except KeyError:
+                    continue
 
-                    try:
-                        player = bot.music.players[inter.guild_id]
-                    except:
+                if not player.static:
+                    await player.destroy_message()
+
+                if global_mode:
+                    skin = select_view.global_skin_selected
+                    skin_static = select_view.global_static_skin_selected
+                else:
+                    skin = select_view.skin_selected
+                    skin_static = select_view.static_skin_selected
+
+                last_skin = str(player.skin)
+                last_static_skin = str(player.skin_static)
+
+                player.skin = skin
+                player.skin_static = skin_static
+                player.setup_features()
+
+                if player.static:
+
+                    if skin_static == last_static_skin:
                         continue
 
-                    if global_mode:
-                        skin = select_view.global_skin_selected
-                        skin_static = select_view.global_static_skin_selected
-                    else:
-                        skin = select_view.skin_selected
-                        skin_static = select_view.static_skin_selected
+                elif skin == last_skin:
+                    continue
 
-                    if player.static and skin_static == player.skin_static:
-                        continue
-
-                    elif skin == player.skin:
-                        continue
-
-                    player.skin = skin
-                    player.skin_static = skin_static
-                    player.setup_hints()
-                    player.process_hint()
-                    player.set_command_log(text=f"{inter.author.mention} alterou a skin do player.", emoji="🎨")
-                    await player.invoke_np(force=True)
-                    await asyncio.sleep(1.5)
-
-            else:
-                player.skin = select_view.skin_selected
-                player.skin_static = select_view.static_skin_selected
                 player.setup_hints()
                 player.process_hint()
                 player.set_command_log(text=f"{inter.author.mention} alterou a skin do player.", emoji="🎨")
                 await player.invoke_np(force=True)
+                await asyncio.sleep(1.5)
+
+        else:
+
+            try:
+                player: LavalinkPlayer = bot.music.players[inter.guild_id]
+            except KeyError:
+                return
+
+            if not player.static:
+                await player.destroy_message()
+
+            player.skin = select_view.skin_selected
+            player.skin_static = select_view.static_skin_selected
+            player.setup_hints()
+            player.process_hint()
+            player.set_command_log(text=f"{inter.author.mention} alterou a skin do player.", emoji="🎨")
+            await player.invoke_np(force=True)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @ensure_bot_instance(return_first=True)
