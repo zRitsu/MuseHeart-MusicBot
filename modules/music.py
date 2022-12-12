@@ -1169,7 +1169,7 @@ class Music(commands.Cog):
             else:
                 txt = ["pulou a música.", f"⏭️ **⠂{inter.author.mention} pulou a música:\n"
                                           f"╰[`{fix_characters(player.current.title, 43)}`]({player.current.uri})**"]
-                await self.interaction_message(inter, txt, emoji="⏭️")
+                await self.interaction_message(inter, txt, emoji="⏭️", store_embed=True)
 
             if player.loop == "current":
                 player.loop = False
@@ -1229,7 +1229,7 @@ class Music(commands.Cog):
                 f"⏮️ **⠂{inter.author.mention} voltou para a música:\n╰[`{fix_characters(t.title, 43)}`]({t.uri})**"
             ]
 
-            await self.interaction_message(inter, txt, emoji="⏮️")
+            await self.interaction_message(inter, txt, emoji="⏮️", store_embed=True)
 
         if player.loop == "current":
             player.loop = False
@@ -3439,7 +3439,7 @@ class Music(commands.Cog):
         return await check_requester_channel(ctx)
 
     async def interaction_message(self, inter: Union[disnake.Interaction, CustomContext], txt, emoji: str = "✅",
-                                  rpc_update: bool = False, data:dict = None):
+                                  rpc_update: bool = False, data:dict = None, store_embed: bool = False):
 
         try:
             txt, txt_ephemeral = txt
@@ -3473,10 +3473,14 @@ class Music(commands.Cog):
             if bot.user.id != self.bot.user.id:
                 embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
 
-            try:
-                await inter.store_message.edit(embed=embed, view=None, content=None)
-            except AttributeError:
-                await inter.send(embed=embed)
+            if store_embed:
+                player.temp_embed = embed
+
+            else:
+                try:
+                    await inter.store_message.edit(embed=embed, view=None, content=None)
+                except AttributeError:
+                    await inter.send(embed=embed)
 
         elif not component_interaction:
 

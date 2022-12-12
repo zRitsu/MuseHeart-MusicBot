@@ -301,6 +301,8 @@ class LavalinkPlayer(wavelink.Player):
         self.mini_queue_feature = False
         self.mini_queue_enabled = False
 
+        self.temp_embed: Optional[disnake.Embed] = None
+
         self.initial_hints = [
             "Você pode alterar a skin/aparência do player usando o comando /change_skin (comando vísivel apenas membros"
             " com perm de: gerenciar servidor).",
@@ -647,7 +649,13 @@ class LavalinkPlayer(wavelink.Player):
         self.updating = True
 
         if not self.controller_mode:
+
             self.message = None
+
+            if self.temp_embed:
+                self.last_data["embeds"].insert(0, self.temp_embed)
+                self.temp_embed = None
+
             await self.text_channel.send(allowed_mentions=self.allowed_mentions, **self.last_data)
 
         else:
