@@ -119,7 +119,14 @@ class Owner(commands.Cog):
     @commands.command(hidden=True, aliases=["ull", "updatell", "llupdate", "llu"])
     async def updatelavalink(self, ctx: CustomContext, *args):
 
-        node: Optional[wavelink.Node] = self.bot.music.nodes.get("LOCAL")
+        node: Optional[wavelink.Node] = None
+
+        for bot in self.bot.pool.bots:
+            try:
+                node = bot.music.nodes["LOCAL"]
+                break
+            except KeyError:
+                continue
 
         if not node and "--force" not in args:
             raise GenericError("**O servidor LOCAL não está sendo usado!**")
@@ -140,37 +147,44 @@ class Owner(commands.Cog):
 
         if node:
 
-            node.restarting = True
+            for bot in self.bot.pool.bots:
 
-            reset_ids = any(a in args for a in ("--reset", "--resetids", "-reset", "-resetids"))
+                try:
+                    node = bot.music.nodes["LOCAL"]
+                except KeyError:
+                    continue
 
-            for player in node.players.values():
-                txt = "O servidor de música está reiniciando e a música será retomada em alguns segundos (Por favor aguarde)..."
+                node.restarting = True
 
-                if reset_ids:
+                reset_ids = any(a in args for a in ("--reset", "--resetids", "-reset", "-resetids"))
 
-                    if player.current:
-                        player.queue.appendleft(player.current)
-                        player.current = None
+                for player in node.players.values():
+                    txt = "O servidor de música está reiniciando e a música será retomada em alguns segundos (Por favor aguarde)..."
 
-                    for t in player.queue:
-                        t.id = ""
+                    if reset_ids:
 
-                    for t in player.played:
-                        t.id = ""
+                        if player.current:
+                            player.queue.appendleft(player.current)
+                            player.current = None
 
-                if player.static:
-                    player.set_command_log(text=txt, emoji="🛠️")
-                    player.update = True
-                else:
-                    self.bot.loop.create_task(
-                        player.text_channel.send(
-                            embed=disnake.Embed(
-                                color=self.bot.get_color(player.guild.me),
-                                description=f"🛠️ **⠂{txt}**"
+                        for t in player.queue:
+                            t.id = ""
+
+                        for t in player.played:
+                            t.id = ""
+
+                    if player.static:
+                        player.set_command_log(text=txt, emoji="🛠️")
+                        player.update = True
+                    else:
+                        bot.loop.create_task(
+                            player.text_channel.send(
+                                embed=disnake.Embed(
+                                    color=self.bot.get_color(player.guild.me),
+                                    description=f"🛠️ **⠂{txt}**"
+                                )
                             )
                         )
-                    )
 
         for process in psutil.process_iter():
             try:
