@@ -3473,7 +3473,7 @@ class Music(commands.Cog):
             if bot.user.id != self.bot.user.id:
                 embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
 
-            if store_embed and len(player.queue) > 0:
+            if store_embed and not player.controller_mode and len(player.queue) > 0:
                 player.temp_embed = embed
 
             else:
