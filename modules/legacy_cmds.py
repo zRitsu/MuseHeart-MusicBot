@@ -451,7 +451,7 @@ class Owner(commands.Cog):
             except Exception as e:
                 out_git += f"{e}\n"
 
-        self.bot.pool.commit = await run_command("git rev-parse HEAD")
+        self.bot.pool.commit = (await run_command("git rev-parse HEAD")).strip("\n")
         self.bot.pool.remote_git_url = self.bot.config["SOURCE_REPO"][:-4]
 
         return out_git
