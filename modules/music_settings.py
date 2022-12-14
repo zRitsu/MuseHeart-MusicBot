@@ -821,7 +821,8 @@ class MusicSettings(commands.Cog):
         embed = disnake.Embed(
             description="**Selecione as skins disponíveis abaixo:**\n\n"
                         "**Modo Normal:**\n\n" + "\n".join(f"`{s}` [`(visualizar)`]({bot.player_skins[s].preview})" for s in skin_list) + "\n\n" 
-                        "**Modo fixo (song-request):**\n\n" + "\n".join(f"`{s}` [`(visualizar)`]({bot.player_static_skins[s].preview})" for s in static_skin_list),
+                        "**Modo fixo (song-request):**\n\n" + "\n".join(f"`{s}` [`(visualizar)`]({bot.player_static_skins[s].preview})" for s in static_skin_list) +
+                        "\n\n`Nota: No modo global todos os bots do servidor usam a mesma skin.`",
             colour=bot.get_color(guild.me)
         )
 
