@@ -146,16 +146,17 @@ class LocalDatabase(BaseDB):
     async def update_data(self, id_: int, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users],
                           collection: str, default_model: dict = None):
 
-        if not default_model:
-            default_model = db_models
-
         id_ = str(id_)
+
+        try:
+            self.data[collection][db_name]
+        except KeyError:
+            self.data[collection] = {db_name: {}}
 
         try:
             self.data[collection][db_name][id_] = data
         except KeyError:
-            self.data[collection] = dict(default_model)
-            self.data[collection][db_name][id_] = data
+            self.data[collection][db_name] = {id_: data}
 
         self.to_update.add(collection)
 
