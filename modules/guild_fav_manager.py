@@ -145,12 +145,12 @@ class GuildFavView(disnake.ui.View):
             await self.ctx.edit_original_message(
                 embed=disnake.Embed(description="**Tempo esgotado...**", color=self.bot.get_color()), view=None
             )
-
         self.stop()
 
     async def favadd_callback(self, inter: disnake.MessageInteraction):
         await inter.response.send_modal(GuildFavModal(bot=self.bot, name="", url="", description=""))
         await inter.delete_original_message()
+        self.stop()
 
     async def edit_callback(self, inter: disnake.MessageInteraction):
 
@@ -174,6 +174,7 @@ class GuildFavView(disnake.ui.View):
             await self.ctx.delete_original_message()
         else:
             await inter.message.delete()
+        self.stop()
 
     async def remove_callback(self, inter: disnake.MessageInteraction):
 
@@ -199,6 +200,7 @@ class GuildFavView(disnake.ui.View):
             view=None)
 
         await self.bot.get_cog("PinManager").process_idle_embed(guild)
+        self.stop()
 
     async def cancel_callback(self, inter: disnake.MessageInteraction):
         await inter.response.edit_message(
