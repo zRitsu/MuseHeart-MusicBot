@@ -6,6 +6,7 @@ requests
 humanize
 tornado
 motor
+tinymongo
 dnspython
 psutil
 aiofiles

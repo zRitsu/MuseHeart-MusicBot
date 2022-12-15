@@ -8,6 +8,12 @@ import traceback
 import disnake
 from disnake.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
+from datetime import datetime
+from tinymongo import TinyMongoClient
+from tinydb_serialization import Serializer, SerializationMiddleware
+from tinymongo.serializers import DateTimeSerializer
+from tinydb.storages import JSONStorage
+from tinydb.middlewares import CachingMiddleware
 from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
@@ -83,59 +89,86 @@ class BaseDB:
     def start_task(self, loop):
         pass
 
+    async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users],
+                          collection: str, default_model: dict = None):
+        pass
+
+    async def move_old_db(self):
+
+        if not os.path.isdir("./local_dbs"):
+            return
+
+        for f in os.listdir("./local_dbs"):
+
+            if not f.endswith(".json"):
+                continue
+
+            with open(f'./local_dbs/{f}') as file:
+                data = json.load(file)
+
+            for db_name, db_data in data.items():
+
+                if not db_data:
+                    continue
+
+                for id_, data in db_data.items():
+                    try:
+                        await self.update_data(id_=id_, data=data, db_name=db_name, collection=f[:-5])
+                    except (KeyError, TypeError):
+                        continue
+
+        shutil.rmtree("./local_dbs")
+
+
+class DatetimeSerializer(Serializer):
+    OBJ_CLASS = datetime
+
+    def __init__(self, format='%Y-%m-%dT%H:%M:%S', *args, **kwargs):
+        super(DatetimeSerializer, self).__init__(*args, **kwargs)
+        self._format = format
+
+    def encode(self, obj):
+        return obj.strftime(self._format)
+
+    def decode(self, s):
+        return datetime.strptime(s, self._format)
+
+class CustomTinyMongoClient(TinyMongoClient):
+
+    @property
+    def _storage(self):
+        serialization = SerializationMiddleware()
+        serialization.register_serializer(DateTimeSerializer(), 'TinyDate')
+        return serialization
+
 
 class LocalDatabase(BaseDB):
 
     def __init__(self):
+
         super().__init__()
-        self.data = {}
-        self.to_update = set()
 
-        if not os.path.isdir("./local_dbs"):
-            os.makedirs("local_dbs")
+        if not os.path.isdir("./local_database"):
+            os.makedirs("./local_database")
 
-        else:
-            for f in os.listdir(f"./local_dbs"):
+        self._connect = CustomTinyMongoClient('./local_database')
 
-                if not f.endswith(".json"):
-                    continue
-
-                with open(f'./local_dbs/{f}') as file:
-                    self.data[f[:-5]] = json.load(file)
-
-    def start_task(self, loop):
-        if not loop:
-            loop = asyncio.get_event_loop()
-        loop.create_task(self.write_json_task())
-
-    async def write_json_task(self):
-
-        while True:
-
-            if self.to_update:
-
-                for i in list(self.to_update):
-                    with open(f'./local_dbs/{i}.json', 'w') as f:
-                        f.write(json.dumps(self.data[i]))
-
-                    self.to_update.remove(i)
-
-            await asyncio.sleep(3)
+        asyncio.get_event_loop().create_task(self.move_old_db())
 
     async def get_data(self, id_: int, *, db_name: Union[DBModel.guilds, DBModel.users],
                        collection: str, default_model: dict = None):
 
-        id_ = str(id_)
-
         if not default_model:
             default_model = db_models
 
-        try:
-            data = self.data[collection][db_name][id_]
-        except KeyError:
+        id_ = str(id_)
+
+        data = self._connect[collection][db_name].find_one({"_id": id_})
+
+        if not data:
             return dict(default_model[db_name])
 
-        if data["ver"] < default_model[db_name]["ver"]:
+        elif data["ver"] < default_model[db_name]["ver"]:
             data = update_values(dict(default_model[db_name]), data)
             data["ver"] = default_model[db_name]["ver"]
 
@@ -143,28 +176,20 @@ class LocalDatabase(BaseDB):
 
         return data
 
-    async def update_data(self, id_: int, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users],
+    async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users],
                           collection: str, default_model: dict = None):
 
-        id_ = str(id_)
+        if not self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data}).upserted_id:
+            data["_id"] = str(id_)
+            self._connect[collection][db_name].insert_one(data)
 
-        try:
-            self.data[collection][db_name]
-        except KeyError:
-            self.data[collection] = {db_name: {}}
-
-        try:
-            self.data[collection][db_name][id_] = data
-        except KeyError:
-            self.data[collection][db_name] = {id_: data}
-
-        self.to_update.add(collection)
-
+        return data
 
 class MongoDatabase(BaseDB):
 
     def __init__(self, token: str):
         super().__init__()
+        self.localdb = False
         self._connect = AsyncIOMotorClient(token, connectTimeoutMS=30000)
 
     async def push_data(self, data, *, db_name: Union[DBModel.guilds, DBModel.users], collection: str):
