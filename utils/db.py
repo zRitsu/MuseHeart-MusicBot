@@ -139,6 +139,7 @@ class CustomTinyMongoClient(TinyMongoClient):
     def _storage(self):
         serialization = SerializationMiddleware()
         serialization.register_serializer(DateTimeSerializer(), 'TinyDate')
+        serialization.register_serializer(CachingMiddleware(JSONStorage), 'TinyCache')
         return serialization
 
 
