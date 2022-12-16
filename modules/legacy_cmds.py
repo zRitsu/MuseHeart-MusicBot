@@ -845,7 +845,7 @@ class Owner(commands.Cog):
 
     @check_voice()
     @commands.command(description='inicializar um player no servidor.', aliases=["spawn", "sp", "spw", "smn"])
-    @ensure_bot_instance(return_first=True)
+    @ensure_bot_instance()
     async def summon(self, ctx: CustomContext):
 
         try:
@@ -864,9 +864,9 @@ class Owner(commands.Cog):
         static_player = guild_data['player_controller']
 
         try:
-            channel = self.bot.get_channel(int(static_player['channel'])) or ctx.channel
+            channel = self.bot.get_channel(int(static_player['channel'])) or await self.bot.fetch_channel(int(static_player['channel'])) or ctx.channel
             message = await channel.fetch_message(int(static_player.get('message_id')))
-        except (KeyError, TypeError):
+        except (KeyError, TypeError, disnake.NotFound):
             channel = ctx.channel
             message = None
 
