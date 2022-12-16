@@ -37,7 +37,7 @@ additional_files = [
 ]
 
 extra_dirs = [
-    "local_dbs",
+    "local_database",
     ".player_sessions"
 ]
 

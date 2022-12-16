@@ -190,7 +190,6 @@ class MongoDatabase(BaseDB):
 
     def __init__(self, token: str):
         super().__init__()
-        self.localdb = False
         self._connect = AsyncIOMotorClient(token, connectTimeoutMS=30000)
 
     async def push_data(self, data, *, db_name: Union[DBModel.guilds, DBModel.users], collection: str):

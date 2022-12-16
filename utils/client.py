@@ -202,11 +202,6 @@ class BotPool:
 
         prefix = guild_prefix if intents.message_content else commands.when_mentioned
 
-        try:
-            os.makedirs("./local_dbs/user_playlists")
-        except:
-            pass
-
         self.load_playlist_cache()
 
         self.ws_client = WSClient(self.config["RPC_SERVER"], pool=self)
