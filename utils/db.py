@@ -12,8 +12,6 @@ from datetime import datetime
 from tinymongo import TinyMongoClient
 from tinydb_serialization import Serializer, SerializationMiddleware
 from tinymongo.serializers import DateTimeSerializer
-from tinydb.storages import JSONStorage
-from tinydb.middlewares import CachingMiddleware
 from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
@@ -139,7 +137,6 @@ class CustomTinyMongoClient(TinyMongoClient):
     def _storage(self):
         serialization = SerializationMiddleware()
         serialization.register_serializer(DateTimeSerializer(), 'TinyDate')
-        serialization.register_serializer(CachingMiddleware(JSONStorage), 'TinyCache')
         return serialization
 
 
