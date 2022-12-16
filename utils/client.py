@@ -13,7 +13,7 @@ import disnake
 from typing import Optional, Union, List
 from config_loader import load_config
 from web_app import WSClient, start
-from utils.music.checks import ensure_bot_instance
+from utils.music.checks import check_pool_bots
 from utils.music.errors import GenericError
 from utils.music.local_lavalink import run_lavalink
 from utils.music.models import music_mode
@@ -249,15 +249,6 @@ class BotPool:
 
             jsk = bot.get_command("jsk")
             jsk.hidden = True
-            jsk.add_check(ensure_bot_instance(return_first=True))
-
-            self.max_counter += 1
-
-            """@bot.check
-            async def forum_check(ctx: CustomContext):
-
-                bot.check_bot_forum_post(ctx.channel, raise_error=True)
-                return True"""
 
             if bot.config['INTERACTION_COMMAND_ONLY']:
 
@@ -271,6 +262,20 @@ class BotPool:
                     return True
 
             if bot.config["GLOBAL_PREFIX"]:
+
+                @bot.check
+                async def jsk_multibot_check(ctx: CustomContext):
+
+                    try:
+                        parent_name = ctx.command.parents[0].name
+                    except IndexError:
+                        pass
+
+                    else:
+                        if parent_name == "jishaku":
+                            await check_pool_bots(ctx, return_first=True)
+
+                    return True
 
                 @bot.listen("on_command_completion")
                 async def message_id_cleanup(ctx: CustomContext):
