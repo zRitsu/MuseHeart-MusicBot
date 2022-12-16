@@ -668,83 +668,88 @@ class Music(commands.Cog):
 
         if not query:
 
-            opts = [disnake.SelectOption(label=f, value=f, emoji="<:play:734221719774035968>")
-                    for f in (await fav_list(inter, ""))]
+            favs = await fav_list(inter, "")
 
-            if not opts:
+            if not favs:
                 raise GenericError("**Você não possui favoritos...**\n"
                                    "`Adicione um usando o comando: /fav manager.`\n"
                                    "`Ou use este comando adicionando um nome ou link de uma música/vídeo.`")
 
-            opts.append(disnake.SelectOption(label="Cancelar", value="cancel", emoji="❌"))
+            if len(favs) == 1:
+                query = f"> fav: {favs[0]}"
 
-            try:
-                add_id = f"_{inter.id}"
-            except AttributeError:
-                add_id = ""
+            else:
+                opts = [disnake.SelectOption(label=f, value=f, emoji="<:play:734221719774035968>") for f in favs]
 
-            embed = disnake.Embed(
-                color=self.bot.get_color(guild.me),
-                description="**Selecione um favorito Abaixo:**\n"
-                            f'Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para escolher!'
-            )
-
-            if bot.user.id != self.bot.user.id:
-                embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
-
-            kwargs = {
-                "content": inter.author.mention,
-                "components": [
-                    disnake.ui.Select(
-                        custom_id=f"enqueue_fav{add_id}",
-                        options=opts
-                    )
-                ],
-                "embed": embed
-            }
-
-            try:
-                msg = await inter.send(ephemeral=ephemeral, **kwargs)
-            except disnake.InteractionTimedOut:
-                msg = await inter.channel.send(**kwargs)
-
-            def check_fav_selection(i: Union[CustomContext, disnake.MessageInteraction]):
+                opts.append(disnake.SelectOption(label="Cancelar", value="cancel", emoji="❌"))
 
                 try:
-                    return i.data.custom_id == f"enqueue_fav_{inter.id}" and i.author == inter.author
+                    add_id = f"_{inter.id}"
                 except AttributeError:
-                    return i.author == inter.author and i.message.id == msg.id
+                    add_id = ""
 
-            try:
-                select_interaction: disnake.MessageInteraction = await self.bot.wait_for(
-                    "dropdown", timeout=45, check=check_fav_selection
+                embed = disnake.Embed(
+                    color=self.bot.get_color(guild.me),
+                    description="**Selecione um favorito Abaixo:**\n"
+                                f'Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para escolher!'
                 )
-            except asyncio.TimeoutError:
+
+                if bot.user.id != self.bot.user.id:
+                    embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+
+                kwargs = {
+                    "content": inter.author.mention,
+                    "components": [
+                        disnake.ui.Select(
+                            custom_id=f"enqueue_fav{add_id}",
+                            options=opts
+                        )
+                    ],
+                    "embed": embed
+                }
+
                 try:
-                    await msg.edit(conent="Tempo de seleção esgotado!", embed=None, view=None)
-                except:
-                    pass
-                return
+                    msg = await inter.send(ephemeral=ephemeral, **kwargs)
+                except disnake.InteractionTimedOut:
+                    msg = await inter.channel.send(**kwargs)
 
-            try:
-                func = select_interaction.response.edit_message
-            except AttributeError:
-                func = msg.edit
+                def check_fav_selection(i: Union[CustomContext, disnake.MessageInteraction]):
 
-            if select_interaction.data.values[0] == "cancel":
-                await func(
-                    embed=disnake.Embed(
-                        description="**Seleção cancelada!**",
-                        color=self.bot.get_color(guild.me)
-                    ),
-                    components=None
-                )
-                return
+                    try:
+                        return i.data.custom_id == f"enqueue_fav_{inter.id}" and i.author == inter.author
+                    except AttributeError:
+                        return i.author == inter.author and i.message.id == msg.id
 
-            inter.token = select_interaction.token
-            inter.id = select_interaction.id
-            inter.response = select_interaction.response
-            query = f"> fav: {select_interaction.data.values[0]}"
+                try:
+                    select_interaction: disnake.MessageInteraction = await self.bot.wait_for(
+                        "dropdown", timeout=45, check=check_fav_selection
+                    )
+                except asyncio.TimeoutError:
+                    try:
+                        await msg.edit(conent="Tempo de seleção esgotado!", embed=None, view=None)
+                    except:
+                        pass
+                    return
+
+                try:
+                    func = select_interaction.response.edit_message
+                except AttributeError:
+                    func = msg.edit
+
+                if select_interaction.data.values[0] == "cancel":
+                    await func(
+                        embed=disnake.Embed(
+                            description="**Seleção cancelada!**",
+                            color=self.bot.get_color(guild.me)
+                        ),
+                        components=None
+                    )
+                    return
+
+                inter.token = select_interaction.token
+                inter.id = select_interaction.id
+                inter.response = select_interaction.response
+                query = f"> fav: {select_interaction.data.values[0]}"
 
         if query.startswith("> pin: "):
             is_pin = True
