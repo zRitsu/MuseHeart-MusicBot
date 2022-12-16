@@ -153,6 +153,7 @@ setup.bat
 database.json
 /index.html
 /local_dbs/
+/local_database/
 application.yml
 /playlist_cache.json
 .local/
