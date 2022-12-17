@@ -677,6 +677,12 @@ class Owner(commands.Cog):
         SECRETS.update(config_json)
         SECRETS.update(env_file)
 
+        if any(f in flags.lower() for f in ("-autodll", "--autodll")):
+            SECRETS["AUTO_DOWNLOAD_LAVALINK_SERVERLIST"] = True
+
+        if any(f in flags.lower() for f in ("--externalservers", "-externalservers", "--llservers", "-llservers", "--lls", "-lls")):
+            await self.download_lavalink_serverlist()
+
         if not os.path.isfile("./.env-temp"):
             shutil.copyfile("./.example.env", "./.env-temp")
 
@@ -684,12 +690,6 @@ class Owner(commands.Cog):
             if not isinstance(SECRETS[i], str):
                 SECRETS[i] = str(SECRETS[i]).lower()
             dotenv.set_key("./.env-temp", i, SECRETS[i])
-
-        if any(f in flags.lower() for f in ("-autodll", "--autodll")):
-            SECRETS["AUTO_DOWNLOAD_LAVALINK_SERVERLIST"] = True
-
-        if any(f in flags.lower() for f in ("--externalservers", "-externalservers", "--llservers", "-llservers", "--lls", "-lls")):
-            await self.download_lavalink_serverlist()
 
         filelist = await run_command("git ls-files --others --exclude-standard --cached")
 
