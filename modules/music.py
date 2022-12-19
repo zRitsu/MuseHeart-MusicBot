@@ -23,10 +23,6 @@ from utils.music.converters import time_format, fix_characters, string_to_second
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, fav_list, queue_track_index
 from user_agent import generate_user_agent
-try:
-    from utils.music.ytdl_tools import YTDLTools
-except:
-    YTDLTools = None
 
 search_sources_opts = [
     disnake.OptionChoice("Youtube", "ytsearch"),
@@ -48,7 +44,7 @@ class Music(commands.Cog):
 
         self.bot = bot
 
-        self.ytdl = YTDLTools(bot) if YTDLTools else None
+        self.ytdl = bot.pool.ytdl
 
         self.song_request_concurrency = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
@@ -3820,7 +3816,7 @@ class Music(commands.Cog):
             if not tracks:
 
                 if self.ytdl:
-                    tracks = await self.ytdl.get_track_info(query, user)
+                    tracks = await self.ytdl.get_track_info(query, user, self.bot.loop)
 
                 if not tracks:
 

@@ -1,10 +1,9 @@
+import asyncio
 import re
 import disnake
-from yt_dlp import YoutubeDL, list_extractors
+import yt_dlp
 from utils.music.errors import GenericError
 from utils.music.models import PartialTrack
-
-extractors = list_extractors()
 
 exclude_extractors = ["youtube", "soundcloud", "deezer", "applemusic", "twitch"]
 
@@ -37,17 +36,17 @@ YTDL_OPTS = {
 
 class YTDLTools:
 
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self):
+        self.extractors = yt_dlp.list_extractors()
 
     def extract_info(self, url: str):
 
-        with YoutubeDL(YTDL_OPTS) as ytdl:
+        with yt_dlp.YoutubeDL(YTDL_OPTS) as ytdl:
             return ytdl.extract_info(url=url, download=False)
 
-    async def get_track_info(self, url: str, user: disnake.Member):
+    async def get_track_info(self, url: str, user: disnake.Member, loop = None):
 
-        for e in extractors:
+        for e in self.extractors:
 
             if not e._VALID_URL:
                 continue
@@ -64,7 +63,10 @@ class YTDLTools:
             if e.age_limit > 17 and e.ie_key() != "Twitter":
                 raise GenericError("**Este link contém conteúdo para maiores de 18 anos!**")
 
-            data = await self.bot.loop.run_in_executor(None, self.extract_info, url)
+            if not loop:
+                loop = asyncio.get_event_loop()
+
+            data = await loop.run_in_executor(None, self.extract_info, url)
 
             try:
                 if data["_type"] == "playlist":

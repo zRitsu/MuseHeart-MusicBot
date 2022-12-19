@@ -26,11 +26,18 @@ from utils.others import sync_message, CustomContext
 import os
 import traceback
 
+#try:
+#    from utils.music.ytdl_tools import YTDLTools
+#except:
+#    YTDLTools = None
+
+YTDLTools = None
 
 class BotPool:
 
     bots: List[BotCore] = []
     killing_state = False
+    ytdl = YTDLTools() if YTDLTools else None
 
     def __init__(self):
         self.playlist_cache = {}
@@ -244,6 +251,8 @@ class BotPool:
                 pool=self,
                 number=int(self.max_counter)
             )
+
+            bot.ytdl = YTDLTools
 
             bot.token = token
 
