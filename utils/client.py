@@ -77,9 +77,11 @@ class BotPool:
                 return
 
             traceback.print_exc()
+            bot.pool.bots.remove(bot)
 
         except Exception:
             traceback.print_exc()
+            bot.pool.bots.remove(bot)
 
         del bot.token
 
