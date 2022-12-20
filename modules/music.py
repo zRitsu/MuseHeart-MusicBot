@@ -44,8 +44,6 @@ class Music(commands.Cog):
 
         self.bot = bot
 
-        self.ytdl = bot.pool.ytdl
-
         self.song_request_concurrency = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
         self.player_interaction_concurrency = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
@@ -3815,46 +3813,41 @@ class Music(commands.Cog):
 
             if not tracks:
 
-                if self.ytdl:
-                    tracks = await self.ytdl.get_track_info(query, user, self.bot.loop)
-
-                if not tracks:
-
-                    if node.search:
-                        node_search = node
-                    else:
-                        try:
-                            node_search = \
-                                sorted(
-                                    [n for n in self.bot.music.nodes.values() if n.search and n.available and n.is_available],
-                                    key=lambda n: len(n.players))[0]
-                        except IndexError:
-                            node_search = node
-
+                if node.search:
+                    node_search = node
+                else:
                     try:
-                        tracks = await node_search.get_tracks(
-                            query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
-                        )
-                    except ClientConnectorCertificateError:
-                        node_search.available = False
+                        node_search = \
+                            sorted(
+                                [n for n in self.bot.music.nodes.values() if n.search and n.available and n.is_available],
+                                key=lambda n: len(n.players))[0]
+                    except IndexError:
+                        node_search = node
 
-                        for n in self.bot.music.nodes.values():
+                try:
+                    tracks = await node_search.get_tracks(
+                        query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
+                    )
+                except ClientConnectorCertificateError:
+                    node_search.available = False
 
-                            if not n.available or not n.is_available:
-                                continue
+                    for n in self.bot.music.nodes.values():
 
-                            try:
-                                tracks = await n.get_tracks(
-                                    query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
-                                )
-                                node_search = n
-                                break
-                            except ClientConnectorCertificateError:
-                                n.available = False
-                                continue
+                        if not n.available or not n.is_available:
+                            continue
 
-                        if not node_search:
-                            raise GenericError("**Não há servidores de música disponível.**")
+                        try:
+                            tracks = await n.get_tracks(
+                                query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
+                            )
+                            node_search = n
+                            break
+                        except ClientConnectorCertificateError:
+                            n.available = False
+                            continue
+
+                    if not node_search:
+                        raise GenericError("**Não há servidores de música disponível.**")
 
         if not tracks:
             raise GenericError("Não houve resultados para sua busca.")
