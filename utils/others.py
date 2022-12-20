@@ -42,7 +42,7 @@ class CustomContext(commands.Context):
         except:
             pass
 
-        return await super().send(*args, **kwargs)
+        return await self.reply(fail_if_not_exists=False, *args, **kwargs)
 
     async def reply(self, *args, **kwargs):
 
