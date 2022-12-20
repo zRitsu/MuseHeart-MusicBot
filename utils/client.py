@@ -244,8 +244,6 @@ class BotPool:
                 number=int(self.max_counter)
             )
 
-            bot.ytdl = YTDLTools
-
             bot.token = token
 
             bot.load_extension("jishaku")
