@@ -673,8 +673,16 @@ class MusicSettings(commands.Cog):
     @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
     @ensure_bot_instance(return_first=True)
     @commands.command(name="adddjrole",description="Adicionar um cargo para a lista de DJ's do servidor.", usage="[id / nome / @cargo]")
-    async def add_dj_role_legacy(self, ctx: CustomContext, *, role: disnake.Role):
-        await self.add_dj_role(ctx, inter=ctx, role=role)
+    async def add_dj_role_legacy(self, ctx: CustomContext, *, role: Optional[disnake.Role] = None):
+
+        if not role:
+            raise GenericError("**Você não especificou um cargo.\n"
+                               "Use o comando por um dos métodos abaixo:**\n\n"
+                               f"{ctx.prefix}{ctx.invoked_with} id_do_cargo\n"
+                               f"{ctx.prefix}{ctx.invoked_with} @cargo\n"
+                               f"{ctx.prefix}{ctx.invoked_with} nome_do_cargo")
+
+        await self.add_dj_role.callback(self=self,inter=ctx, role=role)
 
     @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
     @commands.slash_command(
@@ -705,14 +713,14 @@ class MusicSettings(commands.Cog):
 
         await bot.update_data(guild.id, guild_data, db_name=DBModel.guilds)
 
-        await inter.send(f"O cargo {role.mention} foi adicionado à lista de DJ's\nBot: {bot.user.mention}", ephemeral=True)
+        await inter.send(f"O cargo {role.mention} foi adicionado à lista de DJ's.", ephemeral=True)
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
     @ensure_bot_instance(return_first=True)
     @commands.command(description="Remover um cargo para a lista de DJ's do servidor.", usage="[id / nome / @cargo]")
     async def remove_dj_role_legacy(self, ctx: CustomContext, *, role: disnake.Role):
-        await self.remove_dj_role(ctx, inter=ctx, role=role)
+        await self.remove_dj_role.callback(self=self, inter=ctx, role=role)
 
     @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
     @commands.slash_command(
@@ -749,7 +757,7 @@ class MusicSettings(commands.Cog):
 
         await bot.update_data(guild.id, guild_data, db_name=DBModel.guilds)
 
-        await inter.send(f"O cargo {role.mention} foi removido da lista de DJ's\nBot: {bot.user.mention}", ephemeral=True)
+        await inter.send(f"O cargo {role.mention} foi removido da lista de DJ's.", ephemeral=True)
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.cooldown(1, 10, commands.BucketType.guild)
