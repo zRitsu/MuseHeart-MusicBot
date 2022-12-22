@@ -764,7 +764,7 @@ class Music(commands.Cog):
 
                 query = query.split("&ab_channel=")[0]
 
-                if "&list=" in query:
+                if "&list=" in query and (link_re := YOUTUBE_VIDEO_REG.match(query)):
 
                     view = SelectInteraction(
                         user=inter.author,
@@ -796,7 +796,7 @@ class Music(commands.Cog):
                         return
 
                     if view.selected == "music":
-                        query = YOUTUBE_VIDEO_REG.match(query).group()
+                        query = link_re.group()
 
                     if not isinstance(inter, disnake.ModalInteraction):
                         inter.token = view.inter.token
