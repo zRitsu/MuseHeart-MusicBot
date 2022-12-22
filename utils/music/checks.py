@@ -54,13 +54,16 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
     except AttributeError:
         pass
 
-    if not inter.bot.config["GLOBAL_PREFIX"]:
-        inter.music_bot = inter.bot
-        inter.music_guild = inter.guild
-        return True
-
     if isinstance(inter, (disnake.MessageInteraction, disnake.ModalInteraction)):
         return
+
+    try:
+        if not inter.bot.config["GLOBAL_PREFIX"]:
+            inter.music_bot = inter.bot
+            inter.music_guild = inter.guild
+            return True
+    except AttributeError:
+        pass
 
     if not inter.guild_id:
         return
