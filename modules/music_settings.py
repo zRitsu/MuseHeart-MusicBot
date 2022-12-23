@@ -136,6 +136,8 @@ class MusicSettings(commands.Cog):
         if not bot:
             return
 
+        await inter.response.defer(ephemeral=True)
+
         guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         guild_data["check_other_bots_in_vc"] = opt == "Ativar"
