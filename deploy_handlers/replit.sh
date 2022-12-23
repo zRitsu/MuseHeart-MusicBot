@@ -17,9 +17,9 @@ if [ ! -d "venv" ] || [ -f ".deployed" ] || [ ! -f "./venv/bin/requirements.txt"
   echo "##################################"
   echo "## Inicializando virtual_env... ##"
   echo "##################################"
-  python -m venv venv
+  python3 -m venv venv
   . venv/bin/activate
-  python -m pip install -U pip
+  python3 -m pip install -U pip
   echo "#################################################"
   echo "## Instalando dependências...                  ##"
   echo "## (Esse processo pode demorar até 3 minutos). ##"
