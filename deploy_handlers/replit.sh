@@ -3,9 +3,12 @@
 rm -f poetry.lock && rm -f pyproject.toml
 
 if [ -n "${VIDEO_PREVIEW}" ]; then
+  if [ ! -d "venv" ]; then
+    python3 -m venv venv
+  fi
   . venv/bin/activate
-  python -m pip install tornado
-  python preview.py
+  pip3 install tornado
+  python3 preview.py
   kill "$PPID"
   exit 1
 fi
@@ -24,7 +27,7 @@ if [ ! -d "venv" ] || [ -f ".deployed" ] || [ ! -f "./venv/bin/requirements.txt"
   echo "## Instalando dependências...                  ##"
   echo "## (Esse processo pode demorar até 3 minutos). ##"
   echo "#################################################"
-  pip install -U -r requirements.txt --no-cache-dir
+  pip3 install -U -r requirements.txt --no-cache-dir
   cp -r requirements.txt ./venv/bin/requirements.txt
   rm -f .deployed
 
@@ -33,7 +36,7 @@ elif ! cmp --silent -- "./requirements.txt" "./venv/bin/requirements.txt"; then
   echo "## Instalando/Atualizando dependências... ##"
   echo "############################################"
   . venv/bin/activate
-  pip install -U -r requirements.txt --no-cache-dir
+  pip3 install -U -r requirements.txt --no-cache-dir
   cp -r requirements.txt ./venv/bin/requirements.txt
 
 else
@@ -41,4 +44,4 @@ else
 
 fi
 
-python main.py
+python3 main.py
