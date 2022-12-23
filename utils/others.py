@@ -30,6 +30,7 @@ class CustomContext(commands.Context):
         self.guild_id = self.guild.id
         self.channel_id = self.channel.id
         self.store_message = None
+        self.application_command = None
 
     async def defer(self, ephemeral: bool = False):
         await self.trigger_typing()
