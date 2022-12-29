@@ -4,6 +4,7 @@ rm -f poetry.lock && rm -f pyproject.toml
 
 if [ -n "${VIDEO_PREVIEW}" ]; then
   if [ ! -d "venv" ]; then
+    pip3 remove poetry -y
     python3 -m venv venv
   fi
   . venv/bin/activate
@@ -17,6 +18,7 @@ if [ ! -d "venv" ] || [ -f ".deployed" ] || [ ! -f "./venv/bin/requirements.txt"
   rm -rf venv && rm -rf .config && rm -rf .cache && rm -rf .git
   bash quick_update.sh
   rm -f poetry.lock && rm -f pyproject.toml
+  pip3 remove poetry -y
   echo "##################################"
   echo "## Inicializando virtual_env... ##"
   echo "##################################"
