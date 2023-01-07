@@ -205,7 +205,7 @@ class Node:
 
                 if loadtype == 'NO_MATCHES':
                     __log__.info(f'REST | {self.identifier} | No tracks with query:: <{query}> found.')
-                    raise WavelinkException("Track not found...")
+                    raise TrackNotFound("Track not found...")
 
                 if loadtype == 'LOAD_FAILED':
 
