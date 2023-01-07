@@ -919,10 +919,16 @@ class LavalinkPlayer(wavelink.Player):
                 to_search = track.info["search_uri"]
                 check_duration = False
             except KeyError:
-                to_search = f"{self.bot.config['SEARCH_PROVIDER']}:{track.single_title} - {track.authors_string}"
+                to_search = f"{self.bot.config['SEARCH_PROVIDER']}:{track.single_title.replace(' - ', ' ')} - {track.authors_string}"
                 check_duration = True
 
-            tracks = (await self.node.get_tracks(to_search))
+            try:
+                tracks = (await self.node.get_tracks(to_search))
+            except wavelink.TrackNotFound:
+                tracks = None
+
+            if not tracks and self.bot.config['SEARCH_PROVIDER'] not in ("ytsearch", "ytmsearch", "scsearch"):
+                tracks = await self.node.get_tracks(f"ytmsearch:{track.single_title.replace(' - ', ' ')} - {track.authors_string}")
 
             try:
                 tracks = tracks.tracks

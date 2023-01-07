@@ -45,6 +45,9 @@ class AuthorizationFailure(WavelinkException):
 class BuildTrackError(WavelinkException):
     """Exception raised when a track is failed to be decoded and re-built."""
 
+class TrackNotFound(WavelinkException):
+    pass
+
 class TrackLoadError(WavelinkException):
     """There was an error while loading a track."""
 

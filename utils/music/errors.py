@@ -2,7 +2,7 @@ import traceback
 from typing import Union, Optional
 import disnake
 from disnake.ext import commands
-from wavelink import WavelinkException
+from wavelink import WavelinkException, TrackNotFound
 from utils.music.converters import time_format, perms_translations
 
 
@@ -124,10 +124,11 @@ def parse_error(
         error_txt = f"{ctx.author.mention} **{txt[error.per]} e ainda não teve seu{'s' if error.number > 1 else ''} " \
                     f"uso{'s' if error.number > 1 else ''} finalizado{'s' if error.number > 1 else ''}!**"
 
+    elif isinstance(error, TrackNotFound):
+        error_txt = "**Não houve resultados para sua busca...**"
+
     elif isinstance(error, WavelinkException):
-        if (wave_error := str(error)) == "Track not found...":
-            error_txt = "**Não houve resultados para sua busca...**"
-        elif "Unknown file format" in wave_error:
+        if "Unknown file format" in (wave_error := str(error)):
             error_txt = "**Não há suporte para o link especificado...**"
         elif "This video is not available" in wave_error:
             error_txt = "**Este vídeo está indisponível ou privado...**"
