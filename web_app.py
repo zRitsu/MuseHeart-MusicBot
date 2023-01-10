@@ -48,7 +48,12 @@ class IndexHandler(tornado.web.RequestHandler):
 
         if not cells:
 
-            if self.bots[0].pool.killing_state is True:
+            try:
+                killing_state = self.bots[0].pool.killing_state
+            except:
+                killing_state = False
+
+            if killing_state is True:
                 self.text = '<h1 style=\"font-size:5vw\">A aplicação será reiniciada em breve...</h1>'
             else:
                 self.text = '<h1 style=\"font-size:5vw\">Não há bots disponíveis no momento...</h1>\n' \
