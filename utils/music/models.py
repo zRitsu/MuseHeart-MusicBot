@@ -1056,9 +1056,8 @@ class LavalinkPlayer(wavelink.Player):
                 "position": self.position,
                 "paused": self.is_paused,
                 "loop": self.current.track_loops or self.loop,
+                "queue": len(self.queue),
             }
-
-            stats["queue"] = len(self.queue)
 
             if track.playlist_name:
                 stats["track"].update(
