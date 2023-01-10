@@ -1058,6 +1058,8 @@ class LavalinkPlayer(wavelink.Player):
                 "loop": self.current.track_loops or self.loop,
             }
 
+            stats["queue"] = len(self.queue)
+
             if track.playlist_name:
                 stats["track"].update(
                     {
