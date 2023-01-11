@@ -312,7 +312,7 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @can_send_message_check()
-    @ensure_bot_instance(only_voiced=True, check_player=False)
+    @ensure_bot_instance(only_voiced=True)
     @commands.slash_command(description=f"{desc_prefix}Me conectar em um canal de voz (ou me mover para um).")
     async def connect(
             self,
