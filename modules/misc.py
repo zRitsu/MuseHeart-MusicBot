@@ -324,6 +324,9 @@ class Misc(commands.Cog):
 
             for bot in self.bot.pool.bots:
 
+                if not bot.appinfo:
+                    continue
+
                 if not bot.appinfo.bot_public:
                     continue
 
