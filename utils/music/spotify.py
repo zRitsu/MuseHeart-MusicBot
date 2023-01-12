@@ -49,7 +49,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
             if result.album.name != result.name:
                 t.info["extra"]["album"] = {
                     "name": result.album.name,
-                    "url": result.album.uri
+                    "url": result.album.external_urls["spotify"]
                 }
         except (AttributeError, KeyError):
             pass
