@@ -1,7 +1,7 @@
 from __future__ import annotations
 import disnake
 from disnake.ext import commands
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Union, Optional
 from utils.db import DBModel
 from utils.music.checks import ensure_bot_instance
 from utils.music.converters import URL_REG
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 
 class UserFavModal(disnake.ui.Modal):
-    def __init__(self, bot: BotCore, name: str, url: str):
+    def __init__(self, bot: BotCore, name: Optional[str], url: Optional[str]):
 
         self.bot = bot
         self.name = name
@@ -141,7 +141,7 @@ class UserFavView(disnake.ui.View):
         self.stop()
 
     async def favadd_callback(self, inter: disnake.MessageInteraction):
-        await inter.response.send_modal(UserFavModal(bot=self.bot, name="", url=""))
+        await inter.response.send_modal(UserFavModal(bot=self.bot, name=None, url=None))
         await inter.delete_original_message()
         self.stop()
 

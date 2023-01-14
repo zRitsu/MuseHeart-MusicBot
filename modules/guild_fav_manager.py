@@ -3,7 +3,7 @@ from io import BytesIO
 import json
 import disnake
 from disnake.ext import commands
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Union, Optional
 
 from utils.music.checks import ensure_bot_instance
 from utils.music.converters import URL_REG
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 
 class GuildFavModal(disnake.ui.Modal):
-    def __init__(self, bot: BotCore, name: str, description: str, url: str):
+    def __init__(self, bot: BotCore, name: Optional[str], description: Optional[str], url: Optional[str]):
 
         self.bot = bot
         self.name = name
@@ -148,7 +148,7 @@ class GuildFavView(disnake.ui.View):
         self.stop()
 
     async def favadd_callback(self, inter: disnake.MessageInteraction):
-        await inter.response.send_modal(GuildFavModal(bot=self.bot, name="", url="", description=""))
+        await inter.response.send_modal(GuildFavModal(bot=self.bot, name=None, url=None, description=None))
         await inter.delete_original_message()
         self.stop()
 
@@ -329,6 +329,8 @@ class PinManager(commands.Cog):
 
             if "> fav:" in name.lower():
                 continue
+
+            print(data)
 
             if len(data['url']) > (max_url_chars := bot.config["USER_FAV_MAX_URL_LENGTH"]):
                 raise GenericError(f"**Um item de seu arquiv ultrapassa a quantidade de caracteres permitido:{max_url_chars}\nURL:** {data['url']}")
