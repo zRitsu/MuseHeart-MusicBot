@@ -30,14 +30,14 @@ class UserFavModal(disnake.ui.Modal):
                     custom_id="user_fav_name",
                     min_length=2,
                     max_length=25,
-                    value=name
+                    value=name or None
                 ),
                 disnake.ui.TextInput(
                     label="Link/Url:",
                     custom_id="user_fav_url",
                     min_length=10,
                     max_length=200,
-                    value=url
+                    value=url or None
                 ),
             ]
         )
