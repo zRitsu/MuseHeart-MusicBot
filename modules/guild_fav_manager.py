@@ -330,8 +330,6 @@ class PinManager(commands.Cog):
             if "> fav:" in name.lower():
                 continue
 
-            print(data)
-
             if len(data['url']) > (max_url_chars := bot.config["USER_FAV_MAX_URL_LENGTH"]):
                 raise GenericError(f"**Um item de seu arquiv ultrapassa a quantidade de caracteres permitido:{max_url_chars}\nURL:** {data['url']}")
 
