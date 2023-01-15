@@ -928,7 +928,7 @@ class LavalinkPlayer(wavelink.Player):
                 tracks = None
 
             if not tracks and self.bot.config['SEARCH_PROVIDER'] not in ("ytsearch", "ytmsearch", "scsearch"):
-                tracks = await self.node.get_tracks(f"ytmsearch:{track.single_title.replace(' - ', ' ')} - {track.authors_string}")
+                tracks = await self.node.get_tracks(f"ytsearch:{track.single_title.replace(' - ', ' ')} - {track.authors_string}")
 
             try:
                 tracks = tracks.tracks
@@ -942,7 +942,7 @@ class LavalinkPlayer(wavelink.Player):
                 if t.is_stream:
                     continue
 
-                if [(i in t.title.lower() and i not in track.single_title.lower()) for i in exclude_tags]:
+                if any((i in t.title.lower() and i not in track.title.lower()) for i in exclude_tags):
                     continue
 
                 if check_duration and ((t.duration - 10000) < track.duration < (t.duration + 10000)):
