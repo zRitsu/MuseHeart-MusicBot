@@ -597,63 +597,7 @@ class Music(commands.Cog):
                 await inter.response.defer(ephemeral=ephemeral)
 
             if static_player['channel']:
-
-                try:
-                    channel_db = bot.get_channel(int(static_player['channel'])) or await bot.fetch_channel(
-                        int(static_player['channel']))
-                except (TypeError, disnake.NotFound):
-                    channel_db = None
-                except disnake.Forbidden:
-                    channel_db = bot.get_channel(inter.channel_id)
-                    warn_message = f"Não tenho permissão de acessar o canal <#{static_player['channel']}>, o player será usado no modo tradicional."
-                    static_player["channel"] = None
-
-                if not channel_db or channel_db.guild.id != inter.guild_id:
-                    await self.reset_controller_db(inter.guild_id, guild_data, inter)
-
-                else:
-
-                    if channel_db.id != channel.id:
-
-                        try:
-                            if isinstance(channel_db, disnake.Thread):
-
-                                if not channel_db.parent:
-                                    await self.reset_controller_db(inter.guild_id, guild_data, inter)
-                                    channel_db = None
-
-                                else:
-
-                                    if (channel_db.archived or channel_db.locked) and not channel_db.parent.permissions_for(guild.me).manage_threads:
-                                        raise GenericError(
-                                            f"**{bot.user.mention} não possui permissão de gerenciar tópicos para "
-                                            f"desarquivar/destrancar o tópico: {channel_db.mention}**")
-
-                                    await channel_db.edit(archived=False, locked=False)
-                        except AttributeError:
-                            pass
-
-                        if channel_db:
-
-                            channel_db_perms = channel_db.permissions_for(guild.me)
-
-                            if not channel_db_perms.send_messages:
-                                raise GenericError(
-                                    f"**{bot.user.mention} não possui permissão para enviar mensagens no canal <#{static_player['channel']}>**\n"
-                                    "Caso queira resetar a configuração do canal de pedir música, use o comando /reset ou /setup "
-                                    "novamente..."
-                                )
-
-                            if not channel_db_perms.embed_links:
-                                raise GenericError(
-                                    f"**{bot.user.mention} não possui permissão para anexar links/embeds no canal <#{static_player['channel']}>**\n"
-                                    "Caso queira resetar a configuração do canal de pedir música, use o comando /reset ou /setup "
-                                    "novamente..."
-                                )
-
-                            channel = channel_db
-
-            player: Optional[LavalinkPlayer] = None
+                channel, warn_message = await self.check_channel(guild_data, inter, channel, guild, bot)
 
         if ephemeral is None:
             ephemeral = await self.is_request_channel(inter, data=guild_data, ignore_thread=True)
@@ -810,6 +754,28 @@ class Music(commands.Cog):
             await inter.response.defer(ephemeral=ephemeral)
 
         tracks, node = await self.get_tracks(query, inter.user, node=node, track_loops=repeat_amount)
+
+        try:
+            player = inter.bot.music.players[inter.guild_id]
+        except KeyError:
+            await check_pool_bots(inter, check_player=False)
+
+            player = None
+
+            try:
+                bot = inter.music_bot
+                guild = inter.music_guild
+                channel = bot.get_channel(inter.channel.id)
+            except AttributeError:
+                bot = inter.bot
+                guild = inter.guild
+                channel = inter.channel
+
+            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+            static_player = guild_data['player_controller']
+
+            if static_player['channel']:
+                channel, warn_message = await self.check_channel(guild_data, inter, channel, guild, bot)
 
         if not player:
 
@@ -2848,6 +2814,75 @@ class Music(commands.Cog):
                 return not ignore_thread
 
             return channel.id == channel_ctx.id
+
+    async def check_channel(
+            self,
+            guild_data: dict,
+            inter: Union[disnake.AppCmdInter],
+            channel: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.Thread],
+            guild: disnake.Guild,
+            bot: BotCore
+    ):
+
+        static_player = guild_data['static_player']
+
+        warn_message = None
+
+        try:
+            channel_db = bot.get_channel(int(static_player['channel'])) or await bot.fetch_channel(
+                int(static_player['channel']))
+        except (TypeError, disnake.NotFound):
+            channel_db = None
+        except disnake.Forbidden:
+            channel_db = bot.get_channel(inter.channel_id)
+            warn_message = f"Não tenho permissão de acessar o canal <#{static_player['channel']}>, o player será usado no modo tradicional."
+            static_player["channel"] = None
+
+        if not channel_db or channel_db.guild.id != inter.guild_id:
+            await self.reset_controller_db(inter.guild_id, guild_data, inter)
+
+        else:
+
+            if channel_db.id != channel.id:
+
+                try:
+                    if isinstance(channel_db, disnake.Thread):
+
+                        if not channel_db.parent:
+                            await self.reset_controller_db(inter.guild_id, guild_data, inter)
+                            channel_db = None
+
+                        else:
+
+                            if (channel_db.archived or channel_db.locked) and not channel_db.parent.permissions_for(
+                                    guild.me).manage_threads:
+                                raise GenericError(
+                                    f"**{bot.user.mention} não possui permissão de gerenciar tópicos para "
+                                    f"desarquivar/destrancar o tópico: {channel_db.mention}**")
+
+                            await channel_db.edit(archived=False, locked=False)
+                except AttributeError:
+                    pass
+
+                if channel_db:
+
+                    channel_db_perms = channel_db.permissions_for(guild.me)
+
+                    if not channel_db_perms.send_messages:
+                        raise GenericError(
+                            f"**{bot.user.mention} não possui permissão para enviar mensagens no canal <#{static_player['channel']}>**\n"
+                            "Caso queira resetar a configuração do canal de pedir música, use o comando /reset ou /setup "
+                            "novamente..."
+                        )
+
+                    if not channel_db_perms.embed_links:
+                        raise GenericError(
+                            f"**{bot.user.mention} não possui permissão para anexar links/embeds no canal <#{static_player['channel']}>**\n"
+                            "Caso queira resetar a configuração do canal de pedir música, use o comando /reset ou /setup "
+                            "novamente..."
+                        )
+
+        return channel_db, warn_message
 
     async def process_player_interaction(
             self,
