@@ -2824,7 +2824,7 @@ class Music(commands.Cog):
             bot: BotCore
     ):
 
-        static_player = guild_data['static_player']
+        static_player = guild_data['player_controller']
 
         warn_message = None
 
