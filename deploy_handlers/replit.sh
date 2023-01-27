@@ -14,7 +14,9 @@ if [ -n "${VIDEO_PREVIEW}" ]; then
   exit 1
 fi
 
-if [ ! -d "venv" ] || [ -f ".deployed" ] || [ ! -f "./venv/bin/requirements.txt" ]; then
+deployed=$(grep -Fxq "$REPL_SLUG-$REPL_OWNER" ./venv/.deployed)
+
+if [ ! -d "venv" ] || [ ! -f "./venv/.deployed" ] || [ ! -f "./venv/bin/requirements.txt" ] || [ ! -z $deployed ]; then
   rm -rf venv && rm -rf .config && rm -rf .cache && rm -rf .git
   bash quick_update.sh
   rm -f poetry.lock && rm -f pyproject.toml
@@ -30,7 +32,7 @@ if [ ! -d "venv" ] || [ -f ".deployed" ] || [ ! -f "./venv/bin/requirements.txt"
   echo "#################################################"
   pip3 install -U -r requirements.txt --no-cache-dir
   cp -r requirements.txt ./venv/bin/requirements.txt
-  rm -f .deployed
+  echo "$REPL_SLUG-$REPL_OWNER" > ./venv/.deployed
 
 elif ! cmp --silent -- "./requirements.txt" "./venv/bin/requirements.txt"; then
   echo "############################################"
