@@ -14,9 +14,9 @@ if [ -n "${VIDEO_PREVIEW}" ]; then
   exit 1
 fi
 
-deployed=$(grep -Fxq "$REPL_SLUG-$REPL_OWNER" ./venv/.deployed)
+deployed=$(grep -Fxqs "$REPL_SLUG-$REPL_OWNER" ./venv/.deployed)
 
-if [ ! -d "venv" ] || [ ! -f "./venv/.deployed" ] || [ ! -f "./venv/bin/requirements.txt" ] || [ ! -z $deployed ]; then
+if [ ! -d "venv" ] || [ ! -f "./venv/bin/requirements.txt" ] || [ -z $deployed ]; then
   rm -rf venv && rm -rf .config && rm -rf .cache && rm -rf .git
   bash quick_update.sh
   rm -f poetry.lock && rm -f pyproject.toml
