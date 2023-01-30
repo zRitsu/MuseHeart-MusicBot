@@ -124,8 +124,6 @@ class DefaultSkin:
         embed.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif")
         embed.set_thumbnail(url=player.current.thumb)
 
-        player.auto_update = 0
-
         data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
 
         data["components"] = [
