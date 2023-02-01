@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
 exclude_tags = ["remix", "edit", "extend"]
 
+
 class PartialPlaylist:
 
     def __init__(self, data: dict, url: str):
@@ -143,6 +144,7 @@ class PartialTrack:
         except AttributeError:
             return ""
 
+
 class LavalinkPlaylist:
 
     def __init__(self, data: dict, **kwargs):
@@ -153,7 +155,8 @@ class LavalinkPlaylist:
                 self.url = f"https://www.youtube.com/playlist?list={parse.parse_qs(parse.urlparse(self.url).query)['list'][0]}"
         except IndexError:
             pass
-        self.tracks = [LavalinkTrack(id_=track['track'], info=track['info'], playlist=self, **kwargs) for track in data['tracks']]
+        self.tracks = [LavalinkTrack(
+            id_=track['track'], info=track['info'], playlist=self, **kwargs) for track in data['tracks']]
 
     @property
     def name(self):
@@ -186,12 +189,14 @@ class LavalinkTrack(wavelink.Track):
 
             }
 
-        self.playlist: Optional[LavalinkPlaylist] = kwargs.pop("playlist", None)
+        self.playlist: Optional[LavalinkPlaylist] = kwargs.pop(
+            "playlist", None)
 
         if self.ytid:
             self.info["extra"]["thumb"] = f"https://img.youtube.com/vi/{self.ytid}/mqdefault.jpg"
         elif "soundcloud.com" in self.uri:
-            self.info["extra"]["thumb"] = self.info.get("artworkUrl", "").replace('large.jpg', 't500x500.jpg')
+            self.info["extra"]["thumb"] = self.info.get(
+                "artworkUrl", "").replace('large.jpg', 't500x500.jpg')
         else:
             self.info["extra"]["thumb"] = self.info.get("artworkUrl", "")
 
@@ -263,11 +268,13 @@ class LavalinkPlayer(wavelink.Player):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.guild: disnake.Guild = kwargs.pop('guild')
-        self.text_channel: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.Thread] = kwargs.pop('channel')
+        self.text_channel: Union[disnake.TextChannel,
+                                 disnake.VoiceChannel, disnake.Thread] = kwargs.pop('channel')
         self.message: Optional[disnake.Message] = kwargs.pop('message', None)
         self.static: bool = kwargs.pop('static', False)
         self.skin: str = kwargs.pop("skin", None) or self.bot.default_skin
-        self.skin_static: str = kwargs.pop("skin_static", None) or self.bot.default_static_skin
+        self.skin_static: str = kwargs.pop(
+            "skin_static", None) or self.bot.default_static_skin
         self.queue: deque = deque()
         self.played: deque = deque(maxlen=20)
         self.nightcore: bool = False
@@ -287,16 +294,20 @@ class LavalinkPlayer(wavelink.Player):
         self.command_log: str = ""
         self.command_log_emoji: str = ""
         self.is_closing: bool = False
-        self.last_message_id: Optional[int] = kwargs.pop("last_message_id", None)
+        self.last_message_id: Optional[int] = kwargs.pop(
+            "last_message_id", None)
         self.keep_connected: bool = kwargs.pop("keep_connected", False)
         self.update: bool = False
         self.updating: bool = False
         self.auto_update: int = 0
         self.message_updater_task: Optional[asyncio.Task] = None
-        self.restrict_mode = kwargs.pop('restrict_mode', False) # limitar apenas para dj's e staff's
+        # limitar apenas para dj's e staff's
+        self.restrict_mode = kwargs.pop('restrict_mode', False)
         self.ignore_np_once = False  # não invocar player controller em determinadas situações
-        self.allowed_mentions = disnake.AllowedMentions(users=False, everyone=False, roles=False)
-        self.controller_mode = True  # ativar/desativar modo controller (apenas para uso em skins)
+        self.allowed_mentions = disnake.AllowedMentions(
+            users=False, everyone=False, roles=False)
+        # ativar/desativar modo controller (apenas para uso em skins)
+        self.controller_mode = True
         self.bot.loop.create_task(self.channel_cleanup())
         self.mini_queue_feature = False
         self.mini_queue_enabled = False
@@ -370,9 +381,11 @@ class LavalinkPlayer(wavelink.Player):
     def setup_features(self):
 
         try:
-            (self.bot.player_static_skins[self.skin_static] if self.static else self.bot.player_skins[self.skin]).setup_features(self)
+            (self.bot.player_static_skins[self.skin_static]
+             if self.static else self.bot.player_skins[self.skin]).setup_features(self)
         except:
-            self.auto_update = 0 # linha temporária para resolver possíveis problemas com skins custom criadas por usuarios antes desse commit.
+            # linha temporária para resolver possíveis problemas com skins custom criadas por usuarios antes desse commit.
+            self.auto_update = 0
             self.controller_mode = True
 
     def setup_hints(self):
@@ -387,7 +400,7 @@ class LavalinkPlayer(wavelink.Player):
 
         elif self.bot.intents.message_content and self.controller_mode:
             hints.append("Ao criar uma conversa/thread na mensagem do player, será ativado o modo de song-request "
-                        "nela (possibilitando pedir música apenas enviando o nome/link da música na conversa).")
+                         "nela (possibilitando pedir música apenas enviando o nome/link da música na conversa).")
 
         if self.bot.config["GLOBAL_PREFIX"] and len([b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public]) > 1:
             hints.append("É possível ter bots de música adicionais no servidor compartilhando todos os seus favoritos "
@@ -403,10 +416,11 @@ class LavalinkPlayer(wavelink.Player):
 
         await asyncio.sleep(self.idle_timeout)
         msg = f"**O player foi desligado por falta de membros no canal" + (f"<#{self.guild.me.voice.channel.id}>"
-                                                                         if self.guild.me.voice else '') + "...**"
+                                                                           if self.guild.me.voice else '') + "...**"
         self.command_log = msg
         if not self.static and not self.has_thread:
-            embed = disnake.Embed(description=msg, color=self.bot.get_color(self.guild.me))
+            embed = disnake.Embed(
+                description=msg, color=self.bot.get_color(self.guild.me))
             try:
                 await self.text_channel.send(embed=embed, allowed_mentions=self.allowed_mentions)
             except:
@@ -507,18 +521,25 @@ class LavalinkPlayer(wavelink.Player):
 
         if not self.static and not self.controller_mode:
 
-            cmds = " | ".join(f"{self.bot.get_slash_command(c).name}" for c in ['play', 'back', 'readd', 'stop'])
+            try:
+                cmds = " | ".join(f"{self.bot.get_slash_command(c).name}" for c in [
+                                  'play', 'back', 'readd_songs', 'stop'])
 
-            embed = disnake.Embed(
-                description=f"**As músicas acabaram... Use um dos comandos abaixo para adicionar músicas ou parar "
-                            f"o player.**\n\n`{cmds}`\n\n"
-                            f"**Nota:** `O Player será desligado automaticamente` "
-                            f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=self.idle_timeout)).timestamp())}:R> "
-                            f"`caso nenhum comando seja usado...`",
-                color=self.bot.get_color(self.guild.me)
-            )
-            embed.set_thumbnail(self.guild.me.display_avatar.replace(size=256).url)
-            self.message = await self.text_channel.send(embed=embed)
+                embed = disnake.Embed(
+                    description=f"**As músicas acabaram... Use um dos comandos abaixo para adicionar músicas ou parar "
+                                f"o player.**\n\n`{cmds}`\n\n"
+                                f"**Nota:** `O Player será desligado automaticamente` "
+                                f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=self.idle_timeout)).timestamp())}:R> "
+                                f"`caso nenhum comando seja usado...`",
+                    color=self.bot.get_color(self.guild.me)
+                )
+
+                embed.set_thumbnail(
+                    url=self.guild.me.display_avatar.replace(size=256).url)
+
+                self.message = await self.text_channel.send(embed=embed)
+            except Exception:
+                traceback.print_exc()
             return
 
         controller_opts = [
@@ -600,10 +621,10 @@ class LavalinkPlayer(wavelink.Player):
                 pass
             self.message = await self.text_channel.send(embed=embed, components=components, allowed_mentions=self.allowed_mentions)
 
-
     async def idling_mode(self):
 
-        self.bot.loop.create_task(self.process_rpc(self.guild.me.voice.channel))
+        self.bot.loop.create_task(
+            self.process_rpc(self.guild.me.voice.channel))
 
         await self.process_idle_message()
 
@@ -614,8 +635,10 @@ class LavalinkPlayer(wavelink.Player):
         if self.static or self.has_thread:
             self.command_log = msg
         else:
-            embed = disnake.Embed(description=msg, color=self.bot.get_color(self.guild.me))
-            self.bot.loop.create_task(self.text_channel.send(embed=embed, delete_after=120, allowed_mentions=self.allowed_mentions))
+            embed = disnake.Embed(
+                description=msg, color=self.bot.get_color(self.guild.me))
+            self.bot.loop.create_task(self.text_channel.send(
+                embed=embed, delete_after=120, allowed_mentions=self.allowed_mentions))
 
         self.bot.loop.create_task(self.destroy())
 
@@ -636,7 +659,8 @@ class LavalinkPlayer(wavelink.Player):
         if rpc_update:
             self.bot.loop.create_task(self.process_rpc())
 
-        data = (self.bot.player_static_skins[self.skin_static] if self.static else self.bot.player_skins[self.skin]).load(self)
+        data = (self.bot.player_static_skins[self.skin_static]
+                if self.static else self.bot.player_skins[self.skin]).load(self)
 
         if data == self.last_data:
 
@@ -663,18 +687,24 @@ class LavalinkPlayer(wavelink.Player):
 
         else:
 
-            if self.controller_mode and self.last_data.get("components") is None:  # nenhum controle de botão foi definido na skin (será usado os botões padrões).
+            # nenhum controle de botão foi definido na skin (será usado os botões padrões).
+            if self.controller_mode and self.last_data.get("components") is None:
 
                 # Aviso: Não modifique os components abaixo, prefira copiar uma das skins da pasta utils -> music -> skins
                 # e deixá-la com outro nome (sem acentos, espaços, caracteres especiais) e modifique-as a seu gosto.
                 # Caso queira deixar uma skin customizada por padrão adicione/modifique a config DEFAULT_SKIN="tuaskin"
 
                 self.last_data["components"] = [
-                    disnake.ui.Button(emoji="⏯️", custom_id=PlayerControls.pause_resume, style=get_button_style(self.paused)),
-                    disnake.ui.Button(emoji="⏮️", custom_id=PlayerControls.back),
-                    disnake.ui.Button(emoji="⏹️", custom_id=PlayerControls.stop),
-                    disnake.ui.Button(emoji="⏭️", custom_id=PlayerControls.skip),
-                    disnake.ui.Button(emoji="📑", custom_id=PlayerControls.queue),
+                    disnake.ui.Button(
+                        emoji="⏯️", custom_id=PlayerControls.pause_resume, style=get_button_style(self.paused)),
+                    disnake.ui.Button(
+                        emoji="⏮️", custom_id=PlayerControls.back),
+                    disnake.ui.Button(
+                        emoji="⏹️", custom_id=PlayerControls.stop),
+                    disnake.ui.Button(
+                        emoji="⏭️", custom_id=PlayerControls.skip),
+                    disnake.ui.Button(
+                        emoji="📑", custom_id=PlayerControls.queue),
                     disnake.ui.Select(
                         placeholder="Mais opções:",
                         custom_id="musicplayer_dropdown_inter",
@@ -754,7 +784,8 @@ class LavalinkPlayer(wavelink.Player):
                             await self.message.edit(allowed_mentions=self.allowed_mentions, **self.last_data)
                         except:
                             if not self.bot.get_channel(self.text_channel.id):
-                                await self.destroy(force=True)  # canal não existe mais no servidor...
+                                # canal não existe mais no servidor...
+                                await self.destroy(force=True)
                                 return
 
                     self.updating = False
@@ -763,7 +794,8 @@ class LavalinkPlayer(wavelink.Player):
                 except Exception as e:
                     traceback.print_exc()
                     if self.static or self.has_thread:
-                        self.set_command_log(f"{(interaction.author.mention + ' ') if interaction else ''}houve um erro na interação: {repr(e)}", "⚠️")
+                        self.set_command_log(
+                            f"{(interaction.author.mention + ' ') if interaction else ''}houve um erro na interação: {repr(e)}", "⚠️")
                         self.update = True
                         return
 
@@ -883,7 +915,8 @@ class LavalinkPlayer(wavelink.Player):
                 channel: disnake.Thread = self.bot.get_channel(self.message.id)
                 await channel.edit(archived=True, locked=True)
             except Exception:
-                print(f"Falha ao arquivar thread do servidor: {self.guild.name}\n{traceback.format_exc()}")
+                print(
+                    f"Falha ao arquivar thread do servidor: {self.guild.name}\n{traceback.format_exc()}")
 
         elif inter:
 
@@ -893,8 +926,10 @@ class LavalinkPlayer(wavelink.Player):
                     description=f"🛑 ⠂{self.command_log}",
                     color=self.bot.get_color(self.guild.me)),
                 components=[
-                    disnake.ui.Button(label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song),
-                    disnake.ui.Button(label="Tocar favorito", emoji="⭐", custom_id=PlayerControls.enqueue_fav)
+                    disnake.ui.Button(
+                        label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song),
+                    disnake.ui.Button(
+                        label="Tocar favorito", emoji="⭐", custom_id=PlayerControls.enqueue_fav)
 
                 ]
             )
@@ -965,22 +1000,27 @@ class LavalinkPlayer(wavelink.Player):
 
     async def process_rpc(
             self,
-            voice_channel: Union[disnake.VoiceChannel, disnake.StageChannel] = None,
+            voice_channel: Union[disnake.VoiceChannel,
+                                 disnake.StageChannel] = None,
             close=False,
             users: List[int] = None
     ):
 
         if not voice_channel:
             try:
-                voice_channel = self.bot.get_channel(self.channel_id) or self.guild.voice_client.channel
+                voice_channel = self.bot.get_channel(
+                    self.channel_id) or self.guild.voice_client.channel
             except AttributeError:
-                return #TODO: Investigar possível bug ao mover o bot de canal pelo discord.
+                # TODO: Investigar possível bug ao mover o bot de canal pelo discord.
+                return
             if not voice_channel:
                 return
 
-        thumb = self.bot.user.display_avatar.replace(size=512, static_format="png").url
+        thumb = self.bot.user.display_avatar.replace(
+            size=512, static_format="png").url
 
-        users = [u for u in (users or voice_channel.voice_states) if u != self.bot.user.id]
+        users = [u for u in (users or voice_channel.voice_states)
+                 if u != self.bot.user.id]
 
         if close:
 
@@ -1025,7 +1065,8 @@ class LavalinkPlayer(wavelink.Player):
         }
 
         try:
-            stats["info"]["guild"]["icon"] = self.guild.icon.with_static_format("png").url
+            stats["info"]["guild"]["icon"] = self.guild.icon.with_static_format(
+                "png").url
         except AttributeError:
             pass
 
