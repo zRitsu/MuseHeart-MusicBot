@@ -1,3 +1,4 @@
+from ast import Index
 import datetime
 import json
 import aiofiles
@@ -701,12 +702,15 @@ class Music(commands.Cog):
 
             query = query.strip("<>")
 
-            if not URL_REG.match(query):
+            urls = URL_REG.findall(query)
+
+            if not urls:
+
                 query = f"{source}:{query}"
 
             else:
 
-                query = query.split("&ab_channel=")[0]
+                query = urls[0].split("&ab_channel=")[0]
 
                 if "&list=" in query and (link_re := YOUTUBE_VIDEO_REG.match(query)):
 
@@ -3282,37 +3286,42 @@ class Music(commands.Cog):
 
         try:
 
-            if not URL_REG.match(message.content):
+            urls = URL_REG.findall(message.content)
+
+            if not urls:
                 message.content = f"ytsearch:{message.content}"
+                
+            else:
+                message.content = urls[0]
 
-            elif "&list=" in message.content:
+                if "&list=" in message.content:
 
-                view = SelectInteraction(
-                    user=message.author,
-                    opts=[
-                        disnake.SelectOption(label="Música", emoji="🎵",
-                                             description="Carregar apenas a música do link.", value="music"),
-                        disnake.SelectOption(label="Playlist", emoji="🎶",
-                                             description="Carregar playlist com a música atual.", value="playlist"),
-                    ], timeout=30)
+                    view = SelectInteraction(
+                        user=message.author,
+                        opts=[
+                            disnake.SelectOption(label="Música", emoji="🎵",
+                                                description="Carregar apenas a música do link.", value="music"),
+                            disnake.SelectOption(label="Playlist", emoji="🎶",
+                                                description="Carregar playlist com a música atual.", value="playlist"),
+                        ], timeout=30)
 
-                embed = disnake.Embed(
-                    description="**O link contém vídeo com playlist.**\n"
-                                f'Selecione uma opção em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para prosseguir.',
-                    color=self.bot.get_color(message.guild.me)
-                )
+                    embed = disnake.Embed(
+                        description="**O link contém vídeo com playlist.**\n"
+                                    f'Selecione uma opção em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para prosseguir.',
+                        color=self.bot.get_color(message.guild.me)
+                    )
 
-                msg = await message.channel.send(message.author.mention, embed=embed, view=view)
+                    msg = await message.channel.send(message.author.mention, embed=embed, view=view)
 
-                await view.wait()
+                    await view.wait()
 
-                try:
-                    await view.inter.response.defer()
-                except:
-                    pass
+                    try:
+                        await view.inter.response.defer()
+                    except:
+                        pass
 
-                if view.selected == "music":
-                    message.content = YOUTUBE_VIDEO_REG.match(message.content).group()
+                    if view.selected == "music":
+                        message.content = YOUTUBE_VIDEO_REG.match(message.content).group()
 
             await self.parse_song_request(message, text_channel, data, response=msg)
 

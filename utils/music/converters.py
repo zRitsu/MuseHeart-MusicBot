@@ -9,7 +9,7 @@ from user_agent import generate_user_agent
 if TYPE_CHECKING:
     pass
 
-URL_REG = re.compile(r'https?://(?:www\.)?.+')
+URL_REG = re.compile('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
 YOUTUBE_VIDEO_REG = re.compile(r"(https?://)?(www\.)?youtube\.(com|nl)/watch\?v=([-\w]+)")
 
 replaces = [
@@ -165,5 +165,3 @@ perms_translations = {
     "view_channel": "Ver canal",
     "view_guild_insights": "Ver análises do servidor"
 }
-
-

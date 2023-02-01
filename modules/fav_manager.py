@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ast import Index
 import disnake
 from disnake.ext import commands
 from typing import TYPE_CHECKING, Union, Optional
@@ -46,10 +47,12 @@ class UserFavModal(disnake.ui.Modal):
 
         url = inter.text_values["user_fav_url"]
 
-        if not URL_REG.match(url):
+        try:
+            valid_url = URL_REG.findall(url)[0]
+        except IndexError:
             await inter.send(
                 embed=disnake.Embed(
-                    description=f"**Link inválido:** {url}",
+                    description=f"**Nenhum link válido encontrado:** {url}",
                     color=disnake.Color.red()
                 ), ephemeral=True
             )
@@ -67,7 +70,7 @@ class UserFavModal(disnake.ui.Modal):
         except KeyError:
             pass
 
-        user_data["fav_links"][name] = url
+        user_data["fav_links"][name] = valid_url
 
         await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
 

@@ -54,10 +54,12 @@ class GuildFavModal(disnake.ui.Modal):
 
         url = inter.text_values["guild_fav_url"]
 
-        if not URL_REG.match(url):
+        try:
+            valid_url = URL_REG.findall(url)[0]
+        except IndexError:
             await inter.send(
                 embed=disnake.Embed(
-                    description=f"**Link inválido:** {url}",
+                    description=f"**Nenhum link válido encontrado:** {url}",
                     color=disnake.Color.red()
                 ), ephemeral=True
             )
@@ -83,7 +85,7 @@ class GuildFavModal(disnake.ui.Modal):
         except KeyError:
             pass
 
-        guild_data["player_controller"]["fav_links"][name] = {'url': url, "description": description}
+        guild_data["player_controller"]["fav_links"][name] = {'url': valid_url, "description": description}
 
         await self.bot.update_data(inter.guild_id, guild_data, db_name=DBModel.guilds)
 
