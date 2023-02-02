@@ -17,8 +17,7 @@ fi
 deployed=$(grep -Fxqs "$REPL_SLUG-$REPL_OWNER" ./venv/.deployed)
 
 if [ ! -d "venv" ] || [ ! -f "./venv/bin/requirements.txt" ] || [ -z $deployed ]; then
-  rm -rf venv && rm -rf .config && rm -rf .cache && rm -rf .git
-  bash quick_update.sh
+  rm -rf venv && rm -rf .config && rm -rf .cache
   rm -f poetry.lock && rm -f pyproject.toml
   echo "##################################"
   echo "## Inicializando virtual_env... ##"
