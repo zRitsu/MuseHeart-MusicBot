@@ -22,7 +22,6 @@ class Misc(commands.Cog):
 
     def __init__(self, bot: BotCore):
         self.bot = bot
-        self.source_owner: Optional[disnake.User] = None
         self.activities = None
         self.task = self.bot.loop.create_task(self.presences())
         self.extra_user_bots = []
@@ -154,9 +153,6 @@ class Misc(commands.Cog):
         if not bot:
             return
 
-        if not self.source_owner:
-            self.source_owner = await bot.get_or_fetch_user(184889853102653440)
-
         ram_usage = humanize.naturalsize(psutil.Process(getpid()).memory_info().rss)
 
         guild = bot.get_guild(inter.guild_id) or inter.guild
@@ -225,9 +221,6 @@ class Misc(commands.Cog):
             icon_url=avatar,
             text=f"Dono(a): {bot.owner}"
         )
-
-        if bot.config["HIDE_SOURCE_OWNER"] is not False and bot.owner.id == self.source_owner.id:
-            embed.footer.text += f" | Source by: {self.source_owner}"
 
         components = [disnake.ui.Button(custom_id="bot_invite", label="Me adicione no seu servidor")] if [b for b in bot.pool.bots if b.appinfo and b.appinfo.bot_public] else None
 
