@@ -160,32 +160,6 @@ class MusicSettings(commands.Cog):
             except:
                 await inter.send(embed=embed, ephemeral=True)
 
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    @ensure_bot_instance(return_first=True)
-    @commands.command(aliases=["mgf", "migrarfavoritos", "migrate"],
-                      description="Migrar seus favoritos para database global (comando temporário).")
-    async def migratefav(self, ctx: CustomContext):
-
-        async with ctx.typing():
-            user_data = await self.bot.get_data(ctx.author.id, db_name=DBModel.users)
-            global_user_data = await self.bot.get_global_data(ctx.author.id, db_name=DBModel.users)
-
-            if not user_data["fav_links"]:
-                raise GenericError("**Você não possui favoritos na database antiga.**")
-
-            global_user_data["fav_links"].update(user_data["fav_links"])
-            await self.bot.update_global_data(ctx.author.id, global_user_data, db_name=DBModel.users)
-
-            user_data["fav_links"].clear()
-            await self.bot.update_data(ctx.author.id, user_data, db_name=DBModel.users)
-
-        await ctx.send(
-            embed=disnake.Embed(
-                description="**Os dados foram migrados com sucesso.**",
-                color=self.bot.get_color(ctx.guild.me)
-            )
-        )
-
     @commands.has_guild_permissions(manage_guild=True)
     @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
     @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
