@@ -1472,14 +1472,11 @@ class Music(commands.Cog):
         except AttributeError:
             pass
 
-        if inter.bot.intents.members:
-            try:
-                await check_pool_bots(inter, only_voiced=True)
-                bot = inter.music_bot
-            except:
-                return
-        else:
-            bot = inter.bot
+        try:
+            await check_pool_bots(inter, only_voiced=True)
+            bot = inter.music_bot
+        except:
+            return
 
         try:
             player: LavalinkPlayer = bot.music.players[inter.guild_id]
@@ -1957,14 +1954,11 @@ class Music(commands.Cog):
         except AttributeError:
             pass
 
-        if inter.bot.intents.members:
-            try:
-                if not await check_pool_bots(inter, only_voiced=True):
-                    return
-            except:
+        try:
+            if not await check_pool_bots(inter, only_voiced=True):
                 return
-        else:
-            inter.music_bot = inter.bot
+        except:
+            return
 
         try:
             player = inter.music_bot.music.players[inter.guild_id]
@@ -2569,15 +2563,11 @@ class Music(commands.Cog):
         if not query:
             return
 
-        if inter.bot.intents.members:
-            try:
-                await check_pool_bots(inter, only_voiced=True)
-                bot = inter.music_bot
-            except:
-                return
-
-        else:
-            bot = inter.bot
+        try:
+            await check_pool_bots(inter, only_voiced=True)
+            bot = inter.music_bot
+        except:
+            return
 
         if not inter.author.voice:
             return
@@ -3971,10 +3961,7 @@ class Music(commands.Cog):
 
         if player.guild.me.voice:
 
-            if self.bot.intents.members:
-                check = any(m for m in player.guild.me.voice.channel.members if not m.bot)
-            else:
-                check = any(m for m in member.guild.me.voice.channel.voice_states if m != self.bot.user.id)
+            check = any(m for m in player.guild.me.voice.channel.members if not m.bot)
 
             if not check:
                 player.members_timeout_task = self.bot.loop.create_task(player.members_timeout())

@@ -39,6 +39,9 @@ class IndexHandler(tornado.web.RequestHandler):
             except asyncio.TimeoutError:
                 continue
 
+            if str(bot.user.id) in bot.config['INTERACTION_BOTS_CONTROLLER']:
+                continue
+
             avatar = bot.user.display_avatar.replace(size=256, static_format="png").url
 
             cells += f"<tr><td><img src=\"{avatar}\" width=128 weight=128></img></td>\n" \

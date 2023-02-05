@@ -88,8 +88,11 @@ class Misc(commands.Cog):
     @commands.Cog.listener("on_guild_join")
     async def guild_add(self, guild: disnake.Guild):
 
-        if not guild.system_channel or not guild.system_channel.permissions_for(guild.me).send_messages:
+        if not guild or guild.system_channel or not guild.system_channel.permissions_for(guild.me).send_messages:
             return
+
+        if str(self.bot.user.id) in self.bot.config["INTERACTION_BOTS_CONTROLLER"]:
+            await guild.leave()
 
         if self.bot.config["GLOBAL_PREFIX"]:
             components = [disnake.ui.Button(custom_id="bot_invite", label="Bot invites")] if [b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public] else None
@@ -243,13 +246,13 @@ class Misc(commands.Cog):
 
         for bot in self.bot.pool.bots:
 
-            if bot.appinfo and not bot.appinfo.bot_public:
+            if bot.appinfo and not bot.appinfo.bot_public or str(bot.user.id) in bot.config['INTERACTION_BOTS_CONTROLLER']:
                 continue
 
             bots_invites.append(
                 f"[`{disnake.utils.escape_markdown(str(bot.user.name))}`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})" +
                 (
-                    f" ({len(bot.guilds)}/100)" if bot.appinfo.flags.gateway_message_content_limited else f" ({len(bot.guilds)})"))
+                    f" ({len(bot.guilds)}/100)" if not str(bot.user.id) not in self.bot.config["INTERACTION_BOTS_CONTROLLER"] and bot.appinfo.flags.gateway_message_content_limited else f" ({len(bot.guilds)})"))
 
         if not bots_invites:
             await inter.send(
@@ -301,14 +304,10 @@ class Misc(commands.Cog):
 
             self.extra_user_bots_ids = None
 
-        embed = disnake.Embed(
-                colour=self.bot.get_color(),
-                description=f"[**Clique aqui**]({disnake.utils.oauth_url(self.bot.user.id, permissions=disnake.Permissions(self.bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))}) "
-                "para me adicionar no seu servidor." + ("\n\n`Nota: No momento não será possivel me adicionar devido ao limite de servidores atingido.`" if self.bot.appinfo.flags.verification_pending_guild_limit else "")
-            )
+        extra_bots_msg = ""
 
         if self.extra_user_bots:
-            embed.description += "\n\n**Caso queira bots de música adicionais, você pode adicionar um dos bots abaixo:**\n\n" + \
+            extra_bots_msg += "\n\n**Caso queira bots de música adicionais, você pode adicionar um dos bots abaixo:**\n\n" + \
                                  "\n".join(f"`{bot}:` [`adicionar`]({disnake.utils.oauth_url(bot.id, permissions=disnake.Permissions(self.bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})" for bot in self.extra_user_bots)
 
         elif self.bot.config["GLOBAL_PREFIX"]:
@@ -336,7 +335,18 @@ class Misc(commands.Cog):
                 for i in disnake.utils.as_chunks(bots_invites, 2):
                     txt += " | ".join(i) + "\n"
 
-                embed.description += "\n\n**Bots de música adicionais:**\n" + txt
+                extra_bots_msg += "\n\n**Bots de música adicionais:**\n" + txt
+
+        embed = disnake.Embed(colour=self.bot.get_color())
+
+        if str(self.bot.user.id) not in self.bot.config['INTERACTION_BOTS_CONTROLLER'] and not extra_bots_msg:
+            embed.description = "**Este bot é privado e não pode ser convidado para mais servidores...**"
+
+        else:
+            embed.description = f"[**Clique aqui**]({disnake.utils.oauth_url(self.bot.user.id, permissions=disnake.Permissions(self.bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))}) para me adicionar no seu servidor." + \
+                                ("\n\n`Nota: No momento não será possivel me adicionar devido ao limite de servidores atingido.`" if self.bot.appinfo.flags.verification_pending_guild_limit else "")
+
+            embed.description += extra_bots_msg
 
         try:
             await inter.edit_original_message(embed=embed)
