@@ -182,7 +182,6 @@ def load_config():
         "VOICE_STATES_INTENT",
         "WEBHOOKS_INTENT",
 
-        "MEMBERS_INTENT",
         "PRESENCES_INTENT",
         "MESSAGE_CONTENT_INTENT",
     ]:
