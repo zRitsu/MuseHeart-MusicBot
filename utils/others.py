@@ -335,7 +335,7 @@ async def select_bot_pool(inter, first=False):
 
     if isinstance(inter, CustomContext):
         if not inter.bot.config["GLOBAL_PREFIX"]:
-            return inter.bot
+            return inter, inter.bot
 
     bots = {}
 
@@ -351,7 +351,7 @@ async def select_bot_pool(inter, first=False):
         raise GenericError(f"**Você precisa adicionar pelo menos um desses bots no servidor:**\n{bot_invites}")
 
     if len(bots) == 1 or first:
-        return list(bots.values())[0]
+        return inter, list(bots.values())[0]
     else:
         opts = [disnake.SelectOption(label=f"{b.user}", value=f"{b.user.id}", emoji="🎶") for b in bots.values()]
 
@@ -386,7 +386,7 @@ async def select_bot_pool(inter, first=False):
                 return i.author == inter.author and i.message.id == msg.id
 
         try:
-            select_interaction: disnake.MessageInteraction = await inter.bot.wait_for(
+            inter: disnake.MessageInteraction = await inter.bot.wait_for(
                 "dropdown", timeout=45, check=check_bot_selection
             )
         except asyncio.TimeoutError:
@@ -394,14 +394,14 @@ async def select_bot_pool(inter, first=False):
                 await msg.edit(conent="Tempo de seleção esgotado!", embed=None, view=None)
             except:
                 pass
-            return
+            return None, None
 
         try:
-            func = select_interaction.response.edit_message
+            func = inter.response.edit_message
         except AttributeError:
             func = msg.edit
 
-        if select_interaction.data.values[0] == "cancel":
+        if inter.data.values[0] == "cancel":
             await func(
                 embed=disnake.Embed(
                     description="**Seleção cancelada!**",
@@ -409,15 +409,13 @@ async def select_bot_pool(inter, first=False):
                 ),
                 components=None
             )
-            return
-
-        inter.response = select_interaction.response
+            return None, None
 
         if msg:
             inter.store_message = msg
 
         try:
-            return bots[int(select_interaction.data.values[0])]
+            return inter, bots[int(inter.data.values[0])]
         except KeyError:
             raise GenericError("**O bot selecionado foi removido do servidor antes de sua seleção...**")
 

@@ -131,7 +131,7 @@ class MusicSettings(commands.Cog):
             opt: str = commands.Param(choices=["Ativar", "Desativar"], description="Escolha: ativar ou desativar")
     ):
 
-        bot = await select_bot_pool(inter)
+        inter, bot = await select_bot_pool(inter)
 
         if not bot:
             return
@@ -213,7 +213,7 @@ class MusicSettings(commands.Cog):
             )
     ):
 
-        bot = await select_bot_pool(inter)
+        inter, bot = await select_bot_pool(inter)
 
         if not bot:
             return
@@ -553,7 +553,7 @@ class MusicSettings(commands.Cog):
             )
     ):
 
-        bot = await select_bot_pool(inter)
+        inter, bot = await select_bot_pool(inter)
 
         if not bot:
             return
@@ -611,7 +611,7 @@ class MusicSettings(commands.Cog):
             embed=disnake.Embed(
                 color=self.bot.get_color(guild.me),
                 description="**O Canal de pedir música foi resetado com sucesso.**"
-            ), components=None
+            ), components=[]
         )
 
         try:
@@ -671,7 +671,7 @@ class MusicSettings(commands.Cog):
             role: disnake.Role = commands.Param(name="cargo", description="Cargo")
     ):
 
-        bot = await select_bot_pool(inter)
+        inter, bot = await select_bot_pool(inter)
         guild = bot.get_guild(inter.guild_id) or inter.guild
         role = guild.get_role(role.id)
 
@@ -709,7 +709,7 @@ class MusicSettings(commands.Cog):
             role: disnake.Role = commands.Param(name="cargo", description="Cargo")
     ):
 
-        bot = await select_bot_pool(inter)
+        inter, bot = await select_bot_pool(inter)
 
         if not bot:
             return
@@ -752,7 +752,7 @@ class MusicSettings(commands.Cog):
     )
     async def change_skin(self, inter: disnake.AppCmdInter):
 
-        bot = await select_bot_pool(inter)
+        inter, bot = await select_bot_pool(inter)
 
         if not bot:
             return
@@ -942,7 +942,7 @@ class MusicSettings(commands.Cog):
     )
     async def nodeinfo(self, inter: disnake.AppCmdInter):
 
-        bot = await select_bot_pool(inter)
+        inter, bot = await select_bot_pool(inter)
 
         if not bot:
             return

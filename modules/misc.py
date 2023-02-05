@@ -151,7 +151,7 @@ class Misc(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        bot = await select_bot_pool(inter, first=self.bot.config["GLOBAL_PREFIX"])
+        inter, bot = await select_bot_pool(inter, first=self.bot.config["GLOBAL_PREFIX"])
 
         if not bot:
             return

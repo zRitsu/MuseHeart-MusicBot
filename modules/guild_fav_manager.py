@@ -267,7 +267,7 @@ class PinManager(commands.Cog):
     )
     async def manager(self, inter: disnake.AppCmdInter):
 
-        bot = await select_bot_pool(inter)
+        inter, bot = await select_bot_pool(inter)
 
         if not bot:
             return
@@ -313,7 +313,7 @@ class PinManager(commands.Cog):
         if not file.filename.endswith(".json"):
             raise GenericError("**Tipo de arquivo inválido!**")
 
-        bot = await select_bot_pool(inter)
+        inter, bot = await select_bot_pool(inter)
 
         if not bot:
             return
@@ -385,7 +385,7 @@ class PinManager(commands.Cog):
     )
     async def export(self, inter: disnake.ApplicationCommandInteraction):
 
-        bot = await select_bot_pool(inter)
+        inter, bot = await select_bot_pool(inter)
 
         if not bot:
             return
