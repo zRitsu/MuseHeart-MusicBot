@@ -100,6 +100,7 @@ DEFAULT_CONFIG = {
     ##########################
     ### Privileged Intents ###
     ##########################
+    "MEMBERS_INTENT": False,
     "PRESENCES_INTENT": False,
     "MESSAGE_CONTENT_INTENT": True,
 }
@@ -182,6 +183,7 @@ def load_config():
         "VOICE_STATES_INTENT",
         "WEBHOOKS_INTENT",
 
+        "MEMBERS_INTENT",
         "PRESENCES_INTENT",
         "MESSAGE_CONTENT_INTENT",
     ]:
