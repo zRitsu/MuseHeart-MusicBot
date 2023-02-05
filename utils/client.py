@@ -180,6 +180,8 @@ class BotPool:
             start_local = False
 
         intents = disnake.Intents(**{i[:-7].lower(): v for i, v in self.config.items() if i.lower().endswith("_intent")})
+        intents.members = True
+        intents.guilds = True
 
         mongo_key = self.config.get("MONGO")
 

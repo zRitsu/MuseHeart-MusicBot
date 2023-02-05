@@ -100,7 +100,6 @@ DEFAULT_CONFIG = {
     ##########################
     ### Privileged Intents ###
     ##########################
-    "MEMBERS_INTENT": True,
     "PRESENCES_INTENT": False,
     "MESSAGE_CONTENT_INTENT": True,
 }
