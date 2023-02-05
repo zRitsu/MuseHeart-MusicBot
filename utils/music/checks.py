@@ -209,23 +209,24 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
         extra_bots_counter += 1
 
-    components = None
+    components = []
 
-    if extra_bots_counter == len(inter.bot.pool.bots):
+    if not inter.guild:
+
+        extra_bots_invite = []
 
         msg = "**Não há bots de música compatível no servidor...**"
 
-        interaction_invites = ""
-
         for b in bot.pool.bots:
 
-            if str(b.user.id) not in bot.config["INTERACTION_BOTS"]:
+            if str(b.user.id) in bot.config["INTERACTION_BOTS"]:
                 continue
 
-            interaction_invites += f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) "
+            extra_bots_invite.append(f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])})")
 
-        if interaction_invites:
-            msg += f"\nVocê terá que integrar um dos seguintes bots no servidor: {interaction_invites}"
+        if extra_bots_invite:
+            msg += f"\n\nVocê terá que adicionar um dos seguintes bots no servidor:\n{' **|** '.join(extra_bots_invite)}"
+
 
     else:
         msg = "**Todos os bots estão em uso nomento...**"
