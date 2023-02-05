@@ -88,7 +88,7 @@ class Misc(commands.Cog):
     @commands.Cog.listener("on_guild_join")
     async def guild_add(self, guild: disnake.Guild):
 
-        if not guild or guild.system_channel or not guild.system_channel.permissions_for(guild.me).send_messages:
+        if not guild.system_channel or not guild.system_channel.permissions_for(guild.me).send_messages:
             return
 
         if str(self.bot.user.id) in self.bot.config["INTERACTION_BOTS_CONTROLLER"]:
