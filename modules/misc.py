@@ -339,14 +339,15 @@ class Misc(commands.Cog):
 
         embed = disnake.Embed(colour=self.bot.get_color())
 
-        if str(self.bot.user.id) not in self.bot.config['INTERACTION_BOTS_CONTROLLER'] and not extra_bots_msg:
-            embed.description = "**Este bot é privado e não pode ser convidado para mais servidores...**"
-
-        else:
+        if str(self.bot.user.id) not in self.bot.config['INTERACTION_BOTS_CONTROLLER']:
             embed.description = f"[**Clique aqui**]({disnake.utils.oauth_url(self.bot.user.id, permissions=disnake.Permissions(self.bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))}) para me adicionar no seu servidor." + \
                                 ("\n\n`Nota: No momento não será possivel me adicionar devido ao limite de servidores atingido.`" if self.bot.appinfo.flags.verification_pending_guild_limit else "")
 
+        if extra_bots_msg:
             embed.description += extra_bots_msg
+
+        if not embed.description:
+            embed.description = "**Este bot é privado e não pode ser convidado para mais servidores...**"
 
         try:
             await inter.edit_original_message(embed=embed)
