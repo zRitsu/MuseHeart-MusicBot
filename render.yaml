@@ -18,5 +18,5 @@ services:
       - key: MONGO
         sync: false
       - key: PYTHON_VERSION
-        value: 3.10.6
+        value: 3.11.1
     autoDeploy: false # optional
