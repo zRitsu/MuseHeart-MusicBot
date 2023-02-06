@@ -3,14 +3,18 @@ import asyncio
 import datetime
 import json
 import logging
+import os
+import traceback
 from configparser import ConfigParser
 from importlib import import_module
 from subprocess import check_output
+from typing import Optional, Union, List
+
 import aiohttp
 import requests
 from disnake.ext import commands
 import disnake
-from typing import Optional, Union, List
+
 from config_loader import load_config
 from web_app import WSClient, start
 from utils.music.checks import check_pool_bots
@@ -22,9 +26,7 @@ from asyncspotify import Client
 from utils.owner_panel import PanelView
 from utils.db import MongoDatabase, LocalDatabase, guild_prefix, DBModel, global_db_models
 from asyncspotify import Client as SpotifyClient
-from utils.others import sync_message, CustomContext
-import os
-import traceback
+from utils.others import CustomContext
 
 class BotPool:
 
@@ -328,11 +330,11 @@ class BotPool:
                                     interaction_invites += f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) "
 
                                 embed = disnake.Embed(
-                                    description="Aviso: todos os meus comandos de barra (/) funcionam através dos "
-                                                f"comandos de barra do bot abaixo:\n{interaction_invites}\n\n"
-                                                "Caso os comandos do bot acima não sejam exibidos ao digitar barra (/), "
-                                                "clique no nome do bot acima para integrar os comandos de barra no seu "
-                                                "servidor.",
+                                    description="**Atenção! Todos os meus comandos de barra (/) funcionam através da aplicação "
+                                                f"com um dos nomes abaixo:**\n{interaction_invites}\n\n"
+                                                "**Caso os comandos da aplicação acima não sejam exibidos ao digitar barra (/), "
+                                                "clique no nome acima para integrar os comandos de barra no seu "
+                                                "servidor.**",
                                     color=bot.get_color()
                                 )
 
@@ -577,30 +579,31 @@ class BotCore(commands.Bot):
                 if not isinstance(prefix, str):
                     prefix = prefix[-1]
 
-                embed.description = f"**Olá {message.author.mention}.\n" \
+                embed.description = f"**Olá {message.author.mention}.\n\n" \
                                     f"Para ver todos os meus comandos use: /**"
-
-                if message.author.guild_permissions.administrator:
-                    embed.description += f"\n\n{sync_message(self)}"
-
-                if not self.config["INTERACTION_COMMAND_ONLY"]:
-                    embed.description += f"\n\nTambém tenho comandos de texto por prefixo.\n" \
-                                        f"Para ver todos os meus comandos de texto use **{prefix}help**\n"
 
                 if not self.command_sync_flags.sync_commands and self.config["INTERACTION_BOTS"]:
 
-                    interaction_invites = ""
+                    interaction_invites = []
 
                     for b in self.pool.bots:
 
                         if str(b.user.id) not in self.config["INTERACTION_BOTS"]:
                             continue
 
-                        interaction_invites += f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) "
+                        interaction_invites.append(f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) ")
 
                     if interaction_invites:
-                        embed.description += f"Se os comandos de barra (/) não aparecerem na lista, você terá que " \
-                                             f"integrar um dos seguintes bots no servidor: {interaction_invites}"
+                        embed.description += f"\n\nMeus comandos de barra (/) funcionam através " \
+                                             f"das seguintes aplicações abaixo:\n" \
+                                             f"{' **|** '.join(interaction_invites)}\n\n" \
+                                             f"Caso os comandos da aplicação acima não sejam exibidos ao digitar " \
+                                             f"barra (/), clique no nome acima para integrar os comandos de barra no " \
+                                             f"seu servidor."
+
+                if not self.config["INTERACTION_COMMAND_ONLY"]:
+                    embed.description += f"\n\nTambém tenho comandos de texto por prefixo.\n" \
+                                        f"Para ver todos os meus comandos de texto use **{prefix}help**\n"
 
                 view = None
 

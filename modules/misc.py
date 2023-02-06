@@ -1,20 +1,20 @@
 import traceback
-import disnake
-from disnake.ext import commands
-import asyncio
-from typing import Optional
-from aiohttp import ClientSession
-from utils.client import BotCore
-from utils.db import DBModel, db_models
-from utils.music.checks import check_requester_channel, ensure_bot_instance
-from utils.music.converters import time_format, URL_REG
-import psutil
-import humanize
 from itertools import cycle
 from random import shuffle
 from os import getpid
 import platform
+import asyncio
 
+import disnake
+import psutil
+import humanize
+from disnake.ext import commands
+from aiohttp import ClientSession
+
+from utils.client import BotCore
+from utils.db import DBModel, db_models
+from utils.music.checks import check_requester_channel, ensure_bot_instance
+from utils.music.converters import time_format, URL_REG
 from utils.others import select_bot_pool
 
 
@@ -110,18 +110,22 @@ class Misc(commands.Cog):
 
         if not self.bot.command_sync_flags.sync_commands and self.bot.config["INTERACTION_BOTS"]:
 
-            interaction_invites = ""
+            interaction_invites = []
 
             for b in self.bot.pool.bots:
 
                 if str(b.user.id) not in self.bot.config["INTERACTION_BOTS"]:
                     continue
 
-                interaction_invites += f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) "
+                interaction_invites.append(f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) ")
 
             if interaction_invites:
-                embed.description += f"Se os comandos de barra (/) não aparecerem, você terá que integrar um dos " \
-                                     f"seguintes bots no servidor: {interaction_invites}\n\n"
+                embed.description += f"Meus comandos de barra (/) funcionam através " \
+                                     f"das seguintes aplicações abaixo:\n" \
+                                     f"{' **|** '.join(interaction_invites)}\n\n" \
+                                     f"Caso os comandos da aplicação acima não sejam exibidos ao digitar " \
+                                     f"barra (/), clique no nome acima para integrar os comandos de barra no " \
+                                     f"seu servidor.\n\n"
 
         if components:
             embed.description += "Precisa de mais bots de música? Clique no botão abaixo para adicionar mais bots extras."
