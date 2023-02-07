@@ -167,7 +167,7 @@ class BotPool:
             config.read('lavalink.ini')
         except FileNotFoundError:
             pass
-        except Exception as e:
+        except Exception:
             traceback.print_exc()
         else:
             for key, value in {section: dict(config.items(section)) for section in config.sections()}.items():
