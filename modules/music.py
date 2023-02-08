@@ -737,7 +737,13 @@ class Music(commands.Cog):
                     await view.wait()
 
                     if not view.inter:
-                        await msg.edit(
+
+                        try:
+                            func = inter.edit_original_message
+                        except AttributeError:
+                            func = msg.edit
+
+                        await func(
                             content=f"{inter.author.mention}, tempo esgotado!",
                             embed=None, view=None
                         )
