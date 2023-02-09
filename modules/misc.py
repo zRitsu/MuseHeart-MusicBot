@@ -365,12 +365,11 @@ class Misc(commands.Cog):
 
         assets = {}
 
-        user = await self.bot.fetch_user(inter.target.id) if not inter.target.bot else self.bot.get_user(
-            inter.target.id)
+        user = await self.bot.fetch_user(inter.target.id) if not inter.target.bot else self.bot.get_user(inter.target.id)
 
         if inter.target.guild_avatar:
             assets["Avatar (Server)"] = inter.target.guild_avatar.with_static_format("png")
-        assets["Avatar (User)"] = user.avatar.with_static_format("png")
+        assets["Avatar (User)"] = user.display_avatar.with_static_format("png")
         if user.banner:
             assets["Banner"] = user.banner.with_static_format("png")
 
