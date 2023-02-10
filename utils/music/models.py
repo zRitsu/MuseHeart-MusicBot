@@ -322,6 +322,11 @@ class LavalinkPlayer(wavelink.Player):
             "seus links nos comandos. Experimente usando o comando: /fav manager.",
         ]
 
+        try:
+            self.initial_hints.extend(kwargs.pop("extra_hints"))
+        except:
+            pass
+
         self.hints: cycle = []
         self.current_hint: str = ""
         self.last_data: dict = {}

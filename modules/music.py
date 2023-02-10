@@ -45,6 +45,8 @@ class Music(commands.Cog):
 
         self.bot = bot
 
+        self.extra_hints = bot.config["EXTRA_HINTS"].split("||")
+
         self.song_request_concurrency = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
         self.player_interaction_concurrency = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
@@ -810,7 +812,8 @@ class Music(commands.Cog):
                 node_id=node.identifier,
                 static=bool(static_player['channel']),
                 skin=bot.check_skin(skin),
-                skin_static=bot.check_static_skin(static_skin)
+                skin_static=bot.check_static_skin(static_skin),
+                extra_hints=self.extra_hints,
             )
 
             if static_player['channel']:
@@ -3391,7 +3394,8 @@ class Music(commands.Cog):
                 static=True,
                 skin=self.bot.check_skin(skin),
                 skin_static=self.bot.check_static_skin(static_skin),
-                node_id=node.identifier
+                node_id=node.identifier,
+                extra_hints=self.extra_hints,
             )
 
         if not player.message:

@@ -30,6 +30,8 @@ class PlayerSession(commands.Cog):
 
         node = self.bot.music.get_best_node() or await self.bot.wait_for("wavelink_node_ready")
 
+        hints = self.bot.config["EXTRA_HINTS"].split("||")
+
         try:
 
             for f in os.listdir(f"./.player_sessions/{self.bot.user.id}"):
@@ -86,6 +88,7 @@ class PlayerSession(commands.Cog):
                         player_creator=creator,
                         keep_connected=data["keep_connected"],
                         static=data['static'],
+                        extra_hints=hints,
                     )
                 except Exception:
                     print(f"{self.bot.user} - Falha ao criar player: {guild.name} [{guild.id}]\n{traceback.format_exc()}")
