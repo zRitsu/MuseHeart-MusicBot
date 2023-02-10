@@ -1078,7 +1078,8 @@ class LavalinkPlayer(wavelink.Player):
                     "bot_id": self.bot.user.id,
                     "invite_permissions": self.bot.config["INVITE_PERMISSIONS"],
                     "bot_name": str(self.bot.user),
-                    "public": self.bot.appinfo.bot_public
+                    "public": self.bot.appinfo.bot_public,
+                    "support_server": self.bot.config["SUPPORT_SERVER"],
                 }
             )
 

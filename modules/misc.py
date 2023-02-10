@@ -127,6 +127,9 @@ class Misc(commands.Cog):
                                      f"barra (/), clique no nome acima para integrar os comandos de barra no " \
                                      f"seu servidor.\n\n"
 
+        if self.bot.config["SUPPORT_SERVER"]:
+            embed.description += f"Caso tenha alguma dúvida ou queira acompanhar as últimas novidades, você pode entrar no meu [`servidor de suporte`]({self.bot.config['SUPPORT_SERVER']})\n\n"
+
         if components:
             embed.description += "Precisa de mais bots de música? Clique no botão abaixo para adicionar mais bots extras."
 
