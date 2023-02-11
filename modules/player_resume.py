@@ -106,6 +106,11 @@ class PlayerSession(commands.Cog):
                 if data["volume"] != 100:
                     await player.set_volume(data["volume"])
 
+                player.nightcore = data.get("nightcore")
+
+                if player.nightcore:
+                    await player.set_timescale(pitch=1.2, speed=1.1)
+
                 playlists = {}
 
                 for info in data["tracks"]:
@@ -245,6 +250,7 @@ class PlayerSession(commands.Cog):
                     data = json.dumps(
                         {
                             "volume": player.volume,
+                            "nightcore": player.nightcore,
                             "position": player.position,
                             "voice_channel": player.channel_id,
                             "dj": list(player.dj),
