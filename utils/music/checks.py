@@ -147,10 +147,9 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
         if bot.user.id in author.voice.channel.voice_states:
 
-            is_forum = check_forum(inter, bot)
-
-            if is_forum:
-                return True
+            #is_forum = check_forum(inter, bot)
+            #if is_forum:
+            #    return True
 
             inter.music_bot = bot
             inter.music_guild = guild
