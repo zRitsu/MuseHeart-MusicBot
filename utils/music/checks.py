@@ -46,6 +46,18 @@ async def check_requester_channel(ctx: CustomContext):
 
     return True
 
+
+def check_forum(inter, bot):
+
+    if not bot.check_bot_forum_post(inter.channel, raise_error=False):
+
+        if inter.channel.owner_id == bot.user.id:
+            inter.music_bot = bot
+            inter.music_guild = inter.guild
+            return True
+        else:
+            raise PoolException()
+
 async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool = True, return_first=False):
 
     try:
@@ -68,14 +80,6 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
     if not inter.guild_id:
         return
 
-    if not inter.bot.check_bot_forum_post(inter.channel, raise_error=False):
-        if inter.channel.owner_id == inter.bot.user.id:
-            inter.music_bot = inter.bot
-            inter.music_guild = inter.guild
-            return True
-        else:
-            raise PoolException()
-
     try:
         if inter.bot.user.id in inter.author.voice.channel.voice_states:
             inter.music_bot = inter.bot
@@ -85,6 +89,11 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         pass
 
     if isinstance(inter, CustomContext):
+
+        is_forum = check_forum(inter, inter.bot)
+
+        if is_forum:
+            return True
 
         msg_id = f"{inter.guild_id}-{inter.channel.id}-{inter.message.id}"
 
@@ -102,10 +111,13 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
                 ctx, bot_id = await inter.bot.wait_for("pool_dispatch", check=check, timeout=4)
             except asyncio.TimeoutError:
                 raise PoolException()
+
             if not bot_id or bot_id != inter.bot.user.id:
                 raise PoolException()
+
             inter.music_bot = inter.bot
             inter.music_guild = inter.guild
+
             return True
 
         inter.bot.pool.message_ids.add(msg_id)
@@ -134,8 +146,15 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
             raise NoVoice()
 
         if bot.user.id in author.voice.channel.voice_states:
+
+            is_forum = check_forum(inter, bot)
+
+            if is_forum:
+                return True
+
             inter.music_bot = bot
             inter.music_guild = guild
+
             if isinstance(inter, CustomContext) and inter.music_bot.user.id != inter.bot.user.id:
                 try:
                     await inter.music_bot.wait_for(

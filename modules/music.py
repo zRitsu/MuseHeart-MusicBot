@@ -1,19 +1,20 @@
-from ast import Index
 import datetime
 import json
+import traceback
+import asyncio
+from typing import Union, Optional
+from random import shuffle
+
 import aiofiles
 import aiohttp
 import disnake
 from aiohttp import ClientConnectorCertificateError
 from disnake.ext import commands
-import traceback
 import wavelink
-import asyncio
-from typing import Union, Optional
-from random import shuffle
+
 from utils.client import BotCore
 from utils.db import DBModel
-from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, NoPlayer
+from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolException
 from utils.music.spotify import process_spotify
 from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, \
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen, check_pool_bots, \
@@ -24,6 +25,7 @@ from utils.music.converters import time_format, fix_characters, string_to_second
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, fav_list, queue_track_index
 from user_agent import generate_user_agent
+
 
 search_sources_opts = [
     disnake.OptionChoice("Youtube", "ytsearch"),
@@ -1966,6 +1968,8 @@ class Music(commands.Cog):
         try:
             if not await check_pool_bots(inter, only_voiced=True):
                 return
+        except PoolException:
+            pass
         except:
             return
 
