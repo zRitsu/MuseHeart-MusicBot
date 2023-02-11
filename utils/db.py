@@ -164,7 +164,9 @@ class LocalDatabase(BaseDB):
         data = self._connect[collection][db_name].find_one({"_id": id_})
 
         if not data:
-            return dict(default_model[db_name])
+            data = dict(default_model[db_name])
+            data["_id"] = str(id_)
+            self._connect[collection][db_name].insert_one(data)
 
         elif data["ver"] < default_model[db_name]["ver"]:
             data = update_values(dict(default_model[db_name]), data)
@@ -177,10 +179,7 @@ class LocalDatabase(BaseDB):
     async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users],
                           collection: str, default_model: dict = None):
 
-        if not self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data}).upserted_id:
-            data["_id"] = str(id_)
-            self._connect[collection][db_name].insert_one(data)
-
+        self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data})
         return data
 
 class MongoDatabase(BaseDB):
