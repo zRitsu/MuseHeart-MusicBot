@@ -248,7 +248,6 @@ class FavManager(commands.Cog):
 
     @commands.max_concurrency(1, commands.BucketType.user)
     @commands.cooldown(3, 30, commands.BucketType.user)
-    @ensure_bot_instance(return_first=True)
     @commands.command(name="favmanager", aliases=["favs", "favoritos", "fvmgr"],
                       description="Gerenciar suas playlists/favoritos.")
     async def favmanager_legacy(self, ctx: CustomContext):
@@ -285,7 +284,6 @@ class FavManager(commands.Cog):
         await view.wait()
 
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @ensure_bot_instance(return_first=True)
     @commands.command(name="favlist", description="Exibir sua lista de favoritos.")
     async def favlist_legacy(self, ctx: CustomContext):
         await self.list_.callback(self=self, inter=ctx, hidden=False)

@@ -256,7 +256,6 @@ class PinManager(commands.Cog):
     @commands.has_guild_permissions(manage_guild=True)
     @commands.cooldown(3, 30, commands.BucketType.guild)
     @commands.max_concurrency(1, commands.BucketType.guild)
-    @ensure_bot_instance(return_first=True)
     @commands.command(name="serverplaylist", aliases=["spl", "svp", "svpl"],
                       description="Gerenciar playlists/favoritos do servidor.")
     async def serverplaylist_legacy(self, ctx: CustomContext):

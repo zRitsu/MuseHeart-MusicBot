@@ -142,7 +142,6 @@ class Misc(commands.Cog):
 
 
     @commands.command(name="about", aliases=["sobre", "info", "botinfo"], description="Exibir informações sobre mim.")
-    @ensure_bot_instance(return_first=True)
     async def about_legacy(self, ctx):
         await self.about.callback(self=self, inter=ctx)
 
@@ -285,7 +284,6 @@ class Misc(commands.Cog):
 
 
     @commands.command(name="invite", aliases=["convidar"], description="Exibir meu link de convite para você me adicionar no seu servidor.")
-    @ensure_bot_instance(return_first=True)
     async def invite_legacy(self, ctx):
         await self.invite.callback(self=self, inter=ctx)
 

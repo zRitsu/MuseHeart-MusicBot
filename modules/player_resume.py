@@ -203,7 +203,6 @@ class PlayerSession(commands.Cog):
 
     @commands.max_concurrency(1, commands.BucketType.default)
     @commands.is_owner()
-    @ensure_bot_instance(return_first=True)
     @commands.command(hidden=True, aliases=["savep"])
     async def saveplayers(self, ctx: CustomContext, *args):
 

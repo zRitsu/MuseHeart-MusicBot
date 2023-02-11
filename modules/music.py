@@ -23,7 +23,8 @@ from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, google_search, percentage
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
-from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, fav_list, queue_track_index
+from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, fav_list, queue_track_index, \
+    pool_command
 from user_agent import generate_user_agent
 
 
@@ -68,7 +69,6 @@ class Music(commands.Cog):
 
     @commands.is_owner()
     @commands.command(hidden=True, aliases=["ac"])
-    @ensure_bot_instance(return_first=True)
     async def addcache(self, ctx: CustomContext, url: str):
 
         url = url.strip("<>")
@@ -97,7 +97,6 @@ class Music(commands.Cog):
 
     @commands.is_owner()
     @commands.cooldown(1, 300, commands.BucketType.default)
-    @ensure_bot_instance(return_first=True)
     @commands.command(hidden=True, aliases=["uc"])
     async def updatecache(self, ctx: CustomContext, *args):
 
@@ -168,7 +167,6 @@ class Music(commands.Cog):
         await self.update_cache()
 
     @commands.is_owner()
-    @ensure_bot_instance(return_first=True)
     @commands.command(hidden=True, aliases=["rc"])
     async def removecache(self, ctx: CustomContext, url: str):
 
@@ -182,7 +180,6 @@ class Music(commands.Cog):
         await ctx.send("As músicas do link foram removidas com sucesso do cache.", delete_after=30)
 
     @commands.is_owner()
-    @ensure_bot_instance(return_first=True)
     @commands.command(hidden=True, aliases=["cc"])
     async def clearcache(self, ctx: CustomContext):
 
@@ -196,14 +193,12 @@ class Music(commands.Cog):
         await ctx.send("O cache de playlist foi limpo com sucesso.", delete_after=30)
 
     @commands.is_owner()
-    @ensure_bot_instance(return_first=True)
     @commands.command(hidden=True, aliases=["ec"])
     async def exportcache(self, ctx: CustomContext):
 
         await ctx.send(file=disnake.File("playlist_cache.json"))
 
     @commands.is_owner()
-    @ensure_bot_instance(return_first=True)
     @commands.command(hidden=True, aliases=["ic"])
     async def importcache(self, ctx: CustomContext, url: str):
 
@@ -472,9 +467,8 @@ class Music(commands.Cog):
     @commands.bot_has_guild_permissions(send_messages=True)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
     @commands.max_concurrency(1, commands.BucketType.member)
-    @ensure_bot_instance(check_player=False)
-    @commands.command(name="addposition", description="Adicionar música em uma posição especifica da fila.",
-                      aliases=["adp", "addpos"])
+    @pool_command(name="addposition", description="Adicionar música em uma posição especifica da fila.",
+                      aliases=["adp", "addpos"], check_player=False)
     async def addpos_legacy(self, ctx: CustomContext, position: Optional[int] = None, *, query: str = None):
 
         if not position:
@@ -495,8 +489,7 @@ class Music(commands.Cog):
     @commands.bot_has_guild_permissions(send_messages=True)
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
-    @ensure_bot_instance(check_player=False)
-    @commands.command(name="play", description="Tocar música em um canal de voz.", aliases=["p"])
+    @pool_command(name="play", description="Tocar música em um canal de voz.", aliases=["p"], check_player=False)
     async def play_legacy(self, ctx: CustomContext, *, query: str = ""):
 
         await self.play.callback(self=self, inter=ctx, query=query, position=0, options=False, force_play="no",
@@ -506,9 +499,8 @@ class Music(commands.Cog):
     @check_voice()
     @commands.bot_has_guild_permissions(send_messages=True)
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
-    @ensure_bot_instance(check_player=False)
-    @commands.command(name="search", description="Pesquisar por músicas e escolher uma entre os resultados para tocar.",
-                      aliases=["sc"])
+    @pool_command(name="search", description="Pesquisar por músicas e escolher uma entre os resultados para tocar.",
+                      aliases=["sc"], check_player=False)
     async def search_legacy(self, ctx: CustomContext, *, query: str = None):
 
         if not query:
@@ -1063,9 +1055,8 @@ class Music(commands.Cog):
     @is_requester()
     @check_voice()
     @commands.max_concurrency(1, commands.BucketType.member)
-    @ensure_bot_instance(only_voiced=True)
-    @commands.command(name="skip", aliases=["next", "n", "s", "pular", "skipto"],
-                      description=f"Pular a música atual que está tocando.")
+    @pool_command(name="skip", aliases=["next", "n", "s", "pular", "skipto"],
+                      description=f"Pular a música atual que está tocando.", only_voiced=True)
     async def skip_legacy(self, ctx: CustomContext, *, query: str = None):
 
         if ctx.invoked_with == "skipto" and not query:
@@ -1161,8 +1152,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.dynamic_cooldown(user_cooldown(2, 8), commands.BucketType.guild)
-    @ensure_bot_instance(only_voiced=True)
-    @commands.command(name="back", aliases=["b", "voltar"], description="Voltar para a música anterior.")
+    @pool_command(name="back", aliases=["b", "voltar"], description="Voltar para a música anterior.", only_voiced=True)
     async def back_legacy(self, ctx: CustomContext):
         await self.back.callback(self=self, inter=ctx)
 
@@ -1262,8 +1252,7 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(1, 5), commands.BucketType.member)
-    @ensure_bot_instance(only_voiced=True)
-    @commands.command(name="volume", description="Ajustar volume da música.", aliases=["vol", "v"])
+    @pool_command(name="volume", description="Ajustar volume da música.", aliases=["vol", "v"], only_voiced=True)
     async def volume_legacy(self, ctx: CustomContext, level: str = None):
 
         if not level:
@@ -1326,8 +1315,7 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.member)
-    @ensure_bot_instance(only_voiced=True)
-    @commands.command(name="pause", aliases=["pausar"], description="Pausar a música.")
+    @pool_command(name="pause", aliases=["pausar"], description="Pausar a música.", only_voiced=True)
     async def pause_legacy(self, ctx: CustomContext):
         await self.pause.callback(self=self, inter=ctx)
 
@@ -1362,8 +1350,7 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.member)
-    @ensure_bot_instance(only_voiced=True)
-    @commands.command(name="resume", aliases=["unpause"], description="Retomar/Despausar a música.")
+    @pool_command(name="resume", aliases=["unpause"], description="Retomar/Despausar a música.", only_voiced=True)
     async def resume_legacy(self, ctx: CustomContext):
         await self.resume.callback(self=self, inter=ctx)
 
@@ -1398,8 +1385,8 @@ class Music(commands.Cog):
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.member)
     @commands.max_concurrency(1, commands.BucketType.member)
-    @ensure_bot_instance(only_voiced=True)
-    @commands.command(name="seek", aliases=["sk"], description="Avançar/Retomar a música para um tempo específico.")
+    @pool_command(name="seek", aliases=["sk"], description="Avançar/Retomar a música para um tempo específico.",
+                  only_voiced=True)
     async def seek_legacy(self, ctx: CustomContext, *, position: str = None):
 
         if not position:
@@ -1515,8 +1502,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(3, 5), commands.BucketType.member)
     @commands.max_concurrency(1, commands.BucketType.member)
-    @ensure_bot_instance(only_voiced=True)
-    @commands.command(description=f"Selecionar modo de repetição entre: música atual / fila / desativar / quantidade (usando números).")
+    @pool_command(description=f"Selecionar modo de repetição entre: música atual / fila / desativar / quantidade (usando números).", only_voiced=True)
     async def loop(self, ctx: CustomContext, mode: str = None):
 
         try:
@@ -1677,8 +1663,8 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.max_concurrency(1, commands.BucketType.member)
-    @ensure_bot_instance(only_voiced=True)
-    @commands.command(name="remove", aliases=["r", "del"], description="Remover uma música específica da fila.")
+    @pool_command(name="remove", aliases=["r", "del"], description="Remover uma música específica da fila.",
+                  only_voiced=True)
     async def remove_legacy(self, ctx: CustomContext, *, query: str = None):
 
         if not query:
@@ -1730,8 +1716,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.dynamic_cooldown(user_cooldown(2, 10), commands.BucketType.guild)
-    @ensure_bot_instance(only_voiced=True)
-    @commands.command(name="readd", aliases=["readicionar", "rdd"],
+    @pool_command(name="readd", aliases=["readicionar", "rdd"], only_voiced=True,
                       description="Readicionar as músicas tocadas na fila.")
     async def readd_legacy(self, ctx: CustomContext):
         await self.readd_songs.callback(self=self, inter=ctx)
@@ -1781,8 +1766,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.max_concurrency(1, commands.BucketType.member)
-    @ensure_bot_instance(only_voiced=True)
-    @commands.command(name="move", aliases=["mv", "mover"],
+    @pool_command(name="move", aliases=["mv", "mover"], only_voiced=True,
                       description="Mover uma música para a posição especificada da fila.")
     async def move_legacy(self, ctx: CustomContext, position: Optional[int], *, query: str = None):
 
@@ -1897,8 +1881,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.max_concurrency(1, commands.BucketType.member)
-    @ensure_bot_instance(only_voiced=True)
-    @commands.command(name="rotate", aliases=["rt", "rotacionar"],
+    @pool_command(name="rotate", aliases=["rt", "rotacionar"], only_voiced=True,
                       description="Rotacionar a fila para a música especificada.")
     async def rotate_legacy(self, ctx: CustomContext, *, query: str = None):
 
@@ -1985,8 +1968,7 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.max_concurrency(1, commands.BucketType.member)
-    @ensure_bot_instance(only_voiced=True)
-    @commands.command(name="nightcore", aliases=["nc"],
+    @pool_command(name="nightcore", aliases=["nc"], only_voiced=True,
                       description="Ativar/Desativar o efeito nightcore (Música acelerada com tom mais agudo).")
     async def nightcore_legacy(self, ctx: CustomContext):
 
@@ -2025,8 +2007,8 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.cooldown(1, 10, commands.BucketType.member)
-    @ensure_bot_instance(only_voiced=True)
-    @commands.command(name="controller", aliases=["np", "ctl"], description="Enviar player controller para um canal específico/atual.")
+    @pool_command(name="controller", aliases=["np", "ctl"], only_voiced=True,
+                      description="Enviar player controller para um canal específico/atual.")
     async def controller_legacy(self, ctx: CustomContext):
         await self.controller.callback(self=self, inter=ctx)
 
@@ -2102,9 +2084,8 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
-    @commands.command(name="adddj", aliases=["adj"],
-                      description="Adicionar um membro à lista de DJ's na sessão atual do player.")
+    @pool_command(name="adddj", aliases=["adj"], only_voiced=True,
+                  description="Adicionar um membro à lista de DJ's na sessão atual do player.")
     async def add_dj_legacy(self, ctx: CustomContext, user: Optional[disnake.Member] = None):
 
         if not user:
@@ -2212,8 +2193,7 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @ensure_bot_instance(only_voiced=True)
-    @commands.command(name="stop", aliases=["leave", "parar"],
+    @pool_command(name="stop", aliases=["leave", "parar"], only_voiced=True,
                       description="Parar o player e me desconectar do canal de voz.")
     async def stop_legacy(self, ctx: CustomContext):
         await self.stop.callback(self=self, inter=ctx)
@@ -2273,8 +2253,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(3, 5), commands.BucketType.member)
-    @ensure_bot_instance(only_voiced=True)
-    @commands.command(name="shuffle", aliases=["sf", "shf", "sff", "misturar"],
+    @pool_command(name="shuffle", aliases=["sf", "shf", "sff", "misturar"], only_voiced=True,
                       description="Misturar as músicas da fila")
     async def shuffle_legacy(self, ctx: CustomContext):
         await self.shuffle_.callback(self, inter=ctx)
@@ -2310,8 +2289,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.dynamic_cooldown(user_cooldown(1, 5), commands.BucketType.guild)
-    @ensure_bot_instance(only_voiced=True)
-    @commands.command(name="reverse", aliases=["invert", "inverter", "rv"],
+    @pool_command(name="reverse", aliases=["invert", "inverter", "rv"], only_voiced=True,
                       description="Inverter a ordem das músicas na fila")
     async def reverse_legacy(self, ctx: CustomContext):
         await self.reverse.callback(self=self, inter=ctx)
@@ -2347,8 +2325,8 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.max_concurrency(1, commands.BucketType.member)
-    @ensure_bot_instance(only_voiced=True)
-    @commands.command(name="queue", aliases=["q", "fila"], description="Exibir as músicas que estão na fila.")
+    @pool_command(name="queue", aliases=["q", "fila"], description="Exibir as músicas que estão na fila.",
+                  only_voiced=True)
     async def queue_show_legacy(self, ctx: CustomContext):
         await self.display.callback(self=self, inter=ctx)
 
@@ -2383,8 +2361,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.max_concurrency(1, commands.BucketType.guild)
     @commands.cooldown(1, 5, commands.BucketType.member)
-    @ensure_bot_instance(only_voiced=True)
-    @commands.command(name="clear", aliases=["limpar"], description="Limpar a fila de música.")
+    @pool_command(name="clear", aliases=["limpar"], description="Limpar a fila de música.", only_voiced=True)
     async def clear_legacy(self, ctx: CustomContext, *, range_track: str = None):
 
         try:
@@ -2596,8 +2573,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.cooldown(2, 5, commands.BucketType.member)
-    @ensure_bot_instance(only_voiced=True)
-    @commands.command(name="restrict", aliases=["rstc", "restrito"],
+    @pool_command(name="restrict", aliases=["rstc", "restrito"], only_voiced=True,
                       description="Ativar/Desativar o modo restrito de comandos que requer DJ/Staff.")
     async def restrict_mode_legacy(self, ctx: CustomContext):
 
@@ -2635,8 +2611,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.has_guild_permissions(manage_guild=True)
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @ensure_bot_instance(only_voiced=True)
-    @commands.command(name="247", aliases=["nonstop"],
+    @pool_command(name="247", aliases=["nonstop"], only_voiced=True,
                       description="Ativar/Desativar o modo 24/7 do player (Em testes).")
     async def nonstop_legacy(self, ctx: CustomContext):
         await self.nonstop.callback(self=self, inter=ctx)

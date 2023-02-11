@@ -1,13 +1,14 @@
 from __future__ import annotations
-
 import asyncio
 import datetime
 import json
 from inspect import iscoroutinefunction
 from io import BytesIO
 from typing import TYPE_CHECKING, Union, Optional
+
 import disnake
 from disnake.ext import commands
+
 from utils.db import DBModel
 from utils.music.errors import GenericError
 
@@ -54,6 +55,12 @@ class CustomContext(commands.Context):
 
         return await super().reply(*args, **kwargs)
 
+class PoolCommand(commands.Command):
+    def __init__(self, func, **kwargs):
+        super().__init__(func, **kwargs)
+        self.pool_return_first = kwargs.pop("return_first", False)
+        self.pool_check_player = kwargs.pop("check_player", True)
+        self.pool_only_voiced = kwargs.pop("only_voiced", False)
 
 class ProgressBar:
 
@@ -140,6 +147,9 @@ class EmbedPaginator(disnake.ui.View):
 
         self.stop()
 
+
+def pool_command(*args, **kwargs)-> PoolCommand:
+    return commands.command(*args, **kwargs, cls=PoolCommand)
 
 
 def sync_message(bot: BotCore):

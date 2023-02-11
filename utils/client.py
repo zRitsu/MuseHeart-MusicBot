@@ -18,7 +18,7 @@ import disnake
 from config_loader import load_config
 from web_app import WSClient, start
 from utils.music.checks import check_pool_bots
-from utils.music.errors import GenericError
+from utils.music.errors import GenericError, PoolException
 from utils.music.local_lavalink import run_lavalink
 from utils.music.models import music_mode
 from utils.music.spotify import spotify_client
@@ -267,20 +267,6 @@ class BotPool:
                     return True
 
             if bot.config["GLOBAL_PREFIX"]:
-
-                @bot.check
-                async def jsk_multibot_check(ctx: CustomContext):
-
-                    try:
-                        parent_name = ctx.command.parents[0].name
-                    except IndexError:
-                        pass
-
-                    else:
-                        if parent_name == "jishaku":
-                            await check_pool_bots(ctx, return_first=True)
-
-                    return True
 
                 @bot.listen("on_command_completion")
                 async def message_id_cleanup(ctx: CustomContext):
@@ -627,6 +613,22 @@ class BotCore(commands.Bot):
             return
 
         if not await self.can_send_message(message):
+            return
+
+        try:
+            kwargs = {
+                "only_voiced": ctx.command.pool_only_voiced,
+                "check_player": ctx.command.pool_check_player,
+                "return_first": ctx.command.pool_return_first,
+            }
+        except AttributeError:
+            kwargs = {"return_first": True}
+
+        try:
+            if not await check_pool_bots(ctx, **kwargs):
+                return
+        except Exception as e:
+            self.dispatch("on_command_error", ctx=ctx, error=e)
             return
 
         await self.invoke(ctx)
