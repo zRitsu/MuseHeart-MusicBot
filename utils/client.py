@@ -703,9 +703,9 @@ class BotCore(commands.Bot):
 
         try:
             kwargs = {
-                "only_voiced": inter.application_command.extras["pool_only_voiced"],
-                "check_player": inter.application_command.extras["pool_check_player"],
-                "return_first": inter.application_command.extras["pool_return_first"],
+                "only_voiced": inter.application_command.extras["only_voiced"],
+                "check_player": inter.application_command.extras["check_player"],
+                "return_first": inter.application_command.extras["return_first"],
             }
         except AttributeError:
             kwargs = {"return_first": True}
