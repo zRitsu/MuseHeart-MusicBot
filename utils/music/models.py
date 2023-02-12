@@ -273,8 +273,7 @@ class LavalinkPlayer(wavelink.Player):
         self.message: Optional[disnake.Message] = kwargs.pop('message', None)
         self.static: bool = kwargs.pop('static', False)
         self.skin: str = kwargs.pop("skin", None) or self.bot.default_skin
-        self.skin_static: str = kwargs.pop(
-            "skin_static", None) or self.bot.default_static_skin
+        self.skin_static: str = kwargs.pop("skin_static", None) or self.bot.default_static_skin
         self.queue: deque = deque()
         self.played: deque = deque(maxlen=20)
         self.nightcore: bool = False
@@ -294,18 +293,18 @@ class LavalinkPlayer(wavelink.Player):
         self.command_log: str = ""
         self.command_log_emoji: str = ""
         self.is_closing: bool = False
-        self.last_message_id: Optional[int] = kwargs.pop(
-            "last_message_id", None)
+        self.last_message_id: Optional[int] = kwargs.pop("last_message_id", None)
         self.keep_connected: bool = kwargs.pop("keep_connected", False)
         self.update: bool = False
         self.updating: bool = False
+        self.stage_title_event = False
+        self.last_stage_title = ""
         self.auto_update: int = 0
         self.message_updater_task: Optional[asyncio.Task] = None
         # limitar apenas para dj's e staff's
         self.restrict_mode = kwargs.pop('restrict_mode', False)
         self.ignore_np_once = False  # não invocar player controller em determinadas situações
-        self.allowed_mentions = disnake.AllowedMentions(
-            users=False, everyone=False, roles=False)
+        self.allowed_mentions = disnake.AllowedMentions(users=False, everyone=False, roles=False)
         # ativar/desativar modo controller (apenas para uso em skins)
         self.controller_mode = True
         self.bot.loop.create_task(self.channel_cleanup())
@@ -651,6 +650,29 @@ class LavalinkPlayer(wavelink.Player):
         self.command_log = text
         self.command_log_emoji = emoji
 
+    async def update_stage_topic(self, close=False):
+
+        if not isinstance(self.guild.me.voice.channel, disnake.StageChannel):
+            return
+
+        if not self.stage_title_event:
+            return
+
+        if close and self.guild.me.voice.channel.instance:
+            await self.guild.me.voice.channel.instance.delete()
+            self.last_stage_title = ""
+            return
+
+        if self.current.title == self.last_stage_title:
+            return
+
+        if not self.guild.me.voice.channel.instance:
+            func = self.guild.me.voice.channel.create_instance
+        else:
+            func = self.guild.me.voice.channel.instance.edit
+        await func(topic=f"Tocando: {self.current.title} || Autor/Artista: {self.current.author}")
+        self.last_stage_title = self.current.title
+
     async def invoke_np(self, force=False, interaction=None, rpc_update=False):
 
         if not self.current or self.updating:
@@ -793,6 +815,7 @@ class LavalinkPlayer(wavelink.Player):
                                 await self.destroy(force=True)
                                 return
 
+                    await self.update_stage_topic()
                     self.updating = False
                     #self.message_updater_task = self.bot.loop.create_task(self.message_updater())
                     return
@@ -810,7 +833,8 @@ class LavalinkPlayer(wavelink.Player):
                 self.message = await self.text_channel.send(allowed_mentions=self.allowed_mentions, **self.last_data)
             except:
                 traceback.print_exc()
-                print(self.text_channel)
+
+            await self.update_stage_topic()
 
         self.updating = False
 
@@ -890,6 +914,11 @@ class LavalinkPlayer(wavelink.Player):
         vc = self.bot.get_channel(self.channel_id)
 
         self.bot.loop.create_task(self.process_rpc(vc, close=True))
+
+        try:
+            await self.update_stage_topic(close=True)
+        except:
+            pass
 
         try:
             self.idle_task.cancel()

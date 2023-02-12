@@ -211,6 +211,27 @@ class Music(commands.Cog):
 
         await ctx.send("O arquivo de cache foi importado com sucesso!", delete_after=30)
 
+    @commands.is_owner()
+    @pool_command(
+        only_voiced=True, aliases=["stagevc"],
+        description="Ativar/Desativar o sistema de aualizar topico do palco automáticamente com o nome da música."
+    )
+    async def stageevent(self, ctx: CustomContext):
+
+        player: LavalinkPlayer = self.bot.music.players[ctx.guild.id]
+
+        if not isinstance(ctx.guild.me.voice.channel, disnake.StageChannel):
+            raise GenericError("**Você deve estar em um canal de palco para ativar/desativar este recurso.**")
+
+        player.stage_title_event = not player.stage_title_event
+
+        msg = "ativou" if player.stage_title_event else "desativou"
+
+        txt = [f"{msg} o sistema de tópico automático do palco.",
+               f"⏸️ **⠂{ctx.author.mention} {msg} o sistema de tópico automático do palco.**"]
+
+        await self.interaction_message(ctx, txt, emoji="⏸️")
+
     @check_voice()
     @can_send_message_check()
     @commands.dynamic_cooldown(user_cooldown(2, 5), commands.BucketType.member)
