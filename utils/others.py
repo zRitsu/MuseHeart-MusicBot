@@ -358,7 +358,12 @@ async def select_bot_pool(inter, first=False):
         bot_invites = "\n".join(
             f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, permissions=disnake.Permissions(b.config['INVITE_PERMISSIONS']), scopes=('bot'))})"
             for b in inter.bot.pool.bots if b.appinfo.bot_public)
-        raise GenericError(f"**Você precisa adicionar pelo menos um desses bots no servidor:**\n{bot_invites}")
+
+        if bot_invites:
+            raise GenericError(f"**Será necessário adicionar no servidor pelo menos um dos bots abaixo para usar "
+                               f"meus comandos:**\n{bot_invites}")
+        else:
+            raise GenericError("**Não há bots compatíveis com meus comandos no servidor...**")
 
     if len(bots) == 1 or first:
         return inter, list(bots.values())[0]
