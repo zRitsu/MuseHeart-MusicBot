@@ -855,13 +855,13 @@ class MusicSettings(commands.Cog):
             changed_skins_txt += f"Modo Normal: [`{select_view.skin_selected}`]({self.bot.player_skins[select_view.skin_selected].preview})\n"
 
         if static_selected != select_view.static_skin_selected:
-            changed_skins_txt += f"Song Request: [`{select_view.static_skin_selected}`]({self.bot.player_static_skins[select_view.static_skin_selected]})\n"
+            changed_skins_txt += f"Song Request: [`{select_view.static_skin_selected}`]({self.bot.player_static_skins[select_view.static_skin_selected].preview})\n"
 
         if global_selected != select_view.global_skin_selected:
-            changed_skins_txt += f"Global - Modo Normal: [`{select_view.global_skin_selected}`]({self.bot.player_skins[select_view.global_skin_selected]})\n"
+            changed_skins_txt += f"Global - Modo Normal: [`{select_view.global_skin_selected}`]({self.bot.player_skins[select_view.global_skin_selected].preview})\n"
 
         if global_static_selected != select_view.global_static_skin_selected:
-            changed_skins_txt += f"Global - Song Request: [`{select_view.global_skin_selected}`]({self.bot.player_static_skins[select_view.global_static_skin_selected]})\n"
+            changed_skins_txt += f"Global - Song Request: [`{select_view.global_skin_selected}`]({self.bot.player_static_skins[select_view.global_static_skin_selected].preview})\n"
 
         if global_mode != select_view.global_mode:
             changed_skins_txt += "Skin Global: `" + ("Ativado" if select_view.global_mode else "Desativado") + "`\n"
