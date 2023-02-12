@@ -104,6 +104,11 @@ class PlayerSession(commands.Cog):
                 player.restrict_mode = data["restrict_mode"]
                 player.loop = data["loop"]
 
+                try:
+                    player.stage_title_event = data["stage_title_event"]
+                except:
+                    pass
+
                 if data["volume"] != 100:
                     await player.set_volume(data["volume"])
 
@@ -262,6 +267,7 @@ class PlayerSession(commands.Cog):
                             "message": player.message.id if player.message else None,
                             "played": played,
                             "loop": player.loop,
+                            "stage_title_event": player.stage_title_event,
                             "skin": player.skin,
                             "skin_static": player.skin_static,
                             "restrict_mode": player.restrict_mode,
