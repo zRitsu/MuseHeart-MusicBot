@@ -1,15 +1,16 @@
 # nota: este sistema é totalmente experimental.
 # Será necessário usar um comando para salvar as sessões atuais do player manualmente.
-
+import json
+import asyncio
 import os.path
 import shutil
 import traceback
+
 import disnake
 from disnake.ext import commands
+
 from utils.client import BotCore
-import json
-import asyncio
-from utils.music.checks import can_connect, ensure_bot_instance
+from utils.music.checks import can_connect
 from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialTrack, PartialPlaylist, LavalinkPlaylist
 from utils.others import CustomContext
 

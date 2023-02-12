@@ -1,13 +1,15 @@
 from __future__ import annotations
 import asyncio
+from typing import TYPE_CHECKING, Union, Optional
 import datetime
 import traceback
-import disnake
+
 import humanize
+import disnake
 from disnake.ext import commands
-from typing import TYPE_CHECKING, Union, Optional
+
 from utils.db import DBModel
-from utils.music.checks import user_cooldown, ensure_bot_instance
+from utils.music.checks import user_cooldown
 from utils.music.converters import perms_translations
 from utils.music.errors import GenericError
 from utils.others import send_idle_embed, CustomContext, select_bot_pool

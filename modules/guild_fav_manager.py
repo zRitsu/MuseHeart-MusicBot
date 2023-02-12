@@ -5,7 +5,6 @@ import disnake
 from disnake.ext import commands
 from typing import TYPE_CHECKING, Union, Optional
 
-from utils.music.checks import ensure_bot_instance
 from utils.music.converters import URL_REG
 from utils.music.errors import GenericError
 from utils.music.models import LavalinkPlayer

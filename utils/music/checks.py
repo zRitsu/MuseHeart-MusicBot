@@ -258,15 +258,6 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
     raise PoolException()
 
-def ensure_bot_instance(only_voiced=False, check_player=True, return_first=False):
-
-    async def predicate(inter):
-
-        await check_pool_bots(inter, only_voiced=only_voiced, check_player=check_player, return_first=return_first)
-        return True
-
-    return commands.check(predicate)
-
 def has_player():
 
     async def predicate(inter):

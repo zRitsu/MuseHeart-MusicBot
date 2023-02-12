@@ -13,7 +13,7 @@ from aiohttp import ClientSession
 
 from utils.client import BotCore
 from utils.db import DBModel, db_models
-from utils.music.checks import check_requester_channel, ensure_bot_instance
+from utils.music.checks import check_requester_channel
 from utils.music.converters import time_format, URL_REG
 from utils.others import select_bot_pool
 

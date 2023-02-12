@@ -3,22 +3,24 @@ import os
 import shutil
 import json
 import traceback
-from typing import Union, Optional
 from zipfile import ZipFile
+
+from typing import Union, Optional
 import disnake
 import dotenv
 import psutil
 import wavelink
 from disnake.ext import commands
+from aiohttp import ClientSession
+
 from utils.client import BotCore
 from utils.db import DBModel
-from utils.music.checks import check_voice, check_requester_channel, ensure_bot_instance
+from utils.music.checks import check_voice, check_requester_channel
 from utils.music.local_lavalink import run_lavalink
 from utils.music.models import LavalinkPlayer
 from utils.others import sync_message, chunk_list, EmbedPaginator, CustomContext, string_to_file
 from utils.owner_panel import panel_command, PanelView
 from utils.music.errors import GenericError
-from aiohttp import ClientSession
 from config_loader import DEFAULT_CONFIG
 
 os_quote = "\"" if os.name == "nt" else "'"

@@ -701,6 +701,31 @@ class BotCore(commands.Bot):
             except:
                 traceback.print_exc()
 
+        try:
+            kwargs = {
+                "only_voiced": inter.application_command.extras["pool_only_voiced"],
+                "check_player": inter.application_command.extras["pool_check_player"],
+                "return_first": inter.application_command.extras["pool_return_first"],
+            }
+        except AttributeError:
+            kwargs = {"return_first": True}
+
+        try:
+            await check_pool_bots(inter, **kwargs)
+        except Exception as e:
+            if inter.data.type is disnake.ApplicationCommandType.chat_input:
+                event_name = "slash_command_error"
+            elif inter.data.type is disnake.ApplicationCommandType.user:
+                event_name = "user_command_error"
+            elif inter.data.type is disnake.ApplicationCommandType.message:
+                event_name = "message_command_error"
+            else:
+                print(inter.data)
+                return
+
+            self.dispatch(event_name, inter, e)
+            return
+
         await super().on_application_command(inter)
 
     def load_modules(self, bot_name: str = None):

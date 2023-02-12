@@ -1,15 +1,15 @@
 from __future__ import annotations
-from ast import Index
+from typing import TYPE_CHECKING, Union, Optional
+from io import BytesIO
+import json
+
 import disnake
 from disnake.ext import commands
-from typing import TYPE_CHECKING, Union, Optional
+
 from utils.db import DBModel
-from utils.music.checks import ensure_bot_instance
 from utils.music.converters import URL_REG
 from utils.others import CustomContext
 from utils.music.errors import GenericError
-from io import BytesIO
-import json
 
 if TYPE_CHECKING:
     from utils.client import BotCore
