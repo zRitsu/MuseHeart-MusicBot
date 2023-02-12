@@ -632,6 +632,11 @@ class LavalinkPlayer(wavelink.Player):
 
         await self.process_idle_message()
 
+        try:
+            await self.update_stage_topic(close=True)
+        except:
+            pass
+
         await asyncio.sleep(self.idle_timeout)
 
         msg = "💤 **⠂O player foi desligado por inatividade...**"
@@ -653,6 +658,9 @@ class LavalinkPlayer(wavelink.Player):
     async def update_stage_topic(self, close=False):
 
         if not isinstance(self.guild.me.voice.channel, disnake.StageChannel):
+            return
+
+        if not self.guild.me.voice.channel.permissions_for(self.guild.me).manage_channels:
             return
 
         if not self.stage_title_event:
