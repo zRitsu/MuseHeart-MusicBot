@@ -641,10 +641,9 @@ class BotCore(commands.Bot):
             kwargs = {"return_first": True}
 
         try:
-            if not await check_pool_bots(ctx, **kwargs):
-                return
+            await check_pool_bots(ctx, **kwargs)
         except Exception as e:
-            self.dispatch("on_command_error", ctx=ctx, error=e)
+            self.dispatch("command_error", ctx, e)
             return
 
         await self.invoke(ctx)
