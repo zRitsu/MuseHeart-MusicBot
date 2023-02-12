@@ -213,7 +213,7 @@ class Music(commands.Cog):
 
     @commands.is_owner()
     @pool_command(
-        only_voiced=True, aliases=["stagevc"],
+        only_voiced=True, aliases=["stagevc"], hidden=True,
         description="Ativar/Desativar o sistema de aualizar topico do palco automáticamente com o nome da música."
     )
     async def stageevent(self, ctx: CustomContext):
