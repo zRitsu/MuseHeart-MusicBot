@@ -278,6 +278,22 @@ class BotPool:
                     except:
                         pass
 
+            @bot.application_command_check(slash_commands=True, message_commands=True, user_commands=True)
+            async def check(inter: disnake.ApplicationCommandInteraction):
+
+                try:
+                    kwargs = {
+                        "only_voiced": inter.application_command.extras["only_voiced"],
+                        "check_player": inter.application_command.extras["check_player"],
+                        "return_first": inter.application_command.extras["return_first"],
+                    }
+                except KeyError:
+                    kwargs = {"return_first": True}
+
+                await check_pool_bots(inter, **kwargs)
+
+                return True
+
             @bot.listen()
             async def on_ready():
 
@@ -700,31 +716,6 @@ class BotCore(commands.Bot):
                       f" - [cmd: {inter.data.name}] {datetime.datetime.utcnow().strftime('%d/%m/%Y - %H:%M:%S')} (UTC) - {inter.filled_options}\n" + ("-" * 15))
             except:
                 traceback.print_exc()
-
-        try:
-            kwargs = {
-                "only_voiced": inter.application_command.extras["only_voiced"],
-                "check_player": inter.application_command.extras["check_player"],
-                "return_first": inter.application_command.extras["return_first"],
-            }
-        except KeyError:
-            kwargs = {"return_first": True}
-
-        try:
-            await check_pool_bots(inter, **kwargs)
-        except Exception as e:
-            if inter.data.type is disnake.ApplicationCommandType.chat_input:
-                event_name = "slash_command_error"
-            elif inter.data.type is disnake.ApplicationCommandType.user:
-                event_name = "user_command_error"
-            elif inter.data.type is disnake.ApplicationCommandType.message:
-                event_name = "message_command_error"
-            else:
-                print(inter.data)
-                return
-
-            self.dispatch(event_name, inter, e)
-            return
 
         await super().on_application_command(inter)
 
