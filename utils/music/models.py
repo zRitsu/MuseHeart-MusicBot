@@ -666,19 +666,19 @@ class LavalinkPlayer(wavelink.Player):
         if not self.stage_title_event:
             return
 
-        if close and self.guild.me.voice.channel.instance:
-            await self.guild.me.voice.channel.instance.delete()
-            self.last_stage_title = ""
-            return
-
         if self.current.title == self.last_stage_title:
             return
+
+        msg = f"Tocando: {self.current.title} || Autor/Artista: {self.current.author}"
 
         if not self.guild.me.voice.channel.instance:
             func = self.guild.me.voice.channel.create_instance
         else:
             func = self.guild.me.voice.channel.instance.edit
-        await func(topic=f"Tocando: {self.current.title} || Autor/Artista: {self.current.author}")
+            if close:
+                msg = "Em espera por novas músicas."
+
+        await func(topic=msg)
         self.last_stage_title = self.current.title
 
     async def invoke_np(self, force=False, interaction=None, rpc_update=False):
