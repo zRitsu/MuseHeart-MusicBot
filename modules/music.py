@@ -456,7 +456,6 @@ class Music(commands.Cog):
                 embed.description = f"**Preciso que algum staff me convide para falar no palco: " \
                                     f"[{channel.name}]({channel.jump_url}).**"
 
-
                 embed.set_footer(text="💡 Dica: para me permitir falar no palco automaticamente será necessário me conceder "
                                       "permissão de silenciar membros (no servidor ou apenas no canal de palco escolhido).")
 
@@ -3993,7 +3992,11 @@ class Music(commands.Cog):
 
             if vc:
 
-                self.bot.loop.create_task(player.process_rpc(vc, users=[member.id], close=after.channel != player.guild.me.voice.channel))
+                try:
+                    self.bot.loop.create_task(player.process_rpc(vc, users=[member.id], close=after.channel != player.guild.me.voice.channel))
+                except AttributeError:
+                    pass
+
                 self.bot.loop.create_task(
                     player.process_rpc(vc, users=[m for m in vc.voice_states if (m != member.id)]))
 
