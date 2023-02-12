@@ -227,10 +227,15 @@ class Music(commands.Cog):
 
         msg = "ativou" if player.stage_title_event else "desativou"
 
-        txt = [f"{msg} o sistema de tópico automático do palco.",
-               f"⏸️ **⠂{ctx.author.mention} {msg} o sistema de tópico automático do palco.**"]
+        player.set_command_log(text=f"{msg} o sistema de tópico automático do palco.", emoji="📢")
+        await player.invoke_np(force=True)
 
-        await self.interaction_message(ctx, txt, emoji="⏸️")
+        await ctx.send(
+            embed=disnake.Embed(
+                color=self.bot.get_color(ctx.guild.me),
+                description=f"📢 **⠂{ctx.author.mention} {msg} o sistema de tópico automático do palco.**"
+            )
+        )
 
     @check_voice()
     @can_send_message_check()
