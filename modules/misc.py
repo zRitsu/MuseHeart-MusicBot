@@ -342,7 +342,7 @@ class Misc(commands.Cog):
 
                 extra_bots_msg += "\n\n**Bots de música adicionais:**\n" + txt
 
-        embed = disnake.Embed(colour=self.bot.get_color())
+        embed = disnake.Embed(colour=self.bot.get_color(), description="")
 
         if str(self.bot.user.id) not in self.bot.config['INTERACTION_BOTS_CONTROLLER']:
             embed.description = f"[**Clique aqui**]({disnake.utils.oauth_url(self.bot.user.id, permissions=disnake.Permissions(self.bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))}) para me adicionar no seu servidor." + \
