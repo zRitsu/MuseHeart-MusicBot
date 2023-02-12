@@ -707,7 +707,7 @@ class BotCore(commands.Bot):
                 "check_player": inter.application_command.extras["check_player"],
                 "return_first": inter.application_command.extras["return_first"],
             }
-        except AttributeError:
+        except KeyError:
             kwargs = {"return_first": True}
 
         try:
