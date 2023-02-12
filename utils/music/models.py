@@ -666,8 +666,11 @@ class LavalinkPlayer(wavelink.Player):
         if not self.stage_title_event:
             return
 
-        if self.current.title == self.last_stage_title:
-            return
+        try:
+            if self.current.title == self.last_stage_title:
+                return
+        except AttributeError:
+            pass
 
         if len(self.current.title) > 109:
             msg = f"Tocando: {fix_characters(self.current.title, limit=109)}"
