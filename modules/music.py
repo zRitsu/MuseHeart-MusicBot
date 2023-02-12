@@ -3934,6 +3934,9 @@ class Music(commands.Cog):
             after: disnake.VoiceState
     ):
 
+        if before.channel == after.channel:
+            return
+
         if member.bot and member.id != self.bot.user.id:  # ignorar outros bots
             return
 
@@ -3960,6 +3963,21 @@ class Music(commands.Cog):
         if player.is_closing or member.bot:
             return
 
+        channels = set()
+
+        try:
+            channels.add(before.channel.id)
+        except:
+            pass
+
+        try:
+            channels.add(after.channel.id)
+        except:
+            pass
+
+        if player.channel_id not in channels:
+            return
+
         if not after or before.channel != after.channel:
 
             try:
@@ -3975,9 +3993,9 @@ class Music(commands.Cog):
 
             if vc:
 
-                self.bot.loop.create_task(player.process_rpc(vc, users=[member.id], close=True))
+                self.bot.loop.create_task(player.process_rpc(vc, users=[member.id], close=after.channel != player.guild.me.voice.channel))
                 self.bot.loop.create_task(
-                    player.process_rpc(vc, users=[m for m in vc.voice_states if (m != member.id or m != self.bot.user.id)]))
+                    player.process_rpc(vc, users=[m for m in vc.voice_states if (m != member.id)]))
 
     async def reset_controller_db(self, guild_id: int, data: dict, inter: disnake.AppCmdInter = None):
 
