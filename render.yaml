@@ -19,4 +19,6 @@ services:
         sync: false
       - key: PYTHON_VERSION
         value: 3.11.1
+      - key: AUTO_DOWNLOAD_LAVALINK_SERVERLIST
+        value: true
     autoDeploy: false # optional
