@@ -666,15 +666,14 @@ class LavalinkPlayer(wavelink.Player):
         if not self.stage_title_event:
             return
 
-        try:
-            title = self.current.title
-        except AttributeError:
-            title = ""
+        if not self.current:
 
-        if title == self.last_stage_title:
-            return
+            if not close:
+                return
 
-        if len(self.current.title) > 109:
+            msg = "Em espera por novas músicas."
+
+        elif len(self.current.title) > 109:
             msg = f"Tocando: {fix_characters(self.current.title, limit=109)}"
 
         else:
@@ -682,16 +681,16 @@ class LavalinkPlayer(wavelink.Player):
             if len(msg) > 109:
                 msg = f"Tocando: {fix_characters(self.current.title, limit=109)}"
 
-
         if not self.guild.me.voice.channel.instance:
             func = self.guild.me.voice.channel.create_instance
+        elif self.guild.me.voice.channel.instance.topic == self.last_stage_title:
+            self.last_stage_title = msg
+            return
         else:
             func = self.guild.me.voice.channel.instance.edit
-            if close:
-                msg = "Em espera por novas músicas."
 
         await func(topic=msg)
-        self.last_stage_title = self.current.title
+        self.last_stage_title = msg
 
     async def invoke_np(self, force=False, interaction=None, rpc_update=False):
 
