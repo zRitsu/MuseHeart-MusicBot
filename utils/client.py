@@ -18,7 +18,7 @@ import disnake
 from config_loader import load_config
 from web_app import WSClient, start
 from utils.music.checks import check_pool_bots
-from utils.music.errors import GenericError, PoolException
+from utils.music.errors import GenericError
 from utils.music.local_lavalink import run_lavalink
 from utils.music.models import music_mode
 from utils.music.spotify import spotify_client
@@ -44,6 +44,7 @@ class BotPool:
         self.max_counter: int = 0
         self.message_ids: set = set()
         self.db_cache_cleanup_task = None
+        self.bot_mentions = set()
 
     async def start_bot(self, bot: BotCore):
         try:
@@ -356,6 +357,8 @@ class BotPool:
                         bot.loop.create_task(music_cog.process_nodes(data=LAVALINK_SERVERS, start_local=start_local))
 
                     bot.add_view(PanelView(bot))
+
+                    self.bot_mentions.update((f"<@!{bot.user.id}>", f"<@{bot.user.id}>"))
 
                     bot.bot_ready = True
 

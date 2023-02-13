@@ -88,6 +88,8 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
     except AttributeError:
         pass
 
+    mention_prefixed = False
+
     if isinstance(inter, CustomContext):
 
         is_forum = check_forum(inter, inter.bot)
@@ -95,32 +97,37 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         if is_forum:
             return True
 
-        msg_id = f"{inter.guild_id}-{inter.channel.id}-{inter.message.id}"
+        if not (mention_prefixed:=inter.message.content.startswith(tuple(inter.bot.pool.bot_mentions))):
 
-        if msg_id in inter.bot.pool.message_ids:
+            msg_id = f"{inter.guild_id}-{inter.channel.id}-{inter.message.id}"
 
-            def check(ctx, b_id):
+            if msg_id in inter.bot.pool.message_ids:
+
+                def check(ctx, b_id):
+                    try:
+                        return f"{ctx.guild_id}-{ctx.channel.id}-{ctx.message.id}" == msg_id
+                    except AttributeError:
+                        return
+
+                inter.bot.dispatch("pool_payload_ready", inter)
+
                 try:
-                    return f"{ctx.guild_id}-{ctx.channel.id}-{ctx.message.id}" == msg_id
-                except AttributeError:
-                    return
+                    ctx, bot_id = await inter.bot.wait_for("pool_dispatch", check=check, timeout=4)
+                except asyncio.TimeoutError:
+                    raise PoolException()
 
-            inter.bot.dispatch("pool_payload_ready", inter)
+                if not bot_id or bot_id != inter.bot.user.id:
+                    raise PoolException()
 
-            try:
-                ctx, bot_id = await inter.bot.wait_for("pool_dispatch", check=check, timeout=4)
-            except asyncio.TimeoutError:
-                raise PoolException()
+                inter.music_bot = inter.bot
+                inter.music_guild = inter.guild
 
-            if not bot_id or bot_id != inter.bot.user.id:
-                raise PoolException()
+                return True
 
-            inter.music_bot = inter.bot
-            inter.music_guild = inter.guild
+            inter.bot.pool.message_ids.add(msg_id)
 
+        elif not check_player and not only_voiced:
             return True
-
-        inter.bot.pool.message_ids.add(msg_id)
 
     free_bot = None
 
@@ -147,14 +154,10 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
         if bot.user.id in author.voice.channel.voice_states:
 
-            #is_forum = check_forum(inter, bot)
-            #if is_forum:
-            #    return True
-
             inter.music_bot = bot
             inter.music_guild = guild
 
-            if isinstance(inter, CustomContext) and inter.music_bot.user.id != inter.bot.user.id:
+            if isinstance(inter, CustomContext) and bot.user.id != inter.bot.user.id and not mention_prefixed:
                 try:
                     await inter.music_bot.wait_for(
                         "pool_payload_ready", timeout=4,
@@ -244,7 +247,6 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
         if extra_bots_invite:
             msg += f"\n\nVocê terá que adicionar um dos seguintes bots no servidor:\n{' **|** '.join(extra_bots_invite)}"
-
 
     else:
         msg = "**Todos os bots estão em uso nomento...**"
