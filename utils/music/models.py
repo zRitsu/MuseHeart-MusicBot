@@ -667,10 +667,12 @@ class LavalinkPlayer(wavelink.Player):
             return
 
         try:
-            if self.current.title == self.last_stage_title:
-                return
+            title = self.current.title
         except AttributeError:
-            pass
+            title = ""
+
+        if title == self.last_stage_title:
+            return
 
         if len(self.current.title) > 109:
             msg = f"Tocando: {fix_characters(self.current.title, limit=109)}"
@@ -679,6 +681,7 @@ class LavalinkPlayer(wavelink.Player):
             msg = f"Tocando: {self.current.title} || {self.current.author}"
             if len(msg) > 109:
                 msg = f"Tocando: {fix_characters(self.current.title, limit=109)}"
+
 
         if not self.guild.me.voice.channel.instance:
             func = self.guild.me.voice.channel.create_instance
