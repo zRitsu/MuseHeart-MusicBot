@@ -319,8 +319,7 @@ class BotPool:
                         if self.config["INTERACTION_BOTS"] and self.config["GLOBAL_PREFIX"]:
 
                             @bot.slash_command(description="Use este comando caso tenha problemas de outros comandos"
-                                                           " de barra (/) não estarem disponíveis.",
-                                               default_member_permissions=disnake.Permissions(manage_guild=True))
+                                                           " de barra (/) não estarem disponíveis.")
                             async def info(inter: disnake.AppCmdInter):
 
                                 interaction_invites = ""
@@ -336,13 +335,17 @@ class BotPool:
                                     interaction_invites += f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) "
 
                                 embed = disnake.Embed(
-                                    description="**Atenção! Todos os meus comandos de barra (/) funcionam através da aplicação "
+                                    description="**Atenção!** Todos os meus comandos de barra (/) funcionam através da aplicação "
                                                 f"com um dos nomes abaixo:**\n{interaction_invites}\n\n"
                                                 "**Caso os comandos da aplicação acima não sejam exibidos ao digitar barra (/), "
                                                 "clique no nome acima para integrar os comandos de barra no seu "
-                                                "servidor.**",
+                                                "servidor.",
                                     color=bot.get_color()
                                 )
+
+                                if not inter.author.guild_permissions.manage_guild:
+                                    embed.description += "\n\n**Nota:** Será necessário ter a permissão de **Gerenciar " \
+                                                         "Servidor** para integrar os comandos no servidor atual."
 
                                 await inter.send(embed=embed, ephemeral=True)
 
