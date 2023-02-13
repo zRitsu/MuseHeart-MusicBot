@@ -149,11 +149,14 @@ class BotPool:
         LAVALINK_SERVERS = {}
 
         if self.config["AUTO_DOWNLOAD_LAVALINK_SERVERLIST"]:
+            ini_file = "auto_lavalink.ini"
             print("Baixando lista de servidores lavalink (arquivo: lavalink.ini)")
             r = requests.get(self.config["LAVALINK_SERVER_LIST"], allow_redirects=True)
-            with open("lavalink.ini", 'wb') as f:
+            with open("auto_lavalink.ini", 'wb') as f:
                 f.write(r.content)
             r.close()
+        else:
+            ini_file = "lavalink.ini"
 
         for key, value in self.config.items():
 
@@ -165,7 +168,7 @@ class BotPool:
 
         config = ConfigParser()
         try:
-            config.read('lavalink.ini')
+            config.read(ini_file)
         except FileNotFoundError:
             pass
         except Exception:

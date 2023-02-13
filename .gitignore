@@ -159,3 +159,4 @@ application.yml
 .local/
 .player_sessions/
 .jabba/
+/auto_lavalink.ini
