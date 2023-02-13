@@ -683,7 +683,7 @@ class LavalinkPlayer(wavelink.Player):
 
         if not self.guild.me.voice.channel.instance:
             func = self.guild.me.voice.channel.create_instance
-        elif self.guild.me.voice.channel.instance.topic == self.last_stage_title:
+        elif msg == self.last_stage_title:
             self.last_stage_title = msg
             return
         else:
@@ -853,7 +853,7 @@ class LavalinkPlayer(wavelink.Player):
             except:
                 traceback.print_exc()
 
-            await self.update_stage_topic()
+        await self.update_stage_topic()
 
         self.updating = False
 
@@ -1216,6 +1216,12 @@ class LavalinkPlayer(wavelink.Player):
         await self.cleanup(inter)
 
         self.is_closing = True
+
+        if self.stage_title_event and self.guild.me.guild_permissions.manage_channels:
+            try:
+                await self.guild.me.voice.channel.instance.delete()
+            except Exception:
+                traceback.print_exc()
 
         try:
             await self.guild.voice_client.disconnect(force=True)
