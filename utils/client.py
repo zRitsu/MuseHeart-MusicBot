@@ -318,10 +318,13 @@ class BotPool:
 
                         if self.config["INTERACTION_BOTS"] and self.config["GLOBAL_PREFIX"]:
 
-                            @bot.slash_command(description="Use este comando caso tenha problemas de outros comandos"
-                                                           " de barra (/) não estarem disponíveis.")
-                            async def info(inter: disnake.AppCmdInter):
-
+                            @bot.slash_command(
+                                name=disnake.Localized("register_commands",data={disnake.Locale.pt_BR: "registrar_comandos"}),
+                                description="Use este comando caso meus outros comandos de barra (/) não estejam disponíveis..."
+                            )
+                            async def register_commands(
+                                    inter: disnake.AppCmdInter,
+                            ):
                                 interaction_invites = ""
 
                                 for b in self.bots:
