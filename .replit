@@ -73,16 +73,16 @@ support = true
       logging = {}
 
 # Configures the packager.
-[packager]
-language = "python3"
-ignoredPackages = ["discord.py", "discord", "unit_tests"]
-
-  [packager.features]
-  enabledForHosting = false
-  # Enable searching packages from the sidebar.
-  packageSearch = true
-  # Enable guessing what packages are needed from the code.
-  guessImports = true
+# [packager]
+# language = "python3"
+# ignoredPackages = ["discord.py", "discord", "unit_tests"]
+#
+#  [packager.features]
+#  enabledForHosting = false
+#  # Enable searching packages from the sidebar.
+#  packageSearch = true
+#  # Enable guessing what packages are needed from the code.
+#  guessImports = true
 
 # These are the files that need to be preserved when this
 # language template is used as the base language template
