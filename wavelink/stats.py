@@ -58,7 +58,7 @@ class Stats:
         self.system_load = cpu['systemLoad']
         self.lavalink_load = cpu['lavalinkLoad']
 
-        frame_stats = data.get('frameStats', {})
+        frame_stats = data.get('frameStats', {}) or {}
         self.frames_sent = frame_stats.get('sent', -1)
         self.frames_nulled = frame_stats.get('nulled', -1)
         self.frames_deficit = frame_stats.get('deficit', -1)

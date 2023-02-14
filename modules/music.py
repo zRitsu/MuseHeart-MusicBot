@@ -3547,6 +3547,8 @@ class Music(commands.Cog):
 
         if not node.restarting:
 
+            print(f"{self.bot.user} - [{node.identifier}] Conexão perdida - reconectando em {int(backoff)} segundos.")
+
             for player in list(node.players.values()):
 
                 try:
@@ -3568,9 +3570,6 @@ class Music(commands.Cog):
                 except:
                     traceback.print_exc()
                     continue
-
-        if not node.restarting:
-            print(f"{self.bot.user} - [{node.identifier}] Conexão perdida - reconectando em {int(backoff)} segundos.")
 
         await asyncio.sleep(backoff)
 
