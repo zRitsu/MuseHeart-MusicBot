@@ -126,7 +126,7 @@ class PlayerSession(commands.Cog):
                         if playlist:=info.pop("playlist", None):
 
                             try:
-                                playlist_cls = playlists[playlist["url"]]
+                                playlist = playlists[playlist["url"]]
                             except KeyError:
                                 playlist_cls = PartialPlaylist(
                                     {
@@ -139,6 +139,7 @@ class PlayerSession(commands.Cog):
                                     }, url = playlist["url"]
                                 )
                                 playlists[playlist["url"]] = playlist_cls
+                                playlist = playlist_cls
 
                         t = PartialTrack(info=info, playlist=playlist)
 
@@ -147,7 +148,7 @@ class PlayerSession(commands.Cog):
                         if playlist := info.pop("playlist", None):
 
                             try:
-                                playlist_cls = playlists[playlist["url"]]
+                                playlist = playlists[playlist["url"]]
                             except KeyError:
                                 playlist_cls = LavalinkPlaylist(
                                     {
@@ -160,8 +161,10 @@ class PlayerSession(commands.Cog):
                                     }, url=playlist["url"]
                                 )
                                 playlists[playlist["url"]] = playlist_cls
+                                playlist = playlist_cls
 
                         t = LavalinkTrack(id_=info["id"], info=info, playlist=playlist)
+
                     del t.info["id"]
                     player.queue.append(t)
 
