@@ -13,30 +13,24 @@ hidden = ["venv", ".config", "**/__pycache__", "**/.mypy_cache", "**/*.pyc", "La
 channel = "unstable"
 
 # The command to start the interpreter.
-[interpreter]
-  [interpreter.command]
-  args = [
-    "stderred",
-    "--",
-    "prybar-python310",
-    "-q",
-    "--ps1",
-    "\u0001\u001b[33m\u0002\u0001\u001b[00m\u0002 ",
-    "-i",
-  ]
-  env = { LD_LIBRARY_PATH = "$PYTHON_LD_LIBRARY_PATH" }
+#[interpreter]
+#  [interpreter.command]
+#  args = [
+#    "stderred",
+#    "--",
+#    "prybar-python310",
+#    "-q",
+#    "--ps1",
+#    "\u0001\u001b[33m\u0002\u0001\u001b[00m\u0002 ",
+#    "-i",
+#  ]
+#  env = { LD_LIBRARY_PATH = "$PYTHON_LD_LIBRARY_PATH" }
 
 [env]
 VIRTUAL_ENV = "/home/runner/${REPL_SLUG}/venv"
 PATH = "${VIRTUAL_ENV}/bin"
 PYTHONPATH = "${VIRTUAL_ENV}/lib/python3.10/site-packages"
-REPLIT_POETRY_PYPI_REPOSITORY = "https://package-proxy.replit.com/pypi/"
 MPLBACKEND = "TkAgg"
-POETRY_CACHE_DIR = "${HOME}/${REPL_SLUG}/.cache/pypoetry"
-
-# Enable unit tests. This is only supported for a few languages.
-[unitTest]
-language = "python3"
 
 # Add a debugger!
 [debugger]
