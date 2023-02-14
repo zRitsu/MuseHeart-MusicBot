@@ -236,20 +236,20 @@ class PlayerSession(commands.Cog):
 
                     if player.current:
                         player.current.info["id"] = player.current.id if not reset_ids else ""
-                        if player.current.playlist:
-                            player.current.info["playlist"] = {"name": player.current.playlist.name, "url": player.current.playlist.url}
+                        if player.current.playlist_name:
+                            player.current.info["playlist"] = {"name": player.current.playlist_name, "url": player.current.playlist_url}
                         tracks.append(player.current.info)
 
                     for t in player.queue:
                         t.info["id"] = t.id if not reset_ids else ""
                         if t.playlist:
-                            t.info["playlist"] = {"name": t.playlist.name, "url": t.playlist.url}
+                            t.info["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
                         tracks.append(t.info)
 
                     for t in player.played:
                         t.info["id"] = t.id if not reset_ids else ""
                         if t.playlist:
-                            t.info["playlist"] = {"name": t.playlist.name, "url": t.playlist.url}
+                            t.info["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
                         played.append(t.info)
 
                     if not tracks and not played:
