@@ -138,6 +138,7 @@ class PlayerSession(commands.Cog):
                                         'tracks': []
                                     }, url = playlist["url"]
                                 )
+                                playlists[playlist["url"]] = playlist
 
                         t = PartialTrack(info=info, playlist=playlist)
 
@@ -158,6 +159,7 @@ class PlayerSession(commands.Cog):
                                         'tracks': []
                                     }, url=playlist["url"]
                                 )
+                                playlists[playlist["url"]] = playlist
 
                         t = LavalinkTrack(id_=info["id"], info=info, playlist=playlist)
                     del t.info["id"]
