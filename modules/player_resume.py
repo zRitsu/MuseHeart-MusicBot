@@ -126,9 +126,9 @@ class PlayerSession(commands.Cog):
                         if playlist:=info.pop("playlist", None):
 
                             try:
-                                playlist = playlists[playlist["url"]]
+                                playlist_cls = playlists[playlist["url"]]
                             except KeyError:
-                                playlist = PartialPlaylist(
+                                playlist_cls = PartialPlaylist(
                                     {
                                         'loadType': 'PLAYLIST_LOADED',
                                         'playlistInfo': {
@@ -138,7 +138,7 @@ class PlayerSession(commands.Cog):
                                         'tracks': []
                                     }, url = playlist["url"]
                                 )
-                                playlists[playlist["url"]] = playlist
+                                playlists[playlist["url"]] = playlist_cls
 
                         t = PartialTrack(info=info, playlist=playlist)
 
@@ -147,9 +147,9 @@ class PlayerSession(commands.Cog):
                         if playlist := info.pop("playlist", None):
 
                             try:
-                                playlist = playlists[playlist["url"]]
+                                playlist_cls = playlists[playlist["url"]]
                             except KeyError:
-                                playlist = LavalinkPlaylist(
+                                playlist_cls = LavalinkPlaylist(
                                     {
                                         'loadType': 'PLAYLIST_LOADED',
                                         'playlistInfo': {
@@ -159,7 +159,7 @@ class PlayerSession(commands.Cog):
                                         'tracks': []
                                     }, url=playlist["url"]
                                 )
-                                playlists[playlist["url"]] = playlist
+                                playlists[playlist["url"]] = playlist_cls
 
                         t = LavalinkTrack(id_=info["id"], info=info, playlist=playlist)
                     del t.info["id"]
