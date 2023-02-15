@@ -109,7 +109,10 @@ class EmbedPaginator(disnake.ui.View):
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
 
         if interaction.author != self.ctx.author:
-            await interaction.send(f"O apenas o membro {self.ctx.author.mention} pode usar estes botões...")
+            await interaction.send(
+                f"Apenas o membro {self.ctx.author.mention} pode usar os botões dessa mensagem...",
+                ephemeral=True
+            )
             return False
 
         return True
