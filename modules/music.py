@@ -788,11 +788,9 @@ class Music(commands.Cog):
         tracks, node = await self.get_tracks(query, inter.user, node=node, track_loops=repeat_amount)
 
         try:
-            player = inter.bot.music.players[inter.guild_id]
+            player = bot.music.players[inter.guild_id]
         except KeyError:
             await check_pool_bots(inter, check_player=False)
-
-            player = None
 
             try:
                 bot = inter.music_bot
@@ -803,11 +801,15 @@ class Music(commands.Cog):
                 guild = inter.guild
                 channel = inter.channel
 
-            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-            static_player = guild_data['player_controller']
+            try:
+                player = bot.music.players[inter.guild_id]
+            except KeyError:
+                player = None
+                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                static_player = guild_data['player_controller']
 
-            if static_player['channel']:
-                channel, warn_message = await self.check_channel(guild_data, inter, channel, guild, bot)
+                if static_player['channel']:
+                    channel, warn_message = await self.check_channel(guild_data, inter, channel, guild, bot)
 
         if not player:
 
