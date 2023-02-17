@@ -127,7 +127,11 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
             inter.bot.pool.message_ids.add(msg_id)
 
         elif not check_player and not only_voiced:
-            return True
+
+            if inter.author.voice and inter.bot.user.id not in inter.author.voice.channel.voice_states:
+                pass
+            else:
+                return True
 
     free_bot = None
 
