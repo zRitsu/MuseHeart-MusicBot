@@ -1098,6 +1098,27 @@ class Music(commands.Cog):
     @commands.dynamic_cooldown(user_cooldown(2, 8), commands.BucketType.guild)
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.slash_command(
+        name=disnake.Localized("skipto", data={disnake.Locale.pt_BR: "pular_para"}),
+        description=f"{desc_prefix}Pular para uma música específica da fila.",
+        extras={"only_voiced": True}
+    )
+    async def skipto(
+            self,
+            inter: disnake.AppCmdInter,
+            query: str = commands.Param(
+                name="nome",
+                description="Nome da música (completa ou parte dela).",
+                default=None,
+            )):
+
+        await self.skip.callback(self=self, inter=inter, query=query)
+
+    @is_requester()
+    @has_source()
+    @check_voice()
+    @commands.dynamic_cooldown(user_cooldown(2, 8), commands.BucketType.guild)
+    @commands.max_concurrency(1, commands.BucketType.member)
+    @commands.slash_command(
         name=disnake.Localized("skip", data={disnake.Locale.pt_BR: "pular"}),
         description=f"{desc_prefix}Pular a música atual que está tocando.",
         extras={"only_voiced": True}
@@ -1970,6 +1991,7 @@ class Music(commands.Cog):
     @rotate.autocomplete("nome")
     @move.autocomplete("nome")
     @skip.autocomplete("nome")
+    @skipto.autocomplete("nome")
     @remove.autocomplete("nome")
     async def queue_tracks(self, inter: disnake.AppCmdInter, query: str):
 
