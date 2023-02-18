@@ -471,6 +471,8 @@ class Music(commands.Cog):
             while not me.voice:
                 await asyncio.sleep(1)
 
+            await asyncio.sleep(4)
+
             stage_perms = channel.permissions_for(me)
 
             if stage_perms.mute_members:
@@ -3667,9 +3669,10 @@ class Music(commands.Cog):
                 4016,  # Connection started elsewhere
                 4005  # Already authenticated.
         ):
-            await asyncio.sleep(3)
 
-            await player.connect(player.channel_id)
+            vc_id = int(player.channel_id)
+            await asyncio.sleep(2)
+            await player.connect(vc_id)
             return
 
     @commands.Cog.listener('on_wavelink_track_exception')
