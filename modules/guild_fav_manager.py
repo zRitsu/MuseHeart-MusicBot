@@ -244,19 +244,20 @@ class PinManager(commands.Cog):
 
         await send_idle_embed(message or channel, bot=self.bot, guild_data=guild_data)
 
-    @commands.max_concurrency(1, commands.BucketType.guild)
-    @commands.cooldown(3, 30, commands.BucketType.guild)
+    server_playlist_cd = commands.CooldownMapping.from_cooldown(3, 30, commands.BucketType.guild)
+    server_playlist_mc =commands.MaxConcurrency(1, per=commands.BucketType.guild, wait=False)
+
     @commands.slash_command(
-        default_member_permissions=disnake.Permissions(manage_guild=True)
+        default_member_permissions=disnake.Permissions(manage_guild=True),
+        cooldown=server_playlist_cd, max_concurrency=server_playlist_mc
     )
     async def server_playlist(self, inter: disnake.AppCmdInter):
         pass
 
     @commands.has_guild_permissions(manage_guild=True)
-    @commands.cooldown(3, 30, commands.BucketType.guild)
-    @commands.max_concurrency(1, commands.BucketType.guild)
     @commands.command(name="serverplaylist", aliases=["spl", "svp", "svpl"],
-                      description="Gerenciar playlists/favoritos do servidor.")
+                      description="Gerenciar playlists/favoritos do servidor.",
+                      cooldown=server_playlist_cd, max_concurrency=server_playlist_mc)
     async def serverplaylist_legacy(self, ctx: CustomContext):
         await self.manager.callback(self=self, inter=ctx)
 
@@ -297,7 +298,8 @@ class PinManager(commands.Cog):
 
     @commands.cooldown(1, 20, commands.BucketType.guild)
     @server_playlist.sub_command(
-        name="import", description=f"{desc_prefix}Importar links de arq. json para a lista de links do servidor."
+        name="import", description=f"{desc_prefix}Importar links de arq. json para a lista de links do servidor.",
+        max_concurrency=server_playlist_mc
     )
     async def import_(
             self,
@@ -379,7 +381,8 @@ class PinManager(commands.Cog):
 
     @commands.cooldown(1, 20, commands.BucketType.guild)
     @server_playlist.sub_command(
-        description=f"{desc_prefix}Exportar os links de músicas/playlists fixas do servidor em um arquivo json."
+        description=f"{desc_prefix}Exportar os links de músicas/playlists fixas do servidor em um arquivo json.",
+        max_concurrency=server_playlist_mc
     )
     async def export(self, inter: disnake.ApplicationCommandInteraction):
 

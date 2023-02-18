@@ -141,14 +141,16 @@ class Misc(commands.Cog):
         await self.bot.update_appinfo()
 
 
-    @commands.command(name="about", aliases=["sobre", "info", "botinfo"], description="Exibir informações sobre mim.")
+    about_cd = commands.CooldownMapping.from_cooldown(1, 5, commands.BucketType.member)
+
+    @commands.command(name="about", aliases=["sobre", "info", "botinfo"], description="Exibir informações sobre mim.",
+                      cooldown=about_cd)
     async def about_legacy(self, ctx):
         await self.about.callback(self=self, inter=ctx)
 
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.slash_command(
-        description=f"{desc_prefix}Exibir informações sobre mim."
+        description=f"{desc_prefix}Exibir informações sobre mim.", cooldown=about_cd
     )
     async def about(
             self,

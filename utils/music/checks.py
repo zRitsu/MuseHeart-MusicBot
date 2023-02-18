@@ -78,7 +78,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         return True
 
     if not inter.guild_id:
-        return
+        raise GenericError("**Esse comando não pode ser usado nas mensagens privada.**")
 
     try:
         if inter.bot.user.id in inter.author.voice.channel.voice_states:
@@ -226,7 +226,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         if not bot.appinfo.bot_public:
             continue
 
-        if (bot.user.id == inter.bot.user.id and inter.guild):
+        if (bot.user.id == inter.bot.user.id):
             continue
 
         if bot.get_guild(inter.guild_id):

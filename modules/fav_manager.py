@@ -240,21 +240,20 @@ class FavManager(commands.Cog):
 
     desc_prefix = "⭐ [Favoritos] ⭐ | "
 
-    @commands.max_concurrency(1, commands.BucketType.user)
-    @commands.cooldown(3, 30, commands.BucketType.user)
-    @commands.slash_command()
+    fav_cd = commands.CooldownMapping.from_cooldown(3, 15, commands.BucketType.member)
+    fav_mc =commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
+
+    @commands.slash_command(max_concurrency=fav_mc)
     async def fav(self, inter: disnake.ApplicationCommandInteraction):
         pass
 
-    @commands.max_concurrency(1, commands.BucketType.user)
-    @commands.cooldown(3, 30, commands.BucketType.user)
     @commands.command(name="favmanager", aliases=["favs", "favoritos", "fvmgr"],
-                      description="Gerenciar suas playlists/favoritos.")
+                      description="Gerenciar suas playlists/favoritos.", cooldown=fav_cd, max_concurrency=fav_mc)
     async def favmanager_legacy(self, ctx: CustomContext):
         await self.manager.callback(self=self, inter=ctx)
 
     @fav.sub_command(
-        description=f"{desc_prefix}Gerenciar suas playlists/favoritos."
+        description=f"{desc_prefix}Gerenciar suas playlists/favoritos.", cooldown=fav_cd
     )
     async def manager(self, inter: disnake.AppCmdInter):
 
@@ -288,6 +287,7 @@ class FavManager(commands.Cog):
     async def favlist_legacy(self, ctx: CustomContext):
         await self.list_.callback(self=self, inter=ctx, hidden=False)
 
+    @commands.cooldown(1, 5, commands.BucketType.user)
     @fav.sub_command(
         name="list", description=f"{desc_prefix}Exibir sua lista de favoritos."
     )
@@ -323,8 +323,11 @@ class FavManager(commands.Cog):
         else:
             await inter.edit_original_message(embed=embed)
 
+    fav_import_export_cd = commands.CooldownMapping.from_cooldown(1, 15, commands.BucketType.member)
+
     @fav.sub_command(
-        name="import", description=f"{desc_prefix}Importar seus favoritos a partir de um arquivo."
+        name="import", description=f"{desc_prefix}Importar seus favoritos a partir de um arquivo.",
+        cooldown=fav_import_export_cd, max_concurrency=fav_mc
     )
     async def import_(
             self,
@@ -393,7 +396,8 @@ class FavManager(commands.Cog):
         )
 
     @fav.sub_command(
-        description=f"{desc_prefix}Exportar seus favoritos em um arquivo json."
+        description=f"{desc_prefix}Exportar seus favoritos em um arquivo json.",
+        cooldown=fav_import_export_cd, max_concurrency=fav_mc
     )
     async def export(self, inter: disnake.ApplicationCommandInteraction):
 

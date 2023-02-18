@@ -162,12 +162,15 @@ class MusicSettings(commands.Cog):
             except:
                 await inter.send(embed=embed, ephemeral=True)
 
+    setup_cd = commands.CooldownMapping.from_cooldown(1, 15, commands.BucketType.guild)
+    setup_mc =commands.MaxConcurrency(1, per=commands.BucketType.guild, wait=False)
+
     @commands.has_guild_permissions(manage_guild=True)
     @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
-    @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
     @commands.command(
         name="setup", aliases=["songrequestchannel", "sgrc"], usage="[id do canal ou #canal] [--reset]",
-        description="Criar/escolher um canal dedicado para pedir músicas e deixar player fixado."
+        description="Criar/escolher um canal dedicado para pedir músicas e deixar player fixado.",
+        cooldown=setup_cd, max_concurrency=setup_cd
     )
     async def setup_legacy(
             self,
@@ -189,10 +192,9 @@ class MusicSettings(commands.Cog):
         await self.setup.callback(self=self, inter=ctx, target=channel,
                                   purge_messages=purge_messages)
 
-    @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
     @commands.slash_command(
         description=f"{desc_prefix}Criar/escolher um canal dedicado para pedir músicas e deixar player fixado.",
-        default_member_permissions=disnake.Permissions(manage_guild=True)
+        default_member_permissions=disnake.Permissions(manage_guild=True), cooldown=setup_cd, max_concurrency=setup_cd
     )
     async def setup(
             self,
@@ -527,10 +529,10 @@ class MusicSettings(commands.Cog):
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.bot_has_guild_permissions(manage_threads=True)
-    @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
     @commands.command(
         name="reset", usage="[--delete]",
-        description="Resetar as configurações relacionadas ao canal de pedir música (song request)."
+        description="Resetar as configurações relacionadas ao canal de pedir música (song request).",
+        cooldown=setup_cd, max_concurrency=setup_cd
     )
     async def reset_legacy(self, ctx: CustomContext, *, delete_channel: str = None):
 
@@ -539,10 +541,9 @@ class MusicSettings(commands.Cog):
 
         await self.reset.callback(self=self, inter=ctx, delete_channel=delete_channel)
 
-    @commands.dynamic_cooldown(user_cooldown(1, 30), commands.BucketType.guild)
     @commands.slash_command(
         description=f"{desc_prefix}Resetar as configurações relacionadas ao canal de pedir música (song request).",
-        default_member_permissions=disnake.Permissions(manage_guild=True)
+        default_member_permissions=disnake.Permissions(manage_guild=True), cooldown=setup_cd, max_concurrency=setup_cd
     )
     async def reset(
             self,
@@ -645,9 +646,12 @@ class MusicSettings(commands.Cog):
                 f"```py\n{repr(e)}```"
             )
 
+    djrole_cd = commands.CooldownMapping.from_cooldown(1, 7, commands.BucketType.guild)
+    djrole_mc =commands.MaxConcurrency(1, per=commands.BucketType.guild, wait=False)
+
     @commands.has_guild_permissions(manage_guild=True)
-    @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
-    @commands.command(name="adddjrole",description="Adicionar um cargo para a lista de DJ's do servidor.", usage="[id / nome / @cargo]")
+    @commands.command(name="adddjrole",description="Adicionar um cargo para a lista de DJ's do servidor.",
+                      usage="[id / nome / @cargo]", cooldown=djrole_cd, max_concurrency=djrole_mc)
     async def add_dj_role_legacy(self, ctx: CustomContext, *, role: Optional[disnake.Role] = None):
 
         if not role:
@@ -659,10 +663,9 @@ class MusicSettings(commands.Cog):
 
         await self.add_dj_role.callback(self=self,inter=ctx, role=role)
 
-    @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
     @commands.slash_command(
         description=f"{desc_prefix}Adicionar um cargo para a lista de DJ's do servidor.",
-        default_member_permissions=disnake.Permissions(manage_guild=True)
+        default_member_permissions=disnake.Permissions(manage_guild=True), cooldown=djrole_cd, max_concurrency=djrole_mc
     )
     async def add_dj_role(
             self,
@@ -691,15 +694,14 @@ class MusicSettings(commands.Cog):
         await inter.send(f"O cargo {role.mention} foi adicionado à lista de DJ's.", ephemeral=True)
 
     @commands.has_guild_permissions(manage_guild=True)
-    @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
-    @commands.command(description="Remover um cargo para a lista de DJ's do servidor.", usage="[id / nome / @cargo]")
+    @commands.command(description="Remover um cargo para a lista de DJ's do servidor.", usage="[id / nome / @cargo]",
+                      cooldown=djrole_cd, max_concurrency=djrole_mc)
     async def remove_dj_role_legacy(self, ctx: CustomContext, *, role: disnake.Role):
         await self.remove_dj_role.callback(self=self, inter=ctx, role=role)
 
-    @commands.dynamic_cooldown(user_cooldown(1, 7), commands.BucketType.guild)
     @commands.slash_command(
         description=f"{desc_prefix}Remover um cargo para a lista de DJ's do servidor.",
-        default_member_permissions=disnake.Permissions(manage_guild=True)
+        default_member_permissions=disnake.Permissions(manage_guild=True), cooldown=djrole_cd, max_concurrency=djrole_mc
     )
     async def remove_dj_role(
             self,
@@ -733,18 +735,18 @@ class MusicSettings(commands.Cog):
 
         await inter.send(f"O cargo {role.mention} foi removido da lista de DJ's.", ephemeral=True)
 
+    skin_cd = commands.CooldownMapping.from_cooldown(1, 15, commands.BucketType.guild)
+    skin_mc =commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
+
     @commands.has_guild_permissions(manage_guild=True)
-    @commands.cooldown(1, 10, commands.BucketType.guild)
-    @commands.max_concurrency(1, commands.BucketType.guild)
-    @commands.command(description="Alterar aparência/skin do player.", name="changeskin", aliases=["setskin", "skin"])
+    @commands.command(description="Alterar aparência/skin do player.", name="changeskin", aliases=["setskin", "skin"],
+                      cooldown=skin_cd, max_concurrency=skin_mc)
     async def change_skin_legacy(self, ctx: CustomContext):
 
         await self.change_skin.callback(self=self, inter=ctx)
 
-    @commands.cooldown(1, 10, commands.BucketType.guild)
-    @commands.max_concurrency(1, commands.BucketType.guild)
     @commands.slash_command(
-        description=f"{desc_prefix}Alterar aparência/skin do player.",
+        description=f"{desc_prefix}Alterar aparência/skin do player.", cooldown=skin_cd, max_concurrency=skin_mc,
         default_member_permissions=disnake.Permissions(manage_guild=True)
     )
     async def change_skin(self, inter: disnake.AppCmdInter):

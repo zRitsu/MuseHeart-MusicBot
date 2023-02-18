@@ -369,6 +369,29 @@ class BotPool:
 
                     self.bot_mentions.update((f"<@!{bot.user.id}>", f"<@{bot.user.id}>"))
 
+                    for b in self.bots:
+
+                        if not b.bot_ready:
+                            continue
+
+                        for cmd in b.commands:
+                            bot.get_command(cmd.name)._buckets = cmd._buckets
+
+                        for cmd in b.slash_commands:
+                            c = bot.get_slash_command(cmd.name)
+                            if not c: continue
+                            c._buckets = cmd._buckets
+
+                        for cmd in b.user_commands:
+                            c = bot.get_user_command(cmd.name)
+                            if not c: continue
+                            c._buckets = cmd._buckets
+
+                        for cmd in b.message_commands:
+                            c = bot.get_message_command(cmd.name)
+                            if not c: continue
+                            c._buckets = cmd._buckets
+
                     bot.bot_ready = True
 
                 print(f'{bot.user} - [{bot.user.id}] Online.')
