@@ -75,7 +75,7 @@ Railway
 </summary>
 <br>
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template/WbAx7d?referralCode=JDUKpu)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template/YkBuYT?referralCode=tzsLOv)
 * 1 - Preencha os dados que vão ser requisitados na próxima página (os que tem asteríscos vermelhos são obrigatórios).
 * 2 - Clique no botão deploy e aguarde até o deploy ser concluído (Ficando com cor verde. Pode demorar alguns segundos antes de aparecer um deploy na lista).
 * **Nota 1:** Requer uma conta do github com um bom tempo de criado ou um cartão de crédito para ter uma conta verificada.
