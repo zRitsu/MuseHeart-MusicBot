@@ -1,0 +1,9 @@
+[build]
+builder = "NIXPACKS"
+nixpacksConfigPath = "nixpacks.toml"
+
+[deploy]
+startCommand = "python3 main.py"
+healthcheckPath = "/"
+restartPolicyType = "NEVER"
+healthcheckTimeout = 100
