@@ -673,11 +673,11 @@ class LavalinkPlayer(wavelink.Player):
 
             msg = "Em espera por novas músicas."
 
-        elif len(self.current.title) > 109:
+        elif len(self.current.single_title) > 109:
             msg = f"Tocando: {fix_characters(self.current.title, limit=109)}"
 
         else:
-            msg = f"Tocando: {self.current.title} || {self.current.author}"
+            msg = f"Tocando: {self.current.title} || {self.current.authors_string}"
             if len(msg) > 109:
                 msg = f"Tocando: {fix_characters(self.current.title, limit=109)}"
 
