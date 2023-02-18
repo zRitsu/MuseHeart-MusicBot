@@ -599,6 +599,9 @@ class BotCore(commands.Bot):
         if message.is_system():
             return
 
+        if isinstance(message.channel, disnake.StageChannel):
+            return
+
         if message.content in (f"<@{self.user.id}>",  f"<@!{self.user.id}>"):
 
             if message.author.bot:
