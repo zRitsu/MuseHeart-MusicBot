@@ -234,6 +234,9 @@ class PlayerSession(commands.Cog):
                     tracks = []
                     played = []
 
+                    if not player.guild.me.voice:
+                        continue
+
                     if player.current:
                         player.current.info["id"] = player.current.id if not reset_ids else ""
                         if player.current.playlist_name:
