@@ -64,7 +64,7 @@ class DefaultProgressbarStaticSkin:
         queue_img = ""
 
         try:
-            vc_txt = f"\n> *️⃣ **⠂Canal de voz:** [`{player.guild.me.voice.channel.name}`](http://discordapp.com/channels/{player.guild.id}/{player.guild.me.voice.channel.id})"
+            vc_txt = f"\n> *️⃣ **⠂Canal de voz:** {player.guild.me.voice.channel.mention}"
         except AttributeError:
             pass
 
