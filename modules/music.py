@@ -706,6 +706,11 @@ class Music(commands.Cog):
                     )
                     return
 
+                try:
+                    inter.store_message = msg
+                except AttributeError:
+                    pass
+
                 inter.token = select_interaction.token
                 inter.id = select_interaction.id
                 inter.response = select_interaction.response
@@ -772,6 +777,11 @@ class Music(commands.Cog):
 
                     if view.selected == "music":
                         query = link_re.group()
+
+                    try:
+                        inter.store_message = msg
+                    except AttributeError:
+                        pass
 
                     if not isinstance(inter, disnake.ModalInteraction):
                         inter.token = view.inter.token
