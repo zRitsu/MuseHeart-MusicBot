@@ -118,7 +118,7 @@ class Misc(commands.Cog):
         if self.bot.config["GLOBAL_PREFIX"]:
             components = [disnake.ui.Button(custom_id="bot_invite", label="Bot invites")] if [b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public] else None
         else:
-            components = None
+            components = []
 
         embed = disnake.Embed(
             description="Olá! Para ver todos os meus comandos use **/**\n\n",
@@ -323,6 +323,9 @@ class Misc(commands.Cog):
         interaction_bots = ""
 
         for bot_id in inter.bot.config["INTERACTION_BOTS"].split(" "):
+
+            if bot_id in txt and len(bots_invites + bots_in_guild) < 2:
+                continue
 
             try:
                 if int(bot_id) == inter.bot.user.id:

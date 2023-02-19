@@ -101,7 +101,7 @@ class ErrorHandler(commands.Cog):
 
         else:
 
-            components = None
+            components = []
 
             kwargs["embed"].description = error_msg
 
@@ -163,7 +163,7 @@ class ErrorHandler(commands.Cog):
 
         else:
 
-            components = None
+            components = []
 
             if ctx.channel.permissions_for(ctx.guild.me).embed_links:
                 kwargs["embed"] = disnake.Embed(color=disnake.Colour.red(), description=error_msg)
