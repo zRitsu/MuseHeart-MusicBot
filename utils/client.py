@@ -612,6 +612,8 @@ class BotCore(commands.Bot):
 
             embed = disnake.Embed(color=self.get_color(message.guild.me))
 
+            kwargs = {}
+
             if not (await self.is_owner(message.author)):
 
                 prefix = (await self.get_prefix(message))
@@ -622,6 +624,8 @@ class BotCore(commands.Bot):
                 embed.description = f"**Olá {message.author.mention}.\n\n" \
                                     f"Para ver todos os meus comandos use: /**"
 
+                bot_count = 0
+
                 if not self.command_sync_flags.sync_commands and self.config["INTERACTION_BOTS"]:
 
                     interaction_invites = []
@@ -630,6 +634,12 @@ class BotCore(commands.Bot):
 
                         if str(b.user.id) not in self.config["INTERACTION_BOTS"]:
                             continue
+
+                        try:
+                            if b.appinfo.bot_public and b.user not in message.guild.members:
+                                bot_count += 1
+                        except AttributeError:
+                            pass
 
                         interaction_invites.append(f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) ")
 
@@ -645,15 +655,24 @@ class BotCore(commands.Bot):
                     embed.description += f"\n\nTambém tenho comandos de texto por prefixo.\n" \
                                         f"Para ver todos os meus comandos de texto use **{prefix}help**\n"
 
-                view = None
+                if bot_count:
+
+                    kwargs = {
+                        "components": [
+                            disnake.ui.Button(
+                                custom_id="bot_invite",
+                                label="Precisa de mais bots de música? Clique aqui."
+                            )
+                        ]
+                    }
 
             else:
 
                 embed.title = "PAINEL DE CONTROLE."
                 embed.set_footer(text="Clique em uma tarefa que deseja executar.")
-                view = PanelView(self)
+                kwargs = {"view": PanelView(self)}
 
-            await message.reply(embed=embed, view=view)
+            await message.reply(embed=embed, **kwargs)
             return
 
         ctx: CustomContext = await self.get_context(message, cls=CustomContext)
