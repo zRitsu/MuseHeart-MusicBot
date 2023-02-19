@@ -316,7 +316,7 @@ class BotPool:
 
                         self._command_sync_flags = commands.CommandSyncFlags.none()
 
-                        if self.config["INTERACTION_BOTS"] and self.config["GLOBAL_PREFIX"]:
+                        if self.config["INTERACTION_BOTS"] and self.config["GLOBAL_PREFIX"] and self.config["ADD_REGISTER_COMMAND"]:
 
                             @bot.slash_command(
                                 name=disnake.Localized("register_commands",data={disnake.Locale.pt_BR: "registrar_comandos"}),

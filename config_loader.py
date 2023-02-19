@@ -55,6 +55,7 @@ DEFAULT_CONFIG = {
     "IGNORE_SKINS": '',
     "IGNORE_STATIC_SKINS": '',
     "GUILD_DEAFEN_WARN": True,
+    "ADD_REGISTER_COMMAND": False,
 
     ##############################################
     ### Sistema de música - Suporte ao spotify ###
@@ -169,6 +170,7 @@ def load_config():
         "ENABLE_LOGGER",
         "GUILD_DEAFEN_WARN",
         "GLOBAL_PREFIX",
+        "ADD_REGISTER_COMMAND",
 
         "BANS_INTENT",
         "DM_MESSAGES_INTENT",
