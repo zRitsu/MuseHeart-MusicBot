@@ -79,6 +79,7 @@ DEFAULT_CONFIG = {
     "LISTENING_PRESENCES": "",
     "WATCHING_PRESENCES": "",
     "PLAYING_PRESENCES": "",
+    "STREAMING_PRESENCES": "",
 
     ###############
     ### Intents ###

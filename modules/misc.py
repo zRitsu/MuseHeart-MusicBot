@@ -49,17 +49,25 @@ class Misc(commands.Cog):
 
             activities = []
 
-            for i in self.bot.config.get("LISTENING_PRESENCES", "").split("||"):
+            for i in self.bot.config["LISTENING_PRESENCES"].split("||"):
                 if i:
                     activities.append({"name":i, "type": "listening"})
 
-            for i in self.bot.config.get("WATCHING_PRESENCES", "").split("||"):
+            for i in self.bot.config["WATCHING_PRESENCES"].split("||"):
                 if i:
                     activities.append({"name": i, "type": "watching"})
 
-            for i in self.bot.config.get("PLAYING_PRESENCES", "").split("||"):
+            for i in self.bot.config["PLAYING_PRESENCES"].split("||"):
                 if i:
                     activities.append({"name": i, "type": "playing"})
+
+            for i in self.bot.config["STREAMING_PRESENCES"].split("|||"):
+                if i:
+                    try:
+                        name, url = i.split("||")
+                        activities.append({"name": name, "url": url.strip(" "), "type": "streaming"})
+                    except Exception:
+                        traceback.print_exc()
 
             shuffle(activities)
 
@@ -72,10 +80,23 @@ class Misc(commands.Cog):
             activity_data = next(self.activities)
 
             if activity_data["type"] == "listening":
-                activity = disnake.Activity(type=disnake.ActivityType.listening, name=self.placeholders(activity_data["name"]))
+                activity = disnake.Activity(
+                    type=disnake.ActivityType.listening,
+                    name=self.placeholders(activity_data["name"])
+                )
 
             elif activity_data["type"] == "watching":
-                activity = disnake.Activity(type=disnake.ActivityType.watching, name=self.placeholders(activity_data["name"]))
+                activity = disnake.Activity(
+                    type=disnake.ActivityType.watching,
+                    name=self.placeholders(activity_data["name"])
+                )
+
+            elif activity_data["type"] == "streaming":
+                activity = disnake.Activity(
+                    type=disnake.ActivityType.streaming,
+                    name=self.placeholders(activity_data["name"]),
+                    url=activity_data["url"]
+                )
 
             else:
                 activity = disnake.Game(name=self.placeholders(activity_data["name"]))
