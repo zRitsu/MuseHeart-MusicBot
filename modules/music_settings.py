@@ -170,7 +170,7 @@ class MusicSettings(commands.Cog):
     @commands.command(
         name="setup", aliases=["songrequestchannel", "sgrc"], usage="[id do canal ou #canal] [--reset]",
         description="Criar/escolher um canal dedicado para pedir músicas e deixar player fixado.",
-        cooldown=setup_cd, max_concurrency=setup_cd
+        cooldown=setup_cd, max_concurrency=setup_mc
     )
     async def setup_legacy(
             self,
@@ -194,7 +194,7 @@ class MusicSettings(commands.Cog):
 
     @commands.slash_command(
         description=f"{desc_prefix}Criar/escolher um canal dedicado para pedir músicas e deixar player fixado.",
-        default_member_permissions=disnake.Permissions(manage_guild=True), cooldown=setup_cd, max_concurrency=setup_cd
+        default_member_permissions=disnake.Permissions(manage_guild=True), cooldown=setup_cd, max_concurrency=setup_mc
     )
     async def setup(
             self,
@@ -543,7 +543,7 @@ class MusicSettings(commands.Cog):
 
     @commands.slash_command(
         description=f"{desc_prefix}Resetar as configurações relacionadas ao canal de pedir música (song request).",
-        default_member_permissions=disnake.Permissions(manage_guild=True), cooldown=setup_cd, max_concurrency=setup_cd
+        default_member_permissions=disnake.Permissions(manage_guild=True), cooldown=setup_cd, max_concurrency=setup_mc
     )
     async def reset(
             self,
