@@ -309,7 +309,7 @@ class Misc(commands.Cog):
         if bots_in_guild:
             txt += "**Bots de música que já estão no servidor atual:**\n\n"
             for i in disnake.utils.as_chunks(bots_in_guild, 2):
-                txt += " | ".join(i)
+                txt += " | ".join(i) + "\n"
 
         if not txt:
             await inter.send(
