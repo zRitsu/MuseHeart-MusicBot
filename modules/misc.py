@@ -116,18 +116,14 @@ class Misc(commands.Cog):
             await guild.leave()
 
         if self.bot.config["GLOBAL_PREFIX"]:
-            components = [disnake.ui.Button(custom_id="bot_invite", label="Bot invites")] if [b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public] else None
+            components = [disnake.ui.Button(custom_id="bot_invite", label="Precisa de mais bots de música? Clique aqui.")] if [b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public] else None
         else:
             components = []
 
         embed = disnake.Embed(
-            description="Olá! Para ver todos os meus comandos use **/**\n\n",
+            description="",
             color=self.bot.get_color(guild.me)
         )
-
-        if cmd:=self.bot.get_command("setup"):
-            embed.description += f"Se desejar, use o comando **/{cmd.name}** para criar um canal dedicado para pedir " \
-                                 "músicas sem comandos e deixar o music player fixo em um canal dedicado.\n\n"
 
         if not self.bot.command_sync_flags.sync_commands and self.bot.config["INTERACTION_BOTS"]:
 
@@ -141,18 +137,22 @@ class Misc(commands.Cog):
                 interaction_invites.append(f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) ")
 
             if interaction_invites:
-                embed.description += f"Meus comandos de barra (/) funcionam através " \
-                                     f"das seguintes aplicações abaixo:\n" \
+                embed.description += f"Olá! Para ver todos os meus comandos digite barra (**/**) e confira " \
+                                     f"os comandos das seguintes aplicações abaixo:\n" \
                                      f"{' **|** '.join(interaction_invites)}\n\n" \
                                      f"Caso os comandos da aplicação acima não sejam exibidos ao digitar " \
-                                     f"barra (/), clique no nome acima para integrar os comandos de barra no " \
-                                     f"seu servidor.\n\n"
+                                     f"barra (**/**) você terá que clicar no nome acima para integrar os comandos de " \
+                                     f"barra no seu servidor.\n\n"
+
+            else:
+                embed.description += "Olá! Para ver todos os meus comandos use barra (**/**)\n\n"
+
+        if cmd:=self.bot.get_command("setup"):
+            embed.description += f"Se desejar, use o comando **/{cmd.name}** para criar um canal dedicado pra pedir " \
+                                 "músicas sem comandos e deixar o music player fixo em um canal dedicado.\n\n"
 
         if self.bot.config["SUPPORT_SERVER"]:
             embed.description += f"Caso tenha alguma dúvida ou queira acompanhar as últimas novidades, você pode entrar no meu [`servidor de suporte`]({self.bot.config['SUPPORT_SERVER']})\n\n"
-
-        if components:
-            embed.description += "Precisa de mais bots de música? Clique no botão abaixo para adicionar mais bots extras."
 
         try:
             await guild.system_channel.send(embed=embed, components=components)
