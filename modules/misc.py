@@ -289,7 +289,7 @@ class Misc(commands.Cog):
             if bot.user in inter.guild.members:
                 bots_in_guild.append(invite)
             else:
-                bots_in_guild.append(bots_invites)
+                bots_invites.append(invite)
 
         txt = ""
 
