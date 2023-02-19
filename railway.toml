@@ -1,7 +1,7 @@
 [build]
 builder = "NIXPACKS"
 nixpacksConfigPath = "nixpacks.toml"
-buildCommand = "pip3 install -U requirements.txt"
+# buildCommand = "pip3 install -U requirements.txt"
 
 [deploy]
 startCommand = "python3 main.py"
