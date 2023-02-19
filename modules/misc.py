@@ -272,16 +272,36 @@ class Misc(commands.Cog):
             return
 
         bots_invites = []
+        bots_in_guild = []
 
         for bot in self.bot.pool.bots:
 
             if bot.appinfo and not bot.appinfo.bot_public or str(bot.user.id) in bot.config['INTERACTION_BOTS_CONTROLLER']:
                 continue
 
-            bots_invites.append(
-                f"[`{disnake.utils.escape_markdown(str(bot.user.name))}`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})" +
-                (
-                    f" ({len(bot.guilds)}/100)" if not str(bot.user.id) not in self.bot.config["INTERACTION_BOTS_CONTROLLER"] and bot.appinfo.flags.gateway_message_content_limited else f" ({len(bot.guilds)})"))
+            invite = f"[`{disnake.utils.escape_markdown(str(bot.user.name))}`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})"
+
+            if not str(bot.user.id) not in self.bot.config["INTERACTION_BOTS_CONTROLLER"] and bot.appinfo.flags.gateway_message_content_limited:
+                invite += f" ({len(bot.guilds)}/100)"
+            else:
+                invite += f" ({len(bot.guilds)})"
+
+            if bot.user in inter.guild.members:
+                bots_in_guild.append(invite)
+            else:
+                bots_in_guild.append(bots_invites)
+
+        txt = ""
+
+        if bots_invites:
+            txt += "**Bots disponíveis:**\n"
+            for i in disnake.utils.as_chunks(bots_invites, 2):
+                txt += " | ".join(i) + "\n\n"
+
+        if bots_in_guild:
+            txt += "**Bots que já estão no servidor atual:**\n"
+            for i in disnake.utils.as_chunks(bots_in_guild, 2):
+                txt += " | ".join(i)
 
         if not bots_invites:
             await inter.send(
@@ -292,15 +312,9 @@ class Misc(commands.Cog):
             )
             return
 
-        txt = ""
-
-        for i in disnake.utils.as_chunks(bots_invites, 2):
-            txt += " | ".join(i) + "\n"
-
         await inter.send(
             embed=disnake.Embed(
                 colour=self.bot.get_color(),
-                title="**Bots disponíveis:**",
                 description=txt
             ), ephemeral=True
         )
