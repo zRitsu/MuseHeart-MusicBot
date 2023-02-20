@@ -235,7 +235,7 @@ class Music(commands.Cog):
             )
         )
 
-    play_cd = commands.CooldownMapping.from_cooldown(3, 10, commands.BucketType.member)
+    play_cd = commands.CooldownMapping.from_cooldown(3, 12, commands.BucketType.member)
     play_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
     @check_voice()
@@ -471,7 +471,7 @@ class Music(commands.Cog):
             while not me.voice:
                 await asyncio.sleep(1)
 
-            await asyncio.sleep(4)
+            await asyncio.sleep(1)
 
             stage_perms = channel.permissions_for(me)
 
@@ -977,7 +977,7 @@ class Music(commands.Cog):
                 url=track.uri
             )
             embed.set_thumbnail(url=track.thumb)
-            embed.description = f"`{fix_characters(track.author, 15)}`**┃**`{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}`**┃**{inter.author.mention}{player.controller_link}"
+            embed.description = f"`{fix_characters(track.author, 15)}`**┃**`{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}`**┃**{inter.author.mention}"
             emoji = "🎵"
 
         else:
@@ -1014,24 +1014,8 @@ class Music(commands.Cog):
                     name="Spotify Playlist",
                 )
             embed.set_thumbnail(url=tracks.tracks[0].thumb)
-            embed.description = f"`{len(tracks.tracks)} música(s)`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}{player.controller_link}"
+            embed.description = f"`{len(tracks.tracks)} música(s)`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
             emoji = "🎶"
-
-        if not is_pin:
-            try:
-                func = inter.edit_original_message
-            except AttributeError:
-                if msg:
-                    func = msg.edit
-                elif inter.message.author.id == bot.user.id:
-                    func = inter.message.edit
-                else:
-                    func = inter.send
-
-            if bot.user.id != self.bot.user.id:
-                embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
-
-            await func(embed=embed, view=None)
 
         if not player.is_connected:
 
@@ -1048,6 +1032,26 @@ class Music(commands.Cog):
                 check_other_bots_in_vc=guild_data["check_other_bots_in_vc"],
                 bot=bot, me=guild.me, check_pool=True
             )
+
+            embed.description += f"\n`Canal de voz:` <#{player.channel_id}>"
+
+        embed.description += player.controller_link
+
+        if not is_pin:
+            try:
+                func = inter.edit_original_message
+            except AttributeError:
+                if msg:
+                    func = msg.edit
+                elif inter.message.author.id == bot.user.id:
+                    func = inter.message.edit
+                else:
+                    func = inter.send
+
+            if bot.user.id != self.bot.user.id:
+                embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+
+            await func(embed=embed, view=None)
 
         if not player.current:
             if warn_message:
@@ -1088,7 +1092,7 @@ class Music(commands.Cog):
 
         return await google_search(self.bot, query, max_entries=20 - favs_size) + favs
 
-    skip_back_cd = commands.CooldownMapping.from_cooldown(3, 9, commands.BucketType.member)
+    skip_back_cd = commands.CooldownMapping.from_cooldown(2, 13, commands.BucketType.member)
     skip_back_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
     @is_requester()
@@ -3234,7 +3238,7 @@ class Music(commands.Cog):
         if ctx.command or message.mentions:
             return
 
-        if message.author.bot:
+        if message.author.bot and not isinstance(message.channel, disnake.StageChannel):
             return
 
         try:
@@ -3280,6 +3284,10 @@ class Music(commands.Cog):
                     delete_after=20
                 )
                 return
+
+        if message.is_system():
+            await message.delete()
+            return
 
         try:
             if isinstance(message.channel, disnake.Thread):

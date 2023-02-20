@@ -199,7 +199,7 @@ class MusicSettings(commands.Cog):
     async def setup(
             self,
             inter: disnake.AppCmdInter,
-            target: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.ForumChannel] = commands.Param(
+            target: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.ForumChannel, disnake.StageChannel] = commands.Param(
                 name="canal", default=None, description="Selecionar um canal existente"
             ),
             purge_messages: str = commands.Param(
@@ -348,7 +348,8 @@ class MusicSettings(commands.Cog):
                 components=[
                     disnake.ui.Button(label="Canal de texto", custom_id=f"text_channel_{id_}", emoji="💬"),
                     disnake.ui.Button(label="Canal de voz", custom_id=f"voice_channel_{id_}", emoji="🔊"),
-                    disnake.ui.Button(label="Cancelar", custom_id="voice_channel_cancel", emoji="❌")
+                    disnake.ui.Button(label="Canal de palco", custom_id=f"stage_channel_{id_}", emoji="<:stagechannel:1077351815533826209>"),
+                    disnake.ui.Button(label="Cancelar", custom_id=f"voice_channel_cancel_{id_}", emoji="❌")
                 ],
                 **kwargs_msg
             )
@@ -385,7 +386,8 @@ class MusicSettings(commands.Cog):
                 )
                 return
 
-            if inter.data.custom_id == "voice_channel_cancel":
+            if inter.data.custom_id.startswith("voice_channel_cancel"):
+
                 await inter.response.edit_message(
                     embed=disnake.Embed(
                         description="**Operação cancelada...**",
@@ -416,8 +418,12 @@ class MusicSettings(commands.Cog):
             else:
                 target = guild
 
-            create_func = target.create_voice_channel if \
-                inter.data.custom_id.startswith("voice_channel_") else target.create_text_channel
+            if inter.data.custom_id.startswith("voice_channel_"):
+                create_func = target.create_voice_channel
+            elif inter.data.custom_id.startswith("stage_channel_"):
+                create_func = target.create_stage_channel
+            else:
+                create_func = target.create_text_channel
 
             channel = await create_func(f"{bot.user.name} player controller", **channel_kwargs)
 
@@ -500,7 +506,7 @@ class MusicSettings(commands.Cog):
         elif not message or message.channel.id != channel.id:
             message = await send_idle_embed(channel, bot=bot, force=True, guild_data=guild_data)
 
-        if not isinstance(channel, disnake.VoiceChannel):
+        if not isinstance(channel, (disnake.VoiceChannel, disnake.StageChannel)):
             if not message.thread:
                 await message.create_thread(name="song requests", auto_archive_duration=10080)
             elif message.thread.archived:

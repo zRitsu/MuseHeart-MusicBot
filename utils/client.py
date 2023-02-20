@@ -596,13 +596,13 @@ class BotCore(commands.Bot):
         if not message.guild:
             return
 
-        if message.is_system():
-            return
-
         if isinstance(message.channel, disnake.StageChannel):
+            pass
+
+        elif message.author.bot:
             return
 
-        if message.content in (f"<@{self.user.id}>",  f"<@!{self.user.id}>"):
+        elif message.content in (f"<@{self.user.id}>",  f"<@!{self.user.id}>"):
 
             if message.author.bot:
                 return
@@ -678,9 +678,6 @@ class BotCore(commands.Bot):
         ctx: CustomContext = await self.get_context(message, cls=CustomContext)
 
         self.dispatch("song_request", ctx, message)
-
-        if message.author.bot:
-            return
 
         if not ctx.valid:
             return
