@@ -285,14 +285,25 @@ class BotPool:
             @bot.application_command_check(slash_commands=True, message_commands=True, user_commands=True)
             async def check(inter: disnake.ApplicationCommandInteraction):
 
+                kwargs = {}
+
                 try:
-                    kwargs = {
-                        "only_voiced": inter.application_command.extras["only_voiced"],
-                        "check_player": inter.application_command.extras["check_player"],
-                        "return_first": inter.application_command.extras["return_first"],
-                    }
+                    kwargs["only_voiced"] = inter.application_command.extras["only_voiced"]
                 except KeyError:
-                    kwargs = {"return_first": True}
+                    pass
+
+                try:
+                    kwargs["check_player"] = inter.application_command.extras["check_player"]
+                except KeyError:
+                    pass
+
+                try:
+                    kwargs["return_first"] = inter.application_command.extras["return_first"]
+                except KeyError:
+                    pass
+
+                if not kwargs:
+                    kwargs["return_first"] = True
 
                 await check_pool_bots(inter, **kwargs)
 
