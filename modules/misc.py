@@ -301,13 +301,13 @@ class Misc(commands.Cog):
         txt = ""
 
         if bots_invites:
-            txt += "**Bots de música disponíveis:**\n\n"
+            txt += "**Bots de música disponíveis:**\n"
             for i in disnake.utils.as_chunks(bots_invites, 2):
                 txt += " | ".join(i) + "\n"
             txt += "\n"
 
         if bots_in_guild:
-            txt += "**Bots de música que já estão no servidor atual:**\n\n"
+            txt += "**Bots de música que já estão no servidor atual:**\n"
             for i in disnake.utils.as_chunks(bots_in_guild, 2):
                 txt += " | ".join(i) + "\n"
 
@@ -340,7 +340,7 @@ class Misc(commands.Cog):
                 traceback.print_exc()
 
         if interaction_bots:
-            txt = f"**Registrar os comandos de barra no servidor:**\n\n{interaction_bots}\n\n" + txt
+            txt = f"**Registrar os comandos de barra no servidor:**\n{interaction_bots}\n\n" + txt
 
         await inter.send(
             embed=disnake.Embed(
