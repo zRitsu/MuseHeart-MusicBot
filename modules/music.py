@@ -3302,9 +3302,6 @@ class Music(commands.Cog):
                 await message.delete()
             return
 
-        else:
-            await message.delete()
-
         if not message.content:
 
             try:
