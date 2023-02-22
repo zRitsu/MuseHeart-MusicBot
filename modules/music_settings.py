@@ -435,6 +435,9 @@ class MusicSettings(commands.Cog):
 
                 channel_kwargs.clear()
 
+                if not target.permissions_for(guild.me).create_forum_threads:
+                    raise GenericError(f"**{bot.user.mention} não possui permissão para postar no canal {target.mention}.**")
+
                 thread_wmessage = await target.create_thread(
                     name=f"{bot.user.name} song request",
                     content="Post para pedido de músicas.",
@@ -741,7 +744,7 @@ class MusicSettings(commands.Cog):
 
         await inter.send(f"O cargo {role.mention} foi removido da lista de DJ's.", ephemeral=True)
 
-    skin_cd = commands.CooldownMapping.from_cooldown(1, 15, commands.BucketType.guild)
+    skin_cd = commands.CooldownMapping.from_cooldown(1, 20, commands.BucketType.guild)
     skin_mc =commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
     @commands.has_guild_permissions(manage_guild=True)
