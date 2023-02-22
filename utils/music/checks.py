@@ -135,7 +135,10 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
     free_bot = None
 
-    for bot in inter.bot.pool.bots:
+    for bot in sorted(inter.bot.pool.bots, key=lambda b: b.identifier):
+
+        if not bot.bot_ready:
+            continue
 
         if not (guild := bot.get_guild(inter.guild_id)):
             continue

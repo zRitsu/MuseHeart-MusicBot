@@ -244,6 +244,7 @@ class BotPool:
                 command_prefix=prefix,
                 case_insensitive=True,
                 intents=intents,
+                identifier=bot_name,
                 test_guilds=test_guilds,
                 command_sync_flags=commands.CommandSyncFlags.none(),
                 embed_color=self.config["EMBED_COLOR"],
@@ -318,7 +319,7 @@ class BotPool:
 
                         self._command_sync_flags = commands.CommandSyncFlags.all()
 
-                        bot.load_modules(str(bot.user))
+                        bot.load_modules()
 
                         if bot.config["AUTO_SYNC_COMMANDS"]:
                             await bot.sync_app_commands(force=True)
@@ -366,7 +367,7 @@ class BotPool:
                         if bot.config["AUTO_SYNC_COMMANDS"]:
                             await bot.sync_app_commands(force=True)
 
-                        bot.load_modules(str(bot.user))
+                        bot.load_modules()
 
                     if not bot.appinfo:
                         bot.loop.create_task(bot.update_appinfo())
@@ -474,6 +475,7 @@ class BotCore(commands.Bot):
         self.session = aiohttp.ClientSession()
         self.ws_client = self.pool.ws_client
         self.color = kwargs.pop("embed_color", None)
+        self.identifier = kwargs.pop("identifier", "")
         self.appinfo: Optional[disnake.AppInfo] = None
         self.bot_ready = False
         self.player_skins = {}
@@ -783,7 +785,7 @@ class BotCore(commands.Bot):
 
         await super().on_application_command(inter)
 
-    def load_modules(self, bot_name: str = None):
+    def load_modules(self):
 
         modules_dir = "modules"
 
@@ -792,8 +794,7 @@ class BotCore(commands.Bot):
             "loaded": []
         }
 
-        if not bot_name:
-            bot_name = self.user
+        bot_name = self.user or self.identifier
 
         for item in os.walk(modules_dir):
             files = filter(lambda f: f.endswith('.py'), item[-1])
