@@ -162,7 +162,7 @@ class MusicSettings(commands.Cog):
             except:
                 await inter.send(embed=embed, ephemeral=True)
 
-    setup_cd = commands.CooldownMapping.from_cooldown(1, 15, commands.BucketType.guild)
+    setup_cd = commands.CooldownMapping.from_cooldown(1, 20, commands.BucketType.guild)
     setup_mc =commands.MaxConcurrency(1, per=commands.BucketType.guild, wait=False)
 
     @commands.has_guild_permissions(manage_guild=True)

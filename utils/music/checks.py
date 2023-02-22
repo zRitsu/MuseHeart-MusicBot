@@ -153,8 +153,8 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
             inter.bot.dispatch("pool_dispatch", inter, None)
 
             if return_first:
-                inter.music_bot = inter.bot
-                inter.music_guild = inter.guild
+                inter.music_bot = bot
+                inter.music_guild = guild
                 return True
 
             raise NoVoice()
@@ -179,11 +179,12 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         if only_voiced:
             continue
 
-        if not guild.voice_client:
+        if not guild.me.voice:
             free_bot = bot, guild
+            break
 
     try:
-        if not inter.guild.voice_client:
+        if not isinstance(inter, CustomContext) and not inter.guild.voice_client:
 
             if only_voiced:
                 inter.bot.dispatch("pool_dispatch", None)
@@ -193,7 +194,6 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
             inter.music_guild = inter.guild
             inter.bot.dispatch("pool_dispatch", inter, None)
             return True
-
     except AttributeError:
         pass
 
