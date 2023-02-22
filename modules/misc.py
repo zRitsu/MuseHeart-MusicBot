@@ -281,7 +281,7 @@ class Misc(commands.Cog):
                 if (guild:=bot.get_guild(inter.guild_id)):
                     break
 
-        for bot in self.bot.pool.bots:
+        for bot in sorted(self.bot.pool.bots, key=lambda b: len(b.guilds)):
 
             if bot.appinfo and not bot.appinfo.bot_public or str(bot.user.id) in bot.config['INTERACTION_BOTS_CONTROLLER']:
                 continue
