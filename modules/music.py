@@ -3292,13 +3292,14 @@ class Music(commands.Cog):
 
                     if data['player_controller']["channel"] != str(message.channel.id):
                         return
-                    await message.delete()
+                    if message.is_system():
+                        await message.delete()
 
         except AttributeError:
             pass
 
         if message.author.bot:
-            if message.is_system():
+            if message.is_system() and not isinstance(message.channel, disnake.Thread):
                 await message.delete()
             return
 

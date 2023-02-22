@@ -361,7 +361,7 @@ class LavalinkPlayer(wavelink.Player):
         try:
             if isinstance(self.text_channel.parent, disnake.ForumChannel) and \
                     self.text_channel.owner_id == self.bot.user.id and self.text_channel.message_count > 1:
-                await self.text_channel.purge(check=lambda m: m.channel.id != m.id)
+                await self.text_channel.purge(check=lambda m: m.channel.id != m.id and not m.is_system())
         except AttributeError:
             pass
 
@@ -370,8 +370,13 @@ class LavalinkPlayer(wavelink.Player):
         except TypeError:
             return
 
+        if isinstance(self.text_channel, disnake.Thread):
+            check = (lambda m: m.id != self.last_message_id and not m.is_system())
+        else:
+            check = (lambda m: m.id != self.last_message_id)
+
         if self.static and self.last_message_id != self.text_channel.last_message_id:
-            await self.text_channel.purge(check=lambda m: m.id != self.last_message_id)
+            await self.text_channel.purge(check=check)
 
     async def connect(self, channel_id: int, self_mute: bool = False, self_deaf: bool = False):
         await super().connect(channel_id, self_mute=self_mute, self_deaf=True)
