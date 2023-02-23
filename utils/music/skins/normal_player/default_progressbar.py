@@ -44,9 +44,9 @@ class DefaultProgressbarSkin:
 
         if player.current_hint:
             embed.set_footer(text=f"💡 Dica: {player.current_hint}")
-        elif not (player_server:=str(player)).endswith("LOCAL"):
+        elif player.node.identifier != "LOCAL":
             embed.set_footer(
-                text=player_server,
+                text=str(player),
                 icon_url="https://cdn.discordapp.com/attachments/480195401543188483/907119505971486810/speaker-loud-speaker.gif"
             )
 
