@@ -45,9 +45,9 @@ class DefaultStaticSkin:
 
         if player.current_hint:
             embed.set_footer(text=f"💡 Dica: {player.current_hint}")
-        else:
+        elif not (player_server:=str(player)).endswith("LOCAL"):
             embed.set_footer(
-                text=str(player),
+                text=player_server,
                 icon_url="https://cdn.discordapp.com/attachments/480195401543188483/907119505971486810/speaker-loud-speaker.gif"
             )
 
