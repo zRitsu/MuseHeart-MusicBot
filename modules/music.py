@@ -16,9 +16,9 @@ from utils.client import BotCore
 from utils.db import DBModel
 from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolException
 from utils.music.spotify import process_spotify
-from utils.music.checks import check_voice, user_cooldown, has_player, has_source, is_requester, is_dj, \
+from utils.music.checks import check_voice, has_player, has_source, is_requester, is_dj, \
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen, check_pool_bots, \
-    check_channel_limit
+    check_channel_limit, check_stage_topic
 from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, google_search, percentage
@@ -209,31 +209,53 @@ class Music(commands.Cog):
 
         await ctx.send("O arquivo de cache foi importado com sucesso!", delete_after=30)
 
-    @commands.is_owner()
+    stage_cd = commands.CooldownMapping.from_cooldown(2, 45, commands.BucketType.guild)
+    stage_mc = commands.MaxConcurrency(1, per=commands.BucketType.guild, wait=False)
+
+    @commands.has_permissions(manage_guild=True)
+    @commands.bot_has_guild_permissions(manage_channels=True)
     @pool_command(
-        only_voiced=True, aliases=["stagevc"], hidden=True,
-        description="Ativar/Desativar o sistema de aualizar topico do palco automáticamente com o nome da música."
+        only_voiced=True, name="stageannounce", aliases=["stagevc", "togglestageannounce"], hidden=True,
+        description="Ativar o sistema de anuncio automático do palco com o nome da música.",
+        cooldown=stage_cd, max_concurrency=stage_mc
     )
-    async def stageevent(self, ctx: CustomContext):
+    async def stageannounce_legacy(self, ctx: CustomContext):
 
-        player: LavalinkPlayer = self.bot.music.players[ctx.guild.id]
+        await self.stage_announce.callback(self=self, inter=ctx)
 
-        if not isinstance(ctx.guild.me.voice.channel, disnake.StageChannel):
-            raise GenericError("**Você deve estar em um canal de palco para ativar/desativar este recurso.**")
+    @commands.bot_has_guild_permissions(manage_channels=True)
+    @commands.slash_command(
+        description=f"{desc_prefix}Ativar o sistema de anuncio automático do palco com o nome da música.",
+        extras={"only_voiced": True}, default_member_permissions=disnake.Permissions(manage_guild=True),
+        cooldown=stage_cd, max_concurrency=stage_mc
+    )
+    async def stage_announce(self, inter: disnake.AppCmdInter):
 
-        player.stage_title_event = not player.stage_title_event
+        try:
+            bot = inter.music_bot
+            guild = inter.music_guild
+        except AttributeError:
+            bot = inter.bot
+            guild = inter.guild
 
-        msg = "ativou" if player.stage_title_event else "desativou"
+        if not isinstance(guild.me.voice.channel, disnake.StageChannel):
+            raise GenericError("**Você deve estar em um canal de palco para ativar/desativar esse sistema.**")
 
-        player.set_command_log(text=f"{msg} o sistema de tópico automático do palco.", emoji="📢")
-        await player.invoke_np(force=True)
+        player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
-        await ctx.send(
-            embed=disnake.Embed(
-                color=self.bot.get_color(ctx.guild.me),
-                description=f"📢 **⠂{ctx.author.mention} {msg} o sistema de tópico automático do palco.**"
-            )
-        )
+        if player.stage_title_event:
+            raise GenericError("**O anúncio automático do palco já está ativado.\n"
+                               "Caso queira desativar você pode parar o player (todos os membros do palco serão "
+                               "desconectados automaticamente nesse processo).**")
+
+        player.stage_title_event = True
+        player.start_time = disnake.utils.utcnow()
+
+        txt = [f"ativou o sistema de anúncio automático do palco.",
+               f"📢 **⠂{inter.author.mention} ativou o sistema de anúncio automático do palco.**\n"
+               f"`Nota: Caso o player seja desligado, todos os membros do palco serão desconectados automaticamente.`"]
+
+        await self.interaction_message(inter, txt, emoji="📢", force=True)
 
     play_cd = commands.CooldownMapping.from_cooldown(3, 12, commands.BucketType.member)
     play_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
@@ -271,7 +293,7 @@ class Music(commands.Cog):
             inter: disnake.AppCmdInter,
             query: str = commands.Param(name="busca", desc="Nome ou link da música."),
             *,
-            position: int = commands.Param(name="posição", description="Colocar a música em uma posição específica",
+            position: int = commands.Param(name="posição", description=f"{desc_prefix}Colocar a música em uma posição específica",
                                            default=0),
             force_play: str = commands.Param(
                 name="tocar_agora",
@@ -1095,6 +1117,7 @@ class Music(commands.Cog):
     skip_back_cd = commands.CooldownMapping.from_cooldown(2, 13, commands.BucketType.member)
     skip_back_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
+    @check_stage_topic()
     @is_requester()
     @check_voice()
     @pool_command(name="skip", aliases=["next", "n", "s", "pular", "skipto"], cooldown=skip_back_cd,
@@ -1107,6 +1130,7 @@ class Music(commands.Cog):
 
         await self.skip.callback(self=self, inter=ctx, query=query)
 
+    @check_stage_topic()
     @is_requester()
     @has_source()
     @check_voice()
@@ -1125,6 +1149,7 @@ class Music(commands.Cog):
 
         await self.skip.callback(self=self, inter=inter, query=query)
 
+    @check_stage_topic()
     @is_requester()
     @has_source()
     @check_voice()
@@ -1206,6 +1231,7 @@ class Music(commands.Cog):
 
         await player.stop()
 
+    @check_stage_topic()
     @is_dj()
     @has_player()
     @check_voice()
@@ -1214,6 +1240,7 @@ class Music(commands.Cog):
     async def back_legacy(self, ctx: CustomContext):
         await self.back.callback(self=self, inter=ctx)
 
+    @check_stage_topic()
     @is_dj()
     @has_player()
     @check_voice()
@@ -1271,6 +1298,7 @@ class Music(commands.Cog):
             player.is_previows_music = True
             await player.stop()
 
+    @check_stage_topic()
     @has_source()
     @check_voice()
     @commands.slash_command(
@@ -1448,6 +1476,7 @@ class Music(commands.Cog):
     seek_cd = commands.CooldownMapping.from_cooldown(2, 10, commands.BucketType.member)
     seek_mc =commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
+    @check_stage_topic()
     @is_dj()
     @has_source()
     @check_voice()
@@ -1460,6 +1489,7 @@ class Music(commands.Cog):
 
         await self.seek.callback(self=self, inter=ctx, position=position)
 
+    @check_stage_topic()
     @is_dj()
     @has_source()
     @check_voice()
@@ -3516,7 +3546,7 @@ class Music(commands.Cog):
         return await check_requester_channel(ctx)
 
     async def interaction_message(self, inter: Union[disnake.Interaction, CustomContext], txt, emoji: str = "✅",
-                                  rpc_update: bool = False, data: dict = None, store_embed: bool = False):
+                                  rpc_update: bool = False, data: dict = None, store_embed: bool = False, force=False):
 
         try:
             txt, txt_ephemeral = txt
@@ -3541,7 +3571,7 @@ class Music(commands.Cog):
             player.update = True
 
         await player.update_message(interaction=inter if (bot.user.id == self.bot.user.id and component_interaction) \
-            else False, rpc_update=rpc_update)
+            else False, rpc_update=rpc_update, force=force)
 
         if isinstance(inter, CustomContext):
             embed = disnake.Embed(color=self.bot.get_color(guild.me),

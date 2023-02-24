@@ -311,6 +311,8 @@ class LavalinkPlayer(wavelink.Player):
         self.mini_queue_feature = False
         self.mini_queue_enabled = False
 
+        self.start_time = disnake.utils.utcnow()
+
         self.temp_embed: Optional[disnake.Embed] = None
 
         self.initial_hints = [
@@ -525,6 +527,7 @@ class LavalinkPlayer(wavelink.Player):
         self.locked = False
 
         await self.play(track, start=start_position)
+        self.start_time = disnake.utils.utcnow()
 
     async def process_idle_message(self):
 
@@ -638,7 +641,7 @@ class LavalinkPlayer(wavelink.Player):
         await self.process_idle_message()
 
         try:
-            await self.update_stage_topic(close=True)
+            await self.update_stage_topic()
         except:
             pass
 
@@ -660,7 +663,7 @@ class LavalinkPlayer(wavelink.Player):
         self.command_log = text
         self.command_log_emoji = emoji
 
-    async def update_stage_topic(self, close=False):
+    async def update_stage_topic(self):
 
         if not isinstance(self.guild.me.voice.channel, disnake.StageChannel):
             return
@@ -672,11 +675,7 @@ class LavalinkPlayer(wavelink.Player):
             return
 
         if not self.current:
-
-            if not close:
-                return
-
-            msg = "Em espera por novas músicas."
+            msg = "Status: Aguardando por novas músicas."
 
         elif len(self.current.single_title) > 109:
             msg = f"Tocando: {fix_characters(self.current.title, limit=109)}"
@@ -940,7 +939,7 @@ class LavalinkPlayer(wavelink.Player):
         self.bot.loop.create_task(self.process_rpc(vc, close=True))
 
         try:
-            await self.update_stage_topic(close=True)
+            await self.update_stage_topic()
         except:
             pass
 

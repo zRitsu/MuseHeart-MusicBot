@@ -1,9 +1,12 @@
 from __future__ import annotations
 import asyncio
+import datetime
 import traceback
 from typing import TYPE_CHECKING, Union
 import disnake
 from disnake.ext import commands
+
+from utils.music.converters import time_format
 from utils.music.errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, \
     GenericError, MissingVoicePerms, DiffVoiceChannel, PoolException
 from utils.music.models import LavalinkPlayer
@@ -412,6 +415,30 @@ def has_source():
     return commands.check(predicate)
 
 
+def check_stage_topic():
+
+    async def predicate(inter):
+
+        try:
+            bot = inter.music_bot
+        except AttributeError:
+            bot = inter.bot
+
+        try:
+            player: LavalinkPlayer = bot.music.players[inter.guild_id]
+        except KeyError:
+            raise NoPlayer()
+
+        if player.stage_title_event and (time_:=int((disnake.utils.utcnow() - player.start_time).total_seconds())) < 120:
+            raise GenericError(
+                f"**Você terá que aguardar {time_format((120 - time_) * 1000, use_names=True)} para usar essa função "
+                f"com o anúncio automático do palco ativo...**"
+            )
+
+        return True
+
+    return commands.check(predicate)
+
 def user_cooldown(rate: int, per: int):
     def custom_cooldown(inter: disnake.Interaction):
         # if (await inter.bot.is_owner(inter.author)):
@@ -487,7 +514,6 @@ def check_channel_limit(member: disnake.Member, channel: Union[disnake.VoiceChan
 
     if (channel.user_limit - len(channel.voice_states)) > 0:
         return True
-
 
 def can_connect(
         channel: Union[disnake.VoiceChannel, disnake.StageChannel],

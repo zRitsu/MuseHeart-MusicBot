@@ -107,7 +107,7 @@ def parse_error(
         remaing = int(error.retry_after)
         if remaing < 1:
             remaing = 1
-        error_txt = "**Você deve aguardar {} para usar esse comando.**".format(time_format(int(remaing) * 1000))
+        error_txt = "**Você deve aguardar {} para usar esse comando.**".format(time_format(int(remaing) * 1000, use_names=True))
 
     elif isinstance(error, commands.MaxConcurrencyReached):
         txt = f"{error.number} vezes " if error.number > 1 else ''
