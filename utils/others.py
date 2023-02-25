@@ -178,20 +178,20 @@ async def check_cmd(cmd, inter: Union[disnake.Interaction, disnake.ModalInteract
     except AttributeError:
         pass"""
 
+    if isinstance(inter, CustomContext):
+        await cmd.can_run(inter)
+
+    else:
+        for command_check in cmd.checks:
+            c = (await command_check(inter)) if iscoroutinefunction(command_check) else command_check(inter)
+            if not c:
+                raise commands.CheckFailure()
+
     bucket = cmd._buckets.get_bucket(inter)  # type: ignore
     if bucket:
         retry_after = bucket.update_rate_limit()
         if retry_after:
             raise commands.CommandOnCooldown(cooldown=bucket, retry_after=retry_after, type=cmd._buckets.type)
-
-    if isinstance(inter, CustomContext):
-        await cmd.can_run(inter)
-        return
-
-    for command_check in cmd.checks:
-        c = (await command_check(inter)) if iscoroutinefunction(command_check) else command_check(inter)
-        if not c:
-            raise commands.CheckFailure()
 
     """try:
         chkcmd = list(cmd.children.values())[0]
