@@ -255,7 +255,8 @@ class Music(commands.Cog):
         player.start_time = disnake.utils.utcnow()
 
         txt = [f"ativou o sistema de anúncio automático do palco.",
-               f"📢 **⠂{inter.author.mention} ativou o sistema de anúncio automático do palco {guild.me.voice.channel.mention}.**\n"
+               f"📢 **⠂{inter.author.mention} ativou o sistema de anúncio automático do palco "
+               f"{guild.me.voice.channel.mention}.**\n\n"
                f"`Nota: Caso o player seja desligado, todos os membros do palco serão desconectados automaticamente.`"]
 
         await self.interaction_message(inter, txt, emoji="📢", force=True)
