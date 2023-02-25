@@ -1223,7 +1223,7 @@ class LavalinkPlayer(wavelink.Player):
 
         if self.stage_title_event and self.guild.me.guild_permissions.manage_channels:
             try:
-                await self.guild.me.voice.channel.instance.delete()
+                await self.guild.voice_client.channel.instance.delete()
             except Exception:
                 traceback.print_exc()
 
