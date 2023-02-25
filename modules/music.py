@@ -214,7 +214,6 @@ class Music(commands.Cog):
 
     @has_source()
     @commands.has_guild_permissions(manage_guild=True)
-    @commands.bot_has_guild_permissions(manage_channels=True)
     @pool_command(
         only_voiced=True, name="stageannounce", aliases=["stagevc", "togglestageannounce"], hidden=True,
         description="Ativar o sistema de anuncio automático do palco com o nome da música.",
@@ -242,8 +241,8 @@ class Music(commands.Cog):
         if not isinstance(guild.me.voice.channel, disnake.StageChannel):
             raise GenericError("**Você deve estar em um canal de palco para ativar/desativar esse sistema.**")
 
-        if not guild.me.guild_permissions.manage_channels:
-            raise GenericError(f"**{bot.user.mention} precisa da permissão de gerenciar canais.**")
+        if not guild.me.voice.channel.permissions_for(guild.me).mute_members:
+            raise GenericError(f"**{bot.user.mention} precisa da permissão de silenciar membros.**")
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 

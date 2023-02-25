@@ -668,7 +668,7 @@ class LavalinkPlayer(wavelink.Player):
         if not isinstance(self.guild.me.voice.channel, disnake.StageChannel):
             return
 
-        if not self.guild.me.voice.channel.permissions_for(self.guild.me).manage_channels:
+        if not self.guild.me.voice.channel.permissions_for(self.guild.me).mute_members:
             return
 
         if not self.stage_title_event:
