@@ -212,6 +212,7 @@ class Music(commands.Cog):
     stage_cd = commands.CooldownMapping.from_cooldown(2, 45, commands.BucketType.guild)
     stage_mc = commands.MaxConcurrency(1, per=commands.BucketType.guild, wait=False)
 
+    @has_source()
     @commands.has_permissions(manage_guild=True)
     @commands.bot_has_guild_permissions(manage_channels=True)
     @pool_command(
@@ -223,6 +224,7 @@ class Music(commands.Cog):
 
         await self.stage_announce.callback(self=self, inter=ctx)
 
+    @has_source()
     @commands.bot_has_guild_permissions(manage_channels=True)
     @commands.slash_command(
         description=f"{desc_prefix}Ativar o sistema de anuncio automático do palco com o nome da música.",
