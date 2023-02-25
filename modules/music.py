@@ -213,7 +213,7 @@ class Music(commands.Cog):
     stage_mc = commands.MaxConcurrency(1, per=commands.BucketType.guild, wait=False)
 
     @has_source()
-    @commands.has_permissions(manage_guild=True)
+    @commands.has_guild_permissions(manage_guild=True)
     @commands.bot_has_guild_permissions(manage_channels=True)
     @pool_command(
         only_voiced=True, name="stageannounce", aliases=["stagevc", "togglestageannounce"], hidden=True,
