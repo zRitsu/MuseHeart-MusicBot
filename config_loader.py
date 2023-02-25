@@ -28,6 +28,7 @@ DEFAULT_CONFIG = {
     "INTERACTION_BOTS_CONTROLLER": "",
     "GLOBAL_PREFIX": True,
     "KILL_ON_429": True,
+    "PREFIXED_POOL_TIMEOUT": 4,
 
     ################
     ### Database ###
@@ -152,6 +153,7 @@ def load_config():
         "HINT_RATE",
         "INVITE_PERMISSIONS",
         "MONGO_CACHE_CLEANUP_INTERVAL",
+        "PREFIXED_POOL_TIMEOUT",
     ]:
         try:
             CONFIG[i] = int(CONFIG[i])

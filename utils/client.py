@@ -273,13 +273,18 @@ class BotPool:
 
             if bot.config["GLOBAL_PREFIX"]:
 
-                @bot.listen("on_command_completion")
+                @bot.listen("on_command")
                 async def message_id_cleanup(ctx: CustomContext):
 
-                    await asyncio.sleep(4)
+                    id_ = f"{ctx.guild.id}-{ctx.channel.id}-{ctx.message.id}"
+
+                    if id_ not in ctx.bot.pool.message_ids:
+                        return
+
+                    await asyncio.sleep(ctx.bot.config["PREFIXED_POOL_TIMEOUT"])
 
                     try:
-                        ctx.bot.pool.message_ids.remove(f"{ctx.guild.id}-{ctx.channel.id}-{ctx.message.id}")
+                        ctx.bot.pool.message_ids.remove(id_)
                     except:
                         pass
 
