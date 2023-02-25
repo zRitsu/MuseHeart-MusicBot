@@ -87,17 +87,10 @@ class BotPool:
 
         del bot.token
 
-    async def run_bots(self, bots: List[BotCore], wait=False):
-
-        if wait:
-            await asyncio.wait(
-                [asyncio.create_task(self.start_bot(bot)) for bot in bots]
-            )
-
-        else:
-            for bot in bots:
-                await self.start_bot(bot)
-                await bot.wait_for("ready")
+    async def run_bots(self, bots: List[BotCore]):
+        await asyncio.wait(
+            [asyncio.create_task(self.start_bot(bot)) for bot in bots]
+        )
 
     def load_playlist_cache(self):
 
@@ -465,14 +458,14 @@ class BotPool:
             loop.create_task(self.connect_rpc_ws())
             loop.create_task(self.connect_spotify())
 
-            self.run_bots(self.bots)
+            start(self.bots)
 
         else:
 
             loop.create_task(self.connect_rpc_ws())
             loop.create_task(self.connect_spotify())
             loop.run_until_complete(
-                self.run_bots(self.bots, wait=True)
+                self.run_bots(self.bots)
             )
 
 
