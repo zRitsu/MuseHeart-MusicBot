@@ -1043,23 +1043,10 @@ class Music(commands.Cog):
             embed.description = f"`{len(tracks.tracks)} música(s)`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
             emoji = "🎶"
 
-        if not player.is_connected:
-
-            try:
-                guild_data["check_other_bots_in_vc"]
-            except KeyError:
-                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-
-            if not inter.author.voice:
-                raise NoVoice()
-
-            await self.do_connect(
-                inter, channel=inter.author.voice.channel,
-                check_other_bots_in_vc=guild_data["check_other_bots_in_vc"],
-                bot=bot, me=guild.me, check_pool=True
-            )
-
-            embed.description += f"\n`Canal de voz:` <#{player.channel_id}>"
+        try:
+            embed.description += f"\n`Canal de voz:` {inter.author.voice.channel.mention}"
+        except AttributeError:
+            pass
 
         embed.description += player.controller_link
 
@@ -1078,6 +1065,22 @@ class Music(commands.Cog):
                 embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
 
             await func(embed=embed, view=None)
+
+        if not player.is_connected:
+
+            try:
+                guild_data["check_other_bots_in_vc"]
+            except KeyError:
+                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+
+            if not inter.author.voice:
+                raise NoVoice()
+
+            await self.do_connect(
+                inter, channel=inter.author.voice.channel,
+                check_other_bots_in_vc=guild_data["check_other_bots_in_vc"],
+                bot=bot, me=guild.me, check_pool=True
+            )
 
         if not player.current:
             if warn_message:
