@@ -322,7 +322,7 @@ class Owner(commands.Cog):
         if git_log:
             txt += f"\n\n{self.format_log(git_log[:10])}"
 
-        txt += f"\n\n`📄` **Log:** ```py\n{out_git[:1000]}```\n{text}"
+        txt += f"\n\n`📄` **Log:** ```py\n{out_git[:1000].split('Fast-forward')[-1]}```\n{text}"
 
         if isinstance(ctx, CustomContext):
             embed = disnake.Embed(
