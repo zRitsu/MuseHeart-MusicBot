@@ -1043,14 +1043,16 @@ class Music(commands.Cog):
             embed.description = f"`{len(tracks.tracks)} música(s)`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
             emoji = "🎶"
 
-        try:
-            embed.description += f"\n`Canal de voz:` {inter.author.voice.channel.mention}"
-        except AttributeError:
-            pass
-
         embed.description += player.controller_link
 
         if not is_pin:
+
+            if not player.is_connected:
+                try:
+                    embed.description += f"\n`Canal de voz:` {inter.author.voice.channel.mention}"
+                except AttributeError:
+                    pass
+
             try:
                 func = inter.edit_original_message
             except AttributeError:
