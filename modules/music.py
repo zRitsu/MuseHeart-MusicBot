@@ -217,7 +217,7 @@ class Music(commands.Cog):
     @pool_command(
         only_voiced=True, name="stageannounce", aliases=["stagevc", "togglestageannounce"], hidden=True,
         description="Ativar o sistema de anuncio automático do palco com o nome da música.",
-        cooldown=stage_cd, max_concurrency=stage_mc
+        cooldown=stage_cd, max_concurrency=stage_mc, extras={"exclusive_cooldown": True},
     )
     async def stageannounce_legacy(self, ctx: CustomContext):
 
@@ -226,8 +226,8 @@ class Music(commands.Cog):
     @has_source()
     @commands.slash_command(
         description=f"{desc_prefix}Ativar o sistema de anuncio automático do palco com o nome da música.",
-        extras={"only_voiced": True}, default_member_permissions=disnake.Permissions(manage_guild=True),
-        cooldown=stage_cd, max_concurrency=stage_mc
+        extras={"only_voiced": True, "exclusive_cooldown": True},
+        default_member_permissions=disnake.Permissions(manage_guild=True), cooldown=stage_cd, max_concurrency=stage_mc
     )
     async def stage_announce(self, inter: disnake.AppCmdInter):
 

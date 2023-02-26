@@ -574,21 +574,25 @@ class BotCore(commands.Bot):
                 continue
 
             for cmd in b.commands:
+                if cmd.extras.get("exclusive_cooldown"): continue
                 self.get_command(cmd.name)._buckets = cmd._buckets
 
             for cmd in b.slash_commands:
                 c = self.get_slash_command(cmd.name)
                 if not c: continue
+                if c.extras.get("exclusive_cooldown"): continue
                 c._buckets = cmd._buckets
 
             for cmd in b.user_commands:
                 c = self.get_user_command(cmd.name)
                 if not c: continue
+                if c.extras.get("exclusive_cooldown"): continue
                 c._buckets = cmd._buckets
 
             for cmd in b.message_commands:
                 c = self.get_message_command(cmd.name)
                 if not c: continue
+                if c.extras.get("exclusive_cooldown"): continue
                 c._buckets = cmd._buckets
 
     async def can_send_message(self, message: disnake.Message):
