@@ -217,8 +217,6 @@ class Owner(commands.Cog):
 
         data = self.bot.load_modules()
 
-        self.bot.sync_command_cooldowns()
-
         await self.bot.sync_app_commands()
 
         for bot in self.bot.pool.bots:
@@ -226,6 +224,8 @@ class Owner(commands.Cog):
             if bot.user.id != self.bot.user.id:
                 bot.load_modules()
                 await bot.sync_app_commands()
+
+        self.bot.sync_command_cooldowns()
 
         txt = ""
 
