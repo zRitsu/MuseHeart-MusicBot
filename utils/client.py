@@ -386,28 +386,7 @@ class BotPool:
 
                     self.bot_mentions.update((f"<@!{bot.user.id}>", f"<@{bot.user.id}>"))
 
-                    for b in self.bots:
-
-                        if not b.bot_ready:
-                            continue
-
-                        for cmd in b.commands:
-                            bot.get_command(cmd.name)._buckets = cmd._buckets
-
-                        for cmd in b.slash_commands:
-                            c = bot.get_slash_command(cmd.name)
-                            if not c: continue
-                            c._buckets = cmd._buckets
-
-                        for cmd in b.user_commands:
-                            c = bot.get_user_command(cmd.name)
-                            if not c: continue
-                            c._buckets = cmd._buckets
-
-                        for cmd in b.message_commands:
-                            c = bot.get_message_command(cmd.name)
-                            if not c: continue
-                            c._buckets = cmd._buckets
+                    bot.sync_command_cooldowns()
 
                     bot.bot_ready = True
 
@@ -586,6 +565,31 @@ class BotCore(commands.Bot):
         self._command_sync_flags = commands.CommandSyncFlags.all()
         await self._sync_application_commands()
         self._command_sync_flags = commands.CommandSyncFlags.none()
+
+    def sync_command_cooldowns(self):
+
+        for b in self.pool.bots:
+
+            if not b.bot_ready or b == self:
+                continue
+
+            for cmd in b.commands:
+                self.get_command(cmd.name)._buckets = cmd._buckets
+
+            for cmd in b.slash_commands:
+                c = self.get_slash_command(cmd.name)
+                if not c: continue
+                c._buckets = cmd._buckets
+
+            for cmd in b.user_commands:
+                c = self.get_user_command(cmd.name)
+                if not c: continue
+                c._buckets = cmd._buckets
+
+            for cmd in b.message_commands:
+                c = self.get_message_command(cmd.name)
+                if not c: continue
+                c._buckets = cmd._buckets
 
     async def can_send_message(self, message: disnake.Message):
 

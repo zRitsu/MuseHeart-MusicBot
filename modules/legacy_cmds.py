@@ -216,6 +216,9 @@ class Owner(commands.Cog):
     async def reload(self, ctx: Union[CustomContext, disnake.MessageInteraction]):
 
         data = self.bot.load_modules()
+
+        self.bot.sync_command_cooldowns()
+
         await self.bot.sync_app_commands()
 
         for bot in self.bot.pool.bots:
