@@ -544,6 +544,11 @@ class Music(commands.Cog):
                   cooldown=play_cd, max_concurrency=play_mc)
     async def play_legacy(self, ctx: CustomContext, *, query: str = ""):
 
+        try:
+            query = ctx.message.attachments[0].url
+        except:
+            pass
+
         await self.play.callback(self=self, inter=ctx, query=query, position=0, options=False, force_play="no",
                                  manual_selection=False, source="ytsearch", repeat_amount=0, server=None)
 
@@ -559,6 +564,44 @@ class Music(commands.Cog):
 
         await self.play.callback(self=self, inter=ctx, query=query, position=0, options=False, force_play="no",
                                  manual_selection=True, source="ytsearch", repeat_amount=0, server=None)
+
+    @can_send_message_check()
+    @check_voice()
+    @commands.slash_command(
+        name=disnake.Localized("play_nusic_file", data={disnake.Locale.pt_BR: "tocar_arquivo"}),
+        description=f"{desc_prefix}Tocar arquivo de música em um canal de voz.",
+        extras={"check_player": False}, cooldown=play_cd, max_concurrency=play_mc
+    )
+    async def play_file(
+            self,
+            inter: Union[disnake.AppCmdInter, CustomContext],
+            file: disnake.Attachment = commands.Param(
+                name="arquivo", description="arquivo de audio para tocar ou adicionar na fila"
+            ),
+            position: int = commands.Param(name="posição", description="Colocar a música em uma posição específica",
+                                           default=0),
+            force_play: str = commands.Param(
+                name="tocar_agora",
+                description="Tocar a música imediatamente (ao invés de adicionar na fila).",
+                default="no",
+                choices=[
+                    disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
+                    disnake.OptionChoice(disnake.Localized("No", data={disnake.Locale.pt_BR: "Não"}), "no")
+                ]
+            ),
+            repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.",
+                                                default=0),
+            server: str = commands.Param(name="server", desc="Usar um servidor de música específico na busca.",
+                                         default=None),
+    ):
+
+        class DummyMessage:
+            attachments = [file]
+
+        inter.message = DummyMessage()
+
+        await self.play.callback(self=self, inter=inter, query="", position=position, options=False, force_play=force_play,
+                                 manual_selection=False, source="ytsearch", repeat_amount=repeat_amount, server=server)
 
     @can_send_message_check()
     @check_voice()
@@ -651,6 +694,22 @@ class Music(commands.Cog):
             ephemeral = await self.is_request_channel(inter, data=guild_data, ignore_thread=True)
 
         is_pin = None
+
+        if not query:
+
+            try:
+                attachment = inter.message.attachments[0]
+
+                if attachment.size > 18000000:
+                    raise GenericError("**O arquivo que você enviou deve ter o tamanho igual ou inferior a 18mb.**")
+
+                if attachment.content_type != "audio/mpeg":
+                    raise GenericError("**O arquivo que você enviou não é um arquivo de música válido...**")
+
+                query = attachment.url
+
+            except IndexError:
+                pass
 
         if not query:
 
@@ -985,6 +1044,13 @@ class Music(commands.Cog):
 
             else:
                 track = tracks[0]
+
+            try:
+                if track.title == "Unknown title":
+                    track.info["title"] = inter.message.attachments[0].filename
+                    track.title = track.info["title"]
+            except:
+                pass
 
             if force_play == "yes":
                 player.queue.insert(0, track)
@@ -3344,15 +3410,29 @@ class Music(commands.Cog):
 
         if not message.content:
 
-            try:
-                if message.type.thread_starter_message:
-                    return
-            except AttributeError:
+            if message.is_system():
                 return
 
-            await message.channel.send(f"{message.author.mention} você deve enviar um link/nome da música.",
-                                       delete_after=9)
-            return
+            try:
+                attachment = message.attachments[0]
+            except IndexError:
+                await message.channel.send(f"{message.author.mention} você deve enviar um link/nome da música.",
+                                           delete_after=9)
+                return
+
+            else:
+
+                if attachment.size > 18000000:
+                    await message.channel.send(f"{message.author.mention} o arquivo que você enviou deve ter o tamanho "
+                                               f"inferior a 18mb.", delete_after=9)
+                    return
+
+                if attachment.content_type != "audio/mpeg":
+                    await message.channel.send(f"{message.author.mention} o arquivo que você enviou deve ter o tamanho "
+                                               f"inferior a 18mb.", delete_after=9)
+                    return
+
+                message.content = attachment.url
 
         try:
             await self.song_request_concurrency.acquire(message)
@@ -3433,7 +3513,7 @@ class Music(commands.Cog):
 
         await self.song_request_concurrency.release(message)
 
-    async def parse_song_request(self, message, text_channel, data, *, response=None):
+    async def parse_song_request(self, message, text_channel, data, *, response=None, attachment: disnake.Attachment=None):
 
         if not message.author.voice:
             raise GenericError("Você deve entrar em um canal de voz para pedir uma música.")
@@ -3456,8 +3536,8 @@ class Music(commands.Cog):
 
         try:
             player = self.bot.music.players[message.guild.id]
+            await message.delete()
         except KeyError:
-
             skin = data["player_controller"]["skin"]
             static_skin = data["player_controller"]["static_skin"]
 
@@ -3516,7 +3596,14 @@ class Music(commands.Cog):
                 )
 
         except AttributeError:
-            player.queue.append(tracks[0])
+
+            track = tracks[0]
+
+            if track.title == "Unknown title":
+                track.title = attachment.filename
+                track.info["title"] = track.title
+
+            player.queue.append(track)
             if isinstance(message.channel, disnake.Thread) and not isinstance(message.channel.parent,
                                                                               disnake.ForumChannel):
                 embed.description = f"> 🎵 **┃ Adicionado:** [`{tracks[0].title}`]({tracks[0].uri})\n" \
@@ -3972,7 +4059,7 @@ class Music(commands.Cog):
             raise GenericError("Não houve resultados para sua busca.")
 
         if isinstance(tracks, list):
-            pass
+            tracks[0].info["extra"]["track_loops"] = track_loops
 
         else:
 
