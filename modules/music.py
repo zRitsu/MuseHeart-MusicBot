@@ -3605,9 +3605,16 @@ class Music(commands.Cog):
 
             track = tracks[0]
 
-            if track.title == "Unknown title":
-                track.title = attachment.filename
-                track.info["title"] = track.title
+            if track.info.get("sourceName") == "http":
+
+                if track.title == "Unknown title":
+                    if attachment:
+                        track.info["title"] = attachment.filename
+                    else:
+                        track.info["title"] = track.uri.split("/")[-1]
+                    track.title = track.info["title"]
+
+                track.uri = ""
 
             player.queue.append(track)
             if isinstance(message.channel, disnake.Thread) and not isinstance(message.channel.parent,
