@@ -544,11 +544,6 @@ class Music(commands.Cog):
                   cooldown=play_cd, max_concurrency=play_mc)
     async def play_legacy(self, ctx: CustomContext, *, query: str = ""):
 
-        try:
-            query = ctx.message.attachments[0].url
-        except:
-            pass
-
         await self.play.callback(self=self, inter=ctx, query=query, position=0, options=False, force_play="no",
                                  manual_selection=False, source="ytsearch", repeat_amount=0, server=None)
 
@@ -659,6 +654,8 @@ class Music(commands.Cog):
         ephemeral = None
 
         warn_message = None
+
+        attachment: Optional[disnake.Attachment] = None
 
         try:
             player = bot.music.players[guild.id]
@@ -1050,12 +1047,16 @@ class Music(commands.Cog):
             else:
                 track = tracks[0]
 
-            try:
-                if track.title == "Unknown title":
-                    track.info["title"] = inter.message.attachments[0].filename
-                    track.title = track.info["title"]
-            except:
-                pass
+                if track.info.get("sourceName") == "http":
+
+                    if track.title == "Unknown title":
+                        if attachment:
+                            track.info["title"] = attachment.filename
+                        else:
+                            track.info["title"] = track.uri.split("/")[-1]
+                        track.title = track.info["title"]
+
+                    track.uri = ""
 
             if force_play == "yes":
                 player.queue.insert(0, track)
