@@ -832,6 +832,9 @@ class BotCore(commands.Bot):
 
         print(f"{'=' * 48}")
 
+        if not self.config["ENABLE_DISCORD_URLS_PLAYBACK"]:
+            self.remove_slash_command("play_nusic_file")
+
         for c in self.slash_commands:
             if (desc:=len(c.description)) > 100:
                 raise Exception(f"A descrição do comando {c.name} excedeu a quantidade de caracteres permitido "

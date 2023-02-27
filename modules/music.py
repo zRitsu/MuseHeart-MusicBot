@@ -697,19 +697,21 @@ class Music(commands.Cog):
 
         if not query:
 
-            try:
-                attachment = inter.message.attachments[0]
+            if self.bot.config["ENABLE_DISCORD_URLS_PLAYBACK"]:
 
-                if attachment.size > 18000000:
-                    raise GenericError("**O arquivo que você enviou deve ter o tamanho igual ou inferior a 18mb.**")
+                try:
+                    attachment = inter.message.attachments[0]
 
-                if attachment.content_type != "audio/mpeg":
-                    raise GenericError("**O arquivo que você enviou não é um arquivo de música válido...**")
+                    if attachment.size > 18000000:
+                        raise GenericError("**O arquivo que você enviou deve ter o tamanho igual ou inferior a 18mb.**")
 
-                query = attachment.url
+                    if attachment.content_type != "audio/mpeg":
+                        raise GenericError("**O arquivo que você enviou não é um arquivo de música válido...**")
 
-            except IndexError:
-                pass
+                    query = attachment.url
+
+                except IndexError:
+                    pass
 
         if not query:
 
@@ -820,6 +822,9 @@ class Music(commands.Cog):
                 query = f"{source}:{query}"
 
             else:
+
+                if not self.bot.config["ENABLE_DISCORD_URLS_PLAYBACK"] and "cdn.discordapp.com/attachments/" in query:
+                    raise GenericError("**O suporte a links do discord está desativado.**")
 
                 query = urls[0].split("&ab_channel=")[0]
 
