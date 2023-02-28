@@ -2577,9 +2577,9 @@ class Music(commands.Cog):
                              help="incluir músicas com duração mínima especificada (ex. 1:23).")
     clear_flags.add_argument('-max_time', '-maxtime', '-max', '-max_duration', '-maxduration', default=None,
                              help="incluir músicas da fila a partir de uma posição específica da fila.")
-    clear_flags.add_argument('-start_position', '-startpos', '-start', default=None,
+    clear_flags.add_argument('-start_position', '-startpos', '-start', type=int, default=None,
                              help="incluir músicas da fila a partir de uma posição específica da fila.")
-    clear_flags.add_argument('-end_position', '-endpos', '-end', default=None,
+    clear_flags.add_argument('-end_position', '-endpos', '-end', type=int, default=None,
                              help="incluir músicas da fila até uma posição específica da fila.")
     clear_flags.add_argument('-absent', '-absentmembers', '-abs', action='store_true',
                              help="Incluir músicas adicionads por membros fora do canal")
