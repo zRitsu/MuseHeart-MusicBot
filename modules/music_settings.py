@@ -963,58 +963,59 @@ class MusicSettings(commands.Cog):
             await inter.send(embed=em)
             return
 
+        failed_nodes = set()
+
         for identifier, node in bot.music.nodes.items():
 
             if not node.available: continue
-
-            txt = f"Região: `{node.region.title()}`\n"
 
             try:
                 current_player = node.players[inter.guild_id]
             except KeyError:
                 current_player = None
 
-            if not node.stats:
-                txt += "`Sem informações adicionais...`"
+            if not node.stats or not node.is_available:
+                failed_nodes.add(f"`{node.identifier}`")
+                continue
 
-            else:
-                used = humanize.naturalsize(node.stats.memory_used)
-                total = humanize.naturalsize(node.stats.memory_allocated)
-                free = humanize.naturalsize(node.stats.memory_free)
-                cpu_cores = node.stats.cpu_cores
-                cpu_usage = f"{node.stats.lavalink_load * 100:.2f}"
-                started = node.stats.players
+            txt = f"Região: `{node.region.title()}`\n"
 
-                txt += f'RAM: `{used}/{free}`\n' \
-                       f'RAM Total: `{total}`\n' \
-                       f'CPU Cores: `{cpu_cores}`\n' \
-                       f'Uso de CPU: `{cpu_usage}%`\n' \
-                       f'Uptime: <t:{int((disnake.utils.utcnow() - datetime.timedelta(milliseconds=node.stats.uptime)).timestamp())}:R>\n'
+            used = humanize.naturalsize(node.stats.memory_used)
+            total = humanize.naturalsize(node.stats.memory_allocated)
+            free = humanize.naturalsize(node.stats.memory_free)
+            cpu_cores = node.stats.cpu_cores
+            cpu_usage = f"{node.stats.lavalink_load * 100:.2f}"
+            started = node.stats.players
 
-                if started:
-                    txt += "Players: "
-                    players = node.stats.playing_players
-                    idle = started - players
-                    if players:
-                        txt += f'`[▶️{players}]`' + (" " if idle else "")
-                    if idle:
-                        txt += f'`[💤{idle}]`'
+            txt += f'RAM: `{used}/{free}`\n' \
+                   f'RAM Total: `{total}`\n' \
+                   f'CPU Cores: `{cpu_cores}`\n' \
+                   f'Uso de CPU: `{cpu_usage}%`\n' \
+                   f'Uptime: <t:{int((disnake.utils.utcnow() - datetime.timedelta(milliseconds=node.stats.uptime)).timestamp())}:R>\n'
 
-                    txt += "\n"
+            if started:
+                txt += "Players: "
+                players = node.stats.playing_players
+                idle = started - players
+                if players:
+                    txt += f'`[▶️{players}]`' + (" " if idle else "")
+                if idle:
+                    txt += f'`[💤{idle}]`'
 
-                if node.website:
-                    txt += f'[`Website do server`]({node.website})\n'
+                txt += "\n"
 
-            if current_player:
-                status = "🌟"
-            else:
-                status = "✅" if node.is_available else '❌'
+            if node.website:
+                txt += f'[`Website do server`]({node.website})\n'
+
+            status = "🌟" if current_player else "✅"
 
             em.add_field(name=f'**{identifier}** `{status}`', value=txt)
             em.set_footer(text=f"{bot.user} - [{bot.user.id}]", icon_url=bot.user.display_avatar.with_format("png").url)
 
-        await inter.send(embed=em, ephemeral=True)
+        if failed_nodes:
+            em.add_field(name="**Servidores que falharam** `❌`", value="\n".join(failed_nodes))
 
+        await inter.send(embed=em, ephemeral=True)
 
 def setup(bot: BotCore):
     bot.add_cog(MusicSettings(bot))
