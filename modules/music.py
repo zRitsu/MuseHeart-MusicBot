@@ -428,7 +428,7 @@ class Music(commands.Cog):
                 f"(ou o player não foi inicializado)...\nPor via das dúvidas tente novamente.**"
             )
 
-        can_connect(channel, me.guild, bot, check_other_bots_in_vc, check_pool)
+        can_connect(channel, me.guild, bot)
 
         deafen_check = True
 
@@ -672,11 +672,7 @@ class Music(commands.Cog):
             guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
             if not guild.me.voice:
-                can_connect(
-                    inter.author.voice.channel, guild, bot,
-                    check_other_bots_in_vc=guild_data["check_other_bots_in_vc"],
-                    check_pool=True
-                )
+                can_connect(inter.author.voice.channel, guild, bot)
 
             static_player = guild_data['player_controller']
 
@@ -3527,8 +3523,7 @@ class Music(commands.Cog):
         can_connect(
             channel=message.author.voice.channel,
             guild=message.guild,
-            check_other_bots_in_vc=data["check_other_bots_in_vc"],
-            bot=self.bot,
+            check_other_bots_in_vc=data["check_other_bots_in_vc"]
         )
 
         try:
