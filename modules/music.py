@@ -2626,11 +2626,11 @@ class Music(commands.Cog):
                                                   default=None),
             playlist: str = commands.Param(description="Incluir nome que tiver na playlist.", default=None),
             min_duration: str = commands.Param(name="duração_mínima",
-                                             description="incluir músicas com duração mínima especificada (ex. 1:23).",
-                                             default=None),
+                                               description="incluir músicas com duração mínima especificada (ex. 1:23).",
+                                               default=None),
             max_duration: str = commands.Param(name="duração_máxima",
-                                             description="incluir músicas com duração máxima especificada (ex. 1:45).",
-                                             default=None),
+                                               description="incluir músicas com duração máxima especificada (ex. 1:45).",
+                                               default=None),
             range_start: int = commands.Param(name="posição_inicial",
                                               description="incluir músicas da fila a partir de uma posição específica "
                                                           "da fila.",
@@ -2643,7 +2643,7 @@ class Music(commands.Cog):
                                                   default=False)
     ):
 
-        if time_below and time_above:
+        if min_duration and max_duration:
             raise GenericError(
                 "Você deve escolher apenas uma das opções: **duração_abaixo_de** ou **duração_acima_de**.")
 
@@ -2670,12 +2670,12 @@ class Music(commands.Cog):
             filters.append('user')
         if playlist:
             filters.append('playlist')
-        if time_below:
+        if min_duration:
             filters.append('time_below')
-            time_below = string_to_seconds(time_below) * 1000
-        if time_above:
+            min_duration = string_to_seconds(min_duration) * 1000
+        if max_duration:
             filters.append('time_above')
-            time_above = string_to_seconds(time_above) * 1000
+            max_duration = string_to_seconds(max_duration) * 1000
         if absent_members:
             filters.append('absent_members')
 
@@ -2709,11 +2709,11 @@ class Music(commands.Cog):
 
                 temp_filter = list(filters)
 
-                if 'time_below' in temp_filter and t.duration <= time_below:
+                if 'time_below' in temp_filter and t.duration <= min_duration:
                     temp_filter.remove('time_below')
                     final_filters.add('time_below')
 
-                elif 'time_above' in temp_filter and t.duration >= time_above:
+                elif 'time_above' in temp_filter and t.duration >= max_duration:
                     temp_filter.remove('time_above')
                     final_filters.add('time_above')
 
@@ -2776,13 +2776,13 @@ class Music(commands.Cog):
 
             try:
                 final_filters.remove("time_below")
-                txt.append(f"**Com duração mínima:** `{time_below}`")
+                txt.append(f"**Com duração mínima:** `{min_duration}`")
             except:
                 pass
 
             try:
                 final_filters.remove("time_above")
-                txt.append(f"**Com duração máxima:** `{time_above}`")
+                txt.append(f"**Com duração máxima:** `{max_duration}`")
             except:
                 pass
 
