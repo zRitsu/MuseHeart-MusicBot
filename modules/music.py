@@ -2573,9 +2573,9 @@ class Music(commands.Cog):
                              help="Incluir músicas pedidas pelo usuário selecionado.")
     clear_flags.add_argument('-playlist', '-list', '-pl', nargs='+', default="",
                              help="Incluir nome que tiver na playlist.")
-    clear_flags.add_argument('-minimal_time', '-mintime', '-min', default=None,
+    clear_flags.add_argument('-minimal_time', '-mintime', '-min','-min_duration', '-minduration',  default=None,
                              help="incluir músicas com duração mínima especificada (ex. 1:23).")
-    clear_flags.add_argument('-max_time', '-maxtime', '-max', default=None,
+    clear_flags.add_argument('-max_time', '-maxtime', '-max', '-max_duration', '-maxduration', default=None,
                              help="incluir músicas da fila a partir de uma posição específica da fila.")
     clear_flags.add_argument('-start_position', '-startpos', '-start', default=None,
                              help="incluir músicas da fila a partir de uma posição específica da fila.")
@@ -2599,8 +2599,8 @@ class Music(commands.Cog):
             song_author=" ".join(args.uploader),
             user=await commands.MemberConverter().convert(ctx, " ".join(args.member)) if args.member else None,
             playlist=" ".join(args.playlist),
-            time_below=args.minimal_time,
-            time_above=args.max_time,
+            min_duration=args.minimal_time,
+            max_duration=args.max_time,
             range_start=args.start_position,
             range_end=args.end_position,
             absent_members=args.absent
