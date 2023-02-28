@@ -1,3 +1,4 @@
+import argparse
 import datetime
 import json
 import traceback
@@ -37,6 +38,20 @@ playlist_opts = [
     disnake.OptionChoice("Misturar Playlist", "shuffle"),
     disnake.OptionChoice("Inverter Playlist", "reversed"),
 ]
+
+sources = {
+    "yt": "ytsearch",
+    "y": "ytsearch",
+    "ytb": "ytsearch",
+    "youtube": "ytsearch",
+    "ytm": "ytmsearch",
+    "ytmsc": "ytmsearch",
+    "ytmusic": "ytmsearch",
+    "youtubemusic": "ytmsearch",
+    "sc": "scsearch",
+    "scd": "scsearch",
+    "soundcloud": "scsearch",
+}
 
 u_agent = generate_user_agent()
 
@@ -536,16 +551,40 @@ class Music(commands.Cog):
                                  force_play="no", manual_selection=False,
                                  source="ytsearch", repeat_amount=0, server=None)
 
+    play_flags = argparse.ArgumentParser(exit_on_error=False)
+    play_flags.add_argument('query', nargs='*', help="nome ou link da música")
+    play_flags.add_argument('-position', '-pos', '-p', type=int, default=0, help='Colocar a música em uma posição específica. Ex: -p 10')
+    play_flags.add_argument('-next', '-proximo', action='store_true', help='Adicionar a música/playlist no topo da fila (equivalente ao: -pos 1)')
+    play_flags.add_argument('-reverse', '-r', action='store_true', help='Inverter a ordem das músicas adicionadas (efetivo apenas ao adicionar playlist).')
+    play_flags.add_argument('-shuffle', '-sl', action='store_true', help='Misturar as músicas adicionadas (efetivo apenas ao adicionar playlist).')
+    play_flags.add_argument('-select', '-s', action='store_true', help='Escolher a música entre os resultados encontrados.')
+    play_flags.add_argument('-source', '-scr', type=str, default="ytsearch", help='Fazer a busca da música usando uma fonte específica [youtube/soundcloud etc]')
+    play_flags.add_argument('-force', '-now', '-n', '-f', action='store_true', help='Tocar a música adicionada imediatamente (efetivo apenas se houver uma música tocando atualmente.)')
+    play_flags.add_argument('-loop', '-lp', type=int, default=0, help="Definir a quantidade de repetições da música escolhida. Ex: -loop 5")
+    play_flags.add_argument('-server', '-sv', type=str, default=None, help='Usar um servidor de música específico.')
+
     @can_send_message_check()
     @check_voice()
     @commands.bot_has_guild_permissions(send_messages=True)
     @commands.max_concurrency(1, commands.BucketType.member)
     @pool_command(name="play", description="Tocar música em um canal de voz.", aliases=["p"], check_player=False,
                   cooldown=play_cd, max_concurrency=play_mc)
-    async def play_legacy(self, ctx: CustomContext, *, query: str = ""):
+    async def play_legacy(self, ctx: CustomContext, *flags):
 
-        await self.play.callback(self=self, inter=ctx, query=query, position=0, options=False, force_play="no",
-                                 manual_selection=False, source="ytsearch", repeat_amount=0, server=None)
+        args, unknown = self.play_flags.parse_known_args(flags)
+
+        await self.play.callback(
+            self = self,
+            inter = ctx,
+            query = " ".join(args.query + unknown),
+            position= 1 if args.next else args.position if args.position > 0 else 0,
+            options = "shuffle" if args.shuffle else "reversed" if args.reverse else None,
+            force_play = "yes" if args.force else "no",
+            manual_selection = args.select,
+            source = sources.get(args.source, "ytsearch"),
+            repeat_amount = args.loop,
+            server = args.server
+        )
 
     @can_send_message_check()
     @check_voice()
@@ -2526,24 +2565,46 @@ class Music(commands.Cog):
 
         await view.wait()
 
+    clear_flags = argparse.ArgumentParser(exit_on_error=False)
+    clear_flags.add_argument('song_name', nargs='*', help="incluir nome que tiver na música.")
+    clear_flags.add_argument('-uploader', '-author', '-artist', nargs = '+', default="",
+                             help="Incluir nome que tiver no autor da música.")
+    clear_flags.add_argument('-member', '-user', '-u', nargs='+', default="",
+                             help="Incluir músicas pedidas pelo usuário selecionado.")
+    clear_flags.add_argument('-playlist', '-list', '-pl', nargs='+', default="",
+                             help="Incluir nome que tiver na playlist.")
+    clear_flags.add_argument('-minimal_time', '-mintime', '-min', default=None,
+                             help="incluir músicas com duração mínima especificada (ex. 1:23).")
+    clear_flags.add_argument('-max_time', '-maxtime', '-max', default=None,
+                             help="incluir músicas da fila a partir de uma posição específica da fila.")
+    clear_flags.add_argument('-start_position', '-startpos', '-start', default=None,
+                             help="incluir músicas da fila a partir de uma posição específica da fila.")
+    clear_flags.add_argument('-end_position', '-endpos', '-end', default=None,
+                             help="incluir músicas da fila até uma posição específica da fila.")
+    clear_flags.add_argument('-absent', '-absentmembers', '-abs', action='store_true',
+                             help="Incluir músicas adicionads por membros fora do canal")
+
     @is_dj()
     @has_player()
     @check_voice()
     @pool_command(name="clear", aliases=["limpar"], description="Limpar a fila de música.", only_voiced=True,
                   cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
-    async def clear_legacy(self, ctx: CustomContext, *, range_track: str = None):
+    async def clear_legacy(self, ctx: CustomContext, *flags):
 
-        try:
-            range_start, range_end = range_track.split("-")
-            range_start = int(range_start)
-            range_end = int(range_end) + 1
-        except:
-            range_start = None
-            range_end = None
+        args, unknown = self.clear_flags.parse_known_args(flags)
 
-        await self.clear.callback(self=self, inter=ctx, song_name=None, song_author=None, user=None, playlist=None,
-                                  time_below=None, time_above=None, range_start=range_start, range_end=range_end,
-                                  absent_members=False)
+        await self.clear.callback(
+            self=self, inter=ctx,
+            song_name=" ".join(args.song_name + unknown),
+            song_author=" ".join(args.uploader),
+            user=await commands.MemberConverter().convert(ctx, " ".join(args.member)) if args.member else None,
+            playlist=" ".join(args.playlist),
+            time_below=args.minimal_time,
+            time_above=args.max_time,
+            range_start=args.start_position,
+            range_end=args.end_position,
+            absent_members=args.absent
+        )
 
     @is_dj()
     @has_player()
@@ -2570,11 +2631,11 @@ class Music(commands.Cog):
             time_above: str = commands.Param(name="duração_máxima",
                                              description="incluir músicas com duração máxima especificada (ex. 1:45).",
                                              default=None),
-            range_start: int = commands.Param(name="pos_inicial",
+            range_start: int = commands.Param(name="posição_inicial",
                                               description="incluir músicas da fila a partir de uma posição específica "
                                                           "da fila.",
                                               min_value=1.0, max_value=500.0, default=None),
-            range_end: int = commands.Param(name="pos_final",
+            range_end: int = commands.Param(name="posição_final",
                                             description="incluir músicas da fila até uma posição específica da fila.",
                                             min_value=1.0, max_value=500.0, default=None),
             absent_members: bool = commands.Param(name="membros_ausentes",
@@ -2597,28 +2658,23 @@ class Music(commands.Cog):
             raise GenericError("**Não há musicas na fila.**")
 
         filters = []
+        final_filters = set()
 
         txt = []
 
         if song_name:
             filters.append('song_name')
-            txt.append(f"**Com nome:** `{fix_characters(song_name)}`")
         if song_author:
             filters.append('song_author')
-            txt.append(f"**Do uploader/artista:** `{fix_characters(song_author)}`")
         if user:
             filters.append('user')
-            txt.append(f"**Pedido pelo membro:** {user.mention}")
         if playlist:
             filters.append('playlist')
-            txt.append(f"**Da playlist:** `{fix_characters(playlist)}`")
         if time_below:
             filters.append('time_below')
-            txt.append(f"**Com duração mínima:** `{time_below}`")
             time_below = string_to_seconds(time_below) * 1000
         if time_above:
             filters.append('time_above')
-            txt.append(f"**Com duração máxima:** `{time_above}`")
             time_above = string_to_seconds(time_above) * 1000
         if absent_members:
             filters.append('absent_members')
@@ -2647,9 +2703,6 @@ class Music(commands.Cog):
             else:
                 song_list = list(player.queue)
 
-            if absent_members:
-                txt.append("`Músicas pedidas por membros que saíram do canal.`")
-
             deleted_tracks = 0
 
             for t in song_list:
@@ -2658,24 +2711,36 @@ class Music(commands.Cog):
 
                 if 'time_below' in temp_filter and t.duration <= time_below:
                     temp_filter.remove('time_below')
+                    final_filters.add('time_below')
 
                 elif 'time_above' in temp_filter and t.duration >= time_above:
                     temp_filter.remove('time_above')
+                    final_filters.add('time_above')
 
                 if 'song_name' in temp_filter and song_name.lower() in t.title.lower():
                     temp_filter.remove('song_name')
+                    final_filters.add('song_name')
 
                 if 'song_author' in temp_filter and song_author.lower() in t.author.lower():
                     temp_filter.remove('song_author')
+                    final_filters.add('song_author')
 
                 if 'user' in temp_filter and user.id == t.requester:
                     temp_filter.remove('user')
+                    final_filters.add('user')
 
                 elif 'absent_members' in temp_filter and t.requester not in player.guild.me.voice.channel.voice_states:
                     temp_filter.remove('absent_members')
+                    final_filters.add('absent_members')
 
-                if 'playlist' in temp_filter and playlist == t.playlist_name:
-                    temp_filter.remove('playlist')
+                if 'playlist' in temp_filter:
+                    if playlist == t.playlist_name:
+                        temp_filter.remove('playlist')
+                        final_filters.add('playlist')
+                    elif isinstance(inter, CustomContext) and playlist.lower() in t.playlist_name.lower():
+                        playlist = t.playlist_name
+                        temp_filter.remove('playlist')
+                        final_filters.add('playlist')
 
                 if not temp_filter:
                     player.queue.remove(t)
@@ -2684,6 +2749,48 @@ class Music(commands.Cog):
             if not deleted_tracks:
                 await inter.send("Nenhuma música encontrada!", ephemeral=True)
                 return
+
+            try:
+                final_filters.remove("song_name")
+                txt.append(f"**inclui nome:** `{fix_characters(song_name)}`")
+            except:
+                pass
+
+            try:
+                final_filters.remove("song_author")
+                txt.append(f"**Inclui nome no uploader/artista:** `{fix_characters(song_author)}`")
+            except:
+                pass
+
+            try:
+                final_filters.remove("user")
+                txt.append(f"**Pedido pelo membro:** {user.mention}")
+            except:
+                pass
+
+            try:
+                final_filters.remove("playlist")
+                txt.append(f"**Playlist:** `{fix_characters(playlist)}`")
+            except:
+                pass
+
+            try:
+                final_filters.remove("time_below")
+                txt.append(f"**Com duração mínima:** `{time_below}`")
+            except:
+                pass
+
+            try:
+                final_filters.remove("time_above")
+                txt.append(f"**Com duração máxima:** `{time_above}`")
+            except:
+                pass
+
+            try:
+                final_filters.remove("absent_members")
+                txt.append("`Músicas pedidas por membros que saíram do canal.`")
+            except:
+                pass
 
             txt = [f"removeu {deleted_tracks} música(s) da fila via clear.",
                    f"♻️ **⠂{inter.author.mention} removeu {deleted_tracks} música(s) da fila usando os seguintes "
@@ -3989,6 +4096,7 @@ class Music(commands.Cog):
                         retries += 1
                         continue
 
+        data["identifier"] = data["identifier"].replace(" ", "_")
         node = await self.bot.music.initiate_node(auto_reconnect=False, region=region, **data)
         node.search = search
         node.website = node_website
