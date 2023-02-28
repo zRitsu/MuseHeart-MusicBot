@@ -975,7 +975,7 @@ class MusicSettings(commands.Cog):
                 current_player = None
 
             if not node.stats or not node.is_available:
-                failed_nodes.add(f"`{node.identifier}`")
+                failed_nodes.add(node.identifier)
                 continue
 
             txt = f"Região: `{node.region.title()}`\n"
