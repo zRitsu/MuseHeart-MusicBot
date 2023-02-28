@@ -324,6 +324,9 @@ class Misc(commands.Cog):
 
         for bot_id in inter.bot.config["INTERACTION_BOTS"].split(" "):
 
+            if not bot_id.isdigit():
+                continue
+
             if bot_id in txt and len(bots_invites + bots_in_guild) < 2:
                 continue
 
