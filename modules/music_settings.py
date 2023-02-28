@@ -1012,10 +1012,18 @@ class MusicSettings(commands.Cog):
             em.add_field(name=f'**{identifier}** `{status}`', value=txt)
             em.set_footer(text=f"{bot.user} - [{bot.user.id}]", icon_url=bot.user.display_avatar.with_format("png").url)
 
-        if failed_nodes:
-            em.add_field(name="**Servidores que falharam** `❌`", value="\n".join(failed_nodes))
+        embeds = [em]
 
-        await inter.send(embed=em, ephemeral=True)
+        if failed_nodes:
+            embeds.append(
+                disnake.Embed(
+                    title="**Servidores que falharam** `❌`",
+                    description=f"```ansi\n[31;1m" + "\n".join(failed_nodes) + "[0m\n```",
+                    color=bot.get_color(guild.me)
+                )
+            )
+
+        await inter.send(embeds=embeds, ephemeral=True)
 
 def setup(bot: BotCore):
     bot.add_cog(MusicSettings(bot))
