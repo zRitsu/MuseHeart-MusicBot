@@ -4162,6 +4162,10 @@ class Music(commands.Cog):
 
         if player.guild.me.voice:
 
+            if member.id == self.bot.user.id:
+                # tempfix para channel do voice_client não ser setado ao mover bot do canal.
+                player.guild.voice_client.channel = after.channel
+
             check = any(m for m in player.guild.me.voice.channel.members if not m.bot)
 
             if not check:
