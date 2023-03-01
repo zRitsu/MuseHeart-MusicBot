@@ -28,35 +28,35 @@ from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerContro
     pool_command
 from user_agent import generate_user_agent
 
-search_sources_opts = [
-    disnake.OptionChoice("Youtube", "ytsearch"),
-    disnake.OptionChoice("Youtube Music", "ytmsearch"),
-    disnake.OptionChoice("Soundcloud", "scsearch"),
-]
-
-playlist_opts = [
-    disnake.OptionChoice("Misturar Playlist", "shuffle"),
-    disnake.OptionChoice("Inverter Playlist", "reversed"),
-]
-
-sources = {
-    "yt": "ytsearch",
-    "y": "ytsearch",
-    "ytb": "ytsearch",
-    "youtube": "ytsearch",
-    "ytm": "ytmsearch",
-    "ytmsc": "ytmsearch",
-    "ytmusic": "ytmsearch",
-    "youtubemusic": "ytmsearch",
-    "sc": "scsearch",
-    "scd": "scsearch",
-    "soundcloud": "scsearch",
-}
-
-u_agent = generate_user_agent()
-
 
 class Music(commands.Cog):
+
+    search_sources_opts = [
+        disnake.OptionChoice("Youtube", "ytsearch"),
+        disnake.OptionChoice("Youtube Music", "ytmsearch"),
+        disnake.OptionChoice("Soundcloud", "scsearch"),
+    ]
+
+    playlist_opts = [
+        disnake.OptionChoice("Misturar Playlist", "shuffle"),
+        disnake.OptionChoice("Inverter Playlist", "reversed"),
+    ]
+
+    sources = {
+        "yt": "ytsearch",
+        "y": "ytsearch",
+        "ytb": "ytsearch",
+        "youtube": "ytsearch",
+        "ytm": "ytmsearch",
+        "ytmsc": "ytmsearch",
+        "ytmusic": "ytmsearch",
+        "youtubemusic": "ytmsearch",
+        "sc": "scsearch",
+        "scd": "scsearch",
+        "soundcloud": "scsearch",
+    }
+
+    u_agent = generate_user_agent()
 
     def __init__(self, bot: BotCore):
 
@@ -581,7 +581,7 @@ class Music(commands.Cog):
             options = "shuffle" if args.shuffle else "reversed" if args.reverse else None,
             force_play = "yes" if args.force else "no",
             manual_selection = args.select,
-            source = sources.get(args.source, "ytsearch"),
+            source = self.sources.get(args.source, "ytsearch"),
             repeat_amount = args.loop,
             server = args.server
         )
@@ -4066,7 +4066,7 @@ class Music(commands.Cog):
             return
 
         data['rest_uri'] = ("https" if data.get('secure') else "http") + f"://{data['host']}:{data['port']}"
-        data['user_agent'] = u_agent
+        data['user_agent'] = self.u_agent
         search = data.pop("search", True)
         max_retries = data.pop('retries', 0)
         node_website = data.pop('website', '')

@@ -9,7 +9,6 @@ import disnake
 from disnake.ext import commands
 
 from utils.db import DBModel
-from utils.music.checks import user_cooldown
 from utils.music.converters import perms_translations
 from utils.music.errors import GenericError
 from utils.others import send_idle_embed, CustomContext, select_bot_pool
@@ -17,13 +16,6 @@ from utils.music.models import LavalinkPlayer
 
 if TYPE_CHECKING:
     from utils.client import BotCore
-
-other_bots_vc_opts = commands.option_enum(
-    {
-        "Ativar": "enable",
-        "Desativar": "disable",
-    }
-)
 
 
 class SkinSelector(disnake.ui.View):

@@ -24,28 +24,9 @@ from utils.owner_panel import panel_command, PanelView
 from utils.music.errors import GenericError
 from config_loader import DEFAULT_CONFIG
 
-os_quote = "\"" if os.name == "nt" else "'"
-git_format = f"--pretty=format:{os_quote}%H*****%h*****%s*****%ct{os_quote}"
-
-extra_files = [
-    "./playlist_cache.json",
-]
-
-additional_files = [
-    "./lavalink.ini",
-    "./application.yml",
-    "./squarecloud.config",
-    "./squarecloud.app",
-    "./discloud.config",
-]
-
-extra_dirs = [
-    "local_database",
-    ".player_sessions"
-]
-
 
 def format_git_log(data_list: list):
+
     data = []
 
     for d in data_list:
@@ -80,6 +61,26 @@ class ShellResult:
 
 
 class Owner(commands.Cog):
+
+    os_quote = "\"" if os.name == "nt" else "'"
+    git_format = f"--pretty=format:{os_quote}%H*****%h*****%s*****%ct{os_quote}"
+
+    extra_files = [
+        "./playlist_cache.json",
+    ]
+
+    additional_files = [
+        "./lavalink.ini",
+        "./application.yml",
+        "./squarecloud.config",
+        "./squarecloud.app",
+        "./discloud.config",
+    ]
+
+    extra_dirs = [
+        "local_database",
+        ".player_sessions"
+    ]
 
     def __init__(self, bot: BotCore):
         self.bot = bot
@@ -314,7 +315,7 @@ class Owner(commands.Cog):
                     commit = l.replace("Updating ", "").replace("..", "...")
                     break
 
-            data = (await run_command(f"git log {commit} {git_format}")).split("\n")
+            data = (await run_command(f"git log {commit} {self.git_format}")).split("\n")
 
             git_log += format_git_log(data)
 
@@ -473,7 +474,7 @@ class Owner(commands.Cog):
 
         git_log = []
 
-        data = (await run_command(f"git log -{amount or 10} {git_format}")).split("\n")
+        data = (await run_command(f"git log -{amount or 10} {self.git_format}")).split("\n")
 
         git_log += format_git_log(data)
 
@@ -692,15 +693,15 @@ class Owner(commands.Cog):
         filelist = await run_command("git ls-files --others --exclude-standard --cached")
 
         if any(f in flags.lower() for f in ("--extradirs", "-extradirs", "--ed", "-ed", "--extrafiles", "-extrafiles", "--ef", "-ef")):
-            for extra_dir in extra_dirs:
+            for extra_dir in self.extra_dirs:
                 for dir_path, dir_names, filenames in os.walk(extra_dir):
                     filelist += "\n" + "\n".join(os.path.join(dir_path, file) for file in filenames)
 
-            for file in extra_files:
+            for file in self.extra_files:
                 if os.path.isfile(file):
                     filelist += "\n" + file
 
-        for file in additional_files:
+        for file in self.additional_files:
             if os.path.isfile(file):
                 filelist += "\n" + file
 
