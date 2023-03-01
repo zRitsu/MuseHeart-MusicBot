@@ -737,7 +737,7 @@ class Music(commands.Cog):
                     if attachment.size > 18000000:
                         raise GenericError("**O arquivo que você enviou deve ter o tamanho igual ou inferior a 18mb.**")
 
-                    if attachment.content_type != "audio/mpeg":
+                    if attachment.content_type not in ("audio/mpeg", "audio/ogg"):
                         raise GenericError("**O arquivo que você enviou não é um arquivo de música válido...**")
 
                     query = attachment.url
@@ -3536,7 +3536,7 @@ class Music(commands.Cog):
                                                f"inferior a 18mb.", delete_after=9)
                     return
 
-                if attachment.content_type != "audio/mpeg":
+                if attachment.content_type not in ("audio/mpeg", "audio/ogg"):
                     await message.channel.send(f"{message.author.mention} o arquivo que você enviou deve ter o tamanho "
                                                f"inferior a 18mb.", delete_after=9)
                     return
