@@ -1,4 +1,5 @@
 import asyncio
+import gc
 import os
 import shutil
 import json
@@ -237,6 +238,8 @@ class Owner(commands.Cog):
 
         if not txt:
             txt = "**Nenhum módulo encontrado...**"
+
+        gc.collect()
 
         if isinstance(ctx, CustomContext):
             embed = disnake.Embed(colour=self.bot.get_color(ctx.me), description=txt)
