@@ -3,6 +3,9 @@
 
 ## Bots de exemplo usando esta source: [clique aqui](https://gist.github.com/zRitsu/4875008554a00c3c372b2df6dcdf437f#file-muse_heart_invites-md).
 
+### Servidor de suporte:
+[![Muse Support Server](https://discordapp.com/api/guilds/911370624507707483/embed.png?style=banner2)](https://discord.gg/R7BPG8fZTr)
+
 ### Algumas previews:
 
 - Comandos de barra / Slash commands
@@ -178,5 +181,3 @@ Nota: há mais alguns guias na [wiki]((https://github.com/zRitsu/disnake-LL-musi
 * Não será fornecido suporte caso modifique a source atual (exceto para custom skins), pois atualizo ela com frequência e versões modificadas tendem a ficarem desatualizadas dificultando dar suporte por esse motivo (além de que dependendo da modificação ou implementação poder gerar erros desconhecidos que dificulta ao tentar resolver o problema e de eu exigir usar métodos pra atualizar o code que geralmente desfaz essas alterações).
 
 * Caso queira fazer algum vídeo/tutorial usando esta source, você está totalmente livre para usá-la pra essa finalidade desde que esteja de acordo com a [licença](/LICENSE).
-
-### Caso tenha mais alguma dúvida, entre no servidor de suporte: https://discord.gg/R7BPG8fZTr
