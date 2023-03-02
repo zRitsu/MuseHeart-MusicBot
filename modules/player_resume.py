@@ -19,12 +19,15 @@ class PlayerSession(commands.Cog):
 
     def __init__(self, bot: BotCore):
         self.bot = bot
-        self.resumed = False
+
+        if not hasattr(bot, "player_resumed"):
+            bot.player_resumed = False
+
         self.resume_task = bot.loop.create_task(self.resume_players())
 
     async def resume_players(self):
 
-        if self.resumed:
+        if self.bot.player_resumed:
             return
 
         await self.bot.wait_until_ready()
@@ -314,7 +317,7 @@ class PlayerSession(commands.Cog):
         if not txt:
             txt = "**Nenhum player ativo no momento...**"
 
-        self.resumed = True
+        self.bot.player_resumed = True
         await ctx.send(embed=disnake.Embed(color=self.bot.get_color(ctx.guild.me), description=txt))
 
     def cog_unload(self):
