@@ -90,8 +90,6 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
     mention_prefixed = False
 
-    free_bot = None
-
     if isinstance(inter, CustomContext):
 
         is_forum = check_forum(inter, inter.bot)
@@ -157,6 +155,8 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
                 inter.music_guild = inter.guild
                 return True
 
+    free_bot = []
+
     for bot in sorted(inter.bot.pool.bots, key=lambda b: b.identifier):
 
         if not bot.bot_ready:
@@ -205,7 +205,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
             continue
 
         if not guild.me.voice:
-            free_bot = bot, guild
+            free_bot.append([bot, guild])
 
     try:
         if not isinstance(inter, CustomContext) and not inter.guild.voice_client:
@@ -219,6 +219,12 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
             inter.bot.dispatch("pool_dispatch", inter, None)
             return True
     except AttributeError:
+        pass
+
+    try:
+        free_bot.pop(0)
+        free_bot.clear()
+    except:
         pass
 
     if free_bot:
