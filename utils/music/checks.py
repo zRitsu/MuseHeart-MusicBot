@@ -13,9 +13,6 @@ from utils.music.models import LavalinkPlayer
 from utils.db import DBModel
 from utils.others import CustomContext
 
-if TYPE_CHECKING:
-    from utils.client import BotCore
-
 
 def can_send_message(
         channel: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.Thread],
@@ -209,7 +206,6 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
         if not guild.me.voice:
             free_bot = bot, guild
-            break
 
     try:
         if not isinstance(inter, CustomContext) and not inter.guild.voice_client:
