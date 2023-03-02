@@ -221,14 +221,9 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
     except AttributeError:
         pass
 
-    try:
-        free_bot.pop(0)
-        free_bot.clear()
-    except:
-        pass
-
     if free_bot:
-        inter.music_bot, inter.music_guild = free_bot
+        inter.music_bot, inter.music_guild = free_bot.pop(0)
+        free_bot.clear()
         if isinstance(inter, CustomContext) and not mention_prefixed and inter.music_bot.user.id != inter.bot.user.id:
             try:
                 await inter.music_bot.wait_for(
