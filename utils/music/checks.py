@@ -180,6 +180,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
             if return_first:
                 inter.music_bot = bot
                 inter.music_guild = guild
+                free_bot.clear()
                 return True
 
             raise NoVoice()
@@ -188,6 +189,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
             inter.music_bot = bot
             inter.music_guild = guild
+            free_bot.clear()
 
             if isinstance(inter, CustomContext) and bot.user.id != inter.bot.user.id and not mention_prefixed:
                 try:

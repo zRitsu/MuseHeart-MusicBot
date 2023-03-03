@@ -191,7 +191,7 @@ class Misc(commands.Cog):
 
         embed = disnake.Embed(
             description=f"**Sobre mim:**\n\n",
-            color=bot.get_color(guild.me)
+            color=bot.get_color(inter.guild.me if inter.guild else guild.me)
         )
 
         active_players_other_bots = 0
@@ -314,7 +314,9 @@ class Misc(commands.Cog):
         if not txt:
             await inter.send(
                 embed=disnake.Embed(
-                    colour=self.bot.get_color(),
+                    colour=self.bot.get_color(
+                        inter.guild.me if inter.guild else guild.me if guild else None
+                    ),
                     title="**Não há bots públicos disponível...**",
                 ), ephemeral=True
             )
@@ -347,7 +349,9 @@ class Misc(commands.Cog):
 
         await inter.send(
             embed=disnake.Embed(
-                colour=self.bot.get_color(),
+                colour=self.bot.get_color(
+                    inter.guild.me if inter.guild else guild.me if guild else None
+                ),
                 description=txt
             ), ephemeral=True
         )
