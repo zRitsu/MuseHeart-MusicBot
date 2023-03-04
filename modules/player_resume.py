@@ -1,14 +1,11 @@
 # nota: este sistema é totalmente experimental.
-# Será necessário usar um comando para salvar as sessões atuais do player manualmente.
-import json
 import asyncio
-import os.path
-import shutil
 import traceback
 
 import disnake
 from disnake.ext import commands
 
+import wavelink
 from utils.client import BotCore
 from utils.music.checks import can_connect
 from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialTrack, PartialPlaylist, LavalinkPlaylist
@@ -25,6 +22,100 @@ class PlayerSession(commands.Cog):
 
         self.resume_task = bot.loop.create_task(self.resume_players())
 
+    @commands.Cog.listener()
+    async def on_player_destroy(self, player: LavalinkPlayer):
+        await self.bot.pool.database.delete_data(
+            str(player.guild.id),
+            collection="player_sessions",
+            db_name=str(player.bot.user.id)
+        )
+
+    @commands.Cog.listener('on_wavelink_track_end')
+    async def track_end(self, node, payload: wavelink.TrackStart):
+
+        if len(payload.player.queue) > 0:
+            return
+
+        await self.save_info(payload.player)
+
+    @commands.Cog.listener('on_wavelink_track_start')
+    async def track_start(self, node, payload: wavelink.TrackStart):
+
+        try:
+            payload.player.queue_updater_task.cancel()
+        except:
+            pass
+
+        payload.player.queue_updater_task = self.bot.loop.create_task(self.queue_updater_task(payload.player))
+
+    async def queue_updater_task(self, player: LavalinkPlayer):
+
+        while True:
+            await self.save_info(player)
+            await asyncio.sleep(30)
+
+    async def save_info(self, player: LavalinkPlayer):
+
+        if not player.guild.me.voice:
+            return
+
+        tracks = []
+        played = []
+
+        if player.current:
+            player.current.info["id"] = player.current.id
+            if player.current.playlist_name:
+                player.current.info["playlist"] = {"name": player.current.playlist_name, "url": player.current.playlist_url}
+            tracks.append(player.current.info)
+
+        for t in player.queue:
+            t.info["id"] = t.id
+            if t.playlist:
+                t.info["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
+            tracks.append(t.info)
+
+        for t in player.played:
+            t.info["id"] = t.id
+            if t.playlist:
+                t.info["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
+            played.append(t.info)
+
+        data = {
+            "_id": str(player.guild.id),
+            "volume": player.volume,
+            "nightcore": player.nightcore,
+            "position": player.position,
+            "voice_channel": player.channel_id,
+            "dj": list(player.dj),
+            "player_creator": player.player_creator,
+            "static": player.static,
+            "paused": player.paused,
+            "text_channel": player.text_channel.id,
+            "keep_connected": player.keep_connected,
+            "message": player.message.id if player.message else None,
+            "played": played,
+            "loop": player.loop,
+            "stage_title_event": player.stage_title_event,
+            "skin": player.skin,
+            "skin_static": player.skin_static,
+            "restrict_mode": player.restrict_mode,
+            "mini_queue_enabled": player.mini_queue_enabled,
+            "tracks": tracks
+        }
+
+        bot_id = str(player.bot.user.id)
+
+        try:
+            await self.bot.pool.database.update_data(
+                str(player.guild.id),
+                data=data,
+                collection="player_sessions",
+                db_name=bot_id,
+                default_model={bot_id: {}}
+            )
+        except:
+            traceback.print_exc()
+
     async def resume_players(self):
 
         if self.bot.player_resumed:
@@ -38,18 +129,12 @@ class PlayerSession(commands.Cog):
 
         try:
 
-            for f in os.listdir(f"./.player_sessions/{self.bot.user.id}"):
+            for data in await self.bot.pool.database.query_data(db_name=str(self.bot.user.id), collection="player_sessions"):
 
-                if not f.endswith(".json"):
-                    continue
-
-                with open(f"./.player_sessions/{self.bot.user.id}/{f}") as fp:
-                    data = json.load(fp)
-
-                guild = self.bot.get_guild(int(f[:-5]))
+                guild = self.bot.get_guild(int(data["_id"]))
 
                 if not guild:
-                    print(f"{self.bot.user} - Player Ignorado: {f[:-5]} | Servidor inexistente...")
+                    print(f"{self.bot.user} - Player Ignorado: {data['_id']} | Servidor inexistente...")
                     continue
 
                 voice_channel = self.bot.get_channel(data["voice_channel"])
@@ -206,119 +291,10 @@ class PlayerSession(commands.Cog):
 
                 print(f"{self.bot.user} - Player Retomado: {guild.name} [{guild.id}]")
 
-            shutil.rmtree(f"./.player_sessions/{self.bot.user.id}")
-
-        except FileNotFoundError:
-            return
-
         except Exception:
             print(f"{self.bot.user} - Falha Crítica ao retomar players:\n{traceback.format_exc()}")
 
 
-    @commands.max_concurrency(1, commands.BucketType.default)
-    @commands.is_owner()
-    @commands.command(hidden=True, aliases=["savep"])
-    async def saveplayers(self, ctx: CustomContext, *args):
-
-        saved_players = 0
-        ignored_players = 0
-
-        reset_ids  = any(a in args for a in ("--reset", "--resetids", "-reset", "-resetids"))
-
-        async with ctx.typing():
-
-            for bot in self.bot.pool.bots:
-
-                if not os.path.isdir(f"./.player_sessions/{bot.user.id}"):
-                    os.makedirs(f"./.player_sessions/{bot.user.id}")
-
-                for player in bot.music.players.values():
-
-                    tracks = []
-                    played = []
-
-                    if not player.guild.me.voice:
-                        continue
-
-                    if player.current:
-                        player.current.info["id"] = player.current.id if not reset_ids else ""
-                        if player.current.playlist_name:
-                            player.current.info["playlist"] = {"name": player.current.playlist_name, "url": player.current.playlist_url}
-                        tracks.append(player.current.info)
-
-                    for t in player.queue:
-                        t.info["id"] = t.id if not reset_ids else ""
-                        if t.playlist:
-                            t.info["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
-                        tracks.append(t.info)
-
-                    for t in player.played:
-                        t.info["id"] = t.id if not reset_ids else ""
-                        if t.playlist:
-                            t.info["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
-                        played.append(t.info)
-
-                    if not tracks and not played:
-                        await player.destroy(force=True)
-                        ignored_players += 1
-                        continue
-
-                    data = json.dumps(
-                        {
-                            "volume": player.volume,
-                            "nightcore": player.nightcore,
-                            "position": player.position,
-                            "voice_channel": player.channel_id,
-                            "dj": list(player.dj),
-                            "player_creator": player.player_creator,
-                            "static": player.static,
-                            "paused": player.paused,
-                            "text_channel": player.text_channel.id,
-                            "keep_connected": player.keep_connected,
-                            "message": player.message.id if player.message else None,
-                            "played": played,
-                            "loop": player.loop,
-                            "stage_title_event": player.stage_title_event,
-                            "skin": player.skin,
-                            "skin_static": player.skin_static,
-                            "restrict_mode": player.restrict_mode,
-                            "mini_queue_enabled": player.mini_queue_enabled,
-                            "tracks": tracks
-                        }, indent=4
-                    )
-
-                    with open(f"./.player_sessions/{bot.user.id}/{player.guild_id}.json", "w") as f:
-                        f.write(data)
-
-                    txt = "O player foi desligado para uma rápida manutenção/reinicialização e será restaurado logo."
-
-                    if player.static:
-                        player.set_command_log(text=txt, emoji="🛠️")
-                    else:
-                        self.bot.loop.create_task(
-                            player.text_channel.send(
-                                embed=disnake.Embed(
-                                    color=self.bot.get_color(player.guild.me),
-                                    description=f"🛠️ **⠂{txt}**"
-                                )
-                            )
-                        )
-
-                    await player.destroy(force=True)
-                    saved_players += 1
-
-        txt = ""
-
-        if saved_players:
-            txt += f"**Players salvos: {saved_players}**\n"
-        if ignored_players:
-            txt += f"**Players ignorados: {ignored_players}**\n"
-
-        if not txt:
-            txt = "**Nenhum player ativo no momento...**"
-
-        self.bot.player_resumed = True
-        await ctx.send(embed=disnake.Embed(color=self.bot.get_color(ctx.guild.me), description=txt))
 
     def cog_unload(self):
         try:

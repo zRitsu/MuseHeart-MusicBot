@@ -87,10 +87,6 @@ class BaseDB:
     def start_task(self, loop):
         pass
 
-    async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users],
-                          collection: str, default_model: dict = None):
-        pass
-
     async def move_old_db(self):
 
         if not os.path.isdir("./local_dbs"):
@@ -179,8 +175,20 @@ class LocalDatabase(BaseDB):
     async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users],
                           collection: str, default_model: dict = None):
 
-        self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data})
+        data = self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data})
+
+        if not data.raw_result:
+            data = dict(default_model[db_name])
+            data["_id"] = str(id_)
+            self._connect[collection][db_name].insert_one(data)
+
         return data
+
+    async def query_data(self, db_name: str, collection: str, filter: dict = None) -> list:
+        return self._connect[collection][db_name].find(filter or {})
+
+    async def delete_data(self, id_, db_name: str, collection: str):
+        return self._connect[collection][db_name].delete_one({'_id': str(id_)})
 
 class MongoDatabase(BaseDB):
 
@@ -238,10 +246,16 @@ class MongoDatabase(BaseDB):
 
         return data
 
-    async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users],
+    async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users, str],
                           collection: str, default_model: dict = None):
 
         return await self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data}, upsert=True)
+
+    async def query_data(self, db_name: str, collection: str, filter: dict = None) -> list:
+        return await self._connect[collection][db_name].find(filter or {}).to_list(100)
+
+    async def delete_data(self, id_, db_name: str, collection: str):
+        return await self._connect[collection][db_name].delete_one({'_id': str(id_)})
 
 
 def update_values(d, u):
