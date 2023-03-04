@@ -26,6 +26,12 @@ class PlayerSession(commands.Cog):
 
     @commands.Cog.listener()
     async def on_player_destroy(self, player: LavalinkPlayer):
+
+        try:
+            player.queue_updater_task.cancel()
+        except:
+            pass
+
         await self.bot.pool.database.delete_data(
             str(player.guild.id),
             collection="player_sessions",
