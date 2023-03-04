@@ -86,17 +86,17 @@ class PlayerSession(commands.Cog):
 
         data = {
             "_id": str(player.guild.id),
-            "volume": player.volume,
+            "volume": str(player.volume),
             "nightcore": player.nightcore,
-            "position": player.position,
-            "voice_channel": player.channel_id,
+            "position": str(player.position),
+            "voice_channel": str(player.guild.me.voice.channel.id),
             "dj": list(player.dj),
-            "player_creator": player.player_creator,
+            "player_creator": str(player.player_creator) if player.player_creator else None,
             "static": player.static,
             "paused": player.paused,
-            "text_channel": player.text_channel.id,
+            "text_channel": str(player.text_channel.id),
             "keep_connected": player.keep_connected,
-            "message": player.message.id if player.message else None,
+            "message": str(player.message.id) if player.message else None,
             "played": played,
             "loop": player.loop,
             "stage_title_event": player.stage_title_event,
@@ -166,7 +166,7 @@ class PlayerSession(commands.Cog):
                     await self.bot.pool.database.delete_data(data['_id'], str(self.bot.user.id), collection="player_sessions")
                     continue
 
-                voice_channel = self.bot.get_channel(data["voice_channel"])
+                voice_channel = self.bot.get_channel(int(data["voice_channel"]))
 
                 if not voice_channel:
                     print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\nO canal de voz não existe...")
@@ -180,7 +180,7 @@ class PlayerSession(commands.Cog):
                     await self.bot.pool.database.delete_data(data['_id'], str(self.bot.user.id), collection="player_sessions")
                     continue
 
-                text_channel = self.bot.get_channel(data["text_channel"])
+                text_channel = self.bot.get_channel(int(data["text_channel"]))
 
                 if not text_channel:
 
@@ -197,12 +197,12 @@ class PlayerSession(commands.Cog):
                     continue
 
                 try:
-                    creator = data["player_creator"]
-                except KeyError:
+                    creator = int(data["player_creator"])
+                except:
                     creator = None
 
                 try:
-                    message = await text_channel.fetch_message(data["message"])
+                    message = await text_channel.fetch_message(int(data["message"]))
                 except:
                     message = None
 
@@ -240,8 +240,8 @@ class PlayerSession(commands.Cog):
                 except:
                     pass
 
-                if data["volume"] != 100:
-                    await player.set_volume(data["volume"])
+                if (vol:=int(data["volume"])) != 100:
+                    await player.set_volume(vol)
 
                 player.nightcore = data.get("nightcore")
 
@@ -325,7 +325,7 @@ class PlayerSession(commands.Cog):
                     emoji="🔰"
                 )
 
-                await player.process_next(start_position=data["position"])
+                await player.process_next(start_position=int(data["position"]))
 
                 if data.get("paused"):
                     await asyncio.sleep(1.5)
