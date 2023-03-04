@@ -569,9 +569,9 @@ class Music(commands.Cog):
     @commands.max_concurrency(1, commands.BucketType.member)
     @pool_command(name="play", description="Tocar música em um canal de voz.", aliases=["p"], check_player=False,
                   cooldown=play_cd, max_concurrency=play_mc)
-    async def play_legacy(self, ctx: CustomContext, *flags):
+    async def play_legacy(self, ctx: CustomContext, *, flags: str = ""):
 
-        args, unknown = self.play_flags.parse_known_args(flags)
+        args, unknown = self.play_flags.parse_known_args(flags.split())
 
         await self.play.callback(
             self = self,
@@ -2589,9 +2589,9 @@ class Music(commands.Cog):
     @check_voice()
     @pool_command(name="clear", aliases=["limpar"], description="Limpar a fila de música.", only_voiced=True,
                   cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
-    async def clear_legacy(self, ctx: CustomContext, *flags):
+    async def clear_legacy(self, ctx: CustomContext, *, flags: str = ""):
 
-        args, unknown = self.clear_flags.parse_known_args(flags)
+        args, unknown = self.clear_flags.parse_known_args(flags.split())
 
         await self.clear.callback(
             self=self, inter=ctx,
