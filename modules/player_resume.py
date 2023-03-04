@@ -61,7 +61,7 @@ class PlayerSession(commands.Cog):
     async def queue_updater_task(self, player: LavalinkPlayer):
 
         while True:
-            await asyncio.sleep(30)
+            await asyncio.sleep(self.bot.config["PLAYER_INFO_BACKUP_INTERVAL"])
             await self.save_info(player)
 
     async def save_info(self, player: LavalinkPlayer):

@@ -58,6 +58,7 @@ DEFAULT_CONFIG = {
     "GUILD_DEAFEN_WARN": True,
     "ADD_REGISTER_COMMAND": False,
     "ENABLE_DISCORD_URLS_PLAYBACK": True,
+    "PLAYER_INFO_BACKUP_INTERVAL": 45,
 
     ##############################################
     ### Sistema de música - Suporte ao spotify ###
@@ -155,6 +156,7 @@ def load_config():
         "INVITE_PERMISSIONS",
         "MONGO_CACHE_CLEANUP_INTERVAL",
         "PREFIXED_POOL_TIMEOUT",
+        "PLAYER_INFO_BACKUP_INTERVAL"
     ]:
         try:
             CONFIG[i] = int(CONFIG[i])
@@ -213,5 +215,8 @@ def load_config():
 
     if CONFIG["IDLE_TIMEOUT"] < 30:
         CONFIG["IDLE_TIMEOUT"] = 30
+
+    if CONFIG["PLAYER_INFO_BACKUP_INTERVAL"] < 30:
+        CONFIG["PLAYER_INFO_BACKUP_INTERVAL"] = 30
 
     return CONFIG
