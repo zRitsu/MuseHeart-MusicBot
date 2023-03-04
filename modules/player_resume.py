@@ -325,7 +325,7 @@ class PlayerSession(commands.Cog):
                     emoji="🔰"
                 )
 
-                await player.process_next(start_position=int(data["position"]))
+                await player.process_next(start_position=float(data["position"]))
 
                 if data.get("paused"):
                     await asyncio.sleep(1.5)
