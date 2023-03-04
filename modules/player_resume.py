@@ -7,9 +7,8 @@ from disnake.ext import commands
 
 import wavelink
 from utils.client import BotCore
-from utils.music.checks import can_connect
+from utils.music.checks import can_connect, can_send_message
 from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialTrack, PartialPlaylist, LavalinkPlaylist
-from utils.others import CustomContext
 
 
 class PlayerSession(commands.Cog):
@@ -152,6 +151,16 @@ class PlayerSession(commands.Cog):
                 text_channel = self.bot.get_channel(data["text_channel"])
 
                 if not text_channel:
+
+                    if data["text_channel"] != str(voice_channel.id) and data['static']:
+                        data['static'] = False
+
+                    text_channel = voice_channel
+
+                try:
+                    can_send_message(text_channel, self.bot.user)
+                except Exception:
+                    print(f"{self.bot.user} - Player Ignorado (falta de permissão) [Canal: {text_channel.name} | ID: {text_channel.id}] - [ {guild.name} - {guild.id} ]")
                     continue
 
                 try:
