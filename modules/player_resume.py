@@ -1,5 +1,8 @@
 # nota: este sistema é totalmente experimental.
 import asyncio
+import json
+import os
+import shutil
 import traceback
 
 import disnake
@@ -45,13 +48,15 @@ class PlayerSession(commands.Cog):
         except:
             pass
 
+        await self.save_info(payload.player)
+
         payload.player.queue_updater_task = self.bot.loop.create_task(self.queue_updater_task(payload.player))
 
     async def queue_updater_task(self, player: LavalinkPlayer):
 
         while True:
-            await self.save_info(player)
             await asyncio.sleep(30)
+            await self.save_info(player)
 
     async def save_info(self, player: LavalinkPlayer):
 
@@ -128,7 +133,31 @@ class PlayerSession(commands.Cog):
 
         try:
 
-            for data in await self.bot.pool.database.query_data(db_name=str(self.bot.user.id), collection="player_sessions"):
+            data_list = []
+
+            try:
+                for f in os.listdir(f"./.player_sessions/{self.bot.user.id}"):
+
+                    if not f.endswith(".json"):
+                        continue
+
+                    try:
+                        with open(f"./.player_sessions/{self.bot.user.id}/{f}") as fp:
+                            json_data = json.load(fp)
+                    except Exception:
+                        traceback.print_exc()
+                        continue
+
+                    json_data.update({"_id": f[:-5]})
+                    data_list.append(json_data)
+                shutil.rmtree(f"./.player_sessions/{self.bot.user.id}")
+            except:
+                pass
+
+            if not data_list:
+                data_list = await self.bot.pool.database.query_data(db_name=str(self.bot.user.id), collection="player_sessions")
+
+            for data in data_list:
 
                 guild = self.bot.get_guild(int(data["_id"]))
 
