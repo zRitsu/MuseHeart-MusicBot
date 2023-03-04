@@ -337,6 +337,8 @@ class PlayerSession(commands.Cog):
         except Exception:
             print(f"{self.bot.user} - Falha Crítica ao retomar players:\n{traceback.format_exc()}")
 
+        self.bot.player_resumed = True
+
     def cog_unload(self):
         try:
             self.resume_task.cancel()
