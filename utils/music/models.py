@@ -298,7 +298,7 @@ class LavalinkPlayer(wavelink.Player):
         self.update: bool = False
         self.updating: bool = False
         self.stage_title_event = False
-        self.stage_title_template = kwargs.pop("stage_title_template", "Tocando: {track.title} | {track.author}")
+        self.stage_title_template = kwargs.pop("stage_title_template", None) or "Tocando: {track.title} | {track.author}"
         self.last_stage_title = ""
         self.auto_update: int = 0
         self.message_updater_task: Optional[asyncio.Task] = None
