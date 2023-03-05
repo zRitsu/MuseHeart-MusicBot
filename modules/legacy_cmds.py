@@ -22,7 +22,7 @@ from utils.music.models import LavalinkPlayer
 from utils.others import sync_message, chunk_list, EmbedPaginator, CustomContext, string_to_file
 from utils.owner_panel import panel_command, PanelView
 from utils.music.errors import GenericError
-from config_loader import DEFAULT_CONFIG
+from config_loader import DEFAULT_CONFIG, load_config
 
 
 def format_git_log(data_list: list):
@@ -239,6 +239,8 @@ class Owner(commands.Cog):
 
         if not txt:
             txt = "**Nenhum módulo encontrado...**"
+
+        self.bot.pool.config = load_config()
 
         gc.collect()
 
