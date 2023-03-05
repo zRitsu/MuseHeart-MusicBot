@@ -3045,7 +3045,8 @@ class Music(commands.Cog):
         await ctx.reply(
             embed=disnake.Embed(
                 title="**Player Uptime:**",
-                description="\n-----\n".join(uptime_info)
+                description="\n-----\n".join(uptime_info),
+                color=self.bot.get_color(ctx.guild.me)
             )
         )
 
