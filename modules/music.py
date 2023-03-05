@@ -1375,22 +1375,23 @@ class Music(commands.Cog):
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
-        if not (qsize := len(player.queue)) and not len(player.played):
+        if not len(player.queue) and (player.keep_connected or not len(player.played)):
             await player.seek(0)
             await self.interaction_message(inter, "voltou para o início da música.", emoji="⏪")
             return
 
-        if player.keep_connected and qsize < 2:
+        if player.keep_connected:
             track = player.queue.pop()
-            player.last_track = None
             player.queue.appendleft(player.current)
         else:
             try:
                 track = player.played.pop()
             except:
                 track = player.queue.pop()
-                player.last_track = None
                 player.queue.appendleft(player.current)
+
+        player.last_track = None
+                
         player.queue.appendleft(track)
 
         if isinstance(inter, disnake.MessageInteraction):
