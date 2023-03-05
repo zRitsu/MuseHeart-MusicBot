@@ -106,6 +106,7 @@ class PlayerSession(commands.Cog):
             "played": played,
             "loop": player.loop,
             "stage_title_event": player.stage_title_event,
+            "stage_title_template": player.stage_title_template,
             "skin": player.skin,
             "skin_static": player.skin_static,
             "restrict_mode": player.restrict_mode,
@@ -226,6 +227,7 @@ class PlayerSession(commands.Cog):
                         keep_connected=data["keep_connected"],
                         static=data['static'],
                         extra_hints=hints,
+                        stage_title_template=data.get("stage_title_template")
                     )
                 except Exception:
                     print(f"{self.bot.user} - Falha ao criar player: {guild.name} [{guild.id}]\n{traceback.format_exc()}")

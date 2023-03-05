@@ -298,6 +298,7 @@ class LavalinkPlayer(wavelink.Player):
         self.update: bool = False
         self.updating: bool = False
         self.stage_title_event = False
+        self.stage_title_template = kwargs.pop("stage_title_template", "Tocando: {track.title} | {track.author}")
         self.last_stage_title = ""
         self.auto_update: int = 0
         self.message_updater_task: Optional[asyncio.Task] = None
@@ -677,13 +678,29 @@ class LavalinkPlayer(wavelink.Player):
         if not self.current:
             msg = "Status: Aguardando por novas músicas."
 
-        elif len(self.current.single_title) > 109:
-            msg = f"Tocando: {fix_characters(self.current.title, limit=109)}"
-
         else:
-            msg = f"Tocando: {self.current.title} || {self.current.authors_string}"
-            if len(msg) > 109:
-                msg = f"Tocando: {fix_characters(self.current.title, limit=109)}"
+
+            requester = self.guild.get_member(self.current.requester)
+
+            if requester:
+                requester_name = str(requester.display_name)
+                requester_tag = str(requester.discriminator)
+            else:
+                requester_name = "Membro desconhecido"
+                requester_tag = "????"
+
+            msg = self.stage_title_template\
+                .replace("{track.title}", self.current.single_title)\
+                .replace("{track.author}", self.current.authors_string)\
+                .replace("{track.duration}", time_format(self.current.duration) if not self.current.is_stream else "Livestream")\
+                .replace("{track.source}", self.current.info.get("sourceName", "desconhecido"))\
+                .replace("{track.playlist}", self.current.playlist_name or "Sem playlist")\
+                .replace("{requester.name}", requester_name) \
+                .replace("{requester.tag}", requester_tag) \
+                .replace("{requester.id}", str(self.current.requester))
+
+            if len(msg) > 110:
+                msg = msg[:107] + "..."
 
         if not self.guild.me.voice.channel.instance:
             func = self.guild.me.voice.channel.create_instance

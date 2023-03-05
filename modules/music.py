@@ -231,20 +231,36 @@ class Music(commands.Cog):
     @commands.has_guild_permissions(manage_guild=True)
     @pool_command(
         only_voiced=True, name="stageannounce", aliases=["stagevc", "togglestageannounce"], hidden=True,
-        description="Ativar o sistema de anuncio automático do palco com o nome da música.",
+        description="Ativar o sistema de anuncio automático do palco com o nome da música.\n\n"
+                    "Placeholders:\n"
+                    "{track.title} -> Nome da música\n"
+                    "{track.author} -> Nome do Artista/Uploader/Author da música.\n"
+                    "{track.duration} -> Duração da música.\n"
+                    "{track.source} -> Origem/Fonte da música (Youtube/Spotify/Soundcloud etc)\n"
+                    "{track.playlist} -> Nome da playlist de origem da música (caso tenha)\n"
+                    "{requester.name} -> Nome/Nick do membro que pediu a música\n"
+                    "{requester.tag} -> Tag/Discriminator do membro que pediu a música\n"
+                    "{requester.id} -> ID do membro que pediu a música\n",
         cooldown=stage_cd, max_concurrency=stage_mc, extras={"exclusive_cooldown": True},
     )
-    async def stageannounce_legacy(self, ctx: CustomContext):
+    async def stageannounce_legacy(self, ctx: CustomContext, *, template: str = None):
 
-        await self.stage_announce.callback(self=self, inter=ctx)
+        await self.stage_announce.callback(self=self, inter=ctx, template=template)
 
     @has_source()
     @commands.slash_command(
-        description=f"{desc_prefix}Ativar o sistema de anuncio automático do palco com o nome da música.",
+        description=f"{desc_prefix}Ativar/editar o sistema de anuncio automático do palco com o nome da música.",
         extras={"only_voiced": True, "exclusive_cooldown": True},
         default_member_permissions=disnake.Permissions(manage_guild=True), cooldown=stage_cd, max_concurrency=stage_mc
     )
-    async def stage_announce(self, inter: disnake.AppCmdInter):
+    async def stage_announce(
+            self,
+            inter: disnake.AppCmdInter,
+            template: str = commands.Param(
+                name=disnake.Localized("template", data={disnake.Locale.pt_BR: "modelo"}),
+                description="{track.title} {track.author} {track.duration} {track.playlist} {requester.name} {requester.tag}"
+            )
+    ):
 
         try:
             bot = inter.music_bot
@@ -261,20 +277,36 @@ class Music(commands.Cog):
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
-        if player.stage_title_event:
-            raise GenericError("**O anúncio automático do palco já está ativado.\n"
+        if not template:
+            template = player.stage_title_template
+
+        if player.stage_title_event and player.stage_title_template == template:
+
+            raise GenericError("**O anúncio automático do palco já está ativado (e não houve alterações no "
+                               "template do título).\n"
                                "Caso queira desativar você pode parar o player (todos os membros do palco serão "
                                "desconectados automaticamente nesse processo).**")
 
         player.stage_title_event = True
+        player.stage_title_template = template
         player.start_time = disnake.utils.utcnow()
 
-        txt = [f"ativou o sistema de anúncio automático do palco.",
-               f"📢 **⠂{inter.author.mention} ativou o sistema de anúncio automático do palco "
+        txt = [f"ativou/Alterou o sistema de anúncio automático do palco.",
+               f"📢 **⠂{inter.author.mention} ativou/alterou o sistema de anúncio automático do palco "
                f"{guild.me.voice.channel.mention}.**\n\n"
                f"`Nota: Caso o player seja desligado, todos os membros do palco serão desconectados automaticamente.`"]
 
         await self.interaction_message(inter, txt, emoji="📢", force=True)
+
+    @stage_announce.autocomplete("template")
+    async def fav_add_autocomplete(self, inter: disnake.Interaction, query: str):
+
+        return [
+            "Tocando: {track.title} | {track.author}",
+            "{track.title} | Pedido por: {requester.name}#{requester.tag}",
+            "Rádio 24/7 | {track.title}",
+            "{track.title} | Playlist: {track.playlist}",
+        ]
 
     play_cd = commands.CooldownMapping.from_cooldown(3, 12, commands.BucketType.member)
     play_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
