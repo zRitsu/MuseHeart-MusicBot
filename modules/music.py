@@ -3025,6 +3025,30 @@ class Music(commands.Cog):
         return [n.identifier for n in bot.music.nodes.values() if n != node
                 and query.lower() in n.identifier.lower() and n.available and n.is_available]
 
+    @commands.command(aliases=["puptime"], description="Ver informações de tempo que o player está ativo no servidor.")
+    @commands.cooldown(1, 5, commands.BucketType.guild)
+    async def playeruptime(self, ctx: CustomContext):
+
+        uptime_info = []
+        for bot in self.bot.pool.bots:
+            try:
+                player = bot.music.players[ctx.guild.id]
+                uptime_info.append(f"**Bot:** {bot.user.mention}\n"
+                            f"**Uptime:** <:t{player.uptime}:R>\n"
+                            f"**Canal:** {player.guild.me.voice.channel.mention}")
+            except KeyError:
+                continue
+
+        if not uptime_info:
+            raise GenericError("**Não há players ativos no servidor.**")
+
+        await ctx.reply(
+            embed=disnake.Embed(
+                title="**Player Uptime:**",
+                description="\n-----\n".join(uptime_info)
+            )
+        )
+
     @commands.Cog.listener("on_message_delete")
     async def player_message_delete(self, message: disnake.Message):
 

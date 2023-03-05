@@ -109,6 +109,7 @@ class PlayerSession(commands.Cog):
             "stage_title_template": player.stage_title_template,
             "skin": player.skin,
             "skin_static": player.skin_static,
+            "uptime": player.uptime,
             "restrict_mode": player.restrict_mode,
             "mini_queue_enabled": player.mini_queue_enabled,
             "tracks": tracks
@@ -227,6 +228,7 @@ class PlayerSession(commands.Cog):
                         keep_connected=data["keep_connected"],
                         static=data['static'],
                         extra_hints=hints,
+                        uptime=data.get("uptime"),
                         stage_title_template=data.get("stage_title_template")
                     )
                 except Exception:

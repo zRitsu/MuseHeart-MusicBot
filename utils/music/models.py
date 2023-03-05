@@ -306,6 +306,7 @@ class LavalinkPlayer(wavelink.Player):
         self.restrict_mode = kwargs.pop('restrict_mode', False)
         self.ignore_np_once = False  # não invocar player controller em determinadas situações
         self.allowed_mentions = disnake.AllowedMentions(users=False, everyone=False, roles=False)
+        self.uptime = kwargs.pop("uptime", int(disnake.utils.utcnow().timestamp()))
         # ativar/desativar modo controller (apenas para uso em skins)
         self.controller_mode = True
         self.bot.loop.create_task(self.channel_cleanup())
