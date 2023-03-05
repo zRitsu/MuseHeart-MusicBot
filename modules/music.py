@@ -1380,7 +1380,7 @@ class Music(commands.Cog):
             await self.interaction_message(inter, "voltou para o início da música.", emoji="⏪")
             return
 
-        if player.keep_connected and qsize > 2:
+        if player.keep_connected and qsize < 2:
             track = player.queue.pop()
             player.last_track = None
             player.queue.appendleft(player.current)
