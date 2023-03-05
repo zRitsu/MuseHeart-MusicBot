@@ -3034,7 +3034,7 @@ class Music(commands.Cog):
             try:
                 player = bot.music.players[ctx.guild.id]
                 uptime_info.append(f"**Bot:** {bot.user.mention}\n"
-                            f"**Uptime:** <:t{player.uptime}:R>\n"
+                            f"**Uptime:** <t:{player.uptime}:R>\n"
                             f"**Canal:** {player.guild.me.voice.channel.mention}")
             except KeyError:
                 continue
