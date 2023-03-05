@@ -1380,7 +1380,7 @@ class Music(commands.Cog):
             await self.interaction_message(inter, "voltou para o início da música.", emoji="⏪")
             return
 
-        if player.keep_connected and qsize < 2:
+        if player.keep_connected and qsize > 2:
             track = player.queue.pop()
             player.last_track = None
             player.queue.appendleft(player.current)
@@ -3963,7 +3963,8 @@ class Music(commands.Cog):
                 await player.text_channel.send(embed=embed, delete_after=15)
                 await player.destroy(force=True)
                 return
-        else:
+
+        elif not player.keep_connected and not player.loop:
             player.played.append(player.last_track)
 
         player.locked = True
