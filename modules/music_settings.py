@@ -585,7 +585,20 @@ class MusicSettings(commands.Cog):
                 await channel.delete(reason=f"{inter.author.id} resetou player")
                 if channel_inter != channel:
                     await inter.edit_original_message("O post foi deletado com sucesso!", embed=None, components=None)
+
+                try:
+                    player: LavalinkPlayer = bot.music.players[guild.id]
+                except KeyError:
+                    pass
+                else:
+                    player.static = False
+                    player.message = None
+                    player.text_channel = channel_inter
+                    player.process_hint()
+                    await player.invoke_np(force=True)
+
                 return
+
         except AttributeError:
             pass
 
