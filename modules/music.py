@@ -3586,6 +3586,9 @@ class Music(commands.Cog):
             if message.is_system():
                 return
 
+            if message.type == disnake.MessageType.thread_starter_message:
+                return
+
             try:
                 attachment = message.attachments[0]
             except IndexError:
@@ -3708,7 +3711,8 @@ class Music(commands.Cog):
 
         try:
             player = self.bot.music.players[message.guild.id]
-            await message.delete()
+            if not player.static and not player.has_thread:
+                await message.delete()
         except KeyError:
             skin = data["player_controller"]["skin"]
             static_skin = data["player_controller"]["static_skin"]
