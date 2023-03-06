@@ -533,7 +533,7 @@ class MusicSettings(commands.Cog):
     @commands.command(
         name="reset", usage="[--delete]",
         description="Resetar as configurações relacionadas ao canal de pedir música (song request).",
-        cooldown=setup_cd, max_concurrency=setup_cd
+        cooldown=setup_cd, max_concurrency=setup_mc
     )
     async def reset_legacy(self, ctx: CustomContext, *, delete_channel: str = None):
 
