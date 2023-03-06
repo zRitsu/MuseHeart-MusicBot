@@ -3520,6 +3520,9 @@ class Music(commands.Cog):
 
         if player and isinstance(message.channel, disnake.Thread) and not player.static:
 
+            if player.message.id != message.channel.id and not player.controller_mode:
+                return
+
             text_channel = message.channel
 
         else:
