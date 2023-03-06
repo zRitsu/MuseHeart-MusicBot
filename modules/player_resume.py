@@ -32,8 +32,8 @@ class PlayerSession(commands.Cog):
         except:
             pass
 
-        await self.bot.pool.database.delete_data(
-            str(player.guild.id),
+        await self.database().delete_data(
+            id_=str(player.guild.id),
             collection="player_sessions",
             db_name=str(player.bot.user.id)
         )
@@ -118,15 +118,19 @@ class PlayerSession(commands.Cog):
         bot_id = str(player.bot.user.id)
 
         try:
-            await self.bot.pool.database.update_data(
-                str(player.guild.id),
+            await self.database().update_data(
+                id_=str(player.guild.id),
                 data=data,
                 collection="player_sessions",
-                db_name=bot_id,
-                default_model={bot_id: {}}
+                db_name=bot_id
             )
         except:
             traceback.print_exc()
+
+    def database(self):
+        if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
+            return self.bot.pool.mongo_database
+        return self.bot.pool.local_database
 
     async def resume_players(self):
 
@@ -162,8 +166,10 @@ class PlayerSession(commands.Cog):
             except:
                 pass
 
+            database = self.database()
+
             if not data_list:
-                data_list = await self.bot.pool.database.query_data(db_name=str(self.bot.user.id), collection="player_sessions")
+                data_list = await database.query_data(db_name=str(self.bot.user.id), collection="player_sessions")
 
             for data in data_list:
 
@@ -171,21 +177,21 @@ class PlayerSession(commands.Cog):
 
                 if not guild:
                     print(f"{self.bot.user} - Player Ignorado: {data['_id']} | Servidor inexistente...")
-                    await self.bot.pool.database.delete_data(data['_id'], str(self.bot.user.id), collection="player_sessions")
+                    await database.delete_data(data['_id'], str(self.bot.user.id), collection="player_sessions")
                     continue
 
                 voice_channel = self.bot.get_channel(int(data["voice_channel"]))
 
                 if not voice_channel:
                     print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\nO canal de voz não existe...")
-                    await self.bot.pool.database.delete_data(data['_id'], str(self.bot.user.id), collection="player_sessions")
+                    await database.delete_data(data['_id'], str(self.bot.user.id), collection="player_sessions")
                     continue
 
                 try:
                     can_connect(voice_channel, guild=guild)
                 except Exception as e:
                     print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\n{repr(e)}")
-                    await self.bot.pool.database.delete_data(data['_id'], str(self.bot.user.id), collection="player_sessions")
+                    await database.delete_data(data['_id'], str(self.bot.user.id), collection="player_sessions")
                     continue
 
                 text_channel = self.bot.get_channel(int(data["text_channel"]))
@@ -201,7 +207,7 @@ class PlayerSession(commands.Cog):
                     can_send_message(text_channel, self.bot.user)
                 except Exception:
                     print(f"{self.bot.user} - Player Ignorado (falta de permissão) [Canal: {text_channel.name} | ID: {text_channel.id}] - [ {guild.name} - {guild.id} ]")
-                    await self.bot.pool.database.delete_data(data['_id'], str(self.bot.user.id), collection="player_sessions")
+                    await database.delete_data(data['_id'], str(self.bot.user.id), collection="player_sessions")
                     continue
 
                 try:
@@ -233,7 +239,7 @@ class PlayerSession(commands.Cog):
                     )
                 except Exception:
                     print(f"{self.bot.user} - Falha ao criar player: {guild.name} [{guild.id}]\n{traceback.format_exc()}")
-                    await self.bot.pool.database.delete_data(data['_id'], str(self.bot.user.id), collection="player_sessions")
+                    await database.delete_data(data['_id'], str(self.bot.user.id), collection="player_sessions")
                     continue
 
                 try:

@@ -3,6 +3,7 @@ import asyncio
 import collections.abc
 import json
 import os
+import pprint
 import shutil
 import traceback
 import disnake
@@ -175,11 +176,10 @@ class LocalDatabase(BaseDB):
     async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users],
                           collection: str, default_model: dict = None):
 
-        data = self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data})
+        id_ = str(id_)
 
-        if not data.raw_result:
-            data = dict(default_model[db_name])
-            data["_id"] = str(id_)
+        if not self._connect[collection][db_name].update_one({'_id': id_}, {'$set': data}).raw_result:
+            data["_id"] = id_
             self._connect[collection][db_name].insert_one(data)
 
         return data

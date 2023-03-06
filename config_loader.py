@@ -59,6 +59,7 @@ DEFAULT_CONFIG = {
     "ADD_REGISTER_COMMAND": False,
     "ENABLE_DISCORD_URLS_PLAYBACK": True,
     "PLAYER_INFO_BACKUP_INTERVAL": 45,
+    "PLAYER_SESSIONS_MONGODB": False,
 
     ##############################################
     ### Sistema de música - Suporte ao spotify ###
@@ -177,6 +178,7 @@ def load_config():
         "GLOBAL_PREFIX",
         "ADD_REGISTER_COMMAND",
         "ENABLE_DISCORD_URLS_PLAYBACK",
+        "PLAYER_SESSIONS_MONGODB",
 
         "BANS_INTENT",
         "DM_MESSAGES_INTENT",

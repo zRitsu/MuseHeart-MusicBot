@@ -35,7 +35,8 @@ class BotPool:
 
     def __init__(self):
         self.playlist_cache = {}
-        self.database: Union[MongoDatabase, LocalDatabase] = None
+        self.mongo_database: Optional[MongoDatabase] = None
+        self.local_database: Optional[LocalDatabase] = None
         self.ws_client: Optional[WSClient] = None
         self.spotify: Optional[Client] = None
         self.config = {}
@@ -45,6 +46,14 @@ class BotPool:
         self.message_ids: set = set()
         self.db_cache_cleanup_task = None
         self.bot_mentions = set()
+
+    @property
+    def database(self) -> Union[LocalDatabase, MongoDatabase]:
+
+        if self.config["MONGO"]:
+            return self.mongo_database
+
+        return self.local_database
 
     async def start_bot(self, bot: BotCore):
         try:
@@ -189,11 +198,12 @@ class BotPool:
 
         mongo_key = self.config.get("MONGO")
 
-        if not mongo_key:
-            print(f"O token/link do mongoDB não foi configurado...\nSerá usado um arquivo json para database.\n{'-' * 30}")
-            self.database = LocalDatabase()
+        if mongo_key:
+            self.mongo_database = MongoDatabase(mongo_key)
         else:
-            self.database = MongoDatabase(token=mongo_key)
+            print(f"O token/link do mongoDB não foi configurado...\nSerá usado um arquivo json para database.\n{'-' * 30}")
+
+        self.local_database = LocalDatabase()
 
         try:
             self.commit = check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
