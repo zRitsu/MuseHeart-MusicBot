@@ -48,7 +48,7 @@ class BotPool:
 
     async def start_bot(self, bot: BotCore):
         try:
-            await bot.start(bot.token)
+            await bot.start(bot.http.token)
         except disnake.HTTPException as e:
 
             if e.status == 429 or "429 Too Many Requests" in str(e):
@@ -84,8 +84,6 @@ class BotPool:
         except Exception:
             traceback.print_exc()
             bot.pool.bots.remove(bot)
-
-        del bot.token
 
     async def run_bots(self, bots: List[BotCore]):
         await asyncio.wait(
@@ -253,7 +251,7 @@ class BotPool:
                 number=int(self.max_counter)
             )
 
-            bot.token = token
+            bot.http.token = token
 
             bot.load_extension("jishaku")
 
