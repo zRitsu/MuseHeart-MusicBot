@@ -335,12 +335,22 @@ class PlayerSession(commands.Cog):
                     emoji="🔰"
                 )
 
-                await player.process_next(start_position=float(data["position"]))
-
                 if data.get("paused"):
-                    await asyncio.sleep(1.5)
-                    if player.current:
-                        await player.set_pause(True)
+
+                    try:
+                        track = player.queue.popleft()
+                    except:
+                        track = None
+
+                    if track:
+                        player.paused = True
+                        player.last_position = float(data["position"])
+                        player.current = track
+
+                    await player.invoke_np(rpc_update=True)
+
+                else:
+                    await player.process_next(start_position=float(data["position"]))
 
                 print(f"{self.bot.user} - Player Retomado: {guild.name} [{guild.id}]")
 

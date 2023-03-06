@@ -441,7 +441,7 @@ class LavalinkPlayer(wavelink.Player):
 
         await self.destroy()
 
-    async def process_next(self, start_position: int = 0):
+    async def process_next(self, start_position: Union[int, float] = 0):
 
         if self.locked or self.is_closing:
             return

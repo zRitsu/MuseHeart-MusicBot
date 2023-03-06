@@ -3957,28 +3957,6 @@ class Music(commands.Cog):
         if player.is_closing:
             return
 
-        if payload.code == 4014:
-
-            await asyncio.sleep(1.5)
-
-            if player.guild.me.voice:
-                if player.controller_mode:
-                    player.update = True
-                return
-
-            if player.static:
-                player.command_log = "Desliguei o player por me desconectarem do canal de voz."
-                await player.destroy()
-            else:
-                embed = disnake.Embed(description="**Desliguei o player por me desconectarem do canal de voz.**",
-                                      color=self.bot.get_color(player.guild.me))
-                try:
-                    self.bot.loop.create_task(player.text_channel.send(embed=embed, delete_after=7))
-                except:
-                    traceback.print_exc()
-                await player.destroy()
-            return
-
         if payload.code in (
                 4000,  # internal error
                 1006,
@@ -4308,8 +4286,15 @@ class Music(commands.Cog):
         if before.channel == after.channel:
             return
 
-        if member.bot and member.id != self.bot.user.id:  # ignorar outros bots
-            return
+        destroy_player = False
+
+        if member.bot:
+
+            if member.id != self.bot.user.id:  # ignorar outros bots
+                return
+
+            if before.channel and not after.channel:
+                destroy_player = True
 
         try:
             player: LavalinkPlayer = self.bot.music.players[member.guild.id]
@@ -4322,16 +4307,34 @@ class Music(commands.Cog):
         except AttributeError:
             pass
 
-        if player.guild.me.voice:
+        if destroy_player:
 
-            if member.id == self.bot.user.id:
-                # tempfix para channel do voice_client não ser setado ao mover bot do canal.
-                player.guild.voice_client.channel = after.channel
+            if player.static:
+                player.command_log = "Desliguei o player por me desconectarem do canal de voz."
+                await player.destroy()
 
+            else:
+                embed = disnake.Embed(description="**Desliguei o player por me desconectarem do canal de voz.**",
+                                      color=self.bot.get_color(player.guild.me))
+                try:
+                    self.bot.loop.create_task(player.text_channel.send(embed=embed, delete_after=7))
+                except:
+                    traceback.print_exc()
+                await player.destroy()
+
+            return
+
+        if member.id == self.bot.user.id:
+            # tempfix para channel do voice_client não ser setado ao mover bot do canal.
+            player.guild.voice_client.channel = after.channel
+
+        try:
             check = any(m for m in player.guild.me.voice.channel.members if not m.bot)
+        except:
+            check = None
 
-            if not check:
-                player.members_timeout_task = self.bot.loop.create_task(player.members_timeout())
+        if not check:
+            player.members_timeout_task = self.bot.loop.create_task(player.members_timeout())
 
         # rich presence stuff
 
