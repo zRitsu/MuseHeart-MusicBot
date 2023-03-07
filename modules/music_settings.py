@@ -923,7 +923,7 @@ class MusicSettings(commands.Cog):
             skin = select_view.skin_selected
             skin_static = select_view.static_skin_selected
 
-        for b in [self.bot.pool.bots] if self.bot.config["GLOBAL_PREFIX"] else [bot]:
+        for b in ([self.bot.pool.bots] if self.bot.config["GLOBAL_PREFIX"] else [bot]):
 
             try:
                 player = b.music.players[inter.guild_id]
