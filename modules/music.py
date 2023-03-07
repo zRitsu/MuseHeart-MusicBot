@@ -1676,11 +1676,6 @@ class Music(commands.Cog):
         if milliseconds < 0:
             milliseconds = 0
 
-        await player.seek(milliseconds)
-
-        if player.paused:
-            await player.set_pause(False)
-
         if milliseconds > player.position:
 
             emoji = "⏩"
@@ -1698,6 +1693,11 @@ class Music(commands.Cog):
                 f"voltou o tempo da música para: `{time_format(milliseconds)}`",
                 f"{emoji} **⠂{inter.author.mention} voltou o tempo da música para:** `{time_format(milliseconds)}`"
             ]
+
+        await player.seek(milliseconds)
+
+        if player.paused:
+            await player.set_pause(False)
 
         await self.interaction_message(inter, txt, emoji=emoji)
 
