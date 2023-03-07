@@ -3135,7 +3135,7 @@ class Music(commands.Cog):
     async def check_channel(
             self,
             guild_data: dict,
-            inter: Union[disnake.AppCmdInter],
+            inter: Union[disnake.AppCmdInter, CustomContext],
             channel: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.Thread],
             guild: disnake.Guild,
             bot: BotCore
@@ -4399,20 +4399,26 @@ class Music(commands.Cog):
 
         data['player_controller']['channel'] = None
         data['player_controller']['message_id'] = None
+
         try:
             player: LavalinkPlayer = bot.music.players[guild_id]
-            player.static = False
-            try:
-                if isinstance(inter.channel.parent, disnake.TextChannel):
-                    player.text_channel = inter.channel.parent
-                else:
-                    player.text_channel = inter.channel
-            except AttributeError:
-                player.text_channel = inter.channel
-
         except KeyError:
-            pass
-        await bot.update_data(guild_id, data, db_name=DBModel.guilds)
+            return
+
+        player.static = False
+
+        try:
+            if isinstance(inter.channel.parent, disnake.TextChannel):
+                player.text_channel = inter.channel.parent
+            else:
+                player.text_channel = inter.channel
+        except AttributeError:
+            player.text_channel = inter.channel
+
+        try:
+            await bot.update_data(guild_id, data, db_name=DBModel.guilds)
+        except Exception:
+            traceback.print_exc()
 
     def get_best_node(self, bot: BotCore = None):
 

@@ -895,6 +895,8 @@ class MusicSettings(commands.Cog):
         if global_mode != select_view.global_mode:
             changed_skins_txt += "Skin Global: `" + ("Ativado" if select_view.global_mode else "Desativado") + "`\n"
 
+        global_mode = select_view.global_mode
+
         if not changed_skins_txt:
             txt = "**Não houve alterações nas configurações de skin...**"
         else:
@@ -914,19 +916,19 @@ class MusicSettings(commands.Cog):
         else:
             await inter.send(ephemeral=True, **kwargs)
 
-        for b in self.bot.pool.bots:
+        if global_mode:
+            skin = select_view.global_skin_selected
+            skin_static = select_view.global_static_skin_selected
+        else:
+            skin = select_view.skin_selected
+            skin_static = select_view.static_skin_selected
+
+        for b in [self.bot.pool.bots] if self.bot.config["GLOBAL_PREFIX"] else [bot]:
 
             try:
                 player = b.music.players[inter.guild_id]
             except KeyError:
                 continue
-
-            if global_mode:
-                skin = select_view.global_skin_selected
-                skin_static = select_view.global_static_skin_selected
-            else:
-                skin = select_view.skin_selected
-                skin_static = select_view.static_skin_selected
 
             last_skin = str(player.skin)
             last_static_skin = str(player.skin_static)
@@ -936,14 +938,12 @@ class MusicSettings(commands.Cog):
             player.setup_features()
 
             if player.static:
+
                 if skin_static == last_static_skin:
                     continue
 
             elif skin == last_skin:
                 continue
-
-            else:
-                await player.destroy_message()
 
             player.setup_hints()
             player.process_hint()
