@@ -82,10 +82,10 @@ class MiniSkin:
                         for n, t in (enumerate(itertools.islice(player.queue, 5)))
                     )
                 )
-                embed_queue.set_image(url="https://cdn.discordapp.com/attachments/480195401543188483/795080813678559273/rainbow_bar2.gif")
+                embed_queue.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/1082887587770937455/rainbow_bar2.gif")
 
         embed.set_thumbnail(url=player.current.thumb)
-        embed.set_image(url="https://cdn.discordapp.com/attachments/480195401543188483/795080813678559273/rainbow_bar2.gif")
+        embed.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/1082887587770937455/rainbow_bar2.gif")
 
         if player.current_hint:
             embed.set_footer(text=f"💡 Dica: {player.current_hint}")

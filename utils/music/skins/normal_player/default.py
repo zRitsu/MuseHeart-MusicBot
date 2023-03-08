@@ -118,10 +118,10 @@ class DefaultSkin:
 
                 embed_queue.description += f"\n`[⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + (player.current.duration if not player.current.is_stream else 0)) - player.position)).timestamp())}:R> `⌛]`"
 
-            embed_queue.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif")
+            embed_queue.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/1082887724752715796/rainbow_bar.gif")
 
         embed.description = txt
-        embed.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/937918500784197632/rainbow_bar.gif")
+        embed.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/1082887724752715796/rainbow_bar.gif")
         embed.set_thumbnail(url=player.current.thumb)
 
         data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
