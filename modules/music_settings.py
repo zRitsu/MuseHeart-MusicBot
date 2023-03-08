@@ -383,13 +383,18 @@ class MusicSettings(commands.Cog):
                     except:
                         func = inter.message.edit
 
-                await func(
-                    embed=disnake.Embed(
-                        description="**Tempo esgotado!**",
-                        color=disnake.Color.red()
-                    ),
-                    components=None
-                )
+                try:
+                    await func(
+                        embed=disnake.Embed(
+                            description="**Tempo esgotado!**",
+                            color=disnake.Color.red()
+                        ),
+                        components=None
+                    )
+                except disnake.NotFound:
+                    pass
+                except Exception:
+                    traceback.print_exc()
 
                 return
 
