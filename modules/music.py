@@ -300,7 +300,7 @@ class Music(commands.Cog):
         await self.interaction_message(inter, txt, emoji="📢", force=True)
 
     @stage_announce.autocomplete("template")
-    async def fav_add_autocomplete(self, inter: disnake.Interaction, query: str):
+    async def stage_announce_autocomplete(self, inter: disnake.Interaction, query: str):
 
         return [
             "Tocando: {track.title} | {track.author}",
