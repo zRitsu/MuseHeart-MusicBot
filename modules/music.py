@@ -294,7 +294,8 @@ class Music(commands.Cog):
         txt = [f"ativou/Alterou o sistema de anúncio automático do palco.",
                f"📢 **⠂{inter.author.mention} ativou/alterou o sistema de anúncio automático do palco "
                f"{guild.me.voice.channel.mention}.**\n\n"
-               f"`Nota: Caso o player seja desligado, todos os membros do palco serão desconectados automaticamente.`"]
+               f"`Nota: Caso o player seja desligado, todos os membros do palco serão desconectados automaticamente.`\n\n"
+               f"**Modelo usado:** `{disnake.utils.escape_markdown(template)}`"]
 
         await self.interaction_message(inter, txt, emoji="📢", force=True)
 
