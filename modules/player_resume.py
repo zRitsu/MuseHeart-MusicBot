@@ -46,18 +46,6 @@ class PlayerSession(commands.Cog):
 
         await self.save_info(payload.player)
 
-    @commands.Cog.listener('on_wavelink_track_start')
-    async def track_start(self, node, payload: wavelink.TrackStart):
-
-        try:
-            payload.player.queue_updater_task.cancel()
-        except:
-            pass
-
-        await self.save_info(payload.player)
-
-        payload.player.queue_updater_task = self.bot.loop.create_task(self.queue_updater_task(payload.player))
-
     async def queue_updater_task(self, player: LavalinkPlayer):
 
         while True:
