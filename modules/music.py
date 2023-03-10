@@ -979,12 +979,11 @@ class Music(commands.Cog):
             skin = guild_data["player_controller"]["skin"]
             static_skin = guild_data["player_controller"]["static_skin"]
 
+            global_data = await self.bot.get_global_data(guild.id, db_name=DBModel.guilds)
+
             if self.bot.config["GLOBAL_PREFIX"]:
-
-                global_data = await self.bot.get_global_data(guild.id, db_name=DBModel.guilds)
-
                 if global_data["global_skin"]:
-                    skin = global_data["player_skin"] or guild_data["player_controller"]["skin"]
+                    skin = global_data["player_skin"] or skin
                     static_skin = global_data["player_skin_static"] or guild_data["player_controller"]["static_skin"]
 
             player: LavalinkPlayer = bot.music.get_player(
@@ -997,6 +996,8 @@ class Music(commands.Cog):
                 node_id=node.identifier,
                 static=bool(static_player['channel']),
                 skin=bot.check_skin(skin),
+                custom_skin_data=global_data["custom_skins"],
+                custom_skin_static_data=global_data["custom_skins_static"],
                 skin_static=bot.check_static_skin(static_skin),
                 extra_hints=self.extra_hints,
             )
@@ -3718,13 +3719,11 @@ class Music(commands.Cog):
             skin = data["player_controller"]["skin"]
             static_skin = data["player_controller"]["static_skin"]
 
-            if self.bot.config["GLOBAL_PREFIX"]:
+            global_data = await self.bot.get_global_data(message.guild.id, db_name=DBModel.guilds)
 
-                global_data = await self.bot.get_global_data(message.guild.id, db_name=DBModel.guilds)
-
-                if global_data["global_skin"]:
-                    skin = global_data["player_skin"] or data["player_controller"]["skin"]
-                    static_skin = global_data["player_skin_static"] or data["player_controller"]["static_skin"]
+            if self.bot.config["GLOBAL_PREFIX"] and global_data["global_skin"]:
+                skin = global_data["player_skin"] or skin
+                static_skin = global_data["player_skin_static"] or static_skin
 
             player: LavalinkPlayer = self.bot.music.get_player(
                 guild_id=message.guild.id,
@@ -3736,6 +3735,8 @@ class Music(commands.Cog):
                 static=True,
                 skin=self.bot.check_skin(skin),
                 skin_static=self.bot.check_static_skin(static_skin),
+                custom_skin_data=global_data["custom_skins"],
+                custom_skin_static_data=global_data["custom_skins_static"],
                 node_id=node.identifier,
                 extra_hints=self.extra_hints,
             )

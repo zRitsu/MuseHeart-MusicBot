@@ -7,6 +7,7 @@ import asyncio
 import wavelink
 from urllib import parse
 from utils.music.converters import fix_characters, time_format, get_button_style
+from utils.music.skin_utils import skin_converter
 from utils.music.filters import AudioFilter
 from utils.db import DBModel
 from utils.others import send_idle_embed, PlayerControls
@@ -274,6 +275,8 @@ class LavalinkPlayer(wavelink.Player):
         self.static: bool = kwargs.pop('static', False)
         self.skin: str = kwargs.pop("skin", None) or self.bot.default_skin
         self.skin_static: str = kwargs.pop("skin_static", None) or self.bot.default_static_skin
+        self.custom_skin_data = kwargs.pop("custom_skin_data", {})
+        self.custom_skin_static_data = kwargs.pop("custom_skin_static_data", {})
         self.queue: deque = deque()
         self.played: deque = deque(maxlen=20)
         self.nightcore: bool = False
@@ -727,8 +730,17 @@ class LavalinkPlayer(wavelink.Player):
         if rpc_update:
             self.bot.loop.create_task(self.process_rpc())
 
-        data = (self.bot.player_static_skins[self.skin_static]
-                if self.static else self.bot.player_skins[self.skin]).load(self)
+        if self.static:
+            if self.skin.startswith("> custom_skin: "):
+                data = skin_converter(self.custom_skin_static_data[self.skin[15:]], player=self)
+            else:
+                data = self.bot.player_static_skins[self.skin_static].load(self)
+
+        else:
+            if self.skin.startswith("> custom_skin: "):
+                data = skin_converter(self.custom_skin_data[self.skin[15:]], player=self)
+            else:
+                data = self.bot.player_skins[self.skin_static].load(self)
 
         if data == self.last_data:
 

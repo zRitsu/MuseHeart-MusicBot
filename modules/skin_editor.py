@@ -1,94 +1,49 @@
 from __future__ import annotations
 
-import json
-import random
 import asyncio
+import json
+import pprint
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import disnake
 from disnake.ext import commands
 
-from utils.music.converters import fix_characters, time_format
+from utils.db import DBModel
+from utils.music.models import LavalinkPlayer
+from utils.music.skin_utils import skin_converter
 from utils.music.errors import GenericError
 from utils.others import CustomContext
-from utils.music.models import LavalinkPlayer
 
 if TYPE_CHECKING:
     from utils.client import BotCore
 
 
-def preview(ctx: CustomContext, data: str, player: Optional[LavalinkPlayer] = None) -> dict:
+class Skinbutton(disnake.ui.View):
 
-    if player:
+    def __init__(self, user: disnake.Member, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+        self.mode = None
 
-        requester = ctx.guild.get_member(player.current.requester)
+    @disnake.ui.button(label="Modo normal")
+    async def normal(self, button, interaction: disnake.MessageInteraction):
+        self.mode = "custom_skins"
+        self.stop()
 
-        data = data. \
-            replace('{track.title_25}', fix_characters(player.current.title, 25)). \
-            replace('{track.title_42}', fix_characters(player.current.title, 42)). \
-            replace('{track.title_58}', fix_characters(player.current.title, 58)). \
-            replace('{track.title}', player.current.title). \
-            replace('{track.url}', player.current.uri). \
-            replace('{track.author}', player.current.author). \
-            replace('{track.duration}', time_format(player.current.duration)). \
-            replace('{track.thumb}', player.current.thumb). \
-            replace('{playlist.name}', player.current.playlist_name or "Nenhuma"). \
-            replace('{playlist.url}', player.current.playlist_url). \
-            replace('{loop.mode}', 'Desativado' if not player.loop else 'Música atual' if player.loop == "current" else "Fila"). \
-            replace('{log.text}', player.command_log or ""). \
-            replace('{log.emoji}', player.command_log_emoji or "Sem registro."). \
-            replace('{requester.mention}', f'<@{player.current.requester}>'). \
-            replace('{requester.avatar}', requester.display_avatar.with_static_format("png").url). \
-            replace('{requester.tag}', f"{requester.display_name}#{requester.discriminator}"). \
-            replace('{requester.color}', str(player.bot.get_color(player.guild.me).value)). \
-            replace('{guild.icon}', player.guild.icon.with_static_format("png").url if ctx.guild.icon else ""). \
-            replace('{guild.name}', player.guild.name). \
-            replace('{guild.id}', str(player.guild.id)). \
-            replace('{player.queue.size}', str(len(player.queue))). \
-            replace('{player.volume}', str(player.volume))
+    @disnake.ui.button(label="Modo estático (song-request)")
+    async def static(self, button, interaction: disnake.MessageInteraction):
+        self.mode = "custom_skins_static"
+        self.stop()
 
-    else:
+    async def interaction_check(self, inter: disnake.MessageInteraction) -> bool:
 
-        track_title = 'Sekai - Burn Me Down [NCS Release]'
+        if inter.user.id != self.user.id:
+            await inter.send(f"Apenas o membro {self.user.mention} pode usar es botões da mensagem.", ephemeral=True)
+            return False
 
-        data = data.\
-            replace('{track.title_25}', fix_characters(track_title, 25)). \
-            replace('{track.title_42}', fix_characters(track_title, 42)). \
-            replace('{track.title_58}', fix_characters(track_title, 58)). \
-            replace('{track.title}', track_title). \
-            replace('{track.url}', 'https://youtu.be/B6DmYzyjjMU'). \
-            replace('{track.author}', "NoCopyrightSounds"). \
-            replace('{track.duration}', '3:35'). \
-            replace('{track.thumb}', "https://img.youtube.com/vi/2vFA0HL9kTk/mqdefault.jpg"). \
-            replace('{playlist.name}', "🎵 DV 🎶"). \
-            replace('{playlist.url}', "https://www.youtube.com/playlist?list=PLKlXSJdWVVAD3iztmL2vFVrwA81sRkV7n"). \
-            replace('{loop.mode}', "Música Atual"). \
-            replace('{log.emoji}', "⏭️"). \
-            replace('{log.text}', f"{random.choice(ctx.guild.members)} pulou a música."). \
-            replace('{requester.mention}', ctx.author.mention). \
-            replace('{requester.avatar}', ctx.author.display_avatar.with_static_format("png").url). \
-            replace('{requester.tag}', f"{ctx.author.display_name}#{ctx.author.discriminator}"). \
-            replace('{requester.color}', str(ctx.bot.get_color(ctx.guild.me).value)). \
-            replace('{guild.icon}', ctx.guild.icon.with_static_format("png").url if ctx.guild.icon else ""). \
-            replace('{guild.name}', ctx.guild.name). \
-            replace('{guild.id}', str(ctx.guild.id)). \
-            replace('{player.queue.size}', "6"). \
-            replace('{player.volume}', "100")
+        return True
 
-    data = json.loads(data)
-
-    if embeds := data.get("embeds"):
-        for d in embeds:
-            try:
-                d["color"] = int(d["color"])
-            except:
-                try:
-                    d["color"] = int(d["color"], 16)
-                except KeyError:
-                    continue
-
-    return {'content': data.pop('content', ""), 'embeds': [disnake.Embed.from_dict(e) for e in data.get("embeds")]}
 
 class CustomSkin(commands.Cog):
 
@@ -106,14 +61,16 @@ class CustomSkin(commands.Cog):
 
         player = None
 
-        for b in ctx.bot.pool.bots:
+        for b in self.bot.pool.bots:
             try:
                 player = b.music.players[ctx.guild.id]
                 break
             except KeyError:
                 continue
 
-        msg = await ctx.reply(**preview(ctx, data, player))
+        preview_data = skin_converter(data, ctx, player)
+
+        msg = await ctx.reply(**preview_data)
 
         emojis = ["✅", "❌"]
 
@@ -121,7 +78,7 @@ class CustomSkin(commands.Cog):
             await msg.add_reaction(e)
 
         try:
-            reaction, user = await ctx.bot.wait_for("reaction_add", check=lambda r, u: r.message.id == msg.id and u.id == ctx.author.id and str(r.emoji) in emojis, timeout=120)
+            reaction, user = await self.bot.wait_for("reaction_add", check=lambda r, u: r.message.id == msg.id and u.id == ctx.author.id and str(r.emoji) in emojis, timeout=120)
         except asyncio.TimeoutError:
             await msg.clear_reactions()
             raise GenericError("**Tempo esgotado!**")
@@ -133,7 +90,49 @@ class CustomSkin(commands.Cog):
             await ctx.reply(embed=disnake.Embed(description=f"**Cancelado pelo usuário.**", color=disnake.Color.red()))
             return
 
-        await ctx.reply("Skin aplicada com sucesso.")
+        await ctx.send("Envie o nome que deseja dar a skin (em até 30 segundos e no máximo 15 caracteres).")
+
+        try:
+            msg = await self.bot.wait_for(
+                "message",
+                timeout=30,
+                check=lambda m: m.channel.id == ctx.channel.id and m.author.id == ctx.author.id
+            )
+        except asyncio.TimeoutError:
+            await ctx.reply("Tempo esgotado!")
+            return
+
+        if (msg_len:=len(msg.content)) > 15:
+            await ctx.reply(f"A quantidade de caracteres do nome ({msg_len}) ultrapassou o limite (15).")
+            return
+
+        skin_name = msg.content
+
+        view = Skinbutton(ctx.author, timeout=30)
+        msg = await ctx.send("Selecione o modo que deseja aplicar a skin aplicar.", view=view)
+
+        await view.wait()
+
+        if view.mode is None:
+            await msg.edit("Tempo esgotado!", components=[])
+            return
+
+        global_data = await self.bot.get_global_data(ctx.guild_id, db_name=DBModel.guilds)
+
+        global_data[view.mode][skin_name] = json.dumps(json.loads(data))
+
+        for b in self.bot.pool.bots:
+            try:
+                player: LavalinkPlayer = b.music.players[ctx.guild.id]
+            except KeyError:
+                continue
+            else:
+                player.custom_skin_data = global_data["custom_skins"]
+                player.custom_skin_static_data = global_data["custom_skins_static"]
+
+        await self.bot.update_global_data(ctx.guild_id, global_data, db_name=DBModel.guilds)
+
+        await msg.edit("a skin foi salva/alterada com sucesso!", view=None)
 
 def setup(bot):
     bot.add_cog(CustomSkin(bot))

@@ -51,11 +51,13 @@ global_db_models = {
         "fav_links": {}
     },
     DBModel.guilds: {
-        "ver": 1.1,
+        "ver": 1.2,
         "prefix": "",
         "global_skin": False,
         "player_skin": None,
-        "player_skin_static": None
+        "player_skin_static": None,
+        "custom_skins": {},
+        "custom_skins_static": {}
     }
 }
 

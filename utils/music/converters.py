@@ -165,3 +165,5 @@ perms_translations = {
     "view_channel": "Ver canal",
     "view_guild_insights": "Ver análises do servidor"
 }
+
+
