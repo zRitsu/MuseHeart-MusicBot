@@ -4082,6 +4082,15 @@ class Music(commands.Cog):
 
             self.bot.loop.create_task(player.message_updater())
 
+            cog = self.bot.get_cog("PlayerSession")
+
+            if not cog or len(player.queue) > 0:
+                return
+
+            await cog.save_info(player)
+
+            player.queue_updater_task = self.bot.loop.create_task(cog.queue_updater_task(player))
+
     @commands.Cog.listener("on_wavelink_track_end")
     async def track_end(self, node: wavelink.Node, payload: wavelink.TrackEnd):
 
