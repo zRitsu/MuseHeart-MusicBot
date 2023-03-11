@@ -37,7 +37,7 @@ def skin_converter(data: str, ctx: CustomContext = None, player: Optional[Lavali
             replace('{requester.mention}', f'<@{player.current.requester}>'). \
             replace('{requester.avatar}', requester.display_avatar.with_static_format("png").url). \
             replace('{requester.tag}', f"{requester.display_name}#{requester.discriminator}"). \
-            replace('{guild.color}', str(player.bot.get_color(player.guild.me).value)). \
+            replace('{guild.color}', hex(player.bot.get_color(player.guild.me).value)[2:]). \
             replace('{guild.icon}', player.guild.icon.with_static_format("png").url if player.guild.icon else ""). \
             replace('{guild.name}', player.guild.name). \
             replace('{guild.id}', str(player.guild.id))
@@ -65,7 +65,7 @@ def skin_converter(data: str, ctx: CustomContext = None, player: Optional[Lavali
             replace('{requester.mention}', ctx.author.mention). \
             replace('{requester.avatar}', ctx.author.display_avatar.with_static_format("png").url). \
             replace('{requester.tag}', f"{ctx.author.display_name}#{ctx.author.discriminator}"). \
-            replace('{guild.color}', str(ctx.bot.get_color(ctx.guild.me).value)). \
+            replace('{guild.color}', hex(ctx.bot.get_color(ctx.guild.me).value)[2:]). \
             replace('{guild.icon}', ctx.guild.icon.with_static_format("png").url if ctx.guild.icon else ""). \
             replace('{guild.name}', ctx.guild.name). \
             replace('{guild.id}', str(ctx.guild.id))
@@ -75,13 +75,10 @@ def skin_converter(data: str, ctx: CustomContext = None, player: Optional[Lavali
     if embeds := data.get("embeds"):
         for d in embeds:
             try:
-                d["color"] = int(d["color"])
-            except:
-                try:
-                    d["color"] = int(d["color"], 16)
-                except KeyError:
-                    continue
+                d["color"] = int(d["color"], 16)
+            except KeyError:
+                continue
 
-        data["embeds"] = [disnake.Embed.from_dict(e) for e in data.get("embeds")]
+        data["embeds"] = [disnake.Embed.from_dict(e) for e in embeds]
 
     return data
