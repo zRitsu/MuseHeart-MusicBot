@@ -991,7 +991,7 @@ class Music(commands.Cog):
                 cls=LavalinkPlayer,
                 player_creator=inter.author.id,
                 guild=guild,
-                channel=channel,
+                channel=channel or bot.get_channel(inter.channel_id),
                 last_message_id=guild_data['player_controller']['message_id'],
                 node_id=node.identifier,
                 static=bool(static_player['channel']),
