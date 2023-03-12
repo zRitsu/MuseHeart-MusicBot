@@ -85,6 +85,13 @@ def skin_converter(data: str, ctx: CustomContext = None, player: Optional[Lavali
 
         queue_text = ""
 
+        color = ctx.bot.get_color(ctx.guild.me)
+
+        try:
+            color = hex(ctx.bot.get_color(ctx.guild.me).value)[2:]
+        except AttributeError:
+            color = str(color)
+
         track = {
             'title': 'Sekai - Burn Me Down [NCS Release]',
             'author': "NoCopyrightSounds",
@@ -120,7 +127,7 @@ def skin_converter(data: str, ctx: CustomContext = None, player: Optional[Lavali
             replace('{requester.mention}', ctx.author.mention). \
             replace('{requester.avatar}', ctx.author.display_avatar.with_static_format("png").url). \
             replace('{requester.tag}', f"{ctx.author.display_name}#{ctx.author.discriminator}"). \
-            replace('{guild.color}', hex(ctx.bot.get_color(ctx.guild.me).value)[2:]). \
+            replace('{guild.color}', color). \
             replace('{guild.icon}', ctx.guild.icon.with_static_format("png").url if ctx.guild.icon else ""). \
             replace('{guild.name}', ctx.guild.name). \
             replace('{guild.id}', str(ctx.guild.id)). \
