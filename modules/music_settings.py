@@ -253,6 +253,7 @@ class MusicSettings(commands.Cog):
 
         original_message = None
         message = None
+        existing_channel = True
 
         try:
             player: LavalinkPlayer = bot.music.players[guild.id]
@@ -441,6 +442,8 @@ class MusicSettings(commands.Cog):
             else:
                 target = await target.create_text_channel(f"{bot.user.name} player controller", **channel_kwargs)
 
+            existing_channel = False
+
         if isinstance(target, disnake.ForumChannel):
 
             channel_kwargs.clear()
@@ -464,7 +467,7 @@ class MusicSettings(commands.Cog):
 
         else:
 
-            if not guild.me.guild_permissions.administrator and not target.permissions_for(guild.me).manage_permissions:
+            if existing_channel and not guild.me.guild_permissions.administrator and not target.permissions_for(guild.me).manage_permissions:
                 raise GenericError(f"**{guild.me.mention} não possui permissão de administrador ou permissão de "
                                    f"gerenciar permissões do canal {target.mention}** para editar as permissões "
                                    f"necessárias para o sistema de pedir música funcionar devidamente.\n\n"
