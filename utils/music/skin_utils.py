@@ -90,7 +90,7 @@ def skin_converter(data: str, ctx: CustomContext = None, player: Optional[Lavali
         try:
             color = hex(ctx.bot.get_color(ctx.guild.me).value)[2:]
         except AttributeError:
-            color = str(color)
+            color = hex(color)
 
         track = {
             'title': 'Sekai - Burn Me Down [NCS Release]',
