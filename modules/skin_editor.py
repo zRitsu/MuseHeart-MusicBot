@@ -51,6 +51,7 @@ class CustomSkin(commands.Cog):
         self.bot = bot
 
     @commands.is_owner()
+    @commands.max_concurrency(1, commands.BucketType.user)
     @commands.command(hidden=True)
     async def setskin(self, ctx: CustomContext, *, data: str):
 
@@ -87,7 +88,10 @@ class CustomSkin(commands.Cog):
 
         if emoji == "❌":
             await msg.clear_reactions()
-            await ctx.reply(embed=disnake.Embed(description=f"**Cancelado pelo usuário.**", color=disnake.Color.red()))
+            await ctx.reply(
+                embed=disnake.Embed(description=f"**Cancelado pelo usuário.**", color=disnake.Color.red()),
+                fail_if_not_exists=False
+            )
             return
 
         await ctx.send("Envie o nome que deseja dar a skin (em até 30 segundos e no máximo 15 caracteres).")
@@ -99,11 +103,14 @@ class CustomSkin(commands.Cog):
                 check=lambda m: m.channel.id == ctx.channel.id and m.author.id == ctx.author.id
             )
         except asyncio.TimeoutError:
-            await ctx.reply("Tempo esgotado!")
+            await ctx.reply("Tempo esgotado!", fail_if_not_exists=False)
             return
 
         if (msg_len:=len(msg.content)) > 15:
-            await ctx.reply(f"A quantidade de caracteres do nome ({msg_len}) ultrapassou o limite (15).")
+            await ctx.reply(
+                f"A quantidade de caracteres do nome ({msg_len}) ultrapassou o limite (15).",
+                fail_if_not_exists=False
+            )
             return
 
         skin_name = msg.content

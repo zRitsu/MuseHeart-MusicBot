@@ -95,7 +95,7 @@ def skin_converter(data: str, ctx: CustomContext = None, player: Optional[Lavali
         track = {
             'title': 'Sekai - Burn Me Down [NCS Release]',
             'author': "NoCopyrightSounds",
-            'url': "https://youtu.be/B6DmYzyjjMU",
+            'url': "https://www.youtube.com/watch?v=2vFA0HL9kTk",
             'duration': 215000
         }
 
@@ -120,7 +120,7 @@ def skin_converter(data: str, ctx: CustomContext = None, player: Optional[Lavali
             replace('{playlist.name}', "🎵 DV 🎶"). \
             replace('{playlist.url}', "https://www.youtube.com/playlist?list=PLKlXSJdWVVAD3iztmL2vFVrwA81sRkV7n"). \
             replace('{player.loop.mode}', "Música Atual"). \
-            replace('{player.queue.size}', "6"). \
+            replace('{player.queue.size}', f"{queue_max_entries}"). \
             replace('{player.volume}', "100"). \
             replace('{player.log.emoji}', "⏭️"). \
             replace('{player.log.text}', f"{random.choice(ctx.guild.members)} pulou a música."). \
