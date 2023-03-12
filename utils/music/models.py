@@ -731,8 +731,8 @@ class LavalinkPlayer(wavelink.Player):
             self.bot.loop.create_task(self.process_rpc())
 
         if self.static:
-            if self.skin.startswith("> custom_skin: "):
-                data = skin_converter(self.custom_skin_static_data[self.skin[15:]], player=self)
+            if self.skin_static.startswith("> custom_skin: "):
+                data = skin_converter(self.custom_skin_static_data[self.skin_static[15:]], player=self)
             else:
                 data = self.bot.player_static_skins[self.skin_static].load(self)
 
