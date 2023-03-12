@@ -4083,7 +4083,7 @@ class Music(commands.Cog):
 
             cog = self.bot.get_cog("PlayerSession")
 
-            if not cog or len(player.queue) > 0:
+            if not cog:
                 return
 
             await cog.save_info(player)
