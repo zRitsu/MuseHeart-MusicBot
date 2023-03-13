@@ -316,6 +316,7 @@ class LavalinkPlayer(wavelink.Player):
         self.mini_queue_feature = False
         self.mini_queue_enabled = False
         self.is_resuming = False
+        self.last_channel: Optional[disnake.VoiceChannel] = None
 
         self.start_time = disnake.utils.utcnow()
 
@@ -387,6 +388,7 @@ class LavalinkPlayer(wavelink.Player):
             await self.text_channel.purge(check=check)
 
     async def connect(self, channel_id: int, self_mute: bool = False, self_deaf: bool = False):
+        self.last_channel = self.bot.get_channel(channel_id)
         await super().connect(channel_id, self_mute=self_mute, self_deaf=True)
 
     def process_hint(self):

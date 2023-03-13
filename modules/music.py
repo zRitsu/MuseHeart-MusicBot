@@ -3086,7 +3086,7 @@ class Music(commands.Cog):
                 if player.is_connected:
                     continue
 
-                await player.connect(player.channel_id)
+                await player.connect(player.last_channel.id)
             except:
                 traceback.print_exc()
 
@@ -3369,7 +3369,7 @@ class Music(commands.Cog):
                 if player.interaction_cooldown:
                     raise GenericError("O player está em cooldown, tente novamente em instantes.")
 
-                vc = self.bot.get_channel(player.channel_id)
+                vc = player.last_channel
 
                 if not vc:
                     self.bot.loop.create_task(player.destroy(force=True))
@@ -3961,7 +3961,7 @@ class Music(commands.Cog):
 
         print("-" * 15)
         print(f"Erro no canal de voz!")
-        print(f"guild: {player.guild.name} | canal: {player.channel_id}")
+        print(f"guild: {player.guild.name} | canal: {player.last_channel.id}")
         print(f"server: {payload.player.node.identifier} | ")
         print(f"reason: {payload.reason} | code: {payload.code}")
         print("-" * 15)
@@ -3979,7 +3979,7 @@ class Music(commands.Cog):
         ):
 
             player.is_resuming = True
-            vc_id = int(player.channel_id)
+            vc_id = player.last_channel.id
             await asyncio.sleep(3)
             await player.connect(vc_id)
             player.is_resuming = False
@@ -4351,6 +4351,7 @@ class Music(commands.Cog):
         if member.id == self.bot.user.id:
             # tempfix para channel do voice_client não ser setado ao mover bot do canal.
             player.guild.voice_client.channel = after.channel
+            player.last_channel = after.channel
 
         try:
             check = any(m for m in player.guild.me.voice.channel.members if not m.bot)
@@ -4377,8 +4378,11 @@ class Music(commands.Cog):
         except:
             pass
 
-        if player.channel_id not in channels:
-            return
+        try:
+            if player.last_channel.id not in channels:
+                return
+        except AttributeError:
+            pass
 
         if not after or before.channel != after.channel:
 
