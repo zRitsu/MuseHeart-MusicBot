@@ -315,6 +315,7 @@ class LavalinkPlayer(wavelink.Player):
         self.bot.loop.create_task(self.channel_cleanup())
         self.mini_queue_feature = False
         self.mini_queue_enabled = False
+        self.is_resuming = False
 
         self.start_time = disnake.utils.utcnow()
 

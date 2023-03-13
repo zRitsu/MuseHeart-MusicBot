@@ -3974,12 +3974,15 @@ class Music(commands.Cog):
                 1006,
                 1001,
                 4016,  # Connection started elsewhere
-                4005  # Already authenticated.
+                4005,  # Already authenticated.
+                4006,  # Session is no longer valid.
         ):
 
+            player.is_resuming = True
             vc_id = int(player.channel_id)
-            await asyncio.sleep(2)
+            await asyncio.sleep(3)
             await player.connect(vc_id)
+            player.is_resuming = False
             return
 
     @commands.Cog.listener('on_wavelink_track_exception')
@@ -4328,7 +4331,7 @@ class Music(commands.Cog):
         except AttributeError:
             pass
 
-        if destroy_player:
+        if destroy_player and not player.is_resuming:
 
             if player.static:
                 player.command_log = "Desliguei o player por me desconectarem do canal de voz."
