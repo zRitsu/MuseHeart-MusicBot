@@ -360,8 +360,10 @@ class PlayerSession(commands.Cog):
                         player.paused = True
                         player.last_position = float(data["position"])
                         player.current = track
+                        await player.invoke_np(rpc_update=True)
 
-                    await player.invoke_np(rpc_update=True)
+                    else:
+                        await player.process_next()
 
                 else:
                     await player.process_next(start_position=float(data["position"]))

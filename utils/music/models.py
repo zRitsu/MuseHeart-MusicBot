@@ -468,11 +468,12 @@ class LavalinkPlayer(wavelink.Player):
             return
 
         if not track:
+            await self.process_next()
             return
 
-        if isinstance(track, PartialTrack):
+        self.locked = True
 
-            self.locked = True
+        if isinstance(track, PartialTrack):
 
             if not track.id:
                 try:
@@ -488,10 +489,11 @@ class LavalinkPlayer(wavelink.Player):
                         )
                     except:
                         traceback.print_exc()
+
+                    self.locked = False
+
                     await self.process_next()
                     return
-
-            self.locked = False
 
             if not track.id:
                 try:
@@ -504,10 +506,14 @@ class LavalinkPlayer(wavelink.Player):
                     )
                 except:
                     traceback.print_exc()
+
+                self.locked = False
+
                 await self.process_next()
                 return
 
         elif not track.id:
+
             t = await self.node.get_tracks(track.uri)
 
             if not t:
@@ -521,6 +527,9 @@ class LavalinkPlayer(wavelink.Player):
                     )
                 except:
                     traceback.print_exc()
+
+                self.locked = False
+
                 await self.process_next()
                 return
 
@@ -531,7 +540,6 @@ class LavalinkPlayer(wavelink.Player):
         self.is_previows_music = False
 
         self.locked = False
-
         await self.play(track, start=start_position)
         self.start_time = disnake.utils.utcnow()
 
