@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rm -f poetry.lock && rm -f pyproject.toml
+rm -f poetry.lock && rm -f pyproject.toml && rm -rf .upm
 pip3 uninstall poetry -y
 
 if [ -n "${VIDEO_PREVIEW}" ]; then
