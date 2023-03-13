@@ -4085,7 +4085,7 @@ class Music(commands.Cog):
 
             self.bot.loop.create_task(player.message_updater())
 
-            cog = self.bot.get_cog("PlayerSession")
+        cog = self.bot.get_cog("PlayerSession")
 
         if not cog:
             return
