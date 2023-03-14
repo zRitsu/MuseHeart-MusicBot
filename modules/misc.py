@@ -116,7 +116,7 @@ class Misc(commands.Cog):
 
         for c in (guild.system_channel, guild.public_updates_channel, guild.rules_channel):
 
-            if c and guild.system_channel.permissions_for(guild.me).send_messages:
+            if c and c.permissions_for(guild.me).send_messages:
                 channel = c
                 break
 
