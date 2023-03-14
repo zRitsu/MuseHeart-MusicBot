@@ -444,6 +444,12 @@ class MusicSettings(commands.Cog):
 
             existing_channel = False
 
+        if target == guild.public_updates_channel:
+            raise GenericError("**Você não pode usar um canal de atualizações do discord.**")
+
+        if target == guild.rules_channel:
+            raise GenericError("**Você não pode usar um canal de regras.**")
+
         if isinstance(target, disnake.ForumChannel):
 
             channel_kwargs.clear()
