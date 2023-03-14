@@ -211,9 +211,9 @@ class Misc(commands.Cog):
             for b in bot.pool.bots:
                 for g in b.guilds:
                     all_guilds_ids.add(g.id)
-            embed.description = f"> **Servidores (todos os bots):** `{len(all_guilds_ids)}`\n"
+            embed.description += f"> **Servidores (todos os bots):** `{len(all_guilds_ids)}`\n"
         else:
-            embed.description = f"> **Servidores:** `{len(bot.guilds)}`\n"
+            embed.description += f"> **Servidores:** `{len(bot.guilds)}`\n"
 
         if self.bot.config["GLOBAL_PREFIX"]:
 
