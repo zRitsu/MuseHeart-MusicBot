@@ -109,11 +109,19 @@ class Misc(commands.Cog):
     @commands.Cog.listener("on_guild_join")
     async def guild_add(self, guild: disnake.Guild):
 
-        if not guild.system_channel or not guild.system_channel.permissions_for(guild.me).send_messages:
-            return
-
         if str(self.bot.user.id) in self.bot.config["INTERACTION_BOTS_CONTROLLER"]:
             await guild.leave()
+
+        channel = None
+
+        for c in (guild.system_channel, guild.public_updates_channel, guild.rules_channel):
+
+            if c and guild.system_channel.permissions_for(guild.me).send_messages:
+                channel = c
+                break
+
+        if not channel:
+            return
 
         if self.bot.config["GLOBAL_PREFIX"]:
             components = [disnake.ui.Button(custom_id="bot_invite", label="Precisa de mais bots de música? Clique aqui.")] if [b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public] else None
@@ -154,8 +162,10 @@ class Misc(commands.Cog):
         if self.bot.config["SUPPORT_SERVER"]:
             embed.description += f"Caso tenha alguma dúvida ou queira acompanhar as últimas novidades, você pode entrar no meu [`servidor de suporte`]({self.bot.config['SUPPORT_SERVER']})\n\n"
 
+        kwargs = {"delete_after": 60} if channel == guild.rules_channel else {}
+
         try:
-            await guild.system_channel.send(embed=embed, components=components)
+            await channel.send(embed=embed, components=components, **kwargs)
         except:
             traceback.print_exc()
 
