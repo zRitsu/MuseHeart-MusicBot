@@ -3079,14 +3079,19 @@ class Music(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
 
+        try:
+            if not self.bot.player_resumed:
+                return
+        except AttributeError:
+            pass
+
         for guild_id in list(self.bot.music.players):
             try:
                 player: LavalinkPlayer = self.bot.music.players[guild_id]
-
-                if player.is_connected:
-                    continue
-
                 await player.connect(player.last_channel.id)
+                if not player.is_paused and not player.is_playing:
+                    await player.process_next()
+                print(f"{self.bot.user} - Player Reconectado: {player.guild.name} [{guild_id}]")
             except:
                 traceback.print_exc()
 

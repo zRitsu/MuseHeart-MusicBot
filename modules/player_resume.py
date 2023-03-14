@@ -94,6 +94,13 @@ class PlayerSession(commands.Cog):
             custom_skin_data = {}
             custom_skin_static_data = {}
 
+        try:
+            text_channel = str(player.message.channel.id)
+            message = str(player.message.id)
+        except:
+            text_channel = str(player.text_channel.id)
+            message = None
+
         data = {
             "_id": str(player.guild.id),
             "volume": str(player.volume),
@@ -104,9 +111,9 @@ class PlayerSession(commands.Cog):
             "player_creator": str(player.player_creator) if player.player_creator else None,
             "static": player.static,
             "paused": player.paused,
-            "text_channel": str(player.text_channel.id),
+            "text_channel": text_channel,
             "keep_connected": player.keep_connected,
-            "message": str(player.message.id) if player.message else None,
+            "message": message,
             "played": played,
             "loop": player.loop,
             "stage_title_event": player.stage_title_event,
