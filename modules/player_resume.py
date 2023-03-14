@@ -207,7 +207,8 @@ class PlayerSession(commands.Cog):
                     await database.delete_data(data['_id'], str(self.bot.user.id), collection="player_sessions")
                     continue
 
-                text_channel = self.bot.get_channel(int(data["text_channel"]))
+                text_channel = self.bot.get_channel(int(data["text_channel"])) or \
+                               self.bot.fetch_channel(int(data["text_channel"]))
 
                 if not text_channel:
 
@@ -230,7 +231,9 @@ class PlayerSession(commands.Cog):
 
                 try:
                     message = await text_channel.fetch_message(int(data["message"]))
-                except:
+                except Exception as e:
+                    print(f"Falha ao obter mensagem: {repr(e)}\n"
+                          f"channel_id: {text_channel.id} | message_id {data['message']}")
                     message = None
 
                 try:
