@@ -206,6 +206,15 @@ class Misc(commands.Cog):
 
         active_players_other_bots = 0
 
+        if len(bot.pool.bots) > 1:
+            all_guilds_ids = set()
+            for b in bot.pool.bots:
+                for g in b.guilds:
+                    all_guilds_ids.add(g.id)
+            embed.description = f"> **Servidores (todos os bots):** `{len(all_guilds_ids)}`\n"
+        else:
+            embed.description = f"> **Servidores:** `{len(bot.guilds)}`\n"
+
         if self.bot.config["GLOBAL_PREFIX"]:
 
             for b in bot.pool.bots:
@@ -230,17 +239,7 @@ class Misc(commands.Cog):
         if bot.pool.commit:
             embed.description += f"> **Commit atual:** [`{bot.pool.commit[:7]}`]({bot.pool.remote_git_url}/commit/{bot.pool.commit})\n"
 
-        if len(bot.pool.bots) > 1:
-            all_guilds_ids = set()
-            for b in bot.pool.bots:
-                for g in b.guilds:
-                    all_guilds_ids.add(g.id)
-            guilds = f"> **Servidores (todos os bots):** `{len(all_guilds_ids)}`"
-        else:
-            guilds = f"> **Servidores:** `{len(bot.guilds)}`"
-
-        embed.description += f"{guilds}\n" \
-                             f"> **Versão do Python:** `{platform.python_version()}`\n" \
+        embed.description += f"> **Versão do Python:** `{platform.python_version()}`\n" \
                              f"> **Versão do Disnake:** `{disnake.__version__}`\n" \
                              f"> **Latencia:** `{round(bot.latency * 1000)}ms`\n" \
                              f"> **Uso de RAM:** `{ram_usage}`\n" \
