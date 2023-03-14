@@ -230,7 +230,17 @@ class Misc(commands.Cog):
         if bot.pool.commit:
             embed.description += f"> **Commit atual:** [`{bot.pool.commit[:7]}`]({bot.pool.remote_git_url}/commit/{bot.pool.commit})\n"
 
-        embed.description += f"> **Versão do Python:** `{platform.python_version()}`\n" \
+        if len(bot.pool.bots) > 1:
+            all_guilds_ids = set()
+            for b in bot.pool.bots:
+                for g in b.guilds:
+                    all_guilds_ids.add(g.id)
+            guilds = f"> **Servidores (todos os bots):** `{len(all_guilds_ids)}`"
+        else:
+            guilds = f"> **Servidores:** `{len(bot.guilds)}`"
+
+        embed.description += f"{guilds}\n" \
+                             f"> **Versão do Python:** `{platform.python_version()}`\n" \
                              f"> **Versão do Disnake:** `{disnake.__version__}`\n" \
                              f"> **Latencia:** `{round(bot.latency * 1000)}ms`\n" \
                              f"> **Uso de RAM:** `{ram_usage}`\n" \
