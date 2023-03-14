@@ -86,10 +86,10 @@ class DefaultProgressbarSkin:
             txt += f"\n> 🇳 **⠂Efeito nightcore:** `ativado`"
 
         if player.current.album_name:
-            txt += f"\n> 💽 **⠂Álbum:** [`{fix_characters(player.current.album_name, limit=13)}`]({player.current.album_url})"
+            txt += f"\n> 💽 **⠂Álbum:** [`{fix_characters(player.current.album_name, limit=16)}`]({player.current.album_url})"
 
         if player.current.playlist_name:
-            txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=13)}`]({player.current.playlist_url})"
+            txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=16)}`]({player.current.playlist_url})"
 
         if (qlenght:=len(player.queue)) and not player.mini_queue_enabled:
             txt += f"\n> 🎶 **⠂Músicas na fila:** `{qlenght}`"
@@ -113,7 +113,7 @@ class DefaultProgressbarSkin:
         if qlenght and player.mini_queue_enabled:
 
             queue_txt = "\n".join(
-                f"`{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 30)}`]({t.uri})"
+                f"`{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 38)}`]({t.uri})"
                 for n, t in (enumerate(itertools.islice(player.queue, 3)))
             )
 
@@ -131,10 +131,10 @@ class DefaultProgressbarSkin:
                 if queue_duration:
                     embed_queue.description += f"\n`[⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + (player.current.duration if not player.current.is_stream else 0)) - player.position)).timestamp())}:R> `⌛]`"
 
-            embed_queue.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/1082887724752715796/rainbow_bar.gif")
+            embed_queue.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/1085234017693085776/rainbow_bar3.gif")
 
         embed.description = txt
-        embed.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/1082887724752715796/rainbow_bar.gif")
+        embed.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/1085234017693085776/rainbow_bar3.gif")
         embed.set_thumbnail(url=player.current.thumb)
 
         data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
@@ -144,7 +144,7 @@ class DefaultProgressbarSkin:
             disnake.ui.Button(emoji="⏮️", custom_id=PlayerControls.back),
             disnake.ui.Button(emoji="⏹️", custom_id=PlayerControls.stop),
             disnake.ui.Button(emoji="⏭️", custom_id=PlayerControls.skip),
-            disnake.ui.Button(emoji="📑", custom_id=PlayerControls.queue),
+            disnake.ui.Button(emoji="<:music_queue:703761160679194734>", custom_id=PlayerControls.queue, label="[ Queue ]"),
             disnake.ui.Select(
                 placeholder="Mais opções:",
                 custom_id="musicplayer_dropdown_inter",

@@ -36,11 +36,11 @@ class ClassicSkin:
             description=f"> [**{player.current.title}**]({player.current.uri})"
         )
         embed.set_image(
-            url="https://cdn.discordapp.com/attachments/554468640942981147/1082887724752715796/rainbow_bar.gif"
+            url="https://cdn.discordapp.com/attachments/554468640942981147/1085234017693085776/rainbow_bar3.gif"
         )
 
         embed_top.set_image(
-            url="https://cdn.discordapp.com/attachments/554468640942981147/1082887724752715796/rainbow_bar.gif"
+            url="https://cdn.discordapp.com/attachments/554468640942981147/1085234017693085776/rainbow_bar3.gif"
         )
 
         embed_top.set_thumbnail(url=player.current.thumb)
@@ -66,7 +66,7 @@ class ClassicSkin:
               f"🎧 **⠂Pedido por:** <@{player.current.requester}>\n"
 
         if player.current.playlist_name:
-            txt += f"📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=20)}`]({player.current.playlist_url})\n"
+            txt += f"📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=23)}`]({player.current.playlist_url})\n"
 
         txt += f"🔊 **⠂Volume:** `{player.volume}%`\n"
 
@@ -80,7 +80,7 @@ class ClassicSkin:
             else:
                 queue_txt += "```ansi\n[0;33mPróximas Músicas:[0m```" + "\n".join(
                     f"`{(n + 1):02}) [{time_format(t.duration) if t.duration else '🔴 Livestream'}]` "
-                    f"[`{fix_characters(t.title, 31)}`]({t.uri})" for n, t in
+                    f"[`{fix_characters(t.title, 38)}`]({t.uri})" for n, t in
                     enumerate(itertools.islice(player.queue, 3))
                 )
 
@@ -102,7 +102,7 @@ class ClassicSkin:
             disnake.ui.Button(emoji="⏮️", custom_id=PlayerControls.back),
             disnake.ui.Button(emoji="⏹️", custom_id=PlayerControls.stop),
             disnake.ui.Button(emoji="⏭️", custom_id=PlayerControls.skip),
-            disnake.ui.Button(emoji="📑", custom_id=PlayerControls.queue),
+            disnake.ui.Button(emoji="<:music_queue:703761160679194734>", custom_id=PlayerControls.queue),
             disnake.ui.Select(
                 placeholder="Mais opções:",
                 custom_id="musicplayer_dropdown_inter",

@@ -795,7 +795,7 @@ class LavalinkPlayer(wavelink.Player):
                     disnake.ui.Button(
                         emoji="⏭️", custom_id=PlayerControls.skip),
                     disnake.ui.Button(
-                        emoji="📑", custom_id=PlayerControls.queue),
+                        emoji="<:music_queue:703761160679194734>", custom_id=PlayerControls.queue),
                     disnake.ui.Select(
                         placeholder="Mais opções:",
                         custom_id="musicplayer_dropdown_inter",
