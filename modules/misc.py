@@ -1,9 +1,11 @@
+from __future__ import annotations
 import traceback
 from itertools import cycle
 from random import shuffle
 from os import getpid
 import platform
 import asyncio
+from typing import TYPE_CHECKING
 
 import disnake
 import psutil
@@ -11,11 +13,16 @@ import humanize
 from disnake.ext import commands
 from aiohttp import ClientSession
 
-from utils.client import BotCore
 from utils.db import DBModel, db_models
 from utils.music.checks import check_requester_channel
 from utils.music.converters import time_format, URL_REG
-from utils.others import select_bot_pool
+from utils.others import select_bot_pool, CustomContext
+
+if TYPE_CHECKING:
+    from utils.client import BotCore
+
+
+
 
 
 class Misc(commands.Cog):
@@ -28,7 +35,6 @@ class Misc(commands.Cog):
         self.extra_user_bots_ids = [int(i) for i in bot.config['ADDITIONAL_BOT_IDS'].split() if i.isdigit()]
 
     desc_prefix = "🔰 [Outros] 🔰 | "
-
 
     def placeholders(self, text: str):
 
@@ -176,7 +182,7 @@ class Misc(commands.Cog):
 
     @commands.command(name="about", aliases=["sobre", "info", "botinfo"], description="Exibir informações sobre mim.",
                       cooldown=about_cd)
-    async def about_legacy(self, ctx):
+    async def about_legacy(self, ctx: CustomContext):
         await self.about.callback(self=self, inter=ctx)
 
 
@@ -505,7 +511,7 @@ class GuildLog(commands.Cog):
             description="__**Me adicionaram em um novo servidor:**__\n"
                         f"```{guild.name}```\n"
                         f"**ID:** `{guild.id}`\n"
-		                f"**Dono:** `{guild.owner}`\n"
+		                f"**Dono:** `{guild.owner} [{guild.owner.id}]`\n"
                         f"**Criado em:** <t:{created_at}:f> - <t:{created_at}:R>\n"
 		                f"**Nível de verificação:** `{guild.verification_level or 'nenhuma'}`\n"
 		                f"**Membros:** `{len([m for m in guild.members if not m.bot])}`\n"
