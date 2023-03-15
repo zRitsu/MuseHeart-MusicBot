@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Union, TYPE_CHECKING
+from typing import Union, TYPE_CHECKING, Optional
 
 import disnake
 from disnake.ext import commands
@@ -12,14 +12,15 @@ if TYPE_CHECKING:
 
 class ServerManagerView(disnake.ui.View):
 
-    def __init__(self, inter: Union[disnake.Interaction, CustomContext], bot: BotCore):
+    def __init__(self, inter: Union[disnake.Interaction, CustomContext]):
         super().__init__(timeout=500)
+        self.message: Optional[disnake.Message] = None
         self.inter = inter
-        self.bot = bot
+        self.pages = list(disnake.utils.as_chunks([b for b in inter.bot.pool.bots if b.guilds], 25))
+        self.bot = self.pages[0][0]
         self.current_page = 0
-        self.pages = list(disnake.utils.as_chunks(bot.guilds, 25))
         self.current_guild = self.pages[self.current_page][0]
-        self.update_components_()
+        self.rebuild_components()
 
     def bot_count(self, g: disnake.Guild):
         return len([m for m in g.members if m.bot])
@@ -29,8 +30,8 @@ class ServerManagerView(disnake.ui.View):
 
     async def update_data(self, interaction: disnake.MessageInteraction):
         self.current_page = 0
-        self.pages = list(disnake.utils.as_chunks(self.bot.guilds, 25))
-        self.current_guild = self.pages[self.current_page][0]
+        self.pages = list(disnake.utils.as_chunks([b for b in self.bot.pool.bots if b.guilds], 25))
+        self.current_guild = self.pages[0][0]
         await self.update_message(interaction)
 
     def build_bot_select(self):
@@ -76,17 +77,8 @@ class ServerManagerView(disnake.ui.View):
         created_at = int(self.current_guild.created_at.timestamp())
         joined_at = int(self.current_guild.me.joined_at.timestamp())
         color = self.bot.get_color(self.current_guild.me)
-        embeds=[]
 
-        if len(self.pages) > 1:
-            embeds.append(
-                disnake.Embed(
-                    color=color,
-                    description=f"```ansi\n[32;1mPágina atual: [0m [34;1m[{self.current_page+1}/{len(self.pages)}][0m```"
-                )
-            )
-
-        embed1 = disnake.Embed(
+        embed = disnake.Embed(
             color=color,
             description=f"```{self.current_guild.name}```\n"
                         f"**ID:** `{self.current_guild.id}`\n"
@@ -98,16 +90,17 @@ class ServerManagerView(disnake.ui.View):
                         f"**Bots:** `{self.bot_count(self.current_guild)}`"
         )
 
+        if len(self.pages) > 1:
+            embed.title = f"Página atual: [{self.current_page+1}/{len(self.pages)}]"
+
         if self.current_guild.icon:
-            embed1.set_thumbnail(url=self.current_guild.icon.with_static_format("png").url)
+            embed.set_thumbnail(url=self.current_guild.icon.with_static_format("png").url)
 
-        embed1.set_footer(text=f"{self.bot.user} [{self.bot.user.id}]", icon_url=self.bot.user.display_avatar.url)
+        embed.set_footer(text=f"{self.bot.user} [ID: {self.bot.user.id}]", icon_url=self.bot.user.display_avatar.url)
 
-        embeds.append(embed1)
+        return [embed]
 
-        return embeds
-
-    def update_components_(self):
+    def rebuild_components(self):
 
         if (has_server_select:=len(self.pages[0]) > 1):
 
@@ -134,10 +127,18 @@ class ServerManagerView(disnake.ui.View):
         stop.callback = self.stop_interaction
         self.add_item(stop)
 
+    async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
+
+        if interaction.author.id != self.inter.user.id:
+            await interaction.response.send_message("Você não pode interagir aqui...", ephemeral=True)
+            return False
+
+        return True
+
     async def update_message(self, interaction: disnake.MessageInteraction):
 
         self.clear_items()
-        self.update_components_()
+        self.rebuild_components()
 
         func = interaction.response.edit_message if not interaction.response.is_done() else interaction.message.edit
         await func(embeds=self.build_embed(), view=self)
@@ -161,6 +162,7 @@ class ServerManagerView(disnake.ui.View):
             self.current_page = 0
         else:
             self.current_page += 1
+        self.current_guild = self.pages[self.current_page][0]
         await self.update_message(interaction)
 
     async def previous_page(self, interaction: disnake.MessageInteraction):
@@ -168,6 +170,7 @@ class ServerManagerView(disnake.ui.View):
             self.current_page = (len(self.pages)-1)
         else:
             self.current_page -= 1
+        self.current_guild = self.pages[self.current_page][0]
         await self.update_message(interaction)
 
     async def opts_callback(self, interaction: disnake.MessageInteraction):
@@ -186,13 +189,8 @@ class ServerManagerCog(commands.Cog):
                       description="Gerenciar servidores em que o bot está.")
     async def servermanager(self, ctx: CustomContext):
 
-        ctx, bot = await select_bot_pool(ctx)
-
-        if not bot:
-            return
-
-        view = ServerManagerView(ctx, bot)
-        await ctx.response.edit_message(embeds=view.build_embed(), view=view)
+        view = ServerManagerView(ctx)
+        view.message = await ctx.reply(embeds=view.build_embed(), view=view)
         await view.wait()
 
 def setup(bot: BotCore):
