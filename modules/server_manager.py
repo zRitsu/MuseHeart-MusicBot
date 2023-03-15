@@ -153,9 +153,8 @@ class ServerManagerView(disnake.ui.View):
         await self.update_data(interaction)
 
     async def leave_guild(self, interaction: disnake.MessageInteraction):
-        guild = self.bot.get_guild(int(interaction.values[0]))
         await interaction.response.defer()
-        await guild.leave()
+        await self.current_guild.leave()
         await self.update_data(interaction)
 
     async def stop_interaction(self, interaction: disnake.MessageInteraction):
