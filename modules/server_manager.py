@@ -78,6 +78,14 @@ class ServerManagerView(disnake.ui.View):
         color = self.bot.get_color(self.current_guild.me)
         embeds=[]
 
+        if len(self.pages) > 1:
+            embeds.append(
+                disnake.Embed(
+                    color=color,
+                    description=f"```ansi\n[32;1mPágina atual: [0m [34;1m[{self.current_page+1}/{len(self.pages)}][0m```"
+                )
+            )
+
         embed1 = disnake.Embed(
             color=color,
             description=f"```{self.current_guild.name}```\n"
@@ -97,34 +105,26 @@ class ServerManagerView(disnake.ui.View):
 
         embeds.append(embed1)
 
-        if len(self.pages) > 1:
-            embeds.append(
-                disnake.Embed(
-                    color=color,
-                    description=f"```ansi\n[32;1mPágina atual: [0m [34;1m[{self.current_page}/{len(self.pages)-1}][0m```"
-                )
-            )
-
         return embeds
 
     def update_components_(self):
 
-        if len(self.pages[0]) > 1:
+        if (has_server_select:=len(self.pages[0]) > 1):
 
             self.add_item(self.build_select())
 
-            if len(self.pages) > 1:
-
-                back = disnake.ui.Button(label="Voltar", emoji="⬅️")
-                back.callback = self.previous_page
-                self.add_item(back)
-
-                next = disnake.ui.Button(label="Avançar", emoji="➡️")
-                next.callback = self.next_page
-                self.add_item(next)
-
         if len(self.bot.pool.bots) > 1:
             self.add_item(self.build_bot_select())
+
+        if has_server_select and len(self.pages) > 1:
+
+            back = disnake.ui.Button(label="Voltar", emoji="⬅️")
+            back.callback = self.previous_page
+            self.add_item(back)
+
+            next = disnake.ui.Button(label="Avançar", emoji="➡️")
+            next.callback = self.next_page
+            self.add_item(next)
 
         leave = disnake.ui.Button(label="Remover", emoji="♻️", style=disnake.ButtonStyle.red)
         leave.callback = self.leave_guild
@@ -165,7 +165,7 @@ class ServerManagerView(disnake.ui.View):
 
     async def previous_page(self, interaction: disnake.MessageInteraction):
         if self.current_page == 0:
-            self.current_page += (len(self.pages)-1)
+            self.current_page = (len(self.pages)-1)
         else:
             self.current_page -= 1
         await self.update_message(interaction)
