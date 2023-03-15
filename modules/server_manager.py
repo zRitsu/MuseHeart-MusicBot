@@ -86,8 +86,11 @@ class ServerManagerView(disnake.ui.View):
                         f"**Sou membro desde:** <t:{joined_at}:f> - <t:{joined_at}:R>\n"
                         f"**Nível de verificação:** `{self.current_guild.verification_level or 'nenhuma'}`\n"
                         f"**Membros:** `{self.member_count(self.current_guild)}`\n"
-                        f"**Bots:** `{self.bot_count(self.current_guild)}`\n"
+                        f"**Bots:** `{self.bot_count(self.current_guild)}`"
         )
+
+        if len(self.pages) > 1:
+            embed.description += f"\n```ansi\n[32;1mPágina atual: [0m [34;1m{self.current_page} / {len(self.pages)-1}[0m```"
 
         if self.current_guild.icon:
             embed.set_thumbnail(url=self.current_guild.icon.with_static_format("png").url)
