@@ -34,6 +34,9 @@ class ServerManagerView(disnake.ui.View):
                 next.callback = self.next_page
                 self.add_item(next)
 
+        if len(bot.pool.bots) > 1:
+            self.add_item(self.build_bot_select())
+
         leave = disnake.ui.Button(label="Remover", emoji="♻️", style=disnake.ButtonStyle.red)
         leave.callback = self.leave_guild
         self.add_item(leave)
@@ -54,6 +57,24 @@ class ServerManagerView(disnake.ui.View):
         self.current_guild = self.pages[self.current_page][0]
         await self.update_message(interaction)
 
+    def build_bot_select(self):
+
+        opts = [
+            disnake.SelectOption(
+                label=f"{bot.user}", value=str(bot.user.id),
+                description=f"{bot.user.id} / Servers: {len(bot.guilds)}")
+            for bot in self.bot.pool.bots
+        ]
+
+        select = disnake.ui.Select(
+            placeholder="Selecione um Bot:",
+            options=opts
+        )
+
+        select.callback = self.select_bot
+
+        return select
+
     def build_select(self):
 
         opts = [
@@ -64,8 +85,9 @@ class ServerManagerView(disnake.ui.View):
         ]
 
         select = disnake.ui.Select(
-            placeholder="Selecione um servidor:",
-            options=opts
+            placeholder="Selecione um Servidor:",
+            options=opts,
+            custom_id="server_selection"
         )
 
         select.callback = self.opts_callback
@@ -76,9 +98,11 @@ class ServerManagerView(disnake.ui.View):
 
         created_at = int(self.current_guild.created_at.timestamp())
         joined_at = int(self.current_guild.me.joined_at.timestamp())
+        color = self.bot.get_color(self.current_guild.me)
+        embeds=[]
 
-        embed = disnake.Embed(
-            color=self.bot.get_color(self.current_guild.me),
+        embed1 = disnake.Embed(
+            color=color,
             description=f"```{self.current_guild.name}```\n"
                         f"**ID:** `{self.current_guild.id}`\n"
                         f"**Dono:** `{self.current_guild.owner} [{self.current_guild.owner.id}]`\n"
@@ -89,20 +113,33 @@ class ServerManagerView(disnake.ui.View):
                         f"**Bots:** `{self.bot_count(self.current_guild)}`"
         )
 
-        if len(self.pages) > 1:
-            embed.description += f"\n```ansi\n[32;1mPágina atual: [0m [34;1m{self.current_page} / {len(self.pages)-1}[0m```"
-
         if self.current_guild.icon:
-            embed.set_thumbnail(url=self.current_guild.icon.with_static_format("png").url)
+            embed1.set_thumbnail(url=self.current_guild.icon.with_static_format("png").url)
 
-        embed.set_footer(text=f"{self.bot.user} [{self.bot.user.id}]", icon_url=self.bot.user.display_avatar.url)
+        embed1.set_footer(text=f"{self.bot.user} [{self.bot.user.id}]", icon_url=self.bot.user.display_avatar.url)
 
-        return embed
+        embeds.append(embed1)
+
+        if len(self.pages) > 1:
+            embeds.append(
+                disnake.Embed(
+                    color=color,
+                    description=f"```ansi\n[32;1mPágina atual: [0m [34;1m[{self.current_page}/{len(self.pages)-1}][0m```"
+                )
+            )
+
+        return embeds
 
     async def update_message(self, interaction: disnake.MessageInteraction):
+
         self.children[0] = self.build_select()
+
         func = interaction.response.edit_message if not interaction.response.is_done() else interaction.message.edit
-        await func(embed=self.build_embed(), view=self)
+        await func(embeds=self.build_embed(), view=self)
+
+    async def select_bot(self, interaction: disnake.MessageInteraction):
+        self.bot = [b for b in self.bot.pool.bots if str(b.user.id) == interaction.values[0]][0]
+        await self.update_data(interaction)
 
     async def leave_guild(self, interaction: disnake.MessageInteraction):
         guild = self.bot.get_guild(int(interaction.values[0]))
@@ -150,7 +187,7 @@ class ServerManagerCog(commands.Cog):
             return
 
         view = ServerManagerView(ctx, bot)
-        await ctx.response.edit_message(embed=view.build_embed(), view=view)
+        await ctx.response.edit_message(embeds=view.build_embed(), view=view)
         await view.wait()
 
 def setup(bot: BotCore):
