@@ -19,31 +19,7 @@ class ServerManagerView(disnake.ui.View):
         self.current_page = 0
         self.pages = list(disnake.utils.as_chunks(bot.guilds, 25))
         self.current_guild = self.pages[self.current_page][0]
-
-        if len(self.pages[0]) > 1:
-
-            self.add_item(self.build_select())
-
-            if len(self.pages) > 1:
-
-                back = disnake.ui.Button(label="Voltar", emoji="⬅️")
-                back.callback = self.previous_page
-                self.add_item(back)
-
-                next = disnake.ui.Button(label="Avançar", emoji="➡️")
-                next.callback = self.next_page
-                self.add_item(next)
-
-        if len(bot.pool.bots) > 1:
-            self.add_item(self.build_bot_select())
-
-        leave = disnake.ui.Button(label="Remover", emoji="♻️", style=disnake.ButtonStyle.red)
-        leave.callback = self.leave_guild
-        self.add_item(leave)
-
-        stop = disnake.ui.Button(label="Parar", emoji="⏹️", style=disnake.ButtonStyle.blurple)
-        stop.callback = self.stop_interaction
-        self.add_item(stop)
+        self.update_components_()
 
     def bot_count(self, g: disnake.Guild):
         return len([m for m in g.members if m.bot])
@@ -62,8 +38,9 @@ class ServerManagerView(disnake.ui.View):
         opts = [
             disnake.SelectOption(
                 label=f"{bot.user}", value=str(bot.user.id),
-                description=f"{bot.user.id} / Servers: {len(bot.guilds)}")
-            for bot in self.bot.pool.bots
+                description=f"{bot.user.id} / Servers: {len(bot.guilds)}",
+                default=bot.user.id == self.bot.user.id
+            ) for bot in self.bot.pool.bots
         ]
 
         select = disnake.ui.Select(
@@ -80,8 +57,8 @@ class ServerManagerView(disnake.ui.View):
         opts = [
             disnake.SelectOption(
                 label=f"{guild.name}", value=str(guild.id),
-                description=f"{guild.id} [m: {self.member_count(guild)} / b: {self.bot_count(guild)}]")
-            for guild in self.pages[self.current_page]
+                description=f"{guild.id} [m: {self.member_count(guild)} / b: {self.bot_count(guild)}]",
+                default=guild.id == self.current_guild.id) for guild in self.pages[self.current_page]
         ]
 
         select = disnake.ui.Select(
@@ -130,9 +107,37 @@ class ServerManagerView(disnake.ui.View):
 
         return embeds
 
+    def update_components_(self):
+
+        if len(self.pages[0]) > 1:
+
+            self.add_item(self.build_select())
+
+            if len(self.pages) > 1:
+
+                back = disnake.ui.Button(label="Voltar", emoji="⬅️")
+                back.callback = self.previous_page
+                self.add_item(back)
+
+                next = disnake.ui.Button(label="Avançar", emoji="➡️")
+                next.callback = self.next_page
+                self.add_item(next)
+
+        if len(self.bot.pool.bots) > 1:
+            self.add_item(self.build_bot_select())
+
+        leave = disnake.ui.Button(label="Remover", emoji="♻️", style=disnake.ButtonStyle.red)
+        leave.callback = self.leave_guild
+        self.add_item(leave)
+
+        stop = disnake.ui.Button(label="Parar", emoji="⏹️", style=disnake.ButtonStyle.blurple)
+        stop.callback = self.stop_interaction
+        self.add_item(stop)
+
     async def update_message(self, interaction: disnake.MessageInteraction):
 
-        self.children[0] = self.build_select()
+        self.clear_items()
+        self.update_components_()
 
         func = interaction.response.edit_message if not interaction.response.is_done() else interaction.message.edit
         await func(embeds=self.build_embed(), view=self)
