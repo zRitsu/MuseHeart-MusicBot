@@ -13,11 +13,11 @@ if TYPE_CHECKING:
 class ServerManagerView(disnake.ui.View):
 
     def __init__(self, inter: Union[disnake.Interaction, CustomContext]):
-        super().__init__(timeout=500)
+        super().__init__(timeout=300)
         self.message: Optional[disnake.Message] = None
         self.inter = inter
-        self.pages = list(disnake.utils.as_chunks([b for b in inter.bot.pool.bots if b.guilds], 25))
-        self.bot = self.pages[0][0]
+        self.bot = [b for b in inter.bot.pool.bots if b.guilds][0]
+        self.pages = list(disnake.utils.as_chunks([g for g in self.bot.guilds], 25))
         self.current_page = 0
         self.current_guild = self.pages[self.current_page][0]
         self.rebuild_components()
@@ -30,7 +30,7 @@ class ServerManagerView(disnake.ui.View):
 
     async def update_data(self, interaction: disnake.MessageInteraction):
         self.current_page = 0
-        self.pages = list(disnake.utils.as_chunks([b for b in self.bot.pool.bots if b.guilds], 25))
+        self.pages = list(disnake.utils.as_chunks([g for g in self.bot.guilds], 25))
         self.current_guild = self.pages[0][0]
         await self.update_message(interaction)
 
@@ -134,6 +134,11 @@ class ServerManagerView(disnake.ui.View):
             return False
 
         return True
+
+    async def on_timeout(self) -> None:
+        for c in self.children:
+            c.disabled = True
+        await self.message.edit(view=self)
 
     async def update_message(self, interaction: disnake.MessageInteraction):
 
