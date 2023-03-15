@@ -72,7 +72,7 @@ class ServerManagerView(disnake.ui.View):
 
         return select
 
-    def build_embed(self):
+    def build_embed(self, interaction: Union[disnake.MessageInteraction, CustomContext]):
 
         created_at = int(self.current_guild.created_at.timestamp())
         joined_at = int(self.current_guild.me.joined_at.timestamp())
@@ -95,6 +95,9 @@ class ServerManagerView(disnake.ui.View):
 
         if self.current_guild.icon:
             embed.set_thumbnail(url=self.current_guild.icon.with_static_format("png").url)
+
+        if interaction.guild.id == self.current_guild.id and interaction.bot.user.id == self.bot.user.id:
+            embed.description += f"\n```ansi\n[32;1mEstou no servidor atual!```"
 
         embed.set_footer(text=f"{self.bot.user} [ID: {self.bot.user.id}]", icon_url=self.bot.user.display_avatar.url)
 
@@ -146,13 +149,26 @@ class ServerManagerView(disnake.ui.View):
         self.rebuild_components()
 
         func = interaction.response.edit_message if not interaction.response.is_done() else interaction.message.edit
-        await func(embeds=self.build_embed(), view=self)
+        await func(embeds=self.build_embed(interaction), view=self)
 
     async def select_bot(self, interaction: disnake.MessageInteraction):
         self.bot = [b for b in self.bot.pool.bots if str(b.user.id) == interaction.values[0]][0]
         await self.update_data(interaction)
 
     async def leave_guild(self, interaction: disnake.MessageInteraction):
+
+        if interaction.guild.id == self.current_guild.id and interaction.bot.user.id == self.bot.user.id:
+            await interaction.response.edit_message(
+                embed=disnake.Embed(
+                    description="**Você me removeu do servidor atual.**",
+                    color=self.bot.get_color(interaction.guild.me)
+                ),
+                view=None
+            )
+            await self.current_guild.leave()
+            self.stop()
+            return
+
         await interaction.response.defer()
         await self.current_guild.leave()
         await self.update_data(interaction)
@@ -194,7 +210,7 @@ class ServerManagerCog(commands.Cog):
     async def servermanager(self, ctx: CustomContext):
 
         view = ServerManagerView(ctx)
-        view.message = await ctx.reply(embeds=view.build_embed(), view=view)
+        view.message = await ctx.reply(embeds=view.build_embed(ctx), view=view)
         await view.wait()
 
 def setup(bot: BotCore):
