@@ -4,7 +4,7 @@ from typing import Union, TYPE_CHECKING, Optional
 import disnake
 from disnake.ext import commands
 
-from utils.others import CustomContext, select_bot_pool
+from utils.others import CustomContext
 
 if TYPE_CHECKING:
     from utils.client import BotCore
@@ -41,7 +41,7 @@ class ServerManagerView(disnake.ui.View):
                 label=f"{bot.user}", value=str(bot.user.id),
                 description=f"{bot.user.id} / Servers: {len(bot.guilds)}",
                 default=bot.user.id == self.bot.user.id
-            ) for bot in self.bot.pool.bots
+            ) for bot in self.bot.pool.bots if bot.guilds
         ]
 
         select = disnake.ui.Select(
