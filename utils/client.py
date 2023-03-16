@@ -20,7 +20,7 @@ from web_app import WSClient, start
 from utils.music.checks import check_pool_bots
 from utils.music.errors import GenericError
 from utils.music.local_lavalink import run_lavalink
-from utils.music.models import music_mode
+from utils.music.models import music_mode, LavalinkPlayer
 from utils.music.spotify import spotify_client
 from asyncspotify import Client
 from utils.owner_panel import PanelView
@@ -635,6 +635,13 @@ class BotCore(commands.Bot):
 
         if not message.guild:
             return
+
+        try:
+            player: LavalinkPlayer = self.music.players[message.guild.id]
+            if player.text_channel == message.channel and not message.flags.ephemeral:
+                player.last_message_id = message.id
+        except (KeyError, AttributeError):
+            pass
 
         if isinstance(message.channel, disnake.StageChannel):
             pass

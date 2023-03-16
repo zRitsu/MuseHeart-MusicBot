@@ -3507,13 +3507,6 @@ class Music(commands.Cog):
     @commands.Cog.listener("on_song_request")
     async def song_requests(self, ctx: Optional[CustomContext], message: disnake.Message):
 
-        try:
-            player: LavalinkPlayer = self.bot.music.players[message.guild.id]
-            if player.text_channel == message.channel and not message.flags.ephemeral:
-                player.last_message_id = message.id
-        except (AttributeError, KeyError):
-            player: Optional[LavalinkPlayer] = None
-
         if ctx.command or message.mentions:
             return
 
@@ -3524,6 +3517,8 @@ class Music(commands.Cog):
             data = await self.bot.get_data(message.guild.id, db_name=DBModel.guilds)
         except AttributeError:
             return
+
+        player: Optional[LavalinkPlayer] = self.bot.music.players.get(message.guild.id)
 
         if player and isinstance(message.channel, disnake.Thread) and not player.static:
 
@@ -3736,7 +3731,6 @@ class Music(commands.Cog):
                 player_creator=message.author.id,
                 guild=message.guild,
                 channel=text_channel,
-                last_message_id=data['player_controller']['message_id'],
                 static=True,
                 skin=self.bot.check_skin(skin),
                 skin_static=self.bot.check_static_skin(static_skin),
@@ -3757,6 +3751,7 @@ class Music(commands.Cog):
             player.message = cached_message
 
         embed = disnake.Embed(color=self.bot.get_color(message.guild.me))
+        player.last_message_id = message.id
 
         try:
             player.queue.extend(tracks.tracks)
