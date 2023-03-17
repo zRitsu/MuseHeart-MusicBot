@@ -353,7 +353,7 @@ class MusicSettings(commands.Cog):
             if isinstance(inter, CustomContext):
                 check = (lambda i: i.message.id == msg_select.id and i.author.id == inter.author.id)
             else:
-                check = (lambda i: i.data.custom_id.endswith(f"_{inter.id}") and i.author.id == inter.author.id)
+                check = (lambda i: i.data.custom_id.endswith(f"_{id_}") and i.author.id == inter.author.id)
 
             done, pending = await asyncio.wait([
                 bot.loop.create_task(bot.wait_for('button_click', check=check)),
