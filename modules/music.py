@@ -4078,19 +4078,19 @@ class Music(commands.Cog):
                 force=True if (player.static or not player.loop or not player.is_last_message()) else False,
                 rpc_update=True)
 
-            try:
-                player.message_updater_task.cancel()
-            except:
-                pass
-
-            self.bot.loop.create_task(player.message_updater())
-
         cog = self.bot.get_cog("PlayerSession")
 
         if not cog:
             return
 
         await cog.save_info(player)
+
+        try:
+            player.message_updater_task.cancel()
+        except:
+            pass
+
+        self.bot.loop.create_task(player.message_updater())
 
         player.queue_updater_task = self.bot.loop.create_task(cog.queue_updater_task(player))
 
