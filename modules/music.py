@@ -3712,8 +3712,13 @@ class Music(commands.Cog):
         tracks, node = await self.get_tracks(message.content, message.author)
 
         try:
+            message_id = int(data['player_controller']['message_id'])
+        except TypeError:
+            message_id = None
+
+        try:
             player = self.bot.music.players[message.guild.id]
-            if not player.static and not player.has_thread:
+            if player.static and player.text_channel == message.channel:
                 await message.delete()
         except KeyError:
             skin = data["player_controller"]["skin"]
@@ -3738,11 +3743,12 @@ class Music(commands.Cog):
                 custom_skin_static_data=global_data["custom_skins_static"],
                 node_id=node.identifier,
                 extra_hints=self.extra_hints,
+                last_message_id=message_id,
             )
 
         if not player.message:
             try:
-                cached_message = await text_channel.fetch_message(int(data['player_controller']['message_id']))
+                cached_message = await text_channel.fetch_message(message_id)
             except:
                 cached_message = await send_idle_embed(message, bot=self.bot)
                 data['player_controller']['message_id'] = str(cached_message.id)
@@ -3751,7 +3757,6 @@ class Music(commands.Cog):
             player.message = cached_message
 
         embed = disnake.Embed(color=self.bot.get_color(message.guild.me))
-        player.last_message_id = message.id
 
         try:
             player.queue.extend(tracks.tracks)

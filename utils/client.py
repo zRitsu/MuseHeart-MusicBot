@@ -445,15 +445,21 @@ class BotPool:
             loop.create_task(self.connect_rpc_ws())
             loop.create_task(self.connect_spotify())
 
-            start(self.bots)
+            try:
+                start(self.bots)
+            except KeyboardInterrupt:
+                return
 
         else:
 
             loop.create_task(self.connect_rpc_ws())
             loop.create_task(self.connect_spotify())
-            loop.run_until_complete(
-                self.run_bots(self.bots)
-            )
+            try:
+                loop.run_until_complete(
+                    self.run_bots(self.bots)
+                )
+            except KeyboardInterrupt:
+                return
 
 
 class BotCore(commands.Bot):

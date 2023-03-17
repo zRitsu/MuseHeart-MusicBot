@@ -221,10 +221,8 @@ class MusicSettings(commands.Cog):
 
         channel = bot.get_channel(inter.channel.id)
 
-        try:
+        if target and bot != self.bot:
             target = bot.get_channel(target.id)
-        except AttributeError:
-            pass
 
         perms_dict = {
             "embed_links": True,
@@ -413,21 +411,6 @@ class MusicSettings(commands.Cog):
 
             await inter.response.defer()
 
-            if original_message and original_message.guild.id == inter.guild_id:
-
-                try:
-                    await original_message.edit(content=None, embed=embed_archived, view=None)
-                except:
-                    pass
-                try:
-                    if original_message.thread:
-                        await original_message.thread.edit(
-                            archived=True,
-                            locked=True,
-                            reason=f"Player reconfigurado por {inter.author}.")
-                except:
-                    pass
-
             if channel.category and channel.category.permissions_for(guild.me).send_messages:
                 target = channel.category
             else:
@@ -495,6 +478,21 @@ class MusicSettings(commands.Cog):
                     if m.author == guild.me and m.thread:
                         message = m
                         break
+
+        if original_message and original_message.guild.id == inter.guild_id:
+
+            try:
+                await original_message.edit(content=None, embed=embed_archived, view=None)
+            except:
+                pass
+            try:
+                if original_message.thread:
+                    await original_message.thread.edit(
+                        archived=True,
+                        locked=True,
+                        reason=f"Player reconfigurado por {inter.author}.")
+            except:
+                pass
 
         await target.edit(**channel_kwargs)
 

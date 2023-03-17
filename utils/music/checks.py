@@ -36,11 +36,18 @@ async def check_requester_channel(ctx: CustomContext):
 
     if guild_data['player_controller']["channel"] == str(ctx.channel.id):
 
-        if isinstance(ctx.channel.parent, disnake.ForumChannel):
-            if ctx.channel.owner_id != ctx.bot.user.id:
-                raise PoolException()
-            else:
-                return True
+        try:
+            parent = ctx.channel.parent
+        except AttributeError:
+            return True
+
+        else:
+            if isinstance(parent, disnake.ForumChannel):
+
+                if ctx.channel.owner_id != ctx.bot.user.id:
+                    raise PoolException()
+                else:
+                    return True
 
         raise GenericError("**Use apenas comandos de barra (/) neste canal!**", self_delete=True, delete_original=15)
 

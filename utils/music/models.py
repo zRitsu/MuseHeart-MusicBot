@@ -368,11 +368,14 @@ class LavalinkPlayer(wavelink.Player):
     async def channel_cleanup(self):
 
         try:
-            if isinstance(self.text_channel.parent, disnake.ForumChannel) and \
-                    self.text_channel.owner_id == self.bot.user.id and self.text_channel.message_count > 1:
-                await self.text_channel.purge(check=lambda m: m.channel.id != m.id and not m.is_system())
+            parent = self.text_channel.parent
         except AttributeError:
             pass
+        else:
+            if isinstance(parent, disnake.ForumChannel) and self.text_channel.owner_id == self.bot.user.id and \
+                    self.text_channel.message_count > 1:
+                await self.text_channel.purge(check=lambda m: m.channel.id != m.id and not m.is_system())
+                return
 
         try:
             self.last_message_id = int(self.last_message_id)
