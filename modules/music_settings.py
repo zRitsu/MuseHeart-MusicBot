@@ -250,7 +250,6 @@ class MusicSettings(commands.Cog):
         guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
 
         original_message = None
-        message = None
         existing_channel = True
 
         try:
@@ -274,7 +273,7 @@ class MusicSettings(commands.Cog):
             color=bot.get_color(guild.me)
         )
 
-        async def get_message(original_message):
+        async def get_message(original_message, target):
 
             if original_message and original_message.channel != target and original_message.guild.id == target.guild.id:
 
@@ -351,13 +350,15 @@ class MusicSettings(commands.Cog):
             )
 
             if isinstance(inter, CustomContext):
+                bot_inter = bot
                 check = (lambda i: i.message.id == msg_select.id and i.author.id == inter.author.id)
             else:
+                bot_inter = inter.bot
                 check = (lambda i: i.data.custom_id.endswith(f"_{id_}") and i.author.id == inter.author.id)
 
             done, pending = await asyncio.wait([
-                bot.loop.create_task(bot.wait_for('button_click', check=check)),
-                bot.loop.create_task(bot.wait_for('dropdown', check=check))
+                bot_inter.loop.create_task(bot_inter.wait_for('button_click', check=check)),
+                bot_inter.loop.create_task(bot_inter.wait_for('dropdown', check=check))
             ],
                 timeout=30, return_when=asyncio.FIRST_COMPLETED)
 
@@ -447,12 +448,12 @@ class MusicSettings(commands.Cog):
                 slowmode_delay=5,
             )
 
-            await get_message(original_message)
-
             message = await send_idle_embed(target=thread_wmessage.message, bot=bot, force=True,
                                             guild_data=guild_data)
 
             target = message.channel
+
+            await get_message(original_message, target)
 
         else:
 
@@ -467,9 +468,7 @@ class MusicSettings(commands.Cog):
             if purge_messages == "yes":
                 await target.purge(limit=100, check=lambda m: m.author != guild.me or not m.thread)
 
-            if original_message:
-
-                message = await get_message(original_message)
+            message = await get_message(original_message, target)
 
             if not message:
 
@@ -479,22 +478,8 @@ class MusicSettings(commands.Cog):
                         message = m
                         break
 
-        if original_message and original_message.guild.id == inter.guild_id:
-
-            try:
-                await original_message.edit(content=None, embed=embed_archived, view=None)
-            except:
-                pass
-            try:
-                if original_message.thread:
-                    await original_message.thread.edit(
-                        archived=True,
-                        locked=True,
-                        reason=f"Player reconfigurado por {inter.author}.")
-            except:
-                pass
-
-        await target.edit(**channel_kwargs)
+        if existing_channel:
+            await target.edit(**channel_kwargs)
 
         channel = target
 
