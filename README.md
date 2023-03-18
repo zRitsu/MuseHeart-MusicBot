@@ -36,7 +36,7 @@ Repl.it
 [![Run on Repl.it](https://replit.com/badge/github/zRitsu/disnake-LL-music-bot)](https://replit.com/new/github/zRitsu/disnake-LL-music-bot)
 
 * 1 - Após clicar no botão acima, aguarde até o deploy ser concluído.
-* 2 - Vá em secrets (cadeado do painel à esquerda) e crie uma secret com nome TOKEN_BOT_MAIN e no value coloque o token do bot
+* 2 - Vá em secrets (cadeado do painel à esquerda) e crie uma secret e em KEY coloque um nome qualquer (letras/números/underline) e no value coloque o token do bot
 caso não tenha o token do bot, veja como obter com este [tutorial](https://www.youtube.com/watch?v=lfdmZQySTXE).
 <BR>
 ```
@@ -46,7 +46,7 @@ Incluindo mais tokens no value (separando com espaços).
 
 e/ou:
 
-Repetindo o passo 1 mas apenas alterando o nome MAIN que está no TOKEN_BOT_MAIN (pode ser qualquer nome mas com apenas letras e números sem acentos, ex: TOKEN_BOT_EXTRA2) e adicionar o token de outro bot no value.
+Repetindo o passo 1 com outro nome e adicionar outro(s) token(s) de bot(s) no value (caso adicione mais de 1 token separe com espaço).
 ```
 * 2.1 - Clique em Add new secret após preencher os campos key e value.
 
