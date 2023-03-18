@@ -1,9 +1,12 @@
 from __future__ import annotations
+
 from io import BytesIO
 import json
+import traceback
+from typing import TYPE_CHECKING, Union, Optional
+
 import disnake
 from disnake.ext import commands
-from typing import TYPE_CHECKING, Union, Optional
 
 from utils.music.converters import URL_REG
 from utils.music.errors import GenericError
@@ -94,7 +97,7 @@ class GuildFavModal(disnake.ui.Modal):
                          "Membros podem usá-lo diretamente no player-controller quando não estiver em uso.**",
                                                               color=self.bot.get_color(guild.me)), view=None)
 
-        await self.bot.get_cog("PinManager").process_idle_embed(guild)
+        await self.bot.get_cog("PinManager").process_idle_embed(guild, guild_data=guild_data)
 
 class GuildFavView(disnake.ui.View):
 
@@ -187,20 +190,24 @@ class GuildFavView(disnake.ui.View):
 
         guild_data = await self.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
+        guild = self.bot.get_guild(inter.guild_id) or inter.guild
+
         try:
             del guild_data["player_controller"]["fav_links"][self.current]
-        except:
+        except KeyError:
+            try:
+                await self.bot.get_cog("PinManager").process_idle_embed(guild, guild_data=guild_data)
+            except Exception:
+                traceback.print_exc()
             raise GenericError(f"**Não há links da lista com o nome:** {self.current}")
 
         await self.bot.update_data(inter.guild_id, guild_data, db_name=DBModel.guilds)
-
-        guild = self.bot.get_guild(inter.guild_id) or inter.guild
 
         await inter.edit_original_message(
             embed=disnake.Embed(description="**Link removido com sucesso!**", color=self.bot.get_color(guild.me)),
             view=None)
 
-        await self.bot.get_cog("PinManager").process_idle_embed(guild)
+        await self.bot.get_cog("PinManager").process_idle_embed(guild, guild_data=guild_data)
         self.stop()
 
     async def cancel_callback(self, inter: disnake.MessageInteraction):
@@ -224,8 +231,10 @@ class PinManager(commands.Cog):
 
     desc_prefix = "📌 [Server Playlist] 📌 | "
 
-    async def process_idle_embed(self, guild: disnake.Guild):
-        guild_data = await self.bot.get_data(guild.id, db_name=DBModel.guilds)
+    async def process_idle_embed(self, guild: disnake.Guild, guild_data: dict = None):
+
+        if not guild_data:
+            guild_data = await self.bot.get_data(guild.id, db_name=DBModel.guilds)
 
         try:
             player: LavalinkPlayer = self.bot.music.players[guild.id]
@@ -376,7 +385,7 @@ class PinManager(commands.Cog):
             ), view=None
         )
 
-        await self.process_idle_embed(guild)
+        await self.process_idle_embed(guild, guild_data=guild_data)
 
     @commands.cooldown(1, 20, commands.BucketType.guild)
     @server_playlist.sub_command(
