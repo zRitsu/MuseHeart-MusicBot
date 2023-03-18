@@ -45,7 +45,7 @@ class UserFavModal(disnake.ui.Modal):
 
     async def callback(self, inter: disnake.ModalInteraction):
 
-        url = inter.text_values["user_fav_url"]
+        url = inter.text_values["user_fav_url"].strip()
 
         try:
             valid_url = URL_REG.findall(url)[0]
@@ -62,7 +62,7 @@ class UserFavModal(disnake.ui.Modal):
 
         user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
-        name = inter.text_values["user_fav_name"]
+        name = inter.text_values["user_fav_name"].strip()
 
         try:
             if name != self.name:

@@ -54,7 +54,7 @@ class GuildFavModal(disnake.ui.Modal):
 
     async def callback(self, inter: disnake.ModalInteraction):
 
-        url = inter.text_values["guild_fav_url"]
+        url = inter.text_values["guild_fav_url"].strip()
 
         try:
             valid_url = URL_REG.findall(url)[0]
@@ -74,8 +74,8 @@ class GuildFavModal(disnake.ui.Modal):
         if not guild_data["player_controller"]["channel"] or not self.bot.get_channel(int(guild_data["player_controller"]["channel"])):
             raise GenericError("**Não há player configurado no servidor! Use o comando /setup**")
 
-        name = inter.text_values["guild_fav_name"]
-        description = inter.text_values["guild_fav_description"]
+        name = inter.text_values["guild_fav_name"].strip()
+        description = inter.text_values["guild_fav_description"].strip()
 
         if not guild_data["player_controller"]["channel"] or not self.bot.get_channel(
                 int(guild_data["player_controller"]["channel"])):
