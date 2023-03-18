@@ -146,10 +146,7 @@ class Misc(commands.Cog):
         if not channel:
             return
 
-        if self.bot.config["GLOBAL_PREFIX"]:
-            components = [disnake.ui.Button(custom_id="bot_invite", label="Precisa de mais bots de música? Clique aqui.")] if [b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public] else None
-        else:
-            components = []
+        components = [disnake.ui.Button(custom_id="bot_invite", label="Precisa de mais bots de música? Clique aqui.")] if [b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public] else []
 
         embed = disnake.Embed(
             description="",
@@ -213,7 +210,7 @@ class Misc(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        inter, bot = await select_bot_pool(inter, first=self.bot.config["GLOBAL_PREFIX"])
+        inter, bot = await select_bot_pool(inter, first=True)
 
         if not bot:
             return
@@ -229,35 +226,21 @@ class Misc(commands.Cog):
 
         active_players_other_bots = 0
 
-        if len(bot.pool.bots) > 1:
-            all_guilds_ids = set()
-            for b in bot.pool.bots:
-                for g in b.guilds:
-                    all_guilds_ids.add(g.id)
-            embed.description += f"> **Servidores (todos os bots):** `{len(all_guilds_ids)}`\n"
-        else:
-            embed.description += f"> **Servidores:** `{len(bot.guilds)}`\n"
+        all_guilds_ids = set()
+        for b in bot.pool.bots:
+            for g in b.guilds:
+                all_guilds_ids.add(g.id)
+        guilds_size = len(all_guilds_ids)
 
-        if self.bot.config["GLOBAL_PREFIX"]:
+        embed.description += f"> **Servidores" + (" (todos os bots)" if guilds_size > 1 else "") + \
+                             f":** `{guilds_size}`\n"
 
-            for b in bot.pool.bots:
-                active_players_other_bots += len(b.music.players)
+        for b in bot.pool.bots:
+            active_players_other_bots += len(b.music.players)
 
-            if active_players_other_bots:
-                embed.description += f"> **Players ativos (todos os bots):** `{active_players_other_bots}`\n"
-
-        else:
-
-            if bot.music.players:
-                embed.description += f"> **Players ativos (bot atual):** `{len(bot.music.players)}`\n"
-
-            for b in self.bot.pool.bots:
-                if b.user.id == bot.user.id:
-                    continue
-                active_players_other_bots += len(b.music.players)
-
-            if active_players_other_bots:
-                embed.description += f"> **Players ativos (outros bots):** `{active_players_other_bots}`\n"
+        if active_players_other_bots:
+            embed.description += f"> **Players ativos" + (" (todos os bots)" if len(bot.pool.bots) > 1 else "") + \
+                                 f":** `{active_players_other_bots}`\n"
 
         if bot.pool.commit:
             embed.description += f"> **Commit atual:** [`{bot.pool.commit[:7]}`]({bot.pool.remote_git_url}/commit/{bot.pool.commit})\n"
@@ -268,11 +251,7 @@ class Misc(commands.Cog):
                              f"> **Uso de RAM:** `{ram_usage}`\n" \
                              f"> **Uptime:** <t:{int(bot.uptime.timestamp())}:R>\n"
 
-        if bot.config["GLOBAL_PREFIX"]:
-            guild_data = await bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
-        else:
-            embed.set_thumbnail(url=bot.user.display_avatar.replace(size=256, static_format="png").url)
-            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+        guild_data = await bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
 
         prefix = guild_data["prefix"] or bot.default_prefix
 

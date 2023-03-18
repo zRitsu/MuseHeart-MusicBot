@@ -4,6 +4,7 @@ import datetime
 import json
 import logging
 import os
+import re
 import traceback
 from configparser import ConfigParser
 from importlib import import_module
@@ -28,6 +29,7 @@ from utils.db import MongoDatabase, LocalDatabase, guild_prefix, DBModel, global
 from asyncspotify import Client as SpotifyClient
 from utils.others import CustomContext
 
+
 class BotPool:
 
     bots: List[BotCore] = []
@@ -46,6 +48,7 @@ class BotPool:
         self.message_ids: set = set()
         self.db_cache_cleanup_task = None
         self.bot_mentions = set()
+        self.single_bot = True
 
     @property
     def database(self) -> Union[LocalDatabase, MongoDatabase]:
@@ -227,17 +230,10 @@ class BotPool:
 
         def load_bot(bot_name: str, token: str):
 
-            if self.config["GLOBAL_PREFIX"]:
-                try:
-                    token = token.split()[0]
-                except:
-                    pass
-                default_prefix = self.config["DEFAULT_PREFIX"]
-            else:
-                try:
-                    token, default_prefix = token.split()
-                except:
-                    default_prefix = None
+            try:
+                token = token.split().pop()
+            except:
+                pass
 
             if not token:
                 print(f"{bot_name} Ignorado (token não informado)...")
@@ -256,7 +252,7 @@ class BotPool:
                 test_guilds=test_guilds,
                 command_sync_flags=commands.CommandSyncFlags.none(),
                 embed_color=self.config["EMBED_COLOR"],
-                default_prefix=default_prefix,
+                default_prefix=self.config["DEFAULT_PREFIX"],
                 pool=self,
                 number=int(self.max_counter)
             )
@@ -279,7 +275,7 @@ class BotPool:
 
                     return True
 
-            if bot.config["GLOBAL_PREFIX"]:
+            if bot.pool.single_bot:
 
                 @bot.listen("on_command")
                 async def message_id_cleanup(ctx: CustomContext):
@@ -341,7 +337,7 @@ class BotPool:
 
                         self._command_sync_flags = commands.CommandSyncFlags.none()
 
-                        if self.config["INTERACTION_BOTS"] and self.config["GLOBAL_PREFIX"] and self.config["ADD_REGISTER_COMMAND"]:
+                        if self.config["INTERACTION_BOTS"] and self.config["ADD_REGISTER_COMMAND"]:
 
                             @bot.slash_command(
                                 name=disnake.Localized("register_commands",data={disnake.Locale.pt_BR: "registrar_comandos"}),
@@ -402,19 +398,43 @@ class BotPool:
 
             self.bots.append(bot)
 
-        main_token = self.config.get("TOKEN")
+        all_tokens = {}
 
-        if main_token:
-            load_bot("Main Bot", main_token)
+        token_regex = r'([a-zA-Z0-9]{24}\.[a-zA-Z0-9]{6}\.[a-zA-Z0-9_\-]{27}|mfa\.[a-zA-Z0-9_\-]{84})'
 
         for k, v in self.config.items():
 
-            if not k.lower().startswith("token_bot_"):
+            if not isinstance(v, str):
                 continue
 
-            bot_name = k[10:] or f"Bot_{self.max_counter}"
+            tokens = []
 
-            load_bot(bot_name, v)
+            for string in v.split():
+                if re.findall(token_regex, v):
+                    tokens.append(string)
+
+            if not tokens:
+                continue
+
+            if k.lower().startswith("token_bot_"):
+                k = k[10:]
+
+            if len(tokens) > 1:
+                counter = 1
+                for t in tokens:
+                    if t in all_tokens.values():
+                        continue
+                    all_tokens[f"{k}_{counter}"] = t
+                    counter += 1
+
+            elif (token:=tokens.pop()) not in all_tokens.values():
+                all_tokens[k] = token
+
+        if len(all_tokens) > 1:
+            self.single_bot = False
+
+        for k, v in all_tokens.items():
+            load_bot(k, v)
 
         if not self.bots:
             os.system('cls' if os.name == 'nt' else 'clear')

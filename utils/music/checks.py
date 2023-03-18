@@ -76,7 +76,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
     if isinstance(inter, (disnake.MessageInteraction, disnake.ModalInteraction)):
         return
 
-    if not inter.bot.config["GLOBAL_PREFIX"]:
+    if len(inter.bot.pool.bots) < 2:
         try:
             inter.music_bot = inter.bot
             inter.music_guild = inter.guild

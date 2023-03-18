@@ -70,12 +70,8 @@ async def guild_prefix(bot: BotCore, message: disnake.Message):
     if str(message.content).startswith((f"<@!{bot.user.id}> ", f"<@{bot.user.id}> ")):
         return commands.when_mentioned(bot, message)
 
-    if bot.config["GLOBAL_PREFIX"]:
-        data = await bot.get_global_data(message.guild.id, db_name=DBModel.guilds)
-        prefix = data.get("prefix") or bot.config.get("DEFAULT_PREFIX") or "!!"
-    else:
-        data = await bot.get_data(message.guild.id, db_name=DBModel.guilds)
-        prefix = data.get("prefix") or bot.default_prefix
+    data = await bot.get_global_data(message.guild.id, db_name=DBModel.guilds)
+    prefix = data.get("prefix") or bot.config.get("DEFAULT_PREFIX") or "!!"
 
     return prefix
 

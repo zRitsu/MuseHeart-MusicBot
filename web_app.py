@@ -60,7 +60,7 @@ class IndexHandler(tornado.web.RequestHandler):
                 self.text = '<h1 style=\"font-size:5vw\">A aplicação será reiniciada em breve...</h1>'
             else:
                 self.text = '<h1 style=\"font-size:5vw\">Não há bots disponíveis no momento...</h1>\n' \
-                            '<br>(se o seu bot não apareceu na lista, verifique o erro que apareceu no terminal/console \"'
+                            '<br>(se o seu bot não apareceu na lista, verifique o erro que apareceu no terminal/console)'
 
         else:
 

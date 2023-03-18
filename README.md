@@ -20,10 +20,6 @@
 
 ![](https://media.discordapp.net/attachments/554468640942981147/944945573834936340/unknown.png)
 
-- Player controller: song-request em canal de forum (múltiplos bots) e skin default.
-
-https://user-images.githubusercontent.com/74823568/198839619-a90cf199-fca2-4432-a379-c99145f3d640.mp4
-
 
 * Há diversas outras skins, veja todas usando o comando /change_skin (você também pode criar outras, use os modelos padrões que estão na pasta [skins](utils/music/skins/) como referência, crie uma cópia com outro nome e modifique a seu gosto).
 
@@ -40,15 +36,21 @@ Repl.it
 [![Run on Repl.it](https://replit.com/badge/github/zRitsu/disnake-LL-music-bot)](https://replit.com/new/github/zRitsu/disnake-LL-music-bot)
 
 * 1 - Após clicar no botão acima, aguarde até o deploy ser concluído.
-* 2 - Vá em secrets (cadeado do painel à esquerda) e crie uma secret com nome TOKEN_BOT_MAIN e no value coloque o token do bot + espaço + prefixo (que não seja / )
-ficando assim: `token prefixo`<br>
-ex:<br>
-`MZ1yGvKTjE0rY0cV8i47CjAa.uRHQPq.Xb1Mk2nEhe-4iUcrGOuegj57zMC ==
-` <br>
-caso não tenha o token do bot, veja como obter com este [tutorial](https://www.youtube.com/watch?v=lfdmZQySTXE).<BR>
-Obs: Você pode adicionar mais bots pra rodar junto repetindo esse passo, mas apenas alterando o nome MAIN que está no TOKEN_BOT_**MAIN** (pode ser qualquer nome mas com apenas letras e números sem acentos)
-e adicionar o token de outro bot  + prefixo (diferente) no value.
-* 3 - Também altamente recomendo usar mongodb para database ao invés de json, pra isso crie uma key com nome MONGO e no value coloque o link de sua url do mongodb (caso não tenha, veja como obter por este [tutorial](https://www.youtube.com/watch?v=x1Gq5beRx9k)). </br>
+* 2 - Vá em secrets (cadeado do painel à esquerda) e crie uma secret com nome TOKEN_BOT_MAIN e no value coloque o token do bot
+caso não tenha o token do bot, veja como obter com este [tutorial](https://www.youtube.com/watch?v=lfdmZQySTXE).
+<BR>
+```
+Obs: Caso queira, você pode incluir token de mais bots para ter bots extras pra ativar o suporte a multi-voice em servidores usando um dos seguintes métodos:
+
+Incluindo mais tokens no value (separando com espaços).
+
+e/ou:
+
+Repetindo o passo 1 mas apenas alterando o nome MAIN que está no TOKEN_BOT_MAIN (pode ser qualquer nome mas com apenas letras e números sem acentos, ex: TOKEN_BOT_EXTRA2) e adicionar o token de outro bot no value.
+```
+* 2.1 - Clique em Add new secret após preencher os campos key e value.
+
+* 3 - Não é obrigatório mas recomendo usar mongodb para database ao invés de json, pra isso crie uma key com nome MONGO e no value coloque o link de sua url do mongodb e em seguida clique em Add new secret (caso não tenha, veja como obter por este [tutorial](https://www.youtube.com/watch?v=x1Gq5beRx9k)). </br>
 `se desejar, você pode alterar outras configs, consulte o arquivo .example.env`
 * 4 - Clique em run (botão de **play**) e aguarde o bot instalar as dependências e iniciar.
 </details>
@@ -64,6 +66,11 @@ Render.com
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/zRitsu/disnake-LL-music-bot/tree/main)
 
 * 1 - No campo **TOKEN** coloque o token do bot **( [tutorial de como obter](https://www.youtube.com/watch?v=lfdmZQySTXE) )**.
+
+```
+Obs: Caso queira, no campo TOKEN você pode incluir token de mais bots para ter bots extras pra ativar o suporte a multi-voice incluindo mais tokens no value (separando com espaços).
+```
+
 * 2 - No campo **DEFAULT_PREFIX** coloque um prefixo para o bot.
 * 3 - Nos campos **SPOTIFY_CLIENT_ID** e **SPOTIFY_CLIENT_SECRET** coloque as suas keys do spotify **( [tutorial de como obter](https://www.youtube.com/watch?v=ceKQjWiCyWE) )**.
 * 4 - No campo **MONGO** coloque o link da sua database do MongoDB **( [tutorial de como obter](https://www.youtube.com/watch?v=x1Gq5beRx9k) )**.
@@ -80,6 +87,11 @@ Railway
 
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template/YkBuYT?referralCode=tzsLOv)
 * 1 - Preencha os dados que vão ser requisitados na próxima página (os que tem asteríscos vermelhos são obrigatórios).
+
+```
+Obs: Caso queira, no campo TOKEN você pode incluir token de mais bots para ter bots extras pra ativar o suporte a multi-voice incluindo mais tokens no value (separando com espaços).
+```
+
 * 2 - Clique no botão deploy e aguarde até o deploy ser concluído (Ficando com cor verde. Pode demorar alguns segundos antes de aparecer um deploy na lista).
 * **Nota 1:** Requer uma conta do github com um bom tempo de criado ou um cartão de crédito para ter uma conta verificada.
 * **Nota 2:** Caso queira alterar as configs usadas no passo 1, clique em variables e crie/altere a key e o valor desejado da config, consulte o arquivo .example.env para ver todas as configs disponíveis.
@@ -114,6 +126,11 @@ Heroku
 
 **Nota: A partir do dia 28/11/2022 a heroku não vai mais fornecer planos gratuitos ([clique aqui](https://blog.heroku.com/next-chapter) para saber mais).** 
 * 1 - Preencha os dados que vão ser requisitados na próxima página
+
+```
+Obs: Caso queira, no campo TOKEN você pode incluir token de mais bots para ter bots extras pra ativar o suporte a multi-voice incluindo mais tokens no value (separando com espaços).
+```
+
 * 2 - Clique em deploy app e aguarde (o processo pode demorar entre 2-5 minutos).
 * 3 - Clique em Manage e depois vá em resources.
 * 4 - Desative o dyno web e ative o autoupdate (ou o quickfix, não ative os 2 ao mesmo tempo!) e aguarde o bot logar. `(no canto superior clique em more e em view logs para acompanhar os logs)`
