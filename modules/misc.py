@@ -468,7 +468,7 @@ class GuildLog(commands.Cog):
 
         try:
             guild_data = await self.bot.get_data(guild.id, db_name=DBModel.guilds)
-            guild_data["player_Controller"] = db_models[DBModel.guilds]["player_controller"]
+            guild_data["player_controller"] = db_models[DBModel.guilds]["player_controller"]
             await self.bot.update_data(guild.id, guild_data, db_name=DBModel.guilds)
         except:
             traceback.print_exc()
@@ -497,7 +497,7 @@ class GuildLog(commands.Cog):
 
         try:
             guild_data = await self.bot.get_data(guild.id, db_name=DBModel.guilds)
-            guild_data["player_Controller"] = db_models[DBModel.guilds]["player_controller"]
+            guild_data["player_controller"] = db_models[DBModel.guilds]["player_controller"]
             await self.bot.update_data(guild.id, guild_data, db_name=DBModel.guilds)
         except:
             traceback.print_exc()
