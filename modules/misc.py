@@ -458,7 +458,10 @@ class Misc(commands.Cog):
                     await f.write(json.dumps(db_data, indent=4))
 
                 for data in db_data:
-                    remove_blank_spaces(data["player_controller"]["fav_links"])
+                    try:
+                        remove_blank_spaces(data["player_controller"]["fav_links"])
+                    except KeyError:
+                        continue
                     await bot.update_data(id_=data["_id"], data=data, db_name=DBModel.guilds)
 
             db_data = await self.bot.pool.database.query_data(collection="global", db_name=DBModel.users, limit=500)
