@@ -186,7 +186,7 @@ class LocalDatabase(BaseDB):
 
         return data
 
-    async def query_data(self, db_name: str, collection: str, filter: dict = None) -> list:
+    async def query_data(self, db_name: str, collection: str, filter: dict = None, limit=100) -> list:
         return self._connect[collection][db_name].find(filter or {})
 
     async def delete_data(self, id_, db_name: str, collection: str):
@@ -253,8 +253,8 @@ class MongoDatabase(BaseDB):
 
         return await self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data}, upsert=True)
 
-    async def query_data(self, db_name: str, collection: str, filter: dict = None) -> list:
-        return await self._connect[collection][db_name].find(filter or {}).to_list(100)
+    async def query_data(self, db_name: str, collection: str, filter: dict = None, limit=100) -> list:
+        return await self._connect[collection][db_name].find(filter or {}).to_list(limit)
 
     async def delete_data(self, id_, db_name: str, collection: str):
         return await self._connect[collection][db_name].delete_one({'_id': str(id_)})

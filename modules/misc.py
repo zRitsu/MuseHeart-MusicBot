@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+import json
+import os.path
 import traceback
 from itertools import cycle
 from random import shuffle
@@ -7,6 +10,7 @@ import platform
 import asyncio
 from typing import TYPE_CHECKING
 
+import aiofiles
 import disnake
 import psutil
 import humanize
@@ -22,7 +26,20 @@ if TYPE_CHECKING:
     from utils.client import BotCore
 
 
+def remove_blank_spaces(d):
 
+    for k, v in list(d.items()):
+
+        new_k = k.strip()
+        if new_k != k:
+            d[new_k] = d.pop(k)
+
+        if isinstance(v, str):
+            new_v = v.strip()
+            if new_v != v:
+                d[new_k] = new_v
+        elif isinstance(v, dict):
+            remove_blank_spaces(v)
 
 
 class Misc(commands.Cog):
@@ -421,6 +438,39 @@ class Misc(commands.Cog):
             embeds.append(embed)
 
         await inter.send(embeds=embeds, ephemeral=True)
+
+    @commands.is_owner()
+    @commands.max_concurrency(1, commands.BucketType.default)
+    @commands.command(hidden=True, description="Comando temporário para corrigir favoritos com espaços em branco "
+                                               "que ocasionam erros em algumas situações.")
+    async def fixfavs(self, ctx: CustomContext):
+
+        if not os.path.isdir("./local_database/fixfavs_backup"):
+            os.makedirs("./local_database/fixfavs_backup")
+
+        async with ctx.typing():
+
+            for bot in self.bot.pool.bots:
+
+                db_data = await bot.pool.database.query_data(collection=str(bot.user.id), db_name=DBModel.guilds, limit=300)
+    
+                async with aiofiles.open(f"./local_database/fixfavs_backup/guild_favs_{bot.user.id}.json", "w") as f:
+                    await f.write(json.dumps(db_data, indent=4))
+
+                for data in db_data:
+                    remove_blank_spaces(data["player_controller"]["fav_links"])
+                    await bot.update_data(id_=data["_id"], data=data, db_name=DBModel.guilds)
+
+            db_data = await self.bot.pool.database.query_data(collection="global", db_name=DBModel.users, limit=500)
+
+            async with aiofiles.open("./local_database/fixfavs_backup/user_favs.json", "w") as f:
+                await f.write(json.dumps(db_data, indent=4))
+
+            for data in db_data:
+                remove_blank_spaces(data["fav_links"])
+                await self.bot.update_global_data(id_=data["_id"], data=data, db_name=DBModel.users)
+
+            await ctx.send("os favoritos foram corrigidos com sucesso!")
 
     async def cog_check(self, ctx):
         return await check_requester_channel(ctx)
