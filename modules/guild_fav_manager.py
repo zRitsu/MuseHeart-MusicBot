@@ -199,7 +199,13 @@ class GuildFavView(disnake.ui.View):
                 await self.bot.get_cog("PinManager").process_idle_embed(guild, guild_data=guild_data)
             except Exception:
                 traceback.print_exc()
-            raise GenericError(f"**Não há links da lista com o nome:** {self.current}")
+
+            await inter.edit_original_message(
+                embed=disnake.Embed(
+                    description=f"**Não há links da lista com o nome:** {self.current}",
+                    color=self.bot.get_color(guild.me)),
+                view=None
+            )
 
         await self.bot.update_data(inter.guild_id, guild_data, db_name=DBModel.guilds)
 
