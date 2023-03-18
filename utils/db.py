@@ -27,7 +27,6 @@ class DBModel:
 db_models = {
     DBModel.guilds: {
         "ver": 1.7,
-        "prefix": "",
         "player_controller": {
             "channel": None,
             "message_id": None,
