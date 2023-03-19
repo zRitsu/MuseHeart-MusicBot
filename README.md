@@ -38,7 +38,7 @@ Repl.it
 * 1 - Após clicar no botão acima, aguarde até o deploy ser concluído.
 * 2 - Vá em secrets (cadeado do painel à esquerda) e crie uma secret e em KEY coloque um nome qualquer (letras/números/underline) e no value coloque o token do bot
 caso não tenha o token do bot, veja como obter com este [tutorial](https://www.youtube.com/watch?v=lfdmZQySTXE).
-<BR>
+
 ```
 Obs: Caso queira, você pode incluir token de mais bots para ter bots extras pra ativar o suporte a multi-voice em servidores usando um dos seguintes métodos:
 
@@ -48,6 +48,7 @@ e/ou:
 
 Repetindo o passo 1 com outro nome e adicionar outro(s) token(s) de bot(s) no value (caso adicione mais de 1 token separe com espaço).
 ```
+
 * 2.1 - Clique em Add new secret após preencher os campos key e value.
 
 * 3 - Não é obrigatório mas recomendo usar mongodb para database ao invés de json, pra isso crie uma key com nome MONGO e no value coloque o link de sua url do mongodb e em seguida clique em Add new secret (caso não tenha, veja como obter por este [tutorial](https://www.youtube.com/watch?v=x1Gq5beRx9k)). </br>
@@ -125,7 +126,7 @@ Heroku
 [![Heroku_Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/zRitsu/disnake-LL-music-bot/tree/main)
 
 **Nota: A partir do dia 28/11/2022 a heroku não vai mais fornecer planos gratuitos ([clique aqui](https://blog.heroku.com/next-chapter) para saber mais).** 
-* 1 - Preencha os dados que vão ser requisitados na próxima página
+* 1 - Preencha os dados que vão ser requisitados na próxima página.
 
 ```
 Obs: Caso queira, no campo TOKEN você pode incluir token de mais bots para ter bots extras pra ativar o suporte a multi-voice incluindo mais tokens no value (separando com espaços).
