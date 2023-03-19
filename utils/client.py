@@ -402,7 +402,7 @@ class BotPool:
 
         token_regex = r'([a-zA-Z0-9]{24}\.[a-zA-Z0-9]{6}\.[a-zA-Z0-9_\-]{27}|mfa\.[a-zA-Z0-9_\-]{84})'
 
-        for k, v in self.config.items():
+        for k, v in dict(os.environ, **self.config).items():
 
             if not isinstance(v, str):
                 continue
