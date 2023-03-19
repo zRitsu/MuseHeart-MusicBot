@@ -662,7 +662,7 @@ class Owner(commands.Cog):
         SECRETS.update({"TOKEN": ""})
 
         for env, value in os.environ.items():
-            if env.lower().startswith(("test_guilds_", "lavalink_node_")):
+            if (e:=env.lower()).startswith(("token_bot_", "test_guilds_", "lavalink_node_")) or e == "token":
                 SECRETS[env] = os.environ[env]
                 continue
 
