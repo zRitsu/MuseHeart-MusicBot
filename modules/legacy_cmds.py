@@ -672,7 +672,7 @@ class Owner(commands.Cog):
             tokens = []
 
             for string in value.split():
-                if re.findall(token_regex, value):
+                if re.findall(token_regex, value) and len(string) < 91:
                     tokens.append(string)
 
             if tokens:

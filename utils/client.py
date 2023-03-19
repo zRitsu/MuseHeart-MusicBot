@@ -408,7 +408,7 @@ class BotPool:
             tokens = []
 
             for string in v.split():
-                if re.findall(token_regex, v):
+                if re.findall(token_regex, v) and len(string) < 91:
                     tokens.append(string)
 
             if not tokens:
