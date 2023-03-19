@@ -20,7 +20,7 @@ from utils.db import DBModel
 from utils.music.checks import check_voice, check_requester_channel
 from utils.music.local_lavalink import run_lavalink
 from utils.music.models import LavalinkPlayer
-from utils.others import sync_message, chunk_list, EmbedPaginator, CustomContext, string_to_file
+from utils.others import sync_message, chunk_list, EmbedPaginator, CustomContext, string_to_file, token_regex
 from utils.owner_panel import panel_command, PanelView
 from utils.music.errors import GenericError
 from config_loader import DEFAULT_CONFIG, load_config
@@ -670,8 +670,6 @@ class Owner(commands.Cog):
                 continue
 
             tokens = []
-
-            token_regex = r'([a-zA-Z0-9]{24}\.[a-zA-Z0-9]{6}\.[a-zA-Z0-9_\-]{27}|mfa\.[a-zA-Z0-9_\-]{84})'
 
             for string in value.split():
                 if re.findall(token_regex, value):

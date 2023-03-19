@@ -27,7 +27,7 @@ from asyncspotify import Client
 from utils.owner_panel import PanelView
 from utils.db import MongoDatabase, LocalDatabase, guild_prefix, DBModel, global_db_models
 from asyncspotify import Client as SpotifyClient
-from utils.others import CustomContext
+from utils.others import CustomContext, token_regex
 
 
 class BotPool:
@@ -399,8 +399,6 @@ class BotPool:
             self.bots.append(bot)
 
         all_tokens = {}
-
-        token_regex = r'([a-zA-Z0-9]{24}\.[a-zA-Z0-9]{6}\.[a-zA-Z0-9_\-]{27}|mfa\.[a-zA-Z0-9_\-]{84})'
 
         for k, v in dict(os.environ, **self.config).items():
 

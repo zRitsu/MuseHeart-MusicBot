@@ -15,6 +15,8 @@ from utils.music.errors import GenericError
 if TYPE_CHECKING:
     from utils.client import BotCore
 
+token_regex = r'([\w-]{10,})\.([\w-]{5,})\.([\w-]{10,})'
+
 
 class Test:
 
