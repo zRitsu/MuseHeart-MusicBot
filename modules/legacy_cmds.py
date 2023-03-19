@@ -1,6 +1,7 @@
 import asyncio
 import gc
 import os
+import re
 import shutil
 import json
 import traceback
@@ -660,9 +661,24 @@ class Owner(commands.Cog):
         SECRETS = dict(DEFAULT_CONFIG)
         SECRETS.update({"TOKEN": ""})
 
-        for env in os.environ:
-            if env.lower().startswith(("token_bot_", "test_guilds_", "lavalink_node_")):
+        for env, value in os.environ.items():
+            if env.lower().startswith(("test_guilds_", "lavalink_node_")):
                 SECRETS[env] = os.environ[env]
+                continue
+
+            if not isinstance(value, str):
+                continue
+
+            tokens = []
+
+            token_regex = r'([a-zA-Z0-9]{24}\.[a-zA-Z0-9]{6}\.[a-zA-Z0-9_\-]{27}|mfa\.[a-zA-Z0-9_\-]{84})'
+
+            for string in value.split():
+                if re.findall(token_regex, value):
+                    tokens.append(string)
+
+            if tokens:
+                SECRETS[env] = value
 
         for i in SECRETS:
             try:
