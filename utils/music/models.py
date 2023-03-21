@@ -318,6 +318,8 @@ class LavalinkPlayer(wavelink.Player):
         self.is_resuming = False
         self.last_channel: Optional[disnake.VoiceChannel] = None
 
+        self._rpc_update_task: Optional[asyncio.Task] = None
+
         self.start_time = disnake.utils.utcnow()
 
         self.temp_embed: Optional[disnake.Embed] = None
@@ -654,8 +656,7 @@ class LavalinkPlayer(wavelink.Player):
 
     async def idling_mode(self):
 
-        self.bot.loop.create_task(
-            self.process_rpc(self.guild.me.voice.channel))
+        self.process_rpc(self.guild.me.voice.channel)
 
         await self.process_idle_message()
 
@@ -742,7 +743,7 @@ class LavalinkPlayer(wavelink.Player):
             return
 
         if rpc_update:
-            self.bot.loop.create_task(self.process_rpc())
+            self.process_rpc()
 
         if self.static:
             if self.skin_static.startswith("> custom_skin: "):
@@ -963,8 +964,7 @@ class LavalinkPlayer(wavelink.Player):
 
     async def update_message(self, interaction: disnake.Interaction = None, force=False, rpc_update=False):
 
-        if rpc_update:
-            self.bot.loop.create_task(self.process_rpc())
+        self.process_rpc()
 
         if force or (interaction and not interaction.response.is_done()):
             if self.controller_mode:
@@ -980,7 +980,7 @@ class LavalinkPlayer(wavelink.Player):
 
         vc = self.bot.get_channel(self.channel_id)
 
-        self.bot.loop.create_task(self.process_rpc(vc, close=True))
+        self.process_rpc(vc, close=True)
 
         try:
             await self.update_stage_topic()
@@ -1099,15 +1099,36 @@ class LavalinkPlayer(wavelink.Player):
 
         return
 
-    async def process_rpc(
+    async def _send_rpc_data(self, users: List[int], stats: dict):
+
+        for u in users:
+
+            stats["user"] = u
+
+            try:
+                stats["token"] = self.bot.pool.rpc_token_cache[u]
+            except KeyError:
+                data = await self.bot.get_global_data(id_=u, db_name=DBModel.users)
+                self.bot.pool.rpc_token_cache[u] = data["token"]
+                stats["token"] = data["token"]
+
+            if not stats["token"]:
+                continue
+
+            try:
+                await self.bot.ws_client.send(stats)
+            except Exception:
+                print(traceback.print_exc())
+
+    def process_rpc(
             self,
             voice_channel: Union[disnake.VoiceChannel,
                                  disnake.StageChannel] = None,
             close=False,
-            users: List[int] = None
+            users: List[int] = None,
     ):
 
-        if not voice_channel:
+        if not voice_channel and not close:
             try:
                 voice_channel = self.bot.get_channel(
                     self.channel_id) or self.guild.voice_client.channel
@@ -1132,15 +1153,12 @@ class LavalinkPlayer(wavelink.Player):
                 "thumb": thumb,
             }
 
-            for u in users:
+            try:
+                self._rpc_update_task.cancel()
+            except:
+                pass
 
-                stats["user"] = u
-
-                try:
-                    await self.bot.ws_client.send(stats)
-                except Exception:
-                    traceback.print_exc()
-
+            self._rpc_update_task = self.bot.loop.create_task(self._send_rpc_data(users, stats))
             return
 
         if self.is_closing:
@@ -1218,14 +1236,12 @@ class LavalinkPlayer(wavelink.Player):
                     }
                 )
 
-        for u in users:
+        try:
+            self._rpc_update_task.cancel()
+        except:
+            pass
 
-            stats["user"] = u
-
-            try:
-                await self.bot.ws_client.send(stats)
-            except Exception:
-                traceback.print_exc()
+        self._rpc_update_task = self.bot.loop.create_task(self._send_rpc_data(users, stats))
 
     async def track_end(self):
 

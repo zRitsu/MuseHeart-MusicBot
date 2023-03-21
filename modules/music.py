@@ -1703,7 +1703,7 @@ class Music(commands.Cog):
         await self.interaction_message(inter, txt, emoji=emoji)
 
         await asyncio.sleep(2)
-        self.bot.loop.create_task(player.process_rpc())
+        player.process_rpc()
 
     @seek.autocomplete("tempo")
     async def seek_suggestions(self, inter: disnake.Interaction, query: str):
@@ -1868,7 +1868,7 @@ class Music(commands.Cog):
 
         player.loop = mode
 
-        self.bot.loop.create_task(player.process_rpc())
+        player.process_rpc()
 
         await self.interaction_message(inter, txt, emoji=emoji)
 
@@ -4409,13 +4409,11 @@ class Music(commands.Cog):
             if vc:
 
                 try:
-                    self.bot.loop.create_task(
-                        player.process_rpc(vc, users=[member.id], close=after.channel != player.guild.me.voice.channel))
+                    player.process_rpc(vc, users=[member.id], close=after.channel != player.guild.me.voice.channel)
                 except AttributeError:
                     pass
 
-                self.bot.loop.create_task(
-                    player.process_rpc(vc, users=[m for m in vc.voice_states if (m != member.id)]))
+                player.process_rpc(vc, users=[m for m in vc.voice_states if (m != member.id)])
 
     async def reset_controller_db(self, guild_id: int, data: dict, inter: disnake.AppCmdInter = None):
 

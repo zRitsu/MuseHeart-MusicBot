@@ -1,5 +1,8 @@
 from __future__ import annotations
 import asyncio
+import os
+import random
+import string
 from typing import TYPE_CHECKING, Union, Optional
 import datetime
 import traceback
@@ -16,6 +19,8 @@ from utils.music.models import LavalinkPlayer
 
 if TYPE_CHECKING:
     from utils.client import BotCore
+
+desc_prefix = "🔧 [Configurações] 🔧 | "
 
 
 class SkinSelector(disnake.ui.View):
@@ -111,8 +116,6 @@ class MusicSettings(commands.Cog):
 
     def __init__(self, bot: BotCore):
         self.bot = bot
-
-    desc_prefix = "🔧 [Configurações] 🔧 | "
 
     # O nome desse comando está sujeito a alterações (tá ridiculo, mas não consegui pensar em um nome melhor no momento).
     @commands.cooldown(1, 5, commands.BucketType.guild)
@@ -954,6 +957,28 @@ class MusicSettings(commands.Cog):
             await player.invoke_np(force=True)
             await asyncio.sleep(1.5)
 
+    @commands.Cog.listener("on_modal_submit")
+    async def rpc_create_modal(self, inter: disnake.ModalInteraction):
+
+        if inter.data.custom_id != "rpc_token_create":
+            return
+
+        await inter.response.defer(ephemeral=True)
+
+        data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+
+        if inter.text_values["token_input"] == data["token"]:
+            await inter.send("Seu token é igual ao token atual!", ephemeral=True)
+            return
+
+        await self.close_presence(inter)
+
+        data["token"] = inter.text_values["token_input"]
+
+        await self.bot.update_global_data(id_=inter.author.id, data=data, db_name=DBModel.users)
+
+        await inter.edit_original_message(f"O seu token foi importado/editado com sucesso!\n"
+                                          f"Nota: Adicione/Atualize o token no app de RPC.")
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command(
@@ -1046,5 +1071,158 @@ class MusicSettings(commands.Cog):
 
         await inter.send(embeds=embeds, ephemeral=True)
 
+class RPCCog(commands.Cog):
+
+    def __init__(self, bot: BotCore):
+        self.bot = bot
+
+    rpc_cd = commands.CooldownMapping.from_cooldown(1, 30, commands.BucketType.user)
+
+    @commands.command(description="Ativar/Desativar o sistema de rich-presence no seu status.",
+                      name="richpresence", aliases=["rich_presence", "rpc"], cooldown=rpc_cd)
+    async def rich_presence_legacy(self, ctx: CustomContext):
+
+        await self.rich_presence.callback(self=self, inter=ctx)
+
+    @commands.slash_command(
+        description=f"{desc_prefix}Ativar/Desativar o sistema de rich-presence no seu status.", cooldown=rpc_cd
+    )
+    async def rich_presence(self, inter: disnake.AppCmdInter):
+
+        if not self.bot.config["ENABLE_RPC_COMMAND"] and not await self.bot.is_owner(inter.author):
+            raise GenericError("**Este comando está desativado nas minhas configurações...**\n"
+                               "Apenas o meu desenvolvedor pode ativar este comando publicamente.")
+
+        if not self.bot.config["RPC_SERVER"]:
+            raise GenericError("**O RPC_SERVER não foi configurado na ENV/ENVIROMENTS (ou arquivo .env)**")
+
+        components = [
+            disnake.ui.Button(label="Gerar/Resetar token", custom_id=f"rpc_gen.{inter.author.id}", emoji="🔑", row=0),
+            disnake.ui.Button(label="Importar/Atualizar/Ver token", custom_id=f"rpc_create.{inter.author.id}", emoji="✍️",
+                              row=0),
+            disnake.ui.Button(label="Remover token (Desativar)", custom_id=f"rpc_remove.{inter.author.id}", emoji="♻️",
+                              row=1),
+        ]
+
+        if isinstance(inter, CustomContext):
+            components.append(
+                disnake.ui.Button(label="Fechar", custom_id=f"rpc_close.{inter.author.id}", emoji="❌", row=1),
+            )
+
+        await inter.send(
+            embed=disnake.Embed(
+                description="**Gerencie aqui o token de acesso ao RPC (Rich Presence).**\n\n"
+                            "Você também terá que adicionar o link do websocket abaixo no app de RPC: ```ansi\n"
+                            f"[34;1m{self.bot.config['RPC_SERVER'].replace('$PORT', os.environ.get('PORT', '80'))}[0m```",
+                color=self.bot.get_color()
+            ),
+            components=components,
+            ephemeral=True
+        )
+
+    @commands.Cog.listener("on_button_click")
+    async def rpc_button_event(self, inter: disnake.MessageInteraction):
+
+        if not inter.data.custom_id.startswith("rpc_"):
+            return
+
+        button_id, user_id = inter.data.custom_id.split(".")
+
+        if user_id != str(inter.author.id):
+            await inter.send(f"Apenas <@{user_id}> pode usar os botões da mensagem!", ephemeral=True)
+            return
+
+        if button_id == "rpc_gen":
+            await inter.response.defer()
+            data = await self.bot.get_global_data(id_=user_id, db_name=DBModel.users)
+
+            if data["token"]:
+                await self.close_presence(inter)
+
+            data["token"] = "".join(random.choice(string.ascii_letters + string.digits) for i in range(50))
+            await self.bot.update_global_data(id_=user_id, data=data, db_name=DBModel.users)
+            msg = f"O token para usar no app de RPC (Rich Presence) foi gerado com sucesso!\n\n" \
+                  f"`Token gerado:` ||{data['token']}||"
+
+        elif button_id == "rpc_create":
+
+            kwargs = {}
+
+            try:
+                data = await self.bot.get_global_data(id_=user_id, db_name=DBModel.users)
+                if len(data["token"]) == 50:
+                    kwargs["value"] = data["token"]
+            except:
+                pass
+
+            await inter.response.send_modal(
+                title="Importar token",
+                custom_id="rpc_token_create",
+                components=[
+                    disnake.ui.TextInput(
+                        style=disnake.TextInputStyle.short,
+                        label="Cole o token no campo abaixo:",
+                        placeholder="Nota: Por medida de segurança, jamais inclua uma senha pessoal aqui!",
+                        custom_id="token_input",
+                        min_length=50,
+                        max_length=50,
+                        required=True,
+                        **kwargs
+                    ),
+                ]
+            )
+
+            if not inter.message.flags.ephemeral:
+                await inter.message.delete()
+
+            return
+
+        elif button_id == "rpc_remove":
+
+            await inter.response.defer()
+
+            await self.close_presence(inter)
+
+            data = await self.bot.get_global_data(id_=user_id, db_name=DBModel.users)
+            data["token"] = ""
+            await self.bot.update_global_data(id_=user_id, data=data, db_name=DBModel.users)
+            msg = "O token foi removido com sucesso!\n" \
+                  "Agora o sistema de rpc estará desativado no seu usuário."
+
+        else: # button_id == "rpc_close"
+            await inter.message.delete()
+            return
+
+        if inter.message.flags.ephemeral:
+            await inter.edit_original_message(content=msg, embeds=[], components=[])
+        else:
+            await inter.send(f"{inter.author.mention}: {msg}", embeds=[], components=[], ephemeral=True)
+            await inter.message.delete()
+
+    async def close_presence(self, inter: Union[disnake.MessageInteraction, disnake.ModalInteraction]):
+
+        for b in self.bot.pool.bots:
+            try:
+                player: LavalinkPlayer = b.music.players[inter.guild_id]
+            except KeyError:
+                continue
+
+            try:
+                if inter.author.id not in player.guild.me.voice.channel.voice_states:
+                    continue
+            except AttributeError:
+                continue
+
+            stats = {
+                "op": "close",
+                "bot_id": self.bot.user.id,
+                "bot_name": str(self.bot.user),
+                "thumb": self.bot.user.display_avatar.replace(size=512, static_format="png").url,
+            }
+
+            await player._send_rpc_data([inter.author.id], stats)
+
 def setup(bot: BotCore):
+
     bot.add_cog(MusicSettings(bot))
+    bot.add_cog(RPCCog(bot))

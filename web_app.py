@@ -96,6 +96,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         super().__init__(*args, **kwargs)
         self.user_ids: list = []
         self.bot_ids: list = []
+        self.token = ""
 
     def on_message(self, message):
 
@@ -103,6 +104,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
         ws_id = data.get("user_ids")
         bot_id = data.get("bot_id")
+        token = data.get("token", "")
 
         if not ws_id:
 
@@ -112,6 +114,11 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                 return
 
             try:
+
+                if users_ws[data["user"]].token != data["token"]:
+                    print("rpc:", users_ws[data["user"]].token, "bot:", data["token"])
+                    return
+
                 users_ws[data["user"]].write_message(json.dumps(data))
             except KeyError:
                 pass
@@ -131,9 +138,13 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             self.close(code=403, reason="Você está tentando conectar mais de 3 usuários consecutivamente...")
             return
 
+        elif len(token) != 50:
+            self.close(code=403, reason="O token tem que ter 50 caracteres!")
+            return
+
         self.user_ids = ws_id
 
-        print("\n".join(f"Nova conexão - User: {u} | {data}" for u in self.user_ids))
+        print("\n".join(f"Nova conexão - User: {u}" for u in self.user_ids))
 
         for u_id in ws_id:
             try:
@@ -141,6 +152,8 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             except:
                 pass
             users_ws[u_id] = self
+
+        self.token = data.get('token', "")
 
         for w in bots_ws:
             try:
@@ -227,7 +240,7 @@ class WSClient:
         for bot in self.pool.bots:
             for player in bot.music.players.values():
                 if player.last_channel.voice_states:
-                    bot.loop.create_task(player.process_rpc(player.last_channel))
+                    player.process_rpc(player.last_channel)
 
         print(f"[RPC client] - Os dados de rpc foram sincronizados com sucesso.")
 
@@ -295,7 +308,7 @@ class WSClient:
                             continue
                         vc_user_ids = [i for i in player.last_channel.voice_states if i in users]
                         if vc_user_ids:
-                            bot.loop.create_task(player.process_rpc(player.last_channel))
+                            player.process_rpc(player.last_channel)
                             for i in vc_user_ids:
                                 users.remove(i)
 
