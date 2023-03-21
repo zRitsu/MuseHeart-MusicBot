@@ -155,7 +155,7 @@ class IndexHandler(tornado.web.RequestHandler):
 
         self.write(f"{self.text}<p><a href=\"https://github.com/zRitsu/DC-MusicBot-RPC"
                    f"/releases\" target=\"_blank\">Baixe o app de rich presence aqui.</a></p>Link para adicionar no app "
-                   f"de RPC abaixo: {ws_url}")
+                   f"de RPC abaixo: {ws_url}\nNão esqueça de obter o token para configurar no app, use o comando /rich_presence para obter um.")
         # self.render("index.html") #será implementado futuramente...
 
 
