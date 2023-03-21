@@ -2,6 +2,8 @@ from json import load
 from dotenv import dotenv_values
 from os import environ
 
+import disnake
+
 bools = {
     "true": True,
     "false": False,
@@ -138,7 +140,9 @@ def load_config():
     except:
         pass
 
-    if CONFIG["EMBED_COLOR"] is False:
+    try:
+        CONFIG["EMBED_COLOR"] = disnake.Color(int(CONFIG["EMBED_COLOR"], 16))
+    except:
         CONFIG["EMBED_COLOR"] = None
 
     # converter strings que requer número int.
@@ -167,7 +171,6 @@ def load_config():
     # converter strings que requer valor bool/nulo.
     for i in [
         "AUTO_SYNC_COMMANDS",
-        "EMBED_COLOR",
         "INTERACTION_COMMAND_ONLY",
         "RUN_LOCAL_LAVALINK",
         "COMMAND_LOG",
