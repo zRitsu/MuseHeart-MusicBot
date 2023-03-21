@@ -23,14 +23,18 @@ bots_ws = []
 
 class IndexHandler(tornado.web.RequestHandler):
 
-    def initialize(self, bots: list):
+    def initialize(self, bots: list, message: str = ""):
+        self.message = message
         self.bots = bots
         self.text = ""
         self.preview = False
 
     async def prepare(self):
 
-        if preview:=environ.get("VIDEO_PREVIEW"):
+        if self.message:
+            pass
+
+        elif preview:=environ.get("VIDEO_PREVIEW"):
             self.text = f"""
             <html>
                 <head>
@@ -123,6 +127,8 @@ class IndexHandler(tornado.web.RequestHandler):
 
             if killing_state is True:
                 self.text = '<h1 style=\"font-size:5vw\">A aplicação será reiniciada em breve...</h1>'
+            elif self.message:
+                self.text += self.message.replace("\n", "</br>")
             else:
                 self.text = '<h1 style=\"font-size:5vw\">Não há bots disponíveis no momento...</h1>\n' \
                             '<br>(se o seu bot não apareceu na lista, verifique o erro que apareceu no terminal/console)'
@@ -409,20 +415,20 @@ class WSClient:
                                 users.remove(i)
 
 
-def run_app(bots: Optional[list] = None):
+def run_app(bots: Optional[list] = None, message: str = ""):
 
     bots = bots or []
 
     app = tornado.web.Application([
-        (r'/', IndexHandler, {'bots': bots}),
+        (r'/', IndexHandler, {'bots': bots, 'message': message}),
         (r'/ws', WebSocketHandler),
     ])
 
     app.listen(port=environ.get("PORT", 80))
 
 
-def start(bots: Optional[list] = None):
-    run_app(bots)
+def start(bots: Optional[list] = None, message=""):
+    run_app(bots, message)
     tornado.ioloop.IOLoop.instance().start()
 
 

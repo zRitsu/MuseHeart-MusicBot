@@ -443,15 +443,19 @@ class BotPool:
         for k, v in all_tokens.items():
             load_bot(k, v)
 
-        if not self.bots:
-            os.system('cls' if os.name == 'nt' else 'clear')
-            raise Exception(
-                "O token do bot não foi configurado devidamente!\n"
-                "Confira se o token foi configurado na ENV/ENVIRONMENT/SECRETS ou no arquivo .env\n"
-                "Caso ainda tenha dúvidas, entre no servidor de suporte: https://discord.gg/R7BPG8fZTr"
-            )
+        message = ""
 
-        if start_local:
+        if not self.bots:
+
+            os.system('cls' if os.name == 'nt' else 'clear')
+
+            message = "O token do bot não foi configurado devidamente!\n" \
+                      "Confira se o token foi configurado na ENV/ENVIRONMENT/SECRETS ou no arquivo .env\n" \
+                      "Caso ainda tenha dúvidas, entre no servidor de suporte: https://discord.gg/R7BPG8fZTr"
+
+            print(message)
+
+        elif start_local:
             run_lavalink(
                 lavalink_file_url=self.config['LAVALINK_FILE_URL'],
                 lavalink_initial_ram=self.config['LAVALINK_INITIAL_RAM'],
@@ -466,16 +470,21 @@ class BotPool:
 
         if self.config["RUN_RPC_SERVER"]:
 
-            for bot in self.bots:
-                loop.create_task(self.start_bot(bot))
+            if not message:
 
-            loop.create_task(self.connect_rpc_ws())
-            loop.create_task(self.connect_spotify())
+                for bot in self.bots:
+                    loop.create_task(self.start_bot(bot))
+
+                loop.create_task(self.connect_rpc_ws())
+                loop.create_task(self.connect_spotify())
 
             try:
-                start(self.bots)
+                start(self.bots, message=message)
             except KeyboardInterrupt:
                 return
+
+        elif message:
+            raise Exception(message)
 
         else:
 
