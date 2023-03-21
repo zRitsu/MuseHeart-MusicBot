@@ -8,8 +8,8 @@ if [ -n "${VIDEO_PREVIEW}" ]; then
     python3 -m venv venv
   fi
   . venv/bin/activate
-  pip3 install tornado
-  python3 preview.py
+  pip3 install -r requirements.txt
+  python3 web_app.py
   kill "$PPID"
   exit 1
 fi
