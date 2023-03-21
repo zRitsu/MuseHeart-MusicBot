@@ -6,9 +6,9 @@ pip3 uninstall poetry -y
 if [ -n "${VIDEO_PREVIEW}" ]; then
   if [ ! -d "venv" ]; then
     python3 -m venv venv
+    pip3 install -r requirements.txt
   fi
   . venv/bin/activate
-  pip3 install -r requirements.txt
   python3 web_app.py
   kill "$PPID"
   exit 1
