@@ -656,7 +656,7 @@ class LavalinkPlayer(wavelink.Player):
 
     async def idling_mode(self):
 
-        self.process_rpc(self.guild.me.voice.channel)
+        self.bot.loop.create_task(self.process_rpc(self.guild.me.voice.channel))
 
         await self.process_idle_message()
 
@@ -743,7 +743,7 @@ class LavalinkPlayer(wavelink.Player):
             return
 
         if rpc_update:
-            self.process_rpc()
+            self.bot.loop.create_task(self.process_rpc())
 
         if self.static:
             if self.skin_static.startswith("> custom_skin: "):
@@ -965,7 +965,7 @@ class LavalinkPlayer(wavelink.Player):
     async def update_message(self, interaction: disnake.Interaction = None, force=False, rpc_update=False):
 
         if rpc_update:
-            self.process_rpc()
+            self.bot.loop.create_task(self.process_rpc())
 
         if force or (interaction and not interaction.response.is_done()):
             if self.controller_mode:
@@ -981,7 +981,7 @@ class LavalinkPlayer(wavelink.Player):
 
         vc = self.bot.get_channel(self.channel_id)
 
-        self.process_rpc(vc, close=True)
+        self.bot.loop.create_task(self.process_rpc(vc, close=True))
 
         try:
             await self.update_stage_topic()
@@ -1121,128 +1121,137 @@ class LavalinkPlayer(wavelink.Player):
             except Exception:
                 print(traceback.print_exc())
 
-    def process_rpc(
+    async def process_rpc(
             self,
-            voice_channel: Union[disnake.VoiceChannel,
-                                 disnake.StageChannel] = None,
+            voice_channel: Union[disnake.VoiceChannel, disnake.StageChannel] = None,
             close=False,
             users: List[int] = None,
+            wait: bool = False
     ):
+        try:
+            if not voice_channel and not close:
+                try:
+                    voice_channel = self.bot.get_channel(
+                        self.channel_id) or self.guild.voice_client.channel
+                except AttributeError:
+                    # TODO: Investigar possível bug ao mover o bot de canal pelo discord.
+                    return
+                if not voice_channel:
+                    return
 
-        if not voice_channel and not close:
-            try:
-                voice_channel = self.bot.get_channel(
-                    self.channel_id) or self.guild.voice_client.channel
-            except AttributeError:
-                # TODO: Investigar possível bug ao mover o bot de canal pelo discord.
+            thumb = self.bot.user.display_avatar.replace(
+                size=512, static_format="png").url
+
+            users = [u for u in (users or voice_channel.voice_states)
+                     if u != self.bot.user.id]
+
+            if close:
+
+                stats = {
+                    "op": "close",
+                    "bot_id": self.bot.user.id,
+                    "bot_name": str(self.bot.user),
+                    "thumb": thumb,
+                }
+
+                if wait:
+                    await self._send_rpc_data(users, stats)
+                else:
+                    try:
+                        self._rpc_update_task.cancel()
+                    except:
+                        pass
+                    self._rpc_update_task = self.bot.loop.create_task(self._send_rpc_data(users, stats))
                 return
-            if not voice_channel:
+
+            if self.is_closing:
                 return
-
-        thumb = self.bot.user.display_avatar.replace(
-            size=512, static_format="png").url
-
-        users = [u for u in (users or voice_channel.voice_states)
-                 if u != self.bot.user.id]
-
-        if close:
 
             stats = {
-                "op": "close",
+                "op": "update",
+                "track": None,
                 "bot_id": self.bot.user.id,
                 "bot_name": str(self.bot.user),
                 "thumb": thumb,
+                "info": {
+                    "channel": {
+                        "name": voice_channel.name,
+                        "id": voice_channel.id
+                    },
+                    "guild": {
+                        "name": voice_channel.guild.name,
+                        "id": voice_channel.guild.id,
+                    },
+                    "members": len(users)
+                }
             }
 
             try:
-                self._rpc_update_task.cancel()
-            except:
+                stats["info"]["guild"]["icon"] = self.guild.icon.with_static_format(
+                    "png").url
+            except AttributeError:
                 pass
 
-            self._rpc_update_task = self.bot.loop.create_task(self._send_rpc_data(users, stats))
-            return
+            if not self.current:
 
-        if self.is_closing:
-            return
+                stats.update(
+                    {
+                        "op": "idle",
+                        "bot_id": self.bot.user.id,
+                        "invite_permissions": self.bot.config["INVITE_PERMISSIONS"],
+                        "bot_name": str(self.bot.user),
+                        "public": self.bot.appinfo.bot_public,
+                        "support_server": self.bot.config["SUPPORT_SERVER"],
+                    }
+                )
 
-        stats = {
-            "op": "update",
-            "track": None,
-            "bot_id": self.bot.user.id,
-            "bot_name": str(self.bot.user),
-            "thumb": thumb,
-            "info": {
-                "channel": {
-                    "name": voice_channel.name,
-                    "id": voice_channel.id
-                },
-                "guild": {
-                    "name": voice_channel.guild.name,
-                    "id": voice_channel.guild.id,
-                },
-                "members": len(users)
-            }
-        }
+            else:
 
-        try:
-            stats["info"]["guild"]["icon"] = self.guild.icon.with_static_format(
-                "png").url
-        except AttributeError:
-            pass
+                track: Union[LavalinkTrack, PartialTrack] = self.current
 
-        if not self.current:
-
-            stats.update(
-                {
-                    "op": "idle",
-                    "bot_id": self.bot.user.id,
-                    "invite_permissions": self.bot.config["INVITE_PERMISSIONS"],
-                    "bot_name": str(self.bot.user),
-                    "public": self.bot.appinfo.bot_public,
-                    "support_server": self.bot.config["SUPPORT_SERVER"],
+                stats["track"] = {
+                    "source": track.info["sourceName"],
+                    "thumb": track.thumb if len(track.thumb) < 257 else "",
+                    "title": track.single_title,
+                    "url": track.uri,
+                    "author": track.authors_string,
+                    "duration": track.duration,
+                    "stream": track.is_stream,
+                    "position": self.position,
+                    "paused": self.is_paused,
+                    "loop": self.current.track_loops or self.loop,
+                    "queue": len(self.queue),
                 }
-            )
 
-        else:
+                if track.playlist_name:
+                    stats["track"].update(
+                        {
+                            "playlist_name": track.playlist_name,
+                            "playlist_url": track.playlist_url,
+                        }
+                    )
 
-            track: Union[LavalinkTrack, PartialTrack] = self.current
+                if track.album_name:
+                    stats["track"].update(
+                        {
+                            "album_name": track.album_name,
+                            "album_url": track.album_url,
+                        }
+                    )
 
-            stats["track"] = {
-                "source": track.info["sourceName"],
-                "thumb": track.thumb if len(track.thumb) < 257 else "",
-                "title": track.single_title,
-                "url": track.uri,
-                "author": track.authors_string,
-                "duration": track.duration,
-                "stream": track.is_stream,
-                "position": self.position,
-                "paused": self.is_paused,
-                "loop": self.current.track_loops or self.loop,
-                "queue": len(self.queue),
-            }
+            if wait:
+                await self._send_rpc_data(users, stats)
+            else:
 
-            if track.playlist_name:
-                stats["track"].update(
-                    {
-                        "playlist_name": track.playlist_name,
-                        "playlist_url": track.playlist_url,
-                    }
-                )
+                try:
+                    self._rpc_update_task.cancel()
+                except:
+                    pass
 
-            if track.album_name:
-                stats["track"].update(
-                    {
-                        "album_name": track.album_name,
-                        "album_url": track.album_url,
-                    }
-                )
+                self._rpc_update_task = self.bot.loop.create_task(self._send_rpc_data(users, stats))
 
-        try:
-            self._rpc_update_task.cancel()
-        except:
-            pass
-
-        self._rpc_update_task = self.bot.loop.create_task(self._send_rpc_data(users, stats))
+        except Exception:
+            traceback.print_exc()
 
     async def track_end(self):
 

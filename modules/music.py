@@ -1703,7 +1703,7 @@ class Music(commands.Cog):
         await self.interaction_message(inter, txt, emoji=emoji)
 
         await asyncio.sleep(2)
-        player.process_rpc()
+        await player.process_rpc()
 
     @seek.autocomplete("tempo")
     async def seek_suggestions(self, inter: disnake.Interaction, query: str):
@@ -1868,7 +1868,7 @@ class Music(commands.Cog):
 
         player.loop = mode
 
-        player.process_rpc()
+        bot.loop.create_task(player.process_rpc())
 
         await self.interaction_message(inter, txt, emoji=emoji)
 
@@ -4396,20 +4396,6 @@ class Music(commands.Cog):
         if not after or before.channel != after.channel:
 
             try:
-                if player.guild.me.voice and after.channel != player.guild.me.voice.channel:
-                    await player._send_rpc_data(
-                        users=[member.id],
-                        stats={
-                            "op": "close",
-                            "bot_id": self.bot.user.id,
-                            "bot_name": str(self.bot.user),
-                            "thumb": self.bot.user.display_avatar.with_size(512).url,
-                        }
-                    )
-            except Exception:
-                traceback.print_exc()
-
-            try:
                 vc = player.guild.me.voice.channel
             except AttributeError:
 
@@ -4422,7 +4408,13 @@ class Music(commands.Cog):
 
             if vc:
 
-                player.process_rpc(vc, users=[m for m in vc.voice_states if (m != member.id)])
+                try:
+                    await player.process_rpc(vc, users=[member.id], close=after.channel != player.guild.me.voice.channel, wait=True)
+                except AttributeError:
+                    traceback.print_exc()
+                    pass
+
+                await player.process_rpc(vc, users=[m for m in vc.voice_states if (m != member.id)])
 
     async def reset_controller_db(self, guild_id: int, data: dict, inter: disnake.AppCmdInter = None):
 
