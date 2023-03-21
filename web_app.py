@@ -166,6 +166,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         self.user_ids: list = []
         self.bot_ids: list = []
         self.token = ""
+        self.blocked = False
 
     def on_message(self, message):
 
@@ -174,6 +175,11 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         ws_id = data.get("user_ids")
         bot_id = data.get("bot_id")
         token = data.get("token", "")
+
+        try:
+            version = int(data.get("version"))
+        except:
+            version = 0
 
         if not ws_id:
 
@@ -184,15 +190,36 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
             try:
 
-                if users_ws[data["user"]].token != data["token"]:
-                    print("rpc:", users_ws[data["user"]].token, "bot:", data["token"])
+                if version < 2.2:
+
+                    self.close(code=1005, reason="Versão do app não suportado! Certifique-se de que está usando "
+                                                 "a versão mais recente do app (2.3 ou superior).")
                     return
 
-                users_ws[data["user"]].write_message(json.dumps(data))
+
+                if self.blocked is False and users_ws[data["user"]].token != data["token"]:
+
+                    data.update(
+                        {
+                            "op": "exception",
+                            "message": "token inválido! Por via das dúvidas gere um novo token usando o comando no "
+                                       "bot: /rich_presence."
+                        }
+                    )
+
+                    for d in ("token", "track", "info"):
+                        data.pop(d, None)
+
+                    self.blocked = True
+
+                    users_ws[data["user"]].write_message(json.dumps(data))
+
             except KeyError:
                 pass
+
             except Exception as e:
                 print(f"Erro ao processar dados do rpc para o user [{data['user']}]: {repr(e)}")
+
             return
 
         is_bot = data.pop("bot", False)
