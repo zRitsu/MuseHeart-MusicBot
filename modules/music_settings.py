@@ -1097,8 +1097,8 @@ class RPCCog(commands.Cog):
             raise GenericError("**O RPC_SERVER não foi configurado na ENV/ENVIRONMENTS (ou arquivo .env)**")
 
         components = [
-            disnake.ui.Button(label="Gerar/Resetar token", custom_id=f"rpc_gen.{inter.author.id}", emoji="🔑", row=0),
-            disnake.ui.Button(label="Importar/Atualizar/Ver token", custom_id=f"rpc_create.{inter.author.id}", emoji="✍️",
+            disnake.ui.Button(label="Criar/Resetar token", custom_id=f"rpc_gen.{inter.author.id}", emoji="🔑", row=0),
+            disnake.ui.Button(label="Importar/Editar/Ver token", custom_id=f"rpc_create.{inter.author.id}", emoji="✍️",
                               row=0),
             disnake.ui.Button(label="Remover token (Desativar)", custom_id=f"rpc_remove.{inter.author.id}", emoji="♻️",
                               row=1),
@@ -1111,10 +1111,10 @@ class RPCCog(commands.Cog):
 
         await inter.send(
             embed=disnake.Embed(
-                description="**Gerencie aqui o token de acesso ao RPC (Rich Presence).**\n\n"
+                description="**Gerencie/Crie o token usando os botões abaixo para liberar o acesso ao RPC (Rich Presence).\n\n"
+                            "Caso não tenha o app de Rich Presence você pode fazer o download do musicbot_rpc.zip [aqui](https://github.com/zRitsu/Discord-MusicBot-RPC/releases) (apenas para windows e discord desktop).**\n\n"
                             "Você também terá que adicionar o link do websocket abaixo no app de RPC: ```ansi\n"
-                            f"[34;1m{self.bot.config['RPC_SERVER'].replace('$PORT', os.environ.get('PORT', '80'))}[0m```\n"
-                            "**Caso não tenha o app de Rich Presence você pode fazer o download do musicbot_rpc.zip [aqui](https://github.com/zRitsu/Discord-MusicBot-RPC/releases) (apenas para windows e discord desktop).**",
+                            f"[34;1m{self.bot.config['RPC_SERVER'].replace('$PORT', os.environ.get('PORT', '80'))}[0m```",
                 color=self.bot.get_color()
             ),
             components=components,
