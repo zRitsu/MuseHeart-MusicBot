@@ -4396,6 +4396,20 @@ class Music(commands.Cog):
         if not after or before.channel != after.channel:
 
             try:
+                if player.guild.me.voice and after.channel != player.guild.me.voice.channel:
+                    await player._send_rpc_data(
+                        users=[member.id],
+                        stats={
+                            "op": "close",
+                            "bot_id": self.bot.user.id,
+                            "bot_name": str(self.bot.user),
+                            "thumb": self.bot.user.display_avatar.with_size(512).url,
+                        }
+                    )
+            except Exception:
+                traceback.print_exc()
+
+            try:
                 vc = player.guild.me.voice.channel
             except AttributeError:
 
@@ -4407,11 +4421,6 @@ class Music(commands.Cog):
                 vc = before.channel
 
             if vc:
-
-                try:
-                    player.process_rpc(vc, users=[member.id], close=after.channel != player.guild.me.voice.channel)
-                except AttributeError:
-                    pass
 
                 player.process_rpc(vc, users=[m for m in vc.voice_states if (m != member.id)])
 
