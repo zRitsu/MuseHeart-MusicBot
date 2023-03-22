@@ -183,7 +183,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         token = data.get("token", "")
 
         try:
-            version = int(data.get("version"))
+            version = float(data.get("version"))
         except:
             version = 0
 
