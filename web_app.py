@@ -179,7 +179,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
         ws_id = data.get("user_ids")
         bot_id = data.get("bot_id")
-        token = data.get("token", "")
+        token = data.pop("token", "") or ""
 
         try:
             version = float(data.get("version"))
@@ -194,7 +194,10 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                 return
 
             try:
-                if self.blocked is False and users_ws[data["user"]].token != token:
+                if self.blocked:
+                    return
+
+                if users_ws[data["user"]].token != token:
 
                     data.update(
                         {
@@ -209,7 +212,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
                     self.blocked = True
 
-                users_ws[data["user"]].write_message(json.dumps(data))
+                    users_ws[data["user"]].write_message(json.dumps(data))
 
             except KeyError:
                 pass
@@ -250,7 +253,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                 pass
             users_ws[u_id] = self
 
-        self.token = data.get('token', "")
+        self.token = token
 
         for w in bots_ws:
             try:
