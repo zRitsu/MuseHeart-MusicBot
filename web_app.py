@@ -158,7 +158,6 @@ class IndexHandler(tornado.web.RequestHandler):
                      "getElementById(\"url\").innerHTML = window.location.href.replace(\"http\", \"ws\")" \
                      ".replace(\"https\", \"wss\") + \"ws\"}</script></body>"
 
-
         self.write(f"{self.text}<p><a href=\"https://github.com/zRitsu/DC-MusicBot-RPC"
                    f"/releases\" target=\"_blank\">Baixe o app de rich presence aqui.</a></p>Link para adicionar no app "
                    f"de RPC abaixo: {ws_url}\nNão esqueça de obter o token para configurar no app, use o comando /rich_presence para obter um.")
@@ -195,15 +194,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                 return
 
             try:
-
-                if version < 2.2:
-
-                    self.close(code=1005, reason="Versão do app não suportado! Certifique-se de que está usando "
-                                                 "a versão mais recente do app (2.3 ou superior).")
-                    return
-
-
-                if self.blocked is False and users_ws[data["user"]].token != data["token"]:
+                if self.blocked is False and users_ws[data["user"]].token != token:
 
                     data.update(
                         {
@@ -218,11 +209,10 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
                     self.blocked = True
 
-                    users_ws[data["user"]].write_message(json.dumps(data))
+                users_ws[data["user"]].write_message(json.dumps(data))
 
             except KeyError:
                 pass
-
             except Exception as e:
                 print(f"Erro ao processar dados do rpc para o user [{data['user']}]: {repr(e)}")
 
@@ -234,6 +224,11 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             print(f"Nova conexão - Bot: {ws_id} {self.request.remote_ip}")
             self.bot_ids = ws_id
             bots_ws.append(self)
+            return
+
+        if version < 2.2:
+            self.close(code=1005, reason="Versão do app não suportado! Certifique-se de que está usando "
+                                         "a versão mais recente do app (2.3 ou superior).")
             return
 
         if len(ws_id) > 3:
@@ -290,7 +285,8 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                 try:
                     w.write_message(data)
                 except Exception as e:
-                    print(f"Erro ao processar dados do rpc para os usuários: [{', '.join(str(i) for i in w.user_ids)}]: {repr(e)}")
+                    print(
+                        f"Erro ao processar dados do rpc para os usuários: [{', '.join(str(i) for i in w.user_ids)}]: {repr(e)}")
 
         bots_ws.remove(self)
 
@@ -416,7 +412,6 @@ class WSClient:
 
 
 def run_app(bots: Optional[list] = None, message: str = ""):
-
     bots = bots or []
 
     app = tornado.web.Application([
