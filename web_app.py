@@ -282,14 +282,16 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
             print(f"Conexão Finalizada - Bot ID's: {self.bot_ids}")
 
-            data = {"op": "close", "bot_id": self.bot_ids}
+            if not self.blocked:
 
-            for w in users_ws.values():
-                try:
-                    w.write_message(data)
-                except Exception as e:
-                    print(
-                        f"Erro ao processar dados do rpc para os usuários: [{', '.join(str(i) for i in w.user_ids)}]: {repr(e)}")
+                data = {"op": "close", "bot_id": self.bot_ids}
+
+                for w in users_ws.values():
+                    try:
+                        w.write_message(data)
+                    except Exception as e:
+                        print(
+                            f"Erro ao processar dados do rpc para os usuários: [{', '.join(str(i) for i in w.user_ids)}]: {repr(e)}")
 
         bots_ws.remove(self)
 
