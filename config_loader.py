@@ -49,6 +49,7 @@ DEFAULT_CONFIG = {
     "IDLE_TIMEOUT": 180,
     "RUN_RPC_SERVER": True,
     "RPC_SERVER": "ws://localhost:$PORT/ws",
+    "RPC_PUBLIC_URL": "",
     "ENABLE_RPC_COMMAND": False,
     "MAX_USER_FAVS": 10,
     "USER_FAV_MAX_NAME_LENGTH": 35,

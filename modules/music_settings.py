@@ -1093,7 +1093,7 @@ class RPCCog(commands.Cog):
             raise GenericError("**Este comando está desativado nas minhas configurações...**\n"
                                "Apenas o meu desenvolvedor pode ativar este comando publicamente.")
 
-        if not self.bot.config["RPC_SERVER"]:
+        if not self.bot.config["RPC_PUBLIC_URL"] and not self.bot.config["RPC_SERVER"]:
             raise GenericError("**O RPC_SERVER não foi configurado na ENV/ENVIRONMENTS (ou arquivo .env)**")
 
         components = [
@@ -1114,7 +1114,7 @@ class RPCCog(commands.Cog):
                 description="**Gerencie/Crie o token usando os botões abaixo para liberar o acesso ao RPC (Rich Presence).\n\n"
                             "Caso não tenha o app de Rich Presence você pode fazer o download do musicbot_rpc.zip [aqui](https://github.com/zRitsu/Discord-MusicBot-RPC/releases) (apenas para windows e discord desktop).**\n\n"
                             "Você também terá que adicionar o link do websocket abaixo no app de RPC: ```ansi\n"
-                            f"[34;1m{self.bot.config['RPC_SERVER'].replace('$PORT', os.environ.get('PORT', '80'))}[0m```",
+                            f"[34;1m{(self.bot.config['RPC_PUBLIC_URL'] or self.bot.config['RPC_SERVER']).replace('$PORT', os.environ.get('PORT', '80'))}[0m```",
                 color=self.bot.get_color()
             ),
             components=components,
