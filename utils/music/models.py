@@ -1107,14 +1107,15 @@ class LavalinkPlayer(wavelink.Player):
             stats["user"] = u
 
             try:
-                stats["token"] = self.bot.pool.rpc_token_cache[u]
+                token = self.bot.pool.rpc_token_cache[u]
             except KeyError:
                 data = await self.bot.get_global_data(id_=u, db_name=DBModel.users)
-                self.bot.pool.rpc_token_cache[u] = data["token"]
-                stats["token"] = data["token"]
+                token = data["token"]
 
-            if not stats["token"]:
+            if not token:
                 continue
+
+            stats["token"] = token
 
             try:
                 await self.bot.ws_client.send(stats)
