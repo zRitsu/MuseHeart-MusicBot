@@ -34,7 +34,7 @@ class IndexHandler(tornado.web.RequestHandler):
         if self.message:
             pass
 
-        elif preview:=environ.get("VIDEO_PREVIEW"):
+        elif preview := environ.get("VIDEO_PREVIEW"):
             self.text = f"""
             <html>
                 <head>
@@ -49,7 +49,7 @@ class IndexHandler(tornado.web.RequestHandler):
                           </td>
                       </tr>
                     </table><br>
-            
+
                     <table border="1">
                       <tr>
                           <td><b style="font-size: 30px;">Exemplo do suporte a multi-voice:</b></td>
@@ -63,7 +63,7 @@ class IndexHandler(tornado.web.RequestHandler):
                         </td>
                       </tr>
                     </table><br>
-            
+
                     <table border="1">
                       <tr>
                           <td><b style="font-size: 30px;">Exemplo com canal de song-request em palco com multiplos bots (função de stage_announce ativado):</b></td>
@@ -77,7 +77,7 @@ class IndexHandler(tornado.web.RequestHandler):
                         </td>
                       </tr>
                     </table><br>
-            
+
                     <table border="1">
                       <tr>
                           <td><b style="font-size: 30px;">Exemplo com canal de song-request em canal de forum com múltiplos bots:</b></td>
@@ -194,7 +194,8 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                 return
 
             try:
-                if self.blocked:
+
+                if users_ws[data["user"]].blocked:
                     return
 
                 if users_ws[data["user"]].token != token:
@@ -210,9 +211,9 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                     for d in ("token", "track", "info"):
                         data.pop(d, None)
 
-                    self.blocked = True
+                    users_ws[data["user"]].blocked = True
 
-                    users_ws[data["user"]].write_message(json.dumps(data))
+                users_ws[data["user"]].write_message(json.dumps(data))
 
             except KeyError:
                 pass
@@ -282,16 +283,18 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
             print(f"Conexão Finalizada - Bot ID's: {self.bot_ids}")
 
-            if not self.blocked:
+            data = {"op": "close", "bot_id": self.bot_ids}
 
-                data = {"op": "close", "bot_id": self.bot_ids}
+            for w in users_ws.values():
 
-                for w in users_ws.values():
-                    try:
-                        w.write_message(data)
-                    except Exception as e:
-                        print(
-                            f"Erro ao processar dados do rpc para os usuários: [{', '.join(str(i) for i in w.user_ids)}]: {repr(e)}")
+                if w.blocked:
+                    continue
+
+                try:
+                    w.write_message(data)
+                except Exception as e:
+                    print(
+                        f"Erro ao processar dados do rpc para os usuários: [{', '.join(str(i) for i in w.user_ids)}]: {repr(e)}")
 
         bots_ws.remove(self)
 
