@@ -187,7 +187,8 @@ class Misc(commands.Cog):
 
                         if prefix:
                             embed.description += f"Também tenho comandos de texto por prefixo.\n" \
-                                                 f"Para ver todos os meus comandos de texto use **{prefix}help**\n\n"
+                                                 f"Para ver todos os meus comandos de texto use **{prefix}help** em um " \
+                                                 f"canal do servidor **{guild.name}**\n\n"
 
                         try:
                             return await entry.user.send(embed=embed, components=components)
