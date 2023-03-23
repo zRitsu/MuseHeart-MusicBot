@@ -134,10 +134,57 @@ class Misc(commands.Cog):
 
         if str(self.bot.user.id) in self.bot.config["INTERACTION_BOTS_CONTROLLER"]:
             await guild.leave()
+            return
 
-        channel = None
+        interaction_invites = []
 
-        for c in (guild.system_channel, guild.public_updates_channel, guild.rules_channel):
+        if not self.bot.command_sync_flags.sync_commands and self.bot.config["INTERACTION_BOTS"]:
+
+            for b in self.bot.pool.bots:
+
+                if str(b.user.id) not in self.bot.config["INTERACTION_BOTS"]:
+                    continue
+
+                interaction_invites.append(f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) ")
+
+        if cmd:=self.bot.get_command("setup"):
+            cmd_text = f"Se desejar, use o comando **/{cmd.name}** para criar um canal dedicado pra pedir " \
+                        "músicas sem comandos e deixar o music player fixo em um canal dedicado.\n\n"
+        else:
+            cmd_text = ""
+
+        channel = guild.system_channel
+
+        if not channel:
+
+            if guild.me.guild_permissions.view_audit_log:
+
+                async for entry in guild.audit_logs(action=disnake.AuditLogAction.integration_create, limit=50):
+                    if entry.target.user.id == self.bot.user.id:
+
+                        embed = disnake.Embed(
+                            color=self.bot.get_color(),
+                            description=f"Olá! Agradeço muito por ter me adicionado no servidor: **{guild.name}** :)\n\n"
+                        )
+
+                        if interaction_invites:
+                            embed.description += f"**Observação importante:** Meus comandos de barra funcionam " \
+                                                 f"através de uma das seguintes aplicações abaixo:\n" \
+                                                 f"{' **|** '.join(interaction_invites)}\n\n" \
+                                                 f"Caso os comandos da aplicação acima não sejam exibidos ao digitar " \
+                                                 f"barra (**/**) em um canal do servidor **{guild.name}** você terá " \
+                                                 f"que clicar no nome acima para integrar os comandos de barra no " \
+                                                 f"servidor **{guild.name}**.\n\n"
+
+                        try:
+                            return await entry.user.send(embed=embed)
+                        except disnake.Forbidden:
+                            pass
+                        except Exception as e:
+                            traceback.print_exc()
+                        break
+
+        for c in (guild.public_updates_channel, guild.rules_channel):
 
             if c and c.permissions_for(guild.me).send_messages:
                 channel = c
@@ -148,36 +195,20 @@ class Misc(commands.Cog):
 
         components = [disnake.ui.Button(custom_id="bot_invite", label="Precisa de mais bots de música? Clique aqui.")] if [b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public] else []
 
-        embed = disnake.Embed(
-            description="",
-            color=self.bot.get_color(guild.me)
-        )
+        embed = disnake.Embed(description="", color=self.bot.get_color(guild.me))
 
-        if not self.bot.command_sync_flags.sync_commands and self.bot.config["INTERACTION_BOTS"]:
+        if interaction_invites:
+            embed.description += f"Olá! Para ver todos os meus comandos digite barra (**/**) e confira " \
+                                 f"os comandos das seguintes aplicações abaixo:\n" \
+                                 f"{' **|** '.join(interaction_invites)}\n\n" \
+                                 f"Caso os comandos da aplicação acima não sejam exibidos ao digitar " \
+                                 f"barra (**/**) você terá que clicar no nome acima para integrar os comandos de " \
+                                 f"barra no seu servidor.\n\n"
 
-            interaction_invites = []
+        else:
+            embed.description += "Olá! Para ver todos os meus comandos use barra (**/**)\n\n"
 
-            for b in self.bot.pool.bots:
-
-                if str(b.user.id) not in self.bot.config["INTERACTION_BOTS"]:
-                    continue
-
-                interaction_invites.append(f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) ")
-
-            if interaction_invites:
-                embed.description += f"Olá! Para ver todos os meus comandos digite barra (**/**) e confira " \
-                                     f"os comandos das seguintes aplicações abaixo:\n" \
-                                     f"{' **|** '.join(interaction_invites)}\n\n" \
-                                     f"Caso os comandos da aplicação acima não sejam exibidos ao digitar " \
-                                     f"barra (**/**) você terá que clicar no nome acima para integrar os comandos de " \
-                                     f"barra no seu servidor.\n\n"
-
-            else:
-                embed.description += "Olá! Para ver todos os meus comandos use barra (**/**)\n\n"
-
-        if cmd:=self.bot.get_command("setup"):
-            embed.description += f"Se desejar, use o comando **/{cmd.name}** para criar um canal dedicado pra pedir " \
-                                 "músicas sem comandos e deixar o music player fixo em um canal dedicado.\n\n"
+        embed.description += cmd_text
 
         if self.bot.config["SUPPORT_SERVER"]:
             embed.description += f"Caso tenha alguma dúvida ou queira acompanhar as últimas novidades, você pode entrar no meu [`servidor de suporte`]({self.bot.config['SUPPORT_SERVER']})\n\n"
