@@ -138,6 +138,8 @@ class Misc(commands.Cog):
 
         interaction_invites = []
 
+        components = [disnake.ui.Button(custom_id="bot_invite", label="Precisa de mais bots de música? Clique aqui.")] if [b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public] else []
+
         if not self.bot.command_sync_flags.sync_commands and self.bot.config["INTERACTION_BOTS"]:
 
             for b in self.bot.pool.bots:
@@ -167,7 +169,7 @@ class Misc(commands.Cog):
             if guild.me.guild_permissions.view_audit_log:
 
                 async for entry in guild.audit_logs(action=disnake.AuditLogAction.integration_create, limit=50):
-                    if entry.target.user.id == self.bot.user.id:
+                    if entry.target.application_id == self.bot.user.id:
 
                         embed = disnake.Embed(
                             color=self.bot.get_color(),
@@ -188,7 +190,7 @@ class Misc(commands.Cog):
                                                  f"Para ver todos os meus comandos de texto use **{prefix}help**\n\n"
 
                         try:
-                            return await entry.user.send(embed=embed)
+                            return await entry.user.send(embed=embed, components=components)
                         except disnake.Forbidden:
                             pass
                         except Exception:
@@ -205,8 +207,6 @@ class Misc(commands.Cog):
 
             if not channel:
                 return
-
-        components = [disnake.ui.Button(custom_id="bot_invite", label="Precisa de mais bots de música? Clique aqui.")] if [b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public] else []
 
         embed = disnake.Embed(description="", color=self.bot.get_color(guild.me))
 
