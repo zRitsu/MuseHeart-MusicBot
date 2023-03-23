@@ -153,6 +153,15 @@ class Misc(commands.Cog):
         else:
             cmd_text = ""
 
+        guild_data = await self.bot.get_global_data(guild.id, db_name=DBModel.guilds)
+
+        prefix = guild_data["prefix"] or self.bot.default_prefix
+
+        if self.bot.default_prefix and not self.bot.config["INTERACTION_COMMAND_ONLY"]:
+            prefix = disnake.utils.escape_markdown(prefix, as_needed=True)
+        else:
+            prefix = ""
+
         channel = guild.system_channel
 
         if not channel:
@@ -176,22 +185,28 @@ class Misc(commands.Cog):
                                                  f"que clicar no nome acima para integrar os comandos de barra no " \
                                                  f"servidor **{guild.name}**.\n\n"
 
+                        if prefix:
+                            embed.description += f"Também tenho comandos de texto por prefixo.\n" \
+                                                 f"Para ver todos os meus comandos de texto use **{prefix}help**\n\n"
+
                         try:
                             return await entry.user.send(embed=embed)
                         except disnake.Forbidden:
                             pass
-                        except Exception as e:
+                        except Exception:
                             traceback.print_exc()
                         break
 
-        for c in (guild.public_updates_channel, guild.rules_channel):
-
-            if c and c.permissions_for(guild.me).send_messages:
-                channel = c
-                break
-
         if not channel:
-            return
+
+            for c in (guild.public_updates_channel, guild.rules_channel):
+
+                if c and c.permissions_for(guild.me).send_messages:
+                    channel = c
+                    break
+
+            if not channel:
+                return
 
         components = [disnake.ui.Button(custom_id="bot_invite", label="Precisa de mais bots de música? Clique aqui.")] if [b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public] else []
 
@@ -209,6 +224,10 @@ class Misc(commands.Cog):
             embed.description += "Olá! Para ver todos os meus comandos use barra (**/**)\n\n"
 
         embed.description += cmd_text
+
+        if prefix:
+            embed.description += f"Também tenho comandos de texto por prefixo.\n" \
+                                 f"Para ver todos os meus comandos de texto use **{prefix}help**\n\n"
 
         if self.bot.config["SUPPORT_SERVER"]:
             embed.description += f"Caso tenha alguma dúvida ou queira acompanhar as últimas novidades, você pode entrar no meu [`servidor de suporte`]({self.bot.config['SUPPORT_SERVER']})\n\n"
