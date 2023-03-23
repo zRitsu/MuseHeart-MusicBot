@@ -24,7 +24,7 @@ DEFAULT_CONFIG = {
     "SOURCE_REPO": "https://github.com/zRitsu/disnake-LL-music-bot.git",
     "SUPPORT_SERVER": "",
     "ADDITIONAL_BOT_IDS": "",
-    "INVITE_PERMISSIONS": 534735285328,
+    "INVITE_PERMISSIONS": 332892794064,
     "ENABLE_LOGGER": False,
     "INTERACTION_BOTS": "",
     "INTERACTION_BOTS_CONTROLLER": "",
