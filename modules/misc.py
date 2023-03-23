@@ -153,11 +153,9 @@ class Misc(commands.Cog):
         else:
             cmd_text = ""
 
-        guild_data = await self.bot.get_global_data(guild.id, db_name=DBModel.guilds)
-
-        prefix = guild_data["prefix"] or self.bot.default_prefix
-
         if self.bot.default_prefix and not self.bot.config["INTERACTION_COMMAND_ONLY"]:
+            guild_data = await self.bot.get_global_data(guild.id, db_name=DBModel.guilds)
+            prefix = guild_data["prefix"] or self.bot.default_prefix
             prefix = disnake.utils.escape_markdown(prefix, as_needed=True)
         else:
             prefix = ""
