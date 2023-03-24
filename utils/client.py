@@ -719,63 +719,55 @@ class BotCore(commands.Bot):
 
             kwargs = {}
 
-            if not (await self.is_owner(message.author)):
+            prefix = (await self.get_prefix(message))
 
-                prefix = (await self.get_prefix(message))
+            if not isinstance(prefix, str):
+                prefix = prefix[-1]
 
-                if not isinstance(prefix, str):
-                    prefix = prefix[-1]
+            embed.description = f"**Olá {message.author.mention}.\n\n" \
+                                f"Para ver todos os meus comandos use: /**"
 
-                embed.description = f"**Olá {message.author.mention}.\n\n" \
-                                    f"Para ver todos os meus comandos use: /**"
+            bot_count = 0
 
-                bot_count = 0
+            if not self.command_sync_flags.sync_commands and self.config["INTERACTION_BOTS"]:
 
-                if not self.command_sync_flags.sync_commands and self.config["INTERACTION_BOTS"]:
+                interaction_invites = []
 
-                    interaction_invites = []
+                for b in self.pool.bots:
 
-                    for b in self.pool.bots:
+                    if str(b.user.id) not in self.config["INTERACTION_BOTS"]:
+                        continue
 
-                        if str(b.user.id) not in self.config["INTERACTION_BOTS"]:
-                            continue
+                    try:
+                        if b.appinfo.bot_public and b.user not in message.guild.members:
+                            bot_count += 1
+                    except AttributeError:
+                        pass
 
-                        try:
-                            if b.appinfo.bot_public and b.user not in message.guild.members:
-                                bot_count += 1
-                        except AttributeError:
-                            pass
+                    interaction_invites.append(f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) ")
 
-                        interaction_invites.append(f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) ")
+                if interaction_invites:
+                    embed.description += f"\n\nMeus comandos de barra (/) funcionam através " \
+                                         f"das seguintes aplicações abaixo:\n" \
+                                         f"{' **|** '.join(interaction_invites)}\n\n" \
+                                         f"Caso os comandos da aplicação acima não sejam exibidos ao digitar " \
+                                         f"barra (/), clique no nome acima para integrar os comandos de barra no " \
+                                         f"seu servidor."
 
-                    if interaction_invites:
-                        embed.description += f"\n\nMeus comandos de barra (/) funcionam através " \
-                                             f"das seguintes aplicações abaixo:\n" \
-                                             f"{' **|** '.join(interaction_invites)}\n\n" \
-                                             f"Caso os comandos da aplicação acima não sejam exibidos ao digitar " \
-                                             f"barra (/), clique no nome acima para integrar os comandos de barra no " \
-                                             f"seu servidor."
+            if not self.config["INTERACTION_COMMAND_ONLY"]:
+                embed.description += f"\n\nTambém tenho comandos de texto por prefixo.\n" \
+                                    f"Para ver todos os meus comandos de texto use **{prefix}help**\n"
 
-                if not self.config["INTERACTION_COMMAND_ONLY"]:
-                    embed.description += f"\n\nTambém tenho comandos de texto por prefixo.\n" \
-                                        f"Para ver todos os meus comandos de texto use **{prefix}help**\n"
+            if bot_count:
 
-                if bot_count:
-
-                    kwargs = {
-                        "components": [
-                            disnake.ui.Button(
-                                custom_id="bot_invite",
-                                label="Precisa de mais bots de música? Clique aqui."
-                            )
-                        ]
-                    }
-
-            else:
-
-                embed.title = "PAINEL DE CONTROLE."
-                embed.set_footer(text="Clique em uma tarefa que deseja executar.")
-                kwargs = {"view": PanelView(self)}
+                kwargs = {
+                    "components": [
+                        disnake.ui.Button(
+                            custom_id="bot_invite",
+                            label="Precisa de mais bots de música? Clique aqui."
+                        )
+                    ]
+                }
 
             await message.reply(embed=embed, **kwargs)
             return

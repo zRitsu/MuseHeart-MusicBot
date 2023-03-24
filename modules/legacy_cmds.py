@@ -496,6 +496,17 @@ class Owner(commands.Cog):
         else:
             return txt
 
+    @commands.is_owner()
+    @commands.command(hidden=True, aliases=["menu"])
+    async def panel(self, ctx: CustomContext):
+
+        embed =disnake.Embed(
+            title="PAINEL DE CONTROLE.",
+            color=self.bot.get_color(ctx.guild.me)
+        )
+        embed.set_footer(text="Clique em uma tarefa que deseja executar.")
+        await ctx.send(embed=embed, view=PanelView(self.bot))
+
     @commands.has_guild_permissions(manage_guild=True)
     @commands.command(description="Sincronizar/Registrar os comandos de barra no servidor.", hidden=True)
     async def syncguild(self, ctx: Union[CustomContext, disnake.MessageInteraction]):
