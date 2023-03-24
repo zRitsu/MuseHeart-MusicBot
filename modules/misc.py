@@ -138,6 +138,16 @@ class Misc(commands.Cog):
 
         interaction_invites = []
 
+        bots_in_guild = []
+
+        for bot in self.bot.pool.bots:
+
+            if bot == self.bot:
+                continue
+
+            if bot.user in guild.members:
+                bots_in_guild.append(bot)
+
         components = [disnake.ui.Button(custom_id="bot_invite", label="Precisa de mais bots de música? Clique aqui.")] if [b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public] else []
 
         if not self.bot.command_sync_flags.sync_commands and self.bot.config["INTERACTION_BOTS"]:
@@ -168,39 +178,76 @@ class Misc(commands.Cog):
 
         channel = guild.system_channel
 
+        image = "https://cdn.discordapp.com/attachments/554468640942981147/1082887587770937455/rainbow_bar2.gif"
+
+        color = self.bot.get_color()
+
         if not channel:
 
             if guild.me.guild_permissions.view_audit_log:
 
                 async for entry in guild.audit_logs(action=disnake.AuditLogAction.integration_create, limit=50):
+
                     if entry.target.application_id == self.bot.user.id:
 
-                        embed = disnake.Embed(
-                            color=self.bot.get_color(),
-                            description=f"Olá! Agradeço muito por ter me adicionado no servidor: **{guild.name}** :)\n\n"
+                        embeds = []
+
+                        embeds.append(
+                            disnake.Embed(
+                                color=color,
+                                description=f"Olá! Agradeço muito por ter me adicionado no servidor: **{guild.name}** :)"
+                            ).set_image(url=image)
                         )
 
                         if interaction_invites:
-                            embed.description += f"**Observação importante:** Meus comandos de barra funcionam " \
+                            embeds.append(
+                                disnake.Embed(
+                                    color=color,
+                                    description=f"**Observação importante:** Meus comandos de barra funcionam " \
                                                  f"através de uma das seguintes aplicações abaixo:\n" \
                                                  f"{' **|** '.join(interaction_invites)}\n\n" \
                                                  f"Caso os comandos da aplicação acima não sejam exibidos ao digitar " \
                                                  f"barra (**/**) em um canal do servidor **{guild.name}** você terá " \
                                                  f"que clicar no nome acima para integrar os comandos de barra no " \
-                                                 f"servidor **{guild.name}**.\n\n"
+                                                 f"servidor **{guild.name}**."
+                                ).set_image(url=image)
+                            )
                         else:
-                            embed.description += f"Para ver todos os meus comandos use barra (**/**) no servidor " \
-                                                 f"**{guild.name}**\n\n"
+                            embeds.append(
+                                disnake.Embed(
+                                    color=color,
+                                    description=f"Para ver todos os meus comandos use barra (**/**) no servidor " \
+                                                 f"**{guild.name}**"
+                                ).set_image(url=image)
+                            )
 
                         if prefix:
-                            embed.description += f"Também tenho comandos de texto por prefixo.\n" \
+                            embeds.append(
+                                disnake.Embed(
+                                    color=color,
+                                    description=f"Também tenho comandos de texto por prefixo. " \
                                                  f"Para ver todos os meus comandos de texto use **{prefix}help** em um " \
-                                                 f"canal do servidor **{guild.name}**\n\n"
+                                                 f"canal do servidor **{guild.name}**"
+                                ).set_image(url=image)
+                            )
 
-                        embed.description += support_server
+                        if bots_in_guild:
+                            embeds.append(
+                                disnake.Embed(
+                                    color=color,
+                                    description=f"Notei que há outros bots no servidor **{guild.name}** no qual sou compatível com " \
+                                                 f"o sistema de multi-voice: {', '.join(b.user.mention for b in bots_in_guild)}\n\n"
+                                                f"Ao usar usar os comandos de música (ex: play) sem um dos bots "
+                                                f"conectado no canal, será usado um dos bots que estiver livre no "
+                                                f"servidor."
+                                ).set_image(url=image)
+                            )
+
+                        if support_server:
+                            embeds.append(disnake.Embed(color=color, description=support_server).set_image(url=image))
 
                         try:
-                            return await entry.user.send(embed=embed, components=components)
+                            return await entry.user.send(embeds=embeds, components=components)
                         except disnake.Forbidden:
                             pass
                         except Exception:
@@ -218,31 +265,60 @@ class Misc(commands.Cog):
             if not channel:
                 return
 
-        embed = disnake.Embed(description="", color=self.bot.get_color(guild.me))
+        embeds = []
 
         if interaction_invites:
-            embed.description += f"Olá! Para ver todos os meus comandos digite barra (**/**) e confira " \
+
+            embeds.append(
+                disnake.Embed(
+                    color=color,
+                    description=f"Olá! Para ver todos os meus comandos digite barra (**/**) e confira " \
                                  f"os comandos das seguintes aplicações abaixo:\n" \
                                  f"{' **|** '.join(interaction_invites)}\n\n" \
                                  f"Caso os comandos da aplicação acima não sejam exibidos ao digitar " \
                                  f"barra (**/**) você terá que clicar no nome acima para integrar os comandos de " \
-                                 f"barra no seu servidor.\n\n"
+                                 f"barra no seu servidor."
+
+                ).set_image(url=image)
+            )
 
         else:
-            embed.description += "Olá! Para ver todos os meus comandos use barra (**/**)\n\n"
+            embeds.append(
+                disnake.Embed(
+                    color=color, description="Olá! Para ver todos os meus comandos use barra (**/**)"
+                ).set_image(url=image)
+            )
 
-        embed.description += cmd_text
+        embeds.append(disnake.Embed(color=color, description=cmd_text).set_image(url=image))
 
         if prefix:
-            embed.description += f"Também tenho comandos de texto por prefixo.\n" \
-                     f"Para ver todos os meus comandos de texto use **{prefix}help**\n\n"
+            embeds.append(
+                disnake.Embed(
+                    color=color,
+                    description=f"Também tenho comandos de texto por prefixo. " \
+                     f"Para ver todos os meus comandos de texto use **{prefix}help**"
+                ).set_image(url=image)
+            )
 
-        embed.description += support_server
+        if bots_in_guild:
+            embeds.append(
+                disnake.Embed(
+                    color=color,
+                    description=f"Notei que há outros bots no servidor **{guild.name}** no qual sou compatível com " \
+                                f"o sistema de multi-voice: {', '.join(b.user.mention for b in bots_in_guild)}\n\n"
+                                f"Ao usar usar os comandos de música (ex: play) sem um dos bots "
+                                f"conectado no canal, será usado um dos bots que estiver livre no "
+                                f"servidor."
+                ).set_image(url=image)
+            )
+
+        if support_server:
+            embeds.append(disnake.Embed(color=color, description=support_server).set_image(url=image))
 
         kwargs = {"delete_after": 60} if channel == guild.rules_channel else {}
 
         try:
-            await channel.send(embed=embed, components=components, **kwargs)
+            await channel.send(embeds=embeds, components=components, **kwargs)
         except:
             traceback.print_exc()
 
@@ -538,6 +614,9 @@ class GuildLog(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: disnake.Guild):
 
+        if str(self.bot.user.id) in self.bot.config["INTERACTION_BOTS_CONTROLLER"]:
+            return
+
         print(f"Removido do servidor: {guild.name} - [{guild.id}]")
 
         try:
@@ -581,6 +660,9 @@ class GuildLog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: disnake.Guild):
+
+        if str(self.bot.user.id) in self.bot.config["INTERACTION_BOTS_CONTROLLER"]:
+            return
 
         print(f"Novo servidor: {guild.name} - [{guild.id}]")
 
