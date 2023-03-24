@@ -21,4 +21,6 @@ services:
         value: 3.11.1
       - key: AUTO_DOWNLOAD_LAVALINK_SERVERLIST
         value: true
+      - key: MONGO_SSL_FIX
+        value: true
     autoDeploy: false # optional

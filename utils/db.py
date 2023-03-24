@@ -6,6 +6,8 @@ import os
 import pprint
 import shutil
 import traceback
+from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
+
 import disnake
 from disnake.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -192,7 +194,23 @@ class MongoDatabase(BaseDB):
 
     def __init__(self, token: str):
         super().__init__()
-        self._connect = AsyncIOMotorClient(token, connectTimeoutMS=30000)
+
+        fix_ssl = os.environ.get("MONGO_SSL_FIX") or os.environ.get("REPL_SLUG")
+
+        if fix_ssl:
+            parse_result = urlparse(token)
+            parameters = parse_qs(parse_result.query)
+
+            parameters.update(
+                {
+                    'ssl': ['true'],
+                    'tlsAllowInvalidCertificates': ['true']
+                }
+            )
+
+            token = urlunparse(parse_result._replace(query=urlencode(parameters, doseq=True)))
+
+        self._connect = AsyncIOMotorClient(token.strip("<>"), connectTimeoutMS=30000)
 
     async def push_data(self, data, *, db_name: Union[DBModel.guilds, DBModel.users], collection: str):
         await self._connect[collection][db_name].insert_one(data)
