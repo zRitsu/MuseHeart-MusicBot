@@ -155,10 +155,14 @@ class Misc(commands.Cog):
         else:
             cmd_text = ""
 
+        if self.bot.config["SUPPORT_SERVER"]:
+            support_server = f"Caso tenha alguma dúvida ou queira acompanhar as últimas novidades, você pode entrar no meu [`servidor de suporte`]({self.bot.config['SUPPORT_SERVER']})\n\n"
+        else:
+            support_server = ""
+
         if self.bot.default_prefix and not self.bot.config["INTERACTION_COMMAND_ONLY"]:
             guild_data = await self.bot.get_global_data(guild.id, db_name=DBModel.guilds)
-            prefix = guild_data["prefix"] or self.bot.default_prefix
-            prefix = disnake.utils.escape_markdown(prefix, as_needed=True)
+            prefix = disnake.utils.escape_markdown(guild_data['prefix'] or self.bot.default_prefix, as_needed=True)
         else:
             prefix = ""
 
@@ -184,11 +188,16 @@ class Misc(commands.Cog):
                                                  f"barra (**/**) em um canal do servidor **{guild.name}** você terá " \
                                                  f"que clicar no nome acima para integrar os comandos de barra no " \
                                                  f"servidor **{guild.name}**.\n\n"
+                        else:
+                            embed.description += f"Para ver todos os meus comandos use barra (**/**) no servidor " \
+                                                 f"**{guild.name}**\n\n"
 
                         if prefix:
                             embed.description += f"Também tenho comandos de texto por prefixo.\n" \
                                                  f"Para ver todos os meus comandos de texto use **{prefix}help** em um " \
                                                  f"canal do servidor **{guild.name}**\n\n"
+
+                        embed.description += support_server
 
                         try:
                             return await entry.user.send(embed=embed, components=components)
@@ -226,10 +235,9 @@ class Misc(commands.Cog):
 
         if prefix:
             embed.description += f"Também tenho comandos de texto por prefixo.\n" \
-                                 f"Para ver todos os meus comandos de texto use **{prefix}help**\n\n"
+                     f"Para ver todos os meus comandos de texto use **{prefix}help**\n\n"
 
-        if self.bot.config["SUPPORT_SERVER"]:
-            embed.description += f"Caso tenha alguma dúvida ou queira acompanhar as últimas novidades, você pode entrar no meu [`servidor de suporte`]({self.bot.config['SUPPORT_SERVER']})\n\n"
+        embed.description += support_server
 
         kwargs = {"delete_after": 60} if channel == guild.rules_channel else {}
 
