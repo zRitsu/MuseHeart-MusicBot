@@ -47,10 +47,6 @@ DEFAULT_CONFIG = {
     "DEFAULT_IDLING_SKIN": "default",
     "VOTE_SKIP_AMOUNT": 3,
     "IDLE_TIMEOUT": 180,
-    "RUN_RPC_SERVER": True,
-    "RPC_SERVER": "ws://localhost:$PORT/ws",
-    "RPC_PUBLIC_URL": "",
-    "ENABLE_RPC_COMMAND": False,
     "MAX_USER_FAVS": 10,
     "USER_FAV_MAX_NAME_LENGTH": 35,
     "USER_FAV_MAX_URL_LENGTH": 90,
@@ -70,6 +66,15 @@ DEFAULT_CONFIG = {
     "SPOTIFY_CLIENT_ID": '',
     "SPOTIFY_CLIENT_SECRET": '',
     "SEARCH_PROVIDER": "ytsearch",
+
+    ################################################
+    ### Sistema de música - RPC (Rich Presence): ###
+    ################################################
+    "RUN_RPC_SERVER": True,
+    "RPC_SERVER": "ws://localhost:$PORT/ws",
+    "RPC_PUBLIC_URL": "",
+    "ENABLE_RPC_COMMAND": False,
+    "ENABLE_RPC_AUTH": False,
 
     ##################################################
     ### Sistema de música - Local lavalink stuffs: ###
@@ -177,6 +182,7 @@ def load_config():
         "COMMAND_LOG",
         "RUN_RPC_SERVER",
         "ENABLE_RPC_COMMAND",
+        "ENABLE_RPC_AUTH",
         "AUTO_DOWNLOAD_LAVALINK_SERVERLIST",
         "ENABLE_LOGGER",
         "GUILD_DEAFEN_WARN",

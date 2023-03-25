@@ -146,6 +146,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         ws_id = data.get("user_ids")
         bot_id = data.get("bot_id")
         token = data.pop("token", "") or ""
+        auth_enabled = data.pop("auth_enabled", False)
 
         try:
             version = float(data.get("version"))
@@ -161,23 +162,25 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
             try:
 
-                if users_ws[data["user"]].blocked:
-                    return
+                if auth_enabled:
 
-                if users_ws[data["user"]].token != token:
+                    if users_ws[data["user"]].blocked:
+                        return
 
-                    data.update(
-                        {
-                            "op": "exception",
-                            "message": "token inválido! Por via das dúvidas gere um novo token usando o comando no "
-                                       "bot: /rich_presence."
-                        }
-                    )
+                    if users_ws[data["user"]].token != token:
 
-                    for d in ("token", "track", "info"):
-                        data.pop(d, None)
+                        data.update(
+                            {
+                                "op": "exception",
+                                "message": "token inválido! Por via das dúvidas gere um novo token usando o comando no "
+                                           "bot: /rich_presence."
+                            }
+                        )
 
-                    users_ws[data["user"]].blocked = True
+                        for d in ("token", "track", "info"):
+                            data.pop(d, None)
+
+                        users_ws[data["user"]].blocked = True
 
                 users_ws[data["user"]].write_message(json.dumps(data))
 
@@ -305,7 +308,7 @@ class WSClient:
                 await bot.wait_until_ready()
                 bot_ids.append(bot.user.id)
 
-        await self.send({"user_ids": bot_ids, "bot": True})
+        await self.send({"user_ids": bot_ids, "bot": True, "auth_enabled": self.pool.config["ENABLE_RPC_AUTH"]})
 
         await asyncio.sleep(1)
 

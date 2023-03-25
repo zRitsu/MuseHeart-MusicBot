@@ -1096,13 +1096,45 @@ class RPCCog(commands.Cog):
         if not self.bot.config["RPC_PUBLIC_URL"] and not self.bot.config["RPC_SERVER"]:
             raise GenericError("**O RPC_SERVER não foi configurado na ENV/ENVIRONMENTS (ou arquivo .env)**")
 
-        components = [
-            disnake.ui.Button(label="Criar/Resetar token", custom_id=f"rpc_gen.{inter.author.id}", emoji="🔑", row=0),
-            disnake.ui.Button(label="Importar/Editar/Ver token", custom_id=f"rpc_create.{inter.author.id}", emoji="✍️",
-                              row=0),
-            disnake.ui.Button(label="Remover token (Desativar)", custom_id=f"rpc_remove.{inter.author.id}", emoji="♻️",
-                              row=1),
-        ]
+        components = []
+
+        embed = disnake.Embed(
+            color=self.bot.get_color(),
+            description="**Mini-guia para usar o app para exibir a música que você está ouvindo via RPC:\n\n"
+                        "Faça o download do app (musicbot_rpc.zip) "
+                        "[aqui](https://github.com/zRitsu/Discord-MusicBot-RPC/releases).\n\n"
+                        "Extraia o musicbot_rpc.zip e na pasta abra o musicbot_rpc." \
+                        "Adicione o link do websocket abaixo no app (aba: Socket Settings):** ```ansi\n" \
+                        f"[34;1m{(self.bot.config['RPC_PUBLIC_URL'] or self.bot.config['RPC_SERVER']).replace('$PORT', os.environ.get('PORT', '80'))}[0m```"
+        )
+
+        embed.set_footer(text="Nota: No momento funciona apenas no windows com discord desktop, não funciona no mobile "
+                              "ou discord web.")
+
+        if self.bot.config["ENABLE_RPC_AUTH"]:
+
+            embed.description += "\n**Será necessário criar/gerar/importar um token para liberar o acesso do RPC " \
+                                 "(Verifique os botões abaixo), copie o token e no app (Aba: Socket Settings) " \
+                                 "clique no botão \"Colar Token\"**"
+
+            components.extend(
+                [
+                    disnake.ui.Button(label="Criar/Resetar token", custom_id=f"rpc_gen.{inter.author.id}", emoji="🔑",
+                                      row=0),
+                    disnake.ui.Button(label="Importar/Editar/Ver token", custom_id=f"rpc_create.{inter.author.id}",
+                                      emoji="✍️", row=0),
+                    disnake.ui.Button(label="Remover token (Desativar)", custom_id=f"rpc_remove.{inter.author.id}",
+                                      emoji="♻️", row=1),
+                ]
+            )
+
+        embed.description += "\n\n**Agora basta apenas clicar no botão \"Iniciar Presence\" e escutar música através de " \
+                             "algum bot compatível.**"
+
+        embed.set_author(
+            name=f"{inter.author.display_name}#{inter.author.discriminator} - [ {inter.author.id} ]",
+            icon_url=inter.author.display_avatar.with_static_format("png").url
+        )
 
         if isinstance(inter, CustomContext):
             components.append(
@@ -1110,13 +1142,7 @@ class RPCCog(commands.Cog):
             )
 
         await inter.send(
-            embed=disnake.Embed(
-                description="**Gerencie/Crie o token usando os botões abaixo para liberar o acesso ao RPC (Rich Presence).\n\n"
-                            "Caso não tenha o app de Rich Presence você pode fazer o download do musicbot_rpc.zip [aqui](https://github.com/zRitsu/Discord-MusicBot-RPC/releases) (apenas para windows e discord desktop).**\n\n"
-                            "Você também terá que adicionar o link do websocket abaixo no app de RPC: ```ansi\n"
-                            f"[34;1m{(self.bot.config['RPC_PUBLIC_URL'] or self.bot.config['RPC_SERVER']).replace('$PORT', os.environ.get('PORT', '80'))}[0m```",
-                color=self.bot.get_color()
-            ),
+            embed=embed,
             components=components,
             ephemeral=True
         )
