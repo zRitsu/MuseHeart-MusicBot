@@ -1062,7 +1062,7 @@ class Music(commands.Cog):
 
             if manual_selection and len(tracks) > 1:
 
-                embed.description = f"**Selecione uma música abaixo:**"
+                embed.description = f"**Selecione a(s) música(s) desejada(s) abaixo:**"
 
                 try:
                     func = inter.edit_original_message
@@ -1074,18 +1074,22 @@ class Music(commands.Cog):
                 except AttributeError:
                     add_id = ""
 
+                tracks = tracks[:25]
+
                 msg = await func(
                     embed=embed,
                     components=[
                         disnake.ui.Select(
                             placeholder='Resultados:',
                             custom_id=f"track_selection{add_id}",
+                            min_values=1,
+                            max_values=len(tracks),
                             options=[
                                 disnake.SelectOption(
-                                    label=t.title[:99],
+                                    label=f"{n+1}. {t.title[:96]}",
                                     value=f"track_select_{n}",
                                     description=f"{t.author} [{time_format(t.duration)}]")
-                                for n, t in enumerate(tracks[:25])
+                                for n, t in enumerate(tracks)
                             ]
                         )
                     ]
@@ -1107,44 +1111,97 @@ class Music(commands.Cog):
                 except asyncio.TimeoutError:
                     raise GenericError("Tempo esgotado!")
 
-                track = tracks[int(select_interaction.data.values[0][13:])]
+                if len(select_interaction.data.values) > 1:
+
+                    indexes = set(int(v[13:]) for v in select_interaction.data.values)
+
+                    selected_tracks = []
+
+                    for i in indexes:
+                        for n, t in enumerate(tracks):
+                            if i == n:
+                                selected_tracks.append(t)
+                                break
+
+                    tracks = selected_tracks
+
+                else:
+
+                    tracks = tracks[int(select_interaction.data.values[0][13:])]
 
                 if isinstance(inter, CustomContext):
                     inter.message = msg
 
             else:
-                track = tracks[0]
 
-                if track.info.get("sourceName") == "http":
+                tracks = tracks[0]
 
-                    if track.title == "Unknown title":
+                if tracks.info.get("sourceName") == "http":
+
+                    if tracks.title == "Unknown title":
                         if attachment:
-                            track.info["title"] = attachment.filename
+                            tracks.info["title"] = attachment.filename
                         else:
-                            track.info["title"] = track.uri.split("/")[-1]
-                        track.title = track.info["title"]
+                            tracks.info["title"] = tracks.uri.split("/")[-1]
+                        tracks.title = tracks.info["title"]
 
-                    track.uri = ""
+                    tracks.uri = ""
 
-            if force_play == "yes":
-                player.queue.insert(0, track)
-            elif position < 0:
-                player.queue.append(track)
+            if not isinstance(tracks, list):
+
+                if force_play == "yes":
+                    player.queue.insert(0, tracks)
+                elif position < 0:
+                    player.queue.append(tracks)
+                else:
+                    player.queue.insert(position, tracks)
+                    pos_txt = f" na posição {position + 1} da fila"
+
+                duration = time_format(tracks.duration) if not tracks.is_stream else '🔴 Livestream'
+
+                log_text = f"{inter.author.mention} adicionou [`{fix_characters(tracks.title, 20)}`]({tracks.uri}){pos_txt} `({duration})`."
+
+                embed.set_author(
+                    name=fix_characters(tracks.title, 35),
+                    url=tracks.uri
+                )
+                embed.set_thumbnail(url=tracks.thumb)
+                embed.description = f"`{fix_characters(tracks.author, 15)}`**┃**`{time_format(tracks.duration) if not tracks.is_stream else '🔴 Livestream'}`**┃**{inter.author.mention}"
+                emoji = "🎵"
+
             else:
-                player.queue.insert(position, track)
-                pos_txt = f" na posição {position + 1} da fila"
 
-            duration = time_format(track.duration) if not track.is_stream else '🔴 Livestream'
+                if options == "shuffle":
+                    shuffle(tracks)
 
-            log_text = f"{inter.author.mention} adicionou [`{fix_characters(track.title, 20)}`]({track.uri}){pos_txt} `({duration})`."
+                if position < 0 or len(tracks) < 2:
 
-            embed.set_author(
-                name=fix_characters(track.title, 35),
-                url=track.uri
-            )
-            embed.set_thumbnail(url=track.thumb)
-            embed.description = f"`{fix_characters(track.author, 15)}`**┃**`{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}`**┃**{inter.author.mention}"
-            emoji = "🎵"
+                    if options == "reversed":
+                        tracks.reverse()
+                    for track in tracks:
+                        player.queue.append(track)
+                else:
+                    if options != "reversed":
+                        tracks.reverse()
+                    for track in tracks:
+                        player.queue.insert(position, track)
+
+                    pos_txt = f" (Pos. {position + 1})"
+
+                query = fix_characters(query.replace(f"{source}:", '', 1), 25)
+
+                log_text = f"{inter.author.mention} adicionou `{len(tracks)} músicas` via busca: `{query}`{pos_txt}."
+
+                total_duration = 0
+
+                for t in tracks:
+                    if not t.is_stream:
+                        total_duration += t.duration
+
+                embed.set_author(name=f"Busca: {query}")
+                embed.set_thumbnail(url=tracks[0].thumb)
+                embed.description = f"`{len(tracks)} música(s)`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
+                emoji = "🎶"
 
         else:
 
