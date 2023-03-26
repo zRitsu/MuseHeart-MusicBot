@@ -823,13 +823,13 @@ class BotCore(commands.Bot):
     def get_color(self, me: Optional[disnake.Member] = None):
 
         if not me:
-            return self.color or 0x2F3136
+            return self.color or 0x2b2d31
 
         if self.color:
             return self.color
 
         if me.color.value == 0:
-            return 0x2F3136
+            return 0x2b2d31
 
         return me.color
 
