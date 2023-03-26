@@ -12,6 +12,8 @@ import tornado.web
 import tornado.websocket
 from async_timeout import timeout
 
+from config_loader import load_config
+
 if TYPE_CHECKING:
     from utils.client import BotPool
 
@@ -23,9 +25,10 @@ bots_ws = []
 
 class IndexHandler(tornado.web.RequestHandler):
 
-    def initialize(self, bots: list, message: str = ""):
+    def initialize(self, bots: list, message: str = "", config: dict = None):
         self.message = message
         self.bots = bots
+        self.config = config
         self.text = ""
         self.preview = False
 
@@ -124,9 +127,14 @@ class IndexHandler(tornado.web.RequestHandler):
                      "getElementById(\"url\").innerHTML = window.location.href.replace(\"http\", \"ws\")" \
                      ".replace(\"https\", \"wss\") + \"ws\"}</script></body>"
 
-        self.write(f"{self.text}<p><a href=\"https://github.com/zRitsu/DC-MusicBot-RPC"
-                   f"/releases\" target=\"_blank\">Baixe o app de rich presence aqui.</a></p>Link para adicionar no app "
-                   f"de RPC abaixo: {ws_url}\nNão esqueça de obter o token para configurar no app, use o comando /rich_presence para obter um.")
+        msg = f"{self.text}<p><a href=\"https://github.com/zRitsu/DC-MusicBot-RPC" \
+              f"/releases\" target=\"_blank\">Baixe o app de rich presence aqui.</a></p>Link para adicionar no app " \
+              f"de RPC abaixo: {ws_url}"
+
+        if self.config["ENABLE_RPC_AUTH"]:
+            msg += f"\nNão esqueça de obter o token para configurar no app, use o comando /rich_presence para obter um."
+
+        self.write(msg)
         # self.render("index.html") #será implementado futuramente...
 
 
@@ -388,11 +396,17 @@ class WSClient:
                                 users.remove(i)
 
 
-def run_app(bots: Optional[list] = None, message: str = ""):
+def run_app(bots: Optional[list] = None, message: str = "", config: dict = None):
     bots = bots or []
 
+    if not config:
+        try:
+            config = bots[0].config
+        except IndexError:
+            pass
+
     app = tornado.web.Application([
-        (r'/', IndexHandler, {'bots': bots, 'message': message}),
+        (r'/', IndexHandler, {'bots': bots, 'message': message, 'config': config}),
         (r'/ws', WebSocketHandler),
     ])
 
@@ -400,7 +414,8 @@ def run_app(bots: Optional[list] = None, message: str = ""):
 
 
 def start(bots: Optional[list] = None, message=""):
-    run_app(bots, message)
+    config = load_config()
+    run_app(bots, message, config)
     tornado.ioloop.IOLoop.instance().start()
 
 
