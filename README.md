@@ -16,6 +16,10 @@
 
 ![](https://media.discordapp.net/attachments/554468640942981147/944942948406153276/unknown.png)
 
+- Suporte a [RPC (Rich Presence)](https://github.com/zRitsu/Discord-MusicBot-RPC).
+
+![](https://media.discordapp.net/attachments/554468640942981147/1089678647230726185/rpc_support.png)
+
 - Player controller: modo fixo/estendido com canal e conversa de song requests (skin: default_progressbar), configurável com o comando: /setup
 
 ![](https://media.discordapp.net/attachments/554468640942981147/944945573834936340/unknown.png)
@@ -35,25 +39,27 @@ Repl.it
 
 [![Run on Repl.it](https://replit.com/badge/github/zRitsu/disnake-LL-music-bot)](https://replit.com/new/github/zRitsu/disnake-LL-music-bot)
 
-* 1 - Após clicar no botão acima, aguarde até o deploy ser concluído.
-* 2 - Vá em secrets (cadeado do painel à esquerda) e crie uma secret e em KEY coloque um nome qualquer (letras/números/underline) e no value coloque o token do bot
-caso não tenha o token do bot, veja como obter com este [tutorial](https://www.youtube.com/watch?v=lfdmZQySTXE).
+* **[ 1 ]** - Após clicar no botão acima, aguarde até o deploy ser concluído.
 
-```
-Obs: Caso queira, você pode incluir token de mais bots para ter bots extras pra ativar o suporte a multi-voice em servidores usando um dos seguintes métodos:
 
-Incluindo mais tokens no value (separando com espaços).
+* **[ 2 ]** - Vá em secrets (cadeado do painel à esquerda) e crie uma secret e em KEY coloque um nome qualquer (letras/números/underline) e no value coloque o token do bot
+  (Caso não tenha o token do bot, veja como obter com este [tutorial](https://www.youtube.com/watch?v=lfdmZQySTXE)).
 
-e/ou:
+* `Obs: Caso queira, você pode incluir token de mais bots para ter bots extras pra ativar o suporte a multi-voice em servidores usando um dos seguintes métodos:`
 
-Repetindo o passo 1 com outro nome e adicionar outro(s) token(s) de bot(s) no value (caso adicione mais de 1 token separe com espaço).
-```
+* `Incluindo mais tokens no value (separando com espaços).`
+* `e/ou:`
+* `Repetindo o passo 1 com outro nome e adicionar outro(s) token(s) de bot(s) no value (caso adicione mais de 1 token separe com espaço).`
 
-* 2.1 - Clique em Add new secret após preencher os campos key e value.
 
-* 3 - Não é obrigatório mas recomendo usar mongodb para database ao invés de json, pra isso crie uma key com nome MONGO e no value coloque o link de sua url do mongodb e em seguida clique em Add new secret (caso não tenha, veja como obter por este [tutorial](https://www.youtube.com/watch?v=x1Gq5beRx9k)). </br>
+* **[ 2.1 ]** - Clique em Add new secret após preencher os campos key e value.
+
+
+* **[ 3 ]** - Não é obrigatório mas recomendo usar mongodb para database ao invés de json, pra isso crie uma key com nome MONGO e no value coloque o link de sua url do mongodb e em seguida clique em Add new secret (caso não tenha, veja como obter por este [tutorial](https://www.youtube.com/watch?v=x1Gq5beRx9k)). </br>
 `se desejar, você pode alterar outras configs, consulte o arquivo .example.env`
-* 4 - Clique em run (botão de **play**) e aguarde o bot instalar as dependências e iniciar.
+
+
+* **[ 4 ]** - Clique em run (botão de **play**) e aguarde o bot instalar as dependências e iniciar.
 </details>
 
 ---
@@ -66,16 +72,19 @@ Render.com
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/zRitsu/disnake-LL-music-bot/tree/main)
 
-* 1 - No campo **TOKEN** coloque o token do bot **( [tutorial de como obter](https://www.youtube.com/watch?v=lfdmZQySTXE) )**.
+* **[ 1 ]** - No campo **TOKEN** coloque o token do bot **( [tutorial de como obter](https://www.youtube.com/watch?v=lfdmZQySTXE) )**. `Nota: Caso queira, no campo TOKEN você pode incluir token de mais bots para ter bots extras pra ativar o suporte a multi-voice incluindo mais tokens no value (separando com espaços).`
 
-```
-Obs: Caso queira, no campo TOKEN você pode incluir token de mais bots para ter bots extras pra ativar o suporte a multi-voice incluindo mais tokens no value (separando com espaços).
-```
 
-* 2 - No campo **DEFAULT_PREFIX** coloque um prefixo para o bot.
-* 3 - Nos campos **SPOTIFY_CLIENT_ID** e **SPOTIFY_CLIENT_SECRET** coloque as suas keys do spotify **( [tutorial de como obter](https://www.youtube.com/watch?v=ceKQjWiCyWE) )**.
-* 4 - No campo **MONGO** coloque o link da sua database do MongoDB **( [tutorial de como obter](https://www.youtube.com/watch?v=x1Gq5beRx9k) )**.
-* 5 - Clique em Apply e aguarde o processo de build até o bot iniciar (isso pode demorar bastante, no mínimo uns 13 minutos ou mais para o deploy ser finalizado + bot iniciar + servidor lavalink iniciar).
+* **[ 2 ]** - No campo **DEFAULT_PREFIX** coloque um prefixo para o bot.
+
+
+* **[ 3 ]** - Nos campos **SPOTIFY_CLIENT_ID** e **SPOTIFY_CLIENT_SECRET** coloque as suas keys do spotify **( [tutorial de como obter](https://www.youtube.com/watch?v=ceKQjWiCyWE) )**.
+
+
+* **[ 4 ]** - No campo **MONGO** coloque o link da sua database do MongoDB **( [tutorial de como obter](https://www.youtube.com/watch?v=x1Gq5beRx9k) )**.
+
+
+* **[ 5 ]** - Clique em Apply e aguarde o processo de build até o bot iniciar (isso pode demorar bastante, no mínimo uns 13 minutos ou mais para o deploy ser finalizado + bot iniciar + servidor lavalink iniciar).
 </details>
 
 ---
@@ -87,13 +96,12 @@ Railway
 <br>
 
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template/YkBuYT?referralCode=tzsLOv)
-* 1 - Preencha os dados que vão ser requisitados na próxima página (os que tem asteríscos vermelhos são obrigatórios).
+* **[ 1 ]** - Preencha os dados que vão ser requisitados na próxima página (os que tem asteríscos vermelhos são obrigatórios). `Nota: Caso queira, no campo TOKEN você pode incluir token de mais bots para ter bots extras pra ativar o suporte a multi-voice incluindo mais tokens no value (separando com espaços).`
 
-```
-Obs: Caso queira, no campo TOKEN você pode incluir token de mais bots para ter bots extras pra ativar o suporte a multi-voice incluindo mais tokens no value (separando com espaços).
-```
 
-* 2 - Clique no botão deploy e aguarde até o deploy ser concluído (Ficando com cor verde. Pode demorar alguns segundos antes de aparecer um deploy na lista).
+* **[ 2 ]** - Clique no botão deploy e aguarde até o deploy ser concluído (Ficando com cor verde. Pode demorar alguns segundos antes de aparecer um deploy na lista).
+
+
 * **Nota 1:** Requer uma conta do github com um bom tempo de criado ou um cartão de crédito para ter uma conta verificada.
 * **Nota 2:** Caso queira alterar as configs usadas no passo 1, clique em variables e crie/altere a key e o valor desejado da config, consulte o arquivo .example.env para ver todas as configs disponíveis.
 </details>
@@ -108,8 +116,12 @@ Gitpod
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/zRitsu/disnake-LL-music-bot)
 
-* 1 - Abra o arquivo .env e coloque o token do bot no campo apropriado (caso não tenha, veja como obter com este tutorial [tutorial](https://www.youtube.com/watch?v=lfdmZQySTXE) de como obter). Também altamente recomendo usar mongodb, procure onde tem MONGO= no arquivo .env e nele coloque o link da sua db do mongodb (caso não tenha, veja como obter por este [tutorial](https://www.youtube.com/watch?v=x1Gq5beRx9k)). 
-* 2 - Clique com botão direito em cima do arquivo main.py e depois clique em: Run Python File in Terminal.
+* **[ 1 ]** - Abra o arquivo .env e coloque o token do bot no campo apropriado (caso não tenha, veja como obter com este tutorial [tutorial](https://www.youtube.com/watch?v=lfdmZQySTXE) de como obter). Também altamente recomendo usar mongodb, procure onde tem MONGO= no arquivo .env e nele coloque o link da sua db do mongodb (caso não tenha, veja como obter por este [tutorial](https://www.youtube.com/watch?v=x1Gq5beRx9k)).
+
+
+* **[ 2 ]** - Clique com botão direito em cima do arquivo main.py e depois clique em: Run Python File in Terminal.
+
+
 * **Nota 1:** Requer verificação da conta por número de celular/mobile.
 * **Nota 2:** Não esqueça de ir na lista de [workspaces](https://gitpod.io/workspaces) e clicar nos 3 pontinhos do projeto e depois clicar em **pin**. `(isso evitará o worskpace ser deletado após 14 dias inativo)`
 * **Nota 3:** Não use o gitpod para hospedar / manter o bot online, pois a mesma tem bastante limitações no plano gratuito (mais informações [nesse link](https://www.gitpod.io/pricing)).
@@ -125,16 +137,21 @@ Heroku
 
 [![Heroku_Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/zRitsu/disnake-LL-music-bot/tree/main)
 
-**Nota: A partir do dia 28/11/2022 a heroku não vai mais fornecer planos gratuitos ([clique aqui](https://blog.heroku.com/next-chapter) para saber mais).** 
-* 1 - Preencha os dados que vão ser requisitados na próxima página.
+**Nota: A partir do dia 28/11/2022 a heroku não vai mais fornecer planos gratuitos ([clique aqui](https://blog.heroku.com/next-chapter) para saber mais).**
 
-```
-Obs: Caso queira, no campo TOKEN você pode incluir token de mais bots para ter bots extras pra ativar o suporte a multi-voice incluindo mais tokens no value (separando com espaços).
-```
 
-* 2 - Clique em deploy app e aguarde (o processo pode demorar entre 2-5 minutos).
-* 3 - Clique em Manage e depois vá em resources.
-* 4 - Desative o dyno web e ative o autoupdate (ou o quickfix, não ative os 2 ao mesmo tempo!) e aguarde o bot logar. `(no canto superior clique em more e em view logs para acompanhar os logs)`
+* **[ 1 ]** - Preencha os dados que vão ser requisitados na próxima página. `Nota: Caso queira, no campo TOKEN você pode incluir token de mais bots para ter bots extras pra ativar o suporte a multi-voice incluindo mais tokens no value (separando com espaços).`
+
+
+* **[ 2 ]** - Clique em deploy app e aguarde (o processo pode demorar entre 2-5 minutos).
+
+
+* **[ 3 ]** - Clique em Manage e depois vá em resources.
+
+
+* **[ 4 ]** - Desative o dyno web e ative o autoupdate (ou o quickfix, não ative os 2 ao mesmo tempo!) e aguarde o bot logar. `(no canto superior clique em more e em view logs para acompanhar os logs)`
+
+
 * **Nota:** Caso queira alterar as configs usadas no passo 1, vá em settings e clique em Reveal Config Vars, crie/altere a key e o valor desejado da config, consulte o arquivo .example.env para ver todas as configs disponíveis.
 </details>
 
