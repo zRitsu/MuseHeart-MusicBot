@@ -172,10 +172,10 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
                 if auth_enabled:
 
-                    if users_ws[data["user"]].blocked:
-                        return
-
                     if users_ws[data["user"]].token != token:
+
+                        if users_ws[data["user"]].blocked:
+                            return
 
                         data.update(
                             {
@@ -189,6 +189,9 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                             data.pop(d, None)
 
                         users_ws[data["user"]].blocked = True
+
+                    else:
+                        users_ws[data["user"]].blocked = False
 
                 users_ws[data["user"]].write_message(json.dumps(data))
 
