@@ -231,16 +231,7 @@ class Music(commands.Cog):
     @commands.has_guild_permissions(manage_guild=True)
     @pool_command(
         only_voiced=True, name="stageannounce", aliases=["stagevc", "togglestageannounce"], hidden=True,
-        description="Ativar o sistema de anuncio automático do palco com o nome da música.\n\n"
-                    "Placeholders:\n"
-                    "{track.title} -> Nome da música\n"
-                    "{track.author} -> Nome do Artista/Uploader/Author da música.\n"
-                    "{track.duration} -> Duração da música.\n"
-                    "{track.source} -> Origem/Fonte da música (Youtube/Spotify/Soundcloud etc)\n"
-                    "{track.playlist} -> Nome da playlist de origem da música (caso tenha)\n"
-                    "{requester.name} -> Nome/Nick do membro que pediu a música\n"
-                    "{requester.tag} -> Tag/Discriminator do membro que pediu a música\n"
-                    "{requester.id} -> ID do membro que pediu a música\n",
+        description="Ativar o sistema de anuncio automático do palco com o nome da música.",
         cooldown=stage_cd, max_concurrency=stage_mc, extras={"exclusive_cooldown": True},
     )
     async def stageannounce_legacy(self, ctx: CustomContext, *, template: str = None):
@@ -258,7 +249,7 @@ class Music(commands.Cog):
             inter: disnake.AppCmdInter,
             template: str = commands.Param(
                 name=disnake.Localized("template", data={disnake.Locale.pt_BR: "modelo"}),
-                description="{track.title} {track.author} {track.duration} {track.playlist} {requester.name} {requester.tag}"
+                description=f"{desc_prefix}Ativar o sistema de anuncio automático do palco com o nome da música."
             )
     ):
 
@@ -279,6 +270,23 @@ class Music(commands.Cog):
 
         if not template:
             template = player.stage_title_template
+
+        elif not any(p in template for p in (
+                '{track.title}', '{track.author}', '{track.duration}', '{track.source}', '{track.playlist}',
+                '{requester.name}', '{requester.tag}', '{requester.id}'
+        )):
+            raise GenericError(
+                "**Você deve usar pelo menos um placeholder válido na mensagem.**\n\n"
+                "**PLACEHOLDERS:** ```ansi\n"
+                "[34;1m{track.title}[0m -> Nome da música\n"
+                "[34;1m{track.author}[0m -> Nome do Artista/Uploader/Author da música.\n"
+                "[34;1m{track.duration}[0m -> Duração da música.\n"
+                "[34;1m{track.source}[0m -> Origem/Fonte da música (Youtube/Spotify/Soundcloud etc)\n"
+                "[34;1m{track.playlist}[0m -> Nome da playlist de origem da música (caso tenha)\n"
+                "[34;1m{requester.name}[0m -> Nome/Nick do membro que pediu a música\n"
+                "[34;1m{requester.tag}[0m -> Tag/Discriminator do membro que pediu a música\n"
+                "[34;1m{requester.id}[0m -> ID do membro que pediu a música\n```"
+            )
 
         if player.stage_title_event and player.stage_title_template == template:
 
