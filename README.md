@@ -49,7 +49,7 @@ Repl.it
 
 * `Incluindo mais tokens no value (separando com espaços).`
 * `e/ou:`
-* `Repetindo o passo 1 com outro nome e adicionar outro(s) token(s) de bot(s) no value (caso adicione mais de 1 token separe com espaço).`
+* `Repetindo o passo 2 com outro nome e adicionar outro(s) token(s) de bot(s) no value (caso adicione mais de 1 token separe com espaço).`
 
 
 * **[ 2.1 ]** - Clique em Add new secret após preencher os campos key e value.
