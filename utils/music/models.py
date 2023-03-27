@@ -1138,14 +1138,16 @@ class LavalinkPlayer(wavelink.Player):
                     # TODO: Investigar possível bug ao mover o bot de canal pelo discord.
                     return
 
-            if not voice_channel:
-                return
+            if not users:
+                try:
+                    users = voice_channel.voice_states
+                except AttributeError:
+                    return
 
             thumb = self.bot.user.display_avatar.replace(
                 size=512, static_format="png").url
 
-            users = [u for u in (users or voice_channel.voice_states)
-                     if u != self.bot.user.id]
+            users = [u for u in users if u != self.bot.user.id]
 
             if close:
 
