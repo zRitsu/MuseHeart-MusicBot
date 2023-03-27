@@ -315,7 +315,7 @@ class Misc(commands.Cog):
         if support_server:
             embeds.append(disnake.Embed(color=color, description=support_server).set_image(url=image))
 
-        kwargs = {"delete_after": 60} if channel == guild.rules_channel else {}
+        kwargs = {"delete_after": 60} if channel == guild.rules_channel else {"delete_after": 300}
 
         try:
             await channel.send(embeds=embeds, components=components, **kwargs)
