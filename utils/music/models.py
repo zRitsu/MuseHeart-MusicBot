@@ -1137,8 +1137,9 @@ class LavalinkPlayer(wavelink.Player):
                 except AttributeError:
                     # TODO: Investigar possível bug ao mover o bot de canal pelo discord.
                     return
-                if not voice_channel:
-                    return
+
+            if not voice_channel:
+                return
 
             thumb = self.bot.user.display_avatar.replace(
                 size=512, static_format="png").url
