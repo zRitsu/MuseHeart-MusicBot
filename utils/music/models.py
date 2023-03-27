@@ -1190,12 +1190,6 @@ class LavalinkPlayer(wavelink.Player):
                 }
             }
 
-            try:
-                stats["info"]["guild"]["icon"] = self.guild.icon.with_static_format(
-                    "png").url
-            except AttributeError:
-                pass
-
             if not self.current:
 
                 stats.update(
