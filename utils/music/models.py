@@ -1179,14 +1179,14 @@ class LavalinkPlayer(wavelink.Player):
                 "thumb": thumb,
                 "info": {
                     "channel": {
-                        "name": voice_channel.name,
-                        "id": voice_channel.id
+                        "name": "",
+                        "id": ""
                     },
                     "guild": {
-                        "name": voice_channel.guild.name,
-                        "id": voice_channel.guild.id,
+                        "name": "",
+                        "id": "",
                     },
-                    "members": len(users)
+                    "members": 0
                 }
             }
 
@@ -1223,6 +1223,7 @@ class LavalinkPlayer(wavelink.Player):
                     "stream": track.is_stream,
                     "position": self.position,
                     "paused": self.is_paused,
+                    "requester_id": track.requester,
                     "loop": self.current.track_loops or self.loop,
                     "queue": len(self.queue),
                 }
