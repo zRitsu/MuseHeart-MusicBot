@@ -1133,7 +1133,7 @@ class LavalinkPlayer(wavelink.Player):
             if not voice_channel and not close:
                 try:
                     voice_channel = self.bot.get_channel(
-                        self.channel_id) or self.guild.voice_client.channel
+                        self.channel_id) or self.bot.get_channel(self.guild.voice_client.channel.id)
                 except AttributeError:
                     # TODO: Investigar possível bug ao mover o bot de canal pelo discord.
                     return

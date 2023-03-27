@@ -4044,7 +4044,7 @@ class Music(commands.Cog):
                 1001,
                 4016,  # Connection started elsewhere
                 4005,  # Already authenticated.
-                4006,  # Session is no longer valid.
+                #4006,  # Session is no longer valid.
         ):
 
             player.is_resuming = True
@@ -4385,6 +4385,7 @@ class Music(commands.Cog):
             return
 
         destroy_player = False
+        move_player = False
 
         if member.bot:
 
@@ -4394,9 +4395,29 @@ class Music(commands.Cog):
             if before.channel and not after.channel:
                 destroy_player = True
 
+            elif after.channel:
+
+                for bot in self.bot.pool.bots:
+
+                    if bot == self.bot:
+                        continue
+
+                    if bot.user.id in after.channel.voice_states:
+                        move_player = True
+                        break
+
         try:
             player: LavalinkPlayer = self.bot.music.players[member.guild.id]
         except KeyError:
+            return
+
+        if move_player and before.channel:
+            try:
+                can_connect(before.channel, member.guild)
+            except:
+                await player.destroy()
+            else:
+                await player.guild.voice_client.move_to(before.channel)
             return
 
         try:
