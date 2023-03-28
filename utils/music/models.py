@@ -1176,18 +1176,7 @@ class LavalinkPlayer(wavelink.Player):
                 "track": None,
                 "bot_id": self.bot.user.id,
                 "bot_name": str(self.bot.user),
-                "thumb": thumb,
-                "info": {
-                    "channel": {
-                        "name": "",
-                        "id": ""
-                    },
-                    "guild": {
-                        "name": "",
-                        "id": "",
-                    },
-                    "members": 0
-                }
+                "thumb": thumb
             }
 
             if not self.current:

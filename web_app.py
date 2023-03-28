@@ -210,9 +210,9 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             bots_ws.append(self)
             return
 
-        if version < 2.2:
+        if version < 2.5:
             self.close(code=1005, reason="Versão do app não suportado! Certifique-se de que está usando "
-                                         "a versão mais recente do app (2.3 ou superior).")
+                                         "a versão mais recente do app (2.5 ou superior).")
             return
 
         if len(ws_id) > 3:
