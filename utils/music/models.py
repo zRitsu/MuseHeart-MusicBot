@@ -1156,6 +1156,7 @@ class LavalinkPlayer(wavelink.Player):
                     "bot_id": self.bot.user.id,
                     "bot_name": str(self.bot.user),
                     "thumb": thumb,
+                    "auth_enabled": self.bot.config["ENABLE_RPC_AUTH"]
                 }
 
                 if wait:
@@ -1176,7 +1177,8 @@ class LavalinkPlayer(wavelink.Player):
                 "track": None,
                 "bot_id": self.bot.user.id,
                 "bot_name": str(self.bot.user),
-                "thumb": thumb
+                "thumb": thumb,
+                "auth_enabled": self.bot.config["ENABLE_RPC_AUTH"]
             }
 
             if not self.current:
