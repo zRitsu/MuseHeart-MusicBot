@@ -146,6 +146,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         self.bot_ids: list = []
         self.token = ""
         self.blocked = False
+        self.auth_enabled = False
 
     def on_message(self, message):
 
@@ -154,7 +155,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         ws_id = data.get("user_ids")
         bot_id = data.get("bot_id")
         token = data.pop("token", "") or ""
-        auth_enabled = data.pop("auth_enabled", False)
+        self.auth_enabled = data.pop("auth_enabled", False)
 
         try:
             version = float(data.get("version"))
@@ -165,12 +166,13 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
             if not bot_id:
                 print(f"desconectando: por falta de id de usuario {self.request.remote_ip}\nDados: {data}")
-                self.close(code=1005, reason="Desconectando: por falta de ids de usuario")
+                self.write_message(json.dumps({"op": "disconnect", "reason": "Desconectando por falta de ids de usuario"}))
+                self.close(code=4200)
                 return
 
             try:
 
-                if auth_enabled:
+                if self.auth_enabled:
 
                     if users_ws[data["user"]].token != token:
 
@@ -210,17 +212,21 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             bots_ws.append(self)
             return
 
-        if version < 2.5:
-            self.close(code=1005, reason="Versão do app não suportado! Certifique-se de que está usando "
-                                         "a versão mais recente do app (2.5 ou superior).")
+        if version < 2.6:
+            self.write_message(json.dumps({"op": "disconnect", "reason": "Versão do app não suportado! Certifique-se de que está usando "
+                                         "a versão mais recente do app (2.6 ou superior)."}))
+            self.close(code=4200)
             return
 
         if len(ws_id) > 3:
-            self.close(code=403, reason="Você está tentando conectar mais de 3 usuários consecutivamente...")
+            self.write_message(json.dumps({"op": "disconnect", "reason": "Você está tentando conectar mais de 3 usuários consecutivamente..."}))
+            self.close(code=4200)
             return
 
-        elif len(token) != 50:
-            self.close(code=403, reason="O token tem que ter 50 caracteres!")
+        if len(token) not in (0, 50):
+            self.write_message(
+                json.dumps({"op": "disconnect", "reason": f"O token precisa ter 50 caracteres..."}))
+            self.close(code=4200)
             return
 
         self.user_ids = ws_id
@@ -229,7 +235,9 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
         for u_id in ws_id:
             try:
-                users_ws[u_id].close(code=403, reason="Nova sessão iniciada...")
+                users_ws[u_id].write_message(json.dumps({"op": "disconnect",
+                                               "reason": "Nova sessão iniciada em outro local..."}))
+                users_ws[u_id].close(code=4200)
             except:
                 pass
             users_ws[u_id] = self
@@ -237,6 +245,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         self.token = token
 
         for w in bots_ws:
+
             try:
                 w.write_message(json.dumps(data))
             except Exception as e:
@@ -376,6 +385,10 @@ class WSClient:
                 print(f"RPC Websocket Closed: {message.extra}\nReconnecting in {self.backoff}s")
                 await asyncio.sleep(self.backoff)
                 continue
+
+            elif message.type in (aiohttp.WSMsgType.CLOSING, aiohttp.WSMsgType.CLOSE):
+                print(f"RPC Websocket Finalizado: {message.extra}")
+                return
 
             data = json.loads(message.data)
 
