@@ -35,16 +35,12 @@ class IndexHandler(tornado.web.RequestHandler):
 
     async def update_botlist(self, bot):
 
-        if hasattr(bot, 'has_exception'):
-            return
-
         try:
             async with timeout(30):
                 await bot.wait_until_ready()
         except asyncio.TimeoutError:
             pass
         else:
-
             avatar = bot.user.display_avatar.replace(size=256, static_format="png").url
 
             self.cells.append(f"<tr><td><img src=\"{avatar}\" width=128 weight=128></img></td>\n"
@@ -116,7 +112,7 @@ class IndexHandler(tornado.web.RequestHandler):
 
         if self.message:
             self.text = self.message.replace("\n", "</br>")
-
+            self.write(self.text)
         else:
             self.write('<h1 style=\"font-size:5vw\">Não há bots disponíveis no momento...</h1>\n'
                         '<br>(se o seu bot não apareceu na lista, verifique o erro que apareceu no terminal/console)')
