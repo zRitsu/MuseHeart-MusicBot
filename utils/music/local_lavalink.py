@@ -84,7 +84,7 @@ def run_lavalink(
 
                 os.remove(jdk_filename)
 
-                java_cmd = "./.java/jdk-13/bin/java"
+                java_cmd = os.path.join(os.getcwd(), r"\.java\jdk-13\bin\java")
 
             else:
                 
