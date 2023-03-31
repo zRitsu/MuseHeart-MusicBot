@@ -3,7 +3,7 @@ import asyncio
 import json
 import logging
 from traceback import print_exc
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, List
 from os import environ
 import aiohttp
 import disnake
@@ -15,7 +15,7 @@ from async_timeout import timeout
 from config_loader import load_config
 
 if TYPE_CHECKING:
-    from utils.client import BotPool
+    from utils.client import BotPool, BotCore
 
 logging.getLogger('tornado.access').disabled = True
 
@@ -25,12 +25,44 @@ bots_ws = []
 
 class IndexHandler(tornado.web.RequestHandler):
 
-    def initialize(self, bots: list, message: str = "", config: dict = None):
+    def initialize(self, bots: List[BotCore], message: str = "", config: dict = None):
         self.message = message
         self.bots = bots
         self.config = config
         self.text = ""
         self.preview = False
+        self.cells = []
+
+    async def update_botlist(self, bot):
+
+        if hasattr(bot, 'has_exception'):
+            return
+
+        try:
+            async with timeout(30):
+                await bot.wait_until_ready()
+        except asyncio.TimeoutError:
+            pass
+        else:
+
+            avatar = bot.user.display_avatar.replace(size=256, static_format="png").url
+
+            self.cells.append(f"<tr><td><img src=\"{avatar}\" width=128 weight=128></img></td>\n"
+                     f"<td style=\"padding-top: 10px ; padding-bottom: 10px; padding-left: 10px; padding-right: 10px\">"
+                     f"Adicionar:<br><a href=\"{disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))}\" "
+                     f"target=\"_blank\">{bot.user}</a></td></tr>")
+
+            style = """<style>
+            table, th, td {
+                border:1px solid black;
+                text-align: center;
+            }
+            </style>"""
+
+            self.clear()
+
+            self.write(f"<p style=\"font-size:30px\">Bots Disponíveis:</p>{style}\n<table>{''.join(self.cells)}"
+                       f"</table>{self.text}")
 
     async def prepare(self):
 
@@ -67,57 +99,27 @@ class IndexHandler(tornado.web.RequestHandler):
             self.preview = True
             return
 
-        cells = ""
-
-        for bot in self.bots:
-
-            try:
-                async with timeout(7):
-                    await bot.wait_until_ready()
-            except asyncio.TimeoutError:
-                continue
-
-            if str(bot.user.id) in bot.config['INTERACTION_BOTS_CONTROLLER']:
-                continue
-
-            avatar = bot.user.display_avatar.replace(size=256, static_format="png").url
-
-            cells += f"<tr><td><img src=\"{avatar}\" width=128 weight=128></img></td>\n" \
-                     f"<td style=\"padding-top: 10px ; padding-bottom: 10px; padding-left: 10px; padding-right: 10px\">" \
-                     f"Adicionar:<br><a href=\"{disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))}\" " \
-                     f"target=\"_blank\">{bot.user}</a></td></tr>"
-
-        if not cells:
-
-            try:
-                killing_state = self.bots[0].pool.killing_state
-            except:
-                killing_state = False
-
-            if killing_state is True:
-                self.text = '<h1 style=\"font-size:5vw\">A aplicação será reiniciada em breve...</h1>'
-            elif self.message:
-                self.text += self.message.replace("\n", "</br>")
-            else:
-                self.text = '<h1 style=\"font-size:5vw\">Não há bots disponíveis no momento...</h1>\n' \
-                            '<br>(se o seu bot não apareceu na lista, verifique o erro que apareceu no terminal/console)'
-
-        else:
-
-            style = """<style>
-            table, th, td {
-                border:1px solid black;
-                text-align: center;
-            }
-            </style>"""
-
-            self.text = f"<p style=\"font-size:30px\">Bots Disponíveis:</p>{style}\n<table>{cells}</table>"
-
-    def get(self):
+    async def get(self):
 
         if self.preview:
             self.write(self.text)
             return
+
+        try:
+            killing_state = self.bots[0].pool.killing_state
+        except:
+            killing_state = False
+
+        if killing_state is True:
+            self.write('<h1 style=\"font-size:5vw\">A aplicação será reiniciada em breve...</h1>')
+            return
+
+        if self.message:
+            self.text = self.message.replace("\n", "</br>")
+
+        else:
+            self.write('<h1 style=\"font-size:5vw\">Não há bots disponíveis no momento...</h1>\n'
+                        '<br>(se o seu bot não apareceu na lista, verifique o erro que apareceu no terminal/console)')
 
         try:
             # repl.it stuff
@@ -127,14 +129,14 @@ class IndexHandler(tornado.web.RequestHandler):
                      "getElementById(\"url\").innerHTML = window.location.href.replace(\"http\", \"ws\")" \
                      ".replace(\"https\", \"wss\") + \"ws\"}</script></body>"
 
-        msg = f"{self.text}<p><a href=\"https://github.com/zRitsu/DC-MusicBot-RPC" \
+        self.text = f"{self.text}<p><a href=\"https://github.com/zRitsu/DC-MusicBot-RPC" \
               f"/releases\" target=\"_blank\">Baixe o app de rich presence aqui.</a></p>Link para adicionar no app " \
               f"de RPC abaixo: {ws_url}"
 
         if self.config["ENABLE_RPC_AUTH"]:
-            msg += f"\nNão esqueça de obter o token para configurar no app, use o comando /rich_presence para obter um."
+            self.text += f"\nNão esqueça de obter o token para configurar no app, use o comando /rich_presence para obter um."
 
-        self.write(msg)
+        await asyncio.wait([self.update_botlist(bot) for bot in self.bots], timeout=60)
         # self.render("index.html") #será implementado futuramente...
 
 

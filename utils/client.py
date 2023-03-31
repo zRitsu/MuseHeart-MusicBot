@@ -92,10 +92,12 @@ class BotPool:
                 return
 
             traceback.print_exc()
+            bot.has_exception = e
             bot.pool.bots.remove(bot)
 
-        except Exception:
+        except Exception as e:
             traceback.print_exc()
+            bot.has_exception = e
             bot.pool.bots.remove(bot)
 
     async def run_bots(self, bots: List[BotCore]):
