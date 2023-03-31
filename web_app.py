@@ -138,7 +138,7 @@ class IndexHandler(tornado.web.RequestHandler):
 
         try:
             await asyncio.wait([self.update_botlist(bot) for bot in self.bots], timeout=60)
-        except asyncio.TimeoutError:
+        except (asyncio.TimeoutError, ValueError):
             pass
         # self.render("index.html") #será implementado futuramente...
 
