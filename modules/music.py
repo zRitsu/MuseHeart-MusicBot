@@ -4044,12 +4044,19 @@ class Music(commands.Cog):
                 1001,
                 4016,  # Connection started elsewhere
                 4005,  # Already authenticated.
-                #4006,  # Session is no longer valid.
+                4006,  # Session is no longer valid.
         ):
+
+            if player.is_moving:
+                return
 
             player.is_resuming = True
             vc_id = player.last_channel.id
             await asyncio.sleep(3)
+
+            if player.is_closing:
+                return
+
             await player.connect(vc_id)
             player.is_resuming = False
             return
@@ -4411,13 +4418,19 @@ class Music(commands.Cog):
         except KeyError:
             return
 
+        if player.is_moving:
+            return
+
         if move_player and before.channel:
             try:
                 can_connect(before.channel, member.guild)
             except:
                 await player.destroy()
             else:
-                await player.guild.voice_client.move_to(before.channel)
+                player.is_moving = True
+                await asyncio.sleep(1.5)
+                await member.guild.voice_client.move_to(before.channel)
+                player.is_moving = False
             return
 
         try:

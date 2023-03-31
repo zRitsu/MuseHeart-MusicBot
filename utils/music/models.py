@@ -316,6 +316,7 @@ class LavalinkPlayer(wavelink.Player):
         self.mini_queue_feature = False
         self.mini_queue_enabled = False
         self.is_resuming = False
+        self.is_moving = False
         self.last_channel: Optional[disnake.VoiceChannel] = None
 
         self._rpc_update_task: Optional[asyncio.Task] = None

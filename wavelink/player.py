@@ -64,6 +64,9 @@ class WavelinkVoiceClient(VoiceClient):
         await self.guild.change_voice_state(channel=self.channel, self_mute=self_mute, self_deaf=self_deaf)
         self._connected = True
 
+    async def move_to(self, channel) -> None:
+        await self.guild.change_voice_state(channel=channel)
+
     async def disconnect(self, *, force: bool) -> None:
 
         player = self.client.music.players[self.channel.guild.id]
@@ -281,6 +284,7 @@ class Player:
 
     async def _dispatch_voice_update(self) -> None:
         __log__.debug(f'PLAYER | Dispatching voice update:: {self.channel_id}')
+
         if {'sessionId', 'event'} == self._voice_state.keys():
             await self.node._send(op='voiceUpdate', guildId=str(self.guild_id), **self._voice_state)
 
