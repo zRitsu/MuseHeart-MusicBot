@@ -136,7 +136,10 @@ class IndexHandler(tornado.web.RequestHandler):
         if self.config["ENABLE_RPC_AUTH"]:
             self.text += f"\nNão esqueça de obter o token para configurar no app, use o comando /rich_presence para obter um."
 
-        await asyncio.wait([self.update_botlist(bot) for bot in self.bots], timeout=60)
+        try:
+            await asyncio.wait([self.update_botlist(bot) for bot in self.bots], timeout=60)
+        except asyncio.TimeoutError:
+            pass
         # self.render("index.html") #será implementado futuramente...
 
 
