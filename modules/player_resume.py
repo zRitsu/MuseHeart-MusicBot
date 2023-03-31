@@ -350,7 +350,7 @@ class PlayerSession(commands.Cog):
                     while not guild.me.voice:
                         await asyncio.sleep(1)
 
-                    if voice_channel.permissions_for(guild.me).mute_members:
+                    if guild.me.voice.suppress and voice_channel.permissions_for(guild.me).mute_members:
                         await asyncio.sleep(1.5)
                         await guild.me.edit(suppress=False)
 
