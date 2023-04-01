@@ -236,10 +236,6 @@ class PlayerSession(commands.Cog):
                           f"channel_id: {text_channel.id} | message_id {data['message']}")
                     message = None
 
-                if isinstance(voice_channel, disnake.StageChannel) and guild.me.voice:
-                    # tempfix: contornar audio mudo ao usar connect com o bot já conectado em palco.
-                    await guild.change_voice_state(channel=None)
-
                 try:
                     player: LavalinkPlayer = self.bot.music.get_player(
                         node_id=node.identifier,
@@ -356,8 +352,9 @@ class PlayerSession(commands.Cog):
 
                     if guild.me.voice.suppress and voice_channel.permissions_for(guild.me).mute_members:
                         await asyncio.sleep(1.5)
+                        await guild.me.edit(suppress=True)
+                        await asyncio.sleep(1.5)
                         await guild.me.edit(suppress=False)
-
 
                 player.set_command_log(
                     text="O player foi restaurado com sucesso!",
