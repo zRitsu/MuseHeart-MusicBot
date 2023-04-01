@@ -348,17 +348,16 @@ class PlayerSession(commands.Cog):
                 while not guild.me.voice:
                     await asyncio.sleep(1)
 
-                if isinstance(voice_channel, disnake.StageChannel):
+                if isinstance(voice_channel, disnake.StageChannel) and \
+                        voice_channel.permissions_for(guild.me).mute_members:
 
-                    if voice_channel.permissions_for(guild.me).mute_members:
+                    if not guild.me.voice.suppress:
+                        player.is_moving = True
+                        await guild.me.edit(suppress=True)
+                        await asyncio.sleep(2)
+                        player.is_moving = False
 
-                        if not guild.me.voice.suppress:
-                            player.is_moving = True
-                            await guild.me.edit(suppress=True)
-                            await asyncio.sleep(2)
-                            player.is_moving = False
-
-                        await guild.me.edit(suppress=False)
+                    await guild.me.edit(suppress=False)
 
                 player.set_command_log(
                     text="O player foi restaurado com sucesso!",
