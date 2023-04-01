@@ -643,7 +643,7 @@ class Music(commands.Cog):
     @can_send_message_check()
     @check_voice()
     @commands.slash_command(
-        name=disnake.Localized("play_nusic_file", data={disnake.Locale.pt_BR: "tocar_arquivo"}),
+        name="play_nusic_file",
         description=f"{desc_prefix}Tocar arquivo de música em um canal de voz.",
         extras={"check_player": False}, cooldown=play_cd, max_concurrency=play_mc
     )
@@ -681,7 +681,6 @@ class Music(commands.Cog):
     @can_send_message_check()
     @check_voice()
     @commands.slash_command(
-        name=disnake.Localized("play", data={disnake.Locale.pt_BR: "tocar"}),
         description=f"{desc_prefix}Tocar música em um canal de voz.",
         extras={"check_player": False}, cooldown=play_cd, max_concurrency=play_mc
     )
@@ -1349,7 +1348,6 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.slash_command(
-        name=disnake.Localized("skipto", data={disnake.Locale.pt_BR: "pular_para"}),
         description=f"{desc_prefix}Pular para uma música específica da fila.",
         extras={"only_voiced": True}, cooldown=skip_back_cd, max_concurrency=skip_back_mc
     )
@@ -1368,7 +1366,6 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.slash_command(
-        name=disnake.Localized("skip", data={disnake.Locale.pt_BR: "pular"}),
         description=f"{desc_prefix}Pular a música atual que está tocando.",
         extras={"only_voiced": True}, cooldown=skip_back_cd, max_concurrency=skip_back_mc
     )
@@ -1460,7 +1457,6 @@ class Music(commands.Cog):
     @check_voice()
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.slash_command(
-        name=disnake.Localized("back", data={disnake.Locale.pt_BR: "voltar"}),
         description=f"{desc_prefix}Voltar para a música anterior.",
         extras={"only_voiced": True}, cooldown=skip_back_cd, max_concurrency=skip_back_mc
     )
@@ -1633,7 +1629,6 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.slash_command(
-        name=disnake.Localized("pause", data={disnake.Locale.pt_BR: "pausar"}),
         description=f"{desc_prefix}Pausar a música.", extras={"only_voiced": True},
         cooldown=pause_resume_cd, max_concurrency=pause_resume_mc
     )
@@ -1667,7 +1662,6 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.slash_command(
-        name=disnake.Localized("resume", data={disnake.Locale.pt_BR: "despausar"}),
         description=f"{desc_prefix}Retomar/Despausar a música.",
         extras={"only_voiced": True}, cooldown=pause_resume_cd, max_concurrency=pause_resume_mc
     )
@@ -1709,7 +1703,6 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.slash_command(
-        name=disnake.Localized("seek", data={disnake.Locale.pt_BR: "avançar"}),
         description=f"{desc_prefix}Avançar/Retomar a música para um tempo específico.",
         extras={"only_voiced": True}, cooldown=seek_cd, max_concurrency=seek_mc
     )
@@ -1882,7 +1875,6 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.slash_command(
-        name=disnake.Localized("loop_mode", data={disnake.Locale.pt_BR: "modo_repetição"}),
         description=f"{desc_prefix}Selecionar modo de repetição entre: atual / fila ou desativar.",
         extras={"only_voiced": True}, cooldown=loop_cd, max_concurrency=loop_mc
     )
@@ -1941,7 +1933,6 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.slash_command(
-        name=disnake.Localized("loop_amount", data={disnake.Locale.pt_BR: "quantidade_repetição"}),
         description=f"{desc_prefix}Definir quantidade de repetições da música atual.",
         extras={"only_voiced": True}, cooldown=loop_cd, max_concurrency=loop_mc
     )
@@ -1987,7 +1978,6 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.slash_command(
-        name=disnake.Localized("remove", data={disnake.Locale.pt_BR: "remover"}),
         description=f"{desc_prefix}Remover uma música específica da fila.",
         extras={"only_voiced": True}, max_concurrency=remove_mc
     )
@@ -2036,7 +2026,6 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.slash_command(
-        name=disnake.Localized("readd_songs", data={disnake.Locale.pt_BR: "readicionar_músicas"}),
         description=f"{desc_prefix}Readicionar as músicas tocadas na fila.",
         extras={"only_voiced": True}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc
     )
@@ -2097,7 +2086,6 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.slash_command(
-        name=disnake.Localized("move", data={disnake.Locale.pt_BR: "mover"}),
         description=f"{desc_prefix}Mover uma música para a posição especificada da fila.",
         extras={"only_voiced": True}, max_concurrency=remove_mc
     )
@@ -2203,7 +2191,6 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.slash_command(
-        name=disnake.Localized("rotate", data={disnake.Locale.pt_BR: "rotacionar_fila"}),
         description=f"{desc_prefix}Rotacionar a fila para a música especificada.",
         extras={"only_voiced": True}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc
     )
@@ -2409,7 +2396,6 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.slash_command(
-        name=disnake.Localized("add_dj", data={disnake.Locale.pt_BR: "adicionar_dj"}),
         description=f"{desc_prefix}Adicionar um membro à lista de DJ's na sessão atual do player.",
         extras={"only_voiced": True}
     )
@@ -2459,7 +2445,6 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.slash_command(
-        name=disnake.Localized("remove_dj", data={disnake.Locale.pt_BR: "remover_dj"}),
         description=f"{desc_prefix}Remover um membro da lista de DJ's na sessão atual do player.",
         extras={"only_voiced": True}
     )
@@ -2513,7 +2498,6 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.slash_command(
-        name=disnake.Localized("stop", data={disnake.Locale.pt_BR: "parar"}),
         description=f"{desc_prefix}Parar o player e me desconectar do canal de voz.",
         extras={"only_voiced": True}
     )
@@ -2555,8 +2539,7 @@ class Music(commands.Cog):
 
     @has_player()
     @check_voice()
-    @commands.slash_command(name=disnake.Localized("queue", data={disnake.Locale.pt_BR: "fila"}),
-                            extras={"only_voiced": True})
+    @commands.slash_command(name="queue", extras={"only_voiced": True})
     async def q(self, inter):
         pass
 
@@ -2570,7 +2553,7 @@ class Music(commands.Cog):
 
     @is_dj()
     @q.sub_command(
-        name=disnake.Localized("shuffle", data={disnake.Locale.pt_BR: "misturar"}),
+        name="shuffle",
         description=f"{desc_prefix}Misturar as músicas da fila",
         extras={"only_voiced": True}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
     async def shuffle_(self, inter: disnake.AppCmdInter):
@@ -2604,7 +2587,6 @@ class Music(commands.Cog):
 
     @is_dj()
     @q.sub_command(
-        name=disnake.Localized("reverse", data={disnake.Locale.pt_BR: "inverter"}),
         description=f"{desc_prefix}Inverter a ordem das músicas na fila",
         extras={"only_voiced": True}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc
     )
@@ -2640,7 +2622,6 @@ class Music(commands.Cog):
 
     @commands.max_concurrency(1, commands.BucketType.member)
     @q.sub_command(
-        name=disnake.Localized("display", data={disnake.Locale.pt_BR: "exibir"}),
         description=f"{desc_prefix}Exibir as músicas que estão na fila.", max_concurrency=queue_show_mc
     )
     async def display(self, inter: disnake.AppCmdInter):
@@ -2709,7 +2690,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.slash_command(
-        name=disnake.Localized("clear_queue", data={disnake.Locale.pt_BR: "limpar_fila"}),
+        name="clear_queue",
         description=f"{desc_prefix}Limpar a fila de música.",
         extras={"only_voiced": True}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc
     )
@@ -2959,7 +2940,6 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.slash_command(
-        name=disnake.Localized("restrict_mode", data={disnake.Locale.pt_BR: "modo_restrito"}),
         description=f"{desc_prefix}Ativar/Desativar o modo restrito de comandos que requer DJ/Staff.",
         extras={"only_voiced": True}, cooldown=restrict_cd, max_concurrency=restrict_mc)
     async def restrict_mode(self, inter: disnake.AppCmdInter):
