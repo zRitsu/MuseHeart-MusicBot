@@ -83,7 +83,7 @@ class UserFavModal(disnake.ui.Modal):
                             "- Ao usar o comando /play (no preenchimento automático da busca)\n"
                             "- Ao clicar no botão de pedir música do player.\n"
                             "- Ao usar o comando play (prefixed) sem nome ou link.```",
-                color=self.bot.get_color(guild.me)
+                color=self.bot.get_color()
             )
         )
 
@@ -193,7 +193,7 @@ class UserFavView(disnake.ui.View):
         await inter.edit_original_message(
             embed=disnake.Embed(
                 description="**Link/Favorito foi removido com sucesso!**",
-                color=self.bot.get_color(guild.me)),
+                color=self.bot.get_color()),
             view=None
         )
         self.stop()
