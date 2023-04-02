@@ -292,6 +292,7 @@ class LavalinkPlayer(wavelink.Player):
         self.idle_task: Optional[asyncio.Task] = None
         self.members_timeout_task: Optional[asyncio.Task] = None
         self.idle_timeout = self.bot.config["IDLE_TIMEOUT"]
+        self.idle_endtime: Optional[datetime.datetime] = None
         self.hint_rate = self.bot.config["HINT_RATE"]
         self.command_log: str = ""
         self.command_log_emoji: str = ""
@@ -471,6 +472,7 @@ class LavalinkPlayer(wavelink.Player):
         try:
             track = self.queue.popleft()
         except Exception:
+            self.idle_endtime = disnake.utils.utcnow() + datetime.timedelta(seconds=self.idle_timeout)
             self.last_track = None
             self.idle_task = self.bot.loop.create_task(self.idling_mode())
             return
@@ -1192,6 +1194,7 @@ class LavalinkPlayer(wavelink.Player):
                         "bot_name": str(self.bot.user),
                         "public": self.bot.appinfo.bot_public,
                         "support_server": self.bot.config["SUPPORT_SERVER"],
+                        "idle_endtime": int(self.idle_endtime.timestamp()),
                     }
                 )
 
