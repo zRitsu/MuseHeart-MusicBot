@@ -29,9 +29,7 @@ class IndexHandler(tornado.web.RequestHandler):
         self.message = message
         self.bots = bots
         self.config = config
-        self.text = ""
-        self.preview = False
-        self.cells = []
+        self.preview = ""
 
     async def update_botlist(self, bot):
 
@@ -80,7 +78,7 @@ class IndexHandler(tornado.web.RequestHandler):
                     </table><br>
                 """
 
-            self.text = f"""
+            tables = f"""
             <html>
                 <head>
                 </head>
@@ -90,13 +88,13 @@ class IndexHandler(tornado.web.RequestHandler):
             </html>
             """
 
-            self.preview = True
+            self.preview = tables
             return
 
     async def get(self):
 
         if self.preview:
-            self.write(self.text)
+            self.write(self.preview)
             return
 
         try:
@@ -109,8 +107,7 @@ class IndexHandler(tornado.web.RequestHandler):
             return
 
         if self.message:
-            self.text = self.message.replace("\n", "</br>")
-            self.write(self.text)
+            self.write(self.message.replace("\n", "</br>"))
 
         try:
             # repl.it stuff
@@ -120,17 +117,19 @@ class IndexHandler(tornado.web.RequestHandler):
                      "getElementById(\"url\").innerHTML = window.location.href.replace(\"http\", \"ws\")" \
                      ".replace(\"https\", \"wss\") + \"ws\"}</script></body>"
 
-        self.text = f"{self.text}<p><a href=\"https://github.com/zRitsu/DC-MusicBot-RPC" \
+        text = f"<p><a href=\"https://github.com/zRitsu/DC-MusicBot-RPC" \
               f"/releases\" target=\"_blank\">Baixe o app de rich presence aqui.</a></p>Link para adicionar no app " \
               f"de RPC: {ws_url}"
 
         if self.config["ENABLE_RPC_AUTH"]:
-            self.text += f"\nNão esqueça de obter o token para configurar no app, use o comando /rich_presence para obter um."
+            text += f"\nNão esqueça de obter o token para configurar no app, use o comando /rich_presence para obter um."
+
+        self.write(text)
 
         if not self.bots:
             return
 
-        self.write(f"{self.text}\n<p style=\"font-size:20px\">Bots Disponíveis:</p>")
+        self.write(f"\n<p style=\"font-size:20px\">Bots Disponíveis:</p>")
 
         try:
             await asyncio.wait([asyncio.create_task(self.update_botlist(bot)) for bot in self.bots], timeout=60)
