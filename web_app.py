@@ -43,11 +43,6 @@ class IndexHandler(tornado.web.RequestHandler):
         else:
             avatar = bot.user.display_avatar.replace(size=256, static_format="png").url
 
-            self.cells.append(f"<tr><td><img src=\"{avatar}\" width=128 weight=128></img></td>\n"
-                     f"<td style=\"padding-top: 10px ; padding-bottom: 10px; padding-left: 10px; padding-right: 10px\">"
-                     f"Adicionar:<br><a href=\"{disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))}\" "
-                     f"target=\"_blank\">{bot.user}</a></td></tr>")
-
             style = """<style>
             table, th, td {
                 border:1px solid black;
@@ -55,10 +50,13 @@ class IndexHandler(tornado.web.RequestHandler):
             }
             </style>"""
 
-            self.clear()
+            cell = f"<tr><td><img src=\"{avatar}\" width=128 weight=128></img></td>\n" \
+                   f"<td style=\"padding-top: 10px ; padding-bottom: 10px; padding-left: 10px; padding-right: 10px\">" \
+                   f"Adicionar:<br><a href=\"{disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))}\" " \
+                   f"target=\"_blank\">{bot.user}</a></td></tr>"
 
-            self.write(f"<p style=\"font-size:30px\">Bots Disponíveis:</p>{style}\n<table>{''.join(self.cells)}"
-                       f"</table>{self.text}")
+            self.write(f"{style}\n<table>{cell}"
+                       f"</table>")
 
     async def prepare(self):
 
@@ -113,9 +111,6 @@ class IndexHandler(tornado.web.RequestHandler):
         if self.message:
             self.text = self.message.replace("\n", "</br>")
             self.write(self.text)
-        else:
-            self.write('<h1 style=\"font-size:5vw\">Não há bots disponíveis no momento...</h1>\n'
-                        '<br>(se o seu bot não apareceu na lista, verifique o erro que apareceu no terminal/console)')
 
         try:
             # repl.it stuff
@@ -127,7 +122,7 @@ class IndexHandler(tornado.web.RequestHandler):
 
         self.text = f"{self.text}<p><a href=\"https://github.com/zRitsu/DC-MusicBot-RPC" \
               f"/releases\" target=\"_blank\">Baixe o app de rich presence aqui.</a></p>Link para adicionar no app " \
-              f"de RPC abaixo: {ws_url}"
+              f"de RPC: {ws_url}"
 
         if self.config["ENABLE_RPC_AUTH"]:
             self.text += f"\nNão esqueça de obter o token para configurar no app, use o comando /rich_presence para obter um."
@@ -135,8 +130,10 @@ class IndexHandler(tornado.web.RequestHandler):
         if not self.bots:
             return
 
+        self.write(f"{self.text}\n<p style=\"font-size:20px\">Bots Disponíveis:</p>")
+
         try:
-            await asyncio.wait([self.update_botlist(bot) for bot in self.bots], timeout=60)
+            await asyncio.wait([asyncio.create_task(self.update_botlist(bot)) for bot in self.bots], timeout=60)
         except (asyncio.TimeoutError, ValueError):
             pass
         # self.render("index.html") #será implementado futuramente...
