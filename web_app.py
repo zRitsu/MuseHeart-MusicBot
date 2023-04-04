@@ -33,6 +33,9 @@ class IndexHandler(tornado.web.RequestHandler):
 
     async def update_botlist(self, bot):
 
+        if getattr(bot, 'has_exception', None):
+            return
+
         try:
             async with timeout(30):
                 await bot.wait_until_ready()
