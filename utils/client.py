@@ -458,8 +458,7 @@ class BotPool:
                            "https://gist.github.com/zRitsu/70737984cbe163f890dae05a80a3ddbe\n\n"
 
             else:
-                message += "Confira se o token foi configurado na ENV/ENVIRONMENT ou no arquivo .env\n" \
-                            "Caso ainda tenha dúvidas, entre no servidor de suporte: https://discord.gg/R7BPG8fZTr"
+                message += "Confira se o token foi configurado na ENV/ENVIRONMENT ou no arquivo .env"
 
             print(message)
 
