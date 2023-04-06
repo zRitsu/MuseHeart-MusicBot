@@ -1115,7 +1115,7 @@ class LavalinkPlayer(wavelink.Player):
                 data = await self.bot.get_global_data(id_=u, db_name=DBModel.users)
                 token = data["token"]
 
-            if not token:
+            if self.bot.config["ENABLE_RPC_AUTH"] and not token:
                 continue
 
             stats["token"] = token
@@ -1123,7 +1123,7 @@ class LavalinkPlayer(wavelink.Player):
             try:
                 await self.bot.ws_client.send(stats)
             except Exception:
-                print(traceback.print_exc())
+                print(traceback.format_exc())
 
     async def process_rpc(
             self,
