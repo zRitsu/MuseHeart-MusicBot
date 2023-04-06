@@ -4071,7 +4071,7 @@ class Music(commands.Cog):
                 await player.destroy(force=True)
                 return
 
-        elif not player.keep_connected and not player.loop:
+        if not track.track_loops:
             player.played.append(player.last_track)
 
         player.locked = True
