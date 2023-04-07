@@ -36,6 +36,7 @@ DEFAULT_CONFIG = {
     ################
     "MONGO": "",
     "MONGO_CACHE_CLEANUP_INTERVAL": 300,
+    "SENSITIVE_INFO_WARN": True,
 
     #########################
     ### Sistema de música ###
@@ -189,6 +190,7 @@ def load_config():
         "ADD_REGISTER_COMMAND",
         "ENABLE_DISCORD_URLS_PLAYBACK",
         "PLAYER_SESSIONS_MONGODB",
+        "SENSITIVE_INFO_WARN",
 
         "BANS_INTENT",
         "DM_MESSAGES_INTENT",
