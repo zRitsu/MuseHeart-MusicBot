@@ -2418,6 +2418,8 @@ class Music(commands.Cog):
 
         player: LavalinkPlayer = bot.music.players[guild.id]
 
+        user = guild.get_member(user.id)
+
         if user == inter.author:
             error_text = "**Você não pode adicionar a si mesmo na lista de DJ's.**"
         elif user.guild_permissions.manage_channels:
@@ -2464,6 +2466,8 @@ class Music(commands.Cog):
             channel = inter.channel
 
         player: LavalinkPlayer = bot.music.players[guild.id]
+
+        user = guild.get_member(user.id)
 
         if user.id == player.player_creator:
             if inter.author.guild_permissions.manage_guild:
