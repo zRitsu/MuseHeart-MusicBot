@@ -1,29 +1,30 @@
 from __future__ import annotations
-import asyncio
+
 import collections.abc
 import json
 import os
-import pprint
 import shutil
 import traceback
+from datetime import datetime
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 
 import disnake
 from disnake.ext import commands
+from mongita import MongitaClientDisk
 from motor.motor_asyncio import AsyncIOMotorClient
-from datetime import datetime
-from tinymongo import TinyMongoClient
-from tinydb_serialization import Serializer, SerializationMiddleware
-from tinymongo.serializers import DateTimeSerializer
 from typing import TYPE_CHECKING, Union
+
+from tinydb_serialization import Serializer, SerializationMiddleware
+from tinymongo import TinyMongoClient
+from tinymongo.serializers import DateTimeSerializer
 
 if TYPE_CHECKING:
     from utils.client import BotCore
 
-
 class DBModel:
     guilds = "guilds"
     users = "users"
+    default = "default"
 
 
 db_models = {
@@ -60,6 +61,10 @@ global_db_models = {
         "player_skin_static": None,
         "custom_skins": {},
         "custom_skins_static": {}
+    },
+    DBModel.default: {
+        "ver": 1.0,
+        "extra_tokens": {}
     }
 }
 
@@ -88,31 +93,6 @@ class BaseDB:
     def start_task(self, loop):
         pass
 
-    async def move_old_db(self):
-
-        if not os.path.isdir("./local_dbs"):
-            return
-
-        for f in os.listdir("./local_dbs"):
-
-            if not f.endswith(".json"):
-                continue
-
-            with open(f'./local_dbs/{f}') as file:
-                data = json.load(file)
-
-            for db_name, db_data in data.items():
-
-                if not db_data:
-                    continue
-
-                for id_, data in db_data.items():
-                    try:
-                        await self.update_data(id_=id_, data=data, db_name=db_name, collection=f[:-5])
-                    except (KeyError, TypeError):
-                        continue
-
-        shutil.rmtree("./local_dbs")
 
 
 class DatetimeSerializer(Serializer):
@@ -137,18 +117,15 @@ class CustomTinyMongoClient(TinyMongoClient):
         return serialization
 
 
-class LocalDatabase(BaseDB):
+class OldLocalDatabase(BaseDB):
 
     def __init__(self):
-
         super().__init__()
 
         if not os.path.isdir("./local_database"):
             os.makedirs("./local_database")
 
         self._connect = CustomTinyMongoClient('./local_database')
-
-        asyncio.get_event_loop().create_task(self.move_old_db())
 
     async def get_data(self, id_: int, *, db_name: Union[DBModel.guilds, DBModel.users],
                        collection: str, default_model: dict = None):
@@ -179,6 +156,53 @@ class LocalDatabase(BaseDB):
         id_ = str(id_)
 
         if not self._connect[collection][db_name].update_one({'_id': id_}, {'$set': data}).raw_result:
+            data["_id"] = id_
+            self._connect[collection][db_name].insert_one(data)
+
+        return data
+
+    async def query_data(self, db_name: str, collection: str, filter: dict = None, limit=100) -> list:
+        return self._connect[collection][db_name].find(filter or {})
+
+    async def delete_data(self, id_, db_name: str, collection: str):
+        return self._connect[collection][db_name].delete_one({'_id': str(id_)})
+
+
+class LocalDatabase(BaseDB):
+
+    def __init__(self):
+        super().__init__()
+        self._connect = MongitaClientDisk("./.local_database_sqlite")
+
+    async def get_data(self, id_: int, *, db_name: Union[DBModel.guilds, DBModel.users],
+                       collection: str, default_model: dict = None):
+
+        if not default_model:
+            default_model = db_models
+
+        id_ = str(id_)
+
+        data = self._connect[collection][db_name].find_one({"_id": id_})
+
+        if not data:
+            data = dict(default_model[db_name])
+            data["_id"] = str(id_)
+            self._connect[collection][db_name].insert_one(data)
+
+        elif data["ver"] < default_model[db_name]["ver"]:
+            data = update_values(dict(default_model[db_name]), data)
+            data["ver"] = default_model[db_name]["ver"]
+
+            await self.update_data(id_, data, db_name=db_name, collection=collection)
+
+        return data
+
+    async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users],
+                          collection: str, default_model: dict = None):
+
+        id_ = str(id_)
+
+        if not self._connect[collection][db_name].update_one({'_id': id_}, {'$set': data}).modified_count:
             data["_id"] = id_
             self._connect[collection][db_name].insert_one(data)
 
@@ -241,6 +265,12 @@ class MongoDatabase(BaseDB):
                 except:
                     traceback.print_exc()
 
+    async def get_secret_data(self, id_:int, db_name: Union[DBModel.users_secret, DBModel.global_secrets]):
+        return await self.get_data(
+            id_=id_, db_name=db_name, collection="global",
+            default_model=global_db_models
+        )
+
     async def get_data(self, id_: int, *, db_name: Union[DBModel.guilds, DBModel.users],
                        collection: str, default_model: dict = None):
 
@@ -268,7 +298,7 @@ class MongoDatabase(BaseDB):
         return await self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data}, upsert=True)
 
     async def query_data(self, db_name: str, collection: str, filter: dict = None, limit=100) -> list:
-        return await self._connect[collection][db_name].find(filter or {}).to_list(limit)
+        return await self._connect[collection][db_name].find(filter or {})
 
     async def delete_data(self, id_, db_name: str, collection: str):
         return await self._connect[collection][db_name].delete_one({'_id': str(id_)})

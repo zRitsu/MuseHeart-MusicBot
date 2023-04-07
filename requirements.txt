@@ -7,6 +7,7 @@ humanize
 tornado
 motor
 tinymongo
+mongita
 dnspython
 psutil
 aiofiles

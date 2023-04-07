@@ -25,7 +25,7 @@ from utils.music.models import music_mode, LavalinkPlayer
 from utils.music.spotify import spotify_client
 from asyncspotify import Client
 from utils.owner_panel import PanelView
-from utils.db import MongoDatabase, LocalDatabase, guild_prefix, DBModel, global_db_models
+from utils.db import MongoDatabase, LocalDatabase, guild_prefix, DBModel, global_db_models, OldLocalDatabase
 from asyncspotify import Client as SpotifyClient
 from utils.others import CustomContext, token_regex
 
@@ -39,6 +39,7 @@ class BotPool:
         self.playlist_cache = {}
         self.mongo_database: Optional[MongoDatabase] = None
         self.local_database: Optional[LocalDatabase] = None
+        self.old_local_database = OldLocalDatabase()
         self.ws_client: Optional[WSClient] = None
         self.spotify: Optional[Client] = None
         self.config = {}
@@ -394,6 +395,41 @@ class BotPool:
                     self.bot_mentions.update((f"<@!{bot.user.id}>", f"<@{bot.user.id}>"))
 
                     bot.sync_command_cooldowns()
+
+
+                    ######################################
+                    ### OLD DATABASE - START MIGRATION ###
+                    ######################################
+
+                    # Nota: Agendado para ser removido dia: 25/04/2023
+
+                    for model in (DBModel.users, DBModel.guilds):
+                        datas = await self.old_local_database.query_data(db_name="global", collection=model)
+                        for data in datas:
+                            id_ = data["_id"]
+                            await self.database.update_data(id_=id_, data=data, db_name=model, collection="global", default_model=global_db_models)
+                            await self.old_local_database.delete_data(id_, db_name="global", collection=model)
+
+                    for model in (DBModel.users, DBModel.guilds):
+                        datas = await self.old_local_database.query_data(db_name=str(bot.user.id), collection=model)
+                        for data in datas:
+                            id_ = data["_id"]
+                            await bot.update_data(id_, data, db_name=model)
+                            await self.old_local_database.delete_data(id_, db_name=str(bot.user.id), collection=model)
+
+                    datas = await self.old_local_database.query_data(db_name=str(bot.user.id), collection="player_sessions")
+
+                    database = bot.get_cog("PlayerSession").database()
+
+                    for data in datas:
+                        id_ = data["_id"]
+                        await database.update_data(id_, data, db_name=str(bot.user.id), collection="player_sessions")
+                        await self.old_local_database.delete_data(id_, db_name=str(bot.user.id), collection="player_sessions")
+
+                    ####################################
+                    ### OLD DATABASE - END MIGRATION ###
+                    ####################################
+
 
                     bot.bot_ready = True
 

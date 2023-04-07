@@ -161,3 +161,4 @@ application.yml
 .jabba/
 /auto_lavalink.ini
 /.test/
+/.local_database_sqlite

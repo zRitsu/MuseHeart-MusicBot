@@ -147,42 +147,20 @@ class PlayerSession(commands.Cog):
 
     async def resume_players(self):
 
-        if self.bot.player_resumed:
-            return
-
         await self.bot.wait_until_ready()
 
         node = self.bot.music.get_best_node() or await self.bot.wait_for("wavelink_node_ready")
+
+        while not self.bot.bot_ready:
+            await asyncio.sleep(2)
 
         hints = self.bot.config["EXTRA_HINTS"].split("||")
 
         try:
 
-            data_list = []
-
-            try:
-                for f in os.listdir(f"./.player_sessions/{self.bot.user.id}"):
-
-                    if not f.endswith(".json"):
-                        continue
-
-                    try:
-                        with open(f"./.player_sessions/{self.bot.user.id}/{f}") as fp:
-                            json_data = json.load(fp)
-                    except Exception:
-                        traceback.print_exc()
-                        continue
-
-                    json_data.update({"_id": f[:-5]})
-                    data_list.append(json_data)
-                shutil.rmtree(f"./.player_sessions/{self.bot.user.id}")
-            except:
-                pass
-
             database = self.database()
 
-            if not data_list:
-                data_list = await database.query_data(db_name=str(self.bot.user.id), collection="player_sessions")
+            data_list = await database.query_data(db_name=str(self.bot.user.id), collection="player_sessions")
 
             for data in data_list:
 
