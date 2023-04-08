@@ -746,7 +746,7 @@ class Music(commands.Cog):
             node = bot.music.get_node(server)
 
             if not node:
-                node = self.get_best_node(bot)
+                node = await self.get_best_node(bot)
 
             guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
@@ -3961,7 +3961,7 @@ class Music(commands.Cog):
                 try:
 
                     try:
-                        new_node: wavelink.Node = self.get_best_node()
+                        new_node: wavelink.Node = await self.get_best_node()
                     except:
                         try:
                             await player.text_channel.send(
@@ -4235,7 +4235,7 @@ class Music(commands.Cog):
             track_loops=0, use_cache=True):
 
         if not node:
-            node = self.get_best_node()
+            node = await self.get_best_node()
 
         tracks = await process_spotify(self.bot, user.id, query)
 
@@ -4529,7 +4529,7 @@ class Music(commands.Cog):
         except Exception:
             traceback.print_exc()
 
-    def get_best_node(self, bot: BotCore = None):
+    async def get_best_node(self, bot: BotCore = None):
 
         if not bot:
             bot = self.bot
