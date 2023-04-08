@@ -12,3 +12,4 @@ dnspython
 psutil
 aiofiles
 disnake-jishaku
+packaging

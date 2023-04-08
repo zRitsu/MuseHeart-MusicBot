@@ -1,16 +1,19 @@
 from __future__ import annotations
+
 import asyncio
 import json
 import logging
+from os import environ
 from traceback import print_exc
 from typing import TYPE_CHECKING, Optional, List
-from os import environ
+
 import aiohttp
 import disnake
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
 from async_timeout import timeout
+from packaging import version
 
 from config_loader import load_config
 
@@ -22,6 +25,7 @@ logging.getLogger('tornado.access').disabled = True
 users_ws = {}
 bots_ws = []
 
+minimal_version = version.parse("2.6.1")
 
 class IndexHandler(tornado.web.RequestHandler):
 
@@ -158,12 +162,8 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         ws_id = data.get("user_ids")
         bot_id = data.get("bot_id")
         token = data.pop("token", "") or ""
+        app_version = version.parse(data.get("version", "0"))
         self.auth_enabled = data.pop("auth_enabled", False)
-
-        try:
-            version = float(data.get("version"))
-        except:
-            version = 0
 
         if not ws_id:
 
@@ -215,9 +215,9 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             bots_ws.append(self)
             return
 
-        if version < 2.6:
+        if app_version < minimal_version:
             self.write_message(json.dumps({"op": "disconnect", "reason": "Versão do app não suportado! Certifique-se de que está usando "
-                                         "a versão mais recente do app (2.6 ou superior)."}))
+                                         f"a versão mais recente do app ({minimal_version} ou superior)."}))
             self.close(code=4200)
             return
 
