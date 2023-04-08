@@ -4539,7 +4539,17 @@ class Music(commands.Cog):
                 [n for n in bot.music.nodes.values() if n.stats and n.is_available and n.available],
                 key=lambda n: n.stats.players
             )[0]
+
         except IndexError:
+            try:
+                node = bot.music.nodes['LOCAL']
+            except KeyError:
+                pass
+            else:
+                if not node.is_connected:
+                    await node.connect(bot)
+                return node
+
             raise GenericError("**Não há servidores de música disponível.**")
 
 
