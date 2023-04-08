@@ -407,7 +407,7 @@ class BotPool:
                         datas = await self.old_local_database.query_data(db_name="global", collection=model)
                         for data in datas:
                             id_ = data["_id"]
-                            await self.database.update_data(id_=id_, data=data, db_name=model, collection="global", default_model=global_db_models)
+                            await bot.update_global_data(id_=id_, data=data, db_name=model)
                             await self.old_local_database.delete_data(id_, db_name=model, collection="global")
 
                     for model in (DBModel.users, DBModel.guilds):
