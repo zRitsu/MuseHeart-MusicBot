@@ -147,6 +147,9 @@ class PlayerSession(commands.Cog):
 
     async def resume_players(self):
 
+        if self.bot.player_resumed:
+            return
+
         await self.bot.wait_until_ready()
 
         node = self.bot.music.get_best_node() or await self.bot.wait_for("wavelink_node_ready")
