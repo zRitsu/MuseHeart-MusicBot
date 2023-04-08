@@ -2655,6 +2655,8 @@ class Music(commands.Cog):
                              help="Incluir nome que tiver no autor da música.")
     clear_flags.add_argument('-member', '-user', '-u', nargs='+', default="",
                              help="Incluir músicas pedidas pelo usuário selecionado.")
+    clear_flags.add_argument('-duplicates', '-dupes', '-duplicate', action='store_true',
+                             help="Incluir músicas duplicadas.")
     clear_flags.add_argument('-playlist', '-list', '-pl', nargs='+', default="",
                              help="Incluir nome que tiver na playlist.")
     clear_flags.add_argument('-minimal_time', '-mintime', '-min','-min_duration', '-minduration',  default=None,
@@ -2682,6 +2684,7 @@ class Music(commands.Cog):
             song_name=" ".join(args.song_name + unknown),
             song_author=" ".join(args.uploader),
             user=await commands.MemberConverter().convert(ctx, " ".join(args.member)) if args.member else None,
+            duplicates=args.duplicates,
             playlist=" ".join(args.playlist),
             min_duration=args.minimal_time,
             max_duration=args.max_time,
@@ -2708,6 +2711,8 @@ class Music(commands.Cog):
             user: disnake.Member = commands.Param(name='usuário',
                                                   description="Incluir músicas pedidas pelo usuário selecionado.",
                                                   default=None),
+            duplicates: bool = commands.Param(name="duplicados", description="Incluir músicas duplicadas",
+                                              default=False),
             playlist: str = commands.Param(description="Incluir nome que tiver na playlist.", default=None),
             min_duration: str = commands.Param(name="duração_mínima",
                                                description="incluir músicas com duração mínima especificada (ex. 1:23).",
@@ -2762,6 +2767,8 @@ class Music(commands.Cog):
             max_duration = string_to_seconds(max_duration) * 1000
         if absent_members:
             filters.append('absent_members')
+        if duplicates:
+            filters.append('duplicates')
 
         if not filters and not range_start and not range_end:
             player.queue.clear()
@@ -2789,9 +2796,18 @@ class Music(commands.Cog):
 
             deleted_tracks = 0
 
+            duplicated_titles = set()
+
             for t in song_list:
 
                 temp_filter = list(filters)
+
+                if 'duplicates' in temp_filter:
+                    if (title:=f"{t.author} - {t.title}".lower()) in duplicated_titles:
+                        temp_filter.remove('duplicates')
+                        final_filters.add('duplicates')
+                    else:
+                        duplicated_titles.add(title)
 
                 if 'time_below' in temp_filter and t.duration <= min_duration:
                     temp_filter.remove('time_below')
@@ -2830,6 +2846,8 @@ class Music(commands.Cog):
                     player.queue.remove(t)
                     deleted_tracks += 1
 
+            duplicated_titles.clear()
+
             if not deleted_tracks:
                 await inter.send("Nenhuma música encontrada!", ephemeral=True)
                 return
@@ -2867,6 +2885,12 @@ class Music(commands.Cog):
             try:
                 final_filters.remove("time_above")
                 txt.append(f"**Com duração máxima:** `{max_duration}`")
+            except:
+                pass
+
+            try:
+                final_filters.remove("duplicates")
+                txt.append(f"**Músicas duplicadas**")
             except:
                 pass
 
