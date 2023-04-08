@@ -4189,6 +4189,9 @@ class Music(commands.Cog):
     async def connect_node(self, data: dict):
 
         if data["identifier"] in self.bot.music.nodes:
+            node = self.bot.music.nodes[data['identifier']]
+            if not node.is_connected:
+                await node.connect(self.bot)
             return
 
         data['rest_uri'] = ("https" if data.get('secure') else "http") + f"://{data['host']}:{data['port']}"
@@ -4313,9 +4316,6 @@ class Music(commands.Cog):
     async def connect_local_lavalink(self):
 
         if 'LOCAL' not in self.bot.music.nodes:
-            await asyncio.sleep(7)
-
-            await self.bot.wait_until_ready()
 
             localnode = {
                 'host': '127.0.0.1',
