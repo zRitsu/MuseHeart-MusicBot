@@ -422,17 +422,14 @@ class Player:
         guild = self.bot.get_guild(self.guild_id)
 
         try:
-            try:
-                await guild.voice_client.disconnect(force=True)
-            except:
-                pass
+            await guild.voice_client.disconnect(force=True)
+        except:
+            pass
 
-            try:
-                guild.voice_client.cleanup()
-            except:
-                pass
-        except Exception:
-            print_exc()
+        try:
+            guild.voice_client.cleanup()
+        except:
+            pass
 
         await self.node._send(op='destroy', guildId=str(self.guild_id))
 

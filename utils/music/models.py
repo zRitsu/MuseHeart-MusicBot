@@ -1288,23 +1288,18 @@ class LavalinkPlayer(wavelink.Player):
 
         self.is_closing = True
 
-        if self.stage_title_event and self.guild.me.guild_permissions.manage_channels:
+        try:
+            channel = self.guild.voice_client.channel
+        except AttributeError:
+            channel = self.last_channel
 
-            try:
-                channel = self.guild.voice_client.channel
-            except AttributeError:
-                channel = self.last_channel
+        if isinstance(channel, disnake.StageChannel) and self.stage_title_event and self.guild.me.guild_permissions.manage_channels:
 
-            if channel:
+            if channel.instance:
                 try:
                     await channel.instance.delete()
                 except Exception:
                     traceback.print_exc()
-
-        try:
-            await self.guild.voice_client.disconnect(force=True)
-        except:
-            pass
 
         await super().destroy(force=force)
 
