@@ -34,17 +34,25 @@ class IndexHandler(tornado.web.RequestHandler):
         self.bots = bots
         self.config = config
         self.preview = ""
+        self.bot_task = []
+
+    def check_bot_exception(self, bot):
+        if getattr(bot, 'has_exception', None):
+            self.write(f"{bot.identifier}: Está com erro! (verifique o console/terminal)")
+            return
+
+        return True
 
     async def update_botlist(self, bot):
 
-        if getattr(bot, 'has_exception', None):
+        if not self.check_bot_exception(bot):
             return
 
         try:
             async with timeout(30):
                 await bot.wait_until_ready()
         except asyncio.TimeoutError:
-            pass
+            self.check_bot_exception(bot)
         else:
             avatar = bot.user.display_avatar.replace(size=256, static_format="png").url
 
@@ -138,11 +146,19 @@ class IndexHandler(tornado.web.RequestHandler):
 
         self.write(f"\n<p style=\"font-size:20px\">Bots Disponíveis:</p>")
 
-        try:
-            await asyncio.wait([asyncio.create_task(self.update_botlist(bot)) for bot in self.bots], timeout=60)
-        except (asyncio.TimeoutError, ValueError):
-            pass
+        self.bot_task = [asyncio.create_task(self.update_botlist(bot)) for bot in self.bots]
         # self.render("index.html") #será implementado futuramente...
+
+    async def on_finish(self) -> None:
+        for task in self.bot_task:
+            try:
+                task.cancel()
+            except:
+                continue
+
+    async def on_connection_close(self) -> None:
+        await self.on_finish()
+        super().on_connection_close()
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
