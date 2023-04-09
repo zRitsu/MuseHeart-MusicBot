@@ -982,7 +982,10 @@ class LavalinkPlayer(wavelink.Player):
         self.queue.clear()
         self.played.clear()
 
-        vc = self.bot.get_channel(self.channel_id)
+        try:
+            vc = self.guild.voice_client.channel
+        except:
+            vc = self.last_channel
 
         self.bot.loop.create_task(self.process_rpc(vc, close=True))
 
@@ -1134,17 +1137,17 @@ class LavalinkPlayer(wavelink.Player):
     ):
         try:
             if not voice_channel and not close:
+
                 try:
-                    voice_channel = self.bot.get_channel(
-                        self.channel_id) or self.bot.get_channel(self.guild.voice_client.channel.id)
+                    voice_channel = self.bot.get_channel(self.channel_id) or self.bot.get_channel(self.guild.voice_client.channel.id)
                 except AttributeError:
-                    # TODO: Investigar possível bug ao mover o bot de canal pelo discord.
-                    return
+                    voice_channel = self.last_channel
 
             if not users:
                 try:
                     users = voice_channel.voice_states
                 except AttributeError:
+                    # TODO: Investigar possível bug ao mover o bot de canal pelo discord.
                     return
 
             thumb = self.bot.user.display_avatar.replace(
@@ -1292,18 +1295,14 @@ class LavalinkPlayer(wavelink.Player):
             except AttributeError:
                 channel = self.last_channel
 
-            try:
-                await channel.instance.delete()
-            except Exception:
-                traceback.print_exc()
+            if channel:
+                try:
+                    await channel.instance.delete()
+                except Exception:
+                    traceback.print_exc()
 
         try:
             await self.guild.voice_client.disconnect(force=True)
-        except:
-            pass
-
-        try:
-            self.guild.voice_client.cleanup()
         except:
             pass
 
