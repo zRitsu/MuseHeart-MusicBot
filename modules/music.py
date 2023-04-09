@@ -641,7 +641,7 @@ class Music(commands.Cog):
     @can_send_message_check()
     @check_voice()
     @commands.slash_command(
-        name="play_nusic_file",
+        name="play_music_file",
         description=f"{desc_prefix}Tocar arquivo de música em um canal de voz.",
         extras={"check_player": False}, cooldown=play_cd, max_concurrency=play_mc
     )
