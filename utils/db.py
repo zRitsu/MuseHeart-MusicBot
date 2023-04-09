@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import annotations
 
 import collections.abc
@@ -6,14 +7,13 @@ import os
 import shutil
 import traceback
 from datetime import datetime
+from typing import TYPE_CHECKING, Union
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 
 import disnake
 from disnake.ext import commands
 from mongita import MongitaClientDisk
 from motor.motor_asyncio import AsyncIOMotorClient
-from typing import TYPE_CHECKING, Union
-
 from tinydb_serialization import Serializer, SerializationMiddleware
 from tinymongo import TinyMongoClient
 from tinymongo.serializers import DateTimeSerializer

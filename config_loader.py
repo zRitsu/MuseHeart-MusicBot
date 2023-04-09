@@ -1,8 +1,9 @@
+# -*- coding: utf-8 -*-
 from json import load
-from dotenv import dotenv_values
 from os import environ
 
 import disnake
+from dotenv import dotenv_values
 
 bools = {
     "true": True,

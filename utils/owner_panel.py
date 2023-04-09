@@ -1,8 +1,12 @@
+# -*- coding: utf-8 -*-
 from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import disnake
 from disnake.ext import commands
+
 from utils.music.errors import parse_error
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from utils.client import BotCore

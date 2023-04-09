@@ -1,8 +1,7 @@
+# -*- coding: utf-8 -*-
+
 # nota: este sistema é totalmente experimental.
 import asyncio
-import json
-import os
-import shutil
 import traceback
 
 import disnake

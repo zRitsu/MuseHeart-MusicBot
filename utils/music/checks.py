@@ -1,16 +1,18 @@
+# -*- coding: utf-8 -*-
 from __future__ import annotations
+
 import asyncio
 import traceback
-from typing import TYPE_CHECKING, Union
+from typing import Union
 
 import disnake
 from disnake.ext import commands
 
+from utils.db import DBModel
 from utils.music.converters import time_format
 from utils.music.errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, \
     GenericError, MissingVoicePerms, DiffVoiceChannel, PoolException
 from utils.music.models import LavalinkPlayer
-from utils.db import DBModel
 from utils.others import CustomContext
 
 

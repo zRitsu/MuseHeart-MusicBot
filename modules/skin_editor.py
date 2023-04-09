@@ -1,17 +1,17 @@
+# -*- coding: utf-8 -*-
 from __future__ import annotations
 
 import asyncio
 import json
-
 from typing import TYPE_CHECKING
 
 import disnake
 from disnake.ext import commands
 
 from utils.db import DBModel
+from utils.music.errors import GenericError
 from utils.music.models import LavalinkPlayer
 from utils.music.skin_utils import skin_converter
-from utils.music.errors import GenericError
 from utils.others import CustomContext
 
 if TYPE_CHECKING:

@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
 import asyncio
 import re
+
 import disnake
 import yt_dlp
+
 from utils.music.errors import GenericError
 from utils.music.models import PartialTrack
 

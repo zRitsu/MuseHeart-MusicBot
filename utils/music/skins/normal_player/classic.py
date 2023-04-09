@@ -1,7 +1,10 @@
-from utils.music.models import LavalinkPlayer
-import disnake
-from utils.music.converters import fix_characters, time_format, get_button_style
+# -*- coding: utf-8 -*-
 import itertools
+
+import disnake
+
+from utils.music.converters import fix_characters, time_format, get_button_style
+from utils.music.models import LavalinkPlayer
 from utils.others import PlayerControls
 
 

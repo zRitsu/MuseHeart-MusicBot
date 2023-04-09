@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 from __future__ import annotations
+
 import asyncio
 import datetime
 import json
@@ -12,22 +14,22 @@ from subprocess import check_output
 from typing import Optional, Union, List
 
 import aiohttp
-import requests
-from disnake.ext import commands
 import disnake
+import requests
+from asyncspotify import Client
+from asyncspotify import Client as SpotifyClient
+from disnake.ext import commands
 
 from config_loader import load_config
-from web_app import WSClient, start
+from utils.db import MongoDatabase, LocalDatabase, guild_prefix, DBModel, global_db_models, OldLocalDatabase
 from utils.music.checks import check_pool_bots
 from utils.music.errors import GenericError
 from utils.music.local_lavalink import run_lavalink
 from utils.music.models import music_mode, LavalinkPlayer
 from utils.music.spotify import spotify_client
-from asyncspotify import Client
-from utils.owner_panel import PanelView
-from utils.db import MongoDatabase, LocalDatabase, guild_prefix, DBModel, global_db_models, OldLocalDatabase
-from asyncspotify import Client as SpotifyClient
 from utils.others import CustomContext, token_regex
+from utils.owner_panel import PanelView
+from web_app import WSClient, start
 
 
 class BotPool:

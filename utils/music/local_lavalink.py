@@ -1,11 +1,13 @@
-import subprocess
-import requests
-import re
+# -*- coding: utf-8 -*-
 import os
+import platform
+import re
+import shutil
+import subprocess
 import time
 import zipfile
-import platform
-import shutil
+
+import requests
 
 
 def download_file(url, filename):

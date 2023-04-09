@@ -1,9 +1,12 @@
+# -*- coding: utf-8 -*-
 import traceback
 from typing import Union, Optional
+
 import disnake
 from disnake.ext import commands
-from wavelink import WavelinkException, TrackNotFound
+
 from utils.music.converters import time_format, perms_translations
+from wavelink import WavelinkException, TrackNotFound
 
 
 class PoolException(commands.CheckFailure):

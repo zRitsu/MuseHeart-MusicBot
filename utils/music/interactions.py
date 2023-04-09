@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
+from typing import List, Union, Optional
+
 import disnake
 from disnake.ext import commands
+
 from utils.music.converters import time_format, fix_characters
-from typing import List, Union, Optional
 
 
 class VolumeInteraction(disnake.ui.View):

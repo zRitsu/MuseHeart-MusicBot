@@ -1,15 +1,17 @@
+# -*- coding: utf-8 -*-
 from __future__ import annotations
-from typing import TYPE_CHECKING, Union, Optional
-from io import BytesIO
+
 import json
+from io import BytesIO
+from typing import TYPE_CHECKING, Union, Optional
 
 import disnake
 from disnake.ext import commands
 
 from utils.db import DBModel
 from utils.music.converters import URL_REG
-from utils.others import CustomContext
 from utils.music.errors import GenericError
+from utils.others import CustomContext
 
 if TYPE_CHECKING:
     from utils.client import BotCore
