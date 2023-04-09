@@ -210,7 +210,8 @@ class BotPool:
         if mongo_key:
             self.mongo_database = MongoDatabase(mongo_key)
         else:
-            print(f"O token/link do mongoDB não foi configurado...\nSerá usado um arquivo json para database.\n{'-' * 30}")
+            print(f"O token/link do mongoDB não foi configurado...\nOs arquivos da database serão salvos localmente "
+                  f"na pasta: .local_database_sqlite\n{'-' * 30}")
 
         self.local_database = LocalDatabase()
 
