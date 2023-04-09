@@ -550,11 +550,6 @@ class Music(commands.Cog):
 
         if isinstance(channel, disnake.StageChannel):
 
-            while not me.voice:
-                await asyncio.sleep(1)
-
-            await asyncio.sleep(1)
-
             stage_perms = channel.permissions_for(me)
 
             if stage_perms.mute_members:

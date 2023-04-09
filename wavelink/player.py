@@ -279,6 +279,12 @@ class Player:
             self._voice_state.clear()
             return
 
+        try:
+            if not data['suppress']:
+                return
+        except KeyError:
+            pass
+
         self.channel_id = int(channel_id)
         await self._dispatch_voice_update()
 
