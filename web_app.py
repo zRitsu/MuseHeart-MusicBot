@@ -34,7 +34,7 @@ class IndexHandler(tornado.web.RequestHandler):
         self.bots = bots
         self.config = config
         self.preview = ""
-        self.bot_task = []
+        self.bot_task = None
 
     def check_bot_exception(self, bot):
         if getattr(bot, 'has_exception', None):
@@ -146,17 +146,14 @@ class IndexHandler(tornado.web.RequestHandler):
 
         self.write(f"\n<p style=\"font-size:20px\">Bots Disponíveis:</p>")
 
-        self.bot_task = [asyncio.create_task(self.update_botlist(bot)) for bot in self.bots]
+        self.bot_task = await asyncio.wait([asyncio.create_task(self.update_botlist(bot)) for bot in self.bots], timeout=60)
         # self.render("index.html") #será implementado futuramente...
 
-    def on_finish(self) -> None:
-        for task in self.bot_task:
-            try:
-                task.cancel()
-            except:
-                continue
     def on_connection_close(self) -> None:
-        self.on_finish()
+        try:
+            self.bot_task.close()
+        except:
+            pass
         super().on_connection_close()
 
 
