@@ -36,7 +36,6 @@ DEFAULT_CONFIG = {
     ### Database ###
     ################
     "MONGO": "",
-    "MONGO_CACHE_CLEANUP_INTERVAL": 300,
     "SENSITIVE_INFO_WARN": True,
 
     #########################
@@ -167,7 +166,6 @@ def load_config():
         "PRESENCE_INTERVAL",
         "HINT_RATE",
         "INVITE_PERMISSIONS",
-        "MONGO_CACHE_CLEANUP_INTERVAL",
         "PREFIXED_POOL_TIMEOUT",
         "PLAYER_INFO_BACKUP_INTERVAL"
     ]:
@@ -224,9 +222,6 @@ def load_config():
 
     if CONFIG["PRESENCE_INTERVAL"] < 300:
         CONFIG["PRESENCE_INTERVAL"] = 300
-
-    if CONFIG["MONGO_CACHE_CLEANUP_INTERVAL"] < 30:
-        CONFIG["MONGO_CACHE_CLEANUP_INTERVAL"] = 30
 
     if CONFIG["IDLE_TIMEOUT"] < 30:
         CONFIG["IDLE_TIMEOUT"] = 30
