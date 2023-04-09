@@ -149,15 +149,14 @@ class IndexHandler(tornado.web.RequestHandler):
         self.bot_task = [asyncio.create_task(self.update_botlist(bot)) for bot in self.bots]
         # self.render("index.html") #será implementado futuramente...
 
-    async def on_finish(self) -> None:
+    def on_finish(self) -> None:
         for task in self.bot_task:
             try:
                 task.cancel()
             except:
                 continue
-
-    async def on_connection_close(self) -> None:
-        await self.on_finish()
+    def on_connection_close(self) -> None:
+        self.on_finish()
         super().on_connection_close()
 
 
