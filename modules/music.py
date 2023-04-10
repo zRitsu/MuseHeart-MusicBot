@@ -4569,7 +4569,7 @@ class Music(commands.Cog):
             except KeyError:
                 pass
             else:
-                if not node.is_connected:
+                if not node._websocket.is_connected:
                     await node.connect(bot)
                 return node
 
