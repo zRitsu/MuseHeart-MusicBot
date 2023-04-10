@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import disnake
 
-from utils.music.converters import fix_characters, get_button_style
+from utils.music.converters import fix_characters, get_button_style, music_source_image
 from utils.music.models import LavalinkPlayer
 from utils.others import PlayerControls
 
@@ -38,7 +38,7 @@ class MicroController:
 
         embed.set_author(
             name="Tocando Agora:",
-            icon_url="https://media.discordapp.net/attachments/480195401543188483/987633257178882108/Equalizer.gif"
+            icon_url=music_source_image(player.current.info["sourceName"])
         )
 
         if player.command_log:

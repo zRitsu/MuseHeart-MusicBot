@@ -3,7 +3,7 @@ import itertools
 
 import disnake
 
-from utils.music.converters import fix_characters, time_format, get_button_style
+from utils.music.converters import fix_characters, time_format, get_button_style, music_source_image
 from utils.music.models import LavalinkPlayer
 from utils.others import PlayerControls
 
@@ -41,7 +41,7 @@ class ClassicStaticSkin:
         if not player.paused:
             (embed_top or embed).set_author(
                 name="Tocando Agora:",
-                icon_url="https://cdn.discordapp.com/attachments/480195401543188483/895862881105616947/music_equalizer.gif"
+                icon_url=music_source_image(player.current.info["sourceName"])
             )
         else:
             (embed_top or embed).set_author(

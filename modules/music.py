@@ -23,7 +23,7 @@ from utils.music.checks import check_voice, has_player, has_source, is_requester
     check_channel_limit, check_stage_topic
 from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
-    YOUTUBE_VIDEO_REG, google_search, percentage
+    YOUTUBE_VIDEO_REG, google_search, percentage, music_source_image
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, fav_list, queue_track_index, \
     pool_command
@@ -1169,7 +1169,8 @@ class Music(commands.Cog):
 
                 embed.set_author(
                     name=fix_characters(tracks.title, 35),
-                    url=tracks.uri
+                    url=tracks.uri,
+                    icon_url=music_source_image(tracks.info['sourceName'])
                 )
                 embed.set_thumbnail(url=tracks.thumb)
                 embed.description = f"`{fix_characters(tracks.author, 15)}`**┃**`{time_format(tracks.duration) if not tracks.is_stream else '🔴 Livestream'}`**┃**{inter.author.mention}"
@@ -1204,7 +1205,7 @@ class Music(commands.Cog):
                     if not t.is_stream:
                         total_duration += t.duration
 
-                embed.set_author(name=f"Busca: {query}")
+                embed.set_author(name=f"Busca: {query}", icon_url=music_source_image(tracks[0].info['sourceName']))
                 embed.set_thumbnail(url=tracks[0].thumb)
                 embed.description = f"`{len(tracks)} música(s)`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
                 emoji = "🎶"
@@ -1237,10 +1238,15 @@ class Music(commands.Cog):
                     total_duration += t.duration
 
             try:
-                embed.set_author(name=fix_characters(tracks.name, 35), url=tracks.url)
+                embed.set_author(
+                    name="⠂" + fix_characters(tracks.name, 35),
+                    url=tracks.url,
+                    icon_url=music_source_image(tracks.tracks[0].info['sourceName'])
+                )
             except KeyError:
                 embed.set_author(
-                    name="Spotify Playlist",
+                    name="⠂ Spotify Playlist",
+                    icon_url=music_source_image(tracks.tracks[0].info['sourceName'])
                 )
             embed.set_thumbnail(url=tracks.tracks[0].thumb)
             embed.description = f"`{len(tracks.tracks)} música(s)`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
@@ -3833,10 +3839,11 @@ class Music(commands.Cog):
             player.queue.extend(tracks.tracks)
             if isinstance(message.channel, disnake.Thread) and not isinstance(message.channel.parent,
                                                                               disnake.ForumChannel):
-                embed.description = f"> 🎶 **┃ Playlist adicionada:** [`{tracks.data['playlistInfo']['name']}`]({message.content})\n" \
-                                    f"> ✋ **┃ Pedido por:** {message.author.mention}\n" \
-                                    f"> 🎼 **┃ Música(s):** `[{len(tracks.tracks)}]`"
+                embed.description = f"✋ **⠂ Pedido por:** {message.author.mention}\n" \
+                                    f"🎼 **⠂ Música(s):** `[{len(tracks.tracks)}]`"
                 embed.set_thumbnail(url=tracks.tracks[0].thumb)
+                embed.set_author(name="⠂" + fix_characters(tracks.tracks[0].playlist_name, 35), url=message.content,
+                                 icon_url=music_source_image(tracks.tracks[0].info["sourceName"]))
                 if response:
                     await response.edit(content=None, embed=embed, view=None)
                 else:
@@ -3867,11 +3874,11 @@ class Music(commands.Cog):
             player.queue.append(track)
             if isinstance(message.channel, disnake.Thread) and not isinstance(message.channel.parent,
                                                                               disnake.ForumChannel):
-                embed.description = f"> 🎵 **┃ Adicionado:** [`{tracks[0].title}`]({tracks[0].uri})\n" \
-                                    f"> 💠 **┃ Uploader:** `{tracks[0].author}`\n" \
-                                    f"> ✋ **┃ Pedido por:** {message.author.mention}\n" \
-                                    f"> ⌛ **┃ Duração:** `{time_format(tracks[0].duration) if not tracks[0].is_stream else '🔴 Livestream'}` "
-                embed.set_thumbnail(url=tracks[0].thumb)
+                embed.description = f"💠 **⠂ Uploader:** `{track.author}`\n" \
+                                    f"✋ **⠂ Pedido por:** {message.author.mention}\n" \
+                                    f"⌛ **⠂ Duração:** `{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}` "
+                embed.set_thumbnail(url=track.thumb)
+                embed.set_author(name=track.title, url=track.uri, icon_url=music_source_image(track.info["sourceName"]))
                 if response:
                     await response.edit(content=None, embed=embed, view=None)
                 else:
