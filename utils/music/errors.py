@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+import os
 import traceback
 from typing import Union, Optional
 
 import disnake
 from disnake.ext import commands
+from pymongo.errors import ServerSelectionTimeoutError
 
 from utils.music.converters import time_format, perms_translations
 from wavelink import WavelinkException, TrackNotFound
@@ -60,6 +62,8 @@ def parse_error(
 ):
 
     error_txt = None
+
+    kill_process = False
 
     error = getattr(error, 'original', error)
 
@@ -130,6 +134,11 @@ def parse_error(
     elif isinstance(error, TrackNotFound):
         error_txt = "**Não houve resultados para sua busca...**"
 
+    if isinstance(error, ServerSelectionTimeoutError) and os.environ.get("REPL_SLUG"):
+        error_txt = "Foi detectado um erro de dns na repl.it que me impede de conectar com minha database " \
+                    "do mongo/atlas. irei reiniciar e em breve estarei disponível novamente..."
+        kill_process = True
+
     elif isinstance(error, WavelinkException):
         if "Unknown file format" in (wave_error := str(error)):
             error_txt = "**Não há suporte para o link especificado...**"
@@ -147,4 +156,4 @@ def parse_error(
     else:
         full_error_txt = ""
 
-    return error_txt, full_error_txt
+    return error_txt, full_error_txt, kill_process

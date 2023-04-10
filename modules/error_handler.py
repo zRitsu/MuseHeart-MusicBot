@@ -1,15 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-import os
-
 import disnake
 from disnake.ext import commands
 from aiohttp import ClientSession
 import asyncio
 import traceback
-
-from pymongo.errors import ServerSelectionTimeoutError
 
 from utils.music.converters import URL_REG
 from utils.music.errors import parse_error, PoolException
@@ -44,15 +40,6 @@ class ErrorHandler(commands.Cog):
                     emoji="💻"
                 )
             )
-
-    async def check_replit(self, inter, error):
-        # tempfix para repl.it com problemas de dns frequente.
-        if isinstance(error, ServerSelectionTimeoutError) and os.environ.get("REPL_SLUG"):
-            await inter.send("Foi detectado um erro de dns na repl.it que me impede de conectar com minha database "
-                             "do mongo/atlas. irei reiniciar e em breve estarei disponível novamente...", ephemeral=True)
-
-            os.system("kill 1")
-            return True
 
     @commands.Cog.listener('on_interaction_player_error')
     async def on_inter_player_error(self, inter: disnake.AppCmdInter, error: Exception):
@@ -96,10 +83,7 @@ class ErrorHandler(commands.Cog):
         if isinstance(error, PoolException):
             return
 
-        if (await self.check_replit(inter, error)):
-            return
-
-        error_msg, full_error_msg = parse_error(inter, error)
+        error_msg, full_error_msg, kill_process = parse_error(inter, error)
 
         kwargs = {}
         send_webhook = False
@@ -125,6 +109,10 @@ class ErrorHandler(commands.Cog):
             kwargs["embed"].description = error_msg
 
         await send_message(inter, components=components, **kwargs)
+
+        if kill_process:
+            await asyncio.create_subprocess_shell("kill 1")
+            return
 
         if not send_webhook:
             return
@@ -159,7 +147,7 @@ class ErrorHandler(commands.Cog):
         if (await self.check_replit(ctx, error)):
             return
 
-        error_msg, full_error_msg = parse_error(ctx, error)
+        error_msg, full_error_msg, kill_process = parse_error(ctx, error)
         kwargs = {}
         send_webhook = False
 
@@ -209,6 +197,10 @@ class ErrorHandler(commands.Cog):
             func = ctx.send
 
         await func(components=components, delete_after=delete_time, **kwargs)
+
+        if kill_process:
+            await asyncio.create_subprocess_shell("kill 1")
+            return
 
         if not send_webhook:
             return
