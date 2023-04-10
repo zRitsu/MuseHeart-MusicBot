@@ -5,7 +5,7 @@ user-agent
 requests
 humanize
 tornado
-motor
+motor[gssapi,aws,ocsp,srv,zstd,encryption]
 tinymongo
 mongita
 dnspython
