@@ -45,13 +45,14 @@ class ErrorHandler(commands.Cog):
                 )
             )
 
-    def check_replit(self, inter, error):
+    async def check_replit(self, inter, error):
         # tempfix para repl.it com problemas de dns frequente.
         if isinstance(error, ServerSelectionTimeoutError) and os.environ.get("REPL_SLUG"):
             await inter.send("Foi detectado um erro de dns na repl.it que me impede de conectar com minha database "
                              "do mongo/atlas. irei reiniciar e em breve estarei disponível novamente...", ephemeral=True)
 
             os.system("kill 1")
+            return True
 
     @commands.Cog.listener('on_interaction_player_error')
     async def on_inter_player_error(self, inter: disnake.AppCmdInter, error: Exception):
@@ -95,7 +96,8 @@ class ErrorHandler(commands.Cog):
         if isinstance(error, PoolException):
             return
 
-        self.check_replit(inter, error)
+        if (await self.check_replit(inter, error)):
+            return
 
         error_msg, full_error_msg = parse_error(inter, error)
 
@@ -154,7 +156,8 @@ class ErrorHandler(commands.Cog):
         if isinstance(error, (commands.CommandNotFound, PoolException)):
             return
 
-        self.check_replit(ctx, error)
+        if (await self.check_replit(ctx, error)):
+            return
 
         error_msg, full_error_msg = parse_error(ctx, error)
         kwargs = {}
