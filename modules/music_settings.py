@@ -162,7 +162,6 @@ class MusicSettings(commands.Cog):
     setup_mc =commands.MaxConcurrency(1, per=commands.BucketType.guild, wait=False)
 
     @commands.has_guild_permissions(manage_guild=True)
-    @commands.bot_has_guild_permissions(manage_channels=True, create_public_threads=True)
     @commands.command(
         name="setup", aliases=["songrequestchannel", "sgrc"], usage="[id do canal ou #canal] [--reset]",
         description="Criar/escolher um canal dedicado para pedir músicas e deixar player fixado.",
@@ -219,9 +218,16 @@ class MusicSettings(commands.Cog):
 
         guild = bot.get_guild(inter.guild_id)
 
-        if not guild.me.guild_permissions.manage_channels or not guild.me.guild_permissions.create_public_threads:
-            raise GenericError(f"Não tenho permissão de **{perms_translations['manage_threads']}** e "
-                               f"**{perms_translations['create_public_threads']}** no servidor.")
+        perms = (
+            'manage_channels', 'send_messages', 'embed_links', 'send_messages_in_threads', 'read_messages',
+            'create_public_threads', 'manage_messages'
+        )
+
+        missing_perms = [p for p, v in guild.me.guild_permissions if p in perms and not v]
+
+        if missing_perms:
+            raise GenericError(f"**{bot.user.mention} não possui as seguintes permissões necessárias abaixo:** ```ansi" +
+                               "\n".join(f"[0;33m{p}[0m" for p in perms) + "```")
 
         channel = bot.get_channel(inter.channel.id)
 
@@ -483,7 +489,10 @@ class MusicSettings(commands.Cog):
                         break
 
         if existing_channel:
-            await target.edit(**channel_kwargs)
+            try:
+                await target.edit(**channel_kwargs)
+            except:
+                traceback.print_exc()
 
         channel = target
 
