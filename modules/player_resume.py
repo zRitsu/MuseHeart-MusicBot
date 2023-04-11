@@ -149,6 +149,8 @@ class PlayerSession(commands.Cog):
         if self.bot.player_resumed:
             return
 
+        self.bot.player_resumed = True
+
         await self.bot.wait_until_ready()
 
         node = self.bot.music.get_best_node() or await self.bot.wait_for("wavelink_node_ready")
@@ -170,21 +172,21 @@ class PlayerSession(commands.Cog):
 
                 if not guild:
                     print(f"{self.bot.user} - Player Ignorado: {data['_id']} | Servidor inexistente...")
-                    await database.delete_data(data['_id'], str(self.bot.user.id), collection="player_sessions")
+                    await database.delete_data(id_=data['_id'], db_name=str(self.bot.user.id), collection="player_sessions")
                     continue
 
                 voice_channel = self.bot.get_channel(int(data["voice_channel"]))
 
                 if not voice_channel:
                     print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\nO canal de voz não existe...")
-                    await database.delete_data(data['_id'], str(self.bot.user.id), collection="player_sessions")
+                    await database.delete_data(id_=data['_id'], db_name=str(self.bot.user.id), collection="player_sessions")
                     continue
 
                 try:
                     can_connect(voice_channel, guild=guild)
                 except Exception as e:
                     print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\n{repr(e)}")
-                    await database.delete_data(data['_id'], str(self.bot.user.id), collection="player_sessions")
+                    await database.delete_data(id_=data['_id'], db_name=str(self.bot.user.id), collection="player_sessions")
                     continue
 
                 text_channel = self.bot.get_channel(int(data["text_channel"])) or \
@@ -201,7 +203,7 @@ class PlayerSession(commands.Cog):
                     can_send_message(text_channel, self.bot.user)
                 except Exception:
                     print(f"{self.bot.user} - Player Ignorado (falta de permissão) [Canal: {text_channel.name} | ID: {text_channel.id}] - [ {guild.name} - {guild.id} ]")
-                    await database.delete_data(data['_id'], str(self.bot.user.id), collection="player_sessions")
+                    await database.delete_data(id_=data['_id'], db_name=str(self.bot.user.id), collection="player_sessions")
                     continue
 
                 try:
@@ -237,7 +239,7 @@ class PlayerSession(commands.Cog):
                     )
                 except Exception:
                     print(f"{self.bot.user} - Falha ao criar player: {guild.name} [{guild.id}]\n{traceback.format_exc()}")
-                    await database.delete_data(data['_id'], str(self.bot.user.id), collection="player_sessions")
+                    await database.delete_data(id_=data['_id'], db_name=str(self.bot.user.id), collection="player_sessions")
                     continue
 
                 try:
@@ -360,8 +362,6 @@ class PlayerSession(commands.Cog):
 
         except Exception:
             print(f"{self.bot.user} - Falha Crítica ao retomar players:\n{traceback.format_exc()}")
-
-        self.bot.player_resumed = True
 
     def cog_unload(self):
         try:
