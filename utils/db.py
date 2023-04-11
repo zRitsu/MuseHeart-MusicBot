@@ -117,7 +117,7 @@ class CustomTinyMongoClient(TinyMongoClient):
         return serialization
 
 
-class OldLocalDatabase(BaseDB):
+class LocalDatabase(BaseDB):
 
     def __init__(self):
         super().__init__()
@@ -161,14 +161,14 @@ class OldLocalDatabase(BaseDB):
 
         return data
 
-    async def query_data(self, db_name: str, collection: str, filter: dict = None, limit=100) -> list:
+    async def query_data(self, db_name: str, collection: str, filter: dict = None, limit=500) -> list:
         return self._connect[collection][db_name].find(filter or {})
 
     async def delete_data(self, id_, db_name: str, collection: str):
         return self._connect[collection][db_name].delete_one({'_id': str(id_)})
 
 
-class LocalDatabase(BaseDB):
+class OldLocalDatabase(BaseDB):
 
     def __init__(self):
         super().__init__()
@@ -200,11 +200,7 @@ class LocalDatabase(BaseDB):
     async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users],
                           collection: str, default_model: dict = None):
 
-        id_ = str(id_)
-
-        if not self._connect[collection][db_name].update_one({'_id': id_}, {'$set': data}).modified_count:
-            data["_id"] = id_
-            self._connect[collection][db_name].insert_one(data)
+        self._connect[collection][db_name].replace_one({'_id': str(id_)}, data, upsert=True)
 
         return data
 
