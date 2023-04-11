@@ -1,10 +1,11 @@
 [build]
-builder = "NIXPACKS"
+builder = "nixpacks"
 nixpacksConfigPath = "nixpacks.toml"
 # buildCommand = "pip3 install -U requirements.txt"
 
 [deploy]
 startCommand = "python3 main.py"
 healthcheckPath = "/"
-restartPolicyType = "NEVER"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 5
 healthcheckTimeout = 100
