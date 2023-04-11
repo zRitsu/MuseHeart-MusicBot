@@ -87,7 +87,8 @@ class WebSocket:
                 print(f'\nAuthorization Failed for Node:: {self._node}\n', file=sys.stderr)
             else:
                 __log__.error(f'WEBSOCKET | Connection Failure:: {error}')
-                traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+                print(repr(error))
+                #traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
             return
 
         if not self._task:
