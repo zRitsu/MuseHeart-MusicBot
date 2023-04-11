@@ -144,9 +144,6 @@ class ErrorHandler(commands.Cog):
         if isinstance(error, (commands.CommandNotFound, PoolException)):
             return
 
-        if (await self.check_replit(ctx, error)):
-            return
-
         error_msg, full_error_msg, kill_process = parse_error(ctx, error)
         kwargs = {}
         send_webhook = False
