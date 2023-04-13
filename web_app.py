@@ -35,42 +35,6 @@ class IndexHandler(tornado.web.RequestHandler):
         self.bots = bots
         self.config = config
         self.preview = ""
-        self.bot_task = None
-
-    def check_bot_exception(self, bot):
-        if getattr(bot, 'has_exception', None):
-            self.write(f"{bot.identifier}: Está com erro! (verifique o console/terminal)")
-            return
-
-        return True
-
-    async def update_botlist(self, bot):
-
-        if not self.check_bot_exception(bot):
-            return
-
-        try:
-            async with timeout(30):
-                await bot.wait_until_ready()
-        except asyncio.TimeoutError:
-            self.check_bot_exception(bot)
-        else:
-            avatar = bot.user.display_avatar.replace(size=256, static_format="png").url
-
-            style = """<style>
-            table, th, td {
-                border:1px solid black;
-                text-align: center;
-            }
-            </style>"""
-
-            cell = f"<tr><td><img src=\"{avatar}\" width=128 weight=128></img></td>\n" \
-                   f"<td style=\"padding-top: 10px ; padding-bottom: 10px; padding-left: 10px; padding-right: 10px\">" \
-                   f"Adicionar:<br><a href=\"{disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))}\" " \
-                   f"target=\"_blank\">{bot.user}</a></td></tr>"
-
-            self.write(f"{style}\n<table>{cell}"
-                       f"</table>")
 
     async def prepare(self):
 
@@ -107,6 +71,11 @@ class IndexHandler(tornado.web.RequestHandler):
             self.preview = tables
             return
 
+        await asyncio.wait(
+            [bot.wait_until_ready() for bot in self.bots if not getattr(bot, 'has_exception', None)],
+            timeout=7
+        )
+
     async def get(self):
 
         if self.preview:
@@ -122,8 +91,50 @@ class IndexHandler(tornado.web.RequestHandler):
             self.write('<h1 style=\"font-size:5vw\">A aplicação será reiniciada em breve...</h1>')
             return
 
+        msg = ""
+
         if self.message:
-            self.write(self.message.replace("\n", "</br>"))
+            msg += self.message.replace("\n", "</br>")
+
+        style = """<style>
+        table, th, td {
+            border:1px solid black;
+            text-align: center;
+        }
+        </style>"""
+
+        failed_bots = set()
+        pending_bots = set()
+        ready_bots = set()
+
+        for bot in sorted(self.bots, key=lambda b: b.identifier):
+
+            if getattr(bot, 'has_exception', None):
+                failed_bots.add(f"<tr><td>{bot.identifier}</td>\n<td>{bot.has_exception}</td></tr>")
+
+            elif bot.is_ready():
+                avatar = bot.user.display_avatar.replace(size=256, static_format="png").url
+                ready_bots.add(
+                    f"<tr><td><img src=\"{avatar}\" width=128 weight=128></img></td>\n"
+                    "<td style=\"padding-top: 10px ; padding-bottom: 10px; padding-left: 10px; padding-right: 10px\">"
+                    f"Adicionar:<br><a href=\"{disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))}\" "
+                    f"target=\"_blank\">{bot.user}</a></td></tr>"
+                )
+            else:
+                pending_bots.add(f"<tr><td>{bot.identifier}</td></tr>")
+
+        if ready_bots:
+            msg += f"\n<p style=\"font-size:20px\">Bots Disponíveis:</p>" \
+                   f"{style}\n<table>{''.join(ready_bots)}</table>"
+
+        if pending_bots:
+            msg += f"\n<p style=\"font-size:20px\">Bots em inicialização:</p>" \
+                   f"{style}\n<table>{''.join(pending_bots)}</table>\n" \
+                   f"Nota: Recarregue a página para conferir se o bot está disponível."
+
+        if failed_bots:
+            msg += f"\n<p style=\"font-size:20px\">Bots com falha de inicialização:</p>" \
+                   f"{style}\n<table>{''.join(ready_bots)}</table>"
 
         try:
             # repl.it stuff
@@ -133,29 +144,14 @@ class IndexHandler(tornado.web.RequestHandler):
                      "getElementById(\"url\").innerHTML = window.location.href.replace(\"http\", \"ws\")" \
                      ".replace(\"https\", \"wss\") + \"ws\"}</script></body>"
 
-        text = f"<p><a href=\"https://github.com/zRitsu/DC-MusicBot-RPC" \
+        msg += f"<p><a href=\"https://github.com/zRitsu/DC-MusicBot-RPC" \
               f"/releases\" target=\"_blank\">Baixe o app de rich presence aqui.</a></p>Link para adicionar no app " \
               f"de RPC: {ws_url}"
 
         if self.config["ENABLE_RPC_AUTH"]:
-            text += f"\nNão esqueça de obter o token para configurar no app, use o comando /rich_presence para obter um."
+            msg += f"\nNão esqueça de obter o token para configurar no app, use o comando /rich_presence para obter um."
 
-        self.write(text)
-
-        if not self.bots:
-            return
-
-        self.write(f"\n<p style=\"font-size:20px\">Bots Disponíveis:</p>")
-
-        self.bot_task = await asyncio.wait([asyncio.create_task(self.update_botlist(bot)) for bot in self.bots], timeout=60)
-        # self.render("index.html") #será implementado futuramente...
-
-    def on_connection_close(self) -> None:
-        try:
-            self.bot_task.close()
-        except:
-            pass
-        super().on_connection_close()
+        self.write(msg)
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
