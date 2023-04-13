@@ -72,7 +72,7 @@ class IndexHandler(tornado.web.RequestHandler):
             return
 
         await asyncio.wait(
-            [bot.wait_until_ready() for bot in self.bots if not getattr(bot, 'has_exception', None)],
+            [asyncio.create_task(bot.wait_until_ready()) for bot in self.bots if not getattr(bot, 'has_exception', None)],
             timeout=7
         )
 
