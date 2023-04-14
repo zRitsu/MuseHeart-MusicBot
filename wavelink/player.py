@@ -205,6 +205,7 @@ class Player:
         self.current = None
         self._equalizer = Equalizer.flat()
         self.channel_id = None
+        self.suppress = True
 
         self._new_track = False
 
@@ -276,14 +277,16 @@ class Player:
 
         if not channel_id:  # We're disconnecting
             self.channel_id = None
+            self.suppress = True
             self._voice_state.clear()
             return
 
         try:
-            if not data['suppress']:
+            if not data['suppress'] and self.suppress:
                 return
+            self.suppress = bool(data['suppress'])
         except KeyError:
-            pass
+            self.suppress = True
 
         self.channel_id = int(channel_id)
         await self._dispatch_voice_update()
