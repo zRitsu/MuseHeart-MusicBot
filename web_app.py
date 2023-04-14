@@ -71,10 +71,10 @@ class IndexHandler(tornado.web.RequestHandler):
             self.preview = tables
             return
 
-        await asyncio.wait(
-            [asyncio.create_task(bot.wait_until_ready()) for bot in self.bots if not getattr(bot, 'has_exception', None)],
-            timeout=7
-        )
+        bots = [asyncio.create_task(bot.wait_until_ready()) for bot in self.bots if not getattr(bot, 'has_exception', None)]
+
+        if bots:
+            await asyncio.wait(bots, timeout=7)
 
     async def get(self):
 
