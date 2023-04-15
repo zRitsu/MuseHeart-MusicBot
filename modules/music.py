@@ -756,7 +756,10 @@ class Music(commands.Cog):
                 guild_data = inter.guild_data
             except AttributeError:
                 guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-                inter.guild_data = guild_data
+                try:
+                    inter.guild_data = guild_data
+                except AttributeError:
+                    pass
 
             if not guild.me.voice:
                 can_connect(inter.author.voice.channel, guild, guild_data["check_other_bots_in_vc"])
@@ -993,7 +996,10 @@ class Music(commands.Cog):
                     guild_data = inter.guild_data
                 except AttributeError:
                     guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-                    inter.guild_data = guild_data
+                    try:
+                        inter.guild_data = guild_data
+                    except:
+                        pass
 
                 static_player = guild_data['player_controller']
 
@@ -1009,7 +1015,10 @@ class Music(commands.Cog):
                 global_data = inter.global_guild_data
             except AttributeError:
                 global_data = await self.bot.get_global_data(guild.id, db_name=DBModel.guilds)
-                inter.global_guild_data = global_data
+                try:
+                    inter.global_guild_data = global_data
+                except:
+                    pass
 
             if global_data["global_skin"]:
                 skin = global_data["player_skin"] or skin
@@ -1310,7 +1319,10 @@ class Music(commands.Cog):
                     guild_data = inter.guild_data
                 except AttributeError:
                     guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-                    inter.guild_data = guild_data
+                    try:
+                        inter.guild_data = guild_data
+                    except:
+                        pass
 
             if not inter.author.voice:
                 raise NoVoice()
