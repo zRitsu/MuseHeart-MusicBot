@@ -33,8 +33,11 @@ def can_send_message(
 
 
 async def check_requester_channel(ctx: CustomContext):
-
-    guild_data = await ctx.bot.get_data(ctx.guild_id, db_name=DBModel.guilds)
+    try:
+        guild_data = ctx.guild_data
+    except AttributeError:
+        guild_data = await ctx.bot.get_data(ctx.guild_id, db_name=DBModel.guilds)
+        ctx.guild_data = guild_data
 
     if guild_data['player_controller']["channel"] == str(ctx.channel.id):
 
@@ -508,7 +511,11 @@ async def has_perm(inter):
 
     user_roles = [r.id for r in inter.author.roles]
 
-    guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
+    try:
+        guild_data = inter.guild_data
+    except AttributeError:
+        guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
+        inter.guild_data = guild_data
 
     if [r for r in guild_data['djroles'] if int(r) in user_roles]:
         return True
@@ -528,6 +535,7 @@ async def has_perm(inter):
             description=f"{inter.author.mention} foi adicionado à lista de DJ's por não haver um no canal <#{vc.id}>.",
             color=player.bot.get_color(guild.me)), delete_after=10)
 
+    disnake.MessageInteraction
     return True
 
 def check_channel_limit(member: disnake.Member, channel: Union[disnake.VoiceChannel, disnake.StageChannel]):

@@ -385,7 +385,11 @@ class Misc(commands.Cog):
                              f"> **Uso de RAM:** `{ram_usage}`\n" \
                              f"> **Uptime:** <t:{int(bot.uptime.timestamp())}:R>\n"
 
-        guild_data = await bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
+        try:
+            guild_data = inter.global_guild_data
+        except AttributeError:
+            guild_data = await bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
+            inter.global_guild_data = guild_data
 
         prefix = guild_data["prefix"] or bot.default_prefix
 

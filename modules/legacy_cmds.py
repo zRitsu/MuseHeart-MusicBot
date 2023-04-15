@@ -639,9 +639,14 @@ class Owner(commands.Cog):
         if " " in prefix or len(prefix) > 5:
             raise GenericError("**O prefixo não pode conter espaços ou ter acima de 5 caracteres.**")
 
-        data = await self.bot.get_global_data(ctx.guild.id, db_name=DBModel.guilds)
-        data["prefix"] = prefix
-        await self.bot.update_global_data(ctx.guild.id, data, db_name=DBModel.guilds)
+        try:
+            guild_data = ctx.global_guild_data
+        except AttributeError:
+            guild_data = await self.bot.get_global_data(ctx.guild.id, db_name=DBModel.guilds)
+            ctx.global_guild_data = guild_data
+
+        guild_data["prefix"] = prefix
+        await self.bot.update_global_data(ctx.guild.id, guild_data, db_name=DBModel.guilds)
 
         embed = disnake.Embed(
             description=f"**O prefixo deste servidor agora é:** {disnake.utils.escape_markdown(prefix)}",
@@ -878,7 +883,11 @@ class Owner(commands.Cog):
         if not node:
             raise GenericError("**Não há servidores de música disponível!**")
 
-        guild_data = await self.bot.get_data(ctx.guild.id, db_name=DBModel.guilds)
+        try:
+            guild_data = ctx.guild_data
+        except AttributeError:
+            guild_data = await self.bot.get_data(ctx.guild.id, db_name=DBModel.guilds)
+            ctx.guild_data = guild_data
 
         static_player = guild_data['player_controller']
 

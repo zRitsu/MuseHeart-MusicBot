@@ -136,7 +136,11 @@ class MusicSettings(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+        try:
+            guild_data = inter.guild_data
+        except AttributeError:
+            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+            inter.guild_data = guild_data
 
         guild_data["check_other_bots_in_vc"] = opt == "Ativar"
 
@@ -257,7 +261,11 @@ class MusicSettings(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
+        try:
+            guild_data = inter.guild_data
+        except AttributeError:
+            guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
+            inter.guild_data = guild_data
 
         original_message = None
         existing_channel = True
@@ -592,7 +600,11 @@ class MusicSettings(commands.Cog):
 
         channel_inter = bot.get_channel(inter.channel.id)
 
-        guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
+        try:
+            guild_data = inter.guild_data
+        except AttributeError:
+            guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
+            inter.guild_data = guild_data
 
         try:
             channel = bot.get_channel(int(guild_data['player_controller']['channel'])) or \
@@ -718,7 +730,11 @@ class MusicSettings(commands.Cog):
             await inter.send("Você não pode adicionar esse cargo.", ephemeral=True)
             return
 
-        guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
+        try:
+            guild_data = inter.guild_data
+        except AttributeError:
+            guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
+            inter.guild_data = guild_data
 
         if str(role.id) in guild_data['djroles']:
             await inter.send(f"O cargo {role.mention} já está na lista de DJ's", ephemeral=True)
@@ -751,7 +767,11 @@ class MusicSettings(commands.Cog):
         if not bot:
             return
 
-        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+        try:
+            guild_data = inter.guild_data
+        except AttributeError:
+            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+            inter.guild_data = guild_data
 
         if not guild_data['djroles']:
 
@@ -802,8 +822,18 @@ class MusicSettings(commands.Cog):
 
         add_skin_prefix = (lambda d: [f"> custom_skin: {i}" for i in d.keys()])
 
-        guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
-        global_data = await bot.get_global_data(guild.id, db_name=DBModel.guilds)
+        try:
+            guild_data = inter.guild_data
+        except AttributeError:
+            guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
+            inter.guild_data = guild_data
+
+        try:
+            global_data = inter.global_guild_data
+        except AttributeError:
+            global_data = await bot.get_global_data(guild.id, db_name=DBModel.guilds)
+            inter.global_guild_data = global_data
+
         global_mode = global_data["global_skin"]
 
         selected = guild_data["player_controller"]["skin"] or bot.default_skin
@@ -1171,7 +1201,12 @@ class RPCCog(commands.Cog):
 
         if button_id == "rpc_gen":
             await inter.response.defer()
-            data = await self.bot.get_global_data(id_=user_id, db_name=DBModel.users)
+
+            try:
+                data = inter.global_user_data
+            except AttributeError:
+                data = await self.bot.get_global_data(id_=user_id, db_name=DBModel.users)
+                inter.global_user_data = data
 
             if data["token"]:
                 await self.close_presence(inter)
@@ -1186,7 +1221,13 @@ class RPCCog(commands.Cog):
             kwargs = {}
 
             try:
-                data = await self.bot.get_global_data(id_=user_id, db_name=DBModel.users)
+
+                try:
+                    data = inter.global_user_data
+                except AttributeError:
+                    data = await self.bot.get_global_data(id_=user_id, db_name=DBModel.users)
+                    inter.global_user_data = data
+
                 if len(data["token"]) == 50:
                     kwargs["value"] = data["token"]
             except:
@@ -1220,7 +1261,12 @@ class RPCCog(commands.Cog):
 
             await self.close_presence(inter)
 
-            data = await self.bot.get_global_data(id_=user_id, db_name=DBModel.users)
+            try:
+                data = inter.global_user_data
+            except AttributeError:
+                data = await self.bot.get_global_data(id_=user_id, db_name=DBModel.users)
+                inter.global_user_data = data
+
             data["token"] = ""
             await self.bot.update_global_data(id_=user_id, data=data, db_name=DBModel.users)
             msg = "O token foi removido com sucesso!\n" \

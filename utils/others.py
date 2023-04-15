@@ -337,8 +337,14 @@ def string_to_file(txt, filename="result.txt"):
 
 
 async def fav_list(inter, query: str, *, prefix=""):
-    return sorted([f"{prefix}{favname}" for favname in
-                   (await inter.bot.get_global_data(inter.author.id, db_name=DBModel.users))["fav_links"]
+
+    try:
+        data = inter.global_user_data
+    except:
+        data = await inter.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+        inter.global_user_data = data
+
+    return sorted([f"{prefix}{favname}" for favname in data["fav_links"]
                    if not query or query.lower() in favname.lower()][:20])
 
 

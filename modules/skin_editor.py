@@ -123,7 +123,11 @@ class CustomSkin(commands.Cog):
             await msg.edit("Tempo esgotado!", components=[])
             return
 
-        global_data = await self.bot.get_global_data(ctx.guild_id, db_name=DBModel.guilds)
+        try:
+            global_data = ctx.global_guild_data
+        except AttributeError:
+            global_data = await self.bot.get_global_data(ctx.guild_id, db_name=DBModel.guilds)
+            ctx.global_guild_data = global_data
 
         global_data[view.mode][skin_name] = json.dumps(json.loads(data))
 

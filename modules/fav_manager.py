@@ -181,7 +181,11 @@ class UserFavView(disnake.ui.View):
 
         await inter.response.defer(ephemeral=True)
 
-        user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+        try:
+            user_data = inter.global_user_data
+        except AttributeError:
+            user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+            inter.global_user_data = user_data
 
         try:
             del user_data["fav_links"][self.current]
@@ -204,14 +208,18 @@ class UserFavView(disnake.ui.View):
 
         await inter.response.defer(ephemeral=True)
 
-        data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+        try:
+            user_data = inter.global_user_data
+        except AttributeError:
+            user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+            inter.global_user_data = user_data
 
-        if not data["fav_links"]:
+        if not user_data["fav_links"]:
             raise GenericError("**Você não possui links favoritos!**")
 
-        data["fav_links"].clear()
+        user_data["fav_links"].clear()
 
-        await self.bot.update_global_data(inter.author.id, data, db_name=DBModel.users)
+        await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
 
         embed = disnake.Embed(
             description="Sua lista de favoritos foi limpa com sucesso!",
@@ -261,7 +269,11 @@ class FavManager(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+        try:
+            user_data = inter.global_user_data
+        except AttributeError:
+            user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+            inter.global_user_data = user_data
 
         view = UserFavView(bot=self.bot, ctx=inter, data=user_data)
 
@@ -306,7 +318,11 @@ class FavManager(commands.Cog):
 
         await inter.response.defer(ephemeral=hidden)
 
-        user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+        try:
+            user_data = inter.global_user_data
+        except AttributeError:
+            user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+            inter.global_user_data = user_data
 
         if not user_data["fav_links"]:
             raise GenericError(f"**Você não possui links favoritos..\n"
@@ -363,7 +379,11 @@ class FavManager(commands.Cog):
             if not isinstance(url, str) or not URL_REG.match(url):
                 raise GenericError(f"O seu arquivo contém link inválido: ```ldif\n{url}```")
 
-        user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+        try:
+            user_data = inter.global_user_data
+        except AttributeError:
+            user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+            inter.global_user_data = user_data
 
         for name in json_data.keys():
             if len(name) > (max_name_chars := self.bot.config["USER_FAV_MAX_NAME_LENGTH"]):
@@ -405,7 +425,11 @@ class FavManager(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+        try:
+            user_data = inter.global_user_data
+        except AttributeError:
+            user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+            inter.global_user_data = user_data
 
         if not user_data["fav_links"]:
             raise GenericError(f"**Você não possui links favoritos..\n"

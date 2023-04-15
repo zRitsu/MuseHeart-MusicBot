@@ -115,7 +115,12 @@ class Music(commands.Cog):
     async def updatecache(self, ctx: CustomContext, *args):
 
         if "-fav" in args:
-            data = await self.bot.get_global_data(ctx.author.id, db_name=DBModel.users)
+            try:
+                data = ctx.global_user_data
+            except AttributeError:
+                data = await self.bot.get_global_data(ctx.author.id, db_name=DBModel.users)
+                ctx.global_user_data = data
+
             self.bot.pool.playlist_cache.update({url: [] for url in data["fav_links"].values()})
 
         try:
@@ -747,7 +752,11 @@ class Music(commands.Cog):
             if not node:
                 node = await self.get_best_node(bot)
 
-            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+            try:
+                guild_data = inter.guild_data
+            except AttributeError:
+                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                inter.guild_data = guild_data
 
             if not guild.me.voice:
                 can_connect(inter.author.voice.channel, guild, guild_data["check_other_bots_in_vc"])
@@ -879,7 +888,12 @@ class Music(commands.Cog):
             query = query[7:]
 
         if query.startswith("> fav:"):
-            user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+            try:
+                user_data = inter.global_user_data
+            except AttributeError:
+                user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+                inter.global_user_data = user_data
+
             query = user_data["fav_links"][query[7:]]
 
         else:
@@ -974,7 +988,13 @@ class Music(commands.Cog):
                 player = bot.music.players[inter.guild_id]
             except KeyError:
                 player = None
-                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+
+                try:
+                    guild_data = inter.guild_data
+                except AttributeError:
+                    guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                    inter.guild_data = guild_data
+
                 static_player = guild_data['player_controller']
 
                 if static_player['channel']:
@@ -985,7 +1005,11 @@ class Music(commands.Cog):
             skin = guild_data["player_controller"]["skin"]
             static_skin = guild_data["player_controller"]["static_skin"]
 
-            global_data = await self.bot.get_global_data(guild.id, db_name=DBModel.guilds)
+            try:
+                global_data = inter.global_guild_data
+            except AttributeError:
+                global_data = await self.bot.get_global_data(guild.id, db_name=DBModel.guilds)
+                inter.global_guild_data = global_data
 
             if global_data["global_skin"]:
                 skin = global_data["player_skin"] or skin
@@ -1282,7 +1306,11 @@ class Music(commands.Cog):
             try:
                 guild_data["check_other_bots_in_vc"]
             except KeyError:
-                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                try:
+                    guild_data = inter.guild_data
+                except AttributeError:
+                    guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                    inter.guild_data = guild_data
 
             if not inter.author.voice:
                 raise NoVoice()
@@ -3201,7 +3229,10 @@ class Music(commands.Cog):
 
         except KeyError:
 
-            guild_data = data or await bot.get_data(ctx.guild_id, db_name=DBModel.guilds)
+            try:
+                guild_data = ctx.guild_data
+            except AttributeError:
+                guild_data = data or await bot.get_data(ctx.guild_id, db_name=DBModel.guilds)
 
             try:
                 channel = bot.get_channel(int(guild_data["player_controller"]["channel"]))
@@ -3326,7 +3357,11 @@ class Music(commands.Cog):
             await interaction.send("Você deve entrar em um canal de voz para usar isto.", ephemeral=True)
             return
 
-        guild_data = await self.bot.get_data(interaction.guild_id, db_name=DBModel.guilds)
+        try:
+            guild_data = interaction.guild_data
+        except AttributeError:
+            guild_data = await self.bot.get_data(interaction.guild_id, db_name=DBModel.guilds)
+            interaction.guild_data = guild_data
 
         try:
             query = guild_data["player_controller"]["fav_links"][interaction.data.values[0]]['url']
