@@ -660,7 +660,7 @@ class LavalinkPlayer(wavelink.Player):
 
     async def idling_mode(self):
 
-        self.bot.loop.create_task(self.process_rpc(self.guild.me.voice.channel))
+        await self.process_rpc(self.guild.me.voice.channel)
 
         await self.process_idle_message()
 
@@ -747,7 +747,7 @@ class LavalinkPlayer(wavelink.Player):
             return
 
         if rpc_update:
-            self.bot.loop.create_task(self.process_rpc())
+            await self.process_rpc()
 
         if self.static:
             if self.skin_static.startswith("> custom_skin: "):
@@ -969,7 +969,7 @@ class LavalinkPlayer(wavelink.Player):
     async def update_message(self, interaction: disnake.Interaction = None, force=False, rpc_update=False):
 
         if rpc_update:
-            self.bot.loop.create_task(self.process_rpc())
+            await self.process_rpc()
 
         if force or (interaction and not interaction.response.is_done()):
             if self.controller_mode:
@@ -988,7 +988,7 @@ class LavalinkPlayer(wavelink.Player):
         except:
             vc = self.last_channel
 
-        self.bot.loop.create_task(self.process_rpc(vc, close=True))
+        await self.process_rpc(vc, close=True)
 
         try:
             await self.update_stage_topic()
@@ -1198,9 +1198,13 @@ class LavalinkPlayer(wavelink.Player):
                         "bot_name": str(self.bot.user),
                         "public": self.bot.appinfo.bot_public,
                         "support_server": self.bot.config["SUPPORT_SERVER"],
-                        "idle_endtime": int(self.idle_endtime.timestamp()),
                     }
                 )
+
+                try:
+                    stats["idle_endtime"] = int(self.idle_endtime.timestamp())
+                except:
+                    pass
 
             else:
 
