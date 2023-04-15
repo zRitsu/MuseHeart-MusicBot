@@ -85,7 +85,7 @@ class UserFavModal(disnake.ui.Modal):
                             "- Ao usar o comando /play (no preenchimento automático da busca)\n"
                             "- Ao clicar no botão de pedir música do player.\n"
                             "- Ao usar o comando play (prefixed) sem nome ou link.```",
-                color=self.bot.get_color()
+                color=self.bot.get_color(guild.me)
             )
         )
 
