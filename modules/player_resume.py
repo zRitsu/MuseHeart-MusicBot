@@ -347,8 +347,8 @@ class PlayerSession(commands.Cog):
                         track = None
 
                     if track:
-                        player.paused = True
-                        player.last_position = float(data["position"])
+                        await player.play(track, start=int(data["position"]), replace=False)
+                        await player.set_pause(True)
                         player.current = track
                         await player.invoke_np(rpc_update=True)
 
