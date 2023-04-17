@@ -1485,6 +1485,8 @@ class Music(commands.Cog):
             if player.loop == "current":
                 player.loop = False
 
+        player.current.info["extra"]["track_loops"] = 0
+
         await player.stop()
 
     @check_stage_topic()
@@ -1527,10 +1529,11 @@ class Music(commands.Cog):
                 track = player.played.pop()
             except:
                 track = player.queue.pop()
-                player.queue.appendleft(player.current)
+
+            player.queue.appendleft(player.current)
 
         player.last_track = None
-                
+
         player.queue.appendleft(track)
 
         if isinstance(inter, disnake.MessageInteraction):

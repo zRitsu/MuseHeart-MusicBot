@@ -350,6 +350,7 @@ class PlayerSession(commands.Cog):
                         await player.play(track, start=int(data["position"]), replace=False)
                         await player.set_pause(True)
                         player.current = track
+                        player.last_track = track
                         await player.invoke_np(rpc_update=True)
 
                     else:
