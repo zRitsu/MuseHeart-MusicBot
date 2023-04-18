@@ -240,7 +240,7 @@ class MusicSettings(commands.Cog):
         guild_data = await self.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         try:
-            func = inter.store_message
+            func = inter.store_message.edit
         except AttributeError:
             try:
                 func = inter.edit_original_message
