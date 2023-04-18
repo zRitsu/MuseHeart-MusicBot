@@ -14,6 +14,10 @@ if [ -n "${VIDEO_PREVIEW}" ]; then
   exit 1
 fi
 
+if [ "${SOURCE_AUTO_UPDATE,,}" == "true" ]; then
+  bash quick_update.sh
+fi
+
 if [ ! -d "venv" ] || [ ! -f "./venv/bin/requirements.txt" ] || [ ! "$REPL_SLUG-$REPL_OWNER" == "$(cat ./venv/.deployed)" ]; then
   rm -rf venv && rm -rf .config && rm -rf .cache
   rm -f poetry.lock && rm -f pyproject.toml
