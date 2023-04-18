@@ -1038,6 +1038,8 @@ class Music(commands.Cog):
                 custom_skin_static_data=global_data["custom_skins_static"],
                 skin_static=bot.check_static_skin(static_skin),
                 extra_hints=self.extra_hints,
+                restrict_mode=guild_data['enable_restrict_mode'],
+                volume=guild_data['default_player_volume'],
             )
 
             if static_player['channel']:
@@ -3871,6 +3873,8 @@ class Music(commands.Cog):
                 node_id=node.identifier,
                 extra_hints=self.extra_hints,
                 last_message_id=message_id,
+                restrict_mode=data['enable_restrict_mode'],
+                volume=data['default_player_volume'],
             )
 
         if not player.message:

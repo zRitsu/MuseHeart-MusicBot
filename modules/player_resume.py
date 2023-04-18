@@ -235,7 +235,9 @@ class PlayerSession(commands.Cog):
                         custom_skin_static_data=data.get("custom_skin_static_data", {}),
                         extra_hints=hints,
                         uptime=data.get("uptime"),
-                        stage_title_template=data.get("stage_title_template")
+                        stage_title_template=data.get("stage_title_template"),
+                        restrict_mode=data["restrict_mode"],
+                        volume=data["volume"]
                     )
                 except Exception:
                     print(f"{self.bot.user} - Falha ao criar player: {guild.name} [{guild.id}]\n{traceback.format_exc()}")
@@ -248,7 +250,6 @@ class PlayerSession(commands.Cog):
                     pass
 
                 player.dj = set(data["dj"])
-                player.restrict_mode = data["restrict_mode"]
                 player.loop = data["loop"]
 
                 try:

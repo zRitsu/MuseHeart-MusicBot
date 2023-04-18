@@ -113,21 +113,122 @@ class SkinSelector(disnake.ui.View):
         self.stop()
 
 
+class PlayerSettings(disnake.ui.View):
+
+    def __init__(self, ctx: Union[disnake.AppCmdInter, CustomContext], data: dict):
+        super().__init__()
+        self.ctx = ctx
+        self.check_other_bots_in_vc = data['check_other_bots_in_vc']
+        self.enable_restrict_mode = data['enable_restrict_mode']
+        self.default_player_volume = data['default_player_volume']
+        self.message: Optional[disnake.Message] = None
+        self.load_buttons()
+
+    def load_buttons(self):
+
+        self.clear_items()
+
+        player_volume_select = disnake.ui.Select(
+            placeholder="Selecione um volume padrão.",
+            options=[
+                disnake.SelectOption(label=f"Volume padrão: {i}", default=i == self.default_player_volume, value=str(i)) for i in range(10, 151, 10)
+            ]
+        )
+
+        player_volume_select.callback = self.volume_callback
+        self.add_item(player_volume_select)
+
+        check_other_bots_button = disnake.ui.Button(label="Não conectar com bots incompatíveis.",
+                                                    emoji="✅" if self.check_other_bots_in_vc else "🚫")
+        check_other_bots_button.callback = self.check_other_bots_callback
+        self.add_item(check_other_bots_button)
+
+        restrict_mode_button = disnake.ui.Button(label="Modo restrito",
+                                                    emoji="✅" if self.enable_restrict_mode else "🚫")
+        restrict_mode_button.callback = self.restrict_mode_callback
+        self.add_item(restrict_mode_button)
+
+        close_button = disnake.ui.Button(label="Salvar/Fechar", emoji="💾")
+        close_button.callback = self.close_callback
+        self.add_item(close_button)
+
+    async def check_other_bots_callback(self, interaction: disnake.MessageInteraction):
+        self.check_other_bots_in_vc = not self.check_other_bots_in_vc
+        self.load_buttons()
+        await interaction.response.edit_message(view=self)
+
+    async def restrict_mode_callback(self, interaction: disnake.MessageInteraction):
+        self.enable_restrict_mode = not self.enable_restrict_mode
+        self.load_buttons()
+        await interaction.response.edit_message(view=self)
+
+    async def volume_callback(self, interaction: disnake.MessageInteraction):
+        self.default_player_volume = int(interaction.data.values[0])
+        self.load_buttons()
+        await interaction.response.edit_message(view=self)
+
+    async def close_callback(self, interaction: disnake.MessageInteraction):
+        if isinstance(self.ctx, CustomContext):
+            await interaction.message.delete()
+        else:
+            await interaction.response.edit_message(content="Alterações salvas com sucesso!", view=None, embed=None)
+        await self.save_data()
+        self.stop()
+
+    async def interaction_check(self, inter: disnake.MessageInteraction) -> bool:
+
+        if inter.author.id == self.ctx.author.id:
+            return True
+
+        await inter.send(f"Apenas {self.ctx.author.mention} pode interagir aqui!", ephemeral=True)
+        return False
+
+    async def save_data(self):
+        guild_data = await self.ctx.bot.get_data(self.ctx.guild_id, db_name=DBModel.guilds)
+        guild_data['check_other_bots_in_vc'] = self.check_other_bots_in_vc
+        guild_data['enable_restrict_mode'] = self.enable_restrict_mode
+        guild_data['default_player_volume'] = self.default_player_volume
+        await self.ctx.bot.update_data(self.ctx.guild_id, guild_data, db_name=DBModel.guilds)
+
+    async def on_timeout(self):
+
+        if isinstance(self.ctx, CustomContext):
+            await self.message.edit(
+                embed=disnake.Embed(description="**Tempo esgotado...**", color=self.bot.get_color()), view=None
+            )
+        else:
+            await self.ctx.edit_original_message(
+                embed=disnake.Embed(description="**Tempo esgotado...**", color=self.bot.get_color()), view=None
+            )
+
+        await self.save_data()
+
+        self.stop()
+
+
 class MusicSettings(commands.Cog):
 
     def __init__(self, bot: BotCore):
         self.bot = bot
 
-    # O nome desse comando está sujeito a alterações (tá ridiculo, mas não consegui pensar em um nome melhor no momento).
-    @commands.cooldown(1, 5, commands.BucketType.guild)
+
+    player_settings_cd = commands.CooldownMapping.from_cooldown(1, 5, commands.BucketType.guild)
+    player_settings_mc = commands.MaxConcurrency(1, per=commands.BucketType.guild, wait=False)
+
+    @commands.has_guild_permissions(manage_guild=True)
+    @commands.command(
+        name="playersettings", aliases=["ps", "settings"],
+        description="Alterar algumas configurações padrões do player.",
+        cooldown=player_settings_cd, max_concurrency=player_settings_mc
+    )
+    async def player_settings_legacy(self, ctx: CustomContext):
+        await self.player_settings.callback(self=self, inter=ctx)
+
     @commands.slash_command(
-        description=f"{desc_prefix}Permitir/bloquear de me conectar em um canal onde há outros bots.",
+        description=f"{desc_prefix}Alterar algumas configurações padrões do player.",
         default_member_permissions=disnake.Permissions(manage_guild=True)
     )
-    async def dont_connect_other_bot_vc(
-            self, inter: disnake.ApplicationCommandInteraction,
-            opt: str = commands.Param(choices=["Ativar", "Desativar"], description="Escolha: ativar ou desativar")
-    ):
+    async def player_settings(self, inter: disnake.AppCmdInter):
 
         inter, bot = await select_bot_pool(inter)
 
@@ -136,31 +237,26 @@ class MusicSettings(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
+        guild_data = await self.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+
         try:
-            guild_data = inter.guild_data
+            func = inter.store_message
         except AttributeError:
-            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-            inter.guild_data = guild_data
+            try:
+                func = inter.edit_original_message
+            except AttributeError:
+                func = inter.send
 
-        guild_data["check_other_bots_in_vc"] = opt == "Ativar"
+        view = PlayerSettings(inter, guild_data)
 
-        await bot.update_data(inter.guild_id, guild_data, db_name=DBModel.guilds)
-
-        guild = bot.get_guild(inter.guild_id) or inter.guild
-
-        embed = disnake.Embed(
-            color=self.bot.get_color(guild.me),
-            description="**Configuração salva com sucesso!\n"
-                        f"Agora {'não ' if opt == 'Ativar' else ''}irei me conectar em canais onde há outros bots.**"
+        view.message = await func(
+            embed=disnake.Embed(
+                description="**Ajustar configurações padrão do player:**",
+                color=self.bot.get_color()
+            ).set_author(name=str(bot.user), icon_url=bot.user.display_avatar.url), view=view
         )
 
-        try:
-            await inter.edit_original_message(embed=embed, components=None)
-        except (AttributeError, disnake.InteractionNotEditable):
-            try:
-                await inter.response.edit_message(embed=embed, components=None)
-            except:
-                await inter.send(embed=embed, ephemeral=True)
+        await view.wait()
 
     setup_cd = commands.CooldownMapping.from_cooldown(1, 20, commands.BucketType.guild)
     setup_mc =commands.MaxConcurrency(1, per=commands.BucketType.guild, wait=False)

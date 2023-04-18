@@ -269,6 +269,7 @@ class LavalinkPlayer(wavelink.Player):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.volume = kwargs.get("volume", 100)
         self.guild: disnake.Guild = kwargs.pop('guild')
         self.text_channel: Union[disnake.TextChannel,
                                  disnake.VoiceChannel, disnake.Thread] = kwargs.pop('channel')

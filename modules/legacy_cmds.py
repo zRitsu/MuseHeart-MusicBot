@@ -93,6 +93,7 @@ class Owner(commands.Cog):
             'git checkout -b main -f --track origin/main'
         ]
         self.owner_view: Optional[PanelView] = None
+        self.extra_hints = bot.config["EXTRA_HINTS"].split("||")
 
     def format_log(self, data: list):
         return "\n".join(f"[`{c['abbreviated_commit']}`]({self.bot.pool.remote_git_url}/commit/{c['commit']}) `- "
@@ -906,7 +907,10 @@ class Owner(commands.Cog):
             guild=ctx.guild,
             channel=channel,
             message=message,
-            static=bool(static_player['channel'])
+            static=bool(static_player['channel']),
+            extra_hints=self.extra_hints,
+            restrict_mode=guild_data['enable_restrict_mode'],
+            volume=guild_data['default_player_volume'],
         )
 
         channel = ctx.author.voice.channel
