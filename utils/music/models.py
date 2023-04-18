@@ -341,6 +341,9 @@ class LavalinkPlayer(wavelink.Player):
         except:
             pass
 
+        if self.volume != 100:
+            self.bot.loop.create_task(self.set_volume(self.volume))
+
         self.hints: cycle = []
         self.current_hint: str = ""
         self.last_data: dict = {}

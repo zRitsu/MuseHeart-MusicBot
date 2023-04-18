@@ -237,7 +237,7 @@ class PlayerSession(commands.Cog):
                         uptime=data.get("uptime"),
                         stage_title_template=data.get("stage_title_template"),
                         restrict_mode=data["restrict_mode"],
-                        volume=data["volume"]
+                        volume=int(data["volume"])
                     )
                 except Exception:
                     print(f"{self.bot.user} - Falha ao criar player: {guild.name} [{guild.id}]\n{traceback.format_exc()}")
@@ -256,9 +256,6 @@ class PlayerSession(commands.Cog):
                     player.stage_title_event = data["stage_title_event"]
                 except:
                     pass
-
-                if (vol:=int(data["volume"])) != 100:
-                    await player.set_volume(vol)
 
                 player.nightcore = data.get("nightcore")
 

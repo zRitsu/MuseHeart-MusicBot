@@ -163,7 +163,7 @@ class PlayerSettings(disnake.ui.View):
         await interaction.response.edit_message(view=self)
 
     async def volume_callback(self, interaction: disnake.MessageInteraction):
-        self.default_player_volume = int(interaction.data.values[0])
+        self.default_player_volume = interaction.data.values[0]
         self.load_buttons()
         await interaction.response.edit_message(view=self)
 
@@ -187,7 +187,7 @@ class PlayerSettings(disnake.ui.View):
         guild_data = await self.ctx.bot.get_data(self.ctx.guild_id, db_name=DBModel.guilds)
         guild_data['check_other_bots_in_vc'] = self.check_other_bots_in_vc
         guild_data['enable_restrict_mode'] = self.enable_restrict_mode
-        guild_data['default_player_volume'] = self.default_player_volume
+        guild_data['default_player_volume'] = int(self.default_player_volume)
         await self.ctx.bot.update_data(self.ctx.guild_id, guild_data, db_name=DBModel.guilds)
 
     async def on_timeout(self):
