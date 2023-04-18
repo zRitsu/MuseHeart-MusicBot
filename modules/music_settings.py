@@ -163,7 +163,7 @@ class PlayerSettings(disnake.ui.View):
         await interaction.response.edit_message(view=self)
 
     async def volume_callback(self, interaction: disnake.MessageInteraction):
-        self.default_player_volume = interaction.data.values[0]
+        self.default_player_volume = int(interaction.data.values[0])
         self.load_buttons()
         await interaction.response.edit_message(view=self)
 
