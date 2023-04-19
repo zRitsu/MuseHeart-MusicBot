@@ -741,6 +741,11 @@ class Music(commands.Cog):
         attachment: Optional[disnake.Attachment] = None
 
         try:
+            voice_channel = bot.get_channel(inter.author.voice.channel.id)
+        except AttributeError:
+            raise NoVoice()
+
+        try:
             player = bot.music.players[guild.id]
             node = player.node
             guild_data = {}
@@ -762,7 +767,7 @@ class Music(commands.Cog):
                     pass
 
             if not guild.me.voice:
-                can_connect(inter.author.voice.channel, guild, guild_data["check_other_bots_in_vc"])
+                can_connect(voice_channel, guild, guild_data["check_other_bots_in_vc"])
 
             static_player = guild_data['player_controller']
 
@@ -1293,7 +1298,7 @@ class Music(commands.Cog):
 
             if not player.is_connected:
                 try:
-                    embed.description += f"\n`Canal de voz:` {inter.author.voice.channel.mention}"
+                    embed.description += f"\n`Canal de voz:` {voice_channel.mention}"
                 except AttributeError:
                     pass
 
@@ -1330,7 +1335,7 @@ class Music(commands.Cog):
                 raise NoVoice()
 
             await self.do_connect(
-                inter, channel=inter.author.voice.channel,
+                inter, channel=voice_channel,
                 check_other_bots_in_vc=guild_data["check_other_bots_in_vc"],
                 bot=bot, me=guild.me, check_pool=True
             )
