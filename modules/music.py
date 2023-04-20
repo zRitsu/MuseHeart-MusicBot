@@ -490,7 +490,7 @@ class Music(commands.Cog):
                 f"(ou o player não foi inicializado)...\nPor via das dúvidas tente novamente.**"
             )
 
-        can_connect(channel, me.guild, check_other_bots_in_vc=check_other_bots_in_vc)
+        can_connect(channel, me.guild, check_other_bots_in_vc=check_other_bots_in_vc, bot=bot)
 
         deafen_check = True
 
@@ -767,7 +767,7 @@ class Music(commands.Cog):
                     pass
 
             if not guild.me.voice:
-                can_connect(voice_channel, guild, guild_data["check_other_bots_in_vc"])
+                can_connect(voice_channel, guild, guild_data["check_other_bots_in_vc"], bot=bot)
 
             static_player = guild_data['player_controller']
 
@@ -3816,6 +3816,11 @@ class Music(commands.Cog):
         if error:
 
             try:
+                await message.delete()
+            except Exception:
+                traceback.print_exc()
+
+            try:
                 if msg:
                     await msg.edit(content=error, embed=None, view=None, delete_after=7)
                 else:
@@ -3833,7 +3838,8 @@ class Music(commands.Cog):
         can_connect(
             channel=message.author.voice.channel,
             guild=message.guild,
-            check_other_bots_in_vc=data["check_other_bots_in_vc"]
+            check_other_bots_in_vc=data["check_other_bots_in_vc"],
+            bot=self.bot
         )
 
         try:
@@ -4496,7 +4502,7 @@ class Music(commands.Cog):
 
         if move_player and before.channel:
             try:
-                can_connect(before.channel, member.guild)
+                can_connect(before.channel, member.guild, bot=self.bot)
             except:
                 await player.destroy()
             else:

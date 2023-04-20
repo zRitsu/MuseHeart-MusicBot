@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import traceback
-from typing import Union
+from typing import Union, Optional, TYPE_CHECKING
 
 import disnake
 from disnake.ext import commands
@@ -14,6 +14,9 @@ from utils.music.errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJo
     GenericError, MissingVoicePerms, DiffVoiceChannel, PoolException
 from utils.music.models import LavalinkPlayer
 from utils.others import CustomContext
+
+if TYPE_CHECKING:
+    from utils.client import BotCore
 
 
 def can_send_message(
@@ -556,6 +559,7 @@ def can_connect(
         channel: Union[disnake.VoiceChannel, disnake.StageChannel],
         guild: disnake.Guild,
         check_other_bots_in_vc: bool = False,
+        bot: Optional[BotCore] = None
 ):
 
     perms = channel.permissions_for(guild.me)
@@ -570,6 +574,14 @@ def can_connect(
 
         if not guild.voice_client and not check_channel_limit(guild.me, channel):
             raise GenericError(f"**O canal {channel.mention} está lotado!**")
+
+    if bot:
+        for b in bot.pool.bots:
+            if b == bot:
+                continue
+            if b.bot_ready and b.user.id in channel.voice_states:
+                raise GenericError(f"**Já há um bot conectado no canal {channel.mention}\n"
+                                   f"Bot:** {b.user.mention}")
 
     if check_other_bots_in_vc and any(m for m in channel.members if m.bot and m.id != guild.me.id):
         raise GenericError(f"**Há outro bot conectado no canal:** <#{channel.id}>")

@@ -183,7 +183,7 @@ class PlayerSession(commands.Cog):
                     continue
 
                 try:
-                    can_connect(voice_channel, guild=guild)
+                    can_connect(voice_channel, guild=guild, bot=self.bot)
                 except Exception as e:
                     print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\n{repr(e)}")
                     await database.delete_data(id_=data['_id'], db_name=str(self.bot.user.id), collection="player_sessions")
