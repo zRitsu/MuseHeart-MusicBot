@@ -4082,6 +4082,8 @@ class Music(commands.Cog):
                 print(f"{self.bot.user} - [{node.identifier}] Todas as tentativas de reconectar falharam...")
                 return
 
+            await self.bot.wait_until_ready()
+
             try:
                 async with self.bot.session.get(node.rest_uri) as r:
                     if r.status in [401, 200, 400]:
