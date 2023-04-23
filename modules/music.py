@@ -2770,8 +2770,8 @@ class Music(commands.Cog):
             duplicates: bool = commands.Param(name="duplicados", description="Incluir músicas duplicadas",
                                               default=False),
             playlist: str = commands.Param(description="Incluir nome que tiver na playlist.", default=None),
-            min_duration: str = commands.Param(name="duração_mínima",
-                                               description="incluir músicas com duração mínima especificada (ex. 1:23).",
+            min_duration: str = commands.Param(name="duração_inicial",
+                                               description="incluir músicas com duração acima/igual (ex. 1:23).",
                                                default=None),
             max_duration: str = commands.Param(name="duração_máxima",
                                                description="incluir músicas com duração máxima especificada (ex. 1:45).",
@@ -2865,11 +2865,11 @@ class Music(commands.Cog):
                     else:
                         duplicated_titles.add(title)
 
-                if 'time_below' in temp_filter and t.duration <= min_duration:
+                if 'time_below' in temp_filter and t.duration >= min_duration:
                     temp_filter.remove('time_below')
                     final_filters.add('time_below')
 
-                elif 'time_above' in temp_filter and t.duration >= max_duration:
+                elif 'time_above' in temp_filter and t.duration <= max_duration:
                     temp_filter.remove('time_above')
                     final_filters.add('time_above')
 
@@ -2934,13 +2934,13 @@ class Music(commands.Cog):
 
             try:
                 final_filters.remove("time_below")
-                txt.append(f"**Com duração mínima:** `{min_duration}`")
+                txt.append(f"**Com duração inicial/igual:** `{time_format(min_duration)}`")
             except:
                 pass
 
             try:
                 final_filters.remove("time_above")
-                txt.append(f"**Com duração máxima:** `{max_duration}`")
+                txt.append(f"**Com duração máxima:** `{time_format(max_duration)}`")
             except:
                 pass
 
