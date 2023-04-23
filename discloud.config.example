@@ -2,23 +2,20 @@
 ### Aviso: Caso use este arquivo, renomeie para discloud.config ###
 ###################################################################
 
-#############################################################################################################
-### Atenção: A RAM você pode alterar de acordo com o plano contratado (ou quantidade desejada).           ###
-### Caso use o free (ou qualquer plano que tenha vCPU abaixo de 1.0 e ram abaixo de 512mb) você terá que  ###
-### alterar a RAM para 100 (ou acima caso tenha RAM livre no plano) e no arquivo .env onde tem            ###
-### AUTO_DOWNLOAD_LAVALINK_SERVERLIST mude de false para true (isso fará o bot usar servidores de música  ###
-### externos/públicos, mas o mesmo podem apresentar instabilidades/problemas. Portanto recomendo um plano ###
-### pago com o requisito mínimo apresentado acima para evitar esse problema).                             ###
-###                                                                                                       ###
-### Caso queira, você pode alterar o NAME e link do AVATAR.                                               ###
-#############################################################################################################
+##############################################################################################################
+### Atenção: A RAM você pode alterar de acordo com o plano contratado (ou quantidade desejada).            ###
+### Caso use um plano pago que forneça no mínimo 1GB + 1vcpu recomendo que edite o arquivo .env e no campo ###
+### AUTO_DOWNLOAD_LAVALINK_SERVERLIST mude o valor true para false                                         ###
+###                                                                                                        ###
+### Caso queira, você pode alterar o NAME e link do AVATAR.                                                ###
+##############################################################################################################
 
 ID=1234567890
 NAME=Disnake LL Music
 AVATAR=https://media.discordapp.net/attachments/792731998451531778/991817084248014990/avatar.png
 TYPE=bot
 MAIN=main.py
-RAM=2048
+RAM=100
 AUTORESTART=false
 VERSION=latest
 APT=tools, java
