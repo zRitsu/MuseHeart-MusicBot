@@ -1349,7 +1349,8 @@ class Music(commands.Cog):
                 emoji="▶️",
                 text=f"{inter.author.mention} adicionou a música atual para tocar imediatamente."
             )
-            await player.stop()
+            await player.track_end()
+            await player.process_next()
         else:
             if ephemeral:
                 player.set_command_log(text=log_text, emoji=emoji)
@@ -1605,7 +1606,7 @@ class Music(commands.Cog):
             return
 
         await self.interaction_message(inter, txt, emoji="✋")
-        #await player.stop()
+        await player.track_end()
         await player.process_next()
 
     volume_cd = commands.CooldownMapping.from_cooldown(1, 7, commands.BucketType.member)
