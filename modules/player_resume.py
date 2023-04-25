@@ -329,7 +329,7 @@ class PlayerSession(commands.Cog):
                     await asyncio.sleep(1)
 
                 if isinstance(voice_channel, disnake.StageChannel) and \
-                        voice_channel.permissions_for(guild.me).mute_members and guild.me.voice.suppress:
+                        voice_channel.permissions_for(guild.me).mute_members:
                     await guild.me.edit(suppress=False)
 
                 player.set_command_log(
