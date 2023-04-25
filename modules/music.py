@@ -1494,7 +1494,8 @@ class Music(commands.Cog):
 
         player.current.info["extra"]["track_loops"] = 0
 
-        await player.stop()
+        await player.track_end()
+        await player.process_next()
 
     @check_stage_topic()
     @is_dj()
@@ -1563,7 +1564,8 @@ class Music(commands.Cog):
             await player.process_next()
         else:
             player.is_previows_music = True
-            await player.stop()
+            await player.track_end()
+            await player.process_next()
 
     @check_stage_topic()
     @has_source()
@@ -1603,7 +1605,8 @@ class Music(commands.Cog):
             return
 
         await self.interaction_message(inter, txt, emoji="✋")
-        await player.stop()
+        #await player.stop()
+        await player.process_next()
 
     volume_cd = commands.CooldownMapping.from_cooldown(1, 7, commands.BucketType.member)
     volume_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
@@ -4269,7 +4272,6 @@ class Music(commands.Cog):
             player.set_command_log()
         elif payload.reason == "STOPPED":
             player.ignore_np_once = True
-            pass
         else:
             return
 

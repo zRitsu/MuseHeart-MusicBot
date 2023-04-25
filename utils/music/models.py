@@ -477,6 +477,7 @@ class LavalinkPlayer(wavelink.Player):
         try:
             track = self.queue.popleft()
         except Exception:
+            await self.stop()
             self.idle_endtime = disnake.utils.utcnow() + datetime.timedelta(seconds=self.idle_timeout)
             self.last_track = None
             self.idle_task = self.bot.loop.create_task(self.idling_mode())
