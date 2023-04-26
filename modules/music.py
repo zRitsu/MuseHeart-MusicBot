@@ -3764,7 +3764,7 @@ class Music(commands.Cog):
                                                f"inferior a 18mb.", delete_after=9)
                     return
 
-                if attachment.content_type not in ("audio/mpeg", "audio/ogg"):
+                if attachment.content_type not in ("audio/mpeg", "audio/ogg", "audio/mp4"):
                     await message.channel.send(f"{message.author.mention} o arquivo que você enviou deve ter o tamanho "
                                                f"inferior a 18mb.", delete_after=9)
                     return
