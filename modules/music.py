@@ -793,7 +793,7 @@ class Music(commands.Cog):
                     if attachment.size > 18000000:
                         raise GenericError("**O arquivo que você enviou deve ter o tamanho igual ou inferior a 18mb.**")
 
-                    if attachment.content_type not in ("audio/mpeg", "audio/ogg"):
+                    if attachment.content_type not in ("audio/mpeg", "audio/ogg", "audio/mp4"):
                         raise GenericError("**O arquivo que você enviou não é um arquivo de música válido...**")
 
                     query = attachment.url

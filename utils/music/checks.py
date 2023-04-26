@@ -538,7 +538,6 @@ async def has_perm(inter):
             description=f"{inter.author.mention} foi adicionado à lista de DJ's por não haver um no canal <#{vc.id}>.",
             color=player.bot.get_color(guild.me)), delete_after=10)
 
-    disnake.MessageInteraction
     return True
 
 def check_channel_limit(member: disnake.Member, channel: Union[disnake.VoiceChannel, disnake.StageChannel]):
