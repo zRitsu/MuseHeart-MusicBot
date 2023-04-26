@@ -1446,10 +1446,14 @@ class Music(commands.Cog):
 
         try:
             bot = inter.music_bot
+            guild = inter.music_guild
         except AttributeError:
             bot = inter.bot
+            guild = bot.get_guild(inter.guild_id)
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
+
+        ephemeral = await self.is_request_channel(inter)
 
         if query:
 
@@ -1473,12 +1477,18 @@ class Music(commands.Cog):
             elif index > 0:
                 player.queue.rotate(0 - index)
 
-            txt = [
-                "pulou para a música atual.",
-                f"⤵️ **⠂{inter.author.mention} pulou para a música:**\n╰[`{fix_characters(track.title, 43)}`]({track.uri})"
-            ]
+            player.set_command_log(emoji="⤵️", text="pulou para a música atual.")
 
-            await self.interaction_message(inter, txt, emoji="⤵️", store_embed=True)
+            embed = disnake.Embed(
+                color=self.bot.get_color(guild.me),
+                description= f"⤵️ **⠂{inter.author.mention} pulou para a música:**\n"
+                             f"╰[`{fix_characters(track.title, 43)}`]({track.uri})"
+            )
+
+            if bot != self.bot:
+                embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+
+            await inter.send(embed=embed, ephemeral=ephemeral)
 
         else:
 
@@ -1486,9 +1496,19 @@ class Music(commands.Cog):
                 player.set_command_log(text=f"{inter.author.mention} pulou a música.", emoji="⏭️")
                 await inter.response.defer()
             else:
-                txt = ["pulou a música.", f"⏭️ **⠂{inter.author.mention} pulou a música:\n"
-                                          f"╰[`{fix_characters(player.current.title, 43)}`]({player.current.uri})**"]
-                await self.interaction_message(inter, txt, emoji="⏭️", store_embed=True)
+
+                player.set_command_log(emoji="⏭️", text="pulou a música.")
+
+                embed = disnake.Embed(
+                    color=self.bot.get_color(guild.me),
+                    description=f"⏭️ **⠂{inter.author.mention} pulou a música:\n"
+                                f"╰[`{fix_characters(player.current.title, 43)}`]({player.current.uri})**"
+                )
+
+                if bot != self.bot:
+                    embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+
+                await inter.send(embed=embed, ephemeral=ephemeral)
 
             if player.loop == "current":
                 player.loop = False
