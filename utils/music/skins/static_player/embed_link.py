@@ -15,7 +15,7 @@ class EmbedLinkStaticSkin:
 
     def __init__(self):
         self.name = "embed_link_static"
-        self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1047187413325324319/embed_link_static_skin.png"
+        self.preview = "https://media.discordapp.net/attachments/554468640942981147/1101328287466274816/image.png"
 
     def setup_features(self, player: LavalinkPlayer):
         player.mini_queue_feature = False
@@ -29,7 +29,7 @@ class EmbedLinkStaticSkin:
         txt = ""
 
         if player.current_hint:
-            txt += f"> `💡 Dica: {player.current_hint}`\n> \n"
+            txt += f"\n> `💡 Dica: {player.current_hint}`\n"
 
         if player.current.is_stream:
             duration_txt = f"\n> 🔴 **⠂Duração:** `Livestream`"
@@ -37,10 +37,10 @@ class EmbedLinkStaticSkin:
             duration_txt = f"\n> ⏰ **⠂Duração:** `{time_format(player.current.duration)}`"
 
         if player.paused:
-            txt += f"> ⏸️ **⠂Em Pausa:** {player.current.uri}{duration_txt}"
+            txt += f"\n> ## `⏸️` Em Pausa:\n> ### ╚═【 [{player.current.title}]({player.current.uri}) 】\n{duration_txt}"
 
         else:
-            txt += f"> ▶️ **⠂Tocando Agora:** {player.current.uri}{duration_txt}"
+            txt += f"\n> ## `▶️` Tocando Agora:\n> ### ╚═【 [{player.current.title}]({player.current.uri}) 】\n{duration_txt}"
             if not player.current.is_stream and not player.paused:
                 txt += f" `[`<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`"
 
@@ -80,7 +80,7 @@ class EmbedLinkStaticSkin:
             if qsize  > 4:
                 qtext += f"\n╚═ [0;37mE mais[0m [0;35m{qsize}[0m [0;37mmúsicas(s).[0m"
 
-            txt = qtext + "```\n" + txt
+            txt = qtext + "```" + txt
 
         return {
             "content": txt,
