@@ -1457,6 +1457,8 @@ class Music(commands.Cog):
 
         ephemeral = await self.is_request_channel(inter)
 
+        interaction = None
+
         if query:
 
             try:
@@ -1497,6 +1499,7 @@ class Music(commands.Cog):
             if isinstance(inter, disnake.MessageInteraction):
                 player.set_command_log(text=f"{inter.author.mention} pulou a música.", emoji="⏭️")
                 await inter.response.defer()
+                interaction = inter
             else:
 
                 player.set_command_log(emoji="⏭️", text="pulou a música.")
@@ -1518,7 +1521,7 @@ class Music(commands.Cog):
         player.current.info["extra"]["track_loops"] = 0
 
         await player.track_end()
-        await player.process_next()
+        await player.process_next(inter=interaction)
 
     @check_stage_topic()
     @is_dj()
@@ -1569,9 +1572,13 @@ class Music(commands.Cog):
         player.queue.appendleft(track)
 
         if isinstance(inter, disnake.MessageInteraction):
+            interaction = inter
             player.set_command_log(text=f"{inter.author.mention} voltou para a música atual.", emoji="⏮️")
             await inter.response.defer()
         else:
+
+            interaction = None
+
             t = player.queue[0]
 
             txt = [
@@ -1584,11 +1591,11 @@ class Music(commands.Cog):
         if player.loop == "current":
             player.loop = False
         if not player.current:
-            await player.process_next()
+            await player.process_next(inter=interaction)
         else:
             player.is_previows_music = True
             await player.track_end()
-            await player.process_next()
+            await player.process_next(inter=interaction)
 
     @check_stage_topic()
     @has_source()
@@ -4254,20 +4261,6 @@ class Music(commands.Cog):
             except asyncio.TimeoutError:
                 player.update = True
                 return
-
-        # TODO: rever essa parte caso adicione função de ativar track loops em músicas da fila
-        if player.loop != "current" or (not player.controller_mode and player.current.track_loops == 0):
-
-            await player.invoke_np(
-                force=True if (player.static or not player.loop or not player.is_last_message()) else False,
-                rpc_update=True)
-
-            try:
-                player.message_updater_task.cancel()
-            except:
-                pass
-
-            self.bot.loop.create_task(player.message_updater())
 
         cog = self.bot.get_cog("PlayerSession")
 

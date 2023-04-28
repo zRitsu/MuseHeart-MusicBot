@@ -176,6 +176,7 @@ class LavalinkTrack(wavelink.Track):
             pass
         super().__init__(*args, **kwargs)
         self.title = fix_characters(self.title)
+        self.info["title"] = self.title
 
         try:
             self.info['sourceName']
@@ -459,7 +460,7 @@ class LavalinkPlayer(wavelink.Player):
 
         await self.destroy()
 
-    async def process_next(self, start_position: Union[int, float] = 0):
+    async def process_next(self, start_position: Union[int, float] = 0, inter: disnake.MessageInteraction = None):
 
         if self.locked or self.is_closing:
             return
@@ -556,8 +557,30 @@ class LavalinkPlayer(wavelink.Player):
         self.is_previows_music = False
 
         self.locked = False
-        await self.play(track, start=start_position)
         self.start_time = disnake.utils.utcnow()
+
+        self.current = track
+        self.last_update = 0
+        self.last_position = 0
+        self.position_timestamp = 0
+        self.paused = False
+
+        # TODO: rever essa parte caso adicione função de ativar track loops em músicas da fila
+        if self.loop != "current" or (not self.controller_mode and self.current.track_loops == 0):
+
+            await self.invoke_np(
+                interaction=inter,
+                force=True if (self.static or not self.loop or not self.is_last_message()) else False,
+                rpc_update=True)
+
+            try:
+                self.message_updater_task.cancel()
+            except:
+                pass
+
+            self.bot.loop.create_task(self.message_updater())
+
+        await self.play(track, start=start_position)
 
     async def process_idle_message(self):
 
