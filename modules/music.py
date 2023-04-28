@@ -57,6 +57,8 @@ class Music(commands.Cog):
         "soundcloud": "scsearch",
     }
 
+    audio_formats = ("audio/mpeg", "audio/ogg", "audio/mp4", "audio/aac")
+
     u_agent = generate_user_agent()
 
     def __init__(self, bot: BotCore):
@@ -793,7 +795,7 @@ class Music(commands.Cog):
                     if attachment.size > 18000000:
                         raise GenericError("**O arquivo que você enviou deve ter o tamanho igual ou inferior a 18mb.**")
 
-                    if attachment.content_type not in ("audio/mpeg", "audio/ogg", "audio/mp4"):
+                    if attachment.content_type not in self.audio_formats:
                         raise GenericError("**O arquivo que você enviou não é um arquivo de música válido...**")
 
                     query = attachment.url
@@ -3764,7 +3766,7 @@ class Music(commands.Cog):
                                                f"inferior a 18mb.", delete_after=9)
                     return
 
-                if attachment.content_type not in ("audio/mpeg", "audio/ogg", "audio/mp4"):
+                if attachment.content_type not in self.audio_formats:
                     await message.channel.send(f"{message.author.mention} o arquivo que você enviou deve ter o tamanho "
                                                f"inferior a 18mb.", delete_after=9)
                     return
