@@ -3247,9 +3247,21 @@ class Music(commands.Cog):
             pass
 
         for guild_id in list(self.bot.music.players):
+
             try:
+
                 player: LavalinkPlayer = self.bot.music.players[guild_id]
-                await player.connect(player.last_channel.id)
+
+                if player.is_connected:
+                    continue
+
+                try:
+                    vc = player.guild.me.voice.channel
+                except AttributeError:
+                    vc = player.last_channel
+
+                await player.connect(vc.id)
+
                 if not player.is_paused and not player.is_playing:
                     await player.process_next()
                 print(f"{self.bot.user} - Player Reconectado: {player.guild.name} [{guild_id}]")
@@ -4143,12 +4155,18 @@ class Music(commands.Cog):
 
         player: LavalinkPlayer = payload.player
 
-        print("-" * 15)
-        print(f"Erro no canal de voz!")
-        print(f"guild: {player.guild.name} | canal: {player.last_channel.id}")
-        print(f"server: {payload.player.node.identifier} | ")
-        print(f"reason: {payload.reason} | code: {payload.code}")
-        print("-" * 15)
+        if payload.code == 4014 and player.guild.me.voice:
+            pass
+        else:
+            print(
+                ("-" * 15) +
+                f"\nErro no canal de voz!"
+                f"\nBot: {player.bot.user} [{player.bot.user.id}] | " + ("Online" if self.bot.is_ready() else "Offline") +
+                f"\nGuild: {player.guild.name} [{player.guild.id}]"
+                f"\nCanal: {player.last_channel} [{player.last_channel.id}]"
+                f"\nServer: {player.node.identifier} | code: {payload.code} | reason: {payload.reason}\n" +
+                ("-" * 15)
+            )
 
         if player.is_closing:
             return
@@ -4161,19 +4179,37 @@ class Music(commands.Cog):
                 4005,  # Already authenticated.
                 4006,  # Session is no longer valid.
         ):
+            try:
+                vc_id = player.guild.me.voice.channel.id
+            except AttributeError:
+                vc_id = player.last_channel.id
 
-            if player.is_moving:
-                return
-
-            player.is_resuming = True
-            vc_id = player.last_channel.id
             await asyncio.sleep(3)
 
             if player.is_closing:
                 return
 
             await player.connect(vc_id)
-            player.is_resuming = False
+            return
+
+        if not player.guild.me.voice:
+
+            if not player.bot.is_ready():
+                return
+
+            if player.static:
+                player.command_log = "Desliguei o player por me desconectarem do canal de voz."
+                await player.destroy()
+
+            else:
+                embed = disnake.Embed(description="**Desliguei o player por me desconectarem do canal de voz.**",
+                                      color=self.bot.get_color(player.guild.me))
+                try:
+                    self.bot.loop.create_task(player.text_channel.send(embed=embed, delete_after=7))
+                except:
+                    traceback.print_exc()
+                await player.destroy()
+
             return
 
     @commands.Cog.listener('on_wavelink_track_exception')
@@ -4491,46 +4527,13 @@ class Music(commands.Cog):
         if before.channel == after.channel:
             return
 
-        destroy_player = False
-        move_player = False
-
-        if member.bot:
-
-            if member.id != self.bot.user.id:  # ignorar outros bots
-                return
-
-            if before.channel and not after.channel:
-                destroy_player = True
-
-            elif after.channel:
-
-                for bot in self.bot.pool.bots:
-
-                    if bot == self.bot:
-                        continue
-
-                    if bot.user.id in after.channel.voice_states:
-                        move_player = True
-                        break
+        if member.bot and self.bot.user.id != member.id:
+            # ignorar outros bots
+            return
 
         try:
             player: LavalinkPlayer = self.bot.music.players[member.guild.id]
         except KeyError:
-            return
-
-        if player.is_moving:
-            return
-
-        if move_player and before.channel:
-            try:
-                can_connect(before.channel, member.guild, bot=self.bot)
-            except:
-                await player.destroy()
-            else:
-                player.is_moving = True
-                await asyncio.sleep(1.5)
-                await member.guild.voice_client.move_to(before.channel)
-                player.is_moving = False
             return
 
         try:
@@ -4539,27 +4542,9 @@ class Music(commands.Cog):
         except AttributeError:
             pass
 
-        if destroy_player and not player.is_resuming:
-
-            if player.static:
-                player.command_log = "Desliguei o player por me desconectarem do canal de voz."
-                await player.destroy()
-
-            else:
-                embed = disnake.Embed(description="**Desliguei o player por me desconectarem do canal de voz.**",
-                                      color=self.bot.get_color(player.guild.me))
-                try:
-                    self.bot.loop.create_task(player.text_channel.send(embed=embed, delete_after=7))
-                except:
-                    traceback.print_exc()
-                await player.destroy()
-
-            return
-
         if member.id == self.bot.user.id:
             # tempfix para channel do voice_client não ser setado ao mover bot do canal.
             player.guild.voice_client.channel = after.channel
-            player.last_channel = after.channel
 
         try:
             check = any(m for m in player.guild.me.voice.channel.members if not m.bot)
@@ -4587,7 +4572,12 @@ class Music(commands.Cog):
             pass
 
         try:
-            if player.last_channel.id not in channels:
+            try:
+                vc = player.guild.me.voice.channel
+            except AttributeError:
+                vc = player.last_channel
+
+            if vc.id not in channels:
                 return
         except AttributeError:
             pass

@@ -527,7 +527,10 @@ async def has_perm(inter):
         raise GenericError(f"**Erro!** Apenas DJ's ou membros com a permissão de **gerenciar servidor** "
                            "podem usar este comando/botão com o **modo restrito ativo**...")
 
-    vc = player.last_channel
+    try:
+        vc = player.guild.me.voice.channel
+    except AttributeError:
+        vc = player.last_channel
 
     if not vc and inter.author.voice:
         player.dj.add(inter.author.id)

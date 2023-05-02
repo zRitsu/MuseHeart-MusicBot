@@ -346,7 +346,11 @@ class WSClient:
 
         for bot in self.pool.bots:
             for player in bot.music.players.values():
-                if player.last_channel.voice_states:
+
+                if not player.guild.me.voice:
+                    continue
+
+                if player.guild.me.voice.channel.voice_states:
                     bot.loop.create_task(player.process_rpc(player.last_channel))
 
         print(f"[RPC client] - Os dados de rpc foram sincronizados com sucesso.")
@@ -415,11 +419,12 @@ class WSClient:
 
                 for bot in self.pool.bots:
                     for player in bot.music.players.values():
-                        if not player.last_channel:
+                        if not player.guild.me.voice:
                             continue
-                        vc_user_ids = [i for i in player.last_channel.voice_states if i in users]
+                        vc = player.guild.me.voice.channel
+                        vc_user_ids = [i for i in vc.voice_states if i in users]
                         if vc_user_ids:
-                            bot.loop.create_task(player.process_rpc(player.last_channel))
+                            bot.loop.create_task(player.process_rpc(vc))
                             for i in vc_user_ids:
                                 users.remove(i)
 

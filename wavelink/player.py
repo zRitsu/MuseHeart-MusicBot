@@ -319,17 +319,21 @@ class Player:
         if not guild:
             raise InvalidIDProvided(f'No guild found for id <{self.guild_id}>')
 
+        try:
+            self.bot.music.players[self.guild_id]
+        except KeyError:
+            return
+
         self.channel_id = channel_id
 
         channel = self.bot.get_channel(channel_id)
 
         if not guild.voice_client:
-            await channel.connect(cls=WavelinkVoiceClient, reconnect=True)
+            await channel.connect(cls=WavelinkVoiceClient, reconnect=False)
+            __log__.info(f'PLAYER | Connected to voice channel:: {self.channel_id}')
 
         elif guild.voice_client.channel.id != channel_id:
             await guild.voice_client.move_to(channel)
-
-        __log__.info(f'PLAYER | Connected to voice channel:: {self.channel_id}')
 
     async def disconnect(self, *, force: bool = False) -> None:
         """|coro|
