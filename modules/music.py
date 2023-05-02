@@ -457,7 +457,7 @@ class Music(commands.Cog):
 
         if not channel:
             try:
-                channel = ctx.music_bot.get_channel(ctx.author.voice.channel.id)
+                channel = ctx.music_bot.get_channel(ctx.author.voice.channel.id) or ctx.author.voice.channel
             except AttributeError:
                 channel = ctx.author.voice.channel
 
