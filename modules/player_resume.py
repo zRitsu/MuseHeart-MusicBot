@@ -21,6 +21,9 @@ class PlayerSession(commands.Cog):
         if not hasattr(bot, "player_resumed"):
             bot.player_resumed = False
 
+        if not hasattr(bot, "player_resuming"):
+            bot.player_resuming = False
+
         self.resume_task = bot.loop.create_task(self.resume_players())
 
     @commands.Cog.listener()
@@ -146,10 +149,10 @@ class PlayerSession(commands.Cog):
 
     async def resume_players(self):
 
-        if self.bot.player_resumed:
+        if self.bot.player_resuming:
             return
 
-        self.bot.player_resumed = True
+        self.bot.player_resuming = True
 
         await self.bot.wait_until_ready()
 
@@ -361,6 +364,8 @@ class PlayerSession(commands.Cog):
 
         except Exception:
             print(f"{self.bot.user} - Falha Crítica ao retomar players:\n{traceback.format_exc()}")
+
+        self.bot.player_resumed = True
 
     def cog_unload(self):
         try:

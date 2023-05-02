@@ -3237,8 +3237,8 @@ class Music(commands.Cog):
         player.message = None
         await thread.edit(archived=True, locked=True, name=f"arquivado: {thread.name}")
 
-    @commands.Cog.listener()
-    async def on_ready(self):
+    @commands.Cog.listener('on_ready')
+    async def resume_players_ready(self):
 
         try:
             if not self.bot.player_resumed:
@@ -3252,7 +3252,7 @@ class Music(commands.Cog):
 
                 player: LavalinkPlayer = self.bot.music.players[guild_id]
 
-                if player.is_connected:
+                if player.is_connected and player.guild.me.voice:
                     continue
 
                 try:
