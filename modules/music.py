@@ -4542,7 +4542,7 @@ class Music(commands.Cog):
         except AttributeError:
             pass
 
-        if member.id == self.bot.user.id:
+        if member.id == self.bot.user.id and after.channel:
             # tempfix para channel do voice_client não ser setado ao mover bot do canal.
             player.guild.voice_client.channel = after.channel
 
