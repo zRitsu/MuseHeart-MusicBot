@@ -716,6 +716,10 @@ class LavalinkPlayer(wavelink.Player):
 
     async def update_stage_topic(self):
 
+        if not self.guild.me.voice:
+            await self.connect(self.last_channel.id)
+            return
+
         if not isinstance(self.guild.me.voice.channel, disnake.StageChannel):
             return
 
