@@ -2183,18 +2183,10 @@ class Music(commands.Cog):
             inter: disnake.AppCmdInter,
             query: str = commands.Param(name="nome", description="Nome da música."),
             position: int = commands.Param(name="posição", description="Posição de destino na fila.", default=1),
-            search_all: str = commands.Param(
-                name="mover_vários",
-                description="Incluir todas as músicas da fila com o nome especificado.",
-                choices=[
-                    disnake.OptionChoice(
-                        disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"
-                    ),
-                    disnake.OptionChoice(
-                        disnake.Localized("No", data={disnake.Locale.pt_BR: "Não"}), "no"
-                    )
-                ],
-                default="no"
+            match_count: int = commands.Param(
+                name="quantidade",
+                description="Especificar uma quantidade de músicas para mover com o nome especificado.",
+                default=1, min_value=1, max_value=999,
             )
     ):
 
@@ -2210,7 +2202,7 @@ class Music(commands.Cog):
 
         player: LavalinkPlayer = bot.music.players[guild.id]
 
-        indexes = queue_track_index(inter, bot, query, check_all=search_all == "yes")
+        indexes = queue_track_index(inter, bot, query, match_count=match_count)
 
         if not indexes:
             raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
