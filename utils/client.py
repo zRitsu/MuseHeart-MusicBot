@@ -16,7 +16,6 @@ from typing import Optional, Union, List
 import aiohttp
 import disnake
 import requests
-from asyncspotify import Client
 from asyncspotify import Client as SpotifyClient
 from disnake.ext import commands
 
@@ -43,7 +42,7 @@ class BotPool:
         self.local_database: Optional[LocalDatabase] = None
         self.old_local_database = OldLocalDatabase()
         self.ws_client: Optional[WSClient] = None
-        self.spotify: Optional[Client] = None
+        self.spotify: Optional[SpotifyClient] = None
         self.config = {}
         self.commit = ""
         self.remote_git_url = ""
