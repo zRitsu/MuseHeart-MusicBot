@@ -192,8 +192,11 @@ class PlayerSession(commands.Cog):
                     await database.delete_data(id_=data['_id'], db_name=str(self.bot.user.id), collection="player_sessions")
                     continue
 
-                text_channel = self.bot.get_channel(int(data["text_channel"])) or \
-                               self.bot.fetch_channel(int(data["text_channel"]))
+                try:
+                    text_channel = self.bot.get_channel(int(data["text_channel"])) or \
+                               await self.bot.fetch_channel(int(data["text_channel"]))
+                except disnake.NotFound:
+                    text_channel = None
 
                 if not text_channel:
 
