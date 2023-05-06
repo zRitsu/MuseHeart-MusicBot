@@ -180,6 +180,8 @@ class PlayerSession(commands.Cog):
 
                 voice_channel = self.bot.get_channel(int(data["voice_channel"]))
 
+                message = None
+
                 if not voice_channel:
                     print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\nO canal de voz não existe...")
                     await database.delete_data(id_=data['_id'], db_name=str(self.bot.user.id), collection="player_sessions")
@@ -200,6 +202,8 @@ class PlayerSession(commands.Cog):
 
                 if not text_channel:
 
+                    message = False
+
                     if data["text_channel"] != str(voice_channel.id) and data['static']:
                         data['static'] = False
 
@@ -217,12 +221,13 @@ class PlayerSession(commands.Cog):
                 except:
                     creator = None
 
-                try:
-                    message = await text_channel.fetch_message(int(data["message"]))
-                except Exception as e:
-                    print(f"Falha ao obter mensagem: {repr(e)}\n"
-                          f"channel_id: {text_channel.id} | message_id {data['message']}")
-                    message = None
+                if message is None:
+                    try:
+                        message = await text_channel.fetch_message(int(data["message"]))
+                    except Exception as e:
+                        print(f"Falha ao obter mensagem: {repr(e)}\n"
+                              f"channel_id: {text_channel.id} | message_id {data['message']}")
+                        message = None
 
                 try:
                     player: LavalinkPlayer = self.bot.music.get_player(
@@ -334,9 +339,13 @@ class PlayerSession(commands.Cog):
                 while not guild.me.voice:
                     await asyncio.sleep(1)
 
-                if isinstance(voice_channel, disnake.StageChannel) and \
-                        voice_channel.permissions_for(guild.me).mute_members:
-                    await guild.me.edit(suppress=False)
+                if isinstance(voice_channel, disnake.StageChannel):
+
+                    if not guild.me.voice.suppress:
+                        await guild.me.edit(suppress=True)
+
+                    if voice_channel.permissions_for(guild.me).mute_members:
+                        await guild.me.edit(suppress=False)
 
                 player.set_command_log(
                     text="O player foi restaurado com sucesso!",
