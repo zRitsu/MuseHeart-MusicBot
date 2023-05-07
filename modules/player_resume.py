@@ -156,6 +156,8 @@ class PlayerSession(commands.Cog):
 
         await self.bot.wait_until_ready()
 
+        await asyncio.sleep(5)
+
         node = self.bot.music.get_best_node() or await self.bot.wait_for("wavelink_node_ready")
 
         while not self.bot.bot_ready:
