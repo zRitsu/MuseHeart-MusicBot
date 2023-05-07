@@ -20,7 +20,7 @@ from asyncspotify import Client as SpotifyClient
 from disnake.ext import commands
 
 from config_loader import load_config
-from utils.db import MongoDatabase, LocalDatabase, guild_prefix, DBModel, global_db_models, OldLocalDatabase
+from utils.db import MongoDatabase, LocalDatabase, guild_prefix, DBModel, global_db_models
 from utils.music.checks import check_pool_bots
 from utils.music.errors import GenericError
 from utils.music.local_lavalink import run_lavalink
@@ -40,7 +40,6 @@ class BotPool:
         self.playlist_cache = {}
         self.mongo_database: Optional[MongoDatabase] = None
         self.local_database: Optional[LocalDatabase] = None
-        self.old_local_database = OldLocalDatabase()
         self.ws_client: Optional[WSClient] = None
         self.spotify: Optional[SpotifyClient] = None
         self.config = {}
