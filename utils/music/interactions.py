@@ -57,15 +57,15 @@ class QueueInteraction(disnake.ui.View):
 
         entries = list(self.player.queue)
 
-        self.pages = [entries[i:i + 8] for i in range(0, len(entries), 8)]
+        self.pages = [entries[i:i + 12] for i in range(0, len(entries), 8)]
 
         for n, page in enumerate(self.pages):
 
             txt = "\n"
             for t in page:
                 txt += f"`{counter})` [`{fix_characters(t.title, limit=50)}`]({t.uri})\n" \
-                       f"`[{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]`" + \
-                       (f" - `Repetições: {t.track_loops}`" if t.track_loops else  "") + f" - <@{t.requester}>\n`---------`\n"
+                       f"`⏲️ {time_format(t.duration) if not t.is_stream else '🔴 Livestream'}`" + \
+                       (f" - `Repetições: {t.track_loops}`" if t.track_loops else  "") + f" **|** `✋` <@{t.requester}>\n"
 
                 counter += 1
 
