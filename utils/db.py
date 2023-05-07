@@ -12,7 +12,6 @@ from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 
 import disnake
 from disnake.ext import commands
-from mongita import MongitaClientDisk
 from motor.motor_asyncio import AsyncIOMotorClient
 from tinydb_serialization import Serializer, SerializationMiddleware
 from tinymongo import TinyMongoClient
@@ -169,48 +168,6 @@ class LocalDatabase(BaseDB):
     async def delete_data(self, id_, db_name: str, collection: str):
         return self._connect[collection][db_name].delete_one({'_id': str(id_)})
 
-
-class OldLocalDatabase(BaseDB):
-
-    def __init__(self):
-        super().__init__()
-        self._connect = MongitaClientDisk("./.local_database_sqlite")
-
-    async def get_data(self, id_: int, *, db_name: Union[DBModel.guilds, DBModel.users],
-                       collection: str, default_model: dict = None):
-
-        if not default_model:
-            default_model = db_models
-
-        id_ = str(id_)
-
-        data = self._connect[collection][db_name].find_one({"_id": id_})
-
-        if not data:
-            data = dict(default_model[db_name])
-            data["_id"] = str(id_)
-            self._connect[collection][db_name].insert_one(data)
-
-        elif data["ver"] < default_model[db_name]["ver"]:
-            data = update_values(dict(default_model[db_name]), data)
-            data["ver"] = default_model[db_name]["ver"]
-
-            await self.update_data(id_, data, db_name=db_name, collection=collection)
-
-        return data
-
-    async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users],
-                          collection: str, default_model: dict = None):
-
-        self._connect[collection][db_name].replace_one({'_id': str(id_)}, data, upsert=True)
-
-        return data
-
-    async def query_data(self, db_name: str, collection: str, filter: dict = None, limit=100) -> list:
-        return self._connect[collection][db_name].find(filter or {})
-
-    async def delete_data(self, id_, db_name: str, collection: str):
-        return self._connect[collection][db_name].delete_one({'_id': str(id_)})
 
 class MongoDatabase(BaseDB):
 

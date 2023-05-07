@@ -384,41 +384,6 @@ class BotPool:
 
                     bot.sync_command_cooldowns()
 
-
-                    ######################################
-                    ### OLD DATABASE - START MIGRATION ###
-                    ######################################
-
-                    # Nota: Agendado para ser removido dia: 25/04/2023
-
-                    for model in (DBModel.users, DBModel.guilds):
-                        datas = await self.old_local_database.query_data(db_name="global", collection=model)
-                        for data in datas:
-                            id_ = data["_id"]
-                            await bot.update_global_data(id_=id_, data=data, db_name=model)
-                            await self.old_local_database.delete_data(id_, db_name=model, collection="global")
-
-                    for model in (DBModel.users, DBModel.guilds):
-                        datas = await self.old_local_database.query_data(db_name=str(bot.user.id), collection=model)
-                        for data in datas:
-                            id_ = data["_id"]
-                            await bot.update_data(id_, data, db_name=model)
-                            await self.old_local_database.delete_data(id_, db_name=str(bot.user.id), collection=model)
-
-                    datas = await self.old_local_database.query_data(db_name=str(bot.user.id), collection="player_sessions")
-
-                    database = bot.get_cog("PlayerSession").database()
-
-                    for data in datas:
-                        id_ = data["_id"]
-                        await database.update_data(id_, data, db_name=str(bot.user.id), collection="player_sessions")
-                        await self.old_local_database.delete_data(id_, db_name=str(bot.user.id), collection="player_sessions")
-
-                    ####################################
-                    ### OLD DATABASE - END MIGRATION ###
-                    ####################################
-
-
                     bot.bot_ready = True
 
                 print(f'{bot.user} - [{bot.user.id}] Online.')
