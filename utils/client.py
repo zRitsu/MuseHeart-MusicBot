@@ -473,7 +473,7 @@ class BotPool:
                 loop.create_task(self.connect_spotify())
 
             try:
-                start(self.bots, message=message)
+                start(self, message=message)
             except KeyboardInterrupt:
                 return
 

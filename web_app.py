@@ -6,20 +6,19 @@ import json
 import logging
 from os import environ
 from traceback import print_exc
-from typing import TYPE_CHECKING, Optional, List
+from typing import TYPE_CHECKING, Optional
 
 import aiohttp
 import disnake
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
-from async_timeout import timeout
 from packaging import version
 
 from config_loader import load_config
 
 if TYPE_CHECKING:
-    from utils.client import BotPool, BotCore
+    from utils.client import BotPool
 
 logging.getLogger('tornado.access').disabled = True
 
@@ -30,9 +29,9 @@ minimal_version = version.parse("2.6.1")
 
 class IndexHandler(tornado.web.RequestHandler):
 
-    def initialize(self, bots: List[BotCore], message: str = "", config: dict = None):
+    def initialize(self, pool: Optional[BotPool] = None, message: str = "", config: dict = None):
         self.message = message
-        self.bots = bots
+        self.pool = pool
         self.config = config
         self.preview = ""
 
@@ -71,7 +70,10 @@ class IndexHandler(tornado.web.RequestHandler):
             self.preview = tables
             return
 
-        bots = [asyncio.create_task(bot.wait_until_ready()) for bot in self.bots if not getattr(bot, 'has_exception', None)]
+        if not self.pool:
+            return
+
+        bots = [asyncio.create_task(bot.wait_until_ready()) for bot in self.pool.bots if not getattr(bot, 'has_exception', None)]
 
         if bots:
             await asyncio.wait(bots, timeout=7)
@@ -83,7 +85,7 @@ class IndexHandler(tornado.web.RequestHandler):
             return
 
         try:
-            killing_state = self.bots[0].pool.killing_state
+            killing_state = self.pool.killing_state
         except:
             killing_state = False
 
@@ -107,7 +109,7 @@ class IndexHandler(tornado.web.RequestHandler):
         pending_bots = set()
         ready_bots = set()
 
-        for bot in sorted(self.bots, key=lambda b: b.identifier):
+        for bot in sorted(self.pool.bots, key=lambda b: b.identifier):
 
             if getattr(bot, 'has_exception', None):
                 failed_bots.add(f"<tr><td>{bot.identifier}</td>\n<td>{bot.has_exception}</td></tr>")
@@ -150,6 +152,9 @@ class IndexHandler(tornado.web.RequestHandler):
 
         if self.config["ENABLE_RPC_AUTH"]:
             msg += f"\nNão esqueça de obter o token para configurar no app, use o comando /rich_presence para obter um."
+
+        if self.pool.commit:
+            msg += f"Commit Atual: <a href=\"{self.pool.remote_git_url}/commit/{self.pool.commit}\" target=\"_blank\">{self.pool.commit[:7]}</a>"
 
         self.write(msg)
 
@@ -429,26 +434,26 @@ class WSClient:
                                 users.remove(i)
 
 
-def run_app(bots: Optional[list] = None, message: str = "", config: dict = None):
-    bots = bots or []
+def run_app(pool: BotPool = None, message: str = "", config: dict = None):
 
     if not config:
         try:
-            config = bots[0].config
+            config = pool.config
         except IndexError:
             pass
 
     app = tornado.web.Application([
-        (r'/', IndexHandler, {'bots': bots, 'message': message, 'config': config}),
+        (r'/', IndexHandler, {'pool': pool, 'message': message, 'config': config}),
         (r'/ws', WebSocketHandler),
     ])
 
     app.listen(port=environ.get("PORT", 80))
 
 
-def start(bots: Optional[list] = None, message=""):
-    config = load_config()
-    run_app(bots, message, config)
+def start(pool: BotPool = None, message="", config: dict = None):
+    if not config:
+        config = load_config()
+    run_app(pool, message, config)
     tornado.ioloop.IOLoop.instance().start()
 
 
