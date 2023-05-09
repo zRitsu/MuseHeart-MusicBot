@@ -39,7 +39,7 @@ async def google_search(bot, query: str, *, max_entries: int = 20) -> list:
 
     async with bot.session.get(
             "https://suggestqueries.google.com/complete/search",
-            headers={'User-Agent': u_agent},     params = {'client': 'youtube', 'q': query}) as r:
+            headers={'User-Agent': u_agent}, params={'client': 'youtube', 'q': query}) as r:
 
         text = await r.text()
         json_text = text[text.find("(") + 1:text.rfind(")")]
