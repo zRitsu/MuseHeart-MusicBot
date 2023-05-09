@@ -369,8 +369,23 @@ class Misc(commands.Cog):
         embed.description += f"> **Servidores" + (" (todos os bots)" if guilds_size > 1 else "") + \
                              f":** `{guilds_size}`\n"
 
+        public_bot_count = 0
+        private_bot_count = 0
+
         for b in bot.pool.bots:
+
             active_players_other_bots += len(b.music.players)
+
+            if not b.public:
+                private_bot_count += 1
+            else:
+                public_bot_count += 1
+
+        if public_bot_count:
+            embed.description += f"> **Bot(s) público(s):** `{public_bot_count}`\n"
+
+        if private_bot_count:
+            embed.description += f"> **Bot(s) privado(s):** `{private_bot_count}`\n"
 
         if active_players_other_bots:
             embed.description += f"> **Players ativos" + (" (todos os bots)" if len(bot.pool.bots) > 1 else "") + \
