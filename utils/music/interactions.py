@@ -63,8 +63,8 @@ class QueueInteraction(disnake.ui.View):
 
             txt = "\n"
             for t in page:
-                txt += f"`{counter})` [`{fix_characters(t.title, limit=50)}`]({t.uri})\n" \
-                       f"`⏲️ {time_format(t.duration) if not t.is_stream else '🔴 Livestream'}`" + \
+                txt += f"`┌ {counter})` [`{fix_characters(t.title, limit=50)}`]({t.uri})\n" \
+                       f"`└ ⏲️ {time_format(t.duration) if not t.is_stream else '🔴 Livestream'}`" + \
                        (f" - `Repetições: {t.track_loops}`" if t.track_loops else  "") + f" **|** `✋` <@{t.requester}>\n"
 
                 counter += 1
