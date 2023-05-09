@@ -361,7 +361,7 @@ class PlayerSession(commands.Cog):
                         track = None
 
                     if track:
-                        await player.play(track, start=int(data["position"]), replace=False)
+                        await player.play(track, start=int(data["position"]))
                         await player.set_pause(True)
                         player.current = track
                         player.last_track = track
@@ -371,7 +371,7 @@ class PlayerSession(commands.Cog):
                         await player.process_next()
 
                 else:
-                    await player.process_next(start_position=float(data["position"]))
+                    await player.process_next(start_position=int(float(data["position"])))
 
                 print(f"{self.bot.user} - Player Retomado: {guild.name} [{guild.id}]")
 
