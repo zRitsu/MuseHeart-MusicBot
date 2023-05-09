@@ -35,10 +35,15 @@ u_agent = generate_user_agent()
 
 async def google_search(bot, query: str, *, max_entries: int = 20) -> list:
 
+    # extra_param = {'hl': 'en'}
+
     async with bot.session.get(
-            f"http://suggestqueries.google.com/complete/search?client=chrome&ds=yt&q={query}",
-            headers={'User-Agent': u_agent}) as r:
-        return json.loads(await r.text())[1][:max_entries]
+            "https://suggestqueries.google.com/complete/search",
+            headers={'User-Agent': u_agent},     params = {'client': 'youtube', 'q': query}) as r:
+
+        text = await r.text()
+        json_text = text[text.find("(") + 1:text.rfind(")")]
+        return [result[0] for result in json.loads(json_text)[1][:max_entries]]
 
 
 def get_button_style(enabled: bool, red=True):
