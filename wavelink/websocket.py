@@ -57,11 +57,18 @@ class WebSocket:
 
     @property
     def headers(self):
-        return {'Authorization': self.password,
-                'Resume-Key': self._node.resume_key,
-                'User-Id': str(self.user_id),
-                'Client-Name': 'Wavelink',
-                'User-Agent': self.user_agent}
+
+        headers = {
+            'Authorization': self.password,
+            'Resume-Key': self._node.resume_key,
+            'User-Id': str(self.user_id),
+            'Client-Name': 'Wavelink'
+        }
+
+        if self.user_agent:
+            headers['User-Agent'] = self.user_agent
+
+        return headers
 
     @property
     def is_connected(self) -> bool:
