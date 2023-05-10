@@ -35,11 +35,18 @@ u_agent = generate_user_agent()
 
 async def google_search(bot, query: str, *, max_entries: int = 20) -> list:
 
-    # extra_param = {'hl': 'en'}
-
     async with bot.session.get(
             "https://suggestqueries.google.com/complete/search",
-            headers={'User-Agent': u_agent}, params={'client': 'youtube', 'q': query}) as r:
+            headers={
+                'User-Agent': u_agent
+            },
+            params={
+                'client': 'youtube',
+                'q': query,
+                'ds': 'yt',
+                'hl': 'en'
+            }
+    ) as r:
 
         text = await r.text()
         json_text = text[text.find("(") + 1:text.rfind(")")]
