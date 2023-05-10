@@ -327,7 +327,7 @@ class MusicSettings(commands.Cog):
 
         if missing_perms:
             raise GenericError(f"**{bot.user.mention} não possui as seguintes permissões necessárias abaixo:** ```ansi\n" +
-                               "\n".join(f"[0;33m{p}[0m" for p in perms) + "```")
+                               "\n".join(f"[0;33m{perms_translations.get(p,p)}[0m" for p in perms) + "```")
 
         channel = bot.get_channel(inter.channel.id)
 
