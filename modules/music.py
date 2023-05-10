@@ -4590,7 +4590,7 @@ class Music(commands.Cog):
             if vc:
 
                 try:
-                    await player.process_rpc(vc, users=[member.id], close=after.channel != player.guild.me.voice.channel, wait=True)
+                    await player.process_rpc(vc, users=[member.id], close=not player.guild.me.voice or after.channel != player.guild.me.voice.channel, wait=True)
                 except AttributeError:
                     traceback.print_exc()
                     pass
