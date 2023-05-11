@@ -777,6 +777,8 @@ class LavalinkPlayer(wavelink.Player):
             except:
                 pass
 
+            return
+
         if self.updating and not interaction:
             return
 
