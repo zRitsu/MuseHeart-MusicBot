@@ -3546,9 +3546,9 @@ class Music(commands.Cog):
                 if player.interaction_cooldown:
                     raise GenericError("O player está em cooldown, tente novamente em instantes.")
 
-                vc = player.last_channel
-
-                if not vc:
+                try:
+                    vc = player.guild.me.voice.channel
+                except AttributeError:
                     self.bot.loop.create_task(player.destroy(force=True))
                     return
 
@@ -4537,6 +4537,7 @@ class Music(commands.Cog):
         if member.id == self.bot.user.id and member.guild.voice_client and after.channel:
             # tempfix para channel do voice_client não ser setado ao mover bot do canal.
             player.guild.voice_client.channel = after.channel
+            player.last_channel = after.channel
 
         try:
             check = any(m for m in player.guild.me.voice.channel.members if not m.bot)
