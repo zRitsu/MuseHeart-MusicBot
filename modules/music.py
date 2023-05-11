@@ -4579,12 +4579,6 @@ class Music(commands.Cog):
             try:
                 vc = player.guild.me.voice.channel
             except AttributeError:
-
-                try:
-                    await player.destroy()
-                except:
-                    pass
-
                 vc = before.channel
 
             if vc:
