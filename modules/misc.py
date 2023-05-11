@@ -383,6 +383,12 @@ class Misc(commands.Cog):
 
         for b in bot.pool.bots:
 
+            try:
+                if str(b.user.id) in self.bot.config["INTERACTION_BOTS_CONTROLLER"]:
+                    continue
+            except:
+                pass
+
             active_players_other_bots += len(b.music.players)
 
             if not b.appinfo.bot_public:
