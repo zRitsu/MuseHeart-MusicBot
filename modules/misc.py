@@ -365,7 +365,7 @@ class Misc(commands.Cog):
         for b in bot.pool.bots:
 
             try:
-                if str(bot.user.id) in self.bot.config["INTERACTION_BOTS_CONTROLLER"]:
+                if str(b.user.id) in self.bot.config["INTERACTION_BOTS_CONTROLLER"]:
                     continue
             except:
                 pass
