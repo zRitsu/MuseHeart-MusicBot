@@ -361,9 +361,18 @@ class Misc(commands.Cog):
         active_players_other_bots = 0
 
         all_guilds_ids = set()
+
         for b in bot.pool.bots:
+
+            try:
+                if str(bot.user.id) in self.bot.config["INTERACTION_BOTS_CONTROLLER"]:
+                    continue
+            except:
+                pass
+
             for g in b.guilds:
                 all_guilds_ids.add(g.id)
+
         guilds_size = len(all_guilds_ids)
 
         embed.description += f"> **Servidores" + (" (todos os bots)" if guilds_size > 1 else "") + \
