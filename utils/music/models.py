@@ -475,6 +475,12 @@ class LavalinkPlayer(wavelink.Player):
             pass
 
         try:
+            self.message_updater_task.cancel()
+            self.message_updater_task = None
+        except AttributeError:
+            pass
+
+        try:
             track = self.queue.popleft()
         except Exception:
             await self.stop()
@@ -572,12 +578,7 @@ class LavalinkPlayer(wavelink.Player):
                 force=True if (self.static or not self.loop or not self.is_last_message()) else False,
                 rpc_update=True)
 
-            try:
-                self.message_updater_task.cancel()
-            except:
-                pass
-
-            self.bot.loop.create_task(self.message_updater())
+        self.message_updater_task = self.bot.loop.create_task(self.message_updater())
 
         await self.play(track, start=start_position)
 
