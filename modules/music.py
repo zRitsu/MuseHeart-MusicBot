@@ -1521,6 +1521,7 @@ class Music(commands.Cog):
         player.current.info["extra"]["track_loops"] = 0
 
         await player.track_end()
+        player.ignore_np_once = True
         await player.process_next(inter=interaction)
 
     @check_stage_topic()
@@ -1583,13 +1584,16 @@ class Music(commands.Cog):
 
             txt = [
                 "voltou para a música atual.",
-                f"⏮️ **⠂{inter.author.mention} voltou para a música:\n╰[`{fix_characters(t.title, 43)}`]({t.uri})**"
+                f"⏮️ **⠂{inter.author.mention} voltou para a música:\n╰[`{fix_characters(t.title, 43)}`]({t.uri})**{player.controller_link}{player.controller_link}"
             ]
 
             await self.interaction_message(inter, txt, emoji="⏮️", store_embed=True)
 
         if player.loop == "current":
             player.loop = False
+
+        player.ignore_np_once = True
+
         if not player.current:
             await player.process_next(inter=interaction)
         else:

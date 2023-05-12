@@ -904,18 +904,21 @@ class LavalinkPlayer(wavelink.Player):
                         )
                     )
 
-            if self.message and (self.ignore_np_once or self.has_thread or self.static or not force or self.is_last_message()):
+            try:
+                if interaction.response.is_done():
+                    await interaction.message.edit(allowed_mentions=self.allowed_mentions, **self.last_data)
+                else:
+                    await interaction.response.edit_message(allowed_mentions=self.allowed_mentions, **self.last_data)
+                self.updating = False
+                return
 
-                self.ignore_np_once = False
+            except Exception:
+                if self.message and (self.ignore_np_once or self.has_thread or self.static or not force or self.is_last_message()):
 
-                try:
-                    if interaction and not interaction.response.is_done():
-                        await interaction.response.edit_message(allowed_mentions=self.allowed_mentions, **self.last_data)
-                    else:
-                        try:
-                            await interaction.response.defer()
-                        except:
-                            pass
+                    self.ignore_np_once = False
+
+                    try:
+
                         try:
                             await self.message.edit(allowed_mentions=self.allowed_mentions, **self.last_data)
                         except:
@@ -924,17 +927,17 @@ class LavalinkPlayer(wavelink.Player):
                                 await self.destroy(force=True)
                                 return
 
-                    await self.update_stage_topic()
-                    self.updating = False
-                    #self.message_updater_task = self.bot.loop.create_task(self.message_updater())
-                    return
-                except Exception as e:
-                    traceback.print_exc()
-                    if self.static or self.has_thread:
-                        self.set_command_log(
-                            f"{(interaction.author.mention + ' ') if interaction else ''}houve um erro na interação: {repr(e)}", "⚠️")
-                        self.update = True
+                        await self.update_stage_topic()
+                        self.updating = False
+                        #self.message_updater_task = self.bot.loop.create_task(self.message_updater())
                         return
+                    except Exception as e:
+                        traceback.print_exc()
+                        if self.static or self.has_thread:
+                            self.set_command_log(
+                                f"{(interaction.author.mention + ' ') if interaction else ''}houve um erro na interação: {repr(e)}", "⚠️")
+                            self.update = True
+                            return
 
             await self.destroy_message()
 
