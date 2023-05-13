@@ -15,7 +15,7 @@ from disnake.ext import commands
 from utils.db import DBModel
 from utils.music.converters import perms_translations
 from utils.music.errors import GenericError
-from utils.others import send_idle_embed, CustomContext, select_bot_pool
+from utils.others import send_idle_embed, CustomContext, select_bot_pool, pool_command
 from utils.music.models import LavalinkPlayer
 
 if TYPE_CHECKING:
@@ -1092,6 +1092,33 @@ class MusicSettings(commands.Cog):
             player.set_command_log(text=f"{inter.author.mention} alterou a skin do player.", emoji="🎨")
             await player.invoke_np(force=True)
             await asyncio.sleep(1.5)
+
+    @commands.is_owner()
+    @pool_command(only_voiced=True, hidden=True, aliases=["etp"])
+    async def enabletempinvite(self, ctx: CustomContext):
+
+        try:
+            bot = ctx.music_bot
+            guild = ctx.music_guild
+        except AttributeError:
+            bot = ctx.bot
+            guild = bot.get_guild(ctx.guild_id)
+
+        if not guild.me.guild_permissions.manage_guild:
+            raise GenericError(f"**{bot.user.mention} não possui permissão de gerenciar servidor...")
+
+        player = bot.music.players[ctx.guild_id]
+
+        try:
+            invite = [i for i in await guild.invites() if i.temporary][0]
+            msg = "ativado"
+        except IndexError:
+            invite = await player.guild.me.voice.channel.create_invite(temporary=True)
+            msg = "criado"
+
+        player.listen_along_invite = invite
+
+        await ctx.send(f"O envio de invite para ouvir junto via RPC foi {msg} com sucesso!")
 
     @commands.Cog.listener("on_modal_submit")
     async def rpc_create_modal(self, inter: disnake.ModalInteraction):

@@ -127,6 +127,7 @@ class PlayerSession(commands.Cog):
             "uptime": player.uptime,
             "restrict_mode": player.restrict_mode,
             "mini_queue_enabled": player.mini_queue_enabled,
+            "listen_along_invite": player.listen_along_invite,
             "tracks": tracks
         }
 
@@ -261,6 +262,8 @@ class PlayerSession(commands.Cog):
                     player.mini_queue_enabled = data["mini_queue_enabled"]
                 except:
                     pass
+
+                player.listen_along_invite = data.pop("listen_along_invite", "")
 
                 player.dj = set(data["dj"])
                 player.loop = data["loop"]
