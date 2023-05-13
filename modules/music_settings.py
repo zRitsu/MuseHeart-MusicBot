@@ -1107,7 +1107,7 @@ class MusicSettings(commands.Cog):
         if not guild.me.guild_permissions.manage_guild:
             raise GenericError(f"**{bot.user.mention} não possui permissão de gerenciar servidor...")
 
-        player = bot.music.players[ctx.guild_id]
+        player: LavalinkPlayer = bot.music.players[ctx.guild_id]
 
         try:
             invite = [i for i in await guild.invites() if i.temporary][0]
@@ -1116,7 +1116,9 @@ class MusicSettings(commands.Cog):
             invite = await player.guild.me.voice.channel.create_invite(temporary=True)
             msg = "criado"
 
-        player.listen_along_invite = invite
+        player.listen_along_invite = invite.url
+
+        await player.process_rpc()
 
         await ctx.send(f"O envio de invite para ouvir junto via RPC foi {msg} com sucesso!")
 
