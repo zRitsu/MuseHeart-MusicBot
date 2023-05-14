@@ -24,6 +24,8 @@ exclude_tags = ["remix", "edit", "extend"]
 
 class PartialPlaylist:
 
+    __slots__ = ('data', 'url', 'tracks')
+
     def __init__(self, data: dict, url: str):
         self.data = data
         self.url = url
@@ -38,6 +40,8 @@ class PartialPlaylist:
 
 
 class PartialTrack:
+
+    __slots__ = ('id', 'thumb', 'source_name', 'info', 'playlist')
 
     def __init__(self, *, uri: str = "", title: str = "", author="", thumb: str = "", duration: int = 0,
                  requester: int = 0, track_loops: int = 0, source_name: str = "", info: dict = None,
@@ -148,6 +152,8 @@ class PartialTrack:
 
 
 class LavalinkPlaylist:
+
+    __slots__ = ('data', 'url', 'tracks')
 
     def __init__(self, data: dict, **kwargs):
         self.data = data
