@@ -76,7 +76,10 @@ class UserFavModal(disnake.ui.Modal):
 
         await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
 
-        guild = inter.guild or self.bot.get_guild(inter.guild_id)
+        try:
+            me = (inter.guild or self.bot.get_guild(inter.guild_id)).me
+        except AttributeError:
+            me = None
 
         await inter.edit_original_message(
             embed=disnake.Embed(
@@ -85,7 +88,7 @@ class UserFavModal(disnake.ui.Modal):
                             "- Ao usar o comando /play (no preenchimento automático da busca)\n"
                             "- Ao clicar no botão de pedir música do player.\n"
                             "- Ao usar o comando play (prefixed) sem nome ou link.```",
-                color=self.bot.get_color(guild.me)
+                color=self.bot.get_color(me)
             )
         )
 
