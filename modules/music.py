@@ -2163,7 +2163,7 @@ class Music(commands.Cog):
     @check_voice()
     @pool_command(name="move", aliases=["mv", "mover"], only_voiced=True, max_concurrency=remove_mc,
                   description="Mover uma música para a posição especificada da fila.")
-    async def move_legacy(self, ctx: CustomContext, position: Optional[int], *, flags: str = None):
+    async def move_legacy(self, ctx: CustomContext, position: Optional[int] = None, *, flags: str = None):
 
         args, unknown = self.move_args.parse_known_args(flags.split())
 
@@ -2173,7 +2173,7 @@ class Music(commands.Cog):
         if not unknown:
             raise GenericError("**Você não adicionou o nome da música.**")
 
-        await self.move.callback(self=self, inter=ctx, position=position, query=" ".join(unknown), match_count=args.count)
+        await self.move.callback(self=self, inter=ctx, position=position, query=" ".join(unknown), match_count=args.count or 999)
 
     @is_dj()
     @has_player()
