@@ -2173,7 +2173,7 @@ class Music(commands.Cog):
         if not unknown:
             raise GenericError("**Você não adicionou o nome da música.**")
 
-        await self.move.callback(self=self, inter=ctx, position=position, query=" ".join(unknown), match_count=args.count or 999)
+        await self.move.callback(self=self, inter=ctx, position=position, query=" ".join(unknown), match_count=args.count or 1)
 
     @is_dj()
     @has_player()
