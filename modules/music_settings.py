@@ -1139,7 +1139,7 @@ class MusicSettings(commands.Cog):
             await inter.send("Seu token é igual ao token atual!", ephemeral=True)
             return
 
-        await self.close_presence(inter)
+        await self.bot.get_cog("RPCCog").close_presence(inter)
 
         data["token"] = inter.text_values["token_input"]
 
