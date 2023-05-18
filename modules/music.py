@@ -832,7 +832,7 @@ class Music(commands.Cog):
                 )
 
                 if bot.user.id != self.bot.user.id:
-                    embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+                    embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
 
                 kwargs = {
                     "content": inter.author.mention,
@@ -941,7 +941,7 @@ class Music(commands.Cog):
                     )
 
                     if bot.user.id != self.bot.user.id:
-                        embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+                        embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
 
                     msg = await inter.send(embed=embed, view=view, ephemeral=ephemeral)
 
@@ -1315,7 +1315,7 @@ class Music(commands.Cog):
                     func = inter.send
 
             if bot.user.id != self.bot.user.id:
-                embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+                embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
 
             await func(embed=embed, view=None)
 
@@ -1490,7 +1490,7 @@ class Music(commands.Cog):
             )
 
             if bot != self.bot:
-                embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+                embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
 
             await inter.send(embed=embed, ephemeral=ephemeral)
 
@@ -1511,7 +1511,7 @@ class Music(commands.Cog):
                 )
 
                 if bot != self.bot:
-                    embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+                    embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
 
                 await inter.send(embed=embed, ephemeral=ephemeral)
 
@@ -1690,7 +1690,7 @@ class Music(commands.Cog):
             embed.description = "**Selecione o nível do volume abaixo:**"
 
             if bot.user.id != self.bot.user.id:
-                embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+                embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
 
             await inter.send(embed=embed, ephemeral=await self.is_request_channel(inter), view=view)
             await view.wait()
@@ -1916,7 +1916,7 @@ class Music(commands.Cog):
             )
 
             if bot.user.id != self.bot.user.id:
-                embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+                embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
 
             msg = await ctx.send(
                 ctx.author.mention,
@@ -2253,7 +2253,7 @@ class Music(commands.Cog):
                          f"** para a posição **[{position}]** da fila.", emoji="↪️")
 
             if bot.user.id != self.bot.user.id:
-                embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+                embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
 
             await inter.send(embed=embed, ephemeral=ephemeral)
 
@@ -2441,7 +2441,7 @@ class Music(commands.Cog):
                 )
 
                 if bot.user.id != self.bot.user.id:
-                    embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+                    embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
 
                 await player.text_channel.send(embed=embed)
 
@@ -2614,7 +2614,7 @@ class Music(commands.Cog):
             )
 
             if bot.user.id != self.bot.user.id:
-                embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+                embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
 
             await inter.send(
                 embed=embed,
@@ -2728,7 +2728,7 @@ class Music(commands.Cog):
         view = QueueInteraction(player, inter.author)
         embed = view.embed
         if bot.user.id != self.bot.user.id:
-            embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+            embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
 
         await inter.send(embed=embed, view=view, ephemeral=True)
 
@@ -4049,7 +4049,7 @@ class Music(commands.Cog):
                                   description=f"{txt_ephemeral or txt}{player.controller_link}")
 
             if bot.user.id != self.bot.user.id:
-                embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+                embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
 
             if store_embed and not player.controller_mode and len(player.queue) > 0:
                 player.temp_embed = embed
@@ -4069,7 +4069,7 @@ class Music(commands.Cog):
                 )
 
                 if bot.user.id != self.bot.user.id:
-                    embed.set_footer(text=f"Usando: {bot.user}", icon_url=bot.user.display_avatar.url)
+                    embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
 
                 await inter.send(embed=embed, ephemeral=ephemeral)
 
