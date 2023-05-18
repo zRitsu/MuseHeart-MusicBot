@@ -409,30 +409,37 @@ class PlayerSession(commands.Cog):
             return
 
         try:
-            conn = await aiosqlite.connect(f'./local_database/player_sessions/{self.bot.user.id}/{player.guild.id}.db')
-        except aiosqlite.OperationalError:
-            os.makedirs(f"./local_database/player_sessions/{self.bot.user.id}/")
-            conn = await aiosqlite.connect(f'./local_database/player_sessions/{self.bot.user.id}/{player.guild.id}.db')
+            player.conn_cursor
+        except AttributeError:
+            try:
+                conn = await aiosqlite.connect(f'./local_database/player_sessions/{self.bot.user.id}/{player.guild.id}.db')
+            except aiosqlite.OperationalError:
+                os.makedirs(f"./local_database/player_sessions/{self.bot.user.id}/")
+                conn = await aiosqlite.connect(f'./local_database/player_sessions/{self.bot.user.id}/{player.guild.id}.db')
+            player.conn = conn
+            player.conn_cursor = await conn.cursor()
 
         json_str = json.dumps(data)
 
-        cursor = await conn.cursor()
-
         try:
-            await cursor.execute('UPDATE dados SET json_data = ? WHERE id = ?', (json_str, 1))
+            await player.conn_cursor.execute('UPDATE dados SET json_data = ? WHERE id = ?', (json_str, 1))
         except:
-            await cursor.execute('''
+            await player.conn_cursor.execute('''
                 CREATE TABLE IF NOT EXISTS dados (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     json_data TEXT
                 )
             ''')
-            await cursor.execute('INSERT INTO dados (json_data) VALUES (?)', (json_str,))
+            await player.conn_cursor.execute('INSERT INTO dados (json_data) VALUES (?)', (json_str,))
 
-        await conn.commit()
-        await conn.close()
+        await player.conn.commit()
 
     async def delete_data(self, guild_id):
+
+        try:
+            await self.bot.music.players[guild_id].conn.close()
+        except:
+            pass
 
         if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
             await self.bot.pool.mongo_database.delete_data(id_=str(guild_id), db_name=str(self.bot.user.id), collection="player_sessions")
