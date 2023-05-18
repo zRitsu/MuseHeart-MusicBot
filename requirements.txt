@@ -12,3 +12,4 @@ psutil
 aiofiles
 disnake-jishaku
 packaging
+aiosqlite

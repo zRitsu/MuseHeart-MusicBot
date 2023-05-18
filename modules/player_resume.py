@@ -2,8 +2,11 @@
 
 # nota: este sistema é totalmente experimental.
 import asyncio
+import json
+import os
 import traceback
 
+import aiosqlite
 import disnake
 from disnake.ext import commands
 
@@ -34,11 +37,7 @@ class PlayerSession(commands.Cog):
         except:
             pass
 
-        await self.database().delete_data(
-            id_=str(player.guild.id),
-            collection="player_sessions",
-            db_name=str(player.bot.user.id)
-        )
+        await self.delete_data(player.guild.id)
 
     @commands.Cog.listener('on_wavelink_track_end')
     async def track_end(self, node, payload: wavelink.TrackStart):
@@ -131,22 +130,10 @@ class PlayerSession(commands.Cog):
             "tracks": tracks
         }
 
-        bot_id = str(player.bot.user.id)
-
         try:
-            await self.database().update_data(
-                id_=str(player.guild.id),
-                data=data,
-                collection="player_sessions",
-                db_name=bot_id
-            )
+            await self.save_session(player, data=data)
         except:
             traceback.print_exc()
-
-    def database(self):
-        if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
-            return self.bot.pool.mongo_database
-        return self.bot.pool.local_database
 
     async def resume_players(self):
 
@@ -168,9 +155,7 @@ class PlayerSession(commands.Cog):
 
         try:
 
-            database = self.database()
-
-            data_list = await database.query_data(db_name=str(self.bot.user.id), collection="player_sessions")
+            data_list = await self.get_player_sessions()
 
             for data in data_list:
 
@@ -178,7 +163,7 @@ class PlayerSession(commands.Cog):
 
                 if not guild:
                     print(f"{self.bot.user} - Player Ignorado: {data['_id']} | Servidor inexistente...")
-                    await database.delete_data(id_=data['_id'], db_name=str(self.bot.user.id), collection="player_sessions")
+                    await self.delete_data(guild.id)
                     continue
 
                 voice_channel = self.bot.get_channel(int(data["voice_channel"]))
@@ -187,14 +172,14 @@ class PlayerSession(commands.Cog):
 
                 if not voice_channel:
                     print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\nO canal de voz não existe...")
-                    await database.delete_data(id_=data['_id'], db_name=str(self.bot.user.id), collection="player_sessions")
+                    await self.delete_data(guild.id)
                     continue
 
                 try:
                     can_connect(voice_channel, guild=guild, bot=self.bot)
                 except Exception as e:
                     print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\n{repr(e)}")
-                    await database.delete_data(id_=data['_id'], db_name=str(self.bot.user.id), collection="player_sessions")
+                    await self.delete_data(guild.id)
                     continue
 
                 try:
@@ -216,7 +201,7 @@ class PlayerSession(commands.Cog):
                     can_send_message(text_channel, self.bot.user)
                 except Exception:
                     print(f"{self.bot.user} - Player Ignorado (falta de permissão) [Canal: {text_channel.name} | ID: {text_channel.id}] - [ {guild.name} - {guild.id} ]")
-                    await database.delete_data(id_=data['_id'], db_name=str(self.bot.user.id), collection="player_sessions")
+                    await self.delete_data(guild.id)
                     continue
 
                 try:
@@ -255,7 +240,7 @@ class PlayerSession(commands.Cog):
                     )
                 except Exception:
                     print(f"{self.bot.user} - Falha ao criar player: {guild.name} [{guild.id}]\n{traceback.format_exc()}")
-                    await database.delete_data(id_=data['_id'], db_name=str(self.bot.user.id), collection="player_sessions")
+                    await self.delete_data(guild.id)
                     continue
 
                 try:
@@ -382,6 +367,81 @@ class PlayerSession(commands.Cog):
             print(f"{self.bot.user} - Falha Crítica ao retomar players:\n{traceback.format_exc()}")
 
         self.bot.player_resumed = True
+
+    async def get_player_sessions(self):
+
+        if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
+            return await self.bot.pool.mongo_database.query_data(db_name=str(self.bot.user.id), collection="player_sessions")
+
+        try:
+            files = os.listdir(f"./local_database/player_sessions/{self.bot.user.id}")
+        except FileNotFoundError:
+            return []
+
+        guild_data = []
+
+        for file in files:
+
+            guild_id = file[:-3]
+
+            conn = await aiosqlite.connect(f'./local_database/player_sessions/{self.bot.user.id}/{guild_id}.db')
+            c = await conn.cursor()
+
+            await c.execute('SELECT json_data FROM dados')
+            data = await c.fetchone()
+
+            await conn.close()
+
+            if data:
+                guild_data.append(json.loads(data[0]))
+
+        return guild_data
+
+    async def save_session(self, player: LavalinkPlayer, data: dict):
+
+        if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
+            await self.bot.pool.mongo_database.update_data(
+                id_=str(player.guild.id),
+                data=data,
+                collection="player_sessions",
+                db_name=str(self.bot.user.id)
+            )
+            return
+
+        try:
+            conn = await aiosqlite.connect(f'./local_database/player_sessions/{self.bot.user.id}/{player.guild.id}.db')
+        except aiosqlite.OperationalError:
+            os.makedirs(f"./local_database/player_sessions/{self.bot.user.id}/")
+            conn = await aiosqlite.connect(f'./local_database/player_sessions/{self.bot.user.id}/{player.guild.id}.db')
+
+        json_str = json.dumps(data)
+
+        cursor = await conn.cursor()
+
+        try:
+            await cursor.execute('UPDATE dados SET json_data = ? WHERE id = ?', (json_str, 1))
+        except:
+            await cursor.execute('''
+                CREATE TABLE IF NOT EXISTS dados (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    json_data TEXT
+                )
+            ''')
+            await cursor.execute('INSERT INTO dados (json_data) VALUES (?)', (json_str,))
+
+        await conn.commit()
+        await conn.close()
+
+    async def delete_data(self, guild_id):
+
+        if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
+            await self.bot.pool.mongo_database.delete_data(id_=str(guild_id), db_name=str(self.bot.user.id), collection="player_sessions")
+            return
+
+        try:
+            os.remove(f'./local_database/player_sessions/{self.bot.user.id}/{guild_id}.db')
+        except FileNotFoundError:
+            return
 
     def cog_unload(self):
         try:
