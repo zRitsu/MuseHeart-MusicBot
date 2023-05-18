@@ -391,7 +391,7 @@ class Misc(commands.Cog):
 
             active_players_other_bots += len(b.music.players)
 
-            if not b.appinfo.bot_public:
+            if not b.appinfo or not b.appinfo.bot_public:
                 private_bot_count += 1
             else:
                 public_bot_count += 1
