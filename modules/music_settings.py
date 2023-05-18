@@ -580,7 +580,7 @@ class MusicSettings(commands.Cog):
                                    f"sem selecionar um canal de destino.")
 
             if not target.permissions_for(guild.me).read_messages:
-                raise GenericError(f"Não tenho permissão para ler mensagens no canal {target.mention}")
+                raise GenericError(f"{bot.user.mention} permissão para ler mensagens no canal {target.mention}")
 
             if purge_messages == "yes":
                 await target.purge(limit=100, check=lambda m: m.author != guild.me or not m.thread)
