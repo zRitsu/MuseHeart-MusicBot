@@ -210,10 +210,6 @@ class MusicSettings(commands.Cog):
 
     def __init__(self, bot: BotCore):
         self.bot = bot
-
-        if not hasattr(bot, '_invite_cache'):
-            bot._invite_cache = {}
-
         self.invite_cooldown = commands.CooldownMapping.from_cooldown(rate=1, per=45, type=commands.BucketType.guild)
 
     player_settings_cd = commands.CooldownMapping.from_cooldown(1, 5, commands.BucketType.guild)
@@ -1491,40 +1487,6 @@ class RPCCog(commands.Cog):
         else:
             await inter.send(f"{inter.author.mention}: {msg}", embeds=[], components=[], ephemeral=True)
             await inter.message.delete()
-
-    @commands.Cog.listener()
-    async def on_invite_create(self, invite: disnake.Invite):
-
-        try:
-            if "GUESTS_ENABLED" not in invite.guild.features:
-                return
-        except AttributeError:
-            return
-
-        if not isinstance(invite.channel, disnake.VoiceChannel):
-            return
-
-        try:
-            self.bot._invite_cache[invite.channel.id].add(invite.url)
-        except KeyError:
-            self.bot._invite_cache[invite.channel.id] = set(invite.url)
-
-    @commands.Cog.listener()
-    async def on_invite_delete(self, invite: disnake.Invite):
-
-        try:
-            if "GUESTS_ENABLED" not in invite.guild.features:
-                return
-        except AttributeError:
-            return
-
-        if not isinstance(invite.channel, disnake.VoiceChannel):
-            return
-
-        try:
-            self.bot._invite_cache[invite.channel.id].remove(invite.url)
-        except:
-            pass
 
     async def close_presence(self, inter: Union[disnake.MessageInteraction, disnake.ModalInteraction]):
 
