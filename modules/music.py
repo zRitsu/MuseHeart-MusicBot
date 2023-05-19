@@ -3248,9 +3248,6 @@ class Music(commands.Cog):
 
                 player: LavalinkPlayer = self.bot.music.players[guild_id]
 
-                if player.is_connected and player.guild.me.voice:
-                    continue
-
                 try:
                     vc = player.guild.me.voice.channel
                 except AttributeError:
