@@ -1189,10 +1189,10 @@ class MusicSettings(commands.Cog):
         try:
             invite = await self.bot.fetch_invite(inter.text_values['invite_url'].strip())
         except disnake.NotFound:
-            return await inter.send("Link inválido ou o convite não existe/expirou")
+            return await inter.send("Link inválido ou o convite não existe/expirou", ephemeral=True)
 
         if invite.channel.id != player.guild.me.voice.channel.id:
-            return await inter.send("**O invite informado é de um canal diferente do atual.**")
+            return await inter.send("**O invite informado é de um canal diferente do atual.**", ephemeral=True)
 
         player.listen_along_invite = invite.url
 
