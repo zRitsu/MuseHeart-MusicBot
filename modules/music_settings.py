@@ -3,7 +3,6 @@ from __future__ import annotations
 import asyncio
 import os
 import random
-import re
 import string
 from typing import TYPE_CHECKING, Union, Optional
 import datetime
