@@ -1193,6 +1193,11 @@ class MusicSettings(commands.Cog):
         if invite.channel.id != player.guild.me.voice.channel.id:
             return await inter.send("**O invite informado é de um canal diferente do atual.**", ephemeral=True)
 
+        channel = player.bot.get_channel(invite.channel.id)
+
+        if not isinstance(channel, disnake.VoiceChannel):
+            return await inter.send("**Esse recurso funciona apenas em canais de voz.**", ephemeral=True)
+
         player.listen_along_invite = invite.url
 
         await inter.send(f"**O link {invite} foi ativado com sucesso no player para ser processado via RPC.**\n"
