@@ -1186,14 +1186,15 @@ class MusicSettings(commands.Cog):
         if not player:
             return await inter.send("**Não há player ativo no canal atual...**", ephemeral=True)
 
-        invite = inter.text_values['invite_url'].strip()
+        try:
+            invite = await self.bot.fetch_invite(inter.text_values['invite_url'].strip())
+        except disnake.NotFound:
+            return await inter.send("Link inválido ou o convite não existe/expirou")
 
-        invite_regex = r'(https?://)?(www\.)?(discord\.(gg|io|me|li)|discordapp\.com/invite)/[a-zA-Z0-9]+/?'
+        if invite.channel.id != player.guild.me.voice.channel.id:
+            return await inter.send("**O invite informado é de um canal diferente do atual.**")
 
-        if not re.findall(invite_regex, invite):
-            return await inter.send("**Você não informou um link de convite válido.**", ephemeral=True)
-
-        player.listen_along_invite = invite
+        player.listen_along_invite = invite.url
 
         await inter.send(f"**O link {invite} foi ativado com sucesso no player para ser processado via RPC.**\n"
                          f"`Nota: Caso queira exibir no seu status e não tenha o app de RPC, use o comando "
