@@ -863,8 +863,8 @@ class Music(commands.Cog):
                     )
                 except asyncio.TimeoutError:
                     try:
-                        await msg.edit(conent="Tempo de seleção esgotado!", embed=None, view=None)
-                    except:
+                        await msg.edit(content="Tempo de seleção esgotado!", embed=None, view=None)
+                    except (disnake.NotFound, disnake.Forbidden):
                         pass
                     return
 
