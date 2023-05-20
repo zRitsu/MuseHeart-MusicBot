@@ -472,7 +472,7 @@ class Misc(commands.Cog):
 
         for bot in sorted(self.bot.pool.bots, key=lambda b: len(b.guilds)):
 
-            if bot.appinfo and not bot.appinfo.bot_public or str(bot.user.id) in bot.config['INTERACTION_BOTS_CONTROLLER']:
+            if (bot.appinfo and not bot.appinfo.bot_public and (not await bot.is_owner(inter.author)) or str(bot.user.id) in bot.config['INTERACTION_BOTS_CONTROLLER']):
                 continue
 
             invite = f"[`{disnake.utils.escape_markdown(str(bot.user.name))}`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))})"
