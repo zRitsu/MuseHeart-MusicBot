@@ -55,13 +55,14 @@ global_db_models = {
         "token": ""
     },
     DBModel.guilds: {
-        "ver": 1.2,
+        "ver": 1.3,
         "prefix": "",
         "global_skin": False,
         "player_skin": None,
         "player_skin_static": None,
         "custom_skins": {},
-        "custom_skins_static": {}
+        "custom_skins_static": {},
+        "listen_along_invites": {},
     },
     DBModel.default: {
         "ver": 1.0,

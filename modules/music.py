@@ -1031,6 +1031,17 @@ class Music(commands.Cog):
                 skin = global_data["player_skin"] or skin
                 static_skin = global_data["player_skin_static"] or guild_data["player_controller"]["static_skin"]
 
+            try:
+                invite = global_data["listen_along_invites"][str(inter.channel.id)]
+            except KeyError:
+                invite = None
+
+            else:
+                if not await self.bot.fetch_invite(invite):
+                    invite = None
+                    del global_data["listen_along_invites"][str(inter.channel.id)]
+                    await self.bot.update_global_data(inter.guild_id, global_data, db_name=DBModel.guilds)
+
             player: LavalinkPlayer = bot.music.get_player(
                 guild_id=inter.guild_id,
                 cls=LavalinkPlayer,
@@ -1046,6 +1057,7 @@ class Music(commands.Cog):
                 skin_static=bot.check_static_skin(static_skin),
                 extra_hints=self.extra_hints,
                 restrict_mode=guild_data['enable_restrict_mode'],
+                listen_along_invite=invite,
                 volume=int(guild_data['default_player_volume']),
             )
 
@@ -3909,6 +3921,17 @@ class Music(commands.Cog):
                 skin = global_data["player_skin"] or skin
                 static_skin = global_data["player_skin_static"] or static_skin
 
+            try:
+                invite = global_data["listen_along_invites"][str(message.channel.id)]
+            except KeyError:
+                invite = None
+
+            else:
+                if not await self.bot.fetch_invite(invite):
+                    invite = None
+                    del global_data["listen_along_invites"][str(message.channel.id)]
+                    await self.bot.update_global_data(message.guild.id, global_data, db_name=DBModel.guilds)
+
             player: LavalinkPlayer = self.bot.music.get_player(
                 guild_id=message.guild.id,
                 cls=LavalinkPlayer,
@@ -3924,6 +3947,7 @@ class Music(commands.Cog):
                 extra_hints=self.extra_hints,
                 last_message_id=message_id,
                 restrict_mode=data['enable_restrict_mode'],
+                listen_along_invite=invite,
                 volume=int(data['default_player_volume']),
             )
 

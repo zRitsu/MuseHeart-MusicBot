@@ -314,7 +314,7 @@ class LavalinkPlayer(wavelink.Player):
         self.stage_title_template = kwargs.pop("stage_title_template", None) or "Tocando: {track.title} | {track.author}"
         self.last_stage_title = ""
         self.auto_update: int = 0
-        self.listen_along_invite = ""
+        self.listen_along_invite = kwargs.pop("listen_along_invite", "")
         self.message_updater_task: Optional[asyncio.Task] = None
         # limitar apenas para dj's e staff's
         self.restrict_mode = kwargs.pop('restrict_mode', False)

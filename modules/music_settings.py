@@ -14,7 +14,7 @@ from disnake.ext import commands
 
 from utils.db import DBModel
 from utils.music.converters import perms_translations, time_format
-from utils.music.errors import GenericError
+from utils.music.errors import GenericError, NoVoice
 from utils.others import send_idle_embed, CustomContext, select_bot_pool, pool_command
 from utils.music.models import LavalinkPlayer
 
@@ -1098,7 +1098,7 @@ class MusicSettings(commands.Cog):
 
     @commands.cooldown(2, 10, commands.BucketType.member)
     @commands.has_guild_permissions(manage_channels=True)
-    @pool_command(only_voiced=True, aliases=["la"], description="Ativar o envio de invite para ouvir junto via RPC "
+    @pool_command(aliases=["la"], description="Ativar o envio de invite para ouvir junto via RPC "
                                                                 "(Sistema ainda em testes)")
     async def listenalong(self, ctx: CustomContext):
 
@@ -1115,9 +1115,12 @@ class MusicSettings(commands.Cog):
         if not guild.me.guild_permissions.create_instant_invite:
             raise GenericError(f"**{bot.user.mention} não possui permissão de criar convites instantâneos...**")
 
+        if not ctx.author.voice.channel:
+            raise NoVoice()
+
         await ctx.reply(
             embed=disnake.Embed(
-                description=f"**Crie um convite no canal {guild.me.voice.channel.mention} marcando a opção "
+                description=f"**Crie um convite no canal {ctx.author.voice.channel.mention} marcando a opção "
                             f"\"Inscrição como convidado\" e em seguida clique no botão abaixo para enviar o link do "
                             f"convite.**"
             ).set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/1108943648508366868/image.png"),
@@ -1166,42 +1169,70 @@ class MusicSettings(commands.Cog):
         if retry_after:
             return await inter.send("**Você deve aguardar {} para enviar o convite**".format(time_format(int(retry_after) * 1000, use_names=True)), ephemeral=True)
 
-        player: Optional[LavalinkPlayer] = None
+        await inter.response.defer(ephemeral=True)
+
+        try:
+            invite = await self.bot.fetch_invite(inter.text_values['invite_url'].strip())
+        except disnake.NotFound:
+            return await inter.edit_original_message("Link inválido ou o convite não existe/expirou")
+
+        channel = None
 
         for bot in self.bot.pool.bots:
+
+            channel = bot.get_channel(invite.channel.id)
+
+            if not channel:
+                continue
+
+            if not isinstance(channel, disnake.VoiceChannel):
+                return await inter.edit_original_message("**Esse recurso funciona apenas em canais de voz.**")
+
+            break
+
+        if not channel:
+            return await inter.edit_original_message("**Não há bots compatíveis adicionado no servidor do invite informado.**")
+
+        try:
+            global_data = inter.global_guild_data
+        except AttributeError:
+            global_data = await self.bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
+            try:
+                inter.global_guild_data = global_data
+            except:
+                pass
+
+        if len(global_data["listen_along_invites"]) > 4:
+            return await inter.edit_original_message(
+                embed=disnake.Embed(
+                    description="**Limite de convites excedido no servidor atual, delete pelo menos um dos convites "
+                                "abaixo do servidor:** ```ansi\n" +
+                                ", ".join(f"[31;1m{c}[0m" for c in global_data["listen_along_invites"]) + "```",
+                    color=self.bot.get_color()
+                )
+            )
+
+        global_data["listen_along_invites"][str(inter.channel.id)] = invite.url
+
+        await self.bot.update_global_data(inter.guild_id, global_data, db_name=DBModel.guilds)
+
+        await inter.edit_original_message(
+            f"**O link {invite} foi ativado/atualizado com sucesso para ser enviado via RPC quando houver "
+            f"player ativo no canal {inter.author.voice.channel.mention}.**\n"
+            f"`Nota: Caso queira exibir no seu status e não tenha o app de RPC, use o comando /rich_presence para "
+            f"obter mais informações.`"
+        )
+
+        for bot in self.bot.pool.bots:
+
             try:
                 p = bot.music.players[inter.guild_id]
             except KeyError:
                 continue
 
             if p.guild.me.voice.channel == inter.author.voice.channel:
-                player = p
-                break
-
-        if not player:
-            return await inter.send("**Não há player ativo no canal atual...**", ephemeral=True)
-
-        try:
-            invite = await self.bot.fetch_invite(inter.text_values['invite_url'].strip())
-        except disnake.NotFound:
-            return await inter.send("Link inválido ou o convite não existe/expirou", ephemeral=True)
-
-        if invite.channel.id != player.guild.me.voice.channel.id:
-            return await inter.send("**O invite informado é de um canal diferente do atual.**", ephemeral=True)
-
-        channel = player.bot.get_channel(invite.channel.id)
-
-        if not isinstance(channel, disnake.VoiceChannel):
-            return await inter.send("**Esse recurso funciona apenas em canais de voz.**", ephemeral=True)
-
-        player.listen_along_invite = invite.url
-
-        await inter.send(f"**O link {invite} foi ativado com sucesso no player para ser processado via RPC.**\n"
-                         f"`Nota: Caso queira exibir no seu status e não tenha o app de RPC, use o comando "
-                         f"/rich_presence para obter mais informações.`",
-                         ephemeral=True)
-
-        await player.process_rpc()
+                p.listen_along_invite = invite.url
+                await p.process_rpc()
 
     @commands.Cog.listener("on_modal_submit")
     async def rpc_create_modal(self, inter: disnake.ModalInteraction):
