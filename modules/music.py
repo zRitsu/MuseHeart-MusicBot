@@ -4174,16 +4174,16 @@ class Music(commands.Cog):
 
         if payload.code == 4014 and player.guild.me.voice:
             pass
-        #else:
-        print(
-            ("-" * 15) +
-            f"\nErro no canal de voz!"
-            f"\nBot: {player.bot.user} [{player.bot.user.id}] | " + ("Online" if self.bot.is_ready() else "Offline") +
-            f"\nGuild: {player.guild.name} [{player.guild.id}]"
-            f"\nCanal: {player.last_channel} [{player.last_channel.id}]"
-            f"\nServer: {player.node.identifier} | code: {payload.code} | reason: {payload.reason}\n" +
-            ("-" * 15)
-        )
+        else:
+            print(
+                ("-" * 15) +
+                f"\nErro no canal de voz!"
+                f"\nBot: {player.bot.user} [{player.bot.user.id}] | " + ("Online" if self.bot.is_ready() else "Offline") +
+                f"\nGuild: {player.guild.name} [{player.guild.id}]"
+                f"\nCanal: {player.last_channel} [{player.last_channel.id}]"
+                f"\nServer: {player.node.identifier} | code: {payload.code} | reason: {payload.reason}\n" +
+                ("-" * 15)
+            )
 
         if player.is_closing:
             return
