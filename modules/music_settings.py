@@ -1123,7 +1123,9 @@ class MusicSettings(commands.Cog):
                 description=f"**Crie um convite no canal {ctx.author.voice.channel.mention} marcando a opção "
                             f"\"Inscrição como convidado\" e em seguida clique no botão abaixo para enviar o link do "
                             f"convite.**"
-            ).set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/1108943648508366868/image.png"),
+            ).set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/1108943648508366868/image.png").
+            set_footer(text="Nota: crie um convite sem limitações como: datas para expirar, quantidade de usos ou "
+                            "apenas para um usuário usar."),
             components=[disnake.ui.Button(label="Enviar convite", custom_id=f"listen_along_{ctx.author.id}")]
         )
 
@@ -1172,9 +1174,18 @@ class MusicSettings(commands.Cog):
         await inter.response.defer(ephemeral=True)
 
         try:
-            invite = await self.bot.fetch_invite(inter.text_values['invite_url'].strip())
+            invite = await self.bot.fetch_invite(inter.text_values['invite_url'].strip(), with_expiration=True)
         except disnake.NotFound:
             return await inter.edit_original_message("Link inválido ou o convite não existe/expirou")
+
+        if invite.max_uses:
+            return await inter.edit_original_message("O convite pode ter quantidade máxima de usos")
+
+        if invite.target_user:
+            return await inter.edit_original_message("O convite não pode ser configurado para apenas 1 usuário usar.")
+
+        if invite.expires_at:
+            return await inter.edit_original_message("O convite não pode ter data para expirar.")
 
         channel = None
 
