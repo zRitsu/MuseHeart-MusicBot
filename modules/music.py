@@ -1039,6 +1039,13 @@ class Music(commands.Cog):
             else:
                 if not await self.bot.fetch_invite(invite):
                     invite = None
+                    print(
+                        f'{"-"*15}\n'
+                        f'Removendo invite: {invite} \n'
+                        f'Servidor: {inter.guild.name} [{inter.guild_id}]\n'
+                        f'Canal: {inter.channel.name} [{inter.channel.id}]\n'
+                        f'{"-" * 15}'
+                    )
                     del global_data["listen_along_invites"][str(inter.channel.id)]
                     await self.bot.update_global_data(inter.guild_id, global_data, db_name=DBModel.guilds)
 
@@ -3928,6 +3935,13 @@ class Music(commands.Cog):
 
             else:
                 if not await self.bot.fetch_invite(invite):
+                    print(
+                        f'{"-"*15}\n'
+                        f'Removendo invite: {invite} \n'
+                        f'Servidor: {message.guild.name} [{message.guild.id}]\n'
+                        f'Canal: {message.channel.name} [{message.channel.id}]\n'
+                        f'{"-" * 15}'
+                    )
                     invite = None
                     del global_data["listen_along_invites"][str(message.channel.id)]
                     await self.bot.update_global_data(message.guild.id, global_data, db_name=DBModel.guilds)
