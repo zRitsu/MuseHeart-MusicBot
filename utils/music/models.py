@@ -777,7 +777,7 @@ class LavalinkPlayer(wavelink.Player):
 
     async def invoke_np(self, force=False, interaction=None, rpc_update=False):
 
-        if not self.current:
+        if not self.current or self.updating:
 
             try:
                 if not interaction.response.is_done():
@@ -785,9 +785,6 @@ class LavalinkPlayer(wavelink.Player):
             except:
                 pass
 
-            return
-
-        if self.updating and not interaction:
             return
 
         if rpc_update:
