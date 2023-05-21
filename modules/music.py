@@ -4574,7 +4574,7 @@ class Music(commands.Cog):
 
         # rich presence stuff
 
-        if player.is_closing:
+        if player.is_closing or not before.channel:
             return
 
         channels = set()
