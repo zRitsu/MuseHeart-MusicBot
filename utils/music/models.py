@@ -397,7 +397,7 @@ class LavalinkPlayer(wavelink.Player):
             if isinstance(parent, disnake.ForumChannel) and self.text_channel.owner_id == self.bot.user.id and \
                     self.text_channel.message_count > 1:
                 try:
-                    await self.text_channel.purge(check=lambda m: m.channel.id != m.id and not m.is_system())
+                    await self.text_channel.purge(check=lambda m: m.channel.id != m.id and (not m.pinned or not m.is_system()))
                 except:
                     pass
                 self.is_purging = False
@@ -409,23 +409,25 @@ class LavalinkPlayer(wavelink.Player):
             self.is_purging = False
             return
 
-        if isinstance(self.text_channel, disnake.Thread):
-            check = (lambda m: m.id != self.last_message_id and not m.is_system())
-        else:
-            check = (lambda m: m.id != self.last_message_id)
-
         if self.static and self.last_message_id != self.text_channel.last_message_id:
+
+            if isinstance(self.text_channel, disnake.Thread):
+                check = (lambda m: m.id != self.last_message_id and (not self.message.pinned or not m.is_system()))
+            else:
+                check = (lambda m: m.id != self.last_message_id and not self.message.pinned)
+
             try:
                 await self.text_channel.purge(check=check)
             except:
                 pass
 
-        await asyncio.sleep(2)
+            await asyncio.sleep(2)
+
         self.is_purging = False
 
     async def purge_request_channel(self):
 
-        if self.is_purging or not self.text_channel.permissions_for(self.guild.me).manage_messages:
+        if self.is_purging or not self.guild.me.guild_permissions.manage_messages:
             return
 
         self.is_purging = True
@@ -440,7 +442,20 @@ class LavalinkPlayer(wavelink.Player):
             except AttributeError:
                 pass
 
-            if m.author.id == self.bot.user.id:
+            if m.pinned:
+                return
+
+            try:
+                is_forum = isinstance(m.channel.parent, disnake.ForumChannel)
+            except AttributeError:
+                is_forum = False
+
+            if m.is_system():
+
+                if is_forum:
+                    return
+
+            elif m.author.id == self.bot.user.id:
                 return
 
             return True

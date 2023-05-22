@@ -3701,7 +3701,17 @@ class Music(commands.Cog):
         try:
             player: LavalinkPlayer = self.bot.music.players[message.guild.id]
         except KeyError:
+
+            try:
+                is_forum = isinstance(message.channel.parent, disnake.ForumChannel)
+            except AttributeError:
+                is_forum = False
+
+            if message.is_system() and is_forum:
+                return
+
             if message.guild.me.guild_permissions.manage_messages:
+
                 try:
                     await message.delete()
                 except:
@@ -3790,10 +3800,11 @@ class Music(commands.Cog):
 
         if not message.content:
 
-            if message.is_system():
+            if message.type == disnake.MessageType.thread_starter_message:
                 return
 
-            if message.type == disnake.MessageType.thread_starter_message:
+            if message.is_system():
+                await self.delete_message(message)
                 return
 
             try:

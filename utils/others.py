@@ -256,14 +256,10 @@ async def send_idle_embed(
         target: Union[disnake.Message, disnake.TextChannel, disnake.Thread, disnake.MessageInteraction],
         text="", *, bot: BotCore, force=False, guild_data: dict = None
 ):
-
-    is_forum = False
-
     try:
-        if isinstance(target.channel.parent, disnake.ForumChannel):
-            is_forum = True
+        is_forum = isinstance(target.channel.parent, disnake.ForumChannel)
     except AttributeError:
-        pass
+        is_forum = False
 
     if not guild_data:
         guild_data = await bot.get_data(target.guild.id, db_name=DBModel.guilds)
@@ -325,6 +321,9 @@ async def send_idle_embed(
     else:
 
         message = await bot.get_channel(target.id).send(embed=embed, components=components)
+
+    if not message.pinned and not is_forum and target.guild.me.guild_permissions.manage_messages:
+        await message.pin(reason="Player controller")
 
     return message
 
