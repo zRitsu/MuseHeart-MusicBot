@@ -3948,8 +3948,8 @@ class Music(commands.Cog):
                 static_skin = global_data["player_skin_static"] or static_skin
 
             try:
-                invite = global_data["listen_along_invites"][str(message.channel.id)]
-            except KeyError:
+                invite = global_data["listen_along_invites"][str(message.author.voice.channel.id)]
+            except (KeyError, AttributeError):
                 invite = None
 
             else:
