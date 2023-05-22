@@ -440,7 +440,7 @@ class LavalinkPlayer(wavelink.Player):
             except AttributeError:
                 pass
 
-            if m.author.id == self.bot.user.id and (disnake.utils.utcnow() - m.created_at).total_seconds() < 10:
+            if m.author.id == self.bot.user.id:
                 return
 
             return True

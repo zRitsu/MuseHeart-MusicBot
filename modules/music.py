@@ -3696,6 +3696,19 @@ class Music(commands.Cog):
             except Exception as e:
                 self.bot.dispatch('interaction_player_error', inter, e)
 
+    async def delete_message(self, message: disnake.Message):
+
+        try:
+            player: LavalinkPlayer = self.bot.music.players[message.guild.id]
+        except KeyError:
+            if message.guild.me.guild_permissions.manage_messages:
+                try:
+                    await message.delete()
+                except:
+                    traceback.print_exc()
+        else:
+            await player.purge_request_channel()
+
     @commands.Cog.listener("on_song_request")
     async def song_requests(self, ctx: Optional[CustomContext], message: disnake.Message):
 
@@ -3765,14 +3778,14 @@ class Music(commands.Cog):
                     if data['player_controller']["channel"] != str(message.channel.id):
                         return
                     if message.is_system():
-                        await player.purge_request_channel()
+                        await self.delete_message(message)
 
         except AttributeError:
             pass
 
         if message.author.bot:
             if message.is_system() and not isinstance(message.channel, disnake.Thread):
-                await player.purge_request_channel()
+                await self.delete_message(message)
             return
 
         if not message.content:
@@ -3787,19 +3800,19 @@ class Music(commands.Cog):
                 attachment = message.attachments[0]
             except IndexError:
                 await message.channel.send(f"{message.author.mention} você deve enviar um link/nome da música.",
-                                           delete_after=9)
+                                           delete_after=10)
                 return
 
             else:
 
                 if attachment.size > 18000000:
                     await message.channel.send(f"{message.author.mention} o arquivo que você enviou deve ter o tamanho "
-                                               f"inferior a 18mb.", delete_after=9)
+                                               f"inferior a 18mb.", delete_after=10)
                     return
 
                 if attachment.content_type not in self.audio_formats:
                     await message.channel.send(f"{message.author.mention} o arquivo que você enviou deve ter o tamanho "
-                                               f"inferior a 18mb.", delete_after=9)
+                                               f"inferior a 18mb.", delete_after=10)
                     return
 
                 message.content = attachment.url
@@ -3810,17 +3823,10 @@ class Music(commands.Cog):
 
             await message.channel.send(
                 f"{message.author.mention} você deve aguardar seu pedido de música anterior carregar...",
-                delete_after=7,
+                delete_after=10,
             )
 
-            try:
-                await player.purge_request_channel()
-            except AttributeError:
-                if message.channel.permissions_for(message.guild.me).manage_messages:
-                    try:
-                        await message.delete()
-                    except:
-                        pass
+            await self.delete_message(message)
             return
 
         message.content = message.content.strip("<>")
@@ -3870,18 +3876,6 @@ class Music(commands.Cog):
 
             await self.parse_song_request(message, text_channel, data, response=msg)
 
-            try:
-                player = self.bot.music.players[message.guild.id]
-            except KeyError:
-                if message.channel.permissions_for(message.guild.me).manage_messages:
-                    try:
-                        await message.delete()
-                    except:
-                        pass
-            else:
-                await player.purge_request_channel()
-
-
         except GenericError as e:
             error = f"{message.author.mention}. {e}"
 
@@ -3891,21 +3885,18 @@ class Music(commands.Cog):
 
         if error:
 
-            try:
-                await player.purge_request_channel()
-            except AttributeError:
-                if message.channel.permissions_for(message.guild.me).manage_messages:
-                    try:
-                        await message.delete()
-                    except:
-                        pass
+            await self.delete_message(message)
+
             try:
                 if msg:
-                    await msg.edit(content=error, embed=None, view=None, delete_after=7)
+                    await msg.edit(content=error, embed=None, view=None, delete_after=10)
                 else:
-                    await message.channel.send(error)
+                    await message.channel.send(error, delete_after=10)
             except:
                 traceback.print_exc()
+
+        else:
+            await self.delete_message(message)
 
         await self.song_request_concurrency.release(message)
 
