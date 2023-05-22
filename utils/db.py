@@ -254,7 +254,7 @@ class MongoDatabase(BaseDB):
         return await self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data}, upsert=True)
 
     async def query_data(self, db_name: str, collection: str, filter: dict = None, limit=100) -> list:
-        return await self._connect[collection][db_name].find(filter or {})
+        return [d async for d in self._connect[collection][db_name].find(filter or {})]
 
     async def delete_data(self, id_, db_name: str, collection: str):
         return await self._connect[collection][db_name].delete_one({'_id': str(id_)})
