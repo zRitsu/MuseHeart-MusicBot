@@ -3252,14 +3252,8 @@ class Music(commands.Cog):
         player.message = None
         await thread.edit(archived=True, locked=True, name=f"arquivado: {thread.name}")
 
-    @commands.Cog.listener('on_ready')
+    @commands.Cog.listener('on_resumed')
     async def resume_players_ready(self):
-
-        try:
-            if not self.bot.player_resumed:
-                return
-        except AttributeError:
-            pass
 
         for guild_id in list(self.bot.music.players):
 
@@ -3271,6 +3265,11 @@ class Music(commands.Cog):
                     vc = player.guild.me.voice.channel
                 except AttributeError:
                     vc = player.last_channel
+
+                try:
+                    player.guild.voice_client.cleanup()
+                except:
+                    pass
 
                 await player.connect(vc.id)
 
