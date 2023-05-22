@@ -3962,7 +3962,7 @@ class Music(commands.Cog):
                         f'{"-" * 15}'
                     )
                     invite = None
-                    del global_data["listen_along_invites"][str(message.channel.id)]
+                    del global_data["listen_along_invites"][str(message.author.voice.channel.id)]
                     await self.bot.update_global_data(message.guild.id, global_data, db_name=DBModel.guilds)
 
             player: LavalinkPlayer = self.bot.music.get_player(
