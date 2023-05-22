@@ -4372,8 +4372,14 @@ class Music(commands.Cog):
 
         if payload.reason == "FINISHED":
             player.set_command_log()
+
         elif payload.reason == "STOPPED":
+
+            if len(player.queue) == 0:
+                return
+
             player.ignore_np_once = True
+
         else:
             return
 
