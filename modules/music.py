@@ -3765,14 +3765,14 @@ class Music(commands.Cog):
                     if data['player_controller']["channel"] != str(message.channel.id):
                         return
                     if message.is_system():
-                        await message.delete()
+                        await player.purge_request_channel()
 
         except AttributeError:
             pass
 
         if message.author.bot:
             if message.is_system() and not isinstance(message.channel, disnake.Thread):
-                await message.delete()
+                await player.purge_request_channel()
             return
 
         if not message.content:
@@ -3807,9 +3807,20 @@ class Music(commands.Cog):
         try:
             await self.song_request_concurrency.acquire(message)
         except:
+
             await message.channel.send(
                 f"{message.author.mention} você deve aguardar seu pedido de música anterior carregar...",
-                delete_after=10)
+                delete_after=7,
+            )
+
+            try:
+                await player.purge_request_channel()
+            except AttributeError:
+                if message.channel.permissions_for(message.guild.me).manage_messages:
+                    try:
+                        await message.delete()
+                    except:
+                        pass
             return
 
         message.content = message.content.strip("<>")
@@ -3860,9 +3871,16 @@ class Music(commands.Cog):
             await self.parse_song_request(message, text_channel, data, response=msg)
 
             try:
-                await msg.delete()
-            except:
-                pass
+                player = self.bot.music.players[message.guild.id]
+            except KeyError:
+                if message.channel.permissions_for(message.guild.me).manage_messages:
+                    try:
+                        await message.delete()
+                    except:
+                        pass
+            else:
+                await player.purge_request_channel()
+
 
         except GenericError as e:
             error = f"{message.author.mention}. {e}"
@@ -3874,15 +3892,18 @@ class Music(commands.Cog):
         if error:
 
             try:
-                await message.delete()
-            except Exception:
-                traceback.print_exc()
-
+                await player.purge_request_channel()
+            except AttributeError:
+                if message.channel.permissions_for(message.guild.me).manage_messages:
+                    try:
+                        await message.delete()
+                    except:
+                        pass
             try:
                 if msg:
                     await msg.edit(content=error, embed=None, view=None, delete_after=7)
                 else:
-                    await message.channel.send(error, delete_after=7)
+                    await message.channel.send(error)
             except:
                 traceback.print_exc()
 
@@ -3916,8 +3937,6 @@ class Music(commands.Cog):
 
         try:
             player = self.bot.music.players[message.guild.id]
-            if player.static and player.text_channel == message.channel:
-                await message.delete()
         except KeyError:
             skin = data["player_controller"]["skin"]
             static_skin = data["player_controller"]["static_skin"]

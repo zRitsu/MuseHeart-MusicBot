@@ -327,6 +327,7 @@ class LavalinkPlayer(wavelink.Player):
         self.mini_queue_feature = False
         self.mini_queue_enabled = False
         self.is_resuming = False
+        self.is_purging = False
         self.last_channel: Optional[disnake.VoiceChannel] = None
 
         self._rpc_update_task: Optional[asyncio.Task] = None
@@ -383,6 +384,11 @@ class LavalinkPlayer(wavelink.Player):
 
     async def channel_cleanup(self):
 
+        if self.is_purging:
+            return
+
+        self.is_purging = True
+
         try:
             parent = self.text_channel.parent
         except AttributeError:
@@ -390,12 +396,17 @@ class LavalinkPlayer(wavelink.Player):
         else:
             if isinstance(parent, disnake.ForumChannel) and self.text_channel.owner_id == self.bot.user.id and \
                     self.text_channel.message_count > 1:
-                await self.text_channel.purge(check=lambda m: m.channel.id != m.id and not m.is_system())
+                try:
+                    await self.text_channel.purge(check=lambda m: m.channel.id != m.id and not m.is_system())
+                except:
+                    pass
+                self.is_purging = False
                 return
 
         try:
             self.last_message_id = int(self.last_message_id)
         except TypeError:
+            self.is_purging = False
             return
 
         if isinstance(self.text_channel, disnake.Thread):
@@ -404,7 +415,42 @@ class LavalinkPlayer(wavelink.Player):
             check = (lambda m: m.id != self.last_message_id)
 
         if self.static and self.last_message_id != self.text_channel.last_message_id:
-            await self.text_channel.purge(check=check)
+            try:
+                await self.text_channel.purge(check=check)
+            except:
+                pass
+
+        await asyncio.sleep(2)
+        self.is_purging = False
+
+    async def purge_request_channel(self):
+
+        if self.is_purging or not self.text_channel.permissions_for(self.guild.me).manage_messages:
+            return
+
+        self.is_purging = True
+
+        await asyncio.sleep(15)
+
+        def check(m: disnake.Message):
+
+            try:
+                if m.id == self.message.id:
+                    return
+            except AttributeError:
+                pass
+
+            if m.author.id == self.bot.user.id and (disnake.utils.utcnow() - m.created_at).total_seconds() < 10:
+                return
+
+            return True
+
+        try:
+            await self.text_channel.purge(limit=100, check=check)
+        except:
+            pass
+
+        self.is_purging = False
 
     async def connect(self, channel_id: int, self_mute: bool = False, self_deaf: bool = False):
         self.last_channel = self.bot.get_channel(channel_id)
