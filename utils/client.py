@@ -311,6 +311,10 @@ class BotPool:
                 return True
 
             @bot.listen()
+            async def on_disconnect():
+                print(f'{bot.user} - [{bot.user.id}] Indisponível (conexão com o discord perdida).')
+
+            @bot.listen()
             async def on_ready():
 
                 if not bot.bot_ready:
