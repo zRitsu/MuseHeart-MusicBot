@@ -397,16 +397,7 @@ class PlayerSession(commands.Cog):
 
         return guild_data
 
-    async def save_session(self, player: LavalinkPlayer, data: dict):
-
-        if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
-            await self.bot.pool.mongo_database.update_data(
-                id_=str(player.guild.id),
-                data=data,
-                collection="player_sessions",
-                db_name=str(self.bot.user.id)
-            )
-            return
+    async def check_session(self, player: LavalinkPlayer):
 
         try:
             player.conn_cursor
@@ -419,17 +410,40 @@ class PlayerSession(commands.Cog):
             player.conn = conn
             player.conn_cursor = await conn.cursor()
 
+    async def save_session(self, player: LavalinkPlayer, data: dict):
+
+        if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
+            await self.bot.pool.mongo_database.update_data(
+                id_=str(player.guild.id),
+                data=data,
+                collection="player_sessions",
+                db_name=str(self.bot.user.id)
+            )
+            return
+
+        await self.check_session(player)
+
         json_str = json.dumps(data)
 
         try:
             await player.conn_cursor.execute('UPDATE dados SET json_data = ? WHERE id = ?', (json_str, 1))
         except:
-            await player.conn_cursor.execute('''
-                CREATE TABLE IF NOT EXISTS dados (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    json_data TEXT
-                )
-            ''')
+            try:
+                await player.conn_cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS dados (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        json_data TEXT
+                    )
+                ''')
+            except ValueError:
+                try:
+                    player.conn.close()
+                except:
+                    pass
+                player.conn_cursor = None
+                await self.save_session(player, data)
+                return
+
             await player.conn_cursor.execute('INSERT INTO dados (json_data) VALUES (?)', (json_str,))
 
         await player.conn.commit()
