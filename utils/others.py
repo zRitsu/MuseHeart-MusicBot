@@ -450,13 +450,26 @@ def queue_track_index(inter: disnake.AppCmdInter, bot: BotCore, query: str, matc
 
     player = bot.music.players[inter.guild_id]
 
+    try:
+        query, unique_id = query.split(" || ID > ")
+    except:
+        unique_id = None
+
     query_split = query.lower().split()
 
     tracklist = []
 
-    match_count = match_count
+    count = int(match_count)
 
     for counter, track in enumerate(player.queue):
+
+        if unique_id is not None:
+
+            if unique_id == track.unique_id:
+                return [(counter, track,)]
+
+            if match_count < 2:
+                continue
 
         track_title = track.title.lower().split()
 
@@ -472,8 +485,8 @@ def queue_track_index(inter: disnake.AppCmdInter, bot: BotCore, query: str, matc
         if q_found == len(query_split):
 
             tracklist.append((counter, track,))
-            match_count -= 1
-            if not match_count:
+            count -= 1
+            if not count:
                 break
 
     return tracklist

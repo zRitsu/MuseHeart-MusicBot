@@ -2,6 +2,7 @@
 from __future__ import annotations
 import datetime
 import random
+import uuid
 from itertools import cycle
 import disnake
 import asyncio
@@ -41,7 +42,7 @@ class PartialPlaylist:
 
 class PartialTrack:
 
-    __slots__ = ('id', 'thumb', 'source_name', 'info', 'playlist')
+    __slots__ = ('id', 'thumb', 'source_name', 'info', 'playlist', 'unique_id')
 
     def __init__(self, *, uri: str = "", title: str = "", author="", thumb: str = "", duration: int = 0,
                  requester: int = 0, track_loops: int = 0, source_name: str = "", info: dict = None,
@@ -63,6 +64,7 @@ class PartialTrack:
         }
 
         self.id = ""
+        self.unique_id = str(uuid.uuid4().hex)[:10]
         self.thumb = self.info["extra"]["thumb"]
         self.playlist: Optional[PartialPlaylist] = playlist
 
@@ -173,7 +175,7 @@ class LavalinkPlaylist:
 
 class LavalinkTrack(wavelink.Track):
 
-    __slots__ = ('extra', 'playlist')
+    __slots__ = ('extra', 'playlist', 'unique_id')
 
     def __init__(self, *args, **kwargs):
         try:
@@ -183,6 +185,7 @@ class LavalinkTrack(wavelink.Track):
         super().__init__(*args, **kwargs)
         self.title = fix_characters(self.title)
         self.info["title"] = self.title
+        self.unique_id = str(uuid.uuid4().hex)[:10]
 
         try:
             self.info['sourceName']
