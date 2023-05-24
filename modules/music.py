@@ -749,7 +749,12 @@ class Music(commands.Cog):
 
         try:
             player = bot.music.players[guild.id]
-            node = player.node
+
+            if not server:
+                node = player.node
+            else:
+                node = bot.music.get_node(server) or player.node
+
             guild_data = {}
 
         except KeyError:
