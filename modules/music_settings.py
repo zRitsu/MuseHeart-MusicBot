@@ -969,8 +969,11 @@ class MusicSettings(commands.Cog):
             colour=bot.get_color(guild.me)
         )
 
-        if bot.user.id != self.bot.user.id:
-            embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
+        try:
+            if bot.user.id != self.bot.user.id and inter.free_bot:
+                embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
+        except AttributeError:
+            pass
 
         msg = await func(
             embed=embed,
