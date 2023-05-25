@@ -4289,9 +4289,9 @@ class Music(commands.Cog):
             await player.connect(vc_id)
             return
 
-        if payload.code == 4014 or not player.guild.me.voice:
+        if payload.code == 4014:
 
-            if not player.bot.is_ready():
+            if not player.bot.is_ready() or player.guild.me.voice:
                 return
 
             if player.static:
