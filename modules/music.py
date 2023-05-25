@@ -1520,7 +1520,7 @@ class Music(commands.Cog):
             embed = disnake.Embed(
                 color=self.bot.get_color(guild.me),
                 description= f"⤵️ **⠂{inter.author.mention} pulou para a música:**\n"
-                             f"╰[`{fix_characters(track.title, 43)}`]({track.uri})"
+                             f"╰[`{fix_characters(track.title, 43)}`]({track.uri}){player.controller_link}"
             )
 
             try:
@@ -1545,6 +1545,7 @@ class Music(commands.Cog):
                     color=self.bot.get_color(guild.me),
                     description=f"⏭️ **⠂{inter.author.mention} pulou a música:\n"
                                 f"╰[`{fix_characters(player.current.title, 43)}`]({player.current.uri})**"
+                                f"{player.controller_link}"
                 )
 
                 try:
@@ -1624,7 +1625,8 @@ class Music(commands.Cog):
 
             txt = [
                 "voltou para a música atual.",
-                f"⏮️ **⠂{inter.author.mention} voltou para a música:\n╰[`{fix_characters(t.title, 43)}`]({t.uri})**{player.controller_link}{player.controller_link}"
+                f"⏮️ **⠂{inter.author.mention} voltou para a música:\n╰[`{fix_characters(t.title, 43)}`]({t.uri})**"
+                f"{player.controller_link}"
             ]
 
             await self.interaction_message(inter, txt, emoji="⏮️", store_embed=True)
