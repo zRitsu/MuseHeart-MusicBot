@@ -3295,6 +3295,8 @@ class Music(commands.Cog):
     @commands.Cog.listener('on_resumed')
     async def resume_players_ready(self):
 
+        print(f'{self.bot.user} - [{self.bot.user.id}] reconectado com a API do discord.')
+
         for guild_id in list(self.bot.music.players):
 
             try:
@@ -3315,7 +3317,7 @@ class Music(commands.Cog):
 
                 if not player.is_paused and not player.is_playing:
                     await player.process_next()
-                print(f"{self.bot.user} - Player Reconectado: {player.guild.name} [{guild_id}]")
+                print(f"{self.bot.user} - {player.guild.name} [{guild_id}] - Player Reconectado no canal de voz")
             except:
                 traceback.print_exc()
 
