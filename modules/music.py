@@ -1626,7 +1626,6 @@ class Music(commands.Cog):
             txt = [
                 "voltou para a música atual.",
                 f"⏮️ **⠂{inter.author.mention} voltou para a música:\n╰[`{fix_characters(t.title, 43)}`]({t.uri})**"
-                f"{player.controller_link}"
             ]
 
             await self.interaction_message(inter, txt, emoji="⏮️", store_embed=True)
