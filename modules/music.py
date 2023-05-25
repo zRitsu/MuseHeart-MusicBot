@@ -23,7 +23,7 @@ from utils.music.checks import check_voice, has_player, has_source, is_requester
     check_channel_limit, check_stage_topic
 from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
-    YOUTUBE_VIDEO_REG, google_search, percentage, music_source_image
+    YOUTUBE_VIDEO_REG, google_search, percentage, music_source_image, perms_translations
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, fav_list, queue_track_index, \
     pool_command
@@ -271,8 +271,8 @@ class Music(commands.Cog):
         if not isinstance(guild.me.voice.channel, disnake.StageChannel):
             raise GenericError("**Você deve estar em um canal de palco para ativar/desativar esse sistema.**")
 
-        if not guild.me.voice.channel.permissions_for(guild.me).mute_members:
-            raise GenericError(f"**{bot.user.mention} precisa da permissão de silenciar membros.**")
+        if not guild.me.guild_permissions.manage_guild:
+            raise GenericError(f"{bot.user.mention} não possui permissão de: **{perms_translations['manage_guild']}.**")
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
