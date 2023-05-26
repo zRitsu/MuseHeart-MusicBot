@@ -3293,10 +3293,8 @@ class Music(commands.Cog):
         player.message = None
         await thread.edit(archived=True, locked=True, name=f"arquivado: {thread.name}")
 
-    @commands.Cog.listener('on_resumed')
+    @commands.Cog.listener('on_ready')
     async def resume_players_ready(self):
-
-        print(f'{self.bot.user} - [{self.bot.user.id}] reconectado com a API do discord.')
 
         for guild_id in list(self.bot.music.players):
 
