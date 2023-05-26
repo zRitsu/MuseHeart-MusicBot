@@ -210,12 +210,29 @@ class PlayerSession(commands.Cog):
                     creator = None
 
                 if message is None:
+
                     try:
                         message = await text_channel.fetch_message(int(data["message"]))
-                    except Exception as e:
-                        print(f"Falha ao obter mensagem: {repr(e)}\n"
-                              f"channel_id: {text_channel.id} | message_id {data['message']}")
-                        message = None
+                    except:
+                        if not text_channel.permissions_for(guild.me).read_message_history:
+                            print(f"{self.bot.user} - Não foi possível obter a mensagem e não tem permissão para "
+                                  f"ler o histórico de mensagens. O player controller será reenviado.\n"
+                                  f"Servidor: {guild} [{guild.id}]\n"
+                                  f"Canal: {text_channel.name} [{text_channel.id}]")
+                        else:
+                            try:
+                                async for msg in text_channel.history(limit=100):
+
+                                    if msg.reference:
+                                        continue
+
+                                    if str(msg.id) == data["message"]:
+                                        message = msg
+                                        break
+
+                            except Exception as e:
+                                print(f"{self.bot.user} - Falha ao obter mensagem: {repr(e)}\n"
+                                      f"channel_id: {text_channel.id} | message_id {data['message']}")
 
                 try:
                     player: LavalinkPlayer = self.bot.music.get_player(
