@@ -4179,6 +4179,9 @@ class Music(commands.Cog):
 
         await self.bot.wait_until_ready()
 
+        if str(self.bot.user.id) in self.bot.config["INTERACTION_BOTS_CONTROLLER"]:
+            return
+
         for k, v in data.items():
             self.bot.loop.create_task(self.connect_node(v))
 
