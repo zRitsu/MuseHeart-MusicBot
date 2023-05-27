@@ -209,6 +209,8 @@ class PlayerSession(commands.Cog):
                 except:
                     creator = None
 
+                message_without_thread = None
+
                 if message is None:
 
                     try:
@@ -223,12 +225,20 @@ class PlayerSession(commands.Cog):
                             try:
                                 async for msg in text_channel.history(limit=100):
 
+                                    if message.author.id != self.bot.user.id:
+                                        continue
+
                                     if msg.reference:
                                         continue
 
-                                    if str(msg.id) == data["message"]:
+                                    if msg.thread:
                                         message = msg
                                         break
+
+                                    if message_without_thread:
+                                        continue
+
+                                    message_without_thread = msg
 
                             except Exception as e:
                                 print(f"{self.bot.user} - Falha ao obter mensagem: {repr(e)}\n"
@@ -241,7 +251,7 @@ class PlayerSession(commands.Cog):
                         cls=LavalinkPlayer,
                         guild=guild,
                         channel=text_channel,
-                        message=message,
+                        message=message or message_without_thread,
                         skin=data["skin"],
                         skin_static=data["skin_static"],
                         player_creator=creator,
