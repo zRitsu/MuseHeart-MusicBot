@@ -4401,12 +4401,12 @@ class Music(commands.Cog):
         if not cog:
             return
 
-        await cog.save_info(player)
-
         try:
             player.queue_updater_task.cancel()
         except:
             pass
+
+        await cog.save_info(player)
 
         player.queue_updater_task = self.bot.loop.create_task(cog.queue_updater_task(player))
 
