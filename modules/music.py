@@ -4059,7 +4059,7 @@ class Music(commands.Cog):
                     emoji="🎶"
                 )
                 try:
-                    await message.delete()
+                    await response.delete()
                 except:
                     pass
 
@@ -4098,7 +4098,7 @@ class Music(commands.Cog):
                     emoji="🎵"
                 )
                 try:
-                    await message.delete()
+                    await response.delete()
                 except:
                     pass
 
