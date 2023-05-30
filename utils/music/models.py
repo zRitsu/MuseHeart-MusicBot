@@ -854,17 +854,21 @@ class LavalinkPlayer(wavelink.Player):
         if rpc_update:
             await self.process_rpc()
 
-        if self.static:
-            if self.skin_static.startswith("> custom_skin: "):
-                data = skin_converter(self.custom_skin_static_data[self.skin_static[15:]], player=self)
-            else:
-                data = self.bot.player_static_skins[self.skin_static].load(self)
+        try:
+            if self.static:
+                if self.skin_static.startswith("> custom_skin: "):
+                    data = skin_converter(self.custom_skin_static_data[self.skin_static[15:]], player=self)
+                else:
+                    data = self.bot.player_static_skins[self.skin_static].load(self)
 
-        else:
-            if self.skin.startswith("> custom_skin: "):
-                data = skin_converter(self.custom_skin_data[self.skin[15:]], player=self)
             else:
-                data = self.bot.player_skins[self.skin_static].load(self)
+                if self.skin.startswith("> custom_skin: "):
+                    data = skin_converter(self.custom_skin_data[self.skin[15:]], player=self)
+                else:
+                    data = self.bot.player_skins[self.skin_static].load(self)
+        except OverflowError:
+            await self.process_next()
+            return
 
         if data == self.last_data:
 
