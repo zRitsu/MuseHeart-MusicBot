@@ -4058,6 +4058,10 @@ class Music(commands.Cog):
                          f"({tracks.tracks[0].playlist_url}) `({len(tracks.tracks)})`.",
                     emoji="🎶"
                 )
+                try:
+                    await message.delete()
+                except:
+                    pass
 
         except AttributeError:
 
@@ -4093,6 +4097,10 @@ class Music(commands.Cog):
                     text=f"{message.author.mention} adicionou [`{fix_characters(tracks[0].title, 20)}`]({tracks[0].uri}) `({duration})`.",
                     emoji="🎵"
                 )
+                try:
+                    await message.delete()
+                except:
+                    pass
 
         if not player.is_connected:
             await self.do_connect(
