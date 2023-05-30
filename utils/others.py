@@ -322,7 +322,7 @@ async def send_idle_embed(
 
         message = await bot.get_channel(target.id).send(embed=embed, components=components)
 
-    if not message.pinned and not is_forum and target.guild.me.guild_permissions.manage_messages:
+    if isinstance(message, (disnake.Thread, disnake.TextChannel)) and not message.pinned and not is_forum and target.guild.me.guild_permissions.manage_messages:
         await message.pin(reason="Player controller")
 
     return message
