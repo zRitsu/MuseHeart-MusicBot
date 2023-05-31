@@ -161,7 +161,7 @@ def pool_command(*args, **kwargs)-> PoolCommand:
 
 def sync_message(bot: BotCore):
     app_commands_invite = f"https://discord.com/api/oauth2/authorize?client_id={bot.user.id}&scope=applications.commands"
-    bot_invite = disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))
+    bot_invite = disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'), redirect_uri=bot.config['INVITE_REDIRECT_URL'])
 
     return f"`Caso os comandos de barra não apareçam,` [`clique aqui`]({app_commands_invite}) `para me permitir " \
            "criar comandos de barra no servidor.`\n\n" \
@@ -367,8 +367,11 @@ async def select_bot_pool(inter, first=False):
             bots[pb.user.id] = pb
 
     if not bots:
+
+        kwargs = {"redirect_url": inter.bot.config['INVITE_REDIRECT_URL']} if inter.bot.config['INVITE_REDIRECT_URL'] else {}
+
         bot_invites = "\n".join(
-            f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, permissions=disnake.Permissions(b.config['INVITE_PERMISSIONS']), scopes=('bot'))})"
+            f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, permissions=disnake.Permissions(b.config['INVITE_PERMISSIONS']), scopes=('bot'), **kwargs)})"
             for b in inter.bot.pool.bots if b.appinfo.bot_public)
 
         if bot_invites:

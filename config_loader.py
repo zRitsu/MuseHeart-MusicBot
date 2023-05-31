@@ -31,6 +31,7 @@ DEFAULT_CONFIG = {
     "INTERACTION_BOTS_CONTROLLER": "",
     "KILL_ON_429": True,
     "PREFIXED_POOL_TIMEOUT": 4,
+    "INVITE_REDIRECT_URL": "",
 
     ################
     ### Database ###
