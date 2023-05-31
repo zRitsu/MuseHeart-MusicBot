@@ -368,7 +368,7 @@ async def select_bot_pool(inter, first=False):
 
     if not bots:
 
-        kwargs = {"redirect_url": inter.bot.config['INVITE_REDIRECT_URL']} if inter.bot.config['INVITE_REDIRECT_URL'] else {}
+        kwargs = {"redirect_uri": inter.bot.config['INVITE_REDIRECT_URL']} if inter.bot.config['INVITE_REDIRECT_URL'] else {}
 
         bot_invites = "\n".join(
             f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, permissions=disnake.Permissions(b.config['INVITE_PERMISSIONS']), scopes=('bot'), **kwargs)})"

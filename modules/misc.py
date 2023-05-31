@@ -475,7 +475,7 @@ class Misc(commands.Cog):
             if (bot.appinfo and not bot.appinfo.bot_public and (not await bot.is_owner(inter.author)) or str(bot.user.id) in bot.config['INTERACTION_BOTS_CONTROLLER']):
                 continue
 
-            kwargs = {"redirect_url": self.bot.config['INVITE_REDIRECT_URL']} if self.bot.config['INVITE_REDIRECT_URL'] else {}
+            kwargs = {"redirect_uri": self.bot.config['INVITE_REDIRECT_URL']} if self.bot.config['INVITE_REDIRECT_URL'] else {}
 
             invite = f"[`{disnake.utils.escape_markdown(str(bot.user.name))}`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'), **kwargs)})"
 

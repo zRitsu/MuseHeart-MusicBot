@@ -109,7 +109,7 @@ class IndexHandler(tornado.web.RequestHandler):
         pending_bots = set()
         ready_bots = set()
 
-        kwargs = {"redirect_url": self.config['INVITE_REDIRECT_URL']} if self.config['INVITE_REDIRECT_URL'] else {}
+        kwargs = {"redirect_uri": self.config['INVITE_REDIRECT_URL']} if self.config['INVITE_REDIRECT_URL'] else {}
 
         for bot in sorted(self.pool.bots, key=lambda b: b.identifier):
 
