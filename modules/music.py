@@ -3739,25 +3739,19 @@ class Music(commands.Cog):
     async def delete_message(self, message: disnake.Message):
 
         try:
-            player: LavalinkPlayer = self.bot.music.players[message.guild.id]
-        except KeyError:
+            is_forum = isinstance(message.channel.parent, disnake.ForumChannel)
+        except AttributeError:
+            is_forum = False
+
+        if message.is_system() and is_forum:
+            return
+
+        if message.guild.me.guild_permissions.manage_messages:
 
             try:
-                is_forum = isinstance(message.channel.parent, disnake.ForumChannel)
-            except AttributeError:
-                is_forum = False
-
-            if message.is_system() and is_forum:
-                return
-
-            if message.guild.me.guild_permissions.manage_messages:
-
-                try:
-                    await message.delete()
-                except:
-                    traceback.print_exc()
-        else:
-            await player.purge_request_channel()
+                await message.delete()
+            except:
+                traceback.print_exc()
 
     @commands.Cog.listener("on_song_request")
     async def song_requests(self, ctx: Optional[CustomContext], message: disnake.Message):
@@ -3946,9 +3940,6 @@ class Music(commands.Cog):
             except:
                 traceback.print_exc()
 
-        else:
-            await self.delete_message(message)
-
         await self.song_request_concurrency.release(message)
 
     async def parse_song_request(self, message, text_channel, data, *, response=None, attachment: disnake.Attachment=None):
@@ -4058,10 +4049,9 @@ class Music(commands.Cog):
                          f"({tracks.tracks[0].playlist_url}) `({len(tracks.tracks)})`.",
                     emoji="🎶"
                 )
-                try:
-                    await response.delete()
-                except:
-                    pass
+                await self.delete_message(message)
+                if response:
+                    await self.delete_message(response)
 
         except AttributeError:
 
@@ -4097,10 +4087,9 @@ class Music(commands.Cog):
                     text=f"{message.author.mention} adicionou [`{fix_characters(tracks[0].title, 20)}`]({tracks[0].uri}) `({duration})`.",
                     emoji="🎵"
                 )
-                try:
-                    await response.delete()
-                except:
-                    pass
+                await self.delete_message(message)
+                if response:
+                    await self.delete_message(response)
 
         if not player.is_connected:
             await self.do_connect(
