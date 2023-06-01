@@ -393,11 +393,6 @@ class LavalinkPlayer(wavelink.Player):
 
     async def channel_cleanup(self):
 
-        if self.is_purging:
-            return
-
-        self.is_purging = True
-
         try:
             parent = self.text_channel.parent
         except AttributeError:
@@ -409,72 +404,26 @@ class LavalinkPlayer(wavelink.Player):
                     await self.text_channel.purge(check=lambda m: m.channel.id != m.id and (not m.pinned or not m.is_system()))
                 except:
                     pass
-                self.is_purging = False
                 return
 
         try:
             self.last_message_id = int(self.last_message_id)
         except TypeError:
-            self.is_purging = False
             return
 
         if self.static and self.last_message_id != self.text_channel.last_message_id:
 
             if isinstance(self.text_channel, disnake.Thread):
-                check = (lambda m: m.id != self.last_message_id and (not self.message.pinned or not m.is_system()))
+                check = (lambda m: m.id != self.last_message_id and (not m.pinned or not m.is_system()))
             else:
-                check = (lambda m: m.id != self.last_message_id and not self.message.pinned)
+                check = (lambda m: m.id != self.last_message_id and not m.pinned)
 
             try:
                 await self.text_channel.purge(check=check)
             except:
+                traceback.print_exc()
                 pass
 
-            await asyncio.sleep(2)
-
-        self.is_purging = False
-
-    async def purge_request_channel(self):
-
-        if self.is_purging or not self.guild.me.guild_permissions.manage_messages:
-            return
-
-        self.is_purging = True
-
-        await asyncio.sleep(15)
-
-        def check(m: disnake.Message):
-
-            try:
-                if m.id == self.message.id:
-                    return
-            except AttributeError:
-                pass
-
-            if m.pinned:
-                return
-
-            try:
-                is_forum = isinstance(m.channel.parent, disnake.ForumChannel)
-            except AttributeError:
-                is_forum = False
-
-            if m.is_system():
-
-                if is_forum:
-                    return
-
-            elif m.author.id == self.bot.user.id:
-                return
-
-            return True
-
-        try:
-            await self.text_channel.purge(limit=100, check=check)
-        except:
-            pass
-
-        self.is_purging = False
 
     async def connect(self, channel_id: int, self_mute: bool = False, self_deaf: bool = False):
         self.last_channel = self.bot.get_channel(channel_id)
