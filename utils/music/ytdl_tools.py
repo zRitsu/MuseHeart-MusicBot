@@ -39,31 +39,31 @@ YTDL_OPTS = {
 
 class YTDLTools:
 
-    def __init__(self):
-        self.extractors = yt_dlp.list_extractors()
+    extractors = [
+        {
+            "name": type(e).__name__.lower(),
+            "ie_key": e.ie_key(),
+            "regex": e._VALID_URL,
+            "age_limit": e.age_limit
+        } for e in yt_dlp.list_extractors() if e._VALID_URL
+    ]
 
     def extract_info(self, url: str):
 
         with yt_dlp.YoutubeDL(YTDL_OPTS) as ytdl:
             return ytdl.extract_info(url=url, download=False)
 
-    async def get_track_info(self, url: str, user: disnake.Member, loop = None):
+    async def get_track_info(self, url: str, user: disnake.Member = None, loop = None):
 
         for e in self.extractors:
 
-            if not e._VALID_URL:
+            if not (matches := re.compile(e['regex']).match(url)) or not matches.groups():
                 continue
 
-            if not (matches := re.compile(e._VALID_URL).match(url)):
+            if any(ee in e["name"] for ee in exclude_extractors):
                 continue
 
-            if not matches.groups():
-                continue
-
-            if any(ee in type(e).__name__.lower() for ee in exclude_extractors):
-                continue
-
-            if e.age_limit > 17 and e.ie_key() != "Twitter":
+            if e["age_limit"] > 17 and e["ie_key"] != "Twitter":
                 raise GenericError("**Este link contém conteúdo para maiores de 18 anos!**")
 
             if not loop:
@@ -104,3 +104,16 @@ class YTDLTools:
             })
 
             return [t]
+
+if __name__ == "__main__":
+
+    ydl = YTDLTools()
+    url = "https://www.youtube.com/channel/UC9AiU8Srqw7iPu3UcR9IJ8g"
+    for e in ydl.extractors:
+
+        if e['ie_key'] == "Generic":
+            continue
+
+        a = re.compile(e['regex']).match(url)
+        if a:
+            print(e['ie_key'], e['name'])
