@@ -4817,23 +4817,4 @@ class Music(commands.Cog):
 
 
 def setup(bot: BotCore):
-
-    if not bot.config["USE_YTDL"]:
-        return
-
-    if not hasattr(bot.pool, 'ytdl'):
-
-        from yt_dlp import YoutubeDL
-
-        bot.pool.ytdl = YoutubeDL(
-            {
-                'ignoreerrors': True,
-                'extract_flat': True,
-                'quiet': True,
-                'no_warnings': True,
-                'lazy_playlist': True,
-                'simulate': True
-            }
-        )
-
     bot.add_cog(Music(bot))
