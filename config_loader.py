@@ -121,6 +121,11 @@ DEFAULT_CONFIG = {
     "MEMBERS_INTENT": False,
     "PRESENCES_INTENT": False,
     "MESSAGE_CONTENT_INTENT": True,
+
+    ##############
+    ### Tests ####
+    ##############
+    "USE_YTDL": False
 }
 
 
@@ -211,6 +216,8 @@ def load_config():
         "MEMBERS_INTENT",
         "PRESENCES_INTENT",
         "MESSAGE_CONTENT_INTENT",
+
+        "USE_YTDL",
     ]:
         if CONFIG[i] in (True, False, None):
             continue

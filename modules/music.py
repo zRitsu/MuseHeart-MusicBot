@@ -12,7 +12,6 @@ import aiohttp
 import disnake
 from aiohttp import ClientConnectorCertificateError
 from disnake.ext import commands
-import youtube_dl
 
 import wavelink
 
@@ -78,19 +77,6 @@ class Music(commands.Cog):
 
         self.music_settings_cooldown = commands.CooldownMapping.from_cooldown(rate=3, per=15,
                                                                               type=commands.BucketType.guild)
-
-        if not hasattr(bot.pool, 'ytdl'):
-            bot.pool.ytdl = youtube_dl.YoutubeDL(
-                    {
-                        'ignoreerrors': True,
-                        'extract_flat': True,
-                        'quiet': True,
-                        'no_warnings': True,
-                        'lazy_playlist': True,
-                        'simulate': True
-                    }
-                )
-        self.ytdl = bot.pool.ytdl
 
     desc_prefix = "🎶 [Música] 🎶 | "
 
@@ -933,6 +919,10 @@ class Music(commands.Cog):
                 query = user_data["fav_links"][query[7:]]
 
             else:
+
+                if not self.bot.config["USE_YTDL"]:
+                    raise GenericError("**Não há suporte a esse tipo de requisição no momento...**")
+
                 query = user_data["integration_links"][query[7:]]
 
                 loop = self.bot.loop or asyncio.get_event_loop()
@@ -942,7 +932,7 @@ class Music(commands.Cog):
                 except:
                     pass
 
-                info = await loop.run_in_executor(None, lambda: self.ytdl.extract_info(query, download=False))
+                info = await loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(query, download=False))
 
                 if not info["entries"]:
                     raise GenericError(f"**Conteúdo indisponível (ou privado):**\n{query}")
@@ -4827,4 +4817,23 @@ class Music(commands.Cog):
 
 
 def setup(bot: BotCore):
+
+    if not bot.config["USE_YTDL"]:
+        return
+
+    if not hasattr(bot.pool, 'ytdl'):
+
+        from yt_dlp import YoutubeDL
+
+        bot.pool.ytdl = YoutubeDL(
+            {
+                'ignoreerrors': True,
+                'extract_flat': True,
+                'quiet': True,
+                'no_warnings': True,
+                'lazy_playlist': True,
+                'simulate': True
+            }
+        )
+
     bot.add_cog(Music(bot))

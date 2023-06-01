@@ -13,4 +13,4 @@ aiofiles
 disnake-jishaku
 packaging
 aiosqlite
-youtube_dl
+yt-dlp
