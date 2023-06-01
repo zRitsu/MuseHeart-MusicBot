@@ -12,7 +12,7 @@ import aiohttp
 import disnake
 from aiohttp import ClientConnectorCertificateError
 from disnake.ext import commands
-from yt_dlp import YoutubeDL
+import youtube_dl
 
 import wavelink
 
@@ -79,17 +79,18 @@ class Music(commands.Cog):
         self.music_settings_cooldown = commands.CooldownMapping.from_cooldown(rate=3, per=15,
                                                                               type=commands.BucketType.guild)
 
-        if not hasattr(bot, 'ytdl'):
-            bot.ytdl = YoutubeDL(
+        if not hasattr(bot.pool, 'ytdl'):
+            bot.pool.ytdl = youtube_dl.YoutubeDL(
                     {
                         'ignoreerrors': True,
                         'extract_flat': True,
                         'quiet': True,
                         'no_warnings': True,
+                        'lazy_playlist': True,
+                        'simulate': True
                     }
                 )
-
-        self.ytdl = bot.ytdl
+        self.ytdl = bot.pool.ytdl
 
     desc_prefix = "🎶 [Música] 🎶 | "
 

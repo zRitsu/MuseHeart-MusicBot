@@ -87,7 +87,7 @@ class IntegrationModal(disnake.ui.Modal):
         except:
             pass
 
-        info = await loop.run_in_executor(None, lambda: self.bot.ytdl.extract_info(base_url, download=False))
+        info = await loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(base_url, download=False))
 
         if not info['entries']:
             return
