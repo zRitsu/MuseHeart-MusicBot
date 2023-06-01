@@ -972,8 +972,6 @@ class Music(commands.Cog):
 
                     await view.wait()
 
-                    inter = view.inter
-
                     query = info["entries"][int(view.selected[14:])]["url"]
 
                     if not isinstance(inter, disnake.ModalInteraction):
