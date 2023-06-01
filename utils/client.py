@@ -315,73 +315,77 @@ class BotPool:
 
                 if not bot.bot_ready:
 
-                    if not bot.config["INTERACTION_BOTS"] or str(bot.user.id) in bot.config["INTERACTION_BOTS"]:
+                    try:
+                        if not bot.config["INTERACTION_BOTS"] or str(bot.user.id) in bot.config["INTERACTION_BOTS"]:
 
-                        self._command_sync_flags = commands.CommandSyncFlags.all()
+                            self._command_sync_flags = commands.CommandSyncFlags.all()
 
-                        bot.load_modules()
+                            bot.load_modules()
 
-                        if bot.config["AUTO_SYNC_COMMANDS"]:
-                            await bot.sync_app_commands(force=True)
+                            if bot.config["AUTO_SYNC_COMMANDS"]:
+                                await bot.sync_app_commands(force=True)
 
-                    else:
+                        else:
 
-                        self._command_sync_flags = commands.CommandSyncFlags.none()
+                            self._command_sync_flags = commands.CommandSyncFlags.none()
 
-                        if self.config["INTERACTION_BOTS"] and self.config["ADD_REGISTER_COMMAND"]:
+                            if self.config["INTERACTION_BOTS"] and self.config["ADD_REGISTER_COMMAND"]:
 
-                            @bot.slash_command(
-                                name=disnake.Localized("register_commands",data={disnake.Locale.pt_BR: "registrar_comandos"}),
-                                description="Use este comando caso meus outros comandos de barra (/) não estejam disponíveis..."
-                            )
-                            async def register_commands(
-                                    inter: disnake.AppCmdInter,
-                            ):
-                                interaction_invites = ""
-
-                                for b in self.bots:
-
-                                    try:
-                                        if str(b.user.id) not in self.config["INTERACTION_BOTS"]:
-                                            continue
-                                    except:
-                                        continue
-
-                                    interaction_invites += f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) "
-
-                                embed = disnake.Embed(
-                                    description="**Atenção!** Todos os meus comandos de barra (/) funcionam através da aplicação "
-                                                f"com um dos nomes abaixo:**\n{interaction_invites}\n\n"
-                                                "**Caso os comandos da aplicação acima não sejam exibidos ao digitar barra (/), "
-                                                "clique no nome acima para integrar os comandos de barra no seu "
-                                                "servidor.",
-                                    color=bot.get_color()
+                                @bot.slash_command(
+                                    name=disnake.Localized("register_commands",data={disnake.Locale.pt_BR: "registrar_comandos"}),
+                                    description="Use este comando caso meus outros comandos de barra (/) não estejam disponíveis..."
                                 )
+                                async def register_commands(
+                                        inter: disnake.AppCmdInter,
+                                ):
+                                    interaction_invites = ""
 
-                                if not inter.author.guild_permissions.manage_guild:
-                                    embed.description += "\n\n**Nota:** Será necessário ter a permissão de **Gerenciar " \
-                                                         "Servidor** para integrar os comandos no servidor atual."
+                                    for b in self.bots:
 
-                                await inter.send(embed=embed, ephemeral=True)
+                                        try:
+                                            if str(b.user.id) not in self.config["INTERACTION_BOTS"]:
+                                                continue
+                                        except:
+                                            continue
 
-                        if bot.config["AUTO_SYNC_COMMANDS"]:
-                            await bot.sync_app_commands(force=True)
+                                        interaction_invites += f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) "
 
-                        bot.load_modules()
+                                    embed = disnake.Embed(
+                                        description="**Atenção!** Todos os meus comandos de barra (/) funcionam através da aplicação "
+                                                    f"com um dos nomes abaixo:**\n{interaction_invites}\n\n"
+                                                    "**Caso os comandos da aplicação acima não sejam exibidos ao digitar barra (/), "
+                                                    "clique no nome acima para integrar os comandos de barra no seu "
+                                                    "servidor.",
+                                        color=bot.get_color()
+                                    )
 
-                    if not bot.appinfo:
-                        bot.loop.create_task(bot.update_appinfo())
+                                    if not inter.author.guild_permissions.manage_guild:
+                                        embed.description += "\n\n**Nota:** Será necessário ter a permissão de **Gerenciar " \
+                                                             "Servidor** para integrar os comandos no servidor atual."
 
-                    music_cog = bot.get_cog("Music")
+                                    await inter.send(embed=embed, ephemeral=True)
 
-                    if music_cog:
-                        bot.loop.create_task(music_cog.process_nodes(data=LAVALINK_SERVERS, start_local=start_local))
+                            if bot.config["AUTO_SYNC_COMMANDS"]:
+                                await bot.sync_app_commands(force=True)
 
-                    bot.add_view(PanelView(bot))
+                            bot.load_modules()
 
-                    self.bot_mentions.update((f"<@!{bot.user.id}>", f"<@{bot.user.id}>"))
+                        if not bot.appinfo:
+                            bot.loop.create_task(bot.update_appinfo())
 
-                    bot.sync_command_cooldowns()
+                        music_cog = bot.get_cog("Music")
+
+                        if music_cog:
+                            bot.loop.create_task(music_cog.process_nodes(data=LAVALINK_SERVERS, start_local=start_local))
+
+                        bot.add_view(PanelView(bot))
+
+                        self.bot_mentions.update((f"<@!{bot.user.id}>", f"<@{bot.user.id}>"))
+
+                        bot.sync_command_cooldowns()
+
+                    except Exception:
+                        traceback.print_exc()
 
                     bot.bot_ready = True
 
