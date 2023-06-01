@@ -343,6 +343,9 @@ class LavalinkPlayer(wavelink.Player):
             "Você pode alterar a skin/aparência do player usando o comando /change_skin (comando vísivel apenas membros"
             " com perm de: gerenciar servidor).",
 
+            "Integre link de canais/perfis do youtube ou soundcloud para escutar playlists públicas de forma "
+            "mais facilitada no player. Experimente usando o comando /integration manager.",
+
             "Crie favoritos para ter fácil acesso de usar seus links favoritos aqui dispensando ter que copiar e colar "
             "seus links nos comandos. Experimente usando o comando: /fav manager.",
         ]

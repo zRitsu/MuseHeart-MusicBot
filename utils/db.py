@@ -50,8 +50,9 @@ db_models = {
 
 global_db_models = {
     DBModel.users: {
-        "ver": 1.1,
+        "ver": 1.2,
         "fav_links": {},
+        "integration_links": {},
         "token": ""
     },
     DBModel.guilds: {

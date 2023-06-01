@@ -12,6 +12,8 @@ import aiohttp
 import disnake
 from aiohttp import ClientConnectorCertificateError
 from disnake.ext import commands
+from yt_dlp import YoutubeDL
+
 import wavelink
 
 from utils.client import BotCore
@@ -76,6 +78,18 @@ class Music(commands.Cog):
 
         self.music_settings_cooldown = commands.CooldownMapping.from_cooldown(rate=3, per=15,
                                                                               type=commands.BucketType.guild)
+
+        if not hasattr(bot, 'ytdl'):
+            bot.ytdl = YoutubeDL(
+                    {
+                        'ignoreerrors': True,
+                        'extract_flat': True,
+                        'quiet': True,
+                        'no_warnings': True,
+                    }
+                )
+
+        self.ytdl = bot.ytdl
 
     desc_prefix = "🎶 [Música] 🎶 | "
 
@@ -813,12 +827,12 @@ class Music(commands.Cog):
             favs = await fav_list(inter, "")
 
             if not favs:
-                raise GenericError("**Você não possui favoritos...**\n"
-                                   "`Adicione um usando o comando: /fav manager.`\n"
+                raise GenericError("**Você não possui favoritos/integrações...**\n"
+                                   "`Adicione um usando o comando: /fav manager ou /integration manager.`\n"
                                    "`Ou use este comando adicionando um nome ou link de uma música/vídeo.`")
 
             if len(favs) == 1:
-                query = f"> fav: {favs[0]}"
+                query = favs[0]
 
             else:
                 opts = [disnake.SelectOption(label=f, value=f, emoji="<:play:734221719774035968>") for f in favs]
@@ -842,13 +856,15 @@ class Music(commands.Cog):
                 except AttributeError:
                     pass
 
+                opts = disnake.utils.as_chunks(opts, 25)
+
                 kwargs = {
                     "content": inter.author.mention,
                     "components": [
                         disnake.ui.Select(
                             custom_id=f"enqueue_fav{add_id}",
-                            options=opts
-                        )
+                            options=o
+                        ) for o in opts
                     ],
                     "embed": embed
                 }
@@ -899,20 +915,73 @@ class Music(commands.Cog):
                 inter.token = select_interaction.token
                 inter.id = select_interaction.id
                 inter.response = select_interaction.response
-                query = f"> fav: {select_interaction.data.values[0]}"
+                query = select_interaction.data.values[0]
 
         if query.startswith("> pin: "):
             is_pin = True
             query = query[7:]
 
-        if query.startswith("> fav:"):
+        if query.startswith(("> fav:", "> itg:")):
             try:
                 user_data = inter.global_user_data
             except AttributeError:
                 user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
                 inter.global_user_data = user_data
 
-            query = user_data["fav_links"][query[7:]]
+            if query.startswith("> fav:"):
+                query = user_data["fav_links"][query[7:]]
+
+            else:
+                query = user_data["integration_links"][query[7:]]
+
+                loop = self.bot.loop or asyncio.get_event_loop()
+
+                try:
+                    await inter.response.defer(ephemeral=True)
+                except:
+                    pass
+
+                info = await loop.run_in_executor(None, lambda: self.ytdl.extract_info(query, download=False))
+
+                if not info["entries"]:
+                    raise GenericError(f"**Conteúdo indisponível (ou privado):**\n{query}")
+
+                if len(info["entries"]) == 1:
+                    query = info["entries"][0]['url']
+
+                else:
+                    view = SelectInteraction(
+                        user=inter.author,
+                        opts=[
+                            disnake.SelectOption(label=e['title'][:90], value=f"entrie_select_{c}") for c, e in
+                            enumerate(info['entries'])
+                        ], timeout=30)
+
+                    embed = disnake.Embed(
+                        description="**Escolha uma categoria de playlists abaixo:**\n"
+                                    f'Selecione uma opção em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para prosseguir.',
+                        color=self.bot.get_color()
+                    )
+
+                    try:
+                        func = msg.edit
+                    except AttributeError:
+                        func = inter.edit_original_message
+
+                    await func(embed=embed, view=view)
+
+                    await view.wait()
+
+                    inter = view.inter
+
+                    query = info["entries"][int(view.selected[14:])]["url"]
+
+                    if not isinstance(inter, disnake.ModalInteraction):
+                        inter.token = view.inter.token
+                        inter.id = view.inter.id
+                        inter.response = view.inter.response
+                    else:
+                        inter = view.inter
 
         else:
 

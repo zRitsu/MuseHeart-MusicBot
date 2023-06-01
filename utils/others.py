@@ -343,8 +343,15 @@ async def fav_list(inter, query: str, *, prefix=""):
         data = await inter.bot.get_global_data(inter.author.id, db_name=DBModel.users)
         inter.global_user_data = data
 
-    return sorted([f"{prefix}{favname}" for favname in data["fav_links"]
-                   if not query or query.lower() in favname.lower()][:20])
+    lst = sorted([f"> itg: {integrationname}" for integrationname in data["integration_links"]
+                   if not query or query.lower() in integrationname.lower()])
+
+    if len(lst) > 20:
+        return lst
+
+    lst.extend(sorted([f"> fav: {favname}" for favname in data["fav_links"] if not query or query.lower() in favname.lower()]))
+
+    return lst[:20]
 
 
 async def pin_list(inter, query: str, *, prefix=""):
