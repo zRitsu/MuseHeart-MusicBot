@@ -481,7 +481,7 @@ class IntegrationManager(commands.Cog):
 
 
 def setup(bot: BotCore):
-    
+
     if not bot.config["USE_YTDL"]:
         return
 
