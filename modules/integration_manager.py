@@ -215,7 +215,7 @@ class IntegrationModal(disnake.ui.Modal):
                 else:
                     data = info["entries"][0]
 
-            data["title"] = f'{source} {info["title"]} - {data["title"]}' if info['extractor'].startswith("youtube") else f"{source} {info['title']}"
+            data["title"] = f'{source} {info["channel"]} - {data["title"]}' if info['extractor'].startswith("youtube") else f"{source} {info['title']}"
 
         user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
