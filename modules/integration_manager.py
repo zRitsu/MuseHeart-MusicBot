@@ -111,7 +111,7 @@ class IntegrationModal(disnake.ui.Modal):
                 )
                 return
 
-            data = {"title": f"@{result.name}", "url": url}
+            data = {"title": f"[SP]: {result.name[:90]}", "url": url}
 
         else:
 
@@ -129,6 +129,7 @@ class IntegrationModal(disnake.ui.Modal):
             if match:
                 group = match.group(1)
                 base_url = f"https://www.youtube.com/@{group}/playlists"
+                source = "[YT]:"
             else:
                 match = re.search(soundcloud_regex, url)
 
@@ -143,6 +144,8 @@ class IntegrationModal(disnake.ui.Modal):
                         ), ephemeral=True
                     )
                     return
+
+                source = "[SC]:"
 
             loop = self.bot.loop or asyncio.get_event_loop()
 
@@ -191,7 +194,7 @@ class IntegrationModal(disnake.ui.Modal):
                 else:
                     data = info["entries"][0]
 
-            data["title"] = f'@{group} - {data["title"]}' if info['extractor'].startswith("youtube") else f"@{info['title']}"
+            data["title"] = f'{source} {info["title"]} - {data["title"]}' if info['extractor'].startswith("youtube") else f"{source} {info['title']}"
 
         user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
