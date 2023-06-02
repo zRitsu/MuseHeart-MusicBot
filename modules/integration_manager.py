@@ -156,7 +156,28 @@ class IntegrationModal(disnake.ui.Modal):
 
             info = await loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(base_url, download=False))
 
+            if not info:
+
+                msg = f"**O usuário/canal do link informado não existe:**\n{url}"
+
+                if source == "[YT]:":
+                    msg += f"\n\n`Nota: Confira se no link contém usuário com @, ex: @ytchannel`"
+
+                await inter.send(
+                    embed=disnake.Embed(
+                        description=msg,
+                        color=disnake.Color.red()
+                    ), ephemeral=True
+                )
+                return
+
             if not info['entries']:
+                await inter.send(
+                    embed=disnake.Embed(
+                        description=f"**O usuário/canal do link informado não possui playlists públicas...**",
+                        color=disnake.Color.red()
+                    ), ephemeral=True
+                )
                 return
 
             if info['entries'][0].get('id'):
