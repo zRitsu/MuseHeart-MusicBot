@@ -970,7 +970,17 @@ class Music(commands.Cog):
                         color=self.bot.get_color()
                     )
 
-                    if isinstance(inter, disnake.MessageInteraction) and guild_data and guild_data["player_controller"]["message_id"] == str(inter.message.id):
+                    if not guild_data:
+                        try:
+                            guild_data = inter.guild_data
+                        except AttributeError:
+                            guild_data = await self.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                            try:
+                                inter.guild_data = guild_data
+                            except:
+                                pass
+
+                    if isinstance(inter, disnake.MessageInteraction) and guild_data["player_controller"]["message_id"] == str(inter.message.id):
                         kwargs = {"ephemeral": True}
                         func = inter.send
                     else:
