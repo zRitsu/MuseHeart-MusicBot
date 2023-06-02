@@ -17,7 +17,7 @@ import wavelink
 
 from utils.client import BotCore
 from utils.db import DBModel
-from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolException
+from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolException, parse_error
 from utils.music.spotify import process_spotify, spotify_regex_w_user
 from utils.music.checks import check_voice, has_player, has_source, is_requester, is_dj, \
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen, check_pool_bots, \
@@ -27,7 +27,7 @@ from utils.music.converters import time_format, fix_characters, string_to_second
     YOUTUBE_VIDEO_REG, google_search, percentage, music_source_image, perms_translations
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, fav_list, queue_track_index, \
-    pool_command
+    pool_command, string_to_file
 from user_agent import generate_user_agent
 
 
@@ -3849,131 +3849,130 @@ class Music(commands.Cog):
     @commands.Cog.listener("on_song_request")
     async def song_requests(self, ctx: Optional[CustomContext], message: disnake.Message):
 
-        if ctx.command or message.mentions:
-            return
-
-        if message.author.bot and not isinstance(message.channel, disnake.StageChannel):
-            return
+        msg = None
+        error = None
+        has_exception = None
 
         try:
-            data = await self.bot.get_data(message.guild.id, db_name=DBModel.guilds)
-        except AttributeError:
-            return
-
-        player: Optional[LavalinkPlayer] = self.bot.music.players.get(message.guild.id)
-
-        if player and isinstance(message.channel, disnake.Thread) and not player.static:
-
-            if player.message.id != message.channel.id:
+            if ctx.command or message.mentions:
                 return
 
-            if not player.controller_mode:
-                return
-
-            text_channel = message.channel
-
-        else:
-
-            static_player = data['player_controller']
-
-            channel_id = static_player['channel']
-
-            if not channel_id or (
-                    static_player['message_id'] != str(message.channel.id) and str(message.channel.id) != channel_id):
-                return
-
-            text_channel = self.bot.get_channel(int(channel_id))
-
-            if not text_channel or not text_channel.permissions_for(message.guild.me).send_messages:
-                return
-
-            if not self.bot.intents.message_content:
-
-                if self.song_request_cooldown.get_bucket(message).update_rate_limit():
-                    return
-
-                await message.channel.send(
-                    message.author.mention,
-                    embed=disnake.Embed(
-                        description="Infelizmente não posso conferir o conteúdo de sua mensagem...\n"
-                                    "Tente adicionar música usando **/play** ou clique em um dos botões abaixo:",
-                        color=self.bot.get_color(message.guild.me)
-                    ),
-                    components=[
-                        disnake.ui.Button(emoji="🎶", custom_id=PlayerControls.add_song, label="Pedir uma música"),
-                        disnake.ui.Button(emoji="⭐", custom_id=PlayerControls.enqueue_fav, label="Tocar favorito")
-                    ],
-                    delete_after=20
-                )
-                return
-
-        try:
-            if isinstance(message.channel, disnake.Thread):
-
-                if isinstance(message.channel.parent, disnake.ForumChannel):
-
-                    if data['player_controller']["channel"] != str(message.channel.id):
-                        return
-                    if message.is_system():
-                        await self.delete_message(message)
-
-        except AttributeError:
-            pass
-
-        if message.author.bot:
-            if message.is_system() and not isinstance(message.channel, disnake.Thread):
-                await self.delete_message(message)
-            return
-
-        if not message.content:
-
-            if message.type == disnake.MessageType.thread_starter_message:
-                return
-
-            if message.is_system():
-                await self.delete_message(message)
+            if message.author.bot and not isinstance(message.channel, disnake.StageChannel):
                 return
 
             try:
-                attachment = message.attachments[0]
-            except IndexError:
-                await message.channel.send(f"{message.author.mention} você deve enviar um link/nome da música.",
-                                           delete_after=10)
+                data = await self.bot.get_data(message.guild.id, db_name=DBModel.guilds)
+            except AttributeError:
                 return
+
+            player: Optional[LavalinkPlayer] = self.bot.music.players.get(message.guild.id)
+
+            if player and isinstance(message.channel, disnake.Thread) and not player.static:
+
+                if player.message.id != message.channel.id:
+                    return
+
+                if not player.controller_mode:
+                    return
+
+                text_channel = message.channel
 
             else:
 
-                if attachment.size > 18000000:
-                    await message.channel.send(f"{message.author.mention} o arquivo que você enviou deve ter o tamanho "
-                                               f"inferior a 18mb.", delete_after=10)
+                static_player = data['player_controller']
+
+                channel_id = static_player['channel']
+
+                if not channel_id or (
+                        static_player['message_id'] != str(message.channel.id) and str(message.channel.id) != channel_id):
                     return
 
-                if attachment.content_type not in self.audio_formats:
-                    await message.channel.send(f"{message.author.mention} o arquivo que você enviou deve ter o tamanho "
-                                               f"inferior a 18mb.", delete_after=10)
+                text_channel = self.bot.get_channel(int(channel_id))
+
+                if not text_channel or not text_channel.permissions_for(message.guild.me).send_messages:
                     return
 
-                message.content = attachment.url
+                if not self.bot.intents.message_content:
 
-        try:
-            await self.song_request_concurrency.acquire(message)
-        except:
+                    if self.song_request_cooldown.get_bucket(message).update_rate_limit():
+                        return
 
-            await message.channel.send(
-                f"{message.author.mention} você deve aguardar seu pedido de música anterior carregar...",
-                delete_after=10,
-            )
+                    await message.channel.send(
+                        message.author.mention,
+                        embed=disnake.Embed(
+                            description="Infelizmente não posso conferir o conteúdo de sua mensagem...\n"
+                                        "Tente adicionar música usando **/play** ou clique em um dos botões abaixo:",
+                            color=self.bot.get_color(message.guild.me)
+                        ),
+                        components=[
+                            disnake.ui.Button(emoji="🎶", custom_id=PlayerControls.add_song, label="Pedir uma música"),
+                            disnake.ui.Button(emoji="⭐", custom_id=PlayerControls.enqueue_fav, label="Tocar favorito")
+                        ],
+                        delete_after=20
+                    )
+                    return
 
-            await self.delete_message(message)
-            return
+            try:
+                if isinstance(message.channel, disnake.Thread):
 
-        message.content = message.content.strip("<>")
+                    if isinstance(message.channel.parent, disnake.ForumChannel):
 
-        msg = None
+                        if data['player_controller']["channel"] != str(message.channel.id):
+                            return
+                        if message.is_system():
+                            await self.delete_message(message)
 
-        error = None
+            except AttributeError:
+                pass
 
-        try:
+            if message.author.bot:
+                if message.is_system() and not isinstance(message.channel, disnake.Thread):
+                    await self.delete_message(message)
+                return
+
+            if not message.content:
+
+                if message.type == disnake.MessageType.thread_starter_message:
+                    return
+
+                if message.is_system():
+                    await self.delete_message(message)
+                    return
+
+                try:
+                    attachment = message.attachments[0]
+                except IndexError:
+                    await message.channel.send(f"{message.author.mention} você deve enviar um link/nome da música.",
+                                               delete_after=10)
+                    return
+
+                else:
+
+                    if attachment.size > 18000000:
+                        await message.channel.send(f"{message.author.mention} o arquivo que você enviou deve ter o tamanho "
+                                                   f"inferior a 18mb.", delete_after=10)
+                        return
+
+                    if attachment.content_type not in self.audio_formats:
+                        await message.channel.send(f"{message.author.mention} o arquivo que você enviou deve ter o tamanho "
+                                                   f"inferior a 18mb.", delete_after=10)
+                        return
+
+                    message.content = attachment.url
+
+            try:
+                await self.song_request_concurrency.acquire(message)
+            except:
+
+                await message.channel.send(
+                    f"{message.author.mention} você deve aguardar seu pedido de música anterior carregar...",
+                    delete_after=10,
+                )
+
+                await self.delete_message(message)
+                return
+
+            message.content = message.content.strip("<>")
 
             urls = URL_REG.findall(message.content)
 
@@ -4019,6 +4018,7 @@ class Music(commands.Cog):
 
         except Exception as e:
             traceback.print_exc()
+            has_exception = e
             error = f"{message.author.mention} **ocorreu um erro ao tentar obter resultados para sua busca:** ```py\n{e}```"
 
         if error:
@@ -4034,6 +4034,77 @@ class Music(commands.Cog):
                 traceback.print_exc()
 
         await self.song_request_concurrency.release(message)
+
+        if has_exception and self.bot.config["AUTO_ERROR_REPORT_WEBHOOK"]:
+
+            cog = self.bot.get_cog("ErrorHandler")
+
+            if not cog:
+                return
+
+            max_concurrency = cog.webhook_max_concurrency
+
+            try:
+                await max_concurrency.acquire(message)
+
+                error_msg, full_error_msg, kill_process = parse_error(message, has_exception)
+
+                embed = disnake.Embed(
+                    title="Ocorreu um erro em um servidor (song-request):",
+                    timestamp=disnake.utils.utcnow(),
+                    description=f"```py\n{repr(has_exception)[:2030].replace(self.bot.http.token, 'mytoken')}```"
+                )
+
+                embed.add_field(
+                    name="Servidor:", inline=False,
+                    value=f"```\n{disnake.utils.escape_markdown(ctx.guild.name)}\nID: {ctx.guild.id}```"
+                )
+
+                embed.add_field(
+                    name="Conteúdo do pedido de música:", inline=False,
+                    value=f"```\n{message.content}```"
+                )
+
+                embed.add_field(
+                    name="Canal de texto:", inline=False,
+                    value=f"```\n{disnake.utils.escape_markdown(ctx.channel.name)}\nID: {ctx.channel.id}```"
+                )
+
+                if vc := ctx.author.voice:
+                    embed.add_field(
+                        name="Canal de voz (user):", inline=False,
+                        value=f"```\n{disnake.utils.escape_markdown(vc.channel.name)}" +
+                              (f" ({len(vc.channel.voice_states)}/{vc.channel.user_limit})"
+                               if vc.channel.user_limit else "") + f"\nID: {vc.channel.id}```"
+                    )
+
+                if vcbot := ctx.guild.me.voice:
+                    if vcbot.channel != vc.channel:
+                        embed.add_field(
+                            name="Canal de voz (bot):", inline=False,
+                            value=f"{vc.channel.name}" +
+                                  (f" ({len(vc.channel.voice_states)}/{vc.channel.user_limit})"
+                                   if vc.channel.user_limit else "") + f"\nID: {vc.channel.id}```"
+                        )
+
+                if ctx.guild.icon:
+                    embed.set_thumbnail(url=ctx.guild.icon.with_static_format("png").url)
+
+                await cog.send_webhook(
+                    embed=embed,
+                    file=string_to_file(full_error_msg, "error_traceback_songrequest.txt")
+                )
+
+            except:
+                traceback.print_exc()
+
+                await asyncio.sleep(20)
+
+                try:
+                    await max_concurrency.release(message)
+                except:
+                    pass
+
 
     async def parse_song_request(self, message, text_channel, data, *, response=None, attachment: disnake.Attachment=None):
 
