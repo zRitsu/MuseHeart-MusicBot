@@ -970,17 +970,7 @@ class Music(commands.Cog):
                         color=self.bot.get_color()
                     )
 
-                    if not guild_data:
-                        try:
-                            guild_data = inter.guild_data
-                        except AttributeError:
-                            guild_data = await self.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-                            try:
-                                inter.guild_data = guild_data
-                            except:
-                                pass
-
-                    if isinstance(inter, disnake.MessageInteraction) and guild_data["player_controller"]["message_id"] == str(inter.message.id):
+                    if isinstance(inter, disnake.MessageInteraction):
                         kwargs = {"ephemeral": True}
                         func = inter.send
                     else:
@@ -993,7 +983,7 @@ class Music(commands.Cog):
                             except AttributeError:
                                 func = inter.send
 
-                    await func(embed=embed, view=view, **kwargs)
+                    msg = await func(embed=embed, view=view, **kwargs)
 
                     await view.wait()
 
