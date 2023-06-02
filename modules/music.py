@@ -973,7 +973,10 @@ class Music(commands.Cog):
                     try:
                         func = msg.edit
                     except AttributeError:
-                        func = inter.edit_original_message
+                        try:
+                            func = inter.edit_original_message
+                        except AttributeError:
+                            func = inter.send
 
                     await func(embed=embed, view=view)
 
