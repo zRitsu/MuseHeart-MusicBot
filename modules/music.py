@@ -970,7 +970,7 @@ class Music(commands.Cog):
                         color=self.bot.get_color()
                     )
 
-                    if isinstance(inter, disnake.MessageInteraction):
+                    if isinstance(inter, disnake.MessageInteraction) and guild_data and guild_data["player_controller"]["message_id"] == str(inter.message.id):
                         kwargs = {"ephemeral": True}
                         func = inter.send
                     else:
