@@ -1632,7 +1632,7 @@ class Music(commands.Cog):
                 interaction = inter
             else:
 
-                player.set_command_log(emoji="⏭️", text="pulou a música.")
+                player.set_command_log(emoji="⏭️", text=f"{inter.author.mention} pulou a música.")
 
                 embed = disnake.Embed(
                     color=self.bot.get_color(guild.me),
