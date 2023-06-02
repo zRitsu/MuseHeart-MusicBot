@@ -327,7 +327,7 @@ class IntegrationsView(disnake.ui.View):
             color=self.bot.get_color()
         )
 
-        await inter.response.edit_message(embed=embed, view=None)
+        await inter.edit_original_message(embed=embed, components=None)
         self.stop()
 
     async def cancel_callback(self, inter: disnake.MessageInteraction):

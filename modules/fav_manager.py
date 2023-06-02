@@ -229,7 +229,7 @@ class UserFavView(disnake.ui.View):
             color=self.bot.get_color()
         )
 
-        await inter.edit_original_message(embed=embed)
+        await inter.edit_original_message(embed=embed, components=None)
         self.stop()
 
     async def cancel_callback(self, inter: disnake.MessageInteraction):
