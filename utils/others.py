@@ -364,6 +364,20 @@ async def pin_list(inter, query: str, *, prefix=""):
                    if not query or query.lower() in pinname.lower()][:20])
 
 
+def paginator(txt: str):
+    pages = commands.Paginator(prefix=None, suffix=None)
+    pages.max_size = 1910
+    for line in txt.splitlines():
+        if len(line) >= pages.max_size - 3:
+            l = [(line[i:i + pages.max_size - 3]) for i in range(0, len(line), pages.max_size - 3)]
+            for l2 in l:
+                pages.add_line(l2)
+        else:
+            pages.add_line(line)
+    pages.close_page()
+    return pages.pages
+
+
 async def select_bot_pool(inter, first=False):
 
     if isinstance(inter, CustomContext):

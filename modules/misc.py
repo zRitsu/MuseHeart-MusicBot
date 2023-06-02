@@ -21,7 +21,7 @@ from aiohttp import ClientSession
 from utils.db import DBModel, db_models
 from utils.music.checks import check_requester_channel
 from utils.music.converters import time_format, URL_REG
-from utils.others import select_bot_pool, CustomContext
+from utils.others import select_bot_pool, CustomContext, paginator
 
 if TYPE_CHECKING:
     from utils.client import BotCore
@@ -538,14 +538,16 @@ class Misc(commands.Cog):
         if interaction_bots:
             txt = f"**Registrar os comandos de barra no servidor:**\n{interaction_bots}\n\n" + txt
 
-        await inter.send(
-            embed=disnake.Embed(
-                colour=self.bot.get_color(
-                    inter.guild.me if inter.guild else guild.me if guild else None
-                ),
-                description=txt
-            ), ephemeral=True
-        )
+        color = self.bot.get_color(inter.guild.me if inter.guild else guild.me if guild else None)
+
+        embeds = [
+            disnake.Embed(
+                colour=self.bot.get_color(inter.guild.me if inter.guild else guild.me if guild else None),
+                description=p, color=color
+            ) for p in paginator(txt)
+        ]
+
+        await inter.send(embeds=embeds, ephemeral=True)
 
 
     @commands.command(name="invite", aliases=["convidar"], description="Exibir meu link de convite para você me adicionar no seu servidor.")
