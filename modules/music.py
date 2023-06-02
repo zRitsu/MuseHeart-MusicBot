@@ -857,8 +857,8 @@ class Music(commands.Cog):
                 }
 
                 try:
-                    msg = await inter.send(ephemeral=ephemeral, **kwargs)
-                except disnake.InteractionTimedOut:
+                    msg = await inter.followup.send(ephemeral=ephemeral, wait=True, **kwargs)
+                except (disnake.InteractionTimedOut, AttributeError):
                     msg = await inter.channel.send(**kwargs)
 
                 def check_fav_selection(i: Union[CustomContext, disnake.MessageInteraction]):
@@ -873,9 +873,12 @@ class Music(commands.Cog):
                         "dropdown", timeout=45, check=check_fav_selection
                     )
                 except asyncio.TimeoutError:
+
+                    text = "Tempo de seleção esgotado!"
+
                     try:
-                        await msg.edit(content="Tempo de seleção esgotado!", embed=None, view=None)
-                    except (disnake.NotFound, disnake.Forbidden):
+                        await msg.edit(content=text, embed=None, view=None)
+                    except AttributeError:
                         pass
                     return
 
@@ -970,22 +973,30 @@ class Music(commands.Cog):
                         color=self.bot.get_color()
                     )
 
-                    if isinstance(inter, disnake.MessageInteraction):
-                        kwargs = {"ephemeral": True}
-                        func = inter.send
-                    else:
-                        kwargs = {}
+                    kwargs = {}
+
+                    try:
+                        func = msg.edit
+                    except AttributeError:
                         try:
-                            func = msg.edit
+                            func = inter.edit_original_message
                         except AttributeError:
+                            kwargs["ephemeral"] = True
                             try:
-                                func = inter.edit_original_message
+                                func = inter.followup.send
                             except AttributeError:
                                 func = inter.send
 
                     msg = await func(embed=embed, view=view, **kwargs)
 
                     await view.wait()
+
+                    if not view.inter:
+                        try:
+                            await msg.edit(embed=disnake.Embed(description="Tempo esgotado!"), components=None)
+                        except:
+                            pass
+                        return
 
                     query = info["entries"][int(view.selected[14:])]["url"]
 
