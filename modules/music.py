@@ -3849,82 +3849,82 @@ class Music(commands.Cog):
     @commands.Cog.listener("on_song_request")
     async def song_requests(self, ctx: Optional[CustomContext], message: disnake.Message):
 
+        if ctx.command or message.mentions:
+            return
+
+        if message.author.bot and not isinstance(message.channel, disnake.StageChannel):
+            return
+
+        try:
+            data = await self.bot.get_data(message.guild.id, db_name=DBModel.guilds)
+        except AttributeError:
+            return
+
+        player: Optional[LavalinkPlayer] = self.bot.music.players.get(message.guild.id)
+
+        if player and isinstance(message.channel, disnake.Thread) and not player.static:
+
+            if player.message.id != message.channel.id:
+                return
+
+            if not player.controller_mode:
+                return
+
+            text_channel = message.channel
+
+        else:
+
+            static_player = data['player_controller']
+
+            channel_id = static_player['channel']
+
+            if not channel_id or (
+                    static_player['message_id'] != str(message.channel.id) and str(message.channel.id) != channel_id):
+                return
+
+            text_channel = self.bot.get_channel(int(channel_id))
+
+            if not text_channel or not text_channel.permissions_for(message.guild.me).send_messages:
+                return
+
+            if not self.bot.intents.message_content:
+
+                if self.song_request_cooldown.get_bucket(message).update_rate_limit():
+                    return
+
+                await message.channel.send(
+                    message.author.mention,
+                    embed=disnake.Embed(
+                        description="Infelizmente não posso conferir o conteúdo de sua mensagem...\n"
+                                    "Tente adicionar música usando **/play** ou clique em um dos botões abaixo:",
+                        color=self.bot.get_color(message.guild.me)
+                    ),
+                    components=[
+                        disnake.ui.Button(emoji="🎶", custom_id=PlayerControls.add_song, label="Pedir uma música"),
+                        disnake.ui.Button(emoji="⭐", custom_id=PlayerControls.enqueue_fav, label="Tocar favorito")
+                    ],
+                    delete_after=20
+                )
+                return
+
+        try:
+            if isinstance(message.channel, disnake.Thread):
+
+                if isinstance(message.channel.parent, disnake.ForumChannel):
+
+                    if data['player_controller']["channel"] != str(message.channel.id):
+                        return
+                    if message.is_system():
+                        await self.delete_message(message)
+
+        except AttributeError:
+            pass
+
         msg = None
         error = None
         has_exception = None
 
         try:
-            if ctx.command or message.mentions:
-                return
-
-            if message.author.bot and not isinstance(message.channel, disnake.StageChannel):
-                return
-
-            try:
-                data = await self.bot.get_data(message.guild.id, db_name=DBModel.guilds)
-            except AttributeError:
-                return
-
-            player: Optional[LavalinkPlayer] = self.bot.music.players.get(message.guild.id)
-
-            if player and isinstance(message.channel, disnake.Thread) and not player.static:
-
-                if player.message.id != message.channel.id:
-                    return
-
-                if not player.controller_mode:
-                    return
-
-                text_channel = message.channel
-
-            else:
-
-                static_player = data['player_controller']
-
-                channel_id = static_player['channel']
-
-                if not channel_id or (
-                        static_player['message_id'] != str(message.channel.id) and str(message.channel.id) != channel_id):
-                    return
-
-                text_channel = self.bot.get_channel(int(channel_id))
-
-                if not text_channel or not text_channel.permissions_for(message.guild.me).send_messages:
-                    return
-
-                if not self.bot.intents.message_content:
-
-                    if self.song_request_cooldown.get_bucket(message).update_rate_limit():
-                        return
-
-                    await message.channel.send(
-                        message.author.mention,
-                        embed=disnake.Embed(
-                            description="Infelizmente não posso conferir o conteúdo de sua mensagem...\n"
-                                        "Tente adicionar música usando **/play** ou clique em um dos botões abaixo:",
-                            color=self.bot.get_color(message.guild.me)
-                        ),
-                        components=[
-                            disnake.ui.Button(emoji="🎶", custom_id=PlayerControls.add_song, label="Pedir uma música"),
-                            disnake.ui.Button(emoji="⭐", custom_id=PlayerControls.enqueue_fav, label="Tocar favorito")
-                        ],
-                        delete_after=20
-                    )
-                    return
-
-            try:
-                if isinstance(message.channel, disnake.Thread):
-
-                    if isinstance(message.channel.parent, disnake.ForumChannel):
-
-                        if data['player_controller']["channel"] != str(message.channel.id):
-                            return
-                        if message.is_system():
-                            await self.delete_message(message)
-
-            except AttributeError:
-                pass
-
             if message.author.bot:
                 if message.is_system() and not isinstance(message.channel, disnake.Thread):
                     await self.delete_message(message)
