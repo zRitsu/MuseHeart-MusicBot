@@ -4122,7 +4122,7 @@ class Music(commands.Cog):
 
         embed = disnake.Embed(color=self.bot.get_color(message.guild.me))
 
-        try:
+        if not isinstance(tracks, list):
             player.queue.extend(tracks.tracks)
             if isinstance(message.channel, disnake.Thread) and not isinstance(message.channel.parent,
                                                                               disnake.ForumChannel):
@@ -4146,8 +4146,7 @@ class Music(commands.Cog):
                 if response:
                     await self.delete_message(response)
 
-        except AttributeError:
-
+        else:
             track = tracks[0]
 
             if track.info.get("sourceName") == "http":
