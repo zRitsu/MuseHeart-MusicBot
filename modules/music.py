@@ -970,15 +970,20 @@ class Music(commands.Cog):
                         color=self.bot.get_color()
                     )
 
-                    try:
-                        func = msg.edit
-                    except AttributeError:
+                    if isinstance(inter, disnake.MessageInteraction):
+                        kwargs = {"ephemeral": True}
+                        func = inter.send
+                    else:
+                        kwargs = {}
                         try:
-                            func = inter.edit_original_message
+                            func = msg.edit
                         except AttributeError:
-                            func = inter.send
+                            try:
+                                func = inter.edit_original_message
+                            except AttributeError:
+                                func = inter.send
 
-                    await func(embed=embed, view=view)
+                    await func(embed=embed, view=view, **kwargs)
 
                     await view.wait()
 
