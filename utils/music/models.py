@@ -347,9 +347,9 @@ class LavalinkPlayer(wavelink.Player):
             "seus links nos comandos. Experimente usando o comando: /fav manager.",
         ]
 
-        if self.bot.config["USE_YTDL"]:
+        if self.bot.config["USE_YTDL"] or self.bot.spotify:
             self.initial_hints.append(
-                "Integre link de canais/perfis do youtube ou soundcloud para escutar playlists públicas de forma "
+                "Integre link de canais/perfis do youtube/soundcloud/spotify para escutar playlists públicas de forma "
                 "mais facilitada no player. Experimente usando o comando /integration manager."
             )
 

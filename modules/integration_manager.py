@@ -5,6 +5,7 @@ import asyncio
 import datetime
 import json
 import re
+import traceback
 from io import BytesIO
 from typing import TYPE_CHECKING, Union, Optional
 
@@ -15,6 +16,7 @@ from utils.db import DBModel
 from utils.music.converters import URL_REG, fix_characters
 from utils.music.errors import GenericError
 from utils.music.interactions import SelectInteraction
+from utils.music.spotify import spotify_regex_w_user
 from utils.others import CustomContext
 
 youtube_regex = r"^(?:https?:\/\/)?(?:www\.)?youtube\.com\/(?:@)?([a-zA-Z0-9_-]{1,})(?:\/|$)"
@@ -60,74 +62,136 @@ class IntegrationModal(disnake.ui.Modal):
             )
             return
 
-        match = re.search(youtube_regex, url)
+        if (matches := spotify_regex_w_user.match(url)):
 
-        if match:
-            group = match.group(1)
-            base_url = f"https://www.youtube.com/@{group}/playlists"
-        else:
-            match = re.search(soundcloud_regex, url)
-
-            if match:
-                group = match.group(1)
-                base_url = f"https://soundcloud.com/{group}/sets"
-            else:
+            if not self.bot.spotify:
                 await inter.send(
                     embed=disnake.Embed(
-                        description=f"**Link informado não é suportado:** {url}",
+                        description="**O suporte ao spotify não está disponível no momento...**",
                         color=disnake.Color.red()
                     ), ephemeral=True
                 )
                 return
 
-        loop = self.bot.loop or asyncio.get_event_loop()
+            url_type, user_id = matches.groups()
 
-        try:
-            await inter.response.defer(ephemeral=True)
-        except:
-            pass
+            if url_type != "user":
+                await inter.send(
+                    embed=disnake.Embed(
+                        description=f"**Você deve usar link de um perfil de usuário do spotify.** {url}",
+                        color=disnake.Color.red()
+                    ), ephemeral=True
+                )
+                return
 
-        info = await loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(base_url, download=False))
+            try:
+                await inter.response.defer(ephemeral=True)
+            except:
+                pass
 
-        if not info['entries']:
-            return
+            try:
+                result = await self.bot.spotify.get_user(user_id)
+            except Exception as e:
+                await inter.send(
+                    embed=disnake.Embed(
+                        description="**Ocorreu um erro ao obter informações do spotify:** ```py\n"
+                                    f"{repr(e)}```",
+                        color=self.bot.get_color()
+                    )
+                )
+                traceback.print_exc()
+                return
 
-        if info['entries'][0].get('id'):
-            data = {"title": info["entries"][0]['title'], "url": base_url}
+            if not result:
+                await inter.send(
+                    embed=disnake.Embed(
+                        description="**O usuário do link informado não possui playlists públicas...**",
+                        color=self.bot.get_color()
+                    )
+                )
+                return
+
+            data = {"title": f"@{result.name}", "url": url}
 
         else:
 
-            if len(info['entries']) > 1:
-
-                view = SelectInteraction(
-                    user=inter.author,
-                    opts=[
-                        disnake.SelectOption(label=e['title'][:90], value=f"entrie_select_{c}") for c, e in enumerate(info['entries'])
-                    ], timeout=30)
-
-                embed = disnake.Embed(
-                    description="**Escolha uma categoria de playlists abaixo:**\n"
-                                f'Selecione uma opção em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para prosseguir.',
-                    color=self.bot.get_color()
+            if not self.bot.config["USE_YTDL"]:
+                await inter.send(
+                    embed=disnake.Embed(
+                        description="**Não há suporte a esse tipo de link no momento...**",
+                        color=self.bot.get_color()
+                    )
                 )
+                return
 
-                await inter.edit_original_message(embed=embed, view=view)
+            match = re.search(youtube_regex, url)
 
-                await view.wait()
+            if match:
+                group = match.group(1)
+                base_url = f"https://www.youtube.com/@{group}/playlists"
+            else:
+                match = re.search(soundcloud_regex, url)
 
-                inter = view.inter
+                if match:
+                    group = match.group(1)
+                    base_url = f"https://soundcloud.com/{group}/sets"
+                else:
+                    await inter.send(
+                        embed=disnake.Embed(
+                            description=f"**Link informado não é suportado:** {url}",
+                            color=disnake.Color.red()
+                        ), ephemeral=True
+                    )
+                    return
 
-                try:
-                    await inter.response.defer()
-                except:
-                    pass
+            loop = self.bot.loop or asyncio.get_event_loop()
 
-                data = info["entries"][int(view.selected[14:])]
+            try:
+                await inter.response.defer(ephemeral=True)
+            except:
+                pass
+
+            info = await loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(base_url, download=False))
+
+            if not info['entries']:
+                return
+
+            if info['entries'][0].get('id'):
+                data = {"title": info["entries"][0]['title'], "url": base_url}
 
             else:
-                data = info["entries"][0]
 
-        data["title"] = f'@{group} - {data["title"]}' if info['extractor'].startswith("youtube") else f"@{info['title']}"
+                if len(info['entries']) > 1:
+
+                    view = SelectInteraction(
+                        user=inter.author,
+                        opts=[
+                            disnake.SelectOption(label=e['title'][:90], value=f"entrie_select_{c}") for c, e in enumerate(info['entries'])
+                        ], timeout=30)
+
+                    embed = disnake.Embed(
+                        description="**Escolha uma categoria de playlists abaixo:**\n"
+                                    f'Selecione uma opção em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para prosseguir.',
+                        color=self.bot.get_color()
+                    )
+
+                    await inter.edit_original_message(embed=embed, view=view)
+
+                    await view.wait()
+
+                    inter = view.inter
+
+                    try:
+                        await inter.response.defer()
+                    except:
+                        pass
+
+                    data = info["entries"][int(view.selected[14:])]
+
+                else:
+                    data = info["entries"][0]
+
+            data["title"] = f'@{group} - {data["title"]}' if info['extractor'].startswith("youtube") else f"@{info['title']}"
 
         user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
@@ -144,10 +208,10 @@ class IntegrationModal(disnake.ui.Modal):
 
         await inter.edit_original_message(
             embed=disnake.Embed(
-                description="**Integração adicionada com sucesso!\n"
-                            "Ela vai aparecer nas seguintes ocasições:** ```\n"
+                description=f"**Integração adicionada/editada com sucesso:** [`{title}`]({data['url']})\n"
+                            "**Ela vai aparecer nas seguintes ocasições:** ```\n"
                             "- Ao usar o comando /play (no preenchimento automático da busca)\n"
-                            "- Ao clicar no botão de pedir música do player.\n"
+                            "- Ao clicar no botão de tocar favorito do player.\n"
                             "- Ao usar o comando play (prefixed) sem nome ou link.```",
                 color=self.bot.get_color(me)
             ), view=None
@@ -312,11 +376,23 @@ class IntegrationManager(commands.Cog):
             user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
             inter.global_user_data = user_data
 
+        supported_platforms = []
+
+        if self.bot.config["USE_YTDL"]:
+            supported_platforms.extend(["[31;1mYoutube[0m", "[33;1mSoundcloud[0m"])
+
+        if self.bot.spotify:
+            supported_platforms.append("[32;1mSpotify[0m")
+
+        if not supported_platforms:
+            raise GenericError("**Não há suporte a esse recurso no momento...**\n\n"
+                               "`Suporte ao spotify e YTDL não estão ativados.`")
+
         view = IntegrationsView(bot=self.bot, ctx=inter, data=user_data)
 
         embed = disnake.Embed(
             description="## Gerenciador de integrações de canais/perfis com playlists públicas.\n\n"
-                        "### Links de perfis/canais suportados:\n```ansi\n[31;1mYoutube[0m, [33;1mSoundcloud[0m```",
+                        f"### Links de perfis/canais suportados:\n```ansi\n{', '.join(supported_platforms)}```",
             colour=self.bot.get_color(),
         )
 
@@ -482,10 +558,8 @@ class IntegrationManager(commands.Cog):
 
 def setup(bot: BotCore):
 
-    if not bot.config["USE_YTDL"]:
-        return
+    if bot.config["USE_YTDL"] and not hasattr(bot.pool, 'ytdl'):
 
-    if not hasattr(bot.pool, 'ytdl'):
         from yt_dlp import YoutubeDL
 
         bot.pool.ytdl = YoutubeDL(

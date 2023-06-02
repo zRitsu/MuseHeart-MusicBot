@@ -18,7 +18,7 @@ import wavelink
 from utils.client import BotCore
 from utils.db import DBModel
 from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolException
-from utils.music.spotify import process_spotify
+from utils.music.spotify import process_spotify, spotify_regex_w_user
 from utils.music.checks import check_voice, has_player, has_source, is_requester, is_dj, \
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen, check_pool_bots, \
     check_channel_limit, check_stage_topic
@@ -920,22 +920,38 @@ class Music(commands.Cog):
 
             else:
 
-                if not self.bot.config["USE_YTDL"]:
-                    raise GenericError("**Não há suporte a esse tipo de requisição no momento...**")
-
                 query = user_data["integration_links"][query[7:]]
 
-                loop = self.bot.loop or asyncio.get_event_loop()
+                if (matches := spotify_regex_w_user.match(query)):
 
-                try:
-                    await inter.response.defer(ephemeral=True)
-                except:
-                    pass
+                    if not self.bot.spotify:
+                        raise GenericError("**O suporte ao spotify não está disponível no momento...**")
 
-                info = await loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(query, download=False))
+                    url_type, user_id = matches.groups()
 
-                if not info["entries"]:
-                    raise GenericError(f"**Conteúdo indisponível (ou privado):**\n{query}")
+                    if url_type != "user":
+                        raise GenericError("**Link não suportado usando este método...**")
+
+                    result = await self.bot.spotify.get_user_playlists(user_id)
+
+                    info = {"entries": [{"title": t.name, "url": t.external_urls["spotify"]} for t in result]}
+
+                elif not self.bot.config["USE_YTDL"]:
+                    raise GenericError("**Não há suporte a esse tipo de requisição no momento...**")
+
+                else:
+
+                    loop = self.bot.loop or asyncio.get_event_loop()
+
+                    try:
+                        await inter.response.defer(ephemeral=True)
+                    except:
+                        pass
+
+                    info = await loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(query, download=False))
+
+                    if not info["entries"]:
+                        raise GenericError(f"**Conteúdo indisponível (ou privado):**\n{query}")
 
                 if len(info["entries"]) == 1:
                     query = info["entries"][0]['url']

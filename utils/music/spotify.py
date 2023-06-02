@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from utils.client import BotCore
 
 spotify_regex = re.compile("https://open.spotify.com?.+(album|playlist|artist|track)/([a-zA-Z0-9]+)")
+spotify_regex_w_user = re.compile("https://open.spotify.com?.+(album|playlist|artist|track|user)/([a-zA-Z0-9]+)")
 
 
 def query_spotify_track(func, url_id: str):
