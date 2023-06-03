@@ -460,6 +460,7 @@ class BotPool:
                 lavalink_initial_ram=self.config['LAVALINK_INITIAL_RAM'],
                 lavalink_ram_limit=self.config['LAVALINK_RAM_LIMIT'],
                 lavalink_additional_sleep=int(self.config['LAVALINK_ADDITIONAL_SLEEP']),
+                use_jabba=self.config["USE_JABBA"]
             )
 
         loop = asyncio.get_event_loop()

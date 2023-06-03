@@ -37,6 +37,7 @@ def run_lavalink(
         lavalink_ram_limit: int = 100,
         lavalink_additional_sleep: int = 0,
         lavalink_cpu_cores: int = 1,
+        use_jabba: bool = True
 ):
 
     if not (java_cmd := validate_java("java")):
@@ -88,8 +89,8 @@ def run_lavalink(
 
                 java_cmd = os.path.join(os.getcwd(), r"\.java\jdk-13\bin\java")
 
-            else:
-                
+            elif use_jabba:
+
                 try:
                     shutil.rmtree("~/.jabba/jdk/zulu@1.17.0-0")
                 except:
@@ -99,6 +100,24 @@ def run_lavalink(
                 subprocess.call("bash install_jabba.sh && ~/.jabba/bin/jabba install zulu@1.17.0-0", shell=True)
                 os.remove("install_jabba.sh")
                 java_cmd = "~/.jabba/jdk/zulu@1.17.0-0/bin/java"
+
+            else:
+                if not os.path.isdir("./.java"):
+
+                    if platform.architecture()[0] != "64bit":
+                        jdk_url = "https://cdn.azul.com/zulu/bin/zulu13.54.17-ca-jdk13.0.14-linux_i686.tar.gz"
+                    else:
+                        jdk_url = "https://download.java.net/openjdk/jdk13/ri/openjdk-13+33_linux-x64_bin.tar.gz"
+
+                    jdk_filename = "java.tar.gz"
+
+                    download_file(jdk_url, jdk_filename)
+                    os.makedirs("./.java")
+                    p = subprocess.Popen(["tar", "-zxvf", "java.tar.gz", "-C", "./.java"])
+                    p.wait()
+                    os.remove(f"./{jdk_filename}")
+
+                java_cmd = os.path.join(os.getcwd(), "./.java/jdk-13/bin/java")
 
     clear_plugins = False
 

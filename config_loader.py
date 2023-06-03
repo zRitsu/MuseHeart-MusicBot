@@ -83,6 +83,7 @@ DEFAULT_CONFIG = {
     ### Sistema de música - Local lavalink stuffs: ###
     ##################################################
     "RUN_LOCAL_LAVALINK": False,
+    "USE_JABBA": True,
     "LAVALINK_ADDITIONAL_SLEEP": 0,
     "LAVALINK_INITIAL_RAM": 30,
     "LAVALINK_RAM_LIMIT": 120,
@@ -186,6 +187,7 @@ def load_config():
         "AUTO_SYNC_COMMANDS",
         "INTERACTION_COMMAND_ONLY",
         "RUN_LOCAL_LAVALINK",
+        "USE_JABBA",
         "COMMAND_LOG",
         "RUN_RPC_SERVER",
         "ENABLE_RPC_COMMAND",

@@ -202,6 +202,7 @@ class Owner(commands.Cog):
                         lavalink_initial_ram=self.bot.config['LAVALINK_INITIAL_RAM'],
                         lavalink_ram_limit=self.bot.config['LAVALINK_RAM_LIMIT'],
                         lavalink_additional_sleep=int(self.bot.config['LAVALINK_ADDITIONAL_SLEEP']),
+                        use_jabba=self.bot.config["USE_JABBA"]
                     )
             except (psutil.AccessDenied, PermissionError):
                 continue
