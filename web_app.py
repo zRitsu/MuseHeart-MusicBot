@@ -105,27 +105,27 @@ class IndexHandler(tornado.web.RequestHandler):
         }
         </style>"""
 
-        failed_bots = set()
-        pending_bots = set()
-        ready_bots = set()
+        failed_bots = []
+        pending_bots = []
+        ready_bots = []
 
         kwargs = {"redirect_uri": self.config['INVITE_REDIRECT_URL']} if self.config['INVITE_REDIRECT_URL'] else {}
 
         for bot in sorted(self.pool.bots, key=lambda b: b.identifier):
 
             if getattr(bot, 'has_exception', None):
-                failed_bots.add(f"<tr><td>{bot.identifier}</td>\n<td>{bot.has_exception}</td></tr>")
+                failed_bots.append(f"<tr><td>{bot.identifier}</td><td>{repr(bot.has_exception)}</td></tr>")
 
             elif bot.is_ready():
                 avatar = bot.user.display_avatar.replace(size=256, static_format="png").url
-                ready_bots.add(
+                ready_bots.append(
                     f"<tr><td><img src=\"{avatar}\" width=128 weight=128></img></td>\n"
                     "<td style=\"padding-top: 10px ; padding-bottom: 10px; padding-left: 10px; padding-right: 10px\">"
                     f"Adicionar:<br><a href=\"{disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'), **kwargs)}\" "
                     f"target=\"_blank\">{bot.user}</a></td></tr>"
                 )
             else:
-                pending_bots.add(f"<tr><td>{bot.identifier}</td></tr>")
+                pending_bots.append(f"<tr><td>{bot.identifier}</td></tr>")
 
         if ready_bots:
             msg += f"\n<p style=\"font-size:20px\">Bots Disponíveis:</p>" \
@@ -138,7 +138,7 @@ class IndexHandler(tornado.web.RequestHandler):
 
         if failed_bots:
             msg += f"\n<p style=\"font-size:20px\">Bots com falha de inicialização:</p>" \
-                   f"{style}\n<table>{''.join(ready_bots)}</table>"
+                   f"{style}\n<table>{''.join(failed_bots)}</table>"
 
         try:
             # repl.it stuff
