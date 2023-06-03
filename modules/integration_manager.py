@@ -588,12 +588,16 @@ def setup(bot: BotCore):
 
         bot.pool.ytdl = YoutubeDL(
             {
-                'ignoreerrors': True,
                 'extract_flat': True,
                 'quiet': True,
                 'no_warnings': True,
                 'lazy_playlist': True,
-                'simulate': True
+                'simulate': True,
+                'cachedir': False,
+                'allowed_extractors': [
+                    r'.*youtube.*',
+                    r'.*soundcloud.*',
+                ]
             }
         )
 

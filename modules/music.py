@@ -953,8 +953,11 @@ class Music(commands.Cog):
 
                     info = await loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(query, download=False))
 
-                    if not info["entries"]:
-                        raise GenericError(f"**Conteúdo indisponível (ou privado):**\n{query}")
+                    try:
+                        if not info["entries"]:
+                            raise GenericError(f"**Conteúdo indisponível (ou privado):**\n{query}")
+                    except KeyError:
+                        raise GenericError("**Ocorreu um erro ao tentar obter resultados para a opção selecionada...**")
 
                 if len(info["entries"]) == 1:
                     query = info["entries"][0]['url']
