@@ -111,12 +111,12 @@ class IndexHandler(tornado.web.RequestHandler):
 
         kwargs = {"redirect_uri": self.config['INVITE_REDIRECT_URL']} if self.config['INVITE_REDIRECT_URL'] else {}
 
+        for bot in sorted(self.pool.failed_bots, key=lambda b: b.identifier):
+            failed_bots.append(f"<tr><td>{bot.identifier}</td><td>{repr(bot.has_exception)}</td></tr>")
+
         for bot in sorted(self.pool.bots, key=lambda b: b.identifier):
 
-            if getattr(bot, 'has_exception', None):
-                failed_bots.append(f"<tr><td>{bot.identifier}</td><td>{repr(bot.has_exception)}</td></tr>")
-
-            elif bot.is_ready():
+            if bot.is_ready():
                 avatar = bot.user.display_avatar.replace(size=256, static_format="png").url
                 ready_bots.append(
                     f"<tr><td><img src=\"{avatar}\" width=128 weight=128></img></td>\n"

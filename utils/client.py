@@ -50,6 +50,7 @@ class BotPool:
         self.bot_mentions = set()
         self.single_bot = True
         self.rpc_token_cache: dict = {}
+        self.failed_bots: list = []
 
     @property
     def database(self) -> Union[LocalDatabase, MongoDatabase]:
@@ -93,12 +94,14 @@ class BotPool:
 
             traceback.print_exc()
             bot.has_exception = e
-            bot.pool.bots.remove(bot)
+            self.failed_bots.append(bot)
+            self.bots.remove(bot)
 
         except Exception as e:
             traceback.print_exc()
             bot.has_exception = e
-            bot.pool.bots.remove(bot)
+            self.failed_bots.append(bot)
+            self.bots.remove(bot)
 
     async def run_bots(self, bots: List[BotCore]):
         await asyncio.wait(
