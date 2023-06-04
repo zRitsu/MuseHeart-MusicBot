@@ -2943,7 +2943,10 @@ class Music(commands.Cog):
         except AttributeError:
             pass
 
-        await inter.send(embed=embed, view=view, ephemeral=True)
+        try:
+            view.message = await inter.followup.send(embed=embed, view=view, ephemeral=True)
+        except AttributeError:
+            view.message = await inter.send(embed=embed, view=view, ephemeral=True)
 
         await view.wait()
 
@@ -4104,9 +4107,9 @@ class Music(commands.Cog):
 
             max_concurrency = cog.webhook_max_concurrency
 
-            try:
-                await max_concurrency.acquire(message)
+            await max_concurrency.acquire(message)
 
+            try:
                 error_msg, full_error_msg, kill_process = parse_error(message, has_exception)
 
                 embed = disnake.Embed(
@@ -4163,12 +4166,12 @@ class Music(commands.Cog):
             except:
                 traceback.print_exc()
 
-                await asyncio.sleep(20)
+            await asyncio.sleep(20)
 
-                try:
-                    await max_concurrency.release(message)
-                except:
-                    pass
+            try:
+                await max_concurrency.release(message)
+            except:
+                pass
 
 
     async def parse_song_request(self, message, text_channel, data, *, response=None, attachment: disnake.Attachment=None):

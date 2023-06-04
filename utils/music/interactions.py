@@ -5,6 +5,7 @@ import disnake
 from disnake.ext import commands
 
 from utils.music.converters import time_format, fix_characters
+from utils.others import check_cmd
 
 
 class VolumeInteraction(disnake.ui.View):
@@ -42,12 +43,15 @@ class QueueInteraction(disnake.ui.View):
     def __init__(self, player, user: disnake.Member, timeout=60):
 
         self.player = player
+        self.bot = player.bot
         self.user = user
         self.pages = []
+        self.select_pages = []
         self.current = 0
         self.max_page = len(self.pages) - 1
+        self.message: Optional[disnake.Message] = None
         super().__init__(timeout=timeout)
-        self.embed = disnake.Embed(color=player.bot.get_color(user.guild.me))
+        self.embed = disnake.Embed(color=self.bot.get_color(user.guild.me))
         self.update_pages()
         self.update_embed()
 
@@ -58,72 +62,173 @@ class QueueInteraction(disnake.ui.View):
         entries = list(self.player.queue)
 
         self.pages = [entries[i:i + 12] for i in range(0, len(entries), 8)]
+        self.select_pages.clear()
+
+        self.clear_items()
 
         for n, page in enumerate(self.pages):
 
             txt = "\n"
+            opts = []
+
             for t in page:
+
+                duration = time_format(t.duration) if not t.is_stream else '🔴 Livestream'
+
                 txt += f"`┌ {counter})` [`{fix_characters(t.title, limit=50)}`]({t.uri})\n" \
-                       f"`└ ⏲️ {time_format(t.duration) if not t.is_stream else '🔴 Livestream'}`" + \
-                       (f" - `Repetições: {t.track_loops}`" if t.track_loops else  "") + f" **|** `✋` <@{t.requester}>\n"
+                       f"`└ ⏲️ {duration}`" + (f" - `Repetições: {t.track_loops}`" if t.track_loops else  "") + \
+                       f" **|** `✋` <@{t.requester}>\n"
+
+                opts.append(
+                    disnake.SelectOption(
+                        label=t.author[:25], description=f"[{duration}] | {t.title}"[:50],
+                        value=f"queue_select_{t.unique_id}",
+                    )
+                )
 
                 counter += 1
 
             self.pages[n] = txt
+            self.select_pages.append(opts)
+
+        track_select = disnake.ui.Select(
+            placeholder="Tocar uma música específica da página:",
+            options=self.select_pages[self.current],
+            custom_id="queue_track_selection",
+            max_values=1
+        )
+
+        track_select.callback = self.track_select_callback
+
+        self.add_item(track_select)
+
+        first = disnake.ui.Button(emoji='⏮️', style=disnake.ButtonStyle.grey)
+        first.callback = self.first
+        self.add_item(first)
+
+        back = disnake.ui.Button(emoji='⬅️', style=disnake.ButtonStyle.grey)
+        back.callback = self.back
+        self.add_item(back)
+
+        next = disnake.ui.Button(emoji='➡️', style=disnake.ButtonStyle.grey)
+        next.callback = self.next
+        self.add_item(next)
+
+        last = disnake.ui.Button(emoji='⏭️', style=disnake.ButtonStyle.grey)
+        last.callback = self.last
+        self.add_item(last)
+
+        stop_interaction = disnake.ui.Button(emoji='⏹️', style=disnake.ButtonStyle.grey)
+        stop_interaction.callback = self.stop_interaction
+        self.add_item(stop_interaction)
+
+        update_q = disnake.ui.Button(emoji='🔄', label="Refresh", style=disnake.ButtonStyle.grey)
+        update_q.callback = self.update_q
+        self.add_item(update_q)
 
         self.current = 0
         self.max_page = len(self.pages) - 1
 
+    async def on_timeout(self) -> None:
+
+        if not self.message:
+            return
+
+        embed = self.message.embeds[0]
+        embed.set_footer(text="Tempo para interagir esgotado!")
+
+        for c in self.children:
+            c.disabled = True
+
+        await self.message.edit(embed=embed, view=self)
+
+
     def update_embed(self):
         self.embed.title = f"**Músicas da fila [{self.current+1} / {self.max_page+1}]**"
         self.embed.description = self.pages[self.current]
+        self.children[2].options = self.select_pages[self.current]
 
-    @disnake.ui.button(emoji='⏮️', style=disnake.ButtonStyle.grey)
-    async def first(self, button, interaction: disnake.MessageInteraction):
+        for n, c in enumerate(self.children):
+            if isinstance(c, disnake.ui.StringSelect):
+                self.children[n].options = self.select_pages[self.current]
+
+    async def track_select_callback(self, interaction: disnake.MessageInteraction):
+
+        track_id = interaction.values[0][13:]
+
+        track = None
+
+        try:
+            self.player = self.bot.music.players[interaction.guild_id]
+        except KeyError:
+            await interaction.response.edit_message(embed=None, view=None, content="**O player não está mais ativo no servidor...**")
+            self.stop()
+            return
+
+        for t in  self.player.queue:
+            if t.unique_id == track_id:
+                track = t
+                break
+
+        if not track:
+            await interaction.send(f"Música com id \"{track_id}\" não encontrada na fila do player...", ephemeral=True)
+            return
+
+        command = self.bot.get_slash_command("skip")
+
+        try:
+            await check_cmd(command, interaction)
+
+            await command(interaction, query=f"{track.title} || ID > {track.unique_id}")
+            self.update_pages()
+            self.update_embed()
+            await interaction.message.edit(embed=self.embed, view=self)
+        except Exception as e:
+            self.bot.dispatch('interaction_player_error', interaction, e)
+
+    async def first(self, interaction: disnake.MessageInteraction):
 
         self.current = 0
         self.update_embed()
         await interaction.response.edit_message(embed=self.embed)
 
-    @disnake.ui.button(emoji='⬅️', style=disnake.ButtonStyle.grey)
-    async def back(self, button, interaction: disnake.MessageInteraction):
+    async def back(self, interaction: disnake.MessageInteraction):
 
         if self.current == 0:
             self.current = self.max_page
         else:
             self.current -= 1
         self.update_embed()
-        await interaction.response.edit_message(embed=self.embed)
+        await interaction.response.edit_message(embed=self.embed, view=self)
 
-    @disnake.ui.button(emoji='➡️', style=disnake.ButtonStyle.grey)
-    async def next(self, button, interaction: disnake.MessageInteraction):
+    async def next(self, interaction: disnake.MessageInteraction):
 
         if self.current == self.max_page:
             self.current = 0
         else:
             self.current += 1
         self.update_embed()
-        await interaction.response.edit_message(embed=self.embed)
+        await interaction.response.edit_message(embed=self.embed, view=self)
 
-    @disnake.ui.button(emoji='⏭️', style=disnake.ButtonStyle.grey)
-    async def last(self, button, interaction: disnake.MessageInteraction):
+    async def last(self, interaction: disnake.MessageInteraction):
 
         self.current = self.max_page
         self.update_embed()
         await interaction.response.edit_message(embed=self.embed)
 
-    @disnake.ui.button(emoji='⏹️', style=disnake.ButtonStyle.grey)
-    async def stop_interaction(self, button, interaction: disnake.MessageInteraction):
+
+    async def stop_interaction(self, interaction: disnake.MessageInteraction):
 
         await interaction.response.edit_message(content="Queue fechada", embed=None, view=None)
         self.stop()
 
-    @disnake.ui.button(emoji='🔄', label="Refresh", style=disnake.ButtonStyle.grey)
-    async def update_q(self, button, interaction: disnake.MessageInteraction):
+    async def update_q(self, interaction: disnake.MessageInteraction):
 
+        self.current = 0
+        self.max_page = len(self.pages) - 1
         self.update_pages()
         self.update_embed()
-        await interaction.response.edit_message(embed=self.embed)
+        await interaction.response.edit_message(embed=self.embed, view=self)
 
 
 class SelectInteraction(disnake.ui.View):
