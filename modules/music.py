@@ -2488,7 +2488,22 @@ class Music(commands.Cog):
         except KeyError:
             return
 
-        return [f"{track.title[:81]} || ID > {track.unique_id}" for n, track in enumerate(player.queue)
+        results = []
+
+        count = 0
+
+        for track in player.queue:
+
+            if count == 20:
+                break
+
+            title = track.title.lower().split()
+
+            if all(w in title for w in query.lower().split()):
+                results.append(f"{track.title[:81]} || ID > {track.unique_id}")
+                count += 1
+
+        return results or [f"{track.title[:81]} || ID > {track.unique_id}" for n, track in enumerate(player.queue)
                 if query.lower() in track.title.lower()][:20]
 
     nightcore_cd = commands.CooldownMapping.from_cooldown(1, 7, commands.BucketType.guild)
