@@ -4115,6 +4115,11 @@ class Music(commands.Cog):
                     description=f"```py\n{repr(has_exception)[:2030].replace(self.bot.http.token, 'mytoken')}```"
                 )
 
+                embed.set_footer(
+                    text=f"{message.author} [{message.author.id}]",
+                    icon_url=message.author.display_avatar.with_static_format("png").url
+                )
+
                 embed.add_field(
                     name="Servidor:", inline=False,
                     value=f"```\n{disnake.utils.escape_markdown(ctx.guild.name)}\nID: {ctx.guild.id}```"
