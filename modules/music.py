@@ -4486,7 +4486,7 @@ class Music(commands.Cog):
         except AttributeError:
             vc = None
 
-        if not vc or not player.guild.me:
+        if not player.guild.me or not vc:
             try:
                 print(
                     f"Desligando player por remoção de servidor!"
