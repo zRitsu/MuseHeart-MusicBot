@@ -1520,18 +1520,23 @@ class Music(commands.Cog):
     skip_back_cd = commands.CooldownMapping.from_cooldown(2, 13, commands.BucketType.member)
     skip_back_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
+    case_sensitive_args = argparse.ArgumentParser(exit_on_error=False)
+    case_sensitive_args.add_argument('-casesensitive', '-cs', '-exactmatch', '-exact', action='store_true',
+                             help="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome da música")
     @check_stage_topic()
     @is_requester()
     @check_voice()
     @pool_command(name="skip", aliases=["next", "n", "s", "pular", "skipto"], cooldown=skip_back_cd,
                   max_concurrency=skip_back_mc, description=f"Pular a música atual que está tocando.",
                   only_voiced=True)
-    async def skip_legacy(self, ctx: CustomContext, *, query: str = None):
+    async def skip_legacy(self, ctx: CustomContext, *, flags: str = ""):
 
-        if ctx.invoked_with == "skipto" and not query:
+        args, unknown = self.case_sensitive_args.parse_known_args(flags.split())
+
+        if ctx.invoked_with == "skipto" and not unknown:
             raise GenericError("**Você deve adicionar um nome para usar o skipto.**")
 
-        await self.skip.callback(self=self, inter=ctx, query=query)
+        await self.skip.callback(self=self, inter=ctx, query=" ".join(unknown), case_sensitive=args.casesensitive)
 
     @check_stage_topic()
     @is_requester()
@@ -1547,9 +1552,15 @@ class Music(commands.Cog):
             query: str = commands.Param(
                 name="nome",
                 description="Nome da música (completa ou parte dela)."
-            )):
+            ),
+            case_sensitive: bool = commands.Param(
+                name="nome_exato", default=False,
+                description="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome da música",
 
-        await self.skip.callback(self=self, inter=inter, query=query)
+            )
+    ):
+
+        await self.skip.callback(self=self, inter=inter, query=query, case_sensitive=case_sensitive)
 
     @check_stage_topic()
     @is_requester()
@@ -1579,7 +1590,13 @@ class Music(commands.Cog):
                 ],
                 description="Apenas tocar a música imediatamente (sem rotacionar a flia)",
                 default="no"
-            )):
+            ),
+            case_sensitive: bool = commands.Param(
+                name="nome_exato", default=False,
+                description="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome da música",
+
+            )
+    ):
 
         try:
             bot = inter.music_bot
@@ -1597,7 +1614,7 @@ class Music(commands.Cog):
         if query:
 
             try:
-                index = queue_track_index(inter, bot, query)[0][0]
+                index = queue_track_index(inter, bot, query, case_sensitive=case_sensitive)[0][0]
             except IndexError:
                 raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
 
@@ -2208,12 +2225,14 @@ class Music(commands.Cog):
     @check_voice()
     @pool_command(name="remove", aliases=["r", "del"], description="Remover uma música específica da fila.",
                   only_voiced=True, max_concurrency=remove_mc)
-    async def remove_legacy(self, ctx: CustomContext, *, query: str = None):
+    async def remove_legacy(self, ctx: CustomContext, *, flags: str = ""):
 
-        if not query:
-            raise GenericError("**Você não adicionou um nome ou posição de uma música.**")
+        args, unknown = self.case_sensitive_args.parse_known_args(flags.split())
 
-        await self.remove.callback(self=self, inter=ctx, query=query)
+        if not unknown:
+            raise GenericError("**Você não adicionou o nome da música.**")
+
+        await self.remove.callback(self=self, inter=ctx, query=" ".join(unknown), case_sensitive=args.casesensitive)
 
     @is_dj()
     @has_player()
@@ -2225,7 +2244,12 @@ class Music(commands.Cog):
     async def remove(
             self,
             inter: disnake.AppCmdInter,
-            query: str = commands.Param(name="nome", description="Nome da música completo.")
+            query: str = commands.Param(name="nome", description="Nome da música completo."),
+            case_sensitive: bool = commands.Param(
+                name="nome_exato", default=False,
+                description="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome da música",
+
+            )
     ):
 
         try:
@@ -2234,7 +2258,7 @@ class Music(commands.Cog):
             bot = inter.bot
 
         try:
-            index = queue_track_index(inter, bot, query)[0][0]
+            index = queue_track_index(inter, bot, query, case_sensitive=case_sensitive)[0][0]
         except IndexError:
             raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
 
@@ -2305,23 +2329,26 @@ class Music(commands.Cog):
     move_args = argparse.ArgumentParser(exit_on_error=False)
     move_args.add_argument('-count', '-counter', '-amount', type=int, default=None,
                            help="Especificar uma quantidade de músicas para mover com o nome especificado.")
+    move_args.add_argument('-casesensitive', '-cs', '-exactmatch', '-exact', action='store_true',
+                           help="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome "
+                                "da música")
 
     @is_dj()
     @has_player()
     @check_voice()
     @pool_command(name="move", aliases=["mv", "mover"], only_voiced=True, max_concurrency=remove_mc,
                   description="Mover uma música para a posição especificada da fila.")
-    async def move_legacy(self, ctx: CustomContext, position: Optional[int] = None, *, flags: str = None):
-
-        args, unknown = self.move_args.parse_known_args(flags.split())
+    async def move_legacy(self, ctx: CustomContext, position: Optional[int] = None, *, flags: str = ""):
 
         if not position:
             raise GenericError("**Você não informou uma posição da fila.**")
 
+        args, unknown = self.move_args.parse_known_args(flags.split())
+
         if not unknown:
             raise GenericError("**Você não adicionou o nome da música.**")
 
-        await self.move.callback(self=self, inter=ctx, position=position, query=" ".join(unknown), match_count=args.count or 1)
+        await self.move.callback(self=self, inter=ctx, position=position, query=" ".join(unknown), match_count=args.count or 1, case_sensitive=args.casesensitive)
 
     @is_dj()
     @has_player()
@@ -2339,6 +2366,11 @@ class Music(commands.Cog):
                 name="quantidade",
                 description="Especificar uma quantidade de músicas para mover com o nome especificado.",
                 default=1, min_value=1, max_value=999,
+            ),
+            case_sensitive: bool = commands.Param(
+                name="nome_exato", default=False,
+                description="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome da música",
+
             )
     ):
 
@@ -2354,7 +2386,7 @@ class Music(commands.Cog):
 
         player: LavalinkPlayer = bot.music.players[guild.id]
 
-        indexes = queue_track_index(inter, bot, query, match_count=match_count)
+        indexes = queue_track_index(inter, bot, query, match_count=match_count, case_sensitive=case_sensitive)
 
         if not indexes:
             raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
@@ -2416,12 +2448,14 @@ class Music(commands.Cog):
     @pool_command(name="rotate", aliases=["rt", "rotacionar"], only_voiced=True,
                   description="Rotacionar a fila para a música especificada.",
                   cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
-    async def rotate_legacy(self, ctx: CustomContext, *, query: str = None):
+    async def rotate_legacy(self, ctx: CustomContext, *, flags: str = ""):
 
-        if not query:
-            raise GenericError("**Você não adicionou um nome ou posição de uma música.**")
+        args, unknown = self.case_sensitive_args.parse_known_args(flags.split())
 
-        await self.rotate.callback(self=self, inter=ctx, query=query)
+        if not unknown:
+            raise GenericError("**Você não adicionou o nome da música.**")
+
+        await self.rotate.callback(self=self, inter=ctx, query=" ".join(unknown), case_sensitive=args.casesensitive)
 
     @is_dj()
     @has_player()
@@ -2433,8 +2467,11 @@ class Music(commands.Cog):
     async def rotate(
             self,
             inter: disnake.AppCmdInter,
-            query: str = commands.Param(
-                name="nome", description="Nome da música completo.")
+            query: str = commands.Param(name="nome", description="Nome da música completo."),
+            case_sensitive: bool = commands.Param(
+                name="nome_exato", default=False,
+                description="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome da música",
+            )
     ):
 
         try:
@@ -2442,7 +2479,7 @@ class Music(commands.Cog):
         except AttributeError:
             bot = inter.bot
 
-        index = queue_track_index(inter, bot, query)
+        index = queue_track_index(inter, bot, query, case_sensitive=case_sensitive)
 
         if not index:
             raise GenericError(f"**Não há músicas na fila com o nome: {query}**")

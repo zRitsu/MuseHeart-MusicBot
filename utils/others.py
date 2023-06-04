@@ -474,7 +474,8 @@ async def select_bot_pool(inter, first=False):
         except KeyError:
             raise GenericError("**O bot selecionado foi removido do servidor antes de sua seleção...**")
 
-def queue_track_index(inter: disnake.AppCmdInter, bot: BotCore, query: str, match_count: int = 1):
+def queue_track_index(inter: disnake.AppCmdInter, bot: BotCore, query: str, match_count: int = 1,
+                      case_sensitive: bool = False):
 
     player = bot.music.players[inter.guild_id]
 
@@ -499,22 +500,27 @@ def queue_track_index(inter: disnake.AppCmdInter, bot: BotCore, query: str, matc
             if match_count < 2:
                 continue
 
-        track_title = track.title.lower().split()
+        if case_sensitive:
+            if query.lower() in track.title.lower():
+                tracklist.append(track)
 
-        q_found = 0
+        else:
+            track_title = track.title.lower().split()
 
-        for q in query_split:
-            for t in track_title:
-                if q in t:
-                    q_found += 1
-                    track_title.remove(t)
+            q_found = 0
+
+            for q in query_split:
+                for t in track_title:
+                    if q in t:
+                        q_found += 1
+                        track_title.remove(t)
+                        break
+
+            if q_found == len(query_split):
+
+                tracklist.append((counter, track,))
+                count -= 1
+                if not count:
                     break
-
-        if q_found == len(query_split):
-
-            tracklist.append((counter, track,))
-            count -= 1
-            if not count:
-                break
 
     return tracklist
