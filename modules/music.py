@@ -935,6 +935,11 @@ class Music(commands.Cog):
                     if url_type != "user":
                         raise GenericError("**Link não suportado usando este método...**")
 
+                    try:
+                        await inter.response.defer(ephemeral=True)
+                    except:
+                        pass
+
                     result = await self.bot.spotify.get_user_playlists(user_id)
 
                     info = {"entries": [{"title": t.name, "url": t.external_urls["spotify"]} for t in result]}
