@@ -158,13 +158,6 @@ class QueueInteraction(disnake.ui.View):
 
         track = None
 
-        try:
-            self.player = self.bot.music.players[interaction.guild_id]
-        except KeyError:
-            await interaction.response.edit_message(embed=None, view=None, content="**O player não está mais ativo no servidor...**")
-            self.stop()
-            return
-
         for t in  self.player.queue:
             if t.unique_id == track_id:
                 track = t
@@ -175,6 +168,9 @@ class QueueInteraction(disnake.ui.View):
             return
 
         command = self.bot.get_slash_command("skip")
+
+        interaction.music_bot = self.bot
+        interaction.music_guild = self.user.guild
 
         try:
             await check_cmd(command, interaction)
