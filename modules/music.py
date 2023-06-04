@@ -2943,10 +2943,7 @@ class Music(commands.Cog):
         except AttributeError:
             pass
 
-        try:
-            view.message = await inter.followup.send(embed=embed, view=view, ephemeral=True)
-        except AttributeError:
-            view.message = await inter.send(embed=embed, view=view, ephemeral=True)
+        view.message = await inter.send(embed=embed, view=view, ephemeral=True)
 
         await view.wait()
 
