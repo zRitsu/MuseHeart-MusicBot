@@ -4476,6 +4476,23 @@ class Music(commands.Cog):
 
         player: LavalinkPlayer = payload.player
 
+        try:
+            vc = player.last_channel or player.guild.me.voice.channel
+        except AttributeError:
+            vc = None
+
+        if not vc or not player.guild.me:
+            try:
+                print(
+                    f"Desligando player por remoção de servidor!"
+                    f"\nBot: {player.bot.user} [{player.bot.user.id}]"
+                    f"\nGuild: {player.guild.name} [{player.guild.id}]")
+            except:
+                pass
+
+            await player.destroy(force=True)
+            return
+
         if payload.code == 4014 and player.guild.me.voice:
             pass
         else:
@@ -4484,7 +4501,7 @@ class Music(commands.Cog):
                 f"\nErro no canal de voz!"
                 f"\nBot: {player.bot.user} [{player.bot.user.id}] | " + ("Online" if self.bot.is_ready() else "Offline") +
                 f"\nGuild: {player.guild.name} [{player.guild.id}]"
-                f"\nCanal: {player.last_channel} [{player.last_channel.id}]"
+                f"\nCanal: {vc.name} [{vc.id}]"
                 f"\nServer: {player.node.identifier} | code: {payload.code} | reason: {payload.reason}\n" +
                 ("-" * 15)
             )
