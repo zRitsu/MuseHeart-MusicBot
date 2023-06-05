@@ -331,6 +331,8 @@ class LavalinkPlayer(wavelink.Player):
         self.mini_queue_enabled = False
         self.is_resuming = False
         self.is_purging = False
+        self.auto_pause = False
+
         self.last_channel: Optional[disnake.VoiceChannel] = None
 
         self._rpc_update_task: Optional[asyncio.Task] = None
@@ -468,22 +470,37 @@ class LavalinkPlayer(wavelink.Player):
 
     async def members_timeout(self):
 
-        if self.keep_connected:
-            return
+        if self.auto_pause and self.paused:
+            await self.set_pause(False)
+            self.auto_pause = False
 
         await asyncio.sleep(self.idle_timeout)
-        msg = f"**O player foi desligado por falta de membros no canal" + (f"<#{self.guild.me.voice.channel.id}>"
-                                                                           if self.guild.me.voice else '') + "...**"
-        self.command_log = msg
-        if not self.static and not self.has_thread:
-            embed = disnake.Embed(
-                description=msg, color=self.bot.get_color(self.guild.me))
-            try:
-                await self.text_channel.send(embed=embed, allowed_mentions=self.allowed_mentions)
-            except:
-                pass
 
-        await self.destroy()
+        if self.keep_connected:
+
+            if self.paused:
+                return
+
+            await self.set_pause(True)
+            self.auto_pause = True
+            self.set_command_log(text=f"O player foi pausado por falta de membros no canal <@{self.channel_id}>, a "
+                                      f"música será retomado automaticamente quando um membro entrar no canal "
+                                      f"<@{self.channel_id}>.", emoji="⚠️")
+            await self.invoke_np()
+
+        else:
+            msg = f"**O player foi desligado por falta de membros no canal" + (f"<#{self.guild.me.voice.channel.id}>"
+                                                                               if self.guild.me.voice else '') + "...**"
+            self.command_log = msg
+            if not self.static and not self.has_thread:
+                embed = disnake.Embed(
+                    description=msg, color=self.bot.get_color(self.guild.me))
+                try:
+                    await self.text_channel.send(embed=embed, allowed_mentions=self.allowed_mentions)
+                except:
+                    pass
+
+            await self.destroy()
 
     async def process_next(self, start_position: Union[int, float] = 0, inter: disnake.MessageInteraction = None):
 
