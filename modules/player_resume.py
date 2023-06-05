@@ -388,6 +388,19 @@ class PlayerSession(commands.Cog):
                 else:
                     await player.process_next(start_position=int(float(data["position"])))
 
+                try:
+                    player.members_timeout_task.cancel()
+                except:
+                    pass
+
+                try:
+                    check = any(m for m in player.guild.me.voice.channel.members if not m.bot)
+                except:
+                    check = None
+
+                if not check:
+                    player.members_timeout_task = self.bot.loop.create_task(player.members_timeout())
+
                 print(f"{self.bot.user} - Player Retomado: {guild.name} [{guild.id}]")
 
         except Exception:
