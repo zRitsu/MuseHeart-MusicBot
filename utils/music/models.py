@@ -473,11 +473,17 @@ class LavalinkPlayer(wavelink.Player):
         if self.auto_pause and self.paused and self.current:
             await self.set_pause(False)
             self.auto_pause = False
+            update_log = True
+
+        else:
+            update_log = False
 
         if check:
-            await asyncio.sleep(5)
-            self.set_command_log(emoji="🔰", text="A música foi retomada da pausa automática.")
-            await self.invoke_np()
+
+            if update_log:
+                self.set_command_log(emoji="🔰", text="A música foi retomada da pausa automática.")
+                await self.invoke_np()
+
             return
 
         if not force:
