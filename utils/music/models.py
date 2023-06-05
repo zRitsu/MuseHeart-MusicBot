@@ -468,13 +468,14 @@ class LavalinkPlayer(wavelink.Player):
         random.shuffle(hints)
         self.hints = cycle(hints)
 
-    async def members_timeout(self):
+    async def members_timeout(self, force=False):
 
         if self.auto_pause and self.paused:
             await self.set_pause(False)
             self.auto_pause = False
 
-        await asyncio.sleep(self.idle_timeout)
+        if not force and not self.keep_connected:
+            await asyncio.sleep(self.idle_timeout)
 
         if self.keep_connected:
 
@@ -483,9 +484,9 @@ class LavalinkPlayer(wavelink.Player):
 
             await self.set_pause(True)
             self.auto_pause = True
-            self.set_command_log(text=f"O player foi pausado por falta de membros no canal <@{self.channel_id}>, a "
+            self.set_command_log(text=f"O player foi pausado por falta de membros no canal <#{self.channel_id}>, a "
                                       f"música será retomado automaticamente quando um membro entrar no canal "
-                                      f"<@{self.channel_id}>.", emoji="⚠️")
+                                      f"<#{self.channel_id}>.", emoji="⚠️")
             await self.invoke_np()
 
         else:
