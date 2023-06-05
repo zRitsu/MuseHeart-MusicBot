@@ -112,7 +112,6 @@ class PlayerSession(commands.Cog):
             "player_creator": str(player.player_creator) if player.player_creator else None,
             "static": player.static,
             "paused": player.paused,
-            "auto_pause": player.auto_pause,
             "text_channel": text_channel,
             "keep_connected": player.keep_connected,
             "message": message,
@@ -374,7 +373,7 @@ class PlayerSession(commands.Cog):
                 except:
                     check = None
 
-                if data.get("paused") and not data.get("auto_pause"):
+                if data.get("paused") and check:
 
                     try:
                         track = player.queue.popleft()
@@ -399,7 +398,10 @@ class PlayerSession(commands.Cog):
                 except:
                     pass
 
-                player.members_timeout_task = self.bot.loop.create_task(player.members_timeout(check=check))
+                if not check:
+                    await player.members_timeout(check=check, force=True)
+                else:
+                    player.members_timeout_task = self.bot.loop.create_task(player.members_timeout(check=check))
 
                 print(f"{self.bot.user} - Player Retomado: {guild.name} [{guild.id}]")
 

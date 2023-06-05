@@ -468,7 +468,7 @@ class LavalinkPlayer(wavelink.Player):
         random.shuffle(hints)
         self.hints = cycle(hints)
 
-    async def members_timeout(self, check: bool):
+    async def members_timeout(self, check: bool, force: bool = False):
 
         if self.auto_pause and self.paused and self.current:
             await self.set_pause(False)
@@ -479,7 +479,8 @@ class LavalinkPlayer(wavelink.Player):
             self.set_command_log(emoji="🔰", text="A música foi retomado da pausa automática.")
             return
 
-        await asyncio.sleep(self.idle_timeout)
+        if not force:
+            await asyncio.sleep(self.idle_timeout)
 
         if self.keep_connected:
 
