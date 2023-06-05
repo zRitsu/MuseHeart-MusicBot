@@ -470,12 +470,18 @@ class LavalinkPlayer(wavelink.Player):
 
     async def members_timeout(self, check: bool, force=False):
 
-        if self.auto_pause and self.paused:
+        clear_log = False
+
+        if self.auto_pause and self.paused and self.current:
             await self.set_pause(False)
             self.auto_pause = False
+            clear_log = True
 
         if check:
             await asyncio.sleep(5)
+            if clear_log:
+                self.command_log = ""
+                self.command_log_emoji = ""
             await self.invoke_np()
             return
 
@@ -484,7 +490,7 @@ class LavalinkPlayer(wavelink.Player):
 
         if self.keep_connected:
 
-            if self.paused:
+            if self.paused or not self.current:
                 return
 
             await self.set_pause(True)
