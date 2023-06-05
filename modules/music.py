@@ -857,7 +857,10 @@ class Music(commands.Cog):
                 }
 
                 try:
-                    msg = await inter.followup.send(ephemeral=ephemeral, wait=True, **kwargs)
+                    if not isinstance(inter, disnake.MessageInteraction):
+                        msg = await inter.followup.send(ephemeral=ephemeral, wait=True, **kwargs)
+                    else:
+                        msg = await inter.send(ephemeral=True, **kwargs)
                 except (disnake.InteractionTimedOut, AttributeError):
                     msg = await inter.channel.send(**kwargs)
 
