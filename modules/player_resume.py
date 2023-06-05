@@ -112,6 +112,7 @@ class PlayerSession(commands.Cog):
             "player_creator": str(player.player_creator) if player.player_creator else None,
             "static": player.static,
             "paused": player.paused,
+            "auto_pause": player.auto_pause,
             "text_channel": text_channel,
             "keep_connected": player.keep_connected,
             "message": message,
@@ -368,7 +369,12 @@ class PlayerSession(commands.Cog):
                     emoji="🔰"
                 )
 
-                if data.get("paused"):
+                try:
+                    check = any(m for m in player.guild.me.voice.channel.members if not m.bot)
+                except:
+                    check = None
+
+                if data.get("paused") and not data.get("auto_pause"):
 
                     try:
                         track = player.queue.popleft()
@@ -376,10 +382,10 @@ class PlayerSession(commands.Cog):
                         track = None
 
                     if track:
-                        await player.play(track, start=int(data["position"]))
-                        await player.set_pause(True)
                         player.current = track
+                        await player.play(track, start=int(data["position"]))
                         player.last_track = track
+                        await player.set_pause(True)
                         await player.invoke_np(rpc_update=True)
 
                     else:
@@ -392,11 +398,6 @@ class PlayerSession(commands.Cog):
                     player.members_timeout_task.cancel()
                 except:
                     pass
-
-                try:
-                    check = any(m for m in player.guild.me.voice.channel.members if not m.bot)
-                except:
-                    check = None
 
                 player.members_timeout_task = self.bot.loop.create_task(player.members_timeout(check=check))
 
