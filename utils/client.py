@@ -50,7 +50,7 @@ class BotPool:
         self.bot_mentions = set()
         self.single_bot = True
         self.rpc_token_cache: dict = {}
-        self.failed_bots: list = []
+        self.failed_bots: dict = {}
 
     @property
     def database(self) -> Union[LocalDatabase, MongoDatabase]:
@@ -61,11 +61,14 @@ class BotPool:
         return self.local_database
 
     async def start_bot(self, bot: BotCore):
+
+        e = None
+
         try:
             await bot.start(bot.http.token)
-        except disnake.HTTPException as e:
+        except disnake.HTTPException as error:
 
-            if e.status == 429 or "429 Too Many Requests" in str(e):
+            if error.status == 429 or "429 Too Many Requests" in str(e):
 
                 if not self.config["KILL_ON_429"]:
 
@@ -92,15 +95,24 @@ class BotPool:
 
                 return
 
-            traceback.print_exc()
-            bot.has_exception = e
-            self.failed_bots.append(bot)
-            self.bots.remove(bot)
+            e = error
 
-        except Exception as e:
-            traceback.print_exc()
-            bot.has_exception = e
-            self.failed_bots.append(bot)
+        except Exception as error:
+            e = error
+
+        if e:
+            if isinstance(e, disnake.PrivilegedIntentsRequired):
+                e = "Você não ativou as Privileged Intents na sua aplicação<br>" \
+                    "Acesse o discord developer portal:<br>" \
+                    "https://discord.com/developers/applications/<br>" \
+                    "e ative todas as intents. Print de exemplo:<br>" \
+                    "https://media.discordapp.net/attachments/554468640942981147/1115319340074532915/image.png"
+
+                print(("=" * 30) + f"\nFalha ao iniciar o bot configurado no: {bot.identifier}\n" + e.replace('<br>', '\n') + "\n" + ("=" * 30))
+            else:
+                traceback.print_exc()
+                e = repr(e)
+            self.failed_bots[bot.identifier] = e
             self.bots.remove(bot)
 
     async def run_bots(self, bots: List[BotCore]):

@@ -73,7 +73,7 @@ class IndexHandler(tornado.web.RequestHandler):
         if not self.pool:
             return
 
-        bots = [asyncio.create_task(bot.wait_until_ready()) for bot in self.pool.bots if not getattr(bot, 'has_exception', None)]
+        bots = [asyncio.create_task(bot.wait_until_ready()) for bot in self.pool.bots]
 
         if bots:
             await asyncio.wait(bots, timeout=7)
@@ -111,8 +111,8 @@ class IndexHandler(tornado.web.RequestHandler):
 
         kwargs = {"redirect_uri": self.config['INVITE_REDIRECT_URL']} if self.config['INVITE_REDIRECT_URL'] else {}
 
-        for bot in sorted(self.pool.failed_bots, key=lambda b: b.identifier):
-            failed_bots.append(f"<tr><td>{bot.identifier}</td><td>{repr(bot.has_exception)}</td></tr>")
+        for identifier, exception in self.pool.failed_bots.items():
+            failed_bots.append(f"<tr><td>{identifier}</td><td>{exception}</td></tr>")
 
         for bot in sorted(self.pool.bots, key=lambda b: b.identifier):
 
@@ -129,16 +129,16 @@ class IndexHandler(tornado.web.RequestHandler):
 
         if ready_bots:
             msg += f"\n<p style=\"font-size:20px\">Bots Disponíveis:</p>" \
-                   f"{style}\n<table>{''.join(ready_bots)}</table>"
+                   f"{style}\n<table cellpadding=\"3\">{''.join(ready_bots)}</table>"
 
         if pending_bots:
             msg += f"\n<p style=\"font-size:20px\">Bots em inicialização:</p>" \
-                   f"{style}\n<table>{''.join(pending_bots)}</table>\n" \
+                   f"{style}\n<table cellpadding=\"10\">{''.join(pending_bots)}</table>\n" \
                    f"Nota: Recarregue a página para conferir se o bot está disponível."
 
         if failed_bots:
             msg += f"\n<p style=\"font-size:20px\">Bots com falha de inicialização:</p>" \
-                   f"{style}\n<table>{''.join(failed_bots)}</table>"
+                   f"{style}\n<table cellpadding=\"10\">{''.join(failed_bots)}</table>"
 
         try:
             # repl.it stuff
