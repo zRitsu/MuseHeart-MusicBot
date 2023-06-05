@@ -476,7 +476,7 @@ class LavalinkPlayer(wavelink.Player):
 
         if check:
             await asyncio.sleep(5)
-            self.set_command_log(emoji="🔰", text="A música foi retomado da pausa automática.")
+            self.set_command_log(emoji="🔰", text="A música foi retomada da pausa automática.")
             await self.invoke_np()
             return
 
