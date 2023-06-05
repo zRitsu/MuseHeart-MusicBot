@@ -270,7 +270,10 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
     for bot in inter.bot.pool.bots:
 
-        if not bot.appinfo.bot_public:
+        try:
+            if not bot.appinfo.bot_public:
+                continue
+        except AttributeError:
             continue
 
         if (bot.user.id == inter.bot.user.id):
