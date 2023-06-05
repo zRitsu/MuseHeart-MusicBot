@@ -137,8 +137,16 @@ class IndexHandler(tornado.web.RequestHandler):
                    f"Nota: Recarregue a página para conferir se o bot está disponível."
 
         if failed_bots:
+
+            failed_table_style = """<style>
+            table, th, td {
+                border:1px solid black;
+                text-align: left;
+            }
+            </style>"""
+
             msg += f"\n<p style=\"font-size:20px\">Bots com falha de inicialização:</p>" \
-                   f"{style}\n<table cellpadding=\"10\">{''.join(failed_bots)}</table>"
+                   f"{failed_table_style}\n<table cellpadding=\"10\">{''.join(failed_bots)}</table>"
 
         try:
             # repl.it stuff
