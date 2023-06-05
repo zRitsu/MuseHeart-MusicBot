@@ -468,11 +468,16 @@ class LavalinkPlayer(wavelink.Player):
         random.shuffle(hints)
         self.hints = cycle(hints)
 
-    async def members_timeout(self, force=False):
+    async def members_timeout(self, check: bool, force=False):
 
         if self.auto_pause and self.paused:
             await self.set_pause(False)
             self.auto_pause = False
+
+        if check:
+            await asyncio.sleep(5)
+            await self.invoke_np()
+            return
 
         if not force and not self.keep_connected:
             await asyncio.sleep(self.idle_timeout)
