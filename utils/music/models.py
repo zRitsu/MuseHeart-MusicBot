@@ -475,6 +475,8 @@ class LavalinkPlayer(wavelink.Player):
             self.auto_pause = False
 
         if check:
+            await asyncio.sleep(5)
+            self.set_command_log(emoji="🔰", text="A música foi retomado da pausa automática.")
             return
 
         await asyncio.sleep(self.idle_timeout)
@@ -486,8 +488,8 @@ class LavalinkPlayer(wavelink.Player):
 
             await self.set_pause(True)
             self.auto_pause = True
-            self.set_command_log(text=f"O player foi pausado por falta de membros no canal <#{self.channel_id}>, a "
-                                      f"música será retomado automaticamente quando um membro entrar no canal "
+            self.set_command_log(text=f"O player foi pausado por falta de membros no canal. A "
+                                      f"música será retomada automaticamente quando um membro entrar no canal "
                                       f"<#{self.channel_id}>.", emoji="⚠️")
             await self.invoke_np()
 
