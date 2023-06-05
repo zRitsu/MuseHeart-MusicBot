@@ -101,16 +101,28 @@ class BotPool:
             e = error
 
         if e:
+
             if isinstance(e, disnake.PrivilegedIntentsRequired):
                 e = "Você não ativou as Privileged Intents na sua aplicação<br>" \
                     "Acesse o discord developer portal:<br>" \
                     "https://discord.com/developers/applications/<br>" \
                     "e ative todas as intents. Print de exemplo:<br>" \
-                    "https://media.discordapp.net/attachments/554468640942981147/1115319340074532915/image.png"
+                    "https://media.discordapp.net/attachments/554468640942981147/1115319340074532915/image.png" \
+                    "Após corrigir, reinicie a aplicação."
 
                 print(("=" * 30) + f"\nFalha ao iniciar o bot configurado no: {bot.identifier}\n" + e.replace('<br>', '\n') + "\n" + ("=" * 30))
+
+            elif isinstance(e, disnake.LoginFailure) and "Improper token" in str(e):
+                e = "Foi utilizado um token inválido.<br>" \
+                    "Revise se o token informado está correto<br>" \
+                    "ou se o token foi resetado<br>" \
+                    "ou copiado do local correto ( ex: https://i.imgur.com/k894c1q.png )<br>" \
+                    "Após corrigir, reinicie a aplicação."
+
+                print(("=" * 30) + f"\nFalha ao iniciar o bot configurado no: {bot.identifier}\n" + e.replace('<br>', '\n') + "\n" + ( "=" * 30))
+
             else:
-                traceback.print_exc()
+                traceback.print_tb(e.__traceback__)
                 e = repr(e)
             self.failed_bots[bot.identifier] = e
             self.bots.remove(bot)
