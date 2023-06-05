@@ -23,7 +23,8 @@ SOFTWARE.
 import logging
 import time
 import re
-from traceback import print_exc
+
+import disnake
 from disnake.ext import commands
 from disnake.gateway import DiscordWebSocket
 from disnake import VoiceChannel, VoiceClient
@@ -407,14 +408,15 @@ class Player:
         __log__.debug(f'PLAYER | Current track stopped:: {str(self.current)} ({self.channel_id})')
         self.current = None
 
-    async def destroy(self, *, force: bool = False) -> None:
+    async def destroy(self, *, force: bool = False, guild: Optional[disnake.Guild] = None) -> None:
         """|coro|
 
         Stop the player, and remove any internal references to it.
         """
         await self.stop()
 
-        guild = self.bot.get_guild(self.guild_id)
+        if not guild:
+            guild = self.bot.get_guild(self.guild_id)
 
         try:
             await guild.voice_client.disconnect(force=True)

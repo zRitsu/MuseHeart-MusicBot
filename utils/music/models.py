@@ -1017,7 +1017,7 @@ class LavalinkPlayer(wavelink.Player):
         except:
             pass
 
-        if not self.static:
+        if not self.static and self.guild.me:
             try:
                 await self.message.delete()
             except:
@@ -1103,46 +1103,48 @@ class LavalinkPlayer(wavelink.Player):
         except:
             pass
 
-        if self.static:
-            try:
-                await send_idle_embed(inter or self.message, self.command_log, bot=self.bot)
-            except:
-                pass
+        if self.guild.me:
 
-        elif self.has_thread:
+            if self.static:
+                try:
+                    await send_idle_embed(inter or self.message, self.command_log, bot=self.bot)
+                except:
+                    pass
 
-            try:
-                await self.message.edit(
+            elif self.has_thread:
+
+                try:
+                    await self.message.edit(
+                        embed=disnake.Embed(
+                            description=self.command_log,
+                            color=self.bot.get_color(self.guild.me)
+                        ), view=None, allowed_mentions=self.allowed_mentions
+                    )
+                    channel: disnake.Thread = self.bot.get_channel(self.message.id)
+                    await channel.edit(archived=True, locked=True)
+                except Exception:
+                    print(
+                        f"Falha ao arquivar thread do servidor: {self.guild.name}\n{traceback.format_exc()}")
+
+            elif inter:
+
+                await inter.response.edit_message(
+                    content=None,
                     embed=disnake.Embed(
-                        description=self.command_log,
-                        color=self.bot.get_color(self.guild.me)
-                    ), view=None, allowed_mentions=self.allowed_mentions
+                        description=f"🛑 ⠂{self.command_log}",
+                        color=self.bot.get_color(self.guild.me)),
+                    components=[
+                        disnake.ui.Button(
+                            label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song),
+                        disnake.ui.Button(
+                            label="Tocar favorito", emoji="⭐", custom_id=PlayerControls.enqueue_fav)
+
+                    ]
                 )
-                channel: disnake.Thread = self.bot.get_channel(self.message.id)
-                await channel.edit(archived=True, locked=True)
-            except Exception:
-                print(
-                    f"Falha ao arquivar thread do servidor: {self.guild.name}\n{traceback.format_exc()}")
 
-        elif inter:
+            else:
 
-            await inter.response.edit_message(
-                content=None,
-                embed=disnake.Embed(
-                    description=f"🛑 ⠂{self.command_log}",
-                    color=self.bot.get_color(self.guild.me)),
-                components=[
-                    disnake.ui.Button(
-                        label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song),
-                    disnake.ui.Button(
-                        label="Tocar favorito", emoji="⭐", custom_id=PlayerControls.enqueue_fav)
-
-                ]
-            )
-
-        else:
-
-            await self.destroy_message()
+                await self.destroy_message()
 
         try:
             self.members_timeout_task.cancel()
@@ -1397,7 +1399,7 @@ class LavalinkPlayer(wavelink.Player):
         except AttributeError:
             channel = self.last_channel
 
-        if isinstance(channel, disnake.StageChannel) and self.stage_title_event and self.guild.me.guild_permissions.manage_channels:
+        if isinstance(channel, disnake.StageChannel) and self.stage_title_event and self.guild.me and self.guild.me.guild_permissions.manage_channels:
 
             if channel.instance:
                 try:
@@ -1405,7 +1407,7 @@ class LavalinkPlayer(wavelink.Player):
                 except Exception:
                     traceback.print_exc()
 
-        await super().destroy(force=force)
+        await super().destroy(force=force, guild=self.guild)
 
         self.bot.dispatch("player_destroy", player=self)
 
