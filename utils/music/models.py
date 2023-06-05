@@ -468,7 +468,7 @@ class LavalinkPlayer(wavelink.Player):
         random.shuffle(hints)
         self.hints = cycle(hints)
 
-    async def members_timeout(self, check: bool, force=False):
+    async def members_timeout(self, check: bool):
 
         clear_log = False
 
@@ -485,8 +485,7 @@ class LavalinkPlayer(wavelink.Player):
             await self.invoke_np()
             return
 
-        if not force and not self.keep_connected:
-            await asyncio.sleep(self.idle_timeout)
+        await asyncio.sleep(self.idle_timeout)
 
         if self.keep_connected:
 

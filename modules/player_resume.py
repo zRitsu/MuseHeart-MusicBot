@@ -398,7 +398,7 @@ class PlayerSession(commands.Cog):
                 except:
                     check = None
 
-                player.members_timeout_task = self.bot.loop.create_task(player.members_timeout(check=check, force=True))
+                player.members_timeout_task = self.bot.loop.create_task(player.members_timeout(check=check))
 
                 print(f"{self.bot.user} - Player Retomado: {guild.name} [{guild.id}]")
 
