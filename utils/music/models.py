@@ -639,7 +639,7 @@ class LavalinkPlayer(wavelink.Player):
 
         self.message_updater_task = self.bot.loop.create_task(self.message_updater())
 
-        await self.play(track, start=start_position)
+        await self.play(track, start=start_position if not track.is_stream else 0)
 
     async def process_idle_message(self):
 
