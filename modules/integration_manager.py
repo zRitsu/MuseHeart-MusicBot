@@ -436,7 +436,7 @@ class IntegrationManager(commands.Cog):
                 embed.add_field(name="Como usá-los:", inline=False,
                                 value=f"```- No comando /{cog.play.name} (no preenchimento automático da busca)\n"
                                       "- Ao clicar no botão de tocar favorito do player.\n"
-                                      f"- Ao usar o comando {global_data['prefix']}{cog.play_legacy.name} sem nome ou link.```\n")
+                                      f"- Ao usar o comando {global_data['prefix'] or self.bot.default_prefix}{cog.play_legacy.name} sem nome ou link.```\n")
 
         embed.add_field(
             name="Links de perfis/canais suportados:", inline=False,
