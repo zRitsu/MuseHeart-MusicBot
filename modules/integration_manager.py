@@ -280,18 +280,18 @@ class IntegrationsView(disnake.ui.View):
 
     async def on_timeout(self):
 
+        for c in self.children:
+            c.disabled = True
+
         if isinstance(self.ctx, CustomContext):
             try:
-                await self.message.edit(
-                    embed=disnake.Embed(description="**Tempo esgotado...**", color=self.bot.get_color()), view=None
-                )
+                await self.message.edit(view=self)
             except:
                 pass
 
         else:
-            await self.ctx.edit_original_message(
-                embed=disnake.Embed(description="**Tempo esgotado...**", color=self.bot.get_color()), view=None
-            )
+            await self.ctx.edit_original_message(view=self)
+
         self.stop()
 
     async def integrationadd_callback(self, inter: disnake.MessageInteraction):
@@ -416,7 +416,8 @@ class IntegrationManager(commands.Cog):
 
         embed = disnake.Embed(
             description="## Gerenciador de integrações de canais/perfis com playlists públicas.\n\n"
-                        f"### Links de perfis/canais suportados:\n```ansi\n{', '.join(supported_platforms)}```",
+                        f"### Links de perfis/canais suportados:\n```ansi\n{', '.join(supported_platforms)}```\n"
+                        f"**Suas integrações atuais:**\n\n" + "\n".join(f"` {n+1}. ` [`{f[0]}`]({f[1]})" for n, f in enumerate(user_data["integration_links"].items())),
             colour=self.bot.get_color(),
         )
 
