@@ -474,7 +474,6 @@ class LavalinkPlayer(wavelink.Player):
             await self.set_pause(False)
             self.auto_pause = False
             update_log = True
-            await self.process_save_queue()
 
         else:
             update_log = False
@@ -500,7 +499,6 @@ class LavalinkPlayer(wavelink.Player):
             self.set_command_log(text=f"O player foi pausado por falta de membros no canal. A "
                                       f"música será retomada automaticamente quando um membro entrar no canal "
                                       f"<#{self.channel_id}>.", emoji="⚠️")
-            await self.process_save_queue(create_task=False)
             await self.invoke_np()
 
         else:
