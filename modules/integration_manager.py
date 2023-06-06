@@ -382,7 +382,7 @@ class IntegrationManager(commands.Cog):
     async def integration(self, inter: disnake.ApplicationCommandInteraction):
         pass
 
-    @commands.command(name="integrationmanager", aliases=["integrations", "itg", "itgmgr"],
+    @commands.command(name="integrationmanager", aliases=["integrations", "itg", "itgmgr", "itglist", "integrationlist"],
                       description="Gerenciar suas integrações.", cooldown=itg_cd)
     async def integrationmanager_legacy(self, ctx: CustomContext):
         await self.manager.callback(self=self, inter=ctx)
@@ -456,51 +456,6 @@ class IntegrationManager(commands.Cog):
                 await inter.response.edit_message(embed=embed, view=view)
 
         await view.wait()
-
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.command(name="integrationlist", aliases=["itglist"], description="Exibir sua lista de integrações.")
-    async def integrationlist_legacy(self, ctx: CustomContext):
-        await self.list_.callback(self=self, inter=ctx, hidden=False)
-
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    @integration.sub_command(
-        name="list", description=f"{desc_prefix}Exibir sua lista de integrações."
-    )
-    async def list_(
-            self, inter: disnake.ApplicationCommandInteraction,
-            hidden: bool = commands.Param(
-                name="ocultar",
-                description="Apenas você poderá ver sua lista de integrações.",
-                default=False)
-    ):
-
-        if hidden is False and not self.bot.check_bot_forum_post(inter.channel):
-            hidden = True
-
-        await inter.response.defer(ephemeral=hidden)
-
-        try:
-            user_data = inter.global_user_data
-        except AttributeError:
-            user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
-            inter.global_user_data = user_data
-
-        if not user_data["integration_links"]:
-            raise GenericError(f"**Você não possui integrações..\n"
-                               f"Você pode adicionar usando o comando: /{self.integration.name} {self.manager.name}**")
-
-        embed = disnake.Embed(
-            color=self.bot.get_color(),
-            title="Suas integrações:",
-            description="\n".join(f"{n+1}) [`{f[0]}`]({f[1]})" for n, f in enumerate(user_data["integration_links"].items()))
-        )
-
-        embed.set_footer(text="Você pode usá-los no comando /play")
-
-        if isinstance(inter, CustomContext):
-            await inter.send(embed=embed)
-        else:
-            await inter.edit_original_message(embed=embed)
 
     integration_import_export_cd = commands.CooldownMapping.from_cooldown(1, 15, commands.BucketType.member)
 
