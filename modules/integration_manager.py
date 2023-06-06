@@ -415,10 +415,32 @@ class IntegrationManager(commands.Cog):
         view = IntegrationsView(bot=self.bot, ctx=inter, data=user_data)
 
         embed = disnake.Embed(
-            description="## Gerenciador de integrações de canais/perfis com playlists públicas.\n\n"
-                        f"### Links de perfis/canais suportados:\n```ansi\n{', '.join(supported_platforms)}```\n"
-                        f"**Suas integrações atuais:**\n\n" + "\n".join(f"` {n+1}. ` [`{f[0]}`]({f[1]})" for n, f in enumerate(user_data["integration_links"].items())),
+            title="Gerenciador de integrações de canais/perfis com playlists públicas.",
             colour=self.bot.get_color(),
+        )
+
+        if user_data["integration_links"]:
+
+            embed.description = f"**Suas integrações atuais:**\n\n" + "\n".join(f"` {n+1}. ` [`{f[0]}`]({f[1]})" for n, f in enumerate(user_data["integration_links"].items()))
+
+            cog = self.bot.get_cog("Music")
+
+            if cog:
+
+                try:
+                    global_data = inter.global_guild_data
+                except AttributeError:
+                    global_data = await self.bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
+                    inter.global_guild_data = global_data
+
+                embed.add_field(name="Como usá-los:", inline=False,
+                                value=f"```- No comando /{cog.play.name} (no preenchimento automático da busca)\n"
+                                      "- Ao clicar no botão de tocar favorito do player.\n"
+                                      f"- Ao usar o comando {global_data['prefix']}{cog.play_legacy.name} sem nome ou link.```\n")
+
+        embed.add_field(
+            name="Links de perfis/canais suportados:", inline=False,
+            value=f"```ansi\n{', '.join(supported_platforms)}```"
         )
 
         if isinstance(inter, CustomContext):
