@@ -135,6 +135,64 @@ class PlayerSession(commands.Cog):
         except:
             traceback.print_exc()
 
+    def process_track_cls(self, data: list, playlists: dict = None):
+
+        if not playlists:
+            playlists = {}
+
+        tracks = []
+
+        for info in data:
+
+            if info["sourceName"] == "spotify":
+
+                if playlist := info.pop("playlist", None):
+
+                    try:
+                        playlist = playlists[playlist["url"]]
+                    except KeyError:
+                        playlist_cls = PartialPlaylist(
+                            {
+                                'loadType': 'PLAYLIST_LOADED',
+                                'playlistInfo': {
+                                    'name': playlist["name"],
+                                    'selectedTrack': -1
+                                },
+                                'tracks': []
+                            }, url=playlist["url"]
+                        )
+                        playlists[playlist["url"]] = playlist_cls
+                        playlist = playlist_cls
+
+                t = PartialTrack(info=info, playlist=playlist)
+
+            else:
+
+                if playlist := info.pop("playlist", None):
+
+                    try:
+                        playlist = playlists[playlist["url"]]
+                    except KeyError:
+                        playlist_cls = LavalinkPlaylist(
+                            {
+                                'loadType': 'PLAYLIST_LOADED',
+                                'playlistInfo': {
+                                    'name': playlist["name"],
+                                    'selectedTrack': -1
+                                },
+                                'tracks': []
+                            }, url=playlist["url"]
+                        )
+                        playlists[playlist["url"]] = playlist_cls
+                        playlist = playlist_cls
+
+                t = LavalinkTrack(id_=info["id"], info=info, playlist=playlist)
+
+            del t.info["id"]
+            tracks.append(t)
+
+        return tracks, playlists
+
     async def resume_players(self):
 
         if self.bot.player_resuming:
@@ -290,66 +348,17 @@ class PlayerSession(commands.Cog):
                 if player.nightcore:
                     await player.set_timescale(pitch=1.2, speed=1.1)
 
-                playlists = {}
+                tracks, playlists = self.process_track_cls(data["tracks"])
 
-                for info in data["tracks"]:
+                player.queue.extend(tracks)
 
-                    if info["sourceName"] == "spotify":
+                played_tracks, playlists = self.process_track_cls(data["played"], playlists)
 
-                        if playlist:=info.pop("playlist", None):
-
-                            try:
-                                playlist = playlists[playlist["url"]]
-                            except KeyError:
-                                playlist_cls = PartialPlaylist(
-                                    {
-                                        'loadType': 'PLAYLIST_LOADED',
-                                        'playlistInfo': {
-                                            'name': playlist["name"],
-                                            'selectedTrack': -1
-                                        },
-                                        'tracks': []
-                                    }, url = playlist["url"]
-                                )
-                                playlists[playlist["url"]] = playlist_cls
-                                playlist = playlist_cls
-
-                        t = PartialTrack(info=info, playlist=playlist)
-
-                    else:
-
-                        if playlist := info.pop("playlist", None):
-
-                            try:
-                                playlist = playlists[playlist["url"]]
-                            except KeyError:
-                                playlist_cls = LavalinkPlaylist(
-                                    {
-                                        'loadType': 'PLAYLIST_LOADED',
-                                        'playlistInfo': {
-                                            'name': playlist["name"],
-                                            'selectedTrack': -1
-                                        },
-                                        'tracks': []
-                                    }, url=playlist["url"]
-                                )
-                                playlists[playlist["url"]] = playlist_cls
-                                playlist = playlist_cls
-
-                        t = LavalinkTrack(id_=info["id"], info=info, playlist=playlist)
-
-                    del t.info["id"]
-                    player.queue.append(t)
+                player.played.extend(played_tracks)
 
                 playlists.clear()
-
-                for info in data["played"]:
-                    if info["sourceName"] == "spotify":
-                        t = PartialTrack(info=info)
-                    else:
-                        t = LavalinkTrack(id_=info["id"], info=info)
-                    del t.info["id"]
-                    player.played.append(t)
+                tracks.clear()
+                played_tracks.clear()
 
                 await player.connect(voice_channel.id)
 
