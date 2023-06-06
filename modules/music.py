@@ -3349,6 +3349,8 @@ class Music(commands.Cog):
             player.queue.extend(player.played)
             player.played.clear()
 
+        await player.process_save_queue()
+
         if player.current:
             await self.interaction_message(inter, txt=text, emoji=msg[1])
             return
@@ -3356,8 +3358,6 @@ class Music(commands.Cog):
         await self.interaction_message(inter, text)
 
         await player.process_next()
-
-        await player.process_save_queue()
 
     @check_voice()
     @has_player()
