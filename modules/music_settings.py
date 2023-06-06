@@ -1247,20 +1247,7 @@ class MusicSettings(commands.Cog):
             if p.guild.me.voice.channel == inter.author.voice.channel:
                 p.listen_along_invite = invite.url
                 await p.process_rpc()
-
-                cog = bot.get_cog("PlayerSession")
-
-                if not cog:
-                    continue
-
-                try:
-                    p.queue_updater_task.cancel()
-                except:
-                    pass
-
-                await cog.save_info(p)
-
-                p.queue_updater_task = self.bot.loop.create_task(cog.queue_updater_task(p))
+                await p.process_save_queue()
 
     @commands.Cog.listener("on_modal_submit")
     async def rpc_create_modal(self, inter: disnake.ModalInteraction):

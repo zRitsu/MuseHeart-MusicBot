@@ -4652,19 +4652,7 @@ class Music(commands.Cog):
                 player.update = True
                 return
 
-        cog = self.bot.get_cog("PlayerSession")
-
-        if not cog:
-            return
-
-        try:
-            player.queue_updater_task.cancel()
-        except:
-            pass
-
-        await cog.save_info(player)
-
-        player.queue_updater_task = self.bot.loop.create_task(cog.queue_updater_task(player))
+        await player.process_save_queue()
 
     @commands.Cog.listener("on_wavelink_track_end")
     async def track_end(self, node: wavelink.Node, payload: wavelink.TrackEnd):
