@@ -4916,6 +4916,9 @@ class Music(commands.Cog):
 
         # rich presence stuff
 
+        if player.auto_pause:
+            return
+
         if player.is_closing or (member.bot and not before.channel):
             return
 

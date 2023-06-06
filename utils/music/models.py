@@ -482,7 +482,7 @@ class LavalinkPlayer(wavelink.Player):
 
             if update_log:
                 self.set_command_log(emoji="🔰", text="A música foi retomada da pausa automática.")
-                await self.invoke_np()
+                await self.invoke_np(rpc_update=True)
 
             return
 
