@@ -131,7 +131,12 @@ class PlayerSettings(disnake.ui.View):
         player_volume_select = disnake.ui.Select(
             placeholder="Selecione um volume padrão.",
             options=[
-                disnake.SelectOption(label=f"Volume padrão: {i}", default=i == self.default_player_volume, value=str(i)) for i in range(10, 151, 10)
+                        disnake.SelectOption(label=f"Volume padrão: {i}", default=i == self.default_player_volume,
+                                             value=str(i)) for i in range(5, 101, 5)
+                    ] + [
+                disnake.SelectOption(label=f"Volume padrão: {i}", default=i == self.default_player_volume,
+                                     description="Nota: Acima de 100% o audio pode ficar ruim.",
+                                     value=str(i)) for i in range(110, 151, 10)
             ]
         )
 
