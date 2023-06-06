@@ -470,8 +470,9 @@ class LavalinkPlayer(wavelink.Player):
 
     async def members_timeout(self, check: bool, force: bool = False):
 
-        if self.auto_pause and self.paused and self.current:
-            await self.set_pause(False)
+        if self.auto_pause and self.paused:
+            if self.current:
+                await self.set_pause(False)
             self.auto_pause = False
             update_log = True
 
@@ -491,10 +492,12 @@ class LavalinkPlayer(wavelink.Player):
 
         if self.keep_connected:
 
-            if self.paused or not self.current:
+            if self.paused:
                 return
 
-            await self.set_pause(True)
+            if self.current:
+                await self.set_pause(True)
+
             self.auto_pause = True
             self.set_command_log(text=f"O player foi pausado por falta de membros no canal. A "
                                       f"música será retomada automaticamente quando um membro entrar no canal "

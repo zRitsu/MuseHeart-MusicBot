@@ -3308,7 +3308,7 @@ class Music(commands.Cog):
 
         await self.interaction_message(inter, text, emoji=msg[1])
 
-    nonstop_cd = commands.CooldownMapping.from_cooldown(1, 5, commands.BucketType.member)
+    nonstop_cd = commands.CooldownMapping.from_cooldown(2, 15, commands.BucketType.member)
     nonstop_mc =commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
     @has_player()
@@ -3356,6 +3356,8 @@ class Music(commands.Cog):
         await self.interaction_message(inter, text)
 
         await player.process_next()
+
+        await player.process_save_queue()
 
     @check_voice()
     @has_player()
