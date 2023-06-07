@@ -134,19 +134,17 @@ class UserFavView(disnake.ui.View):
 
     async def on_timeout(self):
 
+        for c in self.children:
+            c.disabled = True
+
         if isinstance(self.ctx, CustomContext):
             try:
-                await self.message.edit(
-                    embed=disnake.Embed(description="**Tempo esgotado...**", color=self.bot.get_color()), view=None
-                )
+                await self.message.edit(view=self)
             except:
                 pass
 
         else:
-            await self.ctx.edit_original_message(
-                embed=disnake.Embed(description="**Tempo esgotado...**", color=self.bot.get_color()), view=None
-            )
-        self.stop()
+            await self.ctx.edit_original_message(view=self)
 
     async def favadd_callback(self, inter: disnake.MessageInteraction):
         await inter.response.send_modal(UserFavModal(bot=self.bot, name=None, url=None))
