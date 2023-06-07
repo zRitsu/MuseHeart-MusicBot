@@ -288,20 +288,20 @@ class FavManager(commands.Cog):
                 f"` {n + 1}. ` [`{f[0]}`]({f[1]})" for n, f in enumerate(user_data["fav_links"].items())
             )
 
-        cog = self.bot.get_cog("Music")
+            cog = self.bot.get_cog("Music")
 
-        if cog:
+            if cog:
 
-            try:
-                global_data = inter.global_guild_data
-            except AttributeError:
-                global_data = await self.bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
-                inter.global_guild_data = global_data
+                try:
+                    global_data = inter.global_guild_data
+                except AttributeError:
+                    global_data = await self.bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
+                    inter.global_guild_data = global_data
 
-            embed.add_field(name="Como usá-los:", inline=False,
-                            value=f"```- No comando /{cog.play.name} (no preenchimento automático da busca)\n"
-                                  "- Ao clicar no botão de tocar favorito do player.\n"
-                                  f"- Ao usar o comando {global_data['prefix'] or self.bot.default_prefix}{cog.play_legacy.name} sem nome ou link.```\n")
+                embed.add_field(name="Como usá-los:", inline=False,
+                                value=f"```- No comando /{cog.play.name} (no preenchimento automático da busca)\n"
+                                      "- Ao clicar no botão de tocar favorito do player.\n"
+                                      f"- Ao usar o comando {global_data['prefix'] or self.bot.default_prefix}{cog.play_legacy.name} sem nome ou link.```\n")
 
         if isinstance(inter, CustomContext):
             try:
