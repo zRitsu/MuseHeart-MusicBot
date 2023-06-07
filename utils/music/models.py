@@ -388,7 +388,7 @@ class LavalinkPlayer(wavelink.Player):
     def controller_link(self):
         try:
             if self.controller_mode:
-                return f" [`💠`]({self.message.jump_url})"
+                return f" [`🎛️`]({self.message.jump_url})"
         except AttributeError:
             pass
         return ""
