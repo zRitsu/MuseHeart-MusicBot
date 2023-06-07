@@ -359,6 +359,7 @@ class Misc(commands.Cog):
         )
 
         active_players_other_bots = 0
+        inactive_players_other_bots = 0
         paused_players_other_bots = 0
 
         all_guilds_ids = set()
@@ -391,8 +392,19 @@ class Misc(commands.Cog):
                 pass
 
             for p in b.music.players:
-                if p.paused:
-                    paused_players_other_bots += 1
+
+                if p.auto_pause:
+                    inactive_players_other_bots += 1
+
+                elif p.paused:
+                    try:
+                        if any(m for m in p.guild.me.voice.channel.members if not m.bot):
+                            paused_players_other_bots += 1
+                            continue
+                    except AttributeError:
+                        pass
+                    inactive_players_other_bots += 1
+
                 else:
                     active_players_other_bots += 1
 
@@ -414,6 +426,10 @@ class Misc(commands.Cog):
         if paused_players_other_bots:
             embed.description += f"> **Players em pausa" + (" (todos os bots)" if len(bot.pool.bots) > 1 else "") + \
                                  f":** `{paused_players_other_bots}`\n"
+
+        if inactive_players_other_bots:
+            embed.description += f"> **Players inativos" + (" (todos os bots)" if len(bot.pool.bots) > 1 else "") + \
+                                 f":** `{inactive_players_other_bots}`\n"
 
         if bot.pool.commit:
             embed.description += f"> **Commit atual:** [`{bot.pool.commit[:7]}`]({bot.pool.remote_git_url}/commit/{bot.pool.commit})\n"
