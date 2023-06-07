@@ -299,7 +299,7 @@ async def send_idle_embed(
             disnake.ui.Button(
                 emoji="⭐",
                 custom_id=PlayerControls.enqueue_fav,
-                label="Tocar favorito"
+                label="Tocar favorito/integração"
             )
         ]
     )

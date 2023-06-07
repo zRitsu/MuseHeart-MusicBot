@@ -2832,7 +2832,7 @@ class Music(commands.Cog):
                 embed=embed,
                 components=[
                     disnake.ui.Button(label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song),
-                    disnake.ui.Button(label="Tocar favorito", emoji="⭐", custom_id=PlayerControls.enqueue_fav)
+                    disnake.ui.Button(label="Tocar favorito/integração", emoji="⭐", custom_id=PlayerControls.enqueue_fav)
                 ] if inter.guild else [],
                 ephemeral=player.static and player.text_channel.id == inter.channel_id
             )
@@ -3983,7 +3983,7 @@ class Music(commands.Cog):
                     ),
                     components=[
                         disnake.ui.Button(emoji="🎶", custom_id=PlayerControls.add_song, label="Pedir uma música"),
-                        disnake.ui.Button(emoji="⭐", custom_id=PlayerControls.enqueue_fav, label="Tocar favorito")
+                        disnake.ui.Button(emoji="⭐", custom_id=PlayerControls.enqueue_fav, label="Tocar favorito/integração")
                     ],
                     delete_after=20
                 )

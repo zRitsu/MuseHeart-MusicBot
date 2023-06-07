@@ -197,8 +197,6 @@ class UserFavView(disnake.ui.View):
 
         await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
 
-        guild = self.bot.get_guild(inter.guild_id) or inter.guild
-
         await inter.edit_original_message(
             embed=disnake.Embed(
                 description="**Link/Favorito foi removido com sucesso!**",
@@ -260,7 +258,7 @@ class FavManager(commands.Cog):
     async def fav(self, inter: disnake.ApplicationCommandInteraction):
         pass
 
-    @commands.command(name="favmanager", aliases=["favs", "favoritos", "fvmgr"],
+    @commands.command(name="favmanager", aliases=["favs", "favoritos", "fvmgr", "favlist"],
                       description="Gerenciar suas playlists/favoritos.", cooldown=fav_cd)
     async def favmanager_legacy(self, ctx: CustomContext):
         await self.manager.callback(self=self, inter=ctx)
@@ -281,9 +279,29 @@ class FavManager(commands.Cog):
         view = UserFavView(bot=self.bot, ctx=inter, data=user_data)
 
         embed = disnake.Embed(
-            description="**Gerenciador de favoritos do usuário.**",
+            title="Gerenciador de favoritos.",
             colour=self.bot.get_color(),
         )
+
+        if user_data["fav_links"]:
+            embed.description = f"**Seus favoritos atuais:**\n\n" + "\n".join(
+                f"` {n + 1}. ` [`{f[0]}`]({f[1]})" for n, f in enumerate(user_data["fav_links"].items())
+            )
+
+        cog = self.bot.get_cog("Music")
+
+        if cog:
+
+            try:
+                global_data = inter.global_guild_data
+            except AttributeError:
+                global_data = await self.bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
+                inter.global_guild_data = global_data
+
+            embed.add_field(name="Como usá-los:", inline=False,
+                            value=f"```- No comando /{cog.play.name} (no preenchimento automático da busca)\n"
+                                  "- Ao clicar no botão de tocar favorito do player.\n"
+                                  f"- Ao usar o comando {global_data['prefix'] or self.bot.default_prefix}{cog.play_legacy.name} sem nome ou link.```\n")
 
         if isinstance(inter, CustomContext):
             try:
@@ -298,51 +316,6 @@ class FavManager(commands.Cog):
                 await inter.response.edit_message(embed=embed, view=view)
 
         await view.wait()
-
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.command(name="favlist", description="Exibir sua lista de favoritos.")
-    async def favlist_legacy(self, ctx: CustomContext):
-        await self.list_.callback(self=self, inter=ctx, hidden=False)
-
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    @fav.sub_command(
-        name="list", description=f"{desc_prefix}Exibir sua lista de favoritos."
-    )
-    async def list_(
-            self, inter: disnake.ApplicationCommandInteraction,
-            hidden: bool = commands.Param(
-                name="ocultar",
-                description="Apenas você pode ver a lista de favoritos.",
-                default=False)
-    ):
-
-        if hidden is False and not self.bot.check_bot_forum_post(inter.channel):
-            hidden = True
-
-        await inter.response.defer(ephemeral=hidden)
-
-        try:
-            user_data = inter.global_user_data
-        except AttributeError:
-            user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
-            inter.global_user_data = user_data
-
-        if not user_data["fav_links"]:
-            raise GenericError(f"**Você não possui links favoritos..\n"
-                               f"Você pode adicionar usando o comando: /{self.fav.name} {self.manager.name}**")
-
-        embed = disnake.Embed(
-            color=self.bot.get_color(),
-            title="Seus Links Favoritos:",
-            description="\n".join(f"{n+1}) [`{f[0]}`]({f[1]})" for n, f in enumerate(user_data["fav_links"].items()))
-        )
-
-        embed.set_footer(text="Você pode usá-los no comando /play")
-
-        if isinstance(inter, CustomContext):
-            await inter.send(embed=embed)
-        else:
-            await inter.edit_original_message(embed=embed)
 
     fav_import_export_cd = commands.CooldownMapping.from_cooldown(1, 15, commands.BucketType.member)
 
