@@ -297,9 +297,9 @@ class FavManager(commands.Cog):
                     inter.global_guild_data = global_data
 
                 embed.add_field(name="Como usá-los:", inline=False,
-                                value=f"```- No comando /{cog.play.name} (no preenchimento automático da busca)\n"
-                                      "- Ao clicar no botão de tocar favorito do player.\n"
-                                      f"- Ao usar o comando {global_data['prefix'] or self.bot.default_prefix}{cog.play_legacy.name} sem nome ou link.```\n")
+                                value=f"```- Usando o comando /{cog.play.name} (no preenchimento automático da busca)\n"
+                                      "- Clicando no botão de tocar favorito do player.\n"
+                                      f"- Usando o comando {global_data['prefix'] or self.bot.default_prefix}{cog.play_legacy.name} sem usar um nome ou link.```\n")
 
         if isinstance(inter, CustomContext):
             try:
