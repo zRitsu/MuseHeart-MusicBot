@@ -245,7 +245,7 @@ class IntegrationModal(disnake.ui.Modal):
 class IntegrationsView(disnake.ui.View):
 
     def __init__(self, bot: BotCore, ctx: Union[disnake.AppCmdInter, CustomContext], data: dict):
-        super().__init__(timeout=60)
+        super().__init__(timeout=180)
         self.bot = bot
         self.ctx = ctx
         self.current = None
