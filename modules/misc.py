@@ -391,7 +391,7 @@ class Misc(commands.Cog):
             except:
                 pass
 
-            for p in b.music.players:
+            for p in b.music.players.values():
 
                 if p.auto_pause:
                     inactive_players_other_bots += 1
