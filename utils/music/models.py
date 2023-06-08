@@ -472,7 +472,11 @@ class LavalinkPlayer(wavelink.Player):
 
         if self.auto_pause and self.paused:
             if self.current:
-                await self.set_pause(False)
+                try:
+                    await self.resolve_track(self.current)
+                    await self.play(self.current, start=self.position)
+                except Exception:
+                    traceback.print_exc()
             self.auto_pause = False
             update_log = True
 
@@ -487,7 +491,7 @@ class LavalinkPlayer(wavelink.Player):
 
             return
 
-        if not force:
+        if not force and check:
             await asyncio.sleep(self.idle_timeout)
 
         if self.keep_connected:
