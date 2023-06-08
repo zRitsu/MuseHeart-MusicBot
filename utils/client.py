@@ -473,13 +473,16 @@ class BotPool:
             message = "O token do bot não foi configurado devidamente!\n\n"
 
             if os.environ.get("REPL_SLUG"):
-                message += "Confira se o token foi adicionado nas secrets da replit.\nGuia de como configurar: " \
-                           "https://gist.github.com/zRitsu/70737984cbe163f890dae05a80a3ddbe\n\n"
+                message += f"Confira se o token foi adicionado nas secrets da replit"
+
+                print(message + ": Guia de como configurar: https://gist.github.com/zRitsu/70737984cbe163f890dae05a80a3ddbe")
+
+                message += f'. <a href="https://gist.github.com/zRitsu/70737984cbe163f890dae05a80a3ddbe">Clique aqui</a> para ver o guia de como configurar.'
 
             else:
                 message += "Confira se o token foi configurado na ENV/ENVIRONMENT ou no arquivo .env"
 
-            print(message)
+                print(message)
 
         elif start_local:
             run_lavalink(
