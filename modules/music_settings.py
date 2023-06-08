@@ -1117,9 +1117,6 @@ class MusicSettings(commands.Cog):
             bot = ctx.bot
             guild = bot.get_guild(ctx.guild_id)
 
-        if "GUESTS_ENABLED" not in guild.features:
-            raise GenericError("**O suporte a criação de convite para convidados ainda não está disponível no servidor atual...**")
-
         if not guild.me.guild_permissions.create_instant_invite:
             raise GenericError(f"**{bot.user.mention} não possui permissão de criar convites instantâneos...**")
 
@@ -1130,7 +1127,10 @@ class MusicSettings(commands.Cog):
             embed=disnake.Embed(
                 description=f"**Crie um convite no canal {ctx.author.voice.channel.mention} marcando a opção "
                             f"\"Inscrição como convidado\" e em seguida clique no botão abaixo para enviar o link do "
-                            f"convite.**"
+                            f"convite.**\n"
+                            f"Cuidado! Caso não tenha essa opção significa que o recurso não está disponível no seu "
+                            f"servidor e não recomendo prosseguir pra evitar dar acesso permanente ao membro que usar "
+                            f"o botão ou evitar problemas de permissões etc."
             ).set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/1108943648508366868/image.png").
             set_footer(text="Nota: crie um convite sem limitações como: datas para expirar, quantidade de usos ou "
                             "apenas para um usuário usar."),
