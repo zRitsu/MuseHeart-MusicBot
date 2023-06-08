@@ -1127,7 +1127,7 @@ class MusicSettings(commands.Cog):
             embed=disnake.Embed(
                 description=f"**Crie um convite no canal {ctx.author.voice.channel.mention} marcando a opção "
                             f"\"Inscrição como convidado\" e em seguida clique no botão abaixo para enviar o link do "
-                            f"convite.**\n"
+                            f"convite.**\n\n"
                             f"Cuidado! Caso não tenha essa opção significa que o recurso não está disponível no seu "
                             f"servidor e não recomendo prosseguir pra evitar dar acesso permanente ao membro que usar "
                             f"o botão ou evitar problemas de permissões etc."
