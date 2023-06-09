@@ -5,6 +5,7 @@ import asyncio
 import json
 import os
 import traceback
+from typing import Union
 
 import aiosqlite
 import disnake
@@ -37,7 +38,7 @@ class PlayerSession(commands.Cog):
         except:
             pass
 
-        await self.delete_data(player.guild_id)
+        await self.delete_data(player)
 
     @commands.Cog.listener('on_wavelink_track_end')
     async def track_end(self, node, payload: wavelink.TrackStart):
@@ -499,14 +500,26 @@ class PlayerSession(commands.Cog):
 
         await player.conn.commit()
 
-    async def delete_data(self, guild_id: int):
+    async def delete_data(self, player: Union[LavalinkPlayer, int]):
+
+        if not isinstance(player, LavalinkPlayer):
+
+            guild_id = player
+
+            try:
+                player = self.bot.music[guild_id]
+            except KeyError:
+                player = None
+
+        else:
+            guild_id = player.guild.id
 
         if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
             await self.bot.pool.mongo_database.delete_data(id_=str(guild_id), db_name=str(self.bot.user.id), collection="player_sessions")
             return
 
         try:
-            await self.bot.music.players[guild_id].conn.close()
+            await player.conn.close()
         except:
             pass
 
