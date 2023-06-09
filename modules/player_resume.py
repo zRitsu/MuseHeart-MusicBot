@@ -37,7 +37,7 @@ class PlayerSession(commands.Cog):
         except:
             pass
 
-        await self.delete_data(player)
+        await self.delete_data(player.guild_id)
 
     @commands.Cog.listener('on_wavelink_track_end')
     async def track_end(self, node, payload: wavelink.TrackStart):
@@ -499,19 +499,19 @@ class PlayerSession(commands.Cog):
 
         await player.conn.commit()
 
-    async def delete_data(self, player: LavalinkPlayer):
+    async def delete_data(self, guild_id: int):
 
         if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
-            await self.bot.pool.mongo_database.delete_data(id_=str(player.guild_id), db_name=str(self.bot.user.id), collection="player_sessions")
+            await self.bot.pool.mongo_database.delete_data(id_=str(guild_id), db_name=str(self.bot.user.id), collection="player_sessions")
             return
 
         try:
-            await player.conn.close()
+            await self.bot.music.players[guild_id].conn.close()
         except:
             pass
 
         try:
-            os.remove(f'./local_database/player_sessions/{self.bot.user.id}/{player.guild_id}.db')
+            os.remove(f'./local_database/player_sessions/{self.bot.user.id}/{guild_id}.db')
         except FileNotFoundError:
             return
 
