@@ -283,7 +283,7 @@ class FavManager(commands.Cog):
 
         if user_data["fav_links"]:
             embed.description = f"**Seus favoritos atuais:**\n\n" + "\n".join(
-                f"` {n + 1}. ` [`{f[0]}`]({f[1]})" for n, f in enumerate(user_data["fav_links"].items())
+                f"> ` {n + 1} ` [`{f[0]}`]({f[1]})" for n, f in enumerate(user_data["fav_links"].items())
             )
 
             cog = self.bot.get_cog("Music")
