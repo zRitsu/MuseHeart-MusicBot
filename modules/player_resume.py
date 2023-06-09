@@ -504,7 +504,7 @@ class PlayerSession(commands.Cog):
 
         if not isinstance(player, LavalinkPlayer):
 
-            guild_id = player
+            guild_id = int(player)
 
             try:
                 player = self.bot.music[guild_id]
