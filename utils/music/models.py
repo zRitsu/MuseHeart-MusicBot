@@ -474,6 +474,7 @@ class LavalinkPlayer(wavelink.Player):
             if self.current:
                 try:
                     await self.resolve_track(self.current)
+                    self.paused = False
                     await self.play(self.current, start=self.position)
                 except Exception:
                     traceback.print_exc()
@@ -491,7 +492,7 @@ class LavalinkPlayer(wavelink.Player):
 
             return
 
-        if not force and check:
+        if not force:
             await asyncio.sleep(self.idle_timeout)
 
         if self.keep_connected:
@@ -499,8 +500,7 @@ class LavalinkPlayer(wavelink.Player):
             if self.paused:
                 return
 
-            if self.current:
-                await self.set_pause(True)
+            await self.set_pause(True)
 
             self.auto_pause = True
             self.set_command_log(text=f"O player foi pausado por falta de membros no canal. A "
@@ -524,7 +524,7 @@ class LavalinkPlayer(wavelink.Player):
 
     async def process_next(self, start_position: Union[int, float] = 0, inter: disnake.MessageInteraction = None):
 
-        if self.locked or self.is_closing:
+        if self.locked or self.is_closing or self.auto_pause:
             return
 
         if not self.is_connected:
