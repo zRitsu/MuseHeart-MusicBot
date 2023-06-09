@@ -1650,7 +1650,10 @@ class Music(commands.Cog):
             except AttributeError:
                 pass
 
-            await inter.send(embed=embed, ephemeral=ephemeral)
+            if isinstance(inter, disnake.MessageInteraction) and inter.data.custom_id == "queue_track_selection":
+                await inter.response.edit_message(embed=embed, view=None)
+            else:
+                await inter.send(embed=embed, ephemeral=ephemeral)
 
         else:
 

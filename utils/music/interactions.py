@@ -174,12 +174,8 @@ class QueueInteraction(disnake.ui.View):
 
         try:
             await check_cmd(command, interaction)
-
             await command(interaction, query=f"{track.title} || ID > {track.unique_id}")
-            if self.message:
-                self.update_pages()
-                self.update_embed()
-                await self.message.edit(embed=self.embed, view=self)
+            self.stop()
         except Exception as e:
             self.bot.dispatch('interaction_player_error', interaction, e)
 
