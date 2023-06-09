@@ -822,18 +822,9 @@ class Music(commands.Cog):
                 query = favs[0]
 
             else:
-                opts = [disnake.SelectOption(label=f, value=f, emoji="<:play:734221719774035968>") for f in favs]
-
-                opts.append(disnake.SelectOption(label="Cancelar", value="cancel", emoji="❌"))
-
-                try:
-                    add_id = f"_{inter.id}"
-                except AttributeError:
-                    add_id = ""
-
                 embed = disnake.Embed(
                     color=self.bot.get_color(guild.me),
-                    description="**Selecione um favorito Abaixo:**\n"
+                    description="**Selecione um favorito/integração abaixo:**\n"
                                 f'Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para escolher!'
                 )
 
@@ -843,44 +834,39 @@ class Music(commands.Cog):
                 except AttributeError:
                     pass
 
-                opts = disnake.utils.as_chunks(opts, 25)
-
                 kwargs = {
                     "content": inter.author.mention,
-                    "components": [
-                        disnake.ui.Select(
-                            custom_id=f"enqueue_fav{add_id}",
-                            options=o
-                        ) for o in opts
-                    ],
                     "embed": embed
                 }
 
+                view = SelectInteraction(
+                    user=inter.author,  timeout=30,
+                    opts=[disnake.SelectOption(label=f, value=f, emoji="<:play:734221719774035968>") for f in favs]
+                )
+
                 try:
                     if not isinstance(inter, disnake.MessageInteraction):
-                        msg = await inter.followup.send(ephemeral=ephemeral, wait=True, **kwargs)
+                        msg = await inter.followup.send(ephemeral=ephemeral, view=view, wait=True, **kwargs)
                     else:
-                        msg = await inter.send(ephemeral=True, **kwargs)
+                        msg = await inter.send(ephemeral=True, view=view, **kwargs)
                 except (disnake.InteractionTimedOut, AttributeError):
-                    msg = await inter.channel.send(**kwargs)
+                    msg = await inter.channel.send(view=view, **kwargs)
 
-                def check_fav_selection(i: Union[CustomContext, disnake.MessageInteraction]):
+                await view.wait()
 
-                    try:
-                        return i.data.custom_id == f"enqueue_fav_{inter.id}" and i.author == inter.author
-                    except AttributeError:
-                        return i.author == inter.author and i.message.id == msg.id
+                select_interaction = view.inter
 
-                try:
-                    select_interaction: disnake.MessageInteraction = await self.bot.wait_for(
-                        "dropdown", timeout=45, check=check_fav_selection
-                    )
-                except asyncio.TimeoutError:
+                if not select_interaction or view.selected is False:
 
-                    text = "Tempo de seleção esgotado!"
+                    text = "### Tempo de seleção esgotado!" if view.selected is not False else "### Cancelado pelo usuário."
 
                     try:
-                        await msg.edit(content=text, embed=None, view=None)
+                        func = msg.edit
+                    except:
+                        func = select_interaction.response.edit_message
+
+                    try:
+                        await func(embed=disnake.Embed(description=text, color=self.bot.get_color(guild.me)), view=None)
                     except AttributeError:
                         pass
                     return
@@ -979,9 +965,9 @@ class Music(commands.Cog):
                         ], timeout=30)
 
                     embed = disnake.Embed(
-                        description="**Escolha uma categoria de playlists abaixo:**\n"
+                        description="**Escolha uma playlist abaixo:**\n"
                                     f'Selecione uma opção em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para prosseguir.',
-                        color=self.bot.get_color()
+                        color=self.bot.get_color(guild.me)
                     )
 
                     kwargs = {}
@@ -1002,11 +988,17 @@ class Music(commands.Cog):
 
                     await view.wait()
 
-                    if not view.inter:
+                    if not view.inter or view.selected is False:
+
                         try:
-                            await msg.edit(embed=disnake.Embed(description="Tempo esgotado!"), components=None)
+                            func = msg.edit
                         except:
-                            pass
+                            func = view.inter.response.edit_message
+
+                        await func(embed=disnake.Embed(color=self.bot.get_color(guild.me),
+                            description="### Tempo esgotado!**" if not view.selected is False else "### Cancelado pelo usuário."),
+                            components=None
+                        )
                         return
 
                     query = info["entries"][int(view.selected[14:])]["url"]
@@ -1063,7 +1055,7 @@ class Music(commands.Cog):
 
                     await view.wait()
 
-                    if not view.inter:
+                    if not view.inter or view.selected is not False:
 
                         try:
                             func = inter.edit_original_message
@@ -1071,7 +1063,7 @@ class Music(commands.Cog):
                             func = msg.edit
 
                         await func(
-                            content=f"{inter.author.mention}, tempo esgotado!",
+                            content=f"{inter.author.mention}, tempo esgotado!" if view.selected is not False else "Cancelado pelo usuário.",
                             embed=None, view=None
                         )
                         return

@@ -229,10 +229,20 @@ class SelectInteraction(disnake.ui.View):
     def __init__(self, user: disnake.Member, opts: List[disnake.SelectOption], *, timeout=180):
         super().__init__(timeout=timeout)
         self.user = user
+
+        chunk = disnake.utils.as_chunks(opts, 25)
+
+        for c in chunk:
+
+            select_menu = disnake.ui.Select(placeholder='Selecione uma opção:', options=c)
+            select_menu.callback = self.callback
+            self.add_item(select_menu)
+
         self.selected = opts[0].value
-        select_menu = disnake.ui.Select(placeholder='Selecione uma opção:', options=opts)
-        select_menu.callback = self.callback
-        self.add_item(select_menu)
+
+        button = disnake.ui.Button(label="Cancelar", emoji="❌")
+        button.callback = self.cancel_callback
+        self.add_item(button)
         self.inter = None
 
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
@@ -241,6 +251,11 @@ class SelectInteraction(disnake.ui.View):
             return True
 
         await interaction.send(f"Apenas {self.user.mention} pode interagir aqui.", ephemeral = True)
+
+    async def cancel_callback(self, interaction: disnake.MessageInteraction):
+        self.selected = False
+        self.inter = interaction
+        self.stop()
 
     async def callback(self, interaction: disnake.MessageInteraction):
         self.selected = interaction.data.values[0]
