@@ -4216,7 +4216,9 @@ class Music(commands.Cog):
 
         try:
             player = self.bot.music.players[message.guild.id]
+            destroy_message = True
         except KeyError:
+            destroy_message = False
             skin = data["player_controller"]["skin"]
             static_skin = data["player_controller"]["static_skin"]
 
@@ -4295,9 +4297,10 @@ class Music(commands.Cog):
                          f"({tracks.tracks[0].playlist_url}) `({len(tracks.tracks)})`.",
                     emoji="🎶"
                 )
-                await self.delete_message(message)
-                if response:
-                    await self.delete_message(response)
+                if destroy_message:
+                    await self.delete_message(message)
+                    if response:
+                        await self.delete_message(response)
 
         else:
             track = tracks[0]
@@ -4332,9 +4335,10 @@ class Music(commands.Cog):
                     text=f"{message.author.mention} adicionou [`{fix_characters(tracks[0].title, 20)}`]({tracks[0].uri}) `({duration})`.",
                     emoji="🎵"
                 )
-                await self.delete_message(message)
-                if response:
-                    await self.delete_message(response)
+                if destroy_message:
+                    await self.delete_message(message)
+                    if response:
+                        await self.delete_message(response)
 
         if not player.is_connected:
             await self.do_connect(
