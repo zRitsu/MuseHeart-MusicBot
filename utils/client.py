@@ -477,7 +477,7 @@ class BotPool:
 
                 print(message + ": Guia de como configurar: https://gist.github.com/zRitsu/70737984cbe163f890dae05a80a3ddbe")
 
-                message += f'. <a href="https://gist.github.com/zRitsu/70737984cbe163f890dae05a80a3ddbe">Clique aqui</a> para ver o guia de como configurar.'
+                message += f'. <a href="https://gist.github.com/zRitsu/70737984cbe163f890dae05a80a3ddbe" target="_blank">Clique aqui</a> para ver o guia de como configurar.'
 
             else:
                 message += "Confira se o token foi configurado na ENV/ENVIRONMENT ou no arquivo .env"
