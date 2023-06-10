@@ -33,7 +33,11 @@ class CommandArgparse(argparse.ArgumentParser):
             kwargs.pop('exit_on_error')
         except:
             pass
-        super().__init__(*args, exit_on_error=False, **kwargs)
+        try:
+            kwargs.pop('allow_abbrev')
+        except:
+            pass
+        super().__init__(*args, exit_on_error=False, allow_abbrev=False, **kwargs)
 
     def error(self, message: str):
         raise ArgumentParsingError(message)
