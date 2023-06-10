@@ -5,6 +5,7 @@ from typing import Union, Optional
 
 import disnake
 from disnake.ext import commands
+from disnake.utils import escape_mentions
 from pymongo.errors import ServerSelectionTimeoutError
 
 from utils.music.converters import time_format, perms_translations
@@ -13,6 +14,10 @@ from wavelink import WavelinkException, TrackNotFound
 
 class PoolException(commands.CheckFailure):
     pass
+
+class ArgumentParsingError(commands.CommandError):
+    def __init__(self, message):
+        super().__init__(escape_mentions(message))
 
 class GenericError(commands.CheckFailure):
 

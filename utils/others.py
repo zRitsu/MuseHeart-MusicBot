@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import argparse
 import asyncio
 import datetime
 import json
@@ -12,7 +13,7 @@ import disnake
 from disnake.ext import commands
 
 from utils.db import DBModel
-from utils.music.errors import GenericError
+from utils.music.errors import GenericError, ArgumentParsingError
 
 if TYPE_CHECKING:
     from utils.client import BotCore
@@ -24,6 +25,18 @@ class Test:
 
     def is_done(self):
         return False
+
+class CommandArgparse(argparse.ArgumentParser):
+
+    def __init__(self, *args, **kwargs):
+        try:
+            kwargs.pop('exit_on_error')
+        except:
+            pass
+        super().__init__(*args, exit_on_error=False, **kwargs)
+
+    def error(self, message: str):
+        raise ArgumentParsingError(message)
 
 class CustomContext(commands.Context):
     bot: BotCore

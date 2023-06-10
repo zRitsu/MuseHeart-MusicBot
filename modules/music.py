@@ -27,7 +27,7 @@ from utils.music.converters import time_format, fix_characters, string_to_second
     YOUTUBE_VIDEO_REG, google_search, percentage, music_source_image, perms_translations
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, fav_list, queue_track_index, \
-    pool_command, string_to_file
+    pool_command, string_to_file, CommandArgparse
 from user_agent import generate_user_agent
 
 
@@ -599,7 +599,7 @@ class Music(commands.Cog):
                                  force_play="no", manual_selection=False,
                                  source="ytsearch", repeat_amount=0, server=None)
 
-    play_flags = argparse.ArgumentParser(exit_on_error=False)
+    play_flags = CommandArgparse()
     play_flags.add_argument('query', nargs='*', help="nome ou link da música")
     play_flags.add_argument('-position', '-pos', '-p', type=int, default=0, help='Colocar a música em uma posição específica. Ex: -p 10')
     play_flags.add_argument('-next', '-proximo', action='store_true', help='Adicionar a música/playlist no topo da fila (equivalente ao: -pos 1)')
@@ -1515,7 +1515,7 @@ class Music(commands.Cog):
     skip_back_cd = commands.CooldownMapping.from_cooldown(2, 13, commands.BucketType.member)
     skip_back_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
-    case_sensitive_args = argparse.ArgumentParser(exit_on_error=False)
+    case_sensitive_args = CommandArgparse()
     case_sensitive_args.add_argument('-casesensitive', '-cs', '-exactmatch', '-exact', action='store_true',
                              help="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome da música")
     @check_stage_topic()
@@ -2324,8 +2324,8 @@ class Music(commands.Cog):
         else:
             await player.update_message()
 
-    move_args = argparse.ArgumentParser(exit_on_error=False)
-    move_args.add_argument('-count', '-counter', '-amount', type=int, default=None,
+    move_args = CommandArgparse()
+    move_args.add_argument('-count', '-counter', '-amount', '-max', type=int, default=None,
                            help="Especificar uma quantidade de músicas para mover com o nome especificado.")
     move_args.add_argument('-casesensitive', '-cs', '-exactmatch', '-exact', action='store_true',
                            help="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome "
@@ -2341,7 +2341,7 @@ class Music(commands.Cog):
         if not position:
             raise GenericError("**Você não informou uma posição da fila.**")
 
-        args, unknown = self.move_args.parse_known_args(flags.split())
+        args, unknown = self.move_args.parse_known_args(args=flags.split())
 
         if not unknown:
             raise GenericError("**Você não adicionou o nome da música.**")
@@ -2409,10 +2409,12 @@ class Music(commands.Cog):
 
             tracklist = "\n".join(f"[`{fix_characters(t.title, 45)}`]({t.uri})" for i, t in indexes[:10])
 
+            position_text = position if i_size == 1 else (str(position) + '-' + str(position+i_size-1))
+
             embed = disnake.Embed(
                 color=self.bot.get_color(guild.me),
                 description=f"↪️ **⠂{inter.author.mention} moveu [{i_size}] músicas com o nome \"{query}\" para " \
-                            f"a posição [{position}] da fila:**\n\n{tracklist}"
+                            f"a posição [{position_text}] da fila:**\n\n{tracklist}"
             )
 
             embed.set_thumbnail(url=indexes[0][1].thumb)
@@ -2428,7 +2430,7 @@ class Music(commands.Cog):
             if ephemeral:
                 player.set_command_log(
                     text=f"{inter.author.mention} moveu **[{i_size}]** músicas com o nome **{fix_characters(query, 25)}"
-                         f"** para a posição **[{position}]** da fila.", emoji="↪️")
+                         f"** para a posição **[{position_text}]** da fila.", emoji="↪️")
 
             try:
                 if bot.user.id != self.bot.user.id and inter.free_bot:
@@ -2962,7 +2964,7 @@ class Music(commands.Cog):
 
         await view.wait()
 
-    clear_flags = argparse.ArgumentParser(exit_on_error=False)
+    clear_flags = CommandArgparse()
     clear_flags.add_argument('song_name', nargs='*', help="incluir nome que tiver na música.")
     clear_flags.add_argument('-uploader', '-author', '-artist', nargs = '+', default="",
                              help="Incluir nome que tiver no autor da música.")
