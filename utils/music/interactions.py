@@ -81,7 +81,7 @@ class QueueInteraction(disnake.ui.View):
 
                 opts.append(
                     disnake.SelectOption(
-                        label=t.author[:25], description=f"[{duration}] | {t.title}"[:50],
+                        label=f"{counter}. {t.author}"[:25], description=f"[{duration}] | {t.title}"[:50],
                         value=f"queue_select_{t.unique_id}",
                     )
                 )
