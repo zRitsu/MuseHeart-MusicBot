@@ -427,31 +427,12 @@ class BotPool:
             if not isinstance(v, str):
                 continue
 
-            tokens = []
-
-            for string in v.split():
-                if token_regex.findall(v):
-                    tokens.append(string)
-
-            if not tokens:
-
-                if v in all_tokens.values():
-                    continue
-
-                if k.lower().startswith("token_bot_"):
-                    k = k[10:]
-                    all_tokens[k] = v
-
-                elif k.lower() == "token":
-                    all_tokens[k] = v
-
+            if not (tokens:=token_regex.findall(v)):
                 continue
 
             if len(tokens) > 1:
                 counter = 1
                 for t in tokens:
-                    if t in all_tokens.values():
-                        continue
                     all_tokens[f"{k}_{counter}"] = t
                     counter += 1
 
