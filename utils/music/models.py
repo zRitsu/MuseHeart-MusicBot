@@ -857,7 +857,7 @@ class LavalinkPlayer(wavelink.Player):
                 if self.skin.startswith("> custom_skin: "):
                     data = skin_converter(self.custom_skin_data[self.skin[15:]], player=self)
                 else:
-                    data = self.bot.player_skins[self.skin_static].load(self)
+                    data = self.bot.player_skins[self.skin].load(self)
         except OverflowError:
             await self.process_next()
             return
