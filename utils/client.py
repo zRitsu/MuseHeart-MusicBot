@@ -433,6 +433,10 @@ class BotPool:
             if len(tokens) > 1:
                 counter = 1
                 for t in tokens:
+
+                    if t in all_tokens.values():
+                        continue
+
                     all_tokens[f"{k}_{counter}"] = t
                     counter += 1
 
