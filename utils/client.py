@@ -107,7 +107,7 @@ class BotPool:
                     "Acesse o discord developer portal:<br>" \
                     "https://discord.com/developers/applications/<br>" \
                     "e ative todas as intents. Print de exemplo:<br>" \
-                    "https://media.discordapp.net/attachments/554468640942981147/1115319340074532915/image.png<br>" \
+                    "https://i.imgur.com/a9c1DHT.png<br>" \
                     "Após corrigir, reinicie a aplicação."
 
                 print(("=" * 30) + f"\nFalha ao iniciar o bot configurado no: {bot.identifier}\n" + e.replace('<br>', '\n') + "\n" + ("=" * 30))
