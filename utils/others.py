@@ -5,6 +5,7 @@ import argparse
 import asyncio
 import datetime
 import json
+import re
 from inspect import iscoroutinefunction
 from io import BytesIO
 from typing import TYPE_CHECKING, Union, Optional
@@ -18,7 +19,7 @@ from utils.music.errors import GenericError, ArgumentParsingError
 if TYPE_CHECKING:
     from utils.client import BotCore
 
-token_regex = r'([\w-]{10,})\.([\w-]{5,})\.([\w-]{10,})'
+token_regex = re.compile(r'[a-zA-Z0-9_-]{23,28}\.[a-zA-Z0-9_-]{6,7}\.[a-zA-Z0-9_-]{27,}')
 
 
 class Test:
