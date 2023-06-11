@@ -351,7 +351,7 @@ class LavalinkPlayer(wavelink.Player):
 
         if self.bot.config["USE_YTDL"] or self.bot.spotify:
             self.initial_hints.append(
-                "Integre link de canais/perfis do youtube/soundcloud/spotify para escutar playlists públicas de forma "
+                "Integre link de canais e perfis do youtube, soundcloud e spotify para escutar playlists públicas de forma "
                 "mais facilitada no player. Experimente usando o comando /integration manager."
             )
 

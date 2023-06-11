@@ -2557,7 +2557,7 @@ class Music(commands.Cog):
         thread = await player.message.create_thread(name=f"{bot.user.name} temp. song-request", auto_archive_duration=10080)
 
         txt = [
-            "usou o sistema de thread/conversa temporária para pedido de música.",
+            "Ativou o sistema de thread/conversa temporária para pedido de música.",
             f"💬 **⠂{inter.author.mention} criou uma [thread/conversa]({thread.jump_url}) temporária para pedido de música.**"
         ]
 
