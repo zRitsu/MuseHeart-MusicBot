@@ -59,9 +59,7 @@ class QueueInteraction(disnake.ui.View):
 
         counter = 1
 
-        entries = list(self.player.queue)
-
-        self.pages = [entries[i:i + 12] for i in range(0, len(entries), 8)]
+        self.pages = list(disnake.utils.as_chunks(self.player.queue, max_size=12))
         self.select_pages.clear()
 
         self.clear_items()
