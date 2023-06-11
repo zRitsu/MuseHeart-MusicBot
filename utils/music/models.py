@@ -382,7 +382,7 @@ class LavalinkPlayer(wavelink.Player):
 
     @property
     def has_thread(self):
-        return self.controller_mode and self.message and self.message.thread and not (self.message.thread.locked or self.message.thread.archived)
+        return self.message and self.message.thread and not (self.message.thread.locked or self.message.thread.archived)
 
     @property
     def controller_link(self):
@@ -967,6 +967,16 @@ class LavalinkPlayer(wavelink.Player):
                             description="Ativar/Desativar a mini-fila do player."
                         )
                     )
+
+                if not self.static and not self.has_thread:
+                    self.last_data["components"][5].options.append(
+                        disnake.SelectOption(
+                            label="Song-Request Thread", emoji="💬",
+                            value=PlayerControls.song_request_thread,
+                            description="Criar uma thread/conversa temporária para pedir músicas usando apenas o nome/link."
+                        )
+                    )
+
 
             try:
                 if interaction.response.is_done():

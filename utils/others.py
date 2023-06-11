@@ -116,6 +116,7 @@ class PlayerControls:
     help_button = "musicplayer_help"
     restrict_mode = "musicplayer_restrict_mode"
     miniqueue = "musicplayer_miniqueue"
+    song_request_thread = "musicplayer_song_request_thread"
 
 
 class EmbedPaginator(disnake.ui.View):

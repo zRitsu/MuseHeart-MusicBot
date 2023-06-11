@@ -2561,9 +2561,7 @@ class Music(commands.Cog):
             f"💬 **⠂{inter.author.mention} criou uma [thread/conversa]({thread.jump_url}) temporária para pedido de música.**"
         ]
 
-        await self.interaction_message(inter, txt, emoji="💬", defered=True)
-
-        await player.update_message()
+        await self.interaction_message(inter, txt, emoji="💬", defered=True, force=True)
 
     @rotate.autocomplete("nome")
     @move.autocomplete("nome")

@@ -147,6 +147,15 @@ class ClassicStaticSkin:
             ),
         ]
 
+        if not player.static and not player.has_thread:
+            data["components"][5].options.append(
+                disnake.SelectOption(
+                    label="Song-Request Thread", emoji="💬",
+                    value=PlayerControls.song_request_thread,
+                    description="Criar uma thread/conversa temporária para pedir músicas usando apenas o nome/link."
+                )
+            )
+
         return data
 
 def load():
