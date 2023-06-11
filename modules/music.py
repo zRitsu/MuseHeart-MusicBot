@@ -2504,6 +2504,62 @@ class Music(commands.Cog):
 
         await player.update_message()
 
+    song_request_thread_cd = commands.CooldownMapping.from_cooldown(1, 120, commands.BucketType.guild)
+
+    @is_dj()
+    @has_player()
+    @check_voice()
+    @commands.bot_has_guild_permissions(manage_threads=True)
+    @pool_command(name="songrequesttread", aliases=["songrequest", "srt"], only_voiced=True,
+                  description="Criar uma thread/conversa temporária para song-request (pedido de música)")
+    async def song_request_thread_legacy(self, ctx: CustomContext):
+
+        await self.song_request_thread.callback(self=self, inter=ctx)
+
+    @is_dj()
+    @has_player()
+    @check_voice()
+    @commands.bot_has_guild_permissions(manage_threads=True)
+    @commands.slash_command(extras={"only_voiced": True}, cooldown=song_request_thread_cd,
+                            description=f"{desc_prefix}Criar uma thread/conversa temporária para song-request (pedido de música)")
+    async def song_request_thread(self, inter: disnake.AppCmdInter):
+
+        try:
+            bot = inter.music_bot
+            guild = inter.music_guild
+        except AttributeError:
+            bot = inter.bot
+            guild = inter.guild
+
+        if not self.bot.intents.message_content:
+            raise GenericError("**Atualmente não tenho a intent de message-content para conferir "
+                               "o conteúdo de mensagens**")
+
+        player: LavalinkPlayer = bot.music.players[guild.id]
+
+        if player.static:
+            raise GenericError("**Você não pode usar esse comando com um canal de song-request configurado.**")
+
+        if player.has_thread:
+            raise GenericError("**Já há uma thread/conversa ativa no player.**")
+
+        if not isinstance(player.text_channel, disnake.TextChannel):
+            raise GenericError(f"**O player-controller está ativo em um canal incompatível com "
+                               f"criação de thread/conversa.**")
+
+        await inter.response.defer(ephemeral=True)
+
+        thread = await player.message.create_thread(name=f"{bot.user.name} temp. song-request", auto_archive_duration=10080)
+
+        txt = [
+            "usou o sistema de thread/conversa temporária para pedido de música.",
+            f"💬 **⠂{inter.author.mention} criou uma [thread/conversa]({thread.jump_url}) temporária para pedido de música.**"
+        ]
+
+        await self.interaction_message(inter, txt, emoji="💬", defered=True)
+
+        await player.update_message()
+
     @rotate.autocomplete("nome")
     @move.autocomplete("nome")
     @skip.autocomplete("nome")
@@ -4361,7 +4417,8 @@ class Music(commands.Cog):
         return await check_requester_channel(ctx)
 
     async def interaction_message(self, inter: Union[disnake.Interaction, CustomContext], txt, emoji: str = "✅",
-                                  rpc_update: bool = False, data: dict = None, store_embed: bool = False, force=False):
+                                  rpc_update: bool = False, data: dict = None, store_embed: bool = False, force=False,
+                                  defered=False):
 
         try:
             txt, txt_ephemeral = txt
@@ -4422,6 +4479,20 @@ class Music(commands.Cog):
                     pass
 
                 await inter.send(embed=embed, ephemeral=ephemeral)
+
+            elif defered:
+                embed = disnake.Embed(
+                    color=self.bot.get_color(guild.me),
+                    description=(txt_ephemeral or f"{inter.author.mention} **{txt}**") + player.controller_link
+                )
+
+                try:
+                    if bot.user.id != self.bot.user.id and inter.free_bot:
+                        embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
+                except AttributeError:
+                    pass
+
+                await inter.edit_original_response(embed=embed)
 
     async def process_nodes(self, data: dict, start_local: bool = False):
 
@@ -4831,20 +4902,6 @@ class Music(commands.Cog):
 
             self.bot.loop.create_task(self.connect_node(localnode))
 
-    @commands.Cog.listener("on_thread_delete")
-    async def player_thread_delete(self, thread: disnake.Thread):
-
-        player: Optional[LavalinkPlayer] = None
-
-        if not player:
-            return
-
-        if player.is_closing:
-            return
-
-        if thread.id != player.message.id:
-            return
-
     @commands.Cog.listener("on_thread_create")
     async def thread_song_request(self, thread: disnake.Thread):
 
@@ -4859,7 +4916,7 @@ class Music(commands.Cog):
         embed = disnake.Embed(color=self.bot.get_color(thread.guild.me))
 
         if self.bot.intents.message_content:
-            embed.description = "**Esta conversa será usada temporariamente para pedir músicas apenas enviando " \
+            embed.description = "**Essa conversa será usada temporariamente para pedir músicas apenas enviando " \
                                 "o nome/link sem necessidade de usar comando.**"
         else:
             embed.description = "**Aviso! Não estou com a intent de message_content ativada por meu desenvolvedor...\n" \
