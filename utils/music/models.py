@@ -382,7 +382,7 @@ class LavalinkPlayer(wavelink.Player):
 
     @property
     def has_thread(self):
-        return self.message and self.message.thread and not (self.message.thread.locked or self.message.thread.archived)
+        return self.controller_mode and self.message and self.message.thread and not (self.message.thread.locked or self.message.thread.archived)
 
     @property
     def controller_link(self):

@@ -2547,6 +2547,11 @@ class Music(commands.Cog):
             raise GenericError(f"**O player-controller está ativo em um canal incompatível com "
                                f"criação de thread/conversa.**")
 
+        if not player.controller_mode:
+            raise GenericError("**A skin/aparência atual não é compatível com o sistem de song-request "
+                               "via thread/conversa\n\n"
+                               "Nota:** `Esse sistema requer uma skin que use botões.`")
+
         await inter.response.defer(ephemeral=True)
 
         thread = await player.message.create_thread(name=f"{bot.user.name} temp. song-request", auto_archive_duration=10080)
@@ -4918,6 +4923,12 @@ class Music(commands.Cog):
         if self.bot.intents.message_content:
             embed.description = "**Essa conversa será usada temporariamente para pedir músicas apenas enviando " \
                                 "o nome/link sem necessidade de usar comando.**"
+
+        elif not player.controller_mode:
+            embed.description = "**A skin/aparência atual não é compatível com o sistem de song-request " \
+                               "via thread/conversa\n\n" \
+                               "Nota:** `Esse sistema requer uma skin que use botões.`"
+
         else:
             embed.description = "**Aviso! Não estou com a intent de message_content ativada por meu desenvolvedor...\n" \
                                 "A funcionalidade de pedir música aqui pode não ter um resultado esperado...**"
