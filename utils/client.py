@@ -106,8 +106,9 @@ class BotPool:
                 e = "Você não ativou as Privileged Intents na sua aplicação<br>" \
                     "Acesse o discord developer portal:<br>" \
                     "https://discord.com/developers/applications/<br>" \
-                    "e ative todas as intents. Print de exemplo:<br>" \
-                    "https://i.imgur.com/a9c1DHT.png<br>" \
+                    "e clique na sua aplicação e depois clique no menu \"bot\"<br>" \
+                    "e em seguida ative todas as intents.<br>" \
+                    "Print de exemplo: https://i.imgur.com/a9c1DHT.png<br>" \
                     "Após corrigir, reinicie a aplicação."
 
                 print(("=" * 30) + f"\nFalha ao iniciar o bot configurado no: {bot.identifier}\n" + e.replace('<br>', '\n') + "\n" + ("=" * 30))
