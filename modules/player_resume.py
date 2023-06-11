@@ -284,6 +284,9 @@ class PlayerSession(commands.Cog):
                             try:
                                 async for msg in text_channel.history(limit=100):
 
+                                    if not message:
+                                        continue
+
                                     if message.author.id != self.bot.user.id:
                                         continue
 
