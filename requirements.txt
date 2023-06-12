@@ -1,5 +1,5 @@
 asyncspotify==0.12.1
-git+https://github.com/DisnakeDev/disnake.git@7a6880e95dff51374069f745e8667d597f447a78
+git+https://github.com/DisnakeDev/disnake.git@094343d20b520ffcfc683cc6a8492d446a759c23
 python-dotenv
 user-agent
 requests
