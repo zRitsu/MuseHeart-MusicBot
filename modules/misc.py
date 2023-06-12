@@ -177,13 +177,13 @@ class Misc(commands.Cog):
         else:
             prefix = ""
 
-        channel = guild.system_channel
-
         image = "https://cdn.discordapp.com/attachments/554468640942981147/1082887587770937455/rainbow_bar2.gif"
 
         color = self.bot.get_color()
 
-        if not channel:
+        channel = guild.system_channel
+
+        if not channel or not channel.permissions_for(guild.me).send_messages:
 
             if guild.me.guild_permissions.view_audit_log:
 
@@ -255,7 +255,7 @@ class Misc(commands.Cog):
                             traceback.print_exc()
                         break
 
-        if not channel:
+        else:
 
             for c in (guild.public_updates_channel, guild.rules_channel):
 
