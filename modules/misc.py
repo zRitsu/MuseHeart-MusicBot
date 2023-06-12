@@ -181,9 +181,12 @@ class Misc(commands.Cog):
 
         color = self.bot.get_color()
 
-        channel = guild.system_channel
+        try:
+            channel = guild.system_channel if guild.system_channel.permissions_for(guild.me).send_messages else None
+        except AttributeError:
+            channel = None
 
-        if not channel or not channel.permissions_for(guild.me).send_messages:
+        if not channel:
 
             if guild.me.guild_permissions.view_audit_log:
 
@@ -255,7 +258,7 @@ class Misc(commands.Cog):
                             traceback.print_exc()
                         break
 
-        else:
+        if not channel:
 
             for c in (guild.public_updates_channel, guild.rules_channel):
 
