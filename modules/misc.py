@@ -321,7 +321,10 @@ class Misc(commands.Cog):
         try:
             await channel.send(embeds=embeds, components=components, **kwargs)
         except:
-            traceback.print_exc()
+            print(f"Falha ao enviar mensagem de novo servidor no canal: {channel}\n"
+                  f"ID do canal: {channel.id}\n"
+                  f"Tipo de canal: {type(channel)}\n"
+                  f"{traceback.format_exc()}")
 
         await self.bot.update_appinfo()
 
