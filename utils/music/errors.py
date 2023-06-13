@@ -27,6 +27,9 @@ class GenericError(commands.CheckFailure):
         self.delete_original = delete_original
 
 
+class EmptyFavIntegration(commands.CheckFailure):
+    pass
+
 class MissingSpotifyClient(commands.CheckFailure):
     pass
 
@@ -69,6 +72,8 @@ def parse_error(
     error_txt = None
 
     kill_process = False
+
+    components = []
 
     error = getattr(error, 'original', error)
 
@@ -121,6 +126,19 @@ def parse_error(
             remaing = 1
         error_txt = "**Você deve aguardar {} para usar esse comando.**".format(time_format(int(remaing) * 1000, use_names=True))
 
+    elif isinstance(error, EmptyFavIntegration):
+        error_txt = "**Você usou o comando sem incluir um nome ou link de uma músisca ou vídeo e você não possui " \
+                    "favoritos ou integrações para usar esse comando dessa forma diretamente...**\n\n" \
+                    "`Caso queira, você pode adicionar um favorito ou integração para usar esse " \
+                    "comando sem incluir um nome ou link. Pra isso você pode clicar em um dos botões abaixo.`"
+
+        components = [
+            disnake.ui.Button(label="Abrir o gerenciador de favoritos",
+                              custom_id="musicplayer_fav_manager", emoji="⭐"),
+            disnake.ui.Button(label="Abrir o gerenciador de integrações",
+                              custom_id="musicplayer_integration_manager", emoji="💠")
+        ]
+
     elif isinstance(error, commands.MaxConcurrencyReached):
         txt = f"{error.number} vezes " if error.number > 1 else ''
         txt = {
@@ -161,4 +179,4 @@ def parse_error(
     else:
         full_error_txt = ""
 
-    return error_txt, full_error_txt, kill_process
+    return error_txt, full_error_txt, kill_process, components

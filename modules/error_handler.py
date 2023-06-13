@@ -83,7 +83,7 @@ class ErrorHandler(commands.Cog):
         if isinstance(error, PoolException):
             return
 
-        error_msg, full_error_msg, kill_process = parse_error(inter, error)
+        error_msg, full_error_msg, kill_process, components = parse_error(inter, error)
 
         kwargs = {}
         send_webhook = False
@@ -144,7 +144,7 @@ class ErrorHandler(commands.Cog):
         if isinstance(error, (commands.CommandNotFound, PoolException)):
             return
 
-        error_msg, full_error_msg, kill_process = parse_error(ctx, error)
+        error_msg, full_error_msg, kill_process, components = parse_error(ctx, error)
         kwargs = {}
         send_webhook = False
 
@@ -169,8 +169,6 @@ class ErrorHandler(commands.Cog):
                                      "```py\n{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
 
         else:
-
-            components = []
 
             if ctx.channel.permissions_for(ctx.guild.me).embed_links:
                 kwargs["embed"] = disnake.Embed(color=disnake.Colour.red(), description=error_msg)

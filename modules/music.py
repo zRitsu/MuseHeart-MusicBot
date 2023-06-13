@@ -17,7 +17,7 @@ import wavelink
 
 from utils.client import BotCore
 from utils.db import DBModel
-from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolException, parse_error
+from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolException, parse_error, EmptyFavIntegration
 from utils.music.spotify import process_spotify, spotify_regex_w_user
 from utils.music.checks import check_voice, has_player, has_source, is_requester, is_dj, \
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen, check_pool_bots, \
@@ -814,9 +814,7 @@ class Music(commands.Cog):
             favs = await fav_list(inter, "")
 
             if not favs:
-                raise GenericError("**Você não possui favoritos/integrações...**\n"
-                                   "`Adicione um usando o comando: /fav manager ou /integration manager.`\n"
-                                   "`Ou use este comando adicionando um nome ou link de uma música/vídeo.`")
+                raise EmptyFavIntegration()
 
             if len(favs) == 1:
                 query = favs[0]
@@ -3774,6 +3772,16 @@ class Music(commands.Cog):
             if control == "musicplayer_request_channel":
                 cmd = self.bot.get_slash_command("setup")
                 kwargs = {"target": interaction.channel}
+                await self.process_player_interaction(interaction, cmd, kwargs)
+                return
+
+            if control == PlayerControls.fav_manageer:
+                cmd = self.bot.get_slash_command("fav").children.get("manager")
+                await self.process_player_interaction(interaction, cmd, kwargs)
+                return
+
+            if control == PlayerControls.integration_manageer:
+                cmd = self.bot.get_slash_command("integration").children.get("manager")
                 await self.process_player_interaction(interaction, cmd, kwargs)
                 return
 
