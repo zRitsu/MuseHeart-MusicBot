@@ -3776,11 +3776,21 @@ class Music(commands.Cog):
                 return
 
             if control == PlayerControls.fav_manageer:
+
+                if str(interaction.user.id) not in interaction.message.content:
+                    await interaction.send("Você não pode interagir aqui!", ephemeral=True)
+                    return
+
                 cmd = self.bot.get_slash_command("fav").children.get("manager")
                 await self.process_player_interaction(interaction, cmd, kwargs)
                 return
 
             if control == PlayerControls.integration_manageer:
+
+                if str(interaction.user.id) not in interaction.message.content:
+                    await interaction.send("Você não pode interagir aqui!", ephemeral=True)
+                    return
+
                 cmd = self.bot.get_slash_command("integration").children.get("manager")
                 await self.process_player_interaction(interaction, cmd, kwargs)
                 return
