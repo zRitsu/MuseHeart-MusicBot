@@ -771,15 +771,23 @@ class Owner(commands.Cog):
 
     def zip_dir(self, filelist: list):
 
+        try:
+            os.remove("./source.zip")
+        except:
+            pass
+
         with ZipFile("./source.zip", 'a') as zipf:
 
             for f in filelist:
                 if not f:
                     continue
-                if f == ".env-temp":
-                    zipf.write('./.env-temp', './.env')
-                else:
-                    zipf.write(f"./{f}")
+                try:
+                    if f == ".env-temp":
+                        zipf.write('./.env-temp', './.env')
+                    else:
+                        zipf.write(f"./{f}")
+                except FileNotFoundError:
+                    continue
 
     @commands.is_owner()
     @commands.command(hidden=True)
