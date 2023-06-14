@@ -171,7 +171,7 @@ def load_config():
         "LAVALINK_CPU_CORES",
         "USER_FAV_MAX_NAME_LENGTH",
         "USER_FAV_MAX_URL_LENGTH",
-        "MAX_USER_INTEGRATIONS"
+        "MAX_USER_INTEGRATIONS",
         "PRESENCE_INTERVAL",
         "HINT_RATE",
         "INVITE_PERMISSIONS",
