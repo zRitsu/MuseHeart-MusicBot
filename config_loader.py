@@ -171,11 +171,12 @@ def load_config():
         "LAVALINK_CPU_CORES",
         "USER_FAV_MAX_NAME_LENGTH",
         "USER_FAV_MAX_URL_LENGTH",
+        "MAX_USER_INTEGRATIONS"
         "PRESENCE_INTERVAL",
         "HINT_RATE",
         "INVITE_PERMISSIONS",
         "PREFIXED_POOL_TIMEOUT",
-        "PLAYER_INFO_BACKUP_INTERVAL"
+        "PLAYER_INFO_BACKUP_INTERVAL",
     ]:
         try:
             CONFIG[i] = int(CONFIG[i])
