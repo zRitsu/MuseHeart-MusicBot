@@ -879,6 +879,7 @@ class Owner(commands.Cog):
             )
 
     @check_voice()
+    @commands.cooldown(1, 15, commands.BucketType.guild)
     @commands.command(description='inicializar um player no servidor.', aliases=["spawn", "sp", "spw", "smn"])
     async def summon(self, ctx: CustomContext):
 
@@ -899,28 +900,65 @@ class Owner(commands.Cog):
             guild_data = await self.bot.get_data(ctx.guild.id, db_name=DBModel.guilds)
             ctx.guild_data = guild_data
 
+        try:
+            global_data = ctx.global_guild_data
+        except AttributeError:
+            global_data = await self.bot.get_global_data(ctx.guild.id, db_name=DBModel.guilds)
+            ctx.global_guild_data = global_data
+
         static_player = guild_data['player_controller']
+
+        skin = guild_data["player_controller"]["skin"]
+        static_skin = guild_data["player_controller"]["static_skin"]
+
+        if global_data["global_skin"]:
+            skin = global_data["player_skin"] or skin
+            static_skin = global_data["player_skin_static"] or guild_data["player_controller"]["static_skin"]
 
         try:
             channel = self.bot.get_channel(int(static_player['channel'])) or await self.bot.fetch_channel(int(static_player['channel'])) or ctx.channel
-            message = await channel.fetch_message(int(static_player.get('message_id')))
         except (KeyError, TypeError, disnake.NotFound):
             channel = ctx.channel
             message = None
+            static_player = False
+        else:
+            try:
+                message = await channel.fetch_message(int(static_player.get('message_id')))
+            except (TypeError, disnake.NotFound):
+                message = None
+            static_player = True
+
+        try:
+            invite = global_data["listen_along_invites"][str(ctx.channel.id)]
+        except KeyError:
+            invite = None
+
+        else:
+            if not await self.bot.fetch_invite(invite):
+                invite = None
+                del global_data["listen_along_invites"][str(ctx.channel.id)]
+                await self.bot.update_global_data(ctx.guild_id, global_data, db_name=DBModel.guilds)
 
         player: LavalinkPlayer = self.bot.music.get_player(
-            node_id=node.identifier,
-            guild_id=ctx.guild.id,
+            guild_id=ctx.guild_id,
             cls=LavalinkPlayer,
             player_creator=ctx.author.id,
             guild=ctx.guild,
-            channel=channel,
-            message=message,
-            static=bool(static_player['channel']),
+            channel=channel or ctx.channel,
+            last_message_id=guild_data['player_controller']['message_id'],
+            node_id=node.identifier,
+            static=static_player,
+            skin=self.bot.check_skin(skin),
+            custom_skin_data=global_data["custom_skins"],
+            custom_skin_static_data=global_data["custom_skins_static"],
+            skin_static=self.bot.check_static_skin(static_skin),
             extra_hints=self.extra_hints,
             restrict_mode=guild_data['enable_restrict_mode'],
-            volume=guild_data['default_player_volume'],
+            listen_along_invite=invite,
+            volume=int(guild_data['default_player_volume']),
         )
+
+        player.message = message
 
         channel = ctx.author.voice.channel
 
