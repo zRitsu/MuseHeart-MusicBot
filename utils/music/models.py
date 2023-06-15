@@ -1128,40 +1128,42 @@ class LavalinkPlayer(wavelink.Player):
                 except:
                     pass
 
-            elif self.has_thread:
-
-                try:
-                    await self.message.edit(
-                        embed=disnake.Embed(
-                            description=self.command_log,
-                            color=self.bot.get_color(self.guild.me)
-                        ), view=None, allowed_mentions=self.allowed_mentions
-                    )
-                    channel: disnake.Thread = self.bot.get_channel(self.message.id)
-                    await channel.edit(archived=True, locked=True)
-                except Exception:
-                    print(
-                        f"Falha ao arquivar thread do servidor: {self.guild.name}\n{traceback.format_exc()}")
-
-            elif inter:
-
-                await inter.response.edit_message(
-                    content=None,
-                    embed=disnake.Embed(
-                        description=f"🛑 ⠂{self.command_log}",
-                        color=self.bot.get_color(self.guild.me)),
-                    components=[
-                        disnake.ui.Button(
-                            label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song),
-                        disnake.ui.Button(
-                            label="Tocar favorito/integração", emoji="⭐", custom_id=PlayerControls.enqueue_fav)
-
-                    ]
-                )
-
             else:
 
-                await self.destroy_message()
+                if self.has_thread:
+
+                    try:
+                        await self.message.edit(
+                            embed=disnake.Embed(
+                                description=self.command_log,
+                                color=self.bot.get_color(self.guild.me)
+                            ), view=None, allowed_mentions=self.allowed_mentions
+                        )
+                        channel: disnake.Thread = self.bot.get_channel(self.message.id)
+                        await channel.edit(archived=True, locked=True)
+                    except Exception:
+                        print(
+                            f"Falha ao arquivar thread do servidor: {self.guild.name}\n{traceback.format_exc()}")
+
+                elif inter:
+
+                    await inter.response.edit_message(
+                        content=None,
+                        embed=disnake.Embed(
+                            description=f"🛑 ⠂{self.command_log}",
+                            color=self.bot.get_color(self.guild.me)),
+                        components=[
+                            disnake.ui.Button(
+                                label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song),
+                            disnake.ui.Button(
+                                label="Tocar favorito/integração", emoji="⭐", custom_id=PlayerControls.enqueue_fav)
+
+                        ]
+                    )
+
+                else:
+
+                    await self.destroy_message()
 
         try:
             self.members_timeout_task.cancel()
