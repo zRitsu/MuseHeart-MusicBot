@@ -2328,7 +2328,7 @@ class Music(commands.Cog):
     move_args.add_argument('-casesensitive', '-cs', '-exactmatch', '-exact', action='store_true',
                            help="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome "
                                 "da música")
-    move_args.add_argument('-position', '-pos', help="Especificar posição destino", type=int, default=None)
+    move_args.add_argument('-position', '-pos', help="Especificar uma posição de destino", type=int, default=None)
 
     @is_dj()
     @has_player()
