@@ -858,10 +858,8 @@ class Music(commands.Cog):
                     try:
                         func = msg.edit
                     except AttributeError:
-                        try:
-                            func = select_interaction.response.edit_message
-                        except AttributeError:
-                            func = inter.message.edit
+                        func = select_interaction.response.edit_message
+
 
                     try:
                         await func(embed=disnake.Embed(description=text, color=self.bot.get_color(guild.me)), view=None)
