@@ -2,7 +2,6 @@
 
 export PYTHONIOENCODING=utf8
 
-
 trap 'kill $(jobs -pr)' SIGINT SIGTERM EXIT
 
 if [[ $OSTYPE == "msys" ]]; then
@@ -32,10 +31,10 @@ fi
 
 echo "Iniciando bot (Verifique se o mesmo está online)..."
 
-mkdir -p ./.logs
+#mkdir -p ./.logs
 
-touch "./.logs/run.log"
+#touch "./.logs/run.log"
 
-python main.py 2>&1 | tee "./.logs/run.log"
+python main.py #2>&1 | tee ./.logs/run.log
 
-sleep 30s
+sleep 120s

@@ -43,4 +43,4 @@ if [ ! -f "./venv/requirements.txt" ]  || [ ! cmp --silent -- "./requirements.tx
   cp -r requirements.txt ./venv/requirements.txt
 fi
 
-read -p "Pressione ENTER para finalizar..."
+sleep 30s

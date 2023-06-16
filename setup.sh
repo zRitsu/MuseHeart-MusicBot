@@ -40,3 +40,5 @@ if [ ! -f ".env" ] && [ ! -f "config.json" ]; then
   cp .example.env .env
   echo 'Não esqueça de adicionar os tokens necessários no arquivo .env'
 fi
+
+sleep 60s
