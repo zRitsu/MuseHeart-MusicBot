@@ -2328,6 +2328,7 @@ class Music(commands.Cog):
     move_args.add_argument('-casesensitive', '-cs', '-exactmatch', '-exact', action='store_true',
                            help="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome "
                                 "da música")
+    move_args.add_argument('-position', '-pos', help="Especificar posição destino", type=int, default=None)
 
     @is_dj()
     @has_player()
@@ -2336,10 +2337,15 @@ class Music(commands.Cog):
                   description="Mover uma música para a posição especificada da fila.")
     async def move_legacy(self, ctx: CustomContext, position: Optional[int] = None, *, flags: str = ""):
 
-        if not position:
-            raise GenericError("**Você não informou uma posição da fila.**")
-
         args, unknown = self.move_args.parse_known_args(args=flags.split())
+
+        if args.position:
+            if position:
+                unknown.insert(0, str(position))
+            position = args.position
+
+        elif not position:
+            raise GenericError("**Você não informou uma posição da fila.**")
 
         if not unknown:
             raise GenericError("**Você não adicionou o nome da música.**")
