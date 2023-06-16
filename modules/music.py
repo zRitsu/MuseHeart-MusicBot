@@ -838,15 +838,12 @@ class Music(commands.Cog):
                 }
 
                 view = SelectInteraction(
-                    user=inter.author,  timeout=30,
+                    user=inter.author,  timeout=45,
                     opts=[disnake.SelectOption(label=f, value=f, emoji="<:play:734221719774035968>") for f in favs]
                 )
 
                 try:
-                    if not isinstance(inter, disnake.MessageInteraction):
-                        msg = await inter.followup.send(ephemeral=ephemeral, view=view, wait=True, **kwargs)
-                    else:
-                        msg = await inter.send(ephemeral=True, view=view, **kwargs)
+                    msg = await inter.followup.send(ephemeral=ephemeral, view=view, wait=True, **kwargs)
                 except (disnake.InteractionTimedOut, AttributeError):
                     msg = await inter.channel.send(view=view, **kwargs)
 
@@ -860,12 +857,16 @@ class Music(commands.Cog):
 
                     try:
                         func = msg.edit
-                    except:
-                        func = select_interaction.response.edit_message
+                    except AttributeError:
+                        try:
+                            func = select_interaction.response.edit_message
+                        except AttributeError:
+                            func = inter.message.edit
 
                     try:
                         await func(embed=disnake.Embed(description=text, color=self.bot.get_color(guild.me)), view=None)
                     except AttributeError:
+                        traceback.print_exc()
                         pass
                     return
 
@@ -994,7 +995,7 @@ class Music(commands.Cog):
                             func = view.inter.response.edit_message
 
                         await func(embed=disnake.Embed(color=self.bot.get_color(guild.me),
-                            description="### Tempo esgotado!**" if not view.selected is False else "### Cancelado pelo usuário."),
+                            description="**Tempo esgotado!**" if not view.selected is False else "### Cancelado pelo usuário."),
                             components=None
                         )
                         return
