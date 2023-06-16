@@ -1492,7 +1492,7 @@ class Music(commands.Cog):
         if URL_REG.match(query):
             return [query] if len(query) < 100 else []
 
-        favs: list = await fav_list(inter, query, prefix="> fav: ")
+        favs: list = await fav_list(inter, query)
 
         if not inter.guild:
             try:

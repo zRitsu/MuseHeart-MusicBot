@@ -356,7 +356,7 @@ def string_to_file(txt, filename="result.txt"):
     return disnake.File(fp=txt, filename=filename or "result.txt")
 
 
-async def fav_list(inter, query: str, *, prefix=""):
+async def fav_list(inter, query: str):
 
     try:
         data = inter.global_user_data
@@ -364,15 +364,11 @@ async def fav_list(inter, query: str, *, prefix=""):
         data = await inter.bot.get_global_data(inter.author.id, db_name=DBModel.users)
         inter.global_user_data = data
 
-    lst = []
+    lst = sorted([f"> itg: {integrationname}" for integrationname in data["integration_links"]
+               if not query or query.lower() in integrationname.lower()])
 
-    if inter.bot.config["USE_YTDL"]:
-
-        lst.extend(sorted([f"> itg: {integrationname}" for integrationname in data["integration_links"]
-                   if not query or query.lower() in integrationname.lower()]))
-
-        if len(lst) > 20:
-            return lst
+    if len(lst) > 20:
+        return lst
 
     lst.extend(sorted([f"> fav: {favname}" for favname in data["fav_links"] if not query or query.lower() in favname.lower()]))
 
