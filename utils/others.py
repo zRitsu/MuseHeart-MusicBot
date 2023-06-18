@@ -518,8 +518,19 @@ def queue_track_index(inter: disnake.AppCmdInter, bot: BotCore, query: str, matc
                 continue
 
         if case_sensitive:
-            if query.lower() in track.title.lower():
-                tracklist.append(track)
+
+            track_split = track.title.lower().split()
+
+            try:
+                check = all(w == track_split[i] for i, w in enumerate(query_split))
+            except IndexError:
+                continue
+
+            if check:
+                tracklist.append((counter, track,))
+                count -= 1
+                if not count:
+                    break
 
         else:
             track_title = track.title.lower().split()
