@@ -128,6 +128,10 @@ class UserFavView(disnake.ui.View):
             clear_button.callback = self.clear_callback
             self.add_item(clear_button)
 
+        import_button = disnake.ui.Button(label="Importar", emoji="📥")
+        import_button.callback = self.import_callback
+        self.add_item(import_button)
+
         cancel_button = disnake.ui.Button(label="Cancelar", emoji="❌")
         cancel_button.callback = self.cancel_callback
         self.add_item(cancel_button)
@@ -228,6 +232,22 @@ class UserFavView(disnake.ui.View):
         await inter.edit_original_message(embed=embed, components=None)
         self.stop()
 
+    async def import_callback(self, inter: disnake.MessageInteraction):
+        await inter.response.send_modal(
+            title="Importar Favoritos",
+            custom_id="user_fav_import",
+            components=[
+                disnake.ui.TextInput(
+                    style=disnake.TextInputStyle.long,
+                    label="Inserir dados (em formato json)",
+                    custom_id="json_data",
+                    min_length=20,
+                    required=True
+                )
+            ]
+        )
+        await inter.delete_original_message()
+
     async def cancel_callback(self, inter: disnake.MessageInteraction):
         await inter.response.edit_message(
             embed=disnake.Embed(
@@ -327,20 +347,32 @@ class FavManager(commands.Cog):
             file: disnake.Attachment = commands.Param(name="arquivo", description="arquivo em formato .json")
     ):
 
-        if file.size > 2097152:
-            raise GenericError("**O tamanho do arquivo não pode ultrapassar 2Mb!**")
+        if isinstance(file, disnake.Attachment):
 
-        if not file.filename.endswith(".json"):
-            raise GenericError("**Tipo de arquivo inválido!**")
+            if file.size > 2097152:
+                raise GenericError("**O tamanho do arquivo não pode ultrapassar 2Mb!**")
 
-        await inter.response.defer(ephemeral=True)
+            if not file.filename.endswith(".json"):
+                raise GenericError("**Tipo de arquivo inválido!**")
 
-        try:
-            data = (await file.read()).decode('utf-8')
-            json_data = json.loads(data)
-        except Exception as e:
-            raise GenericError("**Ocorreu um erro ao ler o arquivo, por favor revise-o e use o comando novamente.**\n"
-                               f"```py\n{repr(e)}```")
+            await inter.response.defer(ephemeral=True)
+
+            try:
+                data = (await file.read()).decode('utf-8')
+                json_data = json.loads(data)
+            except Exception as e:
+                raise GenericError(
+                    "**Ocorreu um erro ao ler o arquivo, por favor revise-o e use o comando novamente.**\n"
+                    f"```py\n{repr(e)}```")
+
+        else:
+            try:
+                json_data = json.loads(file)
+            except Exception as e:
+                raise GenericError(
+                    "**Ocorreu um erro ao analisar os dados ou foi enviado dados inválidos/não-formatado "
+                    f"em formato json.**\n\n`{repr(e)}`")
+            await inter.response.defer(ephemeral=True)
 
         for name, url in json_data.items():
 
@@ -390,6 +422,14 @@ class FavManager(commands.Cog):
                               "**Eles vão aparecer quando usar o comando /play (no preenchimento automático da busca).**",
             )
         )
+
+    @commands.Cog.listener("on_modal_submit")
+    async def modal_import(self, inter: disnake.ModalInteraction):
+
+        if inter.custom_id != "user_fav_import":
+            return
+
+        await self.import_(inter, inter.text_values["json_data"])
 
     @fav.sub_command(
         description=f"{desc_prefix}Exportar seus favoritos em um arquivo json.",

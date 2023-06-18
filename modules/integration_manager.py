@@ -260,7 +260,7 @@ class IntegrationsView(disnake.ui.View):
             integration_select.callback = self.select_callback
             self.add_item(integration_select)
 
-        integrationadd_button = disnake.ui.Button(label="Adicionar", emoji="⭐")
+        integrationadd_button = disnake.ui.Button(label="Adicionar", emoji="💠")
         integrationadd_button.callback = self.integrationadd_callback
         self.add_item(integrationadd_button)
 
@@ -273,6 +273,10 @@ class IntegrationsView(disnake.ui.View):
             clear_button = disnake.ui.Button(label="Limpar Integrações", emoji="🚮")
             clear_button.callback = self.clear_callback
             self.add_item(clear_button)
+
+        import_button = disnake.ui.Button(label="Importar", emoji="📥")
+        import_button.callback = self.import_callback
+        self.add_item(import_button)
 
         cancel_button = disnake.ui.Button(label="Cancelar", emoji="❌")
         cancel_button.callback = self.cancel_callback
@@ -353,6 +357,22 @@ class IntegrationsView(disnake.ui.View):
 
         await inter.edit_original_message(embed=embed, components=None)
         self.stop()
+
+    async def import_callback(self, inter: disnake.MessageInteraction):
+        await inter.response.send_modal(
+            title="Importar integração",
+            custom_id="integration_import",
+            components=[
+                disnake.ui.TextInput(
+                    style=disnake.TextInputStyle.long,
+                    label="Inserir dados (em formato json)",
+                    custom_id="json_data",
+                    min_length=20,
+                    required=True
+                )
+            ]
+        )
+        await inter.delete_original_message()
 
     async def cancel_callback(self, inter: disnake.MessageInteraction):
         await inter.response.edit_message(
@@ -469,20 +489,30 @@ class IntegrationManager(commands.Cog):
             file: disnake.Attachment = commands.Param(name="arquivo", description="arquivo em formato .json")
     ):
 
-        if file.size > 2097152:
-            raise GenericError("**O tamanho do arquivo não pode ultrapassar 2Mb!**")
+        if isinstance(file, disnake.Attachment):
 
-        if not file.filename.endswith(".json"):
-            raise GenericError("**Tipo de arquivo inválido!**")
+            if file.size > 2097152:
+                raise GenericError("**O tamanho do arquivo não pode ultrapassar 2Mb!**")
 
-        await inter.response.defer(ephemeral=True)
+            if not file.filename.endswith(".json"):
+                raise GenericError("**Tipo de arquivo inválido!**")
 
-        try:
-            data = (await file.read()).decode('utf-8')
-            json_data = json.loads(data)
-        except Exception as e:
-            raise GenericError("**Ocorreu um erro ao ler o arquivo, por favor revise-o e use o comando novamente.**\n"
-                               f"```py\n{repr(e)}```")
+            await inter.response.defer(ephemeral=True)
+
+            try:
+                data = (await file.read()).decode('utf-8')
+                json_data = json.loads(data)
+            except Exception as e:
+                raise GenericError("**Ocorreu um erro ao ler o arquivo, por favor revise-o e use o comando novamente.**\n"
+                                   f"```py\n{repr(e)}```")
+
+        else:
+            try:
+                json_data = json.loads(file)
+            except Exception as e:
+                raise GenericError("**Ocorreu um erro ao analisar os dados ou foi enviado dados inválidos/não-formatado "
+                                   f"em formato json.**\n\n`{repr(e)}`")
+            await inter.response.defer(ephemeral=True)
 
         for name, url in json_data.items():
 
@@ -499,7 +529,10 @@ class IntegrationManager(commands.Cog):
             user_data = inter.global_user_data
         except AttributeError:
             user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
-            inter.global_user_data = user_data
+            try:
+                inter.global_user_data = user_data
+            except AttributeError:
+                pass
 
         for name in json_data.keys():
             try:
@@ -530,6 +563,14 @@ class IntegrationManager(commands.Cog):
                               "**Eles vão aparecer quando usar o comando /play (no preenchimento automático da busca).**",
             )
         )
+
+    @commands.Cog.listener("on_modal_submit")
+    async def modal_import(self, inter: disnake.ModalInteraction):
+
+        if inter.custom_id != "integration_import":
+            return
+
+        await self.import_(inter, inter.text_values["json_data"])
 
     @integration.sub_command(
         description=f"{desc_prefix}Exportar suas integrações em um arquivo json.",

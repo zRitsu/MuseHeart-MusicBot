@@ -118,7 +118,7 @@ class GuildFavView(disnake.ui.View):
             fav_select.callback = self.select_callback
             self.add_item(fav_select)
 
-        favadd_button = disnake.ui.Button(label="Adicionar", emoji="⭐")
+        favadd_button = disnake.ui.Button(label="Adicionar", emoji="📌")
         favadd_button.callback = self.favadd_callback
         self.add_item(favadd_button)
 
@@ -131,6 +131,10 @@ class GuildFavView(disnake.ui.View):
             remove_button = disnake.ui.Button(label="Remover", emoji="♻️")
             remove_button.callback = self.remove_callback
             self.add_item(remove_button)
+
+        import_button = disnake.ui.Button(label="Importar", emoji="📥")
+        import_button.callback = self.import_callback
+        self.add_item(import_button)
 
         cancel_button = disnake.ui.Button(label="Cancelar", emoji="❌")
         cancel_button.callback = self.cancel_callback
@@ -220,6 +224,22 @@ class GuildFavView(disnake.ui.View):
 
         await self.bot.get_cog("PinManager").process_idle_embed(guild, guild_data=guild_data)
         self.stop()
+
+    async def import_callback(self, inter: disnake.MessageInteraction):
+        await inter.response.send_modal(
+            title="Importar Playlists para o Servidor",
+            custom_id="guild_fav_import",
+            components=[
+                disnake.ui.TextInput(
+                    style=disnake.TextInputStyle.long,
+                    label="Inserir dados (em formato json)",
+                    custom_id="json_data",
+                    min_length=20,
+                    required=True
+                )
+            ]
+        )
+        await inter.delete_original_message()
 
     async def cancel_callback(self, inter: disnake.MessageInteraction):
         await inter.response.edit_message(
@@ -330,25 +350,32 @@ class PinManager(commands.Cog):
             file: disnake.Attachment = commands.Param(name="arquivo", description="arquivo em formato .json")
     ):
 
-        if file.size > 2097152:
-            raise GenericError("**O tamanho do arquivo não pode ultrapassar 2Mb!**")
+        inter, bot = select_bot_pool(inter)
 
-        if not file.filename.endswith(".json"):
-            raise GenericError("**Tipo de arquivo inválido!**")
+        if isinstance(file, disnake.Attachment):
 
-        inter, bot = await select_bot_pool(inter)
+            if file.size > 2097152:
+                raise GenericError("**O tamanho do arquivo não pode ultrapassar 2Mb!**")
 
-        if not bot:
-            return
+            if not file.filename.endswith(".json"):
+                raise GenericError("**Tipo de arquivo inválido!**")
 
-        await inter.response.defer(ephemeral=True)
+            await inter.response.defer(ephemeral=True)
 
-        try:
-            data = (await file.read()).decode('utf-8')
-            json_data = json.loads(data)
-        except Exception as e:
-            raise GenericError("**Ocorreu um erro ao ler o arquivo, por favor revise-o e use o comando novamente.**\n"
-                               f"```py\n{repr(e)}```")
+            try:
+                data = (await file.read()).decode('utf-8')
+                json_data = json.loads(data)
+            except Exception as e:
+                raise GenericError("**Ocorreu um erro ao ler o arquivo, por favor revise-o e use o comando novamente.**\n"
+                                   f"```py\n{repr(e)}```")
+
+        else:
+            try:
+                json_data = json.loads(file)
+            except Exception as e:
+                raise GenericError("**Ocorreu um erro ao analisar os dados ou foi enviado dados inválidos/não-formatado "
+                                   f"em formato json.**\n\n`{repr(e)}`")
+            await inter.response.defer(ephemeral=True)
 
         for name, data in json_data.items():
 
@@ -405,6 +432,14 @@ class PinManager(commands.Cog):
         )
 
         await self.process_idle_embed(guild, guild_data=guild_data)
+
+    @commands.Cog.listener("on_modal_submit")
+    async def modal_import(self, inter: disnake.ModalInteraction):
+
+        if inter.custom_id != "guild_fav_import":
+            return
+
+        await self.import_(inter, inter.text_values["json_data"])
 
     @commands.cooldown(1, 20, commands.BucketType.guild)
     @server_playlist.sub_command(
