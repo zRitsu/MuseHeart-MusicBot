@@ -11,7 +11,7 @@ class LiteSkin:
 
     def __init__(self):
         self.name = "lite"
-        self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1047184549425184888/skin_lite.png"
+        self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1119823345953804338/lite.png"
 
     def setup_features(self, player: LavalinkPlayer):
         player.mini_queue_feature = False
