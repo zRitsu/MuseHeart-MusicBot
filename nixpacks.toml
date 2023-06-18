@@ -1,8 +1,0 @@
-providers = ["python"]
-
-[phases.setup]
-nixPkgs = ["jdk17_headless", "ffmpeg", "python310Full"]
-aptPkgs = ["wget"]
-
-[phases.build]
-cmds = ["echo iniciando build", "...", "echo build finalizada"]
