@@ -842,10 +842,15 @@ class Music(commands.Cog):
                     opts=[disnake.SelectOption(label=f, value=f, emoji="<:play:734221719774035968>") for f in favs]
                 )
 
-                try:
-                    msg = await inter.followup.send(ephemeral=ephemeral, view=view, wait=True, **kwargs)
-                except (disnake.InteractionTimedOut, AttributeError):
-                    msg = await inter.channel.send(view=view, **kwargs)
+                if isinstance(inter, disnake.MessageInteraction):
+                    msg = await inter.send(ephemeral=ephemeral, view=view, **kwargs)
+                    func = inter.edit_original_message
+                else:
+                    try:
+                        msg = await inter.followup.send(ephemeral=ephemeral, view=view, wait=True, **kwargs)
+                    except (disnake.InteractionTimedOut, AttributeError):
+                        msg = await inter.channel.send(view=view, **kwargs)
+                    func = msg.edit
 
                 await view.wait()
 
@@ -854,12 +859,6 @@ class Music(commands.Cog):
                 if not select_interaction or view.selected is False:
 
                     text = "### Tempo de seleção esgotado!" if view.selected is not False else "### Cancelado pelo usuário."
-
-                    try:
-                        func = msg.edit
-                    except AttributeError:
-                        func = select_interaction.response.edit_message
-
 
                     try:
                         await func(embed=disnake.Embed(description=text, color=self.bot.get_color(guild.me)), view=None)
