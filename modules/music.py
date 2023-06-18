@@ -2321,7 +2321,7 @@ class Music(commands.Cog):
             await player.update_message()
 
     move_args = CommandArgparse()
-    move_args.add_argument('-count', '-counter', '-amount', '-max', type=int, default=None,
+    move_args.add_argument('-count', '-counter', '-amount', '-c', '-max', type=int, default=None,
                            help="Especificar uma quantidade de músicas para mover com o nome especificado.")
     move_args.add_argument('-casesensitive', '-cs', '-exactmatch', '-exact', action='store_true',
                            help="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome "
