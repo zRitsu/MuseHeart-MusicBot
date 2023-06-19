@@ -204,22 +204,31 @@ class LavalinkTrack(wavelink.Track):
         self.playlist: Optional[LavalinkPlaylist] = kwargs.pop(
             "playlist", None)
 
-        if self.ytid:
+        if self.info["sourceName"] == "youtube":
             self.info["extra"]["thumb"] = f"https://img.youtube.com/vi/{self.ytid}/mqdefault.jpg"
-        elif "soundcloud.com" in self.uri:
+            if "list=" not in self.uri:
+                try:
+                    self.uri = f"{self.uri}&list={parse.parse_qs(parse.urlparse(self.playlist_url).query)['list'][0]}"
+                    self.info["uri"] = self.uri
+                except KeyError:
+                    pass
+
+        elif self.info["sourceName"] == "soundcloud":
+
             self.info["extra"]["thumb"] = self.info.get(
                 "artworkUrl", "").replace('large.jpg', 't500x500.jpg')
+
+            if "?in=" not in self.uri:
+                try:
+                    self.uri = f"{self.uri}?in=" + self.playlist_url.split("soundcloud.com/")[1]
+                    self.info["uri"] = self.uri
+                except:
+                    pass
+
         else:
             self.info["extra"]["thumb"] = self.info.get("artworkUrl", "")
 
         self.thumb = self.info["extra"]["thumb"] or ""
-
-        if self.info["sourceName"] == "youtube" and "list=" not in self.uri and self.playlist_url:
-            try:
-                self.uri = f"{self.uri}&list={parse.parse_qs(parse.urlparse(self.playlist_url).query)['list'][0]}"
-                self.info["uri"] = self.uri
-            except KeyError:
-                pass
 
     def __repr__(self):
         return f"{self.info['sourceName']} - {self.duration if not self.is_stream else 'stream'} - {self.authors_string} - {self.title}"
