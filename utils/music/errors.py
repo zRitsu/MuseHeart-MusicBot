@@ -120,6 +120,9 @@ def parse_error(
     elif isinstance(error, MissingSpotifyClient):
         error_txt = "**Não há suporte a links do spotify no momento.**"
 
+    elif isinstance(error, commands.NoPrivateMessage):
+        error_txt = "Esse comando não pode ser executado em mensagens privadas."
+
     elif isinstance(error, commands.CommandOnCooldown):
         remaing = int(error.retry_after)
         if remaing < 1:
