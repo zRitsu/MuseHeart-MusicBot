@@ -247,6 +247,34 @@ class BotPool:
 
         self.spotify = spotify_client(self.config)
 
+        all_tokens = {}
+
+        for k, v in dict(os.environ, **self.config).items():
+
+            if not isinstance(v, str):
+                continue
+
+            if not (tokens := token_regex.findall(v)):
+                continue
+
+            if len(tokens) > 1:
+                counter = 1
+                for t in tokens:
+
+                    if t in all_tokens.values():
+                        continue
+
+                    all_tokens[f"{k}_{counter}"] = t
+                    counter += 1
+
+            elif (token := tokens.pop()) not in all_tokens.values():
+                all_tokens[k] = token
+
+        try:
+            interaction_bot_reg = list(all_tokens)[0]
+        except:
+            interaction_bot_reg = None
+
         def load_bot(bot_name: str, token: str):
 
             try:
@@ -344,7 +372,9 @@ class BotPool:
                 if not bot.bot_ready:
 
                     try:
-                        if not bot.config["INTERACTION_BOTS"] or str(bot.user.id) in bot.config["INTERACTION_BOTS"]:
+                        if str(bot.user.id) in bot.config["INTERACTION_BOTS"] or \
+                                str(bot.user.id) in bot.config["INTERACTION_BOTS_CONTROLLER"] or \
+                                interaction_bot_reg == bot.identifier:
 
                             self._command_sync_flags = commands.CommandSyncFlags.all()
 
@@ -420,29 +450,6 @@ class BotPool:
                 print(f'{bot.user} - [{bot.user.id}] Online.')
 
             self.bots.append(bot)
-
-        all_tokens = {}
-
-        for k, v in dict(os.environ, **self.config).items():
-
-            if not isinstance(v, str):
-                continue
-
-            if not (tokens:=token_regex.findall(v)):
-                continue
-
-            if len(tokens) > 1:
-                counter = 1
-                for t in tokens:
-
-                    if t in all_tokens.values():
-                        continue
-
-                    all_tokens[f"{k}_{counter}"] = t
-                    counter += 1
-
-            elif (token:=tokens.pop()) not in all_tokens.values():
-                all_tokens[k] = token
 
         if len(all_tokens) > 1:
             self.single_bot = False
