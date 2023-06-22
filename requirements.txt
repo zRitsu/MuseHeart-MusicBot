@@ -1,5 +1,5 @@
 asyncspotify==0.12.1
-git+https://github.com/DisnakeDev/disnake.git@18431451718c2a70f250237dd6ac84dc3b9cc497
+disnake>=2.9.0
 python-dotenv
 user-agent
 requests
@@ -13,4 +13,4 @@ aiofiles
 disnake-jishaku
 packaging
 aiosqlite
-yt-dlp>=2023.06.21
+yt-dlp>=2023.06.22
