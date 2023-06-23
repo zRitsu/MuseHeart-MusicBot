@@ -402,10 +402,7 @@ class BotPool:
 
                                     for b in self.bots:
 
-                                        try:
-                                            if str(b.user.id) not in self.config["INTERACTION_BOTS"]:
-                                                continue
-                                        except:
+                                        if not b.interaction_id:
                                             continue
 
                                         interaction_invites += f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) "
@@ -760,7 +757,7 @@ class BotCore(commands.Bot):
 
                 for b in self.pool.bots:
 
-                    if str(b.user.id) not in self.config["INTERACTION_BOTS"]:
+                    if not b.interaction_id:
                         continue
 
                     try:
