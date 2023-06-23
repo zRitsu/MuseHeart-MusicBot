@@ -503,7 +503,13 @@ class Misc(commands.Cog):
 
         for bot in sorted(self.bot.pool.bots, key=lambda b: len(b.guilds)):
 
-            if (bot.appinfo and not bot.appinfo.bot_public and (not await bot.is_owner(inter.author)) or str(bot.user.id) in bot.config['INTERACTION_BOTS_CONTROLLER']):
+            try:
+                if not bot.appinfo.bot_public and not await bot.is_owner(inter.author):
+                    continue
+            except:
+                continue
+
+            if str(bot.user.id) in bot.config['INTERACTION_BOTS_CONTROLLER']:
                 continue
 
             kwargs = {"redirect_uri": self.bot.config['INVITE_REDIRECT_URL']} if self.bot.config['INVITE_REDIRECT_URL'] else {}
