@@ -376,6 +376,8 @@ class BotPool:
                                 str(bot.user.id) in bot.config["INTERACTION_BOTS_CONTROLLER"] or \
                                 interaction_bot_reg == bot.identifier:
 
+                            bot.interaction_id = bot.user.id
+
                             self._command_sync_flags = commands.CommandSyncFlags.all()
 
                             bot.load_modules()
@@ -547,6 +549,7 @@ class BotCore(commands.Bot):
         self.number = kwargs.pop("number", 0)
         super().__init__(*args, **kwargs)
         self.music = music_mode(self)
+        self.interaction_id: Optional[int] = None
 
         for i in self.config["OWNER_IDS"].split("||"):
 

@@ -546,23 +546,16 @@ class Misc(commands.Cog):
 
         interaction_bots = ""
 
-        for bot_id in inter.bot.config["INTERACTION_BOTS"].split(" "):
+        for b in self.bot.pool.bots:
 
-            if not bot_id.isdigit():
-                continue
-
-            if bot_id in txt and len(bots_invites + bots_in_guild) < 2:
+            if str(b.interaction_id) in txt and len(bots_invites + bots_in_guild) < 2:
                 continue
 
             try:
-                if int(bot_id) == inter.bot.user.id:
+                if b.interaction_id == inter.bot.user.id:
                     userbot = inter.bot.user
-                else:
-                    userbot = await inter.bot.get_or_fetch_user(int(bot_id))
-                    if not userbot:
-                        continue
 
-                interaction_bots += f"[`{disnake.utils.escape_markdown(str(userbot.name))}`]({disnake.utils.oauth_url(userbot.id, scopes=['applications.commands'])}) "
+                    interaction_bots += f"[`{disnake.utils.escape_markdown(userbot.name)}`]({disnake.utils.oauth_url(userbot.id, scopes=['applications.commands'])}) "
             except Exception:
                 traceback.print_exc()
 
