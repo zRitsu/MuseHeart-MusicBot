@@ -546,18 +546,17 @@ class Misc(commands.Cog):
 
         interaction_bots = ""
 
-        for b in self.bot.pool.bots:
+        if len(self.bot.pool.bots) > 1:
 
-            if str(b.interaction_id) in txt and len(bots_invites + bots_in_guild) < 2:
-                continue
+            for b in self.bot.pool.bots:
 
-            try:
-                if b.interaction_id == inter.bot.user.id:
-                    userbot = inter.bot.user
+                if not b.interaction_id:
+                    continue
 
-                    interaction_bots += f"[`{disnake.utils.escape_markdown(userbot.name)}`]({disnake.utils.oauth_url(userbot.id, scopes=['applications.commands'])}) "
-            except Exception:
-                traceback.print_exc()
+                try:
+                    interaction_bots += f"[`{disnake.utils.escape_markdown(b.user.name)}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) "
+                except Exception:
+                    traceback.print_exc()
 
         if interaction_bots:
             txt = f"**Registrar os comandos de barra no servidor:**\n{interaction_bots}\n\n" + txt
