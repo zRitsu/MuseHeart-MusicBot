@@ -1330,11 +1330,11 @@ class Music(commands.Cog):
 
                 duration = time_format(tracks.duration) if not tracks.is_stream else '🔴 Livestream'
 
-                log_text = f"{inter.author.mention} adicionou [`{fix_characters(tracks.title, 20)}`]({tracks.uri}){pos_txt} `({duration})`."
+                log_text = f"{inter.author.mention} adicionou [`{fix_characters(tracks.title, 20)}`]({tracks.uri or tracks.search_uri}){pos_txt} `({duration})`."
 
                 embed.set_author(
                     name=fix_characters(tracks.title, 35),
-                    url=tracks.uri,
+                    url=tracks.uri or tracks.search_uri,
                     icon_url=music_source_image(tracks.info['sourceName'])
                 )
                 embed.set_thumbnail(url=tracks.thumb)
@@ -1629,7 +1629,7 @@ class Music(commands.Cog):
             embed = disnake.Embed(
                 color=self.bot.get_color(guild.me),
                 description= f"⤵️ **⠂{inter.author.mention} pulou para a música:**\n"
-                             f"╰[`{fix_characters(track.title, 43)}`]({track.uri}){player.controller_link}"
+                             f"╰[`{fix_characters(track.title, 43)}`]({track.uri or track.search_uri}){player.controller_link}"
             )
 
             try:
@@ -1656,7 +1656,7 @@ class Music(commands.Cog):
                 embed = disnake.Embed(
                     color=self.bot.get_color(guild.me),
                     description=f"⏭️ **⠂{inter.author.mention} pulou a música:\n"
-                                f"╰[`{fix_characters(player.current.title, 43)}`]({player.current.uri})**"
+                                f"╰[`{fix_characters(player.current.title, 43)}`]({player.current.uri or player.current.search_uri})**"
                                 f"{player.controller_link}"
                 )
 
@@ -1737,7 +1737,7 @@ class Music(commands.Cog):
 
             txt = [
                 "voltou para a música atual.",
-                f"⏮️ **⠂{inter.author.mention} voltou para a música:\n╰[`{fix_characters(t.title, 43)}`]({t.uri})**"
+                f"⏮️ **⠂{inter.author.mention} voltou para a música:\n╰[`{fix_characters(t.title, 43)}`]({t.uri or t.search_uri})**"
             ]
 
             await self.interaction_message(inter, txt, emoji="⏮️", store_embed=True)
@@ -2205,9 +2205,9 @@ class Music(commands.Cog):
 
         txt = [
             f"definiu a quantidade de repetições da música "
-            f"[`{(fix_characters(player.current.title, 25))}`]({player.current.uri}) para **{value}**.",
+            f"[`{(fix_characters(player.current.title, 25))}`]({player.current.uri or player.current.search_uri}) para **{value}**.",
             f"🔄 **⠂{inter.author.mention} definiu a quantidade de repetições da música para [{value}]:**\n"
-            f"╰[`{player.current.title}`]({player.current.uri})"
+            f"╰[`{player.current.title}`]({player.current.uri or player.current.search_uri})"
         ]
 
         await self.interaction_message(inter, txt, rpc_update=True, emoji="🔄")
@@ -2263,8 +2263,8 @@ class Music(commands.Cog):
         player.queue.remove(track)
 
         txt = [
-            f"removeu a música [`{(fix_characters(track.title, 25))}`]({track.uri}) da fila.",
-            f"♻️ **⠂{inter.author.mention} removeu a música da fila:**\n╰[`{track.title}`]({track.uri})"
+            f"removeu a música [`{(fix_characters(track.title, 25))}`]({track.uri or track.search_uri}) da fila.",
+            f"♻️ **⠂{inter.author.mention} removeu a música da fila:**\n╰[`{track.title}`]({track.uri or track.search_uri})"
         ]
 
         await self.interaction_message(inter, txt, emoji="♻️")
@@ -2400,16 +2400,16 @@ class Music(commands.Cog):
             track = indexes[0][1]
 
             txt = [
-                f"moveu a música [`{fix_characters(track.title, limit=25)}`]({track.uri}) para a posição **[{position}]** da fila.",
+                f"moveu a música [`{fix_characters(track.title, limit=25)}`]({track.uri or track.search_uri}) para a posição **[{position}]** da fila.",
                 f"↪️ **⠂{inter.author.mention} moveu uma música para a posição [{position}]:**\n"
-                f"╰[`{fix_characters(track.title, limit=43)}`]({track.uri})"
+                f"╰[`{fix_characters(track.title, limit=43)}`]({track.uri or track.search_uri})"
             ]
 
             await self.interaction_message(inter, txt, emoji="↪️")
 
         else:
 
-            tracklist = "\n".join(f"[`{fix_characters(t.title, 45)}`]({t.uri})" for i, t in indexes[:10])
+            tracklist = "\n".join(f"[`{fix_characters(t.title, 45)}`]({t.uri or t.search_uri})" for i, t in indexes[:10])
 
             position_text = position if i_size == 1 else (str(position) + '-' + str(position+i_size-1))
 
@@ -2493,13 +2493,13 @@ class Music(commands.Cog):
         track = player.queue[index]
 
         if index <= 0:
-            raise GenericError(f"**A música **[`{track.title}`]({track.uri}) já é a próxima da fila.")
+            raise GenericError(f"**A música **[`{track.title}`]({track.uri or track.search_uri}) já é a próxima da fila.")
 
         player.queue.rotate(0 - (index))
 
         txt = [
-            f"rotacionou a fila para a música [`{(fix_characters(track.title, limit=25))}`]({track.uri}).",
-            f"🔃 **⠂{inter.author.mention} rotacionou a fila para a música:**\n╰[`{track.title}`]({track.uri})."
+            f"rotacionou a fila para a música [`{(fix_characters(track.title, limit=25))}`]({track.uri or track.search_uri}).",
+            f"🔃 **⠂{inter.author.mention} rotacionou a fila para a música:**\n╰[`{track.title}`]({track.uri or track.search_uri})."
         ]
 
         await self.interaction_message(inter, txt, emoji="🔃")
@@ -4406,7 +4406,7 @@ class Music(commands.Cog):
                                     f"✋ **⠂ Pedido por:** {message.author.mention}\n" \
                                     f"⌛ **⠂ Duração:** `{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}` "
                 embed.set_thumbnail(url=track.thumb)
-                embed.set_author(name=track.title, url=track.uri, icon_url=music_source_image(track.info["sourceName"]))
+                embed.set_author(name=track.title, url=track.uri or track.search_uri, icon_url=music_source_image(track.info["sourceName"]))
                 if response:
                     await response.edit(content=None, embed=embed, view=None)
                 else:
@@ -4415,7 +4415,7 @@ class Music(commands.Cog):
             else:
                 duration = time_format(tracks[0].duration) if not tracks[0].is_stream else '🔴 Livestream'
                 player.set_command_log(
-                    text=f"{message.author.mention} adicionou [`{fix_characters(tracks[0].title, 20)}`]({tracks[0].uri}) `({duration})`.",
+                    text=f"{message.author.mention} adicionou [`{fix_characters(tracks[0].title, 20)}`]({tracks[0].uri or tracks[0].search_uri}) `({duration})`.",
                     emoji="🎵"
                 )
                 if destroy_message:
@@ -4670,7 +4670,7 @@ class Music(commands.Cog):
         player: LavalinkPlayer = payload.player
         track = player.last_track
         embed = disnake.Embed(
-            description=f"**Falha ao reproduzir música:\n[{track.title}]({track.uri})** ```java\n{payload.error}```"
+            description=f"**Falha ao reproduzir música:\n[{track.title}]({track.uri or track.search_uri})** ```java\n{payload.error}```"
                         f"**Servidor:** `{player.node.identifier}`",
             color=disnake.Colour.red())
         await player.text_channel.send(embed=embed, delete_after=10 if player.static else None)
