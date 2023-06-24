@@ -4,6 +4,8 @@ import datetime
 import random
 import uuid
 from itertools import cycle
+from urllib.parse import quote
+
 import disnake
 import asyncio
 import wavelink
@@ -74,6 +76,10 @@ class PartialTrack:
     @property
     def uri(self) -> str:
         return self.info["uri"]
+
+    @property
+    def search_uri(self):
+        return f"https://www.youtube.com/results?search_query={quote(self.title)}"
 
     @property
     def title(self) -> str:
@@ -236,6 +242,10 @@ class LavalinkTrack(wavelink.Track):
     @property
     def single_title(self) -> str:
         return self.title
+
+    @property
+    def search_uri(self):
+        return f"https://www.youtube.com/results?search_query={quote(self.title)}"
 
     @property
     def authors_md(self) -> str:

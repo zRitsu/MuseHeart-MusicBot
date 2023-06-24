@@ -34,7 +34,7 @@ class MiniSkin:
 
         embed = disnake.Embed(
             color=embed_color,
-            description=f"[`{player.current.single_title}`]({player.current.uri})"
+            description=f"[`{player.current.single_title}`]({player.current.uri or player.current.search_uri})"
         )
         embed_queue = None
         queue_size = len(player.queue)

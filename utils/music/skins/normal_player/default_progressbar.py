@@ -68,7 +68,7 @@ class DefaultProgressbarSkin:
 
         vc_txt = ""
 
-        txt = f"[`{player.current.single_title}`]({player.current.uri})\n\n" \
+        txt = f"[`{player.current.single_title}`]({player.current.uri or player.current.search_uri})\n\n" \
               f"> 💠 **⠂Por:** {player.current.authors_md}\n" \
               f"> ✋ **⠂Pedido por:** <@{player.current.requester}>\n" \
               f"> 🔊 **⠂Volume:** `{player.volume}%`"

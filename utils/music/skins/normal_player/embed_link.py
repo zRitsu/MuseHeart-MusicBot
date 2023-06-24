@@ -44,7 +44,7 @@ class EmbedLinkSkin:
             duration_txt = f"\n> ⏰ **⠂Duração:** `{time_format(player.current.duration)}`"
 
         if player.paused:
-            txt += f"\n> ## `⏸️` Em Pausa:\n> ### ╚═【 [{player.current.title}]({player.current.uri}) 】\n{duration_txt}"
+            txt += f"\n> ## `⏸️` Em Pausa:\n> ### ╚═【 [{player.current.title}]({player.current.uri or player.current.search_uri}) 】\n{duration_txt}"
 
         else:
             txt += f"\n> ### `▶️` Tocando Agora:\n> ### ╚═【 [{player.current.title}]({player.current.uri}) 】\n{duration_txt}"

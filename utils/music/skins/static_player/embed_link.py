@@ -36,11 +36,13 @@ class EmbedLinkStaticSkin:
         else:
             duration_txt = f"\n> ⏰ **⠂Duração:** `{time_format(player.current.duration)}`"
 
+        title = player.current.title if not player.current.uri else player.current.uri
+
         if player.paused:
-            txt += f"\n> ## `⏸️` Em Pausa:\n> ### ╚═【 [{player.current.title}]({player.current.uri}) 】\n{duration_txt}"
+            txt += f"\n> ## `⏸️` Em Pausa:\n> ### ╚═【 {title} 】\n{duration_txt}"
 
         else:
-            txt += f"\n> ## `▶️` Tocando Agora:\n> ### ╚═【 [{player.current.title}]({player.current.uri}) 】\n{duration_txt}"
+            txt += f"\n> ## `▶️` Tocando Agora:\n> ### ╚═【 {title} 】\n{duration_txt}"
             if not player.current.is_stream and not player.paused:
                 txt += f" `[`<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`"
 

@@ -32,7 +32,7 @@ class LiteSkin:
         duration = "`🔴 Livestream`" if player.current.is_stream else \
             time_format(player.current.duration)
 
-        embed.description = f"> ▶️ **┃**[`{fix_characters(player.current.title, 45)}`]({player.current.uri})\n" \
+        embed.description = f"> ▶️ **┃**[`{fix_characters(player.current.title, 45)}`]({player.current.uri or player.current.search_uri})\n" \
                             f"> ℹ️ **┃**`{duration}`┃`{fix_characters(player.current.author, 18)}`┃<@{player.current.requester}>"
 
         if player.current.playlist_name:

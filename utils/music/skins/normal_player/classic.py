@@ -36,7 +36,7 @@ class ClassicSkin:
 
         embed_top = disnake.Embed(
             color=player.bot.get_color(player.guild.me),
-            description=f"> [**{player.current.title}**]({player.current.uri})"
+            description=f"> [**{player.current.title}**]({player.current.uri or player.current.search_uri})"
         )
         embed.set_image(
             url="https://cdn.discordapp.com/attachments/554468640942981147/1085234017693085776/rainbow_bar3.gif"

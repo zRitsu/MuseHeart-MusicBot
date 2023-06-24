@@ -32,7 +32,7 @@ class MicroController:
 
         embed = disnake.Embed(
             color=embed_color,
-            description=f"[`{fix_characters(player.current.single_title, 25)}`]({player.current.uri}) "
+            description=f"[`{fix_characters(player.current.single_title, 25)}`]({player.current.uri or player.current.search_uri}) "
                         f"[`{fix_characters(player.current.author, 12)}`] <@{player.current.requester}>"
         )
 

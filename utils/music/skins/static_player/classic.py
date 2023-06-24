@@ -34,7 +34,7 @@ class ClassicStaticSkin:
 
         queue_txt = ""
 
-        embed.description = f"[**{player.current.title}**]({player.current.uri})\n\n"
+        embed.description = f"[**{player.current.title}**]({player.current.uri or player.current.search_uri})\n\n"
         embed.set_image(url=player.current.thumb)
         embed_top = None
 

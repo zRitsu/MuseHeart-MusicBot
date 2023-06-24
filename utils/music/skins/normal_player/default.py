@@ -62,7 +62,7 @@ class DefaultSkin:
             f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`"
             if not player.paused else '')
 
-        txt = f"[`{player.current.single_title}`]({player.current.uri})\n\n" \
+        txt = f"[`{player.current.single_title}`]({player.current.uri or player.current.search_uri})\n\n" \
               f"{duration}\n" \
               f"> 💠 **⠂Por:** {player.current.authors_md}\n" \
               f"> ✋ **⠂Pedido por:** <@{player.current.requester}>\n" \
