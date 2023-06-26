@@ -156,6 +156,12 @@ class ClassicStaticSkin:
                 )
             )
 
+        try:
+            if isinstance(player.text_channel.parent, disnake.ForumChannel):
+                data["content"] = player.current.title[:50]
+        except:
+            pass
+
         return data
 
 def load():

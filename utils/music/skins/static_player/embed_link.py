@@ -84,6 +84,12 @@ class EmbedLinkStaticSkin:
 
             txt = qtext + "```" + txt
 
+        try:
+            if isinstance(player.text_channel.parent, disnake.ForumChannel):
+                txt = f"{txt}\n{player.current.title[:50]}"
+        except:
+            pass
+
         data = {
             "content": txt,
             "embeds": [],
