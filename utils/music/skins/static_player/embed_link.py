@@ -39,9 +39,11 @@ class EmbedLinkStaticSkin:
         title = player.current.title if not player.current.uri else player.current.uri
 
         if player.paused:
+            emoji = "`⏸️`"
             txt += f"\n> ## `⏸️` Em Pausa:\n> ### ╚═【 {title} 】\n{duration_txt}"
 
         else:
+            emoji = "`▶️`"
             txt += f"\n> ## `▶️` Tocando Agora:\n> ### ╚═【 {title} 】\n{duration_txt}"
             if not player.current.is_stream and not player.paused:
                 txt += f" `[`<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`"
@@ -86,7 +88,7 @@ class EmbedLinkStaticSkin:
 
         try:
             if isinstance(player.text_channel.parent, disnake.ForumChannel):
-                txt = f"{txt}\n{player.current.title[:50]}"
+                txt = f"{emoji} {player.current.title[:50]}\n{txt}"
         except:
             pass
 

@@ -35,11 +35,13 @@ class DefaultProgressbarStaticSkin:
         embed_queue = None
 
         if not player.paused:
+            emoji = "⏸️"
             embed.set_author(
                 name="Tocando Agora:",
                 icon_url=music_source_image(player.current.info["sourceName"])
             )
         else:
+            emoji = "▶️"
             embed.set_author(
                 name="Em Pausa:",
                 icon_url="https://cdn.discordapp.com/attachments/480195401543188483/896013933197013002/pause.png"
@@ -214,7 +216,7 @@ class DefaultProgressbarStaticSkin:
 
         try:
             if isinstance(player.text_channel.parent, disnake.ForumChannel):
-                data["content"] = player.current.title[:50]
+                data["content"] = f"{emoji} {player.current.title[:50]}"
         except:
             pass
 
