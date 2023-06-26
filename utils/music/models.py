@@ -752,9 +752,22 @@ class LavalinkPlayer(wavelink.Player):
             color=self.bot.get_color(self.guild.me)
         )
 
+        kwargs = {
+            "embed": embed,
+            "content": None,
+            "components": components,
+            "allowed_mentions": self.allowed_mentions
+        }
+
+        try:
+            if isinstance(self.text_channel.parent, disnake.ForumChannel) and self.static:
+                kwargs["content"] = "💤 Aguardando por novas músicas..."
+        except:
+            pass
+
         try:
             if self.has_thread or self.static or self.text_channel.last_message_id == self.message.id:
-                await self.message.edit(embed=embed, content=None, components=components, allowed_mentions=self.allowed_mentions)
+                await self.message.edit(**kwargs)
                 send_message = False
             else:
                 send_message = True
@@ -766,7 +779,7 @@ class LavalinkPlayer(wavelink.Player):
                 await self.message.delete()
             except:
                 pass
-            self.message = await self.text_channel.send(embed=embed, components=components, allowed_mentions=self.allowed_mentions)
+            self.message = await self.text_channel.send(**kwargs)
 
     async def idling_mode(self):
 

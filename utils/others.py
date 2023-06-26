@@ -325,8 +325,13 @@ async def send_idle_embed(
         ]
     )
 
+    if is_forum:
+        content = "🎶 Peça sua música aqui."
+    else:
+        content = None
+
     if isinstance(target, disnake.MessageInteraction):
-        await target.response.edit_message(embed=embed, components=components, content=None)
+        await target.response.edit_message(embed=embed, components=components, content=content)
         message = target.message
 
     elif isinstance(target, disnake.Message):
@@ -335,13 +340,13 @@ async def send_idle_embed(
             return target
 
         if target.author == target.guild.me:
-            await target.edit(embed=embed, content=None, components=components)
+            await target.edit(embed=embed, content=content, components=components)
             message = target
         else:
-            message = await target.channel.send(embed=embed, components=components)
+            message = await target.channel.send(embed=embed, components=components, content=content)
     else:
 
-        message = await bot.get_channel(target.id).send(embed=embed, components=components)
+        message = await bot.get_channel(target.id).send(embed=embed, components=components, content=content)
 
     if isinstance(message.channel, (disnake.Thread, disnake.TextChannel)) and not message.pinned and not is_forum and target.guild.me.guild_permissions.manage_messages:
         await message.pin(reason="Player controller")
