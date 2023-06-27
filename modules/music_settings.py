@@ -387,11 +387,20 @@ class MusicSettings(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        try:
-            guild_data = inter.guild_data
-        except AttributeError:
-            guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
-            inter.guild_data = guild_data
+        guild_data = None
+
+        if inter.bot == bot:
+            try:
+                guild_data = inter.guild_data
+            except AttributeError:
+                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                try:
+                    inter.guild_data = guild_data
+                except AttributeError:
+                    pass
+
+        if not guild_data:
+            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         original_message = None
         existing_channel = True
@@ -729,11 +738,20 @@ class MusicSettings(commands.Cog):
 
         channel_inter = bot.get_channel(inter.channel.id)
 
-        try:
-            guild_data = inter.guild_data
-        except AttributeError:
-            guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
-            inter.guild_data = guild_data
+        guild_data = None
+
+        if inter.bot == bot:
+            try:
+                guild_data = inter.guild_data
+            except AttributeError:
+                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                try:
+                    inter.guild_data = guild_data
+                except AttributeError:
+                    pass
+
+        if not guild_data:
+            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         try:
             channel = bot.get_channel(int(guild_data['player_controller']['channel'])) or \
@@ -859,11 +877,20 @@ class MusicSettings(commands.Cog):
             await inter.send("Você não pode adicionar esse cargo.", ephemeral=True)
             return
 
-        try:
-            guild_data = inter.guild_data
-        except AttributeError:
-            guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
-            inter.guild_data = guild_data
+        guild_data = None
+
+        if inter.bot == bot:
+            try:
+                guild_data = inter.guild_data
+            except AttributeError:
+                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                try:
+                    inter.guild_data = guild_data
+                except AttributeError:
+                    pass
+
+        if not guild_data:
+            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         if str(role.id) in guild_data['djroles']:
             await inter.send(f"O cargo {role.mention} já está na lista de DJ's", ephemeral=True)
@@ -896,11 +923,20 @@ class MusicSettings(commands.Cog):
         if not bot:
             return
 
-        try:
-            guild_data = inter.guild_data
-        except AttributeError:
+        guild_data = None
+
+        if inter.bot == bot:
+            try:
+                guild_data = inter.guild_data
+            except AttributeError:
+                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                try:
+                    inter.guild_data = guild_data
+                except AttributeError:
+                    pass
+
+        if not guild_data:
             guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-            inter.guild_data = guild_data
 
         if not guild_data['djroles']:
 
@@ -951,11 +987,20 @@ class MusicSettings(commands.Cog):
 
         add_skin_prefix = (lambda d: [f"> custom_skin: {i}" for i in d.keys()])
 
-        try:
-            guild_data = inter.guild_data
-        except AttributeError:
-            guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
-            inter.guild_data = guild_data
+        guild_data = None
+
+        if inter.bot == bot:
+            try:
+                guild_data = inter.guild_data
+            except AttributeError:
+                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                try:
+                    inter.guild_data = guild_data
+                except AttributeError:
+                    pass
+
+        if not guild_data:
+            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         try:
             global_data = inter.global_guild_data

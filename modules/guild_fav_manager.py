@@ -313,11 +313,20 @@ class PinManager(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        try:
-            guild_data = inter.guild_data
-        except AttributeError:
+        guild_data = None
+
+        if inter.bot == bot:
+            try:
+                guild_data = inter.guild_data
+            except AttributeError:
+                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                try:
+                    inter.guild_data = guild_data
+                except AttributeError:
+                    pass
+
+        if not guild_data:
             guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-            inter.guild_data = guild_data
 
         view = GuildFavView(bot=bot, ctx=inter, data=guild_data)
 
@@ -391,11 +400,20 @@ class PinManager(commands.Cog):
             if not isinstance(data['url'], str) or not URL_REG.match(data['url']):
                 raise GenericError(f"O seu arquivo contém link inválido: ```ldif\n{data['url']}```")
 
-        try:
-            guild_data = inter.guild_data
-        except AttributeError:
-            guild_data = await self.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-            inter.guild_data = guild_data
+        guild_data = None
+
+        if inter.bot == bot:
+            try:
+                guild_data = inter.guild_data
+            except AttributeError:
+                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                try:
+                    inter.guild_data = guild_data
+                except AttributeError:
+                    pass
+
+        if not guild_data:
+            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         if not guild_data["player_controller"]["channel"] or not bot.get_channel(int(guild_data["player_controller"]["channel"])):
             raise GenericError("**Não há player configurado no servidor! Use o comando /setup**")
@@ -454,11 +472,20 @@ class PinManager(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        try:
-            guild_data = inter.guild_data
-        except AttributeError:
+        guild_data = None
+
+        if inter.bot == bot:
+            try:
+                guild_data = inter.guild_data
+            except AttributeError:
+                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                try:
+                    inter.guild_data = guild_data
+                except AttributeError:
+                    pass
+
+        if not guild_data:
             guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-            inter.guild_data = guild_data
 
         if not guild_data["player_controller"]["fav_links"]:
             raise GenericError(f"**Não há músicas/playlists fixadas no servidor..\n"

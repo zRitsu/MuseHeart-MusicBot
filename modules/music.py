@@ -765,14 +765,20 @@ class Music(commands.Cog):
             if not node:
                 node = await self.get_best_node(bot)
 
-            try:
-                guild_data = inter.guild_data
-            except AttributeError:
-                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+            guild_data = None
+
+            if inter.bot == bot:
                 try:
-                    inter.guild_data = guild_data
+                    guild_data = inter.guild_data
                 except AttributeError:
-                    pass
+                    guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                    try:
+                        inter.guild_data = guild_data
+                    except AttributeError:
+                        pass
+
+            if not guild_data:
+                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
             if not guild.me.voice:
                 can_connect(voice_channel, guild, guild_data["check_other_bots_in_vc"], bot=bot)
@@ -1103,14 +1109,20 @@ class Music(commands.Cog):
             except KeyError:
                 player = None
 
-                try:
-                    guild_data = inter.guild_data
-                except AttributeError:
-                    guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                guild_data = None
+
+                if inter.bot == bot:
                     try:
-                        inter.guild_data = guild_data
-                    except:
-                        pass
+                        guild_data = inter.guild_data
+                    except AttributeError:
+                        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                        try:
+                            inter.guild_data = guild_data
+                        except AttributeError:
+                            pass
+
+                if not guild_data:
+                    guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
                 static_player = guild_data['player_controller']
 
@@ -1450,14 +1462,20 @@ class Music(commands.Cog):
             try:
                 guild_data["check_other_bots_in_vc"]
             except KeyError:
-                try:
-                    guild_data = inter.guild_data
-                except AttributeError:
-                    guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                guild_data = None
+
+                if inter.bot == bot:
                     try:
-                        inter.guild_data = guild_data
-                    except:
-                        pass
+                        guild_data = inter.guild_data
+                    except AttributeError:
+                        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                        try:
+                            inter.guild_data = guild_data
+                        except AttributeError:
+                            pass
+
+                if not guild_data:
+                    guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
             if not inter.author.voice:
                 raise NoVoice()
