@@ -419,7 +419,7 @@ def music_source_emoji_url(url: str):
     if sp_url_regex.match(url):
         return "<:spotify:715717523626000445>"
 
-    if tw_url_rgex.match(url):
+    if tw_url_regex.match(url):
         return "<:Twitch:803656463695478804>"
 
     return "<:play:734221719774035968>"
