@@ -525,7 +525,11 @@ async def has_perm(inter):
         guild_data = inter.guild_data
     except AttributeError:
         guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
-        inter.guild_data = guild_data
+        if bot == inter.bot:
+            try:
+                inter.guild_data = guild_data
+            except AttributeError:
+                pass
 
     if [r for r in guild_data['djroles'] if int(r) in user_roles]:
         return True
