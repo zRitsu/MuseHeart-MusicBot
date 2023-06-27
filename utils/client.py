@@ -270,10 +270,13 @@ class BotPool:
             elif (token := tokens.pop()) not in all_tokens.values():
                 all_tokens[k] = token
 
-        try:
-            interaction_bot_reg = list(all_tokens)[0]
-        except:
+        if self.config["INTERACTION_BOTS"] or self.config["INTERACTION_BOTS_CONTROLLER"]:
             interaction_bot_reg = None
+        else:
+            try:
+                interaction_bot_reg = list(all_tokens)[0]
+            except:
+                interaction_bot_reg = None
 
         def load_bot(bot_name: str, token: str):
 
