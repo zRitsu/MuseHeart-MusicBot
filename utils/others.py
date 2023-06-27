@@ -302,7 +302,7 @@ async def send_idle_embed(
 
     components = []
 
-    opts = [disnake.SelectOption(label=k, value=k, description=v.get('description')) for k, v in sorted(guild_data["player_controller"]["fav_links"].items(), key=lambda k: k)]
+    opts = [disnake.SelectOption(label=k, value=k, emoji=music_source_emoji_url(v['url']), description=v.get('description')) for k, v in sorted(guild_data["player_controller"]["fav_links"].items(), key=lambda k: k)]
 
     if opts:
         components.append(
@@ -402,6 +402,41 @@ def paginator(txt: str):
     pages.close_page()
     return pages.pages
 
+
+yt_url_regex = re.compile(r"^(https?://)?(www\.)?(youtube\.com|youtu\.be)/.+")
+sc_url_regex = re.compile(r"^(https?://)?(www\.)?(soundcloud\.com)/.+")
+sp_url_regex = re.compile(r"^(https?://)?(www\.)?(open\.spotify\.com|spotify\.com)/.+")
+
+def music_source_emoji_url(url: str):
+
+    if yt_url_regex.match(url):
+        return "<:youtube:647253940882374656>"
+
+    if sc_url_regex.match(url):
+        return "<:soundcloud:721530214764773427>"
+
+    if sp_url_regex.match(url):
+        return "<:spotify:715717523626000445>"
+
+    return "<:play:734221719774035968>"
+
+def music_source_emoji_id(id_: str):
+
+    try:
+        id_ = id_.replace("> itg: ", "").replace("> fav: ", "").split()[0]
+    except:
+        return "<:play:734221719774035968>"
+
+    if id_ == "【YT】:":
+        return "<:youtube:647253940882374656>"
+
+    if id_ == "【SC】:":
+        return "<:soundcloud:721530214764773427>"
+
+    if id_ == "【SP】:":
+        return "<:spotify:715717523626000445>"
+
+    return "<:play:734221719774035968>"
 
 async def select_bot_pool(inter, first=False):
 

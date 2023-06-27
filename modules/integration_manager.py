@@ -17,7 +17,7 @@ from utils.music.converters import URL_REG, fix_characters
 from utils.music.errors import GenericError
 from utils.music.interactions import SelectInteraction
 from utils.music.spotify import spotify_regex_w_user
-from utils.others import CustomContext
+from utils.others import CustomContext, music_source_emoji_id
 
 youtube_regex = r"^(?:https?:\/\/)?(?:www\.)?youtube\.com\/(?:@)?([a-zA-Z0-9_-]{1,})(?:\/|$)"
 soundcloud_regex = r"^(?:https?:\/\/)?(?:www\.)?soundcloud\.com\/([a-zA-Z0-9_-]+)"
@@ -255,7 +255,7 @@ class IntegrationsView(disnake.ui.View):
         if data["integration_links"]:
 
             integration_select = disnake.ui.Select(options=[
-                disnake.SelectOption(label=k) for k, v in data["integration_links"].items()
+                disnake.SelectOption(label=k, emoji=music_source_emoji_id(k)) for k, v in data["integration_links"].items()
             ], min_values=1, max_values=1)
             integration_select.callback = self.select_callback
             self.add_item(integration_select)

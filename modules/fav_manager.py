@@ -11,7 +11,7 @@ from disnake.ext import commands
 from utils.db import DBModel
 from utils.music.converters import URL_REG
 from utils.music.errors import GenericError
-from utils.others import CustomContext
+from utils.others import CustomContext, music_source_emoji_url
 
 if TYPE_CHECKING:
     from utils.client import BotCore
@@ -105,7 +105,7 @@ class UserFavView(disnake.ui.View):
         if data["fav_links"]:
 
             fav_select = disnake.ui.Select(options=[
-                disnake.SelectOption(label=k) for k, v in data["fav_links"].items()
+                disnake.SelectOption(label=k, emoji=music_source_emoji_url(v)) for k, v in data["fav_links"].items()
             ], min_values=1, max_values=1)
             fav_select.callback = self.select_callback
             self.add_item(fav_select)

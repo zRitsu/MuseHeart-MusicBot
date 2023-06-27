@@ -12,7 +12,7 @@ from disnake.ext import commands
 from utils.music.converters import URL_REG
 from utils.music.errors import GenericError
 from utils.music.models import LavalinkPlayer
-from utils.others import send_idle_embed, select_bot_pool, CustomContext
+from utils.others import send_idle_embed, select_bot_pool, CustomContext, music_source_emoji_url
 from utils.db import DBModel
 
 if TYPE_CHECKING:
@@ -113,7 +113,7 @@ class GuildFavView(disnake.ui.View):
         if data["player_controller"]["fav_links"]:
 
             fav_select = disnake.ui.Select(options=[
-                disnake.SelectOption(label=k, description=v.get("description")) for k, v in data["player_controller"]["fav_links"].items()
+                disnake.SelectOption(label=k, emoji=music_source_emoji_url(v['url']),description=v.get("description")) for k, v in data["player_controller"]["fav_links"].items()
             ], min_values=1, max_values=1)
             fav_select.callback = self.select_callback
             self.add_item(fav_select)

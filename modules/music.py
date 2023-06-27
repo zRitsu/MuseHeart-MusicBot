@@ -27,7 +27,7 @@ from utils.music.converters import time_format, fix_characters, string_to_second
     YOUTUBE_VIDEO_REG, google_search, percentage, music_source_image, perms_translations
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, fav_list, queue_track_index, \
-    pool_command, string_to_file, CommandArgparse
+    pool_command, string_to_file, CommandArgparse, music_source_emoji_id, music_source_emoji_url
 from user_agent import generate_user_agent
 
 
@@ -828,7 +828,7 @@ class Music(commands.Cog):
             else:
                 embed = disnake.Embed(
                     color=self.bot.get_color(guild.me),
-                    description="**Selecione um favorito/integração abaixo:**\n"
+                    description="**Selecione um favorito ou integração abaixo:**\n"
                                 f'Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para escolher!'
                 )
 
@@ -845,7 +845,7 @@ class Music(commands.Cog):
 
                 view = SelectInteraction(
                     user=inter.author,  timeout=45,
-                    opts=[disnake.SelectOption(label=f, value=f, emoji="<:play:734221719774035968>") for f in favs]
+                    opts=[disnake.SelectOption(label=f, value=f, emoji=music_source_emoji_id(f)) for f in favs]
                 )
 
                 if isinstance(inter, disnake.MessageInteraction):
@@ -959,11 +959,14 @@ class Music(commands.Cog):
                     query = info["entries"][0]['url']
 
                 else:
+
+                    emoji = music_source_emoji_url(query)
+
                     view = SelectInteraction(
                         user=inter.author,
                         opts=[
-                            disnake.SelectOption(label=e['title'][:90], value=f"entrie_select_{c}") for c, e in
-                            enumerate(info['entries'])
+                            disnake.SelectOption(label=e['title'][:90], value=f"entrie_select_{c}",
+                                                 emoji=emoji) for c, e in enumerate(info['entries'])
                         ], timeout=30)
 
                     embed = disnake.Embed(
