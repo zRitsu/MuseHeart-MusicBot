@@ -406,6 +406,7 @@ def paginator(txt: str):
 yt_url_regex = re.compile(r"^(https?://)?(www\.)?(youtube\.com|youtu\.be)/.+")
 sc_url_regex = re.compile(r"^(https?://)?(www\.)?(soundcloud\.com)/.+")
 sp_url_regex = re.compile(r"^(https?://)?(www\.)?(open\.spotify\.com|spotify\.com)/.+")
+tw_url_rgex = re.compile(r"^(https?://)?(www\.)?(twitch\.tv)/([A-Za-z0-9_]{4,25})(/.+)?")
 
 def music_source_emoji_url(url: str):
 
@@ -418,14 +419,14 @@ def music_source_emoji_url(url: str):
     if sp_url_regex.match(url):
         return "<:spotify:715717523626000445>"
 
+    if tw_url_rgex.match(url):
+        return "<:Twitch:803656463695478804>"
+
     return "<:play:734221719774035968>"
 
 def music_source_emoji_id(id_: str):
 
-    try:
-        id_ = id_.replace("> itg: ", "").replace("> fav: ", "").split()[0]
-    except:
-        return "<:play:734221719774035968>"
+    id_ = id_.replace("> itg: ", "").replace("> fav: ", "").split()[0]
 
     if id_ == "【YT】:":
         return "<:youtube:647253940882374656>"
