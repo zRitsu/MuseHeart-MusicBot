@@ -406,7 +406,7 @@ def paginator(txt: str):
 yt_url_regex = re.compile(r"^(https?://)?(www\.)?(youtube\.com|youtu\.be)/.+")
 sc_url_regex = re.compile(r"^(https?://)?(www\.)?(soundcloud\.com)/.+")
 sp_url_regex = re.compile(r"^(https?://)?(www\.)?(open\.spotify\.com|spotify\.com)/.+")
-tw_url_rgex = re.compile(r"^(https?://)?(www\.)?(twitch\.tv)/([A-Za-z0-9_]{4,25})(/.+)?")
+tw_url_regex = re.compile(r"^(https?://)?(www\.)?(twitch\.tv)/([A-Za-z0-9_]{4,25})(/.+)?")
 
 def music_source_emoji_url(url: str):
 
