@@ -57,13 +57,13 @@ class DefaultSkin:
 
         player.mini_queue_feature = True
 
-        duration = "> 🔴 **⠂Duração:** `Livestream`" if player.current.is_stream else \
+        duration = "> 🔴 **⠂Duração:** `Livestream`\n" if player.current.is_stream else \
             (f"> ⏰ **⠂Duração:** `{time_format(player.current.duration)} [`" +
-            f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`"
+            f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`\n"
             if not player.paused else '')
 
         txt = f"[`{player.current.single_title}`]({player.current.uri or player.current.search_uri})\n\n" \
-              f"{duration}\n" \
+              f"{duration}" \
               f"> 💠 **⠂Por:** {player.current.authors_md}\n" \
               f"> ✋ **⠂Pedido por:** <@{player.current.requester}>\n" \
               f"> 🔊 **⠂Volume:** `{player.volume}%`"
