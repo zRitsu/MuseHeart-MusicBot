@@ -37,14 +37,22 @@ class IndexHandler(tornado.web.RequestHandler):
 
     async def prepare(self):
 
+        try:
+            repl_check = f'{environ["REPL_SLUG"]}-{environ["REPL_OWNER"]}' == "Discord-Music-Bot-PT-BR-xRitsu"
+        except:
+            repl_check = False
+
         if self.message:
             pass
 
-        elif preview := environ.get("VIDEO_PREVIEW"):
+        elif repl_check:
 
             tables = ""
 
-            for url in preview.split():
+            with open("video_previews.txt") as f:
+                previews = f.read()
+
+            for url in previews.split("\n"):
                 tables += f"""
                     <table border="1" style="width: 100%; height: 100%;">
                       <tr>

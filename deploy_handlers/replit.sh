@@ -3,7 +3,8 @@
 rm -f poetry.lock && rm -f pyproject.toml && rm -rf .upm
 pip3 uninstall poetry -y
 
-if [ -n "${VIDEO_PREVIEW}" ]; then
+slug_owner=$(echo -n "$REPL_SLUG-$REPL_OWNER")
+if [ "$slug_owner" = "Discord-Music-Bot-PT-BR-xRitsu" ]; then
   if [ ! -d "venv" ]; then
     python3 -m venv venv
     pip3 install -r requirements.txt
