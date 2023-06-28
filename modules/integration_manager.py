@@ -13,8 +13,7 @@ import disnake
 from disnake.ext import commands
 
 from utils.db import DBModel
-from utils.music.converters import URL_REG, fix_characters
-from utils.music.errors import GenericError
+from utils.music.converters import URL_REG, fix_characters, time_format
 from utils.music.interactions import SelectInteraction
 from utils.music.spotify import spotify_regex_w_user
 from utils.others import CustomContext, music_source_emoji_id
@@ -274,6 +273,10 @@ class IntegrationsView(disnake.ui.View):
             clear_button.callback = self.clear_callback
             self.add_item(clear_button)
 
+            export_button = disnake.ui.Button(label="Exportar", emoji="📤")
+            export_button.callback = self.export_callback
+            self.add_item(export_button)
+
         import_button = disnake.ui.Button(label="Importar", emoji="📥")
         import_button.callback = self.import_callback
         self.add_item(import_button)
@@ -294,7 +297,10 @@ class IntegrationsView(disnake.ui.View):
                 pass
 
         else:
-            await self.ctx.edit_original_message(view=self)
+            try:
+                await self.ctx.edit_original_message(view=self)
+            except:
+                pass
 
         self.stop()
 
@@ -320,7 +326,8 @@ class IntegrationsView(disnake.ui.View):
         try:
             del user_data["integration_links"][self.current]
         except:
-            raise GenericError(f"**Não há integração na lista com o nome:** {self.current}")
+            await inter.send(f"**Não há integração na lista com o nome:** {self.current}", ephemeral=True)
+            return
 
         await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
 
@@ -374,6 +381,10 @@ class IntegrationsView(disnake.ui.View):
         )
         await inter.delete_original_message()
 
+    async def export_callback(self, inter: disnake.MessageInteraction):
+        await self.bot.get_cog("IntegrationManager").export_(inter)
+        self.stop()
+
     async def cancel_callback(self, inter: disnake.MessageInteraction):
         await inter.response.edit_message(
             embed=disnake.Embed(
@@ -397,20 +408,17 @@ class IntegrationManager(commands.Cog):
 
     itg_cd = commands.CooldownMapping.from_cooldown(3, 15, commands.BucketType.member)
 
-    @commands.max_concurrency(1, commands.BucketType.member, wait=False)
-    @commands.slash_command()
     async def integration(self, inter: disnake.ApplicationCommandInteraction):
         pass
 
-    @commands.command(name="integrationmanager", aliases=["integrations", "itg", "itgmgr", "itglist", "integrationlist"],
+    @commands.command(name="integrations", aliases=["integrationmanager", "itg", "itgmgr", "itglist", "integrationlist"],
                       description="Gerenciar suas integrações.", cooldown=itg_cd)
-    async def integrationmanager_legacy(self, ctx: CustomContext):
-        await self.manager.callback(self=self, inter=ctx)
+    async def integratios_legacy(self, ctx: CustomContext):
+        await self.integrations.callback(self=self, inter=ctx)
 
-    @integration.sub_command(
-        description=f"{desc_prefix}Gerenciar suas integrações de canais/perfis com playlists públicas.", cooldown=itg_cd
-    )
-    async def manager(self, inter: disnake.AppCmdInter):
+    @commands.max_concurrency(1, commands.BucketType.member, wait=False)
+    @commands.slash_command(description=f"{desc_prefix}Gerenciar suas integrações de canais/perfis com playlists públicas.", cooldown=itg_cd)
+    async def integrations(self, inter: disnake.AppCmdInter):
 
         await inter.response.defer(ephemeral=True)
 
@@ -429,8 +437,8 @@ class IntegrationManager(commands.Cog):
             supported_platforms.append("[32;1mSpotify[0m")
 
         if not supported_platforms:
-            raise GenericError("**Não há suporte a esse recurso no momento...**\n\n"
-                               "`Suporte ao spotify e YTDL não estão ativados.`")
+            await inter.send("**Não há suporte a esse recurso no momento...**\n\n"
+                               "`Suporte ao spotify e YTDL não estão ativados.`", ephemeral=True)
 
         view = IntegrationsView(bot=self.bot, ctx=inter, data=user_data)
 
@@ -453,10 +461,13 @@ class IntegrationManager(commands.Cog):
                     global_data = await self.bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
                     inter.global_guild_data = global_data
 
-                embed.add_field(name="Como usá-los:", inline=False,
-                                value=f"```- Usando o comando /{cog.play.name} (no preenchimento automático da busca)\n"
-                                      "- Clicando no botão de tocar favorito do player.\n"
-                                      f"- Usando o comando {global_data['prefix'] or self.bot.default_prefix}{cog.play_legacy.name} sem usar um nome ou link.```\n")
+                cmd = f"</play:" + str(self.bot.pool.controller_bot.get_global_command_named("play",
+                                                                                             cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+
+                embed.add_field(name="**Como usá-los?**", inline=False,
+                                value=f"* Usando o comando {cmd} (no preenchimento automático da busca)\n"
+                                      "* Clicando no botão de tocar favorito do player.\n"
+                                      f"* Usando o comando {global_data['prefix'] or self.bot.default_prefix}{cog.play_legacy.name} sem usar um nome ou link.")
 
         embed.add_field(
             name="Links de perfis/canais suportados:", inline=False,
@@ -479,40 +490,27 @@ class IntegrationManager(commands.Cog):
 
     integration_import_export_cd = commands.CooldownMapping.from_cooldown(1, 15, commands.BucketType.member)
 
-    @integration.sub_command(
-        name="import", description=f"{desc_prefix}Importar suas integrações a partir de um arquivo.",
-        cooldown=integration_import_export_cd
-    )
-    async def import_(
-            self,
-            inter: disnake.ApplicationCommandInteraction,
-            file: disnake.Attachment = commands.Param(name="arquivo", description="arquivo em formato .json")
-    ):
+    @commands.Cog.listener("on_modal_submit")
+    async def modal_import(self, inter: disnake.ModalInteraction):
 
-        if isinstance(file, disnake.Attachment):
+        if inter.custom_id != "integration_import":
+            return
 
-            if file.size > 2097152:
-                raise GenericError("**O tamanho do arquivo não pode ultrapassar 2Mb!**")
+        try:
+            json_data = json.loads(inter.text_values["json_data"])
+        except Exception as e:
+            await inter.send("**Ocorreu um erro ao analisar os dados ou foi enviado dados inválidos/não-formatado "
+                               f"em formato json.**\n\n`{repr(e)}`", ephemeral=True)
 
-            if not file.filename.endswith(".json"):
-                raise GenericError("**Tipo de arquivo inválido!**")
+        retry_after = self.integration_import_export_cd.get_bucket(inter).update_rate_limit()
+        if retry_after:
+            if retry_after < 1:
+                retry_after = 1
+            await inter.send("**Você deve aguardar {} para importar.**".format(
+                time_format(int(retry_after) * 1000, use_names=True)), ephemeral=True)
+            return
 
-            await inter.response.defer(ephemeral=True)
-
-            try:
-                data = (await file.read()).decode('utf-8')
-                json_data = json.loads(data)
-            except Exception as e:
-                raise GenericError("**Ocorreu um erro ao ler o arquivo, por favor revise-o e use o comando novamente.**\n"
-                                   f"```py\n{repr(e)}```")
-
-        else:
-            try:
-                json_data = json.loads(file)
-            except Exception as e:
-                raise GenericError("**Ocorreu um erro ao analisar os dados ou foi enviado dados inválidos/não-formatado "
-                                   f"em formato json.**\n\n`{repr(e)}`")
-            await inter.response.defer(ephemeral=True)
+        await inter.response.defer(ephemeral=True)
 
         for name, url in json_data.items():
 
@@ -520,19 +518,15 @@ class IntegrationManager(commands.Cog):
                 continue
 
             if len(url) > (max_url_chars := 150):
-                raise GenericError(f"**Um item de seu arquivo {url} ultrapassa a quantidade de caracteres permitido:{max_url_chars}**")
+                await inter.edit_original_message(
+                    f"**Um item de seu arquivo {url} ultrapassa a quantidade de caracteres permitido:{max_url_chars}**")
+                return
 
             if not isinstance(url, str) or not URL_REG.match(url):
-                raise GenericError(f"O seu arquivo contém link inválido: ```ldif\n{url}```")
+                await inter.edit_original_message(f"O seu arquivo contém link inválido: ```ldif\n{url}```")
+                return
 
-        try:
-            user_data = inter.global_user_data
-        except AttributeError:
-            user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
-            try:
-                inter.global_user_data = user_data
-            except AttributeError:
-                pass
+        user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
         for name in json_data.keys():
             try:
@@ -542,41 +536,43 @@ class IntegrationManager(commands.Cog):
 
         if self.bot.config["MAX_USER_INTEGRATIONS"] > 0 and not (await self.bot.is_owner(inter.author)):
 
-            if (json_size:=len(json_data)) > self.bot.config["MAX_USER_INTEGRATIONS"]:
-                raise GenericError(f"A quantidade de itens no seu arquivo de integrações excede "
+            if (json_size := len(json_data)) > self.bot.config["MAX_USER_INTEGRATIONS"]:
+                await inter.edit_original_message(f"A quantidade de itens no seu arquivo de integrações excede "
                                    f"a quantidade máxima permitida ({self.bot.config['MAX_USER_INTEGRATIONS']}).")
+                return
 
-            if (json_size + (user_integrations:=len(user_data["integration_links"]))) > self.bot.config["MAX_USER_INTEGRATIONS"]:
-                raise GenericError("Você não possui espaço suficiente para adicionar todos as integrações de seu arquivo...\n"
-                                   f"Limite atual: {self.bot.config['MAX_USER_INTEGRATIONS']}\n"
-                                   f"Quantidade de integrações salvas: {user_integrations}\n"
-                                   f"Você precisa de: {(json_size + user_integrations)-self.bot.config['MAX_USER_INTEGRATIONS']}")
+            if (json_size + (user_integrations := len(user_data["integration_links"]))) > self.bot.config[
+                "MAX_USER_INTEGRATIONS"]:
+                await inter.edit_original_message(
+                    "Você não possui espaço suficiente para adicionar todos as integrações de seu arquivo...\n"
+                    f"Limite atual: {self.bot.config['MAX_USER_INTEGRATIONS']}\n"
+                    f"Quantidade de integrações salvas: {user_integrations}\n"
+                    f"Você precisa de: {(json_size + user_integrations) - self.bot.config['MAX_USER_INTEGRATIONS']}")
+                return
 
         user_data["integration_links"].update(json_data)
 
         await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
 
+        cmd = f"</play:" + str(self.bot.pool.controller_bot.get_global_command_named("play", cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+
         await inter.edit_original_message(
-            embed = disnake.Embed(
+            embed=disnake.Embed(
                 color=self.bot.get_color(),
-                description = "**Os links foram importados com sucesso!**\n"
-                              "**Eles vão aparecer quando usar o comando /play (no preenchimento automático da busca).**",
+                description="**Os links foram importados com sucesso!**\n"
+                            f"**Use o comando {cmd} para conferir (no preenchimento automático da busca).**",
             )
         )
 
-    @commands.Cog.listener("on_modal_submit")
-    async def modal_import(self, inter: disnake.ModalInteraction):
+    async def export_(self, inter: disnake.MessageInteraction):
 
-        if inter.custom_id != "integration_import":
+        retry_after = self.integration_import_export_cd.get_bucket(inter).update_rate_limit()
+        if retry_after:
+            if retry_after < 1:
+                retry_after = 1
+            await inter.send("**Você deve aguardar {} para exportar.**".format(
+                time_format(int(retry_after) * 1000, use_names=True)), ephemeral=True)
             return
-
-        await self.import_(inter, inter.text_values["json_data"])
-
-    @integration.sub_command(
-        description=f"{desc_prefix}Exportar suas integrações em um arquivo json.",
-        cooldown=integration_import_export_cd
-    )
-    async def export(self, inter: disnake.ApplicationCommandInteraction):
 
         await inter.response.defer(ephemeral=True)
 
@@ -586,17 +582,22 @@ class IntegrationManager(commands.Cog):
             user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
             inter.global_user_data = user_data
 
+        cmd = f"</{self.integrations.name}:" + str(
+            self.bot.pool.controller_bot.get_global_command_named(self.integrations.name,
+                                                                  cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+
         if not user_data["integration_links"]:
-            raise GenericError(f"**Você não possui integrações adicionadas...\n"
-                               f"Você pode adicionar usando o comando: /{self.integration.name} {self.manager.name}**")
+            await inter.edit_original_message(f"**Você não possui integrações adicionadas...\n"
+                               f"Você pode adicionar usando o comando: {cmd}**")
+            return
 
         fp = BytesIO(bytes(json.dumps(user_data["integration_links"], indent=4), 'utf-8'))
 
         embed = disnake.Embed(
-            description=f"Suas integrações estão aqui.\nVocê pode importar usando o comando: `/{self.import_.name}`",
+            description=f"Suas integrações estão aqui.\nVocê pode importar usando o comando: {cmd}",
             color=self.bot.get_color())
 
-        await inter.edit_original_message(embed=embed, file=disnake.File(fp=fp, filename="integrations.json"))
+        await inter.send(embed=embed, file=disnake.File(fp=fp, filename="integrations.json"), ephemeral=True)
 
 
 def setup(bot: BotCore):

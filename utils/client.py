@@ -51,6 +51,7 @@ class BotPool:
         self.single_bot = True
         self.rpc_token_cache: dict = {}
         self.failed_bots: dict = {}
+        self.controller_bot: Optional[BotCore] = None
 
     @property
     def database(self) -> Union[LocalDatabase, MongoDatabase]:
@@ -380,6 +381,7 @@ class BotPool:
                                 interaction_bot_reg == bot.identifier:
 
                             bot.interaction_id = bot.user.id
+                            self.controller_bot = bot
 
                             self._command_sync_flags = commands.CommandSyncFlags.all()
 
