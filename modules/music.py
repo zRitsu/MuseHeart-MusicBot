@@ -3428,6 +3428,46 @@ class Music(commands.Cog):
 
         await player.process_next()
 
+    autoplay_cd = commands.CooldownMapping.from_cooldown(2, 15, commands.BucketType.member)
+    autoplay_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
+
+    @has_player()
+    @check_voice()
+    @pool_command(name="autoplay", aliases=["ap", "aplay"], only_voiced=True, cooldown=autoplay_cd, max_concurrency=autoplay_mc,
+                  description="Ativar/Desativar a reprodução automática ao acabar as músicas da fila.")
+    async def autoplay_legacy(self, ctx: CustomContext):
+        await self.autoplay.callback(self=self, inter=ctx)
+
+    @has_player()
+    @check_voice()
+    @commands.slash_command(
+        name="autoplay",
+        description=f"{desc_prefix}Ativar/Desativar a reprodução automática ao acabar as músicas da fila.",
+        extras={"only_voiced": True}, cooldown=autoplay_cd, max_concurrency=autoplay_mc
+    )
+    async def autoplay(self, inter: disnake.AppCmdInter):
+
+        try:
+            bot = inter.music_bot
+        except AttributeError:
+            bot = inter.bot
+
+        player: LavalinkPlayer = bot.music.players[inter.guild_id]
+
+        player.autoplay = not player.autoplay
+
+        msg = ["ativou", "🔄"] if player.autoplay else ["desativou", "❌"]
+
+        text = [f"{msg[0]} o autoplay.", f"{msg[1]} **⠂{inter.author.mention} {msg[0]} o autoplay.**"]
+
+        if player.current:
+            await self.interaction_message(inter, txt=text, emoji=msg[1])
+            return
+
+        await self.interaction_message(inter, text)
+
+        await player.process_next()
+
     @check_voice()
     @has_player()
     @is_dj()

@@ -61,6 +61,7 @@ class PlayerSession(commands.Cog):
 
         tracks = []
         played = []
+        autoqueue = []
 
         if player.current:
             player.current.info["id"] = player.current.id
@@ -79,6 +80,10 @@ class PlayerSession(commands.Cog):
             if t.playlist:
                 t.info["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
             played.append(t.info)
+
+        for t in player.queue_autoplay:
+            t.info["id"] = t.id
+            autoqueue.append(t.info)
 
         if player.skin.startswith("> custom_skin: "):
 
@@ -116,8 +121,8 @@ class PlayerSession(commands.Cog):
             "text_channel": text_channel,
             "keep_connected": player.keep_connected,
             "message": message,
-            "played": played,
             "loop": player.loop,
+            "autoplay": player.autoplay,
             "stage_title_event": player.stage_title_event,
             "stage_title_template": player.stage_title_template,
             "skin": player.skin,
@@ -128,7 +133,9 @@ class PlayerSession(commands.Cog):
             "restrict_mode": player.restrict_mode,
             "mini_queue_enabled": player.mini_queue_enabled,
             "listen_along_invite": player.listen_along_invite,
-            "tracks": tracks
+            "tracks": tracks,
+            "played": played,
+            "queue_autoplay": autoqueue
         }
 
         try:
@@ -318,6 +325,7 @@ class PlayerSession(commands.Cog):
                         skin_static=data["skin_static"],
                         player_creator=creator,
                         keep_connected=data["keep_connected"],
+                        autoplay=data.get("autoplay", False),
                         static=data['static'],
                         custom_skin_data=data.get("custom_skin_data", {}),
                         custom_skin_static_data=data.get("custom_skin_static_data", {}),
@@ -360,9 +368,14 @@ class PlayerSession(commands.Cog):
 
                 player.played.extend(played_tracks)
 
+                queue_autoplay_tracks, playlists = self.process_track_cls(data["queue_autoplay"])
+
+                player.queue_autoplay.extend(queue_autoplay_tracks)
+
                 playlists.clear()
                 tracks.clear()
                 played_tracks.clear()
+                queue_autoplay_tracks.clear()
 
                 await player.connect(voice_channel.id)
 

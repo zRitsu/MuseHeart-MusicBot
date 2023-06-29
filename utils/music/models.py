@@ -47,8 +47,8 @@ class PartialTrack:
     __slots__ = ('id', 'thumb', 'source_name', 'info', 'playlist', 'unique_id')
 
     def __init__(self, *, uri: str = "", title: str = "", author="", thumb: str = "", duration: int = 0,
-                 requester: int = 0, track_loops: int = 0, source_name: str = "", info: dict = None,
-                 playlist: PartialPlaylist = None):
+                 requester: int = 0, track_loops: int = 0, source_name: str = "", autoplay: bool = False,
+                 info: dict = None, playlist: PartialPlaylist = None):
 
         self.info = info or {
             "author": fix_characters(author)[:97],
@@ -61,7 +61,8 @@ class PartialTrack:
             "extra": {
                 "requester": requester,
                 "track_loops": track_loops,
-                "thumb": thumb
+                "thumb": thumb,
+                "autoplay": autoplay
             }
         }
 
@@ -117,6 +118,13 @@ class PartialTrack:
     @property
     def requester(self) -> int:
         return self.info["extra"]["requester"]
+
+    @property
+    def autoplay(self) -> str:
+        try:
+            return self.info["extra"]["autoplay"]
+        except KeyError:
+            return ""
 
     @property
     def track_loops(self) -> int:
@@ -203,8 +211,8 @@ class LavalinkTrack(wavelink.Track):
         except KeyError:
             self.info["extra"] = {
                 "track_loops": kwargs.pop('track_loops', 0),
-                "requester": kwargs.pop('requester', '')
-
+                "requester": kwargs.pop('requester', ''),
+                "autoplay": kwargs.pop("autoplay", '')
             }
 
         self.playlist: Optional[LavalinkPlaylist] = kwargs.pop(
@@ -274,6 +282,13 @@ class LavalinkTrack(wavelink.Track):
         return self.info["extra"]["requester"]
 
     @property
+    def autoplay(self) -> str:
+        try:
+            return self.info["extra"]["autoplay"]
+        except KeyError:
+            return ""
+
+    @property
     def track_loops(self) -> int:
         return self.info["extra"]["track_loops"]
 
@@ -310,6 +325,8 @@ class LavalinkPlayer(wavelink.Player):
         self.custom_skin_static_data = kwargs.pop("custom_skin_static_data", {})
         self.queue: deque = deque()
         self.played: deque = deque(maxlen=20)
+        self.queue_autoplay: deque = deque(maxlen=20)
+        self.autoplay: bool = kwargs.pop("autoplay", False)
         self.nightcore: bool = False
         self.loop = False
         self.last_track: Optional[LavalinkTrack] = None
@@ -541,6 +558,55 @@ class LavalinkPlayer(wavelink.Player):
 
             await self.destroy()
 
+    async def get_autoqueue_tracks(self):
+
+        try:
+            return self.queue_autoplay.popleft()
+        except:
+            pass
+
+        try:
+            track_id = self.current.ytid or self.last_track.ytid
+        except:
+            track_id = None
+
+        if not track_id:
+            for t in self.played + self.queue_autoplay:
+                if t.ytid:
+                    track_id = t.ytid
+                    break
+
+        if track_id:
+            tracks = await self.node.get_tracks(f'https://www.youtube.com/watch?v={track_id}&list=RD{track_id}')
+            tracks = tracks.tracks
+
+        else:
+
+            try:
+                t = self.played[0]
+            except IndexError:
+                try:
+                    t = self.queue_autoplay[-1]
+                except:
+                    t = None
+
+            if not t:
+                t = self.current or self.last_track
+
+            if t:
+                tracks = await self.node.get_tracks(f"ytmsearch:{t.title}")
+            else:
+                tracks = []
+
+        tracks = [LavalinkTrack(id_=t.id, info=t.info, autoplay=True, requester=self.bot.user.id) for t in tracks]
+
+        self.queue_autoplay.extend(tracks)
+
+        try:
+            return self.queue_autoplay.popleft()
+        except:
+            return None
+
     async def process_next(self, start_position: Union[int, float] = 0, inter: disnake.MessageInteraction = None):
 
         if self.locked or self.is_closing or self.auto_pause:
@@ -565,11 +631,18 @@ class LavalinkPlayer(wavelink.Player):
         try:
             track = self.queue.popleft()
         except Exception:
-            await self.stop()
-            self.idle_endtime = disnake.utils.utcnow() + datetime.timedelta(seconds=self.idle_timeout)
-            self.last_track = None
-            self.idle_task = self.bot.loop.create_task(self.idling_mode())
-            return
+
+            track = None
+
+            if self.autoplay:
+                track = await self.get_autoqueue_tracks()
+
+            if not track:
+                await self.stop()
+                self.idle_endtime = disnake.utils.utcnow() + datetime.timedelta(seconds=self.idle_timeout)
+                self.last_track = None
+                self.idle_task = self.bot.loop.create_task(self.idling_mode())
+                return
 
         if not track:
             await self.process_next()
@@ -1448,7 +1521,7 @@ class LavalinkPlayer(wavelink.Player):
                     self.is_previows_music = False
                 else:
                     self.queue.append(self.last_track)
-            else:
+            elif not self.last_track.autoplay:
                 self.played.append(self.last_track)
 
         elif self.is_previows_music:
