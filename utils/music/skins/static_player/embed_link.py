@@ -88,7 +88,7 @@ class EmbedLinkStaticSkin:
 
         try:
             if isinstance(player.text_channel.parent, disnake.ForumChannel):
-                txt = f"{emoji} {player.current.title[:50]}\n{txt}"
+                txt = f"`{emoji} {fix_characters(player.current.title, 50)}` {txt}"
         except:
             pass
 
