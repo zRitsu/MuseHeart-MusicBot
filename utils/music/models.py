@@ -565,36 +565,62 @@ class LavalinkPlayer(wavelink.Player):
         except:
             pass
 
-        try:
-            track_id = self.current.ytid or self.last_track.ytid
-        except:
-            track_id = None
+        if self.locked:
+            return
 
-        if not track_id:
+        try:
+            track = self.current or self.last_track
+        except:
+            track = None
+
+        if not track or not track.ytid:
+
             for t in self.played + self.queue_autoplay:
                 if t.ytid:
-                    track_id = t.ytid
+                    track = t
                     break
 
-        if track_id:
-            tracks = await self.node.get_tracks(f'https://www.youtube.com/watch?v={track_id}&list=RD{track_id}')
+        if track and track.ytid:
+            self.locked = True
+            try:
+                tracks = await self.node.get_tracks(f'https://www.youtube.com/watch?v={track.ytid}&list=RD{track.ytid}')
+            except Exception as e:
+                traceback.print_exc()
+                embed = disnake.Embed(
+                    description=f"**Falha ao obter dados do autoplay:\n[{track.title}]({track.uri or track.search_uri})** ```java\n{repr(e)}```"
+                                f"**Servidor:** `{self.node.identifier}`",
+                    color=disnake.Colour.red())
+                await self.text_channel.send(embed=embed, delete_after=10)
+                self.locked = False
+                return
+
             tracks = tracks.tracks
 
         else:
 
             try:
-                t = self.played[0]
+                track = self.played[0]
             except IndexError:
                 try:
-                    t = self.queue_autoplay[-1]
+                    track = self.queue_autoplay[-1]
                 except:
-                    t = None
+                    track = None
 
-            if not t:
-                t = self.current or self.last_track
+            if not track:
+                track = self.current or self.last_track
 
-            if t:
-                tracks = await self.node.get_tracks(f"ytmsearch:{t.title}")
+            if track:
+                try:
+                    tracks = await self.node.get_tracks(f"ytmsearch:{track.title}")
+                except Exception as e:
+                    traceback.print_exc()
+                    embed = disnake.Embed(
+                        description=f"**Falha ao obter dados do autoplay:\n[{track.title}]({track.uri or track.search_uri})** ```java\n{repr(e)}```"
+                                    f"**Servidor:** `{self.node.identifier}`",
+                        color=disnake.Colour.red())
+                    await self.text_channel.send(embed=embed, delete_after=10)
+                    self.locked = False
+                    return
             else:
                 tracks = []
 
