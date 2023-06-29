@@ -1447,7 +1447,8 @@ class LavalinkPlayer(wavelink.Player):
                     "requester_id": track.requester,
                     "loop": self.current.track_loops or self.loop,
                     "queue": len(self.queue),
-                    "247": self.keep_connected
+                    "247": self.keep_connected,
+                    "autoplay": self.current.autoplay
                 }
 
                 if track.playlist_name:
