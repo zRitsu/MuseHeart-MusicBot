@@ -848,15 +848,10 @@ class Music(commands.Cog):
                     opts=[disnake.SelectOption(label=f, value=f, emoji=music_source_emoji_id(f)) for f in favs]
                 )
 
-                if isinstance(inter, disnake.MessageInteraction):
-                    msg = await inter.send(ephemeral=ephemeral, view=view, **kwargs)
-                    func = inter.edit_original_message
-                else:
-                    try:
-                        msg = await inter.followup.send(ephemeral=ephemeral, view=view, wait=True, **kwargs)
-                    except (disnake.InteractionTimedOut, AttributeError):
-                        msg = await inter.channel.send(view=view, **kwargs)
-                    func = msg.edit
+                try:
+                    msg = await inter.followup.send(ephemeral=ephemeral, view=view, wait=True, **kwargs)
+                except (disnake.InteractionTimedOut, AttributeError):
+                    msg = await inter.channel.send(view=view, **kwargs)
 
                 await view.wait()
 
@@ -867,19 +862,14 @@ class Music(commands.Cog):
                     text = "### Tempo de seleção esgotado!" if view.selected is not False else "### Cancelado pelo usuário."
 
                     try:
-                        await func(embed=disnake.Embed(description=text, color=self.bot.get_color(guild.me)), view=None)
+                        await msg.edit(embed=disnake.Embed(description=text, color=self.bot.get_color(guild.me)), view=None)
                     except AttributeError:
                         traceback.print_exc()
                         pass
                     return
 
-                try:
-                    func = select_interaction.response.edit_message
-                except AttributeError:
-                    func = msg.edit
-
                 if select_interaction.data.values[0] == "cancel":
-                    await func(
+                    await msg.edit(
                         embed=disnake.Embed(
                             description="**Seleção cancelada!**",
                             color=self.bot.get_color(guild.me)
