@@ -656,7 +656,11 @@ class LavalinkPlayer(wavelink.Player):
 
         try:
             track = self.queue.popleft()
+            clear_autoqueue = True
+
         except Exception:
+
+            clear_autoqueue = False
 
             track = None
 
@@ -737,6 +741,9 @@ class LavalinkPlayer(wavelink.Player):
                 return
 
             track.id = t[0].id
+
+        if clear_autoqueue:
+            self.queue_autoplay.clear()
 
         self.last_track = track
 
