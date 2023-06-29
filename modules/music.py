@@ -1050,7 +1050,7 @@ class Music(commands.Cog):
 
                     await view.wait()
 
-                    if not view.inter or view.selected is not False:
+                    if not view.inter or view.selected is False:
 
                         try:
                             func = inter.edit_original_message
@@ -1058,7 +1058,7 @@ class Music(commands.Cog):
                             func = msg.edit
 
                         await func(
-                            content=f"{inter.author.mention}, tempo esgotado!" if view.selected is not False else "Cancelado pelo usuário.",
+                            content=f"{inter.author.mention}, {'operação cancelada' if view.selected is not False else 'tempo esgotado'}" if view.selected is not False else "Cancelado pelo usuário.",
                             embed=None, view=None
                         )
                         return
