@@ -96,6 +96,9 @@ class DefaultProgressbarStaticSkin:
         if player.nightcore:
             txt += f"\n> 🇳 **⠂Efeito nightcore:** `ativado`"
 
+        if player.autoplay:
+            txt += "\n> 🔄 **⠂Autoplay:** `ativado`"
+
         if player.current.album_name:
             txt += f"\n> 💽 **⠂Álbum:** [`{fix_characters(player.current.album_name, limit=20)}`]({player.current.album_url})"
 

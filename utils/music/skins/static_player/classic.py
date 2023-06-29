@@ -65,6 +65,9 @@ class ClassicStaticSkin:
 
         txt += f"🔊 **⠂Volume:** `{player.volume}%`\n"
 
+        if player.autoplay:
+            txt += "🔄 **⠂Autoplay:** `ativado`\n"
+
         if player.restrict_mode:
             txt += "🔒 **⠂Modo restrito:** `ativado`\n"
 

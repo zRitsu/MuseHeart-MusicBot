@@ -67,6 +67,9 @@ class EmbedLinkStaticSkin:
             else:
                 txt += '> 🔁 **⠂Repetição:** `fila`\n'
 
+        elif player.autoplay:
+            txt += '> 🔄 **⠂Autoplay:** `ativado`\n'
+
         if player.command_log:
 
             log = re.sub(r"\[(.+)]\(.+\)", r"\1", player.command_log.replace("`", "")) # remover links do command_log p/ evitar gerar mais de uma preview.

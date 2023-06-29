@@ -68,6 +68,9 @@ class ClassicSkin:
               f"💠 **⠂Uploader:** `{player.current.author}`\n" \
               f"🎧 **⠂Pedido por:** <@{player.current.requester}>\n"
 
+        if player.autoplay:
+            txt += "🔄 **⠂Autoplay:** `ativado`\n"
+
         if player.current.playlist_name:
             txt += f"📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=23)}`]({player.current.playlist_url})\n"
 
