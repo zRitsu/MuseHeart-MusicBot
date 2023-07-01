@@ -860,6 +860,9 @@ class Music(commands.Cog):
                     opts=[disnake.SelectOption(label=k, value=k, emoji=music_source_emoji_url(v)) for k, v in db_favs.items()]
                 )
 
+                if isinstance(inter, disnake.MessageInteraction) and not inter.response.is_done():
+                    await inter.response.defer(ephemeral=ephemeral)
+
                 try:
                     msg = await inter.followup.send(ephemeral=ephemeral, view=view, wait=True, **kwargs)
                 except (disnake.InteractionTimedOut, AttributeError):
