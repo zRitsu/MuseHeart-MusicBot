@@ -44,7 +44,7 @@ class PartialPlaylist:
 
 class PartialTrack:
 
-    __slots__ = ('id', 'thumb', 'source_name', 'info', 'playlist', 'unique_id')
+    __slots__ = ('id', 'thumb', 'source_name', 'info', 'playlist', 'unique_id', 'ytid')
 
     def __init__(self, *, uri: str = "", title: str = "", author="", thumb: str = "", duration: int = 0,
                  requester: int = 0, track_loops: int = 0, source_name: str = "", autoplay: bool = False,
@@ -67,6 +67,7 @@ class PartialTrack:
         }
 
         self.id = ""
+        self.ytid = ""
         self.unique_id = str(uuid.uuid4().hex)[:10]
         self.thumb = self.info["extra"]["thumb"]
         self.playlist: Optional[PartialPlaylist] = playlist
@@ -120,11 +121,11 @@ class PartialTrack:
         return self.info["extra"]["requester"]
 
     @property
-    def autoplay(self) -> str:
+    def autoplay(self) -> bool:
         try:
             return self.info["extra"]["autoplay"]
         except KeyError:
-            return ""
+            return False
 
     @property
     def track_loops(self) -> int:
@@ -282,11 +283,11 @@ class LavalinkTrack(wavelink.Track):
         return self.info["extra"]["requester"]
 
     @property
-    def autoplay(self) -> str:
+    def autoplay(self) -> bool:
         try:
             return self.info["extra"]["autoplay"]
         except KeyError:
-            return ""
+            return False
 
     @property
     def track_loops(self) -> int:
@@ -661,6 +662,7 @@ class LavalinkPlayer(wavelink.Player):
             clear_autoqueue = bool(track.ytid)
 
         except Exception:
+            traceback.print_exc()
 
             clear_autoqueue = False
 
