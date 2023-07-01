@@ -817,13 +817,25 @@ class Music(commands.Cog):
 
         if not query:
 
-            favs = await fav_list(inter, "")
+            try:
+                user_data = inter.global_user_data
+            except:
+                user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+                inter.global_user_data = user_data
 
-            if not favs:
+            db_favs = {}
+
+            for k, v in user_data["integration_links"].items():
+                db_favs[f"> itg: {k}"] = v
+
+            for k, v in user_data["fav_links"].items():
+                db_favs[f"> fav: {k}"] = v
+
+            if not db_favs:
                 raise EmptyFavIntegration()
 
-            if len(favs) == 1:
-                query = favs[0]
+            if len(db_favs) == 1:
+                query = list(db_favs)[0]
 
             else:
                 embed = disnake.Embed(
@@ -845,7 +857,7 @@ class Music(commands.Cog):
 
                 view = SelectInteraction(
                     user=inter.author,  timeout=45,
-                    opts=[disnake.SelectOption(label=f, value=f, emoji=music_source_emoji_id(f)) for f in favs]
+                    opts=[disnake.SelectOption(label=k, value=k, emoji=music_source_emoji_url(v)) for k, v in db_favs.items()]
                 )
 
                 try:
@@ -892,7 +904,7 @@ class Music(commands.Cog):
             is_pin = True
             query = query[7:]
 
-        if query.startswith(("> fav:", "> itg:")):
+        if query.startswith(("> fav: ", "> itg: ")):
             try:
                 user_data = inter.global_user_data
             except AttributeError:
