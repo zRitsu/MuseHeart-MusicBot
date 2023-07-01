@@ -378,8 +378,8 @@ class LavalinkPlayer(wavelink.Player):
         self.temp_embed: Optional[disnake.Embed] = None
 
         self.initial_hints = [
-            "Você pode alterar a skin/aparência do player usando o comando /change_skin (comando vísivel apenas membros"
-            " com permissão de gerenciar servidor).",
+            "Você pode alterar a skin/aparência do player usando o comando /change_skin (comando vísivel apenas para "
+            "membros com permissão de gerenciar servidor).",
 
             "Crie favoritos para ter fácil acesso de usar seus links favoritos aqui dispensando ter que copiar e colar "
             "seus links nos comandos. Experimente usando o comando: /fav_manager.",
@@ -490,7 +490,7 @@ class LavalinkPlayer(wavelink.Player):
         if self.static:
             hints.append("Você pode fixar músicas/playlists na mensagem do player quando tiver no modo de "
                          "espera/oscioso para qualquer membro poder usá-las de forma facilitada. Para isso use o "
-                         "comando: /server_playlist (comando vísivel apenas membros com permissão de gerenciar "
+                         "comando: /server_playlist (comando vísivel apenas para membros com permissão de gerenciar "
                          "servidor)")
 
         elif self.bot.intents.message_content and self.controller_mode:
