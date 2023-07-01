@@ -379,16 +379,16 @@ class LavalinkPlayer(wavelink.Player):
 
         self.initial_hints = [
             "Você pode alterar a skin/aparência do player usando o comando /change_skin (comando vísivel apenas membros"
-            " com perm de: gerenciar servidor).",
+            " com permissão de gerenciar servidor).",
 
             "Crie favoritos para ter fácil acesso de usar seus links favoritos aqui dispensando ter que copiar e colar "
-            "seus links nos comandos. Experimente usando o comando: /fav manager.",
+            "seus links nos comandos. Experimente usando o comando: /fav_manager.",
         ]
 
         if self.bot.config["USE_YTDL"] or self.bot.spotify:
             self.initial_hints.append(
                 "Integre link de canais e perfis do youtube, soundcloud e spotify para escutar playlists públicas de forma "
-                "mais facilitada no player. Experimente usando o comando /integration manager."
+                "mais facilitada no player. Experimente usando o comando /integrations."
             )
 
         try:
@@ -490,7 +490,7 @@ class LavalinkPlayer(wavelink.Player):
         if self.static:
             hints.append("Você pode fixar músicas/playlists na mensagem do player quando tiver no modo de "
                          "espera/oscioso para qualquer membro poder usá-las de forma facilitada. Para isso use o "
-                         "comando: /server_playlist manager (comando vísivel apenas membros com perm de: gerenciar "
+                         "comando: /server_playlist (comando vísivel apenas membros com permissão de gerenciar "
                          "servidor)")
 
         elif self.bot.intents.message_content and self.controller_mode:
