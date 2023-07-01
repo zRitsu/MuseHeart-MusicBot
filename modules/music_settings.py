@@ -294,8 +294,6 @@ class MusicSettings(commands.Cog):
     setup_args = CommandArgparse()
     setup_args.add_argument('-reset', '--reset', '-purge', '--purge', action="store_true",
                              help="Limpar mensagens do canal selecionado (até 100 mensagens, não efetivo em forum).")
-    setup_args.add_argument('-name', '--name', nargs='+',
-                             help="Definir o nome do canal manualmente (recomendado para canal de fórum).")
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.command(
@@ -312,7 +310,7 @@ class MusicSettings(commands.Cog):
         args, unknown = self.setup_args.parse_known_args(args)
 
         await self.setup.callback(self=self, inter=ctx, target=channel,
-                                  purge_messages=args.reset, channel_name=args.name)
+                                  purge_messages=args.reset)
 
     @commands.slash_command(
         description=f"{desc_prefix}Criar/escolher um canal dedicado para pedir músicas e deixar player fixado.",
@@ -323,10 +321,6 @@ class MusicSettings(commands.Cog):
             inter: disnake.AppCmdInter,
             target: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.ForumChannel, disnake.StageChannel] = commands.Param(
                 name="canal", default=None, description="Selecionar um canal existente"
-            ),
-            channel_name: str = commands.Param(
-                name="nome_do_canal", default=None,
-                description="Definir o nome do canal manualmente (recomendado para canal de fórum)"
             ),
             purge_messages: str = commands.Param(
                 name="limpar_mensagens", default="no",
@@ -364,9 +358,6 @@ class MusicSettings(commands.Cog):
 
         if target and bot != self.bot:
             target = bot.get_channel(target.id)
-
-        if not channel_name:
-            channel_name = f'{bot.user.name} Song Request'
 
         perms_dict = {
             "embed_links": True,
@@ -567,8 +558,6 @@ class MusicSettings(commands.Cog):
                 )
                 return
 
-            await inter.response.defer()
-
             if channel.category and channel.category.permissions_for(guild.me).send_messages:
                 target = channel.category
             else:
@@ -591,12 +580,54 @@ class MusicSettings(commands.Cog):
         if target == guild.rules_channel:
             raise GenericError("**Você não pode usar um canal de regras.**")
 
+        channel_name = f'{bot.user.name} Song Request'
+
         if isinstance(target, disnake.ForumChannel):
 
             channel_kwargs.clear()
 
             if not target.permissions_for(guild.me).create_forum_threads:
                 raise GenericError(f"**{bot.user.mention} não possui permissão para postar no canal {target.mention}.**")
+
+            try:
+                id_ = f"modal_{inter.id}"
+            except AttributeError:
+                id_ = f"modal_{inter.message.id}"
+
+            await inter.response.send_modal(
+                title="Definir um nome para o post do fórum",
+                custom_id=id_,
+                components=[
+                    disnake.ui.TextInput(
+                        style=disnake.TextInputStyle.short,
+                        label="Nome",
+                        custom_id="forum_title",
+                        min_length=4,
+                        max_length=30,
+                        value=channel_name,
+                        required=True
+                    )
+                ]
+            )
+
+            try:
+                inter: disnake.ModalInteraction = await inter.bot.wait_for("modal_submit", timeout=120, check=lambda i: i.custom_id == id_)
+            except asyncio.TimeoutError:
+                try:
+                    func = inter.edit_original_message
+                except AttributeError:
+                    func = msg_select.edit
+                await func(embed=disnake.Embed(description="### Tempo esgotado!", color=bot.get_color(guild.me)), view=None)
+                return
+
+            try:
+                await msg_select.delete()
+            except:
+                pass
+
+            await inter.response.defer()
+
+            channel_name = inter.text_values["forum_title"]
 
             thread_wmessage = await target.create_thread(
                 name=channel_name,
@@ -676,7 +707,7 @@ class MusicSettings(commands.Cog):
 
         if not isinstance(channel, (disnake.VoiceChannel, disnake.StageChannel)):
             if not message.thread:
-                await message.create_thread(name=channel_name, auto_archive_duration=10080)
+                await message.create_thread(name="Song-Requests", auto_archive_duration=10080)
             elif message.thread.archived:
                 await message.thread.edit(archived=False, reason=f"Song request reativado por: {inter.author}.")
         elif player and player.guild.me.voice.channel != channel:
