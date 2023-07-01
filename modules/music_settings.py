@@ -611,7 +611,7 @@ class MusicSettings(commands.Cog):
             )
 
             try:
-                inter: disnake.ModalInteraction = await inter.bot.wait_for("modal_submit", timeout=120, check=lambda i: i.custom_id == id_)
+                inter: disnake.ModalInteraction = await inter.bot.wait_for("modal_submit", timeout=30, check=lambda i: i.custom_id == id_)
             except asyncio.TimeoutError:
                 try:
                     func = inter.edit_original_message
