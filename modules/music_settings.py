@@ -15,7 +15,7 @@ from disnake.ext import commands
 from utils.db import DBModel
 from utils.music.converters import perms_translations, time_format
 from utils.music.errors import GenericError, NoVoice
-from utils.others import send_idle_embed, CustomContext, select_bot_pool, pool_command
+from utils.others import send_idle_embed, CustomContext, select_bot_pool, pool_command, CommandArgparse
 from utils.music.models import LavalinkPlayer
 
 if TYPE_CHECKING:
@@ -291,6 +291,12 @@ class MusicSettings(commands.Cog):
     setup_cd = commands.CooldownMapping.from_cooldown(1, 20, commands.BucketType.guild)
     setup_mc =commands.MaxConcurrency(1, per=commands.BucketType.guild, wait=False)
 
+    setup_args = CommandArgparse()
+    setup_args.add_argument('-reset', '--reset', '-purge', '--purge', action="store_true",
+                             help="Limpar mensagens do canal selecionado (até 100 mensagens, não efetivo em forum).")
+    setup_args.add_argument('-name', '--name', nargs='+',
+                             help="Definir o nome do canal manualmente (recomendado para canal de fórum).")
+
     @commands.has_guild_permissions(manage_guild=True)
     @commands.command(
         name="setup", aliases=["songrequestchannel", "sgrc"], usage="[id do canal ou #canal] [--reset]",
@@ -303,19 +309,10 @@ class MusicSettings(commands.Cog):
             channel: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.ForumChannel, None] = None, *args
     ):
 
-        args = list(args)
-
-        if "--reset" in args:
-            purge_messages = "yes"
-            args.remove("--reset")
-        else:
-            purge_messages = "no"
-
-        if args:
-            raise GenericError("**Opção inválida:** " + " ".join(args))
+        args, unknown = self.setup_args.parse_known_args(args)
 
         await self.setup.callback(self=self, inter=ctx, target=channel,
-                                  purge_messages=purge_messages)
+                                  purge_messages=args.reset, channel_name=args.name)
 
     @commands.slash_command(
         description=f"{desc_prefix}Criar/escolher um canal dedicado para pedir músicas e deixar player fixado.",
@@ -326,6 +323,10 @@ class MusicSettings(commands.Cog):
             inter: disnake.AppCmdInter,
             target: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.ForumChannel, disnake.StageChannel] = commands.Param(
                 name="canal", default=None, description="Selecionar um canal existente"
+            ),
+            channel_name: str = commands.Param(
+                name="nome_do_canal", default=None,
+                description="Definir o nome do canal manualmente (recomendado para canal de fórum)"
             ),
             purge_messages: str = commands.Param(
                 name="limpar_mensagens", default="no",
@@ -363,6 +364,9 @@ class MusicSettings(commands.Cog):
 
         if target and bot != self.bot:
             target = bot.get_channel(target.id)
+
+        if not channel_name:
+            channel_name = f'{bot.user.name} Song Request'
 
         perms_dict = {
             "embed_links": True,
@@ -595,7 +599,7 @@ class MusicSettings(commands.Cog):
                 raise GenericError(f"**{bot.user.mention} não possui permissão para postar no canal {target.mention}.**")
 
             thread_wmessage = await target.create_thread(
-                name=f"{bot.user.name} song request",
+                name=channel_name,
                 content="Post para pedido de músicas.",
                 auto_archive_duration=10080,
                 slowmode_delay=5,
@@ -672,7 +676,7 @@ class MusicSettings(commands.Cog):
 
         if not isinstance(channel, (disnake.VoiceChannel, disnake.StageChannel)):
             if not message.thread:
-                await message.create_thread(name="song requests", auto_archive_duration=10080)
+                await message.create_thread(name=channel_name, auto_archive_duration=10080)
             elif message.thread.archived:
                 await message.thread.edit(archived=False, reason=f"Song request reativado por: {inter.author}.")
         elif player and player.guild.me.voice.channel != channel:
