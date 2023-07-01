@@ -153,7 +153,8 @@ class IndexHandler(tornado.web.RequestHandler):
             }
             </style>"""
 
-            msg += f"\n<p style=\"font-size:20px\">Bots com falha de inicialização:</p>" \
+            msg += f"\n<p style=\"font-size:20px\">Os seguintes tokens configurado na ENV/SECRET/.env falharam " \
+                   f"ne inicialização:</p>" \
                    f"{failed_table_style}\n<table cellpadding=\"10\">{''.join(failed_bots)}</table>"
 
         try:
