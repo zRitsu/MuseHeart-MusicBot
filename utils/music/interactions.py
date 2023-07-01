@@ -227,21 +227,36 @@ class SelectInteraction(disnake.ui.View):
     def __init__(self, user: disnake.Member, opts: List[disnake.SelectOption], *, timeout=180):
         super().__init__(timeout=timeout)
         self.user = user
+        self.selected = None
+        self.item_pages = list(disnake.utils.as_chunks(opts, 25))
+        self.current_page = 0
+        self.max_page = len(self.item_pages)
+        self.inter = None
 
-        chunk = disnake.utils.as_chunks(opts, 25)
+        self.load_components()
 
-        for c in chunk:
+    def load_components(self):
 
-            select_menu = disnake.ui.Select(placeholder='Selecione uma opção:', options=c)
-            select_menu.callback = self.callback
-            self.add_item(select_menu)
+        self.clear_items()
 
-        self.selected = opts[0].value
+        select_menu = disnake.ui.Select(placeholder='Selecione uma opção:', options=self.item_pages[self.current_page])
+        select_menu.callback = self.callback
+        self.add_item(select_menu)
+        self.selected = self.item_pages[self.current_page][0].value
+
+        if len(self.item_pages) > 1:
+
+            back_button = disnake.ui.Button(emoji="⬅")
+            back_button.callback = self.back_callback
+            self.add_item(back_button)
+
+            next_button = disnake.ui.Button(emoji="➡")
+            next_button.callback = self.next_callback
+            self.add_item(next_button)
 
         button = disnake.ui.Button(label="Cancelar", emoji="❌")
         button.callback = self.cancel_callback
         self.add_item(button)
-        self.inter = None
 
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
 
@@ -249,6 +264,22 @@ class SelectInteraction(disnake.ui.View):
             return True
 
         await interaction.send(f"Apenas {self.user.mention} pode interagir aqui.", ephemeral = True)
+
+    async def back_callback(self, interaction: disnake.MessageInteraction):
+        if self.current_page == 0:
+            self.current_page = self.max_page
+        else:
+            self.current_page -= 1
+        self.load_components()
+        await interaction.response.edit_message(view=self)
+
+    async def next_callback(self, interaction: disnake.MessageInteraction):
+        if self.current_page == self.max_page:
+            self.current_page = 0
+        else:
+            self.current_page += 1
+        self.load_components()
+        await interaction.response.edit_message(view=self)
 
     async def cancel_callback(self, interaction: disnake.MessageInteraction):
         self.selected = False
