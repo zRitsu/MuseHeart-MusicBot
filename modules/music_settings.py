@@ -565,12 +565,14 @@ class MusicSettings(commands.Cog):
 
             if inter.data.custom_id.startswith("existing_channel_"):
                 target = bot.get_channel(int(inter.data.values[0]))
-            elif inter.data.custom_id.startswith("voice_channel_"):
-                target = await target.create_voice_channel(f"{bot.user.name} player controller", **channel_kwargs)
-            elif inter.data.custom_id.startswith("stage_channel_"):
-                target = await target.create_stage_channel(f"{bot.user.name} player controller", **channel_kwargs)
             else:
-                target = await target.create_text_channel(f"{bot.user.name} player controller", **channel_kwargs)
+                await inter.response.defer()
+                if inter.data.custom_id.startswith("voice_channel_"):
+                    target = await target.create_voice_channel(f"{bot.user.name} player controller", **channel_kwargs)
+                elif inter.data.custom_id.startswith("stage_channel_"):
+                    target = await target.create_stage_channel(f"{bot.user.name} player controller", **channel_kwargs)
+                else:
+                    target = await target.create_text_channel(f"{bot.user.name} player controller", **channel_kwargs)
 
             existing_channel = False
 
