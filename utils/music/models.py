@@ -662,8 +662,7 @@ class LavalinkPlayer(wavelink.Player):
             track = self.queue.popleft()
             clear_autoqueue = bool(track.ytid)
 
-        except Exception:
-            traceback.print_exc()
+        except IndexError:
 
             clear_autoqueue = False
 
@@ -678,6 +677,10 @@ class LavalinkPlayer(wavelink.Player):
                 self.last_track = None
                 self.idle_task = self.bot.loop.create_task(self.idling_mode())
                 return
+
+        except Exception:
+            traceback.print_exc()
+            track = None
 
         if not track:
             await self.process_next()
