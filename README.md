@@ -3,28 +3,36 @@
 
 ## Bots de exemplo usando esta source: [clique aqui](https://gist.github.com/zRitsu/4875008554a00c3c372b2df6dcdf437f#file-muse_heart_invites-md).
 
-### Algumas previews:
+### Algumas Previews:
 
-- Comandos de barra / Slash commands
-
-![](https://media.discordapp.net/attachments/554468640942981147/944942596814426122/unknown.png)
-
-- Player controller: modo normal/mini-player (skin: default_progressbar)
-
-![](https://media.discordapp.net/attachments/554468640942981147/944942948406153276/unknown.png)
-
-- Suporte a [RPC (Rich Presence)](https://github.com/zRitsu/Discord-MusicBot-RPC).
+- Player controller: modo normal/mini-player (skin: default) e suporte a [RPC (Rich Presence)](https://github.com/zRitsu/Discord-MusicBot-RPC)
 
 ![](https://media.discordapp.net/attachments/554468640942981147/1089678647230726185/rpc_support.png)
 
+<details>
+<summary>
+Mais previews:
+</summary>
+<br>
+
+- Comandos de barra / Slash commands
+
+![](https://cdn.discordapp.com/attachments/554468640942981147/1125158772608876565/slash_commands.png)
+
 - Player controller: modo fixo/estendido com canal e conversa de song requests (skin: default_progressbar), configurável com o comando: /setup
 
-![](https://media.discordapp.net/attachments/554468640942981147/944945573834936340/unknown.png)
+![](https://cdn.discordapp.com/attachments/554468640942981147/1125154702569504768/player_controller_textchannel.png)
+
+- Player controller: modo fixo/estendido com canal de song-request em forum
+
+![](https://cdn.discordapp.com/attachments/554468640942981147/1125160296785383468/forum_song_request_channel.png)
 
 
 * Há diversas outras skins, veja todas usando o comando /change_skin (você também pode criar outras, use os modelos padrões que estão na pasta [skins](utils/music/skins/) como referência, crie uma cópia com outro nome e modifique a seu gosto).
 
-## Teste agora mesmo um bot próprio com esta source fazendo deploy em um dos serviços abaixo:
+</details>
+
+## Teste agora mesmo criando/reusando um bot próprio com essa source fazendo deploy em um dos serviços abaixo:
 
 ---
 
@@ -32,31 +40,8 @@
 <summary>
 Repl.it
 </summary>
-<br>
 
-[![Run on Repl.it](https://replit.com/badge/github/zRitsu/disnake-LL-music-bot)](https://replit.com/new/github/zRitsu/disnake-LL-music-bot)
-
-* **[ 1 ]** - Após clicar no botão acima, aguarde até o deploy ser concluído.
-
-
-* **[ 2 ]** - Vá em secrets (cadeado do painel à esquerda) e crie uma secret e em KEY coloque um nome qualquer (letras/números/underline) e no value coloque o token do bot
-  (Caso não tenha o token do bot, veja como obter com este [tutorial](https://www.youtube.com/watch?v=lfdmZQySTXE)).
-
-* `Obs: Caso queira, você pode incluir token de mais bots para ter bots extras pra ativar o suporte a multi-voice em servidores usando um dos seguintes métodos:`
-
-* `Incluindo mais tokens no value (separando com espaços).`
-* `e/ou:`
-* `Repetindo o passo 2 com outro nome e adicionar outro(s) token(s) de bot(s) no value (caso adicione mais de 1 token separe com espaço).`
-
-
-* **[ 2.1 ]** - Clique em Add new secret após preencher os campos key e value.
-
-
-* **[ 3 ]** - Não é obrigatório mas recomendo usar mongodb para database ao invés de json, pra isso crie uma key com nome MONGO e no value coloque o link de sua url do mongodb e em seguida clique em Add new secret (caso não tenha, veja como obter por este [tutorial](https://www.youtube.com/watch?v=x1Gq5beRx9k)). </br>
-`se desejar, você pode alterar outras configs, consulte o arquivo .example.env`
-
-
-* **[ 4 ]** - Clique em run (botão de **play**) e aguarde o bot instalar as dependências e iniciar.
+Link do guia com imagens: https://gist.github.com/zRitsu/70737984cbe163f890dae05a80a3ddbe
 </details>
 
 ---
