@@ -4803,8 +4803,6 @@ class Music(commands.Cog):
             await player.destroy()
             return
 
-        player.process_hint()
-
         if not player.guild.me.voice:
             try:
                 await self.bot.wait_for(

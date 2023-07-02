@@ -679,6 +679,7 @@ class LavalinkPlayer(wavelink.Player):
                 return
 
         except Exception:
+            clear_autoqueue = False
             traceback.print_exc()
             track = None
 
@@ -765,6 +766,8 @@ class LavalinkPlayer(wavelink.Player):
         self.last_position = 0
         self.position_timestamp = 0
         self.paused = False
+
+        self.process_hint()
 
         # TODO: rever essa parte caso adicione função de ativar track loops em músicas da fila
         if self.loop != "current" or (not self.controller_mode and self.current.track_loops == 0):
