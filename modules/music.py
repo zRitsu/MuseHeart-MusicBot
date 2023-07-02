@@ -4713,15 +4713,12 @@ class Music(commands.Cog):
 
         if payload.code == 4014:
 
-            if not player.bot.is_ready() or player.guild.me.voice:
-                return
-
             if player.static:
-                player.command_log = "Desliguei o player por me desconectarem do canal de voz."
+                player.command_log = "Desliguei o player por perca de conexão com o canal de voz."
                 await player.destroy()
 
             else:
-                embed = disnake.Embed(description="**Desliguei o player por me desconectarem do canal de voz.**",
+                embed = disnake.Embed(description="**Desliguei o player por perca de conexão com o canal de voz.**",
                                       color=self.bot.get_color(player.guild.me))
                 try:
                     self.bot.loop.create_task(player.text_channel.send(embed=embed, delete_after=7))
