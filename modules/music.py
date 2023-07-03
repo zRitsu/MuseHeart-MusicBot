@@ -1190,6 +1190,7 @@ class Music(commands.Cog):
                 restrict_mode=guild_data['enable_restrict_mode'],
                 listen_along_invite=invite,
                 volume=int(guild_data['default_player_volume']),
+                autoplay=guild_data["autoplay"],
             )
 
             if static_player['channel']:
@@ -1503,6 +1504,10 @@ class Music(commands.Cog):
                 emoji="▶️",
                 text=f"{inter.author.mention} adicionou a música atual para tocar imediatamente."
             )
+            await player.track_end()
+            await player.process_next()
+        elif player.current.autoplay:
+            player.set_command_log(text=log_text, emoji=emoji)
             await player.track_end()
             await player.process_next()
         else:
@@ -4423,6 +4428,7 @@ class Music(commands.Cog):
                 restrict_mode=data['enable_restrict_mode'],
                 listen_along_invite=invite,
                 volume=int(data['default_player_volume']),
+                autoplay=data["autoplay"],
             )
 
         if not player.message:

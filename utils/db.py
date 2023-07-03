@@ -28,7 +28,7 @@ class DBModel:
 
 db_models = {
     DBModel.guilds: {
-        "ver": 1.8,
+        "ver": 1.9,
         "player_controller": {
             "channel": None,
             "message_id": None,
@@ -36,6 +36,7 @@ db_models = {
             "static_skin": None,
             "fav_links": {}
         },
+        "autoplay": True,
         "check_other_bots_in_vc": False,
         "enable_restrict_mode": False,
         "default_player_volume": 100,

@@ -143,6 +143,7 @@ class PlayerSettings(disnake.ui.View):
     def __init__(self, ctx: Union[disnake.AppCmdInter, CustomContext], data: dict):
         super().__init__()
         self.ctx = ctx
+        self.enable_autoplay = data["autoplay"]
         self.check_other_bots_in_vc = data['check_other_bots_in_vc']
         self.enable_restrict_mode = data['enable_restrict_mode']
         self.default_player_volume = data['default_player_volume']
@@ -178,6 +179,11 @@ class PlayerSettings(disnake.ui.View):
         restrict_mode_button.callback = self.restrict_mode_callback
         self.add_item(restrict_mode_button)
 
+        check_autoplay_button = disnake.ui.Button(label="Autoplay.",
+                                                    emoji="✅" if self.enable_autoplay else "🚫")
+        check_autoplay_button.callback = self.autoplay_callback
+        self.add_item(check_autoplay_button)
+
         close_button = disnake.ui.Button(label="Salvar/Fechar", emoji="💾")
         close_button.callback = self.close_callback
         self.add_item(close_button)
@@ -194,6 +200,11 @@ class PlayerSettings(disnake.ui.View):
 
     async def volume_callback(self, interaction: disnake.MessageInteraction):
         self.default_player_volume = int(interaction.data.values[0])
+        self.load_buttons()
+        await interaction.response.edit_message(view=self)
+
+    async def autoplay_callback(self, interaction: disnake.MessageInteraction):
+        self.enable_autoplay = not self.enable_autoplay
         self.load_buttons()
         await interaction.response.edit_message(view=self)
 
@@ -215,6 +226,7 @@ class PlayerSettings(disnake.ui.View):
 
     async def save_data(self):
         guild_data = await self.ctx.bot.get_data(self.ctx.guild_id, db_name=DBModel.guilds)
+        guild_data['autoplay'] = self.enable_autoplay
         guild_data['check_other_bots_in_vc'] = self.check_other_bots_in_vc
         guild_data['enable_restrict_mode'] = self.enable_restrict_mode
         guild_data['default_player_volume'] = int(self.default_player_volume)
