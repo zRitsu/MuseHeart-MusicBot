@@ -30,21 +30,21 @@ class ClassicSkin:
             "embeds": []
         }
 
-        embed = disnake.Embed(color=player.bot.get_color(player.guild.me), description="")
+        color = player.bot.get_color(player.guild.me)
+
+        embed = disnake.Embed(color=color, description="")
 
         queue_txt = ""
 
+        bar = "https://cdn.discordapp.com/attachments/554468640942981147/1085234017693085776/rainbow_bar3.gif"
+
         embed_top = disnake.Embed(
-            color=player.bot.get_color(player.guild.me),
+            color=color,
             description=f"> [**{player.current.title}**]({player.current.uri or player.current.search_uri})"
         )
-        embed.set_image(
-            url="https://cdn.discordapp.com/attachments/554468640942981147/1085234017693085776/rainbow_bar3.gif"
-        )
+        embed.set_image(url=bar)
 
-        embed_top.set_image(
-            url="https://cdn.discordapp.com/attachments/554468640942981147/1085234017693085776/rainbow_bar3.gif"
-        )
+        embed_top.set_image(url=bar)
 
         embed_top.set_thumbnail(url=player.current.thumb)
 
@@ -68,13 +68,19 @@ class ClassicSkin:
               f"💠 **⠂Uploader:** `{player.current.author}`\n" \
               f"🎧 **⠂Pedido por:** <@{player.current.requester}>\n"
 
-        if player.autoplay:
-            txt += "🔄 **⠂Autoplay:** `ativado`\n"
-
         if player.current.playlist_name:
             txt += f"📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=23)}`]({player.current.playlist_url})\n"
 
         txt += f"🔊 **⠂Volume:** `{player.volume}%`\n"
+
+        if player.autoplay:
+
+            try:
+                t = f"[`ativado`]({player.current.info['extra']['related']['uri']})"
+            except:
+                t = "`ativado`"
+
+            txt += f"🔄 **⠂Autoplay:** {t}\n"
 
         if player.restrict_mode:
             txt += "🔒 **⠂Modo restrito:** `ativado`\n"
@@ -153,6 +159,11 @@ class ClassicSkin:
                         label="Nightcore", emoji="🇳",
                         value=PlayerControls.nightcore,
                         description="Ativar/Desativar o efeito nightcore."
+                    ),
+                    disnake.SelectOption(
+                        label=("Desativar" if player.autoplay else "ativar") + " o autoplay", emoji="🔄",
+                        value=PlayerControls.autoplay,
+                        description="Sistema de adição de música automática quando a fila estiver vazia."
                     ),
                     disnake.SelectOption(
                         label="Ativar/Desativar modo restrito", emoji="🔐",

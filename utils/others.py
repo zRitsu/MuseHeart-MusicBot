@@ -119,6 +119,7 @@ class PlayerControls:
     song_request_thread = "musicplayer_song_request_thread"
     fav_manageer = "musicplayer_fav_manager"
     integration_manageer = "musicplayer_integration_manager"
+    autoplay = "musicplayer_autoplay"
 
 
 class EmbedPaginator(disnake.ui.View):

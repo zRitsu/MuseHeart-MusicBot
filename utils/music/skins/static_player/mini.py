@@ -64,7 +64,10 @@ class MiniStaticSkin:
                 embed.description += ' `[🔁 fila]`'
 
         elif player.autoplay:
-            embed.description += " `[🔄 Autoplay]`"
+            try:
+                embed.description += f" [`🔄 Autoplay`]({player.current.info['extra']['related']['uri']})"
+            except:
+                embed.description += " [`🔄 Autoplay`]"
 
         embed.description += f" `[`<@{player.current.requester}>`]`"
 
@@ -157,6 +160,11 @@ class MiniStaticSkin:
                         label="Nightcore", emoji="🇳",
                         value=PlayerControls.nightcore,
                         description="Ativar/Desativar o efeito nightcore."
+                    ),
+                    disnake.SelectOption(
+                        label=("Desativar" if player.autoplay else "ativar") + " o autoplay", emoji="🔄",
+                        value=PlayerControls.autoplay,
+                        description="Sistema de adição de música automática quando a fila estiver vazia."
                     ),
                     disnake.SelectOption(
                         label="Ativar/Desativar modo restrito", emoji="🔐",

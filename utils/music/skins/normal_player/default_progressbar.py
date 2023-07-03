@@ -88,14 +88,19 @@ class DefaultProgressbarSkin:
         if player.nightcore:
             txt += f"\n> 🇳 **⠂Efeito nightcore:** `ativado`"
 
-        if player.autoplay:
-            txt += "\n> 🔄 **⠂Autoplay:** `ativado`"
-
         if player.current.album_name:
             txt += f"\n> 💽 **⠂Álbum:** [`{fix_characters(player.current.album_name, limit=16)}`]({player.current.album_url})"
 
         if player.current.playlist_name:
             txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=16)}`]({player.current.playlist_url})"
+
+        if player.autoplay:
+            try:
+                t = f"[`ativado`]({player.current.info['extra']['related']['uri']})"
+            except:
+                t = "`ativado`"
+
+            txt += f"\n> 🔄 **⠂Autoplay:** {t}"
 
         if (qlenght:=len(player.queue)) and not player.mini_queue_enabled:
             txt += f"\n> 🎶 **⠂Músicas na fila:** `{qlenght}`"
@@ -195,6 +200,11 @@ class DefaultProgressbarSkin:
                         label="Nightcore", emoji="🇳",
                         value=PlayerControls.nightcore,
                         description="Ativar/Desativar o efeito nightcore."
+                    ),
+                    disnake.SelectOption(
+                        label=("Desativar" if player.autoplay else "ativar") + " o autoplay", emoji="🔄",
+                        value=PlayerControls.autoplay,
+                        description="Sistema de adição de música automática quando a fila estiver vazia."
                     ),
                     disnake.SelectOption(
                         label="Ativar/Desativar modo restrito", emoji="🔐",

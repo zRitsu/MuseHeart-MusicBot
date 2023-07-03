@@ -31,7 +31,9 @@ class DefaultSkin:
             "embeds": []
         }
 
-        embed = disnake.Embed(color=player.bot.get_color(player.guild.me))
+        color = player.bot.get_color(player.guild.me)
+
+        embed = disnake.Embed(color=color)
         embed_queue = None
         vc_txt = ""
 
@@ -81,9 +83,6 @@ class DefaultSkin:
         if player.nightcore:
             txt += "\n> 🇳 **⠂Efeito nightcore:** `ativado`"
 
-        if player.autoplay:
-            txt += "\n> 🔄 **⠂Autoplay:** `ativado`"
-
         if player.current.album_name:
             txt += f"\n> 💽 **⠂Álbum:** [`{fix_characters(player.current.album_name, limit=16)}`]({player.current.album_url})"
 
@@ -93,6 +92,14 @@ class DefaultSkin:
         if (qlenght:=len(player.queue)) and not player.mini_queue_enabled:
             txt += f"\n> 🎶 **⠂Músicas na fila:** `{qlenght}`"
 
+        if player.autoplay:
+            try:
+                t = f"[`ativado`]({player.current.info['extra']['related']['uri']})"
+            except:
+                t = "`ativado`"
+
+            txt += f"\n> 🔄 **⠂Autoplay:** {t}"
+
         if player.keep_connected:
             txt += "\n> ♾️ **⠂Modo 24/7:** `Ativado`"
 
@@ -100,6 +107,8 @@ class DefaultSkin:
             txt += f"\n> 🔒 **⠂Modo restrito:** `Ativado`"
 
         txt += f"{vc_txt}\n"
+
+        bar = "https://cdn.discordapp.com/attachments/554468640942981147/1085234017693085776/rainbow_bar3.gif"
 
         if player.command_log:
             txt += f"```ansi\n [34;1mÚltima Interação[0m```**┕ {player.command_log_emoji} ⠂**{player.command_log}\n"
@@ -111,7 +120,7 @@ class DefaultSkin:
                 for n, t in (enumerate(itertools.islice(player.queue, 3)))
             )
 
-            embed_queue = disnake.Embed(title=f"Músicas na fila: {qlenght}", color=player.bot.get_color(player.guild.me),
+            embed_queue = disnake.Embed(title=f"Músicas na fila: {qlenght}", color=color,
                                         description=f"\n{queue_txt}")
 
             if not player.loop and not player.keep_connected and not player.paused:
@@ -124,10 +133,10 @@ class DefaultSkin:
 
                 embed_queue.description += f"\n`[⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + (player.current.duration if not player.current.is_stream else 0)) - player.position)).timestamp())}:R> `⌛]`"
 
-            embed_queue.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/1085234017693085776/rainbow_bar3.gif")
+            embed_queue.set_image(url=bar)
 
         embed.description = txt
-        embed.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/1085234017693085776/rainbow_bar3.gif")
+        embed.set_image(url=bar)
         embed.set_thumbnail(url=player.current.thumb)
 
         data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
@@ -182,6 +191,11 @@ class DefaultSkin:
                         label="Nightcore", emoji="🇳",
                         value=PlayerControls.nightcore,
                         description="Ativar/Desativar o efeito nightcore."
+                    ),
+                    disnake.SelectOption(
+                        label=("Desativar" if player.autoplay else "ativar") + " o autoplay", emoji="🔄",
+                        value=PlayerControls.autoplay,
+                        description="Sistema de adição de música automática quando a fila estiver vazia."
                     ),
                     disnake.SelectOption(
                         label="Ativar/Desativar modo restrito", emoji="🔐",

@@ -628,9 +628,20 @@ class LavalinkPlayer(wavelink.Player):
             else:
                 tracks = []
 
-        tracks = [LavalinkTrack(id_=t.id, info=t.info, autoplay=True, requester=self.bot.user.id) for t in tracks]
+        info = {
+            "title": track.title,
+            "uri": track.uri
+        }
 
-        self.queue_autoplay.extend(tracks)
+        tracks_final = []
+
+        for t in tracks:
+            lavalink_track = LavalinkTrack(id_=t.id, info=t.info, autoplay=True, requester=self.bot.user.id)
+            lavalink_track.info["extra"]["related"] = info
+            tracks_final.append(lavalink_track)
+
+        tracks.clear()
+        self.queue_autoplay.extend(tracks_final)
 
         try:
             return self.queue_autoplay.popleft()
@@ -1098,6 +1109,11 @@ class LavalinkPlayer(wavelink.Player):
                                 label="Nightcore", emoji="🇳",
                                 value=PlayerControls.nightcore,
                                 description="Ativar/Desativar o efeito nightcore."
+                            ),
+                            disnake.SelectOption(
+                                label=("Desativar" if self.autoplay else "ativar") + " o autoplay", emoji="🔄",
+                                value=PlayerControls.autoplay,
+                                description="Sistema de adição de música automática quando a fila estiver vazia."
                             ),
                             disnake.SelectOption(
                                 label="Ativar/Desativar modo restrito", emoji="🔐",

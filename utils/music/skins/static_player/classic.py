@@ -66,7 +66,13 @@ class ClassicStaticSkin:
         txt += f"🔊 **⠂Volume:** `{player.volume}%`\n"
 
         if player.autoplay:
-            txt += "🔄 **⠂Autoplay:** `ativado`\n"
+
+            try:
+                t = f"[`ativado`]({player.current.info['extra']['related']['uri']})"
+            except:
+                t = "`ativado`"
+
+            txt += f"🔄 **⠂Autoplay:** {t}\n"
 
         if player.restrict_mode:
             txt += "🔒 **⠂Modo restrito:** `ativado`\n"
@@ -142,6 +148,11 @@ class ClassicStaticSkin:
                         label="Nightcore", emoji="🇳",
                         value=PlayerControls.nightcore,
                         description="Ativar/Desativar o efeito nightcore."
+                    ),
+                    disnake.SelectOption(
+                        label=("Desativar" if player.autoplay else "ativar") + " o autoplay", emoji="🔄",
+                        value=PlayerControls.autoplay,
+                        description="Sistema de adição de música automática quando a fila estiver vazia."
                     ),
                     disnake.SelectOption(
                         label="Ativar/Desativar modo restrito", emoji="🔐",

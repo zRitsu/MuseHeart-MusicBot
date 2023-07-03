@@ -129,6 +129,11 @@ class EmbedLinkSkin:
                         description="Ativar/Desativar o efeito nightcore."
                     ),
                     disnake.SelectOption(
+                        label=("Desativar" if player.autoplay else "ativar") + " o autoplay", emoji="🔄",
+                        value=PlayerControls.autoplay,
+                        description="Sistema de adição de música automática quando a fila estiver vazia."
+                    ),
+                    disnake.SelectOption(
                         label="Ativar/Desativar modo restrito", emoji="🔐",
                         value=PlayerControls.restrict_mode,
                         description="Apenas DJ's/Staff's podem usar comandos restritos."
