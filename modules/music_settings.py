@@ -1305,9 +1305,6 @@ class MusicSettings(commands.Cog):
         if invite.target_user:
             return await inter.edit_original_message("O convite não pode ser configurado para apenas 1 usuário usar.")
 
-        if invite.expires_at:
-            return await inter.edit_original_message("O convite não pode ter data para expirar.")
-
         channel = None
 
         for bot in self.bot.pool.bots:
