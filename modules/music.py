@@ -2628,7 +2628,18 @@ class Music(commands.Cog):
 
             title = track.title.lower().split()
 
-            if all(w in title for w in query.lower().split()):
+            query_words = query.lower().split()
+
+            word_count = 0
+
+            for query_word in query.lower().split():
+                for title_word in title:
+                    if query_word in title_word:
+                        title.remove(title_word)
+                        word_count += 1
+                        break
+
+            if word_count == len(query_words):
                 results.append(f"{track.title[:81]} || ID > {track.unique_id}")
                 count += 1
 
