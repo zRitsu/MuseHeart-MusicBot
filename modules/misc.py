@@ -605,8 +605,11 @@ class Misc(commands.Cog):
         else:
             user = inter.target
 
-        if inter.target.guild_avatar:
-            assets["Avatar (Server)"] = inter.target.guild_avatar.with_static_format("png")
+        try:
+            if inter.target.guild_avatar:
+                assets["Avatar (Server)"] = inter.target.guild_avatar.with_static_format("png")
+        except AttributeError:
+            pass
         assets["Avatar (User)"] = user.display_avatar.with_static_format("png")
         if user.banner:
             assets["Banner"] = user.banner.with_static_format("png")
