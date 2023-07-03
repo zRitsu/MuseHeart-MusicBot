@@ -628,20 +628,22 @@ class LavalinkPlayer(wavelink.Player):
             else:
                 tracks = []
 
-        info = {
-            "title": track.title,
-            "uri": track.uri
-        }
+        if track:
 
-        tracks_final = []
+            info = {
+                "title": track.title,
+                "uri": track.uri
+            }
 
-        for t in tracks:
-            lavalink_track = LavalinkTrack(id_=t.id, info=t.info, autoplay=True, requester=self.bot.user.id)
-            lavalink_track.info["extra"]["related"] = info
-            tracks_final.append(lavalink_track)
+            tracks_final = []
 
-        tracks.clear()
-        self.queue_autoplay.extend(tracks_final)
+            for t in tracks:
+                lavalink_track = LavalinkTrack(id_=t.id, info=t.info, autoplay=True, requester=self.bot.user.id)
+                lavalink_track.info["extra"]["related"] = info
+                tracks_final.append(lavalink_track)
+
+            tracks.clear()
+            self.queue_autoplay.extend(tracks_final)
 
         try:
             return self.queue_autoplay.popleft()
