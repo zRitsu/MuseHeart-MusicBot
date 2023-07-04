@@ -283,11 +283,7 @@ async def send_idle_embed(
     except AttributeError:
         is_forum = False
 
-    try:
-        guild_data = target.guild_data
-    except AttributeError:
-        if not guild_data:
-            guild_data = await bot.get_data(target.guild.id, db_name=DBModel.guilds)
+    guild_data = await bot.get_data(target.guild.id, db_name=DBModel.guilds)
 
     embed = disnake.Embed(description="**Entre em um canal de voz e peça uma música aqui " +
                                       ("no post" if is_forum else "no canal ou na conversa abaixo") +
