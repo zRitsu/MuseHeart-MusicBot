@@ -214,10 +214,6 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
                 inter.music_bot.dispatch("pool_dispatch", inter, bot.user.id)
                 raise PoolException()
 
-            try:
-                inter.free_bot = [inter.music_bot, inter.music_guild]
-            except:
-                pass
             return True
 
         if only_voiced:
@@ -237,11 +233,6 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
             inter.music_guild = inter.guild
             inter.bot.dispatch("pool_dispatch", inter, None)
 
-            try:
-                inter.free_bot = [inter.music_bot, inter.music_guild]
-            except:
-                pass
-
             return True
 
     except AttributeError:
@@ -249,11 +240,6 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
     if free_bot:
         inter.music_bot, inter.music_guild = free_bot.pop(0)
-
-        try:
-            inter.free_bot = free_bot
-        except AttributeError:
-            pass
 
         if isinstance(inter, CustomContext) and not mention_prefixed and inter.music_bot.user.id != inter.bot.user.id:
             try:

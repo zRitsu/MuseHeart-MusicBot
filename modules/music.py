@@ -845,7 +845,7 @@ class Music(commands.Cog):
                 )
 
                 try:
-                    if bot.user.id != self.bot.user.id and inter.free_bot:
+                    if bot.user.id != self.bot.user.id:
                         embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
                 except AttributeError:
                     pass
@@ -1055,7 +1055,7 @@ class Music(commands.Cog):
                     )
 
                     try:
-                        if bot.user.id != self.bot.user.id and inter.free_bot:
+                        if bot.user.id != self.bot.user.id:
                             embed.set_footer(text=f"Usando: {bot.user.display_name}",
                                              icon_url=bot.user.display_avatar.url)
                     except AttributeError:
@@ -1459,7 +1459,7 @@ class Music(commands.Cog):
                     func = inter.send
 
             try:
-                if bot.user.id != self.bot.user.id and inter.free_bot:
+                if bot.user.id != self.bot.user.id:
                     embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
             except AttributeError:
                 pass
@@ -1664,7 +1664,7 @@ class Music(commands.Cog):
             )
 
             try:
-                if bot.user.id != self.bot.user.id and inter.free_bot:
+                if bot.user.id != self.bot.user.id:
                     embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
             except AttributeError:
                 pass
@@ -1692,7 +1692,7 @@ class Music(commands.Cog):
                 )
 
                 try:
-                    if bot.user.id != self.bot.user.id and inter.free_bot:
+                    if bot.user.id != self.bot.user.id:
                         embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
                 except AttributeError:
                     pass
@@ -1874,7 +1874,7 @@ class Music(commands.Cog):
             embed.description = "**Selecione o nível do volume abaixo:**"
 
             try:
-                if bot.user.id != self.bot.user.id and inter.free_bot:
+                if bot.user.id != self.bot.user.id:
                     embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
             except AttributeError:
                 pass
@@ -2101,12 +2101,6 @@ class Music(commands.Cog):
                 description="**Selecione um modo de repetição:**",
                 color=self.bot.get_color(ctx.guild.me)
             )
-
-            try:
-                if ctx.free_bot:
-                    embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
-            except AttributeError:
-                pass
 
             msg = await ctx.send(
                 ctx.author.mention,
@@ -2466,7 +2460,7 @@ class Music(commands.Cog):
                          f"** para a posição **[{position_text}]** da fila.", emoji="↪️")
 
             try:
-                if bot.user.id != self.bot.user.id and inter.free_bot:
+                if bot.user.id != self.bot.user.id:
                     embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
             except AttributeError:
                 pass
@@ -2747,7 +2741,7 @@ class Music(commands.Cog):
                 )
 
                 try:
-                    if bot.user.id != self.bot.user.id and inter.free_bot:
+                    if bot.user.id != self.bot.user.id:
                         embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
                 except AttributeError:
                     pass
@@ -2923,7 +2917,7 @@ class Music(commands.Cog):
             )
 
             try:
-                if bot.user.id != self.bot.user.id and inter.free_bot:
+                if bot.user.id != self.bot.user.id:
                     embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
             except AttributeError:
                 pass
@@ -3041,7 +3035,7 @@ class Music(commands.Cog):
         embed = view.embed
 
         try:
-            if bot.user.id != self.bot.user.id and inter.free_bot:
+            if bot.user.id != self.bot.user.id:
                 embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
         except AttributeError:
             pass
@@ -4558,7 +4552,7 @@ class Music(commands.Cog):
                                   description=f"{txt_ephemeral or txt}{player.controller_link}")
 
             try:
-                if bot.user.id != self.bot.user.id and inter.free_bot:
+                if bot.user.id != self.bot.user.id:
                     embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
             except AttributeError:
                 pass
@@ -4581,7 +4575,7 @@ class Music(commands.Cog):
                 )
 
                 try:
-                    if bot.user.id != self.bot.user.id and inter.free_bot:
+                    if bot.user.id != self.bot.user.id:
                         embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
                 except AttributeError:
                     pass
@@ -4595,7 +4589,7 @@ class Music(commands.Cog):
                 )
 
                 try:
-                    if bot.user.id != self.bot.user.id and inter.free_bot:
+                    if bot.user.id != self.bot.user.id:
                         embed.set_footer(text=f"Usando: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
                 except AttributeError:
                     pass
