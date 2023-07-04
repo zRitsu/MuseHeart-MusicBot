@@ -213,6 +213,11 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
                     pass
                 inter.music_bot.dispatch("pool_dispatch", inter, bot.user.id)
                 raise PoolException()
+
+            try:
+                inter.free_bot = [inter.music_bot, inter.music_guild]
+            except:
+                pass
             return True
 
         if only_voiced:
@@ -231,7 +236,14 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
             inter.music_bot = inter.bot
             inter.music_guild = inter.guild
             inter.bot.dispatch("pool_dispatch", inter, None)
+
+            try:
+                inter.free_bot = [inter.music_bot, inter.music_guild]
+            except:
+                pass
+
             return True
+
     except AttributeError:
         pass
 
