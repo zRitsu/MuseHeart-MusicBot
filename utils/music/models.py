@@ -612,10 +612,7 @@ class LavalinkPlayer(wavelink.Player):
 
             if track:
                 try:
-                    result = await self.node.get_tracks(f"ytsearch:{track.title}")
-                    ytid = result[0].ytid
-                    result = await self.node.get_tracks(f'https://www.youtube.com/watch?v={ytid}&list=RD{ytid}')
-                    tracks = result.tracks
+                    tracks = await self.node.get_tracks(f"ytmsearch:{track.author}")
                 except Exception as e:
                     traceback.print_exc()
                     embed = disnake.Embed(
