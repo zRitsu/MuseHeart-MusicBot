@@ -3795,7 +3795,7 @@ class Music(commands.Cog):
         try:
             query = guild_data["player_controller"]["fav_links"][interaction.data.values[0]]['url']
         except KeyError:
-            raise GenericError("**O item selecionado não foi encontrado na base de dados...**")
+            return await interaction.send("**O item selecionado não foi encontrado na base de dados...**", ephemeral=True)
 
         kwargs = {
             "query": f"> pin: {query}",
