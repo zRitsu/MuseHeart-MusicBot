@@ -54,7 +54,10 @@ class EmbedLinkSkin:
                 txt += f" `[`<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`" \
                 if not player.paused else ''
 
-        txt += f" <@{player.current.requester}>\n"
+        if player.current.autoplay:
+            txt += " `[Música automática]`\n"
+        else:
+            txt += f" <@{player.current.requester}>\n"
 
         if player.command_log:
 

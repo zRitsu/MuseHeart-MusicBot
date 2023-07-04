@@ -33,7 +33,12 @@ class LiteSkin:
             time_format(player.current.duration)
 
         embed.description = f"> ▶️ **┃**[`{fix_characters(player.current.title, 45)}`]({player.current.uri or player.current.search_uri})\n" \
-                            f"> ℹ️ **┃**`{duration}`┃`{fix_characters(player.current.author, 18)}`┃<@{player.current.requester}>"
+                            f"> ℹ️ **┃**`{duration}`┃`{fix_characters(player.current.author, 18)}`┃"
+
+        if player.current.autoplay:
+            embed.description += " `[Música automática]`"
+        else:
+            embed.description += f"<@{player.current.requester}>"
 
         if player.current.playlist_name:
             embed.description += f"\n> 🎼 **┃ Playlist:** [`{player.current.playlist_name}`]({player.current.playlist_url})"

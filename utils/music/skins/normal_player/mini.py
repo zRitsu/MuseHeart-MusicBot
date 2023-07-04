@@ -60,13 +60,10 @@ class MiniSkin:
             else:
                 embed.description += ' `[🔁 fila]`'
 
-        elif player.autoplay:
-            try:
-                embed.description += f" `[`[`🔄 Autoplay`]({player.current.info['extra']['related']['uri']})`]`"
-            except:
-                embed.description += " `[🔄 Autoplay]`"
-
-        embed.description += f" `[`<@{player.current.requester}>`]`"
+        if player.current.autoplay:
+            embed.description += f" `[música automática]`"
+        else:
+            embed.description += f" `[`<@{player.current.requester}>`]`"
 
         duration = "🔴 Livestream" if player.current.is_stream else \
             time_format(player.current.duration)

@@ -65,22 +65,23 @@ class ClassicSkin:
             duration = f"⏰ **⠂Duração:** `{time_format(player.current.duration)}`"
 
         txt = f"{duration}\n" \
-              f"💠 **⠂Uploader:** `{player.current.author}`\n" \
-              f"🎧 **⠂Pedido por:** <@{player.current.requester}>\n"
+              f"💠 **⠂Uploader:** `{player.current.author}`\n"
+
+        if player.current.autoplay:
+            txt += f"🎵 **⠂Música automática:** `sim`"
+
+            try:
+                txt += f" [`(fonte)`]({player.current.info['extra']['related']['uri']})\n"
+            except:
+                txt += "\n"
+
+        else:
+            txt += f"🎧 **⠂Pedido por:** <@{player.current.requester}>\n"
 
         if player.current.playlist_name:
             txt += f"📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=23)}`]({player.current.playlist_url})\n"
 
         txt += f"🔊 **⠂Volume:** `{player.volume}%`\n"
-
-        if player.autoplay:
-
-            try:
-                t = f"[`ativado`]({player.current.info['extra']['related']['uri']})"
-            except:
-                t = "`ativado`"
-
-            txt += f"🔄 **⠂Autoplay:** {t}\n"
 
         if player.restrict_mode:
             txt += "🔒 **⠂Modo restrito:** `ativado`\n"

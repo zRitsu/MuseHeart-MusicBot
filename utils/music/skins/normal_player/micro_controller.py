@@ -33,8 +33,13 @@ class MicroController:
         embed = disnake.Embed(
             color=embed_color,
             description=f"[`{fix_characters(player.current.single_title, 25)}`]({player.current.uri or player.current.search_uri}) "
-                        f"[`{fix_characters(player.current.author, 12)}`] <@{player.current.requester}>"
+                        f"[`{fix_characters(player.current.author, 12)}`] "
         )
+
+        if player.current.autoplay:
+            embed.description += f"`[música automática]`"
+        else:
+            embed.description += f"<@{player.current.requester}>"
 
         embed.set_author(
             name="Tocando Agora:",

@@ -48,7 +48,10 @@ class EmbedLinkStaticSkin:
             if not player.current.is_stream and not player.paused:
                 txt += f" `[`<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`"
 
-        txt += f"\n> ✋ **⠂Pedido por:** <@{player.current.requester}>\n"
+        if player.current.autoplay:
+            txt += "\n> 🎵 **⠂Música automática:** `sim`\n"
+        else:
+            txt += f"\n> ✋ **⠂Pedido por:** <@{player.current.requester}>\n"
 
         if player.current.playlist_name:
             txt += f"> 📑 **⠂Playlist:** `{fix_characters(player.current.playlist_name)}`\n"
@@ -66,9 +69,6 @@ class EmbedLinkStaticSkin:
                 txt += '> 🔂 **⠂Repetição:** `música atual`\n'
             else:
                 txt += '> 🔁 **⠂Repetição:** `fila`\n'
-
-        elif player.autoplay:
-            txt += '> 🔄 **⠂Autoplay:** `ativado`\n'
 
         if player.command_log:
 

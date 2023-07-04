@@ -69,9 +69,19 @@ class DefaultProgressbarSkin:
         vc_txt = ""
 
         txt = f"[`{player.current.single_title}`]({player.current.uri or player.current.search_uri})\n\n" \
-              f"> 💠 **⠂Por:** {player.current.authors_md}\n" \
-              f"> ✋ **⠂Pedido por:** <@{player.current.requester}>\n" \
-              f"> 🔊 **⠂Volume:** `{player.volume}%`"
+              f"> 💠 **⠂Por:** {player.current.authors_md}\n"
+
+        if player.current.autoplay:
+            txt += f"> 🎵 **⠂Música automática:** `sim`"
+
+            try:
+                txt += f" [`(fonte)`]({player.current.info['extra']['related']['uri']})\n"
+            except:
+                txt += "\n"
+        else:
+            txt += f"> ✋ **⠂Pedido por:** <@{player.current.requester}>\n"
+
+        txt += f"> 🔊 **⠂Volume:** `{player.volume}%`"
 
         if player.current.track_loops:
             txt += f"\n> 🔂 **⠂Repetições restante:** `{player.current.track_loops}`"
@@ -93,14 +103,6 @@ class DefaultProgressbarSkin:
 
         if player.current.playlist_name:
             txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=16)}`]({player.current.playlist_url})"
-
-        if player.autoplay:
-            try:
-                t = f"[`ativado`]({player.current.info['extra']['related']['uri']})"
-            except:
-                t = "`ativado`"
-
-            txt += f"\n> 🔄 **⠂Autoplay:** {t}"
 
         if (qlenght:=len(player.queue)) and not player.mini_queue_enabled:
             txt += f"\n> 🎶 **⠂Músicas na fila:** `{qlenght}`"
