@@ -1238,7 +1238,7 @@ class Music(commands.Cog):
                 except TypeError:
                     message = None
                 except:
-                    message = await send_idle_embed(channel, bot=bot)
+                    message = await send_idle_embed(channel, bot=bot, guild_data=guild_data)
 
                 player.message = message
 
@@ -4429,7 +4429,7 @@ class Music(commands.Cog):
             try:
                 cached_message = await text_channel.fetch_message(message_id)
             except:
-                cached_message = await send_idle_embed(message, bot=self.bot)
+                cached_message = await send_idle_embed(message, bot=self.bot, guild_data=data)
                 data['player_controller']['message_id'] = str(cached_message.id)
                 await self.bot.update_data(message.guild.id, data, db_name=DBModel.guilds)
 

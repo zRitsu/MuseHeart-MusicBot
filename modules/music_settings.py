@@ -394,20 +394,7 @@ class MusicSettings(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        guild_data = None
-
-        if inter.bot == bot:
-            try:
-                guild_data = inter.guild_data
-            except AttributeError:
-                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-                try:
-                    inter.guild_data = guild_data
-                except AttributeError:
-                    pass
-
-        if not guild_data:
-            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         original_message = None
         existing_channel = True

@@ -274,10 +274,7 @@ class PinManager(commands.Cog):
 
     desc_prefix = "📌 [Server Playlist] 📌 | "
 
-    async def process_idle_embed(self, guild: disnake.Guild, guild_data: dict = None):
-
-        if not guild_data:
-            guild_data = await self.bot.get_data(guild.id, db_name=DBModel.guilds)
+    async def process_idle_embed(self, guild: disnake.Guild, guild_data: dict):
 
         try:
             player: LavalinkPlayer = self.bot.music.players[guild.id]
