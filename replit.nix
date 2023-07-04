@@ -8,8 +8,10 @@
   env = {
     PYTHON_LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
       pkgs.stdenv.cc.cc.lib
+      pkgs.glibc
       pkgs.zlib
       pkgs.xorg.libX11
+      pkgs.glib
       pkgs.libopus
     ];
     PYTHONBIN = "${pkgs.python310Full}/bin/python3.10";
