@@ -682,7 +682,10 @@ class LavalinkPlayer(wavelink.Player):
             track = None
 
             if self.autoplay:
-                track = await self.get_autoqueue_tracks()
+                try:
+                    track = await self.get_autoqueue_tracks()
+                except:
+                    traceback.print_exc()
 
             if not track:
                 await self.stop()
