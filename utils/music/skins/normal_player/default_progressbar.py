@@ -75,7 +75,7 @@ class DefaultProgressbarSkin:
             txt += f"> 🎵 **⠂Música automática:** `sim`"
 
             try:
-                txt += f" [`(fonte)`]({player.current.info['extra']['related']['uri']})\n"
+                txt += f" [`(Ref.)`]({player.current.info['extra']['related']['uri']})\n"
             except:
                 txt += "\n"
         else:

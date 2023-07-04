@@ -76,7 +76,7 @@ class DefaultStaticSkin:
             txt += f"> 🎵 **⠂Música automática:** `sim`"
 
             try:
-                txt += f" [`(fonte)`]({player.current.info['extra']['related']['uri']})"
+                txt += f" [`(Ref.)`]({player.current.info['extra']['related']['uri']})"
             except:
                 pass
         else:
