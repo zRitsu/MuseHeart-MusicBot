@@ -4483,7 +4483,7 @@ class Music(commands.Cog):
                                     f"✋ **⠂ Pedido por:** {message.author.mention}\n" \
                                     f"⌛ **⠂ Duração:** `{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}` "
                 embed.set_thumbnail(url=track.thumb)
-                embed.set_author(name=track.title, url=track.uri or track.search_uri, icon_url=music_source_image(track.info["sourceName"]))
+                embed.set_author(name=fix_characters(track.title, 35), url=track.uri or track.search_uri, icon_url=music_source_image(track.info["sourceName"]))
                 if response:
                     await response.edit(content=None, embed=embed, view=None)
                 else:
