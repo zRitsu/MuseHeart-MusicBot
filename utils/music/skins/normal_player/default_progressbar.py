@@ -69,19 +69,12 @@ class DefaultProgressbarSkin:
         vc_txt = ""
 
         txt = f"[`{player.current.single_title}`]({player.current.uri or player.current.search_uri})\n\n" \
-              f"> 💠 **⠂Por:** {player.current.authors_md}\n"
+              f"> 💠 **⠂Por:** {player.current.authors_md}"
 
-        if player.current.autoplay:
-            txt += f"> 🎵 **⠂Música automática:** `sim`"
+        if not player.current.autoplay:
+            txt += f"\n> ✋ **⠂Pedido por:** <@{player.current.requester}>"
 
-            try:
-                txt += f" [`(Ref.)`]({player.current.info['extra']['related']['uri']})\n"
-            except:
-                txt += "\n"
-        else:
-            txt += f"> ✋ **⠂Pedido por:** <@{player.current.requester}>\n"
-
-        txt += f"> 🔊 **⠂Volume:** `{player.volume}%`"
+        txt += f"\n> 🔊 **⠂Volume:** `{player.volume}%`"
 
         if player.current.track_loops:
             txt += f"\n> 🔂 **⠂Repetições restante:** `{player.current.track_loops}`"
@@ -120,6 +113,13 @@ class DefaultProgressbarSkin:
 
         if player.command_log:
             txt += f"> {player.command_log_emoji} **⠂Última Interação:** {player.command_log}\n"
+
+        if player.current.autoplay:
+            try:
+                mode = f" [`reprodução automática`]({player.current.info['extra']['related']['uri']})"
+            except:
+                mode = "`reprodução automática`"
+            txt += f"\n`No momento estou usando a` {mode} `enquanto aguardo algum membro adicionar novas músicas.`\n"
 
         txt += duration
 

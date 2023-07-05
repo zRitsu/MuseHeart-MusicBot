@@ -60,9 +60,7 @@ class MiniSkin:
             else:
                 embed.description += ' `[🔁 fila]`'
 
-        if player.current.autoplay:
-            embed.description += f" `[música automática]`"
-        else:
+        if not player.current.autoplay:
             embed.description += f" `[`<@{player.current.requester}>`]`"
 
         duration = "🔴 Livestream" if player.current.is_stream else \
@@ -75,6 +73,13 @@ class MiniSkin:
         if player.command_log:
             embed.add_field(name=f"{player.command_log_emoji} **⠂Última Interação:**",
                             value=f"{player.command_log}", inline=False)
+
+        if player.current.autoplay:
+            try:
+                mode = f" [`reprodução automática`]({player.current.info['extra']['related']['uri']})"
+            except:
+                mode = "`reprodução automática`"
+            embed.add_field(name="🔄 **⠂Música automática:**", value=f"\n`No momento estou usando a` {mode} `enquanto aguardo algum membro adicionar novas músicas.`\n")
 
         if queue_size:
 

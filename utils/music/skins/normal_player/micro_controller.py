@@ -36,9 +36,7 @@ class MicroController:
                         f"[`{fix_characters(player.current.author, 12)}`] "
         )
 
-        if player.current.autoplay:
-            embed.description += f"`[música automática]`"
-        else:
+        if not player.current.autoplay:
             embed.description += f"<@{player.current.requester}>"
 
         embed.set_author(
@@ -55,6 +53,9 @@ class MicroController:
             data["embeds"].append(embed_hint)
 
         data["embeds"].append(embed)
+
+        if player.current.autoplay:
+            data["embeds"].append(disnake.Embed(color=embed_color).set_footer(text="No momento estou usando a reprodução automática enquanto aguardo algum membro adicionar novas músicas."))
 
         data["components"] = [
             disnake.ui.Button(label="Despausar" if player.paused else "Pausar", custom_id=PlayerControls.pause_resume, style=get_button_style(player.paused)),

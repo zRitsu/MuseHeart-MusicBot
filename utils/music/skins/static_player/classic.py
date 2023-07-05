@@ -59,14 +59,7 @@ class ClassicStaticSkin:
         txt = f"{duration}\n" \
               f"💠 **⠂Uploader:** `{player.current.author}`\n"
 
-        if player.current.autoplay:
-            txt += f"🎵 **⠂Música automática:** `sim`"
-
-            try:
-                txt += f" [`(Ref.)`]({player.current.info['extra']['related']['uri']})\n"
-            except:
-                txt += "\n"
-        else:
+        if not player.current.autoplay:
             f"🎧 **⠂Pedido por:** <@{player.current.requester}>\n"
 
         if player.current.playlist_name:
@@ -95,6 +88,13 @@ class ClassicStaticSkin:
 
         if player.current_hint:
             embed.set_footer(text=f"💡 Dica: {player.current_hint}")
+
+        if player.current.autoplay:
+            try:
+                mode = f" [`reprodução automática`]({player.current.info['extra']['related']['uri']})"
+            except:
+                mode = "`reprodução automática`"
+            txt += f"\n`No momento estou usando a` {mode} `enquanto aguardo algum membro adicionar novas músicas.`\n\n"
 
         data["embeds"] = [embed_top, embed] if embed_top else [embed]
 

@@ -67,15 +67,7 @@ class ClassicSkin:
         txt = f"{duration}\n" \
               f"💠 **⠂Uploader:** `{player.current.author}`\n"
 
-        if player.current.autoplay:
-            txt += f"🎵 **⠂Música automática:** `sim`"
-
-            try:
-                txt += f" [`(Ref.)`]({player.current.info['extra']['related']['uri']})\n"
-            except:
-                txt += "\n"
-
-        else:
+        if not player.current.autoplay:
             txt += f"🎧 **⠂Pedido por:** <@{player.current.requester}>\n"
 
         if player.current.playlist_name:
@@ -102,6 +94,13 @@ class ClassicSkin:
 
         if player.command_log:
             txt += f"{player.command_log_emoji} **⠂Última Interação:** {player.command_log}\n"
+
+        if player.current.autoplay:
+            try:
+                mode = f" [`reprodução automática`]({player.current.info['extra']['related']['uri']})"
+            except:
+                mode = "`reprodução automática`"
+            txt += f"\n`No momento estou usando a` {mode} `enquanto aguardo algum membro adicionar novas músicas.`\n\n"
 
         embed.description += txt + queue_txt
 

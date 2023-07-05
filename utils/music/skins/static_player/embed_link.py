@@ -48,9 +48,7 @@ class EmbedLinkStaticSkin:
             if not player.current.is_stream and not player.paused:
                 txt += f" `[`<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`"
 
-        if player.current.autoplay:
-            txt += "\n> 🎵 **⠂Música automática:** `sim`\n"
-        else:
+        if not player.current.autoplay:
             txt += f"\n> ✋ **⠂Pedido por:** <@{player.current.requester}>\n"
 
         if player.current.playlist_name:
@@ -75,6 +73,9 @@ class EmbedLinkStaticSkin:
             log = re.sub(r"\[(.+)]\(.+\)", r"\1", player.command_log.replace("`", "")) # remover links do command_log p/ evitar gerar mais de uma preview.
 
             txt += f"> {player.command_log_emoji} **⠂Última Interação:** {log}\n"
+
+        if player.current.autoplay:
+            txt += f"\n`No momento estou usando a reprodução automática enquanto aguardo algum membro adicionar novas músicas.`\n"
 
         if qsize := len(player.queue):
 
