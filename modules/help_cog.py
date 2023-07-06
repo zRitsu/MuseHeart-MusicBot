@@ -133,7 +133,10 @@ class ViewHelp(discord.ui.View):
 
 async def check_perms(ctx: CustomContext, cmd: commands.Command):
 
-    if cmd.hidden and not await ctx.bot.is_owner(ctx.author):
+    try:
+        if cmd.hidden and not await ctx.bot.is_owner(ctx.author):
+            return False
+    except:
         return False
 
     return True
@@ -181,8 +184,8 @@ class HelpCog(commands.Cog, name="Ajuda"):
             aliases = " | ".join([f"{ctx.prefix}{ali}" for ali in cmd.aliases])
             txt += f"🔄 **⠂Alternativas:** ```\n{aliases}```\n"
         if hasattr(cmd, 'commands'):
-            subs = " | ".join(c.name for c in cmd.commands if (await check_perms(ctx, c)))
-            txt += f"🔢 **⠂Subcomandos:** ```{subs}```Use o comando [{ctx.prefix}help {cmd} subcomando] para ver mais detalhes do subcomando.\n\n"
+            subs = " | ".join([c.name for c in cmd.commands if (await check_perms(ctx, c))])
+            txt += f"🔢 **⠂Subcomandos:** ```{subs}``` Use o comando: `[ {ctx.prefix}help {cmd} subcomando ]` para ver mais detalhes do subcomando.\n\n"
 
         flags = cmd.extras.get("flags")
 
@@ -217,7 +220,7 @@ class HelpCog(commands.Cog, name="Ajuda"):
 
         if usage_cmd:
             txt += f"📘 **⠂Como Usar:** ```\n{usage_cmd}```\n" \
-                   f"⚠ **⠂Notas sobre o uso dos argumentos no comando:** ```\n" \
+                   f"⚠️ **⠂Notas sobre o uso dos argumentos no comando:** ```\n" \
                    f"[] = Obrigatório\n<> = Opcional```"
 
         embed.description = txt
