@@ -373,6 +373,34 @@ class MusicSettings(commands.Cog):
         if target and bot != self.bot:
             target = bot.get_channel(target.id)
 
+        channel_name = f'{bot.user.name} Song Request'
+
+        if isinstance(target, disnake.ForumChannel) and not isinstance(inter, CustomContext):
+
+            await inter.response.send_modal(
+                title="Escolha um nome para o post (em até 30seg.)",
+                custom_id=str(inter.id),
+                components=[
+                    disnake.ui.TextInput(
+                        style=disnake.TextInputStyle.short,
+                        label="Nome",
+                        custom_id="forum_title",
+                        min_length=4,
+                        max_length=30,
+                        value=channel_name,
+                        required=True
+                    )
+                ]
+            )
+
+            await inter.delete_original_message()
+
+            try:
+                inter: disnake.ModalInteraction = await inter.bot.wait_for("modal_submit", timeout=30,
+                                                                           check=lambda i: i.data.custom_id == str(inter.id))
+            except asyncio.TimeoutError:
+                return
+
         perms_dict = {
             "embed_links": True,
             "send_messages": True,
@@ -582,8 +610,6 @@ class MusicSettings(commands.Cog):
 
         if target == guild.rules_channel:
             raise GenericError("**Você não pode usar um canal de regras.**")
-
-        channel_name = f'{bot.user.name} Song Request'
 
         if isinstance(target, disnake.ForumChannel):
 
