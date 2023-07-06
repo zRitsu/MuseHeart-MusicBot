@@ -3088,7 +3088,7 @@ class Music(commands.Cog):
     clear_flags.add_argument('-start_position', '-startpos', '-start', type=int, default=None,
                              help="Remover músicas da fila a partir de uma posição inicial da fila. Ex: -start 10")
     clear_flags.add_argument('-end_position', '-endpos', '-end', type=int, default=None,
-                             help="Remover músicas da fila até uma específica na fila. Ex: -end 15")
+                             help="Remover músicas da fila até uma posição específica na fila. Ex: -end 15")
     clear_flags.add_argument('-absent', '-absentmembers', '-abs', action='store_true',
                              help="Remover músicas adicionads por membros fora do canal")
 
