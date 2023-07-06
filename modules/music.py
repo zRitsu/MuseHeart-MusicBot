@@ -3096,10 +3096,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @pool_command(name="clear", aliases=["limpar"], description="Limpar a fila de música.", only_voiced=True,
-                  extras={"flags": clear_flags}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc,
-                  usage="{prefix}{cmd} <termo>\n"
-                        "Ex 1: {prefix}{cmd}\n"
-                        "Ex 2: {prefix}{cmd} NCS")
+                  extras={"flags": clear_flags}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
     async def clear_legacy(self, ctx: CustomContext, *, flags: str = ""):
 
         args, unknown = ctx.command.extras['flags'].parse_known_args(flags.split())
