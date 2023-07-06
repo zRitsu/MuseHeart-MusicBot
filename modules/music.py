@@ -2354,11 +2354,11 @@ class Music(commands.Cog):
 
     move_args = CommandArgparse()
     move_args.add_argument('-count', '-counter', '-amount', '-c', '-max', type=int, default=None,
-                           help="Especificar uma quantidade de músicas para mover com o nome especificado.")
+                           help="Especificar uma quantidade de músicas para mover com o nome especificado. Ex: -amount 5")
     move_args.add_argument('-casesensitive', '-cs', '-exactmatch', '-exact', action='store_true',
                            help="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome "
                                 "da música")
-    move_args.add_argument('-position', '-pos', help="Especificar uma posição de destino", type=int, default=None)
+    move_args.add_argument('-position', '-pos', help="Especificar uma posição de destino. Ex: -pos 1", type=int, default=None)
 
     @is_dj()
     @has_player()
@@ -3074,21 +3074,21 @@ class Music(commands.Cog):
     clear_flags = CommandArgparse()
     clear_flags.add_argument('song_name', nargs='*', help="incluir nome que tiver na música.")
     clear_flags.add_argument('-uploader', '-author', '-artist', nargs = '+', default="",
-                             help="Incluir nome que tiver no autor da música.")
+                             help="Incluir nome que tiver no autor da música. Ex: -artist sekai")
     clear_flags.add_argument('-member', '-user', '-u', nargs='+', default="",
-                             help="Incluir músicas pedidas pelo usuário selecionado.")
+                             help="Incluir músicas pedidas pelo usuário selecionado. Ex: -user @user")
     clear_flags.add_argument('-duplicates', '-dupes', '-duplicate', action='store_true',
                              help="Incluir músicas duplicadas.")
     clear_flags.add_argument('-playlist', '-list', '-pl', nargs='+', default="",
-                             help="Incluir nome que tiver na playlist.")
+                             help="Incluir nome que tiver na playlist. Ex: -playlist minhaplaylist")
     clear_flags.add_argument('-minimal_time', '-mintime', '-min','-min_duration', '-minduration',  default=None,
-                             help="incluir músicas com duração mínima especificada (ex. 1:23).")
+                             help="incluir músicas com duração mínima especificada. Ex: -min 1:23.")
     clear_flags.add_argument('-max_time', '-maxtime', '-max', '-max_duration', '-maxduration', default=None,
-                             help="incluir músicas da fila a partir de uma posição específica da fila.")
+                             help="incluir músicas com duração máxima especificada. Ex: -max 1:23.")
     clear_flags.add_argument('-start_position', '-startpos', '-start', type=int, default=None,
-                             help="incluir músicas da fila a partir de uma posição específica da fila.")
+                             help="incluir músicas da fila a partir de uma posição específica da fila. Ex: -start 10")
     clear_flags.add_argument('-end_position', '-endpos', '-end', type=int, default=None,
-                             help="incluir músicas da fila até uma posição específica da fila.")
+                             help="incluir músicas da fila até uma posição específica da fila. Ex: -end 15")
     clear_flags.add_argument('-absent', '-absentmembers', '-abs', action='store_true',
                              help="Incluir músicas adicionads por membros fora do canal")
 
@@ -3096,7 +3096,10 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @pool_command(name="clear", aliases=["limpar"], description="Limpar a fila de música.", only_voiced=True,
-                  extras={"flags": clear_flags}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
+                  extras={"flags": clear_flags}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc,
+                  usage="{prefix}{cmd} <termo>\n"
+                        "Ex 1: {prefix}{cmd}\n"
+                        "Ex 2: {prefix}{cmd} NCS")
     async def clear_legacy(self, ctx: CustomContext, *, flags: str = ""):
 
         args, unknown = ctx.command.extras['flags'].parse_known_args(flags.split())
