@@ -162,8 +162,10 @@ class HelpCog(commands.Cog, name="Ajuda"):
         else:
             help_cmd = "Sem descrição..."
 
+        prefix = ctx.prefix if str(ctx.me.id) not in ctx.prefix else f"@{ctx.me.display_name} "
+
         if cmd.usage:
-            usage_cmd = cmd.usage.replace("{prefix}", ctx.prefix if not ctx.me.mention not in ctx.prefix else f"@{ctx.me.display_name} ").replace("{cmd}", cmd.name).replace("{parent}", cmd.full_parent_name).replace(f"<@!{ctx.bot.user.id}>", f"@{ctx.me.name}").replace(f"<@{ctx.bot.user.id}>", f"@{ctx.me.name}")
+            usage_cmd = cmd.usage.replace("{prefix}", prefix).replace("{cmd}", cmd.name).replace("{parent}", cmd.full_parent_name).replace(f"<@!{ctx.bot.user.id}>", f"@{ctx.me.name}").replace(f"<@{ctx.bot.user.id}>", f"@{ctx.me.name}")
         else:
             usage_cmd = ""
 
