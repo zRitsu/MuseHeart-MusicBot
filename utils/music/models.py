@@ -626,6 +626,8 @@ class LavalinkPlayer(wavelink.Player):
 
             if track:
 
+                self.locked = True
+
                 retries = 3
                 tracks = []
                 exception = None
