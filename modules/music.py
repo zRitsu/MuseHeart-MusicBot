@@ -3072,25 +3072,25 @@ class Music(commands.Cog):
         await view.wait()
 
     clear_flags = CommandArgparse()
-    clear_flags.add_argument('song_name', nargs='*', help="incluir nome que tiver na música.")
+    clear_flags.add_argument('-name', '-song_name', '-title', nargs='+', help="incluir nome que tiver na música. Ex: -name NCS")
     clear_flags.add_argument('-uploader', '-author', '-artist', nargs = '+', default="",
-                             help="Incluir nome que tiver no autor da música. Ex: -artist sekai")
+                             help="Remover músicas com o nome que tiver no autor especificado. Ex: -artist sekai")
     clear_flags.add_argument('-member', '-user', '-u', nargs='+', default="",
-                             help="Incluir músicas pedidas pelo usuário selecionado. Ex: -user @user")
+                             help="Remover músicas pedidas pelo usuário especificado. Ex: -user @user")
     clear_flags.add_argument('-duplicates', '-dupes', '-duplicate', action='store_true',
-                             help="Incluir músicas duplicadas.")
+                             help="Remover músicas duplicadas.")
     clear_flags.add_argument('-playlist', '-list', '-pl', nargs='+', default="",
-                             help="Incluir nome que tiver na playlist. Ex: -playlist minhaplaylist")
+                             help="Remover música que tiver com nome especificado na playlist associada. Ex: -playlist minhaplaylist")
     clear_flags.add_argument('-minimal_time', '-mintime', '-min','-min_duration', '-minduration',  default=None,
-                             help="incluir músicas com duração mínima especificada. Ex: -min 1:23.")
+                             help="Remover músicas com duração mínima especificada. Ex: -min 1:23.")
     clear_flags.add_argument('-max_time', '-maxtime', '-max', '-max_duration', '-maxduration', default=None,
-                             help="incluir músicas com duração máxima especificada. Ex: -max 1:23.")
+                             help="Remover músicas com duração máxima especificada. Ex: -max 1:23.")
     clear_flags.add_argument('-start_position', '-startpos', '-start', type=int, default=None,
-                             help="incluir músicas da fila a partir de uma posição específica da fila. Ex: -start 10")
+                             help="Remover músicas da fila a partir de uma posição inicial da fila. Ex: -start 10")
     clear_flags.add_argument('-end_position', '-endpos', '-end', type=int, default=None,
-                             help="incluir músicas da fila até uma posição específica da fila. Ex: -end 15")
+                             help="Remover músicas da fila até uma específica na fila. Ex: -end 15")
     clear_flags.add_argument('-absent', '-absentmembers', '-abs', action='store_true',
-                             help="Incluir músicas adicionads por membros fora do canal")
+                             help="Remover músicas adicionads por membros fora do canal")
 
     @is_dj()
     @has_player()
