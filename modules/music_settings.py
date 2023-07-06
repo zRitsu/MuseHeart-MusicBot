@@ -597,40 +597,42 @@ class MusicSettings(commands.Cog):
             except AttributeError:
                 id_ = f"modal_{inter.message.id}"
 
-            await inter.response.send_modal(
-                title="Definir um nome para o post do fórum",
-                custom_id=id_,
-                components=[
-                    disnake.ui.TextInput(
-                        style=disnake.TextInputStyle.short,
-                        label="Nome",
-                        custom_id="forum_title",
-                        min_length=4,
-                        max_length=30,
-                        value=channel_name,
-                        required=True
-                    )
-                ]
-            )
+            if not inter.response.is_done():
 
-            try:
-                inter: disnake.ModalInteraction = await inter.bot.wait_for("modal_submit", timeout=30, check=lambda i: i.custom_id == id_)
-            except asyncio.TimeoutError:
+                await inter.response.send_modal(
+                    title="Definir um nome para o post do fórum",
+                    custom_id=id_,
+                    components=[
+                        disnake.ui.TextInput(
+                            style=disnake.TextInputStyle.short,
+                            label="Nome",
+                            custom_id="forum_title",
+                            min_length=4,
+                            max_length=30,
+                            value=channel_name,
+                            required=True
+                        )
+                    ]
+                )
+
                 try:
-                    func = inter.edit_original_message
-                except AttributeError:
-                    func = msg_select.edit
-                await func(embed=disnake.Embed(description="### Tempo esgotado!", color=bot.get_color(guild.me)), view=None)
-                return
+                    inter: disnake.ModalInteraction = await inter.bot.wait_for("modal_submit", timeout=30, check=lambda i: i.custom_id == id_)
+                except asyncio.TimeoutError:
+                    try:
+                        func = inter.edit_original_message
+                    except AttributeError:
+                        func = msg_select.edit
+                    await func(embed=disnake.Embed(description="### Tempo esgotado!", color=bot.get_color(guild.me)), view=None)
+                    return
 
-            try:
-                await msg_select.delete()
-            except:
-                pass
+                try:
+                    await msg_select.delete()
+                except:
+                    pass
 
-            await inter.response.defer()
+                await inter.response.defer()
 
-            channel_name = inter.text_values["forum_title"]
+                channel_name = inter.text_values["forum_title"]
 
             thread_wmessage = await target.create_thread(
                 name=channel_name,
