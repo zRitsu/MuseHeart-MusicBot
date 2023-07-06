@@ -214,9 +214,9 @@ class HelpCog(commands.Cog, name="Ajuda"):
                 txt += ("🚩 **Flags `(opções para adicionar após os argumentos do comando)`:**```ini\n" + "\n\n".join(t) + "```\n")
 
         if usage_cmd:
-            txt += f"⁉ **⠂Como Usar:** ```\n{usage_cmd}```\n" \
+            txt += f"📘 **⠂Como Usar:** ```\n{usage_cmd}```\n" \
                    f"⚠ **⠂Notas sobre o uso dos argumentos no comando:** ```\n" \
-                   f"[] = Obrigatório\n<> = Opcional"
+                   f"[] = Obrigatório\n<> = Opcional```"
 
         embed.description = txt
 
