@@ -276,10 +276,12 @@ class UserFavView(disnake.ui.View):
 
 class FavManager(commands.Cog):
 
+    emoji = "⭐"
+    name = "Favoritos"
+    desc_prefix = f"[{emoji} {name}] | "
+
     def __init__(self, bot: BotCore):
         self.bot = bot
-
-    desc_prefix = "⭐ [Favoritos] ⭐ | "
 
     fav_cd = commands.CooldownMapping.from_cooldown(3, 15, commands.BucketType.member)
 

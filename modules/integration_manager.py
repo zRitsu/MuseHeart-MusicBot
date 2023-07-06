@@ -401,10 +401,12 @@ class IntegrationsView(disnake.ui.View):
 
 class IntegrationManager(commands.Cog):
 
+    emoji = "💠"
+    name = "Integrações"
+    desc_prefix = f"[{emoji} {name}] | "
+
     def __init__(self, bot: BotCore):
         self.bot = bot
-
-    desc_prefix = "💠 [Integrações] 💠 | "
 
     itg_cd = commands.CooldownMapping.from_cooldown(3, 15, commands.BucketType.member)
 

@@ -548,90 +548,12 @@ class Owner(commands.Cog):
         else:
             return txt
 
-    @commands.command(name="help", aliases=["ajuda"], hidden=True)
-    @commands.cooldown(1, 3, commands.BucketType.member)
-    async def help_(self, ctx: CustomContext, cmd_name: str = None):
-
-        is_owner = await ctx.bot.is_owner(ctx.author)
-
-        prefix = ctx.prefix if str(ctx.bot.user.id) not in ctx.prefix else ""
-
-        if cmd_name:
-
-            cmd = self.bot.get_command(cmd_name)
-
-            if not cmd or (cmd.hidden and not is_owner):
-                raise GenericError(f"O comando **{cmd_name}** não existe.")
-
-            embed = disnake.Embed(
-                color=self.bot.get_color(ctx.guild.me),
-                title=f"**Informações do comando: {cmd.name}**"
-            )
-
-            if cmd.description:
-                embed.add_field(name="Descrição:", value=f"```ldif\n{cmd.description}```", inline=False)
-
-            if cmd.aliases:
-                embed.add_field(name="Aliases/Sinônimos:", value="```ldif\n{}```".format(
-                    " | ".join(f"{prefix}{a}" for a in cmd.aliases)), inline=False)
-
-            if cmd.usage:
-                embed.add_field(name="Como usar:", value=f" ```ldif\n{prefix}{cmd.name} {cmd.usage}```",
-                                inline=False)
-
-            await ctx.send(embed=embed)
-            return
-
-        cmds = [c for c in self.bot.commands if not c.hidden] if not is_owner else [c for c in self.bot.commands]
-
-        cmds_final = []
-
-        for cmd in cmds:
-
-            txt = ""
-
-            cmd_name = f"**{prefix}{cmd.name}**"
-
-            if cmd.aliases:
-                cmd_name += f" ({', '.join(a for a in cmd.aliases)})"
-
-            txt += f" ```ldif\n{cmd.description or 'Sem descrição...'}```"
-
-            txt += "\n"
-
-            cmds_final.append([cmd_name, txt])
-
-        embeds = []
-
-        slash_msg = "`Veja meus comandos de barra usando:` **/**\n\n" if self.bot.slash_commands else ""
-
-        txt_chunked = chunk_list(cmds_final, 9)
-
-        for c, txt_pages in enumerate(txt_chunked):
-
-            embed = disnake.Embed(color=self.bot.get_color(ctx.me), title=f"Meus comandos ({len(cmds)}):",
-                                  description=slash_msg)
-
-            embed.set_footer(
-                text=f"Página: {c + 1}/{len(txt_chunked)} | para ver informações detalhadas de um comando especifico use: {prefix}{ctx.invoked_with} comando")
-
-            for cmd_name, cmd_desc in txt_pages:
-                embed.add_field(name=cmd_name, value=cmd_desc)
-
-            embeds.append(embed)
-
-        view = EmbedPaginator(ctx, embeds, timeout=60)
-
-        view.message = await ctx.reply(embed=embeds[0], view=view)
-
-        await view.wait()
-
     @commands.has_guild_permissions(manage_guild=True)
     @commands.cooldown(1, 10, commands.BucketType.guild)
     @commands.command(
         aliases=["mudarprefixo", "prefix", "changeprefix"],
         description="Alterar o prefixo do servidor",
-        usage="prefixo"
+        usage="{prefix}{cmd} [prefixo]\nEx: {prefix}{cmd} >>"
     )
     async def setprefix(self, ctx: CustomContext, prefix: str = None):
 
@@ -994,5 +916,4 @@ class Owner(commands.Cog):
 
 
 def setup(bot: BotCore):
-    bot.remove_command("help")
     bot.add_cog(Owner(bot))

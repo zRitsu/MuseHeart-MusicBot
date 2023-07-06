@@ -269,10 +269,12 @@ class GuildFavView(disnake.ui.View):
 
 class PinManager(commands.Cog):
 
+    emoji = "📌"
+    name = "Server Playlist"
+    desc_prefix = f"[{emoji} {name}] | "
+
     def __init__(self, bot: BotCore):
         self.bot = bot
-
-    desc_prefix = "📌 [Server Playlist] 📌 | "
 
     async def process_idle_embed(self, guild: disnake.Guild, guild_data: dict):
 

@@ -21,8 +21,6 @@ from utils.music.models import LavalinkPlayer
 if TYPE_CHECKING:
     from utils.client import BotCore
 
-desc_prefix = "🔧 [Configurações] 🔧 | "
-
 
 class SkinSelector(disnake.ui.View):
 
@@ -250,6 +248,10 @@ class PlayerSettings(disnake.ui.View):
 
 class MusicSettings(commands.Cog):
 
+    emoji = "🔧"
+    name = "Configurações"
+    desc_prefix = f"[{emoji} {name}] | "
+
     def __init__(self, bot: BotCore):
         self.bot = bot
         self.invite_cooldown = commands.CooldownMapping.from_cooldown(rate=1, per=45, type=commands.BucketType.guild)
@@ -309,9 +311,9 @@ class MusicSettings(commands.Cog):
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.command(
-        name="setup", aliases=["songrequestchannel", "sgrc"], usage="[id do canal ou #canal] [--reset]",
+        name="setup", aliases=["songrequestchannel", "sgrc"], usage="{prefix}{cmd}[id|#canal]\nEx: {prefix}{cmd} #canal",
         description="Criar/escolher um canal dedicado para pedir músicas e deixar player fixado.",
-        cooldown=setup_cd, max_concurrency=setup_mc
+        cooldown=setup_cd, max_concurrency=setup_mc, extras={"flags": setup_args}
     )
     async def setup_legacy(
             self,
@@ -319,7 +321,7 @@ class MusicSettings(commands.Cog):
             channel: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.ForumChannel, None] = None, *args
     ):
 
-        args, unknown = self.setup_args.parse_known_args(args)
+        args, unknown = ctx.command.extras['flags'].parse_known_args(args)
 
         await self.setup.callback(self=self, inter=ctx, target=channel,
                                   purge_messages=args.reset)
@@ -736,7 +738,7 @@ class MusicSettings(commands.Cog):
     @commands.has_guild_permissions(manage_guild=True)
     @commands.bot_has_guild_permissions(manage_threads=True)
     @commands.command(
-        name="reset", usage="[--delete]",
+        name="reset",
         description="Resetar as configurações relacionadas ao canal de pedir música (song request).",
         cooldown=setup_cd, max_concurrency=setup_mc
     )
@@ -883,7 +885,7 @@ class MusicSettings(commands.Cog):
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.command(name="adddjrole",description="Adicionar um cargo para a lista de DJ's do servidor.",
-                      usage="[id / nome / @cargo]", cooldown=djrole_cd, max_concurrency=djrole_mc)
+                      usage="{prefix}{cmd} [id|nome|@cargo]\nEx: {prefix}{cmd} @cargo", cooldown=djrole_cd, max_concurrency=djrole_mc)
     async def add_dj_role_legacy(self, ctx: CustomContext, *, role: Optional[disnake.Role] = None):
 
         if not role:
@@ -939,7 +941,7 @@ class MusicSettings(commands.Cog):
         await inter.send(f"O cargo {role.mention} foi adicionado à lista de DJ's.", ephemeral=True)
 
     @commands.has_guild_permissions(manage_guild=True)
-    @commands.command(description="Remover um cargo para a lista de DJ's do servidor.", usage="[id / nome / @cargo]",
+    @commands.command(description="Remover um cargo para a lista de DJ's do servidor.", usage="{prefix}{cmd} [id|nome|@cargo]\nEx: {prefix}{cmd} @cargo",
                       cooldown=djrole_cd, max_concurrency=djrole_mc)
     async def remove_dj_role_legacy(self, ctx: CustomContext, *, role: disnake.Role):
         await self.remove_dj_role.callback(self=self, inter=ctx, role=role)
@@ -1466,6 +1468,10 @@ class MusicSettings(commands.Cog):
         await inter.send(embeds=embeds, ephemeral=True)
 
 class RPCCog(commands.Cog):
+
+    emoji = "🔧"
+    name = "Configurações"
+    desc_prefix = f"[{emoji} {name}] | "
 
     def __init__(self, bot: BotCore):
         self.bot = bot

@@ -27,11 +27,15 @@ from utils.music.converters import time_format, fix_characters, string_to_second
     YOUTUBE_VIDEO_REG, google_search, percentage, music_source_image, perms_translations
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, fav_list, queue_track_index, \
-    pool_command, string_to_file, CommandArgparse, music_source_emoji_id, music_source_emoji_url
+    pool_command, string_to_file, CommandArgparse, music_source_emoji_url
 from user_agent import generate_user_agent
 
 
 class Music(commands.Cog):
+
+    emoji = "🎶"
+    name = "Música"
+    desc_prefix = f"[{emoji} {name}] | "
 
     search_sources_opts = [
         disnake.OptionChoice("Youtube", "ytsearch"),
@@ -77,8 +81,6 @@ class Music(commands.Cog):
 
         self.music_settings_cooldown = commands.CooldownMapping.from_cooldown(rate=3, per=15,
                                                                               type=commands.BucketType.guild)
-
-    desc_prefix = "🎶 [Música] 🎶 | "
 
     async def update_cache(self):
 
@@ -239,9 +241,10 @@ class Music(commands.Cog):
     @has_source()
     @commands.has_guild_permissions(manage_guild=True)
     @pool_command(
-        only_voiced=True, name="stageannounce", aliases=["stagevc", "togglestageannounce"], hidden=True,
+        only_voiced=True, name="stageannounce", aliases=["stagevc", "togglestageannounce"],
         description="Ativar o sistema de anuncio automático do palco com o nome da música.",
         cooldown=stage_cd, max_concurrency=stage_mc, extras={"exclusive_cooldown": True},
+        usage="{prefix}{cmd} <placeholders>\nEx: {track.author} - {track.title}"
     )
     async def stageannounce_legacy(self, ctx: CustomContext, *, template: str = None):
 
@@ -583,7 +586,8 @@ class Music(commands.Cog):
     @commands.bot_has_guild_permissions(send_messages=True)
     @commands.max_concurrency(1, commands.BucketType.member)
     @pool_command(name="addposition", description="Adicionar música em uma posição especifica da fila.",
-                  aliases=["adp", "addpos"], check_player=False, cooldown=play_cd, max_concurrency=play_mc)
+                  aliases=["adp", "addpos"], check_player=False, cooldown=play_cd, max_concurrency=play_mc,
+                  usage="{prefix}{cmd} [posição(Nº)] [nome|link]\nEx: {prefix}{cmd} 2 sekai - burn me down")
     async def addpos_legacy(self, ctx: CustomContext, position: Optional[int] = None, *, query: str = None):
 
         if not position:
@@ -616,10 +620,11 @@ class Music(commands.Cog):
     @commands.bot_has_guild_permissions(send_messages=True)
     @commands.max_concurrency(1, commands.BucketType.member)
     @pool_command(name="play", description="Tocar música em um canal de voz.", aliases=["p"], check_player=False,
-                  cooldown=play_cd, max_concurrency=play_mc)
+                  cooldown=play_cd, max_concurrency=play_mc, extras={"flags": play_flags},
+                  usage="{prefix}{cmd} [nome|link]\nEx: {prefix}{cmd} sekai - burn me down")
     async def play_legacy(self, ctx: CustomContext, *, flags: str = ""):
 
-        args, unknown = self.play_flags.parse_known_args(flags.split())
+        args, unknown = ctx.command.extras['flags'].parse_known_args(flags.split())
 
         await self.play.callback(
             self = self,
@@ -638,7 +643,8 @@ class Music(commands.Cog):
     @check_voice()
     @commands.bot_has_guild_permissions(send_messages=True)
     @pool_command(name="search", description="Pesquisar por músicas e escolher uma entre os resultados para tocar.",
-                  aliases=["sc"], check_player=False, cooldown=play_cd, max_concurrency=play_mc)
+                  aliases=["sc"], check_player=False, cooldown=play_cd, max_concurrency=play_mc,
+                  usage="{prefix}{cmd} [nome]\nEx: {prefix}{cmd} sekai - burn me down")
     async def search_legacy(self, ctx: CustomContext, *, query: str = None):
 
         if not query:
@@ -1550,10 +1556,11 @@ class Music(commands.Cog):
     @check_voice()
     @pool_command(name="skip", aliases=["next", "n", "s", "pular", "skipto"], cooldown=skip_back_cd,
                   max_concurrency=skip_back_mc, description=f"Pular a música atual que está tocando.",
-                  only_voiced=True)
+                  extras={"flags": case_sensitive_args}, only_voiced=True,
+                  usage="{prefix}{cmd} <termo>\nEx: {prefix}{cmd} sekai")
     async def skip_legacy(self, ctx: CustomContext, *, flags: str = ""):
 
-        args, unknown = self.case_sensitive_args.parse_known_args(flags.split())
+        args, unknown = ctx.command.extras['flags'].parse_known_args(flags.split())
 
         if ctx.invoked_with == "skipto" and not unknown:
             raise GenericError("**Você deve adicionar um nome para usar o skipto.**")
@@ -1833,7 +1840,7 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @pool_command(name="volume", description="Ajustar volume da música.", aliases=["vol", "v"], only_voiced=True,
-                  cooldown=volume_cd, max_concurrency=volume_mc)
+                  cooldown=volume_cd, max_concurrency=volume_mc, usage="{prefix}{cmd} [nivel]\nEx: {prefix}{cmd} 50")
     async def volume_legacy(self, ctx: CustomContext, level: str = None):
 
         if not level:
@@ -1970,7 +1977,10 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @pool_command(name="seek", aliases=["sk"], description="Avançar/Retomar a música para um tempo específico.",
-                  only_voiced=True, cooldown=seek_cd, max_concurrency=seek_mc)
+                  only_voiced=True, cooldown=seek_cd, max_concurrency=seek_mc,
+                  usage="{prefix}{cmd} [tempo]\n"
+                        "Ex 1: {prefix}{cmd} 10 (tempo 0:10)\n"
+                        "Ex 2: {prefix}{cmd} 1:45 (tempo 1:45)")
     async def seek_legacy(self, ctx: CustomContext, *, position: str = None):
 
         if not position:
@@ -2087,13 +2097,9 @@ class Music(commands.Cog):
     @check_voice()
     @pool_command(
         description=f"Selecionar modo de repetição entre: música atual / fila / desativar / quantidade (usando números).",
-        only_voiced=True, cooldown=loop_cd, max_concurrency=loop_mc)
+        only_voiced=True, cooldown=loop_cd, max_concurrency=loop_mc,
+        usage="{prefix}{cmd} <quantidade|modo>\nEx 1: {prefix}{cmd} 1\nEx 2: {prefix}{cmd} queue")
     async def loop(self, ctx: CustomContext, mode: str = None):
-
-        try:
-            bot = ctx.music_bot
-        except AttributeError:
-            bot = ctx.bot
 
         if not mode:
 
@@ -2243,10 +2249,11 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @pool_command(name="remove", aliases=["r", "del"], description="Remover uma música específica da fila.",
-                  only_voiced=True, max_concurrency=remove_mc)
+                  only_voiced=True, max_concurrency=remove_mc, extras={"flags": case_sensitive_args},
+                  usage="{prefix}{cmd} [nome]\nEx: {prefix}{cmd} sekai")
     async def remove_legacy(self, ctx: CustomContext, *, flags: str = ""):
 
-        args, unknown = self.case_sensitive_args.parse_known_args(flags.split())
+        args, unknown = ctx.command.extras['flags'].parse_known_args(flags.split())
 
         if not unknown:
             raise GenericError("**Você não adicionou o nome da música.**")
@@ -2357,10 +2364,11 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @pool_command(name="move", aliases=["mv", "mover"], only_voiced=True, max_concurrency=remove_mc,
-                  description="Mover uma música para a posição especificada da fila.")
+                  description="Mover uma música para a posição especificada da fila.", extras={"flags": move_args},
+                  usage="{prefix}{cmd} [nome]\nEx: {prefix}{cmd} sekai")
     async def move_legacy(self, ctx: CustomContext, position: Optional[int] = None, *, flags: str = ""):
 
-        args, unknown = self.move_args.parse_known_args(args=flags.split())
+        args, unknown = ctx.command.extras['flags'].parse_known_args(flags.split())
 
         if args.position:
             if position:
@@ -2474,10 +2482,11 @@ class Music(commands.Cog):
     @check_voice()
     @pool_command(name="rotate", aliases=["rt", "rotacionar"], only_voiced=True,
                   description="Rotacionar a fila para a música especificada.",
-                  cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
+                  cooldown=queue_manipulation_cd, max_concurrency=remove_mc, extras={"flags": case_sensitive_args},
+                  usage="{prefix}{cmd} [nome]\nEx: {prefix}{cmd} sekai")
     async def rotate_legacy(self, ctx: CustomContext, *, flags: str = ""):
 
-        args, unknown = self.case_sensitive_args.parse_known_args(flags.split())
+        args, unknown = ctx.command.extras['flags'].parse_known_args(flags.split())
 
         if not unknown:
             raise GenericError("**Você não adicionou o nome da música.**")
@@ -2772,7 +2781,8 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @pool_command(name="adddj", aliases=["adj"], only_voiced=True,
-                  description="Adicionar um membro à lista de DJ's na sessão atual do player.")
+                  description="Adicionar um membro à lista de DJ's na sessão atual do player.",
+                  usage="{prefix}{cmd} [id|nome|@cargo]\nEx: {prefix}{cmd} @cargo")
     async def add_dj_legacy(self, ctx: CustomContext, user: Optional[disnake.Member] = None):
 
         if not user:
@@ -3086,10 +3096,10 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @pool_command(name="clear", aliases=["limpar"], description="Limpar a fila de música.", only_voiced=True,
-                  cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
+                  extras={"flags": clear_flags}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
     async def clear_legacy(self, ctx: CustomContext, *, flags: str = ""):
 
-        args, unknown = self.clear_flags.parse_known_args(flags.split())
+        args, unknown = ctx.command.extras['flags'].parse_known_args(flags.split())
 
         await self.clear.callback(
             self=self, inter=ctx,

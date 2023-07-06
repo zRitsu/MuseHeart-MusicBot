@@ -30,15 +30,12 @@ class Test:
 class CommandArgparse(argparse.ArgumentParser):
 
     def __init__(self, *args, **kwargs):
-        try:
-            kwargs.pop('exit_on_error')
-        except:
-            pass
-        try:
-            kwargs.pop('allow_abbrev')
-        except:
-            pass
-        super().__init__(*args, exit_on_error=False, allow_abbrev=False, **kwargs)
+
+        kwargs.pop('exit_on_error', None)
+        kwargs.pop('allow_abbrev', None)
+        kwargs.pop('add_help', None)
+
+        super().__init__(*args, exit_on_error=False, allow_abbrev=False, add_help=False, **kwargs)
 
     def error(self, message: str):
         raise ArgumentParsingError(message)
