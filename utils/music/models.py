@@ -574,10 +574,10 @@ class LavalinkPlayer(wavelink.Player):
         except:
             track = None
 
-        if not track or not track.ytid:
+        if not track or not track.ytid or track.is_stream or track.duration < 90000:
 
             for t in self.played + self.queue_autoplay:
-                if t.ytid:
+                if t.ytid and not t.is_stream and t.duration >= 90000:
                     track = t
                     break
 
@@ -635,6 +635,13 @@ class LavalinkPlayer(wavelink.Player):
             tracks_final = []
 
             for t in tracks:
+
+                if t.is_stream:
+                    continue
+
+                if t.duration < 90000:
+                    continue
+
                 lavalink_track = LavalinkTrack(id_=t.id, info=t.info, autoplay=True, requester=self.bot.user.id)
                 lavalink_track.info["extra"]["related"] = info
                 tracks_final.append(lavalink_track)
