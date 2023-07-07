@@ -2365,7 +2365,8 @@ class Music(commands.Cog):
     @check_voice()
     @pool_command(name="move", aliases=["mv", "mover"], only_voiced=True, max_concurrency=remove_mc,
                   description="Mover uma música para a posição especificada da fila.", extras={"flags": move_args},
-                  usage="{prefix}{cmd} [nome]\nEx: {prefix}{cmd} sekai")
+                  usage="{prefix}{cmd} <posição(nº)> [nome]\nEx 1: {prefix}{cmd} 2 sekai\nEx 2: {prefix}{cmd} sekai\n"
+                        "(caso não especifique a posição a música será movida pra posição 1)")
     async def move_legacy(self, ctx: CustomContext, position: Optional[int] = None, *, flags: str = ""):
 
         args, unknown = ctx.command.extras['flags'].parse_known_args(flags.split())
@@ -3082,15 +3083,15 @@ class Music(commands.Cog):
     clear_flags.add_argument('-playlist', '-list', '-pl', nargs='+', default="",
                              help="Remover música que tiver com nome especificado na playlist associada. Ex: -playlist minhaplaylist")
     clear_flags.add_argument('-minimal_time', '-mintime', '-min','-min_duration', '-minduration',  default=None,
-                             help="Remover músicas com duração mínima especificada. Ex: -min 1:23.")
+                             help="Remover músicas com a duração mínima especificada. Ex: -min 1:23.")
     clear_flags.add_argument('-max_time', '-maxtime', '-max', '-max_duration', '-maxduration', default=None,
-                             help="Remover músicas com duração máxima especificada. Ex: -max 1:23.")
+                             help="Remover músicas com a duração máxima especificada. Ex: -max 1:23.")
     clear_flags.add_argument('-start_position', '-startpos', '-start', type=int, default=None,
-                             help="Remover músicas da fila a partir de uma posição inicial da fila. Ex: -start 10")
+                             help="Remover músicas a partir de uma posição inicial da fila. Ex: -start 10")
     clear_flags.add_argument('-end_position', '-endpos', '-end', type=int, default=None,
                              help="Remover músicas da fila até uma posição específica na fila. Ex: -end 15")
     clear_flags.add_argument('-absent', '-absentmembers', '-abs', action='store_true',
-                             help="Remover músicas adicionads por membros fora do canal")
+                             help="Remover músicas adicionads por membros que saíram do canal")
 
     @is_dj()
     @has_player()

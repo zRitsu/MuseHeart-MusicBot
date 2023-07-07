@@ -311,7 +311,7 @@ class MusicSettings(commands.Cog):
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.command(
-        name="setup", aliases=["songrequestchannel", "sgrc"], usage="{prefix}{cmd}[id|#canal]\nEx: {prefix}{cmd} #canal",
+        name="setup", aliases=["songrequestchannel", "sgrc"], usage="{prefix}{cmd} [id|#canal]\nEx: {prefix}{cmd} #canal",
         description="Criar/escolher um canal dedicado para pedir músicas e deixar player fixado.",
         cooldown=setup_cd, max_concurrency=setup_mc, extras={"flags": setup_args}
     )
@@ -969,7 +969,8 @@ class MusicSettings(commands.Cog):
         await inter.send(f"O cargo {role.mention} foi adicionado à lista de DJ's.", ephemeral=True)
 
     @commands.has_guild_permissions(manage_guild=True)
-    @commands.command(description="Remover um cargo para a lista de DJ's do servidor.", usage="{prefix}{cmd} [id|nome|@cargo]\nEx: {prefix}{cmd} @cargo",
+    @commands.command(name="removedjrole", description="Remover um cargo para a lista de DJ's do servidor.",
+                      usage="{prefix}{cmd} [id|nome|@cargo]\nEx: {prefix}{cmd} @cargo",
                       cooldown=djrole_cd, max_concurrency=djrole_mc)
     async def remove_dj_role_legacy(self, ctx: CustomContext, *, role: disnake.Role):
         await self.remove_dj_role.callback(self=self, inter=ctx, role=role)
