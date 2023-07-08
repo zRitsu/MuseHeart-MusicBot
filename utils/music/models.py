@@ -701,12 +701,6 @@ class LavalinkPlayer(wavelink.Player):
             pass
 
         try:
-            self.message_updater_task.cancel()
-            self.message_updater_task = None
-        except AttributeError:
-            pass
-
-        try:
             track = self.queue.popleft()
             clear_autoqueue = bool(track.ytid)
 
@@ -827,8 +821,6 @@ class LavalinkPlayer(wavelink.Player):
                 interaction=inter,
                 force=True if (self.static or not self.loop or not self.is_last_message()) else False,
                 rpc_update=True)
-
-        self.message_updater_task = self.bot.loop.create_task(self.message_updater())
 
         await self.play(track, start=start_position if not track.is_stream else 0)
 
@@ -1031,6 +1023,13 @@ class LavalinkPlayer(wavelink.Player):
         await func(topic=msg)
         self.last_stage_title = msg
 
+    def start_message_updater_task(self):
+        try:
+            self.message_updater_task.cancel()
+        except AttributeError:
+            pass
+        self.message_updater_task = self.bot.loop.create_task(self.message_updater())
+
     async def invoke_np(self, force=False, interaction=None, rpc_update=False):
 
         if not self.current or self.updating:
@@ -1189,6 +1188,7 @@ class LavalinkPlayer(wavelink.Player):
                 else:
                     await interaction.response.edit_message(allowed_mentions=self.allowed_mentions, **self.last_data)
                 self.updating = False
+                self.start_message_updater_task()
                 return
 
             except Exception:
@@ -1208,7 +1208,6 @@ class LavalinkPlayer(wavelink.Player):
 
                         await self.update_stage_topic()
                         self.updating = False
-                        #self.message_updater_task = self.bot.loop.create_task(self.message_updater())
                         return
                     except Exception as e:
                         traceback.print_exc()
@@ -1224,6 +1223,8 @@ class LavalinkPlayer(wavelink.Player):
                 self.message = await self.text_channel.send(allowed_mentions=self.allowed_mentions, **self.last_data)
             except:
                 traceback.print_exc()
+
+            self.start_message_updater_task()
 
         await self.update_stage_topic()
 
