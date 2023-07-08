@@ -233,7 +233,7 @@ class HelpCog(commands.Cog, name="Ajuda"):
             owner = appinfo.owner
 
         if (max_pages:=len(cmds)) > 1:
-            embed.set_footer(icon_url=owner.avatar.replace(static_format="png"),
+            embed.set_footer(icon_url=owner.display_avatar.replace(static_format="png"),
                              text=f"Página: {index + 1} de {max_pages}")
         return embed
 
@@ -301,7 +301,7 @@ class HelpCog(commands.Cog, name="Ajuda"):
                                                                                        f"@{ctx.me.display_name}"),
             color=self.bot.get_color(ctx.guild.me))
         embed.set_author(name=f"Menu de ajuda - Lista de comandos (prefix)",
-                         icon_url=self.bot.user.avatar.replace(static_format="png").url)
+                         icon_url=self.bot.user.display_avatar.replace(static_format="png").url)
 
         embed.set_footer(icon_url=self.bot.owner.display_avatar.replace(static_format="png").url,
                          text=f"Dono(a): {self.bot.owner} [{self.bot.owner.id}]")
