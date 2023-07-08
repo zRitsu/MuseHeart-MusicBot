@@ -15,7 +15,7 @@ class DefaultSkin:
 
     def __init__(self):
         self.name = "default"
-        self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1119822125021270116/default.png"
+        self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1127304244492509325/default.png"
 
     def setup_features(self, player: LavalinkPlayer):
         player.mini_queue_feature = True
@@ -71,8 +71,6 @@ class DefaultSkin:
         if not player.current.autoplay:
             txt += f"\n> ✋ **⠂Pedido por:** <@{player.current.requester}>"
 
-        txt += f"\n> 🔊 **⠂Volume:** `{player.volume}%`"
-
         if player.current.track_loops:
             txt += f"\n> 🔂 **⠂Repetições restante:** `{player.current.track_loops}`"
 
@@ -82,9 +80,6 @@ class DefaultSkin:
             else:
                 e = '🔁'; m = 'Fila'
             txt += f"\n> {e} **⠂Modo de repetição:** `{m}`"
-
-        if player.nightcore:
-            txt += "\n> 🇳 **⠂Efeito nightcore:** `ativado`"
 
         if player.current.album_name:
             txt += f"\n> 💽 **⠂Álbum:** [`{fix_characters(player.current.album_name, limit=16)}`]({player.current.album_url})"
@@ -98,12 +93,9 @@ class DefaultSkin:
         if player.keep_connected:
             txt += "\n> ♾️ **⠂Modo 24/7:** `Ativado`"
 
-        elif player.restrict_mode:
-            txt += f"\n> 🔒 **⠂Modo restrito:** `Ativado`"
-
         txt += f"{vc_txt}\n"
 
-        bar = "https://cdn.discordapp.com/attachments/554468640942981147/1085234017693085776/rainbow_bar3.gif"
+        bar = "https://cdn.discordapp.com/attachments/554468640942981147/1127294696025227367/rainbow_bar3.gif"
 
         if player.command_log:
             txt += f"```ansi\n [34;1mÚltima Interação[0m```**┕ {player.command_log_emoji} ⠂**{player.command_log}\n"
@@ -148,7 +140,7 @@ class DefaultSkin:
             disnake.ui.Button(emoji="⏮️", custom_id=PlayerControls.back),
             disnake.ui.Button(emoji="⏹️", custom_id=PlayerControls.stop),
             disnake.ui.Button(emoji="⏭️", custom_id=PlayerControls.skip),
-            disnake.ui.Button(emoji="<:music_queue:703761160679194734>", custom_id=PlayerControls.queue, label="[ Queue ]"),
+            disnake.ui.Button(emoji="<:music_queue:703761160679194734>", custom_id=PlayerControls.queue),
             disnake.ui.Select(
                 placeholder="Mais opções:",
                 custom_id="musicplayer_dropdown_inter",
@@ -170,7 +162,7 @@ class DefaultSkin:
                         description="Voltar o tempo da música atual para o inicio."
                     ),
                     disnake.SelectOption(
-                        label="Volume", emoji="🔊",
+                        label=f"Volume: {player.volume}%", emoji="🔊",
                         value=PlayerControls.volume,
                         description="Ajustar volume."
                     ),
@@ -190,9 +182,9 @@ class DefaultSkin:
                         description="Ativar/Desativar repetição da música/fila."
                     ),
                     disnake.SelectOption(
-                        label="Nightcore", emoji="🇳",
+                        label=("Desativar" if player.autoplay else "ativar") + " o efeito nightcore", emoji="🇳",
                         value=PlayerControls.nightcore,
-                        description="Ativar/Desativar o efeito nightcore."
+                        description="Efeito que aumenta velocidade e tom da música."
                     ),
                     disnake.SelectOption(
                         label=("Desativar" if player.autoplay else "ativar") + " o autoplay", emoji="🔄",
@@ -200,7 +192,7 @@ class DefaultSkin:
                         description="Sistema de adição de música automática quando a fila estiver vazia."
                     ),
                     disnake.SelectOption(
-                        label="Ativar/Desativar modo restrito", emoji="🔐",
+                        label= ("Desativar" if player.restrict_mode else "Ativar") + " o modo restrito", emoji="🔐",
                         value=PlayerControls.restrict_mode,
                         description="Apenas DJ's/Staff's podem usar comandos restritos."
                     ),

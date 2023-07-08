@@ -36,11 +36,11 @@ class ClassicSkin:
 
         queue_txt = ""
 
-        bar = "https://cdn.discordapp.com/attachments/554468640942981147/1085234017693085776/rainbow_bar3.gif"
+        bar = "https://cdn.discordapp.com/attachments/554468640942981147/1127294696025227367/rainbow_bar3.gif"
 
         embed_top = disnake.Embed(
             color=color,
-            description=f"> [**{player.current.title}**]({player.current.uri or player.current.search_uri})"
+            description=f"### [{player.current.title}]({player.current.uri or player.current.search_uri})"
         )
         embed.set_image(url=bar)
 
@@ -73,11 +73,6 @@ class ClassicSkin:
         if player.current.playlist_name:
             txt += f"📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=23)}`]({player.current.playlist_url})\n"
 
-        txt += f"🔊 **⠂Volume:** `{player.volume}%`\n"
-
-        if player.restrict_mode:
-            txt += "🔒 **⠂Modo restrito:** `ativado`\n"
-
         if qsize := len(player.queue):
 
             if not player.mini_queue_enabled:
@@ -85,7 +80,7 @@ class ClassicSkin:
             else:
                 queue_txt += "```ansi\n[0;33mPróximas Músicas:[0m```" + "\n".join(
                     f"`{(n + 1):02}) [{time_format(t.duration) if t.duration else '🔴 Livestream'}]` "
-                    f"[`{fix_characters(t.title, 38)}`]({t.uri})" for n, t in
+                    f"[`{fix_characters(t.title, 29)}`]({t.uri})" for n, t in
                     enumerate(itertools.islice(player.queue, 3))
                 )
 
@@ -136,7 +131,7 @@ class ClassicSkin:
                         description="Voltar o tempo da música atual para o inicio."
                     ),
                     disnake.SelectOption(
-                        label="Volume", emoji="🔊",
+                        label=f"Volume: {player.volume}%", emoji="🔊",
                         value=PlayerControls.volume,
                         description="Ajustar volume."
                     ),
@@ -156,9 +151,9 @@ class ClassicSkin:
                         description="Ativar/Desativar repetição da música/fila."
                     ),
                     disnake.SelectOption(
-                        label="Nightcore", emoji="🇳",
+                        label=("Desativar" if player.autoplay else "ativar") + " o efeito nightcore", emoji="🇳",
                         value=PlayerControls.nightcore,
-                        description="Ativar/Desativar o efeito nightcore."
+                        description="Efeito que aumenta velocidade e tom da música."
                     ),
                     disnake.SelectOption(
                         label=("Desativar" if player.autoplay else "ativar") + " o autoplay", emoji="🔄",
@@ -166,7 +161,7 @@ class ClassicSkin:
                         description="Sistema de adição de música automática quando a fila estiver vazia."
                     ),
                     disnake.SelectOption(
-                        label="Ativar/Desativar modo restrito", emoji="🔐",
+                        label= ("Desativar" if player.restrict_mode else "Ativar") + " o modo restrito", emoji="🔐",
                         value=PlayerControls.restrict_mode,
                         description="Apenas DJ's/Staff's podem usar comandos restritos."
                     ),

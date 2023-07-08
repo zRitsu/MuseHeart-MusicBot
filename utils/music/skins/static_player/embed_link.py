@@ -126,7 +126,7 @@ class EmbedLinkStaticSkin:
                             description="Voltar o tempo da música atual para o inicio."
                         ),
                         disnake.SelectOption(
-                            label="Volume", emoji="🔊",
+                            label=f"Volume: {player.volume}%", emoji="🔊",
                             value=PlayerControls.volume,
                             description="Ajustar volume."
                         ),
@@ -146,12 +146,17 @@ class EmbedLinkStaticSkin:
                             description="Ativar/Desativar repetição da música/fila."
                         ),
                         disnake.SelectOption(
-                            label="Nightcore", emoji="🇳",
+                            label=("Desativar" if player.autoplay else "ativar") + " o efeito nightcore", emoji="🇳",
                             value=PlayerControls.nightcore,
-                            description="Ativar/Desativar o efeito nightcore."
+                            description="Efeito que aumenta velocidade e tom da música."
                         ),
                         disnake.SelectOption(
-                            label="Ativar/Desativar modo restrito", emoji="🔐",
+                            label=("Desativar" if player.autoplay else "ativar") + " o autoplay", emoji="🔄",
+                            value=PlayerControls.autoplay,
+                            description="Sistema de adição de música automática quando a fila estiver vazia."
+                        ),
+                        disnake.SelectOption(
+                            label=("Desativar" if player.restrict_mode else "Ativar") + " o modo restrito", emoji="🔐",
                             value=PlayerControls.restrict_mode,
                             description="Apenas DJ's/Staff's podem usar comandos restritos."
                         ),

@@ -15,7 +15,7 @@ class DefaultProgressbarSkin:
 
     def __init__(self):
         self.name = "default_progressbar"
-        self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1119822945745915914/default_progressbar.png"
+        self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1127304244224081931/default_progressbar.png"
 
     def setup_features(self, player: LavalinkPlayer):
         player.mini_queue_feature = True
@@ -74,8 +74,6 @@ class DefaultProgressbarSkin:
         if not player.current.autoplay:
             txt += f"\n> ✋ **⠂Pedido por:** <@{player.current.requester}>"
 
-        txt += f"\n> 🔊 **⠂Volume:** `{player.volume}%`"
-
         if player.current.track_loops:
             txt += f"\n> 🔂 **⠂Repetições restante:** `{player.current.track_loops}`"
 
@@ -88,9 +86,6 @@ class DefaultProgressbarSkin:
                 m = 'Fila'
             txt += f"\n> {e} **⠂Modo de repetição:** `{m}`"
 
-        if player.nightcore:
-            txt += f"\n> 🇳 **⠂Efeito nightcore:** `ativado`"
-
         if player.current.album_name:
             txt += f"\n> 💽 **⠂Álbum:** [`{fix_characters(player.current.album_name, limit=16)}`]({player.current.album_url})"
 
@@ -102,12 +97,6 @@ class DefaultProgressbarSkin:
 
         if player.keep_connected:
             txt += "\n> ♾️ **⠂Modo 24/7:** `Ativado`"
-
-        elif player.restrict_mode:
-            txt += f"\n> 🔒 **⠂Modo restrito:** `Ativado`"
-
-        if player.ping:
-            txt += f"\n> 📶 **⠂Latência:** `{player.ping}ms`"
 
         txt += f"{vc_txt}\n"
 
@@ -122,6 +111,8 @@ class DefaultProgressbarSkin:
             txt += f"\n`No momento estou usando a` {mode} `enquanto aguardo algum membro adicionar novas músicas.`\n"
 
         txt += duration
+
+        rainbow_bar = "https://cdn.discordapp.com/attachments/554468640942981147/1127294696025227367/rainbow_bar3.gif"
 
         if qlenght and player.mini_queue_enabled:
 
@@ -144,10 +135,10 @@ class DefaultProgressbarSkin:
                 if queue_duration:
                     embed_queue.description += f"\n`[⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + (player.current.duration if not player.current.is_stream else 0)) - player.position)).timestamp())}:R> `⌛]`"
 
-            embed_queue.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/1085234017693085776/rainbow_bar3.gif")
+            embed_queue.set_image(url=rainbow_bar)
 
         embed.description = txt
-        embed.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/1085234017693085776/rainbow_bar3.gif")
+        embed.set_image(url=rainbow_bar)
         embed.set_thumbnail(url=player.current.thumb)
 
         data["embeds"] = [embed_queue, embed] if embed_queue else [embed]
@@ -157,7 +148,7 @@ class DefaultProgressbarSkin:
             disnake.ui.Button(emoji="⏮️", custom_id=PlayerControls.back),
             disnake.ui.Button(emoji="⏹️", custom_id=PlayerControls.stop),
             disnake.ui.Button(emoji="⏭️", custom_id=PlayerControls.skip),
-            disnake.ui.Button(emoji="<:music_queue:703761160679194734>", custom_id=PlayerControls.queue, label="[ Queue ]"),
+            disnake.ui.Button(emoji="<:music_queue:703761160679194734>", custom_id=PlayerControls.queue),
             disnake.ui.Select(
                 placeholder="Mais opções:",
                 custom_id="musicplayer_dropdown_inter",
@@ -179,7 +170,7 @@ class DefaultProgressbarSkin:
                         description="Voltar o tempo da música atual para o inicio."
                     ),
                     disnake.SelectOption(
-                        label="Volume", emoji="🔊",
+                        label=f"Volume: {player.volume}%", emoji="🔊",
                         value=PlayerControls.volume,
                         description="Ajustar volume."
                     ),
@@ -199,9 +190,9 @@ class DefaultProgressbarSkin:
                         description="Ativar/Desativar repetição da música/fila."
                     ),
                     disnake.SelectOption(
-                        label="Nightcore", emoji="🇳",
+                        label=("Desativar" if player.autoplay else "ativar") + " o efeito nightcore", emoji="🇳",
                         value=PlayerControls.nightcore,
-                        description="Ativar/Desativar o efeito nightcore."
+                        description="Efeito que aumenta velocidade e tom da música."
                     ),
                     disnake.SelectOption(
                         label=("Desativar" if player.autoplay else "ativar") + " o autoplay", emoji="🔄",
@@ -209,7 +200,7 @@ class DefaultProgressbarSkin:
                         description="Sistema de adição de música automática quando a fila estiver vazia."
                     ),
                     disnake.SelectOption(
-                        label="Ativar/Desativar modo restrito", emoji="🔐",
+                        label= ("Desativar" if player.restrict_mode else "Ativar") + " o modo restrito", emoji="🔐",
                         value=PlayerControls.restrict_mode,
                         description="Apenas DJ's/Staff's podem usar comandos restritos."
                     ),

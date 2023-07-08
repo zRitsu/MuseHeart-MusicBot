@@ -1125,7 +1125,7 @@ class LavalinkPlayer(wavelink.Player):
                                 description="Voltar o tempo da música atual para o inicio."
                             ),
                             disnake.SelectOption(
-                                label="Volume", emoji="🔊",
+                                label=f"Volume: {self.volume}%", emoji="🔊",
                                 value=PlayerControls.volume,
                                 description="Ajustar volume."
                             ),
@@ -1145,17 +1145,18 @@ class LavalinkPlayer(wavelink.Player):
                                 description="Ativar/Desativar repetição da música/fila."
                             ),
                             disnake.SelectOption(
-                                label="Nightcore", emoji="🇳",
+                                label=("Desativar" if self.autoplay else "ativar") + " o efeito nightcore", emoji="🇳",
                                 value=PlayerControls.nightcore,
-                                description="Ativar/Desativar o efeito nightcore."
+                                description="Efeito que aumenta velocidade e tom da música."
                             ),
                             disnake.SelectOption(
-                                label=("Desativar" if self.autoplay else "ativar") + " o autoplay", emoji="🔄",
+                                label=("Desativar" if self.autoplay else "ativar") + " a reprodução automática", emoji="🔄",
                                 value=PlayerControls.autoplay,
-                                description="Sistema de adição de música automática quando a fila estiver vazia."
+                                description="Sistema de reprodução de música automática quando a fila tiver vazia."
                             ),
                             disnake.SelectOption(
-                                label="Ativar/Desativar modo restrito", emoji="🔐",
+                                label=("Desativar" if self.restrict_mode else "Ativar") + " o modo restrito",
+                                emoji="🔐",
                                 value=PlayerControls.restrict_mode,
                                 description="Apenas DJ's/Staff's podem usar comandos restritos."
                             ),
