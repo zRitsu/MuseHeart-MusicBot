@@ -471,9 +471,14 @@ class Misc(commands.Cog):
         except AttributeError:
             avatar = bot.owner.default_avatar.with_static_format("png").url
 
+        try:
+            owner = bot.appinfo.team.owner
+        except AttributeError:
+            owner = bot.appinfo.owner
+
         embed.set_footer(
             icon_url=avatar,
-            text=f"Dono(a): {bot.owner}"
+            text=f"Dono(a): {owner} [{owner.id}]"
         )
 
         components = [disnake.ui.Button(custom_id="bot_invite", label="Me adicione no seu servidor")] if [b for b in bot.pool.bots if b.appinfo and b.appinfo.bot_public] else None
