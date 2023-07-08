@@ -174,18 +174,18 @@ class HelpCog(commands.Cog, name="Ajuda"):
 
         embed = discord.Embed(color=self.bot.get_color(ctx.guild.me))
 
-        txt = ""
-
-        if not category:
-            category = "Diversos"
-        txt += f"### {emoji} ⠂Categoria: [ {category} ]\n```\nComando: {index + 1} de {len(cmds)}```\n"
-        txt += f"⌨️ **⠂Comando: {ctx.prefix}{cmd}** ```\n{help_cmd}```\n"
+        txt = f"### ⌨️ ⠂Comando: {ctx.prefix}{cmd}\n```\n{help_cmd}```\n"
         if cmd.aliases:
             aliases = " | ".join([f"{ctx.prefix}{ali}" for ali in cmd.aliases])
             txt += f"🔄 **⠂Alternativas:** ```\n{aliases}```\n"
         if hasattr(cmd, 'commands'):
             subs = " | ".join([c.name for c in cmd.commands if (await check_perms(ctx, c))])
             txt += f"🔢 **⠂Subcomandos:** ```{subs}``` Use o comando: `[ {ctx.prefix}help {cmd} subcomando ]` para ver mais detalhes do subcomando.\n\n"
+
+        if usage_cmd:
+            txt += f"📘 **⠂Como Usar:** ```\n{usage_cmd}```\n" \
+                   f"⚠️ **⠂Notas sobre o uso dos argumentos no comando:** ```\n" \
+                   f"[] = Obrigatório | <> = Opcional```"
 
         flags = cmd.extras.get("flags")
 
@@ -195,37 +195,32 @@ class HelpCog(commands.Cog, name="Ajuda"):
 
             for a in actions:
 
-                #if a.hidden:
+                # if a.hidden:
                 #    continue
 
                 if not a.help or not a.option_strings:
                     continue
 
-                s = "/".join(i for i in a.option_strings)
+                s = " ".join(i for i in a.option_strings)
 
                 s = f"[{s}] {a.help}"
 
-                #s += f" = `{a.help}`"
+                # s += f" = `{a.help}`"
 
-                #if a.default is False:
+                # if a.default is False:
                 #	s += " `Padrão: Desativado`"
-                #elif a.default is True:
+                # elif a.default is True:
                 #	s += " `Padrão: Ativado`"
-                #elif not a.default is None:
+                # elif not a.default is None:
                 #	s += f" `Padrão: {a.default}`"
                 t.append(s)
 
             if t:
-                txt += ("🚩 **Flags `(opções para adicionar após os argumentos do comando)`:**```ini\n" + "\n\n".join(t) + "```\n")
-
-        if usage_cmd:
-            txt += f"📘 **⠂Como Usar:** ```\n{usage_cmd}```\n" \
-                   f"⚠️ **⠂Notas sobre o uso dos argumentos no comando:** ```\n" \
-                   f"[] = Obrigatório\n<> = Opcional```"
-
-        embed.description = txt
+                txt += ("🚩 **⠂Flags `(opções para adicionar no final do comando)`:**```ini\n" + "\n\n".join(t) + "```")
 
         embed.set_author(name="Menu de ajuda - Lista de comandos (prefix)", icon_url=self.bot.user.display_avatar.url)
+
+        embed.description = txt
 
         try:
             appinfo = ctx.bot.appinfo
@@ -236,8 +231,10 @@ class HelpCog(commands.Cog, name="Ajuda"):
             owner = appinfo.team.owner
         except AttributeError:
             owner = appinfo.owner
-        embed.set_footer(icon_url=owner.avatar.replace(static_format="png"),
-                         text=f"Dono(a): {owner} [{owner.id}]")
+
+        if (max_pages:=len(cmds)) > 1:
+            embed.set_footer(icon_url=owner.avatar.replace(static_format="png"),
+                             text=f"Página: {index + 1} de {max_pages}")
         return embed
 
     @commands.cooldown(2, 5, commands.BucketType.user)
@@ -317,10 +314,8 @@ class HelpCog(commands.Cog, name="Ajuda"):
 
         await view.wait()
 
-        txt = "\n```ansi\n[33;1mTempo esgotado! Caso queira continuar navegando no menu de ajuda use o comando novamente...[0m```"
         eb = view.main_embed
         eb.clear_fields()
-        eb.description += txt
 
         for item in view.children:
             if isinstance(item, (discord.ui.Button, discord.ui.Select)):
