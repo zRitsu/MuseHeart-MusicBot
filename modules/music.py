@@ -1241,20 +1241,7 @@ class Music(commands.Cog):
 
                 try:
                     message = await channel.fetch_message(int(static_player['message_id']))
-
-                    # TODO: Code temporário até investigar o motivo do id da mensagem ser atribuido de outro bot
-                    #  em ocasião desconhecida, no momento isso aconteceu apenas em fórum.
-                    if message.author.id != bot.user.id and isinstance(inter, disnake.MessageInteraction) and \
-                            channel == inter.message.channel and inter.message.author.id == bot.user.id:
-                        message = inter.message
-                        guild_data["player_controller"]["message_id"] = str(message.id)
-
-                        try:
-                            await self.bot.update_data(message.guild.id, guild_data, db_name=DBModel.guilds)
-                        except Exception:
-                            traceback.print_exc()
-
-                except (TypeError, AttributeError):
+                except TypeError:
                     message = None
                 except:
                     message = await send_idle_embed(channel, bot=bot, guild_data=guild_data)
