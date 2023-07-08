@@ -3073,7 +3073,7 @@ class Music(commands.Cog):
         await view.wait()
 
     clear_flags = CommandArgparse()
-    clear_flags.add_argument('-song_name', '-name', '-title', nargs='+', help="incluir nome que tiver na música. Ex: -name NCS")
+    clear_flags.add_argument('-song_name', '-name', '-title', nargs='+', help="incluir nome que tiver na música. Ex: -name NCS", default="")
     clear_flags.add_argument('-uploader', '-author', '-artist', nargs = '+', default="",
                              help="Remover músicas com o nome que tiver no autor especificado. Ex: -artist sekai")
     clear_flags.add_argument('-member', '-user', '-u', nargs='+', default="",
