@@ -4102,6 +4102,10 @@ class Music(commands.Cog):
         if message.author.bot and not isinstance(message.channel, disnake.StageChannel):
             return
 
+        if message.content.startswith("/"):
+            await self.delete_message(message)
+            return
+
         try:
             data = await self.bot.get_data(message.guild.id, db_name=DBModel.guilds)
         except AttributeError:
