@@ -1072,8 +1072,6 @@ class LavalinkPlayer(wavelink.Player):
 
         self.last_data = data
 
-        self.updating = True
-
         if not self.controller_mode:
 
             self.message = None
@@ -1081,6 +1079,8 @@ class LavalinkPlayer(wavelink.Player):
             if self.temp_embed:
                 self.last_data["embeds"].insert(0, self.temp_embed)
                 self.temp_embed = None
+
+            self.updating = True
 
             await self.text_channel.send(allowed_mentions=self.allowed_mentions, **self.last_data)
 
@@ -1182,6 +1182,7 @@ class LavalinkPlayer(wavelink.Player):
                         )
                     )
 
+            self.updating = True
 
             try:
                 if interaction.response.is_done():
@@ -1211,6 +1212,7 @@ class LavalinkPlayer(wavelink.Player):
                         self.updating = False
                         return
                     except Exception as e:
+                        self.updating = False
                         traceback.print_exc()
                         if self.static or self.has_thread:
                             self.set_command_log(
