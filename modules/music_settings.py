@@ -501,12 +501,29 @@ class MusicSettings(commands.Cog):
                         func = inter.send
                         kwargs_msg = {"ephemeral": True}
 
+            buttons = [
+                disnake.ui.Button(label="Criar canal de texto", custom_id=f"text_channel_{id_}", emoji="💬"),
+                disnake.ui.Button(label="Criar canal de voz", custom_id=f"voice_channel_{id_}", emoji="🔊"),
+                disnake.ui.Button(label="Cancelar", custom_id=f"voice_channel_cancel_{id_}", emoji="❌")
+            ]
+
+            if "COMMUNITY" in guild.features:
+                buttons.insert(2, disnake.ui.Button(label="Criar canal de palco", custom_id=f"stage_channel_{id_}",
+                                  emoji="<:stagechannel:1077351815533826209>"))
+
             msg_select = await func(
-                embed=disnake.Embed(
-                    description="**Selecione um canal abaixo ou clique em um dos botões abaixo para criar um novo "
-                                "canal para pedir músicas.**",
-                    color=self.bot.get_color(guild.me)
-                ).set_footer(text="Você tem apenas 30 segundos para clicar em um botão."),
+                embeds=[
+                    disnake.Embed(
+                        description="**Selecione um canal abaixo ou clique em um dos botões abaixo para criar um novo "
+                                    "canal para pedir músicas.**",
+                        color=self.bot.get_color(guild.me)
+                    ).set_footer(text="Você tem apenas 45 segundos para clicar em um botão."),
+                    disnake.Embed(color=self.bot.get_color(guild.me)).set_footer(
+                        text="Nota: Caso queira usar canal de forum você terá que selecionar um na lista de canais "
+                             "abaixo (Caso não tenha você terá que criar um canal de fórum manualmente e usar esse "
+                             "comando novamente."
+                    )
+                ],
                 components=[
                     disnake.ui.ChannelSelect(
                         custom_id=f"existing_channel_{id_}",
@@ -518,11 +535,7 @@ class MusicSettings(commands.Cog):
                             disnake.ChannelType.forum
                         ]
                     ),
-                    disnake.ui.Button(label="Criar canal de texto", custom_id=f"text_channel_{id_}", emoji="💬"),
-                    disnake.ui.Button(label="Criar canal de voz", custom_id=f"voice_channel_{id_}", emoji="🔊"),
-                    disnake.ui.Button(label="Criar canal de palco", custom_id=f"stage_channel_{id_}", emoji="<:stagechannel:1077351815533826209>"),
-                    disnake.ui.Button(label="Cancelar", custom_id=f"voice_channel_cancel_{id_}", emoji="❌")
-                ],
+                ] + buttons,
                 **kwargs_msg
             )
 
@@ -537,7 +550,7 @@ class MusicSettings(commands.Cog):
                 bot_inter.loop.create_task(bot_inter.wait_for('button_click', check=check)),
                 bot_inter.loop.create_task(bot_inter.wait_for('dropdown', check=check))
             ],
-                timeout=30, return_when=asyncio.FIRST_COMPLETED)
+                timeout=45, return_when=asyncio.FIRST_COMPLETED)
 
             for future in pending:
                 future.cancel()
