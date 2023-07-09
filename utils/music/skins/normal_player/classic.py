@@ -71,7 +71,7 @@ class ClassicSkin:
             txt += f"🎧 **⠂Pedido por:** <@{player.current.requester}>\n"
 
         if player.current.playlist_name:
-            txt += f"📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=23)}`]({player.current.playlist_url})\n"
+            txt += f"📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=19)}`]({player.current.playlist_url})\n"
 
         if qsize := len(player.queue):
 

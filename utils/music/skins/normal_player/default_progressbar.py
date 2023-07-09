@@ -87,10 +87,10 @@ class DefaultProgressbarSkin:
             txt += f"\n> {e} **⠂Modo de repetição:** `{m}`"
 
         if player.current.album_name:
-            txt += f"\n> 💽 **⠂Álbum:** [`{fix_characters(player.current.album_name, limit=16)}`]({player.current.album_url})"
+            txt += f"\n> 💽 **⠂Álbum:** [`{fix_characters(player.current.album_name, limit=36)}`]({player.current.album_url})"
 
         if player.current.playlist_name:
-            txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=16)}`]({player.current.playlist_url})"
+            txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=36)}`]({player.current.playlist_url})"
 
         if (qlenght:=len(player.queue)) and not player.mini_queue_enabled:
             txt += f"\n> 🎶 **⠂Músicas na fila:** `{qlenght}`"
