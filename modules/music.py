@@ -4865,10 +4865,7 @@ class Music(commands.Cog):
 
         await player.track_end()
 
-        try:
-            player.message_updater_task.cancel()
-        except:
-            pass
+        player.update = False
 
         await player.process_next()
 
