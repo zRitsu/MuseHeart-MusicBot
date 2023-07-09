@@ -1756,7 +1756,7 @@ class Music(commands.Cog):
             except:
                 track = player.queue.pop()
 
-            if player.current:
+            if player.current and not player.current.autoplay:
                 player.queue.appendleft(player.current)
 
         player.last_track = None
