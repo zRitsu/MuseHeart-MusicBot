@@ -190,7 +190,7 @@ class DefaultProgressbarSkin:
                         description="Ativar/Desativar repetição da música/fila."
                     ),
                     disnake.SelectOption(
-                        label=("Desativar" if player.autoplay else "ativar") + " o efeito nightcore", emoji="🇳",
+                        label=("Desativar" if player.nightcore else "ativar") + " o efeito nightcore", emoji="🇳",
                         value=PlayerControls.nightcore,
                         description="Efeito que aumenta velocidade e tom da música."
                     ),
