@@ -878,6 +878,7 @@ class Owner(commands.Cog):
             restrict_mode=guild_data['enable_restrict_mode'],
             listen_along_invite=invite,
             volume=int(guild_data['default_player_volume']),
+            autoplay=guild_data["autoplay"]
         )
 
         player.message = message
