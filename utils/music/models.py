@@ -1145,12 +1145,12 @@ class LavalinkPlayer(wavelink.Player):
                                 description="Ativar/Desativar repetição da música/fila."
                             ),
                             disnake.SelectOption(
-                                label=("Desativar" if self.nightcore else "ativar") + " o efeito nightcore", emoji="🇳",
+                                label=("Desativar" if self.nightcore else "Ativar") + " o efeito nightcore", emoji="🇳",
                                 value=PlayerControls.nightcore,
                                 description="Efeito que aumenta velocidade e tom da música."
                             ),
                             disnake.SelectOption(
-                                label=("Desativar" if self.autoplay else "ativar") + " a reprodução automática", emoji="🔄",
+                                label=("Desativar" if self.autoplay else "Ativar") + " a reprodução automática", emoji="🔄",
                                 value=PlayerControls.autoplay,
                                 description="Sistema de reprodução de música automática quando a fila tiver vazia."
                             ),

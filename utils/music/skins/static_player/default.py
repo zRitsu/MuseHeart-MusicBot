@@ -181,12 +181,12 @@ class DefaultStaticSkin:
                         description="Ativar/Desativar repetição da música/fila."
                     ),
                     disnake.SelectOption(
-                        label=("Desativar" if player.nightcore else "ativar") + " o efeito nightcore", emoji="🇳",
+                        label=("Desativar" if player.nightcore else "Ativar") + " o efeito nightcore", emoji="🇳",
                         value=PlayerControls.nightcore,
                         description="Efeito que aumenta velocidade e tom da música."
                     ),
                     disnake.SelectOption(
-                        label=("Desativar" if player.autoplay else "ativar") + " o autoplay", emoji="🔄",
+                        label=("Desativar" if player.autoplay else "Ativar") + " a reprodução automática", emoji="🔄",
                         value=PlayerControls.autoplay,
                         description="Sistema de adição de música automática quando a fila estiver vazia."
                     ),
