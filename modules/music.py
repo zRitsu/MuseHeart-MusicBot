@@ -3104,7 +3104,7 @@ class Music(commands.Cog):
 
         await self.clear.callback(
             self=self, inter=ctx,
-            song_name=" ".join(args.song_name + unknown),
+            song_name=" ".join(args.song_name.split() + unknown),
             song_author=" ".join(args.uploader),
             user=await commands.MemberConverter().convert(ctx, " ".join(args.member)) if args.member else None,
             duplicates=args.duplicates,
