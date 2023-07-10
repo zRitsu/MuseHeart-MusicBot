@@ -1208,6 +1208,7 @@ class LavalinkPlayer(wavelink.Player):
                                 await self.destroy(force=True)
                                 return
 
+                        self.start_message_updater_task()
                         await self.update_stage_topic()
                         self.updating = False
                         return
