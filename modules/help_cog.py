@@ -185,7 +185,7 @@ class HelpCog(commands.Cog, name="Ajuda"):
         if usage_cmd:
             txt += f"📘 **⠂Como Usar:** ```\n{usage_cmd}```\n" \
                    f"⚠️ **⠂Notas sobre o uso dos argumentos no comando:** ```\n" \
-                   f"[] = Obrigatório | <> = Opcional```"
+                   f"[] = Obrigatório | <> = Opcional```\n"
 
         flags = cmd.extras.get("flags")
 
