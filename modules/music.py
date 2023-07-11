@@ -2358,7 +2358,7 @@ class Music(commands.Cog):
     move_args.add_argument('-casesensitive', '-cs',  action='store_true',
                            help="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome "
                                 "da música")
-    move_args.add_argument('-position', '-pos', help="Especificar uma posição de destino.\nEx: -pos 1", type=int, default=None)
+    move_args.add_argument('-position', '-pos', help="Especificar uma posição de destino (isso serve pra situações no qual o nome pra busca começe com número).\nEx: -pos 1", type=int, default=None)
 
     @is_dj()
     @has_player()
@@ -2403,7 +2403,7 @@ class Music(commands.Cog):
             ),
             case_sensitive: bool = commands.Param(
                 name="nome_exato", default=False,
-                description="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome da música",
+                description="Buscar por músicas por termo exato ao invés de buscar palavra por palavra no nome da música",
 
             )
     ):
@@ -3082,13 +3082,13 @@ class Music(commands.Cog):
                              help="Remover músicas duplicadas.")
     clear_flags.add_argument('-playlist', '-list', '-pl', nargs='+', default=[],
                              help="Remover música que tiver com nome especificado na playlist associada.\nEx: -playlist minhaplaylist")
-    clear_flags.add_argument('-minimal_time', '-mintime', '-min','-min_duration', '-minduration',  default=None,
+    clear_flags.add_argument('-minimaltime', '-mintime', '-min','-minduration', '-minduration',  default=None,
                              help="Remover músicas com a duração mínima especificada.\nEx: -min 1:23.")
-    clear_flags.add_argument('-maxtime', '-maxtime', '-max', '-max_duration', '-maxduration', default=None,
+    clear_flags.add_argument('-maxduration', '-maxtime', '-max', default=None,
                              help="Remover músicas com a duração máxima especificada.\nEx: -max 1:23.")
     clear_flags.add_argument('-startposition', '-startpos', '-start', type=int, default=None,
                              help="Remover músicas a partir de uma posição inicial da fila.\nEx: -start 10")
-    clear_flags.add_argument('-end_position', '-endpos', '-end', type=int, default=None,
+    clear_flags.add_argument('-endposition', '-endpos', '-end', type=int, default=None,
                              help="Remover músicas da fila até uma posição específica na fila.\nEx: -end 15")
     clear_flags.add_argument('-absentmembers', '-absent', '-abs', action='store_true',
                              help="Remover músicas adicionads por membros que saíram do canal")
@@ -3261,7 +3261,7 @@ class Music(commands.Cog):
                         temp_filter.remove('playlist')
                         final_filters.add('playlist')
                     elif isinstance(inter, CustomContext) and playlist.lower() in t.playlist_name.lower():
-                        playlist = t.playlist_name
+                        playlist = f"[`{t.playlist_name}`]({t.playlist_url})"
                         temp_filter.remove('playlist')
                         final_filters.add('playlist')
 
@@ -3277,7 +3277,7 @@ class Music(commands.Cog):
 
             try:
                 final_filters.remove("song_name")
-                txt.append(f"**inclui nome:** `{fix_characters(song_name)}`")
+                txt.append(f"**Inclui nome:** `{fix_characters(song_name)}`")
             except:
                 pass
 
