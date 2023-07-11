@@ -1549,7 +1549,7 @@ class Music(commands.Cog):
     skip_back_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
     case_sensitive_args = CommandArgparse()
-    case_sensitive_args.add_argument('-casesensitive', '-cs', '-exactmatch', '-exact', action='store_true',
+    case_sensitive_args.add_argument('-casesensitive', '-cs', action='store_true',
                              help="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome da música")
     @check_stage_topic()
     @is_requester()
@@ -2355,7 +2355,7 @@ class Music(commands.Cog):
     move_args = CommandArgparse()
     move_args.add_argument('-count', '-counter', '-amount', '-c', '-max', type=int, default=None,
                            help="Especificar uma quantidade de músicas para mover com o nome especificado. Ex: -amount 5")
-    move_args.add_argument('-casesensitive', '-cs', '-exactmatch', '-exact', action='store_true',
+    move_args.add_argument('-casesensitive', '-cs',  action='store_true',
                            help="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome "
                                 "da música")
     move_args.add_argument('-position', '-pos', help="Especificar uma posição de destino. Ex: -pos 1", type=int, default=None)
@@ -3073,14 +3073,14 @@ class Music(commands.Cog):
         await view.wait()
 
     clear_flags = CommandArgparse()
-    clear_flags.add_argument('-song_name', '-name', '-title', nargs='+', help="incluir nome que tiver na música. Ex: -name NCS", default="")
-    clear_flags.add_argument('-uploader', '-author', '-artist', nargs = '+', default="",
+    clear_flags.add_argument('-songtitle', '-name', '-title', '-songname',nargs='+', help="incluir nome que tiver na música. Ex: -name NCS", default=[])
+    clear_flags.add_argument('-uploader', '-author', '-artist', nargs = '+', default=[],
                              help="Remover músicas com o nome que tiver no autor especificado. Ex: -artist sekai")
-    clear_flags.add_argument('-member', '-user', '-u', nargs='+', default="",
+    clear_flags.add_argument('-member', '-user', '-u', nargs='+', default=[],
                              help="Remover músicas pedidas pelo usuário especificado. Ex: -user @user")
     clear_flags.add_argument('-duplicates', '-dupes', '-duplicate', action='store_true',
                              help="Remover músicas duplicadas.")
-    clear_flags.add_argument('-playlist', '-list', '-pl', nargs='+', default="",
+    clear_flags.add_argument('-playlist', '-list', '-pl', nargs='+', default=[],
                              help="Remover música que tiver com nome especificado na playlist associada. Ex: -playlist minhaplaylist")
     clear_flags.add_argument('-minimal_time', '-mintime', '-min','-min_duration', '-minduration',  default=None,
                              help="Remover músicas com a duração mínima especificada. Ex: -min 1:23.")
@@ -3104,7 +3104,7 @@ class Music(commands.Cog):
 
         await self.clear.callback(
             self=self, inter=ctx,
-            song_name=" ".join(args.song_name.split() + unknown),
+            song_name=" ".join(args.songtitle + unknown),
             song_author=" ".join(args.uploader),
             user=await commands.MemberConverter().convert(ctx, " ".join(args.member)) if args.member else None,
             duplicates=args.duplicates,
