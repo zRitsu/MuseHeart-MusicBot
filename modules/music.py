@@ -3295,7 +3295,7 @@ class Music(commands.Cog):
 
             try:
                 final_filters.remove("playlist")
-                txt.append(f"**Playlist:** {fix_characters(playlist)}")
+                txt.append(f"**Playlist:** {playlist}")
             except:
                 pass
 
