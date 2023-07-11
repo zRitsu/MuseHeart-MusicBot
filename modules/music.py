@@ -605,14 +605,14 @@ class Music(commands.Cog):
 
     play_flags = CommandArgparse()
     play_flags.add_argument('query', nargs='*', help="nome ou link da música")
-    play_flags.add_argument('-position', '-pos', '-p', type=int, default=0, help='Colocar a música em uma posição específica. Ex: -p 10')
+    play_flags.add_argument('-position', '-pos', '-p', type=int, default=0, help='Colocar a música em uma posição específica.\nEx: -p 10')
     play_flags.add_argument('-next', '-proximo', action='store_true', help='Adicionar a música/playlist no topo da fila (equivalente ao: -pos 1)')
     play_flags.add_argument('-reverse', '-r', action='store_true', help='Inverter a ordem das músicas adicionadas (efetivo apenas ao adicionar playlist).')
     play_flags.add_argument('-shuffle', '-sl', action='store_true', help='Misturar as músicas adicionadas (efetivo apenas ao adicionar playlist).')
     play_flags.add_argument('-select', '-s', action='store_true', help='Escolher a música entre os resultados encontrados.')
     play_flags.add_argument('-source', '-scr', type=str, default="ytsearch", help='Fazer a busca da música usando uma fonte específica [youtube/soundcloud etc]')
     play_flags.add_argument('-force', '-now', '-n', '-f', action='store_true', help='Tocar a música adicionada imediatamente (efetivo apenas se houver uma música tocando atualmente.)')
-    play_flags.add_argument('-loop', '-lp', type=int, default=0, help="Definir a quantidade de repetições da música escolhida. Ex: -loop 5")
+    play_flags.add_argument('-loop', '-lp', type=int, default=0, help="Definir a quantidade de repetições da música escolhida.\nEx: -loop 5")
     play_flags.add_argument('-server', '-sv', type=str, default=None, help='Usar um servidor de música específico.')
 
     @can_send_message_check()
@@ -2354,19 +2354,19 @@ class Music(commands.Cog):
 
     move_args = CommandArgparse()
     move_args.add_argument('-count', '-counter', '-amount', '-c', '-max', type=int, default=None,
-                           help="Especificar uma quantidade de músicas para mover com o nome especificado. Ex: -amount 5")
+                           help="Especificar uma quantidade de músicas para mover com o nome especificado.\nEx: -amount 5")
     move_args.add_argument('-casesensitive', '-cs',  action='store_true',
                            help="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome "
                                 "da música")
-    move_args.add_argument('-position', '-pos', help="Especificar uma posição de destino. Ex: -pos 1", type=int, default=None)
+    move_args.add_argument('-position', '-pos', help="Especificar uma posição de destino.\nEx: -pos 1", type=int, default=None)
 
     @is_dj()
     @has_player()
     @check_voice()
     @pool_command(name="move", aliases=["mv", "mover"], only_voiced=True, max_concurrency=remove_mc,
-                  description="Mover uma música para a posição especificada da fila.", extras={"flags": move_args},
+                  description="Mover músicas pra uma posição especificada da fila.", extras={"flags": move_args},
                   usage="{prefix}{cmd} <posição(nº)> [nome]\nEx 1: {prefix}{cmd} 2 sekai\nEx 2: {prefix}{cmd} sekai\n"
-                        "(caso não especifique a posição a música será movida pra posição 1)")
+                        "(Nota: caso não seja especificado uma posição via arg ou flag, a música será movida pra posição 1)")
     async def move_legacy(self, ctx: CustomContext, position: Optional[int] = None, *, flags: str = ""):
 
         args, unknown = ctx.command.extras['flags'].parse_known_args(flags.split())
@@ -3073,24 +3073,24 @@ class Music(commands.Cog):
         await view.wait()
 
     clear_flags = CommandArgparse()
-    clear_flags.add_argument('-songtitle', '-name', '-title', '-songname',nargs='+', help="incluir nome que tiver na música. Ex: -name NCS", default=[])
+    clear_flags.add_argument('-songtitle', '-name', '-title', '-songname',nargs='+', help="incluir nome que tiver na música.\nEx: -name NCS", default=[])
     clear_flags.add_argument('-uploader', '-author', '-artist', nargs = '+', default=[],
-                             help="Remover músicas com o nome que tiver no autor especificado. Ex: -artist sekai")
+                             help="Remover músicas com o nome que tiver no autor especificado.\nEx: -uploader sekai")
     clear_flags.add_argument('-member', '-user', '-u', nargs='+', default=[],
-                             help="Remover músicas pedidas pelo usuário especificado. Ex: -user @user")
+                             help="Remover músicas pedidas pelo usuário especificado.\nEx: -user @user")
     clear_flags.add_argument('-duplicates', '-dupes', '-duplicate', action='store_true',
                              help="Remover músicas duplicadas.")
     clear_flags.add_argument('-playlist', '-list', '-pl', nargs='+', default=[],
-                             help="Remover música que tiver com nome especificado na playlist associada. Ex: -playlist minhaplaylist")
+                             help="Remover música que tiver com nome especificado na playlist associada.\nEx: -playlist minhaplaylist")
     clear_flags.add_argument('-minimal_time', '-mintime', '-min','-min_duration', '-minduration',  default=None,
-                             help="Remover músicas com a duração mínima especificada. Ex: -min 1:23.")
-    clear_flags.add_argument('-max_time', '-maxtime', '-max', '-max_duration', '-maxduration', default=None,
-                             help="Remover músicas com a duração máxima especificada. Ex: -max 1:23.")
-    clear_flags.add_argument('-start_position', '-startpos', '-start', type=int, default=None,
-                             help="Remover músicas a partir de uma posição inicial da fila. Ex: -start 10")
+                             help="Remover músicas com a duração mínima especificada.\nEx: -min 1:23.")
+    clear_flags.add_argument('-maxtime', '-maxtime', '-max', '-max_duration', '-maxduration', default=None,
+                             help="Remover músicas com a duração máxima especificada.\nEx: -max 1:23.")
+    clear_flags.add_argument('-startposition', '-startpos', '-start', type=int, default=None,
+                             help="Remover músicas a partir de uma posição inicial da fila.\nEx: -start 10")
     clear_flags.add_argument('-end_position', '-endpos', '-end', type=int, default=None,
-                             help="Remover músicas da fila até uma posição específica na fila. Ex: -end 15")
-    clear_flags.add_argument('-absent', '-absentmembers', '-abs', action='store_true',
+                             help="Remover músicas da fila até uma posição específica na fila.\nEx: -end 15")
+    clear_flags.add_argument('-absentmembers', '-absent', '-abs', action='store_true',
                              help="Remover músicas adicionads por membros que saíram do canal")
 
     @is_dj()
