@@ -3109,10 +3109,10 @@ class Music(commands.Cog):
             user=await commands.MemberConverter().convert(ctx, " ".join(args.member)) if args.member else None,
             duplicates=args.duplicates,
             playlist=" ".join(args.playlist),
-            min_duration=args.minimal_time,
-            max_duration=args.max_time,
-            range_start=args.start_position,
-            range_end=args.end_position,
+            min_duration=args.minimaltime,
+            max_duration=args.maxduration,
+            range_start=args.startposition,
+            range_end=args.endposition,
             absent_members=args.absent
         )
 
