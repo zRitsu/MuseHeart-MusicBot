@@ -3113,7 +3113,7 @@ class Music(commands.Cog):
             max_duration=args.maxduration,
             range_start=args.startposition,
             range_end=args.endposition,
-            absent_members=args.absent
+            absent_members=args.absentmembers
         )
 
     @is_dj()
