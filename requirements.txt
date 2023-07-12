@@ -13,4 +13,4 @@ aiofiles
 disnake-jishaku
 packaging
 aiosqlite
-yt-dlp>=2023.06.22
+yt-dlp>=2023.07.06
