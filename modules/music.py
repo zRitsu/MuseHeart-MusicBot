@@ -4076,7 +4076,7 @@ class Music(commands.Cog):
             except Exception as e:
                 self.bot.dispatch('interaction_player_error', inter, e)
 
-    async def delete_message(self, message: disnake.Message):
+    async def delete_message(self, message: disnake.Message, delay: int = None):
 
         try:
             is_forum = isinstance(message.channel.parent, disnake.ForumChannel)
@@ -4089,7 +4089,7 @@ class Music(commands.Cog):
         if message.guild.me.guild_permissions.manage_messages:
 
             try:
-                await message.delete()
+                await message.delete(delay=delay)
             except:
                 traceback.print_exc()
 
@@ -4179,6 +4179,8 @@ class Music(commands.Cog):
             if message.author.bot:
                 if message.is_system() and not isinstance(message.channel, disnake.Thread):
                     await self.delete_message(message)
+                if message.author.id == self.bot.user.id:
+                    await self.delete_message(message, delay=15)
                 return
 
             if not message.content:
@@ -4193,20 +4195,19 @@ class Music(commands.Cog):
                 try:
                     attachment = message.attachments[0]
                 except IndexError:
-                    await message.channel.send(f"{message.author.mention} você deve enviar um link/nome da música.",
-                                               delete_after=10)
+                    await message.channel.send(f"{message.author.mention} você deve enviar um link/nome da música.")
                     return
 
                 else:
 
                     if attachment.size > 18000000:
                         await message.channel.send(f"{message.author.mention} o arquivo que você enviou deve ter o tamanho "
-                                                   f"inferior a 18mb.", delete_after=10)
+                                                   f"inferior a 18mb.")
                         return
 
                     if attachment.content_type not in self.audio_formats:
                         await message.channel.send(f"{message.author.mention} o arquivo que você enviou deve ter o tamanho "
-                                                   f"inferior a 18mb.", delete_after=10)
+                                                   f"inferior a 18mb.")
                         return
 
                     message.content = attachment.url
@@ -4217,7 +4218,6 @@ class Music(commands.Cog):
 
                 await message.channel.send(
                     f"{message.author.mention} você deve aguardar seu pedido de música anterior carregar...",
-                    delete_after=10,
                 )
 
                 await self.delete_message(message)
@@ -4278,9 +4278,9 @@ class Music(commands.Cog):
 
             try:
                 if msg:
-                    await msg.edit(content=error, embed=None, view=None, delete_after=10)
+                    await msg.edit(content=error, embed=None, view=None)
                 else:
-                    await message.channel.send(error, delete_after=10)
+                    await message.channel.send(error)
             except:
                 traceback.print_exc()
 
@@ -4474,8 +4474,6 @@ class Music(commands.Cog):
                 )
                 if destroy_message:
                     await self.delete_message(message)
-                    if response:
-                        await self.delete_message(response)
 
         else:
             track = tracks[0]
@@ -4512,8 +4510,6 @@ class Music(commands.Cog):
                 )
                 if destroy_message:
                     await self.delete_message(message)
-                    if response:
-                        await self.delete_message(response)
 
         if not player.is_connected:
             await self.do_connect(
