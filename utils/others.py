@@ -283,9 +283,11 @@ async def send_idle_embed(
     if not guild_data:
         guild_data = await bot.get_data(target.guild.id, db_name=DBModel.guilds)
 
+    cmd = f"</play:" + str(bot.pool.controller_bot.get_global_command_named("play", cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+
     embed = disnake.Embed(description="**Entre em um canal de voz e peça uma música aqui " +
                                       ("no post" if is_forum else "no canal ou na conversa abaixo") +
-                                      " (ou clique no botão abaixo ou use o comando /play aqui ou em algum outro canal)**\n\n"
+                                      f" (ou clique no botão abaixo ou use o comando {cmd} aqui ou em algum outro canal)**\n\n"
                                       "**Você pode usar um nome ou um link de site compatível:**"
                                       " ```ansi\n[31;1mYoutube[0m, [33;1mSoundcloud[0m, [32;1mSpotify[0m, [34;1mTwitch[0m```\n",
                           color=bot.get_color(target.guild.me))
