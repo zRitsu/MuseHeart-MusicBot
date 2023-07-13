@@ -74,7 +74,7 @@ global_db_models = {
 }
 
 
-async def guild_prefix(bot: BotCore, message: disnake.Message):
+async def get_prefix(bot: BotCore, message: disnake.Message):
 
     if not message.guild:
         return commands.when_mentioned_or(bot.default_prefix)

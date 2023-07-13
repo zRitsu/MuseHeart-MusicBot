@@ -20,7 +20,7 @@ from asyncspotify import Client as SpotifyClient
 from disnake.ext import commands
 
 from config_loader import load_config
-from utils.db import MongoDatabase, LocalDatabase, guild_prefix, DBModel, global_db_models
+from utils.db import MongoDatabase, LocalDatabase, get_prefix, DBModel, global_db_models
 from utils.music.checks import check_pool_bots
 from utils.music.errors import GenericError
 from utils.music.local_lavalink import run_lavalink
@@ -241,7 +241,7 @@ class BotPool:
         except:
             self.remote_git_url = ""
 
-        prefix = guild_prefix if intents.message_content else commands.when_mentioned
+        prefix = get_prefix if intents.message_content else commands.when_mentioned
 
         self.load_playlist_cache()
 
