@@ -104,7 +104,7 @@ class DefaultStaticSkin:
                 mode = f" [`reprodução automática`]({player.current.info['extra']['related']['uri']})"
             except:
                 mode = "`reprodução automática`"
-            txt += f"\n`No momento estou usando a` {mode} `enquanto aguardo algum membro do canal {player.guild.me.voice.channel.mention} adicionar novas músicas.`\n"
+            txt += f"\n`No momento estou usando a` {mode} `enquanto aguardo algum membro do canal` {player.guild.me.voice.channel.mention} `adicionar novas músicas.`\n"
 
         if qlenght:=len(player.queue):
 
