@@ -86,7 +86,7 @@ async def get_prefix(bot: BotCore, message: disnake.Message):
         bot.pool.user_prefix_cache[message.author.id] = user_data["custom_prefix"]
         user_prefix = user_data["custom_prefix"]
 
-    if message.content.startswith(user_prefix):
+    if user_prefix and message.content.startswith(user_prefix):
         return user_prefix
 
     if not message.guild:
