@@ -579,6 +579,38 @@ class Owner(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    @commands.cooldown(1, 10, commands.BucketType.guild)
+    @commands.command(
+        aliases=["uprefix", "spu"],
+        description="Alterar seu prefixo de usuário (prefixo que irei responder a você independente "
+                    "do prefixo configurado no servidor).",
+        usage="{prefix}{cmd} [prefixo]\nEx: {prefix}{cmd} >>"
+    )
+    async def setuserprefix(self, ctx: CustomContext, prefix: str = None):
+
+        if not prefix:
+            raise GenericError("**Você não informou um novo prefixo.**")
+
+        if " " in prefix or len(prefix) > 5:
+            raise GenericError("**O prefixo não pode conter espaços ou ter acima de 5 caracteres.**")
+
+        try:
+            user_data = ctx.global_user_data
+        except AttributeError:
+            user_data = await self.bot.get_global_data(ctx.author.id, db_name=DBModel.users)
+            ctx.global_user_data = user_data
+
+        user_data["custom_prefix"] = prefix
+        self.bot.pool.user_prefix_cache[ctx.author.id] = prefix
+        await self.bot.update_global_data(ctx.author.id, user_data, db_name=DBModel.users)
+
+        embed = disnake.Embed(
+            description=f"**O seu prefixo de usuário agora é:** {disnake.utils.escape_markdown(prefix)}",
+            color=self.bot.get_color(ctx.guild.me)
+        )
+
+        await ctx.send(embed=embed)
+
     @commands.is_owner()
     @panel_command(aliases=["expsource", "export", "exs"],
                    description="Exportar minha source para um arquivo zip.", emoji="💾",

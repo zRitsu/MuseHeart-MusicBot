@@ -448,16 +448,27 @@ class Misc(commands.Cog):
                              f"> **Uso de RAM:** `{ram_usage}`\n" \
                              f"> **Uptime:** <t:{int(bot.uptime.timestamp())}:R>\n"
 
-        try:
-            guild_data = inter.global_guild_data
-        except AttributeError:
-            guild_data = await bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
-            inter.global_guild_data = guild_data
+        if not bot.config["INTERACTION_COMMAND_ONLY"]:
 
-        prefix = guild_data["prefix"] or bot.default_prefix
+            try:
+                guild_data = inter.global_guild_data
+            except AttributeError:
+                guild_data = await bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
+                inter.global_guild_data = guild_data
 
-        if bot.default_prefix and not bot.config["INTERACTION_COMMAND_ONLY"]:
-            embed.description += f"> **Prefixo:** `{disnake.utils.escape_markdown(prefix, as_needed=True)}`\n"
+            if guild_data["prefix"]:
+                embed.description += f"> **Prefixo do servidor:** `{disnake.utils.escape_markdown(guild_data['prefix'], as_needed=True)}`\n"
+            else:
+                embed.description += f"> **Prefixo padrão:** `{disnake.utils.escape_markdown(bot.default_prefix, as_needed=True)}`\n"
+
+            try:
+                user_data = inter.global_user_data
+            except AttributeError:
+                user_data = await bot.get_global_data(inter.author.id, db_name=DBModel.users)
+                inter.global_user_data = user_data
+
+            if user_data["custom_prefix"]:
+                embed.description += f"> **Seu prefixo de usuário:** `{disnake.utils.escape_markdown(user_data['custom_prefix'], as_needed=True)}`\n"
 
         links = "[`[Source]`](https://github.com/zRitsu/disnake-LL-music-bot)"
 
