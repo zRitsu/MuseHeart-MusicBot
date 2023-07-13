@@ -502,6 +502,11 @@ class LavalinkPlayer(wavelink.Player):
             hints.append("É possível ter bots de música adicionais no servidor compartilhando todos os seus favoritos "
                          "e funcionando com um único prefixo e comando slash de apenas um bot, use o comando /invite")
 
+        if self.controller_mode:
+            hints.append(
+                "Ao clicar nesse emoji 🎛️ das mensagens de alguns comandos você será redirecionado para o player-controller."
+            )
+
         random.shuffle(hints)
         self.hints = cycle(hints)
 
