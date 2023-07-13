@@ -581,7 +581,7 @@ class Owner(commands.Cog):
 
     @commands.cooldown(1, 10, commands.BucketType.guild)
     @commands.command(
-        aliases=["uprefix", "spu"],
+        aliases=["uprefix", "spu", "setmyprefix", "spm", "setcustomprefix", "scp"],
         description="Alterar seu prefixo de usuário (prefixo que irei responder a você independente "
                     "do prefixo configurado no servidor).",
         usage="{prefix}{cmd} [prefixo]\nEx: {prefix}{cmd} >>"
