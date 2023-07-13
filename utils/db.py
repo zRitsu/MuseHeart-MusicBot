@@ -76,21 +76,21 @@ global_db_models = {
 
 async def get_prefix(bot: BotCore, message: disnake.Message):
 
-    if not message.guild:
-        return commands.when_mentioned_or(bot.default_prefix)
-
     if str(message.content).startswith((f"<@!{bot.user.id}> ", f"<@{bot.user.id}> ")):
         return commands.when_mentioned(bot, message)
 
     try:
-        user_prefix = bot.pool.user_prefix_cache[str(message.author.id)]
+        user_prefix = bot.pool.user_prefix_cache[message.author.id]
     except KeyError:
         user_data = await bot.get_global_data(message.author.id, db_name=DBModel.users)
-        bot.pool.user_prefix_cache[str(message.author.id)] = user_data["custom_prefix"]
+        bot.pool.user_prefix_cache[message.author.id] = user_data["custom_prefix"]
         user_prefix = user_data["custom_prefix"]
 
     if message.content.startswith(user_prefix):
         return user_prefix
+
+    if not message.guild:
+        return commands.when_mentioned_or(bot.default_prefix)
 
     data = await bot.get_global_data(message.guild.id, db_name=DBModel.guilds)
     prefix = data.get("prefix") or bot.config.get("DEFAULT_PREFIX") or "!!"
