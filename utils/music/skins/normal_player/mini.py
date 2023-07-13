@@ -79,7 +79,7 @@ class MiniSkin:
                 mode = f" [`reprodução automática`]({player.current.info['extra']['related']['uri']})"
             except:
                 mode = "`reprodução automática`"
-            embed.add_field(name="🔄 **⠂Música automática:**", value=f"\n`No momento estou usando a` {mode} `enquanto aguardo algum membro adicionar novas músicas.`\n")
+            embed.add_field(name="🔄 **⠂Música automática:**", value=f"\n`No momento estou usando a` {mode} `enquanto aguardo algum membro do canal {player.guild.me.voice.channel.mention} adicionar novas músicas.`\n")
 
         if queue_size:
 

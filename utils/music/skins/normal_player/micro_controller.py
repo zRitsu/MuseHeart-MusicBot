@@ -55,7 +55,7 @@ class MicroController:
         data["embeds"].append(embed)
 
         if player.current.autoplay:
-            data["embeds"].append(disnake.Embed(color=embed_color).set_footer(text="No momento estou usando a reprodução automática enquanto aguardo algum membro adicionar novas músicas."))
+            data["embeds"].append(disnake.Embed(color=embed_color).set_footer(text=f"No momento estou usando a reprodução automática enquanto aguardo algum membro do canal #{player.guild.me.voice.channel.name} adicionar novas músicas."))
 
         data["components"] = [
             disnake.ui.Button(label="Despausar" if player.paused else "Pausar", custom_id=PlayerControls.pause_resume, style=get_button_style(player.paused)),

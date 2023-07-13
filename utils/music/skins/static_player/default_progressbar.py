@@ -71,16 +71,15 @@ class DefaultProgressbarStaticSkin:
         vc_txt = ""
         queue_img = ""
 
-        try:
-            vc_txt = f"\n> *️⃣ **⠂Canal de voz:** {player.guild.me.voice.channel.mention}"
-        except AttributeError:
-            pass
-
         txt = f"[`{player.current.single_title}`]({player.current.uri or player.current.search_uri})\n\n" \
               f"> 💠 **⠂Por:** {player.current.authors_md}"
 
         if not player.current.autoplay:
             txt += f"\n> ✋ **⠂Pedido por:** <@{player.current.requester}>"
+            try:
+                vc_txt = f"\n> *️⃣ **⠂Canal de voz:** {player.guild.me.voice.channel.mention}"
+            except AttributeError:
+                pass
 
         if player.current.track_loops:
             txt += f"\n> 🔂 **⠂Repetições restante:** `{player.current.track_loops}`"
@@ -113,7 +112,7 @@ class DefaultProgressbarStaticSkin:
                 mode = f" [`reprodução automática`]({player.current.info['extra']['related']['uri']})"
             except:
                 mode = "`reprodução automática`"
-            txt += f"\n`No momento estou usando a` {mode} `enquanto aguardo algum membro adicionar novas músicas.`\n"
+            txt += f"\n`No momento estou usando a` {mode} `enquanto aguardo algum membro do canal {player.guild.me.voice.channel.mention} adicionar novas músicas.`\n"
 
         txt += duration
 

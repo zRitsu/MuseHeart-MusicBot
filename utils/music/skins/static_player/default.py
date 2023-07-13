@@ -58,10 +58,6 @@ class DefaultStaticSkin:
 
         queue_img = ""
 
-        try:
-            vc_txt = f"\n> *️⃣ **⠂Canal de voz:** {player.guild.me.voice.channel.mention}"
-        except AttributeError:
-            pass
 
         duration = "> 🔴 **⠂Duração:** `Livestream`\n" if player.current.is_stream else \
             (f"> ⏰ **⠂Duração:** `{time_format(player.current.duration)} [`" +
@@ -74,6 +70,10 @@ class DefaultStaticSkin:
 
         if not player.current.autoplay:
             txt += f"\n> ✋ **⠂Pedido por:** <@{player.current.requester}>"
+            try:
+                vc_txt = f"\n> *️⃣ **⠂Canal de voz:** {player.guild.me.voice.channel.mention}"
+            except AttributeError:
+                pass
 
         if player.current.track_loops:
             txt += f"\n> 🔂 **⠂Repetições restante:** `{player.current.track_loops}`"
@@ -104,7 +104,7 @@ class DefaultStaticSkin:
                 mode = f" [`reprodução automática`]({player.current.info['extra']['related']['uri']})"
             except:
                 mode = "`reprodução automática`"
-            txt += f"\n`No momento estou usando a` {mode} `enquanto aguardo algum membro adicionar novas músicas.`\n"
+            txt += f"\n`No momento estou usando a` {mode} `enquanto aguardo algum membro do canal {player.guild.me.voice.channel.mention} adicionar novas músicas.`\n"
 
         if qlenght:=len(player.queue):
 

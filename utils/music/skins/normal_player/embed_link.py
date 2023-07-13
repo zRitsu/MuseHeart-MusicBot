@@ -64,7 +64,7 @@ class EmbedLinkSkin:
             txt += f"> {player.command_log_emoji} **⠂Última Interação:** {log}\n"
 
         if player.current.autoplay:
-            txt += f"\n`No momento estou usando a reprodução automática enquanto aguardo algum membro adicionar novas músicas.`\n"
+            txt += f"\n`No momento estou usando a reprodução automática enquanto aguardo algum membro do canal {player.guild.me.voice.channel.mention} adicionar novas músicas.`\n"
 
         if qsize := len(player.queue):
 

@@ -82,7 +82,7 @@ class MiniStaticSkin:
                 mode = f" [`reprodução automática`]({player.current.info['extra']['related']['uri']})"
             except:
                 mode = "`reprodução automática`"
-            embed.add_field(name="🔄 **⠂Música automática:**", value=f"\n`No momento estou usando a` {mode} `enquanto aguardo algum membro adicionar novas músicas.`\n")
+            embed.add_field(name="🔄 **⠂Música automática:**", value=f"\n`No momento estou usando a` {mode} `enquanto aguardo algum membro do canal #{player.guild.me.voice.channel.name} adicionar novas músicas.`\n")
 
         embed.set_image(url=player.current.thumb or "https://media.discordapp.net/attachments/480195401543188483/987830071815471114/musicequalizer.gif")
 
