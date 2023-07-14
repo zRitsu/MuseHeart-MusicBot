@@ -76,7 +76,7 @@ def run_lavalink(
                 if platform.architecture()[0] != "64bit":
                     jdk_url = "https://cdn.azul.com/zulu/bin/zulu11.58.25-ca-jdk11.0.16.1-win_i686.zip"
                 else:
-                    jdk_url = "https://download.java.net/openjdk/jdk13/ri/openjdk-13+33_windows-x64_bin.zip"
+                    jdk_url = "https://builds.openlogic.com/downloadJDK/openlogic-openjdk/17.0.5+8/openlogic-openjdk-17.0.5+8-linux-x64.tar.gz"
 
                 jdk_filename = "java.zip"
 
