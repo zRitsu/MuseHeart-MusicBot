@@ -117,6 +117,15 @@ def parse_error(
         except AttributeError:
             error_txt = "**Não há player inicializado no servidor.**"
 
+    elif isinstance(error, commands.UserInputError) and ctx.command.usage:
+
+        prefix = ctx.prefix if str(ctx.me.id) not in ctx.prefix else f"@{ctx.me.display_name} "
+
+        error_txt = "### Você usou o comando de forma incorreta.\n" \
+                    f'📘 **⠂Como Usar:** ```\n{ctx.command.usage.replace("{prefix}", prefix).replace("{cmd}", ctx.command.name).replace("{parent}", ctx.command.full_parent_name)}```\n' \
+                    f"⚠️ **⠂Notas sobre o uso dos argumentos no comando:** ```\n" \
+                    f"[] = Obrigatório | <> = Opcional```\n"
+
     elif isinstance(error, MissingSpotifyClient):
         error_txt = "**Não há suporte a links do spotify no momento.**"
 
