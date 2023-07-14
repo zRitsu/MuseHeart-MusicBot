@@ -148,19 +148,24 @@ class GuildFavView(disnake.ui.View):
 
     async def on_timeout(self):
 
+        try:
+            for i in self.children[0].options:
+                i.default = self.current == i.value
+        except:
+            pass
+
+        for c in self.children:
+            c.disabled = True
+
         if isinstance(self.ctx, CustomContext):
             try:
-                await self.message.edit(
-                    embed=disnake.Embed(description="**Tempo esgotado...**", color=self.bot.get_color()), view=None
-                )
+                await self.message.edit(view=self)
             except:
                 pass
 
         else:
             try:
-                await self.ctx.edit_original_message(
-                    embed=disnake.Embed(description="**Tempo esgotado...**", color=self.bot.get_color()), view=None
-                )
+                await self.ctx.edit_original_message(view=self)
             except:
                 pass
         self.stop()

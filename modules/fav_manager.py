@@ -142,6 +142,12 @@ class UserFavView(disnake.ui.View):
 
     async def on_timeout(self):
 
+        try:
+            for i in self.children[0].options:
+                i.default = self.current == i.value
+        except:
+            pass
+
         for c in self.children:
             c.disabled = True
 
