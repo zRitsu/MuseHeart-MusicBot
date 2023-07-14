@@ -588,16 +588,10 @@ class Music(commands.Cog):
     @pool_command(name="addposition", description="Adicionar música em uma posição especifica da fila.",
                   aliases=["adp", "addpos"], check_player=False, cooldown=play_cd, max_concurrency=play_mc,
                   usage="{prefix}{cmd} [posição(Nº)] [nome|link]\nEx: {prefix}{cmd} 2 sekai - burn me down")
-    async def addpos_legacy(self, ctx: CustomContext, position: Optional[int] = None, *, query: str = None):
-
-        if not position:
-            raise GenericError("Você não informou uma posição válida.**")
+    async def addpos_legacy(self, ctx: CustomContext, position: int, *, query: str):
 
         if position < 1:
             raise GenericError("**Número da posição da fila tem que ser 1 ou superior.**")
-
-        if not query:
-            raise GenericError("Você não adicionou um nome ou link de uma música.**")
 
         await self.play.callback(self=self, inter=ctx, query=query, position=position, options=False,
                                  force_play="no", manual_selection=False,
@@ -645,10 +639,7 @@ class Music(commands.Cog):
     @pool_command(name="search", description="Pesquisar por músicas e escolher uma entre os resultados para tocar.",
                   aliases=["sc"], check_player=False, cooldown=play_cd, max_concurrency=play_mc,
                   usage="{prefix}{cmd} [nome]\nEx: {prefix}{cmd} sekai - burn me down")
-    async def search_legacy(self, ctx: CustomContext, *, query: str = None):
-
-        if not query:
-            raise GenericError("**Você não adicionou um nome ou link para tocar.**")
+    async def search_legacy(self, ctx: CustomContext, *, query):
 
         await self.play.callback(self=self, inter=ctx, query=query, position=0, options=False, force_play="no",
                                  manual_selection=True, source="ytsearch", repeat_amount=0, server=None)
@@ -1841,12 +1832,9 @@ class Music(commands.Cog):
     @check_voice()
     @pool_command(name="volume", description="Ajustar volume da música.", aliases=["vol", "v"], only_voiced=True,
                   cooldown=volume_cd, max_concurrency=volume_mc, usage="{prefix}{cmd} [nivel]\nEx: {prefix}{cmd} 50")
-    async def volume_legacy(self, ctx: CustomContext, level: str = None):
+    async def volume_legacy(self, ctx: CustomContext, level: int):
 
-        if not level:
-            raise GenericError("**Você não informou o volume (entre 5-150).**")
-
-        if not level.isdigit() or len(level) > 3:
+        if 4 < level < 151:
             raise GenericError("**Volume inválido! escolha entre 5 a 150**", self_delete=7)
 
         await self.volume.callback(self=self, inter=ctx, value=int(level))
@@ -1981,11 +1969,7 @@ class Music(commands.Cog):
                   usage="{prefix}{cmd} [tempo]\n"
                         "Ex 1: {prefix}{cmd} 10 (tempo 0:10)\n"
                         "Ex 2: {prefix}{cmd} 1:45 (tempo 1:45)")
-    async def seek_legacy(self, ctx: CustomContext, *, position: str = None):
-
-        if not position:
-            raise GenericError("**Você não informou o tempo para avançar/voltar (ex: 1:55 | 33 | 0:45).**")
-
+    async def seek_legacy(self, ctx: CustomContext, *, position: str):
         await self.seek.callback(self=self, inter=ctx, position=position)
 
     @check_stage_topic()
@@ -2783,12 +2767,8 @@ class Music(commands.Cog):
     @check_voice()
     @pool_command(name="adddj", aliases=["adj"], only_voiced=True,
                   description="Adicionar um membro à lista de DJ's na sessão atual do player.",
-                  usage="{prefix}{cmd} [id|nome|@cargo]\nEx: {prefix}{cmd} @cargo")
-    async def add_dj_legacy(self, ctx: CustomContext, user: Optional[disnake.Member] = None):
-
-        if not user:
-            raise GenericError(f"**Você não informou um membro (ID, menção, nome, etc).**")
-
+                  usage="{prefix}{cmd} [id|nome|@user]\nEx: {prefix}{cmd} @membro")
+    async def add_dj_legacy(self, ctx: CustomContext, user: disnake.Member):
         await self.add_dj.callback(self=self, inter=ctx, user=user)
 
     @is_dj()

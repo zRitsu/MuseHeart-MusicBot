@@ -927,15 +927,7 @@ class MusicSettings(commands.Cog):
     @commands.has_guild_permissions(manage_guild=True)
     @commands.command(name="adddjrole",description="Adicionar um cargo para a lista de DJ's do servidor.",
                       usage="{prefix}{cmd} [id|nome|@cargo]\nEx: {prefix}{cmd} @cargo", cooldown=djrole_cd, max_concurrency=djrole_mc)
-    async def add_dj_role_legacy(self, ctx: CustomContext, *, role: Optional[disnake.Role] = None):
-
-        if not role:
-            raise GenericError("**Você não especificou um cargo.\n"
-                               "Use o comando por um dos métodos abaixo:**\n\n"
-                               f"{ctx.prefix}{ctx.invoked_with} id_do_cargo\n"
-                               f"{ctx.prefix}{ctx.invoked_with} @cargo\n"
-                               f"{ctx.prefix}{ctx.invoked_with} nome_do_cargo")
-
+    async def add_dj_role_legacy(self, ctx: CustomContext, *, role: disnake.Role = None):
         await self.add_dj_role.callback(self=self,inter=ctx, role=role)
 
     @commands.slash_command(
