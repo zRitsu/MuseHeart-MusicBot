@@ -256,6 +256,7 @@ class IntegrationsView(disnake.ui.View):
             integration_select = disnake.ui.Select(options=[
                 disnake.SelectOption(label=k, emoji=music_source_emoji_id(k)) for k, v in data["integration_links"].items()
             ], min_values=1, max_values=1)
+            integration_select.options[0].default = True
             integration_select.callback = self.select_callback
             self.add_item(integration_select)
 
