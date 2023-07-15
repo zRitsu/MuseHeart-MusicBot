@@ -3156,6 +3156,7 @@ class Music(commands.Cog):
         final_filters = set()
 
         txt = []
+        playlist_hyperlink = ""
 
         if song_name:
             filters.append('song_name')
@@ -3241,10 +3242,11 @@ class Music(commands.Cog):
 
                 if 'playlist' in temp_filter:
                     if playlist == t.playlist_name:
+                        playlist_hyperlink = f"[`{fix_characters(t.playlist_name)}`]({t.playlist_url})"
                         temp_filter.remove('playlist')
                         final_filters.add('playlist')
                     elif isinstance(inter, CustomContext) and playlist.lower() in t.playlist_name.lower():
-                        playlist = f"[`{t.playlist_name}`]({t.playlist_url})"
+                        playlist_hyperlink = f"[`{fix_characters(t.playlist_name)}`]({t.playlist_url})"
                         temp_filter.remove('playlist')
                         final_filters.add('playlist')
 
@@ -3278,7 +3280,7 @@ class Music(commands.Cog):
 
             try:
                 final_filters.remove("playlist")
-                txt.append(f"**Playlist:** {playlist}")
+                txt.append(f"**Playlist:** {playlist_hyperlink}")
             except:
                 pass
 
