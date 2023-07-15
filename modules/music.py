@@ -1700,7 +1700,10 @@ class Music(commands.Cog):
             if player.loop == "current":
                 player.loop = False
 
-        player.current.info["extra"]["track_loops"] = 0
+        try:
+            (player.current or player.last_track).info["extra"]["track_loops"] = 0
+        except AttributeError:
+            pass
 
         await player.track_end()
         player.ignore_np_once = True
