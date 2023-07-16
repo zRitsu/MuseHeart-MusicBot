@@ -2316,14 +2316,17 @@ class Music(commands.Cog):
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
-        if not player.played:
+        if not player.played or not player.failed_tracks:
             raise GenericError("**Não há músicas tocadas.**")
 
-        qsize = len(player.played)
+        qsize = len(player.played) + len(player.failed_tracks)
 
         player.played.reverse()
+        player.failed_tracks.reverse()
+        player.queue.extend(player.failed_tracks)
         player.queue.extend(player.played)
         player.played.clear()
+        player.failed_tracks.reverse()
 
         txt = [
             f"readicionou [{qsize}] música(s) tocada(s) na fila.",
@@ -4768,7 +4771,7 @@ class Music(commands.Cog):
         if player.last_track:
 
             if not track.track_loops:
-                player.played.append(player.last_track)
+                player.played.append(player.failed_tracks)
 
             elif player.keep_connected and not player.last_track.autoplay and len(player.queue) > 15:
                 player.queue.append(player.last_track)

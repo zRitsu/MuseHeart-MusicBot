@@ -326,7 +326,8 @@ class LavalinkPlayer(wavelink.Player):
         self.custom_skin_static_data = kwargs.pop("custom_skin_static_data", {})
         self.queue: deque = deque()
         self.played: deque = deque(maxlen=20)
-        self.queue_autoplay: deque = deque(maxlen=20)
+        self.queue_autoplay: deque = deque(maxlen=30)
+        self.failed_tracks: deque = deque(maxlen=30)
         self.autoplay: bool = kwargs.pop("autoplay", False)
         self.nightcore: bool = False
         self.loop = False

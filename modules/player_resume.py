@@ -62,6 +62,7 @@ class PlayerSession(commands.Cog):
         tracks = []
         played = []
         autoqueue = []
+        failed_tracks = []
 
         if player.current:
             player.current.info["id"] = player.current.id
@@ -84,6 +85,10 @@ class PlayerSession(commands.Cog):
         for t in player.queue_autoplay:
             t.info["id"] = t.id
             autoqueue.append(t.info)
+
+        for t in player.failed_tracks:
+            t.info["id"] = t.id
+            failed_tracks.append(t.info)
 
         if player.skin.startswith("> custom_skin: "):
 
@@ -135,7 +140,8 @@ class PlayerSession(commands.Cog):
             "listen_along_invite": player.listen_along_invite,
             "tracks": tracks,
             "played": played,
-            "queue_autoplay": autoqueue
+            "queue_autoplay": autoqueue,
+            "failed_tracks": failed_tracks
         }
 
         try:
@@ -366,19 +372,21 @@ class PlayerSession(commands.Cog):
 
                 played_tracks, playlists = self.process_track_cls(data["played"], playlists)
 
-                if player.keep_connected:
-                    player.queue.extend(played_tracks)
-                else:
-                    player.played.extend(played_tracks)
+                player.played.extend(played_tracks)
 
                 queue_autoplay_tracks, playlists = self.process_track_cls(data.get("queue_autoplay", []))
 
                 player.queue_autoplay.extend(queue_autoplay_tracks)
 
+                failed_tracks, playlists = self.process_track_cls(data.get("failed_tracks", []), playlists)
+
+                player.queue.extend(failed_tracks)
+
                 playlists.clear()
                 tracks.clear()
                 played_tracks.clear()
                 queue_autoplay_tracks.clear()
+                failed_tracks.clear()
 
                 await player.connect(voice_channel.id)
 
