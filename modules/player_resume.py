@@ -366,7 +366,10 @@ class PlayerSession(commands.Cog):
 
                 played_tracks, playlists = self.process_track_cls(data["played"], playlists)
 
-                player.played.extend(played_tracks)
+                if player.keep_connected:
+                    player.queue.extend(played_tracks)
+                else:
+                    player.played.extend(played_tracks)
 
                 queue_autoplay_tracks, playlists = self.process_track_cls(data.get("queue_autoplay", []))
 

@@ -4765,8 +4765,13 @@ class Music(commands.Cog):
                 await player.destroy(force=True)
                 return
 
-        if not track.track_loops:
-            player.played.append(player.last_track)
+        if player.last_track:
+
+            if not track.track_loops:
+                player.played.append(player.last_track)
+
+            elif player.keep_connected and not player.last_track.autoplay and len(player.queue) > 15:
+                player.queue.append(player.last_track)
 
         player.locked = True
         await asyncio.sleep(6)
