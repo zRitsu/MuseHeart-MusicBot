@@ -144,6 +144,10 @@ class ErrorHandler(commands.Cog):
         if isinstance(error, (commands.CommandNotFound, PoolException)):
             return
 
+        if isinstance(error, commands.NotOwner):
+            print(f"{ctx.author} [{ctx.author.id}] não é dono do bot para usar o comando: {ctx.command.name}")
+            return
+
         error_msg, full_error_msg, kill_process, components = parse_error(ctx, error)
         kwargs = {}
         send_webhook = False
