@@ -20,6 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import pprint
 
 
 class WavelinkException(Exception):
@@ -56,12 +57,13 @@ class TrackLoadError(WavelinkException):
     def __init__(self, node, error, data):
         self.error = error
         self.node = node
+        self.data = data
         self.exception = data.get('exception', {})
         self.severity = self.exception.get('severity')
         self.message = self.exception.get('message')
 
     def __repr__(self):
-        return f"{self.node.identifier} | {self.error} | {self.message}"
+        return f"{self.node.identifier}\n{pprint.pformat(self.data)}"
 
     def __str__(self):
-        return f"{self.node.identifier} | {self.error} | {self.message}"
+        return f"{self.node.identifier}\n{pprint.pformat(self.data)}"
