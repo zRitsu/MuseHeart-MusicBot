@@ -2326,7 +2326,7 @@ class Music(commands.Cog):
         player.queue.extend(player.failed_tracks)
         player.queue.extend(player.played)
         player.played.clear()
-        player.failed_tracks.reverse()
+        player.failed_tracks.clear()
 
         txt = [
             f"readicionou [{qsize}] música(s) tocada(s) na fila.",
@@ -4771,7 +4771,7 @@ class Music(commands.Cog):
         if player.last_track:
 
             if not track.track_loops:
-                player.played.append(player.failed_tracks)
+                player.failed_tracks.append(player.last_track)
 
             elif player.keep_connected and not player.last_track.autoplay and len(player.queue) > 15:
                 player.queue.append(player.last_track)

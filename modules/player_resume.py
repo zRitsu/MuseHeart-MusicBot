@@ -88,6 +88,8 @@ class PlayerSession(commands.Cog):
 
         for t in player.failed_tracks:
             t.info["id"] = t.id
+            if t.playlist:
+                t.info["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
             failed_tracks.append(t.info)
 
         if player.skin.startswith("> custom_skin: "):
