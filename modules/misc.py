@@ -233,7 +233,9 @@ class Misc(commands.Cog):
                                     color=color,
                                     description=f"Também tenho comandos de texto por prefixo. " \
                                                  f"Para ver todos os meus comandos de texto use **{prefix}help** em um " \
-                                                 f"canal do servidor **{guild.name}**"
+                                                 f"canal do servidor **{guild.name}**. Caso queira alterar meu prefixo "
+                                                f"padrão use o comando **{prefix}setprefix** (você pode ter um prefixo "
+                                                f"pessoal usando o comando **{prefix}setmyprefix**)."
                                 ).set_image(url=image)
                             )
 
