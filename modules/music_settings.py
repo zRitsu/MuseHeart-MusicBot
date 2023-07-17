@@ -768,6 +768,9 @@ class MusicSettings(commands.Cog):
                         f"delete o canal/post {channel.mention}",
             color=bot.get_color(guild.me)
         )
+
+        if not inter.response.is_done():
+            await inter.response.edit_message(embed=embed, components=None)
         try:
             await inter.edit_original_message(embed=embed, components=None)
         except (AttributeError, disnake.InteractionNotEditable):
