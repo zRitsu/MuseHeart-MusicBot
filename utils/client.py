@@ -662,9 +662,7 @@ class BotCore(commands.Bot):
         if not self.command_sync_flags.sync_commands and not force:
             return
 
-        self._command_sync_flags = commands.CommandSyncFlags.all()
         await self._sync_application_commands()
-        self._command_sync_flags = commands.CommandSyncFlags.none()
 
     def sync_command_cooldowns(self):
 
