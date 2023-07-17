@@ -231,7 +231,8 @@ class Misc(commands.Cog):
                             embeds.append(
                                 disnake.Embed(
                                     color=color,
-                                    description=f"Também tenho comandos de texto por prefixo. " \
+                                    description=f"Também tenho comandos de texto por prefixo. Meu prefixo padrão é "
+                                                f"**{prefix}** (minha menção também funciona como prefixo). " \
                                                  f"Para ver todos os meus comandos de texto use **{prefix}help** em um " \
                                                  f"canal do servidor **{guild.name}**. Caso queira alterar meu prefixo "
                                                 f"padrão use o comando **{prefix}setprefix** (você pode ter um prefixo "
