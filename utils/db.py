@@ -36,7 +36,7 @@ db_models = {
             "static_skin": None,
             "fav_links": {}
         },
-        "autoplay": True,
+        "autoplay": False,
         "check_other_bots_in_vc": False,
         "enable_restrict_mode": False,
         "default_player_volume": 100,
