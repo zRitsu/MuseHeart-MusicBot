@@ -1502,7 +1502,10 @@ class MusicSettings(commands.Cog):
                 )
             )
 
-        await inter.send(embeds=embeds, ephemeral=True)
+        if isinstance(inter, disnake.MessageInteraction):
+            await inter.response.edit_message(embeds=embeds, view=None)
+        else:
+            await inter.send(embeds=embeds, ephemeral=True)
 
 class RPCCog(commands.Cog):
 
