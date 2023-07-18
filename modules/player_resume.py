@@ -322,6 +322,11 @@ class PlayerSession(commands.Cog):
                                       f"channel_id: {text_channel.id} | message_id {data['message']}")
 
                 try:
+                    last_message_id = message.id
+                except AttributeError:
+                    last_message_id = None
+
+                try:
                     player: LavalinkPlayer = self.bot.music.get_player(
                         node_id=node.identifier,
                         guild_id=guild.id,
@@ -329,6 +334,7 @@ class PlayerSession(commands.Cog):
                         guild=guild,
                         channel=text_channel,
                         message=message or message_without_thread,
+                        last_message_id=last_message_id,
                         skin=data["skin"],
                         skin_static=data["skin_static"],
                         player_creator=creator,
