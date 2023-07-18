@@ -42,7 +42,7 @@ DEFAULT_CONFIG = {
     #########################
     ### Sistema de música ###
     #########################
-    "AUTO_DOWNLOAD_LAVALINK_SERVERLIST": True,
+    "AUTO_DOWNLOAD_LAVALINK_SERVERLIST": False,
     "LAVALINK_SERVER_LIST": "https://gist.githubusercontent.com/zRitsu/c3511e1da0440b94c126769dd40c9d91/raw/lavalink.ini",
     "DEFAULT_SKIN": "default",
     "DEFAULT_STATIC_SKIN": "default",
