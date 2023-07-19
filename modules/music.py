@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-import argparse
 import datetime
 import json
+import pprint
 import traceback
 import asyncio
 from typing import Union, Optional
@@ -81,6 +81,12 @@ class Music(commands.Cog):
 
         self.music_settings_cooldown = commands.CooldownMapping.from_cooldown(rate=3, per=15,
                                                                               type=commands.BucketType.guild)
+
+        if not self.bot.config["AUTO_ERROR_REPORT_WEBHOOK"] and self.bot.config["ERROR_REPORT_WEBHOOK"]:
+            self.error_report_queue = asyncio.Queue()
+            self.error_report_task = bot.loop.create_task(self.error_report_loop())
+        else:
+            self.error_report_queue = None
 
     async def update_cache(self):
 
@@ -4517,6 +4523,13 @@ class Music(commands.Cog):
 
         return await check_requester_channel(ctx)
 
+    def cog_unload(self):
+        try:
+            self.error_report_task.cancel()
+        except:
+            pass
+
+
     async def interaction_message(self, inter: Union[disnake.Interaction, CustomContext], txt, emoji: str = "✅",
                                   rpc_update: bool = False, data: dict = None, store_embed: bool = False, force=False,
                                   defered=False):
@@ -4747,6 +4760,27 @@ class Music(commands.Cog):
                         f"**Servidor:** `{player.node.identifier}`",
             color=disnake.Colour.red())
         await player.text_channel.send(embed=embed, delete_after=10 if player.static else None)
+
+        error_format = pprint.pformat(payload.data)
+
+        print(f"Erro ao reproduzir a música: {track.uri or track.search_uri}\n"
+              f"Servidor: {player.node.identifier} ```json\n"
+              f"{error_format}```")
+
+        if self.error_report_queue:
+
+            embed.description += f"\n**Servidor:** `{player.guild.name} [{player.guild.id}]`"
+
+            try:
+                embed.description += f"\nCanal: {player.guild.me.voice.channel} [{player.guild.me.voice.channel.id}]\n"
+            except:
+                pass
+
+            embed.description += f" ```json\n{error_format}```"
+
+            embed.timestamp = disnake.utils.utcnow()
+
+            await self.error_report_queue.put({"embed": disnake.Embed(description=embed)})
 
         if player.locked:
             return
@@ -5169,6 +5203,18 @@ class Music(commands.Cog):
                 return node
 
             raise GenericError("**Não há servidores de música disponível.**")
+
+    async def error_report_loop(self):
+
+        while True:
+
+            data = await self.error_report_queue.get()
+
+            async with aiohttp.ClientSession() as session:
+                webhook = disnake.Webhook.from_url(self.bot.config["AUTO_ERROR_REPORT_WEBHOOK"], session=session)
+                await webhook.send(**data)
+
+            await asyncio.sleep(15)
 
 
 def setup(bot: BotCore):
