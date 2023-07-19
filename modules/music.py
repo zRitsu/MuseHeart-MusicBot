@@ -4763,9 +4763,9 @@ class Music(commands.Cog):
 
         error_format = pprint.pformat(payload.data)
 
-        print(f"Erro ao reproduzir a música: {track.uri or track.search_uri}\n"
-              f"Servidor: {player.node.identifier} ```json\n"
-              f"{error_format}```")
+        print(("-" * 50) + f"Erro ao reproduzir a música: {track.uri or track.search_uri}\n"
+              f"Servidor: {player.node.identifier}\n"
+              f"{error_format}\n" + ("-" * 50))
 
         if self.error_report_queue:
 
@@ -4776,9 +4776,7 @@ class Music(commands.Cog):
             except:
                 pass
 
-            embed.description += f" ```json\n{error_format}```"
-
-            embed.timestamp = disnake.utils.utcnow()
+            embed.description += f" ```json\n{error_format}```\n<t:{int(disnake.utils.utcnow().timestamp())}:R>"
 
             await self.error_report_queue.put({"embed": disnake.Embed(description=embed)})
 
