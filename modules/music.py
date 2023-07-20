@@ -82,7 +82,7 @@ class Music(commands.Cog):
         self.music_settings_cooldown = commands.CooldownMapping.from_cooldown(rate=3, per=15,
                                                                               type=commands.BucketType.guild)
 
-        if not self.bot.config["AUTO_ERROR_REPORT_WEBHOOK"] and self.bot.config["ERROR_REPORT_WEBHOOK"]:
+        if not self.bot.config["AUTO_ERROR_REPORT_WEBHOOK"]:
             self.error_report_queue = asyncio.Queue()
             self.error_report_task = bot.loop.create_task(self.error_report_loop())
         else:
