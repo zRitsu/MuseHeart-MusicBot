@@ -555,10 +555,7 @@ class Owner(commands.Cog):
         description="Alterar o prefixo do servidor",
         usage="{prefix}{cmd} [prefixo]\nEx: {prefix}{cmd} >>"
     )
-    async def setprefix(self, ctx: CustomContext, prefix: str = None):
-
-        if not prefix:
-            raise GenericError("**Você não informou um novo prefixo.**")
+    async def setprefix(self, ctx: CustomContext, prefix: str):
 
         if " " in prefix or len(prefix) > 5:
             raise GenericError("**O prefixo não pode conter espaços ou ter acima de 5 caracteres.**")
@@ -586,10 +583,7 @@ class Owner(commands.Cog):
                     "do prefixo configurado no servidor).",
         usage="{prefix}{cmd} [prefixo]\nEx: {prefix}{cmd} >>"
     )
-    async def setuserprefix(self, ctx: CustomContext, prefix: str = None):
-
-        if not prefix:
-            raise GenericError("**Você não informou um novo prefixo.**")
+    async def setuserprefix(self, ctx: CustomContext, prefix: str):
 
         if " " in prefix or len(prefix) > 5:
             raise GenericError("**O prefixo não pode conter espaços ou ter acima de 5 caracteres.**")
