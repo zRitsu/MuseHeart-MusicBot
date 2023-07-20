@@ -598,7 +598,7 @@ class LavalinkPlayer(wavelink.Player):
 
                 try:
                     tracks = await self.node.get_tracks(f'https://www.youtube.com/watch?v={track.ytid}&list=RD{track.ytid}')
-                    tracks = tracks.tracks
+                    tracks = tracks.tracks[1:]
                     break
                 except Exception as e:
                     traceback.print_exc()
