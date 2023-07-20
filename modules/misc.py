@@ -331,7 +331,7 @@ class Misc(commands.Cog):
 
         timestamp = int((disnake.utils.utcnow() + datetime.timedelta(seconds=kwargs["delete_after"])).timestamp())
 
-        embeds[-1].description -= f"\nEssa mensagem será deletada automaticamente: <t:{timestamp}:R>"
+        embeds[-1].description += f"\nEssa mensagem será deletada automaticamente: <t:{timestamp}:R>"
 
         try:
             await channel.send(embeds=embeds, components=components, **kwargs)
