@@ -2322,7 +2322,7 @@ class Music(commands.Cog):
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
-        if not player.played or not player.failed_tracks:
+        if not player.played and not player.failed_tracks:
             raise GenericError("**Não há músicas tocadas.**")
 
         qsize = len(player.played) + len(player.failed_tracks)
