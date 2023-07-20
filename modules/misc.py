@@ -170,7 +170,7 @@ class Misc(commands.Cog):
             cmd_text = ""
 
         if self.bot.config["SUPPORT_SERVER"]:
-            support_server = f"Caso tenha alguma dúvida ou queira acompanhar as últimas novidades, você pode entrar no meu [`servidor de suporte`]({self.bot.config['SUPPORT_SERVER']})\n\n"
+            support_server = f"Caso tenha alguma dúvida ou queira acompanhar as últimas novidades, você pode entrar no meu [`servidor de suporte`]({self.bot.config['SUPPORT_SERVER']})"
         else:
             support_server = ""
 
@@ -299,15 +299,13 @@ class Misc(commands.Cog):
                 ).set_image(url=image)
             )
 
-        embeds.append(disnake.Embed(color=color, description=cmd_text).set_image(url=image))
-
         if prefix:
             embeds.append(
                 disnake.Embed(
                     color=color,
                     description=f"Também tenho comandos de texto por prefixo. Meu prefixo padrão é "
                                 f"**{prefix}** (minha menção também funciona como prefixo). " \
-                                f"Para ver todos os meus comandos de texto use **{prefix}help**." \
+                                f"Para ver todos os meus comandos de texto use **{prefix}help**. " \
                                 f"Caso queira alterar meu prefixo padrão use o comando **{prefix}setprefix**."
                 ).set_image(url=image)
             )
@@ -324,6 +322,8 @@ class Misc(commands.Cog):
                 ).set_image(url=image)
             )
 
+        embeds.append(disnake.Embed(color=color, description=cmd_text).set_image(url=image))
+
         if support_server:
             embeds.append(disnake.Embed(color=color, description=support_server).set_image(url=image))
 
@@ -331,7 +331,7 @@ class Misc(commands.Cog):
 
         timestamp = int((disnake.utils.utcnow() + datetime.timedelta(seconds=kwargs["delete_after"])).timestamp())
 
-        embeds[-1].description += f"\nEssa mensagem será deletada automaticamente: <t:{timestamp}:R>"
+        embeds[-1].description += f"\n\nEssa mensagem será deletada automaticamente: <t:{timestamp}:R>"
 
         try:
             await channel.send(embeds=embeds, components=components, **kwargs)
