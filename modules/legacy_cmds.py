@@ -608,7 +608,7 @@ class Owner(commands.Cog):
     @commands.is_owner()
     @commands.command(
         aliases=["guildprefix", "sgp", "gp"], hidden=True,
-        description="Setar um prefixo antecipado pra um server com o id informado (útil para botlists)",
+        description="Setar um prefixo manualmente pra um server com o id informado (útil para botlists)",
         usage="{prefix}{cmd} [server id] <prefixo>\nEx: {prefix}{cmd} 1155223334455667788 >>\nNota: Use o comando sem especificar um prefix para removê-lo."
     )
     async def setguildprefix(self, ctx: CustomContext, server_id: int, prefix: str = None):
