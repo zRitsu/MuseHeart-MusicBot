@@ -1843,7 +1843,7 @@ class Music(commands.Cog):
                   cooldown=volume_cd, max_concurrency=volume_mc, usage="{prefix}{cmd} [nivel]\nEx: {prefix}{cmd} 50")
     async def volume_legacy(self, ctx: CustomContext, level: int):
 
-        if 4 < level < 151:
+        if not 4 < level < 151:
             raise GenericError("**Volume inválido! escolha entre 5 a 150**", self_delete=7)
 
         await self.volume.callback(self=self, inter=ctx, value=int(level))
