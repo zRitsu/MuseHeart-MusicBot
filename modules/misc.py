@@ -176,7 +176,7 @@ class Misc(commands.Cog):
 
         if self.bot.default_prefix and not self.bot.config["INTERACTION_COMMAND_ONLY"]:
             guild_data = await self.bot.get_global_data(guild.id, db_name=DBModel.guilds)
-            prefix = disnake.utils.escape_markdown(guild_data['prefix'] or self.bot.default_prefix, as_needed=True)
+            prefix = disnake.utils.escape_markdown(guild_data['prefix'], as_needed=True)
         else:
             prefix = ""
 
@@ -229,17 +229,22 @@ class Misc(commands.Cog):
                             )
 
                         if prefix:
-                            embeds.append(
-                                disnake.Embed(
-                                    color=color,
-                                    description=f"Também tenho comandos de texto por prefixo. Meu prefixo padrão é "
-                                                f"**{prefix}** (minha menção também funciona como prefixo). " \
-                                                 f"Para ver todos os meus comandos de texto use **{prefix}help** em um " \
-                                                 f"canal do servidor **{guild.name}**. Caso queira alterar meu prefixo "
-                                                f"padrão use o comando **{prefix}setprefix** (você pode ter um prefixo "
-                                                f"pessoal usando o comando **{prefix}setmyprefix**)."
-                                ).set_image(url=image)
-                            )
+                            prefix_msg = f"Meu prefixo no servidor **{guild.name}** é: **{prefix}**"
+                        else:
+                            prefix = self.bot.default_prefix
+                            prefix_msg = f"Meu prefixo padrão é **{prefix}**"
+
+                        embeds.append(
+                            disnake.Embed(
+                                color=color,
+                                description=f"Também tenho comandos de texto por prefixo. {prefix_msg} (minha menção "
+                                            f"também funciona como prefixo). Pra ver todos os meus comandos de texto "
+                                            f"use **{prefix}help** em um canal do servidor **{guild.name}**. "
+                                            f"Caso queira alterar meu prefixo use o comando **{prefix}setprefix** "
+                                            f"(você pode ter um prefixo pessoal usando o comando "
+                                            f"**{prefix}setmyprefix**)."
+                            ).set_image(url=image)
+                        )
 
                         if bots_in_guild:
                             embeds.append(
@@ -300,15 +305,20 @@ class Misc(commands.Cog):
             )
 
         if prefix:
-            embeds.append(
-                disnake.Embed(
-                    color=color,
-                    description=f"Também tenho comandos de texto por prefixo. Meu prefixo padrão é "
-                                f"**{prefix}** (minha menção também funciona como prefixo). " \
-                                f"Para ver todos os meus comandos de texto use **{prefix}help**. " \
-                                f"Caso queira alterar meu prefixo padrão use o comando **{prefix}setprefix**."
-                ).set_image(url=image)
-            )
+            prefix_msg = f"Meu prefixo no servidor é: **{prefix}**"
+        else:
+            prefix = self.bot.default_prefix
+            prefix_msg = f"Meu prefixo padrão é **{prefix}**"
+
+        embeds.append(
+            disnake.Embed(
+                color=color,
+                description=f"Também tenho comandos de texto por prefixo. {prefix_msg} (minha menção "
+                            f"também funciona como prefixo). Pra ver todos os meus comandos de texto use "
+                            f"**{prefix}help**. Caso queira alterar meu prefixo use o comando **{prefix}setprefix** "
+                            f"(você pode ter um prefixo pessoal usando o comando **{prefix}setmyprefix**)."
+            ).set_image(url=image)
+        )
 
         if bots_in_guild:
             embeds.append(
