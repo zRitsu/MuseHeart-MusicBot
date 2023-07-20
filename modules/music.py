@@ -4898,6 +4898,11 @@ class Music(commands.Cog):
         except:
             pass
 
+        try:
+            player = self.bot.music.players[player.guild.id]
+        except:
+            return
+
         await player.track_end()
 
         player.update = False
