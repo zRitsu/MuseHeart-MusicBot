@@ -93,6 +93,33 @@ async def get_prefix(bot: BotCore, message: disnake.Message):
         return commands.when_mentioned_or(bot.default_prefix)
 
     data = await bot.get_global_data(message.guild.id, db_name=DBModel.guilds)
+
+    prefix = None
+
+    try:
+        prefix = bot.temp_prefixes.pop(message.guild.id, None)
+    except AttributeError:
+        try:
+            with open("./local_database/temp_prefixes.json") as f:
+                bot.temp_prefixes = json.load(f)
+        except AttributeError:
+            bot.temp_prefixes = {}
+        except:
+            pass
+        else:
+            prefix = bot.temp_prefixes.pop(message.guild.id, None)
+
+    if prefix:
+
+        data["prefix"] = prefix
+
+        await bot.update_global_data(message.guild.id, data, db_name=DBModel.guilds)
+
+        with open("./local_database/temp_prefixes.json", "w") as f:
+            json.dump(bot.temp_prefixes, f, indent=4)
+
+        return prefix
+
     prefix = data.get("prefix") or bot.config.get("DEFAULT_PREFIX") or "!!"
 
     return prefix
