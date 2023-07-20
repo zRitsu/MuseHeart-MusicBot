@@ -100,7 +100,7 @@ async def get_prefix(bot: BotCore, message: disnake.Message):
         prefix = bot.temp_prefixes.pop(message.guild.id, None)
     except AttributeError:
         try:
-            with open("./local_database/temp_prefixes.json") as f:
+            with open("./.local_database/temp_prefixes.json") as f:
                 bot.temp_prefixes = json.load(f)
         except AttributeError:
             bot.temp_prefixes = {}
@@ -115,7 +115,7 @@ async def get_prefix(bot: BotCore, message: disnake.Message):
 
         await bot.update_global_data(message.guild.id, data, db_name=DBModel.guilds)
 
-        with open("./local_database/temp_prefixes.json", "w") as f:
+        with open("./.local_database/temp_prefixes.json", "w") as f:
             json.dump(bot.temp_prefixes, f, indent=4)
 
         return prefix
