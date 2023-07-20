@@ -606,6 +606,33 @@ class Owner(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.is_owner()
+    @commands.command(
+        aliases=["tempprefix", "stp", "tp"], hidden=True,
+        description="Setar um prefixo antecipado pra um server com o id informado (útil para botlists)",
+        usage="{prefix}{cmd} [server id] <prefixo>\nEx: {prefix}{cmd} 1155223334455667788 >>\nNota: Use o comando sem especificar um prefix para removê-lo."
+    )
+    async def settempprefix(self, ctx: CustomContext, server_id: int, prefix: str = None):
+
+        if not 17 < len(str(server_id)) < 24:
+            raise GenericError("**A quantidade de caracteres do id do servidor tem que estar entre 18 a 23.**")
+
+        guild_data = await self.bot.get_global_data(server_id, db_name=DBModel.guilds)
+
+        embed = disnake.Embed(color=self.bot.get_color(ctx.guild.me))
+
+        if not prefix:
+            guild_data["prefix"] = ""
+            await ctx.bot.update_global_data(server_id, guild_data, db_name=DBModel.guilds)
+            embed.description = "**O prefixo antecipado do servidor com o id informado foi resetado com sucesso.**"
+
+        else:
+            guild_data["prefix"] = prefix
+            await self.bot.update_global_data(server_id, guild_data, db_name=DBModel.guilds)
+            embed.description = f"**O prefixo para o servidor com o id informado agora é:** {disnake.utils.escape_markdown(prefix)}"
+
+        await ctx.send(embed=embed)
+
+    @commands.is_owner()
     @panel_command(aliases=["expsource", "export", "exs"],
                    description="Exportar minha source para um arquivo zip.", emoji="💾",
                    alt_name="Exportar source/código-fonte.")
