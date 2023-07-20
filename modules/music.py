@@ -4804,7 +4804,10 @@ class Music(commands.Cog):
 
         if player.last_track:
 
-            if not track.track_loops:
+            if payload.cause == "java.net.SocketTimeoutException: connect timed out":
+                player.queue.appendleft(player.last_track)
+
+            elif not track.track_loops:
                 player.failed_tracks.append(player.last_track)
 
             elif player.keep_connected and not player.last_track.autoplay and len(player.queue) > 15:
@@ -4812,6 +4815,12 @@ class Music(commands.Cog):
 
         player.locked = True
         await asyncio.sleep(6)
+
+        try:
+            player = player.bot.music.players[player.guild.id]
+        except:
+            return
+
         player.locked = False
         await player.process_next()
 
