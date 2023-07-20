@@ -607,11 +607,11 @@ class Owner(commands.Cog):
 
     @commands.is_owner()
     @commands.command(
-        aliases=["tempprefix", "stp", "tp"], hidden=True,
+        aliases=["guildprefix", "sgp", "gp"], hidden=True,
         description="Setar um prefixo antecipado pra um server com o id informado (útil para botlists)",
         usage="{prefix}{cmd} [server id] <prefixo>\nEx: {prefix}{cmd} 1155223334455667788 >>\nNota: Use o comando sem especificar um prefix para removê-lo."
     )
-    async def settempprefix(self, ctx: CustomContext, server_id: int, prefix: str = None):
+    async def setguildprefix(self, ctx: CustomContext, server_id: int, prefix: str = None):
 
         if not 17 < len(str(server_id)) < 24:
             raise GenericError("**A quantidade de caracteres do id do servidor tem que estar entre 18 a 23.**")
