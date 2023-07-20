@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import datetime
 import json
 import os.path
 import traceback
@@ -327,6 +328,10 @@ class Misc(commands.Cog):
             embeds.append(disnake.Embed(color=color, description=support_server).set_image(url=image))
 
         kwargs = {"delete_after": 60} if channel == guild.rules_channel else {"delete_after": 300}
+
+        timestamp = str((disnake.utils.utcnow() + datetime.timedelta(seconds=kwargs["delete_after"])).timestamp())
+
+        embeds[-1].description -= f"\nEssa mensagem será deletada automaticamente: <t:{timestamp}:R>"
 
         try:
             await channel.send(embeds=embeds, components=components, **kwargs)
