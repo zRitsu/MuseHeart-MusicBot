@@ -329,7 +329,7 @@ class Misc(commands.Cog):
 
         kwargs = {"delete_after": 60} if channel == guild.rules_channel else {"delete_after": 300}
 
-        timestamp = str((disnake.utils.utcnow() + datetime.timedelta(seconds=kwargs["delete_after"])).timestamp())
+        timestamp = int((disnake.utils.utcnow() + datetime.timedelta(seconds=kwargs["delete_after"])).timestamp())
 
         embeds[-1].description -= f"\nEssa mensagem será deletada automaticamente: <t:{timestamp}:R>"
 
