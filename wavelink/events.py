@@ -65,16 +65,17 @@ class TrackException:
         The error reason dispatched with the event.
     """
 
-    __slots__ = ('track', 'player', 'error', 'cause', 'message', 'severity', 'data')
+    __slots__ = ('track', 'player', 'error', 'data', 'exception', 'cause', 'message', 'severity')
 
     def __init__(self, data: dict):
         self.track = data.get('track')
         self.player = data.get('player')
         self.error = data.get('error')
-        self.cause = data.get('cause')
-        self.message = data.get('message')
-        self.severity = data.get('severity')
         self.data = data
+        self.exception = data.get('exception', {})
+        self.cause = self.exception.get('cause')
+        self.message = self.exception.get('message')
+        self.severity = self.exception.get('severity')
 
     def __str__(self):
         return 'TrackExceptionEvent'

@@ -600,6 +600,11 @@ class LavalinkPlayer(wavelink.Player):
                     tracks = await self.node.get_tracks(f'https://www.youtube.com/watch?v={track.ytid}&list=RD{track.ytid}')
                     tracks = tracks.tracks[1:]
                     break
+                except wavelink.TrackLoadError as e:
+                    traceback.print_exc()
+                    exception = e
+                    if e.message == "Could not find tracks from mix.":
+                        break
                 except Exception as e:
                     traceback.print_exc()
                     exception = e
@@ -615,6 +620,7 @@ class LavalinkPlayer(wavelink.Player):
                     await self.text_channel.send(embed=embed, delete_after=10)
                 except:
                     traceback.print_exc()
+                await asyncio.sleep(5)
                 return
 
         else:
@@ -643,6 +649,11 @@ class LavalinkPlayer(wavelink.Player):
                     try:
                         tracks = await self.node.get_tracks(f"ytmsearch:{track.author}")
                         break
+                    except wavelink.TrackLoadError as e:
+                        traceback.print_exc()
+                        exception = e
+                        if e.message == "Could not find tracks from mix.":
+                            break
                     except Exception as e:
                         traceback.print_exc()
                         exception = e
@@ -658,6 +669,7 @@ class LavalinkPlayer(wavelink.Player):
                         await self.text_channel.send(embed=embed, delete_after=10)
                     except:
                         traceback.print_exc()
+                    await asyncio.sleep(5)
                     return
             else:
                 tracks = []
@@ -706,33 +718,36 @@ class LavalinkPlayer(wavelink.Player):
         except:
             pass
 
-        try:
+        if len(self.queue):
             track = self.queue.popleft()
             clear_autoqueue = bool(track.ytid)
 
-        except IndexError:
+        else:
 
-            clear_autoqueue = False
+            try:
 
-            track = None
+                clear_autoqueue = False
 
-            if self.autoplay:
-                try:
-                    track = await self.get_autoqueue_tracks()
-                except:
-                    traceback.print_exc()
+                track = None
 
-            if not track:
-                await self.stop()
-                self.idle_endtime = disnake.utils.utcnow() + datetime.timedelta(seconds=self.idle_timeout)
-                self.last_track = None
-                self.idle_task = self.bot.loop.create_task(self.idling_mode())
-                return
+                if self.autoplay:
+                    try:
+                        track = await self.get_autoqueue_tracks()
+                    except:
+                        traceback.print_exc()
 
-        except Exception:
-            clear_autoqueue = False
-            traceback.print_exc()
-            track = None
+                if not track:
+                    await self.stop()
+                    self.idle_endtime = disnake.utils.utcnow() + datetime.timedelta(seconds=self.idle_timeout)
+                    self.last_track = None
+                    self.idle_task = self.bot.loop.create_task(self.idling_mode())
+                    return
+
+            except Exception as e:
+                clear_autoqueue = False
+                traceback.print_exc()
+                print("test", type(e))
+                track = None
 
         if not track:
             await self.process_next()
