@@ -569,8 +569,39 @@ class Owner(commands.Cog):
         guild_data["prefix"] = prefix
         await self.bot.update_global_data(ctx.guild.id, guild_data, db_name=DBModel.guilds)
 
+        prefix = disnake.utils.escape_markdown(prefix)
+
         embed = disnake.Embed(
-            description=f"**O prefixo deste servidor agora é:** {disnake.utils.escape_markdown(prefix)}",
+            description=f"**O prefixo deste servidor agora é:** `{prefix}`\n"
+                        f"**Caso queira restaurar o prefixo padrão use o comando:** `{prefix}{self.resetprefix.name}`",
+            color=self.bot.get_color(ctx.guild.me)
+        )
+
+        await ctx.send(embed=embed)
+
+    @commands.has_guild_permissions(manage_guild=True)
+    @commands.cooldown(1, 10, commands.BucketType.guild)
+    @commands.command(
+        description="Resetar o prefixo do servidor (Usar o prefixo padrão do bot)"
+    )
+    async def resetprefix(self, ctx: CustomContext):
+
+        try:
+            guild_data = ctx.global_guild_data
+        except AttributeError:
+            guild_data = await self.bot.get_global_data(ctx.guild.id, db_name=DBModel.guilds)
+            ctx.global_guild_data = guild_data
+
+        if not guild_data["prefix"]:
+            raise GenericError("**Nao há prefixo configurado no servidor.**")
+
+        guild_data["prefix"] = ""
+
+        await self.bot.update_global_data(ctx.guild.id, guild_data, db_name=DBModel.guilds)
+
+        embed = disnake.Embed(
+            description=f"**O prefixo do servidor foi resetado com sucesso.\n"
+                        f"O prefixo padrão agora é:** `{disnake.utils.escape_markdown(self.bot.default_prefix)}`",
             color=self.bot.get_color(ctx.guild.me)
         )
 
@@ -598,8 +629,35 @@ class Owner(commands.Cog):
         self.bot.pool.user_prefix_cache[ctx.author.id] = prefix
         await self.bot.update_global_data(ctx.author.id, user_data, db_name=DBModel.users)
 
+        prefix = disnake.utils.escape_markdown(prefix)
+
         embed = disnake.Embed(
-            description=f"**O seu prefixo de usuário agora é:** {disnake.utils.escape_markdown(prefix)}",
+            description=f"**O seu prefixo de usuário agora é:** `{prefix}`\n"
+                        f"**Caso queira remover seu prefixo de usuário use o comando:** `{prefix}{self.resetuserprefix.name}`",
+            color=self.bot.get_color(ctx.guild.me)
+        )
+
+        await ctx.send(embed=embed)
+
+    @commands.cooldown(1, 10, commands.BucketType.guild)
+    @commands.command(description="Remover seu prefixo de usuário")
+    async def resetuserprefix(self, ctx: CustomContext):
+
+        try:
+            user_data = ctx.global_user_data
+        except AttributeError:
+            user_data = await self.bot.get_global_data(ctx.author.id, db_name=DBModel.users)
+            ctx.global_user_data = user_data
+
+        if not user_data["custom_prefix"]:
+            raise GenericError("**Você não possui prefixo configurado.**")
+
+        user_data["custom_prefix"] = ""
+        self.bot.pool.user_prefix_cache[ctx.author.id] = ""
+        await self.bot.update_global_data(ctx.author.id, user_data, db_name=DBModel.users)
+
+        embed = disnake.Embed(
+            description=f"**O seu prefixo de usuário foi removido com sucesso.**",
             color=self.bot.get_color(ctx.guild.me)
         )
 
