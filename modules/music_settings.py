@@ -1259,7 +1259,7 @@ class MusicSettings(commands.Cog):
         if not guild.me.guild_permissions.create_instant_invite:
             raise GenericError(f"**{bot.user.mention} não possui permissão de criar convites instantâneos...**")
 
-        if not ctx.author.voice.channel:
+        if not ctx.author.voice:
             raise NoVoice()
 
         await ctx.reply(
