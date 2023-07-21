@@ -608,7 +608,8 @@ class LavalinkPlayer(wavelink.Player):
                 except Exception as e:
                     traceback.print_exc()
                     exception = e
-                    retries -= 1
+
+                retries -= 1
 
             if not tracks:
                 self.locked = False
@@ -657,7 +658,8 @@ class LavalinkPlayer(wavelink.Player):
                     except Exception as e:
                         traceback.print_exc()
                         exception = e
-                        retries -= 1
+
+                    retries -= 1
 
                 if not tracks:
                     self.locked = False
