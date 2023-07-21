@@ -10,6 +10,7 @@ from random import shuffle
 import aiofiles
 import aiohttp
 import disnake
+import psutil
 from aiohttp import ClientConnectorCertificateError
 from disnake.ext import commands
 
@@ -18,6 +19,7 @@ import wavelink
 from utils.client import BotCore
 from utils.db import DBModel
 from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolException, parse_error, EmptyFavIntegration
+from utils.music.local_lavalink import run_lavalink
 from utils.music.spotify import process_spotify, spotify_regex_w_user
 from utils.music.checks import check_voice, has_player, has_source, is_requester, is_dj, \
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen, check_pool_bots, \
@@ -4806,6 +4808,41 @@ class Music(commands.Cog):
 
             if payload.cause == "java.net.SocketTimeoutException: connect timed out":
                 player.queue.appendleft(player.last_track)
+
+            # TODO: Desativar esse recurso após a correção do lavaplayer ser efetuada.
+            elif payload.cause == "java.lang.RuntimeException: Not success status code: 403" and player.node.identifier == "LOCAL" and not player.node.restarting:
+                for process in psutil.process_iter():
+                    try:
+                        if "Lavalink.jar" in process.cmdline():
+                            txt = "O servidor de música foi reiniciado para uma correção e a música será retomada em " \
+                                  "alguns segundos (Por favor aguarde)..."
+                            for p in player.node.players.values():
+                                if p.static or p.controller_mode:
+                                    p.set_command_log(text=txt, emoji="🛠️")
+                                    self.bot.loop.create_task(p.invoke_np(force=True))
+                                else:
+                                    self.bot.loop.create_task(
+                                        p.text_channel.send(
+                                            embed=disnake.Embed(
+                                                color=self.bot.get_color(p.guild.me),
+                                                description=f"🛠️ **⠂{txt}**"
+                                            )
+                                        )
+                                    )
+                            process.terminate()
+                            run_lavalink(
+                                lavalink_file_url=self.bot.config['LAVALINK_FILE_URL'],
+                                lavalink_initial_ram=self.bot.config['LAVALINK_INITIAL_RAM'],
+                                lavalink_ram_limit=self.bot.config['LAVALINK_RAM_LIMIT'],
+                                lavalink_additional_sleep=int(self.bot.config['LAVALINK_ADDITIONAL_SLEEP']),
+                                use_jabba=self.bot.config["USE_JABBA"]
+                            )
+                            return
+                    except (psutil.AccessDenied, PermissionError):
+                        continue
+                    except Exception:
+                        traceback.print_exc()
+                return
 
             elif not track.track_loops:
                 player.failed_tracks.append(player.last_track)
