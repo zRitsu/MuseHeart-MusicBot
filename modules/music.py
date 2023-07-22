@@ -4760,8 +4760,9 @@ class Music(commands.Cog):
         embed = disnake.Embed(
             description=f"**Falha ao reproduzir música:\n[{track.title}]({track.uri or track.search_uri})** ```java\n{payload.message}```\n"
                         f"**Causa:** ```java\n{payload.cause}```\n"
+                        f"**Mensagem:** `\n{payload.message}`"
                         f"**Nível:** `{payload.severity}`\n"
-                        f"**Servidor:** `{player.node.identifier}`",
+                        f"**Servidor de música:** `{player.node.identifier}`",
             color=disnake.Colour.red())
         await player.text_channel.send(embed=embed, delete_after=10 if player.static else None)
 
@@ -4780,7 +4781,7 @@ class Music(commands.Cog):
             except:
                 pass
 
-            embed.description += f" ```json\n{error_format}```\n<t:{int(disnake.utils.utcnow().timestamp())}:R>"
+            embed.description += f"**Data:** <t:{int(disnake.utils.utcnow().timestamp())}:F>"
 
             await self.error_report_queue.put({"embed": embed})
 

@@ -587,18 +587,38 @@ class LavalinkPlayer(wavelink.Player):
                     track = t
                     break
 
+        search_url = ""
+        tracks = []
+
         if track and track.ytid:
+            search_url =  f'https://www.youtube.com/watch?v={track.ytid}&list=RD{track.ytid}'
+        else:
+            try:
+                track = self.played[0]
+            except IndexError:
+                try:
+                    track = self.queue_autoplay[-1]
+                except:
+                    track = None
+
+            if not track:
+                track = self.current or self.last_track
+
+            if track:
+                search_url = f"ytmsearch:{track.author}"
+
+        if search_url:
+
             self.locked = True
 
             retries = 3
-            tracks = []
             exception = None
 
             while retries:
 
                 try:
-                    tracks = await self.node.get_tracks(f'https://www.youtube.com/watch?v={track.ytid}&list=RD{track.ytid}')
-                    tracks = tracks.tracks[1:]
+                    tracks = await self.node.get_tracks(search_url)
+                    tracks = tracks.tracks[1:] if not search_url.startswith("ytmsearch:") else tracks.tracks
                     break
                 except wavelink.TrackLoadError as e:
                     traceback.print_exc()
@@ -613,68 +633,26 @@ class LavalinkPlayer(wavelink.Player):
 
             if not tracks:
                 self.locked = False
+
+                if isinstance(exception, wavelink.TrackLoadError):
+                    error_msg = f"**Causa:** ```java\n{exception.cause}```\n" \
+                                f"**Mensagem:** `\n{exception.message}`\n" \
+                                f"**Nível:** `{exception.severity}`\n" \
+                                f"**Servidor de música:** `{self.node.identifier}`"
+                else:
+                    error_msg = f"**Detalhes:** ```py\n{repr(exception)}```"
+
                 try:
                     embed = disnake.Embed(
-                        description=f"**Falha ao obter dados do autoplay:\n[{track.title}]({track.uri or track.search_uri})** ```java\n{repr(exception)}```"
-                                    f"**Servidor:** `{self.node.identifier}`",
+                        description=f"**Falha ao obter dados do autoplay:\n"
+                                    f"[{track.title}]({track.uri or track.search_uri})**\n"
+                                    f"{error_msg}",
                         color=disnake.Colour.red())
                     await self.text_channel.send(embed=embed, delete_after=10)
                 except:
                     traceback.print_exc()
-                await asyncio.sleep(5)
+                await asyncio.sleep(7)
                 return
-
-        else:
-
-            try:
-                track = self.played[0]
-            except IndexError:
-                try:
-                    track = self.queue_autoplay[-1]
-                except:
-                    track = None
-
-            if not track:
-                track = self.current or self.last_track
-
-            if track:
-
-                self.locked = True
-
-                retries = 3
-                tracks = []
-                exception = None
-
-                while retries:
-
-                    try:
-                        tracks = await self.node.get_tracks(f"ytmsearch:{track.author}")
-                        break
-                    except wavelink.TrackLoadError as e:
-                        traceback.print_exc()
-                        exception = e
-                        if e.message == "Could not find tracks from mix.":
-                            break
-                    except Exception as e:
-                        traceback.print_exc()
-                        exception = e
-
-                    retries -= 1
-
-                if not tracks:
-                    self.locked = False
-                    try:
-                        embed = disnake.Embed(
-                            description=f"**Falha ao obter dados do autoplay:\n[{track.title}]({track.uri or track.search_uri})** ```java\n{repr(exception)}```"
-                                        f"**Servidor:** `{self.node.identifier}`",
-                            color=disnake.Colour.red())
-                        await self.text_channel.send(embed=embed, delete_after=10)
-                    except:
-                        traceback.print_exc()
-                    await asyncio.sleep(5)
-                    return
-            else:
-                tracks = []
 
         if track:
 
