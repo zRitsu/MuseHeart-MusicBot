@@ -5264,7 +5264,7 @@ class Music(commands.Cog):
 
             async with aiohttp.ClientSession() as session:
                 webhook = disnake.Webhook.from_url(self.bot.config["AUTO_ERROR_REPORT_WEBHOOK"], session=session)
-                await webhook.send(**data)
+                await webhook.send(username=self.bot.user.display_name, avatar_url=self.bot.user.display_avatar.url, **data)
 
             await asyncio.sleep(15)
 
