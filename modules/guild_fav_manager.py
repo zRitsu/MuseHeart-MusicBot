@@ -272,6 +272,13 @@ class GuildFavView(disnake.ui.View):
         self.current = inter.values[0]
         await inter.response.defer()
 
+    async def interaction_check(self, inter: disnake.MessageInteraction) -> bool:
+
+        if inter.author.id == self.ctx.author.id:
+            return True
+
+        await inter.send(f"Apenas o membro {self.ctx.author.mention} pode interagir nessa mensagem.", ephemeral=True)
+
 
 class PinManager(commands.Cog):
 
