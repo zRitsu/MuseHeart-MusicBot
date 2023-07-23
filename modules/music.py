@@ -5240,7 +5240,7 @@ class Music(commands.Cog):
 
         try:
             return sorted(
-                [n for n in bot.music.nodes.values() if n.stats and n.is_available and n.available],
+                [n for n in bot.music.nodes.values() if n.stats and n.is_available and n.available and not n.restarting],
                 key=lambda n: n.stats.players
             )[0]
 
