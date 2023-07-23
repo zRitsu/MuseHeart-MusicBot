@@ -467,9 +467,10 @@ class Owner(commands.Cog):
 
         return out_git
 
-    @commands.is_owner()
+    @commands.max_concurrency(1, commands.BucketType.guild)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     @panel_command(aliases=["latest", "lastupdate"], description="Ver minhas atualizações mais recentes.", emoji="📈",
-                   alt_name="Ultimas atualizações")
+                   alt_name="Ultimas atualizações", hidden=False)
     async def updatelog(self, ctx: Union[CustomContext, disnake.MessageInteraction], amount: int = 10):
 
         if not os.path.isdir("./.git"):
@@ -494,7 +495,7 @@ class Owner(commands.Cog):
                 color=self.bot.get_color(ctx.guild.me)
             )
 
-            await ctx.send(embed=embed, view=self.owner_view)
+            await ctx.send(embed=embed, view=self.owner_view if (await self.bot.is_owner(ctx.author)) else None)
 
         else:
             return txt
