@@ -64,7 +64,7 @@ class TrackLoadError(WavelinkException):
         self.cause = self.exception.get('cause')
 
     def __repr__(self):
-        return f"{pprint.pformat(self.data)}"
+        return self.message
 
     def __str__(self):
-        return f"{pprint.pformat(self.data)}"
+        return self.message
