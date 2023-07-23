@@ -5031,7 +5031,7 @@ class Music(commands.Cog):
                         node_search = \
                             sorted(
                                 [n for n in self.bot.music.nodes.values() if
-                                 n.search and n.available and n.is_available],
+                                 n.search and n.available and n.is_available and not n.restarting],
                                 key=lambda n: len(n.players))[0]
                     except IndexError:
                         node_search = node
@@ -5045,7 +5045,7 @@ class Music(commands.Cog):
 
                     for n in self.bot.music.nodes.values():
 
-                        if not n.available or not n.is_available:
+                        if not n.available or not n.is_available or n.restarting:
                             continue
 
                         try:
