@@ -4777,7 +4777,7 @@ class Music(commands.Cog):
             embed.description += f"\n**Servidor:** `{disnake.utils.escape_markdown(player.guild.name)} [{player.guild.id}]`"
 
             try:
-                embed.description += f"\nCanal: {player.guild.me.voice.channel} [{player.guild.me.voice.channel.id}]\n"
+                embed.description += f"\n**Canal:** `{disnake.utils.escape_markdown(player.guild.me.voice.channel.name)}` [{player.guild.me.voice.channel.id}]\n"
             except:
                 pass
 
