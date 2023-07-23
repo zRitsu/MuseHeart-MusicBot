@@ -4760,7 +4760,7 @@ class Music(commands.Cog):
         embed = disnake.Embed(
             description=f"**Falha ao reproduzir música:\n[{track.title}]({track.uri or track.search_uri})** ```java\n{payload.message}```\n"
                         f"**Causa:** ```java\n{payload.cause}```\n"
-                        f"**Mensagem:** `\n{payload.message}`"
+                        f"**Mensagem:** `\n{payload.message}`\n"
                         f"**Nível:** `{payload.severity}`\n"
                         f"**Servidor de música:** `{player.node.identifier}`",
             color=disnake.Colour.red())
@@ -4774,7 +4774,7 @@ class Music(commands.Cog):
 
         if self.error_report_queue:
 
-            embed.description += f"\n**Servidor:** `{player.guild.name} [{player.guild.id}]`"
+            embed.description += f"\n**Servidor:** `{disnake.utils.escape_markdown(player.guild.name)} [{player.guild.id}]`"
 
             try:
                 embed.description += f"\nCanal: {player.guild.me.voice.channel} [{player.guild.me.voice.channel.id}]\n"
