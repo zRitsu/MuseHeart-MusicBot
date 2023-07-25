@@ -4830,6 +4830,7 @@ class Music(commands.Cog):
                                             )
                                         )
                                     )
+                            player.node.restarting = True
                             process.terminate()
                             run_lavalink(
                                 lavalink_file_url=self.bot.config['LAVALINK_FILE_URL'],
