@@ -1661,7 +1661,7 @@ class Music(commands.Cog):
             elif index > 0:
                 player.queue.rotate(0 - index)
 
-            player.set_command_log(emoji="⤵️", text="pulou para a música atual.")
+            player.set_command_log(emoji="⤵️", text=f"{inter.author.mention} pulou para a música atual.")
 
             embed = disnake.Embed(
                 color=self.bot.get_color(guild.me),
