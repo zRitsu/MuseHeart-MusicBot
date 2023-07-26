@@ -4810,6 +4810,11 @@ class Music(commands.Cog):
             if payload.cause == "java.net.SocketTimeoutException: connect timed out":
                 player.queue.appendleft(player.last_track)
 
+            elif payload.cause == "java.lang.InterruptedException":
+                player.queue.appendleft(player.last_track)
+                player.locked = False
+                return
+
             # TODO: Desativar esse recurso após a correção do lavaplayer ser efetuada.
             elif payload.cause == "java.lang.RuntimeException: Not success status code: 403" and player.node.identifier == "LOCAL":
                 for process in psutil.process_iter():
@@ -4861,6 +4866,7 @@ class Music(commands.Cog):
                         continue
                     except Exception:
                         traceback.print_exc()
+                player.locked = False
                 return
 
             elif not track.track_loops:
