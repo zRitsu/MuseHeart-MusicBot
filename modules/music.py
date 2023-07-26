@@ -4814,7 +4814,6 @@ class Music(commands.Cog):
                 player.queue.appendleft(player.last_track)
 
                 if player.node.identifier == "LOCAL":
-                    player.locked = False
                     return
                 else:
                     try:
@@ -4866,7 +4865,7 @@ class Music(commands.Cog):
                                                     )
                                                 )
                                             )
-                                        p.locked = False
+                                        p.locked = True
 
                             process.terminate()
                             run_lavalink(
@@ -4916,6 +4915,7 @@ class Music(commands.Cog):
                         text="O servidor de música foi reconectado com sucesso!",
                         emoji="🔰"
                     )
+                    player.locked = False
                     if not player.current and len(player.queue) > 0:
                         await player.process_next()
                     else:
