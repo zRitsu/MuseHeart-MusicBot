@@ -50,7 +50,7 @@ def run_lavalink(
             pass
 
         if os.name == "nt":
-            dirs.append(".java\\jdk-13\\bin\\java")
+            dirs.append(".java\\zulu17.44.15-ca-jdk17.0.8-win_x64\\bin\\java")
         else:
             dirs.extend(
                 [
@@ -74,9 +74,9 @@ def run_lavalink(
                     pass
 
                 if platform.architecture()[0] != "64bit":
-                    jdk_url = "https://cdn.azul.com/zulu/bin/zulu11.58.25-ca-jdk11.0.16.1-win_i686.zip"
+                    jdk_url = "https://cdn.azul.com/zulu/bin/zulu17.44.15-ca-jdk17.0.8-win_i686.zip"
                 else:
-                    jdk_url = "https://builds.openlogic.com/downloadJDK/openlogic-openjdk/17.0.5+8/openlogic-openjdk-17.0.5+8-linux-x64.tar.gz"
+                    jdk_url = "https://cdn.azul.com/zulu/bin/zulu17.44.15-ca-jdk17.0.8-win_x64.zip"
 
                 jdk_filename = "java.zip"
 
@@ -87,7 +87,7 @@ def run_lavalink(
 
                 os.remove(jdk_filename)
 
-                java_cmd = os.path.join(os.getcwd(), r"\.java\jdk-13\bin\java")
+                java_cmd = os.path.join(os.getcwd(), r"\.java\zulu17.44.15-ca-jdk17.0.8-win_x64\bin\java")
 
             elif use_jabba:
 
@@ -105,9 +105,9 @@ def run_lavalink(
                 if not os.path.isdir("./.java"):
 
                     if platform.architecture()[0] != "64bit":
-                        jdk_url = "https://cdn.azul.com/zulu/bin/zulu13.54.17-ca-jdk13.0.14-linux_i686.tar.gz"
+                        jdk_url = "https://cdn.azul.com/zulu/bin/zulu17.44.15-ca-jdk17.0.8-linux_i686.tar.gz"
                     else:
-                        jdk_url = "https://download.java.net/openjdk/jdk13/ri/openjdk-13+33_linux-x64_bin.tar.gz"
+                        jdk_url = "https://cdn.azul.com/zulu/bin/zulu17.44.17-ca-crac-jdk17.0.8-linux_x64.tar.gz"
 
                     jdk_filename = "java.tar.gz"
 
