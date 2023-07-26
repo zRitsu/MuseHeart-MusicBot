@@ -49,7 +49,7 @@ class EmbedLinkSkin:
             txt += f"\n> ## `⏸️` Em Pausa:\n> ### ╚═【 {title} 】\n{duration_txt}"
 
         else:
-            txt += f"\n> ### `▶️` Tocando Agora:\n> ### ╚═【 {title} 】\n{duration_txt}"
+            txt += f"\n> `▶️` **Tocando Agora:** {title}\n{duration_txt}"
             if not player.current.is_stream:
                 txt += f" `[`<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`" \
                 if not player.paused else ''
@@ -65,19 +65,6 @@ class EmbedLinkSkin:
 
         if player.current.autoplay:
             txt += f"\n`No momento estou usando a reprodução automática enquanto aguardo algum membro do canal {player.guild.me.voice.channel.mention} adicionar novas músicas.`\n"
-
-        if qsize := len(player.queue):
-
-            qtext = "**Músicas na fila:**\n```ansi\n" + \
-                              "\n".join(
-                                  f"[0;33m{(n + 1):02}[0m [0;34m[{time_format(t.duration) if not t.is_stream else '🔴 stream'}][0m [0;36m{fix_characters(t.title, 45)}[0m"
-                                  for n, t in enumerate(
-                                      itertools.islice(player.queue, 4)))
-
-            if qsize  > 4:
-                qtext += f"\n╚═ [0;37mE mais[0m [0;35m{qsize}[0m [0;37mmúsicas(s).[0m"
-
-            txt = qtext + "``` " + txt
 
         data["content"] = txt
 
@@ -145,15 +132,6 @@ class EmbedLinkSkin:
                 ]
             ),
         ]
-
-        if player.mini_queue_feature:
-            data["components"][5].options.append(
-                disnake.SelectOption(
-                    label="Mini-fila do player", emoji="<:music_queue:703761160679194734>",
-                    value=PlayerControls.miniqueue,
-                    description="Ativar/Desativar a mini-fila do player."
-                )
-            )
 
         if not player.static and not player.has_thread:
             data["components"][5].options.append(
