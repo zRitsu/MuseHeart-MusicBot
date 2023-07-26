@@ -4812,8 +4812,21 @@ class Music(commands.Cog):
 
             elif payload.cause == "java.lang.InterruptedException":
                 player.queue.appendleft(player.last_track)
-                player.locked = False
-                return
+
+                if player.node.identifier == "LOCAL":
+                    player.locked = False
+                    return
+                else:
+                    try:
+                        n = await self.get_best_node()
+                    except:
+                        if player.static:
+                            player.set_command_log(text="O player foi desligado por falta de servidores de música...")
+                        else:
+                            await player.text_channel.send("**O player foi desligado por falta de servidores de música...**")
+                        await player.destroy()
+                        return
+                    await player.change_node(n.identifier)
 
             # TODO: Desativar esse recurso após a correção do lavaplayer ser efetuada.
             elif payload.cause == "java.lang.RuntimeException: Not success status code: 403" and player.node.identifier == "LOCAL":
