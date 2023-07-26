@@ -54,6 +54,9 @@ class EmbedLinkSkin:
                 txt += f" `[`<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`" \
                 if not player.paused else ''
 
+        if q:=len(player.queue):
+            txt += f" `[Na fila: {q}]`"
+
         if not player.current.autoplay:
             txt += f" <@{player.current.requester}>\n"
 
