@@ -4853,6 +4853,8 @@ class Music(commands.Cog):
                                                     )
                                                 )
                                             )
+                                        p.locked = False
+
                             process.terminate()
                             run_lavalink(
                                 lavalink_file_url=self.bot.config['LAVALINK_FILE_URL'],
