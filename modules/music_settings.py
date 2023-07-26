@@ -694,7 +694,7 @@ class MusicSettings(commands.Cog):
                                    f"gerenciar permissões do canal {target.mention}** para editar as permissões "
                                    f"necessárias para o sistema de pedir música funcionar devidamente.\n\n"
                                    f"Caso não queira fornecer a permissão de administrador ou editar as permissões do"
-                                   f" canal {target.mention} para me permitir gerenciar permissões, reuse o comando "
+                                   f" canal {target.mention} para me permitir gerenciar permissões ou reuse o comando "
                                    f"sem selecionar um canal de destino.")
 
             if not target.permissions_for(guild.me).read_messages:
