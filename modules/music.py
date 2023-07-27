@@ -4919,7 +4919,9 @@ class Music(commands.Cog):
                     )
                     player.locked = False
                     if player.current:
-                        await player.play(player.current, position=player.position)
+                        if not player.paused:
+                            await player.play(player.current, position=player.position)
+                        player.update = True
                     else:
                         await player.process_next()
                 except:
