@@ -1196,6 +1196,7 @@ class Music(commands.Cog):
                 listen_along_invite=invite,
                 volume=int(guild_data['default_player_volume']),
                 autoplay=guild_data["autoplay"],
+                prefix=global_data["prefix"] or bot.default_prefix,
             )
 
             if static_player['channel']:
@@ -4434,6 +4435,7 @@ class Music(commands.Cog):
                 listen_along_invite=invite,
                 volume=int(data['default_player_volume']),
                 autoplay=data["autoplay"],
+                prefix=global_data["prefix"] or self.bot.default_prefix,
             )
 
         if not player.message:

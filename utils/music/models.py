@@ -378,19 +378,22 @@ class LavalinkPlayer(wavelink.Player):
         self.start_time = disnake.utils.utcnow()
 
         self.temp_embed: Optional[disnake.Embed] = None
+        self.prefix_info = kwargs.pop("prefix", "")
 
         self.initial_hints = [
-            "Você pode alterar a skin/aparência do player usando o comando /change_skin (comando vísivel apenas para "
-            "membros com permissão de gerenciar servidor).",
+            f"Você pode alterar a skin/aparência do player usando o comando /change_skin ou {self.prefix_info}skin "
+            f"(Apenas membros com permissão de gerenciar servidor pode usar esse comando).",
 
-            "Crie favoritos para ter fácil acesso de usar seus links favoritos aqui dispensando ter que copiar e colar "
-            "seus links nos comandos. Experimente usando o comando: /fav_manager.",
+            f"Vcoê pode criar links favoritos para ter fácil acesso usá-los no comando /play ou {self.prefix_info}play "
+            f"sem ter necessidade de copiar e colar os links no comando. Experimente usando o comando /fav_manager ou "
+            f"{self.prefix_info}favmanager.",
         ]
 
         if self.bot.config["USE_YTDL"] or self.bot.spotify:
             self.initial_hints.append(
-                "Integre link de canais e perfis do youtube, soundcloud e spotify para escutar playlists públicas de forma "
-                "mais facilitada no player. Experimente usando o comando /integrations."
+                "Você pode adicionar/integrar link de canais e perfis do youtube, soundcloud e spotify para tocar "
+                "uma playlist pública que tem nesses canais/perfis de forma bem conveniente. "
+                f"Experimente usando o comando /integrations ou {self.prefix_info}integrations."
             )
 
         try:
@@ -490,18 +493,19 @@ class LavalinkPlayer(wavelink.Player):
         hints = list(self.initial_hints)
 
         if self.static:
-            hints.append("Você pode fixar músicas/playlists na mensagem do player quando tiver no modo de "
-                         "espera/oscioso para qualquer membro poder usá-las de forma facilitada. Para isso use o "
-                         "comando: /server_playlist (comando vísivel apenas para membros com permissão de gerenciar "
-                         "servidor)")
+            hints.append("É possível fixar músicas/playlists na mensagem do player quando tiver no modo de "
+                         "espera/oscioso pra permitir membros ouvi-las de forma pública. Pra isso use o "
+                         f"comando /server_playlist ou {self.prefix_info}serverplaylist (apenas membros com permissão de gerenciar "
+                         "servidor pode usar esse comando).")
 
         elif self.bot.intents.message_content and self.controller_mode:
             hints.append("Ao criar uma conversa/thread na mensagem do player, será ativado o modo de song-request "
                          "nela (possibilitando pedir música apenas enviando o nome/link da música na conversa).")
 
         if len([b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public]) > 1:
-            hints.append("É possível ter bots de música adicionais no servidor compartilhando todos os seus favoritos "
-                         "e funcionando com um único prefixo e comando slash de apenas um bot, use o comando /invite")
+            hints.append("É possível ter bots de música adicionais no servidor compartilhando todos os seus favoritos/"
+                         "integrações e funcionando com um único prefixo e comando slash de apenas um bot. "
+                         f"Você pode usar o comando /invite ou {self.prefix_info}invite para adicioná-los.")
 
         if self.controller_mode:
             hints.append(

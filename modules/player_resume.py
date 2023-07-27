@@ -13,6 +13,7 @@ from disnake.ext import commands
 
 import wavelink
 from utils.client import BotCore
+from utils.db import DBModel
 from utils.music.checks import can_connect, can_send_message
 from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialTrack, PartialPlaylist, LavalinkPlaylist
 
@@ -115,6 +116,11 @@ class PlayerSession(commands.Cog):
             text_channel = str(player.text_channel.id)
             message = None
 
+        try:
+            prefix = player.prefix_info
+        except AttributeError:
+            prefix = ""
+
         data = {
             "_id": str(player.guild.id),
             "volume": str(player.volume),
@@ -143,7 +149,8 @@ class PlayerSession(commands.Cog):
             "tracks": tracks,
             "played": played,
             "queue_autoplay": autoqueue,
-            "failed_tracks": failed_tracks
+            "failed_tracks": failed_tracks,
+            "prefix_info": prefix
         }
 
         try:
@@ -326,6 +333,10 @@ class PlayerSession(commands.Cog):
                 except AttributeError:
                     last_message_id = None
 
+                if not (prefix:=data.get("prefix_info")):
+                    global_data = await self.bot.get_global_data(guild.id, db_name=DBModel.guilds)
+                    prefix = global_data["prefix"] or self.bot.default_prefix
+
                 try:
                     player: LavalinkPlayer = self.bot.music.get_player(
                         node_id=node.identifier,
@@ -347,7 +358,8 @@ class PlayerSession(commands.Cog):
                         uptime=data.get("uptime"),
                         stage_title_template=data.get("stage_title_template"),
                         restrict_mode=data["restrict_mode"],
-                        volume=int(data["volume"])
+                        volume=int(data["volume"]),
+                        prefix=prefix
                     )
                 except Exception:
                     print(f"{self.bot.user} - Falha ao criar player: {guild.name} [{guild.id}]\n{traceback.format_exc()}")
