@@ -4901,9 +4901,12 @@ class Music(commands.Cog):
 
     @commands.Cog.listener("on_wavelink_node_ready")
     async def node_ready(self, node: wavelink.Node):
-        print(f'{self.bot.user} - Servidor de música: [{node.identifier}] está pronto para uso!')
+        msg = f'{self.bot.user} - Servidor de música: [{node.identifier}] está pronto para uso!'
 
         if node.restarting:
+
+            print(msg + " Reconectando players...")
+
             node.restarting = False
 
             for guild_id in list(node.players):
@@ -4915,13 +4918,16 @@ class Music(commands.Cog):
                         emoji="🔰"
                     )
                     player.locked = False
-                    if not player.current and len(player.queue) > 0:
-                        await player.process_next()
+                    if player.current:
+                        await player.play(player.current, position=player.position)
                     else:
-                        await player.invoke_np()
+                        await player.process_next()
                 except:
                     traceback.print_exc()
                     continue
+
+        else:
+            print(msg)
 
     @commands.Cog.listener('on_wavelink_track_start')
     async def track_start(self, node, payload: wavelink.TrackStart):
