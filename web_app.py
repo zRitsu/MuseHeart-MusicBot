@@ -37,49 +37,8 @@ class IndexHandler(tornado.web.RequestHandler):
 
     async def prepare(self):
 
-        try:
-            repl_check = f'{environ["REPL_SLUG"]}-{environ["REPL_OWNER"]}' == "Discord-Music-Bot-PT-BR-xRitsu"
-        except:
-            repl_check = False
-
-        if self.message:
+        if self.message or not self.pool:
             pass
-
-        elif repl_check:
-
-            tables = ""
-
-            with open("video_previews.txt") as f:
-                previews = f.read()
-
-            for url in previews.split("\n"):
-                tables += f"""
-                    <table border="1" style="width: 100%; height: 100%;">
-                      <tr>
-                          <td style="width: 100%; height: 100%;">
-                            <iframe width="100%" height="100%"
-                                src="{url}">
-                            </iframe><br>
-                          </td>
-                      </tr>
-                    </table><br>
-                """
-
-            tables = f"""
-            <html>
-                <head>
-                </head>
-                <body>
-                    {tables}
-                </body>
-            </html>
-            """
-
-            self.preview = tables
-            return
-
-        if not self.pool:
-            return
 
         bots = [asyncio.create_task(bot.wait_until_ready()) for bot in self.pool.bots]
 
