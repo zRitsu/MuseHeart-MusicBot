@@ -4829,6 +4829,41 @@ class Music(commands.Cog):
 
             # TODO: Desativar esse recurso após a correção do lavaplayer ser efetuada.
             elif payload.cause == "java.lang.RuntimeException: Not success status code: 403" and player.node.identifier == "LOCAL":
+
+                txt = "O servidor de música foi reiniciado para uma correção e a música será retomada em alguns " \
+                      "segundos (Por favor aguarde)..."
+
+                for b in self.bot.pool.bots:
+
+                    for n in b.music.nodes.values():
+
+                        if n.identifier != "LOCAL" or n.restarting:
+                            continue
+
+                        for p in n.players.values():
+
+                            if p.node.identifier != "LOCAL":
+                                continue
+
+                            if p.node.restarting:
+                                continue
+
+                            p.node.restarting = True
+
+                            if p.static or p.controller_mode:
+                                p.set_command_log(text=txt, emoji="🛠️")
+                                self.bot.loop.create_task(p.invoke_np(force=True))
+                            else:
+                                self.bot.loop.create_task(
+                                    p.text_channel.send(
+                                        embed=disnake.Embed(
+                                            color=self.bot.get_color(p.guild.me),
+                                            description=f"🛠️ **⠂{txt}**"
+                                        )
+                                    )
+                                )
+                            p.locked = True
+
                 self.bot.pool.start_lavalink()
                 player.locked = False
                 return
