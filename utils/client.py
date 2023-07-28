@@ -6,7 +6,6 @@ import datetime
 import json
 import logging
 import os
-import re
 import subprocess
 import traceback
 from configparser import ConfigParser
@@ -294,7 +293,7 @@ class BotPool:
             interaction_bot_reg = None
         else:
             try:
-                interaction_bot_reg = list(all_tokens)[0]
+                interaction_bot_reg = sorted(list(all_tokens), key=lambda i: i)[0]
             except:
                 interaction_bot_reg = None
 
