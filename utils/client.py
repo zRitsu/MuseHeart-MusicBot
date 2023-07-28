@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import re
+import subprocess
 import traceback
 from configparser import ConfigParser
 from importlib import import_module
@@ -43,6 +44,7 @@ class BotPool:
         self.local_database: Optional[LocalDatabase] = None
         self.ws_client: Optional[WSClient] = None
         self.spotify: Optional[SpotifyClient] = None
+        self.lavalink_instance: Optional[subprocess.Popen] = None
         self.config = {}
         self.commit = ""
         self.remote_git_url = ""
@@ -61,6 +63,22 @@ class BotPool:
             return self.mongo_database
 
         return self.local_database
+
+    def start_lavalink(self):
+
+        if self.lavalink_instance:
+            try:
+                self.lavalink_instance.kill()
+            except:
+                traceback.print_exc()
+
+        self.lavalink_instance = run_lavalink(
+            lavalink_file_url=self.config['LAVALINK_FILE_URL'],
+            lavalink_initial_ram=self.config['LAVALINK_INITIAL_RAM'],
+            lavalink_ram_limit=self.config['LAVALINK_RAM_LIMIT'],
+            lavalink_additional_sleep=int(self.config['LAVALINK_ADDITIONAL_SLEEP']),
+            use_jabba=self.config["USE_JABBA"]
+        )
 
     async def start_bot(self, bot: BotCore):
 
@@ -483,13 +501,7 @@ class BotPool:
                 print(message)
 
         elif start_local:
-            run_lavalink(
-                lavalink_file_url=self.config['LAVALINK_FILE_URL'],
-                lavalink_initial_ram=self.config['LAVALINK_INITIAL_RAM'],
-                lavalink_ram_limit=self.config['LAVALINK_RAM_LIMIT'],
-                lavalink_additional_sleep=int(self.config['LAVALINK_ADDITIONAL_SLEEP']),
-                use_jabba=self.config["USE_JABBA"]
-            )
+            self.start_lavalink()
 
         loop = asyncio.get_event_loop()
 

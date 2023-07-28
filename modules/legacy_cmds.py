@@ -19,9 +19,8 @@ from aiohttp import ClientSession
 from utils.client import BotCore
 from utils.db import DBModel
 from utils.music.checks import check_voice, check_requester_channel
-from utils.music.local_lavalink import run_lavalink
 from utils.music.models import LavalinkPlayer
-from utils.others import sync_message, chunk_list, EmbedPaginator, CustomContext, string_to_file, token_regex
+from utils.others import sync_message, CustomContext, string_to_file, token_regex
 from utils.owner_panel import panel_command, PanelView
 from utils.music.errors import GenericError
 from config_loader import DEFAULT_CONFIG, load_config
@@ -192,22 +191,7 @@ class Owner(commands.Cog):
                             )
                         )
 
-        for process in psutil.process_iter():
-            try:
-                if "Lavalink.jar" in process.cmdline():
-                    print(f"{ctx.invoked_with} - Reiniciando lavalink...")
-                    process.terminate()
-                    run_lavalink(
-                        lavalink_file_url=self.bot.config['LAVALINK_FILE_URL'],
-                        lavalink_initial_ram=self.bot.config['LAVALINK_INITIAL_RAM'],
-                        lavalink_ram_limit=self.bot.config['LAVALINK_RAM_LIMIT'],
-                        lavalink_additional_sleep=int(self.bot.config['LAVALINK_ADDITIONAL_SLEEP']),
-                        use_jabba=self.bot.config["USE_JABBA"]
-                    )
-            except (psutil.AccessDenied, PermissionError):
-                continue
-            except Exception:
-                traceback.print_exc()
+        self.bot.pool.start_lavalink()
 
         await ctx.send(
             embed=disnake.Embed(
