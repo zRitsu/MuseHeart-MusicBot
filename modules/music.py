@@ -4830,59 +4830,69 @@ class Music(commands.Cog):
 
             # TODO: Desativar esse recurso após a correção do lavaplayer ser efetuada.
             elif payload.cause == "java.lang.RuntimeException: Not success status code: 403" and player.node.identifier == "LOCAL":
-                for process in psutil.process_iter():
-                    try:
-                        if "Lavalink.jar" in process.cmdline():
 
-                            txt = "O servidor de música foi reiniciado para uma correção e a música será retomada em " \
-                                  "alguns segundos (Por favor aguarde)..."
+                try:
+                    player.pool.track_retries
+                except AttributeError:
+                    player.pool.track_retries = 3
+                else:
+                    if player.pool.track_retries > 0:
+                        player.pool.track_retries -= 1
+                    else:
+                        for process in psutil.process_iter():
+                            try:
+                                if "Lavalink.jar" in process.cmdline():
 
-                            for b in self.bot.pool.bots:
+                                    txt = "O servidor de música foi reiniciado para uma correção e a música será retomada em " \
+                                          "alguns segundos (Por favor aguarde)..."
 
-                                for n in b.music.nodes.values():
+                                    for b in self.bot.pool.bots:
 
-                                    if n.identifier != "LOCAL" or n.restarting:
-                                        continue
+                                        for n in b.music.nodes.values():
 
-                                    for p in n.players.values():
+                                            if n.identifier != "LOCAL" or n.restarting:
+                                                continue
 
-                                        if p.node.identifier != "LOCAL":
-                                            continue
+                                            for p in n.players.values():
 
-                                        if p.node.restarting:
-                                            continue
+                                                if p.node.identifier != "LOCAL":
+                                                    continue
 
-                                        p.node.restarting = True
+                                                if p.node.restarting:
+                                                    continue
 
-                                        if p.static or p.controller_mode:
-                                            p.set_command_log(text=txt, emoji="🛠️")
-                                            self.bot.loop.create_task(p.invoke_np(force=True))
-                                        else:
-                                            self.bot.loop.create_task(
-                                                p.text_channel.send(
-                                                    embed=disnake.Embed(
-                                                        color=self.bot.get_color(p.guild.me),
-                                                        description=f"🛠️ **⠂{txt}**"
+                                                p.node.restarting = True
+
+                                                if p.static or p.controller_mode:
+                                                    p.set_command_log(text=txt, emoji="🛠️")
+                                                    self.bot.loop.create_task(p.invoke_np(force=True))
+                                                else:
+                                                    self.bot.loop.create_task(
+                                                        p.text_channel.send(
+                                                            embed=disnake.Embed(
+                                                                color=self.bot.get_color(p.guild.me),
+                                                                description=f"🛠️ **⠂{txt}**"
+                                                            )
+                                                        )
                                                     )
-                                                )
-                                            )
-                                        p.locked = True
+                                                p.locked = True
 
-                            process.terminate()
-                            run_lavalink(
-                                lavalink_file_url=self.bot.config['LAVALINK_FILE_URL'],
-                                lavalink_initial_ram=self.bot.config['LAVALINK_INITIAL_RAM'],
-                                lavalink_ram_limit=self.bot.config['LAVALINK_RAM_LIMIT'],
-                                lavalink_additional_sleep=int(self.bot.config['LAVALINK_ADDITIONAL_SLEEP']),
-                                use_jabba=self.bot.config["USE_JABBA"]
-                            )
-                            return
-                    except (psutil.AccessDenied, PermissionError):
-                        continue
-                    except Exception:
-                        traceback.print_exc()
-                player.locked = False
-                return
+                                    process.terminate()
+                                    run_lavalink(
+                                        lavalink_file_url=self.bot.config['LAVALINK_FILE_URL'],
+                                        lavalink_initial_ram=self.bot.config['LAVALINK_INITIAL_RAM'],
+                                        lavalink_ram_limit=self.bot.config['LAVALINK_RAM_LIMIT'],
+                                        lavalink_additional_sleep=int(self.bot.config['LAVALINK_ADDITIONAL_SLEEP']),
+                                        use_jabba=self.bot.config["USE_JABBA"]
+                                    )
+                                    return
+                            except (psutil.AccessDenied, PermissionError):
+                                continue
+                            except Exception:
+                                traceback.print_exc()
+                        player.locked = False
+                        player.pool.track_retries = 3
+                        return
 
             elif not track.track_loops:
                 player.failed_tracks.append(player.last_track)

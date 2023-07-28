@@ -3,18 +3,6 @@
 rm -f poetry.lock && rm -f pyproject.toml && rm -rf .upm
 pip3 uninstall poetry -y
 
-slug_owner=$(echo -n "$REPL_SLUG-$REPL_OWNER")
-if [ "$slug_owner" = "Discord-Music-Bot-PT-BR-xRitsu" ]; then
-  if [ ! -d "venv" ]; then
-    python3 -m venv venv
-    pip3 install -r requirements.txt
-  fi
-  . venv/bin/activate
-  python3 web_app.py
-  kill "$PPID"
-  exit 1
-fi
-
 if [ "${SOURCE_AUTO_UPDATE,,}" == "true" ]; then
   bash quick_update.sh
 fi
