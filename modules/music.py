@@ -4844,11 +4844,7 @@ class Music(commands.Cog):
 
                         for p in n.players.values():
 
-                            if p.node.identifier != "LOCAL":
-                                continue
-
-                            if p.node.restarting:
-                                continue
+                            p.locked = True
 
                             p.node.restarting = True
 
@@ -4864,10 +4860,9 @@ class Music(commands.Cog):
                                         )
                                     )
                                 )
-                            p.locked = True
 
                 self.bot.pool.start_lavalink()
-                player.locked = False
+                player.locked = True
                 return
 
             elif not track.track_loops:
