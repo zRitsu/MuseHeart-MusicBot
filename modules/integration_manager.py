@@ -436,14 +436,6 @@ class IntegrationManager(commands.Cog):
     @commands.slash_command(description=f"{desc_prefix}Gerenciar suas integrações de canais/perfis com playlists públicas.", cooldown=itg_cd)
     async def integrations(self, inter: disnake.AppCmdInter):
 
-        await inter.response.defer(ephemeral=True)
-
-        try:
-            user_data = inter.global_user_data
-        except AttributeError:
-            user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
-            inter.global_user_data = user_data
-
         supported_platforms = []
 
         if self.bot.config["USE_YTDL"]:
@@ -455,6 +447,15 @@ class IntegrationManager(commands.Cog):
         if not supported_platforms:
             await inter.send("**Não há suporte a esse recurso no momento...**\n\n"
                                "`Suporte ao spotify e YTDL não estão ativados.`", ephemeral=True)
+            return
+
+        await inter.response.defer(ephemeral=True)
+
+        try:
+            user_data = inter.global_user_data
+        except AttributeError:
+            user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+            inter.global_user_data = user_data
 
         view = IntegrationsView(bot=self.bot, ctx=inter, data=user_data)
 

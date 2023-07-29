@@ -33,23 +33,20 @@ class IndexHandler(tornado.web.RequestHandler):
         self.message = message
         self.pool = pool
         self.config = config
-        self.preview = ""
 
-    async def prepare(self):
+    """async def prepare(self):
 
-        if self.message or not self.pool:
-            pass
+        bots = [asyncio.create_task(bot.wait_until_ready()) for bot in self.pool.bots]
+
+        if bots:
+            await asyncio.wait(bots, timeout=7)"""
+
+    async def get(self):
 
         bots = [asyncio.create_task(bot.wait_until_ready()) for bot in self.pool.bots]
 
         if bots:
             await asyncio.wait(bots, timeout=7)
-
-    async def get(self):
-
-        if self.preview:
-            self.write(self.preview)
-            return
 
         try:
             killing_state = self.pool.killing_state
@@ -412,7 +409,7 @@ class WSClient:
                                 users.remove(i)
 
 
-def run_app(pool: BotPool = None, message: str = "", config: dict = None):
+def run_app(pool: BotPool, message: str = "", config: dict = None):
 
     if not config:
         try:
@@ -428,7 +425,7 @@ def run_app(pool: BotPool = None, message: str = "", config: dict = None):
     app.listen(port=environ.get("PORT", 80))
 
 
-def start(pool: BotPool = None, message="", config: dict = None):
+def start(pool: BotPool, message="", config: dict = None):
     if not config:
         config = load_config()
     run_app(pool, message, config)
@@ -436,4 +433,4 @@ def start(pool: BotPool = None, message="", config: dict = None):
 
 
 if __name__ == '__main__':
-    start()
+    start(BotPool())
