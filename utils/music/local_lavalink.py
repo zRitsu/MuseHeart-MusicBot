@@ -55,6 +55,7 @@ def run_lavalink(
             dirs.extend(
                 [
                     "./.java/jdk-13/bin/java",
+                    "./.jabba/jdk/zulu@1.17.0-0/bin/java",
                     "~/.jabba/jdk/zulu@1.17.0-0/bin/java",
                 ]
             )
@@ -99,7 +100,9 @@ def run_lavalink(
                 download_file("https://github.com/shyiko/jabba/raw/master/install.sh", "install_jabba.sh")
                 subprocess.call("bash install_jabba.sh && ~/.jabba/bin/jabba install zulu@1.17.0-0", shell=True)
                 os.remove("install_jabba.sh")
-                java_cmd = "~/.jabba/jdk/zulu@1.17.0-0/bin/java"
+
+                java_cmd = ("~" if os.path.isfile("~/.jabba/jdk/zulu@1.17.0-0/bin/java") else ".") + \
+                           "/.jabba/jdk/zulu@1.17.0-0/bin/java"
 
             else:
                 if not os.path.isdir("./.java"):
@@ -148,7 +151,7 @@ def run_lavalink(
     print(f"Iniciando o servidor Lavalink (dependendo da hospedagem o lavalink pode demorar iniciar, "
           f"o que pode ocorrer falhas em algumas tentativas de conexão até ele iniciar totalmente).\n{'-' * 30}")
 
-    lavalink_process = subprocess.Popen(java_cmd.split(), stdout=subprocess.DEVNULL)
+    lavalink_process = subprocess.Popen(java_cmd, stdout=subprocess.DEVNULL)
 
     if lavalink_additional_sleep:
         print(f"Aguarde {lavalink_additional_sleep} segundos...\n{'-' * 30}")
