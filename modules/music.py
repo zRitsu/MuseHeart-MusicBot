@@ -4830,6 +4830,8 @@ class Music(commands.Cog):
             # TODO: Desativar esse recurso após a correção do lavaplayer ser efetuada.
             elif payload.cause == "java.lang.RuntimeException: Not success status code: 403" and player.node.identifier == "LOCAL":
 
+                player.queue.appendleft(player.last_track)
+
                 txt = "O servidor de música foi reiniciado para uma correção e a música será retomada em alguns " \
                       "segundos (Por favor aguarde)..."
 
