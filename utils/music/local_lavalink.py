@@ -122,6 +122,8 @@ def run_lavalink(
 
                 java_cmd = os.path.join(os.getcwd(), "./.java/jdk-13/bin/java")
 
+    java_cmd = [java_cmd]
+
     clear_plugins = False
 
     for filename, url in (
@@ -132,15 +134,15 @@ def run_lavalink(
             clear_plugins = True
 
     if lavalink_cpu_cores >= 1:
-        java_cmd += f" -XX:ActiveProcessorCount={lavalink_cpu_cores}"
+        java_cmd.append(f"-XX:ActiveProcessorCount={lavalink_cpu_cores}")
 
     if lavalink_ram_limit > 10:
-        java_cmd += f" -Xmx{lavalink_ram_limit}m"
+        java_cmd.append(f"-Xmx{lavalink_ram_limit}m")
 
     if 0 < lavalink_initial_ram < lavalink_ram_limit:
-        java_cmd += f" -Xms{lavalink_ram_limit}m"
+        java_cmd.append(f"-Xms{lavalink_ram_limit}m")
 
-    java_cmd += " -jar Lavalink.jar"
+    java_cmd.extend(["-jar", "Lavalink.jar"])
 
     if clear_plugins:
         try:
