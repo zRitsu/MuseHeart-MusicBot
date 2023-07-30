@@ -3490,7 +3490,8 @@ class Music(commands.Cog):
 
         msg = ["ativou", "🔄"] if player.autoplay else ["desativou", "❌"]
 
-        text = [f"{msg[0]} o autoplay.", f"{msg[1]} **⠂{inter.author.mention} {msg[0]} o autoplay.**"]
+        text = [f"{msg[0]} a reprodução automática.",
+                f"{msg[1]} **⠂{inter.author.mention} {msg[0]} a reprodução automática.**"]
 
         if player.current:
             await self.interaction_message(inter, txt=text, emoji=msg[1])
