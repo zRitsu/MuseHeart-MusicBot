@@ -624,8 +624,17 @@ class LavalinkPlayer(wavelink.Player):
 
                 try:
                     tracks = await self.node.get_tracks(search_url)
-                    tracks = tracks.tracks[1:] if not search_url.startswith("ytmsearch:") else tracks.tracks
+
+                    try:
+                        tracks = tracks.tracks
+                    except AttributeError:
+                        pass
+
+                    if search_url.startswith("ytmsearch:"):
+                        tracks.pop(0)
+
                     break
+
                 except wavelink.TrackLoadError as e:
                     traceback.print_exc()
                     exception = e
