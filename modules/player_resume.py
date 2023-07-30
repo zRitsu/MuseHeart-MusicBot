@@ -511,6 +511,15 @@ class PlayerSession(commands.Cog):
 
     async def save_session(self, player: LavalinkPlayer, data: dict):
 
+        try:
+            player = player.bot.music.players[player.guild.id]
+        except:
+            try:
+                player.queue_updater_task.cancel()
+            except:
+                pass
+            return
+
         if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
             await self.bot.pool.mongo_database.update_data(
                 id_=str(player.guild.id),
@@ -534,7 +543,7 @@ class PlayerSession(commands.Cog):
                         json_data TEXT
                     )
                 ''')
-            except ValueError:
+            except (ValueError, AttributeError):
                 try:
                     player.conn.close()
                 except:
