@@ -12,7 +12,7 @@
 
 ID=1234567890
 NAME=Disnake LL Music
-AVATAR=https://media.discordapp.net/attachments/792731998451531778/991817084248014990/avatar.png
+AVATAR=https://cdn.discordapp.com/attachments/554468640942981147/1135003645495226410/xritsuavatar.png
 TYPE=bot
 MAIN=main.py
 RAM=100
