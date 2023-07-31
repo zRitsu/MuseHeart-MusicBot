@@ -651,7 +651,9 @@ def setup(bot: BotCore):
                         'player_client': ['android_creator'],
                         'max_comments': [0],
                     },
-                    'youtubetab': ['webpage']
+                    'youtubetab': {
+                        "skip": ["webpage"]
+                    }
                 }
             }
         )
