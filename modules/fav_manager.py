@@ -107,6 +107,7 @@ class UserFavView(disnake.ui.View):
                 disnake.SelectOption(label=k, emoji=music_source_emoji_url(v)) for k, v in data["fav_links"].items()
             ], min_values=1, max_values=1)
             fav_select.options[0].default = True
+            self.current = fav_select.options[0].label
             fav_select.callback = self.select_callback
             self.add_item(fav_select)
 

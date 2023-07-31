@@ -117,6 +117,7 @@ class GuildFavView(disnake.ui.View):
                 disnake.SelectOption(label=k, emoji=music_source_emoji_url(v['url']),description=v.get("description")) for k, v in data["player_controller"]["fav_links"].items()
             ], min_values=1, max_values=1)
             fav_select.options[0].default = True
+            self.current = fav_select.options[0].label
             fav_select.callback = self.select_callback
             self.add_item(fav_select)
 
