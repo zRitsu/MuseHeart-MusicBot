@@ -635,7 +635,24 @@ def setup(bot: BotCore):
                 'allowed_extractors': [
                     r'.*youtube.*',
                     r'.*soundcloud.*',
-                ]
+                ],
+                'extractor_args': {
+                    'youtube': {
+                        'skip': [
+                            'hls',
+                            'dash',
+                            'translated_subs'
+                        ],
+                        'player_skip': [
+                            'js',
+                            'configs',
+                            'webpage'
+                        ],
+                        'player_client': ['android_creator'],
+                        'max_comments': [0],
+                    },
+                    'youtubetab': ['webpage']
+                }
             }
         )
 
