@@ -98,7 +98,7 @@ def run_lavalink(
                     pass
 
                 download_file("https://github.com/shyiko/jabba/raw/master/install.sh", "install_jabba.sh")
-                subprocess.call("bash install_jabba.sh && ~/.jabba/bin/jabba install zulu@1.17.0-0", shell=True)
+                subprocess.call("bash install_jabba.sh && ~/.jabba/bin/jabba install zulu@>=1.17.0-0", shell=True)
                 os.remove("install_jabba.sh")
 
                 java_cmd = ("~" if os.path.isfile("~/.jabba/jdk/zulu@1.17.0-0/bin/java") else ".") + \
@@ -122,8 +122,6 @@ def run_lavalink(
 
                 java_cmd = os.path.join(os.getcwd(), "./.java/jdk-13/bin/java")
 
-    java_cmd = [java_cmd]
-
     clear_plugins = False
 
     for filename, url in (
@@ -134,15 +132,15 @@ def run_lavalink(
             clear_plugins = True
 
     if lavalink_cpu_cores >= 1:
-        java_cmd.append(f"-XX:ActiveProcessorCount={lavalink_cpu_cores}")
+        java_cmd += f" -XX:ActiveProcessorCount={lavalink_cpu_cores}"
 
     if lavalink_ram_limit > 10:
-        java_cmd.append(f"-Xmx{lavalink_ram_limit}m")
+        java_cmd += f" -Xmx{lavalink_ram_limit}m"
 
     if 0 < lavalink_initial_ram < lavalink_ram_limit:
-        java_cmd.append(f"-Xms{lavalink_ram_limit}m")
+        java_cmd += f" -Xms{lavalink_ram_limit}m"
 
-    java_cmd.extend(["-jar", "Lavalink.jar"])
+    java_cmd += " -jar Lavalink.jar"
 
     if clear_plugins:
         try:
@@ -153,7 +151,7 @@ def run_lavalink(
     print(f"Iniciando o servidor Lavalink (dependendo da hospedagem o lavalink pode demorar iniciar, "
           f"o que pode ocorrer falhas em algumas tentativas de conexão até ele iniciar totalmente).\n{'-' * 30}")
 
-    lavalink_process = subprocess.Popen(java_cmd, stdout=subprocess.DEVNULL)
+    lavalink_process = subprocess.Popen(java_cmd.split(), stdout=subprocess.DEVNULL)
 
     if lavalink_additional_sleep:
         print(f"Aguarde {lavalink_additional_sleep} segundos...\n{'-' * 30}")
