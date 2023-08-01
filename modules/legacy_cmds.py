@@ -20,7 +20,7 @@ from utils.client import BotCore
 from utils.db import DBModel
 from utils.music.checks import check_voice, check_requester_channel
 from utils.music.models import LavalinkPlayer
-from utils.others import sync_message, CustomContext, string_to_file, token_regex
+from utils.others import sync_message, CustomContext, string_to_file, token_regex, CommandArgparse
 from utils.owner_panel import panel_command, PanelView
 from utils.music.errors import GenericError
 from config_loader import DEFAULT_CONFIG, load_config
@@ -118,10 +118,21 @@ class Owner(commands.Cog):
             )
         )
 
+    updatelavalink_flags = CommandArgparse()
+    updatelavalink_flags.add_argument('-force', '--force', action='store_true',
+                                      help="Ignorar a execução/uso do servidor LOCAL.")
+    updatelavalink_flags.add_argument('-yml', '--yml', action='store_true',
+                                      help="Fazer download do arquivo application.yml.")
+    updatelavalink_flags.add_argument("-resetids", "-reset", "--resetids", "--reset",
+                                      help="Resetar info de ids das músicas (útil pra evitar problemas com certas "
+                                           "mudanças do lavaplayer/lavalink).")
+
     @commands.is_owner()
     @commands.max_concurrency(1, commands.BucketType.user)
-    @commands.command(hidden=True, aliases=["ull", "updatell", "llupdate", "llu"])
-    async def updatelavalink(self, ctx: CustomContext, *args):
+    @commands.command(hidden=True, aliases=["ull", "updatell", "llupdate", "llu"], extras={"flags": updatelavalink_flags})
+    async def updatelavalink(self, ctx: CustomContext, flags: str):
+
+        args, unknown = ctx.command.extras['flags'].parse_known_args(flags.split())
 
         node: Optional[wavelink.Node] = None
 
@@ -132,12 +143,12 @@ class Owner(commands.Cog):
             except KeyError:
                 continue
 
-        if not node and "--force" not in args:
+        if not node and not args.force:
             raise GenericError("**O servidor LOCAL não está sendo usado!**")
 
         download_urls = [self.bot.config["LAVALINK_FILE_URL"]]
 
-        if "--yml" in args:
+        if args.yml:
             download_urls.append("https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/application.yml")
 
         async with ctx.typing():
@@ -160,13 +171,11 @@ class Owner(commands.Cog):
 
                 node.restarting = True
 
-                reset_ids = any(a in args for a in ("--reset", "--resetids", "-reset", "-resetids"))
-
                 for player in node.players.values():
 
                     txt = "O servidor de música foi reiniciado e a música será retomada em alguns segundos (Por favor aguarde)..."
 
-                    if reset_ids:
+                    if args.resetids:
 
                         if player.current:
                             player.queue.appendleft(player.current)
@@ -238,6 +247,12 @@ class Owner(commands.Cog):
         else:
             return txt
 
+    update_flags = CommandArgparse()
+    update_flags.add_argument("-force", "--force", action="store_true",
+                              help="Forçar update ignorando o estado do repositório local).")
+    update_flags.add_argument("-pip", "--pip", action="store_true",
+                              help="Instalar/atualizar dependências após a atualização.")
+
     @commands.is_owner()
     @commands.max_concurrency(1, commands.BucketType.default)
     @panel_command(aliases=["up", "atualizar"], description="Atualizar meu code usando o git.",
@@ -248,8 +263,6 @@ class Owner(commands.Cog):
         out_git = ""
 
         git_log = []
-
-        force = "--force" in opts
 
         if shutil.which("poetry"):
             file = "./pyproject.toml"
@@ -265,9 +278,11 @@ class Owner(commands.Cog):
         except:
             pass
 
-        if not os.path.isdir("./.git") or force:
+        args, unknown = ctx.command.extras['flags'].parse_known_args(opts.split())
 
-            out_git += await self.cleanup_git(force=force)
+        if not os.path.isdir("./.git") or args.force:
+
+            out_git += await self.cleanup_git(force=args.force)
 
         else:
 
@@ -325,13 +340,13 @@ class Owner(commands.Cog):
             )
             await ctx.send(embed=embed, view=self.owner_view)
 
-            self.bot.loop.create_task(self.update_deps(ctx, requirements_old, opts, use_poetry=use_poetry))
+            self.bot.loop.create_task(self.update_deps(ctx, requirements_old, args, use_poetry=use_poetry))
 
         else:
-            self.bot.loop.create_task(self.update_deps(ctx, requirements_old, opts, use_poetry=use_poetry))
+            self.bot.loop.create_task(self.update_deps(ctx, requirements_old, args, use_poetry=use_poetry))
             return txt
 
-    async def update_deps(self, ctx, original_reqs, opts, use_poetry=False):
+    async def update_deps(self, ctx, original_reqs, args, use_poetry=False):
 
         if use_poetry:
             cmd = "poetry install"
@@ -340,7 +355,7 @@ class Owner(commands.Cog):
             cmd = "pip3 install -U -r requirements.txt --no-cache-dir"
             file = "./requirements.txt"
 
-        if "--pip" in opts:
+        if args.pip:
 
             embed = disnake.Embed(
                 description="**Instalando as dependências.\nPor favor aguarde...**",
