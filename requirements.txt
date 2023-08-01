@@ -4,8 +4,7 @@ python-dotenv
 user-agent
 requests
 humanize
-tornado
-motor[srv]
+motor[srv]>=3.2.0
 tinymongo
 dnspython
 psutil
