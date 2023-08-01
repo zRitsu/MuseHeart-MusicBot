@@ -24,7 +24,7 @@ def validate_java(cmd: str, debug: bool = False):
     try:
         java_info = subprocess.check_output(f'{cmd} -version', shell=True, stderr=subprocess.STDOUT)
         java_version = re.search(r'\d+', java_info.decode().split("\r")[0]).group().replace('"', '')
-        if int(java_version.split('.')[0]) >= 11:
+        if int(java_version.split('.')[0]) >= 17:
             return cmd
     except Exception as e:
         if debug:
