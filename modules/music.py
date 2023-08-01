@@ -4765,7 +4765,7 @@ class Music(commands.Cog):
                         f"**Nível:** `{payload.severity}`\n"
                         f"**Servidor de música:** `{player.node.identifier}`",
             color=disnake.Colour.red())
-        await player.text_channel.send(embed=embed, delete_after=10 if player.static else None)
+        await player.text_channel.send(embed=embed, delete_after=10)
 
         error_format = pprint.pformat(payload.data)
 
@@ -4876,7 +4876,7 @@ class Music(commands.Cog):
                 player.queue.append(player.last_track)
 
         player.locked = True
-        await asyncio.sleep(6)
+        await asyncio.sleep(10)
 
         try:
             player = player.bot.music.players[player.guild.id]
