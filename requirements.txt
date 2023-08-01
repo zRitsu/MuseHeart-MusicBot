@@ -6,7 +6,7 @@ requests
 humanize
 motor[srv]
 tinymongo
-dnspython
+dnspython==2.4.0
 psutil
 aiofiles
 disnake-jishaku
