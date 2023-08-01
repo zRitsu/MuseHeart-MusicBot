@@ -34,19 +34,16 @@ class IndexHandler(tornado.web.RequestHandler):
         self.pool = pool
         self.config = config
 
-    """async def prepare(self):
+    async def prepare(self):
 
-        bots = [asyncio.create_task(bot.wait_until_ready()) for bot in self.pool.bots]
+        bots = [asyncio.create_task(bot.wait_until_ready()) for bot in self.pool.bots if not bot.is_ready()]
 
         if bots:
-            await asyncio.wait(bots, timeout=7)"""
+            self.write("")
+            await self.flush()
+            await asyncio.wait(bots, timeout=7)
 
     async def get(self):
-
-        bots = [asyncio.create_task(bot.wait_until_ready()) for bot in self.pool.bots]
-
-        if bots:
-            await asyncio.wait(bots, timeout=7)
 
         try:
             killing_state = self.pool.killing_state
