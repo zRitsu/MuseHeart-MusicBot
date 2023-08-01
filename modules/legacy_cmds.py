@@ -278,7 +278,7 @@ class Owner(commands.Cog):
         except:
             pass
 
-        args, unknown = ctx.command.extras['flags'].parse_known_args(opts.split())
+        args, unknown = self.bot.get_command("update").extras['flags'].parse_known_args(opts.split())
 
         if not os.path.isdir("./.git") or args.force:
 
