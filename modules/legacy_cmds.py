@@ -443,7 +443,10 @@ class Owner(commands.Cog):
             await self.cleanup_git(force=True)
 
         await inter.message.delete()
-        await self.update_deps(inter, "", "--pip", use_poetry=inter.data.custom_id.endswith("_poetry"))
+
+        args, unknown = self.bot.get_command("update").extras['flags'].parse_known_args([])
+
+        await self.update_deps(inter, "", args, use_poetry=inter.data.custom_id.endswith("_poetry"))
 
     async def cleanup_git(self, force=False):
 
