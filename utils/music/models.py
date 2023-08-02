@@ -384,7 +384,7 @@ class LavalinkPlayer(wavelink.Player):
             f"Você pode alterar a skin/aparência do player usando o comando /change_skin ou {self.prefix_info}skin "
             f"(Apenas membros com permissão de gerenciar servidor pode usar esse comando).",
 
-            f"Vcoê pode criar links favoritos para ter fácil acesso usá-los no comando /play ou {self.prefix_info}play "
+            f"Você pode criar links favoritos para ter fácil acesso usá-los no comando /play ou {self.prefix_info}play "
             f"sem ter necessidade de copiar e colar os links no comando. Experimente usando o comando /fav_manager ou "
             f"{self.prefix_info}favmanager.",
         ]
