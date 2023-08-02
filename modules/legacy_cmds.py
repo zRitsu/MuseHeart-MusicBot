@@ -130,7 +130,7 @@ class Owner(commands.Cog):
     @commands.is_owner()
     @commands.max_concurrency(1, commands.BucketType.user)
     @commands.command(hidden=True, aliases=["ull", "updatell", "llupdate", "llu"], extras={"flags": updatelavalink_flags})
-    async def updatelavalink(self, ctx: CustomContext, flags: str):
+    async def updatelavalink(self, ctx: CustomContext, flags: str = ""):
 
         args, unknown = ctx.command.extras['flags'].parse_known_args(flags.split())
 
