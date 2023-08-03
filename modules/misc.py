@@ -559,7 +559,7 @@ class Misc(commands.Cog):
             else:
                 invite += f" ({len(bot.guilds)})"
 
-            if guild and bot.user in guild.members:
+            if guild and inter.author.guild_permissions.manage_guild and bot.user in guild.members:
                 bots_in_guild.append(invite)
             else:
                 bots_invites.append(invite)
