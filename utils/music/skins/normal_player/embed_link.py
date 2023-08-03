@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
-import itertools
 import re
+from os.path import basename
 
 import disnake
 
@@ -15,8 +15,7 @@ class EmbedLinkSkin:
     __slots__ = ("name", "preview")
 
     def __init__(self):
-
-        self.name = "embed_link"
+        self.name = basename(__file__)
         self.preview = "https://media.discordapp.net/attachments/554468640942981147/1101330475164893244/Discord_N1QhBDXtar.png"
 
     def setup_features(self, player: LavalinkPlayer):
@@ -43,7 +42,7 @@ class EmbedLinkSkin:
         else:
             duration_txt = f"\n> `⏰` **⠂Duração:** `{time_format(player.current.duration)}`"
 
-        title = player.current.title if not player.current.uri else player.current.uri
+        title = f"`{player.current.title}`" if not player.current.uri else f"[`{fix_characters(player.current.title, 40)}`]({player.current.uri})"
 
         if player.paused:
             txt += f"\n> `⏸️` **⠂Em Pausa:** {title}{duration_txt}"
