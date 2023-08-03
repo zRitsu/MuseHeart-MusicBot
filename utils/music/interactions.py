@@ -144,7 +144,7 @@ class QueueInteraction(disnake.ui.View):
     def update_embed(self):
         self.embed.title = f"**Músicas da fila [{self.current+1} / {self.max_page+1}]**"
         self.embed.description = self.pages[self.current]
-        self.children[2].options = self.select_pages[self.current]
+        self.children[0].options = self.select_pages[self.current]
 
         for n, c in enumerate(self.children):
             if isinstance(c, disnake.ui.StringSelect):
