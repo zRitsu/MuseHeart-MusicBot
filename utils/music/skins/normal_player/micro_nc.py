@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from os.path import basename
+
 import disnake
 
 from utils.music.converters import fix_characters
@@ -10,7 +12,7 @@ class MicroNC:
     __slots__ = ("name", "preview")
 
     def __init__(self):
-        self.name = "micro_nc"
+        self.name = basename(__file__)[:-3]
         self.preview = "https://media.discordapp.net/attachments/554468640942981147/1050275579766784051/micro_nc.png"
 
     def setup_features(self, player: LavalinkPlayer):

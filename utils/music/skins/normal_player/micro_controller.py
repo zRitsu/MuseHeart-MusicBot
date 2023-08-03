@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from os.path import basename
+
 import disnake
 
 from utils.music.converters import fix_characters, get_button_style, music_source_image
@@ -11,7 +13,7 @@ class MicroController:
     __slots__ = ("name", "preview")
 
     def __init__(self):
-        self.name = "micro_controller"
+        self.name = basename(__file__)[:-3]
         self.preview = "https://media.discordapp.net/attachments/554468640942981147/1050285454186000464/micro_controller.png"
 
     def setup_features(self, player: LavalinkPlayer):

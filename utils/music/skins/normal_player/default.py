@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 import itertools
+from os.path import basename
 
 import disnake
 
@@ -14,7 +15,7 @@ class DefaultSkin:
     __slots__ = ("name", "preview")
 
     def __init__(self):
-        self.name = "default"
+        self.name = basename(__file__)[:-3]
         self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1127304244492509325/default.png"
 
     def setup_features(self, player: LavalinkPlayer):

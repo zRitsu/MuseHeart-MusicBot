@@ -2,6 +2,7 @@
 import datetime
 import itertools
 import re
+from os.path import basename
 
 import disnake
 
@@ -14,7 +15,7 @@ class EmbedLinkStaticSkin:
     __slots__ = ("name", "preview")
 
     def __init__(self):
-        self.name = "embed_link_static"
+        self.name = basename(__file__)[:-3] + "_static"
         self.preview = "https://media.discordapp.net/attachments/554468640942981147/1101328287466274816/image.png"
 
     def setup_features(self, player: LavalinkPlayer):

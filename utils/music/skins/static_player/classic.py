@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import itertools
+from os.path import basename
 
 import disnake
 
@@ -13,7 +14,7 @@ class ClassicStaticSkin:
     __slots__ = ("name", "preview")
 
     def __init__(self):
-        self.name = "classic_static"
+        self.name = basename(__file__)[:-3] + "_static"
         self.preview = "https://media.discordapp.net/attachments/554468640942981147/1047187412343853146/classic_static_skin.png"
 
     def setup_features(self, player: LavalinkPlayer):

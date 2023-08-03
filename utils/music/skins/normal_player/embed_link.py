@@ -15,7 +15,7 @@ class EmbedLinkSkin:
     __slots__ = ("name", "preview")
 
     def __init__(self):
-        self.name = basename(__file__)
+        self.name = basename(__file__)[:-3]
         self.preview = "https://media.discordapp.net/attachments/554468640942981147/1101330475164893244/Discord_N1QhBDXtar.png"
 
     def setup_features(self, player: LavalinkPlayer):

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 import itertools
+from os.path import basename
 
 import disnake
 
@@ -14,7 +15,7 @@ class MiniStaticSkin:
     __slots__ = ("name", "preview")
 
     def __init__(self):
-        self.name = "mini_static"
+        self.name = basename(__file__)[:-3] + "_static"
         self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1047187413702807552/mini_static_skin.png"
 
     def setup_features(self, player: LavalinkPlayer):

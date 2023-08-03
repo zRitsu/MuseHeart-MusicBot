@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from os.path import basename
+
 import disnake
 
 from utils.music.converters import fix_characters, time_format
@@ -10,7 +12,7 @@ class Minimalist:
     __slots__ = ("name", "preview")
 
     def __init__(self):
-        self.name = "minimalist"
+        self.name = basename(__file__)[:-3]
         self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1136339237046845471/minimalist.png"
 
     def setup_features(self, player: LavalinkPlayer):
