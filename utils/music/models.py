@@ -630,8 +630,7 @@ class LavalinkPlayer(wavelink.Player):
                     except AttributeError:
                         pass
 
-                    if search_url.startswith("ytmsearch:"):
-                        tracks.pop(0)
+                    tracks = [t for t in tracks if not track.uri.startswith(t)]
 
                     break
 
