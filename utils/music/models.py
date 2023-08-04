@@ -630,7 +630,7 @@ class LavalinkPlayer(wavelink.Player):
                     except AttributeError:
                         pass
 
-                    tracks = [t for t in tracks if not track.uri.startswith(t)]
+                    tracks = [t for t in tracks if not track.uri.startswith(t.uri)]
 
                     break
 
