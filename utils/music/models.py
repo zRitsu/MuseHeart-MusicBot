@@ -845,7 +845,7 @@ class LavalinkPlayer(wavelink.Player):
 
             try:
                 cmds = " | ".join(f"{self.bot.get_slash_command(c).name}" for c in [
-                                  'play', 'back', 'readd_songs', 'stop'])
+                                  'play', 'back', 'readd_songs', 'stop', 'autoplay'])
 
                 embed = disnake.Embed(
                     description=f"**As músicas acabaram... Use um dos comandos abaixo para adicionar músicas ou parar "
@@ -876,11 +876,18 @@ class LavalinkPlayer(wavelink.Player):
         ]
 
         if (played := len(self.played)) or self.last_track:
-            controller_opts.append(
-                disnake.SelectOption(
-                    emoji="⏮️", value=PlayerControls.back, label="Voltar",
-                    description=f"Ouvir novamente: {self.played[-1].title[:31]}"
-                )
+            controller_opts.extend(
+                [
+                    disnake.SelectOption(
+                        emoji="⏮️", value=PlayerControls.back, label="Voltar",
+                        description=f"Ouvir novamente: {self.played[-1].title[:31]}"
+                    ),
+                    disnake.SelectOption(
+                        label="Ativar a reprodução automática", emoji="🔄",
+                        value=PlayerControls.autoplay,
+                        description=f"Tocar música relacionadas a: {self.played[-1].title[:19]}"
+                    ),
+                ]
             )
 
         if played > 1:
