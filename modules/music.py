@@ -4083,7 +4083,7 @@ class Music(commands.Cog):
         if message.is_system() and is_forum:
             return
 
-        if message.guild.me.guild_permissions.manage_messages:
+        if message.channel.permissions_for(message.guild.me).manage_messages:
 
             try:
                 await message.delete(delay=delay)
