@@ -965,7 +965,10 @@ class LavalinkPlayer(wavelink.Player):
 
     async def idling_mode(self):
 
-        await self.process_rpc(self.guild.me.voice.channel)
+        try:
+            await self.process_rpc(self.guild.me.voice.channel)
+        except:
+            traceback.print_exc()
 
         await self.process_idle_message()
 
