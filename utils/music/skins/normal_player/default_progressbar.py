@@ -118,7 +118,7 @@ class DefaultProgressbarSkin:
         if qlenght and player.mini_queue_enabled:
 
             queue_txt = "\n".join(
-                f"`{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 34)}`]({t.uri})"
+                f"`{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 21)}`]({t.uri})"
                 for n, t in (enumerate(itertools.islice(player.queue, 3)))
             )
 
