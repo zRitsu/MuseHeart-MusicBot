@@ -1112,7 +1112,7 @@ class LavalinkPlayer(wavelink.Player):
         else:
 
             # nenhum controle de botão foi definido na skin (será usado os botões padrões).
-            if self.controller_mode and self.last_data.get("components") is None:
+            if self.last_data.get("components") is None:
 
                 # Aviso: Não modifique os components abaixo, prefira copiar uma das skins da pasta utils -> music -> skins
                 # e deixá-la com outro nome (sem acentos, espaços, caracteres especiais) e modifique-as a seu gosto.
