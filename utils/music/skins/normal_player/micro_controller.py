@@ -64,7 +64,7 @@ class MicroController:
             disnake.ui.Button(label="Voltar", custom_id=PlayerControls.back),
             disnake.ui.Button(label="Parar", custom_id=PlayerControls.stop, style=disnake.ButtonStyle.red),
             disnake.ui.Button(label="Pular", custom_id=PlayerControls.skip),
-            disnake.ui.Button(label="Fila", custom_id=PlayerControls.queue)
+            disnake.ui.Button(label="Fila", custom_id=PlayerControls.queue, disabled=not player.queue)
         ]
 
         return data
