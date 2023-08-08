@@ -263,7 +263,7 @@ class HelpCog(commands.Cog, name="Ajuda"):
                     cmdlst[category_icon] = (cmd.category, [])
                 cmdlst[category_icon][1].append(cmd)
 
-            elif not cmd.cog or not hasattr(cmd.cog, 'name'):
+            elif not cmd.cog or not hasattr(cmd.cog, 'name') or len(cmd.cog.get_commands()) < 2:
                 if not "🔰" in cmdlst:
                     cmdlst["🔰"] = ("Diversos", [])
                 cmdlst["🔰"][1].append(cmd)
