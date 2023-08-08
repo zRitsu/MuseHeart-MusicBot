@@ -804,12 +804,7 @@ class GuildLog(commands.Cog):
         except AttributeError:
             pass
 
-        try:
-            owner_mention = self.bot.owner.mention
-        except AttributeError:
-            owner_mention = ""
-
-        await self.send_hook(owner_mention, embed=embed)
+        await self.send_hook(", ".join(f"<@{owner_id}>" for owner_id in self.bot.owner_ids) or self.bot.owner.mention, embed=embed)
 
     async def send_hook(self, content="", *, embed: disnake.Embed=None):
 
