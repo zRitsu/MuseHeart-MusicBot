@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rm -f poetry.lock && rm -f pyproject.toml && rm -rf .upm
+rm -rf poetry.lock pyproject.toml .upm
 pip3 uninstall poetry -y
 
 if [ "${SOURCE_AUTO_UPDATE,,}" == "true" ]; then
@@ -8,8 +8,7 @@ if [ "${SOURCE_AUTO_UPDATE,,}" == "true" ]; then
 fi
 
 if [ ! -d "venv" ] || [ ! -f "./venv/bin/requirements.txt" ] || [ ! "$REPL_SLUG-$REPL_OWNER" == "$(cat ./venv/.deployed)" ]; then
-  rm -rf venv && rm -rf .config && rm -rf .cache && rm Lavalink.jar && rm -rf local_database && rm -rf .logs
-  rm -f poetry.lock && rm -f pyproject.toml
+  rm -rf venv .config .cache local_database .logs Lavalink.jar pyproject.toml poetry.lock
   echo -e "\n####################################" \
           "\n### Inicializando virtual_env... ###" \
           "\n####################################\n"
