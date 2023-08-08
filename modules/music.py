@@ -1684,7 +1684,11 @@ class Music(commands.Cog):
 
             if isinstance(inter, disnake.MessageInteraction):
                 player.set_command_log(text=f"{inter.author.mention} pulou a música.", emoji="⏭️")
-                await inter.response.defer()
+                if not inter.response.is_done():
+                    try:
+                        await inter.response.defer()
+                    except:
+                        pass
                 interaction = inter
             else:
 
