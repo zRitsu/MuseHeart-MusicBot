@@ -498,14 +498,14 @@ class Misc(commands.Cog):
         embed.description += f">  {links}\n"
 
         try:
-            avatar = bot.owner.avatar.with_static_format("png").url
-        except AttributeError:
-            avatar = bot.owner.default_avatar.with_static_format("png").url
-
-        try:
             owner = bot.appinfo.team.owner
         except AttributeError:
             owner = bot.appinfo.owner
+
+        try:
+            avatar = owner.avatar.with_static_format("png").url
+        except AttributeError:
+            avatar = owner.default_avatar.with_static_format("png").url
 
         embed.set_footer(
             icon_url=avatar,

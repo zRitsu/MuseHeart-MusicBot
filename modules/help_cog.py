@@ -303,8 +303,13 @@ class HelpCog(commands.Cog, name="Ajuda"):
         embed.set_author(name=f"Menu de ajuda - Lista de comandos (prefix)",
                          icon_url=self.bot.user.display_avatar.replace(static_format="png").url)
 
-        embed.set_footer(icon_url=self.bot.owner.display_avatar.replace(static_format="png").url,
-                         text=f"Dono(a): {self.bot.owner} [{self.bot.owner.id}]")
+        try:
+            owner = self.bot.appinfo.team.owner
+        except AttributeError:
+            owner = self.bot.appinfo.owner
+
+        embed.set_footer(icon_url=owner.display_avatar.replace(static_format="png").url,
+                         text=f"Dono(a): {owner} [{owner.id}]")
 
         view = ViewHelp(ctx, btn_id, get_cmd=self.get_cmd, cmd_list=cmd_lst_new, category_cmd=None,
                  main_embed=embed, timeout=180)
