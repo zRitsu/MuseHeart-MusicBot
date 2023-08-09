@@ -2549,7 +2549,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.bot_has_guild_permissions(manage_threads=True)
-    @pool_command(name="songrequesttread", aliases=["songrequest", "srt"], only_voiced=True,
+    @pool_command(name="songrequestthread", aliases=["songrequest", "srt"], only_voiced=True,
                   description="Criar uma thread/conversa temporária para song-request (pedido de música)")
     async def song_request_thread_legacy(self, ctx: CustomContext):
 
@@ -3381,7 +3381,7 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @pool_command(name="restrict", aliases=["rstc", "restrito"], only_voiced=True, cooldown=restrict_cd, max_concurrency=restrict_mc,
+    @pool_command(name="restrictmode", aliases=["rstc", "restrict", "restrito", "modorestrito"], only_voiced=True, cooldown=restrict_cd, max_concurrency=restrict_mc,
                   description="Ativar/Desativar o modo restrito de comandos que requer DJ/Staff.")
     async def restrict_mode_legacy(self, ctx: CustomContext):
 
