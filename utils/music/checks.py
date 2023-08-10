@@ -416,7 +416,7 @@ def check_voice():
 
         if not guild.me.voice:
 
-            if not inter.guild.me.guild_permissions.connect and not inter.author.voice.channel.permissions_for(guild.me).connect :
+            if not guild.me.guild_permissions.connect and not inter.author.voice.channel.permissions_for(guild.me).connect :
                 raise MissingVoicePerms(inter.author.voice.channel)
 
         try:
