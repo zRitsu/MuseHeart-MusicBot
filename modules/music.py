@@ -4027,6 +4027,10 @@ class Music(commands.Cog):
                                 description="### Não há itens para favoritar na música atual."
                             ), ephemeral=True
                         )
+                        try:
+                            await self.player_interaction_concurrency.release(interaction)
+                        except:
+                            pass
                         return
 
                     if len(choices) == 1:
@@ -4034,14 +4038,15 @@ class Music(commands.Cog):
 
                     else:
                         view = SelectInteraction(
-                            user=interaction.author, timeout=45,
+                            user=interaction.author, timeout=20,
                             opts=[disnake.SelectOption(label=k, description=v["name"][:50], emoji=v["emoji"]) for k,v in choices.items()]
                         )
 
                         await interaction.send(
                             embed=disnake.Embed(
                                 color=self.bot.get_color(interaction.guild.me),
-                                description=f"### Selecione um item da música atual:\n\n{msg}"
+                                description=f"### Selecione um item da música atual para adicionar nos seus favoritos:"
+                                            f"\n\n{msg}"
                             ), view=view, ephemeral=True
                         )
 
@@ -4087,6 +4092,11 @@ class Music(commands.Cog):
                             description="### Item adicionado/editado com sucesso nos seus favoritos:\n\n"
                                         f"**{select_type}:** [`{info['name']}`]({info['url']})"
                         ), view=None)
+
+                    try:
+                        await self.player_interaction_concurrency.release(interaction)
+                    except:
+                        pass
 
                     return
 
