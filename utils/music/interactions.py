@@ -230,7 +230,7 @@ class SelectInteraction(disnake.ui.View):
         self.selected = None
         self.item_pages = list(disnake.utils.as_chunks(opts, 25))
         self.current_page = 0
-        self.max_page = len(self.item_pages)
+        self.max_page = len(self.item_pages)-1
         self.inter = None
 
         self.load_components()
