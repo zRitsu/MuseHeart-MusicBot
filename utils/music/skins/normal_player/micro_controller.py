@@ -14,7 +14,7 @@ class MicroController:
 
     def __init__(self):
         self.name = basename(__file__)[:-3]
-        self.preview = "https://media.discordapp.net/attachments/554468640942981147/1050285454186000464/micro_controller.png"
+        self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1139395692658446336/micro_controller.png"
 
     def setup_features(self, player: LavalinkPlayer):
         player.mini_queue_feature = False
@@ -34,7 +34,7 @@ class MicroController:
 
         embed = disnake.Embed(
             color=embed_color,
-            description=f"[`{fix_characters(player.current.single_title, 25)}`]({player.current.uri or player.current.search_uri}) "
+            description=f"[`{fix_characters(player.current.single_title, 32)}`]({player.current.uri or player.current.search_uri}) "
                         f"[`{fix_characters(player.current.author, 12)}`] "
         )
 
@@ -60,11 +60,13 @@ class MicroController:
             data["embeds"].append(disnake.Embed(color=embed_color).set_footer(text=f"No momento estou usando a reprodução automática enquanto aguardo algum membro do canal #{player.guild.me.voice.channel.name} adicionar novas músicas."))
 
         data["components"] = [
-            disnake.ui.Button(label="Despausar" if player.paused else "Pausar", custom_id=PlayerControls.pause_resume, style=get_button_style(player.paused)),
-            disnake.ui.Button(label="Voltar", custom_id=PlayerControls.back),
-            disnake.ui.Button(label="Parar", custom_id=PlayerControls.stop, style=disnake.ButtonStyle.red),
-            disnake.ui.Button(label="Pular", custom_id=PlayerControls.skip),
-            disnake.ui.Button(label="Fila", custom_id=PlayerControls.queue, disabled=not player.queue)
+            disnake.ui.Button(emoji="⏯️", label="Retomar" if player.paused else "Pausar", custom_id=PlayerControls.pause_resume, style=get_button_style(player.paused)),
+            disnake.ui.Button(emoji="⏮️", label="Voltar", custom_id=PlayerControls.back),
+            disnake.ui.Button(emoji="⏹️", label="Parar", custom_id=PlayerControls.stop, style=disnake.ButtonStyle.red),
+            disnake.ui.Button(emoji="⏭️", label="Pular", custom_id=PlayerControls.skip),
+            disnake.ui.Button(emoji="<:music_queue:703761160679194734>", label="Fila", custom_id=PlayerControls.queue,disabled=not player.queue),
+            disnake.ui.Button(emoji="💗", label="Adicionar nos seus favoritos", custom_id=PlayerControls.add_favorite),
+            disnake.ui.Button(emoji="⭐", label="Tocar favorito", custom_id=PlayerControls.enqueue_fav),
         ]
 
         return data

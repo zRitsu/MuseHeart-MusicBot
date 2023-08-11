@@ -122,9 +122,14 @@ class ClassicSkin:
                         description="Adicionar uma música/playlist na fila."
                     ),
                     disnake.SelectOption(
-                        label="Adicionar favorito", emoji="⭐",
+                        label="Adicionar favorito na fila", emoji="⭐",
                         value=PlayerControls.enqueue_fav,
                         description="Adicionar um de seus favoritos na fila."
+                    ),
+                    disnake.SelectOption(
+                        label="Adicionar nos seus favoritos", emoji="💗",
+                        value=PlayerControls.add_favorite,
+                        description="Adicionar a música atual nos seus favoritos."
                     ),
                     disnake.SelectOption(
                         label="Tocar do inicio", emoji="⏪",
