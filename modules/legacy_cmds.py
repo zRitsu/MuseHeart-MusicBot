@@ -125,7 +125,7 @@ class Owner(commands.Cog):
                                       help="Fazer download do arquivo application.yml.")
     updatelavalink_flags.add_argument("-resetids", "-reset", "--resetids", "--reset",
                                       help="Resetar info de ids das músicas (útil pra evitar problemas com certas "
-                                           "mudanças do lavaplayer/lavalink).")
+                                           "mudanças do lavaplayer/lavalink).", action="store_true")
 
     @commands.is_owner()
     @commands.max_concurrency(1, commands.BucketType.user)
