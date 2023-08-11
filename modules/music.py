@@ -4089,6 +4089,7 @@ class Music(commands.Cog):
 
                     await interaction.edit_original_response(
                         embed=disnake.Embed(
+                            color=self.bot.get_color(interaction.guild.me),
                             description="### Item adicionado/editado com sucesso nos seus favoritos:\n\n"
                                         f"**{select_type}:** [`{info['name']}`]({info['url']})"
                         ), view=None)
