@@ -4038,7 +4038,7 @@ class Music(commands.Cog):
 
                     else:
                         view = SelectInteraction(
-                            user=interaction.author, timeout=20,
+                            user=interaction.author, timeout=30,
                             opts=[disnake.SelectOption(label=k, description=v["name"][:50], emoji=v["emoji"]) for k,v in choices.items()]
                         )
 
