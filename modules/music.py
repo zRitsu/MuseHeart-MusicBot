@@ -2778,7 +2778,7 @@ class Music(commands.Cog):
     @commands.user_command(name=disnake.Localized("Add DJ", data={disnake.Locale.pt_BR: "Adicionar DJ"}),
                            extras={"only_voiced": True})
     async def adddj_u(self, inter: disnake.UserCommandInteraction):
-        await self.add_dj(inter, user=inter.target)
+        await self.add_dj(interaction=inter, user=inter.target)
 
     @is_dj()
     @has_player()
@@ -2817,6 +2817,8 @@ class Music(commands.Cog):
 
         user = guild.get_member(user.id)
 
+        if user.bot:
+            error_text = "**Você não pode adicionar um bot na lista de DJ's.**"
         if user == inter.author:
             error_text = "**Você não pode adicionar a si mesmo na lista de DJ's.**"
         elif user.guild_permissions.manage_channels:
