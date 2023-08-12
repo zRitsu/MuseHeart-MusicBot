@@ -809,6 +809,11 @@ class LavalinkPlayer(wavelink.Player):
                 await self.process_next()
                 return
 
+            try:
+                t = t.tracks
+            except:
+                pass
+
             track.id = t[0].id
 
         if clear_autoqueue:
