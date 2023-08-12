@@ -16,7 +16,7 @@ from utils.db import DBModel
 from utils.music.converters import URL_REG, fix_characters, time_format
 from utils.music.interactions import SelectInteraction
 from utils.music.spotify import spotify_regex_w_user
-from utils.others import CustomContext, music_source_emoji_id
+from utils.others import CustomContext, music_source_emoji_id, PlayerControls
 
 youtube_regex = r"^(?:https?:\/\/)?(?:www\.)?youtube\.com\/(?:@)?([a-zA-Z0-9_-]{1,})(?:\/|$)"
 soundcloud_regex = r"^(?:https?:\/\/)?(?:www\.)?soundcloud\.com\/([a-zA-Z0-9_-]+)"
@@ -283,6 +283,11 @@ class IntegrationsView(disnake.ui.View):
         import_button.callback = self.import_callback
         self.add_item(import_button)
 
+        if data["integration_links"]:
+            play_button = disnake.ui.Button(label="Tocar a integração selecionada", emoji="▶")
+            play_button.callback = self.play_callback
+            self.add_item(play_button)
+
         cancel_button = disnake.ui.Button(label="Cancelar", emoji="❌")
         cancel_button.callback = self.cancel_callback
         self.add_item(cancel_button)
@@ -388,6 +393,9 @@ class IntegrationsView(disnake.ui.View):
             ]
         )
         await inter.delete_original_message()
+
+    async def play_callback(self, inter: disnake.MessageInteraction):
+        await self.bot.get_cog("Music").player_controller(inter, PlayerControls.enqueue_fav, query=f"> itg: {self.current}" )
 
     async def export_callback(self, inter: disnake.MessageInteraction):
         await self.bot.get_cog("IntegrationManager").export_(inter)

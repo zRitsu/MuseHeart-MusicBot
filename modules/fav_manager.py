@@ -10,7 +10,7 @@ from disnake.ext import commands
 
 from utils.db import DBModel
 from utils.music.converters import URL_REG, time_format
-from utils.others import CustomContext, music_source_emoji_url
+from utils.others import CustomContext, music_source_emoji_url, PlayerControls
 
 if TYPE_CHECKING:
     from utils.client import BotCore
@@ -136,6 +136,11 @@ class UserFavView(disnake.ui.View):
         import_button = disnake.ui.Button(label="Importar", emoji="📥")
         import_button.callback = self.import_callback
         self.add_item(import_button)
+
+        if data["integration_links"]:
+            play_button = disnake.ui.Button(label="Tocar o favorito selecionado", emoji="▶")
+            play_button.callback = self.play_callback
+            self.add_item(play_button)
 
         cancel_button = disnake.ui.Button(label="Cancelar", emoji="❌")
         cancel_button.callback = self.cancel_callback
@@ -263,6 +268,9 @@ class UserFavView(disnake.ui.View):
             ]
         )
         await inter.delete_original_message()
+
+    async def play_callback(self, inter: disnake.MessageInteraction):
+        await self.bot.get_cog("Music").player_controller(inter, PlayerControls.enqueue_fav, query=f"> fav: {self.current}" )
 
     async def export_callback(self, inter: disnake.MessageInteraction):
         await self.bot.get_cog("FavManager").export_(inter)

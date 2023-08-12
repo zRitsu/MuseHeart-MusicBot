@@ -3845,7 +3845,7 @@ class Music(commands.Cog):
 
         await self.player_controller(interaction, interaction.data.custom_id)
 
-    async def player_controller(self, interaction: disnake.MessageInteraction, control: str):
+    async def player_controller(self, interaction: disnake.MessageInteraction, control: str, **kwargs):
 
         if not self.bot.bot_ready:
             await interaction.send("Ainda estou inicializando...", ephemeral=True)
@@ -3855,7 +3855,7 @@ class Music(commands.Cog):
             await interaction.response.edit_message(components=None)
             return
 
-        kwargs = {}
+        cmd_kwargs = {}
 
         cmd: Optional[disnake.AppCmdInter] = None
 
@@ -3863,8 +3863,8 @@ class Music(commands.Cog):
 
             if control == "musicplayer_request_channel":
                 cmd = self.bot.get_slash_command("setup")
-                kwargs = {"target": interaction.channel}
-                await self.process_player_interaction(interaction, cmd, kwargs)
+                cmd_kwargs = {"target": interaction.channel}
+                await self.process_player_interaction(interaction, cmd, cmd_kwargs)
                 return
 
             if control == PlayerControls.fav_manageer:
@@ -3874,7 +3874,7 @@ class Music(commands.Cog):
                     return
 
                 cmd = self.bot.get_slash_command("fav").children.get("manager")
-                await self.process_player_interaction(interaction, cmd, kwargs)
+                await self.process_player_interaction(interaction, cmd, cmd_kwargs)
                 return
 
             if control == PlayerControls.integration_manager:
@@ -3884,7 +3884,7 @@ class Music(commands.Cog):
                     return
 
                 cmd = self.bot.get_slash_command("integration").children.get("manager")
-                await self.process_player_interaction(interaction, cmd, kwargs)
+                await self.process_player_interaction(interaction, cmd, cmd_kwargs)
                 return
 
             if control == PlayerControls.add_song:
@@ -3919,16 +3919,17 @@ class Music(commands.Cog):
 
             if control == PlayerControls.enqueue_fav:
 
-                kwargs = {
-                    "query": "",
+                cmd_kwargs = {
+                    "query": kwargs.get("query", ""),
                     "position": 0,
                     "options": False,
-                    "manual_selection": True,
                     "source": "ytsearch",
                     "repeat_amount": 0,
                     "server": None,
                     "force_play": "no"
                 }
+
+                cmd_kwargs["manual_selection"] = not cmd_kwargs["query"]
 
                 cmd = self.bot.get_slash_command("play")
 
@@ -4102,7 +4103,7 @@ class Music(commands.Cog):
                     return
 
                 if control == PlayerControls.volume:
-                    kwargs = {"value": None}
+                    cmd_kwargs = {"value": None}
 
                 elif control == PlayerControls.queue:
                     cmd = self.bot.get_slash_command("queue").children.get("display")
@@ -4112,7 +4113,7 @@ class Music(commands.Cog):
 
                 elif control == PlayerControls.seek_to_start:
                     cmd = self.bot.get_slash_command("seek")
-                    kwargs = {"position": "0"}
+                    cmd_kwargs = {"position": "0"}
 
                 elif control == PlayerControls.pause_resume:
                     control = PlayerControls.pause if not player.paused else PlayerControls.resume
@@ -4120,14 +4121,14 @@ class Music(commands.Cog):
                 elif control == PlayerControls.loop_mode:
 
                     if player.loop == "current":
-                        kwargs['mode'] = 'queue'
+                        cmd_kwargs['mode'] = 'queue'
                     elif player.loop == "queue":
-                        kwargs['mode'] = 'off'
+                        cmd_kwargs['mode'] = 'off'
                     else:
-                        kwargs['mode'] = 'current'
+                        cmd_kwargs['mode'] = 'current'
 
                 elif control == PlayerControls.skip:
-                    kwargs = {"query": None, "play_only": "no"}
+                    cmd_kwargs = {"query": None, "play_only": "no"}
 
             if not cmd:
                 cmd = self.bot.get_slash_command(control[12:])
@@ -4135,7 +4136,7 @@ class Music(commands.Cog):
             await self.process_player_interaction(
                 interaction=interaction,
                 command=cmd,
-                kwargs=kwargs
+                kwargs=cmd_kwargs
             )
 
             try:
