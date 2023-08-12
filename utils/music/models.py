@@ -10,7 +10,7 @@ import disnake
 import asyncio
 import wavelink
 from urllib import parse
-from utils.music.converters import fix_characters, time_format, get_button_style
+from utils.music.converters import fix_characters, time_format, get_button_style, YOUTUBE_VIDEO_REG
 from utils.music.skin_utils import skin_converter
 from utils.music.filters import AudioFilter
 from utils.db import DBModel
@@ -790,7 +790,17 @@ class LavalinkPlayer(wavelink.Player):
 
         elif not track.id:
 
-            t = await self.node.get_tracks(track.uri)
+            if "&list=" in track.uri and (link_re := YOUTUBE_VIDEO_REG.match(track.uri)):
+                query = link_re.group()
+            else:
+                query = track.uri
+
+            t = await self.node.get_tracks(query)
+
+            try:
+                t = t.tracks
+            except:
+                pass
 
             if not t:
                 try:
@@ -808,11 +818,6 @@ class LavalinkPlayer(wavelink.Player):
 
                 await self.process_next()
                 return
-
-            try:
-                t = t.tracks
-            except:
-                pass
 
             track.id = t[0].id
 
