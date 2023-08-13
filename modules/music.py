@@ -855,9 +855,15 @@ class Music(commands.Cog):
                     pass
 
                 kwargs = {
-                    "content": inter.author.mention,
+                    "content": "",
                     "embed": embed
                 }
+
+                try:
+                    if inter.message.author.bot:
+                        kwargs["content"] = inter.author.mention
+                except AttributeError:
+                    pass
 
                 view = SelectInteraction(
                     user=inter.author,  timeout=45,
@@ -1076,8 +1082,16 @@ class Music(commands.Cog):
                         except AttributeError:
                             func = msg.edit
 
+                        mention = ""
+
+                        try:
+                            if inter.message.author.bot:
+                                mention = f"{inter.author.mention}, "
+                        except AttributeError:
+                            pass
+
                         await func(
-                            content=f"{inter.author.mention}, {'operação cancelada' if view.selected is not False else 'tempo esgotado'}" if view.selected is not False else "Cancelado pelo usuário.",
+                            content=f"{mention}{'operação cancelada' if view.selected is not False else 'tempo esgotado'}" if view.selected is not False else "Cancelado pelo usuário.",
                             embed=None, view=None
                         )
                         return

@@ -85,11 +85,14 @@ class ErrorHandler(commands.Cog):
 
         error_msg, full_error_msg, kill_process, components = parse_error(inter, error)
 
-        kwargs = {}
+        kwargs = {"text": "", "embed": disnake.Embed(color=disnake.Colour.red())}
         send_webhook = False
 
-        kwargs["embed"] = disnake.Embed(color=disnake.Colour.red())
-        kwargs["text"] = inter.author.mention
+        try:
+            if inter.message.author.bot:
+                kwargs["text"] = inter.author.mention
+        except AttributeError:
+            pass
 
         if not error_msg:
 
@@ -149,10 +152,11 @@ class ErrorHandler(commands.Cog):
             return
 
         error_msg, full_error_msg, kill_process, components = parse_error(ctx, error)
-        kwargs = {}
+        kwargs = {"content": ""}
         send_webhook = False
 
-        kwargs["content"] = ctx.author.mention
+        if ctx.author.bot:
+            kwargs["content"] = ctx.author.mention
 
         if not error_msg:
 
