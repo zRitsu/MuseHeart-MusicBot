@@ -2819,7 +2819,7 @@ class Music(commands.Cog):
 
         if user.bot:
             error_text = "**Você não pode adicionar um bot na lista de DJ's.**"
-        if user == inter.author:
+        elif user == inter.author:
             error_text = "**Você não pode adicionar a si mesmo na lista de DJ's.**"
         elif user.guild_permissions.manage_channels:
             error_text = f"você não pode adicionar o membro {user.mention} na lista de DJ's (ele(a) possui permissão de **gerenciar canais**)."
