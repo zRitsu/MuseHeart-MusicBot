@@ -4047,16 +4047,16 @@ class Music(commands.Cog):
                         msg += f"**Playlist:** [`{player.current.playlist_name}`]({player.current.playlist_url})\n"
 
                     if not choices:
+                        try:
+                            await self.player_interaction_concurrency.release(interaction)
+                        except:
+                            pass
                         await interaction.send(
                             embed=disnake.Embed(
                                 color=self.bot.get_color(interaction.guild.me),
                                 description="### Não há itens para favoritar na música atual."
                             ), ephemeral=True
                         )
-                        try:
-                            await self.player_interaction_concurrency.release(interaction)
-                        except:
-                            pass
                         return
 
                     if len(choices) == 1:
@@ -4081,6 +4081,10 @@ class Music(commands.Cog):
                         select_interaction = view.inter
 
                         if not select_interaction or view.selected is False:
+                            try:
+                                await self.player_interaction_concurrency.release(interaction)
+                            except:
+                                pass
                             await interaction.edit_original_message(
                                 embed=disnake.Embed(
                                     color=self.bot.get_color(interaction.guild.me),
