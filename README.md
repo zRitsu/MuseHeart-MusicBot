@@ -172,7 +172,13 @@ Nota: há mais alguns guias na [wiki]((https://github.com/zRitsu/disnake-LL-musi
 
 ### Observaçoes importantes:
 
-* Esta source foi criada com intuito para ser usado em bots privados (não está otimizado o suficiente pra lidar com alta demanda de servidores).
+* Esta source pode ser usada como alternativa de self-hosting do meu bot principal (Muse Heart) pra hospedar seu próprio bot de música pra usar em servidores privados ou servidores públicos no qual você gerencia (com cargo que permita você adicionar o bot no server). Porém não recomendo o uso público do bot com essa source no intuito de divulgar/crescer seu próprio bot etc, pois além de não estar otimizado o suficiente pra lidar com alta demanda de servidores. Exceto em ocasiões especiais e de onde o bot estiver sendo divulgado há possibilidade de eu como criador dessa source apontar o uso dela no seu bot.
+<details>
+<summary>
+Exemplo de condições especiais:
+</summary>
+Não ter retirado/alterado o link da source no comando about/info ou no minimo ter me creditado de alguma forma mencionando meu user do discord (xritsu) ou do github(zRitsu) ou citando o link desse repositório ou do meu perfil do github.
+</details>
 
 * Recomendo usar a source atual sem alterações no code. Caso queira fazer modificações (e principalmente adicionar novas funcionalidades) é altamente recomendável que tenha conhecimento em python e disnake. E caso queira manter sua source modificada com updates em dias usando a source base também recomendo ter conhecimento em git (pelo menos o necessário pra fazer um merge sem erros).
 
