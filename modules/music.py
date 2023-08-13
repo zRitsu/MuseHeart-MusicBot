@@ -22,7 +22,7 @@ from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolExc
 from utils.music.spotify import process_spotify, spotify_regex_w_user
 from utils.music.checks import check_voice, has_player, has_source, is_requester, is_dj, \
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen, check_pool_bots, \
-    check_channel_limit, check_stage_topic
+    check_channel_limit, check_stage_topic, check_queue_loading
 from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, google_search, percentage, music_source_image, perms_translations
@@ -1552,6 +1552,7 @@ class Music(commands.Cog):
                              help="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome da música")
     @check_stage_topic()
     @is_requester()
+    @check_queue_loading()
     @check_voice()
     @pool_command(name="skip", aliases=["next", "n", "s", "pular", "skipto"], cooldown=skip_back_cd,
                   max_concurrency=skip_back_mc, description=f"Pular a música atual que está tocando.",
@@ -1568,6 +1569,7 @@ class Music(commands.Cog):
 
     @check_stage_topic()
     @is_requester()
+    @check_queue_loading()
     @has_source()
     @check_voice()
     @commands.slash_command(
@@ -1592,6 +1594,7 @@ class Music(commands.Cog):
 
     @check_stage_topic()
     @is_requester()
+    @check_queue_loading()
     @has_source()
     @check_voice()
     @commands.slash_command(
@@ -1723,6 +1726,7 @@ class Music(commands.Cog):
 
     @check_stage_topic()
     @is_dj()
+    @check_queue_loading()
     @has_player()
     @check_voice()
     @pool_command(name="back", aliases=["b", "voltar"], description="Voltar para a música anterior.", only_voiced=True,
@@ -1733,6 +1737,7 @@ class Music(commands.Cog):
     @check_stage_topic()
     @is_dj()
     @has_player()
+    @check_queue_loading()
     @check_voice()
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.slash_command(
@@ -1799,6 +1804,7 @@ class Music(commands.Cog):
             await player.process_next(inter=interaction)
 
     @check_stage_topic()
+    @check_queue_loading()
     @has_source()
     @check_voice()
     @commands.slash_command(
@@ -1977,6 +1983,7 @@ class Music(commands.Cog):
 
     @check_stage_topic()
     @is_dj()
+    @check_queue_loading()
     @has_source()
     @check_voice()
     @pool_command(name="seek", aliases=["sk"], description="Avançar/Retomar a música para um tempo específico.",
@@ -1989,6 +1996,7 @@ class Music(commands.Cog):
 
     @check_stage_topic()
     @is_dj()
+    @check_queue_loading()
     @has_source()
     @check_voice()
     @commands.slash_command(
@@ -2497,6 +2505,7 @@ class Music(commands.Cog):
         await self.rotate.callback(self=self, inter=ctx, query=" ".join(unknown), case_sensitive=args.casesensitive)
 
     @is_dj()
+    @check_queue_loading()
     @has_player()
     @check_voice()
     @commands.slash_command(

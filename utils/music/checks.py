@@ -452,6 +452,29 @@ def has_source():
     return commands.check(predicate)
 
 
+def check_queue_loading():
+
+    async def predicate(inter):
+
+        try:
+            bot = inter.music_bot
+        except AttributeError:
+            bot = inter.bot
+
+        try:
+            player = bot.music.players[inter.guild_id]
+        except KeyError:
+            raise NoPlayer()
+
+        if player.locked:
+            raise GenericError("**Não é possível executar essa ação com o processamento da música em andamento "
+                               "(por favor aguarde mais alguns segundos e tente novamente).**")
+
+        return True
+
+    return commands.check(predicate)
+
+
 def check_stage_topic():
 
     async def predicate(inter):
