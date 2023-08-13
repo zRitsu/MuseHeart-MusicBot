@@ -416,7 +416,9 @@ def check_voice():
 
         if not guild.me.voice:
 
-            if not guild.me.guild_permissions.connect and not inter.author.voice.channel.permissions_for(guild.me).connect :
+            perms = inter.author.voice.channel.permissions_for(guild.me)
+
+            if not perms.connect:
                 raise MissingVoicePerms(inter.author.voice.channel)
 
         try:
@@ -595,14 +597,13 @@ def can_connect(
 ):
 
     perms = channel.permissions_for(guild.me)
-    guild_perms = guild.me.guild_permissions
 
-    if not perms.connect and not guild_perms.connect:
+    if not perms.connect:
         raise GenericError(f"**Não tenho permissão para conectar no canal {channel.mention}**")
 
     if not isinstance(channel, disnake.StageChannel):
 
-        if not perms.speak and not guild_perms.speak:
+        if not perms.speak:
             raise GenericError(f"**Não tenho permissão para falar no canal {channel.mention}**")
 
         if not guild.voice_client and not check_channel_limit(guild.me, channel):
