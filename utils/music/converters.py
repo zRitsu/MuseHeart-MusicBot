@@ -162,7 +162,7 @@ perms_translations = {
     "create_private_threads": "Criar Tópicos Privado",
     "create_public_threads": "Criar Tópicos Públicos",
     "deafen_members": "Ensurdecer membros",
-    "embed_links": "Embutir links",
+    "embed_links": "Inserir links",
     "kick_members": "Expulsar Membros",
     "manage_channels": "Gerenciar Canais",
     "manage_emojis_and_stickers": "Gerenciar Emojis e Figurinhas",
@@ -179,6 +179,7 @@ perms_translations = {
     "mute_members": "Silenciar membros",
     "priority_speaker": "Prioridade para falar",
     "read_message_history": "Mostrar histórico de mensagens",
+    "read_messages": "Ler mensagens",
     "request_to_speak": "Pedir para falar",
     "send_messages": "Enviar mensagem",
     "send_messages_in_threads": "Enviar mensagem em tópicos",
@@ -194,5 +195,3 @@ perms_translations = {
     "view_channel": "Ver canal",
     "view_guild_insights": "Ver análises do servidor"
 }
-
-
