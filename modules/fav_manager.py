@@ -137,7 +137,7 @@ class UserFavView(disnake.ui.View):
         import_button.callback = self.import_callback
         self.add_item(import_button)
 
-        if data["integration_links"]:
+        if data["fav_links"]:
             play_button = disnake.ui.Button(label="Tocar o favorito selecionado", emoji="▶")
             play_button.callback = self.play_callback
             self.add_item(play_button)
