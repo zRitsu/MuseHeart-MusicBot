@@ -970,7 +970,9 @@ class Owner(commands.Cog):
             invite = None
 
         else:
-            if not await self.bot.fetch_invite(invite):
+            try:
+                await self.bot.fetch_invite(invite)
+            except disnake.NotFound:
                 invite = None
                 del global_data["listen_along_invites"][str(ctx.channel.id)]
                 await self.bot.update_global_data(ctx.guild_id, global_data, db_name=DBModel.guilds)
