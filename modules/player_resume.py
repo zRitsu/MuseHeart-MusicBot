@@ -130,7 +130,7 @@ class PlayerSession(commands.Cog):
             "dj": list(player.dj),
             "player_creator": str(player.player_creator) if player.player_creator else None,
             "static": player.static,
-            "paused": player.paused,
+            "paused": player.paused and not player.auto_pause,
             "text_channel": text_channel,
             "keep_connected": player.keep_connected,
             "message": message,
