@@ -153,7 +153,12 @@ class IntegrationModal(disnake.ui.Modal):
             except:
                 pass
 
-            info = await loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(base_url, download=False))
+            try:
+                info = await loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(base_url, download=False))
+            except Exception as e:
+                traceback.print_exc()
+                await inter.edit_original_message(f"**Ocorreu um erro ao obter informação da url:** ```py\n{repr(e)}```")
+                return
 
             if not info:
 
@@ -162,20 +167,20 @@ class IntegrationModal(disnake.ui.Modal):
                 if source == "[YT]:":
                     msg += f"\n\n`Nota: Confira se no link contém usuário com @, ex: @ytchannel`"
 
-                await inter.send(
+                await inter.edit_original_message(
                     embed=disnake.Embed(
                         description=msg,
                         color=disnake.Color.red()
-                    ), ephemeral=True
+                    )
                 )
                 return
 
             if not info['entries']:
-                await inter.send(
+                await inter.edit_original_message(
                     embed=disnake.Embed(
                         description=f"**O usuário/canal do link informado não possui playlists públicas...**",
                         color=disnake.Color.red()
-                    ), ephemeral=True
+                    )
                 )
                 return
 
