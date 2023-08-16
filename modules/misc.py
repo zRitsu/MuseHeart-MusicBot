@@ -140,7 +140,7 @@ class Misc(commands.Cog):
             await guild.leave()
             return
 
-        interaction_invites = []
+        interaction_invite = ""
 
         bots_in_guild = []
 
@@ -154,14 +154,8 @@ class Misc(commands.Cog):
 
         components = [disnake.ui.Button(custom_id="bot_invite", label="Precisa de mais bots de música? Clique aqui.")] if [b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public] else []
 
-        if not self.bot.command_sync_flags.sync_commands and self.bot.config["INTERACTION_BOTS"]:
-
-            for b in self.bot.pool.bots:
-
-                if str(b.user.id) not in self.bot.config["INTERACTION_BOTS"]:
-                    continue
-
-                interaction_invites.append(f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) ")
+        if self.bot.pool.controller_bot != self.bot:
+            interaction_invite = f"[`{disnake.utils.escape_markdown(str(self.bot.user.name))}`]({disnake.utils.oauth_url(self.bot.user.id, scopes=['applications.commands'])})"
 
         if cmd:=self.bot.get_command("setup"):
             cmd_text = f"Se desejar, use o comando **/{cmd.name}** para criar um canal dedicado pra pedir " \
@@ -206,17 +200,18 @@ class Misc(commands.Cog):
                             ).set_image(url=image)
                         )
 
-                        if interaction_invites:
+                        if interaction_invite:
                             embeds.append(
                                 disnake.Embed(
                                     color=color,
-                                    description=f"**Observação importante:** Meus comandos de barra funcionam " \
-                                                 f"através de uma das seguintes aplicações abaixo:\n" \
-                                                 f"{' **|** '.join(interaction_invites)}\n\n" \
-                                                 f"Caso os comandos da aplicação acima não sejam exibidos ao digitar " \
-                                                 f"barra (**/**) em um canal do servidor **{guild.name}** você terá " \
-                                                 f"que clicar no nome acima para integrar os comandos de barra no " \
-                                                 f"servidor **{guild.name}**."
+                                    description=f"**Observação importante:** Meus comandos de barra funcionam através "
+                                                f"da seguinte aplicação: {interaction_invite}\n\n"
+                                                f"Caso os comandos da aplicação acima não sejam exibidos ao digitar "
+                                                f"barra (**/**) em um canal do servidor **{guild.name}** você terá que "
+                                                f"clicar no nome acima para integrar os comandos de barra no servidor "
+                                                f"**{guild.name}**.\n`Nota: Caso os comandos ainda não apareçam após "
+                                                f"integrar os comandos, talvez seu servidor tenha atingido o limite de "
+                                                f"bots com comandos de barra registrados.`"
                                 ).set_image(url=image)
                             )
                         else:
@@ -282,17 +277,17 @@ class Misc(commands.Cog):
 
         embeds = []
 
-        if interaction_invites:
+        if interaction_invite:
 
             embeds.append(
                 disnake.Embed(
                     color=color,
-                    description=f"Olá! Para ver todos os meus comandos digite barra (**/**) e confira " \
-                                 f"os comandos das seguintes aplicações abaixo:\n" \
-                                 f"{' **|** '.join(interaction_invites)}\n\n" \
-                                 f"Caso os comandos da aplicação acima não sejam exibidos ao digitar " \
-                                 f"barra (**/**) você terá que clicar no nome acima para integrar os comandos de " \
-                                 f"barra no seu servidor."
+                    description=f"Olá! Para ver todos os meus comandos digite barra (**/**) e confira "
+                                f"os comandos da seguinte aplicação: {interaction_invite}\n\n"
+                                f"Caso os comandos da aplicação acima não sejam exibidos ao digitar barra (**/**) você "
+                                f"terá que clicar no nome acima para integrar os comandos de barra no seu servidor.\n"
+                                f"`Nota: Caso os comandos ainda não apareçam após integrar os comandos, talvez seu "
+                                f"servidor tenha atingido o limite de bots com comandos de barra registrados.`"
 
                 ).set_image(url=image)
             )
@@ -512,7 +507,7 @@ class Misc(commands.Cog):
             text=f"Dono(a): {owner} [{owner.id}]"
         )
 
-        components = [disnake.ui.Button(custom_id="bot_invite", label="Me adicione no seu servidor")] if [b for b in bot.pool.bots if b.appinfo and b.appinfo.bot_public] else None
+        components = [disnake.ui.Button(custom_id="bot_invite", label="Me adicione no seu servidor")] if [b for b in bot.pool.bots if b.appinfo and (b.appinfo.bot_public or await b.is_owner(inter.author))] else None
 
         try:
             await inter.edit_original_message(embed=embed, components=components)
@@ -588,22 +583,9 @@ class Misc(commands.Cog):
             )
             return
 
-        interaction_bots = ""
-
-        if len(self.bot.pool.bots) > 1:
-
-            for b in self.bot.pool.bots:
-
-                if not b.interaction_id:
-                    continue
-
-                try:
-                    interaction_bots += f"[`{disnake.utils.escape_markdown(b.user.name)}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) "
-                except Exception:
-                    traceback.print_exc()
-
-        if interaction_bots:
-            txt = f"**Registrar os comandos de barra no servidor:**\n{interaction_bots}\n\n" + txt
+        if (len(bots_in_guild) + len(bots_invites)) > 1:
+            invite = f"[`{disnake.utils.escape_markdown(str(self.bot.user.name))}`]({disnake.utils.oauth_url(self.bot.user.id, scopes=['applications.commands'])})"
+            txt = f"**Registrar os comandos de barra no servidor:**\n{invite}\n\n" + txt
 
         color = self.bot.get_color(inter.guild.me if inter.guild else guild.me if guild else None)
 
