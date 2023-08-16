@@ -351,8 +351,9 @@ class FavManager(commands.Cog):
 
                 embed.add_field(name="**Como usá-los?**", inline=False,
                                 value=f"* Usando o comando {cmd} (no preenchimento automático da busca)\n"
-                                      "* Clicando no botão de tocar favorito do player.\n"
-                                      f"* Usando o comando {global_data['prefix'] or self.bot.default_prefix}{cog.play_legacy.name} sem usar um nome ou link.")
+                                      "* Clicando no botão/select de tocar favorito/integração do player.\n"
+                                      f"* Usando o comando {global_data['prefix'] or self.bot.default_prefix}{cog.play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n"
+                                      "* Usando o botão de tocar favorito abaixo.")
 
         if isinstance(inter, CustomContext):
             try:
