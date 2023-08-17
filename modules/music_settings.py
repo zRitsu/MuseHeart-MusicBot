@@ -357,17 +357,6 @@ class MusicSettings(commands.Cog):
 
         guild = bot.get_guild(inter.guild_id)
 
-        perms = (
-            'manage_channels', 'send_messages', 'embed_links', 'send_messages_in_threads', 'read_messages',
-            'create_public_threads', 'manage_messages'
-        )
-
-        missing_perms = [p for p, v in guild.me.guild_permissions if p in perms and not v]
-
-        if missing_perms:
-            raise GenericError(f"**{bot.user.mention} não possui as seguintes permissões necessárias abaixo:** ```ansi\n" +
-                               "\n".join(f"[0;33m{perms_translations.get(p,p)}[0m" for p in perms) + "```")
-
         channel = bot.get_channel(inter.channel.id)
 
         if target and bot != self.bot:
@@ -623,6 +612,17 @@ class MusicSettings(commands.Cog):
 
         if target == guild.rules_channel:
             raise GenericError("**Você não pode usar um canal de regras.**")
+
+        perms = (
+            'manage_channels', 'send_messages', 'embed_links', 'send_messages_in_threads', 'read_messages',
+            'create_public_threads', 'manage_messages'
+        )
+
+        missing_perms = [p for p, v in target.permissions_for(target.guild.me) if p in perms and not v]
+
+        if missing_perms:
+            raise GenericError(f"**{bot.user.mention} não possui as seguintes permissões necessárias abaixo:** ```ansi\n" +
+                               "\n".join(f"[0;33m{perms_translations.get(p,p)}[0m" for p in perms) + "```")
 
         if isinstance(target, disnake.ForumChannel):
 
