@@ -18,7 +18,7 @@ from utils.music.interactions import SelectInteraction
 from utils.music.spotify import spotify_regex_w_user
 from utils.others import CustomContext, music_source_emoji_id, PlayerControls
 
-youtube_regex = r"^(?:https?:\/\/)?(?:www\.)?youtube\.com\/(?:@)?([a-zA-Z0-9_-]{1,})(?:\/|$)"
+youtube_regex = r"https?://www\.youtube\.com/(?:channel/|@)[^/]+"
 soundcloud_regex = r"^(?:https?:\/\/)?(?:www\.)?soundcloud\.com\/([a-zA-Z0-9_-]+)"
 
 if TYPE_CHECKING:
@@ -126,12 +126,10 @@ class IntegrationModal(disnake.ui.Modal):
             match = re.search(youtube_regex, url)
 
             if match:
-                group = match.group(1)
-                base_url = f"https://www.youtube.com/@{group}/playlists"
+                base_url = match.group(0)
                 source = "[YT]:"
             else:
                 match = re.search(soundcloud_regex, url)
-
                 if match:
                     group = match.group(1)
                     base_url = f"https://soundcloud.com/{group}/sets"
