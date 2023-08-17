@@ -583,8 +583,10 @@ class Misc(commands.Cog):
             )
             return
 
-        if (len(bots_in_guild) + len(bots_invites)) > 1:
-            invite = f"[`{disnake.utils.escape_markdown(str(self.bot.user.name))}`]({disnake.utils.oauth_url(self.bot.user.id, scopes=['applications.commands'])})"
+        controller_bot = self.bot.pool.controller_bot
+
+        if (len(bots_in_guild) + len(bots_invites)) > 1 and str(controller_bot.user.id) not in str(bots_in_guild) and not str(controller_bot.user.id) not in str(bots_invites):
+            invite = f"[`{disnake.utils.escape_markdown(str(controller_bot.user.name))}`]({disnake.utils.oauth_url(controller_bot.user.id, scopes=['applications.commands'])})"
             txt = f"**Registrar os comandos de barra no servidor:**\n{invite}\n\n" + txt
 
         color = self.bot.get_color(inter.guild.me if inter.guild else guild.me if guild else None)
