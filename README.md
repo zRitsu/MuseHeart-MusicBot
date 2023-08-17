@@ -19,7 +19,7 @@ Mais previews:
 
 ![](https://cdn.discordapp.com/attachments/554468640942981147/1125158772608876565/slash_commands.png)
 
-- Player controller: modo fixo/estendido com canal e conversa de song requests (skin: default_progressbar), configurável com o comando: /setup
+- Player controller: modo fixo/estendido com canal e conversa de song requests (skin: default), configurável com o comando: /setup
 
 ![](https://cdn.discordapp.com/attachments/554468640942981147/1125154702569504768/player_controller_textchannel.png)
 
@@ -168,23 +168,23 @@ bash update.sh
 
 ---
 
-Nota: há mais alguns guias na [wiki]((https://github.com/zRitsu/disnake-LL-music-bot/wiki)).
+Nota: há mais alguns guias na [wiki](https://github.com/zRitsu/disnake-LL-music-bot/wiki).
 
 ### Observaçoes importantes:
 
-* Esta source pode ser usada como alternativa de self-hosting do meu bot principal (Muse Heart) pra hospedar seu próprio bot de música pra usar em servidores privados ou servidores públicos no qual você gerencia (com cargo que permita você adicionar o bot no server). Porém não recomendo o uso público do bot com essa source no intuito de divulgar/crescer seu próprio bot etc, pois além de não estar otimizado o suficiente pra lidar com alta demanda de servidores. Exceto em ocasiões especiais e de onde o bot estiver sendo divulgado há possibilidade de eu como criador dessa source apontar o uso dela no seu bot.
+* Você pode usar essa source como alternativa de self-hosting do meu bot principal (Muse Heart) hospedando/rodando seu próprio bot de música para uso privado ou em servidores públicos no qual você gerencia (que você tenha permissão de adicionar seu próprio bot no servidor). Entretanto não recomendo o uso público do bot usando essa source no intuito de divulgar/crescer seu próprio bot. Pois além de não estar otimizado o suficiente pra lidar com alta demanda de servidores, dependendo de onde o bot estiver sendo divulgado há possibilidade de eu como criador dessa source apontar o uso dela no seu bot (exceto em ocasiões especiais).
 <details>
 <summary>
-Exemplo de condições especiais:
+Exemplo de ocasiões especiais:
 </summary>
-Não ter retirado/alterado o link da source no comando about/info ou no minimo ter me creditado de alguma forma mencionando meu user do discord (xritsu) ou do github(zRitsu) ou citando o link desse repositório ou do meu perfil do github.
+Não ter retirado/alterado o link da source no comando about/info.
 </details>
 
 * Recomendo usar a source atual sem alterações no code. Caso queira fazer modificações (e principalmente adicionar novas funcionalidades) é altamente recomendável que tenha conhecimento em python e disnake. E caso queira manter sua source modificada com updates em dias usando a source base também recomendo ter conhecimento em git (pelo menos o necessário pra fazer um merge sem erros).
 
 * Não será fornecido suporte caso modifique a source atual (exceto para custom skins), pois atualizo ela com frequência e versões modificadas tendem a ficarem desatualizadas dificultando dar suporte por esse motivo (além de que dependendo da modificação ou implementação poder gerar erros desconhecidos que dificulta ao tentar resolver o problema e de eu exigir usar métodos pra atualizar o code que geralmente desfaz essas alterações).
 
-* Caso queira fazer algum vídeo/tutorial usando esta source, você está totalmente livre para usá-la pra essa finalidade desde que esteja de acordo com a [licença](/LICENSE).
+* Caso queira postar algum vídeo/tutorial usando essa source, você está totalmente livre para usá-la pra essa finalidade desde que esteja de acordo com a [licença](/LICENSE) e com os termos citados nos parágrafos acima.
 
 ---
 
