@@ -4117,12 +4117,21 @@ class Music(commands.Cog):
 
                     await self.bot.update_global_data(interaction.author.id, user_data, db_name=DBModel.users)
 
+                    global_data = await self.bot.get_global_data(interaction.author.id, db_name=DBModel.guilds)
+
+                    slashcmd = f"</play:" + str(self.bot.pool.controller_bot.get_global_command_named("play", cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+
                     await interaction.edit_original_response(
                         embed=disnake.Embed(
                             color=self.bot.get_color(interaction.guild.me),
                             description="### Item adicionado/editado com sucesso nos seus favoritos:\n\n"
-                                        f"**{select_type}:** [`{info['name']}`]({info['url']})"
-                        ), view=None)
+                                        f"**{select_type}:** [`{info['name']}`]({info['url']})\n\n"
+                                        f"### Como usar?\n"
+                                        f"* Usando o comando {slashcmd} (no preenchimento automático da busca)\n"
+                                        f"* Clicando no botão/select de tocar favorito/integração do player.\n"
+                                        f"* Usando o comando {global_data['prefix'] or self.bot.default_prefix}{self.play_legacy.name} sem incluir um nome ou link de uma música/vídeo."
+                        ), view=None
+                    )
 
                     try:
                         await self.player_interaction_concurrency.release(interaction)
