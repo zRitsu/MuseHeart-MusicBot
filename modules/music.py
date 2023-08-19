@@ -2581,7 +2581,6 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @commands.bot_has_guild_permissions(manage_threads=True)
     @commands.slash_command(extras={"only_voiced": True}, cooldown=song_request_thread_cd,
                             description=f"{desc_prefix}Criar uma thread/conversa temporária para song-request (pedido de música)")
     async def song_request_thread(self, inter: disnake.AppCmdInter):
@@ -2613,6 +2612,9 @@ class Music(commands.Cog):
             raise GenericError("**A skin/aparência atual não é compatível com o sistem de song-request "
                                "via thread/conversa\n\n"
                                "Nota:** `Esse sistema requer uma skin que use botões.`")
+
+        if player.text_channel.permissions_for(guild.me).create_public_threads:
+            raise commands.MissingPermissions(["create_public_threads"])
 
         await inter.response.defer(ephemeral=True)
 
