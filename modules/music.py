@@ -2613,7 +2613,7 @@ class Music(commands.Cog):
                                "via thread/conversa\n\n"
                                "Nota:** `Esse sistema requer uma skin que use botões.`")
 
-        if player.text_channel.permissions_for(guild.me).create_public_threads:
+        if not player.text_channel.permissions_for(guild.me).create_public_threads:
             raise commands.MissingPermissions(["create_public_threads"])
 
         await inter.response.defer(ephemeral=True)
