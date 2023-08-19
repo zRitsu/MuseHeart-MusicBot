@@ -5293,8 +5293,9 @@ class Music(commands.Cog):
         embed = disnake.Embed(color=self.bot.get_color(thread.guild.me))
 
         if self.bot.intents.message_content:
-            embed.description = "**Essa conversa será usada temporariamente para pedir músicas apenas enviando " \
-                                "o nome/link sem necessidade de usar comando.**"
+            embed.description = "**Peça sua música aqui enviando o nome dela ou o link de uma música/vídeo " \
+                                "que seja de uma das seguintes plataformas suportadas:** " \
+                                "```ansi\n[31;1mYoutube[0m, [33;1mSoundcloud[0m, [32;1mSpotify[0m, [34;1mTwitch[0m```"
 
         elif not player.controller_mode:
             embed.description = "**A skin/aparência atual não é compatível com o sistem de song-request " \

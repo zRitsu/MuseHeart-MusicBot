@@ -1390,7 +1390,23 @@ class LavalinkPlayer(wavelink.Player):
                             ), view=None, allowed_mentions=self.allowed_mentions
                         )
                         channel: disnake.Thread = self.bot.get_channel(self.message.id)
-                        await channel.edit(archived=True, locked=True)
+
+                        try:
+                            await channel.send(
+                                embed=disnake.Embed(
+                                    color=self.bot.get_color(self.guild.me),
+                                    description="**A sessão de pedidos de músicas foi encerrada.**",
+                                )
+                            )
+                        except:
+                            pass
+
+                        if channel.owner.id == self.bot.user.id or channel.parent.permissions_for(self.guild.me).manage_threads:
+                            kwargs = {"archived": True, "locked": True}
+                        else:
+                            kwargs = {}
+
+                        await channel.edit(**kwargs)
                     except Exception:
                         print(
                             f"Falha ao arquivar thread do servidor: {self.guild.name}\n{traceback.format_exc()}")
