@@ -7,7 +7,7 @@ if  [ ! -d ".git" ] || [ -z "$(git remote -v)" ]; then
   git init
 
   if [ -z "$SOURCE_REPO" ]; then
-    git remote add origin https://github.com/zRitsu/disnake-LL-music-bot.git
+    git remote add origin https://github.com/zRitsu/MuseHeart-MusicBot.git
   else
     git remote add origin $SOURCE_REPO
   fi

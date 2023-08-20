@@ -11,7 +11,7 @@
 ##############################################################################################################
 
 DISPLAY_NAME=Disnake LL Music Bot
-DESCRIPTION=Source de música criada por [`xRitsu [184889853102653440]`](https://github.com/zRitsu/disnake-LL-music-bot)
+DESCRIPTION=Source de música criada por [`xRitsu [184889853102653440]`](https://github.com/zRitsu/MuseHeart-MusicBot)
 MAIN=main.py
 MEMORY=128
 VERSION=recommended

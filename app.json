@@ -47,7 +47,7 @@
     "SOURCE_REPO": {
       "description": "Link da source para usar no auto-update (pode deixar vazio)",
       "required": false,
-      "value": "https://github.com/zRitsu/disnake-LL-music-bot.git"
+      "value": "https://github.com/zRitsu/MuseHeart-MusicBot.git"
     }
   }
 }

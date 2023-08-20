@@ -77,7 +77,7 @@ Gitpod
 </summary>
 <br>
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/zRitsu/disnake-LL-music-bot)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/zRitsu/MuseHeart-MusicBot)
 
 * **[ 1 ]** - Abra o arquivo .env e coloque o token do bot no campo apropriado (caso não tenha, veja como obter com este tutorial [tutorial](https://www.youtube.com/watch?v=lfdmZQySTXE) de como obter). Também altamente recomendo usar mongodb, procure onde tem MONGO= no arquivo .env e nele coloque o link da sua db do mongodb (caso não tenha, veja como obter por este [tutorial](https://www.youtube.com/watch?v=x1Gq5beRx9k)).
 
@@ -141,7 +141,7 @@ Hospedando no seu próprio PC/VPS (windows/linux)
 
 * Baixe esta source como [zip](https://github.com/zRitsu/MuseHeart-MusicBot/archive/refs/heads/main.zip) e extraia em seguida (Ou use o comando abaixo no terminal/cmd e abra a pasta em seguida):
 ```shell
-git clone https://github.com/zRitsu/disnake-LL-music-bot.git
+git clone https://github.com/zRitsu/MuseHeart-MusicBot.git
 ```
 * dê clique-duplo no arquivo setup.sh (ou apenas setup caso o seu windows não esteja exibindo extensões de arquivo) e aguarde.</br>
 `Caso esteja usando linux use o comando no terminal:` 
