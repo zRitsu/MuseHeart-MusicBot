@@ -1395,7 +1395,7 @@ class LavalinkPlayer(wavelink.Player):
                             await channel.send(
                                 embed=disnake.Embed(
                                     color=self.bot.get_color(self.guild.me),
-                                    description="**A sessão de pedidos de músicas foi encerrada.**",
+                                    description="**A sessão de pedido de música da conversa atual foi encerrada.**",
                                 )
                             )
                         except:
