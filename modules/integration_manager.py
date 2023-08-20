@@ -126,7 +126,7 @@ class IntegrationModal(disnake.ui.Modal):
             match = re.search(youtube_regex, url)
 
             if match:
-                base_url = match.group(0)
+                base_url = f"{match.group(0)}/playlists"
                 source = "[YT]:"
             else:
                 match = re.search(soundcloud_regex, url)
