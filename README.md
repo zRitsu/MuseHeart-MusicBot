@@ -52,7 +52,7 @@ Render.com
 </summary>
 <br>
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/zRitsu/disnake-LL-music-bot/tree/main)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/zRitsu/MuseHeart-MusicBot/tree/main)
 
 * **[ 1 ]** - No campo **TOKEN** coloque o token do bot **( [tutorial de como obter](https://www.youtube.com/watch?v=lfdmZQySTXE) )**. `Nota: Caso queira, no campo TOKEN você pode incluir token de mais bots para ter bots extras pra ativar o suporte a multi-voice incluindo mais tokens no value (separando com espaços).`
 
@@ -98,7 +98,7 @@ Heroku
 </summary>
 <br>
 
-[![Heroku_Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/zRitsu/disnake-LL-music-bot/tree/main)
+[![Heroku_Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/zRitsu/MuseHeart-MusicBot/tree/main)
 
 **Nota: A partir do dia 28/11/2022 a heroku não vai mais fornecer planos gratuitos ([clique aqui](https://blog.heroku.com/next-chapter) para saber mais).**
 
@@ -139,7 +139,7 @@ Hospedando no seu próprio PC/VPS (windows/linux)
 
 ### Iniciar bot (guia rápido):
 
-* Baixe esta source como [zip](https://github.com/zRitsu/disnake-LL-music-bot/archive/refs/heads/main.zip) e extraia em seguida (Ou use o comando abaixo no terminal/cmd e abra a pasta em seguida):
+* Baixe esta source como [zip](https://github.com/zRitsu/MuseHeart-MusicBot/archive/refs/heads/main.zip) e extraia em seguida (Ou use o comando abaixo no terminal/cmd e abra a pasta em seguida):
 ```shell
 git clone https://github.com/zRitsu/disnake-LL-music-bot.git
 ```
@@ -168,24 +168,27 @@ bash update.sh
 
 ---
 
-Nota: há mais alguns guias na [wiki](https://github.com/zRitsu/disnake-LL-music-bot/wiki).
+Nota: há mais alguns guias na [wiki](https://github.com/zRitsu/MuseHeart-MusicBot/wiki).
 
 ### Observaçoes importantes:
 
-* Você pode usar essa source como alternativa de self-hosting do meu bot principal (Muse Heart) hospedando/rodando seu próprio bot de música para uso privado ou em servidores públicos no qual você gerencia (que você tenha permissão de adicionar seu próprio bot no servidor). Entretanto não recomendo o uso público do bot usando essa source no intuito de divulgar/crescer seu próprio bot. Pois além de não estar otimizado o suficiente pra lidar com alta demanda de servidores, dependendo de onde o bot estiver sendo divulgado há possibilidade de eu como criador dessa source apontar o uso dela no seu bot (exceto em ocasiões especiais).
-<details>
-<summary>
-Exemplo de ocasiões especiais:
-</summary>
-Não ter retirado/alterado o link da source no comando about/info.
-</details>
+* Você pode usar essa source como alternativa de self-hosting do meu bot principal (Muse Heart) pra hospedar/rodar seu próprio bot de música para uso privado ou em servidores públicos no qual você gerencia (que você tenha permissão de adicionar seu próprio bot no servidor). Entretanto não recomendo o uso público do bot com intuito de divulgar/crescer seu próprio bot que esteja usando essa source. Pois além de não estar otimizado o suficiente pra lidar com alta demanda de servidores, dependendo de onde o bot estiver sendo divulgado há possibilidade de seu bot ser apontado pelo uso dessa source (por via das dúvidas consulte a [licença](/LICENSE) para saber mais e evitar possíveis problemas relacionado a isso).
 
 * Recomendo usar a source atual sem alterações no code. Caso queira fazer modificações (e principalmente adicionar novas funcionalidades) é altamente recomendável que tenha conhecimento em python e disnake. E caso queira manter sua source modificada com updates em dias usando a source base também recomendo ter conhecimento em git (pelo menos o necessário pra fazer um merge sem erros).
 
 * Não será fornecido suporte caso modifique a source atual (exceto para custom skins), pois atualizo ela com frequência e versões modificadas tendem a ficarem desatualizadas dificultando dar suporte por esse motivo (além de que dependendo da modificação ou implementação poder gerar erros desconhecidos que dificulta ao tentar resolver o problema e de eu exigir usar métodos pra atualizar o code que geralmente desfaz essas alterações).
 
-* Caso queira postar algum vídeo/tutorial usando essa source, você está totalmente livre para usá-la pra essa finalidade desde que esteja de acordo com a [licença](/LICENSE) e com os termos citados nos parágrafos acima.
+* Caso queira postar algum vídeo/tutorial usando essa source, você está totalmente livre para usá-la pra essa finalidade desde que esteja de acordo com os termos citados nos parágrafos acima.
 
 ---
 
-### Caso tenha algum problema, poste uma [issue](https://github.com/zRitsu/disnake-LL-music-bot/issues) detalhando o problema.
+### Caso tenha algum problema, poste uma [issue](https://github.com/zRitsu/MuseHeart-MusicBot/issues) detalhando o problema.
+
+
+## Agradecimentos especiais e créditos:
+
+* [DisnakeDev](https://github.com/DisnakeDev) (disnake) e ao Rapptz pelo [discord.py](https://github.com/Rapptz/discord.py) original
+* [Pythonista Guild](https://github.com/PythonistaGuild) (wavelink)
+* [Lavalink-Devs](https://github.com/lavalink-devs) (lavalink e lavaplayer)
+* E a todos os membros que me me ajudaram bastante com reports de erros (sendo nas [issues](https://github.com/zRitsu/MuseHeart-MusicBot/issues) e no servidor do discord)
+* Demais atribuições podem ser conferidas no [dependency graph](https://github.com/zRitsu/MuseHeart-MusicBot/network/dependencies)
