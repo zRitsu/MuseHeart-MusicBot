@@ -4,6 +4,7 @@ from __future__ import annotations
 import datetime
 import json
 import re
+import traceback
 from typing import Union, TYPE_CHECKING
 
 import disnake
@@ -32,22 +33,25 @@ replaces = [
 
 async def google_search(bot, query: str, *, max_entries: int = 20) -> list:
 
-    async with bot.session.get(
-            "https://suggestqueries.google.com/complete/search",
-            headers={
-                'User-Agent': bot.pool.current_useragent
-            },
-            params={
-                'client': 'youtube',
-                'q': query,
-                'ds': 'yt',
-                'hl': 'en'
-            }
-    ) as r:
+    try:
+        async with bot.session.get(
+                "https://suggestqueries.google.com/complete/search",
+                headers={
+                    'User-Agent': bot.pool.current_useragent
+                },
+                params={
+                    'client': 'youtube',
+                    'q': query,
+                    'ds': 'yt',
+                    'hl': 'en'
+                }
+        ) as r:
 
-        text = await r.text()
-        json_text = text[text.find("(") + 1:text.rfind(")")]
-        return [result[0] for result in json.loads(json_text)[1][:max_entries]]
+            text = await r.text()
+            json_text = text[text.find("(") + 1:text.rfind(")")]
+            return [result[0] for result in json.loads(json_text)[1][:max_entries]]
+    except:
+        traceback.print_exc()
 
 
 def get_button_style(enabled: bool, red=True):
