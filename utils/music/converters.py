@@ -7,7 +7,6 @@ import re
 from typing import Union, TYPE_CHECKING
 
 import disnake
-from user_agent import generate_user_agent
 
 if TYPE_CHECKING:
     pass
@@ -30,15 +29,13 @@ replaces = [
     ("`", "'")
 ]
 
-u_agent = generate_user_agent()
-
 
 async def google_search(bot, query: str, *, max_entries: int = 20) -> list:
 
     async with bot.session.get(
             "https://suggestqueries.google.com/complete/search",
             headers={
-                'User-Agent': u_agent
+                'User-Agent': bot.pool.current_useragent
             },
             params={
                 'client': 'youtube',

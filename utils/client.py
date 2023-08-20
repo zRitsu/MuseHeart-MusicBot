@@ -18,6 +18,7 @@ import disnake
 import requests
 from asyncspotify import Client as SpotifyClient
 from disnake.ext import commands
+from user_agent import generate_user_agent
 
 from config_loader import load_config
 from utils.db import MongoDatabase, LocalDatabase, get_prefix, DBModel, global_db_models
@@ -54,6 +55,10 @@ class BotPool:
         self.rpc_token_cache: dict = {}
         self.failed_bots: dict = {}
         self.controller_bot: Optional[BotCore] = None
+        self.current_useragent = self.reset_useragent()
+
+    def reset_useragent(self):
+        self.current_useragent = generate_user_agent()
 
     @property
     def database(self) -> Union[LocalDatabase, MongoDatabase]:

@@ -29,7 +29,6 @@ from utils.music.converters import time_format, fix_characters, string_to_second
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, fav_list, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url
-from user_agent import generate_user_agent
 
 
 class Music(commands.Cog):
@@ -64,8 +63,6 @@ class Music(commands.Cog):
     }
 
     audio_formats = ("audio/mpeg", "audio/ogg", "audio/mp4", "audio/aac")
-
-    u_agent = generate_user_agent()
 
     def __init__(self, bot: BotCore):
 
@@ -5146,7 +5143,7 @@ class Music(commands.Cog):
             return
 
         data['rest_uri'] = ("https" if data.get('secure') else "http") + f"://{data['host']}:{data['port']}"
-        data['user_agent'] = self.u_agent
+        data['user_agent'] = self.bot.pool.current_useragent
         search = data.pop("search", True)
         max_retries = data.pop('retries', 0)
         node_website = data.pop('website', '')
