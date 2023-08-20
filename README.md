@@ -5,7 +5,7 @@
 
 ### Algumas Previews:
 
-- Player controller: modo normal/mini-player (skin: default) e suporte a [RPC (Rich Presence)](https://github.com/zRitsu/Discord-MusicBot-RPC)
+- Player controller: modo normal/mini-player (skin: default) e suporte a [RPC (Rich Presence)](https://github.com/zRitsu/MuseHeart-MusicBot-RPC-app)
 
 ![](https://media.discordapp.net/attachments/554468640942981147/1089678647230726185/rpc_support.png)
 
