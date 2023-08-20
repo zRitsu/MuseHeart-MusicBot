@@ -444,7 +444,7 @@ class Owner(commands.Cog):
 
         await inter.message.delete()
 
-        args, unknown = self.bot.get_command("update").extras['flags'].parse_known_args([])
+        args, unknown = self.bot.get_command("update").extras['flags'].parse_known_args(["-pip"])
 
         await self.update_deps(inter, "", args, use_poetry=inter.data.custom_id.endswith("_poetry"))
 
