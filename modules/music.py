@@ -2635,7 +2635,12 @@ class Music(commands.Cog):
                                "Nota:** `Esse sistema requer uma skin que use botões.`")
 
         if not player.text_channel.permissions_for(guild.me).create_public_threads:
-            raise commands.MissingPermissions(["create_public_threads"])
+            raise GenericError("**Não tenho permissão de criar tópicos públicos**")
+
+        if not [m for m in player.guild.me.voice.channel.members if not m.bot and
+                player.text_channel.permissions_for(m).send_messages_in_threads]:
+            raise GenericError(f"**Não há membros no canal <#{player.channel_id}> com permissão de enviar mensagens "
+                               f"em tópicos no canal {player.text_channel.mention}")
 
         await inter.response.defer(ephemeral=True)
 
