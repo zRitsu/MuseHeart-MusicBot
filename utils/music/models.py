@@ -423,7 +423,7 @@ class LavalinkPlayer(wavelink.Player):
 
     @property
     def has_thread(self):
-        return self.message and self.message.thread and not (self.message.thread.locked or self.message.thread.archived)
+        return self.message and self.message.thread #and not (self.message.thread.locked or self.message.thread.archived)
 
     @property
     def controller_link(self):
@@ -997,7 +997,7 @@ class LavalinkPlayer(wavelink.Player):
             embed = disnake.Embed(
                 description=msg, color=self.bot.get_color(self.guild.me))
             self.bot.loop.create_task(self.text_channel.send(
-                embed=embed, delete_after=120, allowed_mentions=self.allowed_mentions))
+                embed=embed, delete_after=120, allowed_mentions=self.allowed_mentions,))
 
         self.bot.loop.create_task(self.destroy())
 
@@ -1382,24 +1382,36 @@ class LavalinkPlayer(wavelink.Player):
 
                 if self.has_thread:
 
+                    if getattr(inter, 'message') and inter.message.id == self.message.id:
+                        func = inter.response.edit_message
+                    else:
+                        func = self.message.edit
+
                     try:
-                        await self.message.edit(
+                        await func(
                             embed=disnake.Embed(
                                 description=self.command_log,
                                 color=self.bot.get_color(self.guild.me)
-                            ), view=None, allowed_mentions=self.allowed_mentions
+                            ), allowed_mentions=self.allowed_mentions,
+                            components=[
+                                disnake.ui.Button(label="Pedir uma música", emoji="🎶",
+                                                  custom_id=PlayerControls.add_song),
+                                disnake.ui.Button(label="Tocar favorito/integração", emoji="⭐",
+                                                  custom_id=PlayerControls.enqueue_fav)
+                            ]
                         )
                         channel: disnake.Thread = self.bot.get_channel(self.message.id)
 
-                        try:
-                            await channel.send(
-                                embed=disnake.Embed(
-                                    color=self.bot.get_color(self.guild.me),
-                                    description="**A sessão de pedido de música da conversa atual foi encerrada.**",
+                        if channel.permissions_for(self.guild.me).send_messages:
+                            try:
+                                await channel.send(
+                                    embed=disnake.Embed(
+                                        color=self.bot.get_color(self.guild.me),
+                                        description="**A sessão de pedido de música da conversa atual foi encerrada.**",
+                                    )
                                 )
-                            )
-                        except:
-                            pass
+                            except:
+                                pass
 
                         if channel.owner.id == self.bot.user.id or channel.parent.permissions_for(self.guild.me).manage_threads:
                             kwargs = {"archived": True, "locked": True}

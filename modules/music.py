@@ -742,6 +742,16 @@ class Music(commands.Cog):
 
         warn_message = None
 
+        try:
+            message_inter = inter.message
+        except AttributeError:
+            message_inter = None
+
+        try:
+            modal_message_id = int(inter.data.custom_id[15:])
+        except:
+            modal_message_id = None
+
         attachment: Optional[disnake.Attachment] = None
 
         try:
@@ -1249,14 +1259,28 @@ class Music(commands.Cog):
 
                         await channel_check.edit(overwrites=overwrites)
 
-                try:
-                    message = await channel.fetch_message(int(static_player['message_id']))
-                except TypeError:
-                    message = None
-                except:
-                    message = await send_idle_embed(channel, bot=bot, guild_data=guild_data)
+                if not player.message:
+                    try:
+                        player.message = await channel.fetch_message(int(static_player['message_id']))
+                    except TypeError:
+                        player.message = None
+                    except:
+                        player.message = await send_idle_embed(channel, bot=bot, guild_data=guild_data)
 
-                player.message = message
+            if not player.static:
+
+                if message_inter:
+                    player.message = message_inter
+                elif modal_message_id:
+                    try:
+                        player.message = await inter.channel.fetch_message(modal_message_id)
+                    except:
+                        pass
+
+                if not player.has_thread:
+                    player.message = None
+                else:
+                    await self.thread_song_request(message_inter.thread, reopen=True)
 
         pos_txt = ""
 
@@ -3918,7 +3942,7 @@ class Music(commands.Cog):
 
                 await interaction.response.send_modal(
                     title="Pedir uma música",
-                    custom_id="modal_add_song",
+                    custom_id=f"modal_add_song" + (f"_{interaction.message.id}" if interaction.message.thread else ""),
                     components=[
                         disnake.ui.TextInput(
                             style=disnake.TextInputStyle.short,
@@ -4191,7 +4215,7 @@ class Music(commands.Cog):
     @commands.Cog.listener("on_modal_submit")
     async def song_request_modal(self, inter: disnake.ModalInteraction):
 
-        if inter.custom_id == "modal_add_song":
+        if inter.custom_id.startswith("modal_add_song"):
 
             try:
 
@@ -5277,7 +5301,7 @@ class Music(commands.Cog):
             self.bot.loop.create_task(self.connect_node(localnode))
 
     @commands.Cog.listener("on_thread_create")
-    async def thread_song_request(self, thread: disnake.Thread):
+    async def thread_song_request(self, thread: disnake.Thread, reopen: bool = False):
 
         try:
             player: LavalinkPlayer = self.bot.music.players[thread.guild.id]
@@ -5287,13 +5311,22 @@ class Music(commands.Cog):
         if player.static or player.message.id != thread.id:
             return
 
+        if not thread.parent.permissions_for(thread.guild.me).send_messages_in_threads:
+            await player.text_channel.send(
+                embed=disnake.Embed(
+                    color=self.bot.get_color(thread.guild.me),
+                    description="**Não tenho permissão de enviar mensagens em conversas do canal atual para ativar "
+                                "o sistema de song-request...**\n\n"
+                                f"Mensagens enviadas na conversa {thread.mention} serão ignoradas."
+                ), delete_after=30
+            )
+            return
+
         embed = disnake.Embed(color=self.bot.get_color(thread.guild.me))
 
-        if self.bot.intents.message_content:
-            embed.description = "**Essa conversa será usada temporariamente para pedido de músicas.**\n\n" \
-                                "**Peça sua música aqui enviando o nome dela ou o link de uma música/vídeo " \
-                                "que seja de uma das seguintes plataformas suportadas:** " \
-                                "```ansi\n[31;1mYoutube[0m, [33;1mSoundcloud[0m, [32;1mSpotify[0m, [34;1mTwitch[0m```"
+        if not self.bot.intents.message_content:
+            embed.description = "**Aviso! Não estou com a intent de message_content ativada por meu desenvolvedor...\n" \
+                                "A funcionalidade de pedir música aqui pode não ter um resultado esperado...**"
 
         elif not player.controller_mode:
             embed.description = "**A skin/aparência atual não é compatível com o sistem de song-request " \
@@ -5301,8 +5334,13 @@ class Music(commands.Cog):
                                "Nota:** `Esse sistema requer uma skin que use botões.`"
 
         else:
-            embed.description = "**Aviso! Não estou com a intent de message_content ativada por meu desenvolvedor...\n" \
-                                "A funcionalidade de pedir música aqui pode não ter um resultado esperado...**"
+            if reopen:
+                embed.description = "**A sessão para pedidos de música nessa conversa foi reaberta na conversa atual.**"
+            else:
+                embed.description = "**Essa conversa será usada temporariamente para pedido de músicas.**\n\n" \
+                                    "**Peça sua música aqui enviando o nome dela ou o link de uma música/vídeo " \
+                                    "que seja de uma das seguintes plataformas suportadas:** " \
+                                    "```ansi\n[31;1mYoutube[0m, [33;1mSoundcloud[0m, [32;1mSpotify[0m, [34;1mTwitch[0m```"
 
         await thread.send(embed=embed)
 
