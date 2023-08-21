@@ -3672,14 +3672,25 @@ class Music(commands.Cog):
                 player: LavalinkPlayer = self.bot.music.players[guild_id]
 
                 try:
-                    vc = player.guild.me.voice.channel
+                    channel_id = player.guild.me.voice.channel.id
                 except AttributeError:
-                    vc = player.last_channel
+                    channel_id = player.channel_id
+
+                vc = self.bot.get_channel(channel_id) or player.last_channel
 
                 try:
                     player.guild.voice_client.cleanup()
                 except:
                     pass
+
+                if not vc:
+                    print(
+                        f"{self.bot.user} - {player.guild.name} [{guild_id}] - Player finalizado por falta de canal de voz")
+                    try:
+                        await player.destroy()
+                    except:
+                        traceback.print_exc()
+                    continue
 
                 await player.connect(vc.id)
 
