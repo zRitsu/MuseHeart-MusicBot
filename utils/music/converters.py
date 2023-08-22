@@ -36,9 +36,7 @@ async def google_search(bot, query: str, *, max_entries: int = 20) -> list:
     try:
         async with bot.session.get(
                 "https://suggestqueries.google.com/complete/search",
-                headers={
-                    'User-Agent': bot.pool.current_useragent
-                },
+                headers={'User-Agent': bot.pool.current_useragent} if bot.pool.current_useragent else None,
                 params={
                     'client': 'youtube',
                     'q': query,
@@ -52,6 +50,7 @@ async def google_search(bot, query: str, *, max_entries: int = 20) -> list:
             return [result[0] for result in json.loads(json_text)[1][:max_entries]]
     except:
         traceback.print_exc()
+        return []
 
 
 def get_button_style(enabled: bool, red=True):
