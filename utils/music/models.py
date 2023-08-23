@@ -544,6 +544,14 @@ class LavalinkPlayer(wavelink.Player):
         if not force:
             await asyncio.sleep(self.idle_timeout)
 
+            try:
+                vc = self.guild.me.voice.channel
+            except AttributeError:
+                vc = self.last_channel
+
+            if [m for m in vc.members if not m.bot]:
+                return
+
         if self.keep_connected:
 
             if self.paused:
