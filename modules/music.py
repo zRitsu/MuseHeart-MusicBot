@@ -1186,8 +1186,13 @@ class Music(commands.Cog):
                 invite = None
 
             else:
-                if not await self.bot.fetch_invite(invite):
+
+                try:
+                    invite = await self.bot.fetch_invite(invite)
+                except disnake.NotFound:
                     invite = None
+
+                if not invite:
                     print(
                         f'{"-"*15}\n'
                         f'Removendo invite: {invite} \n'
