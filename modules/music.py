@@ -5008,8 +5008,9 @@ class Music(commands.Cog):
         if player.last_track:
 
             if payload.cause in (
-                "java.net.SocketTimeoutException: connect timed out",
-                "com.sedmelluq.discord.lavaplayer.tools.io.PersistentHttpStream$PersistentHttpException: Not success status code: 403"
+                    "java.net.SocketTimeoutException: connect timed out",
+                    "java.lang.RuntimeException: Not success status code: 403",
+                    "com.sedmelluq.discord.lavaplayer.tools.io.PersistentHttpStream$PersistentHttpException: Not success status code: 403",
             ):
                 player.queue.appendleft(player.last_track)
 
@@ -5029,44 +5030,6 @@ class Music(commands.Cog):
                         await player.destroy()
                         return
                     await player.change_node(n.identifier)
-
-            # TODO: Desativar esse recurso após a correção do lavaplayer ser efetuada.
-            elif payload.cause == "java.lang.RuntimeException: Not success status code: 403" and player.node.identifier == "LOCAL":
-
-                player.queue.appendleft(player.last_track)
-
-                txt = "O servidor de música foi reiniciado para uma correção e a música será retomada em alguns " \
-                      "segundos (Por favor aguarde)..."
-
-                for b in self.bot.pool.bots:
-
-                    for n in b.music.nodes.values():
-
-                        if n.identifier != "LOCAL" or n.restarting:
-                            continue
-
-                        for p in n.players.values():
-
-                            p.locked = True
-
-                            p.node.restarting = True
-
-                            if p.static or p.controller_mode:
-                                p.set_command_log(text=txt, emoji="🛠️")
-                                self.bot.loop.create_task(p.invoke_np(force=True))
-                            else:
-                                self.bot.loop.create_task(
-                                    p.text_channel.send(
-                                        embed=disnake.Embed(
-                                            color=self.bot.get_color(p.guild.me),
-                                            description=f"🛠️ **⠂{txt}**"
-                                        )
-                                    )
-                                )
-
-                self.bot.pool.start_lavalink()
-                player.locked = True
-                return
 
             elif not track.track_loops:
                 player.failed_tracks.append(player.last_track)
