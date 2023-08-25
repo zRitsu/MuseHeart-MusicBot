@@ -1,7 +1,7 @@
 # MuseHeart-MusicBot
 ## bot de música programado em python com player interativo, comandos barra/slash e muito mais.
 
-## Bots de exemplo usando esta source: [clique aqui](https://gist.github.com/zRitsu/4875008554a00c3c372b2df6dcdf437f#file-muse_heart_invites-md).
+## Página com invites e algumas infos/screenshots da Muse Heart e funcionamento dessa source: [clique aqui](https://gist.github.com/zRitsu/4875008554a00c3c372b2df6dcdf437f#file-muse_heart_invites-md).
 
 ### Algumas Previews:
 
@@ -172,11 +172,14 @@ Nota: há mais alguns guias na [wiki](https://github.com/zRitsu/MuseHeart-MusicB
 
 ### Observaçoes importantes:
 
-* Você pode usar essa source como alternativa de self-hosting do meu bot principal (Muse Heart) pra hospedar/rodar seu próprio bot de música para uso privado ou em servidores públicos no qual você gerencia (que você tenha permissão de adicionar seu próprio bot no servidor). Entretanto não recomendo o uso público do bot com intuito de divulgar/crescer seu próprio bot que esteja usando essa source. Pois além de não estar otimizado o suficiente pra lidar com alta demanda de servidores, dependendo de onde o bot estiver sendo divulgado há possibilidade de seu bot ser apontado pelo uso dessa source (por via das dúvidas consulte a [licença](/LICENSE) para saber mais e evitar possíveis problemas relacionado a isso).
+* Você pode usar essa source como alternativa de self-hosting do meu bot principal (Muse Heart) pra hospedar/rodar seu próprio bot de música para uso privado ou em servidores públicos no qual você gerencia (que você tenha permissão de adicionar seu próprio bot no servidor). Entretanto não recomendo distribuir o bot usando essa source publicamente por não estar otimizado o suficiente pra lidar com alta demanda de servidores, mas se mesmo assim decidir fazer isso o bot terá que estar sob a [licença](/LICENSE) da source original e dependendo de onde o bot estiver sendo divulgado (ex: botlists) há possibilidade de seu bot ser apontado pelo uso dessa source.
+
 
 * Recomendo usar a source atual sem alterações no code. Caso queira fazer modificações (e principalmente adicionar novas funcionalidades) é altamente recomendável que tenha conhecimento em python, disnake, lavalink e etc. E caso queira manter sua source modificada com updates em dias usando a source base também recomendo ter conhecimento em git (pelo menos o necessário pra fazer um merge sem erros).
 
+
 * Não será fornecido suporte caso modifique a source atual (exceto para custom skins), pois atualizo ela com frequência e versões modificadas tendem a ficarem desatualizadas dificultando dar suporte por esse motivo (além de que dependendo da modificação ou implementação poder gerar erros desconhecidos que dificulta ao tentar resolver o problema e de eu exigir usar métodos pra atualizar o code que geralmente desfaz essas alterações).
+
 
 * Caso queira postar algum vídeo/tutorial usando essa source, você está totalmente livre para usá-la pra essa finalidade desde que esteja de acordo com os termos citados nos parágrafos acima.
 
