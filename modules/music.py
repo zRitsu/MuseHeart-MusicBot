@@ -5010,7 +5010,7 @@ class Music(commands.Cog):
             if payload.cause.startswith((
                     "java.net.SocketTimeoutException: connect timed out",
                     "java.lang.RuntimeException: Not success status code: 403",
-                    "java.net.UnknownHostException:"
+                    "java.net.UnknownHostException:",
                     "com.sedmelluq.discord.lavaplayer.tools.io.PersistentHttpStream$PersistentHttpException: Not success status code: 403",
             )):
                 player.queue.appendleft(player.last_track)
