@@ -145,7 +145,7 @@ class PlayerSession(commands.Cog):
             "uptime": player.uptime,
             "restrict_mode": player.restrict_mode,
             "mini_queue_enabled": player.mini_queue_enabled,
-            "listen_along_invite": str(player.listen_along_invite),
+            "listen_along_invite": player.listen_along_invite,
             "tracks": tracks,
             "played": played,
             "queue_autoplay": autoqueue,
