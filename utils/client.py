@@ -202,7 +202,7 @@ class BotPool:
 
         if self.config["AUTO_DOWNLOAD_LAVALINK_SERVERLIST"]:
             ini_file = "auto_lavalink.ini"
-            print("Baixando lista de servidores lavalink (arquivo: lavalink.ini)")
+            print(f"Baixando lista de servidores lavalink (arquivo: {ini_file})")
             r = requests.get(self.config["LAVALINK_SERVER_LIST"], allow_redirects=True)
             with open("auto_lavalink.ini", 'wb') as f:
                 f.write(r.content)
@@ -261,7 +261,7 @@ class BotPool:
             self.remote_git_url = check_output(['git', 'remote', '-v']).decode(
                 'ascii').strip().split("\n")[0][7:].replace(".git", "").replace(" (fetch)", "")
         except:
-            self.remote_git_url = ""
+            self.remote_git_url = self.config["SOURCE_REPO"]
 
         prefix = get_prefix if intents.message_content else commands.when_mentioned
 
