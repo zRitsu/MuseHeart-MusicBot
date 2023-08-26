@@ -1188,7 +1188,7 @@ class Music(commands.Cog):
             else:
 
                 try:
-                    invite = await self.bot.fetch_invite(invite)
+                    invite = (await self.bot.fetch_invite(invite)).url
                 except disnake.NotFound:
                     invite = None
 
@@ -4603,7 +4603,7 @@ class Music(commands.Cog):
 
             else:
                 try :
-                    await self.bot.fetch_invite(invite)
+                    invite = (await self.bot.fetch_invite(invite)).url
                 except disnake.NotFound:
                     print(
                         f'{"-"*15}\n'

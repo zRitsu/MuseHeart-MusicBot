@@ -971,7 +971,7 @@ class Owner(commands.Cog):
 
         else:
             try:
-                await self.bot.fetch_invite(invite)
+                invite = (await self.bot.fetch_invite(invite)).url
             except disnake.NotFound:
                 invite = None
                 del global_data["listen_along_invites"][str(ctx.channel.id)]
