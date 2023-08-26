@@ -363,7 +363,7 @@ class PlayerSession(commands.Cog):
                     )
                 except Exception:
                     print(f"{self.bot.user} - Falha ao criar player: {guild.name} [{guild.id}]\n{traceback.format_exc()}")
-                    await self.delete_data(guild.id)
+                    # await self.delete_data(guild.id)
                     continue
 
                 try:
