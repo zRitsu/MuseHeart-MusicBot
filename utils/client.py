@@ -245,9 +245,9 @@ class BotPool:
 
         if mongo_key:
             self.mongo_database = MongoDatabase(mongo_key)
+            print("Database em uso: MongoDB")
         else:
-            print(f"O token/link do mongoDB não foi configurado...\nOs arquivos da database serão salvos localmente "
-                  f"na pasta: local_database\n{'-' * 30}")
+            print("Database em uso: TinyMongo | Nota: Os arquivos da database serão salvos localmente na pasta: local_database")
 
         self.local_database = LocalDatabase()
 
