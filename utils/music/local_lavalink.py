@@ -102,7 +102,7 @@ def run_lavalink(
                 subprocess.call("~/.jabba/bin/jabba install zulu@>=1.17.0-0", shell=True)
                 os.remove("install_jabba.sh")
 
-                java_cmd = os.path.realpath("~/.jabba/jdk/zulu@1.17.0-0/bin/java")
+                java_cmd = os.path.expanduser("~/.jabba/jdk/zulu@1.17.0-0/bin/java")
 
             else:
                 if not os.path.isdir("./.java"):
@@ -128,6 +128,11 @@ def run_lavalink(
                     p = subprocess.Popen(["tar", "-zxvf", "java.tar.gz", "-C", "./.java"])
                     p.wait()
                     os.remove(f"./{jdk_filename}")
+
+                else:
+                    java_cmd = "./.java/zulu17.44.15-ca-jdk17.0.8-linux_i686/bin/java" \
+                        if platform.architecture()[0] != "64bit" else \
+                        "./.java/zulu17.44.17-ca-crac-jdk17.0.8-linux_x64/bin/java"
 
     clear_plugins = False
 
