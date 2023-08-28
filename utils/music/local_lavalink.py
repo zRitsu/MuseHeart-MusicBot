@@ -158,5 +158,3 @@ def run_lavalink(
         time.sleep(lavalink_additional_sleep)
 
     return lavalink_process
-
-run_lavalink()
