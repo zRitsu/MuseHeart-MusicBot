@@ -99,11 +99,10 @@ def run_lavalink(
 
                 download_file("https://github.com/shyiko/jabba/raw/master/install.sh", "install_jabba.sh")
                 subprocess.call("bash install_jabba.sh".split())
-                subprocess.call("~/.jabba/bin/jabba install zulu@>=1.17.0-0".split())
+                subprocess.call("~/.jabba/bin/jabba install zulu@>=1.17.0-0", shell=True)
                 os.remove("install_jabba.sh")
 
-                java_cmd = ("~" if os.path.isfile("~/.jabba/jdk/zulu@1.17.0-0/bin/java") else ".") + \
-                           "/.jabba/jdk/zulu@1.17.0-0/bin/java"
+                java_cmd = "~/.jabba/jdk/zulu@1.17.0-0/bin/java"
 
             else:
                 if not os.path.isdir("./.java"):
@@ -159,3 +158,5 @@ def run_lavalink(
         time.sleep(lavalink_additional_sleep)
 
     return lavalink_process
+
+run_lavalink()
