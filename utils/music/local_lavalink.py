@@ -109,18 +109,25 @@ def run_lavalink(
 
                     if platform.architecture()[0] != "64bit":
                         jdk_url = "https://cdn.azul.com/zulu/bin/zulu17.44.15-ca-jdk17.0.8-linux_i686.tar.gz"
+                        java_cmd = "./.java/zulu17.44.15-ca-jdk17.0.8-linux_i686/bin/java"
                     else:
                         jdk_url = "https://cdn.azul.com/zulu/bin/zulu17.44.17-ca-crac-jdk17.0.8-linux_x64.tar.gz"
+                        java_cmd = "./.java/zulu17.44.17-ca-crac-jdk17.0.8-linux_x64/bin/java"
 
                     jdk_filename = "java.tar.gz"
 
                     download_file(jdk_url, jdk_filename)
+
+                    try:
+                        shutil.rmtree("./.java")
+                    except:
+                        pass
+
                     os.makedirs("./.java")
+
                     p = subprocess.Popen(["tar", "-zxvf", "java.tar.gz", "-C", "./.java"])
                     p.wait()
                     os.remove(f"./{jdk_filename}")
-
-                java_cmd = os.path.join(os.getcwd(), "./.java/jdk-13/bin/java")
 
     clear_plugins = False
 
