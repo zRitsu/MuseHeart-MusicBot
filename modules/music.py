@@ -4983,6 +4983,9 @@ class Music(commands.Cog):
 
             embed.description += f"**Data:** <t:{int(disnake.utils.utcnow().timestamp())}:F>"
 
+            if player.guild.icon:
+                embed.set_thumbnail(url=player.guild.icon.with_format("png").url)
+
             await self.error_report_queue.put({"embed": embed})
 
         if player.locked:
