@@ -5365,6 +5365,16 @@ class Music(commands.Cog):
         except:
             check = None
 
+        if isinstance(before.channel, disnake.StageChannel) and player.stage_title_event:
+
+            if before.channel.instance:
+                try:
+                    await before.channel.instance.edit(topic="atualização automática desativada")
+                except:
+                    traceback.print_exc()
+
+            player.stage_title_event = False
+
         player.members_timeout_task = self.bot.loop.create_task(player.members_timeout(check=check))
 
         # rich presence stuff
