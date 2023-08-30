@@ -194,7 +194,7 @@ class MiniStaticSkin:
 
         try:
             if isinstance(player.text_channel.parent, disnake.ForumChannel):
-                data["content"] = f"`{emoji} {fix_characters(player.current.title, 50)}`"
+                data["content"] = f"`{emoji}` [`{fix_characters(player.current.title, 50)}`]({player.current.uri})"
         except:
             pass
 
