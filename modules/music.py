@@ -4818,7 +4818,7 @@ class Music(commands.Cog):
         if str(self.bot.user.id) in self.bot.config["INTERACTION_BOTS_CONTROLLER"]:
             return
 
-        for k, v in data.items():
+        for k, v in dict(data).items():
             self.bot.loop.create_task(self.connect_node(v))
 
         if start_local:
