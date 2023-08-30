@@ -4818,7 +4818,7 @@ class Music(commands.Cog):
         if str(self.bot.user.id) in self.bot.config["INTERACTION_BOTS_CONTROLLER"]:
             return
 
-        for k, v in dict(data).items():
+        for k, v in data.items():
             self.bot.loop.create_task(self.connect_node(v))
 
         if start_local:
@@ -5154,6 +5154,8 @@ class Music(commands.Cog):
                 await node.connect(self.bot)
             return
 
+        data = dict(data)
+
         data['rest_uri'] = ("https" if data.get('secure') else "http") + f"://{data['host']}:{data['port']}"
         data['user_agent'] = self.bot.pool.current_useragent
         search = data.pop("search", True)
@@ -5162,7 +5164,7 @@ class Music(commands.Cog):
 
         try:
             max_retries = int(data.pop('retries', 0))
-        except TypeError:
+        except KeyError:
             max_retries = 0
 
         if max_retries:
