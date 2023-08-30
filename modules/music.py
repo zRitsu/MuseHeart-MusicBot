@@ -5161,9 +5161,9 @@ class Music(commands.Cog):
         region = data.pop('region', 'us_central')
 
         try:
-            max_retries = int(data.pop('retries', 3))
+            max_retries = int(data.pop('retries', 0))
         except TypeError:
-            max_retries = 3
+            max_retries = 0
 
         if max_retries:
 
