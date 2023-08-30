@@ -4,6 +4,7 @@ import json
 import pprint
 import traceback
 import asyncio
+from copy import deepcopy
 from typing import Union, Optional
 from random import shuffle
 
@@ -5154,7 +5155,7 @@ class Music(commands.Cog):
                 await node.connect(self.bot)
             return
 
-        data = dict(data)
+        data = deepcopy(data)
 
         data['rest_uri'] = ("https" if data.get('secure') else "http") + f"://{data['host']}:{data['port']}"
         data['user_agent'] = self.bot.pool.current_useragent
@@ -5163,8 +5164,8 @@ class Music(commands.Cog):
         region = data.pop('region', 'us_central')
 
         try:
-            max_retries = int(data.pop('retries', 0))
-        except KeyError:
+            max_retries = int(data.pop('retries'))
+        except TypeError:
             max_retries = 0
 
         if max_retries:
