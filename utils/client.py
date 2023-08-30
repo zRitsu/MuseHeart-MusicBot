@@ -461,7 +461,7 @@ class BotPool:
                         music_cog = bot.get_cog("Music")
 
                         if music_cog:
-                            bot.loop.create_task(music_cog.process_nodes(data=LAVALINK_SERVERS, start_local=start_local))
+                            bot.loop.create_task(music_cog.process_nodes(data=LAVALINK_SERVERS, start_local=self.config["CONNECT_LOCAL_LAVALINK"] and start_local))
 
                         bot.add_view(PanelView(bot))
 
