@@ -1390,7 +1390,7 @@ class LavalinkPlayer(wavelink.Player):
 
                 if self.has_thread:
 
-                    if getattr(inter, 'message') and inter.message.id == self.message.id:
+                    if getattr(inter, 'message') and self.message and inter.message.id == self.message.id:
                         func = inter.response.edit_message
                     else:
                         func = self.message.edit
