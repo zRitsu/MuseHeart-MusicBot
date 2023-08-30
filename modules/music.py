@@ -5165,7 +5165,7 @@ class Music(commands.Cog):
 
         try:
             max_retries = int(data.pop('retries'))
-        except TypeError:
+        except (TypeError, KeyError):
             max_retries = 0
 
         if max_retries:
