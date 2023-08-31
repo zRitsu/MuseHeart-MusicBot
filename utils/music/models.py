@@ -1405,43 +1405,44 @@ class LavalinkPlayer(wavelink.Player):
                         try:
                             func = self.message.edit
                         except AttributeError:
-                            return
+                            func = None
 
-                    try:
-                        await func(
-                            embed=disnake.Embed(
-                                description=self.command_log,
-                                color=self.bot.get_color(self.guild.me)
-                            ), allowed_mentions=self.allowed_mentions,
-                            components=[
-                                disnake.ui.Button(label="Pedir uma música", emoji="🎶",
-                                                  custom_id=PlayerControls.add_song),
-                                disnake.ui.Button(label="Tocar favorito/integração", emoji="⭐",
-                                                  custom_id=PlayerControls.enqueue_fav)
-                            ]
-                        )
-                        channel: disnake.Thread = self.bot.get_channel(self.message.id)
+                    if func:
+                        try:
+                            await func(
+                                embed=disnake.Embed(
+                                    description=self.command_log,
+                                    color=self.bot.get_color(self.guild.me)
+                                ), allowed_mentions=self.allowed_mentions,
+                                components=[
+                                    disnake.ui.Button(label="Pedir uma música", emoji="🎶",
+                                                      custom_id=PlayerControls.add_song),
+                                    disnake.ui.Button(label="Tocar favorito/integração", emoji="⭐",
+                                                      custom_id=PlayerControls.enqueue_fav)
+                                ]
+                            )
+                            channel: disnake.Thread = self.bot.get_channel(self.message.id)
 
-                        if channel.permissions_for(self.guild.me).send_messages:
-                            try:
-                                await channel.send(
-                                    embed=disnake.Embed(
-                                        color=self.bot.get_color(self.guild.me),
-                                        description="**A sessão de pedido de música da conversa atual foi encerrada.**",
+                            if channel.permissions_for(self.guild.me).send_messages:
+                                try:
+                                    await channel.send(
+                                        embed=disnake.Embed(
+                                            color=self.bot.get_color(self.guild.me),
+                                            description="**A sessão de pedido de música da conversa atual foi encerrada.**",
+                                        )
                                     )
-                                )
-                            except:
-                                pass
+                                except:
+                                    pass
 
-                        if channel.owner.id == self.bot.user.id or channel.parent.permissions_for(self.guild.me).manage_threads:
-                            kwargs = {"archived": True, "locked": True}
-                        else:
-                            kwargs = {}
+                            if channel.owner.id == self.bot.user.id or channel.parent.permissions_for(self.guild.me).manage_threads:
+                                kwargs = {"archived": True, "locked": True}
+                            else:
+                                kwargs = {}
 
-                        await channel.edit(**kwargs)
-                    except Exception:
-                        print(
-                            f"Falha ao arquivar thread do servidor: {self.guild.name}\n{traceback.format_exc()}")
+                            await channel.edit(**kwargs)
+                        except Exception:
+                            print(
+                                f"Falha ao arquivar thread do servidor: {self.guild.name}\n{traceback.format_exc()}")
 
                 elif inter:
 
