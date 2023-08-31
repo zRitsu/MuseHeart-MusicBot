@@ -423,6 +423,12 @@ class LavalinkPlayer(wavelink.Player):
 
     @property
     def has_thread(self):
+        try:
+            if isinstance(self.message.channel.parent, disnake.ForumChannel):
+                return
+        except AttributeError:
+            pass
+
         return self.message and self.message.thread #and not (self.message.thread.locked or self.message.thread.archived)
 
     @property
