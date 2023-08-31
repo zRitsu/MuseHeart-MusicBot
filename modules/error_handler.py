@@ -174,7 +174,7 @@ class ErrorHandler(commands.Cog):
 
             else:
                 kwargs["content"] += "\n**Ocorreu um erro no comando:**\n" \
-                                     "```py\n{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
+                                     f"```py\n{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
 
         else:
 
