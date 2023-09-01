@@ -546,11 +546,9 @@ class BotCore(commands.Bot):
     def __init__(self, *args, **kwargs):
         self.session: Optional[aiohttp.ClientError] = None
         self.pool: BotPool = kwargs.pop('pool')
-        self.config = self.pool.config
         self.default_prefix = kwargs.pop("default_prefix", "!!")
         self.spotify: Optional[SpotifyClient] = self.pool.spotify
         self.session = aiohttp.ClientSession()
-        self.ws_client = self.pool.ws_client
         self.color = kwargs.pop("embed_color", None)
         self.identifier = kwargs.pop("identifier", "")
         self.appinfo: Optional[disnake.AppInfo] = None
@@ -609,6 +607,14 @@ class BotCore(commands.Bot):
                 print(f"Falha ao carregar skin [static_player]: {traceback.format_exc()}")
         if self.default_static_skin not in self.player_static_skins:
             self.default_static_skin = "default"
+
+    @property
+    def config(self):
+        return self.pool.config
+
+    @property
+    def ws_client(self):
+        return self.pool.ws_client
 
     async def get_data(self, id_: int, *, db_name: Union[DBModel.guilds, DBModel.users]):
         return await self.pool.database.get_data(
