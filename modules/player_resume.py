@@ -563,7 +563,7 @@ class PlayerSession(commands.Cog):
             guild_id = int(player)
 
             try:
-                player = self.bot.music[guild_id]
+                player = self.bot.music.players[guild_id]
             except KeyError:
                 player = None
 
