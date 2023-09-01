@@ -88,6 +88,10 @@ class Misc(commands.Cog):
                 if i:
                     activities.append({"name": i, "type": "playing"})
 
+            for i in self.bot.config["CUSTOM_STATUS_PRESENCES"].split("||"):
+                if i:
+                    activities.append({"name": i, "type": "custom_status"})
+
             for i in self.bot.config["STREAMING_PRESENCES"].split("|||"):
                 if i:
                     try:
@@ -125,8 +129,15 @@ class Misc(commands.Cog):
                     url=activity_data["url"]
                 )
 
-            else:
+            elif activity_data["type"] == "listening":
                 activity = disnake.Game(name=self.placeholders(activity_data["name"]))
+
+            else:
+                activity = disnake.Activity(
+                    name="customstatus",
+                    type=disnake.ActivityType.custom,
+                    state=self.placeholders(activity_data["name"]),
+                )
 
             await self.bot.change_presence(activity=activity)
 
