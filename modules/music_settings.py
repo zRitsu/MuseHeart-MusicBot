@@ -674,14 +674,41 @@ class MusicSettings(commands.Cog):
 
                 channel_name = inter.text_values["forum_title"]
 
-            thread_wmessage = await target.create_thread(
-                name=channel_name,
-                content="Post para pedido de músicas.",
-                auto_archive_duration=10080,
-                slowmode_delay=5,
-            )
+            thread = None
+            message = None
 
-            message = await send_idle_embed(target=thread_wmessage.message, bot=bot, force=True,
+            if target.permissions_for(target.guild.me).manage_threads:
+                for t in target.threads:
+                    if t.owner_id == bot.user.id:
+                        try:
+                            message = await t.fetch_message(t.id)
+                        except disnake.NotFound:
+                            continue
+                        thread = t
+                        await thread.edit(archived=False, locked=False)
+                        break
+
+                if not thread:
+                    async for t in target.archived_threads(limit=100):
+                        if t.owner_id == bot.user.id:
+                            try:
+                                message = await t.fetch_message(t.id)
+                            except disnake.NotFound:
+                                continue
+                            thread = t
+                            await thread.edit(archived=False, locked=False)
+                            break
+
+            if not thread:
+                thread = await target.create_thread(
+                    name=channel_name,
+                    content="Post para pedido de músicas.",
+                    auto_archive_duration=10080,
+                    slowmode_delay=5,
+                )
+                message = thread.message
+
+            message = await send_idle_embed(target=message, bot=bot, force=True,
                                             guild_data=guild_data)
 
             target = message.channel
