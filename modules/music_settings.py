@@ -382,7 +382,8 @@ class MusicSettings(commands.Cog):
                 ]
             )
 
-            await inter.delete_original_message()
+            if isinstance(inter, disnake.MessageInteraction):
+                await inter.delete_original_message()
 
             try:
                 inter: disnake.ModalInteraction = await inter.bot.wait_for("modal_submit", timeout=30,
