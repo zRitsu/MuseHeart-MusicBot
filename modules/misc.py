@@ -129,7 +129,7 @@ class Misc(commands.Cog):
                     url=activity_data["url"]
                 )
 
-            elif activity_data["type"] == "listening":
+            elif activity_data["type"] == "playing":
                 activity = disnake.Game(name=self.placeholders(activity_data["name"]))
 
             else:
