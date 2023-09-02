@@ -470,7 +470,8 @@ class LavalinkPlayer(wavelink.Player):
             try:
                 await self.text_channel.purge(check=check)
             except:
-                traceback.print_exc()
+                print(f"Falha ao limpar mensagens do canal {self.text_channel} [ID: {self.text_channel.id}]:\n"
+                      f"{traceback.format_exc()}")
                 pass
 
 
