@@ -463,7 +463,7 @@ class LavalinkPlayer(wavelink.Player):
         if self.static and self.last_message_id != self.text_channel.last_message_id:
 
             if isinstance(self.text_channel, disnake.Thread):
-                check = (lambda m: m.id != self.last_message_id and (not m.pinned or not m.is_system() or m.type != disnake.MessageType.channel_name_change))
+                check = (lambda m: m.id != self.last_message_id and not not m.pinned and (not m.is_system() or m.type != disnake.MessageType.channel_name_change))
             else:
                 check = (lambda m: m.id != self.last_message_id and not m.pinned)
 
