@@ -567,7 +567,7 @@ class LavalinkPlayer(wavelink.Player):
             await self.set_pause(True)
 
             self.auto_pause = True
-            self.set_command_log(text=f"O player foi pausado por falta de membros no canal. A "
+            self.set_command_log(text=f"O player foi pausado temporariamente por falta de membros no canal. A "
                                       f"música será retomada automaticamente quando um membro entrar no canal "
                                       f"<#{self.channel_id}>.", emoji="⚠️")
             await self.invoke_np()
