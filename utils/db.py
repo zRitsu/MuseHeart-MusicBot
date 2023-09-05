@@ -28,13 +28,14 @@ class DBModel:
 
 db_models = {
     DBModel.guilds: {
-        "ver": 1.9,
+        "ver": 1.10,
         "player_controller": {
             "channel": None,
             "message_id": None,
             "skin": None,
             "static_skin": None,
-            "fav_links": {}
+            "fav_links": {},
+            "purge_mode": "on_message"
         },
         "autoplay": False,
         "check_other_bots_in_vc": False,
@@ -158,7 +159,7 @@ class LocalDatabase(BaseDB):
             data["_id"] = str(id_)
             self._connect[collection][db_name].insert_one(data)
 
-        elif data["ver"] < default_model[db_name]["ver"]:
+        elif data["ver"] != default_model[db_name]["ver"]:
             data = update_values(dict(default_model[db_name]), data)
             data["ver"] = default_model[db_name]["ver"]
 
@@ -254,7 +255,7 @@ class MongoDatabase(BaseDB):
         if not data:
             return dict(default_model[db_name])
 
-        elif data["ver"] < default_model[db_name]["ver"]:
+        elif data["ver"] != default_model[db_name]["ver"]:
             data = update_values(dict(default_model[db_name]), data)
             data["ver"] = default_model[db_name]["ver"]
 

@@ -29,7 +29,7 @@ from utils.music.converters import time_format, fix_characters, string_to_second
     YOUTUBE_VIDEO_REG, google_search, percentage, music_source_image, perms_translations
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, fav_list, queue_track_index, \
-    pool_command, string_to_file, CommandArgparse, music_source_emoji_url
+    pool_command, string_to_file, CommandArgparse, music_source_emoji_url, SongRequestPurgeMode
 
 
 class Music(commands.Cog):
@@ -1223,6 +1223,7 @@ class Music(commands.Cog):
                 volume=int(guild_data['default_player_volume']),
                 autoplay=guild_data["autoplay"],
                 prefix=global_data["prefix"] or bot.default_prefix,
+                purge_mode=guild_data['player_controller']['purge_mode']
             )
 
             if static_player['channel']:
@@ -4274,7 +4275,10 @@ class Music(commands.Cog):
             except Exception as e:
                 self.bot.dispatch('interaction_player_error', inter, e)
 
-    async def delete_message(self, message: disnake.Message, delay: int = None):
+    async def delete_message(self, message: disnake.Message, delay: int = None, ignore=False):
+
+        if ignore:
+            return
 
         try:
             is_forum = isinstance(message.channel.parent, disnake.ForumChannel)
@@ -4364,7 +4368,7 @@ class Music(commands.Cog):
                     if data['player_controller']["channel"] != str(message.channel.id):
                         return
                     if message.is_system():
-                        await self.delete_message(message)
+                        await self.delete_message(message, ignore=data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message)
 
         except AttributeError:
             pass
@@ -4376,9 +4380,9 @@ class Music(commands.Cog):
         try:
             if message.author.bot:
                 if message.is_system() and not isinstance(message.channel, disnake.Thread):
-                    await self.delete_message(message)
+                    await self.delete_message(message, ignore=data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message)
                 if message.author.id == self.bot.user.id:
-                    await self.delete_message(message, delay=15)
+                    await self.delete_message(message, delay=15, ignore=data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message)
                 return
 
             if not message.content:
@@ -4418,7 +4422,7 @@ class Music(commands.Cog):
                     f"{message.author.mention} você deve aguardar seu pedido de música anterior carregar...",
                 )
 
-                await self.delete_message(message)
+                await self.delete_message(message, ignore=data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message)
                 return
 
             message.content = message.content.strip("<>")
@@ -4472,7 +4476,7 @@ class Music(commands.Cog):
 
         if error:
 
-            await self.delete_message(message)
+            await self.delete_message(message, ignore=data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message)
 
             try:
                 if msg:
@@ -4639,6 +4643,7 @@ class Music(commands.Cog):
                 volume=int(data['default_player_volume']),
                 autoplay=data["autoplay"],
                 prefix=global_data["prefix"] or self.bot.default_prefix,
+                purge_mode=data['player_controller']['purge_mode']
             )
 
         if not player.message:
@@ -4655,10 +4660,9 @@ class Music(commands.Cog):
 
         if not isinstance(tracks, list):
             player.queue.extend(tracks.tracks)
-            if isinstance(message.channel, disnake.Thread) and not isinstance(message.channel.parent,
-                                                                              disnake.ForumChannel):
+            if isinstance(message.channel, disnake.Thread) and not isinstance(message.channel.parent, disnake.ForumChannel):
                 embed.description = f"✋ **⠂ Pedido por:** {message.author.mention}\n" \
-                                    f"🎼 **⠂ Música(s):** `[{len(tracks.tracks)}]`"
+                                    f"🎼 **⠂ Música(s):** `[{len(tracks.tracks)}]`{player.controller_link}"
                 embed.set_thumbnail(url=tracks.tracks[0].thumb)
                 embed.set_author(name="⠂" + fix_characters(tracks.tracks[0].playlist_name, 35), url=message.content,
                                  icon_url=music_source_image(tracks.tracks[0].info["sourceName"]))
@@ -4666,6 +4670,18 @@ class Music(commands.Cog):
                     await response.edit(content=None, embed=embed, view=None)
                 else:
                     await message.channel.send(embed=embed)
+
+            elif data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message:
+
+                txt = f"> 🎼 **⠂** [`{fix_characters(tracks.tracks[0].playlist_name, 35)}`](<{message.content}>) `[{len(tracks.tracks)} música(s)]` {message.author.mention}"
+
+                if player.controller_link:
+                    txt += f" [`[ir p/ mensagem]`](<{player.message.jump_url}>)"
+
+                if response:
+                    await response.edit(content=txt, embed=None, view=None)
+                else:
+                    await message.channel.send(txt, allowed_mentions=disnake.AllowedMentions(users=False, everyone=False, roles=False))
 
             else:
                 player.set_command_log(
@@ -4691,17 +4707,31 @@ class Music(commands.Cog):
                 track.uri = ""
 
             player.queue.append(track)
-            if isinstance(message.channel, disnake.Thread) and not isinstance(message.channel.parent,
-                                                                              disnake.ForumChannel):
+            if isinstance(message.channel, disnake.Thread) and not isinstance(message.channel.parent, disnake.ForumChannel):
                 embed.description = f"💠 **⠂ Uploader:** `{track.author}`\n" \
                                     f"✋ **⠂ Pedido por:** {message.author.mention}\n" \
                                     f"⌛ **⠂ Duração:** `{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}` "
+
+                embed.description += player.controller_link
+
                 embed.set_thumbnail(url=track.thumb)
                 embed.set_author(name=fix_characters(track.title, 35), url=track.uri or track.search_uri, icon_url=music_source_image(track.info["sourceName"]))
                 if response:
                     await response.edit(content=None, embed=embed, view=None)
                 else:
                     await message.channel.send(embed=embed)
+
+            elif data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message:
+
+                txt = f"> 🎵 **⠂** [`{fix_characters(track.title, 35)}`](<{track.uri}>) `[{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}]` {message.author.mention}"
+
+                if player.controller_link:
+                    txt += f" [`[ir p/ mensagem]`](<{player.message.jump_url}>)"
+
+                if response:
+                    await response.edit(content=txt, embed=None, view=None)
+                else:
+                    await message.channel.send(txt, allowed_mentions=disnake.AllowedMentions(users=False, everyone=False, roles=False))
 
             else:
                 duration = time_format(tracks[0].duration) if not tracks[0].is_stream else '🔴 Livestream'
@@ -4710,7 +4740,7 @@ class Music(commands.Cog):
                     emoji="🎵"
                 )
                 if destroy_message:
-                    await self.delete_message(message)
+                    await self.delete_message(message, ignore=data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message)
 
         if not player.is_connected:
             await self.do_connect(

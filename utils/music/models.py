@@ -14,7 +14,7 @@ from utils.music.converters import fix_characters, time_format, get_button_style
 from utils.music.skin_utils import skin_converter
 from utils.music.filters import AudioFilter
 from utils.db import DBModel
-from utils.others import send_idle_embed, PlayerControls
+from utils.others import send_idle_embed, PlayerControls, SongRequestPurgeMode
 import traceback
 from collections import deque
 from typing import Optional, Union, TYPE_CHECKING, List
@@ -364,7 +364,6 @@ class LavalinkPlayer(wavelink.Player):
         self.uptime = kwargs.pop("uptime", None) or int(disnake.utils.utcnow().timestamp())
         # ativar/desativar modo controller (apenas para uso em skins)
         self.controller_mode = True
-        self.bot.loop.create_task(self.channel_cleanup())
         self.mini_queue_feature = False
         self.mini_queue_enabled = False
         self.is_resuming = False
@@ -372,10 +371,13 @@ class LavalinkPlayer(wavelink.Player):
         self.auto_pause = False
 
         self.last_channel: Optional[disnake.VoiceChannel] = None
-
         self._rpc_update_task: Optional[asyncio.Task] = None
-
         self.start_time = disnake.utils.utcnow()
+
+        self.purge_mode = kwargs.pop("purge_mode", SongRequestPurgeMode.on_message)
+
+        if self.static and self.purge_mode in (SongRequestPurgeMode.on_message, SongRequestPurgeMode.on_player_start):
+            self.bot.loop.create_task(self.channel_cleanup())
 
         self.temp_embed: Optional[disnake.Embed] = None
         self.prefix_info = kwargs.pop("prefix", "")
@@ -435,7 +437,7 @@ class LavalinkPlayer(wavelink.Player):
     def controller_link(self):
         try:
             if self.controller_mode:
-                return f" [`🎛️`]({self.message.jump_url})"
+                return f" [`🎛️`](<{self.message.jump_url}>)"
         except AttributeError:
             pass
         return ""
@@ -460,7 +462,7 @@ class LavalinkPlayer(wavelink.Player):
         except TypeError:
             return
 
-        if self.static and self.last_message_id != self.text_channel.last_message_id:
+        if self.last_message_id != self.text_channel.last_message_id:
 
             if isinstance(self.text_channel, disnake.Thread):
                 check = (lambda m: m.id != self.last_message_id and not not m.pinned and (not m.is_system() or m.type != disnake.MessageType.channel_name_change))
@@ -1388,10 +1390,14 @@ class LavalinkPlayer(wavelink.Player):
         if self.guild.me:
 
             if self.static:
+
                 try:
                     await send_idle_embed(inter or self.message, self.command_log, bot=self.bot)
                 except:
                     pass
+
+                if self.purge_mode == SongRequestPurgeMode.on_player_Stop:
+                    await self.channel_cleanup()
 
             else:
 

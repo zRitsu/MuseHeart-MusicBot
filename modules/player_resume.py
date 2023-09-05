@@ -16,6 +16,7 @@ from utils.client import BotCore
 from utils.db import DBModel
 from utils.music.checks import can_connect, can_send_message
 from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialTrack, PartialPlaylist, LavalinkPlaylist
+from utils.others import SongRequestPurgeMode
 
 
 class PlayerSession(commands.Cog):
@@ -121,6 +122,11 @@ class PlayerSession(commands.Cog):
         except AttributeError:
             prefix = ""
 
+        try:
+            purge_mode = player.purge_mode
+        except AttributeError:
+            purge_mode = SongRequestPurgeMode.on_message
+
         data = {
             "_id": str(player.guild.id),
             "volume": str(player.volume),
@@ -150,7 +156,8 @@ class PlayerSession(commands.Cog):
             "played": played,
             "queue_autoplay": autoqueue,
             "failed_tracks": failed_tracks,
-            "prefix_info": prefix
+            "prefix_info": prefix,
+            "purge_mode": purge_mode,
         }
 
         try:
@@ -337,6 +344,8 @@ class PlayerSession(commands.Cog):
                     global_data = await self.bot.get_global_data(guild.id, db_name=DBModel.guilds)
                     prefix = global_data["prefix"] or self.bot.default_prefix
 
+                purge_mode = data.get("purge_mode", SongRequestPurgeMode.on_message)
+
                 try:
                     player: LavalinkPlayer = self.bot.music.get_player(
                         node_id=node.identifier,
@@ -359,7 +368,8 @@ class PlayerSession(commands.Cog):
                         stage_title_template=data.get("stage_title_template"),
                         restrict_mode=data["restrict_mode"],
                         volume=int(data["volume"]),
-                        prefix=prefix
+                        prefix=prefix,
+                        purge_mode=purge_mode
                     )
                 except Exception:
                     print(f"{self.bot.user} - Falha ao criar player: {guild.name} [{guild.id}]\n{traceback.format_exc()}")
