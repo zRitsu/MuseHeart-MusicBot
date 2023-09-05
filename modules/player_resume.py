@@ -346,6 +346,12 @@ class PlayerSession(commands.Cog):
 
                 purge_mode = data.get("purge_mode", SongRequestPurgeMode.on_message)
 
+                if purge_mode == SongRequestPurgeMode.on_player_start:
+                    purge_mode = SongRequestPurgeMode.no_purge
+                    temp_purge_mode = True
+                else:
+                    temp_purge_mode = False
+
                 try:
                     player: LavalinkPlayer = self.bot.music.get_player(
                         node_id=node.identifier,
@@ -380,6 +386,9 @@ class PlayerSession(commands.Cog):
                     player.mini_queue_enabled = data["mini_queue_enabled"]
                 except:
                     pass
+
+                if temp_purge_mode:
+                    player.purge_mode = SongRequestPurgeMode.on_player_start
 
                 player.listen_along_invite = data.pop("listen_along_invite", "")
 
