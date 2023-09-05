@@ -2105,10 +2105,13 @@ class Music(commands.Cog):
     async def seek_suggestions(self, inter: disnake.Interaction, query: str):
 
         try:
-            if query or not inter.author.voice:
+            if not inter.author.voice:
                 return
         except AttributeError:
             pass
+
+        if query:
+            return [time_format(string_to_seconds(query)*1000)]
 
         try:
             await check_pool_bots(inter, only_voiced=True)

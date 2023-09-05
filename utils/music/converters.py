@@ -121,7 +121,7 @@ time_names = ["seconds", "minutes", "hours"]
 def string_to_seconds(time):
     try:
 
-        times = reversed(time.split(':'))
+        times = reversed([i for i in time.replace(" ", ":").split(':') if i.isdigit()])
         time_dict = {}
 
         for n, t in enumerate(times):
