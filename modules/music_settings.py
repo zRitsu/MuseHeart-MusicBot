@@ -167,8 +167,8 @@ class PlayerSettings(disnake.ui.View):
                 disnake.SelectOption(
                     label="Limpar ao finalizar o player",
                     description="Limpar mensagens do song-request ao finalizar",
-                    value=SongRequestPurgeMode.on_player_Stop,
-                    default=SongRequestPurgeMode.on_player_Stop == self.player_purge_mode
+                    value=SongRequestPurgeMode.on_player_stop,
+                    default=SongRequestPurgeMode.on_player_stop == self.player_purge_mode
                 ),
                 disnake.SelectOption(
                     label="Limpar ao iniciar o player",

@@ -1396,7 +1396,7 @@ class LavalinkPlayer(wavelink.Player):
                 except:
                     pass
 
-                if self.purge_mode == SongRequestPurgeMode.on_player_Stop:
+                if self.purge_mode == SongRequestPurgeMode.on_player_stop:
                     await self.channel_cleanup()
 
             else:
