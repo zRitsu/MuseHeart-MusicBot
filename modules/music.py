@@ -1850,7 +1850,6 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.slash_command(
-        name=disnake.Localized("voteskip", data={disnake.Locale.pt_BR: "votar_pular"}),
         description=f"{desc_prefix}Votar para pular a música atual.",
         extras={"only_voiced": True}
     )
