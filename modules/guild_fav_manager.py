@@ -99,7 +99,7 @@ class GuildFavModal(disnake.ui.Modal):
                          "Membros podem usá-lo diretamente no player-controller quando não estiver em uso.**",
                                                               color=self.bot.get_color(guild.me)), view=None)
 
-        await self.bot.get_cog("PinManager").process_idle_embed(guild, guild_data=guild_data)
+        await self.bot.get_cog("PinManager").process_idle_embed(self.bot, guild, guild_data=guild_data)
 
 class GuildFavView(disnake.ui.View):
 
@@ -220,7 +220,7 @@ class GuildFavView(disnake.ui.View):
             del guild_data["player_controller"]["fav_links"][self.current]
         except KeyError:
             try:
-                await self.bot.get_cog("PinManager").process_idle_embed(guild, guild_data=guild_data)
+                await self.bot.get_cog("PinManager").process_idle_embed(self.bot, guild, guild_data=guild_data)
             except Exception:
                 traceback.print_exc()
 
@@ -237,7 +237,7 @@ class GuildFavView(disnake.ui.View):
             embed=disnake.Embed(description="**Link removido com sucesso!**", color=self.bot.get_color(guild.me)),
             view=None)
 
-        await self.bot.get_cog("PinManager").process_idle_embed(guild, guild_data=guild_data)
+        await self.bot.get_cog("PinManager").process_idle_embed(self.bot, guild, guild_data=guild_data)
         self.stop()
 
     async def import_callback(self, inter: disnake.MessageInteraction):
@@ -290,10 +290,10 @@ class PinManager(commands.Cog):
     def __init__(self, bot: BotCore):
         self.bot = bot
 
-    async def process_idle_embed(self, guild: disnake.Guild, guild_data: dict):
+    async def process_idle_embed(self, bot: BotCore, guild: disnake.Guild, guild_data: dict):
 
         try:
-            player: LavalinkPlayer = self.bot.music.players[guild.id]
+            player: LavalinkPlayer = bot.music.players[guild.id]
             if not player.current:
                 await player.process_idle_message()
             return
@@ -301,13 +301,13 @@ class PinManager(commands.Cog):
             pass
 
         try:
-            channel = self.bot.get_channel(int(guild_data["player_controller"]["channel"]))
+            channel = bot.get_channel(int(guild_data["player_controller"]["channel"]))
             message = await channel.fetch_message(int(guild_data["player_controller"]["message_id"]))
 
         except:
             return
 
-        await send_idle_embed(message or channel, bot=self.bot, guild_data=guild_data)
+        await send_idle_embed(message or channel, bot=bot, guild_data=guild_data)
 
     server_playlist_cd = commands.CooldownMapping.from_cooldown(3, 30, commands.BucketType.guild)
 
@@ -425,7 +425,7 @@ class PinManager(commands.Cog):
 
         guild_data["player_controller"]["fav_links"].update(json_data)
 
-        await self.bot.update_data(inter.guild_id, guild_data, db_name=DBModel.guilds)
+        await bot.update_data(inter.guild_id, guild_data, db_name=DBModel.guilds)
 
         guild = bot.get_guild(inter.guild_id) or inter.guild
 
@@ -439,7 +439,7 @@ class PinManager(commands.Cog):
             )
         )
 
-        await self.process_idle_embed(guild, guild_data=guild_data)
+        await self.process_idle_embed(bot, guild, guild_data=guild_data)
 
     async def export_(self, inter: disnake.MessageInteraction):
 
@@ -491,5 +491,4 @@ class PinManager(commands.Cog):
 
 
 def setup(bot: BotCore):
-    return
     bot.add_cog(PinManager(bot))
