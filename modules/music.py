@@ -4317,10 +4317,6 @@ class Music(commands.Cog):
 
             text_channel = message.channel
 
-            if message.content.startswith("/") or message.is_system():
-                await self.delete_message(message)
-                return
-
         else:
 
             static_player = data['player_controller']
@@ -4352,9 +4348,9 @@ class Music(commands.Cog):
                 )
                 return
 
-            if message.content.startswith("/") or message.is_system():
-                await self.delete_message(message)
-                return
+        if message.content.startswith("/") or message.is_system():
+            await self.delete_message(message)
+            return
 
         try:
             if isinstance(message.channel, disnake.Thread):
