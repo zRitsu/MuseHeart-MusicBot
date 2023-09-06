@@ -4661,18 +4661,23 @@ class Music(commands.Cog):
 
         embed = disnake.Embed(color=self.bot.get_color(message.guild.me))
 
+        try:
+            components = [disnake.ui.Button(emoji="🎛️", label="Ir para o player-controller", url=player.message.jump_url)]
+        except AttributeError:
+            components = []
+
         if not isinstance(tracks, list):
             player.queue.extend(tracks.tracks)
             if (isinstance(message.channel, disnake.Thread) and
                     (not isinstance(message.channel.parent, disnake.ForumChannel) or
                      data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message)):
                 embed.description = f"✋ **⠂ Pedido por:** {message.author.mention}\n" \
-                                    f"🎼 **⠂ Música(s):** `[{len(tracks.tracks)}]`{player.controller_link}"
+                                    f"🎼 **⠂ Música(s):** `[{len(tracks.tracks)}]`"
                 embed.set_thumbnail(url=tracks.tracks[0].thumb)
                 embed.set_author(name="⠂" + fix_characters(tracks.tracks[0].playlist_name, 35), url=message.content,
                                  icon_url=music_source_image(tracks.tracks[0].info["sourceName"]))
                 if response:
-                    await response.edit(content=None, embed=embed, view=None)
+                    await response.edit(content=None, embed=embed, components=components)
                 else:
                     await message.reply(embed=embed, fail_if_not_exists=False, mention_author=False)
 
@@ -4680,13 +4685,10 @@ class Music(commands.Cog):
 
                 txt = f"> 🎼 **⠂** [`{fix_characters(tracks.tracks[0].playlist_name, 35)}`](<{message.content}>) `[{len(tracks.tracks)} música(s)]` {message.author.mention}"
 
-                if player.controller_link:
-                    txt += f" [`[ir p/ mensagem]`](<{player.message.jump_url}>)"
-
                 if response:
-                    await response.edit(content=txt, embed=None, view=None)
+                    await response.edit(content=txt, embed=None, components=components)
                 else:
-                    await message.reply(txt, allowed_mentions=disnake.AllowedMentions(users=False, everyone=False, roles=False), fail_if_not_exists=False, mention_author=False)
+                    await message.reply(txt, components=components, allowed_mentions=disnake.AllowedMentions(users=False, everyone=False, roles=False), fail_if_not_exists=False, mention_author=False)
 
             else:
                 player.set_command_log(
@@ -4717,28 +4719,23 @@ class Music(commands.Cog):
                      data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message)):
                 embed.description = f"💠 **⠂ Uploader:** `{track.author}`\n" \
                                     f"✋ **⠂ Pedido por:** {message.author.mention}\n" \
-                                    f"⌛ **⠂ Duração:** `{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}` "
-
-                embed.description += player.controller_link
+                                    f"⌛ **⠂ Duração:** `{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}`"
 
                 embed.set_thumbnail(url=track.thumb)
                 embed.set_author(name=fix_characters(track.title, 35), url=track.uri or track.search_uri, icon_url=music_source_image(track.info["sourceName"]))
                 if response:
-                    await response.edit(content=None, embed=embed, view=None)
+                    await response.edit(content=None, embed=embed, components=components)
                 else:
-                    await message.reply(embed=embed, fail_if_not_exists=False, mention_author=False)
+                    await message.reply(embed=embed, fail_if_not_exists=False, mention_author=False, components=components)
 
             elif data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message:
 
                 txt = f"> 🎵 **⠂** [`{fix_characters(track.title, 35)}`](<{track.uri}>) `[{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}]` {message.author.mention}"
 
-                if player.controller_link:
-                    txt += f" [`[ir p/ mensagem]`](<{player.message.jump_url}>)"
-
                 if response:
-                    await response.edit(content=txt, embed=None, view=None)
+                    await response.edit(content=txt, embed=None, components=components)
                 else:
-                    await message.reply(txt, allowed_mentions=disnake.AllowedMentions(users=False, everyone=False, roles=False), fail_if_not_exists=False, mention_author=False)
+                    await message.reply(txt, components=components, allowed_mentions=disnake.AllowedMentions(users=False, everyone=False, roles=False), fail_if_not_exists=False, mention_author=False)
 
             else:
                 duration = time_format(tracks[0].duration) if not tracks[0].is_stream else '🔴 Livestream'
