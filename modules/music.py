@@ -1053,7 +1053,7 @@ class Music(commands.Cog):
                 if not self.bot.config["ENABLE_DISCORD_URLS_PLAYBACK"] and "cdn.discordapp.com/attachments/" in query:
                     raise GenericError("**O suporte a links do discord está desativado.**")
 
-                query = urls[0].split("&ab_channel=")[0]
+                query = urls[0].split("&ab_channel=")[0].split("&start_radio=")[0]
 
                 if "&list=" in query and (link_re := YOUTUBE_VIDEO_REG.match(query)):
 
