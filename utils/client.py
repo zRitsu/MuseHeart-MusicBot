@@ -822,6 +822,9 @@ class BotCore(commands.Bot):
             await message.reply(embed=embed, **kwargs)
             return
 
+        if not message.guild:
+            return
+
         ctx: CustomContext = await self.get_context(message, cls=CustomContext)
 
         self.dispatch("song_request", ctx, message)
