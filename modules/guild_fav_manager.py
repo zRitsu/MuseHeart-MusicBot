@@ -491,4 +491,5 @@ class PinManager(commands.Cog):
 
 
 def setup(bot: BotCore):
+    return
     bot.add_cog(PinManager(bot))
