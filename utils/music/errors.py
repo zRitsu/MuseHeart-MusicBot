@@ -187,6 +187,8 @@ def parse_error(
             error_txt = "**Não há suporte para o link informado.**"
         elif "This video is not available" in wave_error:
             error_txt = "**Este vídeo está indisponível ou privado...**"
+        elif "This playlist type is unviewable" in wave_error:
+            error_txt = "**O link de playlist informado contêm um parâmetro/id não suportado...**"
         elif "The playlist does not exist" in wave_error:
             error_txt = "**A playlist não existe (ou está privada).**"
         elif "not made this video available in your country" in wave_error.lower() or \
