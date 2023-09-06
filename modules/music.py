@@ -4304,10 +4304,6 @@ class Music(commands.Cog):
         if message.author.bot and not isinstance(message.channel, disnake.StageChannel):
             return
 
-        if message.content.startswith("/") or message.is_system():
-            await self.delete_message(message)
-            return
-
         try:
             data = await self.bot.get_data(message.guild.id, db_name=DBModel.guilds)
         except AttributeError:
@@ -4324,6 +4320,10 @@ class Music(commands.Cog):
                 return
 
             text_channel = message.channel
+
+            if message.content.startswith("/") or message.is_system():
+                await self.delete_message(message)
+                return
 
         else:
 
@@ -4358,6 +4358,10 @@ class Music(commands.Cog):
                     ],
                     delete_after=20
                 )
+                return
+
+            if message.content.startswith("/") or message.is_system():
+                await self.delete_message(message)
                 return
 
         try:
