@@ -4158,7 +4158,7 @@ class Music(commands.Cog):
                                 embed=disnake.Embed(
                                     color=self.bot.get_color(interaction.guild.me),
                                     description="Você não possui espaço suficiente para adicionar todos os favoritos de seu arquivo...\n"
-                                                "Limite atual: {self.bot.config['MAX_USER_FAVS']}"
+                                                f"Limite atual: {self.bot.config['MAX_USER_FAVS']}"
                                 ), view=None)
                             return
 
