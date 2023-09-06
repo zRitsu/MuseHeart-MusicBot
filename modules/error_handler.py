@@ -151,6 +151,10 @@ class ErrorHandler(commands.Cog):
             print(f"{ctx.author} [{ctx.author.id}] não é dono do bot para usar o comando: {ctx.command.name}")
             return
 
+        if isinstance(error, commands.MissingPermissions) and (await ctx.bot.is_owner(ctx.author)):
+            await ctx.reinvoke()
+            return
+
         error_msg, full_error_msg, kill_process, components = parse_error(ctx, error)
         kwargs = {"content": ""}
         send_webhook = False
