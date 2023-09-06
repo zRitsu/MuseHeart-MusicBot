@@ -4304,7 +4304,7 @@ class Music(commands.Cog):
         if message.author.bot and not isinstance(message.channel, disnake.StageChannel):
             return
 
-        if message.content.startswith("/"):
+        if message.content.startswith("/") or message.is_system():
             await self.delete_message(message)
             return
 
@@ -4564,7 +4564,7 @@ class Music(commands.Cog):
                 pass
 
 
-    async def parse_song_request(self, message, text_channel, data, *, response=None, attachment: disnake.Attachment=None):
+    async def parse_song_request(self, message: disnake.Message, text_channel, data, *, response=None, attachment: disnake.Attachment=None):
 
         if not message.author.voice:
             raise GenericError("Você deve entrar em um canal de voz para pedir uma música.")
@@ -4660,7 +4660,9 @@ class Music(commands.Cog):
 
         if not isinstance(tracks, list):
             player.queue.extend(tracks.tracks)
-            if isinstance(message.channel, disnake.Thread) and not isinstance(message.channel.parent, disnake.ForumChannel):
+            if (isinstance(message.channel, disnake.Thread) and
+                    (not isinstance(message.channel.parent, disnake.ForumChannel) or
+                     data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message)):
                 embed.description = f"✋ **⠂ Pedido por:** {message.author.mention}\n" \
                                     f"🎼 **⠂ Música(s):** `[{len(tracks.tracks)}]`{player.controller_link}"
                 embed.set_thumbnail(url=tracks.tracks[0].thumb)
@@ -4669,7 +4671,7 @@ class Music(commands.Cog):
                 if response:
                     await response.edit(content=None, embed=embed, view=None)
                 else:
-                    await message.channel.send(embed=embed)
+                    await message.reply(embed=embed, fail_if_not_exists=False, mention_author=False)
 
             elif data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message:
 
@@ -4681,7 +4683,7 @@ class Music(commands.Cog):
                 if response:
                     await response.edit(content=txt, embed=None, view=None)
                 else:
-                    await message.channel.send(txt, allowed_mentions=disnake.AllowedMentions(users=False, everyone=False, roles=False))
+                    await message.reply(txt, allowed_mentions=disnake.AllowedMentions(users=False, everyone=False, roles=False), fail_if_not_exists=False, mention_author=False)
 
             else:
                 player.set_command_log(
@@ -4707,7 +4709,9 @@ class Music(commands.Cog):
                 track.uri = ""
 
             player.queue.append(track)
-            if isinstance(message.channel, disnake.Thread) and not isinstance(message.channel.parent, disnake.ForumChannel):
+            if (isinstance(message.channel, disnake.Thread) and
+                    (not isinstance(message.channel.parent, disnake.ForumChannel) or
+                     data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message)):
                 embed.description = f"💠 **⠂ Uploader:** `{track.author}`\n" \
                                     f"✋ **⠂ Pedido por:** {message.author.mention}\n" \
                                     f"⌛ **⠂ Duração:** `{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}` "
@@ -4719,7 +4723,7 @@ class Music(commands.Cog):
                 if response:
                     await response.edit(content=None, embed=embed, view=None)
                 else:
-                    await message.channel.send(embed=embed)
+                    await message.reply(embed=embed, fail_if_not_exists=False, mention_author=False)
 
             elif data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message:
 
@@ -4731,7 +4735,7 @@ class Music(commands.Cog):
                 if response:
                     await response.edit(content=txt, embed=None, view=None)
                 else:
-                    await message.channel.send(txt, allowed_mentions=disnake.AllowedMentions(users=False, everyone=False, roles=False))
+                    await message.reply(txt, allowed_mentions=disnake.AllowedMentions(users=False, everyone=False, roles=False), fail_if_not_exists=False, mention_author=False)
 
             else:
                 duration = time_format(tracks[0].duration) if not tracks[0].is_stream else '🔴 Livestream'
