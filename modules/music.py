@@ -29,7 +29,7 @@ from utils.music.converters import time_format, fix_characters, string_to_second
     YOUTUBE_VIDEO_REG, google_search, percentage, music_source_image, perms_translations
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, fav_list, queue_track_index, \
-    pool_command, string_to_file, CommandArgparse, music_source_emoji_url, SongRequestPurgeMode
+    pool_command, string_to_file, CommandArgparse, music_source_emoji_url, SongRequestPurgeMode, song_request_buttons
 
 
 class Music(commands.Cog):
@@ -895,7 +895,7 @@ class Music(commands.Cog):
                     text = "### Tempo de seleção esgotado!" if view.selected is not False else "### Cancelado pelo usuário."
 
                     try:
-                        await msg.edit(embed=disnake.Embed(description=text, color=self.bot.get_color(guild.me)), view=None)
+                        await msg.edit(embed=disnake.Embed(description=text, color=self.bot.get_color(guild.me)), components=song_request_buttons)
                     except AttributeError:
                         traceback.print_exc()
                         pass
@@ -1025,7 +1025,7 @@ class Music(commands.Cog):
 
                         await func(embed=disnake.Embed(color=self.bot.get_color(guild.me),
                             description="**Tempo esgotado!**" if not view.selected is False else "### Cancelado pelo usuário."),
-                            components=None
+                            components=song_request_buttons
                         )
                         return
 
@@ -1100,7 +1100,7 @@ class Music(commands.Cog):
 
                         await func(
                             content=f"{mention}{'operação cancelada' if view.selected is not False else 'tempo esgotado'}" if view.selected is not False else "Cancelado pelo usuário.",
-                            embed=None, view=None
+                            embed=None, components=song_request_buttons
                         )
                         return
 
@@ -2995,10 +2995,7 @@ class Music(commands.Cog):
 
             await inter.send(
                 embed=embed,
-                components=[
-                    disnake.ui.Button(label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song),
-                    disnake.ui.Button(label="Tocar favorito/integração", emoji="⭐", custom_id=PlayerControls.enqueue_fav)
-                ] if inter.guild else [],
+                components=song_request_buttons if inter.guild else [],
                 ephemeral=player.static and player.text_channel.id == inter.channel_id
             )
             await player.destroy()
@@ -4351,11 +4348,7 @@ class Music(commands.Cog):
                                     "Tente adicionar música usando **/play** ou clique em um dos botões abaixo:",
                         color=self.bot.get_color(message.guild.me)
                     ),
-                    components=[
-                        disnake.ui.Button(emoji="🎶", custom_id=PlayerControls.add_song, label="Pedir uma música"),
-                        disnake.ui.Button(emoji="⭐", custom_id=PlayerControls.enqueue_fav, label="Tocar favorito/integração")
-                    ],
-                    delete_after=20
+                    components=song_request_buttons, delete_after=20
                 )
                 return
 

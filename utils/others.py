@@ -21,7 +21,6 @@ if TYPE_CHECKING:
 
 token_regex = re.compile(r'[a-zA-Z0-9_-]{23,28}\.[a-zA-Z0-9_-]{6,7}\.[a-zA-Z0-9_-]{27,}')
 
-
 class Test:
 
     def is_done(self):
@@ -182,6 +181,12 @@ class EmbedPaginator(disnake.ui.View):
         self.stop()
 
 
+song_request_buttons = [
+    disnake.ui.Button(label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song),
+    disnake.ui.Button(label="Tocar favorito/integração", emoji="⭐", custom_id=PlayerControls.enqueue_fav)
+]
+
+
 def pool_command(*args, **kwargs)-> PoolCommand:
     return commands.command(*args, **kwargs, cls=PoolCommand)
 
@@ -318,20 +323,7 @@ async def send_idle_embed(
             )
         )
 
-    components.extend(
-        [
-            disnake.ui.Button(
-                emoji="🎶",
-                custom_id=PlayerControls.add_song,
-                label="Pedir uma música"
-            ),
-            disnake.ui.Button(
-                emoji="⭐",
-                custom_id=PlayerControls.enqueue_fav,
-                label="Tocar favorito/integração"
-            )
-        ]
-    )
+    components.extend(song_request_buttons)
 
     if is_forum:
         content = "🎶 Peça sua música aqui."

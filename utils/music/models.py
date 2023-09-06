@@ -14,7 +14,7 @@ from utils.music.converters import fix_characters, time_format, get_button_style
 from utils.music.skin_utils import skin_converter
 from utils.music.filters import AudioFilter
 from utils.db import DBModel
-from utils.others import send_idle_embed, PlayerControls, SongRequestPurgeMode
+from utils.others import send_idle_embed, PlayerControls, SongRequestPurgeMode, song_request_buttons
 import traceback
 from collections import deque
 from typing import Optional, Union, TYPE_CHECKING, List
@@ -23,7 +23,6 @@ if TYPE_CHECKING:
     from utils.client import BotCore
 
 exclude_tags = ["remix", "edit", "extend"]
-
 
 class PartialPlaylist:
 
@@ -1421,12 +1420,7 @@ class LavalinkPlayer(wavelink.Player):
                                     description=self.command_log,
                                     color=self.bot.get_color(self.guild.me)
                                 ), allowed_mentions=self.allowed_mentions,
-                                components=[
-                                    disnake.ui.Button(label="Pedir uma música", emoji="🎶",
-                                                      custom_id=PlayerControls.add_song),
-                                    disnake.ui.Button(label="Tocar favorito/integração", emoji="⭐",
-                                                      custom_id=PlayerControls.enqueue_fav)
-                                ]
+                                components=song_request_buttons
                             )
                             channel: disnake.Thread = self.bot.get_channel(self.message.id)
 
@@ -1458,13 +1452,7 @@ class LavalinkPlayer(wavelink.Player):
                         embed=disnake.Embed(
                             description=f"🛑 ⠂{self.command_log}",
                             color=self.bot.get_color(self.guild.me)),
-                        components=[
-                            disnake.ui.Button(
-                                label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song),
-                            disnake.ui.Button(
-                                label="Tocar favorito/integração", emoji="⭐", custom_id=PlayerControls.enqueue_fav)
-
-                        ]
+                        components=song_request_buttons
                     )
 
                 else:
