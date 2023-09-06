@@ -4665,6 +4665,12 @@ class Music(commands.Cog):
                 embed.set_thumbnail(url=tracks.tracks[0].thumb)
                 embed.set_author(name="⠂" + fix_characters(tracks.tracks[0].playlist_name, 35), url=message.content,
                                  icon_url=music_source_image(tracks.tracks[0].info["sourceName"]))
+
+                try:
+                    embed.description += f"\n🔊 **⠂ Canal de voz:** {message.author.voice.channel.mention}"
+                except AttributeError:
+                    pass
+
                 if response:
                     await response.edit(content=None, embed=embed, components=components)
                 else:
@@ -4673,6 +4679,11 @@ class Music(commands.Cog):
             elif data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message:
 
                 txt = f"> 🎼 **⠂** [`{fix_characters(tracks.tracks[0].playlist_name, 35)}`](<{message.content}>) `[{len(tracks.tracks)} música(s)]` {message.author.mention}"
+
+                try:
+                    txt += f" `|` {message.author.voice.channel.mention}"
+                except AttributeError:
+                    pass
 
                 if response:
                     await response.edit(content=txt, embed=None, components=components)
@@ -4708,7 +4719,12 @@ class Music(commands.Cog):
                      data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message)):
                 embed.description = f"💠 **⠂ Uploader:** `{track.author}`\n" \
                                     f"✋ **⠂ Pedido por:** {message.author.mention}\n" \
-                                    f"⌛ **⠂ Duração:** `{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}`"
+                                    f"⏰ **⠂ Duração:** `{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}`"
+
+                try:
+                    embed.description += f"\n🔊 **⠂ Canal de voz:** {message.author.voice.channel.mention}"
+                except AttributeError:
+                    pass
 
                 embed.set_thumbnail(url=track.thumb)
                 embed.set_author(name=fix_characters(track.title, 35), url=track.uri or track.search_uri, icon_url=music_source_image(track.info["sourceName"]))
@@ -4720,6 +4736,11 @@ class Music(commands.Cog):
             elif data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message:
 
                 txt = f"> 🎵 **⠂** [`{fix_characters(track.title, 35)}`](<{track.uri}>) `[{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}]` {message.author.mention}"
+
+                try:
+                    txt += f" `|` {message.author.voice.channel.mention}"
+                except AttributeError:
+                    pass
 
                 if response:
                     await response.edit(content=txt, embed=None, components=components)
