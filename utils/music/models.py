@@ -1548,13 +1548,16 @@ class LavalinkPlayer(wavelink.Player):
 
             await asyncio.sleep(5)
 
-        await self.change_node(node.identifier)
-
-        self.set_command_log(
-            f"O player foi reconectado em um novo servidor de música: **{self.node.identifier}**",
-            emoji="📶"
-        )
-        self.update = True
+        try:
+            await self.change_node(node.identifier, force=True)
+        except:
+            traceback.print_exc()
+        else:
+            self.set_command_log(
+                f"O player foi reconectado em um novo servidor de música: **{self.node.identifier}**",
+                emoji="📶"
+            )
+            self.update = True
 
     async def _send_rpc_data(self, users: List[int], stats: dict):
 
