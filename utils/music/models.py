@@ -371,7 +371,7 @@ class LavalinkPlayer(wavelink.Player):
 
         self.last_channel: Optional[disnake.VoiceChannel] = None
         self._rpc_update_task: Optional[asyncio.Task] = None
-        self._new_node_task = Optional[asyncio.Task] = None
+        self._new_node_task: Optional[asyncio.Task] = None
         self.start_time = disnake.utils.utcnow()
 
         self.purge_mode = kwargs.pop("purge_mode", SongRequestPurgeMode.on_message)
