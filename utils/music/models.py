@@ -371,6 +371,7 @@ class LavalinkPlayer(wavelink.Player):
 
         self.last_channel: Optional[disnake.VoiceChannel] = None
         self._rpc_update_task: Optional[asyncio.Task] = None
+        self._new_node_task = Optional[asyncio.Task] = None
         self.start_time = disnake.utils.utcnow()
 
         self.purge_mode = kwargs.pop("purge_mode", SongRequestPurgeMode.on_message)
@@ -1383,9 +1384,15 @@ class LavalinkPlayer(wavelink.Player):
 
         try:
             self.idle_task.cancel()
-            self.idle_task = None
         except:
             pass
+        self.idle_task = None
+
+        try:
+            self._new_node_task.cancel()
+        except:
+            pass
+        self._new_node_task = None
 
         try:
             self.message_updater_task.cancel()
@@ -1524,6 +1531,30 @@ class LavalinkPlayer(wavelink.Player):
             return
 
         return
+
+    async def _wait_for_new_node(self):
+
+        self.set_command_log(
+            "Não há servidores de música disponível. Irei fazer algumas tentativas de conectar em um novo servidor de música.",
+            emoji="⏰"
+        )
+        self.update = True
+
+        while True:
+            node = self.bot.music.get_best_node()
+
+            if node:
+                break
+
+            await asyncio.sleep(5)
+
+        await self.change_node(node.identifier)
+
+        self.set_command_log(
+            f"O player foi reconectado em um novo servidor de música: **{self.node.identifier}**",
+            emoji="📶"
+        )
+        self.update = True
 
     async def _send_rpc_data(self, users: List[int], stats: dict):
 

@@ -4889,25 +4889,11 @@ class Music(commands.Cog):
             for player in list(node.players.values()):
 
                 try:
-
-                    try:
-                        new_node: wavelink.Node = await self.get_best_node()
-                    except:
-                        try:
-                            await player.text_channel.send(
-                                "O player foi finalizado por falta de servidores de música...",
-                                delete_after=11)
-                        except:
-                            pass
-                        await player.destroy()
-                        continue
-
-                    await player.change_node(new_node.identifier)
-                    await player.update_message()
-
+                    player._new_node_task.cancel()
                 except:
-                    traceback.print_exc()
-                    continue
+                    pass
+
+                player._new_node_task = self.bot.loop.create_task(player._wait_for_new_node())
 
         await asyncio.sleep(backoff)
 
