@@ -362,6 +362,10 @@ class PinManager(commands.Cog):
         if inter.custom_id != "guild_fav_import":
             return
 
+        if not inter.guild_id:
+            await inter.send("Você não pode executar isso no DM.", ephemeral=True)
+            return
+
         inter, bot = select_bot_pool(inter)
 
         try:
@@ -378,24 +382,24 @@ class PinManager(commands.Cog):
                 time_format(int(retry_after) * 1000, use_names=True)), ephemeral=True)
             return
 
-        await inter.response.defer(ephemeral=True)
-
         for name, data in json_data.items():
 
             if "> fav:" in name.lower():
                 continue
 
             if len(data['url']) > (max_url_chars := bot.config["USER_FAV_MAX_URL_LENGTH"]):
-                await inter.edit_original_message(f"**Um item de seu arquivo ultrapassa a quantidade de caracteres permitido:{max_url_chars}\nURL:** {data['url']}")
+                await inter.send(f"**Um item de seu arquivo ultrapassa a quantidade de caracteres permitido:{max_url_chars}\nURL:** {data['url']}", ephemeral=True)
                 return
 
             if len(data['description']) > 50:
-                await inter.edit_original_message(f"**Um item de seu arquivo ultrapassa a quantidade de caracteres permitido:{max_url_chars}\nDescrição:** {data['description']}")
+                await inter.send(f"**Um item de seu arquivo ultrapassa a quantidade de caracteres permitido:{max_url_chars}\nDescrição:** {data['description']}", ephemeral=True)
                 return
 
             if not isinstance(data['url'], str) or not URL_REG.match(data['url']):
-                await inter.edit_original_message(f"O seu arquivo contém link inválido: ```ldif\n{data['url']}```")
+                await inter.send(f"O seu arquivo contém link inválido: ```ldif\n{data['url']}```", ephemeral=True)
                 return
+
+        await inter.response.defer(ephemeral=True)
 
         guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
@@ -457,20 +461,7 @@ class PinManager(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        guild_data = None
-
-        if inter.bot == bot:
-            try:
-                guild_data = inter.guild_data
-            except AttributeError:
-                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-                try:
-                    inter.guild_data = guild_data
-                except AttributeError:
-                    pass
-
-        if not guild_data:
-            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         cmd = f"</{self.server_playlist.name}:" + str(self.bot.pool.controller_bot.get_global_command_named(self.server_playlist.name, cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
 

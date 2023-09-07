@@ -377,6 +377,10 @@ class FavManager(commands.Cog):
         if inter.custom_id != "user_fav_import":
             return
 
+        if not inter.guild_id:
+            await inter.send("Você não pode executar isso no DM.", ephemeral=True)
+            return
+
         retry_after = self.fav_import_export_cd.get_bucket(inter).update_rate_limit()
         if retry_after:
             if retry_after < 1:
@@ -393,21 +397,20 @@ class FavManager(commands.Cog):
                 f"em formato json.**\n\n`{repr(e)}`", ephemeral=True)
             return
 
-        await inter.response.defer(ephemeral=True)
-
         for name, url in json_data.items():
 
             if "> fav:" in name.lower():
                 continue
 
             if len(url) > (max_url_chars := self.bot.config["USER_FAV_MAX_URL_LENGTH"]):
-                await inter.edit_original_message(
-                    f"**Um item de seu arquivo {url} ultrapassa a quantidade de caracteres permitido:{max_url_chars}**")
+                await inter.send(f"**Um item de seu arquivo {url} ultrapassa a quantidade de caracteres permitido:{max_url_chars}**", ephemeral=True)
                 return
 
             if not isinstance(url, str) or not URL_REG.match(url):
-                await inter.edit_original_message(f"O seu arquivo contém link inválido: ```ldif\n{url}```")
+                await inter.send(f"O seu arquivo contém link inválido: ```ldif\n{url}```", ephemeral=True)
                 return
+
+        await inter.response.defer(ephemeral=True)
 
         user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 

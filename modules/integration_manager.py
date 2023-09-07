@@ -526,11 +526,16 @@ class IntegrationManager(commands.Cog):
         if inter.custom_id != "integration_import":
             return
 
+        if not inter.guild_id:
+            await inter.send("Você não pode executar isso no DM.", ephemeral=True)
+            return
+
         try:
             json_data = json.loads(inter.text_values["json_data"])
         except Exception as e:
             await inter.send("**Ocorreu um erro ao analisar os dados ou foi enviado dados inválidos/não-formatado "
                                f"em formato json.**\n\n`{repr(e)}`", ephemeral=True)
+            return
 
         retry_after = self.integration_import_export_cd.get_bucket(inter).update_rate_limit()
         if retry_after:
@@ -539,8 +544,6 @@ class IntegrationManager(commands.Cog):
             await inter.send("**Você deve aguardar {} para importar.**".format(
                 time_format(int(retry_after) * 1000, use_names=True)), ephemeral=True)
             return
-
-        await inter.response.defer(ephemeral=True)
 
         for name, url in json_data.items():
 
@@ -555,6 +558,8 @@ class IntegrationManager(commands.Cog):
             if not isinstance(url, str) or not URL_REG.match(url):
                 await inter.edit_original_message(f"O seu arquivo contém link inválido: ```ldif\n{url}```")
                 return
+
+        await inter.response.defer(ephemeral=True)
 
         user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
