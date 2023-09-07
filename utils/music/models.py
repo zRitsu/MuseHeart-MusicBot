@@ -1544,14 +1544,15 @@ class LavalinkPlayer(wavelink.Player):
             node = self.bot.music.get_best_node()
 
             if node:
-                break
+                try:
+                    await self.change_node(node.identifier, force=True)
+                except:
+                    traceback.print_exc()
+                else:
+                    break
 
             await asyncio.sleep(5)
 
-        try:
-            await self.change_node(node.identifier, force=True)
-        except:
-            traceback.print_exc()
         else:
             self.set_command_log(
                 f"O player foi reconectado em um novo servidor de música: **{self.node.identifier}**",
