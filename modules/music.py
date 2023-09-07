@@ -5237,6 +5237,7 @@ class Music(commands.Cog):
         search = data.pop("search", True)
         node_website = data.pop('website', '')
         region = data.pop('region', 'us_central')
+        heartbeat = data.pop('heartbeat', 30)
 
         try:
             max_retries = int(data.pop('retries'))
@@ -5268,7 +5269,7 @@ class Music(commands.Cog):
                         continue
 
         data["identifier"] = data["identifier"].replace(" ", "_")
-        node = await self.bot.music.initiate_node(auto_reconnect=False, region=region, **data)
+        node = await self.bot.music.initiate_node(auto_reconnect=False, region=region, heartbeat=heartbeat, **data)
         node.search = search
         node.website = node_website
 
