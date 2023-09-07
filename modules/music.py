@@ -2968,12 +2968,12 @@ class Music(commands.Cog):
 
         try:
             bot = inter.music_bot
-            inter_destroy = inter if bot.user.id == self.bot.user.id else None
             guild = inter.music_guild
         except AttributeError:
             bot = inter.bot
-            inter_destroy = inter
             guild = inter.guild
+
+        inter_destroy = inter if bot.user.id == self.bot.user.id else None
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
         player.command_log = f"{inter.author.mention} **parou o player!**"
@@ -3868,6 +3868,8 @@ class Music(commands.Cog):
             await interaction.send("Você deve entrar em um canal de voz para usar isto.", ephemeral=True)
             return
 
+        await interaction.response.defer(ephemeral=True)
+
         try:
             guild_data = interaction.guild_data
         except AttributeError:
@@ -3877,7 +3879,9 @@ class Music(commands.Cog):
         try:
             query = guild_data["player_controller"]["fav_links"][interaction.data.values[0]]['url']
         except KeyError:
-            return await interaction.send("**O item selecionado não foi encontrado na base de dados...**", ephemeral=True)
+            await interaction.edit_original_message("**O item selecionado não foi encontrado na base de dados...**")
+            await send_idle_embed(interaction.message, bot=self.bot, guild_data=guild_data, force=True)
+            return
 
         kwargs = {
             "query": f"> pin: {query}",
