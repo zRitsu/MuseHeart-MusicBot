@@ -5083,6 +5083,9 @@ class Music(commands.Cog):
 
                         for p in n.players.values():
 
+                            if p.node.restarting:
+                                continue
+
                             p.locked = True
 
                             p.node.restarting = True
