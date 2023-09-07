@@ -996,7 +996,10 @@ class LavalinkPlayer(wavelink.Player):
         except:
             traceback.print_exc()
 
-        await self.process_idle_message()
+        try:
+            await self.process_idle_message()
+        except:
+            traceback.print_exc()
 
         try:
             await self.update_stage_topic()
@@ -1007,13 +1010,16 @@ class LavalinkPlayer(wavelink.Player):
 
         msg = "💤 **⠂O player foi desligado por inatividade...**"
 
-        if self.static or self.has_thread:
-            self.command_log = msg
-        else:
-            embed = disnake.Embed(
-                description=msg, color=self.bot.get_color(self.guild.me))
-            self.bot.loop.create_task(self.text_channel.send(
-                embed=embed, delete_after=120, allowed_mentions=self.allowed_mentions,))
+        try:
+            if self.static or self.has_thread:
+                self.command_log = msg
+            else:
+                embed = disnake.Embed(
+                    description=msg, color=self.bot.get_color(self.guild.me))
+                self.bot.loop.create_task(self.text_channel.send(
+                    embed=embed, delete_after=120, allowed_mentions=self.allowed_mentions))
+        except:
+            traceback.print_exc()
 
         self.bot.loop.create_task(self.destroy())
 
