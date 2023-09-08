@@ -5237,7 +5237,7 @@ class Music(commands.Cog):
         search = data.pop("search", True)
         node_website = data.pop('website', '')
         region = data.pop('region', 'us_central')
-        heartbeat = data.pop('heartbeat', 30)
+        heartbeat = int(data.pop('heartbeat', 30))
 
         try:
             max_retries = int(data.pop('retries'))
