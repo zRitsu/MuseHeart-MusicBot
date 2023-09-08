@@ -2969,11 +2969,11 @@ class Music(commands.Cog):
         try:
             bot = inter.music_bot
             guild = inter.music_guild
+            inter_destroy = inter if bot.user.id == self.bot.user.id else None
         except AttributeError:
             bot = inter.bot
             guild = inter.guild
-
-        inter_destroy = inter if bot.user.id == self.bot.user.id else None
+            inter_destroy = inter
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
         player.command_log = f"{inter.author.mention} **parou o player!**"
