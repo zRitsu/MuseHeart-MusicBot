@@ -719,7 +719,7 @@ class LavalinkPlayer(wavelink.Player):
         if self.locked or self.is_closing or self.auto_pause:
             return
 
-        if not self.node.is_available:
+        if not self.node or not self.node.is_available:
             try:
                 self._new_node_task.cancel()
             except:
