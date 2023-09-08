@@ -719,6 +719,14 @@ class LavalinkPlayer(wavelink.Player):
         if self.locked or self.is_closing or self.auto_pause:
             return
 
+        if not self.node.is_available:
+            try:
+                self._new_node_task.cancel()
+            except:
+                pass
+            self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node())
+            return
+
         if not self.is_connected:
             self.bot.loop.create_task(self.destroy(force=True))
             return
@@ -1534,11 +1542,12 @@ class LavalinkPlayer(wavelink.Player):
 
     async def _wait_for_new_node(self):
 
-        self.set_command_log(
-            "Não há servidores de música disponível. Irei fazer algumas tentativas de conectar em um novo servidor de música.",
-            emoji="⏰"
-        )
-        self.update = True
+        if not self.auto_pause:
+            self.set_command_log(
+                "Não há servidores de música disponível. Irei fazer algumas tentativas de conectar em um novo servidor de música.",
+                emoji="⏰"
+            )
+            self.update = True
 
         while True:
             node = self.bot.music.get_best_node()
@@ -1553,11 +1562,12 @@ class LavalinkPlayer(wavelink.Player):
 
             await asyncio.sleep(5)
 
-        self.set_command_log(
-            f"O player foi reconectado em um novo servidor de música: **{self.node.identifier}**",
-            emoji="📶"
-        )
-        self.update = True
+        if not self.auto_pause:
+            self.set_command_log(
+                f"O player foi reconectado em um novo servidor de música: **{self.node.identifier}**",
+                emoji="📶"
+            )
+            self.update = True
 
     async def _send_rpc_data(self, users: List[int], stats: dict):
 
