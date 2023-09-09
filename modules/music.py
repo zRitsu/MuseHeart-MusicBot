@@ -3882,7 +3882,7 @@ class Music(commands.Cog):
         try:
             query = guild_data["player_controller"]["fav_links"][interaction.data.values[0]]['url']
         except KeyError:
-            await interaction.edit_original_message("**O item selecionado não foi encontrado na base de dados...**")
+            await interaction.send("**O item selecionado não foi encontrado na base de dados...**", ephemeral=True)
             await send_idle_embed(interaction.message, bot=self.bot, guild_data=guild_data, force=True)
             return
 
