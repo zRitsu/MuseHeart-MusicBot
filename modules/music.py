@@ -5034,68 +5034,24 @@ class Music(commands.Cog):
 
         player.current = None
 
-        if payload.error == "This IP address has been blocked by YouTube (429)":
+        if payload.error == "This IP address has been blocked by YouTube (429)" or (payload.cause.startswith("java.lang.RuntimeException: Not success status code: 403") and track.info["sourceName"] == "youtube"):
             player.node.available = False
-            newnode = [n for n in self.bot.music.nodes.values() if n != player.node and n.available and n.is_available]
-            if newnode:
-                player.queue.appendleft(player.last_track)
-                await player.change_node(newnode[0].identifier)
-            else:
-                embed = disnake.Embed(
-                    color=self.bot.get_color(player.guild.me),
-                    description="**O player foi finalizado por falta de servidores disponíveis.**"
-                )
-                await player.text_channel.send(embed=embed, delete_after=15)
-                await player.destroy(force=True)
-                return
+
+            try:
+                player._new_node_task.cancel()
+            except:
+                pass
+            player._new_node_task = player.bot.loop.create_task(player._wait_for_new_node(f"O servidor **{node.identifier}** tomou ratelimit do youtube está indisponível no momento (aguardando um novo servidor ficar disponível)."))
+            return
 
         if player.last_track:
 
             if payload.cause.startswith((
                     "java.net.SocketTimeoutException: connect timed out",
-                    #"java.lang.RuntimeException: Not success status code: 403",
                     "java.net.UnknownHostException:",
                     "com.sedmelluq.discord.lavaplayer.tools.io.PersistentHttpStream$PersistentHttpException: Not success status code: 403",
             )):
                 player.queue.appendleft(player.last_track)
-
-            # TODO: Desativar esse recurso após a correção do lavaplayer ser efetuada.
-            elif payload.cause == "java.lang.RuntimeException: Not success status code: 403" and player.node.identifier == "LOCAL":
-
-                player.queue.appendleft(player.last_track)
-
-                txt = "O servidor de música foi reiniciado para uma correção e a música será retomada em alguns " \
-                      "segundos (Por favor aguarde)..."
-
-                for b in self.bot.pool.bots:
-
-                    for n in b.music.nodes.values():
-
-                        if n.identifier != "LOCAL" or n.restarting:
-                            continue
-
-                        for p in n.players.values():
-
-                            p.locked = True
-
-                            p.node.restarting = True
-
-                            if p.static or p.controller_mode:
-                                p.set_command_log(text=txt, emoji="🛠️")
-                                self.bot.loop.create_task(p.invoke_np(force=True))
-                            else:
-                                self.bot.loop.create_task(
-                                    p.text_channel.send(
-                                        embed=disnake.Embed(
-                                            color=self.bot.get_color(p.guild.me),
-                                            description=f"🛠️ **⠂{txt}**"
-                                        )
-                                    )
-                                )
-
-                self.bot.pool.start_lavalink()
-                player.locked = True
-                return
 
             elif payload.cause == "java.lang.InterruptedException":
                 player.queue.appendleft(player.last_track)

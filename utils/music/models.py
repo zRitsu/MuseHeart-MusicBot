@@ -1540,11 +1540,11 @@ class LavalinkPlayer(wavelink.Player):
 
         return
 
-    async def _wait_for_new_node(self):
+    async def _wait_for_new_node(self, txt: str):
 
         if not self.auto_pause:
             self.set_command_log(
-                "Não há servidores de música disponível. Irei fazer algumas tentativas de conectar em um novo servidor de música.",
+                txt or "Não há servidores de música disponível. Irei fazer algumas tentativas de conectar em um novo servidor de música.",
                 emoji="⏰"
             )
             self.update = True
