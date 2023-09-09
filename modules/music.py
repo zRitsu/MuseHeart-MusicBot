@@ -682,7 +682,10 @@ class Music(commands.Cog):
         class DummyMessage:
             attachments = [file]
 
+        thread = inter.message.thread
+
         inter.message = DummyMessage()
+        inter.message.thread = thread
 
         await self.play.callback(self=self, inter=inter, query="", position=position, options=False, force_play=force_play,
                                  manual_selection=False, source="ytsearch", repeat_amount=repeat_amount, server=server)
