@@ -1549,6 +1549,8 @@ class LavalinkPlayer(wavelink.Player):
             )
             self.update = True
 
+        old_node = self.node.identifier
+
         while True:
             node = self.bot.music.get_best_node()
 
@@ -1563,11 +1565,14 @@ class LavalinkPlayer(wavelink.Player):
             await asyncio.sleep(5)
 
         if not self.auto_pause:
-            self.set_command_log(
-                f"O player foi reconectado em um novo servidor de música: **{self.node.identifier}**",
-                emoji="📶"
-            )
-            self.update = True
+
+            if old_node == node.identifier:
+                txt = f"A conexão com servidor de música **{node.identifier}** foi restabelecida com sucesso."
+            else:
+                txt = f"O player foi reconectado em um novo servidor de música: **{node.identifier}**."
+
+            self.set_command_log(txt, emoji="📶")
+            await self.invoke_np(force=True)
 
     async def _send_rpc_data(self, users: List[int], stats: dict):
 
