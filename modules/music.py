@@ -749,7 +749,10 @@ class Music(commands.Cog):
         warn_message = None
 
         try:
-            message_inter = inter.message
+            if isinstance(inter.message, disnake.Message):
+                message_inter = inter.message
+            else:
+                message_inter = None
         except AttributeError:
             message_inter = None
 
