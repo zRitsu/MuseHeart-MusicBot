@@ -682,8 +682,10 @@ class Music(commands.Cog):
         class DummyMessage:
             attachments = [file]
 
-        thread = inter.message.thread
-
+        try:
+            thread = inter.message.thread
+        except:
+            thread = None
         inter.message = DummyMessage()
         inter.message.thread = thread
 
