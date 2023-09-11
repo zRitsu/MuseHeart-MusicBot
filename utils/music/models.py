@@ -1540,7 +1540,7 @@ class LavalinkPlayer(wavelink.Player):
 
         return
 
-    async def _wait_for_new_node(self, txt: str):
+    async def _wait_for_new_node(self, txt: str = None):
 
         if not self.auto_pause:
             self.set_command_log(
