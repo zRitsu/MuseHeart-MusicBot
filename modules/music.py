@@ -3807,11 +3807,11 @@ class Music(commands.Cog):
 
                             if (channel_db.archived or channel_db.locked) and not channel_db.parent.permissions_for(
                                     guild.me).manage_threads:
-                                raise GenericError(
-                                    f"**{bot.user.mention} não possui permissão de gerenciar tópicos para "
-                                    f"desarquivar/destrancar o tópico: {channel_db.mention}**")
+                                warn_message = f"**{bot.user.mention} não possui permissão de gerenciar tópicos para " \
+                                                f"desarquivar/destrancar o tópico: {channel_db.mention}**"
 
-                            await channel_db.edit(archived=False, locked=False)
+                            else:
+                                await channel_db.edit(archived=False, locked=False)
                 except AttributeError:
                     pass
 
