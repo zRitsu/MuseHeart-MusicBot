@@ -3804,14 +3804,15 @@ class Music(commands.Cog):
                             channel_db = None
 
                         else:
+                            if (channel_db.archived or channel_db.locked) and not channel_db.parent.permissions_for(guild.me).manage_threads:
 
-                            if (channel_db.archived or channel_db.locked) and not channel_db.parent.permissions_for(
-                                    guild.me).manage_threads:
-                                warn_message = f"**{bot.user.mention} não possui permissão de gerenciar tópicos para " \
-                                                f"desarquivar/destrancar o tópico: {channel_db.mention}**"
+                                if isinstance(channel.parent, disnake.ForumChannel):
+                                    warn_message = f"**{bot.user.mention} não possui permissão de gerenciar tópicos " \
+                                                    f"para desarquivar/destrancar o tópico: {channel_db.mention}**"
 
                             else:
                                 await channel_db.edit(archived=False, locked=False)
+
                 except AttributeError:
                     pass
 
