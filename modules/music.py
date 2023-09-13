@@ -5050,38 +5050,36 @@ class Music(commands.Cog):
             player._new_node_task = player.bot.loop.create_task(player._wait_for_new_node(f"O servidor **{node.identifier}** tomou ratelimit do youtube está indisponível no momento (aguardando um novo servidor ficar disponível)."))
             return
 
-        if player.last_track:
+        if payload.cause.startswith((
+                "java.net.SocketTimeoutException: Read timed out",
+                "java.net.SocketTimeoutException: connect timed out",
+                "java.net.UnknownHostException:",
+                "com.sedmelluq.discord.lavaplayer.tools.io.PersistentHttpStream$PersistentHttpException: Not success status code: 403",
+        )):
+            player.queue.appendleft(track)
 
-            if payload.cause.startswith((
-                    "java.net.SocketTimeoutException: Read timed out",
-                    "java.net.SocketTimeoutException: connect timed out",
-                    "java.net.UnknownHostException:",
-                    "com.sedmelluq.discord.lavaplayer.tools.io.PersistentHttpStream$PersistentHttpException: Not success status code: 403",
-            )):
-                player.queue.appendleft(player.last_track)
+        elif payload.cause == "java.lang.InterruptedException":
+            player.queue.appendleft(track)
 
-            elif payload.cause == "java.lang.InterruptedException":
-                player.queue.appendleft(player.last_track)
-
-                if player.node.identifier == "LOCAL":
+            if player.node.identifier == "LOCAL":
+                return
+            else:
+                try:
+                    n = await self.get_best_node()
+                except:
+                    if player.static:
+                        player.set_command_log(text="O player foi desligado por falta de servidores de música...")
+                    else:
+                        await player.text_channel.send("**O player foi desligado por falta de servidores de música...**")
+                    await player.destroy()
                     return
-                else:
-                    try:
-                        n = await self.get_best_node()
-                    except:
-                        if player.static:
-                            player.set_command_log(text="O player foi desligado por falta de servidores de música...")
-                        else:
-                            await player.text_channel.send("**O player foi desligado por falta de servidores de música...**")
-                        await player.destroy()
-                        return
-                    await player.change_node(n.identifier)
+                await player.change_node(n.identifier)
 
-            elif not track.track_loops:
-                player.failed_tracks.append(player.last_track)
+        elif not track.track_loops:
+            player.failed_tracks.append(track)
 
-            elif player.keep_connected and not player.last_track.autoplay and len(player.queue) > 15:
-                player.queue.append(player.last_track)
+        elif player.keep_connected and not track.autoplay and len(player.queue) > 15:
+            player.queue.append(track)
 
         player.locked = True
         await asyncio.sleep(10)
