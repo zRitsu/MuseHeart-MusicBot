@@ -61,23 +61,23 @@ class ClassicSkin:
             )
 
         if player.current.is_stream:
-            duration = "🔴 **⠂Livestream**"
+            duration = "🔴 **⠂ `Livestream`"
         else:
-            duration = f"⏰ **⠂Duração:** `{time_format(player.current.duration)}`"
+            duration = f"⏰ **⠂** `{time_format(player.current.duration)}`"
 
         txt = f"{duration}\n" \
-              f"💠 **⠂Uploader:** `{player.current.author}`\n"
+              f"👤 **⠂** `{player.current.author}`\n"
 
         if not player.current.autoplay:
-            txt += f"🎧 **⠂Pedido por:** <@{player.current.requester}>\n"
+            txt += f"🎧 **⠂** <@{player.current.requester}>\n"
 
         if player.current.playlist_name:
-            txt += f"📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=19)}`]({player.current.playlist_url})\n"
+            txt += f"📑 **⠂** [`{fix_characters(player.current.playlist_name, limit=19)}`]({player.current.playlist_url})\n"
 
         if qsize := len(player.queue):
 
             if not player.mini_queue_enabled:
-                txt += f"🎶 **⠂Músicas na fila:** `{qsize}`\n"
+                txt += f"🎶 **⠂** `{qsize} música(s) na fila`\n"
             else:
                 queue_txt += "```ansi\n[0;33mPróximas Músicas:[0m```" + "\n".join(
                     f"`{(n + 1):02}) [{time_format(t.duration) if t.duration else '🔴 Livestream'}]` "

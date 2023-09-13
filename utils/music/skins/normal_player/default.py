@@ -60,39 +60,39 @@ class DefaultSkin:
 
         player.mini_queue_feature = True
 
-        duration = "> 🔴 **⠂Duração:** `Livestream`\n" if player.current.is_stream else \
-            (f"> ⏰ **⠂Duração:** `{time_format(player.current.duration)} [`" +
+        duration = "> 🔴 **⠂** `Livestream`\n" if player.current.is_stream else \
+            (f"> ⏰ **⠂** `{time_format(player.current.duration)} [`" +
             f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`\n"
             if not player.paused else '')
 
         txt = f"[`{player.current.single_title}`]({player.current.uri or player.current.search_uri})\n\n" \
               f"{duration}" \
-              f"> 💠 **⠂Por:** {player.current.authors_md}"
+              f"> 👤 **⠂** {player.current.authors_md}"
 
         if not player.current.autoplay:
-            txt += f"\n> ✋ **⠂Pedido por:** <@{player.current.requester}>"
+            txt += f"\n> ✋ **⠂** <@{player.current.requester}>"
 
         if player.current.track_loops:
-            txt += f"\n> 🔂 **⠂Repetições restante:** `{player.current.track_loops}`"
+            txt += f"\n> 🔂 **⠂** `Repetições restantes: {player.current.track_loops}`"
 
         if player.loop:
             if player.loop == 'current':
                 e = '🔂'; m = 'Música atual'
             else:
                 e = '🔁'; m = 'Fila'
-            txt += f"\n> {e} **⠂Modo de repetição:** `{m}`"
+            txt += f"\n> {e} **⠂** `Repetição: {m}`"
 
         if player.current.album_name:
-            txt += f"\n> 💽 **⠂Álbum:** [`{fix_characters(player.current.album_name, limit=36)}`]({player.current.album_url})"
+            txt += f"\n> 💽 **⠂** [`{fix_characters(player.current.album_name, limit=36)}`]({player.current.album_url})"
 
         if player.current.playlist_name:
-            txt += f"\n> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=36)}`]({player.current.playlist_url})"
+            txt += f"\n> 📑 **⠂** [`{fix_characters(player.current.playlist_name, limit=36)}`]({player.current.playlist_url})"
 
         if (qlenght:=len(player.queue)) and not player.mini_queue_enabled:
-            txt += f"\n> 🎶 **⠂Músicas na fila:** `{qlenght}`"
+            txt += f"\n> 🎶 **⠂** `{qlenght} música(s) na fila`"
 
         if player.keep_connected:
-            txt += "\n> ♾️ **⠂Modo 24/7:** `Ativado`"
+            txt += "\n> ♾️ **⠂** `Modo 24/7 ativado`"
 
         txt += f"{vc_txt}\n"
 
