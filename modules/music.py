@@ -5054,6 +5054,8 @@ class Music(commands.Cog):
                 "java.net.SocketTimeoutException: Read timed out",
                 "java.net.SocketTimeoutException: connect timed out",
                 "java.net.UnknownHostException:",
+                "java.lang.IllegalStateException: Current position is beyond this element",
+                "javax.script.ScriptEngine.eval(String)",
                 "com.sedmelluq.discord.lavaplayer.tools.io.PersistentHttpStream$PersistentHttpException: Not success status code: 403",
         )):
             player.queue.appendleft(track)
