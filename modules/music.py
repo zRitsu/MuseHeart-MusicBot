@@ -2,6 +2,7 @@
 import datetime
 import json
 import pprint
+import re
 import traceback
 import asyncio
 from copy import deepcopy
@@ -1061,7 +1062,13 @@ class Music(commands.Cog):
                 if not self.bot.config["ENABLE_DISCORD_URLS_PLAYBACK"] and "cdn.discordapp.com/attachments/" in query:
                     raise GenericError("**O suporte a links do discord está desativado.**")
 
-                query = urls[0].split("&ab_channel=")[0].split("&start_radio=")[0]
+                for p in ("&ab_channel=", "&start_radio="):
+                    if p in query:
+                        try:
+                            query = f'https://www.youtube.com/watch?v={re.search(r"v=([a-zA-Z0-9_-]+)", query).group(1)}'
+                        except:
+                            pass
+                        break
 
                 if "&list=" in query and (link_re := YOUTUBE_VIDEO_REG.match(query)):
 
