@@ -70,7 +70,7 @@ class CustomSkin(commands.Cog):
 
         preview_data = skin_converter(data, ctx, player)
 
-        msg = await ctx.reply(**preview_data)
+        msg = await ctx.reply(fail_if_not_exists=False, **preview_data)
 
         emojis = ["✅", "❌"]
 

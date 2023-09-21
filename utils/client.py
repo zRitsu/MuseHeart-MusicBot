@@ -819,7 +819,7 @@ class BotCore(commands.Bot):
                     ]
                 }
 
-            await message.reply(embed=embed, **kwargs)
+            await message.reply(embed=embed, fail_if_not_exists=False, **kwargs)
             return
 
         ctx: CustomContext = await self.get_context(message, cls=CustomContext)

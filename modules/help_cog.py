@@ -374,7 +374,7 @@ class HelpCog(commands.Cog, name="Ajuda"):
                 cmds = [cmd]
                 index = 0
 
-        await ctx.reply(ctx.author.mention, embed=await self.get_cmd(ctx=ctx, cmds=cmds, index=index, category=name, emoji=emoji), mention_author = False)
+        await ctx.reply(ctx.author.mention, embed=await self.get_cmd(ctx=ctx, cmds=cmds, index=index, category=name, emoji=emoji), mention_author = False, fail_if_not_exists=False)
 
 
     async def add_reactions(self, msg: discord.Message, reactions):

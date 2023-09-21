@@ -910,7 +910,7 @@ class Owner(commands.Cog):
                 components=[
                     disnake.ui.Button(label="Fechar Shell", custom_id="close_shell_result", emoji="♻️")
                 ],
-                mention_author=False,
+                mention_author=False, fail_if_not_exists=False,
                 **kwargs
             )
 

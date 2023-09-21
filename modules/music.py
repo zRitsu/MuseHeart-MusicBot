@@ -3661,7 +3661,7 @@ class Music(commands.Cog):
                 title="**Player Uptime:**",
                 description="\n-----\n".join(uptime_info),
                 color=self.bot.get_color(ctx.guild.me)
-            )
+            ), fail_if_not_exists=False
         )
 
     @commands.Cog.listener("on_message_delete")

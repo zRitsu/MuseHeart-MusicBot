@@ -1355,7 +1355,8 @@ class MusicSettings(commands.Cog):
             ).set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/1108943648508366868/image.png").
             set_footer(text="Nota: crie um convite sem limitações como: datas para expirar, quantidade de usos ou "
                             "apenas para um usuário usar."),
-            components=[disnake.ui.Button(label="Enviar convite", custom_id=f"listen_along_{ctx.author.id}")]
+            components=[disnake.ui.Button(label="Enviar convite", custom_id=f"listen_along_{ctx.author.id}")],
+            fail_if_not_exists=False
         )
 
     @commands.Cog.listener("on_button_click")

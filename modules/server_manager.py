@@ -212,7 +212,7 @@ class ServerManagerCog(commands.Cog):
     async def servermanager(self, ctx: CustomContext):
 
         view = ServerManagerView(ctx)
-        view.message = await ctx.reply(embeds=view.build_embed(ctx), view=view)
+        view.message = await ctx.reply(embeds=view.build_embed(ctx), view=view, fail_if_not_exists=False)
         await view.wait()
 
 def setup(bot: BotCore):
