@@ -614,7 +614,7 @@ async def update_vc_status(bot, channel: disnake.VoiceChannel, status: str = Non
 
     url = f'https://discord.com/api/v9/channels/{channel.id}/voice-status'
 
-    params = {"status": status}
+    params = {"status": status} if status else {}
 
     async with ClientSession() as session:
         async with session.put(url, headers=headers, json=params) as resp:

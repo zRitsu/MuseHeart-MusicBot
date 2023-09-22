@@ -1097,10 +1097,11 @@ class LavalinkPlayer(wavelink.Player):
 
         else: # voicechannel
 
-            if msg == self.last_stage_title:
-                return
-
             if msg:
+
+                if msg == self.last_stage_title:
+                    return
+
                 msg = f"<:play:734221719774035968> {msg}"
 
             await update_vc_status(self.bot, self.guild.me.voice.channel, msg)
@@ -1279,10 +1280,10 @@ class LavalinkPlayer(wavelink.Player):
                         await interaction.message.edit(allowed_mentions=self.allowed_mentions, **self.last_data)
                     else:
                         await interaction.response.edit_message(allowed_mentions=self.allowed_mentions, **self.last_data)
-                    self.updating = False
-                    self.start_message_updater_task()
                 except:
                     traceback.print_exc()
+                self.updating = False
+                self.start_message_updater_task()
                 return
 
             else:
@@ -1302,7 +1303,6 @@ class LavalinkPlayer(wavelink.Player):
                                 return
 
                         self.start_message_updater_task()
-                        await self.update_stage_topic()
                         self.updating = False
                         return
                     except Exception as e:
@@ -1322,8 +1322,6 @@ class LavalinkPlayer(wavelink.Player):
                 traceback.print_exc()
 
             self.start_message_updater_task()
-
-        await self.update_stage_topic()
 
         self.updating = False
 

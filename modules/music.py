@@ -333,6 +333,8 @@ class Music(commands.Cog):
 
         await self.interaction_message(inter, txt, emoji="📢", force=True)
 
+        await player.update_stage_topic()
+
     @stage_announce.autocomplete("template")
     async def stage_announce_autocomplete(self, inter: disnake.Interaction, query: str):
 
@@ -5166,6 +5168,8 @@ class Music(commands.Cog):
 
         await player.process_save_queue()
 
+        await player.update_stage_topic()
+
     @commands.Cog.listener("on_wavelink_track_end")
     async def track_end(self, node: wavelink.Node, payload: wavelink.TrackEnd):
 
@@ -5432,7 +5436,7 @@ class Music(commands.Cog):
         except:
             check = None
 
-        if player.stage_title_event:
+        if player.stage_title_event and not after.channel:
 
             if isinstance(before.channel, disnake.StageChannel):
 
