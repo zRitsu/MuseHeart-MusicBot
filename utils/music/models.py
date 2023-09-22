@@ -1050,7 +1050,8 @@ class LavalinkPlayer(wavelink.Player):
             return
 
         if clear:
-            if isinstance(self.guild.me.voice, disnake.VoiceChannel):
+            if isinstance(self.guild.me.voice.channel, disnake.VoiceChannel) and \
+                    [m for m in self.guild.me.voice.channel.voice_states if m != self.bot.user.id]:
                 await update_vc_status(self.bot, self.guild.me.voice.channel)
             return
 
