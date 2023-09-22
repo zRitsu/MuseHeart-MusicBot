@@ -30,7 +30,8 @@ from utils.music.converters import time_format, fix_characters, string_to_second
     YOUTUBE_VIDEO_REG, google_search, percentage, music_source_image, perms_translations
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, fav_list, queue_track_index, \
-    pool_command, string_to_file, CommandArgparse, music_source_emoji_url, SongRequestPurgeMode, song_request_buttons
+    pool_command, string_to_file, CommandArgparse, music_source_emoji_url, SongRequestPurgeMode, song_request_buttons, \
+    update_vc_status
 
 
 class Music(commands.Cog):
@@ -247,8 +248,8 @@ class Music(commands.Cog):
     @has_source()
     @commands.has_guild_permissions(manage_guild=True)
     @pool_command(
-        only_voiced=True, name="stageannounce", aliases=["stagevc", "togglestageannounce"],
-        description="Ativar o sistema de anuncio automático do palco com o nome da música.",
+        only_voiced=True, name="stageannounce", aliases=["stagevc", "togglestageannounce", "announce", "vcannounce"],
+        description="Ativar o sistema de anuncio/status automático do canal com o nome da música.",
         cooldown=stage_cd, max_concurrency=stage_mc, extras={"exclusive_cooldown": True},
         usage="{prefix}{cmd} <placeholders>\nEx: {track.author} - {track.title}"
     )
@@ -258,7 +259,7 @@ class Music(commands.Cog):
 
     @has_source()
     @commands.slash_command(
-        description=f"{desc_prefix}Ativar/editar o sistema de anuncio automático do palco com o nome da música.",
+        description=f"{desc_prefix}Ativar/editar o sistema de anuncio/status automático do canal com o nome da música.",
         extras={"only_voiced": True, "exclusive_cooldown": True},
         default_member_permissions=disnake.Permissions(manage_guild=True), cooldown=stage_cd, max_concurrency=stage_mc
     )
@@ -278,7 +279,11 @@ class Music(commands.Cog):
             bot = inter.bot
             guild = inter.guild
 
-        if not isinstance(guild.me.voice.channel, disnake.StageChannel):
+        if isinstance(guild.me.voice.channel, disnake.VoiceChannel):
+            if not bot.config.get("X_SUPER_PROPERTIES"):
+                raise GenericError("**Você deve estar em um canal de voz/palco para ativar/desativar esse sistema.**")
+
+        elif not isinstance(guild.me.voice.channel, disnake.StageChannel):
             raise GenericError("**Você deve estar em um canal de palco para ativar/desativar esse sistema.**")
 
         if not guild.me.guild_permissions.manage_guild:
@@ -5424,13 +5429,18 @@ class Music(commands.Cog):
         except:
             check = None
 
-        if isinstance(before.channel, disnake.StageChannel) and player.stage_title_event:
+        if player.stage_title_event:
 
-            if before.channel.instance:
-                try:
-                    await before.channel.instance.edit(topic="atualização automática desativada")
-                except:
-                    traceback.print_exc()
+            if isinstance(before.channel, disnake.StageChannel):
+
+                if before.channel.instance:
+                    try:
+                        await before.channel.instance.edit(topic="atualização automática desativada")
+                    except:
+                        traceback.print_exc()
+
+            elif isinstance(before.channel, disnake.VoiceChannel):
+                await update_vc_status(self.bot, before.channel, status=None)
 
             player.stage_title_event = False
 

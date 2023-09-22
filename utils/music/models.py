@@ -14,7 +14,7 @@ from utils.music.converters import fix_characters, time_format, get_button_style
 from utils.music.skin_utils import skin_converter
 from utils.music.filters import AudioFilter
 from utils.db import DBModel
-from utils.others import send_idle_embed, PlayerControls, SongRequestPurgeMode, song_request_buttons
+from utils.others import send_idle_embed, PlayerControls, SongRequestPurgeMode, song_request_buttons, update_vc_status
 import traceback
 from collections import deque
 from typing import Optional, Union, TYPE_CHECKING, List
@@ -1042,9 +1042,6 @@ class LavalinkPlayer(wavelink.Player):
             await self.connect(self.last_channel.id)
             return
 
-        if not isinstance(self.guild.me.voice.channel, disnake.StageChannel):
-            return
-
         if not self.guild.me.guild_permissions.manage_guild:
             return
 
@@ -1078,15 +1075,20 @@ class LavalinkPlayer(wavelink.Player):
             if len(msg) > 110:
                 msg = msg[:107] + "..."
 
-        if not self.guild.me.voice.channel.instance:
-            func = self.guild.me.voice.channel.create_instance
-        elif msg == self.last_stage_title:
-            self.last_stage_title = msg
-            return
-        else:
-            func = self.guild.me.voice.channel.instance.edit
+        if isinstance(self.guild.me.voice.channel, disnake.StageChannel):
+            if not self.guild.me.voice.channel.instance:
+                func = self.guild.me.voice.channel.create_instance
+            elif msg == self.last_stage_title:
+                self.last_stage_title = msg
+                return
+            else:
+                func = self.guild.me.voice.channel.instance.edit
 
-        await func(topic=msg)
+            await func(topic=msg)
+
+        else: # voicechannel
+            await update_vc_status(self.bot, self.guild.me.voice.channel, msg)
+
         self.last_stage_title = msg
 
     def start_message_updater_task(self):
