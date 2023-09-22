@@ -1036,16 +1036,22 @@ class LavalinkPlayer(wavelink.Player):
         self.command_log = text
         self.command_log_emoji = emoji
 
-    async def update_stage_topic(self):
+    async def update_stage_topic(self, reconnect=True, clear=False):
 
         if not self.guild.me.voice:
-            await self.connect(self.last_channel.id)
+            if reconnect:
+                await self.connect(self.last_channel.id)
             return
 
         if not self.guild.me.guild_permissions.manage_guild:
             return
 
         if not self.stage_title_event:
+            return
+
+        if clear:
+            if isinstance(self.guild.me.voice, disnake.VoiceChannel):
+                await update_vc_status(self.bot, self.guild.me.voice.channel)
             return
 
         if not self.current:
@@ -1388,7 +1394,7 @@ class LavalinkPlayer(wavelink.Player):
         await self.process_rpc(vc, close=True)
 
         try:
-            await self.update_stage_topic()
+            await self.update_stage_topic(reconnect=False, clear=True)
         except:
             pass
 
