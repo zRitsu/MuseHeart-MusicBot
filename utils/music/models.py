@@ -1095,7 +1095,6 @@ class LavalinkPlayer(wavelink.Player):
             if not self.guild.me.voice.channel.instance:
                 func = self.guild.me.voice.channel.create_instance
             elif msg == self.last_stage_title:
-                self.last_stage_title = msg
                 return
             else:
                 func = self.guild.me.voice.channel.instance.edit
@@ -1103,6 +1102,9 @@ class LavalinkPlayer(wavelink.Player):
             await func(topic=msg)
 
         else: # voicechannel
+
+            if msg == self.last_stage_title:
+                return
 
             if msg:
                 msg = f"<:play:734221719774035968> {msg}"
