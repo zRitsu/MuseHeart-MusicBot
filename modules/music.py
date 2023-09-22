@@ -5436,7 +5436,7 @@ class Music(commands.Cog):
         except:
             check = None
 
-        if player.stage_title_event and not after.channel:
+        if player.stage_title_event:
 
             if isinstance(before.channel, disnake.StageChannel):
 
@@ -5445,11 +5445,15 @@ class Music(commands.Cog):
                         await before.channel.instance.edit(topic="atualização automática desativada")
                     except:
                         traceback.print_exc()
+                    player.stage_title_event = False
 
-            elif isinstance(before.channel, disnake.VoiceChannel):
-                await update_vc_status(self.bot, before.channel, status=None)
+            else:
+                if isinstance(before.channel, disnake.VoiceChannel):
+                    player.stage_title_event = False
+                    await update_vc_status(self.bot, before.channel, status=None)
 
-            player.stage_title_event = False
+                if isinstance(after.channel, disnake.VoiceChannel):
+                    await player.update_stage_topic()
 
         player.members_timeout_task = self.bot.loop.create_task(player.members_timeout(check=check))
 
