@@ -293,7 +293,7 @@ class Music(commands.Cog):
 
         if not template:
             if isinstance(guild.me.voice.channel, disnake.VoiceChannel):
-                template = "{track.title} | {track.author}"
+                template = "<:play:734221719774035968> {track.title} | {track.author}"
             else:
                 template = player.stage_title_template
 

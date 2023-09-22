@@ -1097,12 +1097,8 @@ class LavalinkPlayer(wavelink.Player):
 
         else: # voicechannel
 
-            if msg:
-
-                if msg == self.last_stage_title:
-                    return
-
-                msg = f"<:play:734221719774035968> {msg}"
+            if msg == self.last_stage_title:
+                return
 
             await update_vc_status(self.bot, self.guild.me.voice.channel, msg)
 
