@@ -11,6 +11,7 @@ from io import BytesIO
 from typing import TYPE_CHECKING, Union, Optional
 
 import disnake
+from aiohttp import ClientSession
 from disnake.ext import commands
 
 from utils.db import DBModel
@@ -615,6 +616,7 @@ async def update_vc_status(bot, channel: disnake.VoiceChannel, status: str = Non
 
     params = {"status": status}
 
-    async with bot.session.put(url, headers=headers, json=params) as resp:
-        if resp.status != 204:
-            raise Exception(f"{resp.status}")
+    async with ClientSession() as session:
+        async with session.put(url, headers=headers, json=params) as resp:
+            if resp.status != 204:
+                raise Exception(f"{resp.status}")
