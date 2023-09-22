@@ -1277,8 +1277,6 @@ class LavalinkPlayer(wavelink.Player):
 
             self.updating = True
 
-            done = False # TODO: tempfix pra um raro problema do try/except não ser passado ocasionalmente
-
             if interaction:
                 try:
                     if interaction.response.is_done():
@@ -1287,11 +1285,11 @@ class LavalinkPlayer(wavelink.Player):
                         await interaction.response.edit_message(allowed_mentions=self.allowed_mentions, **self.last_data)
                     self.updating = False
                     self.start_message_updater_task()
-                    done = True
                 except:
                     traceback.print_exc()
+                return
 
-            if not done:
+            else:
 
                 if self.message and (self.ignore_np_once or self.has_thread or self.static or not force or self.is_last_message()):
 
