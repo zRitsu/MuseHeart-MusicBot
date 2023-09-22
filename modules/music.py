@@ -292,7 +292,10 @@ class Music(commands.Cog):
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         if not template:
-            template = player.stage_title_template
+            if isinstance(guild.me.voice.channel, disnake.VoiceChannel):
+                template = "{track.title} | {track.author}"
+            else:
+                template = player.stage_title_template
 
         elif not any(p in template for p in (
                 '{track.title}', '{track.author}', '{track.duration}', '{track.source}', '{track.playlist}',

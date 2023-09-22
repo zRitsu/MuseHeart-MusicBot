@@ -351,7 +351,7 @@ class LavalinkPlayer(wavelink.Player):
         self.update: bool = False
         self.updating: bool = False
         self.stage_title_event = False
-        self.stage_title_template = kwargs.pop("stage_title_template", None)
+        self.stage_title_template = kwargs.pop("stage_title_template", None) or "Tocando: {track.title} | {track.author}"
         self.last_stage_title = ""
         self.auto_update: int = 0
         self.listen_along_invite = kwargs.pop("listen_along_invite", "")
@@ -1054,12 +1054,6 @@ class LavalinkPlayer(wavelink.Player):
                     [m for m in self.guild.me.voice.channel.voice_states if m != self.bot.user.id]:
                 await update_vc_status(self.bot, self.guild.me.voice.channel)
             return
-
-        if not self.stage_title_template:
-            template = "{track.title} | {track.author}"
-            if isinstance(self.guild.me.voice.channel, disnake.StageChannel):
-                template = f"Tocando: {template}"
-            self.stage_title_template = template
 
         msg = None
 
