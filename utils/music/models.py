@@ -1277,16 +1277,22 @@ class LavalinkPlayer(wavelink.Player):
 
             self.updating = True
 
-            try:
-                if interaction.response.is_done():
-                    await interaction.message.edit(allowed_mentions=self.allowed_mentions, **self.last_data)
-                else:
-                    await interaction.response.edit_message(allowed_mentions=self.allowed_mentions, **self.last_data)
-                self.updating = False
-                self.start_message_updater_task()
-                return
+            done = False # TODO: tempfix pra um raro problema do try/except não ser passado ocasionalmente
 
-            except Exception:
+            if interaction:
+                try:
+                    if interaction.response.is_done():
+                        await interaction.message.edit(allowed_mentions=self.allowed_mentions, **self.last_data)
+                    else:
+                        await interaction.response.edit_message(allowed_mentions=self.allowed_mentions, **self.last_data)
+                    self.updating = False
+                    self.start_message_updater_task()
+                    done = True
+                except:
+                    traceback.print_exc()
+
+            if not done:
+
                 if self.message and (self.ignore_np_once or self.has_thread or self.static or not force or self.is_last_message()):
 
                     self.ignore_np_once = False
