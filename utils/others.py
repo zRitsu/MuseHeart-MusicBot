@@ -616,4 +616,5 @@ async def update_vc_status(bot, channel: disnake.VoiceChannel, status: str = Non
     params = {"status": status}
 
     async with bot.session.put(url, headers=headers, json=params) as resp:
-        return resp.status
+        if resp.status != 204:
+            raise Exception(f"{resp.status}")

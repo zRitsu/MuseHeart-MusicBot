@@ -351,7 +351,7 @@ class LavalinkPlayer(wavelink.Player):
         self.update: bool = False
         self.updating: bool = False
         self.stage_title_event = False
-        self.stage_title_template = kwargs.pop("stage_title_template", None) or "Tocando: {track.title} | {track.author}"
+        self.stage_title_template = kwargs.pop("stage_title_template", None)
         self.last_stage_title = ""
         self.auto_update: int = 0
         self.listen_along_invite = kwargs.pop("listen_along_invite", "")
@@ -1054,10 +1054,15 @@ class LavalinkPlayer(wavelink.Player):
                 await update_vc_status(self.bot, self.guild.me.voice.channel)
             return
 
-        if not self.current:
-            msg = "Status: Aguardando por novas músicas."
+        if not self.stage_title_template:
+            template = "{track.title} | {track.author}"
+            if isinstance(self.guild.me.voice.channel, disnake.StageChannel):
+                template = f"Tocando: {template}"
+            self.stage_title_template = template
 
-        else:
+        msg = None
+
+        if self.current:
 
             requester = self.guild.get_member(self.current.requester)
 
@@ -1082,6 +1087,10 @@ class LavalinkPlayer(wavelink.Player):
                 msg = msg[:107] + "..."
 
         if isinstance(self.guild.me.voice.channel, disnake.StageChannel):
+
+            if not msg:
+                msg = "Status: Aguardando por novas músicas."
+
             if not self.guild.me.voice.channel.instance:
                 func = self.guild.me.voice.channel.create_instance
             elif msg == self.last_stage_title:
@@ -1093,6 +1102,10 @@ class LavalinkPlayer(wavelink.Player):
             await func(topic=msg)
 
         else: # voicechannel
+
+            if msg:
+                msg = f"<:play:734221719774035968> {msg}"
+
             await update_vc_status(self.bot, self.guild.me.voice.channel, msg)
 
         self.last_stage_title = msg
