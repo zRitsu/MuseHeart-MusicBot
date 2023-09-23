@@ -1111,10 +1111,13 @@ class LavalinkPlayer(wavelink.Player):
             try:
                 await update_vc_status(self.bot, self.guild.me.voice.channel, msg)
             except Exception as e:
-                self.set_command_log(text=f"O status automático foi desativado devido ao erro: {e}", emoji="⚠️")
-                self.stage_title_event = False
-                self.update = True
-                return
+                if str(e).startswith("403"):
+                    self.set_command_log(text=f"O status automático foi desativado devido ao erro: {e}", emoji="⚠️")
+                    self.stage_title_event = False
+                    self.update = True
+                    return
+                else:
+                    traceback.print_exc()
 
         self.last_stage_title = msg
 
