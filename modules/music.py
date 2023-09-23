@@ -279,15 +279,17 @@ class Music(commands.Cog):
             bot = inter.bot
             guild = inter.guild
 
-        if isinstance(guild.me.voice.channel, disnake.VoiceChannel):
+        if isinstance(guild.me.voice.channel, disnake.StageChannel):
+            if not guild.me.guild_permissions.manage_guild:
+                raise GenericError(
+                    f"{bot.user.mention} não possui permissão de: **{perms_translations['manage_guild']}.**")
+
+        elif isinstance(guild.me.voice.channel, disnake.VoiceChannel):
             if not bot.config.get("X_SUPER_PROPERTIES"):
                 raise GenericError("**Você deve estar em um canal de voz/palco para ativar/desativar esse sistema.**")
 
-        elif not isinstance(guild.me.voice.channel, disnake.StageChannel):
+        else:
             raise GenericError("**Você deve estar em um canal de palco para ativar/desativar esse sistema.**")
-
-        if not guild.me.guild_permissions.manage_guild:
-            raise GenericError(f"{bot.user.mention} não possui permissão de: **{perms_translations['manage_guild']}.**")
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
@@ -324,6 +326,8 @@ class Music(commands.Cog):
         player.stage_title_event = True
         player.stage_title_template = template
         player.start_time = disnake.utils.utcnow()
+
+        await inter.response.defer(ephemeral=True)
 
         txt = [f"ativou/Alterou o sistema de anúncio automático do palco.",
                f"📢 **⠂{inter.author.mention} ativou/alterou o sistema de anúncio automático do palco "

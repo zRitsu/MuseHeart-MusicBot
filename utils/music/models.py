@@ -1043,9 +1043,6 @@ class LavalinkPlayer(wavelink.Player):
                 await self.connect(self.last_channel.id)
             return
 
-        if not self.guild.me.guild_permissions.manage_guild:
-            return
-
         if not self.stage_title_event:
             return
 
@@ -1082,6 +1079,9 @@ class LavalinkPlayer(wavelink.Player):
 
         if isinstance(self.guild.me.voice.channel, disnake.StageChannel):
 
+            if not self.guild.me.guild_permissions.manage_guild:
+                return
+
             if not msg:
                 msg = "Status: Aguardando por novas músicas."
 
@@ -1099,7 +1099,13 @@ class LavalinkPlayer(wavelink.Player):
             if msg == self.last_stage_title:
                 return
 
-            await update_vc_status(self.bot, self.guild.me.voice.channel, msg)
+            try:
+                await update_vc_status(self.bot, self.guild.me.voice.channel, msg)
+            except Exception as e:
+                self.set_command_log(text=f"O status automático foi desativado devido ao erro: {e}", emoji="⚠️")
+                self.stage_title_event = False
+                self.update = True
+                return
 
         self.last_stage_title = msg
 
