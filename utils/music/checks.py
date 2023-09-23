@@ -491,9 +491,11 @@ def check_stage_topic():
         except KeyError:
             raise NoPlayer()
 
-        if player.stage_title_event and (time_:=int((disnake.utils.utcnow() - player.start_time).total_seconds())) < 120 and not (await bot.is_owner(inter.author)):
+        time_limit = 30 if isinstance(player.guild.me.voice.channel, disnake.VoiceChannel) else 120
+
+        if player.stage_title_event and (time_:=int((disnake.utils.utcnow() - player.start_time).total_seconds())) < time_limit and not (await bot.is_owner(inter.author)):
             raise GenericError(
-                f"**Você terá que aguardar {time_format((120 - time_) * 1000, use_names=True)} para usar essa função "
+                f"**Você terá que aguardar {time_format((time_limit - time_) * 1000, use_names=True)} para usar essa função "
                 f"com o anúncio automático do palco ativo...**"
             )
 
