@@ -1105,6 +1105,9 @@ class LavalinkPlayer(wavelink.Player):
             if msg == self.last_stage_title:
                 return
 
+            if msg and len(msg) > 146:
+                msg = msg[:146] + "..."
+
             try:
                 await update_vc_status(self.bot, self.guild.me.voice.channel, msg)
             except Exception as e:
