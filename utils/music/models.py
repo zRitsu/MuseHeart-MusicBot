@@ -1064,18 +1064,21 @@ class LavalinkPlayer(wavelink.Player):
                 requester_name = "Membro desconhecido"
                 requester_tag = "????"
 
+            if not self.current.is_stream:
+                timestamp = f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=((self.current.duration if not self.current.is_stream else 0)) - self.position)).timestamp())}:R>"
+            else:
+                timestamp = "Livestream"
+
             msg = self.stage_title_template\
                 .replace("{track.title}", self.current.single_title)\
                 .replace("{track.author}", self.current.authors_string)\
-                .replace("{track.duration}", time_format(self.current.duration) if not self.current.is_stream else "Livestream")\
+                .replace("{track.duration}", time_format(self.current.duration) if not self.current.is_stream else "Livestream") \
+                .replace("{track.timestamp}", timestamp) \
                 .replace("{track.source}", self.current.info.get("sourceName", "desconhecido"))\
                 .replace("{track.playlist}", self.current.playlist_name or "Sem playlist")\
                 .replace("{requester.name}", requester_name) \
                 .replace("{requester.tag}", requester_tag) \
                 .replace("{requester.id}", str(self.current.requester))
-
-            if len(msg) > 110:
-                msg = msg[:107] + "..."
 
         if isinstance(self.guild.me.voice.channel, disnake.StageChannel):
 
@@ -1084,6 +1087,9 @@ class LavalinkPlayer(wavelink.Player):
 
             if not msg:
                 msg = "Status: Aguardando por novas músicas."
+
+            elif len(msg) > 110:
+                msg = msg[:107] + "..."
 
             if not self.guild.me.voice.channel.instance:
                 func = self.guild.me.voice.channel.create_instance

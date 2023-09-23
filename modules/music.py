@@ -295,7 +295,7 @@ class Music(commands.Cog):
 
         if not template:
             if isinstance(guild.me.voice.channel, disnake.VoiceChannel):
-                template = "<:play:734221719774035968> {track.title} | {track.author}"
+                template = "<:play:734221719774035968> {track.title} | {track.timestamp} | {track.author}"
             else:
                 template = player.stage_title_template
 
@@ -309,6 +309,7 @@ class Music(commands.Cog):
                 "[34;1m{track.title}[0m -> Nome da música\n"
                 "[34;1m{track.author}[0m -> Nome do Artista/Uploader/Author da música.\n"
                 "[34;1m{track.duration}[0m -> Duração da música.\n"
+                "[34;1m{track.timestamp}[0m -> Tempo restante da duração (apenas em canal de voz).\n"
                 "[34;1m{track.source}[0m -> Origem/Fonte da música (Youtube/Spotify/Soundcloud etc)\n"
                 "[34;1m{track.playlist}[0m -> Nome da playlist de origem da música (caso tenha)\n"
                 "[34;1m{requester.name}[0m -> Nome/Nick do membro que pediu a música\n"
