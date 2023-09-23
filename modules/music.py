@@ -2021,6 +2021,7 @@ class Music(commands.Cog):
         txt = ["pausou a música.", f"⏸️ **⠂{inter.author.mention} pausou a musica.**"]
 
         await self.interaction_message(inter, txt, rpc_update=True, emoji="⏸️")
+        await player.update_stage_topic()
 
     @is_dj()
     @has_source()
@@ -2053,6 +2054,7 @@ class Music(commands.Cog):
 
         txt = ["retomou a música.", f"▶️ **⠂{inter.author.mention} despausou a música.**"]
         await self.interaction_message(inter, txt, rpc_update=True, emoji="▶️")
+        await player.update_stage_topic()
 
     seek_cd = commands.CooldownMapping.from_cooldown(2, 10, commands.BucketType.member)
     seek_mc =commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
@@ -2134,6 +2136,7 @@ class Music(commands.Cog):
         await self.interaction_message(inter, txt, emoji=emoji)
 
         await asyncio.sleep(2)
+        await player.update_stage_topic()
         await player.process_rpc()
 
     @seek.autocomplete("tempo")

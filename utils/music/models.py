@@ -1053,6 +1053,8 @@ class LavalinkPlayer(wavelink.Player):
 
         msg = None
 
+        timestamp = ""
+
         if self.current:
 
             requester = self.guild.get_member(self.current.requester)
@@ -1064,16 +1066,15 @@ class LavalinkPlayer(wavelink.Player):
                 requester_name = "Membro desconhecido"
                 requester_tag = "????"
 
-            if not self.current.is_stream:
+            if not self.current.is_stream or not self.paused:
                 timestamp = f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=((self.current.duration if not self.current.is_stream else 0)) - self.position)).timestamp())}:R>"
             else:
-                timestamp = "Livestream"
+                timestamp = f"<t:{int(disnake.utils.utcnow().timestamp())}:R>"
 
             msg = self.stage_title_template\
                 .replace("{track.title}", self.current.single_title)\
                 .replace("{track.author}", self.current.authors_string)\
                 .replace("{track.duration}", time_format(self.current.duration) if not self.current.is_stream else "Livestream") \
-                .replace("{track.timestamp}", timestamp) \
                 .replace("{track.source}", self.current.info.get("sourceName", "desconhecido"))\
                 .replace("{track.playlist}", self.current.playlist_name or "Sem playlist")\
                 .replace("{requester.name}", requester_name) \
@@ -1105,8 +1106,12 @@ class LavalinkPlayer(wavelink.Player):
             if msg == self.last_stage_title:
                 return
 
-            if msg and len(msg) > 146:
-                msg = msg[:146] + "..."
+            if msg:
+
+                if len(msg) > 146:
+                    msg = msg[:146] + "..."
+
+                msg = msg.replace("{track.timestamp}", timestamp)
 
             try:
                 await update_vc_status(self.bot, self.guild.me.voice.channel, msg)
