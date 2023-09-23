@@ -5448,22 +5448,25 @@ class Music(commands.Cog):
 
         if player.stage_title_event:
 
-            if isinstance(before.channel, disnake.StageChannel):
+            try:
+                if isinstance(before.channel, disnake.StageChannel):
 
-                if before.channel.instance and self.bot.user.id not in before.channel.voice_states:
-                    try:
-                        await before.channel.instance.edit(topic="atualização automática desativada")
-                    except:
-                        traceback.print_exc()
-                    player.stage_title_event = False
+                    if before.channel.instance and self.bot.user.id not in before.channel.voice_states:
+                        try:
+                            await before.channel.instance.edit(topic="atualização automática desativada")
+                        except:
+                            traceback.print_exc()
+                        player.stage_title_event = False
 
-            else:
-                if isinstance(before.channel, disnake.VoiceChannel) and self.bot.user.id not in before.channel.voice_states:
-                    player.stage_title_event = False
-                    await update_vc_status(self.bot, before.channel, status=None)
+                else:
+                    if isinstance(before.channel, disnake.VoiceChannel) and self.bot.user.id not in before.channel.voice_states:
+                        player.stage_title_event = False
+                        await update_vc_status(self.bot, before.channel, status=None)
 
-                if isinstance(after.channel, disnake.VoiceChannel) and self.bot.user.id in before.channel.voice_states:
-                    await player.update_stage_topic()
+                    if isinstance(after.channel, disnake.VoiceChannel) and self.bot.user.id in before.channel.voice_states:
+                        await player.update_stage_topic()
+            except Exception:
+                traceback.print_exc()
 
         player.members_timeout_task = self.bot.loop.create_task(player.members_timeout(check=check))
 
