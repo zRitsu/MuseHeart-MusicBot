@@ -284,9 +284,20 @@ class Music(commands.Cog):
                 raise GenericError(
                     f"{bot.user.mention} não possui permissão de: **{perms_translations['manage_guild']}.**")
 
+            txt = [f"ativou/alterou o sistema de anúncio automático do palco.",
+                   f"📢 **⠂{inter.author.mention} ativou/alterou o sistema de anúncio automático do palco "
+                   f"{guild.me.voice.channel.mention}.**\n\n"
+                   f"`Nota: Caso o player seja desligado, todos os membros do palco serão desconectados automaticamente.`\n\n"
+                   f"**Modelo usado:** `{disnake.utils.escape_markdown(template, as_needed=True)}`"]
+
         elif isinstance(guild.me.voice.channel, disnake.VoiceChannel):
             if not bot.config.get("X_SUPER_PROPERTIES"):
                 raise GenericError("**Você deve estar em um canal de voz/palco para ativar/desativar esse sistema.**")
+
+            txt = [f"ativou/alterou o sistema de status automático do canal de voz.",
+                   f"📢 **⠂{inter.author.mention} ativou/alterou o sistema de status automático do canal de voz "
+                   f"{guild.me.voice.channel.mention}.**\n\n"
+                   f"**Modelo usado:** `{disnake.utils.escape_markdown(template, as_needed=True)}`"]
 
         else:
             raise GenericError("**Você deve estar em um canal de palco para ativar/desativar esse sistema.**")
@@ -329,12 +340,6 @@ class Music(commands.Cog):
         player.start_time = disnake.utils.utcnow()
 
         await inter.response.defer(ephemeral=True)
-
-        txt = [f"ativou/Alterou o sistema de anúncio automático do palco.",
-               f"📢 **⠂{inter.author.mention} ativou/alterou o sistema de anúncio automático do palco "
-               f"{guild.me.voice.channel.mention}.**\n\n"
-               f"`Nota: Caso o player seja desligado, todos os membros do palco serão desconectados automaticamente.`\n\n"
-               f"**Modelo usado:** `{disnake.utils.escape_markdown(template)}`"]
 
         await self.interaction_message(inter, txt, emoji="📢", force=True)
 
