@@ -279,6 +279,32 @@ class Music(commands.Cog):
             bot = inter.bot
             guild = inter.guild
 
+        player: LavalinkPlayer = bot.music.players[inter.guild_id]
+
+        if not template:
+            if isinstance(guild.me.voice.channel, disnake.VoiceChannel):
+                template = "<:play:734221719774035968> {track.title} | {track.timestamp} | {track.author}"
+            else:
+                template = player.stage_title_template or "{track.title} | {track.author}"
+
+        elif not any(p in template for p in (
+                '{track.title}', '{track.author}', '{track.duration}', '{track.source}', '{track.playlist}',
+                '{requester.name}', '{requester.tag}', '{requester.id}'
+        )):
+            raise GenericError(
+                "**Você deve usar pelo menos um placeholder válido na mensagem.**\n\n"
+                "**PLACEHOLDERS:** ```ansi\n"
+                "[34;1m{track.title}[0m -> Nome da música\n"
+                "[34;1m{track.author}[0m -> Nome do Artista/Uploader/Author da música.\n"
+                "[34;1m{track.duration}[0m -> Duração da música.\n"
+                "[34;1m{track.timestamp}[0m -> Tempo restante da duração (apenas em canal de voz).\n"
+                "[34;1m{track.source}[0m -> Origem/Fonte da música (Youtube/Spotify/Soundcloud etc)\n"
+                "[34;1m{track.playlist}[0m -> Nome da playlist de origem da música (caso tenha)\n"
+                "[34;1m{requester.name}[0m -> Nome/Nick do membro que pediu a música\n"
+                "[34;1m{requester.tag}[0m -> Tag/Discriminator do membro que pediu a música\n"
+                "[34;1m{requester.id}[0m -> ID do membro que pediu a música\n```"
+            )
+
         if isinstance(guild.me.voice.channel, disnake.StageChannel):
             if not guild.me.guild_permissions.manage_guild:
                 raise GenericError(
@@ -301,32 +327,6 @@ class Music(commands.Cog):
 
         else:
             raise GenericError("**Você deve estar em um canal de palco para ativar/desativar esse sistema.**")
-
-        player: LavalinkPlayer = bot.music.players[inter.guild_id]
-
-        if not template:
-            if isinstance(guild.me.voice.channel, disnake.VoiceChannel):
-                template = "<:play:734221719774035968> {track.title} | {track.timestamp} | {track.author}"
-            else:
-                template = player.stage_title_template
-
-        elif not any(p in template for p in (
-                '{track.title}', '{track.author}', '{track.duration}', '{track.source}', '{track.playlist}',
-                '{requester.name}', '{requester.tag}', '{requester.id}'
-        )):
-            raise GenericError(
-                "**Você deve usar pelo menos um placeholder válido na mensagem.**\n\n"
-                "**PLACEHOLDERS:** ```ansi\n"
-                "[34;1m{track.title}[0m -> Nome da música\n"
-                "[34;1m{track.author}[0m -> Nome do Artista/Uploader/Author da música.\n"
-                "[34;1m{track.duration}[0m -> Duração da música.\n"
-                "[34;1m{track.timestamp}[0m -> Tempo restante da duração (apenas em canal de voz).\n"
-                "[34;1m{track.source}[0m -> Origem/Fonte da música (Youtube/Spotify/Soundcloud etc)\n"
-                "[34;1m{track.playlist}[0m -> Nome da playlist de origem da música (caso tenha)\n"
-                "[34;1m{requester.name}[0m -> Nome/Nick do membro que pediu a música\n"
-                "[34;1m{requester.tag}[0m -> Tag/Discriminator do membro que pediu a música\n"
-                "[34;1m{requester.id}[0m -> ID do membro que pediu a música\n```"
-            )
 
         if player.stage_title_event and player.stage_title_template == template:
 
