@@ -98,6 +98,7 @@ DEFAULT_CONFIG = {
     "WATCHING_PRESENCES": "",
     "PLAYING_PRESENCES": "",
     "STREAMING_PRESENCES": "",
+    "CUSTOM_STATUS_PRESENCES": "",
 
     ###############
     ### Intents ###
