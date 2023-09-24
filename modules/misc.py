@@ -53,7 +53,6 @@ class Misc(commands.Cog):
 
     def __init__(self, bot: BotCore):
         self.bot = bot
-        self.activities = None
         self.task = self.bot.loop.create_task(self.presences())
         self.extra_user_bots = []
         self.extra_user_bots_ids = [int(i) for i in bot.config['ADDITIONAL_BOT_IDS'].split() if i.isdigit()]
@@ -73,7 +72,7 @@ class Misc(commands.Cog):
 
     async def presences(self):
 
-        if not self.activities:
+        try:
 
             activities = []
 
@@ -101,48 +100,54 @@ class Misc(commands.Cog):
                     except Exception:
                         traceback.print_exc()
 
+            if not activities:
+                return
+
             shuffle(activities)
 
-            self.activities = cycle(activities)
+            activities = cycle(activities)
 
-        while True:
+            while True:
 
-            await self.bot.wait_until_ready()
+                await self.bot.wait_until_ready()
 
-            activity_data = next(self.activities)
+                activity_data = next(activities)
 
-            if activity_data["type"] == "listening":
-                activity = disnake.Activity(
-                    type=disnake.ActivityType.listening,
-                    name=self.placeholders(activity_data["name"])
-                )
+                if activity_data["type"] == "listening":
+                    activity = disnake.Activity(
+                        type=disnake.ActivityType.listening,
+                        name=self.placeholders(activity_data["name"])
+                    )
 
-            elif activity_data["type"] == "watching":
-                activity = disnake.Activity(
-                    type=disnake.ActivityType.watching,
-                    name=self.placeholders(activity_data["name"])
-                )
+                elif activity_data["type"] == "watching":
+                    activity = disnake.Activity(
+                        type=disnake.ActivityType.watching,
+                        name=self.placeholders(activity_data["name"])
+                    )
 
-            elif activity_data["type"] == "streaming":
-                activity = disnake.Activity(
-                    type=disnake.ActivityType.streaming,
-                    name=self.placeholders(activity_data["name"]),
-                    url=activity_data["url"]
-                )
+                elif activity_data["type"] == "streaming":
+                    activity = disnake.Activity(
+                        type=disnake.ActivityType.streaming,
+                        name=self.placeholders(activity_data["name"]),
+                        url=activity_data["url"]
+                    )
 
-            elif activity_data["type"] == "playing":
-                activity = disnake.Game(name=self.placeholders(activity_data["name"]))
+                elif activity_data["type"] == "playing":
+                    activity = disnake.Game(name=self.placeholders(activity_data["name"]))
 
-            else:
-                activity = disnake.Activity(
-                    name="customstatus",
-                    type=disnake.ActivityType.custom,
-                    state=self.placeholders(activity_data["name"]),
-                )
+                else:
+                    activity = disnake.Activity(
+                        name="customstatus",
+                        type=disnake.ActivityType.custom,
+                        state=self.placeholders(activity_data["name"]),
+                    )
 
-            await self.bot.change_presence(activity=activity)
+                await self.bot.change_presence(activity=activity)
 
-            await asyncio.sleep(self.bot.config["PRESENCE_INTERVAL"])
+                await asyncio.sleep(self.bot.config["PRESENCE_INTERVAL"])
+
+        except Exception:
+            traceback.print_exc()
 
 
     @commands.Cog.listener("on_guild_join")
