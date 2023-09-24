@@ -340,8 +340,6 @@ class Music(commands.Cog):
         player.stage_title_template = template
         player.start_time = disnake.utils.utcnow()
 
-        await inter.response.defer(ephemeral=True)
-
         await self.interaction_message(inter, txt, emoji="📢", force=True)
 
         await player.update_stage_topic()
