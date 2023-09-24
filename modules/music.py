@@ -288,7 +288,7 @@ class Music(commands.Cog):
                 template = player.stage_title_template or "{track.title} | {track.author}"
 
         elif not any(p in template for p in (
-                '{track.title}', '{track.author}', '{track.duration}', '{track.source}', '{track.playlist}',
+                '{track.title}', '{track.timestamp}', '{track.emoji}', '{track.author}', '{track.duration}', '{track.source}', '{track.playlist}',
                 '{requester.name}', '{requester.tag}', '{requester.id}'
         )):
             raise GenericError(
@@ -298,6 +298,7 @@ class Music(commands.Cog):
                 "[34;1m{track.author}[0m -> Nome do Artista/Uploader/Author da música.\n"
                 "[34;1m{track.duration}[0m -> Duração da música.\n"
                 "[34;1m{track.timestamp}[0m -> Tempo restante da duração (apenas em canal de voz).\n"
+                "[34;1m{track.emoji}[0m -> Emoji da fonte de música (apenas em canal de voz).\n"
                 "[34;1m{track.source}[0m -> Origem/Fonte da música (Youtube/Spotify/Soundcloud etc)\n"
                 "[34;1m{track.playlist}[0m -> Nome da playlist de origem da música (caso tenha)\n"
                 "[34;1m{requester.name}[0m -> Nome/Nick do membro que pediu a música\n"

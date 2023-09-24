@@ -411,19 +411,29 @@ sc_url_regex = re.compile(r"^(https?://)?(www\.)?(soundcloud\.com)/.+")
 sp_url_regex = re.compile(r"^(https?://)?(www\.)?(open\.spotify\.com|spotify\.com)/.+")
 tw_url_regex = re.compile(r"^(https?://)?(www\.)?(twitch\.tv)/([A-Za-z0-9_]{4,25})(/.+)?")
 
+music_source_emoji_data = {
+    "youtube": "<:youtube:647253940882374656>",
+    "sourndcloud": "<:soundcloud:721530214764773427>",
+    "spotify": "<:spotify:715717523626000445>",
+    "twitch": "<:Twitch:803656463695478804>",
+}
+
+def music_source_emoji(name: str):
+    return music_source_emoji_data.get(name, "<:play:734221719774035968>")
+
 def music_source_emoji_url(url: str):
 
     if yt_url_regex.match(url):
-        return "<:youtube:647253940882374656>"
+        return music_source_emoji_data["youtube"]
 
     if sc_url_regex.match(url):
-        return "<:soundcloud:721530214764773427>"
+        return music_source_emoji_data["soundcloud"]
 
     if sp_url_regex.match(url):
-        return "<:spotify:715717523626000445>"
+        return music_source_emoji_data["spotify"]
 
     if tw_url_regex.match(url):
-        return "<:Twitch:803656463695478804>"
+        return music_source_emoji_data["twitch"]
 
     return "<:play:734221719774035968>"
 
@@ -432,13 +442,13 @@ def music_source_emoji_id(id_: str):
     id_ = id_.replace("> itg: ", "").replace("> fav: ", "").split()[0]
 
     if id_ == "【YT】:":
-        return "<:youtube:647253940882374656>"
+        return music_source_emoji_data["youtube"]
 
     if id_ == "【SC】:":
-        return "<:soundcloud:721530214764773427>"
+        return music_source_emoji_data["soundcloud"]
 
     if id_ == "【SP】:":
-        return "<:spotify:715717523626000445>"
+        return music_source_emoji_data["spotify"]
 
     return "<:play:734221719774035968>"
 

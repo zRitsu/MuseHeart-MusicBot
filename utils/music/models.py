@@ -14,7 +14,7 @@ from utils.music.converters import fix_characters, time_format, get_button_style
 from utils.music.skin_utils import skin_converter
 from utils.music.filters import AudioFilter
 from utils.db import DBModel
-from utils.others import send_idle_embed, PlayerControls, SongRequestPurgeMode, song_request_buttons, update_vc_status
+from utils.others import music_source_emoji, send_idle_embed, PlayerControls, SongRequestPurgeMode, song_request_buttons, update_vc_status
 import traceback
 from collections import deque
 from typing import Optional, Union, TYPE_CHECKING, List
@@ -1111,7 +1111,9 @@ class LavalinkPlayer(wavelink.Player):
                 if len(msg) > 146:
                     msg = msg[:146] + "..."
 
-                msg = msg.replace("{track.timestamp}", timestamp)
+                msg = msg\
+                    .replace("{track.timestamp}", timestamp)\
+                    .replace("{track.emoji}", music_source_emoji(self.current.info["sourceName"]))
 
             try:
                 await update_vc_status(self.bot, self.guild.me.voice.channel, msg)
