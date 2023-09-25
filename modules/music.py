@@ -402,7 +402,7 @@ class Music(commands.Cog):
 
             log, msg = txt
 
-            if guild.me.guild_permissions.manage_guild:
+            if author.guild_permissions.manage_guild:
                 global_data["voice_channel_status"] = template
                 await self.bot.update_global_data(inter.guild_id, global_data, db_name=DBModel.guilds)
                 msg += "\n\n**Nota:** `O modelo foi salvo e será usado automáticamente em canais de voz.`"
