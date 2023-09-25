@@ -375,7 +375,7 @@ class PlayerSession(commands.Cog):
                         restrict_mode=data["restrict_mode"],
                         volume=int(data["volume"]),
                         prefix=prefix,
-                        purge_mode=purge_mode
+                        purge_mode=purge_mode,
                     )
                 except Exception:
                     print(f"{self.bot.user} - Falha ao criar player: {guild.name} [{guild.id}]\n{traceback.format_exc()}")

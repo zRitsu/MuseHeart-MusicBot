@@ -59,11 +59,12 @@ global_db_models = {
         "custom_prefix": "",
     },
     DBModel.guilds: {
-        "ver": 1.3,
+        "ver": 1.4,
         "prefix": "",
         "global_skin": False,
         "player_skin": None,
         "player_skin_static": None,
+        "voice_channel_status": "",
         "custom_skins": {},
         "custom_skins_static": {},
         "listen_along_invites": {},

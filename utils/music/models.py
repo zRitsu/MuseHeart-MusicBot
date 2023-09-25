@@ -350,9 +350,6 @@ class LavalinkPlayer(wavelink.Player):
         self.keep_connected: bool = kwargs.pop("keep_connected", False)
         self.update: bool = False
         self.updating: bool = False
-        self.stage_title_event = False
-        self.stage_title_template = kwargs.pop("stage_title_template", None) or "Tocando: {track.title} | {track.author}"
-        self.last_stage_title = ""
         self.auto_update: int = 0
         self.listen_along_invite = kwargs.pop("listen_along_invite", "")
         self.message_updater_task: Optional[asyncio.Task] = None
@@ -374,6 +371,12 @@ class LavalinkPlayer(wavelink.Player):
         self._new_node_task: Optional[asyncio.Task] = None
         self.start_time = disnake.utils.utcnow()
 
+        stage_template = kwargs.pop("stage_title_template", None)
+
+        self.stage_title_event = bool(stage_template)
+        self.stage_title_template: str = stage_template or "Tocando: {track.title} | {track.author}"
+        self.last_stage_title = ""
+
         self.purge_mode = kwargs.pop("purge_mode", SongRequestPurgeMode.on_message)
 
         if self.static and self.purge_mode in (SongRequestPurgeMode.on_message, SongRequestPurgeMode.on_player_start):
@@ -389,6 +392,9 @@ class LavalinkPlayer(wavelink.Player):
             f"Você pode criar links favoritos para ter fácil acesso usá-los no comando /play ou {self.prefix_info}play "
             f"sem ter necessidade de copiar e colar os links no comando. Experimente usando o comando /fav_manager ou "
             f"{self.prefix_info}favmanager.",
+            f"Caso esteja em um canal de voz você pode definir o status automático do canal com info sobre "
+            f"a música que está sendo tocada. Experimente usando o comando /stage_announce ou "
+            f"{self.prefix_info}stageannounce"
         ]
 
         if self.bot.config["USE_YTDL"] or self.bot.spotify:
@@ -1082,6 +1088,9 @@ class LavalinkPlayer(wavelink.Player):
                 .replace("{requester.id}", str(self.current.requester))
 
         if isinstance(self.guild.me.voice.channel, disnake.StageChannel):
+
+            if not self.stage_title_event:
+                return
 
             if not self.guild.me.guild_permissions.manage_guild:
                 return

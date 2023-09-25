@@ -245,45 +245,100 @@ class Music(commands.Cog):
     stage_cd = commands.CooldownMapping.from_cooldown(2, 45, commands.BucketType.guild)
     stage_mc = commands.MaxConcurrency(1, per=commands.BucketType.guild, wait=False)
 
+    stage_flags = CommandArgparse()
+    stage_flags.add_argument('template', nargs='*', help="Modelo a ser usado no lugar do padrão.")
+    stage_flags.add_argument('-save', '-s', action='store_true',
+                             help='Salvar o modelo pra ser ativado automaticamente ao conectar no canal de voz.')
+    stage_flags.add_argument('-reset', '-r', action='store_true',
+                             help='Desativar o status automático (canal de voz)')
+
     @has_source()
-    @commands.has_guild_permissions(manage_guild=True)
     @pool_command(
         only_voiced=True, name="stageannounce", aliases=["stagevc", "togglestageannounce", "announce", "vcannounce"],
         description="Ativar o sistema de anuncio/status automático do canal com o nome da música.",
-        cooldown=stage_cd, max_concurrency=stage_mc, extras={"exclusive_cooldown": True},
+        cooldown=stage_cd, max_concurrency=stage_mc, extras={"exclusive_cooldown": True, "flags": stage_flags},
         usage="{prefix}{cmd} <placeholders>\nEx: {track.author} - {track.title}"
     )
-    async def stageannounce_legacy(self, ctx: CustomContext, *, template: str = None):
+    async def stageannounce_legacy(self, ctx: CustomContext, *, flags: str = ""):
 
-        await self.stage_announce.callback(self=self, inter=ctx, template=template)
+        args, unknown = ctx.command.extras['flags'].parse_known_args(flags.split())
+
+        await self.stage_announce.callback(self=self, inter=ctx, template=" ".join(args.template + unknown))
 
     @has_source()
     @commands.slash_command(
-        description=f"{desc_prefix}Ativar/editar o sistema de anuncio/status automático do canal com o nome da música.",
-        extras={"only_voiced": True, "exclusive_cooldown": True},
-        default_member_permissions=disnake.Permissions(manage_guild=True), cooldown=stage_cd, max_concurrency=stage_mc
+        description=f"{desc_prefix}Ativar/editar o sistema de anúncio/status automático do canal com o nome da música.",
+        extras={"only_voiced": True, "exclusive_cooldown": True}, cooldown=stage_cd, max_concurrency=stage_mc
     )
     async def stage_announce(
             self,
             inter: disnake.AppCmdInter,
             template: str = commands.Param(
                 name=disnake.Localized("template", data={disnake.Locale.pt_BR: "modelo"}),
-                description=f"{desc_prefix}Ativar o sistema de anuncio automático do palco com o nome da música."
+                description="Modelo a ser usado no lugar do padrão.", default=""
+            ),
+            save: bool = commands.Param(
+                name=disnake.Localized("save", data={disnake.Locale.pt_BR: "salvar"}),
+                description="Salvar o modelo pra ser ativado automaticamente ao conectar no canal de voz.",
+                default=False,
+            ),
+            reset: bool = commands.Param(
+                name=disnake.Localized("reset", data={disnake.Locale.pt_BR: "resetar"}),
+                description="Desativar o status automático (canal de voz).",
+                default=False,
             )
     ):
 
         try:
             bot = inter.music_bot
             guild = inter.music_guild
+            author = guild.get_member(inter.author.id)
         except AttributeError:
             bot = inter.bot
             guild = inter.guild
+            author = inter.author
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
-        if not template:
+        if reset:
+
+            if not author.guild_permissions.manage_guild:
+                raise GenericError("**Você não possui permissão de gerenciar servidor para desativar o status automático**")
+
+            await inter.response.defer(ephemeral=True)
+            global_data = await self.bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
+            if not global_data["voice_channel_status"]:
+                raise GenericError("**O status automático não foi configurado.**")
+            global_data["voice_channel_status"] = ""
+
+            await self.bot.update_global_data(inter.guild_id, global_data, db_name=DBModel.guilds)
+            await player.update_stage_topic(clear=True)
+
+            player.stage_title_event = False
+
+            try:
+                func = inter.edit_original_message
+            except:
+                func = inter.send
+
+            await func(
+                embed=disnake.Embed(
+                    description="**O status automático do canal de voz foi desativado com sucesso!**",
+                    color=self.bot.get_color(guild.me)
+                )
+            )
+            await player.process_save_queue()
+            return
+
+        if isinstance(guild.me.voice.channel, disnake.StageChannel) and not author.guild_permissions.manage_guild:
+            raise GenericError("**Você precisa da permissão de gerenciar servidor pra usar esse comando em palcos**")
+
+        await inter.response.defer(ephemeral=True)
+        global_data = await self.bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
+
+        if not author.guild_permissions.manage_guild or not template:
             if isinstance(guild.me.voice.channel, disnake.VoiceChannel):
-                template = "<:play:734221719774035968> {track.title} | {track.timestamp} | {track.author}"
+                template = global_data["voice_channel_status"] or "{track.emoji} {track.title} | {track.timestamp}"
             else:
                 template = player.stage_title_template or "{track.title} | {track.author}"
 
@@ -307,9 +362,19 @@ class Music(commands.Cog):
             )
 
         if isinstance(guild.me.voice.channel, disnake.StageChannel):
+
             if not guild.me.guild_permissions.manage_guild:
                 raise GenericError(
                     f"{bot.user.mention} não possui permissão de: **{perms_translations['manage_guild']}.**")
+
+            if save:
+                raise GenericError("**A opção save deve ser usada apenas em canais de voz.**")
+
+            if player.stage_title_event and player.stage_title_template == template:
+                raise GenericError("**O anúncio automático do palco já está ativado (e não houve alterações no "
+                                   "template do título).\n"
+                                   "Caso queira desativar você pode parar o player (todos os membros do palco serão "
+                                   "desconectados automaticamente nesse processo).**")
 
             txt = [f"ativou/alterou o sistema de anúncio automático do palco.",
                    f"📢 **⠂{inter.author.mention} ativou/alterou o sistema de anúncio automático do palco "
@@ -329,18 +394,30 @@ class Music(commands.Cog):
         else:
             raise GenericError("**Você deve estar em um canal de palco para ativar/desativar esse sistema.**")
 
-        if player.stage_title_event and player.stage_title_template == template:
-
-            raise GenericError("**O anúncio automático do palco já está ativado (e não houve alterações no "
-                               "template do título).\n"
-                               "Caso queira desativar você pode parar o player (todos os membros do palco serão "
-                               "desconectados automaticamente nesse processo).**")
-
         player.stage_title_event = True
         player.stage_title_template = template
         player.start_time = disnake.utils.utcnow()
 
-        await self.interaction_message(inter, txt, emoji="📢", force=True)
+        if save and isinstance(guild.me.voice.channel, disnake.VoiceChannel):
+
+            global_data["voice_channel_status"] = template
+            await self.bot.update_global_data(inter.guild_id, global_data, db_name=DBModel.guilds)
+
+            log, msg = txt
+
+            player.set_command_log(emoji="📢", text=log)
+            player.update = True
+
+            try:
+                func = inter.edit_original_message
+            except:
+                func = inter.send
+
+            await func(embed=disnake.Embed(description=msg + "\n\n**Nota:** `O modelo foi salvo e será usado automáticamente em canais de voz.`", color=self.bot.get_color(guild.me)))
+            await player.process_save_queue()
+
+        else:
+            await self.interaction_message(inter, txt, emoji="📢", force=True)
 
         await player.update_stage_topic()
 
@@ -622,24 +699,24 @@ class Music(commands.Cog):
                                  force_play="no", manual_selection=False,
                                  source="ytsearch", repeat_amount=0, server=None)
 
-    play_flags = CommandArgparse()
-    play_flags.add_argument('query', nargs='*', help="nome ou link da música")
-    play_flags.add_argument('-position', '-pos', '-p', type=int, default=0, help='Colocar a música em uma posição específica.\nEx: -p 10')
-    play_flags.add_argument('-next', '-proximo', action='store_true', help='Adicionar a música/playlist no topo da fila (equivalente ao: -pos 1)')
-    play_flags.add_argument('-reverse', '-r', action='store_true', help='Inverter a ordem das músicas adicionadas (efetivo apenas ao adicionar playlist).')
-    play_flags.add_argument('-shuffle', '-sl', action='store_true', help='Misturar as músicas adicionadas (efetivo apenas ao adicionar playlist).')
-    play_flags.add_argument('-select', '-s', action='store_true', help='Escolher a música entre os resultados encontrados.')
-    play_flags.add_argument('-source', '-scr', type=str, default="ytsearch", help='Fazer a busca da música usando uma fonte específica [youtube/soundcloud etc]')
-    play_flags.add_argument('-force', '-now', '-n', '-f', action='store_true', help='Tocar a música adicionada imediatamente (efetivo apenas se houver uma música tocando atualmente.)')
-    play_flags.add_argument('-loop', '-lp', type=int, default=0, help="Definir a quantidade de repetições da música escolhida.\nEx: -loop 5")
-    play_flags.add_argument('-server', '-sv', type=str, default=None, help='Usar um servidor de música específico.')
+    stage_flags = CommandArgparse()
+    stage_flags.add_argument('query', nargs='*', help="nome ou link da música")
+    stage_flags.add_argument('-position', '-pos', '-p', type=int, default=0, help='Colocar a música em uma posição específica.\nEx: -p 10')
+    stage_flags.add_argument('-next', '-proximo', action='store_true', help='Adicionar a música/playlist no topo da fila (equivalente ao: -pos 1)')
+    stage_flags.add_argument('-reverse', '-r', action='store_true', help='Inverter a ordem das músicas adicionadas (efetivo apenas ao adicionar playlist).')
+    stage_flags.add_argument('-shuffle', '-sl', action='store_true', help='Misturar as músicas adicionadas (efetivo apenas ao adicionar playlist).')
+    stage_flags.add_argument('-select', '-s', action='store_true', help='Escolher a música entre os resultados encontrados.')
+    stage_flags.add_argument('-source', '-scr', type=str, default="ytsearch", help='Fazer a busca da música usando uma fonte específica [youtube/soundcloud etc]')
+    stage_flags.add_argument('-force', '-now', '-n', '-f', action='store_true', help='Tocar a música adicionada imediatamente (efetivo apenas se houver uma música tocando atualmente.)')
+    stage_flags.add_argument('-loop', '-lp', type=int, default=0, help="Definir a quantidade de repetições da música escolhida.\nEx: -loop 5")
+    stage_flags.add_argument('-server', '-sv', type=str, default=None, help='Usar um servidor de música específico.')
 
     @can_send_message_check()
     @check_voice()
     @commands.bot_has_guild_permissions(send_messages=True)
     @commands.max_concurrency(1, commands.BucketType.member)
     @pool_command(name="play", description="Tocar música em um canal de voz.", aliases=["p"], check_player=False,
-                  cooldown=play_cd, max_concurrency=play_mc, extras={"flags": play_flags},
+                  cooldown=play_cd, max_concurrency=play_mc, extras={"flags": stage_flags},
                   usage="{prefix}{cmd} [nome|link]\nEx: {prefix}{cmd} sekai - burn me down")
     async def play_legacy(self, ctx: CustomContext, *, flags: str = ""):
 
@@ -1257,7 +1334,8 @@ class Music(commands.Cog):
                 volume=int(guild_data['default_player_volume']),
                 autoplay=guild_data["autoplay"],
                 prefix=global_data["prefix"] or bot.default_prefix,
-                purge_mode=guild_data['player_controller']['purge_mode']
+                purge_mode=guild_data['player_controller']['purge_mode'],
+                stage_title_template=global_data['voice_channel_status'],
             )
 
             if static_player['channel']:
@@ -5466,7 +5544,7 @@ class Music(commands.Cog):
                         if player.last_stage_title:
                             await update_vc_status(self.bot, before.channel, status=None)
 
-                    if isinstance(after.channel, disnake.VoiceChannel) and self.bot.user.id in before.channel.voice_states:
+                    if isinstance(after.channel, disnake.VoiceChannel) and before.channel and self.bot.user.id in before.channel.voice_states:
                         await player.update_stage_topic()
             except Exception:
                 traceback.print_exc()
