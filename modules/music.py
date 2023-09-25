@@ -263,7 +263,13 @@ class Music(commands.Cog):
 
         args, unknown = ctx.command.extras['flags'].parse_known_args(flags.split())
 
-        await self.stage_announce.callback(self=self, inter=ctx, template=" ".join(args.template + unknown))
+        await self.stage_announce.callback(
+            self=self,
+            inter=ctx,
+            template=" ".join(args.template + unknown),
+            save=args.save,
+            reset=args.reset,
+        )
 
     @has_source()
     @commands.slash_command(
