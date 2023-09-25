@@ -210,7 +210,7 @@ class Owner(commands.Cog):
         )
 
     @commands.is_owner()
-    @panel_command(aliases=["rc", "rcfg"], description="Recarregar as configs do bot.", emoji="⚙",
+    @panel_command(aliases=["rcfg"], description="Recarregar as configs do bot.", emoji="⚙",
                    alt_name="Recarregar as configs do bot.")
     async def reloadconfig(self, ctx: Union[CustomContext, disnake.MessageInteraction]):
 
