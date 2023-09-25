@@ -400,10 +400,14 @@ class Music(commands.Cog):
 
         if save and isinstance(guild.me.voice.channel, disnake.VoiceChannel):
 
-            global_data["voice_channel_status"] = template
-            await self.bot.update_global_data(inter.guild_id, global_data, db_name=DBModel.guilds)
-
             log, msg = txt
+
+            if guild.me.guild_permissions.manage_guild:
+                global_data["voice_channel_status"] = template
+                await self.bot.update_global_data(inter.guild_id, global_data, db_name=DBModel.guilds)
+                msg += "\n\n**Nota:** `O modelo foi salvo e será usado automáticamente em canais de voz.`"
+            else:
+                msg += "\n\n**Nota:** `O template não foi salvo porque você não possui permissão de gerenciar servidor.`"
 
             player.set_command_log(emoji="📢", text=log)
             player.update = True
@@ -413,7 +417,7 @@ class Music(commands.Cog):
             except:
                 func = inter.send
 
-            await func(embed=disnake.Embed(description=msg + "\n\n**Nota:** `O modelo foi salvo e será usado automáticamente em canais de voz.`", color=self.bot.get_color(guild.me)))
+            await func(embed=disnake.Embed(description=msg, color=self.bot.get_color(guild.me)))
             await player.process_save_queue()
 
         else:
