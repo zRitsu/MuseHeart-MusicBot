@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Union, Optional
 
 import disnake
-import disnake as discord
 from disnake.ext import commands
 
 from utils.music.errors import GenericError
@@ -15,10 +14,10 @@ if TYPE_CHECKING:
 category_icons = {}
 
 
-class ViewHelp(discord.ui.View):
+class ViewHelp(disnake.ui.View):
 
     def __init__(self, ctx, items, *, get_cmd, main_embed, cmd_list, category_cmd=None, timeout=180):
-        self.message: Optional[discord.Message] = None
+        self.message: Optional[disnake.Message] = None
         self.page_index = 0
         self.cmd_lst = cmd_list
         self.category = category_cmd
@@ -30,7 +29,7 @@ class ViewHelp(discord.ui.View):
         super().__init__(timeout=timeout)
         self.process_buttons()
 
-    async def interaction_check(self, interaction: discord.Interaction):
+    async def interaction_check(self, interaction: disnake.Interaction):
 
         if interaction.user != self.ctx.author:
             await interaction.response.send_message(f"Apenas o membro {self.ctx.author.mention} pode usar essas opções.", ephemeral=True)
@@ -44,7 +43,7 @@ class ViewHelp(discord.ui.View):
 
         for category, emoji in self.items:
 
-            b = discord.SelectOption(
+            b = disnake.SelectOption(
                 label=category, value=category, emoji=emoji, default=category == self.category,
                 description="Ver detalhes dos comandos desta categoria."
             )
@@ -52,22 +51,22 @@ class ViewHelp(discord.ui.View):
             options.append(b)
 
         if options:
-            sel = discord.ui.Select(placeholder='Escolha uma categoria para ver todos os comandos:', options=options)
+            sel = disnake.ui.Select(placeholder='Escolha uma categoria para ver todos os comandos:', options=options)
             sel.callback = self.callback_help
             self.add_item(sel)
 
         if self.category:
 
             if len(self.cmd_lst[self.category]['cmds']) > 1:
-                left_button = discord.ui.Button(style=discord.ButtonStyle.grey, emoji='<:arrow_left:867934922944442368>', custom_id="left_page")
+                left_button = disnake.ui.Button(style=disnake.ButtonStyle.grey, emoji='<:arrow_left:867934922944442368>', custom_id="left_page")
                 left_button.callback = self.callback_left
                 self.add_item(left_button)
 
-                right_button = discord.ui.Button(style=discord.ButtonStyle.grey, emoji='<:arrow_right:867934922940235787>', custom_id="right_page")
+                right_button = disnake.ui.Button(style=disnake.ButtonStyle.grey, emoji='<:arrow_right:867934922940235787>', custom_id="right_page")
                 right_button.callback = self.callback_right
                 self.add_item(right_button)
 
-            back_button = discord.ui.Button(style=discord.ButtonStyle.grey, emoji='<:leftwards_arrow_with_hook:868761137703964692>', custom_id="back_page", label="Voltar")
+            back_button = disnake.ui.Button(style=disnake.ButtonStyle.grey, emoji='<:leftwards_arrow_with_hook:868761137703964692>', custom_id="back_page", label="Voltar")
             back_button.callback = self.callback_back
             self.add_item(back_button)
 
@@ -113,7 +112,7 @@ class ViewHelp(discord.ui.View):
 
         await interaction.response.edit_message(embed=self.first_embed, view=self)
 
-    async def callback_help(self, interaction: discord.MessageInteraction):
+    async def callback_help(self, interaction: disnake.MessageInteraction):
 
         self.category = interaction.data.values[0]
 
@@ -172,7 +171,7 @@ class HelpCog(commands.Cog, name="Ajuda"):
         else:
             usage_cmd = ""
 
-        embed = discord.Embed(color=self.bot.get_color(ctx.guild.me))
+        embed = disnake.Embed(color=self.bot.get_color(ctx.guild.me))
 
         txt = f"### ⌨️ ⠂Comando: {ctx.prefix}{cmd}\n```\n{help_cmd}```\n"
         if cmd.aliases:
@@ -296,7 +295,7 @@ class HelpCog(commands.Cog, name="Ajuda"):
               "Para obter informações de um comando diretamente, use: \n" \
               f"`{ctx.prefix}{ctx.invoked_with} <comando/alias>`"
 
-        embed = discord.Embed(
+        embed = disnake.Embed(
             description=txt.replace(ctx.me.mention, f"@{ctx.me.display_name}").replace(f"<@!{ctx.bot.user.id}>",
                                                                                        f"@{ctx.me.display_name}"),
             color=self.bot.get_color(ctx.guild.me))
@@ -323,7 +322,7 @@ class HelpCog(commands.Cog, name="Ajuda"):
         eb.clear_fields()
 
         for item in view.children:
-            if isinstance(item, (discord.ui.Button, discord.ui.Select)):
+            if isinstance(item, (disnake.ui.Button, disnake.ui.Select)):
                 item.disabled = True
 
         try:
@@ -377,7 +376,7 @@ class HelpCog(commands.Cog, name="Ajuda"):
         await ctx.reply(ctx.author.mention, embed=await self.get_cmd(ctx=ctx, cmds=cmds, index=index, category=name, emoji=emoji), mention_author = False, fail_if_not_exists=False)
 
 
-    async def add_reactions(self, msg: discord.Message, reactions):
+    async def add_reactions(self, msg: disnake.Message, reactions):
         for e in reactions:
             await msg.add_reaction(e)
 
