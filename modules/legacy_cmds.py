@@ -210,6 +210,21 @@ class Owner(commands.Cog):
         )
 
     @commands.is_owner()
+    @panel_command(aliases=["rc", "rcfg"], description="Recarregar as configs do bot.", emoji="⚙",
+                   alt_name="Recarregar as configs do bot.")
+    async def reloadconfig(self, ctx: Union[CustomContext, disnake.MessageInteraction]):
+
+        self.bot.pool.load_cfg()
+
+        txt = "Config do bot foi recarregado com sucesso!"
+
+        if isinstance(ctx, CustomContext):
+            embed = disnake.Embed(colour=self.bot.get_color(ctx.me), description=txt)
+            await ctx.send(embed=embed, view=self.owner_view)
+        else:
+            return txt
+
+    @commands.is_owner()
     @panel_command(aliases=["rd", "recarregar"], description="Recarregar os módulos.", emoji="🔄",
                    alt_name="Carregar/Recarregar módulos.")
     async def reload(self, ctx: Union[CustomContext, disnake.MessageInteraction]):

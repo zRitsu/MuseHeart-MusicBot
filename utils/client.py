@@ -180,12 +180,16 @@ class BotPool:
         else:
             await self.ws_client.ws_loop()
 
-    def setup(self):
+    def load_cfg(self):
 
         self.config = load_config()
 
         if not self.config["DEFAULT_PREFIX"]:
             self.config["DEFAULT_PREFIX"] = "!!"
+
+    def setup(self):
+
+        self.load_cfg()
 
         if self.config['ENABLE_LOGGER']:
 
