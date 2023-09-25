@@ -252,6 +252,7 @@ class Music(commands.Cog):
     stage_flags.add_argument('-reset', '-r', action='store_true',
                              help='Desativar o status automático (canal de voz)')
 
+    @is_dj()
     @has_source()
     @pool_command(
         only_voiced=True, name="stageannounce", aliases=["stagevc", "togglestageannounce", "announce", "vcannounce"],
@@ -271,6 +272,7 @@ class Music(commands.Cog):
             reset=args.reset,
         )
 
+    @is_dj()
     @has_source()
     @commands.slash_command(
         description=f"{desc_prefix}Ativar/editar o sistema de anúncio/status automático do canal com o nome da música.",
