@@ -5463,7 +5463,8 @@ class Music(commands.Cog):
                 else:
                     if isinstance(before.channel, disnake.VoiceChannel) and self.bot.user.id not in before.channel.voice_states:
                         player.stage_title_event = False
-                        await update_vc_status(self.bot, before.channel, status=None)
+                        if player.last_stage_title:
+                            await update_vc_status(self.bot, before.channel, status=None)
 
                     if isinstance(after.channel, disnake.VoiceChannel) and self.bot.user.id in before.channel.voice_states:
                         await player.update_stage_topic()
