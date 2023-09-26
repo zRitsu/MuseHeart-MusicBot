@@ -73,7 +73,6 @@ def skin_converter(data: str, ctx: CustomContext = None, player: Optional[Lavali
             replace('{player.log.emoji}', player.command_log_emoji or ""). \
             replace('{requester.mention}', f'<@{player.current.requester}>'). \
             replace('{requester.avatar}', requester.display_avatar.with_static_format("png").url). \
-            replace('{requester.tag}', f"{requester.display_name}#{requester.discriminator}"). \
             replace('{guild.color}', hex(player.bot.get_color(player.guild.me).value)[2:]). \
             replace('{guild.icon}', player.guild.icon.with_static_format("png").url if player.guild.icon else ""). \
             replace('{guild.name}', player.guild.name). \
@@ -127,7 +126,6 @@ def skin_converter(data: str, ctx: CustomContext = None, player: Optional[Lavali
             replace('{player.log.text}', f"{random.choice(ctx.guild.members)} pulou a música."). \
             replace('{requester.mention}', ctx.author.mention). \
             replace('{requester.avatar}', ctx.author.display_avatar.with_static_format("png").url). \
-            replace('{requester.tag}', f"{ctx.author.display_name}#{ctx.author.discriminator}"). \
             replace('{guild.color}', color). \
             replace('{guild.icon}', ctx.guild.icon.with_static_format("png").url if ctx.guild.icon else ""). \
             replace('{guild.name}', ctx.guild.name). \

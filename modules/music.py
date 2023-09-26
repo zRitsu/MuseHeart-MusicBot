@@ -353,7 +353,7 @@ class Music(commands.Cog):
         if not any(p in template for p in (
                 '{track.title}', '{track.timestamp}', '{track.emoji}', '{track.author}', '{track.duration}',
                 '{track.source}', '{track.playlist}',
-                '{requester.name}', '{requester.tag}', '{requester.id}'
+                '{requester.name}', '{requester.id}'
         )):
             raise GenericError(
                 "**Você deve usar pelo menos um placeholder válido na mensagem.**\n\n"
@@ -366,7 +366,6 @@ class Music(commands.Cog):
                 "[34;1m{track.source}[0m -> Origem/Fonte da música (Youtube/Spotify/Soundcloud etc)\n"
                 "[34;1m{track.playlist}[0m -> Nome da playlist de origem da música (caso tenha)\n"
                 "[34;1m{requester.name}[0m -> Nome/Nick do membro que pediu a música\n"
-                "[34;1m{requester.tag}[0m -> Tag/Discriminator do membro que pediu a música\n"
                 "[34;1m{requester.id}[0m -> ID do membro que pediu a música\n```"
             )
 

@@ -1067,10 +1067,8 @@ class LavalinkPlayer(wavelink.Player):
 
             if requester:
                 requester_name = str(requester.display_name)
-                requester_tag = str(requester.discriminator)
             else:
                 requester_name = "Membro desconhecido"
-                requester_tag = "????"
 
             if not self.current.is_stream or not self.paused:
                 timestamp = f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=((self.current.duration if not self.current.is_stream else 0)) - self.position)).timestamp())}:R>"
@@ -1084,7 +1082,6 @@ class LavalinkPlayer(wavelink.Player):
                 .replace("{track.source}", self.current.info.get("sourceName", "desconhecido"))\
                 .replace("{track.playlist}", self.current.playlist_name or "Sem playlist")\
                 .replace("{requester.name}", requester_name) \
-                .replace("{requester.tag}", requester_tag) \
                 .replace("{requester.id}", str(self.current.requester))
 
         if isinstance(self.guild.me.voice.channel, disnake.StageChannel):
