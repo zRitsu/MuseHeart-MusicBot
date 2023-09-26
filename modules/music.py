@@ -350,32 +350,30 @@ class Music(commands.Cog):
                 raise GenericError("**Você precisa da permissão de gerenciar servidor pra usar esse comando com um modelo.\n"
                                    "Use o comando novamente sem incluir um modelo.**")
 
+        if not any(p in template for p in (
+                '{track.title}', '{track.timestamp}', '{track.emoji}', '{track.author}', '{track.duration}',
+                '{track.source}', '{track.playlist}',
+                '{requester.name}', '{requester.tag}', '{requester.id}'
+        )):
+            raise GenericError(
+                "**Você deve usar pelo menos um placeholder válido na mensagem.**\n\n"
+                "**PLACEHOLDERS:** ```ansi\n"
+                "[34;1m{track.title}[0m -> Nome da música\n"
+                "[34;1m{track.author}[0m -> Nome do Artista/Uploader/Author da música.\n"
+                "[34;1m{track.duration}[0m -> Duração da música.\n"
+                "[34;1m{track.timestamp}[0m -> Tempo restante da duração (apenas em canal de voz).\n"
+                "[34;1m{track.emoji}[0m -> Emoji da fonte de música (apenas em canal de voz).\n"
+                "[34;1m{track.source}[0m -> Origem/Fonte da música (Youtube/Spotify/Soundcloud etc)\n"
+                "[34;1m{track.playlist}[0m -> Nome da playlist de origem da música (caso tenha)\n"
+                "[34;1m{requester.name}[0m -> Nome/Nick do membro que pediu a música\n"
+                "[34;1m{requester.tag}[0m -> Tag/Discriminator do membro que pediu a música\n"
+                "[34;1m{requester.id}[0m -> ID do membro que pediu a música\n```"
+            )
+
+        if isinstance(guild.me.voice.channel, disnake.VoiceChannel):
+            template = global_data["voice_channel_status"] or "{track.emoji} {track.title} | {track.timestamp}"
         else:
-
-            if not any(p in template for p in (
-                    '{track.title}', '{track.timestamp}', '{track.emoji}', '{track.author}', '{track.duration}',
-                    '{track.source}', '{track.playlist}',
-                    '{requester.name}', '{requester.tag}', '{requester.id}'
-            )):
-                raise GenericError(
-                    "**Você deve usar pelo menos um placeholder válido na mensagem.**\n\n"
-                    "**PLACEHOLDERS:** ```ansi\n"
-                    "[34;1m{track.title}[0m -> Nome da música\n"
-                    "[34;1m{track.author}[0m -> Nome do Artista/Uploader/Author da música.\n"
-                    "[34;1m{track.duration}[0m -> Duração da música.\n"
-                    "[34;1m{track.timestamp}[0m -> Tempo restante da duração (apenas em canal de voz).\n"
-                    "[34;1m{track.emoji}[0m -> Emoji da fonte de música (apenas em canal de voz).\n"
-                    "[34;1m{track.source}[0m -> Origem/Fonte da música (Youtube/Spotify/Soundcloud etc)\n"
-                    "[34;1m{track.playlist}[0m -> Nome da playlist de origem da música (caso tenha)\n"
-                    "[34;1m{requester.name}[0m -> Nome/Nick do membro que pediu a música\n"
-                    "[34;1m{requester.tag}[0m -> Tag/Discriminator do membro que pediu a música\n"
-                    "[34;1m{requester.id}[0m -> ID do membro que pediu a música\n```"
-                )
-
-            if isinstance(guild.me.voice.channel, disnake.VoiceChannel):
-                template = global_data["voice_channel_status"] or "{track.emoji} {track.title} | {track.timestamp}"
-            else:
-                template = player.stage_title_template or "{track.title} | {track.author}"
+            template = player.stage_title_template or "{track.title} | {track.author}"
 
         if isinstance(guild.me.voice.channel, disnake.StageChannel):
 
