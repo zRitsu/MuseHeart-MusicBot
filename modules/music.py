@@ -346,7 +346,7 @@ class Music(commands.Cog):
         global_data = await self.bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
 
         if template:
-            if not author.guild_permissions.manage_guild or not (await bot.is_owner(author)):
+            if not author.guild_permissions.manage_guild and not (await bot.is_owner(author)):
                 raise GenericError("**Você precisa da permissão de gerenciar servidor pra usar esse comando com um modelo.\n"
                                    "Use o comando novamente sem incluir um modelo.**")
 
