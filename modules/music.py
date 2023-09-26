@@ -255,7 +255,8 @@ class Music(commands.Cog):
     @is_dj()
     @has_source()
     @pool_command(
-        only_voiced=True, name="stageannounce", aliases=["stagevc", "togglestageannounce", "announce", "vcannounce"],
+        only_voiced=True, name="stageannounce", aliases=["stagevc", "togglestageannounce", "announce", "vcannounce",
+                                                         "voicestatus", "setvcstatus", "setvoicestatus"],
         description="Ativar o sistema de anuncio/status automático do canal com o nome da música.",
         cooldown=stage_cd, max_concurrency=stage_mc, extras={"exclusive_cooldown": True, "flags": stage_flags},
         usage="{prefix}{cmd} <placeholders>\nEx: {track.author} - {track.title}"
@@ -413,7 +414,7 @@ class Music(commands.Cog):
             if author.guild_permissions.manage_guild:
                 global_data["voice_channel_status"] = template
                 await self.bot.update_global_data(inter.guild_id, global_data, db_name=DBModel.guilds)
-                msg += "\n\n**Nota:** `O modelo foi salvo e será usado automáticamente em canais de voz.`"
+                msg += "\n\n**Nota:** `O modelo foi salvo e será usado automaticamente em canais de voz.`"
             else:
                 msg += "\n\n**Nota:** `O template não foi salvo porque você não possui permissão de gerenciar servidor.`"
 
