@@ -347,8 +347,8 @@ class Music(commands.Cog):
 
         if template:
             if not author.guild_permissions.manage_guild and not (await bot.is_owner(author)):
-                raise GenericError("**Você precisa da permissão de gerenciar servidor pra usar esse comando com um modelo.\n"
-                                   "Use o comando novamente sem incluir um modelo.**")
+                raise GenericError("**Você precisa da permissão de gerenciar servidor pra usar esse comando com um modelo personalizado.\n"
+                                   "Use o comando novamente sem incluir um modelo (será usado o modelo padrão).**")
 
         if not any(p in template for p in (
                 '{track.title}', '{track.timestamp}', '{track.emoji}', '{track.author}', '{track.duration}',
