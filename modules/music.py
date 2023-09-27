@@ -436,10 +436,12 @@ class Music(commands.Cog):
 
             if inter.response.is_done():
                 func = inter.edit_original_message
+                kwargs = {}
             else:
                 func = inter.send
+                kwargs = {"ephemeral": True} if not isinstance(inter, CustomContext) else {}
 
-            await func(embed=disnake.Embed(description=msg, color=self.bot.get_color(guild.me)))
+            await func(embed=disnake.Embed(description=msg, color=self.bot.get_color(guild.me)), **kwargs)
             await player.process_save_queue()
 
         else:

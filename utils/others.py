@@ -118,6 +118,7 @@ class PlayerControls:
     integration_manager = "musicplayer_integration_manager"
     autoplay = "musicplayer_autoplay"
     add_favorite = "musicplayer_add_favorite"
+    stage_announce = "musicplayer_stage_announce"
 
 
 class SongRequestPurgeMode:

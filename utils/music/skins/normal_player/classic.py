@@ -184,6 +184,16 @@ class ClassicSkin:
                 )
             )
 
+        if isinstance(player.guild.me.voice.channel, disnake.VoiceChannel):
+            txt = "Desativar" if player.stage_title_event else "Ativar"
+            data["components"][5].options.append(
+                disnake.SelectOption(
+                    label= f"{txt} status automático", emoji="📢",
+                    value=PlayerControls.stage_announce,
+                    description=f"{txt} o status automático do canal de voz."
+                )
+            )
+
         if not player.static and not player.has_thread:
             data["components"][5].options.append(
                 disnake.SelectOption(
