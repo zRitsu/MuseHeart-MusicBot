@@ -273,6 +273,7 @@ class Music(commands.Cog):
             template=" ".join(args.template + unknown),
             save=args.save,
             clear=args.clear,
+            disable=args.disable,
         )
 
     @is_dj()
@@ -4367,7 +4368,7 @@ class Music(commands.Cog):
 
                 elif control == PlayerControls.stage_announce:
                     cmd = self.bot.get_slash_command("stage_announce")
-                    cmd_kwargs = {"clear": player.stage_title_event}
+                    cmd_kwargs = {"clear": player.stage_title_event, "save": False, "disable": False, "template": ""}
 
                 elif control == PlayerControls.pause_resume:
                     control = PlayerControls.pause if not player.paused else PlayerControls.resume
