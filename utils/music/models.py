@@ -1289,6 +1289,16 @@ class LavalinkPlayer(wavelink.Player):
                         )
                     )
 
+                if isinstance(self.guild.me.voice.channel, disnake.VoiceChannel):
+                    txt = "Desativar" if self.stage_title_event else "Ativar"
+                    data["components"][5].options.append(
+                        disnake.SelectOption(
+                            label=f"{txt} status automático", emoji="📢",
+                            value=PlayerControls.stage_announce,
+                            description=f"{txt} o status automático do canal de voz."
+                        )
+                    )
+
                 if not self.static and not self.has_thread:
                     self.last_data["components"][5].options.append(
                         disnake.SelectOption(
