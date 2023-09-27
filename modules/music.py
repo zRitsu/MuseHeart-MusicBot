@@ -330,24 +330,25 @@ class Music(commands.Cog):
                     raise GenericError("**O status automático não foi configurado.**")
                 global_data["voice_channel_status"] = ""
                 await self.bot.update_global_data(inter.guild_id, global_data, db_name=DBModel.guilds)
-            else:
-                await asyncio.sleep(2)
 
             await player.update_stage_topic(clear=True)
 
             player.stage_title_event = False
 
-            try:
-                func = inter.edit_original_message
-            except:
-                func = inter.send
+            if isinstance(inter, disnake.MessageInteraction):
+                await self.interaction_message(inter,  "desativou o status automático do canal de voz.", emoji="📢", force=True)
+            else:
+                try:
+                    func = inter.edit_original_message
+                except:
+                    func = inter.send
 
-            await func(
-                embed=disnake.Embed(
-                    description="**O status automático do canal de voz foi desativado com sucesso!**",
-                    color=self.bot.get_color(guild.me)
+                await func(
+                    embed=disnake.Embed(
+                        description="**O status automático do canal de voz foi desativado com sucesso!**",
+                        color=self.bot.get_color(guild.me)
+                    )
                 )
-            )
             await player.process_save_queue()
             return
 
@@ -455,17 +456,12 @@ class Music(commands.Cog):
             await func(embed=disnake.Embed(description=msg, color=self.bot.get_color(guild.me)), **kwargs)
             await player.process_save_queue()
 
-        elif isinstance(inter, disnake.MessageInteraction):
-            log, msg = txt
-            await inter.send(
-                embed=disnake.Embed(description=txt, color=self.bot.get_color(guild.me)),
-                ephemeral=True
-            )
-            player.set_command_log(log, emoji="📢")
-            player.update = True
+        elif isinstance(inter, (disnake.MessageInteraction)):
+            player.set_command_log(f"{inter.author.mention} {txt[0]}", emoji="📢")
+            await player.invoke_np(force=True, interaction=inter)
 
         else:
-            await self.interaction_message(inter, txt, emoji="📢", force=True)
+            await self.interaction_message(inter, txt, emoji="📢")
 
         await player.update_stage_topic()
 
