@@ -1289,7 +1289,7 @@ class LavalinkPlayer(wavelink.Player):
                         )
                     )
 
-                if isinstance(self.guild.me.voice.channel, disnake.VoiceChannel):
+                if self.guild.me.voice and isinstance(self.guild.me.voice.channel, disnake.VoiceChannel):
                     txt = "Desativar" if self.stage_title_event else "Ativar"
                     data["components"][5].options.append(
                         disnake.SelectOption(

@@ -140,7 +140,7 @@ class EmbedLinkSkin:
             ),
         ]
 
-        if isinstance(player.guild.me.voice.channel, disnake.VoiceChannel):
+        if player.guild.me.voice and isinstance(player.guild.me.voice.channel, disnake.VoiceChannel):
             txt = "Desativar" if player.stage_title_event else "Ativar"
             data["components"][5].options.append(
                 disnake.SelectOption(
