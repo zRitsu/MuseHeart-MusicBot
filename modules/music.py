@@ -444,7 +444,6 @@ class Music(commands.Cog):
             player.set_command_log(emoji="📢", text=log)
             player.update = True
 
-
             if inter.response.is_done():
                 func = inter.edit_original_message
                 kwargs = {}
@@ -454,6 +453,15 @@ class Music(commands.Cog):
 
             await func(embed=disnake.Embed(description=msg, color=self.bot.get_color(guild.me)), **kwargs)
             await player.process_save_queue()
+
+        elif isinstance(inter, disnake.MessageInteraction):
+            log, msg = txt
+            await inter.send(
+                embed=disnake.Embed(description=txt, color=self.bot.get_color(guild.me)),
+                ephemeral=True
+            )
+            player.set_command_log(txt, emoji="📢")
+            player.update = True
 
         else:
             await self.interaction_message(inter, txt, emoji="📢", force=True)
