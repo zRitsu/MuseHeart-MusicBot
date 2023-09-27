@@ -460,7 +460,7 @@ class Music(commands.Cog):
                 embed=disnake.Embed(description=txt, color=self.bot.get_color(guild.me)),
                 ephemeral=True
             )
-            player.set_command_log(txt, emoji="📢")
+            player.set_command_log(log, emoji="📢")
             player.update = True
 
         else:
