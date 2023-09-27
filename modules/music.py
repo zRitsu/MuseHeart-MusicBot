@@ -249,7 +249,9 @@ class Music(commands.Cog):
     stage_flags.add_argument('template', nargs='*', help="Modelo a ser usado no lugar do padrão.")
     stage_flags.add_argument('-save', '-s', action='store_true',
                              help='Salvar o modelo pra ser ativado automaticamente ao conectar no canal de voz.')
-    stage_flags.add_argument('-reset', '-r', action='store_true',
+    stage_flags.add_argument('-clear', '-c', action='store_true',
+                             help='Limpar o status automático do canal de voz')
+    stage_flags.add_argument('-disable', '-d', action='store_true',
                              help='Desativar o status automático (canal de voz)')
 
     @is_dj()
@@ -270,7 +272,7 @@ class Music(commands.Cog):
             inter=ctx,
             template=" ".join(args.template + unknown),
             save=args.save,
-            reset=args.reset,
+            clear=args.clear,
         )
 
     @is_dj()
@@ -291,8 +293,13 @@ class Music(commands.Cog):
                 description="Salvar o modelo pra ser ativado automaticamente ao conectar no canal de voz.",
                 default=False,
             ),
-            reset: bool = commands.Param(
-                name=disnake.Localized("reset", data={disnake.Locale.pt_BR: "resetar"}),
+            clear: bool = commands.Param(
+                name=disnake.Localized("clear", data={disnake.Locale.pt_BR: "limpar"}),
+                description="Limpar/desativar o status automático (canal de voz).",
+                default=False,
+            ),
+            disable: bool = commands.Param(
+                name=disnake.Localized("disable", data={disnake.Locale.pt_BR: "desativar"}),
                 description="Desativar o status automático (canal de voz).",
                 default=False,
             )
@@ -309,18 +316,22 @@ class Music(commands.Cog):
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
-        if reset:
+        if disable or clear:
 
             if not author.guild_permissions.manage_guild:
                 raise GenericError("**Você não possui permissão de gerenciar servidor para desativar o status automático**")
 
             await inter.response.defer(ephemeral=True)
-            global_data = await self.bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
-            if not global_data["voice_channel_status"]:
-                raise GenericError("**O status automático não foi configurado.**")
-            global_data["voice_channel_status"] = ""
 
-            await self.bot.update_global_data(inter.guild_id, global_data, db_name=DBModel.guilds)
+            if disable:
+                global_data = await self.bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
+                if not global_data["voice_channel_status"]:
+                    raise GenericError("**O status automático não foi configurado.**")
+                global_data["voice_channel_status"] = ""
+                await self.bot.update_global_data(inter.guild_id, global_data, db_name=DBModel.guilds)
+            else:
+                await asyncio.sleep(2)
+
             await player.update_stage_topic(clear=True)
 
             player.stage_title_event = False
@@ -4345,6 +4356,10 @@ class Music(commands.Cog):
                 elif control == PlayerControls.seek_to_start:
                     cmd = self.bot.get_slash_command("seek")
                     cmd_kwargs = {"position": "0"}
+
+                elif control == PlayerControls.stage_announce:
+                    cmd = self.bot.get_slash_command("stage_announce")
+                    cmd_kwargs = {"clear": player.stage_title_event}
 
                 elif control == PlayerControls.pause_resume:
                     control = PlayerControls.pause if not player.paused else PlayerControls.resume
