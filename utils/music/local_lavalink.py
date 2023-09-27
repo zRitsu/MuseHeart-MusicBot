@@ -50,7 +50,7 @@ def run_lavalink(
             pass
 
         if os.name == "nt":
-            dirs.append(".java\\zulu17.44.15-ca-jdk17.0.8-win_x64\\bin\\java")
+            dirs.append(r".java\zulu17.44.15-ca-jdk17.0.8-win_x64\bin\java")
         else:
             dirs.extend(
                 [
@@ -88,7 +88,7 @@ def run_lavalink(
 
                 os.remove(jdk_filename)
 
-                java_cmd = os.path.join(os.getcwd(), r"\.java\zulu17.44.15-ca-jdk17.0.8-win_x64\bin\java")
+                java_cmd = r"\.java\zulu17.44.15-ca-jdk17.0.8-win_x64\bin\java"
 
             elif use_jabba:
 
