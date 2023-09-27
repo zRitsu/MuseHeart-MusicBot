@@ -461,7 +461,7 @@ class Music(commands.Cog):
             await player.invoke_np(force=True, interaction=inter)
 
         else:
-            await self.interaction_message(inter, txt, emoji="📢")
+            await self.interaction_message(inter, txt, emoji="📢", defered=True)
 
         await player.update_stage_topic()
 
@@ -4999,32 +4999,21 @@ class Music(commands.Cog):
 
         elif not component_interaction:
 
+            embed = disnake.Embed(
+                color=self.bot.get_color(guild.me),
+                description=(txt_ephemeral or f"{inter.author.mention} **{txt}**") + player.controller_link
+            )
+
+            try:
+                if bot.user.id != self.bot.user.id:
+                    embed.set_footer(text=f"Via: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
+            except AttributeError:
+                pass
+
             if not inter.response.is_done():
-                embed = disnake.Embed(
-                    color=self.bot.get_color(guild.me),
-                    description=(txt_ephemeral or f"{inter.author.mention} **{txt}**") + player.controller_link
-                )
-
-                try:
-                    if bot.user.id != self.bot.user.id:
-                        embed.set_footer(text=f"Via: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
-                except AttributeError:
-                    pass
-
                 await inter.send(embed=embed, ephemeral=ephemeral)
 
             elif defered:
-                embed = disnake.Embed(
-                    color=self.bot.get_color(guild.me),
-                    description=(txt_ephemeral or f"{inter.author.mention} **{txt}**") + player.controller_link
-                )
-
-                try:
-                    if bot.user.id != self.bot.user.id:
-                        embed.set_footer(text=f"Via: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
-                except AttributeError:
-                    pass
-
                 await inter.edit_original_response(embed=embed)
 
     async def process_nodes(self, data: dict, start_local: bool = False):
