@@ -6,6 +6,7 @@ import re
 import traceback
 import asyncio
 from copy import deepcopy
+from time import time
 from typing import Union, Optional
 from random import shuffle
 
@@ -5182,10 +5183,14 @@ class Music(commands.Cog):
         if player.locked:
             return
 
+        player.locked = True
+
         player.current = None
 
         if payload.error == "This IP address has been blocked by YouTube (429)" or (payload.cause.startswith("java.lang.RuntimeException: Not success status code: 403") and track.info["sourceName"] == "youtube"):
             player.node.available = False
+
+            player.locked = False
 
             try:
                 player._new_node_task.cancel()
@@ -5193,6 +5198,8 @@ class Music(commands.Cog):
                 pass
             player._new_node_task = player.bot.loop.create_task(player._wait_for_new_node(f"O servidor **{node.identifier}** tomou ratelimit do youtube está indisponível no momento (aguardando um novo servidor ficar disponível)."))
             return
+
+        start_position = 0
 
         if payload.cause.startswith((
                 "java.net.SocketTimeoutException: Read timed out",
@@ -5204,22 +5211,17 @@ class Music(commands.Cog):
         )):
             player.queue.appendleft(track)
 
+            difference = (time() * 1000) - player.last_update
+            position = player.last_position + difference
+            start_position = 0 if position > track.duration else min(position, track.duration)
+
         elif payload.cause == "java.lang.InterruptedException":
             player.queue.appendleft(track)
-
-            if player.node.identifier == "LOCAL":
-                return
-            else:
-                try:
-                    n = await self.get_best_node()
-                except:
-                    if player.static:
-                        player.set_command_log(text="O player foi desligado por falta de servidores de música...")
-                    else:
-                        await player.text_channel.send("**O player foi desligado por falta de servidores de música...**")
-                    await player.destroy()
-                    return
-                await player.change_node(n.identifier)
+            try:
+                player._new_node_task.cancel()
+            except:
+                pass
+            player._new_node_task = player.bot.loop.create_task(player._wait_for_new_node())
 
         elif not track.track_loops:
             player.failed_tracks.append(track)
@@ -5227,7 +5229,6 @@ class Music(commands.Cog):
         elif player.keep_connected and not track.autoplay and len(player.queue) > 15:
             player.queue.append(track)
 
-        player.locked = True
         await asyncio.sleep(10)
 
         try:
@@ -5236,7 +5237,7 @@ class Music(commands.Cog):
             return
 
         player.locked = False
-        await player.process_next()
+        await player.process_next(start_position=start_position)
 
     @commands.Cog.listener("on_wavelink_node_ready")
     async def node_ready(self, node: wavelink.Node):
