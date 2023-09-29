@@ -234,7 +234,7 @@ def load_config():
         except KeyError:
             raise Exception(f"Você usou uma configuração inválida! {i}: {CONFIG[i]}")
 
-    CONFIG["RPC_SERVER"] = CONFIG["RPC_SERVER"].replace("$PORT", environ.get("PORT", "80"))
+    CONFIG["RPC_SERVER"] = CONFIG["RPC_SERVER"].replace("$PORT", CONFIG.get("PORT") or environ.get("PORT", "80"))
 
     if CONFIG["PRESENCE_INTERVAL"] < 300:
         CONFIG["PRESENCE_INTERVAL"] = 300
