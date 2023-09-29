@@ -75,6 +75,7 @@ DEFAULT_CONFIG = {
     ################################################
     "RUN_RPC_SERVER": True,
     "RPC_SERVER": "ws://localhost:$PORT/ws",
+    "PORT": None,
     "RPC_PUBLIC_URL": "",
     "ENABLE_RPC_COMMAND": False,
     "ENABLE_RPC_AUTH": False,

@@ -423,7 +423,7 @@ def run_app(pool: BotPool, message: str = "", config: dict = None):
         (r'/ws', WebSocketHandler),
     ])
 
-    app.listen(port=environ.get("PORT", 80))
+    app.listen(port=config.get("PORT") or environ.get("PORT", 80))
 
 
 def start(pool: BotPool, message="", config: dict = None):
