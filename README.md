@@ -94,34 +94,6 @@ Gitpod
 
 <details>
 <summary>
-Heroku
-</summary>
-<br>
-
-[![Heroku_Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/zRitsu/MuseHeart-MusicBot/tree/main)
-
-**Nota: A partir do dia 28/11/2022 a heroku não vai mais fornecer planos gratuitos ([clique aqui](https://blog.heroku.com/next-chapter) para saber mais).**
-
-
-* **[ 1 ]** - Preencha os dados que vão ser requisitados na próxima página. `Nota: Caso queira, no campo TOKEN você pode incluir token de mais bots para ter bots extras pra ativar o suporte a multi-voice incluindo mais tokens no value (separando com espaços).`
-
-
-* **[ 2 ]** - Clique em deploy app e aguarde (o processo pode demorar entre 2-5 minutos).
-
-
-* **[ 3 ]** - Clique em Manage e depois vá em resources.
-
-
-* **[ 4 ]** - Desative o dyno web e ative o autoupdate (ou o quickfix, não ative os 2 ao mesmo tempo!) e aguarde o bot logar. `(no canto superior clique em more e em view logs para acompanhar os logs)`
-
-
-* **Nota:** Caso queira alterar as configs usadas no passo 1, vá em settings e clique em Reveal Config Vars, crie/altere a key e o valor desejado da config, consulte o arquivo .example.env para ver todas as configs disponíveis.
-</details>
-
----
-
-<details>
-<summary>
 Hospedando no seu próprio PC/VPS (windows/linux)
 </summary>
 <br>
