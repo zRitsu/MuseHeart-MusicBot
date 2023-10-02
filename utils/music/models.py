@@ -1072,8 +1072,8 @@ class LavalinkPlayer(wavelink.Player):
             else:
                 requester_name = "Membro desconhecido"
 
-            if not self.current.is_stream or (not self.paused and not self.auto_pause):
-                timestamp = f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=((self.current.duration if not self.current.is_stream else 0)) - self.position)).timestamp())}:R>"
+            if not self.current.is_stream and not self.paused and not self.auto_pause:
+                timestamp = f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=((self.current.duration)) - self.position)).timestamp())}:R>"
             else:
                 timestamp = ("pausado " if (self.paused or self.auto_pause) else "🔴 ") + f"<t:{int(disnake.utils.utcnow().timestamp())}:R>"
 
