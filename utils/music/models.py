@@ -1073,7 +1073,7 @@ class LavalinkPlayer(wavelink.Player):
             if not self.current.is_stream or not self.paused:
                 timestamp = f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=((self.current.duration if not self.current.is_stream else 0)) - self.position)).timestamp())}:R>"
             else:
-                timestamp = f"<t:{int(disnake.utils.utcnow().timestamp())}:R>"
+                timestamp = ("pausado " if self.paused else "🔴 ") + f"<t:{int(disnake.utils.utcnow().timestamp())}:R>"
 
             msg = self.stage_title_template\
                 .replace("{track.title}", self.current.single_title)\
