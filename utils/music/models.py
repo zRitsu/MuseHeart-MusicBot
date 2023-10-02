@@ -554,6 +554,7 @@ class LavalinkPlayer(wavelink.Player):
                     await self.invoke_np(rpc_update=True)
                 else:
                     await self.process_next()
+            await self.update_stage_topic()
             return
 
         if not force:
@@ -579,6 +580,7 @@ class LavalinkPlayer(wavelink.Player):
                                       f"música será retomada automaticamente quando um membro entrar no canal "
                                       f"<#{self.channel_id}>.", emoji="⚠️")
             await self.invoke_np()
+            await self.update_stage_topic()
 
         else:
             msg = f"**O player foi desligado por falta de membros no canal" + (f"<#{self.guild.me.voice.channel.id}>"
