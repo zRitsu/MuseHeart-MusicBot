@@ -1275,6 +1275,9 @@ class Music(commands.Cog):
                     else:
                         inter = view.inter
 
+        if query.startswith("https://www.youtube.com/results"):
+            raise GenericError(f"**Não há suporte para o link informado:** {query}")
+
         if not inter.response.is_done():
             await inter.response.defer(ephemeral=ephemeral)
 
