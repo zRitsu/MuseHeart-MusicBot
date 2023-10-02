@@ -1114,8 +1114,8 @@ class LavalinkPlayer(wavelink.Player):
 
             if msg:
 
-                if len(msg) > 146:
-                    msg = msg[:146] + "..."
+                if len(msg) > 496:
+                    msg = msg[:496] + "..."
 
                 msg = msg\
                     .replace("{track.timestamp}", timestamp)\
