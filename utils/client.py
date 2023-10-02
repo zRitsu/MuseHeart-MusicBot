@@ -889,6 +889,8 @@ class BotCore(commands.Bot):
 
     async def update_appinfo(self):
 
+        await self.wait_until_ready()
+
         self.appinfo = (await self.application_info())
 
         try:
