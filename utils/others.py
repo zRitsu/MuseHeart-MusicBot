@@ -376,7 +376,7 @@ async def send_idle_embed(
                             except disnake.NotFound:
                                 continue
                             thread = t
-                            if target.permissions_for(target.guild.me).manage_threads:
+                            if (thread.locked or thread.archived) and target.permissions_for(target.guild.me).manage_threads:
                                 await thread.edit(archived=False, locked=False)
                             break
 
@@ -388,7 +388,7 @@ async def send_idle_embed(
                                 except disnake.NotFound:
                                     continue
                                 thread = t
-                                if target.permissions_for(target.guild.me).manage_threads:
+                                if (thread.locked or thread.archived) and target.permissions_for(target.guild.me).manage_threads:
                                     await thread.edit(archived=False, locked=False)
                                 break
             else:
