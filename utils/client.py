@@ -402,6 +402,11 @@ class BotPool:
 
                 if not bot.bot_ready:
 
+                    if bot.initializing:
+                        return
+
+                    bot.initializing = True
+
                     try:
                         if str(bot.user.id) in bot.config["INTERACTION_BOTS"] or \
                                 str(bot.user.id) in bot.config["INTERACTION_BOTS_CONTROLLER"] or \
@@ -459,9 +464,6 @@ class BotPool:
 
                             bot.load_modules()
 
-                        if not bot.appinfo:
-                            bot.loop.create_task(bot.update_appinfo())
-
                         music_cog = bot.get_cog("Music")
 
                         if music_cog:
@@ -475,6 +477,17 @@ class BotPool:
 
                     except Exception:
                         traceback.print_exc()
+
+                    retries = 3
+
+                    while retries:
+                        try:
+                            await bot.update_appinfo()
+                            break
+                        except:
+                            print(f"{bot.user} - Falha ao obter appinfo {retries}/3: {repr(e)}")
+                            retries -= 1
+                            await asyncio.sleep(5)
 
                     bot.bot_ready = True
 
@@ -557,6 +570,7 @@ class BotCore(commands.Bot):
         self.identifier = kwargs.pop("identifier", "")
         self.appinfo: Optional[disnake.AppInfo] = None
         self.bot_ready = False
+        self.initializing = False
         self.player_skins = {}
         self.player_static_skins = {}
         self.default_skin = self.config.get("DEFAULT_SKIN", "default")
@@ -891,7 +905,7 @@ class BotCore(commands.Bot):
 
         await self.wait_until_ready()
 
-        self.appinfo = (await self.application_info())
+        self.appinfo = await self.application_info()
 
         try:
             self.owner = self.appinfo.team.members[0]
