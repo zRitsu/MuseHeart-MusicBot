@@ -365,7 +365,7 @@ async def send_idle_embed(
                 message = await channel.parent.fetch_message(channel.id)
             except disnake.NotFound:
                 message = None
-                if isinstance(channel.parent, disnake.ForumChannel) and target.permissions_for(target.guild.me).manage_threads:
+                if isinstance(channel.parent, disnake.ForumChannel):
 
                     thread = None
 
@@ -376,7 +376,8 @@ async def send_idle_embed(
                             except disnake.NotFound:
                                 continue
                             thread = t
-                            await thread.edit(archived=False, locked=False)
+                            if target.permissions_for(target.guild.me).manage_threads:
+                                await thread.edit(archived=False, locked=False)
                             break
 
                     if not thread:
@@ -387,7 +388,8 @@ async def send_idle_embed(
                                 except disnake.NotFound:
                                     continue
                                 thread = t
-                                await thread.edit(archived=False, locked=False)
+                                if target.permissions_for(target.guild.me).manage_threads:
+                                    await thread.edit(archived=False, locked=False)
                                 break
             else:
                 await message.edit(embed=embed, content=content, components=components)
