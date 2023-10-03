@@ -363,8 +363,6 @@ class Misc(commands.Cog):
                   f"Tipo de canal: {type(channel)}\n"
                   f"{traceback.format_exc()}")
 
-        await self.bot.update_appinfo()
-
 
     about_cd = commands.CooldownMapping.from_cooldown(1, 5, commands.BucketType.member)
 
