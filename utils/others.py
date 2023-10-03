@@ -283,6 +283,11 @@ async def send_message(
         try:
             await inter.send(text, ephemeral=True, **kwargs)
         except disnake.InteractionTimedOut:
+            try:
+                if not inter.channel.permissions_for(inter.guild.me).send_messages:
+                    return
+            except AttributeError:
+                return
             await inter.channel.send(text, **kwargs)
 
 

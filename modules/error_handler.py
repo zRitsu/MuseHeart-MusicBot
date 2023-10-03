@@ -111,7 +111,10 @@ class ErrorHandler(commands.Cog):
 
             kwargs["embed"].description = error_msg
 
-        await send_message(inter, components=components, **kwargs)
+        try:
+            await send_message(inter, components=components, **kwargs)
+        except:
+            traceback.print_exc()
 
         if kill_process:
             await asyncio.create_subprocess_shell("kill 1")
