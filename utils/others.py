@@ -353,7 +353,41 @@ async def send_idle_embed(
             message = await target.channel.send(embed=embed, components=components, content=content)
     else:
 
-        message = await bot.get_channel(target.id).send(embed=embed, components=components, content=content)
+        channel = bot.get_channel(target.id)
+
+        if isinstance(channel, disnake.Thread) and guild_data["player_controller"]["channel"] == str(channel.id):
+            try:
+                message = await channel.parent.fetch_message(channel.id)
+            except disnake.NotFound:
+                message = None
+                if isinstance(channel.parent, disnake.ForumChannel) and target.permissions_for(target.guild.me).manage_threads:
+
+                    thread = None
+
+                    for t in channel.parent.threads:
+                        if t.owner_id == bot.user.id:
+                            try:
+                                message = await t.fetch_message(t.id)
+                            except disnake.NotFound:
+                                continue
+                            thread = t
+                            await thread.edit(archived=False, locked=False)
+                            break
+
+                    if not thread:
+                        async for t in target.parent.archived_threads(limit=100):
+                            if t.owner_id == bot.user.id:
+                                try:
+                                    message = await t.fetch_message(t.id)
+                                except disnake.NotFound:
+                                    continue
+                                thread = t
+                                await thread.edit(archived=False, locked=False)
+                                break
+            else:
+                await message.edit(embed=embed, content=content, components=components)
+        else:
+            message = await channel.send(embed=embed, components=components, content=content)
 
     if isinstance(message.channel, (disnake.Thread, disnake.TextChannel)) and not message.pinned and not is_forum and target.guild.me.guild_permissions.manage_messages:
         await message.pin(reason="Player controller")
