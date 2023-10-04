@@ -421,6 +421,10 @@ class Misc(commands.Cog):
         public_bot_count = 0
         private_bot_count = 0
 
+        users = set()
+        bots = set()
+        botpool_ids = [b.user.id for b in self.bot.pool.bots]
+
         for b in bot.pool.bots:
 
             try:
@@ -428,6 +432,16 @@ class Misc(commands.Cog):
                     continue
             except:
                 pass
+
+            for user in b.users:
+
+                if user.id in botpool_ids:
+                    continue
+
+                if user.bot:
+                    bots.add(user.id)
+                else:
+                    users.add(user.id)
 
             for p in b.music.players.values():
 
@@ -452,22 +466,30 @@ class Misc(commands.Cog):
                 public_bot_count += 1
 
         if public_bot_count:
-            embed.description += f"> **Bot(s) público(s):** `{public_bot_count}`\n"
+            embed.description += f"> **Bot(s) público(s):** `{public_bot_count:,}`\n"
 
         if private_bot_count:
-            embed.description += f"> **Bot(s) privado(s):** `{private_bot_count}`\n"
+            embed.description += f"> **Bot(s) privado(s):** `{private_bot_count:,}`\n"
 
         if active_players_other_bots:
             embed.description += f"> **Players ativos" + (" (todos os bots)" if len(bot.pool.bots) > 1 else "") + \
-                                 f":** `{active_players_other_bots}`\n"
+                                 f":** `{active_players_other_bots:,}`\n"
 
         if paused_players_other_bots:
             embed.description += f"> **Players em pausa" + (" (todos os bots)" if len(bot.pool.bots) > 1 else "") + \
-                                 f":** `{paused_players_other_bots}`\n"
+                                 f":** `{paused_players_other_bots:,}`\n"
 
         if inactive_players_other_bots:
             embed.description += f"> **Players inativos" + (" (todos os bots)" if len(bot.pool.bots) > 1 else "") + \
-                                 f":** `{inactive_players_other_bots}`\n"
+                                 f":** `{inactive_players_other_bots:,}`\n"
+
+        if users_amount:=len(users):
+            embed.description += f"> **Quantidade de usuários" + (" (todos os bots)" if len(bot.pool.bots) > 1 else "") + \
+                                 f":** `{users_amount:,}`\n"
+
+        if bots_amount:=len(bots):
+            embed.description += f"> **Quantidade de bots" + (" (todos os bots)" if len(bot.pool.bots) > 1 else "") + \
+                                 f":** `{bots_amount:,}`\n"
 
         if bot.pool.commit:
             embed.description += f"> **Commit atual:** [`{bot.pool.commit[:7]}`]({bot.pool.remote_git_url}/commit/{bot.pool.commit})\n"
