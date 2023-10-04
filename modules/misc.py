@@ -62,6 +62,11 @@ class Misc(commands.Cog):
         if not text:
             return ""
 
+        try:
+            text = text.replace("{owner}", str(self.bot.owner))
+        except AttributeError:
+            pass
+
         return text \
             .replace("{users}", f'{len([m for m in self.bot.users if not m.bot]):,}'.replace(",", ".")) \
             .replace("{playing}", f'{len(self.bot.music.players):,}'.replace(",", ".")) \
