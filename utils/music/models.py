@@ -1007,9 +1007,14 @@ class LavalinkPlayer(wavelink.Player):
             self.message = await self.text_channel.send(**kwargs)
 
     async def idling_mode(self):
+        
+        try:
+            vc = self.guild.me.voice.channel
+        except AttributeError:
+            vc = self.last_channel
 
         try:
-            await self.process_rpc(self.guild.me.voice.channel)
+            await self.process_rpc(vc)
         except:
             traceback.print_exc()
 
