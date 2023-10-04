@@ -380,7 +380,7 @@ async def send_idle_embed(
                                 await thread.edit(archived=False, locked=False)
                             break
 
-                    if not thread:
+                    if not thread and target.guild.me.guild_permissions.read_message_history:
                         async for t in target.parent.archived_threads(limit=100):
                             if t.owner_id == bot.user.id:
                                 try:

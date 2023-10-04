@@ -739,7 +739,7 @@ class MusicSettings(commands.Cog):
                         await thread.edit(archived=False, locked=False)
                         break
 
-                if not thread:
+                if not thread and guild.me.guild_permissions.read_message_history:
                     async for t in target.archived_threads(limit=100):
                         if t.owner_id == bot.user.id:
                             try:
