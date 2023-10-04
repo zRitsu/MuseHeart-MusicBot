@@ -471,25 +471,22 @@ class Misc(commands.Cog):
         if private_bot_count:
             embed.description += f"> **Bot(s) privado(s):** `{private_bot_count:,}`\n"
 
+        extra_txt = " (todos os bots)" if len(bot.pool.bots) > 1 else ""
+
         if active_players_other_bots:
-            embed.description += f"> **Players ativos" + (" (todos os bots)" if len(bot.pool.bots) > 1 else "") + \
-                                 f":** `{active_players_other_bots:,}`\n"
+            embed.description += f"> **Players ativos{extra_txt}:** `{active_players_other_bots:,}`\n"
 
         if paused_players_other_bots:
-            embed.description += f"> **Players em pausa" + (" (todos os bots)" if len(bot.pool.bots) > 1 else "") + \
-                                 f":** `{paused_players_other_bots:,}`\n"
+            embed.description += f"> **Players em pausa{extra_txt}:** `{paused_players_other_bots:,}`\n"
 
         if inactive_players_other_bots:
-            embed.description += f"> **Players inativos" + (" (todos os bots)" if len(bot.pool.bots) > 1 else "") + \
-                                 f":** `{inactive_players_other_bots:,}`\n"
+            embed.description += f"> **Players inativos{extra_txt}:** `{inactive_players_other_bots:,}`\n"
 
         if users_amount:=len(users):
-            embed.description += f"> **Quantidade de usuários" + (" (todos os bots)" if len(bot.pool.bots) > 1 else "") + \
-                                 f":** `{users_amount:,}`\n"
+            embed.description += f"> **Quantidade de usuários{extra_txt}:** `{users_amount:,}`\n"
 
         if bots_amount:=len(bots):
-            embed.description += f"> **Quantidade de bots" + (" (todos os bots)" if len(bot.pool.bots) > 1 else "") + \
-                                 f":** `{bots_amount:,}`\n"
+            embed.description += f"> **Quantidade de bots{extra_txt}:** `{bots_amount:,}`\n"
 
         if bot.pool.commit:
             embed.description += f"> **Commit atual:** [`{bot.pool.commit[:7]}`]({bot.pool.remote_git_url}/commit/{bot.pool.commit})\n"
