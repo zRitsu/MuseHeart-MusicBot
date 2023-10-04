@@ -155,7 +155,10 @@ class ErrorHandler(commands.Cog):
             return
 
         if isinstance(error, commands.MissingPermissions) and (await ctx.bot.is_owner(ctx.author)):
-            await ctx.reinvoke()
+            try:
+                await ctx.reinvoke()
+            except Exception as e:
+                await self.on_legacy_command_error(ctx, e)
             return
 
         error_msg, full_error_msg, kill_process, components = parse_error(ctx, error)
