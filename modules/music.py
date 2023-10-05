@@ -5206,7 +5206,7 @@ class Music(commands.Cog):
 
         if payload.cause.startswith((
                 "java.net.SocketTimeoutException: Read timed out",
-                "java.net.SocketTimeoutException: connect timed out",
+                "java.net.SocketTimeoutException: Connect timed out",
                 "java.net.UnknownHostException:",
                 "java.lang.IllegalStateException: Current position is beyond this element",
                 "javax.script.ScriptEngine.eval(String)",
