@@ -12,6 +12,6 @@ aiofiles
 disnake-jishaku
 packaging
 aiosqlite
-yt-dlp>=2023.09.24
+yt-dlp>=2023.10.07
 tornado
 git+https://github.com/zRitsu/Wavelink.git@8247d9fbee0a2b50d5c668d8b4827bf552430925
