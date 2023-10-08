@@ -5297,7 +5297,10 @@ class Music(commands.Cog):
                 player.update = True
                 return
 
-        await player.process_save_queue()
+        try:
+            await player.process_save_queue()
+        except:
+            traceback.print_exc()
 
         await player.update_stage_topic()
 
