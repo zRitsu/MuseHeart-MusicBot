@@ -396,10 +396,7 @@ class Misc(commands.Cog):
 
         guild = bot.get_guild(inter.guild_id) or inter.guild
 
-        embed = disnake.Embed(
-            description=f"**Sobre mim:**\n\n",
-            color=bot.get_color(inter.guild.me if inter.guild else guild.me)
-        )
+        embed = disnake.Embed(description="", color=bot.get_color(inter.guild.me if inter.guild else guild.me))
 
         active_players_other_bots = 0
         inactive_players_other_bots = 0
@@ -420,15 +417,22 @@ class Misc(commands.Cog):
 
         guilds_size = len(all_guilds_ids)
 
-        embed.description += f"> **Servidores" + (" (todos os bots)" if guilds_size > 1 else "") + \
-                             f":** `{guilds_size}`\n"
-
         public_bot_count = 0
         private_bot_count = 0
 
         users = set()
         bots = set()
+
+        user_count = 0
+        bot_count = 0
+
         botpool_ids = [b.user.id for b in self.bot.pool.bots]
+
+        for user in bot.users:
+            if user.bot:
+                bot_count += 1
+            else:
+                user_count += 1
 
         for b in bot.pool.bots:
 
@@ -470,28 +474,41 @@ class Misc(commands.Cog):
             else:
                 public_bot_count += 1
 
-        if public_bot_count:
-            embed.description += f"> **Bot(s) público(s):** `{public_bot_count:,}`\n"
+        embed.description += "### Estatíticas (bot atual):\n" \
+                            f"> **Quantidade de servidores:** `{len(bot.guilds)}`\n" \
+                            f"> **Quantidade de usuários:** `{user_count:,}`\n"
 
-        if private_bot_count:
-            embed.description += f"> **Bot(s) privado(s):** `{private_bot_count:,}`\n"
+        if bot_count:
+            embed.description += f"> **Quantidade de bots:** `{bot_count:,}`\n"
 
-        extra_txt = " (todos os bots)" if len(bot.pool.bots) > 1 else ""
+        if len(bot.pool.bots) > 1:
+
+            embed.description += "### Estatísticas (todos os bots)\n"
+
+            if public_bot_count:
+                embed.description += f"> **Bot(s) público(s):** `{public_bot_count:,}`\n"
+
+            if private_bot_count:
+                embed.description += f"> **Bot(s) privado(s):** `{private_bot_count:,}`\n"
+
+            embed.description += f"> **Servidores:** `{guilds_size}`\n"
+
+            if users_amount := len(users):
+                embed.description += f"> **Quantidade de usuários:** `{users_amount:,}`\n"
+
+            if bots_amount := len(bots):
+                embed.description += f"> **Quantidade de bots:** `{bots_amount:,}`\n"
+
+        embed.description += "### Outras informações:\n"
 
         if active_players_other_bots:
-            embed.description += f"> **Players ativos{extra_txt}:** `{active_players_other_bots:,}`\n"
+            embed.description += f"> **Players ativos:** `{active_players_other_bots:,}`\n"
 
         if paused_players_other_bots:
-            embed.description += f"> **Players em pausa{extra_txt}:** `{paused_players_other_bots:,}`\n"
+            embed.description += f"> **Players em pausa:** `{paused_players_other_bots:,}`\n"
 
         if inactive_players_other_bots:
-            embed.description += f"> **Players inativos{extra_txt}:** `{inactive_players_other_bots:,}`\n"
-
-        if users_amount:=len(users):
-            embed.description += f"> **Quantidade de usuários{extra_txt}:** `{users_amount:,}`\n"
-
-        if bots_amount:=len(bots):
-            embed.description += f"> **Quantidade de bots{extra_txt}:** `{bots_amount:,}`\n"
+            embed.description += f"> **Players inativos:** `{inactive_players_other_bots:,}`\n"
 
         if bot.pool.commit:
             embed.description += f"> **Commit atual:** [`{bot.pool.commit[:7]}`]({bot.pool.remote_git_url}/commit/{bot.pool.commit})\n"
