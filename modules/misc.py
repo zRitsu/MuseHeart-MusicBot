@@ -568,10 +568,11 @@ class Misc(commands.Cog):
 
         guild = inter.guild
 
-        if not guild:
+        if not guild or not isinstance(guild, disnake.Guild):
             for bot in self.bot.pool.bots:
                 if (guild:=bot.get_guild(inter.guild_id)):
                     break
+            guild = None
 
         for bot in sorted(self.bot.pool.bots, key=lambda b: len(b.guilds)):
 
