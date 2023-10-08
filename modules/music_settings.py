@@ -522,7 +522,19 @@ class MusicSettings(commands.Cog):
             else:
                 return original_message
 
+        perms = (
+            'manage_channels', 'send_messages', 'embed_links', 'send_messages_in_threads', 'read_messages',
+            'create_public_threads', 'manage_messages'
+        )
+
         if not target:
+
+            missing_perms = [p for p, v in target.permissions_for(target.guild.me) if p in perms and not v]
+
+            if missing_perms:
+                raise GenericError(
+                    f"**{bot.user.mention} não possui as seguintes permissões necessárias abaixo:** ```ansi\n" +
+                    "\n".join(f"[0;33m{perms_translations.get(p, p)}[0m" for p in perms) + "```")
 
             try:
                 id_ = inter.id
@@ -664,11 +676,6 @@ class MusicSettings(commands.Cog):
 
         if target == guild.rules_channel:
             raise GenericError("**Você não pode usar um canal de regras.**")
-
-        perms = (
-            'manage_channels', 'send_messages', 'embed_links', 'send_messages_in_threads', 'read_messages',
-            'create_public_threads', 'manage_messages'
-        )
 
         missing_perms = [p for p, v in target.permissions_for(target.guild.me) if p in perms and not v]
 
