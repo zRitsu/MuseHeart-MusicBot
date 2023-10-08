@@ -792,8 +792,7 @@ class BotCore(commands.Bot):
             if not isinstance(prefix, str):
                 prefix = prefix[-1]
 
-            embed.description = f"**Olá {message.author.mention}.\n\n" \
-                                f"Para ver todos os meus comandos use: /**"
+            embed.description = f"**Olá {message.author.mention}."
 
             bot_count = 0
 
@@ -822,9 +821,15 @@ class BotCore(commands.Bot):
                                          f"barra (/), clique no nome acima para integrar os comandos de barra no " \
                                          f"seu servidor."
 
+                else:
+                    embed.description += "**\n\nPra ver todos os meus comandos use: /**"
+
+            else:
+                embed.description += "\n\n**Pra ver todos os meus comandos use: /**"
+
             if not self.config["INTERACTION_COMMAND_ONLY"]:
                 embed.description += f"\n\nTambém tenho comandos de texto por prefixo.\n" \
-                                    f"Para ver todos os meus comandos de texto use **{prefix}help**\n"
+                                    f"Pra ver todos os meus comandos de texto use **{prefix}help**\n"
 
             if bot_count:
 
