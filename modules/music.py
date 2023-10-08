@@ -257,6 +257,7 @@ class Music(commands.Cog):
 
     @is_dj()
     @has_source()
+    @commands.has_guild_permissions(manage_guild=True)
     @pool_command(
         only_voiced=True, name="stageannounce", aliases=["stagevc", "togglestageannounce", "announce", "vcannounce",
                                                          "voicestatus", "setvcstatus", "setvoicestatus"],
@@ -281,7 +282,8 @@ class Music(commands.Cog):
     @has_source()
     @commands.slash_command(
         description=f"{desc_prefix}Ativar/editar o sistema de anúncio/status automático do canal com o nome da música.",
-        extras={"only_voiced": True, "exclusive_cooldown": True}, cooldown=stage_cd, max_concurrency=stage_mc
+        extras={"only_voiced": True, "exclusive_cooldown": True}, cooldown=stage_cd, max_concurrency=stage_mc,
+        default_member_permissions=disnake.Permissions(manage_guild=True)
     )
     async def stage_announce(
             self,
@@ -318,10 +320,10 @@ class Music(commands.Cog):
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
-        if disable or clear:
+        if not author.guild_permissions.manage_guild:
+            raise GenericError("**Você não possui permissão de gerenciar servidor para ativar/desativar esse sistema.**")
 
-            if not author.guild_permissions.manage_guild:
-                raise GenericError("**Você não possui permissão de gerenciar servidor para desativar o status automático**")
+        if disable or clear:
 
             await inter.response.defer(ephemeral=True)
 
