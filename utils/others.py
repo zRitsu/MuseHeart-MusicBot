@@ -56,7 +56,7 @@ class CustomContext(commands.Context):
         await self.trigger_typing()
         return
 
-    async def send(self, *args, **kwargs):
+    async def send(self, content: Optional[str] = None, **kwargs):
 
         try:
             kwargs.pop("ephemeral")
@@ -69,11 +69,11 @@ class CustomContext(commands.Context):
             pass
 
         if self.channel.permissions_for(self.guild.me).read_message_history:
-            return await super().reply(fail_if_not_exists=False, *args, **kwargs)
+            return await super().reply(fail_if_not_exists=False, content=content, **kwargs)
 
-        return await super().send(*args, **kwargs)
+        return await super().send(content=content, **kwargs)
 
-    async def reply(self, *args, **kwargs):
+    async def reply(self, content: Optional[str] = None, **kwargs):
 
         try:
             kwargs.pop("ephemeral")
@@ -85,9 +85,16 @@ class CustomContext(commands.Context):
             pass
 
         if not self.channel.permissions_for(self.guild.me).read_message_history:
-            return await super().send(*args, **kwargs)
 
-        return await super().reply(fail_if_not_exists=False, *args, **kwargs)
+            if self.author.mention not in content:
+                content = f"{self.author.mention}. {content}"
+
+            return await super().send(content=content, **kwargs)
+
+        if self.author.id == self.bot.user.id and self.author.mention not in content:
+            content = f"{self.author.mention}. {content}"
+
+        return await super().reply(fail_if_not_exists=False, content=content, **kwargs)
 
 class PoolCommand(commands.Command):
     def __init__(self, func, **kwargs):
