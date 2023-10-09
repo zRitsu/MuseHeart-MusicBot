@@ -483,13 +483,13 @@ class Misc(commands.Cog):
 
         if len(bot.pool.bots) > 1:
 
-            embed.description += "### Estatísticas (todos os bots)\n"
+            embed.description += "### Estatísticas (totais em todos os bots):\n"
 
             if public_bot_count:
-                embed.description += f"> **Bot(s) público(s):** `{public_bot_count:,}`\n"
+                embed.description += f"> **Bots público:** `{public_bot_count:,}`\n"
 
             if private_bot_count:
-                embed.description += f"> **Bot(s) privado(s):** `{private_bot_count:,}`\n"
+                embed.description += f"> **Bots privados:** `{private_bot_count:,}`\n"
 
             embed.description += f"> **Servidores:** `{guilds_size}`\n"
 
