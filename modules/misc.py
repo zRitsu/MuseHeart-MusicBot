@@ -475,29 +475,29 @@ class Misc(commands.Cog):
                 public_bot_count += 1
 
         embed.description += "### Estatíticas (bot atual):\n" \
-                            f"> **Quantidade de servidores:** `{len(bot.guilds)}`\n" \
-                            f"> **Quantidade de usuários:** `{user_count:,}`\n"
+                            f"> **Servidores:** `{len(bot.guilds)}`\n" \
+                            f"> **Usuários:** `{user_count:,}`\n"
 
         if bot_count:
-            embed.description += f"> **Quantidade de bots:** `{bot_count:,}`\n"
+            embed.description += f"> **Bots:** `{bot_count:,}`\n"
 
         if len(bot.pool.bots) > 1:
 
-            embed.description += "### Estatísticas (totais em todos os bots):\n"
+            embed.description += "### Estatísticas totais em todos os bots:\n"
 
             if public_bot_count:
-                embed.description += f"> **Bots público:** `{public_bot_count:,}`\n"
+                embed.description += f"> **Bot(s) adicionais público(s):** `{public_bot_count:,}`\n"
 
             if private_bot_count:
-                embed.description += f"> **Bots privados:** `{private_bot_count:,}`\n"
+                embed.description += f"> **Bot(s) adicionais privado(s):** `{private_bot_count:,}`\n"
 
             embed.description += f"> **Servidores:** `{guilds_size}`\n"
 
             if users_amount := len(users):
-                embed.description += f"> **Quantidade de usuários:** `{users_amount:,}`\n"
+                embed.description += f"> **Usuários:** `{users_amount:,}`\n"
 
             if bots_amount := len(bots):
-                embed.description += f"> **Quantidade de bots:** `{bots_amount:,}`\n"
+                embed.description += f"> **Bots:** `{bots_amount:,}`\n"
 
         embed.description += "### Outras informações:\n"
 
