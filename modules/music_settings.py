@@ -529,7 +529,7 @@ class MusicSettings(commands.Cog):
 
         if not target:
 
-            missing_perms = [p for p, v in target.permissions_for(target.guild.me) if p in perms and not v]
+            missing_perms = [p for p, v in guild.me.guild_permissions if p in perms and not v]
 
             if missing_perms:
                 raise GenericError(
