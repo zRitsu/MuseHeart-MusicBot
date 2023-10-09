@@ -63,7 +63,15 @@ class CustomContext(commands.Context):
         except:
             pass
 
-        return await self.reply(fail_if_not_exists=False, *args, **kwargs)
+        try:
+            kwargs.pop("fail_if_not_exists")
+        except:
+            pass
+
+        if self.channel.permissions_for(self.guild.me).read_message_history:
+            return await super().reply(fail_if_not_exists=False, *args, **kwargs)
+
+        return await super().send(*args, **kwargs)
 
     async def reply(self, *args, **kwargs):
 
@@ -71,8 +79,15 @@ class CustomContext(commands.Context):
             kwargs.pop("ephemeral")
         except:
             pass
+        try:
+            kwargs.pop("fail_if_not_exists")
+        except:
+            pass
 
-        return await super().reply(*args, **kwargs)
+        if not self.channel.permissions_for(self.guild.me).read_message_history:
+            return await super().send(*args, **kwargs)
+
+        return await super().reply(fail_if_not_exists=False, *args, **kwargs)
 
 class PoolCommand(commands.Command):
     def __init__(self, func, **kwargs):
