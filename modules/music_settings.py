@@ -549,14 +549,14 @@ class MusicSettings(commands.Cog):
             missing_perms = [p for p, v in guild.me.guild_permissions if p in perms and not v]
 
             buttons = [
-                disnake.ui.Button(label="Criar canal de texto", custom_id=f"text_channel_{id_}", emoji="💬", disabled=not missing_perms),
-                disnake.ui.Button(label="Criar canal de voz", custom_id=f"voice_channel_{id_}", emoji="🔊", disabled=not missing_perms),
+                disnake.ui.Button(label="Criar canal de texto", custom_id=f"text_channel_{id_}", emoji="💬", disabled=bool(missing_perms)),
+                disnake.ui.Button(label="Criar canal de voz", custom_id=f"voice_channel_{id_}", emoji="🔊", disabled=bool(missing_perms)),
                 disnake.ui.Button(label="Cancelar", custom_id=f"voice_channel_cancel_{id_}", emoji="❌")
             ]
 
             if "COMMUNITY" in guild.features:
                 buttons.insert(2, disnake.ui.Button(label="Criar canal de palco", custom_id=f"stage_channel_{id_}",
-                                  emoji="<:stagechannel:1077351815533826209>", disabled=not missing_perms))
+                                  emoji="<:stagechannel:1077351815533826209>", disabled=bool(missing_perms)))
 
             color = self.bot.get_color(guild.me)
 
