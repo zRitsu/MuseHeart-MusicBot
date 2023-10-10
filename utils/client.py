@@ -792,7 +792,7 @@ class BotCore(commands.Bot):
             if not isinstance(prefix, str):
                 prefix = prefix[-1]
 
-            embed.description = f"**Olá {message.author.mention}."
+            embed.description = f"**Olá {message.author.mention}.**"
 
             bot_count = 0
 
@@ -822,7 +822,7 @@ class BotCore(commands.Bot):
                                          f"seu servidor."
 
                 else:
-                    embed.description += "**\n\nPra ver todos os meus comandos use: /**"
+                    embed.description += "\n\n**Pra ver todos os meus comandos use: /**"
 
             else:
                 embed.description += "\n\n**Pra ver todos os meus comandos use: /**"
