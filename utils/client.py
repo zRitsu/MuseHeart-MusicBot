@@ -495,6 +495,14 @@ class BotPool:
 
             self.bots.append(bot)
 
+            if bot.appinfo.bot_public and not self.config.get("SILENT_PUBLICBOT_WARNING"):
+                print(f"\nAtenção: O bot {bot.user} (ID: {bot.user.id}) foi configurado no portal do desenvolvedor "
+                      f"como bot público, lembrando que se caso o bot seja divulgado pra ser adicionado publicamente "
+                      f"o mesmo terá que estar sob as condições da licença GPL-2: "
+                      f"https://github.com/zRitsu/MuseHeart-MusicBot/blob/main/LICENSE\n"
+                      f"Você pode deixar o bot privado desmarcando a opção public bot entrando no link: "
+                      f"https://discord.com/developers/applications/{bot.user.id}/bot\n")
+
         if len(all_tokens) > 1:
             self.single_bot = False
 
