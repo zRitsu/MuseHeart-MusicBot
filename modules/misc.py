@@ -776,27 +776,8 @@ class GuildLog(commands.Cog):
         if not self.hook_url:
             return
 
-        embed = disnake.Embed(
-            description=f"**Me removeram do servidor:**\n"
-                        f"```{guild.name}```\n"
-                        f"**ID:** `{guild.id}`",
-            color=disnake.Colour.red()
-        )
-
         try:
-            guild_data = await self.bot.get_data(guild.id, db_name=DBModel.guilds)
-            guild_data["player_controller"] = deepcopy(db_models[DBModel.guilds]["player_controller"])
-            await self.bot.update_data(guild.id, guild_data, db_name=DBModel.guilds)
-        except:
-            traceback.print_exc()
-
-        try:
-            embed.set_thumbnail(url=guild.icon.replace(static_format="png").url)
-        except AttributeError:
-            pass
-
-        try:
-            await self.send_hook(", ".join(f"<@{owner_id}>" for owner_id in self.bot.owner_ids) or self.bot.owner.mention, embed=embed)
+            await self.send_hook(guild, title="Me removeram do servidor", color=disnake.Color.red())
         except:
             traceback.print_exc()
 
@@ -820,18 +801,27 @@ class GuildLog(commands.Cog):
         if not self.hook_url:
             return
 
+        try:
+            await self.send_hook(guild, title="Me adicionaram em um novo servidor", color=disnake.Color.green())
+        except:
+            traceback.print_exc()
+
+        await self.bot.update_appinfo()
+
+    async def send_hook(self, guild: disnake.Guild, title: str, color: disnake.Color):
+
         created_at = int(guild.created_at.timestamp())
 
-        embed =disnake.Embed(
-            description="__**Me adicionaram em um novo servidor:**__\n"
+        embed = disnake.Embed(
+            description=f"__**{title}:**__\n"
                         f"```{guild.name}```\n"
                         f"**ID:** `{guild.id}`\n"
-		                f"**Dono:** `{guild.owner} [{guild.owner.id}]`\n"
+                        f"**Dono:** `{guild.owner} [{guild.owner.id}]`\n"
                         f"**Criado em:** <t:{created_at}:f> - <t:{created_at}:R>\n"
-		                f"**Nível de verificação:** `{guild.verification_level or 'nenhuma'}`\n"
-		                f"**Membros:** `{len([m for m in guild.members if not m.bot])}`\n"
-		                f"**Bots:** `{len([m for m in guild.members if m.bot])}`\n",
-            color=disnake.Colour.green()
+                        f"**Nível de verificação:** `{guild.verification_level or 'nenhuma'}`\n"
+                        f"**Membros:** `{len([m for m in guild.members if not m.bot])}`\n"
+                        f"**Bots:** `{len([m for m in guild.members if m.bot])}`\n",
+            color=color
         )
 
         try:
@@ -839,19 +829,10 @@ class GuildLog(commands.Cog):
         except AttributeError:
             pass
 
-        try:
-            await self.send_hook(", ".join(f"<@{owner_id}>" for owner_id in self.bot.owner_ids) or self.bot.owner.mention, embed=embed)
-        except:
-            traceback.print_exc()
-
-        await self.bot.update_appinfo()
-
-    async def send_hook(self, content="", *, embed: disnake.Embed=None):
-
         async with ClientSession() as session:
             webhook = disnake.Webhook.from_url(self.hook_url, session=session)
             await webhook.send(
-                content=content,
+                content=", ".join(f"<@{owner_id}>" for owner_id in self.bot.owner_ids) or self.bot.owner.mention,
                 username=self.bot.user.name,
                 avatar_url=self.bot.user.display_avatar.replace(size=256, static_format="png").url,
                 embed=embed
