@@ -9,6 +9,7 @@ from copy import deepcopy
 from time import time
 from typing import Union, Optional
 from random import shuffle
+from urllib.parse import urlparse, parse_qs
 
 import aiofiles
 import aiohttp
@@ -1278,7 +1279,11 @@ class Music(commands.Cog):
                         inter = view.inter
 
         if query.startswith("https://www.youtube.com/results"):
-            raise GenericError(f"**Não há suporte para o link informado:** {query}")
+            try:
+                query = f"ytsearch:{parse_qs(urlparse(query).query)['search_query'][0]}"
+            except:
+                raise GenericError(f"**Não há suporte para o link informado:** {query}")
+            manual_selection = True
 
         if not inter.response.is_done():
             await inter.response.defer(ephemeral=ephemeral)
