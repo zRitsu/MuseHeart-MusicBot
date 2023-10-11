@@ -1195,6 +1195,17 @@ class Music(commands.Cog):
 
             query = query.strip("<>")
 
+            if query.startswith("https://www.youtube.com/results"):
+                try:
+                    query = f"ytsearch:{parse_qs(urlparse(query).query)['search_query'][0]}"
+                except:
+                    raise GenericError(f"**Não há suporte para o link informado:** {query}")
+                manual_selection = True
+
+            elif query.startswith("youtube.com/live/"):
+                raise GenericError(
+                    f"**No momento não há suporte a esse tipo de link de lives do youtube:** {query.replace('/live/', '**/live/**')}")
+
             urls = URL_REG.findall(query)
 
             if not urls:
@@ -1277,13 +1288,6 @@ class Music(commands.Cog):
                         inter.response = view.inter.response
                     else:
                         inter = view.inter
-
-        if query.startswith("https://www.youtube.com/results"):
-            try:
-                query = f"ytsearch:{parse_qs(urlparse(query).query)['search_query'][0]}"
-            except:
-                raise GenericError(f"**Não há suporte para o link informado:** {query}")
-            manual_selection = True
 
         if not inter.response.is_done():
             await inter.response.defer(ephemeral=ephemeral)
