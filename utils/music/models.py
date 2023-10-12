@@ -1747,7 +1747,6 @@ class LavalinkPlayer(wavelink.Player):
                     "title": track.single_title,
                     "url": track.uri,
                     "author": track.authors_string,
-                    "duration": track.duration,
                     "stream": track.is_stream,
                     "position": self.position,
                     "paused": self.is_paused,
@@ -1757,6 +1756,11 @@ class LavalinkPlayer(wavelink.Player):
                     "247": self.keep_connected,
                     "autoplay": self.current.autoplay
                 }
+
+                if track.is_stream:
+                    stats["duration"] = int(self.start_time.timestamp())
+                else:
+                    stats["duration"] = track.duration
 
                 if track.playlist_name:
                     stats["track"].update(
