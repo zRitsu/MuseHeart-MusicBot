@@ -4507,8 +4507,7 @@ class Music(commands.Cog):
 
             channel_id = static_player['channel']
 
-            if not channel_id or (
-                    static_player['message_id'] != str(message.channel.id) and str(message.channel.id) != channel_id):
+            if not channel_id or str(message.channel.id) != channel_id:
                 return
 
             text_channel = self.bot.get_channel(int(channel_id))
