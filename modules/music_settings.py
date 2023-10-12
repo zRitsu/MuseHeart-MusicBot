@@ -433,14 +433,16 @@ class MusicSettings(commands.Cog):
                 ]
             )
 
-            if isinstance(inter, disnake.MessageInteraction):
-                await inter.delete_original_message()
-
             try:
-                inter: disnake.ModalInteraction = await inter.bot.wait_for("modal_submit", timeout=30,
+                modal_inter: disnake.ModalInteraction = await inter.bot.wait_for("modal_submit", timeout=30,
                                                                            check=lambda i: i.data.custom_id == str(inter.id))
             except asyncio.TimeoutError:
+                await inter.delete_original_message()
                 return
+
+            await inter.delete_original_message()
+
+            inter = modal_inter
 
         perms_dict = {
             "embed_links": True,
