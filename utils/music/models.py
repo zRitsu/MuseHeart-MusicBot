@@ -1758,9 +1758,9 @@ class LavalinkPlayer(wavelink.Player):
                 }
 
                 if track.is_stream:
-                    stats["duration"] = int(self.start_time.timestamp())
+                    stats["track"]["duration"] = int(self.start_time.timestamp())
                 else:
-                    stats["duration"] = track.duration
+                    stats["track"]["duration"] = track.duration
 
                 if track.playlist_name:
                     stats["track"].update(
