@@ -611,18 +611,18 @@ class LavalinkPlayer(wavelink.Player):
         except:
             track = None
 
-        if not track or not track.ytid or track.is_stream or track.duration < 90000:
+        if not track or not track.info["sourceName"] != "youtube" or track.is_stream or track.duration < 90000:
 
             for t in self.played + self.queue_autoplay:
-                if t.ytid and not t.is_stream and t.duration >= 90000:
+                if t.info["sourceName"] == "youtube" and not t.is_stream and t.duration >= 90000:
                     track = t
                     break
 
         search_url = ""
         tracks = []
 
-        if track and track.ytid:
-            search_url =  f'https://www.youtube.com/watch?v={track.ytid}&list=RD{track.ytid}'
+        if track and track.info["sourceName"] == "youtube":
+            search_url =  f'https://music.youtube.com/watch?v={track.ytid}&list=RD{track.ytid}'
         else:
             try:
                 track = self.played[0]
@@ -668,6 +668,7 @@ class LavalinkPlayer(wavelink.Player):
                     traceback.print_exc()
                     exception = e
 
+                await asyncio.sleep(1.5)
                 retries -= 1
 
             if not tracks:
