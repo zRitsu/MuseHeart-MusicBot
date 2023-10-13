@@ -579,7 +579,7 @@ async def select_bot_pool(inter, first=False):
                 return i.author == inter.author and i.message.id == msg.id
 
         try:
-            inter: disnake.MessageInteraction = await inter.bot.wait_for(
+            new_inter: disnake.MessageInteraction = await inter.bot.wait_for(
                 "dropdown", timeout=45, check=check_bot_selection
             )
         except asyncio.TimeoutError:
@@ -589,12 +589,16 @@ async def select_bot_pool(inter, first=False):
                 pass
             return None, None
 
+        inter.token = new_inter.token
+        inter.id = new_inter.id
+        inter.response = new_inter.response
+
         try:
             func = inter.response.edit_message
         except AttributeError:
             func = msg.edit
 
-        if inter.data.values[0] == "cancel":
+        if new_inter.data.values[0] == "cancel":
             await func(
                 embed=disnake.Embed(
                     description="**Seleção cancelada!**",
@@ -608,7 +612,7 @@ async def select_bot_pool(inter, first=False):
             inter.store_message = msg
 
         try:
-            return inter, bots[int(inter.data.values[0])]
+            return inter, bots[int(new_inter.data.values[0])]
         except KeyError:
             raise GenericError("**O bot selecionado foi removido do servidor antes de sua seleção...**")
 

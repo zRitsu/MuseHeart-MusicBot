@@ -442,6 +442,9 @@ class MusicSettings(commands.Cog):
 
             await inter.delete_original_message()
 
+            inter.token = modal_inter.token
+            inter.id = modal_inter.id
+            inter.response = modal_inter.response
             inter = modal_inter
 
         perms_dict = {
@@ -732,7 +735,7 @@ class MusicSettings(commands.Cog):
                 )
 
                 try:
-                    inter: disnake.ModalInteraction = await inter.bot.wait_for("modal_submit", timeout=30, check=lambda i: i.custom_id == id_)
+                    modal_inter: disnake.ModalInteraction = await inter.bot.wait_for("modal_submit", timeout=30, check=lambda i: i.custom_id == id_)
                 except asyncio.TimeoutError:
                     try:
                         func = inter.edit_original_message
@@ -745,6 +748,11 @@ class MusicSettings(commands.Cog):
                     await msg_select.delete()
                 except:
                     pass
+
+                inter.token = modal_inter.token
+                inter.id = modal_inter.id
+                inter.response = modal_inter.response
+                inter = modal_inter
 
                 await inter.response.defer()
 
@@ -1817,3 +1825,4 @@ def setup(bot: BotCore):
 
     bot.add_cog(MusicSettings(bot))
     bot.add_cog(RPCCog(bot))
+
