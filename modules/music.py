@@ -4657,7 +4657,7 @@ class Music(commands.Cog):
                 if msg:
                     await msg.edit(content=error, embed=None, view=None)
                 else:
-                    await message.channel.send(error)
+                    await message.channel.send(error, delete_after=9)
             except:
                 traceback.print_exc()
 
@@ -4675,7 +4675,10 @@ class Music(commands.Cog):
             await max_concurrency.acquire(message)
 
             try:
-                error_msg, full_error_msg, kill_process = parse_error(message, has_exception)
+                try:
+                    error_msg, full_error_msg, kill_process = parse_error(message, has_exception)
+                except:
+                    full_error_msg = has_exception
 
                 embed = disnake.Embed(
                     title="Ocorreu um erro em um servidor (song-request):",
