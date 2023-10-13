@@ -6,6 +6,7 @@ import json
 import os
 import shutil
 import traceback
+from copy import deepcopy
 from datetime import datetime
 from typing import TYPE_CHECKING, Union
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
@@ -105,8 +106,8 @@ class BaseDB:
 
     def get_default(self, collection: str, db_name: Union[DBModel.guilds, DBModel.users]):
         if collection == "global":
-            return dict(global_db_models[db_name])
-        return dict(db_models[db_name])
+            return deepcopy(global_db_models[db_name])
+        return deepcopy(db_models[db_name])
 
     def start_task(self, loop):
         pass

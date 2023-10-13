@@ -1444,7 +1444,11 @@ class Music(commands.Cog):
                     except TypeError:
                         player.message = None
                     except:
-                        player.message = await send_idle_embed(channel, bot=bot, guild_data=guild_data)
+                        traceback.print_exc()
+                        if isinstance(channel.parent, disnake.ForumChannel) and str(channel.id) == static_player['message_id']:
+                            pass
+                        else:
+                            player.message = await send_idle_embed(channel, bot=bot, guild_data=guild_data)
 
             if not player.static:
 
@@ -4046,11 +4050,7 @@ class Music(commands.Cog):
 
         await interaction.response.defer(ephemeral=True)
 
-        try:
-            guild_data = interaction.guild_data
-        except AttributeError:
-            guild_data = await self.bot.get_data(interaction.guild_id, db_name=DBModel.guilds)
-            interaction.guild_data = guild_data
+        guild_data = await self.bot.get_data(interaction.guild_id, db_name=DBModel.guilds)
 
         try:
             query = guild_data["player_controller"]["fav_links"][interaction.data.values[0]]['url']

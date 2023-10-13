@@ -317,6 +317,10 @@ async def send_idle_embed(
         target: Union[disnake.Message, disnake.TextChannel, disnake.Thread, disnake.MessageInteraction],
         text="", *, bot: BotCore, force=False, guild_data: dict = None
 ):
+
+    if not target:
+        return
+
     try:
         is_forum = isinstance(target.channel.parent, disnake.ForumChannel)
     except AttributeError:

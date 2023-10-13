@@ -135,6 +135,10 @@ class GuildFavView(disnake.ui.View):
             remove_button.callback = self.remove_callback
             self.add_item(remove_button)
 
+            clear_button = disnake.ui.Button(label="Limpar favoritos", emoji="🚮")
+            clear_button.callback = self.clear_callback
+            self.add_item(clear_button)
+
             export_button = disnake.ui.Button(label="Exportar", emoji="📤")
             export_button.callback = self.export_callback
             self.add_item(export_button)
@@ -172,11 +176,24 @@ class GuildFavView(disnake.ui.View):
         self.stop()
 
     async def favadd_callback(self, inter: disnake.MessageInteraction):
+
+        guild = self.bot.get_guild(inter.guild_id) or inter.guild
+
+        if not guild:
+            await inter.send("Você não pode executar essa ação fora de um servidor.", ephemeral=True)
+            return
+
         await inter.response.send_modal(GuildFavModal(bot=self.bot, name=None, url=None, description=None))
         await inter.delete_original_message()
         self.stop()
 
     async def edit_callback(self, inter: disnake.MessageInteraction):
+
+        guild = self.bot.get_guild(inter.guild_id) or inter.guild
+
+        if not guild:
+            await inter.send("Você não pode executar essa ação fora de um servidor.", ephemeral=True)
+            return
 
         if not self.current:
             await inter.send("Você deve selecionar um item!", ephemeral=True)
@@ -202,19 +219,19 @@ class GuildFavView(disnake.ui.View):
 
     async def remove_callback(self, inter: disnake.MessageInteraction):
 
+        guild = self.bot.get_guild(inter.guild_id)
+
+        if not guild:
+            await inter.send("Você não pode executar essa ação fora de um servidor.", ephemeral=True)
+            return
+
         if not self.current:
             await inter.send("Você deve selecionar um item!", ephemeral=True)
             return
 
         await inter.response.defer(ephemeral=True)
 
-        try:
-            guild_data = inter.guild_data
-        except AttributeError:
-            guild_data = await self.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-            inter.guild_data = guild_data
-
-        guild = self.bot.get_guild(inter.guild_id) or inter.guild
+        guild_data = await self.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         try:
             del guild_data["player_controller"]["fav_links"][self.current]
@@ -236,6 +253,36 @@ class GuildFavView(disnake.ui.View):
         await inter.edit_original_message(
             embed=disnake.Embed(description="**Link removido com sucesso!**", color=self.bot.get_color(guild.me)),
             view=None)
+
+        await self.bot.get_cog("PinManager").process_idle_embed(self.bot, guild, guild_data=guild_data)
+        self.stop()
+
+    async def clear_callback(self, inter: disnake.MessageInteraction):
+
+        guild = self.bot.get_guild(inter.guild_id) or inter.guild
+
+        if not guild:
+            await inter.send("Você não pode executar essa ação fora de um servidor.", ephemeral=True)
+            return
+
+        await inter.response.defer(ephemeral=True)
+
+        guild_data = await self.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+
+        if not guild_data["player_controller"]["fav_links"]:
+            await inter.send("**Não há links favoritos no servidor.**", ephemeral=True)
+            return
+
+        guild_data["player_controller"]["fav_links"].clear()
+
+        await self.bot.update_data(inter.guild_id, guild_data, db_name=DBModel.guilds)
+
+        embed = disnake.Embed(
+            description="Os favoritos do server foram removidos com sucesso.",
+            color=self.bot.get_color()
+        )
+
+        await inter.edit_original_message(embed=embed, components=None)
 
         await self.bot.get_cog("PinManager").process_idle_embed(self.bot, guild, guild_data=guild_data)
         self.stop()
@@ -294,18 +341,21 @@ class PinManager(commands.Cog):
 
         try:
             player: LavalinkPlayer = bot.music.players[guild.id]
-            if not player.current:
-                await player.process_idle_message()
+            #if not player.current:
+            #    await player.process_idle_message()
             return
         except KeyError:
             pass
 
         try:
             channel = bot.get_channel(int(guild_data["player_controller"]["channel"]))
-            message = await channel.fetch_message(int(guild_data["player_controller"]["message_id"]))
-
         except:
             return
+
+        try:
+            message = await channel.fetch_message(int(guild_data["player_controller"]["message_id"]))
+        except:
+            message = None
 
         await send_idle_embed(message or channel, bot=bot, guild_data=guild_data)
 
@@ -417,7 +467,7 @@ class PinManager(commands.Cog):
                 continue
 
         if (json_size:=len(json_data)) > 25:
-            await inter.edit_original_message(f"A quantidade de itens no no arquivo excede a quantidade máxima permitida (25).")
+            await inter.edit_original_message(f"A quantidade de itens no arquivo excede a quantidade máxima permitida (25).")
             return
 
         if (json_size + (user_favs:=len(guild_data["player_controller"]["fav_links"]))) > 25:
@@ -431,7 +481,7 @@ class PinManager(commands.Cog):
 
         await bot.update_data(inter.guild_id, guild_data, db_name=DBModel.guilds)
 
-        guild = bot.get_guild(inter.guild_id) or inter.guild
+        guild = bot.get_guild(inter.guild_id)
 
         cmd = f"</play:" + str(self.bot.pool.controller_bot.get_global_command_named("play", cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
 
