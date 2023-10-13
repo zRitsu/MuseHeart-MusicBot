@@ -5183,7 +5183,8 @@ class Music(commands.Cog):
 
         if self.error_report_queue:
 
-            embed.description += f"\n**Servidor:** `{disnake.utils.escape_markdown(player.guild.name)} [{player.guild.id}]`"
+            embed.description += f"\n**Fonte:** `{track['info']['sourceName']}`" \
+                                  f"\n**Servidor:** `{disnake.utils.escape_markdown(player.guild.name)} [{player.guild.id}]`"
 
             try:
                 embed.description += f"\n**Canal:** `{disnake.utils.escape_markdown(player.guild.me.voice.channel.name)} [{player.guild.me.voice.channel.id}]`\n"
