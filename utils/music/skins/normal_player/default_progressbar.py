@@ -16,7 +16,7 @@ class DefaultProgressbarSkin:
 
     def __init__(self):
         self.name = basename(__file__)[:-3]
-        self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1127304244224081931/default_progressbar.png"
+        self.preview = "https://i.ibb.co/683gh83/image.png"
 
     def setup_features(self, player: LavalinkPlayer):
         player.mini_queue_feature = True

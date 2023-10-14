@@ -16,7 +16,7 @@ class DefaultSkin:
 
     def __init__(self):
         self.name = basename(__file__)[:-3]
-        self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1127304244492509325/default.png"
+        self.preview = "https://i.ibb.co/4PkWyqb/image.png"
 
     def setup_features(self, player: LavalinkPlayer):
         player.mini_queue_feature = True
