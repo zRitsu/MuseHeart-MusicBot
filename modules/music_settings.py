@@ -906,7 +906,7 @@ class MusicSettings(commands.Cog):
         if delete_channel == "--delete":
             delete_channel = "sim"
 
-        await self.reset.callback(self=self, inter=ctx, delete_channel=delete_channel)
+        await self.reset.callback(self=self, interaction=ctx, delete_channel=delete_channel)
 
     @commands.slash_command(
         description=f"{desc_prefix}Resetar as configurações relacionadas ao canal de pedir música (song request).",
@@ -914,14 +914,14 @@ class MusicSettings(commands.Cog):
     )
     async def reset(
             self,
-            inter: disnake.AppCmdInter,
+            interaction: disnake.AppCmdInter,
             delete_channel: str = commands.Param(
                 name="deletar_canal",
                 description="deletar o canal do player controller", default=None, choices=["sim", "não"]
             )
     ):
 
-        inter, bot = await select_bot_pool(inter)
+        inter, bot = await select_bot_pool(interaction)
 
         if not bot:
             return
