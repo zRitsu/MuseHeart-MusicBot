@@ -512,7 +512,7 @@ class Owner(commands.Cog):
                 color=self.bot.get_color(ctx.guild.me)
             )
 
-            await ctx.send(embed=embed, view=self.owner_view if (await self.bot.is_owner(ctx.author)) else None)
+            await ctx.send(embed=embed)
 
         else:
             return txt
