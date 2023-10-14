@@ -837,7 +837,7 @@ class BotCore(commands.Bot):
 
             if not self.config["INTERACTION_COMMAND_ONLY"]:
                 embed.description += f"\n\nTambém tenho comandos de texto por prefixo.\n" \
-                                    f"Meu prefixo no servidor é: **{prefix}**"\
+                                    f"Meu prefixo no servidor é: **{prefix}** (minha menção também funciona como prefixo).\n"\
                                     f"Pra ver todos os meus comandos de texto use **{prefix}help**\n"
 
             if bot_count:
