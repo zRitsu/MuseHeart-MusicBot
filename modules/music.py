@@ -889,6 +889,8 @@ class Music(commands.Cog):
 
         msg = None
 
+        query = query.strip()
+
         ephemeral = None
 
         warn_message = None
