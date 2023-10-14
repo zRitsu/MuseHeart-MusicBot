@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from os.path import basename
 
-import disnake
+from emoji import demojize
 
 from utils.music.converters import fix_characters, time_format
 from utils.music.models import LavalinkPlayer
@@ -29,7 +29,7 @@ class Minimalist:
 
         data = {
             "embeds": [],
-            "content": f"`🎶⠂Tocando agora:` [`{fix_characters(player.current.title, 30)}`](<{player.current.uri or player.current.search_uri}>) `[{fix_characters(player.current.author, 20)}] {duration}`"
+            "content": f"`🎶⠂Tocando agora:` [`{fix_characters(demojize(player.current.title), 30)}`](<{player.current.uri or player.current.search_uri}>) `[{fix_characters(player.current.author, 20)}] {duration}`"
         }
 
         if player.current_hint:
