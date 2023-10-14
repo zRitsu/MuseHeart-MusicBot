@@ -590,7 +590,7 @@ class Owner(commands.Cog):
         prefix = disnake.utils.escape_markdown(prefix)
 
         embed = disnake.Embed(
-            description=f"**O prefixo deste servidor agora é:** `{prefix}`\n"
+            description=f"**O meu prefixo no servidor agora é:** `{prefix}`\n"
                         f"**Caso queira restaurar o prefixo padrão use o comando:** `{prefix}{self.resetprefix.name}`",
             color=self.bot.get_color(ctx.guild.me)
         )
