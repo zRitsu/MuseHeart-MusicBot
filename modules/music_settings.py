@@ -1254,7 +1254,9 @@ class MusicSettings(commands.Cog):
                 msg = await inter.original_message()
             except AttributeError:
                 pass
-            await msg.edit(view=None, embed=disnake.Embed(description="**Tempo esgotado!**", colour=bot.get_color(guild.me)))
+            for c in select_view.children:
+                c.disabled = True
+            await msg.edit(view=select_view)
             return
 
         inter = select_view.interaction
