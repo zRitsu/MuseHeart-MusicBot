@@ -1227,8 +1227,8 @@ class MusicSettings(commands.Cog):
         global_static_skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Song-Request: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "skin atual"} if global_static_selected == s else {}) for s in static_skin_list + add_skin_prefix(global_data["custom_skins_static"])]
 
         embed = disnake.Embed(
-            description="```Modo Normal:``` " + "\n".join(f"[**{s}**]({bot.player_skins[s].preview})" for s in skin_list) + "\n\n" 
-                        "```Modo Fixo (Song-Request):``` " + "\n".join(f"[**{s}**]({bot.player_static_skins[s].preview})" for s in static_skin_list) +
+            description="```ansi\n[31;1mModo Normal:[0m``` " + ", ".join(f"[`[{s}]`]({bot.player_skins[s].preview})" for s in skin_list) + "\n\n" 
+                        "```ansi\n[33;1mModo Fixo (Song-Request):[0m``` " + ", ".join(f"[`[{s}]`]({bot.player_static_skins[s].preview})" for s in static_skin_list) +
                         "\n\n`Nota: No modo global a skin será aplicada globalmente em todos os bots.`",
             colour=bot.get_color(guild.me)
         ).set_image("https://cdn.discordapp.com/attachments/554468640942981147/1082887587770937455/rainbow_bar2.gif")
