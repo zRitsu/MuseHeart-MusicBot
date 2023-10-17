@@ -718,8 +718,6 @@ class MusicSettings(commands.Cog):
         if target == guild.rules_channel:
             raise GenericError("**Você não pode usar um canal de regras.**")
 
-        raise GenericError("aaaaaaaaaaaaaaa")
-
         check_channel_perm(target)
 
         if isinstance(target, disnake.ForumChannel):
