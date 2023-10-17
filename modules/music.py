@@ -4470,7 +4470,7 @@ class Music(commands.Cog):
         if message.is_system() and is_forum:
             return
 
-        if message.channel.permissions_for(message.guild.me).manage_messages:
+        if message.channel.permissions_for(message.guild.me).manage_messages or message.author.id == self.bot.user.id:
 
             try:
                 await message.delete(delay=delay)

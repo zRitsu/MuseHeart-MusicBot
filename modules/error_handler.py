@@ -194,9 +194,9 @@ class ErrorHandler(commands.Cog):
                 kwargs["content"] += f"\n{error_msg}"
 
         try:
-            delete_time = error.delete_original
+            kwargs["delete_after"] = error.delete_original
         except AttributeError:
-            delete_time = None
+            pass
 
         try:
             if error.self_delete and ctx.channel.permissions_for(ctx.guild.me).manage_messages:
@@ -204,12 +204,19 @@ class ErrorHandler(commands.Cog):
         except:
             pass
 
-        try:
-            func = ctx.store_message.edit
-        except:
-            func = ctx.send
+        if hasattr(ctx, "inter"):
+            if ctx.inter.response.is_done():
+                func = ctx.inter.edit_original_message
+            else:
+                func = ctx.inter.response.edit_message
+                kwargs.pop("delete_after", None)
+        else:
+            try:
+                func = ctx.store_message.edit
+            except:
+                func = ctx.send
 
-        await func(components=components, delete_after=delete_time, **kwargs)
+        await func(components=components, **kwargs)
 
         if kill_process:
             await asyncio.create_subprocess_shell("kill 1")

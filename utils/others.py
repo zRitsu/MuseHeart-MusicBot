@@ -280,7 +280,13 @@ async def send_message(
     if embed:
         kwargs["embed"] = embed
 
-    if inter.response.is_done() and isinstance(inter, disnake.AppCmdInter):
+    if hasattr(inter, 'self_mod'):
+        if inter.response.is_done():
+            await inter.edit_original_message(content=text, components=components, **kwargs)
+        else:
+            await inter.response.edit_message(content=text, components=components, **kwargs)
+
+    elif inter.response.is_done() and isinstance(inter, disnake.AppCmdInter):
         await inter.edit_original_message(content=text, components=components, **kwargs)
 
     else:
@@ -702,3 +708,17 @@ async def update_vc_status(bot, channel: disnake.VoiceChannel, status: str = "")
         async with session.put(url, headers=headers, json=params) as resp:
             if resp.status != 204:
                 raise Exception(f"{resp.status} - {await resp.text()}")
+
+def update_inter(old: Union[disnake.Interaction, CustomContext], new: disnake.Interaction):
+
+    if isinstance(old, CustomContext):
+        old.inter = new
+    else:
+        old.token = new.token
+        old.id = new.id
+        old.response = new.response
+
+        try:
+            old.self_mod = True
+        except AttributeError:
+            pass

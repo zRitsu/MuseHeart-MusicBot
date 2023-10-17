@@ -16,11 +16,31 @@ from utils.db import DBModel
 from utils.music.converters import perms_translations, time_format
 from utils.music.errors import GenericError, NoVoice
 from utils.others import send_idle_embed, CustomContext, select_bot_pool, pool_command, CommandArgparse, \
-    SongRequestPurgeMode
+    SongRequestPurgeMode, update_inter
 from utils.music.models import LavalinkPlayer
 
 if TYPE_CHECKING:
     from utils.client import BotCore
+
+channel_perms = ("send_messages", "embed_links", "read_messages")
+
+thread_perms = ("send_messages_in_threads", "embed_links", "read_messages")
+
+forum_perms = ("create_forum_threads", "send_messages_in_threads", "read_messages", "embed_links")
+
+def check_channel_perm(channel: Union[disnake.StageChannel, disnake.VoiceChannel, disnake.ForumChannel, disnake.TextChannel]):
+
+    if isinstance(channel, disnake.ForumChannel):
+        missing_perms = [p for p, v in channel.permissions_for(channel.guild.me) if p in forum_perms and not v]
+    elif isinstance(channel, disnake.Thread):
+        missing_perms = [p for p,v in channel.parent.permissions_for(channel.guild.me) if p in thread_perms and not v]
+    else:
+        missing_perms = [p for p, v in channel.permissions_for(channel.guild.me) if p in channel_perms and not v]
+
+    if missing_perms:
+        raise GenericError(
+            f"**{channel.guild.me.mention} não possui as seguintes permissões necessárias no canal {channel.mention}** ```ansi\n" +
+            "\n".join(f"[0;33m{perms_translations.get(p, p)}[0m" for p in missing_perms) + "```")
 
 
 class SkinSelector(disnake.ui.View):
@@ -374,7 +394,7 @@ class MusicSettings(commands.Cog):
 
         args, unknown = ctx.command.extras['flags'].parse_known_args(args)
 
-        await self.setup.callback(self=self, inter=ctx, target=channel,
+        await self.setup.callback(self=self, interaction=ctx, target=channel,
                                   purge_messages=args.reset)
 
     @commands.slash_command(
@@ -383,7 +403,7 @@ class MusicSettings(commands.Cog):
     )
     async def setup(
             self,
-            inter: disnake.AppCmdInter,
+            interaction: disnake.AppCmdInter,
             target: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.ForumChannel, disnake.StageChannel] = commands.Param(
                 name="canal", default=None, description="Selecionar um canal existente"
             ),
@@ -401,7 +421,7 @@ class MusicSettings(commands.Cog):
             )
     ):
 
-        inter, bot = await select_bot_pool(inter)
+        inter, bot = await select_bot_pool(interaction)
 
         if not bot:
             return
@@ -437,14 +457,20 @@ class MusicSettings(commands.Cog):
                 modal_inter: disnake.ModalInteraction = await inter.bot.wait_for("modal_submit", timeout=30,
                                                                            check=lambda i: i.data.custom_id == str(inter.id))
             except asyncio.TimeoutError:
-                await inter.delete_original_message()
+                if isinstance(inter, disnake.MessageInteraction):
+                    try:
+                        await inter.delete_original_message()
+                    except:
+                        pass
                 return
 
-            await inter.delete_original_message()
+            if isinstance(inter, disnake.MessageInteraction):
+                try:
+                    await inter.delete_original_message()
+                except:
+                    pass
 
-            inter.token = modal_inter.token
-            inter.id = modal_inter.id
-            inter.response = modal_inter.response
+            update_inter(interaction, modal_inter)
             inter = modal_inter
 
         perms_dict = {
@@ -527,11 +553,6 @@ class MusicSettings(commands.Cog):
             else:
                 return original_message
 
-        perms = (
-            'manage_channels', 'send_messages', 'embed_links', 'send_messages_in_threads', 'read_messages',
-            'create_public_threads', 'manage_messages'
-        )
-
         if not target:
             try:
                 id_ = inter.id
@@ -551,33 +572,30 @@ class MusicSettings(commands.Cog):
                         func = inter.send
                         kwargs_msg = {"ephemeral": True}
 
-            missing_perms = [p for p, v in guild.me.guild_permissions if p in perms and not v]
-
             buttons = [
-                disnake.ui.Button(label="Criar canal de texto", custom_id=f"text_channel_{id_}", emoji="💬", disabled=bool(missing_perms)),
-                disnake.ui.Button(label="Criar canal de voz", custom_id=f"voice_channel_{id_}", emoji="🔊", disabled=bool(missing_perms)),
+                disnake.ui.Button(label="Criar canal de texto", custom_id=f"text_channel_{id_}", emoji="💬", disabled=not guild.me.guild_permissions.manage_channels),
+                disnake.ui.Button(label="Criar canal de voz", custom_id=f"voice_channel_{id_}", emoji="🔊", disabled=not guild.me.guild_permissions.manage_channels),
                 disnake.ui.Button(label="Cancelar", custom_id=f"voice_channel_cancel_{id_}", emoji="❌")
             ]
 
             if "COMMUNITY" in guild.features:
                 buttons.insert(2, disnake.ui.Button(label="Criar canal de palco", custom_id=f"stage_channel_{id_}",
-                                  emoji="<:stagechannel:1077351815533826209>", disabled=bool(missing_perms)))
+                                  emoji="<:stagechannel:1077351815533826209>", disabled=not guild.me.guild_permissions.manage_channels))
 
             color = self.bot.get_color(guild.me)
 
             embeds = [
                 disnake.Embed(
-                    description="**Selecione um canal " + ("ou clique em um dos botões abaixo para criar um novo canal para pedir músicas." if not missing_perms else "abaixo:") +'**' ,
+                    description="**Selecione um canal " + ("ou clique em um dos botões abaixo para criar um novo canal para pedir músicas." if guild.me.guild_permissions.manage_channels else "abaixo:") +'**' ,
                     color=color
                 ).set_footer(text="Você tem apenas 45 segundos para selecionar/clicar em uma opção.")
             ]
 
-            if missing_perms:
+            if not guild.me.guild_permissions.manage_channels:
                 embeds.append(
                     disnake.Embed(
-                        description=f"Os botões de criar canal foram desativados devido ao bot **{bot.user.mention} "
-                                    f"não possuir as seguintes permissões necessárias abaixo:** ```ansi\n" +
-                                    "\n".join(f"[0;33m{perms_translations.get(p, p)}[0m" for p in perms) + "```",
+                        description=f"Os botões de criar canal foram desativados devido o bot **{bot.user.mention}** "
+                                    "não possuir a permissão de **gerenciar canais** no servidor.",
                         color=color
                     )
                 )
@@ -654,11 +672,13 @@ class MusicSettings(commands.Cog):
 
                 return
 
-            inter = done.pop().result()
+            inter_message = done.pop().result()
 
-            if inter.data.custom_id.startswith("voice_channel_cancel"):
+            update_inter(interaction, inter_message)
 
-                await inter.response.edit_message(
+            if inter_message.data.custom_id.startswith("voice_channel_cancel"):
+
+                await inter_message.response.edit_message(
                     embed=disnake.Embed(
                         description="**Operação cancelada...**",
                         color=self.bot.get_color(guild.me),
@@ -671,26 +691,26 @@ class MusicSettings(commands.Cog):
             else:
                 target = guild
 
-            if inter.data.custom_id.startswith("existing_channel_"):
-                target = bot.get_channel(int(inter.data.values[0]))
+            if inter_message.data.custom_id.startswith("existing_channel_"):
+                target = bot.get_channel(int(inter_message.data.values[0]))
+                existing_channel = True
+
             else:
 
-                missing_perms = [p for p, v in target.permissions_for(target.guild.me) if p in perms and not v]
+                if not guild.me.guild_permissions.manage_channels:
+                    raise GenericError(f"**O bot {bot.user.mention} não possui permissão de gerenciar canais pra criar um novo canal.**")
 
-                if missing_perms:
-                    raise GenericError(
-                        f"**{bot.user.mention} não possui as seguintes permissões necessárias abaixo:** ```ansi\n" +
-                        "\n".join(f"[0;33m{perms_translations.get(p, p)}[0m" for p in perms) + "```")
-
-                await inter.response.defer()
-                if inter.data.custom_id.startswith("voice_channel_"):
+                await inter_message.response.defer()
+                if inter_message.data.custom_id.startswith("voice_channel_"):
                     target = await target.create_voice_channel(f"{bot.user.name} player controller", **channel_kwargs)
-                elif inter.data.custom_id.startswith("stage_channel_"):
+                elif inter_message.data.custom_id.startswith("stage_channel_"):
                     target = await target.create_stage_channel(f"{bot.user.name} player controller", **channel_kwargs)
                 else:
                     target = await target.create_text_channel(f"{bot.user.name} player controller", **channel_kwargs)
 
-            existing_channel = False
+                existing_channel = False
+
+            inter = inter_message
 
         if target == guild.public_updates_channel:
             raise GenericError("**Você não pode usar um canal de atualizações do discord.**")
@@ -698,11 +718,9 @@ class MusicSettings(commands.Cog):
         if target == guild.rules_channel:
             raise GenericError("**Você não pode usar um canal de regras.**")
 
-        missing_perms = [p for p, v in target.permissions_for(target.guild.me) if p in perms and not v]
+        raise GenericError("aaaaaaaaaaaaaaa")
 
-        if missing_perms:
-            raise GenericError(f"**{bot.user.mention} não possui as seguintes permissões necessárias abaixo:** ```ansi\n" +
-                               "\n".join(f"[0;33m{perms_translations.get(p,p)}[0m" for p in perms) + "```")
+        check_channel_perm(target)
 
         if isinstance(target, disnake.ForumChannel):
 
@@ -749,9 +767,7 @@ class MusicSettings(commands.Cog):
                 except:
                     pass
 
-                inter.token = modal_inter.token
-                inter.id = modal_inter.id
-                inter.response = modal_inter.response
+                update_inter(interaction, modal_inter)
                 inter = modal_inter
 
                 await inter.response.defer()
@@ -1155,15 +1171,15 @@ class MusicSettings(commands.Cog):
                       cooldown=skin_cd, max_concurrency=skin_mc)
     async def change_skin_legacy(self, ctx: CustomContext):
 
-        await self.change_skin.callback(self=self, inter=ctx)
+        await self.change_skin.callback(self=self, interaction=ctx)
 
     @commands.slash_command(
         description=f"{desc_prefix}Alterar aparência/skin do player.", cooldown=skin_cd, max_concurrency=skin_mc,
         default_member_permissions=disnake.Permissions(manage_guild=True)
     )
-    async def change_skin(self, inter: disnake.AppCmdInter):
+    async def change_skin(self, interaction: disnake.AppCmdInter):
 
-        inter, bot = await select_bot_pool(inter)
+        inter, bot = await select_bot_pool(interaction)
 
         if not bot:
             return
@@ -1258,6 +1274,8 @@ class MusicSettings(commands.Cog):
                 c.disabled = True
             await msg.edit(view=select_view)
             return
+
+        update_inter(interaction, select_view.interaction)
 
         inter = select_view.interaction
 
