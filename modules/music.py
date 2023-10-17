@@ -1316,20 +1316,20 @@ class Music(commands.Cog):
             except KeyError:
                 player = None
 
-                guild_data = None
-
-                if inter.bot == bot:
-                    try:
-                        guild_data = inter.guild_data
-                    except AttributeError:
-                        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-                        try:
-                            inter.guild_data = guild_data
-                        except AttributeError:
-                            pass
-
                 if not guild_data:
-                    guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+
+                    if inter.bot == bot:
+                        try:
+                            guild_data = inter.guild_data
+                        except AttributeError:
+                            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                            try:
+                                inter.guild_data = guild_data
+                            except AttributeError:
+                                pass
+
+                    if not guild_data:
+                        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
                 static_player = guild_data['player_controller']
 
@@ -3977,14 +3977,58 @@ class Music(commands.Cog):
                             channel_db = None
 
                         else:
-                            if (channel_db.archived or channel_db.locked) and not channel_db.parent.permissions_for(guild.me).manage_threads:
+                            if channel_db.owner != bot.user.id:
 
-                                if isinstance(channel.parent, disnake.ForumChannel):
+                                if not isinstance(channel_db.parent, disnake.ForumChannel):
+                                    await self.reset_controller_db(inter.guild_id, guild_data, inter)
+                                    channel_db = None
+                                else:
+
+                                    thread = None
+
+                                    for t in channel_db.parent.threads:
+
+                                        if t.owner_id == bot.user.id:
+                                            try:
+                                                message = await t.fetch_message(t.id)
+                                            except disnake.NotFound:
+                                                continue
+                                            if not message or message.author.id != bot.user.id:
+                                                continue
+                                            thread = t
+                                            break
+
+                                    if not thread and guild.me.guild_permissions.read_message_history:
+                                        async for t in channel_db.parent.archived_threads(limit=100):
+                                            if t.owner_id == bot.user.id:
+                                                try:
+                                                    message = await t.fetch_message(t.id)
+                                                except disnake.NotFound:
+                                                    continue
+                                                if not message or message.author.id != bot.user.id:
+                                                    continue
+                                                thread = t
+                                                break
+
+                                    if not thread:
+                                        thread_wmessage = await channel_db.parent.create_thread(
+                                            name=f"{bot.user} song-request",
+                                            content="Post para pedido de músicas.",
+                                            auto_archive_duration=10080,
+                                            slowmode_delay=5,
+                                        )
+                                        channel_db = thread_wmessage.thread
+                                    else:
+                                        channel_db = thread
+
+                            if (channel_db.archived or channel_db.locked):
+
+                                if channel_db.permissions_for(guild.me).manage_threads:
+                                    await channel_db.edit(archived=False, locked=False)
+
+                                elif isinstance(channel.parent, disnake.ForumChannel):
                                     warn_message = f"**{bot.user.mention} não possui permissão de gerenciar tópicos " \
                                                     f"para desarquivar/destrancar o tópico: {channel_db.mention}**"
-
-                            else:
-                                await channel_db.edit(archived=False, locked=False)
 
                 except AttributeError:
                     pass

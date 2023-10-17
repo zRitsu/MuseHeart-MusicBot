@@ -775,36 +775,37 @@ class MusicSettings(commands.Cog):
             thread = None
             message = None
 
-            if target.permissions_for(target.guild.me).manage_threads:
-                for t in target.threads:
+            for t in target.threads:
+                if t.owner_id == bot.user.id:
+                    try:
+                        message = await t.fetch_message(t.id)
+                    except disnake.NotFound:
+                        continue
+                    thread = t
+                    if target.permissions_for(target.guild.me).manage_threads:
+                        await thread.edit(archived=False, locked=False)
+                    break
+
+            if not thread and guild.me.guild_permissions.read_message_history:
+                async for t in target.archived_threads(limit=100):
                     if t.owner_id == bot.user.id:
                         try:
                             message = await t.fetch_message(t.id)
                         except disnake.NotFound:
                             continue
                         thread = t
-                        await thread.edit(archived=False, locked=False)
+                        if target.permissions_for(target.guild.me).manage_threads:
+                            await thread.edit(archived=False, locked=False)
                         break
 
-                if not thread and guild.me.guild_permissions.read_message_history:
-                    async for t in target.archived_threads(limit=100):
-                        if t.owner_id == bot.user.id:
-                            try:
-                                message = await t.fetch_message(t.id)
-                            except disnake.NotFound:
-                                continue
-                            thread = t
-                            await thread.edit(archived=False, locked=False)
-                            break
-
             if not thread:
-                thread = await target.create_thread(
+                thread_wmessage = await target.create_thread(
                     name=channel_name,
                     content="Post para pedido de músicas.",
                     auto_archive_duration=10080,
                     slowmode_delay=5,
                 )
-                message = thread.message
+                message = thread_wmessage.message
 
             message = await send_idle_embed(target=message, bot=bot, force=True,
                                             guild_data=guild_data)

@@ -359,7 +359,7 @@ def can_send_message_check():
             try:
                 await inter.response.defer(ephemeral=True)
                 inter.channel = await inter.bot.fetch_channel(inter.channel_id)
-                if inter.channel.archived:
+                if inter.channel.archived and inter.channel.permissions_for(inter.channel.guild.me).manage_threads:
                     await inter.channel.edit(archived=False)
             except:
                 pass
