@@ -81,7 +81,7 @@ class SkinSelector(disnake.ui.View):
         self.clear_items()
 
         if not self.global_mode:
-            self.embed.title = "Seletor de skin (para o bot selecionado)"
+            self.embed.title = "Seletor de skin (Aplicar no bot selecionado)"
 
             for s in self.select_opts:
                 s.default = self.skin_selected == s.value
@@ -93,7 +93,7 @@ class SkinSelector(disnake.ui.View):
             static_select_opts = self.static_select_opts
 
         else:
-            self.embed.title = "Seletor de skin (para todos os bots do servidor)"
+            self.embed.title = "Seletor de skin (Aplicar em todos os bots do servidor)"
 
             for s in self.global_select_opts:
                 s.default = self.skin_selected == s.value
@@ -1229,11 +1229,11 @@ class MusicSettings(commands.Cog):
         global_static_skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Song-Request: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "skin atual"} if global_static_selected == s else {}) for s in static_skin_list + add_skin_prefix(global_data["custom_skins_static"])]
 
         embed = disnake.Embed(
-            description="**Modo Normal:**\n\n" + "\n".join(f"`{s}` [`(visualizar)`]({bot.player_skins[s].preview})" for s in skin_list) + "\n\n" 
-                        "**Modo fixo (song-request):**\n\n" + "\n".join(f"`{s}` [`(visualizar)`]({bot.player_static_skins[s].preview})" for s in static_skin_list) +
-                        "\n\n`Nota: No modo global todos os bots do servidor usam a mesma skin.`",
+            description="```Modo Normal:``` " + "\n".join(f"[**{s}**]({bot.player_skins[s].preview})" for s in skin_list) + "\n\n" 
+                        "```Modo Fixo (Song-Request):``` " + "\n".join(f"[**{s}**]({bot.player_static_skins[s].preview})" for s in static_skin_list) +
+                        "\n\n`Nota: No modo global a skin será aplicada globalmente em todos os bots.`",
             colour=bot.get_color(guild.me)
-        )
+        ).set_image("https://cdn.discordapp.com/attachments/554468640942981147/1082887587770937455/rainbow_bar2.gif")
 
         try:
             if bot.user.id != self.bot.user.id:
