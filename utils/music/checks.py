@@ -219,6 +219,9 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         if only_voiced:
             continue
 
+        if not inter.channel.permissions_for(guild.me).send_messages:
+            continue
+
         if not guild.me.voice:
             free_bot.append([bot, guild])
 
