@@ -957,7 +957,7 @@ class Music(commands.Cog):
                 await inter.response.defer(ephemeral=ephemeral)
 
             if static_player['channel']:
-                channel, warn_message = await self.check_channel(guild_data, inter, channel, guild, bot)
+                channel, warn_message, message = await self.check_channel(guild_data, inter, channel, guild, bot)
 
         if ephemeral is None:
             ephemeral = await self.is_request_channel(inter, data=guild_data, ignore_thread=True)
@@ -1334,7 +1334,7 @@ class Music(commands.Cog):
                 static_player = guild_data['player_controller']
 
                 if static_player['channel']:
-                    channel, warn_message = await self.check_channel(guild_data, inter, channel, guild, bot)
+                    channel, warn_message, message = await self.check_channel(guild_data, inter, channel, guild, bot)
 
         if not player:
 
@@ -3951,6 +3951,7 @@ class Music(commands.Cog):
         static_player = guild_data['player_controller']
 
         warn_message = None
+        message: Optional[disnake.Message] = None
 
         try:
             channel_db = bot.get_channel(int(static_player['channel'])) or await bot.fetch_channel(
@@ -4018,6 +4019,7 @@ class Music(commands.Cog):
                                             slowmode_delay=5,
                                         )
                                         channel_db = thread_wmessage.thread
+                                        message = thread_wmessage.message
                                     else:
                                         channel_db = thread
 
@@ -4051,7 +4053,7 @@ class Music(commands.Cog):
                             "novamente..."
                         )
 
-        return channel_db, warn_message
+        return channel_db, warn_message, message
 
     async def process_player_interaction(
             self,
