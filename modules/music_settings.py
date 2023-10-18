@@ -337,15 +337,15 @@ class MusicSettings(commands.Cog):
         cooldown=player_settings_cd, max_concurrency=player_settings_mc
     )
     async def player_settings_legacy(self, ctx: CustomContext):
-        await self.player_settings.callback(self=self, inter=ctx)
+        await self.player_settings.callback(self=self, interaction=ctx)
 
     @commands.slash_command(
         description=f"{desc_prefix}Alterar algumas configurações padrões do player.",
         default_member_permissions=disnake.Permissions(manage_guild=True)
     )
-    async def player_settings(self, inter: disnake.AppCmdInter):
+    async def player_settings(self, interaction: disnake.AppCmdInter):
 
-        inter, bot = await select_bot_pool(inter)
+        inter, bot = await select_bot_pool(interaction)
 
         if not bot:
             return
@@ -1077,7 +1077,7 @@ class MusicSettings(commands.Cog):
     @commands.command(name="adddjrole",description="Adicionar um cargo para a lista de DJ's do servidor.",
                       usage="{prefix}{cmd} [id|nome|@cargo]\nEx: {prefix}{cmd} @cargo", cooldown=djrole_cd, max_concurrency=djrole_mc)
     async def add_dj_role_legacy(self, ctx: CustomContext, *, role: disnake.Role):
-        await self.add_dj_role.callback(self=self,inter=ctx, role=role)
+        await self.add_dj_role.callback(self=self, interaction=ctx, role=role)
 
     @commands.slash_command(
         description=f"{desc_prefix}Adicionar um cargo para a lista de DJ's do servidor.",
@@ -1085,11 +1085,11 @@ class MusicSettings(commands.Cog):
     )
     async def add_dj_role(
             self,
-            inter: disnake.ApplicationCommandInteraction,
+            interaction: disnake.ApplicationCommandInteraction,
             role: disnake.Role = commands.Param(name="cargo", description="Cargo")
     ):
 
-        inter, bot = await select_bot_pool(inter)
+        inter, bot = await select_bot_pool(interaction)
         guild = bot.get_guild(inter.guild_id) or inter.guild
         role = guild.get_role(role.id)
 
@@ -1127,7 +1127,7 @@ class MusicSettings(commands.Cog):
                       usage="{prefix}{cmd} [id|nome|@cargo]\nEx: {prefix}{cmd} @cargo",
                       cooldown=djrole_cd, max_concurrency=djrole_mc)
     async def remove_dj_role_legacy(self, ctx: CustomContext, *, role: disnake.Role):
-        await self.remove_dj_role.callback(self=self, inter=ctx, role=role)
+        await self.remove_dj_role.callback(self=self, interaction=ctx, role=role)
 
     @commands.slash_command(
         description=f"{desc_prefix}Remover um cargo da lista de DJ's do servidor.",
@@ -1135,11 +1135,11 @@ class MusicSettings(commands.Cog):
     )
     async def remove_dj_role(
             self,
-            inter: disnake.ApplicationCommandInteraction,
+            interaction: disnake.ApplicationCommandInteraction,
             role: disnake.Role = commands.Param(name="cargo", description="Cargo")
     ):
 
-        inter, bot = await select_bot_pool(inter)
+        inter, bot = await select_bot_pool(interaction)
 
         if not bot:
             return
@@ -1571,15 +1571,15 @@ class MusicSettings(commands.Cog):
         description="Ver informações dos servidores de música."
     )
     async def nodeinfo_legacy(self, ctx: CustomContext):
-        await self.nodeinfo.callback(self=self, inter=ctx)
+        await self.nodeinfo.callback(self=self, interaction=ctx)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.slash_command(
         description=f"{desc_prefix}Ver informações dos servidores de música (lavalink servers)."
     )
-    async def nodeinfo(self, inter: disnake.AppCmdInter):
+    async def nodeinfo(self, interaction: disnake.AppCmdInter):
 
-        inter, bot = await select_bot_pool(inter)
+        inter, bot = await select_bot_pool(interaction, return_new=True)
 
         if not bot:
             return

@@ -374,7 +374,7 @@ class Misc(commands.Cog):
     @commands.command(name="about", aliases=["sobre", "info", "botinfo"], description="Exibir informações sobre mim.",
                       cooldown=about_cd)
     async def about_legacy(self, ctx: CustomContext):
-        await self.about.callback(self=self, inter=ctx)
+        await self.about.callback(self=self, interaction=ctx)
 
 
     @commands.slash_command(
@@ -382,12 +382,12 @@ class Misc(commands.Cog):
     )
     async def about(
             self,
-            inter: disnake.AppCmdInter
+            interaction: disnake.AppCmdInter
     ):
 
         await inter.response.defer(ephemeral=True)
 
-        inter, bot = await select_bot_pool(inter, first=True)
+        inter, bot = await select_bot_pool(interaction, first=True)
 
         if not bot:
             return

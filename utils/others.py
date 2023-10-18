@@ -545,7 +545,7 @@ def music_source_emoji_id(id_: str):
 
     return "<:play:734221719774035968>"
 
-async def select_bot_pool(inter, first=False):
+async def select_bot_pool(inter, first=False, return_new=False):
 
     if isinstance(inter, CustomContext):
         if len(inter.bot.pool.bots) < 2:
@@ -618,9 +618,7 @@ async def select_bot_pool(inter, first=False):
                 pass
             return None, None
 
-        inter.token = new_inter.token
-        inter.id = new_inter.id
-        inter.response = new_inter.response
+        update_inter(inter, new_inter)
 
         try:
             func = inter.response.edit_message
@@ -636,6 +634,9 @@ async def select_bot_pool(inter, first=False):
                 components=None
             )
             return None, None
+
+        if return_new:
+            inter = new_inter
 
         if msg:
             inter.store_message = msg

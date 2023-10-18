@@ -366,7 +366,7 @@ class PinManager(commands.Cog):
                       description="Gerenciar playlists/favoritos do servidor.",
                       cooldown=server_playlist_cd)
     async def serverplaylist_legacy(self, ctx: CustomContext):
-        await self.server_playlist.callback(self=self, inter=ctx)
+        await self.server_playlist.callback(self=self, interaction=ctx)
 
     @commands.max_concurrency(1, commands.BucketType.guild, wait=False)
     @commands.slash_command(
@@ -374,9 +374,9 @@ class PinManager(commands.Cog):
         default_member_permissions=disnake.Permissions(manage_guild=True),
         cooldown=server_playlist_cd
     )
-    async def server_playlist(self, inter: disnake.AppCmdInter):
+    async def server_playlist(self, interaction: disnake.AppCmdInter):
 
-        inter, bot = await select_bot_pool(inter)
+        inter, bot = await select_bot_pool(interaction)
 
         if not bot:
             return
