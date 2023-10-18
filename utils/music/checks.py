@@ -301,7 +301,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
             components = [disnake.ui.Button(custom_id="bot_invite", label="Adicionar bot(s).")]
 
     else:
-        msg = "**Todos os bots estão em uso nomento...**"
+        msg = "**Todos os bots estão em uso no nomento...**"
         if extra_bots_counter:
             components = [disnake.ui.Button(custom_id="bot_invite", label="Precisa de mais bots de música? Clique aqui.")]
 
