@@ -277,6 +277,11 @@ async def send_message(
     # correção temporária usando variavel kwargs.
     kwargs = {}
 
+    try:
+        bot = inter.music_bot
+    except AttributeError:
+        bot = inter.bot
+
     if embed:
         kwargs["embed"] = embed
 
@@ -301,9 +306,14 @@ async def send_message(
             except AttributeError:
                 channel = inter.channel
 
-            if isinstance(channel.parent, disnake.ForumChannel) and (channel.archived or channel.locked) and \
-                    channel.guild.me.guild_permissions.manage_threads:
-                await channel.edit(archived=False, locked=False)
+            if isinstance(channel.parent, disnake.ForumChannel):
+                thread_kw = {}
+                if channel.locked and channel.guild.me.guild_permissions.manage_threads:
+                    thread_kw.update({"locked": False, "archived": False})
+                elif channel.archived and channel.owner_id == bot.user.id:
+                    thread_kw["archived"] = False
+                if thread_kw:
+                    await channel.edit(**thread_kw)
 
         except AttributeError:
             pass
@@ -408,8 +418,13 @@ async def send_idle_embed(
                             except disnake.NotFound:
                                 continue
                             thread = t
-                            if (thread.locked or thread.archived) and target.permissions_for(target.guild.me).manage_threads:
-                                await thread.edit(archived=False, locked=False)
+                            thread_kw = {}
+                            if thread.locked and target.permissions_for(target.guild.me).manage_threads:
+                                thread_kw.update({"locked": False, "archived": False})
+                            elif thread.archived:
+                                thread_kw["archived"] = False
+                            if thread_kw:
+                                await thread.edit(**thread_kw)
                             break
 
                     if not thread and target.guild.me.guild_permissions.read_message_history:
@@ -419,9 +434,13 @@ async def send_idle_embed(
                                     message = await t.fetch_message(t.id)
                                 except disnake.NotFound:
                                     continue
-                                thread = t
-                                if (thread.locked or thread.archived) and target.permissions_for(target.guild.me).manage_threads:
-                                    await thread.edit(archived=False, locked=False)
+                                thread_kw = {}
+                                if thread.locked and target.permissions_for(target.guild.me).manage_threads:
+                                    thread_kw.update({"locked": False, "archived": False})
+                                elif thread.archived:
+                                    thread_kw["archived"] = False
+                                if thread_kw:
+                                    await thread.edit(**thread_kw)
                                 break
             else:
                 await message.edit(embed=embed, content=content, components=components)

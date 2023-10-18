@@ -354,13 +354,23 @@ def can_send_message_check():
 
             raise GenericError("**Este comando deve ser usado em um servidor...**")
 
-        # TODO: tempfix para canal de forum (thread arquyivada)
+        try:
+            bot = inter.music_bot
+        except:
+            bot = inter.bot
+
+        # TODO: tempfix para canal de forum (thread arquivada)
         if isinstance(inter.channel, disnake.PartialMessageable):
             try:
                 await inter.response.defer(ephemeral=True)
-                inter.channel = await inter.bot.fetch_channel(inter.channel_id)
-                if inter.channel.archived and inter.channel.permissions_for(inter.channel.guild.me).manage_threads:
-                    await inter.channel.edit(archived=False)
+                inter.channel = await bot.fetch_channel(inter.channel_id)
+                thread_kw = {}
+                if inter.channel.locked and inter.channel.parent.permissions_for(inter.channel.guild.me).manage_threads:
+                    thread_kw.update({"locked": False, "archived": False})
+                elif inter.channel.archived and inter.channel.owner_id == bot.user.id:
+                    thread_kw["archived"] = False
+                if thread_kw:
+                    await inter.channel.edit(**thread_kw)
             except:
                 pass
 

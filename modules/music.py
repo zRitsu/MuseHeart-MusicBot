@@ -4023,14 +4023,20 @@ class Music(commands.Cog):
                                     else:
                                         channel_db = thread
 
-                            if (channel_db.archived or channel_db.locked):
+                            thread_kw = {}
 
-                                if channel_db.permissions_for(guild.me).manage_threads:
-                                    await channel_db.edit(archived=False, locked=False)
+                            if channel_db.locked and channel_db.permissions_for(guild.me).manage_threads:
+                                thread_kw.update({"locked": False, "archived": False})
 
-                                elif isinstance(channel.parent, disnake.ForumChannel):
-                                    warn_message = f"**{bot.user.mention} não possui permissão de gerenciar tópicos " \
-                                                    f"para desarquivar/destrancar o tópico: {channel_db.mention}**"
+                            elif channel_db.archived and channel_db.owner_id == bot.user.id:
+                                thread_kw["archived"] = False
+
+                            if thread_kw:
+                                await channel_db.edit(**thread_kw)
+
+                            elif isinstance(channel.parent, disnake.ForumChannel):
+                                warn_message = f"**{bot.user.mention} não possui permissão de gerenciar tópicos " \
+                                                f"para desarquivar/destrancar o tópico: {channel_db.mention}**"
 
                 except AttributeError:
                     pass

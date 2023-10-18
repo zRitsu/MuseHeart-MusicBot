@@ -782,8 +782,13 @@ class MusicSettings(commands.Cog):
                     except disnake.NotFound:
                         continue
                     thread = t
-                    if target.permissions_for(target.guild.me).manage_threads:
-                        await thread.edit(archived=False, locked=False)
+                    thread_kw = {}
+                    if thread.locked and target.permissions_for(target.guild.me).manage_threads:
+                        thread_kw.update({"locked": False, "archived": False})
+                    elif thread.archived:
+                        thread_kw["archived"] = False
+                    if thread_kw:
+                        await t.edit(**thread_kw)
                     break
 
             if not thread and guild.me.guild_permissions.read_message_history:
@@ -794,8 +799,13 @@ class MusicSettings(commands.Cog):
                         except disnake.NotFound:
                             continue
                         thread = t
-                        if target.permissions_for(target.guild.me).manage_threads:
-                            await thread.edit(archived=False, locked=False)
+                        thread_kw = {}
+                        if thread.locked and target.permissions_for(target.guild.me).manage_threads:
+                            thread_kw.update({"locked": False, "archived": False})
+                        elif thread.archived:
+                            thread_kw["archived"] = False
+                        if thread_kw:
+                            await t.edit(**thread_kw)
                         break
 
             if not thread:
@@ -876,12 +886,18 @@ class MusicSettings(commands.Cog):
         elif not message or message.channel.id != channel.id:
             message = await send_idle_embed(channel, bot=bot, force=True, guild_data=guild_data)
 
-        if not isinstance(channel, (disnake.VoiceChannel, disnake.StageChannel)):
+        if isinstance(channel, disnake.TextChannel):
             if not message.thread:
                 await message.create_thread(name="Song-Requests", auto_archive_duration=10080)
-            elif message.thread.archived:
-                await message.thread.edit(archived=False, reason=f"Song request reativado por: {inter.author}.")
-        elif player and player.guild.me.voice.channel != channel:
+            else:
+                thread_kw = {}
+                if message.thread.locked and message.thread.permissions_for(guild.me).manage_threads:
+                    thread_kw.update({"locked": False, "archived": False})
+                elif message.thread.archived and message.thread.owner_id == bot.user.id:
+                    thread_kw["archived"] = False
+                if thread_kw:
+                    await message.thread.edit(reason=f"Song request reativado por: {inter.author}.", **thread_kw)
+        elif player and isinstance(channel, (disnake.VoiceChannel, disnake.StageChannel)) and player.guild.me.voice.channel != channel:
             await player.connect(channel.id)
 
         guild_data['player_controller']['channel'] = str(channel.id)
