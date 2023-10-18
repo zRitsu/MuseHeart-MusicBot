@@ -1360,10 +1360,11 @@ class LavalinkPlayer(wavelink.Player):
 
             await self.destroy_message()
 
-            try:
-                self.message = await self.text_channel.send(allowed_mentions=self.allowed_mentions, **self.last_data)
-            except:
-                traceback.print_exc()
+            if not self.static:
+                try:
+                    self.message = await self.text_channel.send(allowed_mentions=self.allowed_mentions, **self.last_data)
+                except:
+                    traceback.print_exc()
 
             self.start_message_updater_task()
 
