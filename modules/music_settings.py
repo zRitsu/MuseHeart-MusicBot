@@ -1166,7 +1166,7 @@ class MusicSettings(commands.Cog):
     skin_mc =commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
     @commands.has_guild_permissions(manage_guild=True)
-    @commands.command(description="Alterar aparência/skin do player.", name="changeskin", aliases=["skin"],
+    @commands.command(description="Alterar aparência/skin do player.", name="changeskin", aliases=["skin", "skins"],
                       cooldown=skin_cd, max_concurrency=skin_mc)
     async def change_skin_legacy(self, ctx: CustomContext):
 
