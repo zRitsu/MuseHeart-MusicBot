@@ -441,11 +441,14 @@ class LavalinkPlayer(wavelink.Player):
 
     @property
     def controller_link(self):
-        try:
-            if self.controller_mode:
+        if self.controller_mode:
+            try:
                 return f" [`🎛️`](<{self.message.jump_url}>)"
-        except AttributeError:
-            pass
+            except AttributeError:
+                try:
+                    return f" [`#`](<{self.text_channel.jump_url}>)"
+                except AttributeError:
+                    pass
         return ""
 
     async def channel_cleanup(self):
