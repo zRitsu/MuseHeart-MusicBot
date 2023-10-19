@@ -8,7 +8,7 @@ from utils.music.models import LavalinkPlayer
 from utils.others import PlayerControls
 
 
-class MicroController:
+class MiniPlayer:
 
     __slots__ = ("name", "preview")
 
@@ -72,4 +72,4 @@ class MicroController:
         return data
 
 def load():
-    return MicroController()
+    return MiniPlayer()
