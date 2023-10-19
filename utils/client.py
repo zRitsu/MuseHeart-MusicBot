@@ -843,7 +843,7 @@ class BotCore(commands.Bot):
             if bot_count:
 
                 embed.description += "\n\n`Caso precise de mais bots de música neste servidor ou queira adicionar bots " \
-                                     "de música em outro servidor clique no botão abaixo.`"
+                                     "de música em outro servidor, clique no botão abaixo.`"
 
                 kwargs = {
                     "components": [
