@@ -838,15 +838,28 @@ class BotCore(commands.Bot):
             if not self.config["INTERACTION_COMMAND_ONLY"]:
                 embed.description += f"\n\nTambém tenho comandos de texto por prefixo.\n" \
                                     f"Meu prefixo no servidor é: **{prefix}** (minha menção também funciona como prefixo).\n"\
-                                    f"Pra ver todos os meus comandos de texto use **{prefix}help**\n"
+                                    f"Pra ver todos os meus comandos de texto use **{prefix}help**"
 
             if bot_count:
+
+                embed.description += "\n\n`Caso precise de mais bots de música neste servidor ou queira adicionar bots " \
+                                     "de música em outro servidor clique no botão abaixo.`"
 
                 kwargs = {
                     "components": [
                         disnake.ui.Button(
                             custom_id="bot_invite",
-                            label="Precisa de mais bots de música? Clique aqui."
+                            label="Me adicione no seu servidor."
+                        )
+                    ]
+                }
+
+            else:
+                kwargs = {
+                    "components": [
+                        disnake.ui.Button(
+                            label="Me adicione no seu servidor.",
+                            url=disnake.utils.oauth_url(self.user.id, permissions=disnake.Permissions(self.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))
                         )
                     ]
                 }
