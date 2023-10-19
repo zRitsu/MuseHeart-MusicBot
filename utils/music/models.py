@@ -446,7 +446,7 @@ class LavalinkPlayer(wavelink.Player):
                 return f" [`🎛️`](<{self.message.jump_url}>)"
             except AttributeError:
                 try:
-                    return f" [`#`](<{self.text_channel.jump_url}>)"
+                    return f" [`#️⃣`](<{self.text_channel.jump_url}>)"
                 except AttributeError:
                     pass
         return ""
