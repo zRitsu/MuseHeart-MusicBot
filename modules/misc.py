@@ -385,12 +385,12 @@ class Misc(commands.Cog):
             interaction: disnake.AppCmdInter
     ):
 
-        await inter.response.defer(ephemeral=True)
-
         inter, bot = await select_bot_pool(interaction, first=True)
 
         if not bot:
             return
+
+        await inter.response.defer(ephemeral=True)
 
         ram_usage = humanize.naturalsize(psutil.Process(getpid()).memory_info().rss)
 
