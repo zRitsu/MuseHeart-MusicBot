@@ -1383,11 +1383,14 @@ class LavalinkPlayer(wavelink.Player):
         except:
             pass
 
-        if not self.static and self.guild.me:
-            try:
+        if self.static:
+            return
+
+        try:
+            if self.guild.me:
                 await self.message.delete()
-            except:
-                pass
+        except:
+            pass
 
         self.message = None
 

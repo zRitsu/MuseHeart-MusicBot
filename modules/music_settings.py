@@ -1368,16 +1368,12 @@ class MusicSettings(commands.Cog):
         for b in self.bot.pool.bots:
 
             try:
-                player = b.music.players[inter.guild_id]
+                player: LavalinkPlayer = b.music.players[inter.guild_id]
             except KeyError:
                 continue
 
             last_skin = str(player.skin)
             last_static_skin = str(player.skin_static)
-
-            player.skin = select_view.skin_selected
-            player.skin_static = select_view.static_skin_selected
-            player.setup_features()
 
             if player.static:
 
@@ -1386,6 +1382,15 @@ class MusicSettings(commands.Cog):
 
             elif select_view.skin_selected == last_skin:
                 continue
+
+            try:
+                await player.destroy_message()
+            except:
+                traceback.print_exc()
+
+            player.skin = select_view.skin_selected
+            player.skin_static = select_view.static_skin_selected
+            player.setup_features()
 
             player.setup_hints()
             player.process_hint()
