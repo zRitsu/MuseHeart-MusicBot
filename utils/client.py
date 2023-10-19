@@ -793,14 +793,16 @@ class BotCore(commands.Bot):
 
             embed = disnake.Embed(color=self.get_color(message.guild.me))
 
-            kwargs = {}
-
             prefix = (await self.get_prefix(message))
 
             if not isinstance(prefix, str):
                 prefix = prefix[-1]
 
             embed.description = f"**Olá {message.author.mention}.**"
+
+            if not self.config["INTERACTION_COMMAND_ONLY"]:
+                embed.description += f"\n\nMeu prefixo no servidor é: **{prefix}** `(minha menção também funciona como prefixo).`\n"\
+                                    f"Pra ver todos os meus comandos use **{prefix}help**"
 
             bot_count = 0
 
@@ -835,15 +837,11 @@ class BotCore(commands.Bot):
             else:
                 embed.description += "\n\n**Pra ver todos os meus comandos use: /**"
 
-            if not self.config["INTERACTION_COMMAND_ONLY"]:
-                embed.description += f"\n\nTambém tenho comandos de texto por prefixo.\n" \
-                                    f"Meu prefixo no servidor é: **{prefix}** (minha menção também funciona como prefixo).\n"\
-                                    f"Pra ver todos os meus comandos de texto use **{prefix}help**"
-
             if bot_count:
 
-                embed.description += "\n\n`Caso precise de mais bots de música neste servidor ou queira adicionar bots " \
-                                     "de música em outro servidor, clique no botão abaixo.`"
+                if message.author.guild and message.author.guild_permissions.manage_guild:
+                    embed.description += "\n\n`Caso precise de mais bots de música neste servidor ou queira adicionar bots " \
+                                         "de música em outro servidor, clique no botão abaixo.`"
 
                 kwargs = {
                     "components": [
