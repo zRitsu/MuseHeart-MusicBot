@@ -1294,6 +1294,8 @@ class MusicSettings(commands.Cog):
 
         inter = select_view.interaction
 
+        await inter.response.defer()
+
         try:
             global_data.update({"global_skin": select_view.global_mode})
         except:
@@ -1358,7 +1360,7 @@ class MusicSettings(commands.Cog):
             ).set_footer(text=f"{bot.user} - [{bot.user.id}]", icon_url=bot.user.display_avatar.with_format("png").url)
         }
 
-        if msg:
+        if isinstance(inter, CustomContext):
             await msg.edit(view=None, **kwargs)
         elif inter.response.is_done():
             await inter.edit_original_message(view=None, **kwargs)
