@@ -1194,7 +1194,7 @@ class MusicSettings(commands.Cog):
     )
     async def change_skin(self, interaction: disnake.AppCmdInter):
 
-        inter, bot = await select_bot_pool(interaction)
+        inter, bot = await select_bot_pool(interaction, return_new=True)
 
         if not bot:
             return
