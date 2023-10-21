@@ -770,8 +770,10 @@ class GuildLog(commands.Cog):
 
         try:
             await self.bot.music.players[guild.id].destroy()
-        except:
+        except KeyError:
             pass
+        except:
+            traceback.print_exc()
 
         if not self.hook_url:
             return

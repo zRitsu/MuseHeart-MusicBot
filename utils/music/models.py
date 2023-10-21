@@ -1454,12 +1454,10 @@ class LavalinkPlayer(wavelink.Player):
         except:
             vc = self.last_channel
 
-        await self.process_rpc(vc, close=True)
-
         try:
-            await self.update_stage_topic(reconnect=False, clear=True)
+            await self.process_rpc(vc, close=True)
         except:
-            pass
+            traceback.print_exc()
 
         try:
             self.idle_task.cancel()
@@ -1479,6 +1477,11 @@ class LavalinkPlayer(wavelink.Player):
             pass
 
         if self.guild.me:
+
+            try:
+                await self.update_stage_topic(reconnect=False, clear=True)
+            except:
+                pass
 
             if self.static:
 
