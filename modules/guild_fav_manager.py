@@ -39,14 +39,16 @@ class GuildFavModal(disnake.ui.Modal):
                 disnake.ui.TextInput(
                     label="Descrição:",
                     custom_id="guild_fav_description",
+                    min_length=3,
                     max_length=50,
-                    value=description or None
+                    value=description or None,
+                    required=False
                 ),
                 disnake.ui.TextInput(
                     label="Link/Url:",
                     custom_id="guild_fav_url",
                     min_length=10,
-                    max_length=200,
+                    max_length=250,
                     value=url or None
                 ),
             ]
