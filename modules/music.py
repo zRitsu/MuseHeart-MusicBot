@@ -1220,77 +1220,79 @@ class Music(commands.Cog):
                 if not self.bot.config["ENABLE_DISCORD_URLS_PLAYBACK"] and "cdn.discordapp.com/attachments/" in query:
                     raise GenericError("**O suporte a links do discord está desativado.**")
 
-                for p in ("&ab_channel=", "&start_radio="):
-                    if p in query:
-                        try:
-                            query = f'https://www.youtube.com/watch?v={re.search(r"v=([a-zA-Z0-9_-]+)", query).group(1)}'
-                        except:
-                            pass
-                        break
+                if query.startswith(("https://youtu.be/", "https://www.youtube.com/")):
 
-                if "&list=" in query and (link_re := YOUTUBE_VIDEO_REG.match(query)):
+                    for p in ("&ab_channel=", "&start_radio="):
+                        if p in query:
+                            try:
+                                query = f'https://www.youtube.com/watch?v={re.search(r"v=([a-zA-Z0-9_-]+)", query).group(1)}'
+                            except:
+                                pass
+                            break
 
-                    view = SelectInteraction(
-                        user=inter.author,
-                        opts=[
-                            disnake.SelectOption(label="Música", emoji="🎵",
-                                                 description="Carregar apenas a música do link.", value="music"),
-                            disnake.SelectOption(label="Playlist", emoji="🎶",
-                                                 description="Carregar playlist com a música atual.", value="playlist"),
-                        ], timeout=30)
+                    if "&list=" in query and (link_re := YOUTUBE_VIDEO_REG.match(query)):
 
-                    embed = disnake.Embed(
-                        description='**O link contém vídeo com playlist.**\n'
-                                    f'Selecione uma opção em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para prosseguir.',
-                        color=self.bot.get_color(guild.me)
-                    )
+                        view = SelectInteraction(
+                            user=inter.author,
+                            opts=[
+                                disnake.SelectOption(label="Música", emoji="🎵",
+                                                     description="Carregar apenas a música do link.", value="music"),
+                                disnake.SelectOption(label="Playlist", emoji="🎶",
+                                                     description="Carregar playlist com a música atual.", value="playlist"),
+                            ], timeout=30)
 
-                    try:
-                        if bot.user.id != self.bot.user.id:
-                            embed.set_footer(text=f"Via: {bot.user.display_name}",
-                                             icon_url=bot.user.display_avatar.url)
-                    except AttributeError:
-                        pass
-
-                    msg = await inter.send(embed=embed, view=view, ephemeral=ephemeral)
-
-                    await view.wait()
-
-                    if not view.inter or view.selected is False:
-
-                        try:
-                            func = inter.edit_original_message
-                        except AttributeError:
-                            func = msg.edit
-
-                        mention = ""
-
-                        try:
-                            if inter.message.author.bot:
-                                mention = f"{inter.author.mention}, "
-                        except AttributeError:
-                            pass
-
-                        await func(
-                            content=f"{mention}{'operação cancelada' if view.selected is not False else 'tempo esgotado'}" if view.selected is not False else "Cancelado pelo usuário.",
-                            embed=None, components=song_request_buttons
+                        embed = disnake.Embed(
+                            description='**O link contém vídeo com playlist.**\n'
+                                        f'Selecione uma opção em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para prosseguir.',
+                            color=self.bot.get_color(guild.me)
                         )
-                        return
 
-                    if view.selected == "music":
-                        query = link_re.group()
+                        try:
+                            if bot.user.id != self.bot.user.id:
+                                embed.set_footer(text=f"Via: {bot.user.display_name}",
+                                                 icon_url=bot.user.display_avatar.url)
+                        except AttributeError:
+                            pass
 
-                    try:
-                        inter.store_message = msg
-                    except AttributeError:
-                        pass
+                        msg = await inter.send(embed=embed, view=view, ephemeral=ephemeral)
 
-                    if not isinstance(inter, disnake.ModalInteraction):
-                        inter.token = view.inter.token
-                        inter.id = view.inter.id
-                        inter.response = view.inter.response
-                    else:
-                        inter = view.inter
+                        await view.wait()
+
+                        if not view.inter or view.selected is False:
+
+                            try:
+                                func = inter.edit_original_message
+                            except AttributeError:
+                                func = msg.edit
+
+                            mention = ""
+
+                            try:
+                                if inter.message.author.bot:
+                                    mention = f"{inter.author.mention}, "
+                            except AttributeError:
+                                pass
+
+                            await func(
+                                content=f"{mention}{'operação cancelada' if view.selected is not False else 'tempo esgotado'}" if view.selected is not False else "Cancelado pelo usuário.",
+                                embed=None, components=song_request_buttons
+                            )
+                            return
+
+                        if view.selected == "music":
+                            query = link_re.group()
+
+                        try:
+                            inter.store_message = msg
+                        except AttributeError:
+                            pass
+
+                        if not isinstance(inter, disnake.ModalInteraction):
+                            inter.token = view.inter.token
+                            inter.id = view.inter.id
+                            inter.response = view.inter.response
+                        else:
+                            inter = view.inter
 
         if not inter.response.is_done():
             await inter.response.defer(ephemeral=ephemeral)
