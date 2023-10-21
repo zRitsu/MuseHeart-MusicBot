@@ -535,12 +535,14 @@ class LavalinkPlayer(wavelink.Player):
 
     async def members_timeout(self, check: bool, force: bool = False):
 
-        if self.auto_pause and self.paused:
+        if self.auto_pause:
             if self.current:
                 try:
                     await self.resolve_track(self.current)
                     self.paused = False
-                    await self.play(self.current, start=self.position)
+                    start_timestamp = int((disnake.utils.utcnow()-self.start_time).total_seconds()*1000)
+                    await self.play(self.current, start=start_timestamp)
+                    self.last_position = start_timestamp
                 except Exception:
                     traceback.print_exc()
             self.auto_pause = False
@@ -552,8 +554,13 @@ class LavalinkPlayer(wavelink.Player):
         if check:
 
             if update_log:
-                self.set_command_log(emoji="🔰", text="A música foi retomada da pausa automática.")
+                self.set_command_log(emoji="🔋", text="O modo **economia de recursos** foi desativado.")
+                try:
+                    self.auto_skip_track_task.cancel()
+                except:
+                    pass
                 if self.current:
+                    await asyncio.sleep(self.idle_timeout)
                     await self.invoke_np(rpc_update=True)
                 else:
                     await self.process_next()
@@ -576,13 +583,19 @@ class LavalinkPlayer(wavelink.Player):
             if self.paused:
                 return
 
-            await self.set_pause(True)
-
             self.auto_pause = True
-            self.set_command_log(text=f"O player foi pausado temporariamente por falta de membros no canal. A "
-                                      f"música será retomada automaticamente quando um membro entrar no canal "
-                                      f"<#{self.channel_id}>.", emoji="⚠️")
+            self.set_command_log(text="O player está no **modo economia** temporariamente por falta de membros "
+                                      "no canal. Esse modo será desativado automaticamente quando um membro entrar "
+                                      f"no canal <#{self.channel_id}>.", emoji="🔋")
             await self.invoke_np()
+            track = self.current
+            await self.stop()
+            self.current = track
+            try:
+                self.auto_skip_track_task.cancel()
+            except:
+                pass
+            self.auto_skip_track_task = self.bot.loop.create_task(self.auto_skip_track())
             await self.update_stage_topic()
 
         else:
@@ -728,7 +741,7 @@ class LavalinkPlayer(wavelink.Player):
 
     async def process_next(self, start_position: Union[int, float] = 0, inter: disnake.MessageInteraction = None):
 
-        if self.locked or self.is_closing or self.auto_pause:
+        if self.locked or self.is_closing:
             return
 
         if not self.node or not self.node.is_available:
@@ -876,15 +889,17 @@ class LavalinkPlayer(wavelink.Player):
 
         self.process_hint()
 
-        # TODO: rever essa parte caso adicione função de ativar track loops em músicas da fila
-        if self.loop != "current" or (not self.controller_mode and self.current.track_loops == 0):
+        if not self.auto_pause:
 
-            await self.invoke_np(
-                interaction=inter,
-                force=True if (self.static or not self.loop or not self.is_last_message()) else False,
-                rpc_update=True)
+            # TODO: rever essa parte caso adicione função de ativar track loops em músicas da fila
+            if self.loop != "current" or (not self.controller_mode and self.current.track_loops == 0):
 
-        await self.play(track, start=start_position if not track.is_stream else 0)
+                await self.invoke_np(
+                    interaction=inter,
+                    force=True if (self.static or not self.loop or not self.is_last_message()) else False,
+                    rpc_update=True)
+
+            await self.play(track, start=start_position if not track.is_stream else 0)
 
     async def process_idle_message(self):
 
@@ -1558,6 +1573,30 @@ class LavalinkPlayer(wavelink.Player):
             self.members_timeout_task.cancel()
         except:
             pass
+
+    async def auto_skip_track(self):
+
+        if not self.controller_mode:
+            return
+
+        while not self.bot.is_closed():
+
+            if self.current.is_stream:
+                return
+
+            await asyncio.sleep((self.current.duration-self.position)/1000)
+
+            self.last_position = 0
+
+            try:
+                await self.process_next()
+            except:
+                print(traceback.format_exc())
+
+            try:
+                await self.invoke_np(force=True)
+            except:
+                traceback.print_exc()
 
     async def resolve_track(self, track: PartialTrack):
 

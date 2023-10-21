@@ -5350,6 +5350,9 @@ class Music(commands.Cog):
 
         player: LavalinkPlayer = payload.player
 
+        if player.auto_pause:
+            return
+
         if not player.text_channel.permissions_for(player.guild.me).send_messages:
             try:
                 print(f"{player.guild.name} [{player.guild_id}] - Desligando player por falta de permissão para enviar "
@@ -5380,7 +5383,7 @@ class Music(commands.Cog):
 
         player: LavalinkPlayer = payload.player
 
-        if player.locked:
+        if player.locked or player.auto_pause:
             return
 
         if payload.reason == "FINISHED":
