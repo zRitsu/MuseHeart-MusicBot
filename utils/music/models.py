@@ -560,7 +560,7 @@ class LavalinkPlayer(wavelink.Player):
                 except:
                     pass
                 if self.current:
-                    await asyncio.sleep(self.idle_timeout)
+                    await asyncio.sleep(1.5)
                     await self.invoke_np(rpc_update=True)
                 else:
                     await self.process_next()

@@ -5386,8 +5386,9 @@ class Music(commands.Cog):
         if player.locked or player.auto_pause:
             return
 
-        if payload.reason == "FINISHED" and not player.auto_pause:
-            player.set_command_log()
+        if payload.reason == "FINISHED":
+            if not player.auto_pause:
+                player.set_command_log()
 
         elif payload.reason == "STOPPED":
 
