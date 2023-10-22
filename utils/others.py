@@ -306,7 +306,15 @@ async def send_message(
             except AttributeError:
                 channel = inter.channel
 
-            if isinstance(channel.parent, disnake.ForumChannel):
+            is_forum = False
+
+            try:
+                if isinstance(channel.parent, disnake.ForumChannel):
+                    is_forum = True
+            except AttributeError:
+                pass
+
+            if is_forum:
                 thread_kw = {}
                 if channel.locked and channel.guild.me.guild_permissions.manage_threads:
                     thread_kw.update({"locked": False, "archived": False})

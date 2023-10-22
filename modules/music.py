@@ -1449,7 +1449,7 @@ class Music(commands.Cog):
                         player.message = None
                     except:
                         traceback.print_exc()
-                        if isinstance(channel.parent, disnake.ForumChannel) and str(channel.id) == static_player['message_id']:
+                        if hasattr(channel, 'parent') and isinstance(channel.parent, disnake.ForumChannel) and str(channel.id) == static_player['message_id']:
                             pass
                         else:
                             player.message = await send_idle_embed(channel, bot=bot, guild_data=guild_data)
