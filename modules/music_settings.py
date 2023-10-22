@@ -1397,6 +1397,17 @@ class MusicSettings(commands.Cog):
             player.setup_hints()
             player.process_hint()
             player.set_command_log(text=f"{inter.author.mention} alterou a skin do player.", emoji="🎨")
+
+            try:
+                if player.controller_mode and not [m for m in player.guild.me.voice.channel.members if not m.bot]:
+                    try:
+                        player.auto_skip_track_task.cancel()
+                    except:
+                        pass
+                    player.auto_skip_track_task = b.loop.create_task(player.auto_skip_track())
+            except:
+                traceback.print_exc()
+
             await player.invoke_np(force=True)
             await asyncio.sleep(1.5)
 
