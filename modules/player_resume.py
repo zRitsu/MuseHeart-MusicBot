@@ -364,7 +364,7 @@ class PlayerSession(commands.Cog):
                         skin=data["skin"],
                         skin_static=data["skin_static"],
                         player_creator=creator,
-                        keep_connected=data["keep_connected"],
+                        keep_connected=data.get("keep_connected"),
                         autoplay=data.get("autoplay", False),
                         static=data['static'],
                         custom_skin_data=data.get("custom_skin_data", {}),
@@ -474,7 +474,10 @@ class PlayerSession(commands.Cog):
                 except:
                     pass
 
-                player.members_timeout_task = self.bot.loop.create_task(player.members_timeout(check=check))
+                if not check:
+                    await player.members_timeout(check=check, force=True)
+                else:
+                    player.members_timeout_task = self.bot.loop.create_task(player.members_timeout(check=check))
 
                 print(f"{self.bot.user} - Player Retomado: {guild.name} [{guild.id}]")
 

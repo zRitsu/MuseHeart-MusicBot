@@ -553,18 +553,21 @@ class LavalinkPlayer(wavelink.Player):
 
         if check:
 
-            if update_log:
-                self.set_command_log(emoji="🔋", text="O modo **economia de recursos** foi desativado.")
-                try:
-                    self.auto_skip_track_task.cancel()
-                except:
-                    pass
-                if self.current:
-                    await asyncio.sleep(1.5)
-                    await self.invoke_np(rpc_update=True)
-                else:
-                    await self.process_next()
-            await self.update_stage_topic()
+            try:
+                if update_log:
+                    self.set_command_log(emoji="🔋", text="O modo **[economia de recursos]** foi desativado.")
+                    try:
+                        self.auto_skip_track_task.cancel()
+                    except:
+                        pass
+                    if self.current:
+                        await asyncio.sleep(1.5)
+                        await self.invoke_np(rpc_update=True)
+                    else:
+                        await self.process_next()
+                await self.update_stage_topic()
+            except Exception:
+                traceback.print_exc()
             return
 
         if not force:
@@ -584,7 +587,7 @@ class LavalinkPlayer(wavelink.Player):
                 return
 
             self.auto_pause = True
-            self.set_command_log(text="O player está temporariamente no modo **economia de recursos** por falta de membros "
+            self.set_command_log(text="O player está temporariamente no modo **[economia de recursos]** por falta de membros "
                                       "no canal. Esse modo será desativado automaticamente quando um membro entrar "
                                       f"no canal <#{self.channel_id}>.", emoji="🔋")
             await self.invoke_np()
