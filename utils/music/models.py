@@ -1589,6 +1589,11 @@ class LavalinkPlayer(wavelink.Player):
 
             await asyncio.sleep((self.current.duration-self.position)/1000)
 
+            try:
+                await self.track_end()
+            except Exception:
+                traceback.print_exc()
+
             self.last_position = 0
 
             try:
