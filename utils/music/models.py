@@ -1869,6 +1869,9 @@ class LavalinkPlayer(wavelink.Player):
 
         if self.last_track:
 
+            if not self.last_track.is_stream and self.last_track.duration < 60000:
+                await asyncio.sleep(7)
+
             if self.loop == "current":
                 self.queue.appendleft(self.last_track)
             elif self.is_previows_music:
