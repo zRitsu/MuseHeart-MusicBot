@@ -1714,7 +1714,7 @@ class RPCCog(commands.Cog):
                         "[aqui](https://github.com/zRitsu/Discord-MusicBot-RPC/releases).\n\n"
                         "Extraia o musicbot_rpc.zip e na pasta abra o musicbot_rpc." \
                         "Adicione o link do websocket abaixo no app (aba: Socket Settings):** ```ansi\n" \
-                        f"[34;1m{(self.bot.config['RPC_PUBLIC_URL'] or self.bot.config['RPC_SERVER']).replace('$PORT', os.environ.get('PORT', '80'))}[0m```"
+                        f"{(self.bot.config['RPC_PUBLIC_URL'] or self.bot.config['RPC_SERVER']).replace('$PORT', os.environ.get('PORT', '80'))}```"
         )
 
         embed.set_footer(text="Nota: No momento funciona apenas no windows com discord desktop, não funciona no mobile "
