@@ -5620,13 +5620,13 @@ class Music(commands.Cog):
         if before.channel == after.channel:
             return
 
-        if member.bot and self.bot.user.id != member.id:
-            # ignorar outros bots
-            return
-
         try:
             player: LavalinkPlayer = self.bot.music.players[member.guild.id]
         except KeyError:
+            return
+
+        if member.bot and player.bot.user.id != member.id:
+            # ignorar outros bots
             return
 
         try:
@@ -5635,13 +5635,13 @@ class Music(commands.Cog):
         except AttributeError:
             pass
 
-        if member.id == self.bot.user.id and member.guild.voice_client and after.channel:
+        if member.id == player.bot.user.id and member.guild.voice_client and after.channel:
             # tempfix para channel do voice_client não ser setado ao mover bot do canal.
             player.guild.voice_client.channel = after.channel
             player.last_channel = after.channel
 
         try:
-            check = any(m for m in player.guild.me.voice.channel.members if not m.bot)
+            check = [m for m in player.guild.me.voice.channel.members if not m.bot]
         except:
             check = None
 
@@ -5650,7 +5650,7 @@ class Music(commands.Cog):
             try:
                 if isinstance(before.channel, disnake.StageChannel):
 
-                    if before.channel.instance and self.bot.user.id not in before.channel.voice_states:
+                    if before.channel.instance and player.bot.user.id not in before.channel.voice_states:
                         try:
                             await before.channel.instance.edit(topic="atualização automática desativada")
                         except:
@@ -5658,17 +5658,17 @@ class Music(commands.Cog):
                         player.stage_title_event = False
 
                 else:
-                    if isinstance(before.channel, disnake.VoiceChannel) and self.bot.user.id not in before.channel.voice_states:
+                    if isinstance(before.channel, disnake.VoiceChannel) and player.bot.user.id not in before.channel.voice_states:
                         player.stage_title_event = False
                         if player.last_stage_title:
-                            await update_vc_status(self.bot, before.channel, status=None)
+                            await update_vc_status(player.bot, before.channel, status=None)
 
                     if isinstance(after.channel, disnake.VoiceChannel) and before.channel and self.bot.user.id in before.channel.voice_states:
                         await player.update_stage_topic()
             except Exception:
                 traceback.print_exc()
 
-        player.members_timeout_task = self.bot.loop.create_task(player.members_timeout(check=check))
+        player.members_timeout_task = player.bot.loop.create_task(player.members_timeout(check=bool(check)))
 
         # rich presence stuff
 
