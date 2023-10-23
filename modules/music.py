@@ -4400,7 +4400,10 @@ class Music(commands.Cog):
 
                     global_data = await self.bot.get_global_data(interaction.author.id, db_name=DBModel.guilds)
 
-                    slashcmd = f"</play:" + str(self.bot.pool.controller_bot.get_global_command_named("play", cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+                    try:
+                        slashcmd = f"</play:" + str(self.bot.pool.controller_bot.get_global_command_named("play", cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+                    except AttributeError:
+                        slashcmd = "/play"
 
                     await interaction.edit_original_response(
                         embed=disnake.Embed(

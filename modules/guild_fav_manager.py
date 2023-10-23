@@ -485,7 +485,10 @@ class PinManager(commands.Cog):
 
         guild = bot.get_guild(inter.guild_id)
 
-        cmd = f"</play:" + str(self.bot.pool.controller_bot.get_global_command_named("play", cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+        try:
+            cmd = f"</play:" + str(self.bot.pool.controller_bot.get_global_command_named("play", cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+        except AttributeError:
+            cmd = "/play"
 
         await inter.edit_original_message(
             embed=disnake.Embed(
@@ -515,7 +518,10 @@ class PinManager(commands.Cog):
 
         guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
-        cmd = f"</{self.server_playlist.name}:" + str(self.bot.pool.controller_bot.get_global_command_named(self.server_playlist.name, cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+        try:
+            cmd = f"</{self.server_playlist.name}:" + str(self.bot.pool.controller_bot.get_global_command_named(self.server_playlist.name, cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+        except AttributeError:
+            cmd = "/play"
 
         if not guild_data["player_controller"]["fav_links"]:
             await inter.edit_original_message(content=f"**Não há músicas/playlists fixadas no servidor..\n"

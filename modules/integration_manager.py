@@ -490,8 +490,11 @@ class IntegrationManager(commands.Cog):
                     global_data = await self.bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
                     inter.global_guild_data = global_data
 
-                cmd = f"</play:" + str(self.bot.pool.controller_bot.get_global_command_named("play",
+                try:
+                    cmd = f"</play:" + str(self.bot.pool.controller_bot.get_global_command_named("play",
                                                                                              cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+                except AttributeError:
+                    cmd = "/play"
 
                 embed.add_field(name="**Como tocar a playlist de uma integração?**", inline=False,
                                 value=f"* Usando o comando {cmd} (no preenchimento automático da busca)\n"
@@ -589,7 +592,10 @@ class IntegrationManager(commands.Cog):
 
         await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
 
-        cmd = f"</play:" + str(self.bot.pool.controller_bot.get_global_command_named("play", cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+        try:
+            cmd = f"</play:" + str(self.bot.pool.controller_bot.get_global_command_named("play", cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+        except AttributeError:
+            cmd = "/play"
 
         await inter.edit_original_message(
             embed=disnake.Embed(
@@ -617,9 +623,12 @@ class IntegrationManager(commands.Cog):
             user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
             inter.global_user_data = user_data
 
-        cmd = f"</{self.integrations.name}:" + str(
-            self.bot.pool.controller_bot.get_global_command_named(self.integrations.name,
+        try:
+            cmd = f"</{self.integrations.name}:" + str(
+                self.bot.pool.controller_bot.get_global_command_named(self.integrations.name,
                                                                   cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+        except AttributeError:
+            cmd = "/play"
 
         if not user_data["integration_links"]:
             await inter.edit_original_message(f"**Você não possui integrações adicionadas...\n"
