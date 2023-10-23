@@ -475,49 +475,49 @@ class Misc(commands.Cog):
                 public_bot_count += 1
 
         embed.description += "### Estatíticas (bot atual):\n" \
-                            f"> **Servidores:** `{len(bot.guilds)}`\n" \
-                            f"> **Usuários:** `{user_count:,}`\n"
+                            f"> 🏙️ **⠂Servidores:** `{len(bot.guilds)}`\n" \
+                            f"> 👥 **⠂Usuários:** `{user_count:,}`\n"
 
         if bot_count:
-            embed.description += f"> **Bots:** `{bot_count:,}`\n"
+            embed.description += f"> 🤖 **⠂Bots:** `{bot_count:,}`\n"
 
         if len(bot.pool.bots) > 1:
 
             embed.description += "### Estatísticas totais em todos os bots:\n"
 
             if public_bot_count:
-                embed.description += f"> **Bot(s) adicionais público(s):** `{public_bot_count:,}`\n"
+                embed.description += f"> 🤖 **⠂Bot(s) adicionais público(s):** `{public_bot_count:,}`\n"
 
             if private_bot_count:
-                embed.description += f"> **Bot(s) adicionais privado(s):** `{private_bot_count:,}`\n"
+                embed.description += f"> 🤖 **⠂Bot(s) adicionais privado(s):** `{private_bot_count:,}`\n"
 
-            embed.description += f"> **Servidores:** `{guilds_size}`\n"
+            embed.description += f"> 🏙️ **⠂Servidores:** `{guilds_size}`\n"
 
             if users_amount := len(users):
-                embed.description += f"> **Usuários:** `{users_amount:,}`\n"
+                embed.description += f"> 👥 **⠂Usuários:** `{users_amount:,}`\n"
 
             if bots_amount := len(bots):
-                embed.description += f"> **Bots:** `{bots_amount:,}`\n"
+                embed.description += f"> 🤖 **⠂Bots:** `{bots_amount:,}`\n"
 
         embed.description += "### Outras informações:\n"
 
         if active_players_other_bots:
-            embed.description += f"> **Players ativos:** `{active_players_other_bots:,}`\n"
+            embed.description += f"> ▶️ **⠂Players ativos:** `{active_players_other_bots:,}`\n"
 
         if paused_players_other_bots:
-            embed.description += f"> **Players em pausa:** `{paused_players_other_bots:,}`\n"
+            embed.description += f"> ⏸️ **⠂Players em pausa:** `{paused_players_other_bots:,}`\n"
 
         if inactive_players_other_bots:
-            embed.description += f"> **Players inativos:** `{inactive_players_other_bots:,}`\n"
+            embed.description += f"> 🪫 **⠂Players inativos:** `{inactive_players_other_bots:,}`\n"
 
         if bot.pool.commit:
-            embed.description += f"> **Commit atual:** [`{bot.pool.commit[:7]}`]({bot.pool.remote_git_url}/commit/{bot.pool.commit})\n"
+            embed.description += f"> 📥 **⠂Commit atual:** [`{bot.pool.commit[:7]}`]({bot.pool.remote_git_url}/commit/{bot.pool.commit})\n"
 
-        embed.description += f"> **Versão do Python:** `{platform.python_version()}`\n" \
-                             f"> **Versão do Disnake:** `{disnake.__version__}`\n" \
-                             f"> **Latencia:** `{round(bot.latency * 1000)}ms`\n" \
-                             f"> **Uso de RAM:** `{ram_usage}`\n" \
-                             f"> **Uptime:** <t:{int(bot.uptime.timestamp())}:R>\n"
+        embed.description += f"> 🐍 **⠂Versão do Python:** `{platform.python_version()}`\n" \
+                             f"> 📦 **⠂Versão do Disnake:** `{disnake.__version__}`\n" \
+                             f"> 📶 **⠂Latencia:** `{round(bot.latency * 1000)}ms`\n" \
+                             f"> 🖥️ **⠂Uso de RAM:** `{ram_usage}`\n" \
+                             f"> ⏰ **⠂Uptime:** <t:{int(bot.uptime.timestamp())}:R>\n"
 
         if not bot.config["INTERACTION_COMMAND_ONLY"]:
 
@@ -528,9 +528,9 @@ class Misc(commands.Cog):
                 inter.global_guild_data = guild_data
 
             if guild_data["prefix"]:
-                embed.description += f"> **Prefixo do servidor:** `{disnake.utils.escape_markdown(guild_data['prefix'], as_needed=True)}`\n"
+                embed.description += f"> ⌨️ **⠂Prefixo do servidor:** `{disnake.utils.escape_markdown(guild_data['prefix'], as_needed=True)}`\n"
             else:
-                embed.description += f"> **Prefixo padrão:** `{disnake.utils.escape_markdown(bot.default_prefix, as_needed=True)}`\n"
+                embed.description += f"> ⌨️ **⠂Prefixo padrão:** `{disnake.utils.escape_markdown(bot.default_prefix, as_needed=True)}`\n"
 
             try:
                 user_data = inter.global_user_data
@@ -539,14 +539,14 @@ class Misc(commands.Cog):
                 inter.global_user_data = user_data
 
             if user_data["custom_prefix"]:
-                embed.description += f"> **Seu prefixo de usuário:** `{disnake.utils.escape_markdown(user_data['custom_prefix'], as_needed=True)}`\n"
+                embed.description += f"> ⌨️ **⠂Seu prefixo de usuário:** `{disnake.utils.escape_markdown(user_data['custom_prefix'], as_needed=True)}`\n"
 
         links = "[`[Source]`](https://github.com/zRitsu/MuseHeart-MusicBot)"
 
         if bot.config["SUPPORT_SERVER"]:
             links += f" **|** [`[Suporte]`]({bot.config['SUPPORT_SERVER']})"
 
-        embed.description += f">  {links}\n"
+        embed.description += f"> 🌐 **⠂**{links}\n"
 
         try:
             owner = bot.appinfo.team.owner
