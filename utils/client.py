@@ -27,7 +27,7 @@ from utils.music.errors import GenericError
 from utils.music.local_lavalink import run_lavalink
 from utils.music.models import music_mode, LavalinkPlayer
 from utils.music.spotify import spotify_client
-from utils.others import CustomContext, token_regex
+from utils.others import CustomContext, token_regex, sort_dict_recursively
 from utils.owner_panel import PanelView
 from web_app import WSClient, start
 
@@ -710,9 +710,31 @@ class BotCore(commands.Bot):
         if not self.command_sync_flags.sync_commands and not force:
             return
 
+        current_cmds = sorted([sort_dict_recursively(cmd.body.to_dict()) for cmd in self.application_commands], key=lambda k: k["name"])
+
+        try:
+            with open(f"./local_database/{self.user.id}_app_cmds.json") as f:
+                synced_cmds = json.load(f)
+        except FileNotFoundError:
+            synced_cmds = None
+
+        if current_cmds == synced_cmds:
+            if current_cmds:
+                print(f"{self.user} - Os comandos já estão sincronizados.")
+            return
+
         self._command_sync_flags = commands.CommandSyncFlags.all()
         await self._sync_application_commands()
         self._command_sync_flags = commands.CommandSyncFlags.none()
+
+        try:
+            if not os.path.isdir("./local_database"):
+                os.makedirs("./local_database")
+
+            with open(f"./local_database/{self.user.id}_app_cmds.json", "w") as f:
+                json.dump(current_cmds, f, indent=4)
+        except:
+            traceback.print_exc()
 
     def sync_command_cooldowns(self):
 

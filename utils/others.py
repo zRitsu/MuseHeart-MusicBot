@@ -750,3 +750,26 @@ def update_inter(old: Union[disnake.Interaction, CustomContext], new: disnake.In
             old.self_mod = True
         except AttributeError:
             pass
+
+
+def custom_sort_key(e):
+    if isinstance(e, dict):
+        return sorted(e.items())
+    return e
+
+
+def sort_dict_recursively(d):
+    if isinstance(d, dict):
+        new_dict = {}
+        for key, value in d.items():
+            new_dict[key] = sort_dict_recursively(value)
+        return new_dict
+    elif isinstance(d, list):
+        for i, e in enumerate(d):
+            d[i] = sort_dict_recursively(e)
+        try:
+            return sorted(d, key=custom_sort_key)
+        except TypeError:
+            return d
+    else:
+        return d
