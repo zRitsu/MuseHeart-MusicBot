@@ -61,7 +61,7 @@ class EmbedLinkStaticSkin:
                 pass
 
         if player.current.playlist_name:
-            txt += f"> 📑 **⠂Playlist:** [{replace_emoji(fix_characters(player.current.playlist_name)) or 'Visualizar'}](<{player.current.playlist_url}>)\n"
+            txt += f"> 📑 **⠂Playlist:** [`{replace_emoji(fix_characters(player.current.playlist_name)) or 'Visualizar'}`](<{player.current.playlist_url}>)\n"
 
         if player.current.track_loops:
             txt += f"> 🔂 **⠂Repetições restantes:** `{player.current.track_loops}`\n"
