@@ -589,7 +589,7 @@ class LavalinkPlayer(wavelink.Player):
             self.auto_pause = True
             self.set_command_log(text="O player está temporariamente no modo **[economia de recursos]** por falta de membros "
                                       "no canal. Esse modo será desativado automaticamente quando um membro entrar "
-                                      f"no canal <#{self.channel_id}>.", emoji="🔋")
+                                      f"no canal <#{self.channel_id}>.", emoji="🪫")
             await self.invoke_np()
             track = self.current
             await self.stop()
