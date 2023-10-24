@@ -5445,22 +5445,26 @@ class Music(commands.Cog):
 
             backoff = 9
             retries = 1
+            exception = None
 
             print(f"{self.bot.user} - Iniciando servidor de música: {data['identifier']}")
 
             while not self.bot.is_closed():
                 if retries >= max_retries:
                     print(
-                        f"{self.bot.user} - Todas as tentativas de conectar ao servidor [{data['identifier']}] falharam.")
+                        f"{self.bot.user} - Todas as tentativas de conectar ao servidor [{data['identifier']}] falharam.\n"
+                        f"Causa: {repr(exception)}")
                     return
                 else:
                     await asyncio.sleep(backoff)
                     try:
                         async with self.bot.session.get(data['rest_uri'], timeout=10) as r:
                             break
-                    except Exception:
-                        print(f'{self.bot.user} - Falha ao conectar no servidor [{data["identifier"]}], '
-                              f'nova tentativa [{retries}/{max_retries}] em {backoff} segundos.')
+                    except Exception as e:
+                        exception = e
+                        if data["identifier"] != "LOCAL":
+                            print(f'{self.bot.user} - Falha ao conectar no servidor [{data["identifier"]}], '
+                                  f'nova tentativa [{retries}/{max_retries}] em {backoff} segundos.')
                         backoff += 2
                         retries += 1
                         continue
