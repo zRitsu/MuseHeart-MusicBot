@@ -95,11 +95,16 @@ async def get_prefix(bot: BotCore, message: disnake.Message):
     if not message.guild:
         return commands.when_mentioned_or(bot.default_prefix)
 
-    data = await bot.get_global_data(message.guild.id, db_name=DBModel.guilds)
+    try:
+        guild_prefix = bot.pool.guild_prefix_cache[message.guild.id]
+    except KeyError:
+        data = await bot.get_global_data(message.guild.id, db_name=DBModel.guilds)
+        guild_prefix = data.get("prefix")
 
-    prefix = data.get("prefix") or bot.config.get("DEFAULT_PREFIX") or "!!"
+    if not guild_prefix:
+        guild_prefix = bot.config.get("DEFAULT_PREFIX") or "!!"
 
-    return prefix
+    return guild_prefix
 
 
 class BaseDB:

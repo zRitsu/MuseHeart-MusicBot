@@ -40,6 +40,7 @@ class BotPool:
     def __init__(self):
         self.playlist_cache = {}
         self.user_prefix_cache = {}
+        self.guild_prefix_cache = {}
         self.mongo_database: Optional[MongoDatabase] = None
         self.local_database: Optional[LocalDatabase] = None
         self.ws_client: Optional[WSClient] = None

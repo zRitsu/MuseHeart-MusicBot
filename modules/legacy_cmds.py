@@ -575,7 +575,9 @@ class Owner(commands.Cog):
     )
     async def setprefix(self, ctx: CustomContext, prefix: str):
 
-        if " " in prefix or len(prefix) > 5:
+        prefix = prefix.strip()
+
+        if not prefix or len(prefix) > 5:
             raise GenericError("**O prefixo não pode conter espaços ou ter acima de 5 caracteres.**")
 
         try:
@@ -584,6 +586,7 @@ class Owner(commands.Cog):
             guild_data = await self.bot.get_global_data(ctx.guild.id, db_name=DBModel.guilds)
             ctx.global_guild_data = guild_data
 
+        self.bot.pool.guild_prefix_cache[ctx.guild.id] = prefix
         guild_data["prefix"] = prefix
         await self.bot.update_global_data(ctx.guild.id, guild_data, db_name=DBModel.guilds)
 
@@ -614,6 +617,7 @@ class Owner(commands.Cog):
             raise GenericError("**Nao há prefixo configurado no servidor.**")
 
         guild_data["prefix"] = ""
+        self.bot.pool.guild_prefix_cache[ctx.guild.id] = ""
 
         await self.bot.update_global_data(ctx.guild.id, guild_data, db_name=DBModel.guilds)
 
@@ -634,7 +638,9 @@ class Owner(commands.Cog):
     )
     async def setuserprefix(self, ctx: CustomContext, prefix: str):
 
-        if " " in prefix or len(prefix) > 5:
+        prefix = prefix.strip()
+
+        if not prefix or len(prefix) > 5:
             raise GenericError("**O prefixo não pode conter espaços ou ter acima de 5 caracteres.**")
 
         try:
@@ -696,6 +702,8 @@ class Owner(commands.Cog):
 
         embed = disnake.Embed(color=self.bot.get_color(ctx.guild.me))
 
+        prefix = prefix.strip()
+
         if not prefix:
             guild_data["prefix"] = ""
             await ctx.bot.update_global_data(server_id, guild_data, db_name=DBModel.guilds)
@@ -705,6 +713,8 @@ class Owner(commands.Cog):
             guild_data["prefix"] = prefix
             await self.bot.update_global_data(server_id, guild_data, db_name=DBModel.guilds)
             embed.description = f"**O prefixo para o servidor com o id informado agora é:** {disnake.utils.escape_markdown(prefix)}"
+
+        self.bot.pool.guild_prefix_cache[ctx.guild.id] = prefix
 
         await ctx.send(embed=embed)
 
