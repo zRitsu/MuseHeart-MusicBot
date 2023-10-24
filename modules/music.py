@@ -4300,6 +4300,10 @@ class Music(commands.Cog):
 
                 if control == PlayerControls.add_favorite:
 
+                    if not player.current:
+                        await interaction.send("**Não há música tocando atualmente...**", ephemeral=True)
+                        return
+
                     choices = {}
                     msg = ""
 
