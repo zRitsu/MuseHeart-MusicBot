@@ -392,26 +392,16 @@ class Misc(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        lavalink_ram = 0
-
-        for b in self.bot.pool.bots:
-            try:
-                lavalink_ram = b.music.nodes["LOCAL"].stats.memory_allocated
-                break
-            except KeyError:
-                continue
+        try:
+            lavalink_ram = psutil.Process(self.bot.pool.lavalink_instance.pid).memory_info().rss
+        except:
+            lavalink_ram = 0
 
         python_ram = psutil.Process(getpid()).memory_info().rss
 
         ram_msg = f"> 🖥️ **⠂Uso de RAM (Python):** `{humanize.naturalsize(python_ram)}`\n"
 
         if lavalink_ram:
-
-            try:
-                lavalink_ram += psutil.Process(self.bot.pool.lavalink_instance.pid).memory_info().rss
-            except:
-                pass
-
             ram_msg += f"> 🌋 **⠂Uso de RAM (Lavalink):** `{humanize.naturalsize(lavalink_ram)}`\n" \
                         f"> 🖥️ **⠂Uso de RAM (Total):** `{humanize.naturalsize(python_ram + lavalink_ram)}`\n"
 
