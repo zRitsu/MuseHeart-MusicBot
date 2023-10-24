@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from utils.client import BotCore
 
 spotify_regex = re.compile("https://open.spotify.com?.+(album|playlist|artist|track)/([a-zA-Z0-9]+)")
+spotify_link_regex = re.compile(r"(?i)https?:\/\/spotify\.link\/?(?P<id>[a-zA-Z0-9]+)")
 spotify_regex_w_user = re.compile("https://open.spotify.com?.+(album|playlist|artist|track|user)/([a-zA-Z0-9]+)")
 
 
@@ -23,6 +24,10 @@ def query_spotify_track(func, url_id: str):
 
 
 async def process_spotify(bot: BotCore, requester: int, query: str):
+
+    if spotify_link_regex.match(query):
+        async with bot.session.get(query, allow_redirects=False) as r:
+            query = str(r).split("Location': \'")[1].split("\'")[0]
 
     if not (matches := spotify_regex.match(query)):
         return
