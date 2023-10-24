@@ -406,7 +406,13 @@ class Misc(commands.Cog):
         ram_msg = f"> 🖥️ **⠂Uso de RAM (Python):** `{humanize.naturalsize(python_ram)}`\n"
 
         if lavalink_ram:
-            ram_msg += f"> 🌋 **⠂RAM alocada do Lavalink:** `{humanize.naturalsize(lavalink_ram)}`\n" \
+
+            try:
+                lavalink_ram += psutil.Process(self.bot.pool.lavalink_instance.pid).memory_info().rss
+            except:
+                pass
+
+            ram_msg += f"> 🌋 **⠂Uso de RAM (Lavalink):** `{humanize.naturalsize(lavalink_ram)}`\n" \
                         f"> 🖥️ **⠂Uso de RAM (Total):** `{humanize.naturalsize(python_ram + lavalink_ram)}`\n"
 
         guild = bot.get_guild(inter.guild_id) or inter.guild
