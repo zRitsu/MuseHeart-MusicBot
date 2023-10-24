@@ -392,7 +392,22 @@ class Misc(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        ram_usage = humanize.naturalsize(psutil.Process(getpid()).memory_info().rss)
+        lavalink_ram = 0
+
+        for b in self.bot.pool.bots:
+            try:
+                lavalink_ram = b.music.nodes["LOCAL"].stats.memory_allocated
+                break
+            except KeyError:
+                continue
+
+        python_ram = psutil.Process(getpid()).memory_info().rss
+
+        ram_msg = f"> 🖥️ **⠂Uso de RAM (Python):** `{humanize.naturalsize(python_ram)}`\n"
+
+        if lavalink_ram:
+            ram_msg += f"> 🌋 **⠂Uso de RAM (Lavalink):** `{humanize.naturalsize(lavalink_ram)}`\n" \
+                        f"> 🖥️ **⠂Uso de RAM (Total):** `{humanize.naturalsize(python_ram + lavalink_ram)}`\n"
 
         guild = bot.get_guild(inter.guild_id) or inter.guild
 
@@ -516,7 +531,7 @@ class Misc(commands.Cog):
         embed.description += f"> 🐍 **⠂Versão do Python:** `{platform.python_version()}`\n" \
                              f"> 📦 **⠂Versão do Disnake:** `{disnake.__version__}`\n" \
                              f"> 📶 **⠂Latencia:** `{round(bot.latency * 1000)}ms`\n" \
-                             f"> 🖥️ **⠂Uso de RAM:** `{ram_usage}`\n" \
+                             f"{ram_msg}" \
                              f"> ⏰ **⠂Uptime:** <t:{int(bot.uptime.timestamp())}:R>\n"
 
         if not bot.config["INTERACTION_COMMAND_ONLY"]:
