@@ -18,6 +18,7 @@ import disnake
 import requests
 from asyncspotify import Client as SpotifyClient
 from disnake.ext import commands
+from dotenv import dotenv_values
 from user_agent import generate_user_agent
 
 from config_loader import load_config
@@ -237,10 +238,27 @@ class BotPool:
                 value["search"] = value.get("search") != "false"
                 LAVALINK_SERVERS[key] = value
 
-        if start_local := (self.config['RUN_LOCAL_LAVALINK'] is True or not LAVALINK_SERVERS):
-            pass
-        else:
-            start_local = False
+        start_local = None
+
+        if os.environ.get("SQUARECLOUD_LAVALINK_AUTO_CONFIG", "").lower() == "true":
+            for f in ("squarecloud.config", "squarecloud.app"):
+                try:
+                    square_cfg = dotenv_values(f"./{f}")
+                except:
+                    continue
+                else:
+                    try:
+                        start_local = int(square_cfg["MEMORY"]) >= 490
+                    except KeyError:
+                        pass
+                    break
+
+        if start_local is None:
+
+            if start_local := (self.config['RUN_LOCAL_LAVALINK'] is True or not LAVALINK_SERVERS):
+                pass
+            else:
+                start_local = False
 
         intents = disnake.Intents(**{i[:-7].lower(): v for i, v in self.config.items() if i.lower().endswith("_intent")})
         intents.members = True

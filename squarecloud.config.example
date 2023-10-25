@@ -16,3 +16,4 @@ MAIN=main.py
 MEMORY=128
 VERSION=recommended
 AVATAR=https://i.ibb.co/6J59k3c/image.png
+ENVIRONMENT=SQUARECLOUD_LAVALINK_AUTO_CONFIG:true
