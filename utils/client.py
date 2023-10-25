@@ -567,7 +567,7 @@ class BotPool:
                 return
 
 
-class BotCore(commands.Bot):
+class BotCore(commands.AutoShardedBot):
 
     def __init__(self, *args, **kwargs):
         self.session: Optional[aiohttp.ClientError] = None
