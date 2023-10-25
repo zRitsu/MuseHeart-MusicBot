@@ -250,6 +250,7 @@ class BotPool:
                     try:
                         start_local = int(square_cfg["MEMORY"]) >= 490
                         self.config["AUTO_DOWNLOAD_LAVALINK_SERVERLIST"] = not start_local
+                        self.config['USE_YTDL'] = int(square_cfg["MEMORY"]) >= 512
                     except KeyError:
                         pass
                     break
