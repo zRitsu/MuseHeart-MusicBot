@@ -240,7 +240,8 @@ class BotPool:
 
         start_local = None
 
-        if os.environ.get("SQUARECLOUD_LAVALINK_AUTO_CONFIG", "").lower() == "true":
+        if os.environ.get("HOSTNAME", "").lower() == "squarecloud.app" and self.config.get("SQUARECLOUD_LAVALINK_AUTO_CONFIG", "").lower() != "false":
+            print("Usando a configuração automática do lavalink na squarecloud")
             for f in ("squarecloud.config", "squarecloud.app"):
                 try:
                     square_cfg = dotenv_values(f"./{f}")
