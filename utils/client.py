@@ -241,7 +241,6 @@ class BotPool:
         start_local = None
 
         if os.environ.get("HOSTNAME", "").lower() == "squarecloud.app" and self.config.get("SQUARECLOUD_LAVALINK_AUTO_CONFIG", "").lower() != "false":
-            print("Usando a configuração automática do lavalink na squarecloud")
             for f in ("squarecloud.config", "squarecloud.app"):
                 try:
                     square_cfg = dotenv_values(f"./{f}")
@@ -250,10 +249,13 @@ class BotPool:
                 else:
                     try:
                         start_local = int(square_cfg["MEMORY"]) >= 490
-                        self.config["AUTO_DOWNLOAD_LAVALINK_SERVERLIST"] = not start_local
-                        self.config['USE_YTDL'] = int(square_cfg["MEMORY"]) >= 512
                     except KeyError:
                         pass
+                    else:
+                        self.config["AUTO_DOWNLOAD_LAVALINK_SERVERLIST"] = not start_local
+                        self.config['USE_YTDL'] = int(square_cfg["MEMORY"]) >= 512
+                        print("Usando a configuração automática do lavalink na squarecloud\n"
+                              f"Lavalink local: {start_local} | YTDL: {self.config['USE_YTDL']} | Memória: {square_cfg['MEMORY']}")
                     break
 
         if start_local is None:
