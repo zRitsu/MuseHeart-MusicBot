@@ -594,9 +594,11 @@ class Misc(commands.Cog):
         bots_invites = []
         bots_in_guild = []
 
-        guild = inter.guild
+        guild = None
 
-        if not guild or not isinstance(guild, disnake.Guild):
+        if inter.guild_id:
+            guild = inter.guild
+        else:
             for bot in self.bot.pool.bots:
                 if (guild:=bot.get_guild(inter.guild_id)):
                     break
