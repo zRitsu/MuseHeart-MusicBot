@@ -5277,6 +5277,9 @@ class Music(commands.Cog):
                 player._new_node_task.cancel()
             except:
                 pass
+
+            player.current = player.last_track
+
             player._new_node_task = player.bot.loop.create_task(player._wait_for_new_node(f"O servidor **{node.identifier}** tomou ratelimit do youtube está indisponível no momento (aguardando um novo servidor ficar disponível)."))
             return
 
