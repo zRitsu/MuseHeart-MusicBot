@@ -74,10 +74,15 @@ class BotPool:
             except asyncio.TimeoutError:
                 return
 
+            if bot.appinfo:
+                return
+
             try:
                 await bot.update_appinfo()
             except:
                 print(f"{bot.user} -  Falha ao obter dados de owners via api do discord:\n{traceback.format_exc()}")
+
+            await asyncio.sleep(2)
 
 
     @property
