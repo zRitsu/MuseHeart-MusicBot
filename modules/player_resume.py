@@ -225,21 +225,26 @@ class PlayerSession(commands.Cog):
 
     async def resume_players(self):
 
-        if self.bot.player_resuming:
+        try:
+            if self.bot.player_resuming:
+                return
+
+            self.bot.player_resuming = True
+
+            await self.bot.wait_until_ready()
+
+            while True:
+                node = self.bot.music.get_best_node()
+                if not node or not self.bot.bot_ready:
+                    await asyncio.sleep(5)
+                    continue
+                break
+
+            hints = self.bot.config["EXTRA_HINTS"].split("||")
+        except Exception:
+            traceback.print_exc()
+            self.bot.player_resuming = False
             return
-
-        self.bot.player_resuming = True
-
-        await self.bot.wait_until_ready()
-
-        await asyncio.sleep(5)
-
-        node = self.bot.music.get_best_node() or await self.bot.wait_for("wavelink_node_ready")
-
-        while not self.bot.bot_ready:
-            await asyncio.sleep(2)
-
-        hints = self.bot.config["EXTRA_HINTS"].split("||")
 
         try:
 
