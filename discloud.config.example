@@ -12,7 +12,7 @@
 
 ID=1234567890
 NAME=Muse Heart Music Source
-AVATAR=https://i.ibb.co/8N3Jjvw/result.jpg
+AVATAR=https://cdn.discordapp.com/avatars/784891594306093101/0c48b24db5f6d01d0cf5242ef9badd97.png
 TYPE=bot
 MAIN=main.py
 RAM=100
