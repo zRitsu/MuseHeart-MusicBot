@@ -818,7 +818,7 @@ class BotCore(commands.AutoShardedBot):
 
     async def on_message(self, message: disnake.Message):
 
-        if not self.bot_ready:
+        if not self.bot_ready or not self.appinfo:
             return
 
         if not message.guild:

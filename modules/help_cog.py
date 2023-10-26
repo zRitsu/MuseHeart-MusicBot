@@ -221,11 +221,7 @@ class HelpCog(commands.Cog, name="Ajuda"):
 
         embed.description = txt
 
-        try:
-            appinfo = ctx.bot.appinfo
-        except AttributeError:
-            appinfo = (await ctx.bot.application_info())
-            ctx.bot.appinfo = appinfo
+        appinfo = ctx.bot.appinfo
         try:
             owner = appinfo.team.owner
         except AttributeError:
