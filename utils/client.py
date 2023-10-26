@@ -16,6 +16,7 @@ from typing import Optional, Union, List
 import aiohttp
 import disnake
 import requests
+from async_timeout import timeout
 from asyncspotify import Client as SpotifyClient
 from disnake.ext import commands
 from dotenv import dotenv_values
@@ -58,9 +59,26 @@ class BotPool:
         self.failed_bots: dict = {}
         self.controller_bot: Optional[BotCore] = None
         self.current_useragent = self.reset_useragent()
+        self.fill_owner_queue = asyncio.Queue()
 
     def reset_useragent(self):
         self.current_useragent = generate_user_agent()
+
+    async def fill_owner_task(self):
+
+        while True:
+
+            try:
+                async with timeout(900):
+                    bot: BotCore = await self.fill_owner_queue.get()
+            except asyncio.TimeoutError:
+                return
+
+            try:
+                await bot.update_appinfo()
+            except:
+                print(f"{bot.user} -  Falha ao obter dados de owners via api do discord:\n{traceback.format_exc()}")
+
 
     @property
     def database(self) -> Union[LocalDatabase, MongoDatabase]:
@@ -502,29 +520,11 @@ class BotPool:
                     except Exception:
                         traceback.print_exc()
 
-                    retries = 3
-
-                    while retries:
-                        try:
-                            await bot.update_appinfo()
-                            break
-                        except:
-                            print(f"{bot.user} - Falha ao obter appinfo {retries}/3: {repr(e)}")
-                            retries -= 1
-                            await asyncio.sleep(5)
+                    await self.fill_owner_queue.put(bot)
 
                     bot.bot_ready = True
 
                 print(f'{bot.user} - [{bot.user.id}] Online.')
-
-                if bot.appinfo.bot_public and not self.config.get("SILENT_PUBLICBOT_WARNING"):
-                    print(f"\nAtenção: O bot [{bot.user}] (ID: {bot.user.id}) foi configurado no portal do desenvolvedor "
-                          "como bot público\n"
-                          "lembrando que se caso o bot seja divulgado pra ser adicionado publicamente o mesmo terá que "
-                          "estar sob as condições da licença GPL-2: "
-                          "https://github.com/zRitsu/MuseHeart-MusicBot/blob/main/LICENSE\n"
-                          "Caso não queira seguir as condições da licença no seu bot, você pode deixar o bot privado desmarcando a "
-                          f"opção public bot acessando o link: https://discord.com/developers/applications/{bot.user.id}/bot\n")
 
             self.bots.append(bot)
 
@@ -560,6 +560,8 @@ class BotPool:
         loop = asyncio.get_event_loop()
 
         self.database.start_task(loop)
+
+        loop.create_task(self.fill_owner_task())
 
         if self.config["RUN_RPC_SERVER"]:
 
@@ -983,6 +985,15 @@ class BotCore(commands.AutoShardedBot):
             self.owner = self.appinfo.team.members[0]
         except AttributeError:
             self.owner = self.appinfo.owner
+
+        if self.appinfo.bot_public and not self.config.get("SILENT_PUBLICBOT_WARNING"):
+            print(f"\nAtenção: O bot [{self.user}] (ID: {self.user.id}) foi configurado no portal do desenvolvedor "
+                  "como bot público\n"
+                  "lembrando que se caso o bot seja divulgado pra ser adicionado publicamente o mesmo terá que "
+                  "estar sob as condições da licença GPL-2: "
+                  "https://github.com/zRitsu/MuseHeart-MusicBot/blob/main/LICENSE\n"
+                  "Caso não queira seguir as condições da licença no seu bot, você pode deixar o bot privado desmarcando a "
+                  f"opção public bot acessando o link: https://discord.com/developers/applications/{self.user.id}/bot\n")
 
     async def on_application_command_autocomplete(self, inter: disnake.ApplicationCommandInteraction):
 
