@@ -518,12 +518,13 @@ class BotPool:
                 print(f'{bot.user} - [{bot.user.id}] Online.')
 
                 if bot.appinfo.bot_public and not self.config.get("SILENT_PUBLICBOT_WARNING"):
-                    print(f"\nAtenção: O bot {bot.user} (ID: {bot.user.id}) foi configurado no portal do desenvolvedor "
-                          f"como bot público, lembrando que se caso o bot seja divulgado pra ser adicionado publicamente "
-                          f"o mesmo terá que estar sob as condições da licença GPL-2: "
-                          f"https://github.com/zRitsu/MuseHeart-MusicBot/blob/main/LICENSE\n"
-                          f"Caso não queira seguir as condições da licença no seu bot, você pode deixar o bot privado desmarcando a "
-                          f"opção public bot entrando no link: https://discord.com/developers/applications/{bot.user.id}/bot\n")
+                    print(f"\nAtenção: O bot [{bot.user}] (ID: {bot.user.id}) foi configurado no portal do desenvolvedor "
+                          "como bot público\n"
+                          "lembrando que se caso o bot seja divulgado pra ser adicionado publicamente o mesmo terá que "
+                          "estar sob as condições da licença GPL-2: "
+                          "https://github.com/zRitsu/MuseHeart-MusicBot/blob/main/LICENSE\n"
+                          "Caso não queira seguir as condições da licença no seu bot, você pode deixar o bot privado desmarcando a "
+                          f"opção public bot acessando o link: https://discord.com/developers/applications/{bot.user.id}/bot\n")
 
             self.bots.append(bot)
 

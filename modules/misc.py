@@ -684,7 +684,7 @@ class Misc(commands.Cog):
 
         await self.invite_button(inter, is_command=True)
 
-    @commands.user_command(name="avatar")
+    @commands.user_command(name="Avatar")
     async def avatar(self, inter: disnake.UserCommandInteraction):
 
         embeds = []
