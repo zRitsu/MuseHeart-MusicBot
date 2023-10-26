@@ -75,7 +75,7 @@ class BotPool:
                 return
 
             if bot.appinfo:
-                return
+                continue
 
             try:
                 await bot.update_appinfo()
