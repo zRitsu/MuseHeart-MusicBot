@@ -1028,21 +1028,28 @@ class BotCore(commands.AutoShardedBot):
                 module_filename = os.path.join(modules_dir, filename).replace('\\', '.').replace('/', '.')
                 try:
                     self.reload_extension(module_filename)
-                    print(f"{'=' * 48}\n[OK] {bot_name} - {filename}.py Recarregado.")
+                    if self.pool.controller_bot == self and not self.bot_ready:
+                        print(f"{'=' * 48}\n[OK] {bot_name} - {filename}.py Recarregado.")
                     load_status["reloaded"].append(f"{filename}.py")
                 except (commands.ExtensionAlreadyLoaded, commands.ExtensionNotLoaded):
                     try:
                         self.load_extension(module_filename)
-                        print(f"{'=' * 48}\n[OK] {bot_name} - {filename}.py Carregado.")
+                        if self.pool.controller_bot == self and not self.bot_ready:
+                            print(f"{'=' * 48}\n[OK] {bot_name} - {filename}.py Carregado.")
                         load_status["loaded"].append(f"{filename}.py")
                     except Exception as e:
+                        if self.pool.controller_bot == self and not self.bot_ready:
+                            print(f"{'=' * 48}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename}")
+                            raise e
+                        return
+                except Exception as e:
+                    if self.pool.controller_bot == self and not self.bot_ready:
                         print(f"{'=' * 48}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename}")
                         raise e
-                except Exception as e:
-                    print(f"{'=' * 48}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename}")
-                    raise e
+                    return
 
-        print(f"{'=' * 48}")
+        if self.pool.controller_bot == self and not self.bot_ready:
+            print(f"{'=' * 48}")
 
         if not self.config["ENABLE_DISCORD_URLS_PLAYBACK"]:
             self.remove_slash_command("play_music_file")
