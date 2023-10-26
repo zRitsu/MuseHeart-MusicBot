@@ -233,11 +233,19 @@ class PlayerSession(commands.Cog):
 
             await self.bot.wait_until_ready()
 
+            while not self.bot.bot_ready:
+                await asyncio.sleep(3)
+
             while True:
+
                 node = self.bot.music.get_best_node()
-                if not node or not self.bot.bot_ready:
-                    await asyncio.sleep(5)
-                    continue
+
+                if not node:
+                    try:
+                        node = await self.bot.wait_for("wavelink_node_ready", timeout=5)
+                    except asyncio.TimeoutError:
+                        continue
+
                 break
 
             hints = self.bot.config["EXTRA_HINTS"].split("||")
