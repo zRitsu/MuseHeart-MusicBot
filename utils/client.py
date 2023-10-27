@@ -987,18 +987,40 @@ class BotCore(commands.AutoShardedBot):
         self.appinfo = await self.application_info()
 
         try:
-            self.owner = self.appinfo.team.members[0]
+            self.owner = self.appinfo.team.owner
+            owners =self.appinfo.team.members
         except AttributeError:
             self.owner = self.appinfo.owner
+            owners = [self.appinfo.owner]
 
-        if self.appinfo.bot_public and not self.config.get("SILENT_PUBLICBOT_WARNING"):
-            print(f"\nAtenção: O bot [{self.user}] (ID: {self.user.id}) foi configurado no portal do desenvolvedor "
-                  "como bot público\n"
-                  "lembrando que se caso o bot seja divulgado pra ser adicionado publicamente o mesmo terá que "
-                  "estar sob as condições da licença GPL-2: "
-                  "https://github.com/zRitsu/MuseHeart-MusicBot/blob/main/LICENSE\n"
-                  "Caso não queira seguir as condições da licença no seu bot, você pode deixar o bot privado desmarcando a "
-                  f"opção public bot acessando o link: https://discord.com/developers/applications/{self.user.id}/bot\n")
+        if self.appinfo.bot_public is False and not self.config.get("SILENT_PUBLICBOT_WARNING"):
+
+            guilds = set()
+            for bot_owner in owners:
+                for guild in self.guilds:
+                    member = guild.get_member(bot_owner.id)
+                    if member and member.guild_permissions.manage_guild:
+                        continue
+                    guilds.add(guild)
+
+            warn_msg = f"Atenção: O bot [{self.user}] (ID: {self.user.id}) foi configurado no portal do desenvolvedor " \
+                  "como bot público\n" \
+                  "lembrando que se caso o bot seja divulgado pra ser adicionado publicamente o mesmo terá que " \
+                  "estar sob as condições da licença GPL-2: " \
+                  "https://github.com/zRitsu/MuseHeart-MusicBot/blob/main/LICENSE\n" \
+                  "Caso não queira seguir as condições da licença no seu bot, você pode deixar o bot privado desmarcando a " \
+                  f"opção public bot acessando o link: https://discord.com/developers/applications/{self.user.id}/bot"
+
+            if guilds:
+                warn_msg += "\n\nAtualmente o bot se encontra em servidores no qual você (ou membro da equipe) não "\
+                            f"estão ou que não possuem permissão de gerenciar servidor pra adicionar o próprio bot " \
+                             f"[{self.user}] no servidor:\n"
+
+                warn_msg += "\n".join(f"{g.name} [ID: {g.id}]" for g in guilds[:-11])
+                if (gcount:=len(guilds)) > 10:
+                    warn_msg += F"\ne em mais {gcount-10} servidor(es)."
+
+            print(("="*50) + f"\n{warn_msg}\n" + ("="*50))
 
     async def on_application_command_autocomplete(self, inter: disnake.ApplicationCommandInteraction):
 
