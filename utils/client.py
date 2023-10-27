@@ -1012,9 +1012,9 @@ class BotCore(commands.AutoShardedBot):
                   f"opção public bot acessando o link: https://discord.com/developers/applications/{self.user.id}/bot"
 
             if guilds:
-                warn_msg += "\n\nAtualmente o bot se encontra em servidores no qual você (ou membro da equipe) não "\
+                warn_msg += "\n\nAtualmente o bot se encontra em servidores no qual o dono do bot (ou membro da equipe) não "\
                             f"estão ou que não possuem permissão de gerenciar servidor pra adicionar o próprio bot " \
-                             f"[{self.user}] no servidor:\n"
+                             f"[{self.user}] nos servidores abaixo:\n"
 
                 warn_msg += "\n".join(f"{g.name} [ID: {g.id}]" for g in guilds[:-11])
                 if (gcount:=len(guilds)) > 10:
