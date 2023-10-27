@@ -5297,7 +5297,8 @@ class Music(commands.Cog):
 
             difference = (time() * 1000) - player.last_update
             position = player.last_position + difference
-            start_position = 0 if position > track.duration else min(position, track.duration)
+            if 0 < position < track.duration:
+                start_position = min(position, track.duration)
 
         elif payload.cause == "java.lang.InterruptedException":
             player.queue.appendleft(track)
