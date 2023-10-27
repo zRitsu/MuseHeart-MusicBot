@@ -5295,10 +5295,11 @@ class Music(commands.Cog):
         )):
             player.queue.appendleft(track)
 
-            difference = (time() * 1000) - player.last_update
-            position = player.last_position + difference
-            if 0 < position < track.duration:
-                start_position = min(position, track.duration)
+            if not track.is_stream:
+                difference = (time() * 1000) - player.last_update
+                position = player.last_position + difference
+                if 0 < position < track.duration:
+                    start_position = min(position, track.duration)
 
         elif payload.cause == "java.lang.InterruptedException":
             player.queue.appendleft(track)
