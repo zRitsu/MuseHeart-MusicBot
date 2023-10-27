@@ -993,7 +993,7 @@ class BotCore(commands.AutoShardedBot):
             self.owner = self.appinfo.owner
             owners = [self.appinfo.owner]
 
-        if self.appinfo.bot_public is False and not self.config.get("SILENT_PUBLICBOT_WARNING"):
+        if self.appinfo.bot_public and not self.config.get("SILENT_PUBLICBOT_WARNING"):
 
             guilds = set()
             for bot_owner in owners:
