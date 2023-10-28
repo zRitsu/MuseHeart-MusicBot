@@ -720,7 +720,7 @@ class MusicSettings(commands.Cog):
 
         check_channel_perm(target)
 
-        if isinstance(target, disnake.ForumChannel) and not existing_channel:
+        if isinstance(target, disnake.ForumChannel):
 
             channel_kwargs.clear()
 
