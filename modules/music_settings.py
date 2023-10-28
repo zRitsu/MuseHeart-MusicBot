@@ -421,7 +421,7 @@ class MusicSettings(commands.Cog):
             )
     ):
 
-        inter, bot = await select_bot_pool(interaction)
+        inter, bot = await select_bot_pool(interaction, return_new=True)
 
         if not bot:
             return
@@ -720,7 +720,7 @@ class MusicSettings(commands.Cog):
 
         check_channel_perm(target)
 
-        if isinstance(target, disnake.ForumChannel):
+        if isinstance(target, disnake.ForumChannel) and not existing_channel:
 
             channel_kwargs.clear()
 
@@ -858,7 +858,7 @@ class MusicSettings(commands.Cog):
 
         channel = target
 
-        msg = f"O canal de pedido de músicas foi definido para <#{channel.id}> através do bot: {bot.user.mention}"
+        msg = f"{inter.author.mention}, o sistema pra pedidos de música foi configurado no canal <#{channel.id}> através do bot: {bot.user.mention}"
 
         if player and player.text_channel != target:
             if player.static:
@@ -907,7 +907,7 @@ class MusicSettings(commands.Cog):
         reset_txt = f"{inter.prefix}reset" if isinstance(inter, CustomContext) else "/reset"
 
         embed = disnake.Embed(
-            description=f"**{msg}**\n\nObs: Caso queira reverter esta configuração, apenas use o comando {reset_txt} ou "
+            description=f"**{msg}**\n\nObs: Caso queira reverter essa configuração, apenas use o comando {reset_txt} ou "
                         f"delete o canal/post {channel.mention}",
             color=bot.get_color(guild.me)
         )
