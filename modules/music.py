@@ -5236,7 +5236,6 @@ class Music(commands.Cog):
                         f"**Nível:** `{payload.severity}`\n"
                         f"**Servidor de música:** `{player.node.identifier}`",
             color=disnake.Colour.red())
-        await player.text_channel.send(embed=embed, delete_after=10)
 
         error_format = pprint.pformat(payload.data)
 
@@ -5262,6 +5261,8 @@ class Music(commands.Cog):
             await self.error_report_queue.put({"embed": embed})
 
         if player.locked:
+            player.set_command_log(text=f"A reprodução da música falhou: [`{fix_characters(track.title, 15)}`]({track.uri or track.search_uri}). **Causa:** `{payload.cause}`")
+            player.update = True
             return
 
         player.locked = True
@@ -5293,6 +5294,8 @@ class Music(commands.Cog):
                 "javax.script.ScriptEngine.eval(String)",
                 "com.sedmelluq.discord.lavaplayer.tools.io.PersistentHttpStream$PersistentHttpException: Not success status code: 403",
         )):
+            embed = None
+
             player.queue.appendleft(track)
 
             if not track.is_stream:
@@ -5302,6 +5305,7 @@ class Music(commands.Cog):
                     start_position = min(position, track.duration)
 
         elif payload.cause == "java.lang.InterruptedException":
+            embed = None
             player.queue.appendleft(track)
             try:
                 player._new_node_task.cancel()
@@ -5314,6 +5318,9 @@ class Music(commands.Cog):
 
         elif player.keep_connected and not track.autoplay and len(player.queue) > 15:
             player.queue.append(track)
+
+        if embed and player.text_channel and player.text_channel.permissions_for(player.guild.me).send_messages:
+            await player.text_channel.send(embed=embed, delete_after=10)
 
         await asyncio.sleep(10)
 
