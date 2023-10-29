@@ -1172,7 +1172,7 @@ class LavalinkPlayer(wavelink.Player):
 
     async def invoke_np(self, force=False, interaction=None, rpc_update=False):
 
-        if not self.current or self.updating:
+        if not self.current or self.updating or not self.text_channel:
 
             try:
                 if not interaction.response.is_done():
@@ -1362,9 +1362,15 @@ class LavalinkPlayer(wavelink.Player):
                         try:
                             await self.message.edit(allowed_mentions=self.allowed_mentions, **self.last_data)
                         except:
-                            if not self.bot.get_channel(self.text_channel.id):
-                                # canal não existe mais no servidor...
-                                await self.destroy(force=True)
+                            self.text_channel = self.bot.get_channel(self.text_channel.id)
+
+                            if not self.text_channel:
+                                self.message = None
+                                return
+
+                            perms = self.text_channel.permissions_for(self.guild.me)
+
+                            if not perms.send_messages or not perms.read_messages:
                                 return
 
                         self.start_message_updater_task()
@@ -1423,7 +1429,7 @@ class LavalinkPlayer(wavelink.Player):
 
         while True:
 
-            if not self.controller_mode:
+            if not self.text_channel or not self.controller_mode:
                 pass
 
             elif self.auto_update:
