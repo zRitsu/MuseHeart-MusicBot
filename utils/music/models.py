@@ -1669,6 +1669,8 @@ class LavalinkPlayer(wavelink.Player):
 
     async def _wait_for_new_node(self, txt: str = None):
 
+        self.locked = True
+
         if not self.auto_pause:
             self.set_command_log(
                 txt or "Não há servidores de música disponível. Irei fazer algumas tentativas de conectar em um novo servidor de música.",
@@ -1690,6 +1692,8 @@ class LavalinkPlayer(wavelink.Player):
                     break
 
             await asyncio.sleep(5)
+
+        self.locked = False
 
         if not self.auto_pause:
 
