@@ -889,7 +889,7 @@ class Music(commands.Cog):
 
         msg = None
 
-        query = query.strip()
+        query = query.replace("\n", " ").strip()
 
         ephemeral = None
 
