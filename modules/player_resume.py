@@ -264,7 +264,7 @@ class PlayerSession(commands.Cog):
 
                 if not guild:
                     print(f"{self.bot.user} - Player Ignorado: {data['_id']} | Servidor inexistente...")
-                    await self.delete_data(guild.id)
+                    await self.delete_data(data['_id'])
                     continue
 
                 voice_channel = self.bot.get_channel(int(data["voice_channel"]))
