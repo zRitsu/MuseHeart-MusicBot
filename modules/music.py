@@ -5272,8 +5272,6 @@ class Music(commands.Cog):
         if payload.error == "This IP address has been blocked by YouTube (429)" or (payload.cause.startswith("java.lang.RuntimeException: Not success status code: 403") and track.info["sourceName"] == "youtube"):
             player.node.available = False
 
-            player.locked = False
-
             try:
                 player._new_node_task.cancel()
             except:
