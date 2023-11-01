@@ -1772,7 +1772,7 @@ class Music(commands.Cog):
 
     case_sensitive_args = CommandArgparse()
     case_sensitive_args.add_argument('-casesensitive', '-cs', action='store_true',
-                             help="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome da música")
+                             help="Buscar por músicas com a frase exata no nome da música ao invés de buscar palavra por palavra.")
     @check_stage_topic()
     @is_requester()
     @check_queue_loading()
@@ -1808,7 +1808,7 @@ class Music(commands.Cog):
             ),
             case_sensitive: bool = commands.Param(
                 name="nome_exato", default=False,
-                description="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome da música",
+                description="Buscar por músicas com a frase exata no nome da música ao invés de buscar palavra por palavra.",
 
             )
     ):
@@ -1847,7 +1847,7 @@ class Music(commands.Cog):
             ),
             case_sensitive: bool = commands.Param(
                 name="nome_exato", default=False,
-                description="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome da música",
+                description="Buscar por músicas com a frase exata no nome da música ao invés de buscar palavra por palavra.",
 
             )
     ):
@@ -2508,7 +2508,7 @@ class Music(commands.Cog):
             query: str = commands.Param(name="nome", description="Nome da música completo."),
             case_sensitive: bool = commands.Param(
                 name="nome_exato", default=False,
-                description="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome da música",
+                description="Buscar por músicas com a frase exata no nome da música ao invés de buscar palavra por palavra.",
 
             )
     ):
@@ -2594,8 +2594,7 @@ class Music(commands.Cog):
     move_args.add_argument('-count', '-counter', '-amount', '-c', '-max', type=int, default=None,
                            help="Especificar uma quantidade de músicas para mover com o nome especificado.\nEx: -amount 5")
     move_args.add_argument('-casesensitive', '-cs',  action='store_true',
-                           help="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome "
-                                "da música")
+                           help="Buscar por músicas com a frase exata no nome da música ao invés de buscar palavra por palavra.")
     move_args.add_argument('-position', '-pos', help="Especificar uma posição de destino (isso serve pra situações no qual o nome pra busca começe com número).\nEx: -pos 1", type=int, default=None)
 
     @is_dj()
@@ -2746,7 +2745,7 @@ class Music(commands.Cog):
             query: str = commands.Param(name="nome", description="Nome da música completo."),
             case_sensitive: bool = commands.Param(
                 name="nome_exato", default=False,
-                description="Buscar por músicas com letra exatas ao invés de buscar palavra por palavra no nome da música",
+                description="Buscar por músicas com a frase exata no nome da música ao invés de buscar palavra por palavra.",
             )
     ):
 
@@ -3323,7 +3322,7 @@ class Music(commands.Cog):
     clear_flags.add_argument('-duplicates', '-dupes', '-duplicate', action='store_true',
                              help="Remover músicas duplicadas.")
     clear_flags.add_argument('-playlist', '-list', '-pl', nargs='+', default=[],
-                             help="Remover música que tiver com nome especificado na playlist associada.\nEx: -playlist minhaplaylist")
+                             help="Remover música que tiver com o nome especificado na playlist associada.\nEx: -playlist minhaplaylist")
     clear_flags.add_argument('-minimaltime', '-mintime', '-min','-minduration', '-minduration',  default=None,
                              help="Remover músicas com a duração mínima especificada.\nEx: -min 1:23.")
     clear_flags.add_argument('-maxduration', '-maxtime', '-max', default=None,
