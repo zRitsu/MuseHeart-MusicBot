@@ -284,7 +284,7 @@ class Music(commands.Cog):
     @commands.slash_command(
         description=f"{desc_prefix}Ativar/editar o sistema de anúncio/status automático do canal com o nome da música.",
         extras={"only_voiced": True, "exclusive_cooldown": True}, cooldown=stage_cd, max_concurrency=stage_mc,
-        default_member_permissions=disnake.Permissions(manage_guild=True)
+        default_member_permissions=disnake.Permissions(manage_guild=True), dm_permission=False
     )
     async def stage_announce(
             self,
@@ -485,7 +485,7 @@ class Music(commands.Cog):
     @check_voice()
     @can_send_message_check()
     @commands.message_command(name="add to queue", extras={"check_player": False},
-                              cooldown=play_cd, max_concurrency=play_mc)
+                              cooldown=play_cd, max_concurrency=play_mc, dm_permission=False)
     async def message_play(self, inter: disnake.MessageCommandInteraction):
 
         if not inter.target.content:
@@ -509,7 +509,8 @@ class Music(commands.Cog):
     @check_voice()
     @can_send_message_check()
     @commands.slash_command(name="search", extras={"check_player": False}, cooldown=play_cd, max_concurrency=play_mc,
-                            description=f"{desc_prefix}Buscar música e escolher uma entre os resultados para tocar.")
+                            description=f"{desc_prefix}Buscar música e escolher uma entre os resultados para tocar.",
+                            dm_permission=False)
     async def search(
             self,
             inter: disnake.AppCmdInter,
@@ -581,7 +582,7 @@ class Music(commands.Cog):
     @can_send_message_check()
     @commands.max_concurrency(1, commands.BucketType.guild)
     @commands.slash_command(
-        extras={"only_voiced": True},
+        extras={"only_voiced": True}, dm_permission=False,
         description=f"{desc_prefix}Me conectar em um canal de voz (ou me mover para um)."
     )
     async def connect(
@@ -797,7 +798,7 @@ class Music(commands.Cog):
     @can_send_message_check()
     @check_voice()
     @commands.slash_command(
-        name="play_music_file",
+        name="play_music_file", dm_permission=False,
         description=f"{desc_prefix}Tocar arquivo de música em um canal de voz.",
         extras={"check_player": False}, cooldown=play_cd, max_concurrency=play_mc
     )
@@ -840,7 +841,7 @@ class Music(commands.Cog):
     @can_send_message_check()
     @check_voice()
     @commands.slash_command(
-        description=f"{desc_prefix}Tocar música em um canal de voz.",
+        description=f"{desc_prefix}Tocar música em um canal de voz.", dm_permission=False,
         extras={"check_player": False}, cooldown=play_cd, max_concurrency=play_mc
     )
     async def play(
@@ -1795,7 +1796,7 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.slash_command(
-        description=f"{desc_prefix}Pular para uma música específica da fila.",
+        description=f"{desc_prefix}Pular para uma música específica da fila.", dm_permission=False,
         extras={"only_voiced": True}, cooldown=skip_back_cd, max_concurrency=skip_back_mc
     )
     async def skipto(
@@ -1820,7 +1821,7 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.slash_command(
-        description=f"{desc_prefix}Pular a música atual que está tocando.",
+        description=f"{desc_prefix}Pular a música atual que está tocando.", dm_permission=False,
         extras={"only_voiced": True}, cooldown=skip_back_cd, max_concurrency=skip_back_mc
     )
     async def skip(
@@ -1963,7 +1964,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.max_concurrency(1, commands.BucketType.member)
     @commands.slash_command(
-        description=f"{desc_prefix}Voltar para a música anterior.",
+        description=f"{desc_prefix}Voltar para a música anterior.", dm_permission=False,
         extras={"only_voiced": True}, cooldown=skip_back_cd, max_concurrency=skip_back_mc
     )
     async def back(self, inter: disnake.AppCmdInter):
@@ -2031,7 +2032,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.slash_command(
         description=f"{desc_prefix}Votar para pular a música atual.",
-        extras={"only_voiced": True}
+        extras={"only_voiced": True}, dm_permission=False
     )
     async def voteskip(self, inter: disnake.AppCmdInter):
 
@@ -2085,7 +2086,7 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.slash_command(description=f"{desc_prefix}Ajustar volume da música.", extras={"only_voiced": True},
-                            cooldown=volume_cd, max_concurrency=volume_mc)
+                            cooldown=volume_cd, max_concurrency=volume_mc, dm_permission=False)
     async def volume(
             self,
             inter: disnake.AppCmdInter, *,
@@ -2147,7 +2148,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.slash_command(
         description=f"{desc_prefix}Pausar a música.", extras={"only_voiced": True},
-        cooldown=pause_resume_cd, max_concurrency=pause_resume_mc
+        cooldown=pause_resume_cd, max_concurrency=pause_resume_mc, dm_permission=False
     )
     async def pause(self, inter: disnake.AppCmdInter):
 
@@ -2180,7 +2181,7 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.slash_command(
-        description=f"{desc_prefix}Retomar/Despausar a música.",
+        description=f"{desc_prefix}Retomar/Despausar a música.", dm_permission=False,
         extras={"only_voiced": True}, cooldown=pause_resume_cd, max_concurrency=pause_resume_mc
     )
     async def resume(self, inter: disnake.AppCmdInter):
@@ -2224,7 +2225,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.slash_command(
         description=f"{desc_prefix}Avançar/Retomar a música para um tempo específico.",
-        extras={"only_voiced": True}, cooldown=seek_cd, max_concurrency=seek_mc
+        extras={"only_voiced": True}, cooldown=seek_cd, max_concurrency=seek_mc, dm_permission=False
     )
     async def seek(
             self,
@@ -2393,7 +2394,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.slash_command(
         description=f"{desc_prefix}Selecionar modo de repetição entre: atual / fila ou desativar.",
-        extras={"only_voiced": True}, cooldown=loop_cd, max_concurrency=loop_mc
+        extras={"only_voiced": True}, cooldown=loop_cd, max_concurrency=loop_mc, dm_permission=False
     )
     async def loop_mode(
             self,
@@ -2451,7 +2452,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.slash_command(
         description=f"{desc_prefix}Definir quantidade de repetições da música atual.",
-        extras={"only_voiced": True}, cooldown=loop_cd, max_concurrency=loop_mc
+        extras={"only_voiced": True}, cooldown=loop_cd, max_concurrency=loop_mc, dm_permission=False
     )
     async def loop_amount(
             self,
@@ -2499,7 +2500,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.slash_command(
         description=f"{desc_prefix}Remover uma música específica da fila.",
-        extras={"only_voiced": True}, max_concurrency=remove_mc
+        extras={"only_voiced": True}, max_concurrency=remove_mc, dm_permission=False
     )
     async def remove(
             self,
@@ -2551,7 +2552,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.slash_command(
-        description=f"{desc_prefix}Readicionar as músicas tocadas na fila.",
+        description=f"{desc_prefix}Readicionar as músicas tocadas na fila.", dm_permission=False,
         extras={"only_voiced": True}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc
     )
     async def readd_songs(self, inter: disnake.AppCmdInter):
@@ -2626,7 +2627,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.slash_command(
         description=f"{desc_prefix}Mover uma música para a posição especificada da fila.",
-        extras={"only_voiced": True}, max_concurrency=remove_mc
+        extras={"only_voiced": True}, max_concurrency=remove_mc, dm_permission=False
     )
     async def move(
             self,
@@ -2736,7 +2737,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.slash_command(
-        description=f"{desc_prefix}Rotacionar a fila para a música especificada.",
+        description=f"{desc_prefix}Rotacionar a fila para a música especificada.", dm_permission=False,
         extras={"only_voiced": True}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc
     )
     async def rotate(
@@ -2794,7 +2795,7 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @commands.slash_command(extras={"only_voiced": True}, cooldown=song_request_thread_cd,
+    @commands.slash_command(extras={"only_voiced": True}, cooldown=song_request_thread_cd, dm_permission=False,
                             description=f"{desc_prefix}Criar uma thread/conversa temporária para song-request (pedido de música)")
     async def song_request_thread(self, inter: disnake.AppCmdInter):
 
@@ -2917,7 +2918,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.slash_command(
         description=f"{desc_prefix}Ativar/Desativar o efeito nightcore (Música acelerada com tom mais agudo).",
-        extras={"only_voiced": True}, cooldown=nightcore_cd, max_concurrency=nightcore_mc,
+        extras={"only_voiced": True}, cooldown=nightcore_cd, max_concurrency=nightcore_mc, dm_permission=False,
     )
     async def nightcore(self, inter: disnake.AppCmdInter):
 
@@ -2955,7 +2956,8 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.slash_command(description=f"{desc_prefix}Enviar player controller para um canal específico/atual.",
-                            extras={"only_voiced": True}, cooldown=controller_cd, max_concurrency=controller_mc,)
+                            extras={"only_voiced": True}, cooldown=controller_cd, max_concurrency=controller_mc,
+                            dm_permission=False)
     async def controller(self, inter: disnake.AppCmdInter):
 
         try:
@@ -3019,7 +3021,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.user_command(name=disnake.Localized("Add DJ", data={disnake.Locale.pt_BR: "Adicionar DJ"}),
-                           extras={"only_voiced": True})
+                           extras={"only_voiced": True}, dm_permission=False)
     async def adddj_u(self, inter: disnake.UserCommandInteraction):
         await self.add_dj(interaction=inter, user=inter.target)
 
@@ -3037,7 +3039,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.slash_command(
         description=f"{desc_prefix}Adicionar um membro à lista de DJ's na sessão atual do player.",
-        extras={"only_voiced": True}
+        extras={"only_voiced": True}, dm_permission=False
     )
     async def add_dj(
             self,
@@ -3090,7 +3092,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.slash_command(
         description=f"{desc_prefix}Remover um membro da lista de DJ's na sessão atual do player.",
-        extras={"only_voiced": True}
+        extras={"only_voiced": True}, dm_permission=False
     )
     async def remove_dj(
             self,
@@ -3145,7 +3147,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.slash_command(
         description=f"{desc_prefix}Parar o player e me desconectar do canal de voz.",
-        extras={"only_voiced": True}
+        extras={"only_voiced": True}, dm_permission=False
     )
     async def stop(self, inter: disnake.AppCmdInter):
 
@@ -3185,7 +3187,7 @@ class Music(commands.Cog):
 
     @has_player()
     @check_voice()
-    @commands.slash_command(name="queue", extras={"only_voiced": True})
+    @commands.slash_command(name="queue", extras={"only_voiced": True}, dm_permission=False)
     async def q(self, inter):
         pass
 
@@ -3361,7 +3363,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.slash_command(
         name="clear_queue",
-        description=f"{desc_prefix}Limpar a fila de música.",
+        description=f"{desc_prefix}Limpar a fila de música.", dm_permission=False,
         extras={"only_voiced": True}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc
     )
     async def clear(
@@ -3634,7 +3636,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.slash_command(
         description=f"{desc_prefix}Ativar/Desativar o modo restrito de comandos que requer DJ/Staff.",
-        extras={"only_voiced": True}, cooldown=restrict_cd, max_concurrency=restrict_mc)
+        extras={"only_voiced": True}, cooldown=restrict_cd, max_concurrency=restrict_mc, dm_permission=False)
     async def restrict_mode(self, inter: disnake.AppCmdInter):
 
         try:
@@ -3671,7 +3673,7 @@ class Music(commands.Cog):
     @commands.slash_command(
         name="247",
         description=f"{desc_prefix}Ativar/Desativar o modo 24/7 do player (Em testes).",
-        default_member_permissions=disnake.Permissions(manage_guild=True),
+        default_member_permissions=disnake.Permissions(manage_guild=True), dm_permission=False,
         extras={"only_voiced": True}, cooldown=nonstop_cd, max_concurrency=nonstop_mc
     )
     async def nonstop(self, inter: disnake.AppCmdInter):
@@ -3721,7 +3723,7 @@ class Music(commands.Cog):
     @commands.slash_command(
         name="autoplay",
         description=f"{desc_prefix}Ativar/Desativar a reprodução automática ao acabar as músicas da fila.",
-        extras={"only_voiced": True}, cooldown=autoplay_cd, max_concurrency=autoplay_mc
+        extras={"only_voiced": True}, cooldown=autoplay_cd, max_concurrency=autoplay_mc, dm_permission=False
     )
     async def autoplay(self, inter: disnake.AppCmdInter):
 
@@ -3752,7 +3754,7 @@ class Music(commands.Cog):
     @is_dj()
     @commands.cooldown(1, 10, commands.BucketType.guild)
     @commands.slash_command(
-        description=f"{desc_prefix}Migrar o player para outro servidor de música."
+        description=f"{desc_prefix}Migrar o player para outro servidor de música.", dm_permission=False
     )
     async def change_node(
             self,

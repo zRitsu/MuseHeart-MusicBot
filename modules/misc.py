@@ -378,7 +378,7 @@ class Misc(commands.Cog):
 
 
     @commands.slash_command(
-        description=f"{desc_prefix}Exibir informações sobre mim.", cooldown=about_cd
+        description=f"{desc_prefix}Exibir informações sobre mim.", cooldown=about_cd, dm_permission=False
     )
     async def about(
             self,
@@ -676,7 +676,8 @@ class Misc(commands.Cog):
 
 
     @commands.slash_command(
-        description=f"{desc_prefix}Exibir meu link de convite para você me adicionar no seu servidor."
+        description=f"{desc_prefix}Exibir meu link de convite para você me adicionar no seu servidor.",
+        dm_permission=False
     )
     async def invite(self, inter: disnake.AppCmdInter):
 
@@ -684,7 +685,7 @@ class Misc(commands.Cog):
 
         await self.invite_button(inter, is_command=True)
 
-    @commands.user_command(name="Avatar")
+    @commands.user_command(name="Avatar", dm_permission=False)
     async def avatar(self, inter: disnake.UserCommandInteraction):
 
         embeds = []

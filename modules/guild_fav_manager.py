@@ -374,7 +374,7 @@ class PinManager(commands.Cog):
     @commands.slash_command(
         description=f"{desc_prefix}Gerenciar playlists/favoritos do servidor.",
         default_member_permissions=disnake.Permissions(manage_guild=True),
-        cooldown=server_playlist_cd
+        cooldown=server_playlist_cd, dm_permission=False
     )
     async def server_playlist(self, interaction: disnake.AppCmdInter):
 

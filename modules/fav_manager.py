@@ -313,7 +313,8 @@ class FavManager(commands.Cog):
     async def favmanager_legacy(self, ctx: CustomContext):
         await self.fav_manager.callback(self=self, inter=ctx)
 
-    @commands.slash_command(description=f"{desc_prefix}Gerenciar suas playlists/favoritos.", cooldown=fav_cd)
+    @commands.slash_command(description=f"{desc_prefix}Gerenciar suas playlists/favoritos.", cooldown=fav_cd,
+                            dm_permission=False)
     async def fav_manager(self, inter: disnake.AppCmdInter):
 
         await inter.response.defer(ephemeral=True)

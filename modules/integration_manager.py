@@ -445,7 +445,9 @@ class IntegrationManager(commands.Cog):
         await self.integrations.callback(self=self, inter=ctx)
 
     @commands.max_concurrency(1, commands.BucketType.member, wait=False)
-    @commands.slash_command(description=f"{desc_prefix}Gerenciar suas integrações de canais/perfis com playlists públicas.", cooldown=itg_cd)
+    @commands.slash_command(
+        description=f"{desc_prefix}Gerenciar suas integrações de canais/perfis com playlists públicas.",
+        cooldown=itg_cd, dm_permission=False)
     async def integrations(self, inter: disnake.AppCmdInter):
 
         supported_platforms = []
