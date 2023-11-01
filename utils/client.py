@@ -1017,7 +1017,7 @@ class BotCore(commands.AutoShardedBot):
                             f"estão ou que não possuem permissão de gerenciar servidor pra adicionar o próprio bot " \
                              f"[{self.user}] nos servidores abaixo:\n"
 
-                warn_msg += "\n".join(f"{g.name} [ID: {g.id}]" for g in guilds[:-11])
+                warn_msg += "\n".join(f"{g.name} [ID: {g.id}]" for g in list(guilds)[:-11])
                 if (gcount:=len(guilds)) > 10:
                     warn_msg += F"\ne em mais {gcount-10} servidor(es)."
 
