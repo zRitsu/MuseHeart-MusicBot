@@ -1681,7 +1681,14 @@ class LavalinkPlayer(wavelink.Player):
         old_node = self.node.identifier
 
         while True:
-            node = self.bot.music.get_best_node()
+
+            if self.node and self.node.stats and self.node.is_available and self.node.available and not self.node.restarting:
+                break
+
+            try:
+                node = await self.bot.get_cog("Music").get_best_node()
+            except:
+                node = None
 
             if node:
                 try:
