@@ -571,12 +571,16 @@ class LavalinkPlayer(wavelink.Player):
             return
 
         if not force:
-            await asyncio.sleep(self.idle_timeout)
 
             try:
                 vc = self.guild.me.voice.channel
             except AttributeError:
                 vc = self.last_channel
+
+            if [m for m in vc.members if not m.bot]:
+                return
+
+            await asyncio.sleep(self.idle_timeout)
 
             if [m for m in vc.members if not m.bot]:
                 return
