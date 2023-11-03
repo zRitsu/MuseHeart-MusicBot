@@ -172,6 +172,8 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
     free_bot = []
 
+    bot_missing_perms = []
+
     for bot in sorted(inter.bot.pool.bots, key=lambda b: b.identifier):
 
         if not bot.bot_ready:
@@ -220,6 +222,10 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
             continue
 
         if not bot.get_channel(inter.channel.id).permissions_for(guild.me).send_messages:
+
+            if not guild.me.voice:
+                bot_missing_perms.append(bot)
+
             continue
 
         if not guild.me.voice:
@@ -291,9 +297,9 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
         msg = "**Não há bots de música compatível no servidor...**"
 
-        for b in bot.pool.bots:
+        for b in inter.bot.pool.bots:
 
-            if str(b.user.id) in bot.config["INTERACTION_BOTS"]:
+            if str(b.user.id) in inter.bot.config["INTERACTION_BOTS"]:
                 continue
 
         if extra_bots_counter:
@@ -301,7 +307,12 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
             components = [disnake.ui.Button(custom_id="bot_invite", label="Adicionar bot(s).")]
 
     else:
-        msg = "**Todos os bots estão em uso no nomento...**"
+
+        if bot_missing_perms:
+            msg = f"**Há disponíveis no servidor mas estão sem permissão de enviar mensagens no canal {inter.channel.mention}**:\n\n" + \
+                ", ".join(b.user.mention for b in bot_missing_perms)
+        else:
+            msg = "**Todos os bots estão em uso no nomento...**"
         if extra_bots_counter:
             components = [disnake.ui.Button(custom_id="bot_invite", label="Precisa de mais bots de música? Clique aqui.")]
 
