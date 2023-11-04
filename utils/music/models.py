@@ -1687,33 +1687,35 @@ class LavalinkPlayer(wavelink.Player):
         while True:
 
             try:
-                node = sorted([n for n in self.bot.music.nodes.values() if n.stats and n.is_available and n.available and not n.restarting],
+                node = sorted([n for n in self.bot.music.nodes.values() if n.stats and n.is_available and n.available],
                 key=lambda n: n.stats.players
             )[0]
             except:
-                node = None
+                await asyncio.sleep(5)
+                continue
 
-            if node:
+            else:
                 try:
                     self.locked = False
                     await self.change_node(node.identifier, force=True)
                 except:
                     traceback.print_exc()
                     self.locked = True
-                else:
-                    break
 
-            await asyncio.sleep(5)
+                if not self.auto_pause:
 
-        if not self.auto_pause:
+                    if old_node == node.identifier:
+                        txt = f"A conexão com servidor de música **{node.identifier}** foi restabelecida com sucesso."
+                    else:
+                        txt = f"O player foi reconectado em um novo servidor de música: **{node.identifier}**."
 
-            if old_node == node.identifier:
-                txt = f"A conexão com servidor de música **{node.identifier}** foi restabelecida com sucesso."
-            else:
-                txt = f"O player foi reconectado em um novo servidor de música: **{node.identifier}**."
+                    self.set_command_log(txt, emoji="📶")
+                    try:
+                        await self.invoke_np(force=True)
+                    except:
+                        traceback.print_exc()
 
-            self.set_command_log(txt, emoji="📶")
-            await self.invoke_np(force=True)
+                return
 
     async def _send_rpc_data(self, users: List[int], stats: dict):
 

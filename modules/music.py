@@ -5117,18 +5117,16 @@ class Music(commands.Cog):
         retries = 0
         backoff = 7
 
-        if not node.restarting:
+        print(f"{self.bot.user} - [{node.identifier}] Conexão perdida - reconectando em {int(backoff)} segundos.")
 
-            print(f"{self.bot.user} - [{node.identifier}] Conexão perdida - reconectando em {int(backoff)} segundos.")
+        for player in list(node.players.values()):
 
-            for player in list(node.players.values()):
+            try:
+                player._new_node_task.cancel()
+            except:
+                pass
 
-                try:
-                    player._new_node_task.cancel()
-                except:
-                    pass
-
-                player._new_node_task = self.bot.loop.create_task(player._wait_for_new_node())
+            player._new_node_task = self.bot.loop.create_task(player._wait_for_new_node())
 
         await asyncio.sleep(backoff)
 
@@ -5262,7 +5260,7 @@ class Music(commands.Cog):
             await self.error_report_queue.put({"embed": embed})
 
         if player.locked:
-            player.set_command_log(text=f"A reprodução da música falhou: [`{fix_characters(track.title, 15)}`]({track.uri or track.search_uri}). **Causa:** `{payload.cause}`")
+            player.set_command_log(text=f"A reprodução da música falhou (tentando tocar novamente): [`{fix_characters(track.title, 15)}`]({track.uri or track.search_uri}). **Causa:** `{payload.cause}`")
             player.update = True
             return
 
@@ -5329,40 +5327,15 @@ class Music(commands.Cog):
         except:
             return
 
+        if not player.locked:
+            return
+
         player.locked = False
         await player.process_next(start_position=start_position)
 
     @commands.Cog.listener("on_wavelink_node_ready")
     async def node_ready(self, node: wavelink.Node):
-        msg = f'{self.bot.user} - Servidor de música: [{node.identifier}] está pronto para uso!'
-
-        if node.restarting:
-
-            print(msg + " Reconectando players...")
-
-            node.restarting = False
-
-            for guild_id in list(node.players):
-                try:
-                    player = node.players[guild_id]
-                    await player.change_node(node.identifier, force=True)
-                    player.set_command_log(
-                        text="O servidor de música foi reconectado com sucesso!",
-                        emoji="🔰"
-                    )
-                    player.locked = False
-                    if player.current:
-                        if not player.paused:
-                            await player.play(player.current, start=player.position)
-                        player.update = True
-                    else:
-                        await player.process_next()
-                except:
-                    traceback.print_exc()
-                    continue
-
-        else:
-            print(msg)
+        print(f'{self.bot.user} - Servidor de música: [{node.identifier}] está pronto para uso!')
 
     @commands.Cog.listener('on_wavelink_track_start')
     async def track_start(self, node, payload: wavelink.TrackStart):
@@ -5529,8 +5502,7 @@ class Music(commands.Cog):
                     try:
                         node_search = \
                             sorted(
-                                [n for n in self.bot.music.nodes.values() if
-                                 n.search and n.available and n.is_available and not n.restarting],
+                                [n for n in self.bot.music.nodes.values() if n.search and n.available and n.is_available],
                                 key=lambda n: len(n.players))[0]
                     except IndexError:
                         node_search = node
@@ -5544,7 +5516,7 @@ class Music(commands.Cog):
 
                     for n in self.bot.music.nodes.values():
 
-                        if not n.available or not n.is_available or n.restarting:
+                        if not n.available or not n.is_available:
                             continue
 
                         try:
@@ -5778,7 +5750,7 @@ class Music(commands.Cog):
 
         try:
             return sorted(
-                [n for n in bot.music.nodes.values() if n.stats and n.is_available and n.available and not n.restarting],
+                [n for n in bot.music.nodes.values() if n.stats and n.is_available and n.available],
                 key=lambda n: n.stats.players
             )[0]
 
