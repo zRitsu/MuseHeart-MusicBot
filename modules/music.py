@@ -3360,9 +3360,9 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @commands.slash_command(
-        name="clear_queue",
-        description=f"{desc_prefix}Limpar a fila de música.", dm_permission=False,
+    @q.sub_command(
+        name="clear",
+        description=f"{desc_prefix}Limpar a fila de música.",
         extras={"only_voiced": True}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc
     )
     async def clear(
