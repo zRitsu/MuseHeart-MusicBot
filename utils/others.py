@@ -49,7 +49,7 @@ class CommandArgparse(argparse.ArgumentParser):
             for arg_name in e.argument_name.split("/"):
                 for c, a in enumerate(args):
                     if a.startswith(arg_name):
-                        args[c] = a.replace("-", "")
+                        args[c] = a.replace("-", "", count=1)
                         return self.parse_known_args(args, namespace)
 
     def error(self, message: str):
