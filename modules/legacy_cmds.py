@@ -160,46 +160,6 @@ class Owner(commands.Cog):
                         with open(url.split("/")[-1], "wb") as f:
                             f.write(lavalink_jar)
 
-        if node:
-
-            for bot in self.bot.pool.bots:
-
-                try:
-                    node = bot.music.nodes["LOCAL"]
-                except KeyError:
-                    continue
-
-                node.restarting = True
-
-                for player in node.players.values():
-
-                    txt = "O servidor de música foi reiniciado e a música será retomada em alguns segundos (Por favor aguarde)..."
-
-                    if args.resetids:
-
-                        if player.current:
-                            player.queue.appendleft(player.current)
-                            player.current = None
-
-                        for t in player.queue:
-                            t.id = ""
-
-                        for t in player.played:
-                            t.id = ""
-
-                    if player.static or player.controller_mode:
-                        player.set_command_log(text=txt, emoji="🛠️")
-                        bot.loop.create_task(player.invoke_np(force=True))
-                    else:
-                        bot.loop.create_task(
-                            player.text_channel.send(
-                                embed=disnake.Embed(
-                                    color=self.bot.get_color(player.guild.me),
-                                    description=f"🛠️ **⠂{txt}**"
-                                )
-                            )
-                        )
-
         self.bot.pool.start_lavalink()
 
         await ctx.send(

@@ -1686,25 +1686,24 @@ class LavalinkPlayer(wavelink.Player):
 
         while True:
 
-            if self.node and self.node.stats and self.node.is_available and self.node.available and not self.node.restarting:
-                break
-
             try:
-                node = await self.bot.get_cog("Music").get_best_node()
+                node = sorted([n for n in self.bot.music.nodes.values() if n.stats and n.is_available and n.available and not n.restarting],
+                key=lambda n: n.stats.players
+            )[0]
             except:
                 node = None
 
             if node:
                 try:
+                    self.locked = False
                     await self.change_node(node.identifier, force=True)
                 except:
                     traceback.print_exc()
+                    self.locked = True
                 else:
                     break
 
             await asyncio.sleep(5)
-
-        self.locked = False
 
         if not self.auto_pause:
 
