@@ -37,6 +37,21 @@ class CommandArgparse(argparse.ArgumentParser):
 
         super().__init__(*args, exit_on_error=False, allow_abbrev=False, add_help=False, **kwargs)
 
+    def parse_known_args(
+        self, args = None, namespace = None
+    ):
+        try:
+            return super().parse_known_args(args, namespace)
+        except argparse.ArgumentError as e:
+            if "ignored explicit argument" not in str(e):
+                raise e
+
+            for arg_name in e.argument_name.split("/"):
+                for c, a in enumerate(args):
+                    if a.startswith(arg_name):
+                        args[c] = a.replace("-", "")
+                        return self.parse_known_args(args, namespace)
+
     def error(self, message: str):
         raise ArgumentParsingError(message)
 
