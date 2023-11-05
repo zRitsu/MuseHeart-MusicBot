@@ -817,6 +817,8 @@ class BotCore(commands.AutoShardedBot):
             except disnake.HTTPException:
                 pass
 
+            return
+
         return True
 
     async def on_message(self, message: disnake.Message):
