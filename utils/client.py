@@ -799,9 +799,12 @@ class BotCore(commands.AutoShardedBot):
 
     async def can_send_message(self, message: disnake.Message, dm_user=True):
 
-        if not message.channel.permissions_for(message.guild.me).send_messages and dm_user:
+        if not message.channel.permissions_for(message.guild.me).send_messages:
 
             print(f"Can't send message in: {message.channel.name} [{message.channel.id}] (Missing permissions)")
+
+            if not dm_user:
+                return
 
             bucket = self.dm_cooldown.get_bucket(message)
             retry_after = bucket.update_rate_limit()
