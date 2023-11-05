@@ -797,9 +797,9 @@ class BotCore(commands.AutoShardedBot):
                 if c.extras.get("exclusive_cooldown"): continue
                 c._buckets = cmd._buckets
 
-    async def can_send_message(self, message: disnake.Message):
+    async def can_send_message(self, message: disnake.Message, dm_user=True):
 
-        if not message.channel.permissions_for(message.guild.me).send_messages:
+        if not message.channel.permissions_for(message.guild.me).send_messages and dm_user:
 
             print(f"Can't send message in: {message.channel.name} [{message.channel.id}] (Missing permissions)")
 
@@ -842,7 +842,7 @@ class BotCore(commands.AutoShardedBot):
             if message.author.bot:
                 return
 
-            if not await self.can_send_message(message):
+            if not await self.can_send_message(message, dm_user=False):
                 return
 
             embed = disnake.Embed(color=self.get_color(message.guild.me))
