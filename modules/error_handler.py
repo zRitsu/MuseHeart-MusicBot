@@ -85,11 +85,11 @@ class ErrorHandler(commands.Cog):
 
         error_msg, full_error_msg, kill_process, components, mention_author = parse_error(inter, error)
 
-        kwargs = {"text": inter.author.mention, "embed": disnake.Embed(color=disnake.Colour.red())}
+        kwargs = {"text": "", "embed": disnake.Embed(color=disnake.Colour.red())}
         send_webhook = False
 
         try:
-            if inter.message.author.bot:
+            if inter.message.author.bot or mention_author:
                 kwargs["text"] = inter.author.mention
         except AttributeError:
             pass
