@@ -1090,12 +1090,12 @@ class BotCore(commands.AutoShardedBot):
                         if self.pool.controller_bot == self and not self.bot_ready:
                             print(f"{'=' * 48}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename}")
                             raise e
-                        return
+                        return load_status
                 except Exception as e:
                     if self.pool.controller_bot == self and not self.bot_ready:
                         print(f"{'=' * 48}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename}")
                         raise e
-                    return
+                    return load_status
 
         if self.pool.controller_bot == self and not self.bot_ready:
             print(f"{'=' * 48}")
