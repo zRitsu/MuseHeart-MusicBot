@@ -25,16 +25,14 @@ def can_send_message(
 ):
 
     if isinstance(channel, disnake.Thread):
-        perms = channel.parent.permissions_for(channel.guild.me)
-        send_message_perm = perms.send_messages_in_threads
+        send_message_perm = channel.parent.permissions_for(channel.guild.me).send_messages_in_threads
     else:
-        perms = channel.permissions_for(channel.guild.me)
-        send_message_perm = perms.send_messages
+        send_message_perm = channel.permissions_for(channel.guild.me).send_messages
 
     if not send_message_perm:
         raise GenericError(f"**{bot.mention} não possui permissão de enviar mensagens no canal:** {channel.mention}")
 
-    if not perms.embed_links:
+    if not channel.permissions_for(channel.guild.me).embed_links:
         raise GenericError(f"**{bot.mention} não possui permissão de inserir links no canal: {channel.mention}**")
 
     return True
