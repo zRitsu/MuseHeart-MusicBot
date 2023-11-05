@@ -73,6 +73,8 @@ def parse_error(
 
     kill_process = False
 
+    mention_author = False
+
     components = []
 
     error = getattr(error, 'original', error)
@@ -153,6 +155,8 @@ def parse_error(
                         "`Caso queira, você pode adicionar um favorito ou integração para usar esse " \
                         "comando sem incluir um nome ou link. Pra isso você pode clicar em um dos botões abaixo.`"
 
+        mention_author = True
+
         components = [
             disnake.ui.Button(label="Abrir o gerenciador de favoritos",
                               custom_id="musicplayer_fav_manager", emoji="⭐"),
@@ -204,4 +208,4 @@ def parse_error(
     else:
         full_error_txt = ""
 
-    return error_txt, full_error_txt, kill_process, components
+    return error_txt, full_error_txt, kill_process, components, mention_author

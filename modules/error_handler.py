@@ -83,9 +83,9 @@ class ErrorHandler(commands.Cog):
         if isinstance(error, PoolException):
             return
 
-        error_msg, full_error_msg, kill_process, components = parse_error(inter, error)
+        error_msg, full_error_msg, kill_process, components, mention_author = parse_error(inter, error)
 
-        kwargs = {"text": "", "embed": disnake.Embed(color=disnake.Colour.red())}
+        kwargs = {"text": inter.author.mention, "embed": disnake.Embed(color=disnake.Colour.red())}
         send_webhook = False
 
         try:
@@ -161,11 +161,11 @@ class ErrorHandler(commands.Cog):
                 await self.on_legacy_command_error(ctx, e)
             return
 
-        error_msg, full_error_msg, kill_process, components = parse_error(ctx, error)
+        error_msg, full_error_msg, kill_process, components, mention_author = parse_error(ctx, error)
         kwargs = {"content": ""}
         send_webhook = False
 
-        if ctx.author.bot:
+        if ctx.author.bot or mention_author:
             kwargs["content"] = ctx.author.mention
 
         if not error_msg:
