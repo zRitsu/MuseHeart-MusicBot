@@ -191,13 +191,13 @@ class Owner(commands.Cog):
 
         data = self.bot.load_modules()
 
-        await self.bot.sync_app_commands()
+        await self.bot.sync_app_commands(force=self.bot == self.bot.pool.controller_bot)
 
         for bot in self.bot.pool.bots:
 
             if bot.user.id != self.bot.user.id:
                 bot.load_modules()
-                await bot.sync_app_commands()
+                await bot.sync_app_commands(force=bot == self.bot.pool.controller_bot)
 
         self.bot.sync_command_cooldowns()
 
