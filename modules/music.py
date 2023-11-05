@@ -2597,6 +2597,7 @@ class Music(commands.Cog):
                            help="Buscar por músicas com a frase exata no nome da música ao invés de buscar palavra por palavra.")
     move_args.add_argument('-position', '-pos', help="Especificar uma posição de destino (isso serve pra situações no qual o nome pra busca começe com número).\nEx: -pos 1", type=int, default=None)
 
+    @check_queue_loading()
     @is_dj()
     @has_player()
     @check_voice()
@@ -2621,6 +2622,7 @@ class Music(commands.Cog):
 
         await self.move.callback(self=self, inter=ctx, position=position, query=" ".join(unknown), match_count=args.count or 1, case_sensitive=args.casesensitive)
 
+    @check_queue_loading()
     @is_dj()
     @has_player()
     @check_voice()
@@ -3316,7 +3318,7 @@ class Music(commands.Cog):
     clear_flags = CommandArgparse()
     clear_flags.add_argument('-songtitle', '-name', '-title', '-songname',nargs='+', help="incluir nome que tiver na música.\nEx: -name NCS", default=[])
     clear_flags.add_argument('-uploader', '-author', '-artist', nargs = '+', default=[],
-                             help="Remover músicas com o nome que tiver no autor especificado.\nEx: -uploader sekai")
+                             help="Remover músicas com o nome que tiver no autor/artista/uploader especificado.\nEx: -uploader sekai")
     clear_flags.add_argument('-member', '-user', '-u', nargs='+', default=[],
                              help="Remover músicas pedidas pelo usuário especificado.\nEx: -user @user")
     clear_flags.add_argument('-duplicates', '-dupes', '-duplicate', action='store_true',
@@ -3357,6 +3359,7 @@ class Music(commands.Cog):
             absent_members=args.absentmembers
         )
 
+    @check_queue_loading()
     @is_dj()
     @has_player()
     @check_voice()
@@ -3572,6 +3575,260 @@ class Music(commands.Cog):
 
         await self.interaction_message(inter, txt, emoji="♻️")
 
+
+    move_queue_flags = CommandArgparse()
+    move_queue_flags.add_argument('-position', '-pos',
+                           help="Especificar uma posição de destino (opcional).\nEx: -pos 1",
+                           type=int, default=1)
+    move_queue_flags._actions.extend(clear_flags._actions)
+
+    @check_queue_loading()
+    @is_dj()
+    @has_player()
+    @check_voice()
+    @pool_command(name="movequeue", aliases=["moveadv", "moveadvanced", "moveq", "mq"], description="Mover músicas da fila em lote.", only_voiced=True,
+                  extras={"flags": move_queue_flags}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
+    async def move_advanced_legacy(self, ctx: CustomContext, *, flags: str = ""):
+
+        args, unknown = ctx.command.extras['flags'].parse_known_args(flags.split())
+
+        await self.move_advanced.callback(
+            self=self, inter=ctx,
+            position=args.position,
+            song_name=" ".join(args.songtitle + unknown),
+            song_author=" ".join(args.uploader),
+            user=await commands.MemberConverter().convert(ctx, " ".join(args.member)) if args.member else None,
+            duplicates=args.duplicates,
+            playlist=" ".join(args.playlist),
+            min_duration=args.minimaltime,
+            max_duration=args.maxduration,
+            range_start=args.startposition,
+            range_end=args.endposition,
+            absent_members=args.absentmembers
+        )
+
+    @check_queue_loading()
+    @is_dj()
+    @has_player()
+    @check_voice()
+    @q.sub_command(
+        name="move",
+        description=f"{desc_prefix}Mover músicas da fila em lote.",
+        extras={"only_voiced": True}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc
+    )
+    async def move_advanced(
+            self,
+            inter: disnake.AppCmdInter,
+            position: int = commands.Param(name="posição", description="Posição de destino na fila.", min_value=1.0),
+            song_name: str = commands.Param(name="nome_da_música", description="incluir nome que tiver na música.",
+                                            default=None),
+            song_author: str = commands.Param(name="nome_do_autor",
+                                              description="Incluir nome que tiver no autor/artista/uploader da música.",
+                                              default=None),
+            user: disnake.Member = commands.Param(name='usuário',
+                                                  description="Incluir músicas pedidas pelo usuário selecionado.",
+                                                  default=None),
+            duplicates: bool = commands.Param(name="duplicados", description="Incluir músicas duplicadas",
+                                              default=False),
+            playlist: str = commands.Param(description="Incluir nome que tiver na playlist.", default=None),
+            min_duration: str = commands.Param(name="duração_inicial",
+                                               description="incluir músicas com duração acima/igual (ex. 1:23).",
+                                               default=None),
+            max_duration: str = commands.Param(name="duração_máxima",
+                                               description="incluir músicas com duração máxima especificada (ex. 1:45).",
+                                               default=None),
+            range_start: int = commands.Param(name="posição_inicial",
+                                              description="incluir músicas da fila a partir de uma posição específica "
+                                                          "da fila.",
+                                              min_value=1.0, max_value=500.0, default=None),
+            range_end: int = commands.Param(name="posição_final",
+                                            description="incluir músicas da fila até uma posição específica da fila.",
+                                            min_value=1.0, max_value=500.0, default=None),
+            absent_members: bool = commands.Param(name="membros_ausentes",
+                                                  description="Incluir músicas adicionads por membros fora do canal",
+                                                  default=False)
+    ):
+
+        if min_duration and max_duration:
+            raise GenericError(
+                "Você deve escolher apenas uma das opções: **duração_abaixo_de** ou **duração_acima_de**.")
+
+        try:
+            bot = inter.music_bot
+        except AttributeError:
+            bot = inter.bot
+
+        player: LavalinkPlayer = bot.music.players[inter.guild_id]
+
+        if not player.queue:
+            raise GenericError("**Não há musicas na fila.**")
+
+        filters = []
+        final_filters = set()
+
+        txt = []
+        playlist_hyperlink = set()
+
+        if song_name:
+            filters.append('song_name')
+        if song_author:
+            filters.append('song_author')
+        if user:
+            filters.append('user')
+        if playlist:
+            filters.append('playlist')
+        if min_duration:
+            filters.append('time_below')
+            min_duration = string_to_seconds(min_duration) * 1000
+        if max_duration:
+            filters.append('time_above')
+            max_duration = string_to_seconds(max_duration) * 1000
+        if absent_members:
+            filters.append('absent_members')
+        if duplicates:
+            filters.append('duplicates')
+
+        if not filters and not range_start and not range_end:
+            raise GenericError("**Você deve usar pelo menos uma opção pra mover**")
+
+        else:
+
+            if range_start and range_end:
+
+                if range_start >= range_end:
+                    raise GenericError("**A posição final deve ser maior que a posição inicial!**")
+
+                song_list = list(player.queue)[range_start - 1: range_end - 1]
+                txt.append(f"**Posição inicial da fila:** `{range_start}`\n"
+                           f"**Posição final da fila:** `{range_end}`")
+
+            elif range_start:
+                song_list = list(player.queue)[range_start - 1:]
+                txt.append(f"**Posição inicial da fila:** `{range_start}`")
+            elif range_end:
+                song_list = list(player.queue)[:range_end - 1]
+                txt.append(f"**Posição final da fila:** `{range_end}`")
+            else:
+                song_list = list(player.queue)
+
+            moved_tracks = 0
+
+            duplicated_titles = set()
+
+            song_list.reverse()
+
+            for t in song_list:
+
+                temp_filter = list(filters)
+
+                if 'duplicates' in temp_filter:
+                    if (title := f"{t.author} - {t.title}".lower()) in duplicated_titles:
+                        temp_filter.remove('duplicates')
+                        final_filters.add('duplicates')
+                    else:
+                        duplicated_titles.add(title)
+
+                if 'time_below' in temp_filter and t.duration >= min_duration:
+                    temp_filter.remove('time_below')
+                    final_filters.add('time_below')
+
+                elif 'time_above' in temp_filter and t.duration <= max_duration:
+                    temp_filter.remove('time_above')
+                    final_filters.add('time_above')
+
+                if 'song_name' in temp_filter and song_name.lower() in t.title.lower():
+                    temp_filter.remove('song_name')
+                    final_filters.add('song_name')
+
+                if 'song_author' in temp_filter and song_author.lower() in t.author.lower():
+                    temp_filter.remove('song_author')
+                    final_filters.add('song_author')
+
+                if 'user' in temp_filter and user.id == t.requester:
+                    temp_filter.remove('user')
+                    final_filters.add('user')
+
+                elif 'absent_members' in temp_filter and t.requester not in player.guild.me.voice.channel.voice_states:
+                    temp_filter.remove('absent_members')
+                    final_filters.add('absent_members')
+
+                if 'playlist' in temp_filter:
+                    if playlist == t.playlist_name:
+                        playlist_hyperlink.add(f"[`{fix_characters(t.playlist_name)}`]({t.playlist_url})")
+                        temp_filter.remove('playlist')
+                        final_filters.add('playlist')
+                    elif isinstance(inter, CustomContext) and playlist.lower() in t.playlist_name.lower():
+                        playlist_hyperlink.add(f"[`{fix_characters(t.playlist_name)}`]({t.playlist_url})")
+                        temp_filter.remove('playlist')
+                        final_filters.add('playlist')
+
+                if not temp_filter:
+                    track = player.queue[player.queue.index(t)]
+                    player.queue.remove(t)
+                    player.queue.insert(position - 1, track)
+                    moved_tracks += 1
+
+            duplicated_titles.clear()
+
+            if not moved_tracks:
+                await inter.send("Nenhuma música encontrada!", ephemeral=True)
+                return
+
+            try:
+                final_filters.remove("song_name")
+                txt.append(f"**Inclui nome:** `{fix_characters(song_name)}`")
+            except:
+                pass
+
+            try:
+                final_filters.remove("song_author")
+                txt.append(f"**Inclui nome no uploader/artista:** `{fix_characters(song_author)}`")
+            except:
+                pass
+
+            try:
+                final_filters.remove("user")
+                txt.append(f"**Pedido pelo membro:** {user.mention}")
+            except:
+                pass
+
+            try:
+                final_filters.remove("playlist")
+                txt.append(f"**Playlist:** {' | '.join(playlist_hyperlink)}")
+            except:
+                pass
+
+            try:
+                final_filters.remove("time_below")
+                txt.append(f"**Com duração inicial/igual:** `{time_format(min_duration)}`")
+            except:
+                pass
+
+            try:
+                final_filters.remove("time_above")
+                txt.append(f"**Com duração máxima:** `{time_format(max_duration)}`")
+            except:
+                pass
+
+            try:
+                final_filters.remove("duplicates")
+                txt.append(f"**Músicas duplicadas**")
+            except:
+                pass
+
+            try:
+                final_filters.remove("absent_members")
+                txt.append("`Músicas pedidas por membros que saíram do canal.`")
+            except:
+                pass
+
+            txt = [f"moveu {moved_tracks} música(s) da fila para a posição **[{position}]**.",
+                   f"↪️ **⠂{inter.author.mention} moveu {moved_tracks} música(s) da fila para a posição "
+                   f"[{position}] usando os seguintes filtros:**\n\n" + '\n'.join(txt)]
+
+        await self.interaction_message(inter, txt, emoji="↪️", force=True)
+
+    @move_advanced.autocomplete("playlist")
     @clear.autocomplete("playlist")
     async def queue_playlist(self, inter: disnake.Interaction, query: str):
 
@@ -3596,11 +3853,9 @@ class Music(commands.Cog):
         return list(set([track.playlist_name for track in player.queue if track.playlist_name and
                          query.lower() in track.playlist_name.lower()]))[:20]
 
+    @move_advanced.autocomplete("nome_do_autor")
     @clear.autocomplete("nome_do_autor")
     async def queue_author(self, inter: disnake.Interaction, query: str):
-
-        if not query:
-            return
 
         try:
             await check_pool_bots(inter, only_voiced=True)
@@ -3616,7 +3871,10 @@ class Music(commands.Cog):
         except KeyError:
             return
 
-        return list(set([track.author for track in player.queue if query.lower() in track.author.lower()]))[:20]
+        if not query:
+            return list(set([track.authors_string for track in player.queue]))[:20]
+        else:
+            return list(set([track.authors_string for track in player.queue if query.lower() in track.authors_string.lower()]))[:20]
 
     restrict_cd = commands.CooldownMapping.from_cooldown(2, 7, commands.BucketType.member)
     restrict_mc =commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
