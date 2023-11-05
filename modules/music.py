@@ -3420,12 +3420,15 @@ class Music(commands.Cog):
         playlist_hyperlink = set()
 
         if song_name:
+            song_name = song_name.replace("️", "")
             filters.append('song_name')
         if song_author:
+            song_author = song_author.replace("️", "")
             filters.append('song_author')
         if user:
             filters.append('user')
         if playlist:
+            playlist = playlist.replace("️", "")
             filters.append('playlist')
         if min_duration:
             filters.append('time_below')
@@ -3485,11 +3488,11 @@ class Music(commands.Cog):
                     temp_filter.remove('time_above')
                     final_filters.add('time_above')
 
-                if 'song_name' in temp_filter and song_name.lower() in t.title.lower():
+                if 'song_name' in temp_filter and song_name.lower() in t.title.replace("️", "").lower():
                     temp_filter.remove('song_name')
                     final_filters.add('song_name')
 
-                if 'song_author' in temp_filter and song_author.lower() in t.author.lower():
+                if 'song_author' in temp_filter and song_author.lower() in t.author.replace("️", "").lower():
                     temp_filter.remove('song_author')
                     final_filters.add('song_author')
 
@@ -3502,11 +3505,11 @@ class Music(commands.Cog):
                     final_filters.add('absent_members')
 
                 if 'playlist' in temp_filter:
-                    if playlist == t.playlist_name:
+                    if playlist == t.playlist_name.replace("️", ""):
                         playlist_hyperlink.add(f"[`{fix_characters(t.playlist_name)}`]({t.playlist_url})")
                         temp_filter.remove('playlist')
                         final_filters.add('playlist')
-                    elif isinstance(inter, CustomContext) and playlist.lower() in t.playlist_name.lower():
+                    elif isinstance(inter, CustomContext) and playlist.lower() in t.playlist_name.replace("️", "").lower():
                         playlist_hyperlink.add(f"[`{fix_characters(t.playlist_name)}`]({t.playlist_url})")
                         temp_filter.remove('playlist')
                         final_filters.add('playlist')
@@ -3670,12 +3673,15 @@ class Music(commands.Cog):
         playlist_hyperlink = set()
 
         if song_name:
+            song_name = song_name.replace("️", "")
             filters.append('song_name')
         if song_author:
+            song_author = song_author.replace("️", "")
             filters.append('song_author')
         if user:
             filters.append('user')
         if playlist:
+            playlist = playlist.replace("️", "")
             filters.append('playlist')
         if min_duration:
             filters.append('time_below')
@@ -3736,11 +3742,11 @@ class Music(commands.Cog):
                     temp_filter.remove('time_above')
                     final_filters.add('time_above')
 
-                if 'song_name' in temp_filter and song_name.lower() in t.title.lower():
+                if 'song_name' in temp_filter and song_name.lower() in t.title.replace("️", "").lower():
                     temp_filter.remove('song_name')
                     final_filters.add('song_name')
 
-                if 'song_author' in temp_filter and song_author.lower() in t.author.lower():
+                if 'song_author' in temp_filter and song_author.lower() in t.author.replace("️", "").lower():
                     temp_filter.remove('song_author')
                     final_filters.add('song_author')
 
@@ -3753,11 +3759,11 @@ class Music(commands.Cog):
                     final_filters.add('absent_members')
 
                 if 'playlist' in temp_filter:
-                    if playlist == t.playlist_name:
+                    if playlist == t.playlist_name.replace("️", ""):
                         playlist_hyperlink.add(f"[`{fix_characters(t.playlist_name)}`]({t.playlist_url})")
                         temp_filter.remove('playlist')
                         final_filters.add('playlist')
-                    elif isinstance(inter, CustomContext) and playlist.lower() in t.playlist_name.lower():
+                    elif isinstance(inter, CustomContext) and playlist.lower() in t.playlist_name.replace("️", "").lower():
                         playlist_hyperlink.add(f"[`{fix_characters(t.playlist_name)}`]({t.playlist_url})")
                         temp_filter.remove('playlist')
                         final_filters.add('playlist')
