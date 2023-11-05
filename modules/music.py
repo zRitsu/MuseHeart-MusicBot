@@ -3329,6 +3329,8 @@ class Music(commands.Cog):
                              help="Remover músicas com a duração mínima especificada.\nEx: -min 1:23.")
     clear_flags.add_argument('-maxduration', '-maxtime', '-max', default=None,
                              help="Remover músicas com a duração máxima especificada.\nEx: -max 1:23.")
+    clear_flags.add_argument('-amount', '-counter', '-count', '-c', '-max', type=int, default=None,
+                           help="Especificar uma quantidade de músicas para mover com o nome especificado.\nEx: -amount 5")
     clear_flags.add_argument('-startposition', '-startpos', '-start', type=int, default=None,
                              help="Remover músicas a partir de uma posição inicial da fila.\nEx: -start 10")
     clear_flags.add_argument('-endposition', '-endpos', '-end', type=int, default=None,
@@ -3354,6 +3356,7 @@ class Music(commands.Cog):
             playlist=" ".join(args.playlist),
             min_duration=args.minimaltime,
             max_duration=args.maxduration,
+            amount=args.amount,
             range_start=args.startposition,
             range_end=args.endposition,
             absent_members=args.absentmembers
@@ -3387,6 +3390,8 @@ class Music(commands.Cog):
             max_duration: str = commands.Param(name="duração_máxima",
                                                description="incluir músicas com duração máxima especificada (ex. 1:45).",
                                                default=None),
+            amount: int = commands.Param(name="quantidade", description="Quantidade de músicas para mover.",
+                                         min_value=0, max_value=99, default=0),
             range_start: int = commands.Param(name="posição_inicial",
                                               description="incluir músicas da fila a partir de uma posição específica "
                                                           "da fila.",
@@ -3469,7 +3474,12 @@ class Music(commands.Cog):
 
             duplicated_titles = set()
 
+            amount_counter = int(amount) if amount < 0 else 0
+
             for t in song_list:
+
+                if amount and amount_counter < 1:
+                    break
 
                 temp_filter = list(filters)
 
@@ -3517,6 +3527,8 @@ class Music(commands.Cog):
                 if not temp_filter:
                     player.queue.remove(t)
                     deleted_tracks += 1
+                    if amount:
+                        amount_counter -= 1
 
             duplicated_titles.clear()
 
@@ -3605,6 +3617,7 @@ class Music(commands.Cog):
             playlist=" ".join(args.playlist),
             min_duration=args.minimaltime,
             max_duration=args.maxduration,
+            amount=args.amount,
             range_start=args.startposition,
             range_end=args.endposition,
             absent_members=args.absentmembers
@@ -3640,6 +3653,8 @@ class Music(commands.Cog):
             max_duration: str = commands.Param(name="duração_máxima",
                                                description="incluir músicas com duração máxima especificada (ex. 1:45).",
                                                default=None),
+            amount: int = commands.Param(name="quantidade", description="Quantidade de músicas para mover.",
+                                         min_value=0, max_value=99, default=0),
             range_start: int = commands.Param(name="posição_inicial",
                                               description="incluir músicas da fila a partir de uma posição específica "
                                                           "da fila.",
@@ -3723,7 +3738,12 @@ class Music(commands.Cog):
 
             song_list.reverse()
 
+            amount_counter = int(amount) if amount < 0 else 0
+
             for t in song_list:
+
+                if amount and amount_counter < 1:
+                    break
 
                 temp_filter = list(filters)
 
@@ -3769,10 +3789,13 @@ class Music(commands.Cog):
                         final_filters.add('playlist')
 
                 if not temp_filter:
+
                     track = player.queue[player.queue.index(t)]
                     player.queue.remove(t)
                     player.queue.insert(position - 1, track)
                     moved_tracks += 1
+                    if amount:
+                        amount_counter -= 1
 
             duplicated_titles.clear()
 
