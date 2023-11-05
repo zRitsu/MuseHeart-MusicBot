@@ -44,6 +44,7 @@ DEFAULT_CONFIG = {
     #########################
     "AUTO_DOWNLOAD_LAVALINK_SERVERLIST": False,
     "LAVALINK_SERVER_LIST": "https://gist.githubusercontent.com/zRitsu/c3511e1da0440b94c126769dd40c9d91/raw/lavalink.ini",
+    "LAVALINK_NODE_RECONNECT_RETRIES": 30,
     "DEFAULT_SKIN": "default",
     "DEFAULT_STATIC_SKIN": "default",
     "DEFAULT_IDLING_SKIN": "default",
@@ -181,6 +182,7 @@ def load_config():
         "INVITE_PERMISSIONS",
         "PREFIXED_POOL_TIMEOUT",
         "PLAYER_INFO_BACKUP_INTERVAL",
+        "LAVALINK_NODE_RECONNECT_RETRIES",
     ]:
         try:
             CONFIG[i] = int(CONFIG[i])
@@ -246,5 +248,8 @@ def load_config():
 
     if CONFIG["PLAYER_INFO_BACKUP_INTERVAL"] < 30:
         CONFIG["PLAYER_INFO_BACKUP_INTERVAL"] = 30
+
+    if CONFIG["LAVALINK_NODE_RECONNECT_RETRIES"] < 5:
+        CONFIG["LAVALINK_NODE_RECONNECT_RETRIES"] = 0
 
     return CONFIG

@@ -5396,7 +5396,10 @@ class Music(commands.Cog):
 
         while True:
 
-            if retries == 30:
+            if node.is_available:
+                return
+
+            if self.bot.config["LAVALINK_NODE_RECONNECT_RETRIES"] and retries == self.bot.config["LAVALINK_NODE_RECONNECT_RETRIES"]:
                 print(f"{self.bot.user} - [{node.identifier}] Todas as tentativas de reconectar falharam...")
                 return
 
