@@ -799,7 +799,12 @@ class BotCore(commands.AutoShardedBot):
 
     async def can_send_message(self, message: disnake.Message, dm_user=True):
 
-        if not message.channel.permissions_for(message.guild.me).send_messages:
+        if isinstance(message.channel, disnake.Thread):
+            perm_check = message.channel.parent.permissions_for(message.guild.me).send_messages_in_threads
+        else:
+            perm_check = message.channel.permissions_for(message.guild.me).send_messages
+
+        if not perm_check:
 
             print(f"Can't send message in: {message.channel.name} [{message.channel.id}] (Missing permissions)")
 
