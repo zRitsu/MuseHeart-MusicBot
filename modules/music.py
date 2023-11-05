@@ -3329,7 +3329,7 @@ class Music(commands.Cog):
                              help="Remover músicas com a duração mínima especificada.\nEx: -min 1:23.")
     clear_flags.add_argument('-maxduration', '-maxtime', '-max', default=None,
                              help="Remover músicas com a duração máxima especificada.\nEx: -max 1:23.")
-    clear_flags.add_argument('-amount', '-counter', '-count', '-c', '-max', type=int, default=None,
+    clear_flags.add_argument('-amount', '-counter', '-count', '-c', type=int, default=None,
                            help="Especificar uma quantidade de músicas para mover com o nome especificado.\nEx: -amount 5")
     clear_flags.add_argument('-startposition', '-startpos', '-start', type=int, default=None,
                              help="Remover músicas a partir de uma posição inicial da fila.\nEx: -start 10")
@@ -3341,7 +3341,8 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @pool_command(name="clear", aliases=["limpar"], description="Limpar a fila de música.", only_voiced=True,
+    @pool_command(name="clear", aliases=["limpar", "clearqueue"], description="Limpar a fila de música.",
+                  only_voiced=True,
                   extras={"flags": clear_flags}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
     async def clear_legacy(self, ctx: CustomContext, *, flags: str = ""):
 
