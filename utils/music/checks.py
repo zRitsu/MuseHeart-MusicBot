@@ -24,9 +24,14 @@ def can_send_message(
         bot: Union[disnake.ClientUser, disnake.Member]
 ):
 
-    perms = channel.permissions_for(channel.guild.me)
+    if isinstance(channel, disnake.Thread):
+        perms = channel.parent.permissions_for(channel.guild.me)
+        send_message_perm = perms.send_messages_in_threads
+    else:
+        perms = channel.permissions_for(channel.guild.me)
+        send_message_perm = perms.send_messages
 
-    if not perms.send_messages:
+    if not send_message_perm:
         raise GenericError(f"**{bot.mention} não possui permissão de enviar mensagens no canal:** {channel.mention}")
 
     if not perms.embed_links:
@@ -221,7 +226,14 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         if only_voiced:
             continue
 
-        if not bot.get_channel(inter.channel.id).permissions_for(guild.me).send_messages:
+        channel = bot.get_channel(inter.channel.id)
+
+        if isinstance(channel, disnake.Thread):
+            send_message_perm = channel.parent.permissions_for(channel.guild.me).send_messages_in_threads
+        else:
+            send_message_perm = channel.permissions_for(channel.guild.me).send_messages
+
+        if not send_message_perm:
 
             if not guild.me.voice:
                 bot_missing_perms.append(bot)

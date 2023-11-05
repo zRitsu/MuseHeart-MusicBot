@@ -344,8 +344,14 @@ async def send_message(
         try:
             await inter.send(text, ephemeral=True, **kwargs)
         except disnake.InteractionTimedOut:
+
             try:
-                if not inter.channel.permissions_for(inter.guild.me).send_messages:
+                if isinstance(inter.channel, disnake.Thread):
+                    send_message_perm = inter.channel.parent.permissions_for(inter.guild.me).send_messages_in_threads
+                else:
+                    send_message_perm = inter.channel.permissions_for(inter.guild.me).send_messages
+
+                if not send_message_perm:
                     return
             except AttributeError:
                 return

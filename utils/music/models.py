@@ -1372,9 +1372,12 @@ class LavalinkPlayer(wavelink.Player):
                                 self.message = None
                                 return
 
-                            perms = self.text_channel.permissions_for(self.guild.me)
+                            if isinstance(self.text_channel, disnake.Thread):
+                                send_message_perm = self.text_channel.parent.permissions_for(self.guild.me).send_messages_in_threads
+                            else:
+                                send_message_perm = self.text_channel.permissions_for(self.guild.me).send_messages
 
-                            if not perms.send_messages or not perms.read_messages:
+                            if not send_message_perm or not self.text_channel.permissions_for(self.guild.me).read_messages:
                                 return
 
                         self.start_message_updater_task()
@@ -1547,7 +1550,7 @@ class LavalinkPlayer(wavelink.Player):
                             )
                             channel: disnake.Thread = self.bot.get_channel(self.message.id)
 
-                            if channel.permissions_for(self.guild.me).send_messages:
+                            if channel.parent.permissions_for(self.guild.me).send_messages_in_threads:
                                 try:
                                     await channel.send(
                                         embed=disnake.Embed(

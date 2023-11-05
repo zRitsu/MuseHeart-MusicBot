@@ -4312,7 +4312,14 @@ class Music(commands.Cog):
 
                     channel_db_perms = channel_db.permissions_for(guild.me)
 
-                    if not channel_db_perms.send_messages:
+                    channel = bot.get_channel(inter.channel.id)
+
+                    if isinstance(channel, disnake.Thread):
+                        send_message_perm = channel_db.parent.permissions_for(channel.guild.me).send_messages_in_threads
+                    else:
+                        send_message_perm = channel_db.permissions_for(channel.guild.me).send_messages
+
+                    if not send_message_perm:
                         raise GenericError(
                             f"**{bot.user.mention} não possui permissão para enviar mensagens no canal <#{static_player['channel']}>**\n"
                             "Caso queira resetar a configuração do canal de pedir música, use o comando /reset ou /setup "
@@ -4840,7 +4847,15 @@ class Music(commands.Cog):
 
             text_channel = self.bot.get_channel(int(channel_id))
 
-            if not text_channel or not text_channel.permissions_for(message.guild.me).send_messages:
+            if not text_channel:
+                return
+
+            if isinstance(text_channel, disnake.Thread):
+                send_message_perm = text_channel.parent.permissions_for(message.guild.me).send_messages_in_threads
+            else:
+                send_message_perm = text_channel.permissions_for(message.guild.me).send_messages
+
+            if not send_message_perm:
                 return
 
             if not self.bot.intents.message_content:
@@ -5584,7 +5599,12 @@ class Music(commands.Cog):
         elif player.keep_connected and not track.autoplay and len(player.queue) > 15:
             player.queue.append(track)
 
-        if embed and player.text_channel and player.text_channel.permissions_for(player.guild.me).send_messages:
+        if isinstance(player.text_channel, disnake.Thread):
+            send_message_perm = player.text_channel.parent.permissions_for(player.guild.me).send_messages_in_threads
+        else:
+            send_message_perm = player.text_channel.permissions_for(player.guild.me).send_messages
+
+        if embed and player.text_channel and send_message_perm:
             await player.text_channel.send(embed=embed, delete_after=10)
 
         await asyncio.sleep(10)
@@ -5612,7 +5632,12 @@ class Music(commands.Cog):
         if player.auto_pause:
             return
 
-        if not player.text_channel.permissions_for(player.guild.me).send_messages:
+        if isinstance(player.text_channel, disnake.Thread):
+            send_message_perm = player.text_channel.parent.permissions_for(player.guild.me).send_messages_in_threads
+        else:
+            send_message_perm = player.text_channel.permissions_for(player.guild.me).send_messages
+
+        if not send_message_perm:
             try:
                 print(f"{player.guild.name} [{player.guild_id}] - Desligando player por falta de permissão para enviar "
                       f"mensagens no canal: {player.text_channel.name} [{player.text_channel.id}]")
