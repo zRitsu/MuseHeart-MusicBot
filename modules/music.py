@@ -4451,7 +4451,7 @@ class Music(commands.Cog):
                     await interaction.send("Você não pode interagir aqui!", ephemeral=True)
                     return
 
-                cmd = self.bot.pool.controller_bot.get_slash_command("fav").children.get("manager")
+                cmd = self.bot.pool.controller_bot.get_slash_command("fav_manager")
                 await self.process_player_interaction(interaction, cmd, cmd_kwargs)
                 return
 
@@ -4461,7 +4461,7 @@ class Music(commands.Cog):
                     await interaction.send("Você não pode interagir aqui!", ephemeral=True)
                     return
 
-                cmd = self.bot.pool.controller_bot.get_slash_command("integration").children.get("manager")
+                cmd = self.bot.pool.controller_bot.get_slash_command("integration_manager")
                 await self.process_player_interaction(interaction, cmd, cmd_kwargs)
                 return
 
