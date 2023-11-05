@@ -4445,7 +4445,7 @@ class Music(commands.Cog):
                 await self.process_player_interaction(interaction, cmd, cmd_kwargs)
                 return
 
-            if control == PlayerControls.fav_manageer:
+            if control == PlayerControls.fav_manager:
 
                 if str(interaction.user.id) not in interaction.message.content:
                     await interaction.send("Você não pode interagir aqui!", ephemeral=True)

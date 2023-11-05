@@ -151,7 +151,7 @@ class PlayerControls:
     restrict_mode = "musicplayer_restrict_mode"
     miniqueue = "musicplayer_miniqueue"
     song_request_thread = "musicplayer_song_request_thread"
-    fav_manageer = "musicplayer_fav_manager"
+    fav_manager = "musicplayer_fav_manager"
     integration_manager = "musicplayer_integration_manager"
     autoplay = "musicplayer_autoplay"
     add_favorite = "musicplayer_add_favorite"
