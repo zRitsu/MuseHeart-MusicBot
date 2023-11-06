@@ -3472,7 +3472,7 @@ class Music(commands.Cog):
 
             duplicated_titles = set()
 
-            amount_counter = int(amount) if amount < 0 else 0
+            amount_counter = int(amount) if amount > 0 else 0
 
             for t in song_list:
 
@@ -3736,7 +3736,7 @@ class Music(commands.Cog):
 
             song_list.reverse()
 
-            amount_counter = int(amount) if amount < 0 else 0
+            amount_counter = int(amount) if amount > 0 else 0
 
             for t in song_list:
 
