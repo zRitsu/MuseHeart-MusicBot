@@ -455,8 +455,6 @@ class LavalinkPlayer(wavelink.Player):
 
     async def hook(self, event) -> None:
 
-        print("test1", type(event))
-
         await super().hook(event)
 
         if isinstance(event, wavelink.TrackEnd):
