@@ -5458,10 +5458,13 @@ class Music(commands.Cog):
             retries += 1
             continue
 
+    @commands.Cog.listener("on_wavelink_track_start")
+    @commands.Cog.listener("on_wavelink_track_end")
+    @commands.Cog.listener("on_wavelink_track_exception")
     @commands.Cog.listener("on_wavelink_websocket_closed")
     async def node_ws_voice_closed(self, node: wavelink.Node, payload: wavelink.events.WebsocketClosed):
         player: LavalinkPlayer = payload.player
-        await player.player_ws_close_event_handler(payload)
+        await player.hook(payload)
 
     @commands.Cog.listener("on_wavelink_node_ready")
     async def node_ready(self, node: wavelink.Node):

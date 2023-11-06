@@ -455,7 +455,7 @@ class LavalinkPlayer(wavelink.Player):
 
     async def hook(self, event) -> None:
 
-        await super().hook(event)
+        # await super().hook(event)
 
         if isinstance(event, wavelink.TrackEnd):
 
@@ -636,76 +636,76 @@ class LavalinkPlayer(wavelink.Player):
             await self.process_next(start_position=start_position)
             return
 
-    async def player_ws_close_event_handler(self, event: wavelink.WebsocketClosed):
+        if isinstance(event, wavelink.WebsocketClosed):
 
-        if event.code == 1000:
-            return
+            if event.code == 1000:
+                return
 
-        if not self.guild.me:
-            await self.destroy(force=True)
-            return
+            if not self.guild.me:
+                await self.destroy(force=True)
+                return
 
-        try:
-            vc = self.last_channel or self.guild.me.voice.channel
-        except AttributeError:
-            vc = None
-
-        if event.code == 4014 and self.guild.me.voice:
-            pass
-        else:
-            print(
-                ("-" * 15) +
-                f"\nErro no canal de voz!"
-                f"\nBot: {self.bot.user} [{self.bot.user.id}] | " + (
-                    "Online" if self.bot.is_ready() else "Offline") +
-                f"\nGuild: {self.guild.name} [{self.guild.id}]"
-                f"\nCanal: {vc.name} [{vc.id}]"
-                f"\nServer: {self.node.identifier} | code: {event.code} | reason: {event.reason}\n" +
-                ("-" * 15)
-            )
-
-        if self.is_closing:
-            return
-
-        if event.code in (
-                4000,  # internal error
-                1006,
-                1001,
-                4016,  # Connection started elsewhere
-                4005,  # Already authenticated.
-                4006,  # Session is no longer valid.
-        ):
             try:
-                vc_id = self.guild.me.voice.channel.id
+                vc = self.last_channel or self.guild.me.voice.channel
             except AttributeError:
-                vc_id = self.last_channel.id
+                vc = None
 
-            await asyncio.sleep(3)
+            if event.code == 4014 and self.guild.me.voice:
+                pass
+            else:
+                print(
+                    ("-" * 15) +
+                    f"\nErro no canal de voz!"
+                    f"\nBot: {self.bot.user} [{self.bot.user.id}] | " + (
+                        "Online" if self.bot.is_ready() else "Offline") +
+                    f"\nGuild: {self.guild.name} [{self.guild.id}]"
+                    f"\nCanal: {vc.name} [{vc.id}]"
+                    f"\nServer: {self.node.identifier} | code: {event.code} | reason: {event.reason}\n" +
+                    ("-" * 15)
+                )
 
             if self.is_closing:
                 return
 
-            await self.connect(vc_id)
-            return
-
-        if event.code == 4014:
-
-            if self.static:
-                self.command_log = "Desliguei o player por perca de conexão com o canal de voz."
-                await self.destroy()
-
-            else:
-                embed = disnake.Embed(description="**Desliguei o player por perca de conexão com o canal de voz.**",
-                                      color=self.bot.get_color(self.guild.me))
+            if event.code in (
+                    4000,  # internal error
+                    1006,
+                    1001,
+                    4016,  # Connection started elsewhere
+                    4005,  # Already authenticated.
+                    4006,  # Session is no longer valid.
+            ):
                 try:
-                    self.bot.loop.create_task(self.text_channel.send(embed=embed, delete_after=7))
-                except:
-                    traceback.print_exc()
-                await self.destroy()
+                    vc_id = self.guild.me.voice.channel.id
+                except AttributeError:
+                    vc_id = self.last_channel.id
+
+                await asyncio.sleep(3)
+
+                if self.is_closing:
+                    return
+
+                await self.connect(vc_id)
+                return
+
+            if event.code == 4014:
+
+                if self.static:
+                    self.command_log = "Desliguei o player por perca de conexão com o canal de voz."
+                    await self.destroy()
+
+                else:
+                    embed = disnake.Embed(description="**Desliguei o player por perca de conexão com o canal de voz.**",
+                                          color=self.bot.get_color(self.guild.me))
+                    try:
+                        self.bot.loop.create_task(self.text_channel.send(embed=embed, delete_after=7))
+                    except:
+                        traceback.print_exc()
+                    await self.destroy()
+
+                return
 
             return
-
-        return
 
     async def channel_cleanup(self):
 
