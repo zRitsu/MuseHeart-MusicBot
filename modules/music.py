@@ -5461,14 +5461,6 @@ class Music(commands.Cog):
             retries += 1
             continue
 
-    @commands.Cog.listener("on_wavelink_track_start")
-    @commands.Cog.listener("on_wavelink_track_end")
-    @commands.Cog.listener("on_wavelink_track_exception")
-    @commands.Cog.listener("on_wavelink_websocket_closed")
-    async def wavelink_player_events(self, node: wavelink.Node, payload: wavelink.WavelinkException):
-        player: LavalinkPlayer = payload.player
-        await player.hook(payload)
-
     @commands.Cog.listener("on_wavelink_node_ready")
     async def node_ready(self, node: wavelink.Node):
         print(f'{self.bot.user} - Servidor de música: [{node.identifier}] está pronto para uso!')
