@@ -3312,28 +3312,32 @@ class Music(commands.Cog):
 
         await view.wait()
 
-    clear_flags = CommandArgparse()
-    clear_flags.add_argument('-songtitle', '-name', '-title', '-songname',nargs='+', help="incluir nome que tiver na música.\nEx: -name NCS", default=[])
-    clear_flags.add_argument('-uploader', '-author', '-artist', nargs = '+', default=[],
-                             help="Remover músicas com o nome que tiver no autor/artista/uploader especificado.\nEx: -uploader sekai")
-    clear_flags.add_argument('-member', '-user', '-u', nargs='+', default=[],
-                             help="Remover músicas pedidas pelo usuário especificado.\nEx: -user @user")
-    clear_flags.add_argument('-duplicates', '-dupes', '-duplicate', action='store_true',
-                             help="Remover músicas duplicadas.")
-    clear_flags.add_argument('-playlist', '-list', '-pl', nargs='+', default=[],
-                             help="Remover música que tiver com o nome especificado na playlist associada.\nEx: -playlist minhaplaylist")
-    clear_flags.add_argument('-minimaltime', '-mintime', '-min','-minduration', '-minduration',  default=None,
-                             help="Remover músicas com a duração mínima especificada.\nEx: -min 1:23.")
-    clear_flags.add_argument('-maxduration', '-maxtime', '-max', default=None,
-                             help="Remover músicas com a duração máxima especificada.\nEx: -max 1:23.")
-    clear_flags.add_argument('-amount', '-counter', '-count', '-c', type=int, default=0,
-                           help="Especificar uma quantidade de músicas para mover com o nome especificado.\nEx: -amount 5")
-    clear_flags.add_argument('-startposition', '-startpos', '-start', type=int, default=None,
-                             help="Remover músicas a partir de uma posição inicial da fila.\nEx: -start 10")
-    clear_flags.add_argument('-endposition', '-endpos', '-end', type=int, default=None,
-                             help="Remover músicas da fila até uma posição específica na fila.\nEx: -end 15")
-    clear_flags.add_argument('-absentmembers', '-absent', '-abs', action='store_true',
-                             help="Remover músicas adicionads por membros que saíram do canal")
+    adv_queue_flags = CommandArgparse()
+
+    adv_queue_flags.add_argument('-songtitle', '-name', '-title', '-songname', nargs='+',
+                                 help="incluir nome que tiver na música.\nEx: -name NCS", default=[])
+    adv_queue_flags.add_argument('-uploader', '-author', '-artist', nargs='+', default=[],
+                                 help="Remover músicas com o nome que tiver no autor/artista/uploader especificado.\nEx: -uploader sekai")
+    adv_queue_flags.add_argument('-member', '-user', '-u', nargs='+', default=[],
+                                 help="Remover músicas pedidas pelo usuário especificado.\nEx: -user @user")
+    adv_queue_flags.add_argument('-duplicates', '-dupes', '-duplicate', action='store_true',
+                                 help="Remover músicas duplicadas.")
+    adv_queue_flags.add_argument('-playlist', '-list', '-pl', nargs='+', default=[],
+                                 help="Remover música que tiver com o nome especificado na playlist associada.\nEx: -playlist minhaplaylist")
+    adv_queue_flags.add_argument('-minimaltime', '-mintime', '-min', '-minduration', '-minduration', default=None,
+                                 help="Remover músicas com a duração mínima especificada.\nEx: -min 1:23.")
+    adv_queue_flags.add_argument('-maxduration', '-maxtime', '-max', default=None,
+                                 help="Remover músicas com a duração máxima especificada.\nEx: -max 1:23.")
+    adv_queue_flags.add_argument('-amount', '-counter', '-count', '-c', type=int, default=0,
+                                 help="Especificar uma quantidade de músicas para mover com o nome especificado.\nEx: -amount 5")
+    adv_queue_flags.add_argument('-startposition', '-startpos', '-start', type=int, default=None,
+                                 help="Remover músicas a partir de uma posição inicial da fila.\nEx: -start 10")
+    adv_queue_flags.add_argument('-endposition', '-endpos', '-end', type=int, default=None,
+                                 help="Remover músicas da fila até uma posição específica na fila.\nEx: -end 15")
+    adv_queue_flags.add_argument('-absentmembers', '-absent', '-abs', action='store_true',
+                                 help="Remover músicas adicionads por membros que saíram do canal")
+
+    clear_flags = CommandArgparse(parents=[adv_queue_flags])
 
     @is_dj()
     @has_player()
@@ -3589,11 +3593,10 @@ class Music(commands.Cog):
         await self.interaction_message(inter, txt, emoji="♻️")
 
 
-    move_queue_flags = CommandArgparse()
+    move_queue_flags = CommandArgparse(parents=[adv_queue_flags])
     move_queue_flags.add_argument('-position', '-pos',
                            help="Especificar uma posição de destino (opcional).\nEx: -pos 1",
                            type=int, default=1)
-    move_queue_flags._actions.extend(clear_flags._actions)
 
     @check_queue_loading()
     @is_dj()
