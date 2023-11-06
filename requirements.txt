@@ -15,4 +15,4 @@ aiosqlite
 yt-dlp>=2023.10.13
 tornado
 emoji
-git+https://github.com/zRitsu/Wavelink.git@8247d9fbee0a2b50d5c668d8b4827bf552430925
+git+https://github.com/zRitsu/Wavelink.git@2e9a3ac0034adb51d9c32f6b97ae2b0a0496f946
