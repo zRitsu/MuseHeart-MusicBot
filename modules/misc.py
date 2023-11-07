@@ -505,16 +505,20 @@ class Misc(commands.Cog):
 
         for identifier, data in node_data.items():
 
-            if (data["total"] - data["available"]) >= 0:
+            if data["available"] > 0:
                 if data['website']:
                     nodes_available.add(
                         f"> [`✅ - {identifier}`]({data['website']}) `[{data['available']}/{data['total']}]`")
                 else:
                     nodes_available.add(f"> `✅ - {identifier} [{data['available']}/{data['total']}]`")
             else:
-                nodes_unavailable.add(f"> `❌` - {identifier}")
+                nodes_unavailable.add(f"> `❌ - {identifier}`")
 
-        node_txt_final = "\n".join(nodes_available) + "\n".join(nodes_unavailable)
+        node_txt_final = "\n".join(nodes_available)
+
+        if node_txt_final:
+            node_txt_final += "\n"
+        node_txt_final += "\n".join(nodes_unavailable)
 
         embed.description += "### Estatíticas (bot atual):\n" \
                             f"> 🏙️ **⠂Servidores:** `{len(bot.guilds)}`\n" \
