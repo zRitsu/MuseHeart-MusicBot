@@ -286,7 +286,7 @@ class PlayerSession(commands.Cog):
                 try:
                     text_channel = self.bot.get_channel(int(data["text_channel"])) or \
                                await self.bot.fetch_channel(int(data["text_channel"]))
-                except disnake.NotFound:
+                except (disnake.NotFound, AttributeError):
                     text_channel = None
 
                 if not text_channel:
@@ -298,12 +298,11 @@ class PlayerSession(commands.Cog):
 
                     text_channel = voice_channel
 
-                try:
-                    can_send_message(text_channel, self.bot.user)
-                except Exception:
-                    print(f"{self.bot.user} - Player Ignorado (falta de permissão) [Canal: {text_channel.name} | ID: {text_channel.id}] - [ {guild.name} - {guild.id} ]")
-                    await self.delete_data(guild.id)
-                    continue
+                if text_channel:
+                    try:
+                        can_send_message(text_channel, self.bot.user)
+                    except Exception:
+                        print(f"{self.bot.user} - Controller Ignorado (falta de permissão) [Canal: {text_channel.name} | ID: {text_channel.id}] - [ {guild.name} - {guild.id} ]")
 
                 try:
                     creator = int(data["player_creator"])
@@ -312,7 +311,7 @@ class PlayerSession(commands.Cog):
 
                 message_without_thread = None
 
-                if message is None:
+                if message is None and text_channel:
 
                     try:
                         message = await text_channel.fetch_message(int(data["message"]))
