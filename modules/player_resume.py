@@ -303,6 +303,7 @@ class PlayerSession(commands.Cog):
                         can_send_message(text_channel, self.bot.user)
                     except Exception:
                         print(f"{self.bot.user} - Controller Ignorado (falta de permissão) [Canal: {text_channel.name} | ID: {text_channel.id}] - [ {guild.name} - {guild.id} ]")
+                        text_channel = None
 
                 try:
                     creator = int(data["player_creator"])
