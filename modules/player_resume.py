@@ -286,7 +286,7 @@ class PlayerSession(commands.Cog):
                 try:
                     text_channel = self.bot.get_channel(int(data["text_channel"])) or \
                                await self.bot.fetch_channel(int(data["text_channel"]))
-                except (disnake.NotFound, AttributeError):
+                except (disnake.NotFound, TypeError):
                     text_channel = None
 
                 if not text_channel:
