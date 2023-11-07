@@ -442,8 +442,8 @@ class Misc(commands.Cog):
         botpool_ids = [b.user.id for b in self.bot.pool.bots]
 
         node_data = {}
-        nodes_available = []
-        nodes_unavailable = []
+        nodes_available = set()
+        nodes_unavailable = set()
 
         for user in bot.users:
             if user.bot:
@@ -481,16 +481,6 @@ class Misc(commands.Cog):
                 else:
                     node_data[n.identifier]["available"] -= 1
 
-            for identifier, data in node_data.items():
-
-                if (data["total"] - data["available"]) >= 0:
-                    if data['website']:
-                        nodes_available.append(f"> [`✅ - {identifier}`]({data['website']}) [{data['available']}/{data['total']}]")
-                    else:
-                        nodes_available.append(f"> `✅ - {identifier} [{data['available']}/{data['total']}]`")
-                else:
-                    nodes_unavailable.append(f"> `❌` - {identifier}")
-
             for p in b.music.players.values():
 
                 if p.auto_pause:
@@ -512,6 +502,17 @@ class Misc(commands.Cog):
                 private_bot_count += 1
             else:
                 public_bot_count += 1
+
+        for identifier, data in node_data.items():
+
+            if (data["total"] - data["available"]) >= 0:
+                if data['website']:
+                    nodes_available.add(
+                        f"> [`✅ - {identifier}`]({data['website']}) [{data['available']}/{data['total']}]")
+                else:
+                    nodes_available.add(f"> `✅ - {identifier} [{data['available']}/{data['total']}]`")
+            else:
+                nodes_unavailable.add(f"> `❌` - {identifier}")
 
         node_txt_final = "\n".join(nodes_available) + "\n".join(nodes_unavailable)
 
