@@ -508,7 +508,7 @@ class Misc(commands.Cog):
             if (data["total"] - data["available"]) >= 0:
                 if data['website']:
                     nodes_available.add(
-                        f"> [`✅ - {identifier}`]({data['website']}) [{data['available']}/{data['total']}]")
+                        f"> [`✅ - {identifier}`]({data['website']}) `[{data['available']}/{data['total']}]`")
                 else:
                     nodes_available.add(f"> `✅ - {identifier} [{data['available']}/{data['total']}]`")
             else:
