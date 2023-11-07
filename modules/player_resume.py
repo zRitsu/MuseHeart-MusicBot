@@ -114,7 +114,7 @@ class PlayerSession(commands.Cog):
             text_channel = str(player.message.channel.id)
             message = str(player.message.id)
         except:
-            text_channel = str(player.text_channel.id)
+            text_channel = str(player.text_channel.id) if player.text_channel else None
             message = None
 
         try:
