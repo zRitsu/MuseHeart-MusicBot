@@ -407,7 +407,9 @@ class Misc(commands.Cog):
 
         guild = bot.get_guild(inter.guild_id) or inter.guild
 
-        embed = disnake.Embed(description="", color=bot.get_color(inter.guild.me if inter.guild else guild.me))
+        color = bot.get_color(inter.guild.me if inter.guild else guild.me)
+
+        embed = disnake.Embed(description="", color=color)
 
         active_players_other_bots = 0
         inactive_players_other_bots = 0
@@ -439,6 +441,10 @@ class Misc(commands.Cog):
 
         botpool_ids = [b.user.id for b in self.bot.pool.bots]
 
+        node_data = {}
+        nodes_available = []
+        nodes_unavailable = []
+
         for user in bot.users:
             if user.bot:
                 bot_count += 1
@@ -463,6 +469,28 @@ class Misc(commands.Cog):
                 else:
                     users.add(user.id)
 
+            for n in b.music.nodes.values():
+
+                if not n.identifier in node_data:
+                    node_data[n.identifier] = {"total": 0, "available": 0, "website": n.website}
+
+                node_data[n.identifier]["total"] += 1
+
+                if n.is_available:
+                    node_data[n.identifier]["available"] += 1
+                else:
+                    node_data[n.identifier]["available"] -= 1
+
+            for identifier, data in node_data.items():
+
+                if (data["total"] - data["available"]) >= 0:
+                    if data['website']:
+                        nodes_available.append(f"> [`✅ - {identifier}`]({data['website']}) [{data['available']}/{data['total']}]")
+                    else:
+                        nodes_available.append(f"> `✅ - {identifier} [{data['available']}/{data['total']}]`")
+                else:
+                    nodes_unavailable.append(f"> `❌` - {identifier}")
+
             for p in b.music.players.values():
 
                 if p.auto_pause:
@@ -484,6 +512,8 @@ class Misc(commands.Cog):
                 private_bot_count += 1
             else:
                 public_bot_count += 1
+
+        node_txt_final = "\n".join(nodes_available) + "\n".join(nodes_unavailable)
 
         embed.description += "### Estatíticas (bot atual):\n" \
                             f"> 🏙️ **⠂Servidores:** `{len(bot.guilds)}`\n" \
@@ -555,7 +585,7 @@ class Misc(commands.Cog):
         links = "[`[Source]`](https://github.com/zRitsu/MuseHeart-MusicBot)"
 
         if bot.config["SUPPORT_SERVER"]:
-            links += f" **|** [`[Suporte]`]({bot.config['SUPPORT_SERVER']})"
+            links = f"[`[Suporte]`]({bot.config['SUPPORT_SERVER']})  **|** {links}"
 
         embed.description += f"> 🌐 **⠂**{links}\n"
 
@@ -563,6 +593,10 @@ class Misc(commands.Cog):
             owner = bot.appinfo.team.owner
         except AttributeError:
             owner = bot.appinfo.owner
+
+        if node_txt_final:
+
+            embed.description += f"### Servidores de música (Lavalink Servers):\n{node_txt_final}"
 
         try:
             avatar = owner.avatar.with_static_format("png").url
