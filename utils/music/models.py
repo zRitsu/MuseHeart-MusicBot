@@ -1962,6 +1962,8 @@ class LavalinkPlayer(wavelink.Player):
                 except:
                     traceback.print_exc()
                     self.locked = True
+                    await asyncio.sleep(5)
+                    continue
 
                 if not self.auto_pause:
 
