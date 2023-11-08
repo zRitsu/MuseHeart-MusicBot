@@ -473,6 +473,7 @@ class MusicSettings(commands.Cog):
 
             update_inter(interaction, modal_inter)
             inter = modal_inter
+            channel_name = inter.text_values["forum_title"]
 
         perms_dict = {
             "embed_links": True,
