@@ -811,6 +811,11 @@ class MusicSettings(commands.Cog):
                         break
 
             if not thread:
+
+                if not target.permissions_for(guild.me).create_forum_threads:
+                    raise GenericError(
+                        f"**{bot.user.mention} não possui permissão para postar no canal {target.mention}.**")
+
                 thread_wmessage = await target.create_thread(
                     name=channel_name,
                     content="Post para pedido de músicas.",
@@ -890,7 +895,8 @@ class MusicSettings(commands.Cog):
 
         if isinstance(channel, disnake.TextChannel):
             if not message.thread:
-                await message.create_thread(name="Song-Requests", auto_archive_duration=10080)
+                if channel.permissions_for(guild.me).create_public_threads:
+                    await message.create_thread(name="Song-Requests", auto_archive_duration=10080)
             else:
                 thread_kw = {}
                 if message.thread.locked and message.thread.permissions_for(guild.me).manage_threads:
