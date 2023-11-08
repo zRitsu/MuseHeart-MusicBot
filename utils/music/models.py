@@ -26,6 +26,13 @@ if TYPE_CHECKING:
 
 exclude_tags = ["remix", "edit", "extend"]
 
+thread_archive_time = {
+    60: 30,
+    24: 720,
+    2880: 720,
+    10080: 2880,
+}
+
 class PartialPlaylist:
 
     __slots__ = ('data', 'url', 'tracks')
@@ -1631,11 +1638,31 @@ class LavalinkPlayer(wavelink.Player):
                                 return
 
                             if isinstance(self.text_channel, disnake.Thread):
-                                send_message_perm = self.text_channel.parent.permissions_for(self.guild.me).send_messages_in_threads
-                            else:
-                                send_message_perm = self.text_channel.permissions_for(self.guild.me).send_messages
 
-                            if not send_message_perm or not self.text_channel.permissions_for(self.guild.me).read_messages:
+                                if not self.text_channel.parent.permissions_for(self.guild.me).send_messages_in_threads or not self.text_channel.permissions_for(
+                                        self.guild.me).read_messages:
+                                    return
+
+                                if self.text_channel.locked:
+
+                                    if not self.text_channel.parent.permissions_for(self.guild.me).manage_threads:
+                                        self.text_channel = None
+                                        self.message = None
+                                        return
+                                    else:
+                                        await self.text_channel.edit(archived=False, locked=False)
+
+                                elif self.text_channel.archived:
+
+                                    if self.text_channel.owner_id == self.bot.user.id:
+                                        await self.text_channel.edit(archived=False)
+                                    else:
+                                        await self.text_channel.send("Desarquivando o tópico.", delete_after=2)
+
+                                elif ((self.text_channel.archive_timestamp - disnake.utils.utcnow()).total_seconds() / 60) < (thread_archive_time[self.text_channel.auto_archive_duration]):
+                                    await self.text_channel.send("Evitando o tópico auto-arquivar...", delete_after=2)
+
+                            elif not self.text_channel.permissions_for(self.guild.me).send_messages or not self.text_channel.permissions_for(self.guild.me).read_messages:
                                 return
 
                         self.start_message_updater_task()
