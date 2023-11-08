@@ -478,8 +478,6 @@ class Misc(commands.Cog):
 
                 if n.is_available:
                     node_data[n.identifier]["available"] += 1
-                else:
-                    node_data[n.identifier]["available"] -= 1
 
             for p in b.music.players.values():
 
