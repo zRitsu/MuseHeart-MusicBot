@@ -88,6 +88,8 @@ class Music(commands.Cog):
         else:
             self.error_report_queue = None
 
+        self.node_connection_monitor_task = self.bot.loop.create_task(self.node_connection_monitor())
+
     async def update_cache(self):
 
         async with aiofiles.open("./playlist_cache.json", "w") as f:
@@ -5332,6 +5334,10 @@ class Music(commands.Cog):
             self.error_report_task.cancel()
         except:
             pass
+        try:
+            self.node_connection_monitor_task.cancel()
+        except:
+            pass
 
 
     async def interaction_message(self, inter: Union[disnake.Interaction, CustomContext], txt, emoji: str = "✅",
@@ -5414,6 +5420,20 @@ class Music(commands.Cog):
         if start_local:
             self.bot.loop.create_task(self.connect_local_lavalink())
 
+    async def node_connection_monitor(self):
+
+        while True:
+            await asyncio.sleep(180)
+            await self.bot.wait_until_ready()
+            for node in self.bot.music.nodes.values():
+                if node._websocket.is_connected:
+                    continue
+                try:
+                    await node.connect(self.bot)
+                except:
+                    traceback.print_exc()
+                await asyncio.sleep(3)
+
     @commands.Cog.listener("on_wavelink_node_connection_closed")
     async def node_connection_closed(self, node: wavelink.Node):
 
@@ -5469,7 +5489,7 @@ class Music(commands.Cog):
 
         if data["identifier"] in self.bot.music.nodes:
             node = self.bot.music.nodes[data['identifier']]
-            if not node.is_connected:
+            if not node._websocket.is_connected:
                 await node.connect(self.bot)
             return
 
