@@ -448,7 +448,7 @@ class MusicSettings(commands.Cog):
                         custom_id="forum_title",
                         min_length=4,
                         max_length=30,
-                        value=channel_name,
+                        value=channel_name[:30],
                         required=True
                     )
                 ]
@@ -745,7 +745,7 @@ class MusicSettings(commands.Cog):
                             custom_id="forum_title",
                             min_length=4,
                             max_length=30,
-                            value=channel_name,
+                            value=channel_name[:30],
                             required=True
                         )
                     ]
