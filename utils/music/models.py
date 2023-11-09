@@ -16,7 +16,8 @@ from utils.music.converters import fix_characters, time_format, get_button_style
 from utils.music.skin_utils import skin_converter
 from utils.music.filters import AudioFilter
 from utils.db import DBModel
-from utils.others import music_source_emoji, send_idle_embed, PlayerControls, SongRequestPurgeMode, song_request_buttons, update_vc_status
+from utils.others import music_source_emoji, send_idle_embed, PlayerControls, SongRequestPurgeMode, \
+    song_request_buttons, update_vc_status
 import traceback
 from collections import deque
 from typing import Optional, Union, TYPE_CHECKING, List
@@ -33,8 +34,17 @@ thread_archive_time = {
     10080: 2880,
 }
 
-class PartialPlaylist:
 
+def get_start_pos(player, track):
+    if not track.is_stream:
+        difference = (time() * 1000) - player.last_update
+        position = player.last_position + difference
+        if 0 < position < track.duration:
+            return min(position, track.duration)
+    return 0
+
+
+class PartialPlaylist:
     __slots__ = ('data', 'url', 'tracks')
 
     def __init__(self, data: dict, url: str):
@@ -51,7 +61,6 @@ class PartialPlaylist:
 
 
 class PartialTrack:
-
     __slots__ = ('id', 'thumb', 'source_name', 'info', 'playlist', 'unique_id', 'ytid')
 
     def __init__(self, *, uri: str = "", title: str = "", author="", thumb: str = "", duration: int = 0,
@@ -177,7 +186,6 @@ class PartialTrack:
 
 
 class LavalinkPlaylist:
-
     __slots__ = ('data', 'url', 'tracks')
 
     def __init__(self, data: dict, **kwargs):
@@ -197,7 +205,6 @@ class LavalinkPlaylist:
 
 
 class LavalinkTrack(wavelink.Track):
-
     __slots__ = ('extra', 'playlist', 'unique_id')
 
     def __init__(self, *args, **kwargs):
@@ -317,7 +324,6 @@ class LavalinkTrack(wavelink.Track):
 
 
 class LavalinkPlayer(wavelink.Player):
-
     bot: BotCore
 
     def __init__(self, *args, **kwargs):
@@ -325,7 +331,7 @@ class LavalinkPlayer(wavelink.Player):
         self.volume = kwargs.get("volume", 100)
         self.guild: disnake.Guild = kwargs.pop('guild')
         self.text_channel: Union[disnake.TextChannel,
-                                 disnake.VoiceChannel, disnake.Thread] = kwargs.pop('channel')
+        disnake.VoiceChannel, disnake.Thread] = kwargs.pop('channel')
         self.message: Optional[disnake.Message] = kwargs.pop('message', None)
         self.static: bool = kwargs.pop('static', False)
         self.skin: str = kwargs.pop("skin", None) or self.bot.default_skin
@@ -446,7 +452,7 @@ class LavalinkPlayer(wavelink.Player):
         except AttributeError:
             pass
 
-        return self.message and self.message.thread #and not (self.message.thread.locked or self.message.thread.archived)
+        return self.message and self.message.thread  # and not (self.message.thread.locked or self.message.thread.archived)
 
     @property
     def controller_link(self):
@@ -582,21 +588,27 @@ class LavalinkPlayer(wavelink.Player):
             error_403 = None
 
             if event.error == "This IP address has been blocked by YouTube (429)" or (
-                    (error_403:=event.cause.startswith("java.lang.RuntimeException: Not success status code: 403") and track.info[
-                "sourceName"] == "youtube" or (self.bot.config["SEARCH_PROVIDER"] == "ytsearch" and track.info["sourceName"] == "spotify"))):
+                    (error_403 := event.cause.startswith("java.lang.RuntimeException: Not success status code: 403") and
+                                  track.info[
+                                      "sourceName"] == "youtube" or (
+                                          self.bot.config["SEARCH_PROVIDER"] == "ytsearch" and track.info[
+                                      "sourceName"] == "spotify"))):
 
                 if error_403:
 
                     if not hasattr(self, 'retries_403'):
                         self.retries_403 = {"last_time": None, 'counter': 0}
 
-                    if not self.retries_403["last_time"] or ((disnake.utils.utcnow() - self.retries_403["last_time"]).total_seconds() > 7 and self.retries_403["counter"] < 6):
+                    if not self.retries_403["last_time"] or (
+                            (disnake.utils.utcnow() - self.retries_403["last_time"]).total_seconds() > 5 and
+                            self.retries_403["counter"] < 6):
                         self.retries_403["counter"] += 1
                         await asyncio.sleep(3)
                         self.retries_403["last_time"] = disnake.utils.utcnow()
                         self.locked = False
-                        self.set_command_log(text=f'Ocorreu o erro 403 do youtube na reprodução da música atual. Tentativa {self.retries_403["counter"]}/5...')
-                        await self.play(track, start=self.position)
+                        self.set_command_log(
+                            text=f'Ocorreu o erro 403 do youtube na reprodução da música atual. Tentativa {self.retries_403["counter"]}/5...')
+                        await self.play(track, start=get_start_pos(self, track))
                         return
 
                 self.node.available = False
@@ -627,11 +639,7 @@ class LavalinkPlayer(wavelink.Player):
 
                 self.queue.appendleft(track)
 
-                if not track.is_stream:
-                    difference = (time() * 1000) - self.last_update
-                    position = self.last_position + difference
-                    if 0 < position < track.duration:
-                        start_position = min(position, track.duration)
+                start_position = get_start_pos(self, track)
 
             elif event.cause == "java.lang.InterruptedException":
                 embed = None
@@ -743,7 +751,8 @@ class LavalinkPlayer(wavelink.Player):
             if isinstance(parent, disnake.ForumChannel) and self.text_channel.owner_id == self.bot.user.id and \
                     self.text_channel.message_count > 1:
                 try:
-                    await self.text_channel.purge(check=lambda m: m.channel.id != m.id and (not m.pinned or not m.is_system()))
+                    await self.text_channel.purge(
+                        check=lambda m: m.channel.id != m.id and (not m.pinned or not m.is_system()))
                 except:
                     pass
                 return
@@ -756,7 +765,8 @@ class LavalinkPlayer(wavelink.Player):
         if self.last_message_id != self.text_channel.last_message_id:
 
             if isinstance(self.text_channel, disnake.Thread):
-                check = (lambda m: m.id != self.last_message_id and not not m.pinned and (not m.is_system() or m.type != disnake.MessageType.channel_name_change))
+                check = (lambda m: m.id != self.last_message_id and not not m.pinned and (
+                            not m.is_system() or m.type != disnake.MessageType.channel_name_change))
             else:
                 check = (lambda m: m.id != self.last_message_id and not m.pinned)
 
@@ -766,7 +776,6 @@ class LavalinkPlayer(wavelink.Player):
                 print(f"Falha ao limpar mensagens do canal {self.text_channel} [ID: {self.text_channel.id}]:\n"
                       f"{traceback.format_exc()}")
                 pass
-
 
     async def connect(self, channel_id: int, self_mute: bool = False, self_deaf: bool = False):
         self.last_channel = self.bot.get_channel(channel_id)
@@ -822,7 +831,7 @@ class LavalinkPlayer(wavelink.Player):
                 try:
                     await self.resolve_track(self.current)
                     self.paused = False
-                    start_timestamp = int((disnake.utils.utcnow()-self.start_time).total_seconds()*1000)
+                    start_timestamp = int((disnake.utils.utcnow() - self.start_time).total_seconds() * 1000)
                     await self.play(self.current, start=start_timestamp)
                     self.last_position = start_timestamp
                 except Exception:
@@ -873,9 +882,10 @@ class LavalinkPlayer(wavelink.Player):
                 return
 
             self.auto_pause = True
-            self.set_command_log(text="O player está temporariamente no modo **[economia de recursos]** por falta de membros "
-                                      "no canal. Esse modo será desativado automaticamente quando um membro entrar "
-                                      f"no canal <#{self.channel_id}>.", emoji="🪫")
+            self.set_command_log(
+                text="O player está temporariamente no modo **[economia de recursos]** por falta de membros "
+                     "no canal. Esse modo será desativado automaticamente quando um membro entrar "
+                     f"no canal <#{self.channel_id}>.", emoji="🪫")
             await self.invoke_np()
             track = self.current
             await self.stop()
@@ -927,7 +937,7 @@ class LavalinkPlayer(wavelink.Player):
         tracks = []
 
         if track and track.info["sourceName"] == "youtube":
-            search_url =  f'https://music.youtube.com/watch?v={track.ytid}&list=RD{track.ytid}'
+            search_url = f'https://music.youtube.com/watch?v={track.ytid}&list=RD{track.ytid}'
         else:
             try:
                 track = self.played[0]
@@ -1182,7 +1192,6 @@ class LavalinkPlayer(wavelink.Player):
 
             # TODO: rever essa parte caso adicione função de ativar track loops em músicas da fila
             if self.loop != "current" or (not self.controller_mode and self.current.track_loops == 0):
-
                 await self.invoke_np(
                     interaction=inter,
                     force=True if (self.static or not self.loop or not self.is_last_message()) else False,
@@ -1196,7 +1205,7 @@ class LavalinkPlayer(wavelink.Player):
 
             try:
                 cmds = " | ".join(f"{self.bot.get_slash_command(c).name}" for c in [
-                                  'play', 'back', 'readd_songs', 'stop', 'autoplay'])
+                    'play', 'back', 'readd_songs', 'stop', 'autoplay'])
 
                 embed = disnake.Embed(
                     description=f"**As músicas acabaram... Use um dos comandos abaixo para adicionar músicas ou parar "
@@ -1269,7 +1278,6 @@ class LavalinkPlayer(wavelink.Player):
                 guild_data["player_controller"]["fav_links"].items()]
 
         if opts:
-
             components.append(
                 disnake.ui.Select(
                     placeholder="Tocar música/playlist do servidor.",
@@ -1315,7 +1323,7 @@ class LavalinkPlayer(wavelink.Player):
             self.message = await self.text_channel.send(**kwargs)
 
     async def idling_mode(self):
-        
+
         try:
             vc = self.guild.me.voice.channel
         except AttributeError:
@@ -1388,14 +1396,16 @@ class LavalinkPlayer(wavelink.Player):
             if not self.current.is_stream and not self.paused and not self.auto_pause:
                 timestamp = f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=((self.current.duration)) - self.position)).timestamp())}:R>"
             else:
-                timestamp = ("pausado " if (self.paused or self.auto_pause) else "🔴 ") + f"<t:{int(disnake.utils.utcnow().timestamp())}:R>"
+                timestamp = ("pausado " if (
+                            self.paused or self.auto_pause) else "🔴 ") + f"<t:{int(disnake.utils.utcnow().timestamp())}:R>"
 
-            msg = self.stage_title_template\
-                .replace("{track.title}", self.current.single_title)\
-                .replace("{track.author}", self.current.authors_string)\
-                .replace("{track.duration}", time_format(self.current.duration) if not self.current.is_stream else "Livestream") \
-                .replace("{track.source}", self.current.info.get("sourceName", "desconhecido"))\
-                .replace("{track.playlist}", self.current.playlist_name or "Sem playlist")\
+            msg = self.stage_title_template \
+                .replace("{track.title}", self.current.single_title) \
+                .replace("{track.author}", self.current.authors_string) \
+                .replace("{track.duration}",
+                         time_format(self.current.duration) if not self.current.is_stream else "Livestream") \
+                .replace("{track.source}", self.current.info.get("sourceName", "desconhecido")) \
+                .replace("{track.playlist}", self.current.playlist_name or "Sem playlist") \
                 .replace("{requester.name}", requester_name) \
                 .replace("{requester.id}", str(self.current.requester))
 
@@ -1422,7 +1432,7 @@ class LavalinkPlayer(wavelink.Player):
 
             await func(topic=msg)
 
-        else: # voicechannel
+        else:  # voicechannel
 
             if msg == self.last_stage_title:
                 return
@@ -1432,8 +1442,8 @@ class LavalinkPlayer(wavelink.Player):
                 if len(msg) > 496:
                     msg = msg[:496] + "..."
 
-                msg = msg\
-                    .replace("{track.timestamp}", timestamp)\
+                msg = msg \
+                    .replace("{track.timestamp}", timestamp) \
                     .replace("{track.emoji}", music_source_emoji(self.current.info["sourceName"]))
 
             try:
@@ -1529,7 +1539,8 @@ class LavalinkPlayer(wavelink.Player):
                     disnake.ui.Button(
                         emoji="⏭️", custom_id=PlayerControls.skip),
                     disnake.ui.Button(
-                        emoji="<:music_queue:703761160679194734>", custom_id=PlayerControls.queue, disabled=not self.queue),
+                        emoji="<:music_queue:703761160679194734>", custom_id=PlayerControls.queue,
+                        disabled=not self.queue),
                     disnake.ui.Select(
                         placeholder="Mais opções:",
                         custom_id="musicplayer_dropdown_inter",
@@ -1581,7 +1592,8 @@ class LavalinkPlayer(wavelink.Player):
                                 description="Efeito que aumenta velocidade e tom da música."
                             ),
                             disnake.SelectOption(
-                                label=("Desativar" if self.autoplay else "Ativar") + " a reprodução automática", emoji="🔄",
+                                label=("Desativar" if self.autoplay else "Ativar") + " a reprodução automática",
+                                emoji="🔄",
                                 value=PlayerControls.autoplay,
                                 description="Sistema de reprodução de música automática quando a fila tiver vazia."
                             ),
@@ -1630,7 +1642,8 @@ class LavalinkPlayer(wavelink.Player):
                     if interaction.response.is_done():
                         await interaction.message.edit(allowed_mentions=self.allowed_mentions, **self.last_data)
                     else:
-                        await interaction.response.edit_message(allowed_mentions=self.allowed_mentions, **self.last_data)
+                        await interaction.response.edit_message(allowed_mentions=self.allowed_mentions,
+                                                                **self.last_data)
                 except:
                     traceback.print_exc()
                 self.updating = False
@@ -1639,7 +1652,8 @@ class LavalinkPlayer(wavelink.Player):
 
             else:
 
-                if self.message and (self.ignore_np_once or self.has_thread or self.static or not force or self.is_last_message()):
+                if self.message and (
+                        self.ignore_np_once or self.has_thread or self.static or not force or self.is_last_message()):
 
                     self.ignore_np_once = False
 
@@ -1656,7 +1670,8 @@ class LavalinkPlayer(wavelink.Player):
 
                             if isinstance(self.text_channel, disnake.Thread):
 
-                                if not self.text_channel.parent.permissions_for(self.guild.me).send_messages_in_threads or not self.text_channel.permissions_for(
+                                if not self.text_channel.parent.permissions_for(
+                                        self.guild.me).send_messages_in_threads or not self.text_channel.permissions_for(
                                         self.guild.me).read_messages:
                                     return
 
@@ -1676,10 +1691,14 @@ class LavalinkPlayer(wavelink.Player):
                                     else:
                                         await self.text_channel.send("Desarquivando o tópico.", delete_after=2)
 
-                                elif ((self.text_channel.archive_timestamp - disnake.utils.utcnow()).total_seconds() / 60) < (thread_archive_time[self.text_channel.auto_archive_duration]):
+                                elif ((
+                                              self.text_channel.archive_timestamp - disnake.utils.utcnow()).total_seconds() / 60) < (
+                                thread_archive_time[self.text_channel.auto_archive_duration]):
                                     await self.text_channel.send("Evitando o tópico auto-arquivar...", delete_after=2)
 
-                            elif not self.text_channel.permissions_for(self.guild.me).send_messages or not self.text_channel.permissions_for(self.guild.me).read_messages:
+                            elif not self.text_channel.permissions_for(
+                                    self.guild.me).send_messages or not self.text_channel.permissions_for(
+                                    self.guild.me).read_messages:
                                 return
 
                         self.start_message_updater_task()
@@ -1690,7 +1709,8 @@ class LavalinkPlayer(wavelink.Player):
                         traceback.print_exc()
                         if self.static or self.has_thread:
                             self.set_command_log(
-                                f"{(interaction.author.mention + ' ') if interaction else ''}houve um erro na interação: {repr(e)}", "⚠️")
+                                f"{(interaction.author.mention + ' ') if interaction else ''}houve um erro na interação: {repr(e)}",
+                                "⚠️")
                             self.update = True
                             return
 
@@ -1698,7 +1718,8 @@ class LavalinkPlayer(wavelink.Player):
 
             if not self.static:
                 try:
-                    self.message = await self.text_channel.send(allowed_mentions=self.allowed_mentions, **self.last_data)
+                    self.message = await self.text_channel.send(allowed_mentions=self.allowed_mentions,
+                                                                **self.last_data)
                 except:
                     traceback.print_exc()
 
@@ -1863,7 +1884,8 @@ class LavalinkPlayer(wavelink.Player):
                                 except:
                                     pass
 
-                            if channel.owner.id == self.bot.user.id or channel.parent.permissions_for(self.guild.me).manage_threads:
+                            if channel.owner.id == self.bot.user.id or channel.parent.permissions_for(
+                                    self.guild.me).manage_threads:
                                 kwargs = {"archived": True, "locked": True}
                             else:
                                 kwargs = {}
@@ -1902,7 +1924,7 @@ class LavalinkPlayer(wavelink.Player):
             if self.current.is_stream:
                 return
 
-            await asyncio.sleep((self.current.duration-self.position)/1000)
+            await asyncio.sleep((self.current.duration - self.position) / 1000)
 
             try:
                 await self.track_end()
@@ -1941,7 +1963,8 @@ class LavalinkPlayer(wavelink.Player):
                 tracks = None
 
             if not tracks and self.bot.config['SEARCH_PROVIDER'] not in ("ytsearch", "ytmsearch", "scsearch"):
-                tracks = await self.node.get_tracks(f"ytsearch:{track.single_title.replace(' - ', ' ')} - {track.authors_string}")
+                tracks = await self.node.get_tracks(
+                    f"ytsearch:{track.single_title.replace(' - ', ' ')} - {track.authors_string}")
 
             try:
                 tracks = tracks.tracks
@@ -1993,8 +2016,8 @@ class LavalinkPlayer(wavelink.Player):
 
             try:
                 node = sorted([n for n in self.bot.music.nodes.values() if n.stats and n.is_available and n.available],
-                key=lambda n: n.stats.players
-            )[0]
+                              key=lambda n: n.stats.players
+                              )[0]
             except:
                 await asyncio.sleep(5)
                 continue
@@ -2057,7 +2080,8 @@ class LavalinkPlayer(wavelink.Player):
             if not voice_channel and not close:
 
                 try:
-                    voice_channel = self.bot.get_channel(self.channel_id) or self.bot.get_channel(self.guild.voice_client.channel.id)
+                    voice_channel = self.bot.get_channel(self.channel_id) or self.bot.get_channel(
+                        self.guild.voice_client.channel.id)
                 except AttributeError:
                     voice_channel = self.last_channel
 
@@ -2242,7 +2266,8 @@ class LavalinkPlayer(wavelink.Player):
         except AttributeError:
             channel = self.last_channel
 
-        if isinstance(channel, disnake.StageChannel) and self.stage_title_event and self.guild.me and self.guild.me.guild_permissions.manage_channels:
+        if isinstance(channel,
+                      disnake.StageChannel) and self.stage_title_event and self.guild.me and self.guild.me.guild_permissions.manage_channels:
 
             if channel.instance:
                 try:
