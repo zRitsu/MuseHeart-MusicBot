@@ -1481,14 +1481,31 @@ class LavalinkPlayer(wavelink.Player):
 
     async def invoke_np(self, force=False, interaction=None, rpc_update=False):
 
-        if not self.current or self.updating or not self.text_channel:
-
+        if not self.text_channel:
             try:
                 if not interaction.response.is_done():
                     await interaction.response.defer()
             except:
                 pass
+            return
 
+        if not self.current:
+            if not force:
+                try:
+                    if not interaction.response.is_done():
+                        await interaction.response.defer()
+                except:
+                    pass
+            else:
+                await self.process_idle_message()
+            return
+
+        if self.updating and not force:
+            try:
+                if not interaction.response.is_done():
+                    await interaction.response.defer()
+            except:
+                pass
             return
 
         if rpc_update:
