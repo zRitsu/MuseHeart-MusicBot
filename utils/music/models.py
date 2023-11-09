@@ -556,29 +556,32 @@ class LavalinkPlayer(wavelink.Player):
                                f"Servidor: {self.node.identifier}\n"
                                f"{error_format}\n" + ("-" * 50))
 
-            cog = self.bot.get_cog("Music")
+            async def send_report():
 
-            if cog and cog.error_report_queue:
+                cog = self.bot.get_cog("Music")
 
-                embed.description += f"\n**Fonte:** `{track.info['sourceName']}`" \
-                                     f"\n**Servidor:** `{disnake.utils.escape_markdown(self.guild.name)} [{self.guild.id}]`"
+                if cog and cog.error_report_queue:
 
-                try:
-                    embed.description += f"\n**Canal:** `{disnake.utils.escape_markdown(self.guild.me.voice.channel.name)} [{self.guild.me.voice.channel.id}]`\n"
-                except:
-                    pass
+                    embed.description += f"\n**Fonte:** `{track.info['sourceName']}`" \
+                                         f"\n**Servidor:** `{disnake.utils.escape_markdown(self.guild.name)} [{self.guild.id}]`"
 
-                embed.description += f"**Data:** <t:{int(disnake.utils.utcnow().timestamp())}:F>"
+                    try:
+                        embed.description += f"\n**Canal:** `{disnake.utils.escape_markdown(self.guild.me.voice.channel.name)} [{self.guild.me.voice.channel.id}]`\n"
+                    except:
+                        pass
 
-                if self.guild.icon:
-                    embed.set_thumbnail(url=self.guild.icon.with_format("png").url)
+                    embed.description += f"**Data:** <t:{int(disnake.utils.utcnow().timestamp())}:F>"
 
-                await cog.error_report_queue.put({"embed": embed})
+                    if self.guild.icon:
+                        embed.set_thumbnail(url=self.guild.icon.with_format("png").url)
+
+                    await cog.error_report_queue.put({"embed": embed})
 
             if self.locked:
                 self.set_command_log(
                     text=f"A reprodução da música falhou (tentando tocar novamente): [`{fix_characters(track.title, 15)}`]({track.uri or track.search_uri}). **Causa:** `{event.cause}`")
                 self.update = True
+                await send_report()
                 return
 
             self.locked = True
@@ -603,9 +606,11 @@ class LavalinkPlayer(wavelink.Player):
                         await asyncio.sleep(1)
                         self.retries_403["last_time"] = disnake.utils.utcnow()
                         await self.play(track, start=get_start_pos(self, track))
+                        self.locked = False
+                        self.update = True
                         return
 
-                    elif self.retries_403["counter"] < 6:
+                    elif self.retries_403["counter"] < 3:
                         self.retries_403["counter"] += 1
                         await asyncio.sleep(3)
                         self.retries_403["last_time"] = disnake.utils.utcnow()
@@ -614,7 +619,10 @@ class LavalinkPlayer(wavelink.Player):
                             text=f'Ocorreu o erro 403 do youtube na reprodução da música atual. Tentativa {self.retries_403["counter"]}/5...')
                         await self.play(track, start=get_start_pos(self, track))
                         await self.invoke_np()
+                        await send_report()
                         return
+
+                await send_report()
 
                 self.node.available = False
 
@@ -628,6 +636,8 @@ class LavalinkPlayer(wavelink.Player):
                 self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node(
                     f"O servidor **{self.node.identifier}** tomou ratelimit do youtube está indisponível no momento (aguardando um novo servidor ficar disponível)."))
                 return
+
+            await send_report()
 
             start_position = 0
 
