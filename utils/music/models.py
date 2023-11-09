@@ -599,9 +599,13 @@ class LavalinkPlayer(wavelink.Player):
                     if not hasattr(self, 'retries_403'):
                         self.retries_403 = {"last_time": None, 'counter': 0}
 
-                    if not self.retries_403["last_time"] or (
-                            (disnake.utils.utcnow() - self.retries_403["last_time"]).total_seconds() > 5 and
-                            self.retries_403["counter"] < 6):
+                    if not self.retries_403["last_time"] or ((disnake.utils.utcnow() - self.retries_403["last_time"]).total_seconds() > 7):
+                        await asyncio.sleep(1)
+                        self.retries_403["last_time"] = disnake.utils.utcnow()
+                        await self.play(track, start=get_start_pos(self, track))
+                        return
+
+                    elif self.retries_403["counter"] < 6:
                         self.retries_403["counter"] += 1
                         await asyncio.sleep(3)
                         self.retries_403["last_time"] = disnake.utils.utcnow()
