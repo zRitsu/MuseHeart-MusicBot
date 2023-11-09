@@ -579,9 +579,26 @@ class LavalinkPlayer(wavelink.Player):
 
             self.current = None
 
+            error_403 = None
+
             if event.error == "This IP address has been blocked by YouTube (429)" or (
-                    event.cause.startswith("java.lang.RuntimeException: Not success status code: 403") and track.info[
-                "sourceName"] == "youtube"):
+                    (error_403:=event.cause.startswith("java.lang.RuntimeException: Not success status code: 403") and track.info[
+                "sourceName"] == "youtube" or (self.bot.config["SEARCH_PROVIDER"] == "ytsearch" and track.info["sourceName"] == "spotify"))):
+
+                if error_403:
+
+                    if not hasattr(self, 'retries_403'):
+                        self.retries_403 = {"last_time": None, 'counter': 0}
+
+                    if not self.retries_403["last_time"] or ((disnake.utils.utcnow() - self.retries_403["last_time"]).total_seconds() > 7 and self.retries_403["counter"] < 6):
+                        self.retries_403["counter"] += 1
+                        await asyncio.sleep(3)
+                        self.retries_403["last_time"] = disnake.utils.utcnow()
+                        self.locked = False
+                        self.set_command_log(text=f'Ocorreu o erro 403 do youtube na reprodução da música atual. Tentativa {self.retries_403["counter"]}/5...')
+                        await self.play(track, start=self.position)
+                        return
+
                 self.node.available = False
 
                 try:
