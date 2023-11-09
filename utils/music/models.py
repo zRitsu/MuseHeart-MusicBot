@@ -609,6 +609,7 @@ class LavalinkPlayer(wavelink.Player):
                         self.set_command_log(
                             text=f'Ocorreu o erro 403 do youtube na reprodução da música atual. Tentativa {self.retries_403["counter"]}/5...')
                         await self.play(track, start=get_start_pos(self, track))
+                        await self.invoke_np()
                         return
 
                 self.node.available = False
