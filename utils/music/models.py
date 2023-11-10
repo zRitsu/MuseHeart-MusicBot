@@ -602,7 +602,7 @@ class LavalinkPlayer(wavelink.Player):
 
                     if not self.retries_403["last_time"] or ((disnake.utils.utcnow() - self.retries_403["last_time"]).total_seconds() > 7):
                         await asyncio.sleep(1)
-                        self.retries_403["last_time"] = disnake.utils.utcnow()
+                        self.retries_403 = {"last_time": disnake.utils.utcnow(), 'counter': 0}
                         await self.play(track, start=get_start_pos(self, track, 1))
                         self.locked = False
                         self.update = True
