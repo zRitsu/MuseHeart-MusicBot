@@ -42,11 +42,11 @@ class EmbedLinkStaticSkin:
 
         if player.paused:
             emoji = "`⏸️`"
-            txt += f"\n> ## `⏸️` Em Pausa:\n> ### ╚═【 {title} 】\n{duration_txt}"
+            txt += f"\n> ### `⏸️` Em Pausa: {title}\n{duration_txt}"
 
         else:
             emoji = "`▶️`"
-            txt += f"\n> ## `▶️` Tocando Agora:\n> ### ╚═【 {title} 】\n{duration_txt}"
+            txt += f"\n> ### `▶️` Tocando Agora: {title}\n{duration_txt}"
             if not player.current.is_stream and not player.paused:
                 txt += f" `[`<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`"
 
