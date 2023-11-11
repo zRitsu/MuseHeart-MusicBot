@@ -588,6 +588,8 @@ class LavalinkPlayer(wavelink.Player):
 
             error_403 = None
 
+            cooldown = 10
+
             if event.error == "This IP address has been blocked by YouTube (429)" or (error_403 := event.cause.startswith("java.lang.RuntimeException: Not success status code: 403")):
 
                 if error_403:
@@ -654,6 +656,8 @@ class LavalinkPlayer(wavelink.Player):
 
                 start_position = get_start_pos(self, track)
 
+                cooldown = 4
+
             elif event.cause == "java.lang.InterruptedException":
                 embed = None
                 self.queue.appendleft(track)
@@ -662,6 +666,7 @@ class LavalinkPlayer(wavelink.Player):
                 except:
                     pass
                 self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node())
+                return
 
             elif not track.track_loops:
                 self.failed_tracks.append(track)
@@ -677,7 +682,7 @@ class LavalinkPlayer(wavelink.Player):
             if embed and self.text_channel and send_message_perm:
                 await self.text_channel.send(embed=embed, delete_after=10)
 
-            await asyncio.sleep(10)
+            await asyncio.sleep(cooldown)
 
             self.locked = False
             await self.process_next(start_position=start_position)
