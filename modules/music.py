@@ -318,7 +318,7 @@ class Music(commands.Cog):
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
-        if not author.guild_permissions.manage_guild:
+        if not author.guild_permissions.manage_guild and not (await bot.is_owner(author)):
             raise GenericError("**Você não possui permissão de gerenciar servidor para ativar/desativar esse sistema.**")
 
         if disable or clear:
@@ -353,7 +353,7 @@ class Music(commands.Cog):
             await player.process_save_queue()
             return
 
-        if isinstance(guild.me.voice.channel, disnake.StageChannel) and not author.guild_permissions.manage_guild:
+        if isinstance(guild.me.voice.channel, disnake.StageChannel) and not author.guild_permissions.manage_guild and not (await bot.is_owner(author)):
             raise GenericError("**Você precisa da permissão de gerenciar servidor pra usar esse comando em palcos**")
 
         await inter.response.defer(ephemeral=True)
