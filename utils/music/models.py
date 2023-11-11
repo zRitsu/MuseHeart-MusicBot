@@ -759,7 +759,7 @@ class LavalinkPlayer(wavelink.Player):
 
             return
 
-        print(f"Unknow Wavelink event: {repr(event)}")
+        print(f"Unknown Wavelink event: {repr(event)}")
 
     async def channel_cleanup(self):
 
