@@ -503,6 +503,8 @@ class BotPool:
                     except Exception:
                         traceback.print_exc()
 
+                    await bot.update_appinfo()
+
                     bot.bot_ready = True
 
                 print(f'{bot.user} - [{bot.user.id}] Online.')
