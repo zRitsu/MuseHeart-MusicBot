@@ -401,15 +401,15 @@ class LavalinkPlayer(wavelink.Player):
         self.prefix_info = kwargs.pop("prefix", "")
 
         self.initial_hints = [
-            f"Você pode alterar a skin/aparência do player usando o comando /change_skin ou {self.prefix_info}skin "
+            f"É possível alterar a skin/aparência do player usando o comando /change_skin ou {self.prefix_info}skin "
             f"(Apenas membros com permissão de gerenciar servidor pode usar esse comando).",
 
-            f"Você pode criar links favoritos para ter fácil acesso usá-los no comando /play ou {self.prefix_info}play "
-            f"sem ter necessidade de copiar e colar os links no comando. Experimente usando o comando /fav_manager ou "
-            f"{self.prefix_info}favmanager.",
-            f"Caso esteja em um canal de voz você pode definir o status automático do canal com info sobre "
-            f"a música que está sendo tocada. Experimente usando o comando /stage_announce ou "
-            f"{self.prefix_info}stageannounce"
+            f"Você pode criar links favoritos para ter fácil acesso pra usá-los no comando /play ou {self.prefix_info}play "
+            "dispensando a necessidade de copiar e colar os links pra tocar/adicionar suas músicas favoritas. "
+            f"Experimente usando o comando /fav_manager ou {self.prefix_info}favmanager.",
+            "É possível definir um status automático no canal de voz com informações sobre "
+            "a música que está sendo tocada no momento. Experimente usando o comando /stage_announce ou "
+            f"{self.prefix_info}stageannounce (Apenas membros com permissão de gerenciar servidor pode usar esse recurso)."
         ]
 
         if self.bot.config["USE_YTDL"] or self.bot.spotify:
@@ -795,7 +795,8 @@ class LavalinkPlayer(wavelink.Player):
         await super().connect(channel_id, self_mute=self_mute, self_deaf=True)
 
     def process_hint(self):
-        if random.choice([x for x in range(self.hint_rate)]) == 0:
+
+        if not self.auto_pause and random.choice([x for x in range(self.hint_rate)]) == 0:
             self.current_hint = next(self.hints)
         else:
             self.current_hint = ""
