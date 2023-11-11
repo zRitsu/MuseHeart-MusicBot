@@ -2170,13 +2170,18 @@ class LavalinkPlayer(wavelink.Player):
 
             if not self.current:
 
+                try:
+                    bot_public = self.bot.appinfo.bot_public
+                except AttributeError:
+                    bot_public = False
+
                 stats.update(
                     {
                         "op": "idle",
                         "bot_id": self.bot.user.id,
                         "invite_permissions": self.bot.config["INVITE_PERMISSIONS"],
                         "bot_name": str(self.bot.user),
-                        "public": self.bot.appinfo.bot_public,
+                        "public": bot_public,
                         "support_server": self.bot.config["SUPPORT_SERVER"],
                     }
                 )

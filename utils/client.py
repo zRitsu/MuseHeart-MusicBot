@@ -16,7 +16,6 @@ from typing import Optional, Union, List
 import aiohttp
 import disnake
 import requests
-from async_timeout import timeout
 from asyncspotify import Client as SpotifyClient
 from disnake.ext import commands
 from dotenv import dotenv_values
@@ -59,30 +58,9 @@ class BotPool:
         self.failed_bots: dict = {}
         self.controller_bot: Optional[BotCore] = None
         self.current_useragent = self.reset_useragent()
-        self.fill_owner_queue = asyncio.Queue()
 
     def reset_useragent(self):
         self.current_useragent = generate_user_agent()
-
-    async def fill_owner_task(self):
-
-        while True:
-
-            try:
-                async with timeout(900):
-                    bot: BotCore = await self.fill_owner_queue.get()
-            except asyncio.TimeoutError:
-                return
-
-            if bot.appinfo:
-                continue
-
-            try:
-                await bot.update_appinfo()
-            except:
-                print(f"{bot.user} -  Falha ao obter dados de owners via api do discord:\n{traceback.format_exc()}")
-
-            await asyncio.sleep(2)
 
 
     @property
@@ -525,8 +503,6 @@ class BotPool:
                     except Exception:
                         traceback.print_exc()
 
-                    await self.fill_owner_queue.put(bot)
-
                     bot.bot_ready = True
 
                 print(f'{bot.user} - [{bot.user.id}] Online.')
@@ -565,8 +541,6 @@ class BotPool:
         loop = asyncio.get_event_loop()
 
         self.database.start_task(loop)
-
-        loop.create_task(self.fill_owner_task())
 
         if self.config["RUN_RPC_SERVER"]:
 
