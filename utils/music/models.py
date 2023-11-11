@@ -588,12 +588,7 @@ class LavalinkPlayer(wavelink.Player):
 
             error_403 = None
 
-            if event.error == "This IP address has been blocked by YouTube (429)" or (
-                    (error_403 := event.cause.startswith("java.lang.RuntimeException: Not success status code: 403") and
-                                  track.info[
-                                      "sourceName"] == "youtube" or (
-                                          self.bot.config["SEARCH_PROVIDER"] == "ytsearch" and track.info[
-                                      "sourceName"] == "spotify"))):
+            if event.error == "This IP address has been blocked by YouTube (429)" or (error_403 := event.cause.startswith("java.lang.RuntimeException: Not success status code: 403")):
 
                 if error_403:
 
@@ -620,20 +615,25 @@ class LavalinkPlayer(wavelink.Player):
                         await send_report()
                         return
 
-                await send_report()
+                self.retries_403 = {"last_time": None, 'counter': 0}
 
-                self.node.available = False
+                if track.info["sourceName"] == "youtube" or (self.bot.config["SEARCH_PROVIDER"] == "ytsearch" and
+                                                             track.info["sourceName"] == "spotify"):
 
-                try:
-                    self._new_node_task.cancel()
-                except:
-                    pass
+                    await send_report()
 
-                self.current = self.last_track
+                    self.node.available = False
 
-                self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node(
-                    f"O servidor **{self.node.identifier}** tomou ratelimit do youtube está indisponível no momento (aguardando um novo servidor ficar disponível)."))
-                return
+                    try:
+                        self._new_node_task.cancel()
+                    except:
+                        pass
+
+                    self.current = self.last_track
+
+                    self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node(
+                        f"O servidor **{self.node.identifier}** tomou ratelimit do youtube está indisponível no momento (aguardando um novo servidor ficar disponível)."))
+                    return
 
             await send_report()
 
