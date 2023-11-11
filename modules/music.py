@@ -3636,7 +3636,8 @@ class Music(commands.Cog):
     async def move_advanced(
             self,
             inter: disnake.AppCmdInter,
-            position: int = commands.Param(name="posição", description="Posição de destino na fila.", min_value=1.0),
+            position: int = commands.Param(name="posição", description="Opcional: Posição de destino na fila.", min_value=1,
+                                           max_value=999, default=1),
             song_name: str = commands.Param(name="nome_da_música", description="incluir nome que tiver na música.",
                                             default=None),
             song_author: str = commands.Param(name="nome_do_autor",
@@ -3654,7 +3655,7 @@ class Music(commands.Cog):
             max_duration: str = commands.Param(name="duração_máxima",
                                                description="incluir músicas com duração máxima especificada (ex. 1:45).",
                                                default=None),
-            amount: int = commands.Param(name="quantidade", description="Quantidade de músicas para mover.",
+            amount: int = commands.Param(name="quantidade", description="Opcional: Quantidade de músicas para mover.",
                                          min_value=0, max_value=99, default=0),
             range_start: int = commands.Param(name="posição_inicial",
                                               description="incluir músicas da fila a partir de uma posição específica "
