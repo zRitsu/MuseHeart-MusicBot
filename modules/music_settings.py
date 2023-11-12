@@ -1360,7 +1360,7 @@ class MusicSettings(commands.Cog):
         if not changed_skins_txt:
             txt = "**Não houve alterações nas configurações de skin...**"
         else:
-            txt = f"**A skin do player do servidor foi alterado com sucesso.**\n{changed_skins_txt}"
+            txt = f"**A skin do player do servidor foi alterada com sucesso.**\n{changed_skins_txt}"
 
         kwargs = {
             "embed": disnake.Embed(
