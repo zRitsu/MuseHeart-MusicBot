@@ -3530,7 +3530,7 @@ class Music(commands.Cog):
                         final_filters.add('playlist')
 
                 if not temp_filter:
-                    tracklist.append(t)
+                    tracklist.insert(0, t)
                     player.queue.remove(t)
                     deleted_tracks += 1
                     if amount:
@@ -3589,6 +3589,7 @@ class Music(commands.Cog):
                 txt.append("`Músicas pedidas por membros que saíram do canal.`")
             except:
                 pass
+
 
             msg_txt = f"### ♻️ ⠂{inter.author.mention} removeu {deleted_tracks} música(s) da fila:\n" + "\n".join(f"[`{fix_characters(t.title, 45)}`]({t.uri})" for t in tracklist[:7])
 
@@ -3808,7 +3809,7 @@ class Music(commands.Cog):
                     player.queue.insert(position - 1, track)
                     moved_tracks += 1
 
-                    tracklist.append(track)
+                    tracklist.insert(0, track)
 
                     if amount:
                         amount_counter -= 1
