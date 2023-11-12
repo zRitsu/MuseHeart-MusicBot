@@ -867,7 +867,7 @@ class LavalinkPlayer(wavelink.Player):
 
             try:
                 if update_log:
-                    self.set_command_log(emoji="🔋", text="O modo **[economia de recursos]** foi desativado.")
+                    #self.set_command_log(emoji="🔋", text="O modo **[economia de recursos]** foi desativado.")
                     try:
                         self.auto_skip_track_task.cancel()
                     except:
@@ -903,11 +903,11 @@ class LavalinkPlayer(wavelink.Player):
                 return
 
             self.auto_pause = True
-            self.set_command_log(
-                text="O player está temporariamente no modo **[economia de recursos]** por falta de membros "
-                     "no canal. Esse modo será desativado automaticamente quando um membro entrar "
-                     f"no canal <#{self.channel_id}>.", emoji="🪫")
-            await self.invoke_np()
+            #self.set_command_log(
+            #    text="O player está temporariamente no modo **[economia de recursos]** por falta de membros "
+            #         "no canal. Esse modo será desativado automaticamente quando um membro entrar "
+            #         f"no canal <#{self.channel_id}>.", emoji="🪫")
+            #await self.invoke_np()
             track = self.current
             await self.stop()
             self.current = track
