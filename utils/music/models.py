@@ -870,7 +870,7 @@ class LavalinkPlayer(wavelink.Player):
                 try:
                     await self.resolve_track(self.current)
                     self.paused = False
-                    await self.play(self.current, start=self.position)
+                    await self.play(self.current, start=0 if self.current.is_stream else self.position)
                 except Exception:
                     traceback.print_exc()
             self.auto_pause = False
