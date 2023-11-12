@@ -2003,6 +2003,11 @@ class LavalinkPlayer(wavelink.Player):
             except:
                 traceback.print_exc()
 
+            try:
+                await self.process_save_queue()
+            except:
+                traceback.print_exc()
+
     async def resolve_track(self, track: PartialTrack):
 
         if track.id:
