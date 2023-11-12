@@ -1447,18 +1447,17 @@ class LavalinkPlayer(wavelink.Player):
 
         else:  # voicechannel
 
-            msg = msg \
-                .replace("{track.timestamp}", timestamp) \
-                .replace("{track.emoji}", music_source_emoji(self.current.info["sourceName"]))
+            if msg is not None:
+
+                msg = msg \
+                    .replace("{track.timestamp}", timestamp) \
+                    .replace("{track.emoji}", music_source_emoji(self.current.info["sourceName"]))
+
+                if len(msg) > 496:
+                    msg = msg[:496] + "..."
 
             if msg == self.last_stage_title:
                 return
-
-            if not msg:
-                msg = "Status: Aguardando por novas músicas."
-
-            elif len(msg) > 496:
-                msg = msg[:496] + "..."
 
             try:
                 await update_vc_status(self.bot, self.guild.me.voice.channel, msg)
