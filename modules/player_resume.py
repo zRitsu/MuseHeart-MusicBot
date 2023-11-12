@@ -471,7 +471,8 @@ class PlayerSession(commands.Cog):
 
                     if track:
                         player.current = track
-                        await player.play(track, start=int(data["position"]))
+                        player.last_position = int(data["position"])
+                        await player.play(track, start=player.last_position)
                         player.last_track = track
                         await player.set_pause(True)
                         await player.invoke_np(rpc_update=True)
@@ -480,7 +481,8 @@ class PlayerSession(commands.Cog):
                         await player.process_next()
 
                 else:
-                    await player.process_next(start_position=int(float(data["position"])))
+                    player.last_position = int(float(data["position"]))
+                    await player.process_next(start_position=player.last_position)
 
                 try:
                     player.members_timeout_task.cancel()
