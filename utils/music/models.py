@@ -384,7 +384,6 @@ class LavalinkPlayer(wavelink.Player):
         self.last_channel: Optional[disnake.VoiceChannel] = None
         self._rpc_update_task: Optional[asyncio.Task] = None
         self._new_node_task: Optional[asyncio.Task] = None
-        self.start_time = disnake.utils.utcnow()
 
         stage_template = kwargs.pop("stage_title_template", None)
 
@@ -871,9 +870,7 @@ class LavalinkPlayer(wavelink.Player):
                 try:
                     await self.resolve_track(self.current)
                     self.paused = False
-                    start_timestamp = int((disnake.utils.utcnow() - self.start_time).total_seconds() * 1000)
-                    await self.play(self.current, start=start_timestamp)
-                    self.last_position = start_timestamp
+                    await self.play(self.current, start=self.position)
                 except Exception:
                     traceback.print_exc()
             self.auto_pause = False
@@ -1212,7 +1209,6 @@ class LavalinkPlayer(wavelink.Player):
         self.is_previows_music = False
 
         self.locked = False
-        self.start_time = disnake.utils.utcnow()
 
         self.current = track
         self.last_update = 0
@@ -2235,7 +2231,7 @@ class LavalinkPlayer(wavelink.Player):
                 }
 
                 if track.is_stream:
-                    stats["track"]["duration"] = int(self.start_time.timestamp())
+                    stats["track"]["duration"] = int(self.last_position)
                 else:
                     stats["track"]["duration"] = track.duration
 
