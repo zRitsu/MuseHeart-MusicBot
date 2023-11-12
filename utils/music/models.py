@@ -928,6 +928,7 @@ class LavalinkPlayer(wavelink.Player):
                 self.auto_skip_track_task.cancel()
             except:
                 pass
+            self.last_update = time() * 1000
             self.auto_skip_track_task = self.bot.loop.create_task(self.auto_skip_track())
             await self.update_stage_topic()
 
