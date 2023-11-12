@@ -550,11 +550,11 @@ class LavalinkPlayer(wavelink.Player):
 
             error_format = pprint.pformat(event.data)
 
-            print(("-" * 50) + f"\nErro ao reproduzir a música: {track.uri or track.search_uri}\n"
-                               f"Servidor: {self.node.identifier}\n"
-                               f"{error_format}\n" + ("-" * 50))
-
             async def send_report():
+
+                print(("-" * 50) + f"\nErro ao reproduzir a música: {track.uri or track.search_uri}\n"
+                                   f"Servidor: {self.node.identifier}\n"
+                                   f"{error_format}\n" + ("-" * 50))
 
                 cog = self.bot.get_cog("Music")
 
