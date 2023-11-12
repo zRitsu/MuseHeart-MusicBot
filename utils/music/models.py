@@ -512,16 +512,11 @@ class LavalinkPlayer(wavelink.Player):
             except:
                 pass
 
-            try:
-                player = self.bot.music.players[self.guild.id]
-            except:
-                return
+            await self.track_end()
 
-            await player.track_end()
+            self.update = False
 
-            player.update = False
-
-            await player.process_next()
+            await self.process_next()
 
             return
 
@@ -542,7 +537,7 @@ class LavalinkPlayer(wavelink.Player):
             if not self.guild.me.voice:
                 try:
                     await self.bot.wait_for(
-                        "voice_state_update", check=lambda m, b, a: m == player.guild.me and m.voice, timeout=7
+                        "voice_state_update", check=lambda m, b, a: m == self.guild.me and m.voice, timeout=7
                     )
                 except asyncio.TimeoutError:
                     self.update = True
