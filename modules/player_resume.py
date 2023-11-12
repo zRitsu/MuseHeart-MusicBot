@@ -476,6 +476,7 @@ class PlayerSession(commands.Cog):
                         player.last_track = track
                         await player.set_pause(True)
                         await player.invoke_np(rpc_update=True)
+                        await player.update_stage_topic()
 
                     else:
                         await player.process_next()
