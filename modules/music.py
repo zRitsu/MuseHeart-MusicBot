@@ -2713,7 +2713,7 @@ class Music(commands.Cog):
 
             await inter.send(embed=embed, ephemeral=ephemeral)
 
-        await player.update_message()
+            await player.update_message()
 
     @is_dj()
     @has_player()
@@ -3379,8 +3379,8 @@ class Music(commands.Cog):
             inter: disnake.AppCmdInter,
             song_name: str = commands.Param(name="nome_da_música", description="incluir nome que tiver na música.",
                                             default=None),
-            song_author: str = commands.Param(name="nome_do_autor",
-                                              description="Incluir nome que tiver no autor da música.", default=None),
+            song_author: str = commands.Param(name="nome_do_uploader",
+                                              description="Incluir nome que tiver no autor/artista/uploader da música.", default=None),
             user: disnake.Member = commands.Param(name='usuário',
                                                   description="Incluir músicas pedidas pelo usuário selecionado.",
                                                   default=None),
@@ -3426,6 +3426,8 @@ class Music(commands.Cog):
 
         txt = []
         playlist_hyperlink = set()
+
+        tracklist = []
 
         if song_name:
             song_name = song_name.replace("️", "")
@@ -3528,6 +3530,7 @@ class Music(commands.Cog):
                         final_filters.add('playlist')
 
                 if not temp_filter:
+                    tracklist.append(t)
                     player.queue.remove(t)
                     deleted_tracks += 1
                     if amount:
@@ -3587,11 +3590,16 @@ class Music(commands.Cog):
             except:
                 pass
 
-            txt = [f"removeu {deleted_tracks} música(s) da fila via clear.",
-                   f"♻️ **⠂{inter.author.mention} removeu {deleted_tracks} música(s) da fila usando os seguintes "
-                   f"filtros:**\n\n" + '\n'.join(txt)]
+            msg_txt = f"### ♻️ ⠂{inter.author.mention} removeu {deleted_tracks} música(s) da fila:\n" + "\n".join(f"[`{fix_characters(t.title, 45)}`]({t.uri})" for t in tracklist[:7])
 
-        await self.interaction_message(inter, txt, emoji="♻️")
+            if (trackcount:=(len(tracklist) - 7)) > 0:
+                msg_txt += f"\n`e mais {trackcount} música(s).`"
+
+            msg_txt += f"\n### ✅ ⠂Filtro(s) usado(s):\n" + '\n'.join(txt)
+
+            txt = [f"removeu {deleted_tracks} música(s) da fila via clear.", msg_txt]
+
+        await self.interaction_message(inter, txt, emoji="♻️", thumb=tracklist[0].thumb)
 
 
     move_queue_flags = CommandArgparse(parents=[adv_queue_flags])
@@ -3641,7 +3649,7 @@ class Music(commands.Cog):
                                            max_value=999, default=1),
             song_name: str = commands.Param(name="nome_da_música", description="incluir nome que tiver na música.",
                                             default=None),
-            song_author: str = commands.Param(name="nome_do_autor",
+            song_author: str = commands.Param(name="nome_do_uploader",
                                               description="Incluir nome que tiver no autor/artista/uploader da música.",
                                               default=None),
             user: disnake.Member = commands.Param(name='usuário',
@@ -3689,6 +3697,8 @@ class Music(commands.Cog):
 
         txt = []
         playlist_hyperlink = set()
+
+        tracklist = []
 
         if song_name:
             song_name = song_name.replace("️", "")
@@ -3797,14 +3807,16 @@ class Music(commands.Cog):
                     player.queue.remove(t)
                     player.queue.insert(position - 1, track)
                     moved_tracks += 1
+
+                    tracklist.append(track)
+
                     if amount:
                         amount_counter -= 1
 
             duplicated_titles.clear()
 
             if not moved_tracks:
-                await inter.send("Nenhuma música encontrada!", ephemeral=True)
-                return
+                raise GenericError("Nenhuma música encontrada com os filtros selecionados!")
 
             try:
                 final_filters.remove("song_name")
@@ -3854,11 +3866,16 @@ class Music(commands.Cog):
             except:
                 pass
 
-            txt = [f"moveu {moved_tracks} música(s) da fila para a posição **[{position}]**.",
-                   f"↪️ **⠂{inter.author.mention} moveu {moved_tracks} música(s) da fila para a posição "
-                   f"[{position}] usando os seguintes filtros:**\n\n" + '\n'.join(txt)]
+            msg_txt = f"### ↪️ ⠂{inter.author.mention} moveu {moved_tracks} música(s) pra posição {position} da fila:\n" + "\n".join(f"[`{fix_characters(t.title, 45)}`]({t.uri})" for t in tracklist[:7])
 
-        await self.interaction_message(inter, txt, emoji="↪️", force=True)
+            if (trackcount:=(len(tracklist) - 7)) > 0:
+                msg_txt += f"\n`e mais {trackcount} música(s).`"
+
+            msg_txt += f"\n### ✅ ⠂Filtro(s) usado(s):\n" + '\n'.join(txt)
+
+            txt = [f"moveu {moved_tracks} música(s) pra posição **[{position}]** da fila.", msg_txt]
+
+        await self.interaction_message(inter, txt, emoji="↪️", force=True, thumb=tracklist[0].thumb)
 
     @move_advanced.autocomplete("playlist")
     @clear.autocomplete("playlist")
@@ -3885,8 +3902,8 @@ class Music(commands.Cog):
         return list(set([track.playlist_name for track in player.queue if track.playlist_name and
                          query.lower() in track.playlist_name.lower()]))[:20]
 
-    @move_advanced.autocomplete("nome_do_autor")
-    @clear.autocomplete("nome_do_autor")
+    @move_advanced.autocomplete("nome_do_uploader")
+    @clear.autocomplete("nome_do_uploader")
     async def queue_author(self, inter: disnake.Interaction, query: str):
 
         try:
@@ -5338,7 +5355,7 @@ class Music(commands.Cog):
 
     async def interaction_message(self, inter: Union[disnake.Interaction, CustomContext], txt, emoji: str = "✅",
                                   rpc_update: bool = False, data: dict = None, store_embed: bool = False, force=False,
-                                  defered=False):
+                                  defered=False, thumb=None):
 
         try:
             txt, txt_ephemeral = txt
@@ -5369,6 +5386,9 @@ class Music(commands.Cog):
             embed = disnake.Embed(color=self.bot.get_color(guild.me),
                                   description=f"{txt_ephemeral or txt}{player.controller_link}")
 
+            if thumb:
+                embed.set_thumbnail(url=thumb)
+
             try:
                 if bot.user.id != self.bot.user.id:
                     embed.set_footer(text=f"Via: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
@@ -5390,6 +5410,9 @@ class Music(commands.Cog):
                 color=self.bot.get_color(guild.me),
                 description=(txt_ephemeral or f"{inter.author.mention} **{txt}**") + player.controller_link
             )
+
+            if thumb:
+                embed.set_thumbnail(url=thumb)
 
             try:
                 if bot.user.id != self.bot.user.id:
