@@ -408,11 +408,6 @@ class PlayerSession(commands.Cog):
                 player.dj = set(data["dj"])
                 player.loop = data["loop"]
 
-                try:
-                    player.stage_title_event = data["stage_title_event"]
-                except:
-                    pass
-
                 player.nightcore = data.get("nightcore")
 
                 if player.nightcore:
@@ -456,6 +451,11 @@ class PlayerSession(commands.Cog):
                     text="O player foi restaurado com sucesso!",
                     emoji="🔰"
                 )
+
+                try:
+                    player.stage_title_event = data["stage_title_event"]
+                except:
+                    pass
 
                 try:
                     check = any(m for m in player.guild.me.voice.channel.members if not m.bot)
