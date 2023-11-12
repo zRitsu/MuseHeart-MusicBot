@@ -476,8 +476,7 @@ class LavalinkPlayer(wavelink.Player):
                 return
 
             if event.reason == "FINISHED":
-                if not self.auto_pause:
-                    self.set_command_log()
+                self.set_command_log()
 
             elif event.reason == "STOPPED":
 
@@ -803,7 +802,7 @@ class LavalinkPlayer(wavelink.Player):
 
     def process_hint(self):
 
-        if not self.auto_pause and random.choice([x for x in range(self.hint_rate)]) == 0:
+        if random.choice([x for x in range(self.hint_rate)]) == 0:
             self.current_hint = next(self.hints)
         else:
             self.current_hint = ""
@@ -867,7 +866,6 @@ class LavalinkPlayer(wavelink.Player):
 
             try:
                 if update_log:
-                    #self.set_command_log(emoji="🔋", text="O modo **[economia de recursos]** foi desativado.")
                     try:
                         self.auto_skip_track_task.cancel()
                     except:
@@ -903,11 +901,6 @@ class LavalinkPlayer(wavelink.Player):
                 return
 
             self.auto_pause = True
-            #self.set_command_log(
-            #    text="O player está temporariamente no modo **[economia de recursos]** por falta de membros "
-            #         "no canal. Esse modo será desativado automaticamente quando um membro entrar "
-            #         f"no canal <#{self.channel_id}>.", emoji="🪫")
-            #await self.invoke_np()
             track = self.current
             await self.stop()
             self.current = track
@@ -1417,8 +1410,7 @@ class LavalinkPlayer(wavelink.Player):
             if not self.current.is_stream and (not self.auto_pause or not self.paused):
                 timestamp = f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=((self.current.duration)) - self.position)).timestamp())}:R>"
             else:
-                timestamp = ("pausado " if (
-                            self.paused or self.auto_pause) else "🔴 ") + f"<t:{int(disnake.utils.utcnow().timestamp())}:R>"
+                timestamp = ("pausado " if (self.paused) else "🔴 ") + f"<t:{int(disnake.utils.utcnow().timestamp())}:R>"
 
             msg = self.stage_title_template \
                 .replace("{track.title}", self.current.single_title) \
@@ -2041,12 +2033,11 @@ class LavalinkPlayer(wavelink.Player):
 
         self.locked = True
 
-        if not self.auto_pause:
-            self.set_command_log(
-                txt or "Não há servidores de música disponível. Irei fazer algumas tentativas de conectar em um novo servidor de música.",
-                emoji="⏰"
-            )
-            self.update = True
+        self.set_command_log(
+            txt or "Não há servidores de música disponível. Irei fazer algumas tentativas de conectar em um novo servidor de música.",
+            emoji="⏰"
+        )
+        self.update = True
 
         old_node = self.node.identifier
 
@@ -2070,18 +2061,16 @@ class LavalinkPlayer(wavelink.Player):
                     await asyncio.sleep(5)
                     continue
 
-                if not self.auto_pause:
+                if old_node == node.identifier:
+                    txt = f"A conexão com servidor de música **{node.identifier}** foi restabelecida com sucesso."
+                else:
+                    txt = f"O player foi reconectado em um novo servidor de música: **{node.identifier}**."
 
-                    if old_node == node.identifier:
-                        txt = f"A conexão com servidor de música **{node.identifier}** foi restabelecida com sucesso."
-                    else:
-                        txt = f"O player foi reconectado em um novo servidor de música: **{node.identifier}**."
-
-                    self.set_command_log(txt, emoji="📶")
-                    try:
-                        await self.invoke_np(force=True)
-                    except:
-                        traceback.print_exc()
+                self.set_command_log(txt, emoji="📶")
+                try:
+                    await self.invoke_np(force=True)
+                except:
+                    traceback.print_exc()
 
                 return
 
