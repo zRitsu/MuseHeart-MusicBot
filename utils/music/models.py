@@ -466,6 +466,26 @@ class LavalinkPlayer(wavelink.Player):
                     pass
         return ""
 
+    @property
+    def position(self):
+
+        if not self.is_playing:
+            return 0
+
+        if not self.current:
+            return 0
+
+        if self.paused and not self.auto_pause:
+            return min(self.last_position, self.current.duration)
+
+        difference = (time() * 1000) - self.last_update
+        position = self.last_position + difference
+
+        if position > self.current.duration:
+            return 0
+
+        return min(position, self.current.duration)
+
     async def hook(self, event) -> None:
 
         if isinstance(event, wavelink.TrackEnd):
@@ -1459,16 +1479,23 @@ class LavalinkPlayer(wavelink.Player):
             if msg == self.last_stage_title:
                 return
 
-            try:
-                await update_vc_status(self.bot, self.guild.me.voice.channel, msg)
-            except Exception as e:
-                if str(e).startswith("403"):
-                    self.set_command_log(text=f"O status automático foi desativado devido ao erro: {e}", emoji="⚠️")
-                    self.stage_title_event = False
-                    self.update = True
-                    return
-                else:
-                    traceback.print_exc()
+            retries = 3
+
+            while retries > 0:
+
+                try:
+                    await update_vc_status(self.bot, self.guild.me.voice.channel, msg)
+                    break
+                except Exception as e:
+                    if str(e).startswith("403"):
+                        self.set_command_log(text=f"O status automático foi desativado devido ao erro: {e}", emoji="⚠️")
+                        self.stage_title_event = False
+                        self.update = True
+                        return
+                    else:
+                        traceback.print_exc()
+                        retries -= 1
+                        await asyncio.sleep(1)
 
         self.last_stage_title = msg
 
