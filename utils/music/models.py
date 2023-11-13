@@ -2373,7 +2373,54 @@ class LavalinkPlayer(wavelink.Player):
     #######################
 
     async def change_node(self, identifier: str = None, force: bool = False):
-        await super().change_node(identifier=identifier, force=force)
+
+        if identifier:
+            node = self.bot.music.get_node(identifier)
+
+            if not node:
+                raise wavelink.WavelinkException(f'No Nodes matching identifier:: {identifier}')
+            elif node == self.node and force is False:
+                raise wavelink.WavelinkException('Node identifiers must not be the same while changing.')
+        else:
+            self.node.close()
+            node = None
+
+            if self.node.region:
+                node = self.bot.music.get_node_by_region(self.node.region)
+
+            if not node and self.node.shard_id:
+                node = self.bot.music.get_node_by_shard(self.node.shard_id)
+
+            if not node:
+                node = self.bot.music.get_best_node()
+
+            if not node:
+                self.node.open()
+                raise wavelink.WavelinkException('No Nodes available for changeover.')
+
+        self.node.open()
+
+        if self.node != node:
+            old = self.node
+            del old.players[self.guild_id]
+            await old._send(op='destroy', guildId=str(self.guild_id))
+
+        self.node = node
+        self.node.players[int(self.guild_id)] = self
+
+        if self._voice_state:
+            await self._dispatch_voice_update()
+
+        if self.current and not self.auto_pause:
+            await self.node._send(op='play', guildId=str(self.guild_id), track=self.current.id, startTime=int(self.position))
+            self.last_update = time() * 1000
+
+            if self.paused:
+                await self.node._send(op='pause', guildId=str(self.guild_id), pause=self.paused)
+
+        if self.volume != 100:
+            await self.node._send(op='volume', guildId=str(self.guild_id), volume=self.volume)
+
         await self.node._send(op="filters", **self.filters, guildId=str(self.guild_id))
 
     async def set_volume(self, vol: int) -> None:
