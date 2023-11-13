@@ -623,7 +623,10 @@ class LavalinkPlayer(wavelink.Player):
                     if not self.retries_403["last_time"] or ((disnake.utils.utcnow() - self.retries_403["last_time"]).total_seconds() > self.bot.pool.config.get("ERROR_403_RETRIES", 7)):
                         await asyncio.sleep(1)
                         self.retries_403 = {"last_time": disnake.utils.utcnow(), 'counter': 0}
-                        await self.play(track, start=get_start_pos(self, track, self.bot.pool.config.get("ERROR_403_ADDITIONAL_SECONDS", 2)))
+                        if self.auto_pause:
+                            self.update = True
+                        else:
+                            await self.play(track, start=get_start_pos(self, track, self.bot.pool.config.get("ERROR_403_ADDITIONAL_SECONDS", 2)))
                         self.locked = False
                         self.update = True
                         return
@@ -635,8 +638,11 @@ class LavalinkPlayer(wavelink.Player):
                         self.locked = False
                         self.set_command_log(
                             text=f'Ocorreu o erro 403 do youtube na reprodução da música atual. Tentativa {self.retries_403["counter"]}/5...')
-                        await self.play(track, start=get_start_pos(self, track, self.bot.pool.config.get("ERROR_403_ADDITIONAL_SECONDS", 2)))
-                        await self.invoke_np()
+                        if not self.auto_pause:
+                            self.update = True
+                        else:
+                            await self.play(track, start=get_start_pos(self, track, self.bot.pool.config.get("ERROR_403_ADDITIONAL_SECONDS", 2)))
+                            await self.invoke_np()
                         await send_report()
                         return
 
