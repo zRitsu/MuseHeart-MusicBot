@@ -552,7 +552,7 @@ class Misc(commands.Cog):
             embed.description += f"> ⏸️ **⠂Players em pausa:** `{paused_players_other_bots:,}`\n"
 
         if inactive_players_other_bots:
-            embed.description += f"> 🪫 **⠂Players inativos:** `{inactive_players_other_bots:,}`\n"
+            embed.description += f"> 💤 **⠂Players inativos:** `{inactive_players_other_bots:,}`\n"
 
         if bot.pool.commit:
             embed.description += f"> 📥 **⠂Commit atual:** [`{bot.pool.commit[:7]}`]({bot.pool.remote_git_url}/commit/{bot.pool.commit})\n"
