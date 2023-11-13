@@ -485,6 +485,16 @@ class LavalinkPlayer(wavelink.Player):
 
         return min(position, self.current.duration)
 
+    async def update_state(self, state: dict) -> None:
+        state = state['state']
+
+        if not self.auto_pause:
+            self.last_position = state.get('position', 0)
+
+        self.last_update = time() * 1000
+        self.position_timestamp = state.get('time', 0)
+        self.ping = state.get('ping', None)
+
     async def hook(self, event) -> None:
 
         if isinstance(event, wavelink.TrackEnd):
