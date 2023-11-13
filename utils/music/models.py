@@ -1232,7 +1232,9 @@ class LavalinkPlayer(wavelink.Player):
 
         self.process_hint()
 
-        if not self.auto_pause:
+        if self.auto_pause:
+            self.last_update = time() * 1000
+        else:
             await self.play(track, start=start_position)
             # TODO: rever essa parte caso adicione função de ativar track loops em músicas da fila
             if self.loop != "current" or (not self.controller_mode and self.current.track_loops == 0):
