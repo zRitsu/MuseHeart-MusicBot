@@ -132,6 +132,8 @@ class PlayerSession(commands.Cog):
             "volume": str(player.volume),
             "nightcore": player.nightcore,
             "position": str(player.position),
+            "last_position": str(player.last_position),
+            "last_update": str(player.last_update),
             "voice_channel": str(player.guild.me.voice.channel.id),
             "dj": list(player.dj),
             "player_creator": str(player.player_creator) if player.player_creator else None,
@@ -462,6 +464,9 @@ class PlayerSession(commands.Cog):
                 except:
                     check = None
 
+                if not check:
+                    await asyncio.sleep(1)
+
                 if data.get("paused") and check:
 
                     try:
@@ -471,8 +476,9 @@ class PlayerSession(commands.Cog):
 
                     if track:
                         player.current = track
-                        player.last_position = int(data["position"])
-                        await player.play(track, start=player.last_position)
+                        await player.play(track, start=float(data.get("position", 0)) if not track.is_stream else 0)
+                        player.last_update = float(data.get("last_update", 0))
+                        player.last_position = float(data.get("last_position", 0))
                         player.last_track = track
                         await player.set_pause(True)
                         await player.invoke_np(rpc_update=True)
@@ -482,8 +488,10 @@ class PlayerSession(commands.Cog):
                         await player.process_next()
 
                 else:
-                    player.last_position = int(float(data["position"]))
-                    await player.process_next(start_position=player.last_position)
+                    await player.process_next(start_position=int(float(data.get("position", 0))))
+                    if not check:
+                        player.last_update = float(data.get("last_update", 0))
+                        player.last_position = float(data.get("last_position", 0))
 
                 try:
                     player.members_timeout_task.cancel()

@@ -468,10 +468,10 @@ class LavalinkPlayer(wavelink.Player):
     @property
     def position(self):
 
-        if not self.is_playing:
+        if not self.current:
             return 0
 
-        if not self.current:
+        if not self.is_playing:
             return 0
 
         if self.paused and not self.auto_pause:
@@ -1205,24 +1205,30 @@ class LavalinkPlayer(wavelink.Player):
 
         self.locked = False
 
+        if track.is_stream:
+            start_position = 0
+
         self.current = track
         self.last_update = 0
-        self.last_position = 0
+        self.last_position = start_position
         self.position_timestamp = 0
         self.paused = False
 
         self.process_hint()
 
         if not self.auto_pause:
-
+            await self.play(track, start=start_position)
             # TODO: rever essa parte caso adicione função de ativar track loops em músicas da fila
             if self.loop != "current" or (not self.controller_mode and self.current.track_loops == 0):
+
+                if start_position:
+                    await asyncio.sleep(1)
+
                 await self.invoke_np(
                     interaction=inter,
                     force=True if (self.static or not self.loop or not self.is_last_message()) else False,
-                    rpc_update=True)
-
-            await self.play(track, start=start_position if not track.is_stream else 0)
+                    rpc_update=True
+                )
 
     async def process_idle_message(self):
 
@@ -1967,36 +1973,43 @@ class LavalinkPlayer(wavelink.Player):
         if not self.controller_mode:
             return
 
-        while not self.bot.is_closed():
+        while True:
 
-            if self.current.is_stream:
+            try:
+
+                try:
+                    await self.process_save_queue()
+                except:
+                    traceback.print_exc()
+
+                if self.current.is_stream:
+                    return
+
+                await asyncio.sleep((self.current.duration - self.position) / 1000)
+
+                self.set_command_log()
+
+                try:
+                    await self.track_end()
+                except Exception:
+                    traceback.print_exc()
+
+                try:
+                    await self.process_next()
+                except:
+                    print(traceback.format_exc())
+
+                try:
+                    await self.invoke_np(force=True)
+                except:
+                    traceback.print_exc()
+
+            except asyncio.CancelledError:
                 return
 
-            await asyncio.sleep((self.current.duration - self.position) / 1000)
-
-            self.set_command_log()
-
-            try:
-                await self.track_end()
             except Exception:
                 traceback.print_exc()
-
-            self.last_position = 0
-
-            try:
-                await self.process_next()
-            except:
-                print(traceback.format_exc())
-
-            try:
-                await self.invoke_np(force=True)
-            except:
-                traceback.print_exc()
-
-            try:
-                await self.process_save_queue()
-            except:
-                traceback.print_exc()
+                return
 
     async def resolve_track(self, track: PartialTrack):
 
