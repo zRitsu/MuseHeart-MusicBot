@@ -485,18 +485,13 @@ class PlayerSession(commands.Cog):
                 else:
                     position = int(float(data.get("position", 0)))
                     await player.process_next(start_position=position)
-                    if not check:
-                        player.last_position = position
 
                 try:
                     player.members_timeout_task.cancel()
                 except:
                     pass
 
-                if not check:
-                    await player.members_timeout(check=check, force=True)
-                else:
-                    player.members_timeout_task = self.bot.loop.create_task(player.members_timeout(check=check))
+                player.members_timeout_task = self.bot.loop.create_task(player.members_timeout(check=check, idle_timeout=10))
 
                 print(f"{self.bot.user} - Player Retomado: {guild.name} [{guild.id}]")
 

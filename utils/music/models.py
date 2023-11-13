@@ -875,7 +875,7 @@ class LavalinkPlayer(wavelink.Player):
         random.shuffle(hints)
         self.hints = cycle(hints)
 
-    async def members_timeout(self, check: bool, force: bool = False):
+    async def members_timeout(self, check: bool, force: bool = False, idle_timeout = None):
 
         if self.auto_pause:
             if self.current:
@@ -919,7 +919,7 @@ class LavalinkPlayer(wavelink.Player):
             if [m for m in vc.members if not m.bot]:
                 return
 
-            await asyncio.sleep(self.idle_timeout)
+            await asyncio.sleep(idle_timeout or self.idle_timeout)
 
             if [m for m in vc.members if not m.bot]:
                 return
