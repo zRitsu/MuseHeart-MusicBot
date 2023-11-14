@@ -2411,12 +2411,17 @@ class LavalinkPlayer(wavelink.Player):
         if self._voice_state:
             await self._dispatch_voice_update()
 
-        if self.current and not self.auto_pause:
-            await self.node._send(op='play', guildId=str(self.guild_id), track=self.current.id, startTime=int(self.position))
-            self.last_update = time() * 1000
+        if self.current:
 
-            if self.paused:
-                await self.node._send(op='pause', guildId=str(self.guild_id), pause=self.paused)
+            if self.auto_pause:
+                self.last_update = time() * 1000
+
+            else:
+                await self.node._send(op='play', guildId=str(self.guild_id), track=self.current.id, startTime=int(self.position))
+                self.last_update = time() * 1000
+
+                if self.paused:
+                    await self.node._send(op='pause', guildId=str(self.guild_id), pause=self.paused)
 
         if self.volume != 100:
             await self.node._send(op='volume', guildId=str(self.guild_id), volume=self.volume)
