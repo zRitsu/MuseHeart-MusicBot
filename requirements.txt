@@ -12,7 +12,7 @@ aiofiles
 disnake-jishaku
 packaging
 aiosqlite
-yt-dlp>=2023.10.13
+yt-dlp>=2023.11.14
 tornado
 emoji
 git+https://github.com/zRitsu/Wavelink.git@0895277ab2a9f9abee6b3972948b2b265dbe023a
