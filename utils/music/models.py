@@ -624,7 +624,7 @@ class LavalinkPlayer(wavelink.Player):
 
             if event.error == "This IP address has been blocked by YouTube (429)" or (error_403 := event.cause.startswith("java.lang.RuntimeException: Not success status code: 403")):
 
-                if error_403:
+                if error_403 and self.node.retry_403:
 
                     if not hasattr(self, 'retries_403'):
                         self.retries_403 = {"last_time": None, 'counter': 0}

@@ -5507,6 +5507,7 @@ class Music(commands.Cog):
         node_website = data.pop('website', '')
         region = data.pop('region', 'us_central')
         heartbeat = int(data.pop('heartbeat', 30))
+        retry_403 = data.pop('retry_403', False)
 
         try:
             max_retries = int(data.pop('retries'))
@@ -5545,6 +5546,7 @@ class Music(commands.Cog):
         node = await self.bot.music.initiate_node(auto_reconnect=False, region=region, heartbeat=heartbeat, **data)
         node.search = search
         node.website = node_website
+        node.retry_403 = retry_403
 
     async def get_tracks(
             self, query: str, user: disnake.Member, node: wavelink.Node = None,
@@ -5638,7 +5640,8 @@ class Music(commands.Cog):
                 'password': 'youshallnotpass',
                 'identifier': 'LOCAL',
                 'region': 'us_central',
-                'retries': 25
+                'retries': 25,
+                'retry_403': True,
             }
 
             self.bot.loop.create_task(self.connect_node(localnode))
