@@ -497,6 +497,9 @@ class LavalinkPlayer(wavelink.Player):
 
     async def hook(self, event) -> None:
 
+        if self.is_closing:
+            return
+
         if isinstance(event, wavelink.TrackEnd):
 
             self.bot.dispatch("wavelink_track_end", self.node, event)
