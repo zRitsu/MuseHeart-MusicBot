@@ -522,6 +522,8 @@ class LavalinkPlayer(wavelink.Player):
             except:
                 pass
 
+            await self.bot.wait_until_ready()
+
             await self.track_end()
 
             self.update = False
@@ -543,6 +545,8 @@ class LavalinkPlayer(wavelink.Player):
             if not send_message_perm:
                 self.text_channel = None
                 return
+
+            await self.bot.wait_until_ready()
 
             if not self.guild.me.voice:
                 try:
@@ -612,6 +616,8 @@ class LavalinkPlayer(wavelink.Player):
             error_403 = None
 
             cooldown = 10
+
+            await self.bot.wait_until_ready()
 
             if event.error == "This IP address has been blocked by YouTube (429)" or (error_403 := event.cause.startswith("java.lang.RuntimeException: Not success status code: 403")):
 
