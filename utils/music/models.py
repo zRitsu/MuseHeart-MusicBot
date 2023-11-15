@@ -2013,8 +2013,11 @@ class LavalinkPlayer(wavelink.Player):
                 except:
                     traceback.print_exc()
 
-                if self.current.is_stream:
-                    return
+                try:
+                    if self.current.is_stream:
+                        return
+                except AttributeError:
+                    pass
 
                 await asyncio.sleep((self.current.duration - self.position) / 1000)
 
