@@ -800,6 +800,28 @@ class LavalinkPlayer(wavelink.Player):
 
             return
 
+        if isinstance(event, wavelink.TrackStuck):
+
+            await self.bot.wait_until_ready()
+
+            try:
+                self.message_updater_task.cancel()
+            except:
+                pass
+
+            await self.track_end()
+
+            self.update = False
+
+            try:
+                self.set_command_log(text=f"A música [{fix_characters(self.current.single_title, 25)}]({self.current.uri}) travou.", emoji="⚠")
+            except:
+                pass
+
+            await self.process_next()
+
+            return
+
         print(f"Unknown Wavelink event: {repr(event)}")
 
     async def channel_cleanup(self):
