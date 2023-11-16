@@ -693,27 +693,27 @@ class LavalinkPlayer(wavelink.Player):
             )):
 
                 if not hasattr(self, 'retries_general_errors'):
-                    self.retries_general_errors = {'counter': 6, 'last_node': self.node.identifier}
+                    self.retries_general_errors = {'counter': 6, 'last_node': self.node.identifier, "last_time": disnake.utils.utcnow()}
 
                 embed = None
 
                 self.queue.appendleft(track)
 
-                if self.retries_general_errors["counter"] < 1:
+                if self.retries_general_errors["counter"] < 1 and self.node.identifier == self.retries_general_errors["last_node"] and (disnake.utils.utcnow() - self.retries_general_errors["last_time"]).total_seconds() < 180:
 
-                    if self.node.identifier == self.retries_general_errors["last_node"]:
+                    try:
+                        self._new_node_task.cancel()
+                    except:
+                        pass
+                    self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node(ignore_node=self.node.identifier))
+                    return
 
-                        try:
-                            self._new_node_task.cancel()
-                        except:
-                            pass
-                        self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node())
-                        return
+                self.retries_general_errors["last_time"] = disnake.utils.utcnow()
 
                 if self.retries_general_errors['last_node'] == self.node.identifier:
                     self.retries_general_errors['counter'] -= 1
                 else:
-                    self.retries_general_errors = {'counter': 6, 'last_node': self.node.identifier}
+                    self.retries_general_errors = {'counter': 6, 'last_node': self.node.identifier, "last_time": disnake.utils.utcnow()}
 
                 start_position = get_start_pos(self, track)
 
@@ -2143,7 +2143,7 @@ class LavalinkPlayer(wavelink.Player):
 
         return
 
-    async def _wait_for_new_node(self, txt: str = None):
+    async def _wait_for_new_node(self, txt: str = None, ignore_node=None):
 
         self.locked = True
 
@@ -2158,7 +2158,8 @@ class LavalinkPlayer(wavelink.Player):
         while True:
 
             try:
-                node = sorted([n for n in self.bot.music.nodes.values() if n.stats and n.is_available and n.available],
+                node = sorted([n for n in self.bot.music.nodes.values() if n.stats and n.is_available
+                               and n.available and n.identifier != ignore_node],
                               key=lambda n: n.stats.players
                               )[0]
             except:
