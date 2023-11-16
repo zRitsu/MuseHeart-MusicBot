@@ -691,9 +691,29 @@ class LavalinkPlayer(wavelink.Player):
                     "javax.script.ScriptEngine.eval(String)",
                     "com.sedmelluq.discord.lavaplayer.tools.io.PersistentHttpStream$PersistentHttpException: Not success status code: 403",
             )):
+
+                if not hasattr(self, 'retries_general_errors'):
+                    self.retries_general_errors = {'counter': 6, 'last_node': self.node.identifier}
+
                 embed = None
 
                 self.queue.appendleft(track)
+
+                if self.retries_general_errors["counter"] < 1:
+
+                    if self.node.identifier == self.retries_general_errors["last_node"]:
+
+                        try:
+                            self._new_node_task.cancel()
+                        except:
+                            pass
+                        self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node())
+                        return
+
+                if self.retries_general_errors['last_node'] == self.node.identifier:
+                    self.retries_general_errors['counter'] -= 1
+                else:
+                    self.retries_general_errors = {'counter': 6, 'last_node': self.node.identifier}
 
                 start_position = get_start_pos(self, track)
 
