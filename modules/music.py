@@ -3600,7 +3600,12 @@ class Music(commands.Cog):
 
             txt = [f"removeu {deleted_tracks} música(s) da fila via clear.", msg_txt]
 
-        await self.interaction_message(inter, txt, emoji="♻️", thumb=tracklist[0].thumb)
+        try:
+            kwargs = {"thumb": tracklist[0].thumb}
+        except IndexError:
+            kwargs = {}
+
+        await self.interaction_message(inter, txt, emoji="♻️", **kwargs)
 
 
     move_queue_flags = CommandArgparse(parents=[adv_queue_flags])
