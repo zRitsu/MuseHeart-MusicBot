@@ -2001,7 +2001,7 @@ class LavalinkPlayer(wavelink.Player):
 
     async def auto_skip_track(self):
 
-        if not self.controller_mode:
+        if not self.controller_mode or not self.current:
             return
 
         while True:
