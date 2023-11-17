@@ -71,6 +71,12 @@ class BotPool:
 
         return self.local_database
 
+    async def mongo_cache_task_cleanup(self):
+
+        while True:
+            await asyncio.sleep(3600)
+            self.mongo_database.cache.clear()
+
     def start_lavalink(self):
 
         if self.lavalink_instance:
@@ -543,6 +549,9 @@ class BotPool:
         loop = asyncio.get_event_loop()
 
         self.database.start_task(loop)
+
+        if self.mongo_database:
+            loop.create_task(self.mongo_cache_task_cleanup())
 
         if self.config["RUN_RPC_SERVER"]:
 
