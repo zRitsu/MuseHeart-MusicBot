@@ -200,8 +200,6 @@ class MongoDatabase(BaseDB):
     def __init__(self, token: str):
         super().__init__()
 
-        self.cache = {}
-
         fix_ssl = os.environ.get("MONGO_SSL_FIX") or os.environ.get("REPL_SLUG")
 
         if fix_ssl:
@@ -262,21 +260,15 @@ class MongoDatabase(BaseDB):
 
         id_ = str(id_)
 
-        try:
-            return self.cache[collection][db_name][id_]
-        except KeyError:
-            pass
-
         data = await self._connect[collection][db_name].find_one({"_id": id_})
 
         if not data:
-            data = default_model[db_name].copy()
-            self.cache[collection][db_name][id_] = data
-            return data
+            return default_model[db_name].copy()
 
         elif data["ver"] != default_model[db_name]["ver"]:
             data = update_values(default_model[db_name].copy(), data)
             data["ver"] = default_model[db_name]["ver"]
+
             await self.update_data(id_, data, db_name=db_name, collection=collection)
 
         return data
@@ -284,20 +276,12 @@ class MongoDatabase(BaseDB):
     async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users, str],
                           collection: str, default_model: dict = None):
 
-        data = await self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data}, upsert=True)
-        self.cache[collection][db_name][id_] = data
-        return data
+        return await self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data}, upsert=True)
 
     async def query_data(self, db_name: str, collection: str, filter: dict = None, limit=100) -> list:
         return [d async for d in self._connect[collection][db_name].find(filter or {})]
 
     async def delete_data(self, id_, db_name: str, collection: str):
-
-        try:
-            del self.cache[collection][db_name][id_]
-        except KeyError:
-            pass
-
         return await self._connect[collection][db_name].delete_one({'_id': str(id_)})
 
 
