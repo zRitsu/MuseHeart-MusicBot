@@ -506,11 +506,11 @@ class Misc(commands.Cog):
             if data["available"] > 0:
                 if data['website']:
                     nodes_available.add(
-                        f"> [`✅ - {identifier}`]({data['website']}) `[{data['available']}/{data['total']}]`")
+                        f"> [`✅⠂{identifier}`]({data['website']}) `[{data['available']}/{data['total']}]`")
                 else:
-                    nodes_available.add(f"> `✅ - {identifier} [{data['available']}/{data['total']}]`")
+                    nodes_available.add(f"> `✅⠂{identifier} [{data['available']}/{data['total']}]`")
             else:
-                nodes_unavailable.add(f"> `❌ - {identifier}`")
+                nodes_unavailable.add(f"> `❌⠂{identifier}`")
 
         node_txt_final = "\n".join(nodes_available)
 
