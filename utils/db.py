@@ -86,7 +86,8 @@ async def get_prefix(bot: BotCore, message: disnake.Message):
         user_prefix = bot.pool.user_prefix_cache[message.author.id]
     except KeyError:
         user_data = await bot.get_global_data(message.author.id, db_name=DBModel.users)
-        bot.pool.user_prefix_cache[message.author.id] = user_data["custom_prefix"]
+        if not bot.pool.mongo_database:
+            bot.pool.user_prefix_cache[message.author.id] = user_data["custom_prefix"]
         user_prefix = user_data["custom_prefix"]
 
     if user_prefix and message.content.startswith(user_prefix):
@@ -100,6 +101,8 @@ async def get_prefix(bot: BotCore, message: disnake.Message):
     except KeyError:
         data = await bot.get_global_data(message.guild.id, db_name=DBModel.guilds)
         guild_prefix = data.get("prefix")
+        if not bot.pool.mongo_database:
+            bot.pool.guild_prefix_cache[message.guild.id] = guild_prefix
 
     if not guild_prefix:
         guild_prefix = bot.config.get("DEFAULT_PREFIX") or "!!"
