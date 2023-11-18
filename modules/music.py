@@ -2691,16 +2691,19 @@ class Music(commands.Cog):
             raise GenericError("**Já há uma thread/conversa ativa no player.**")
 
         if not isinstance(player.text_channel, disnake.TextChannel):
-            raise GenericError(f"**O player-controller está ativo em um canal incompatível com "
-                               f"criação de thread/conversa.**")
+            raise GenericError("**O player-controller está ativo em um canal incompatível com "
+                               "criação de thread/conversa.**")
 
         if not player.controller_mode:
             raise GenericError("**A skin/aparência atual não é compatível com o sistem de song-request "
                                "via thread/conversa\n\n"
                                "Nota:** `Esse sistema requer uma skin que use botões.`")
 
+        if not player.text_channel.permissions_for(guild.me).send_messages:
+            raise GenericError(f"**{bot.user.mention} não possui permissão enviar mensagens no canal {player.text_channel.mention}.**")
+
         if not player.text_channel.permissions_for(guild.me).create_public_threads:
-            raise GenericError("**Não tenho permissão de criar tópicos públicos**")
+            raise GenericError(f"**{bot.user.mention} não possui permissão de criar tópicos públicos.**")
 
         if not [m for m in player.guild.me.voice.channel.members if not m.bot and
                 player.text_channel.permissions_for(m).send_messages_in_threads]:
