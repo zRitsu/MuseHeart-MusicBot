@@ -635,6 +635,7 @@ class LavalinkPlayer(wavelink.Player):
                             self.update = True
                         else:
                             await self.play(track, start=get_start_pos(self, track, self.bot.pool.config.get("ERROR_403_ADDITIONAL_SECONDS", 1)))
+                            await asyncio.sleep(1)
                         self.locked = False
                         self.update = True
                         return
@@ -657,6 +658,8 @@ class LavalinkPlayer(wavelink.Player):
                             await self.invoke_np()
                         await send_report()
                         return
+
+                    self.queue.append(track)
 
                 self.retries_403 = {"last_time": None, 'counter': 0}
 
