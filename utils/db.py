@@ -295,9 +295,9 @@ class MongoDatabase(BaseDB):
     async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users, str],
                           collection: str, default_model: dict = None):
 
-        data = await self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data}, upsert=True)
         self.check_cache(collection, db_name)
         self.cache[collection][db_name][id_] = data
+        await self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data}, upsert=True)
         return data
 
     async def query_data(self, db_name: str, collection: str, filter: dict = None, limit=100) -> list:
