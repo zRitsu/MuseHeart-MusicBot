@@ -256,12 +256,13 @@ class MongoDatabase(BaseDB):
         try:
             self.cache[collection]
         except KeyError:
-            self.cache[collection] = {}
-        else:
-            try:
-                self.cache[collection][db_name]
-            except KeyError:
-                self.cache[collection][db_name] = {}
+            self.cache[collection] = {db_name: {}}
+            return
+
+        try:
+            self.cache[collection][db_name]
+        except KeyError:
+            self.cache[collection][db_name] = {}
 
     async def get_data(self, id_: int, *, db_name: Union[DBModel.guilds, DBModel.users],
                        collection: str, default_model: dict = None):
