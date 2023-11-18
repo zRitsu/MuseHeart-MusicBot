@@ -86,8 +86,7 @@ async def get_prefix(bot: BotCore, message: disnake.Message):
         user_prefix = bot.pool.user_prefix_cache[message.author.id]
     except KeyError:
         user_data = await bot.get_global_data(message.author.id, db_name=DBModel.users)
-        if not bot.pool.mongo_database:
-            bot.pool.user_prefix_cache[message.author.id] = user_data["custom_prefix"]
+        bot.pool.user_prefix_cache[message.author.id] = user_data["custom_prefix"]
         user_prefix = user_data["custom_prefix"]
 
     if user_prefix and message.content.startswith(user_prefix):
@@ -101,8 +100,6 @@ async def get_prefix(bot: BotCore, message: disnake.Message):
     except KeyError:
         data = await bot.get_global_data(message.guild.id, db_name=DBModel.guilds)
         guild_prefix = data.get("prefix")
-        if not bot.pool.mongo_database:
-            bot.pool.guild_prefix_cache[message.guild.id] = guild_prefix
 
     if not guild_prefix:
         guild_prefix = bot.config.get("DEFAULT_PREFIX") or "!!"
@@ -200,6 +197,8 @@ class MongoDatabase(BaseDB):
     def __init__(self, token: str):
         super().__init__()
 
+        self.cache = {}
+
         fix_ssl = os.environ.get("MONGO_SSL_FIX") or os.environ.get("REPL_SLUG")
 
         if fix_ssl:
@@ -252,6 +251,18 @@ class MongoDatabase(BaseDB):
             default_model=global_db_models
         )
 
+    def check_cache(self, collection, db_name):
+
+        try:
+            self.cache[collection]
+        except KeyError:
+            self.cache[collection] = {}
+        else:
+            try:
+                self.cache[collection][db_name]
+            except KeyError:
+                self.cache[collection][db_name] = {}
+
     async def get_data(self, id_: int, *, db_name: Union[DBModel.guilds, DBModel.users],
                        collection: str, default_model: dict = None):
 
@@ -260,15 +271,22 @@ class MongoDatabase(BaseDB):
 
         id_ = str(id_)
 
+        try:
+            return self.cache[collection][db_name][id_]
+        except KeyError:
+            pass
+
         data = await self._connect[collection][db_name].find_one({"_id": id_})
 
         if not data:
-            return default_model[db_name].copy()
+            self.check_cache(collection, db_name)
+            data = default_model[db_name].copy()
+            self.cache[collection][db_name][id_] = data
+            return data
 
         elif data["ver"] != default_model[db_name]["ver"]:
             data = update_values(default_model[db_name].copy(), data)
             data["ver"] = default_model[db_name]["ver"]
-
             await self.update_data(id_, data, db_name=db_name, collection=collection)
 
         return data
@@ -276,12 +294,21 @@ class MongoDatabase(BaseDB):
     async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users, str],
                           collection: str, default_model: dict = None):
 
-        return await self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data}, upsert=True)
+        data = await self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data}, upsert=True)
+        self.check_cache(collection, db_name)
+        self.cache[collection][db_name][id_] = data
+        return data
 
     async def query_data(self, db_name: str, collection: str, filter: dict = None, limit=100) -> list:
         return [d async for d in self._connect[collection][db_name].find(filter or {})]
 
     async def delete_data(self, id_, db_name: str, collection: str):
+
+        try:
+            del self.cache[collection][db_name][id_]
+        except KeyError:
+            pass
+
         return await self._connect[collection][db_name].delete_one({'_id': str(id_)})
 
 
