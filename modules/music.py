@@ -5685,6 +5685,12 @@ class Music(commands.Cog):
 
         if not check:
             player.members_timeout_task = player.bot.loop.create_task(player.members_timeout(check=False))
+        else:
+            try:
+                player.auto_skip_track_task.cancel()
+                player.auto_skip_track_task = None
+            except AttributeError:
+                pass
 
         # rich presence stuff
 
