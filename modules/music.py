@@ -5683,7 +5683,8 @@ class Music(commands.Cog):
             except Exception:
                 traceback.print_exc()
 
-        player.members_timeout_task = player.bot.loop.create_task(player.members_timeout(check=bool(check)))
+        if not check:
+            player.members_timeout_task = player.bot.loop.create_task(player.members_timeout(check=False))
 
         # rich presence stuff
 
