@@ -1652,6 +1652,11 @@ class LavalinkPlayer(wavelink.Player):
 
         if not self.controller_mode:
 
+            try:
+                await self.message.delete()
+            except:
+                pass
+
             self.message = None
 
             if self.temp_embed:
