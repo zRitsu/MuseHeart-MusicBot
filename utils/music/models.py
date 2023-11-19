@@ -978,11 +978,19 @@ class LavalinkPlayer(wavelink.Player):
                 vc = self.last_channel
 
             if [m for m in vc.members if not m.bot]:
+                try:
+                    self.auto_skip_track_task.cancel()
+                except:
+                    pass
                 return
 
             await asyncio.sleep(idle_timeout or self.idle_timeout)
 
             if [m for m in vc.members if not m.bot]:
+                try:
+                    self.auto_skip_track_task.cancel()
+                except:
+                    pass
                 return
 
         if self.keep_connected:
