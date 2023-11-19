@@ -2318,10 +2318,7 @@ class LavalinkPlayer(wavelink.Player):
                     "autoplay": self.current.autoplay
                 }
 
-                if track.is_stream:
-                    stats["track"]["duration"] = int(self.last_position)
-                else:
-                    stats["track"]["duration"] = track.duration
+                stats["track"]["duration"] = track.duration
 
                 if track.playlist_name:
                     stats["track"].update(
