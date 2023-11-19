@@ -1652,10 +1652,7 @@ class LavalinkPlayer(wavelink.Player):
 
         if not self.controller_mode:
 
-            try:
-                await self.message.delete()
-            except:
-                pass
+            await self.destroy_message()
 
             self.message = None
 
