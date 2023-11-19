@@ -399,6 +399,8 @@ class LavalinkPlayer(wavelink.Player):
         self.temp_embed: Optional[disnake.Embed] = None
         self.prefix_info = kwargs.pop("prefix", "")
 
+        self.start_timestamp: Optional[float] = None
+
         self.initial_hints = [
             f"É possível alterar a skin/aparência do player usando o comando /change_skin ou {self.prefix_info}skin "
             f"(Apenas membros com permissão de gerenciar servidor pode usar esse comando).",
@@ -536,6 +538,8 @@ class LavalinkPlayer(wavelink.Player):
             return
 
         if isinstance(event, wavelink.TrackStart):
+
+            self.start_timestamp = time()
 
             if self.auto_pause:
                 return
@@ -2318,7 +2322,10 @@ class LavalinkPlayer(wavelink.Player):
                     "autoplay": self.current.autoplay
                 }
 
-                stats["track"]["duration"] = track.duration
+                if self.current.is_stream:
+                    stats["track"]["duration"] = self.start_timestamp or time()
+                else:
+                    stats["track"]["duration"] = track.duration
 
                 if track.playlist_name:
                     stats["track"].update(
