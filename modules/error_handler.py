@@ -112,7 +112,6 @@ class ErrorHandler(commands.Cog):
 
         else:
 
-            components = []
             kwargs["embeds"] = []
 
             for p in paginate(error_msg):
