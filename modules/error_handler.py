@@ -7,6 +7,7 @@ from aiohttp import ClientSession
 import asyncio
 import traceback
 
+from modules.debugger import paginate
 from utils.music.converters import URL_REG
 from utils.music.errors import parse_error, PoolException
 from utils.others import send_message, CustomContext, string_to_file
@@ -85,8 +86,9 @@ class ErrorHandler(commands.Cog):
 
         error_msg, full_error_msg, kill_process, components, mention_author = parse_error(inter, error)
 
-        kwargs = {"text": "", "embed": disnake.Embed(color=disnake.Colour.red())}
+        kwargs = {"text": ""}
         send_webhook = False
+        color = disnake.Color.red()
 
         try:
             if inter.message.author.bot or mention_author:
@@ -98,8 +100,11 @@ class ErrorHandler(commands.Cog):
 
             components = self.components
 
-            kwargs["embed"].title = "Ocorreu um erro no comando:"
-            kwargs["embed"].description = f"```py\n{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
+            kwargs["embed"] = disnake.Embed(
+                color=color,
+                title = "Ocorreu um erro no comando:",
+                description=f"```py\n{repr(error)[:2030].replace(self.bot.http.token, 'mytoken')}```"
+            )
 
             if self.bot.config["AUTO_ERROR_REPORT_WEBHOOK"]:
                 send_webhook = True
@@ -108,8 +113,12 @@ class ErrorHandler(commands.Cog):
         else:
 
             components = []
+            kwargs["embeds"] = []
 
-            kwargs["embed"].description = error_msg
+            for p in paginate(error_msg):
+                kwargs["embeds"] = disnake.Embed(color=color, description=p)
+
+            kwargs["embeds"][0].title = "Ocorreu um erro no comando:"
 
         try:
             await send_message(inter, components=components, **kwargs)
