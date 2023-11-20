@@ -114,6 +114,7 @@ class ErrorHandler(commands.Cog):
         try:
             await send_message(inter, components=components, **kwargs)
         except:
+            print(("-"*50) + f"\n{error_msg}\n" + ("-"*50))
             traceback.print_exc()
 
         if kill_process:
