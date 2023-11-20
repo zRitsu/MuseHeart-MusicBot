@@ -399,7 +399,6 @@ class LavalinkPlayer(wavelink.Player):
         self.temp_embed: Optional[disnake.Embed] = None
         self.prefix_info = kwargs.pop("prefix", "")
 
-        self.start_timestamp: Optional[float] = None
         self.start_time = disnake.utils.utcnow()
 
         self.initial_hints = [
@@ -540,7 +539,7 @@ class LavalinkPlayer(wavelink.Player):
 
         if isinstance(event, wavelink.TrackStart):
 
-            self.start_timestamp = time()
+            self.start_time = disnake.utils.utcnow()
 
             if self.auto_pause:
                 return
@@ -2316,7 +2315,7 @@ class LavalinkPlayer(wavelink.Player):
                 }
 
                 if self.current.is_stream:
-                    stats["track"]["duration"] = self.start_timestamp or time()
+                    stats["track"]["duration"] = self.start_time.timestamp()
                 else:
                     stats["track"]["duration"] = track.duration
 
