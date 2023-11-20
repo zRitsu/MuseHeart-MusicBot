@@ -400,6 +400,7 @@ class LavalinkPlayer(wavelink.Player):
         self.prefix_info = kwargs.pop("prefix", "")
 
         self.start_timestamp: Optional[float] = None
+        self.start_time = disnake.utils.utcnow()
 
         self.initial_hints = [
             f"É possível alterar a skin/aparência do player usando o comando /change_skin ou {self.prefix_info}skin "
