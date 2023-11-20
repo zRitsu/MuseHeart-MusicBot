@@ -116,7 +116,7 @@ class ErrorHandler(commands.Cog):
             kwargs["embeds"] = []
 
             for p in paginate(error_msg):
-                kwargs["embeds"] = disnake.Embed(color=color, description=p)
+                kwargs["embeds"].append(disnake.Embed(color=color, description=p))
 
             kwargs["embeds"][0].title = "Ocorreu um erro no comando:"
 
