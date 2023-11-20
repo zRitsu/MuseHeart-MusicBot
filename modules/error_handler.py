@@ -117,8 +117,6 @@ class ErrorHandler(commands.Cog):
             for p in paginate(error_msg):
                 kwargs["embeds"].append(disnake.Embed(color=color, description=p))
 
-            kwargs["embeds"][0].title = "Ocorreu um erro no comando:"
-
         try:
             await send_message(inter, components=components, **kwargs)
         except:
