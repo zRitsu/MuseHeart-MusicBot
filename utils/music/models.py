@@ -1033,86 +1033,72 @@ class LavalinkPlayer(wavelink.Player):
         if self.locked:
             return
 
-        try:
-            track = self.current or self.last_track
-        except:
-            track = None
+        tracks_search = []
 
-        if not track or not track.info["sourceName"] != "youtube" or track.is_stream or track.duration < 90000:
+        if current:=(self.current or self.last_track):
+            if current.duration < 90000:
+                tracks_search.append(current)
 
-            for t in self.played + self.queue_autoplay:
-                if t.info["sourceName"] == "youtube" and not t.is_stream and t.duration >= 90000:
-                    track = t
-                    break
+        for t in self.played + self.queue_autoplay:
 
-        search_url = ""
+            if len(tracks_search) > 4:
+                break
+
+            if t.duration < 90000:
+                continue
+
+            tracks_search.append(t)
+
+        track = None
         tracks = []
 
-        if track and track.info["sourceName"] == "youtube":
-            search_url = f'https://music.youtube.com/watch?v={track.ytid}&list=RD{track.ytid}'
-        else:
-            try:
-                track = self.played[0]
-            except IndexError:
-                try:
-                    track = self.queue_autoplay[-1]
-                except:
-                    track = None
+        exception = None
 
-            if not track:
-                track = self.current or self.last_track
-
-            if track:
-                search_url = f"ytmsearch:{track.author}"
-
-        if search_url:
+        if tracks_search:
 
             self.locked = True
 
-            retries = 3
-            exception = None
+            for track_data in tracks_search:
 
-            while retries:
+                if track_data.info["sourceName"] == "youtube":
+                    query = f'https://music.youtube.com/watch?v={track_data.ytid}&list=RD{track_data.ytid}'
+                else:
+                    query = f"ytmsearch:{track_data.author}"
 
                 try:
-                    tracks = await self.node.get_tracks(search_url)
+                    tracks = await self.node.get_tracks(query)
 
                     try:
                         tracks = tracks.tracks
                     except AttributeError:
                         pass
 
-                    tracks = [t for t in tracks if not track.uri.startswith(t.uri)]
-
+                    tracks = [t for t in tracks if not [u for u in tracks_search if t.uri.startswith(u.uri)]]
+                    track = track_data
                     break
-
-                except wavelink.TrackLoadError as e:
-                    traceback.print_exc()
-                    exception = e
-                    if e.message == "Could not find tracks from mix.":
-                        break
                 except Exception as e:
                     traceback.print_exc()
                     exception = e
 
                 await asyncio.sleep(1.5)
-                retries -= 1
 
             if not tracks:
                 self.locked = False
 
-                if isinstance(exception, wavelink.TrackLoadError):
-                    error_msg = f"**Causa:** ```java\n{exception.cause}```\n" \
-                                f"**Mensagem:** `\n{exception.message}`\n" \
-                                f"**Nível:** `{exception.severity}`\n" \
-                                f"**Servidor de música:** `{self.node.identifier}`"
+                if exception:
+                    if isinstance(exception, wavelink.TrackLoadError):
+                        error_msg = f"**Causa:** ```java\n{exception.cause}```\n" \
+                                    f"**Mensagem:** `\n{exception.message}`\n" \
+                                    f"**Nível:** `{exception.severity}`\n" \
+                                    f"**Servidor de música:** `{self.node.identifier}`"
+                    else:
+                        error_msg = f"**Detalhes:** ```py\n{repr(exception)}```"
                 else:
-                    error_msg = f"**Detalhes:** ```py\n{repr(exception)}```"
+                    error_msg = "Não houve resultados relacionados as músicas tocadas..."
 
                 try:
                     embed = disnake.Embed(
                         description=f"**Falha ao obter dados do autoplay:\n"
-                                    f"[{track.title}]({track.uri or track.search_uri})**\n"
                                     f"{error_msg}",
                         color=disnake.Colour.red())
                     await self.text_channel.send(embed=embed, delete_after=10)
