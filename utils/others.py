@@ -284,35 +284,26 @@ async def check_cmd(cmd, inter: Union[disnake.Interaction, disnake.ModalInteract
 async def send_message(
         inter: Union[disnake.Interaction, disnake.ApplicationCommandInteraction],
         text=None,
-        *,
-        embed: disnake.Embed = None,
-        components: Optional[list] = None,
+        **kwargs,
 ):
 
     # correção temporária usando variavel kwargs.
-    kwargs = {}
 
     try:
         bot = inter.music_bot
     except AttributeError:
         bot = inter.bot
 
-    if embed:
-        kwargs["embed"] = embed
-
     if hasattr(inter, 'self_mod'):
         if inter.response.is_done():
-            await inter.edit_original_message(content=text, components=components, **kwargs)
+            await inter.edit_original_message(content=text, **kwargs)
         else:
-            await inter.response.edit_message(content=text, components=components, **kwargs)
+            await inter.response.edit_message(content=text, **kwargs)
 
     elif inter.response.is_done() and isinstance(inter, disnake.AppCmdInter):
-        await inter.edit_original_message(content=text, components=components, **kwargs)
+        await inter.edit_original_message(content=text, **kwargs)
 
     else:
-
-        if components:
-            kwargs["components"] = components
 
         try:
 
