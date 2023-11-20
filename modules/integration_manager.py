@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import asyncio
-import datetime
 import json
 import re
 import traceback
@@ -182,42 +181,7 @@ class IntegrationModal(disnake.ui.Modal):
                 )
                 return
 
-            if info['entries'][0].get('id'):
-                data = {"title": info["entries"][0]['title'], "url": base_url}
-
-            else:
-
-                if len(info['entries']) > 1:
-
-                    view = SelectInteraction(
-                        user=inter.author,
-                        opts=[
-                            disnake.SelectOption(label=e['title'][:90], value=f"entrie_select_{c}") for c, e in enumerate(info['entries'])
-                        ], timeout=30)
-
-                    embed = disnake.Embed(
-                        description="**Escolha uma categoria de playlists abaixo:**\n"
-                                    f'Selecione uma opção em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para prosseguir.',
-                        color=self.bot.get_color()
-                    )
-
-                    await inter.edit_original_message(embed=embed, view=view)
-
-                    await view.wait()
-
-                    inter = view.inter
-
-                    try:
-                        await inter.response.defer()
-                    except:
-                        pass
-
-                    data = info["entries"][int(view.selected[14:])]
-
-                else:
-                    data = info["entries"][0]
-
-            data["title"] = f'{source} {info["channel"]} - {data["title"]}' if info['extractor'].startswith("youtube") else f"{source} {info['title']}"
+            data = {"title": f"{source} {info['title']}", "url": info["original_url"]}
 
         user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
