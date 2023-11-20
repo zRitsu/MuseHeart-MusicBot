@@ -7,10 +7,9 @@ from aiohttp import ClientSession
 import asyncio
 import traceback
 
-from modules.debugger import paginate
 from utils.music.converters import URL_REG
 from utils.music.errors import parse_error, PoolException
-from utils.others import send_message, CustomContext, string_to_file
+from utils.others import send_message, CustomContext, string_to_file, paginator
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
@@ -114,7 +113,7 @@ class ErrorHandler(commands.Cog):
 
             kwargs["embeds"] = []
 
-            for p in paginate(error_msg):
+            for p in paginator(error_msg):
                 kwargs["embeds"].append(disnake.Embed(color=color, description=p))
 
         try:
