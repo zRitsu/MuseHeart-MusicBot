@@ -143,13 +143,13 @@ class CustomTinyMongoClient(TinyMongoClient):
 
 class LocalDatabase(BaseDB):
 
-    def __init__(self):
+    def __init__(self, dir_="./local_database"):
         super().__init__()
 
-        if not os.path.isdir("./local_database"):
-            os.makedirs("./local_database")
+        if not os.path.isdir(dir_):
+            os.makedirs(dir_)
 
-        self._connect = CustomTinyMongoClient('./local_database')
+        self._connect = CustomTinyMongoClient(dir_)
 
     async def get_data(self, id_: int, *, db_name: Union[DBModel.guilds, DBModel.users],
                        collection: str, default_model: dict = None):
@@ -197,7 +197,12 @@ class MongoDatabase(BaseDB):
     def __init__(self, token: str):
         super().__init__()
 
-        self.cache = {}
+        try:
+            shutil.rmtree("./.db_cache")
+        except:
+            pass
+
+        self.cache = LocalDatabase(dir_="./.db_cache")
 
         fix_ssl = os.environ.get("MONGO_SSL_FIX") or os.environ.get("REPL_SLUG")
 
@@ -251,19 +256,6 @@ class MongoDatabase(BaseDB):
             default_model=global_db_models
         )
 
-    def check_cache(self, collection, db_name):
-
-        try:
-            self.cache[collection]
-        except KeyError:
-            self.cache[collection] = {db_name: {}}
-            return
-
-        try:
-            self.cache[collection][db_name]
-        except KeyError:
-            self.cache[collection][db_name] = {}
-
     async def get_data(self, id_: int, *, db_name: Union[DBModel.guilds, DBModel.users],
                        collection: str, default_model: dict = None):
 
@@ -272,17 +264,14 @@ class MongoDatabase(BaseDB):
 
         id_ = str(id_)
 
-        try:
-            return self.cache[collection][db_name][id_]
-        except KeyError:
-            pass
-
-        data = await self._connect[collection][db_name].find_one({"_id": id_})
+        data = self.cache._connect[collection][db_name].find_one({"_id": id_})
 
         if not data:
-            self.check_cache(collection, db_name)
+            data = await self._connect[collection][db_name].find_one({"_id": id_})
+
+        if not data:
             data = default_model[db_name].copy()
-            self.cache[collection][db_name][id_] = data
+            await self.cache.update_data(id_, data, db_name=db_name, collection=collection, default_model=default_model)
             return data
 
         elif data["ver"] != default_model[db_name]["ver"]:
@@ -295,21 +284,15 @@ class MongoDatabase(BaseDB):
     async def update_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users, str],
                           collection: str, default_model: dict = None):
 
-        self.check_cache(collection, db_name)
-        self.cache[collection][db_name][id_] = data
         await self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data}, upsert=True)
+        await self.cache.update_data(id_, data, db_name=db_name, collection=collection, default_model=default_model)
         return data
 
     async def query_data(self, db_name: str, collection: str, filter: dict = None, limit=100) -> list:
         return [d async for d in self._connect[collection][db_name].find(filter or {})]
 
     async def delete_data(self, id_, db_name: str, collection: str):
-
-        try:
-            del self.cache[collection][db_name][id_]
-        except KeyError:
-            pass
-
+        await self.cache.delete_data(id_, db_name=db_name, collection=collection)
         return await self._connect[collection][db_name].delete_one({'_id': str(id_)})
 
 
