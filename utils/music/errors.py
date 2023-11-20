@@ -21,10 +21,11 @@ class ArgumentParsingError(commands.CommandError):
 
 class GenericError(commands.CheckFailure):
 
-    def __init__(self, text: str, *, self_delete: int = None, delete_original: Optional[int] = None):
+    def __init__(self, text: str, *, self_delete: int = None, delete_original: Optional[int] = None, components: list = None):
         self.text = text
         self.self_delete = self_delete
         self.delete_original = delete_original
+        self.components = components
 
 
 class EmptyFavIntegration(commands.CheckFailure):
@@ -99,6 +100,7 @@ def parse_error(
 
     elif isinstance(error, GenericError):
         error_txt = error.text
+        components = error.components
 
     elif isinstance(error, NotRequester):
         error_txt = "**Você deve ter pedido a música atual ou estar na lista de DJ ou ter a permissão de " \

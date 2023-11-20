@@ -583,15 +583,9 @@ async def select_bot_pool(inter, first=False, return_new=False):
 
     if not bots:
 
-        kwargs = {"redirect_uri": inter.bot.config['INVITE_REDIRECT_URL']} if inter.bot.config['INVITE_REDIRECT_URL'] else {}
-
-        bot_invites = "\n".join(
-            f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, permissions=disnake.Permissions(b.config['INVITE_PERMISSIONS']), scopes=('bot'), **kwargs)})"
-            for b in inter.bot.pool.bots if b.appinfo.bot_public)
-
-        if bot_invites:
-            raise GenericError(f"**Será necessário adicionar no servidor pelo menos um dos bots abaixo para usar "
-                               f"meus comandos:**\n{bot_invites}")
+        if [b for b in inter.bot.pool.bots if b.appinfo and b.appinfo.bot_public]:
+            raise GenericError(
+                f"**Será necessário adicionar no servidor pelo menos um bot compatível clicando no botão abaixo:**")
         else:
             raise GenericError("**Não há bots compatíveis com meus comandos no servidor...**")
 
