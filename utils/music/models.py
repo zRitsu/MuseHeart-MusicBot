@@ -1035,10 +1035,6 @@ class LavalinkPlayer(wavelink.Player):
 
         tracks_search = []
 
-        if current:=(self.current or self.last_track):
-            if current.duration < 90000:
-                tracks_search.append(current)
-
         for t in self.played + self.queue_autoplay:
 
             if len(tracks_search) > 4:
