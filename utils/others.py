@@ -294,14 +294,17 @@ async def send_message(
     except AttributeError:
         bot = inter.bot
 
+    if components:=kwargs.pop("components", []) is None:
+        components = []
+
     if hasattr(inter, 'self_mod'):
         if inter.response.is_done():
-            await inter.edit_original_message(content=text, **kwargs)
+            await inter.edit_original_message(content=text, components=components, **kwargs)
         else:
-            await inter.response.edit_message(content=text, **kwargs)
+            await inter.response.edit_message(content=text, components=components, **kwargs)
 
     elif inter.response.is_done() and isinstance(inter, disnake.AppCmdInter):
-        await inter.edit_original_message(content=text, **kwargs)
+        await inter.edit_original_message(content=text, components=components, **kwargs)
 
     else:
 
@@ -333,7 +336,7 @@ async def send_message(
             pass
 
         try:
-            await inter.send(text, ephemeral=True, **kwargs)
+            await inter.send(text, ephemeral=True, components=components, **kwargs)
         except disnake.InteractionTimedOut:
 
             try:
@@ -346,7 +349,7 @@ async def send_message(
                     return
             except AttributeError:
                 return
-            await inter.channel.send(text, **kwargs)
+            await inter.channel.send(text, components=components, **kwargs)
 
 
 async def send_idle_embed(
