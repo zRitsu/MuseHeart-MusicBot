@@ -3742,7 +3742,9 @@ class Music(commands.Cog):
 
             moved_tracks = len(tracklist)
 
-            msg_txt = f"### ↪️ ⠂{inter.author.mention} moveu {moved_tracks} música(s) pra posição {position} da fila:\n" + "\n".join(f"[`{fix_characters(t.title, 45)}`]({t.uri})" for t in tracklist[:7])
+            moved_tracks_txt = moved_tracks if moved_tracks == 1 else f"[{position}-{position+moved_tracks}]"
+
+            msg_txt = f"### ↪️ ⠂{inter.author.mention} moveu {moved_tracks} música(s) para a posição {moved_tracks_txt} da fila:\n" + "\n".join(f"`{position+n}.` [`{fix_characters(t.title, 45)}`]({t.uri})" for n, t in enumerate(tracklist[:7]))
 
             if (track_extra:=(moved_tracks - 7)) > 0:
                 msg_txt += f"\n`e mais {track_extra} música(s).`"
