@@ -3152,9 +3152,9 @@ class Music(commands.Cog):
                                  help="Remover músicas com a duração máxima especificada.\nEx: -max 1:23.")
     adv_queue_flags.add_argument('-amount', '-counter', '-count', '-c', type=int, default=None,
                                  help="Especificar uma quantidade de músicas para mover com o nome especificado.\nEx: -amount 5")
-    adv_queue_flags.add_argument('-startposition', '-startpos', '-start', type=int, default=None,
+    adv_queue_flags.add_argument('-startposition', '-startpos', '-start', type=int, default=0,
                                  help="Remover músicas a partir de uma posição inicial da fila.\nEx: -start 10")
-    adv_queue_flags.add_argument('-endposition', '-endpos', '-end', type=int, default=None,
+    adv_queue_flags.add_argument('-endposition', '-endpos', '-end', type=int, default=0,
                                  help="Remover músicas da fila até uma posição específica na fila.\nEx: -end 15")
     adv_queue_flags.add_argument('-absentmembers', '-absent', '-abs', action='store_true',
                                  help="Remover músicas adicionads por membros que saíram do canal")
@@ -3219,10 +3219,10 @@ class Music(commands.Cog):
             range_start: int = commands.Param(name="posição_inicial",
                                               description="incluir músicas da fila a partir de uma posição específica "
                                                           "da fila.",
-                                              min_value=1.0, max_value=500.0, default=None),
+                                              min_value=1.0, max_value=500.0, default=0),
             range_end: int = commands.Param(name="posição_final",
                                             description="incluir músicas da fila até uma posição específica da fila.",
-                                            min_value=1.0, max_value=500.0, default=None),
+                                            min_value=1.0, max_value=500.0, default=0),
             absent_members: bool = commands.Param(name="membros_ausentes",
                                                   description="Incluir músicas adicionads por membros fora do canal",
                                                   default=False)
@@ -3281,20 +3281,20 @@ class Music(commands.Cog):
 
         else:
 
-            if range_start and range_end:
+            if range_start > 0 and range_end > 0:
 
                 if range_start >= range_end:
                     raise GenericError("**A posição final deve ser maior que a posição inicial!**")
 
-                song_list = list(player.queue)[range_start - 1: range_end - 1]
+                song_list = list(player.queue)[range_start - 1: -(range_end - 1)]
                 txt.append(f"**Posição inicial da fila:** `{range_start}`\n"
                            f"**Posição final da fila:** `{range_end}`")
 
-            elif range_start:
+            elif range_start > 0:
                 song_list = list(player.queue)[range_start - 1:]
                 txt.append(f"**Posição inicial da fila:** `{range_start}`")
-            elif range_end:
-                song_list = list(player.queue)[:range_end - 1]
+            elif range_end > 0:
+                song_list = list(player.queue)[:-(range_end - 1)]
                 txt.append(f"**Posição final da fila:** `{range_end}`")
             else:
                 song_list = list(player.queue)
@@ -3354,7 +3354,7 @@ class Music(commands.Cog):
                         final_filters.add('playlist')
 
                 if not temp_filter:
-                    tracklist.insert(0, t)
+                    tracklist.append(t)
                     player.queue.remove(t)
                     deleted_tracks += 1
                     if amount:
@@ -3413,7 +3413,6 @@ class Music(commands.Cog):
                 txt.append("`Músicas pedidas por membros que saíram do canal.`")
             except:
                 pass
-
 
             msg_txt = f"### ♻️ ⠂{inter.author.mention} removeu {deleted_tracks} música(s) da fila:\n" + "\n".join(f"[`{fix_characters(t.title, 45)}`]({t.uri})" for t in tracklist[:7])
 
@@ -3510,10 +3509,10 @@ class Music(commands.Cog):
             range_start: int = commands.Param(name="posição_inicial",
                                               description="incluir músicas da fila a partir de uma posição específica "
                                                           "da fila.",
-                                              min_value=1.0, max_value=500.0, default=None),
+                                              min_value=1.0, max_value=500.0, default=0),
             range_end: int = commands.Param(name="posição_final",
                                             description="incluir músicas da fila até uma posição específica da fila.",
-                                            min_value=1.0, max_value=500.0, default=None),
+                                            min_value=1.0, max_value=500.0, default=0),
             absent_members: bool = commands.Param(name="membros_ausentes",
                                                   description="Incluir músicas adicionads por membros fora do canal",
                                                   default=False),
@@ -3528,8 +3527,8 @@ class Music(commands.Cog):
     async def do_move(
             self, inter: Union[disnake.AppCmdInter, CustomContext], position: int = 1, song_name: str = None,
             song_author: str = None, user: disnake.Member = None, duplicates: bool = False, playlist: str = None,
-            min_duration: str = None, max_duration: str = None, amount: int = None, range_start: int = None,
-            range_end: int = None, absent_members: bool = False, case_sensitive=False
+            min_duration: str = None, max_duration: str = None, amount: int = None, range_start: int = 0,
+            range_end: int = 0, absent_members: bool = False, case_sensitive=False
     ):
 
         if min_duration and max_duration:
@@ -3579,24 +3578,22 @@ class Music(commands.Cog):
         if not filters and not range_start and not range_end:
             raise GenericError("**Você deve usar pelo menos uma opção pra mover**")
 
-        moved_tracks = 0
-
         indexes = None
 
-        if range_start and range_end:
+        if range_start > 0 and range_end > 0:
 
             if range_start >= range_end:
                 raise GenericError("**A posição final deve ser maior que a posição inicial!**")
 
-            song_list = list(player.queue)[range_start - 1: range_end - 1]
+            song_list = list(player.queue)[range_start - 1: -(range_end - 1)]
             txt.append(f"**Posição inicial da fila:** `{range_start}`\n"
                        f"**Posição final da fila:** `{range_end}`")
 
-        elif range_start:
+        elif range_start > 0:
             song_list = list(player.queue)[range_start - 1:]
             txt.append(f"**Posição inicial da fila:** `{range_start}`")
-        elif range_end:
-            song_list = list(player.queue)[:range_end - 1]
+        elif range_end > 0:
+            song_list = list(player.queue)[:-(range_end - 1)]
             txt.append(f"**Posição final da fila:** `{range_end}`")
         elif song_name and filters == ["song_name"] and amount is None:
             indexes = queue_track_index(inter, bot, song_name, match_count=1, case_sensitive=case_sensitive)
@@ -3604,7 +3601,6 @@ class Music(commands.Cog):
                 player.queue.remove(track)
                 player.queue.insert(int(position) - 1, track)
                 tracklist.append(track)
-                moved_tracks += 1
             song_list = []
 
         else:
@@ -3671,18 +3667,18 @@ class Music(commands.Cog):
 
                     track = player.queue[player.queue.index(t)]
                     player.queue.remove(t)
-                    player.queue.insert(position - 1, track)
-                    moved_tracks += 1
-
-                    tracklist.insert(0, track)
+                    tracklist.append(track)
 
                     if amount:
                         amount_counter -= 1
 
             duplicated_titles.clear()
 
-        if not moved_tracks:
+        if not tracklist:
             raise GenericError("Nenhuma música encontrada com os filtros selecionados!")
+
+        for t in reversed(tracklist):
+            player.queue.insert(position-1, t)
 
         try:
             final_filters.remove("song_name")
@@ -3744,10 +3740,12 @@ class Music(commands.Cog):
 
         else:
 
+            moved_tracks = len(tracklist)
+
             msg_txt = f"### ↪️ ⠂{inter.author.mention} moveu {moved_tracks} música(s) pra posição {position} da fila:\n" + "\n".join(f"[`{fix_characters(t.title, 45)}`]({t.uri})" for t in tracklist[:7])
 
-            if (trackcount:=(len(tracklist) - 7)) > 0:
-                msg_txt += f"\n`e mais {trackcount} música(s).`"
+            if (track_extra:=(moved_tracks - 7)) > 0:
+                msg_txt += f"\n`e mais {track_extra} música(s).`"
 
             msg_txt += f"\n### ✅ ⠂Filtro(s) usado(s):\n" + '\n'.join(txt)
 
