@@ -3599,7 +3599,6 @@ class Music(commands.Cog):
             indexes = queue_track_index(inter, bot, song_name, match_count=1, case_sensitive=case_sensitive)
             for index, track in reversed(indexes):
                 player.queue.remove(track)
-                player.queue.insert(int(position) - 1, track)
                 tracklist.append(track)
             song_list = []
 
@@ -3742,7 +3741,7 @@ class Music(commands.Cog):
 
             moved_tracks = len(tracklist)
 
-            moved_tracks_txt = moved_tracks if moved_tracks == 1 else f"[{position}-{position+moved_tracks}]"
+            moved_tracks_txt = moved_tracks if moved_tracks == 1 else f"[{position}-{position+moved_tracks-1}]"
 
             msg_txt = f"### ↪️ ⠂{inter.author.mention} moveu {moved_tracks} música(s) para a posição {moved_tracks_txt} da fila:\n" + "\n".join(f"`{position+n}.` [`{fix_characters(t.title, 45)}`]({t.uri})" for n, t in enumerate(tracklist[:7]))
 
