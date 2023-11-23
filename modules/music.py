@@ -1732,10 +1732,10 @@ class Music(commands.Cog):
             )
             await player.track_end()
             await player.process_next()
-        elif player.current.autoplay:
-            player.set_command_log(text=log_text, emoji=emoji)
-            await player.track_end()
-            await player.process_next()
+        #elif player.current.autoplay:
+        #    player.set_command_log(text=log_text, emoji=emoji)
+        #    await player.track_end()
+        #    await player.process_next()
         else:
             if ephemeral:
                 player.set_command_log(text=log_text, emoji=emoji)
