@@ -160,3 +160,4 @@ application.yml
 /auto_lavalink.ini
 /.test/
 /.local_database_sqlite
+/.db_cache/
