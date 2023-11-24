@@ -420,6 +420,14 @@ class LavalinkPlayer(wavelink.Player):
                 f"Experimente usando o comando /integrations ou {self.prefix_info}integrations."
             )
 
+        if (extrabots:=len([b for b in self.bot.pool.bots if b != self.bot and b.get_guild(self.guild.id)])) > 0:
+            self.initial_hints.append(
+                "Caso algum membro queira me utilizar em algum outro canal de voz sem precisar me esperar/interromperem "
+                f"no canal atual, há mais {extrabots} bot(s) neste servidor que funciona(m) com o meu mesmo "
+                "sistema/comandos (usando o mesmo prefixo/comandos de barra que eu uso). Experimente entrando em um "
+                f"canal de voz diferente sem me desconectar/parar e use o comando {self.prefix_info}play ou /play."
+            )
+
         try:
             self.initial_hints.extend(kwargs.pop("extra_hints"))
         except:
