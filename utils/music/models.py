@@ -925,7 +925,7 @@ class LavalinkPlayer(wavelink.Player):
         if len(self.bot.pool.bots) > 1:
 
             if (extrabots := len([b for b in self.bot.pool.bots if b != self.bot and b.get_guild(self.guild.id)])) > 0:
-                self.initial_hints.append(
+                hints.append(
                     "Caso algum membro queira me utilizar em algum outro canal de voz sem precisar me esperar/interromperem "
                     f"no canal atual, há mais {extrabots} bot(s) neste servidor que funciona(m) com o meu mesmo "
                     "sistema/comandos (usando o mesmo prefixo/comandos de barra que eu uso). Experimente entrando em um "
