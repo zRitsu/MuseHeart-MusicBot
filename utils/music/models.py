@@ -420,15 +420,6 @@ class LavalinkPlayer(wavelink.Player):
                 f"Experimente usando o comando /integrations ou {self.prefix_info}integrations."
             )
 
-        if (extrabots:=len([b for b in self.bot.pool.bots if b != self.bot and b.get_guild(self.guild.id)])) > 0:
-            self.initial_hints.append(
-                "Caso algum membro queira me utilizar em algum outro canal de voz sem precisar me esperar/interromperem "
-                f"no canal atual, há mais {extrabots} bot(s) neste servidor que funciona(m) com o meu mesmo "
-                "sistema/comandos (usando o mesmo prefixo/comandos de barra que eu uso). Experimente entrando em um "
-                "canal de voz diferente (sem me esperar desconectar/parar) e use o comando "
-                f"{self.prefix_info}play ou /play."
-            )
-
         try:
             self.initial_hints.extend(kwargs.pop("extra_hints"))
         except:
@@ -931,11 +922,22 @@ class LavalinkPlayer(wavelink.Player):
             hints.append("Ao criar uma conversa/thread na mensagem do player, será ativado o modo de song-request "
                          "nela (possibilitando pedir música apenas enviando o nome/link da música na conversa).")
 
-        if len([b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public]) > 1:
-            hints.append("É possível ter bots de música adicionais no servidor para usá-los em mútiplos canais "
-                         "de voz funcionando com o mesmo prefixo em cada canal (e compartilhando comandos slash "
-                         "de apenas um bot) além de você ter acesso a todos os seus favoritos/integrações em todos "
-                         f"os bots. Você pode usar o comando /invite ou {self.prefix_info}invite para adicioná-los.")
+        if len(self.bot.pool.bots) > 1:
+
+            if (extrabots := len([b for b in self.bot.pool.bots if b != self.bot and b.get_guild(self.guild.id)])) > 0:
+                self.initial_hints.append(
+                    "Caso algum membro queira me utilizar em algum outro canal de voz sem precisar me esperar/interromperem "
+                    f"no canal atual, há mais {extrabots} bot(s) neste servidor que funciona(m) com o meu mesmo "
+                    "sistema/comandos (usando o mesmo prefixo/comandos de barra que eu uso). Experimente entrando em um "
+                    "canal de voz diferente (sem me esperar desconectar/parar) e use o comando "
+                    f"{self.prefix_info}play ou /play."
+                )
+
+            else:
+                hints.append("É possível ter bots de música adicionais no servidor para usá-los em mútiplos canais "
+                             "de voz funcionando com o mesmo prefixo em cada canal (e compartilhando comandos slash "
+                             "de apenas um bot) além de você ter acesso a todos os seus favoritos/integrações em todos "
+                             f"os bots. Você pode usar o comando /invite ou {self.prefix_info}invite para adicioná-los.")
 
         if self.controller_mode:
             hints.append(
