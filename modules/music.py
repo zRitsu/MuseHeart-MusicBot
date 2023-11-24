@@ -4994,7 +4994,7 @@ class Music(commands.Cog):
 
             try:
                 try:
-                    error_msg, full_error_msg, kill_process = parse_error(message, has_exception)
+                    error_msg, full_error_msg, kill_process, components, mention_author = parse_error(message, has_exception)
                 except:
                     full_error_msg = has_exception
 
