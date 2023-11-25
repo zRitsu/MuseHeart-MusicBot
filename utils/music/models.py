@@ -929,7 +929,11 @@ class LavalinkPlayer(wavelink.Player):
 
             for b in self.bot.pool.bots:
 
-                if b == self.bot or not b.bot_ready or str(b.user.id) in self.bot.pool.config["INTERACTION_BOTS_CONTROLLER"]:
+                try:
+                    if b == self.bot or str(b.user.id) in self.bot.pool.config["INTERACTION_BOTS_CONTROLLER"]:
+                        continue
+                except:
+                    bots_outside_guild += 1
                     continue
 
                 if b.get_guild(self.guild.id):
