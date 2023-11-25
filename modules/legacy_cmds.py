@@ -743,14 +743,18 @@ class Owner(commands.Cog):
 
         filelist = await run_command("git ls-files --others --exclude-standard --cached")
 
-        if any(f in flags.lower() for f in ("--extradirs", "-extradirs", "--ed", "-ed", "--extrafiles", "-extrafiles", "--ef", "-ef")):
-            for extra_dir in self.extra_dirs:
-                for dir_path, dir_names, filenames in os.walk(extra_dir):
-                    filelist += "\n" + "\n".join(os.path.join(dir_path, file) for file in filenames)
+        for folder, subfolder, files in os.walk("./modules"):
+            for file in files:
+                if file.endswith(".py") and (filename:=os.path.join(file)) not in filelist.split("\n"):
+                    filelist += f"\n{filename}"
 
-            for file in self.extra_files:
-                if os.path.isfile(file):
-                    filelist += "\n" + file
+        for extra_dir in self.extra_dirs:
+            for dir_path, dir_names, filenames in os.walk(extra_dir):
+                filelist += "\n" + "\n".join(os.path.join(dir_path, file) for file in filenames)
+
+        for file in self.extra_files:
+            if os.path.isfile(file):
+                filelist += "\n" + file
 
         for file in self.additional_files:
             if os.path.isfile(file):
