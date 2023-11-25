@@ -946,7 +946,7 @@ class LavalinkPlayer(wavelink.Player):
             if bots_in_guild:
                 hints.append(
                     "Caso algum membro queira me usar em outro canal de voz sem precisar aguardar me "
-                    f"desconectarem/interromperem do canal atual, há mais {bots_in_guild} bot(s) no servidor que "
+                    f"desconectarem ou me interromperem do canal atual, há mais {bots_in_guild} bot(s) no servidor que "
                     "funciona(m) com o meu mesmo sistema/comandos (usando o mesmo prefixo/comandos de barra). "
                     f"Experimente entrar em um canal de voz diferente do meu atual e use o comando "
                     f"{self.prefix_info}play ou /play."
@@ -955,7 +955,7 @@ class LavalinkPlayer(wavelink.Player):
             elif bots_outside_guild:
                 hints.append(
                     "Caso algum membro queira me usar em outro canal de voz sem precisar aguardar me "
-                    f"desconectarem/interromperem do canal atual. Dá para adicionar mais {bots_outside_guild} bot(s) "
+                    f"desconectarem ou me interromperem do canal atual. Dá para adicionar mais {bots_outside_guild} bot(s) "
                     f"extras no servidor atual que funciona(m) com o meu mesmo sistema/comandos (usando o mesmo "
                     f"prefixo/comandos de barra). Use o comando {self.prefix_info}invite ou /invite para adicioná-los."
                 )
