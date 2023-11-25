@@ -4963,9 +4963,16 @@ class Music(commands.Cog):
             error = f"{message.author.mention}. {e}"
 
         except Exception as e:
-            traceback.print_exc()
-            has_exception = e
-            error = f"{message.author.mention} **ocorreu um erro ao tentar obter resultados para sua busca:** ```py\n{e}```"
+            try:
+                error_msg, full_error_msg, kill_process, components, mention_author = parse_error(ctx, e)
+            except:
+                has_exception = e
+            else:
+                if not error_msg:
+                    has_exception = e
+                    error = f"{message.author.mention} **ocorreu um erro ao tentar obter resultados para sua busca:** ```py\n{error_msg}```"
+                else:
+                    error = f"{message.author.mention}. {error_msg}"
 
         if error:
 
