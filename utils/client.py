@@ -902,7 +902,10 @@ class BotCore(commands.AutoShardedBot):
                     ]
                 }
 
-            await message.reply(embed=embed, fail_if_not_exists=False, **kwargs)
+            if message.channel.permissions_for(message.guild.me).read_message_history:
+                await message.reply(embed=embed, fail_if_not_exists=False, **kwargs)
+            else:
+                await message.channel.send(message.author.mention, embed=embed, **kwargs)
             return
 
         ctx: CustomContext = await self.get_context(message, cls=CustomContext)
