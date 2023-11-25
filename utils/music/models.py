@@ -924,20 +924,35 @@ class LavalinkPlayer(wavelink.Player):
 
         if len(self.bot.pool.bots) > 1:
 
-            if (extrabots := len([b for b in self.bot.pool.bots if b != self.bot and b.get_guild(self.guild.id)])) > 0:
+            bots_in_guild = 0
+            bots_outside_guild = 0
+
+            for b in self.bot.pool.bots:
+
+                if b == self.bot or not b.bot_ready or str(b.user.id) in self.bot.pool.config["INTERACTION_BOTS_CONTROLLER"]:
+                    continue
+
+                if b.get_guild(self.guild.id):
+                    bots_in_guild += 1
+                else:
+                    bots_outside_guild += 1
+
+            if bots_in_guild:
                 hints.append(
-                    "Caso algum membro queira me utilizar em algum outro canal de voz sem precisar me esperar/interromperem "
-                    f"no canal atual, há mais {extrabots} bot(s) neste servidor que funciona(m) com o meu mesmo "
-                    "sistema/comandos (usando o mesmo prefixo/comandos de barra que eu uso). Experimente entrando em um "
-                    "canal de voz diferente (sem me esperar desconectar/parar) e use o comando "
+                    "Caso algum membro queira me usar em outro canal de voz sem precisar aguardar me "
+                    f"desconectarem/interromperem do canal atual, há mais {bots_in_guild} bot(s) no servidor que "
+                    "funciona(m) com o meu mesmo sistema/comandos (usando o mesmo prefixo/comandos de barra). "
+                    f"Experimente entrar em um canal de voz diferente do meu atual e use o comando "
                     f"{self.prefix_info}play ou /play."
                 )
 
-            else:
-                hints.append("É possível ter bots de música adicionais no servidor para usá-los em mútiplos canais "
-                             "de voz funcionando com o mesmo prefixo em cada canal (e compartilhando comandos slash "
-                             "de apenas um bot) além de você ter acesso a todos os seus favoritos/integrações em todos "
-                             f"os bots. Você pode usar o comando /invite ou {self.prefix_info}invite para adicioná-los.")
+            elif bots_outside_guild:
+                hints.append(
+                    "Caso algum membro queira me usar em outro canal de voz sem precisar aguardar me "
+                    f"desconectarem/interromperem do canal atual. Dá para adicionar mais {bots_outside_guild} bot(s) "
+                    f"extras no servidor atual que funciona(m) com o meu mesmo sistema/comandos (usando o mesmo "
+                    f"prefixo/comandos de barra). Use o comando {self.prefix_info}invite ou /invite para adicioná-los."
+                )
 
         if self.controller_mode:
             hints.append(
