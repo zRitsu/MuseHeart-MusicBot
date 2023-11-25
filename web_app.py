@@ -88,7 +88,7 @@ class IndexHandler(tornado.web.RequestHandler):
                     f"<tr><td><img src=\"{avatar}\" width=128 weight=128></img></td>\n"
                     "<td style=\"padding-top: 10px ; padding-bottom: 10px; padding-left: 10px; padding-right: 10px\">"
                     f"Adicionar:<br><a href=\"{disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'), **kwargs)}\" "
-                    f"rel=\"nofollow\" target=\"_blank\">{bot.user}</a>" + (f"<br>Servers: {guilds}" if guilds else "") + f"<br>Prefixo padrão: {bot.default_prefix}</td></tr>"
+                    f"rel=\"nofollow\" target=\"_blank\">{bot.user}</a>" + (f"<br>Servers: {guilds}" if guilds else "") + "</td></tr>"
                 )
             else:
                 pending_bots.append(f"<tr><td>{bot.identifier}</td></tr>")
@@ -129,6 +129,8 @@ class IndexHandler(tornado.web.RequestHandler):
 
         if self.config["ENABLE_RPC_AUTH"]:
             msg += f"\nNão esqueça de obter o token para configurar no app, use o comando /rich_presence para obter um.\n<br><br>"
+
+        msg += f"\nPrefixo padrão: {self.pool.config['DEFAULT_PREFIX']}<br><br>"
 
         if self.pool.commit:
             msg += f"\nCommit Atual: <a href=\"{self.pool.remote_git_url}/commit/{self.pool.commit}\" target=\"_blank\">{self.pool.commit[:7]}</a>"
