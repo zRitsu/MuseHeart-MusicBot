@@ -413,6 +413,8 @@ class LavalinkPlayer(wavelink.Player):
             f"{self.prefix_info}stageannounce (Apenas membros com permissão de gerenciar servidor pode usar esse recurso)."
         ]
 
+        self.retry_setup_hints = False
+
         if self.bot.config["USE_YTDL"] or self.bot.spotify:
             self.initial_hints.append(
                 "Você pode adicionar/integrar link de canais e perfis do youtube, soundcloud e spotify para tocar "
@@ -933,7 +935,7 @@ class LavalinkPlayer(wavelink.Player):
                     if b == self.bot or str(b.user.id) in self.bot.pool.config["INTERACTION_BOTS_CONTROLLER"]:
                         continue
                 except:
-                    bots_outside_guild += 1
+                    self.retry_setup_hints = True
                     continue
 
                 if b.get_guild(self.guild.id):
@@ -1633,7 +1635,14 @@ class LavalinkPlayer(wavelink.Player):
             return
 
         if rpc_update:
-            await self.process_rpc()
+            try:
+                await self.process_rpc()
+            except:
+                traceback.print_exc()
+
+        if self.retry_setup_hints:
+            self.setup_hints()
+            self.retry_setup_hints = False
 
         try:
             if self.static:
