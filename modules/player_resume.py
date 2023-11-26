@@ -4,6 +4,7 @@
 import asyncio
 import json
 import os
+import shutil
 import traceback
 from typing import Union
 
@@ -514,6 +515,9 @@ class PlayerSession(commands.Cog):
 
         for file in files:
 
+            if not file.endswith(".db"):
+                continue
+
             guild_id = file[:-3]
 
             conn = await aiosqlite.connect(f'./local_database/player_sessions/{self.bot.user.id}/{guild_id}.db')
@@ -566,6 +570,15 @@ class PlayerSession(commands.Cog):
 
         json_str = json.dumps(data)
 
+        path = f'./local_database/player_sessions/{self.bot.user.id}/{player.guild.id}'
+
+        try:
+            shutil.copy(f'{path}.db', f'{path}.bk')
+        except FileNotFoundError:
+            pass
+        except Exception:
+            traceback.print_exc()
+
         try:
             await player.conn_cursor.execute('UPDATE dados SET json_data = ? WHERE id = ?', (json_str, 1))
         except:
@@ -583,6 +596,14 @@ class PlayerSession(commands.Cog):
                     pass
                 player.conn_cursor = None
                 await self.save_session(player, data)
+                return
+            except Exception:
+                try:
+                    shutil.copy(f'{path}.bk', f'{path}.db')
+                except FileNotFoundError:
+                    pass
+                except Exception:
+                    traceback.print_exc()
                 return
 
             await player.conn_cursor.execute('INSERT INTO dados (json_data) VALUES (?)', (json_str,))
@@ -612,10 +633,13 @@ class PlayerSession(commands.Cog):
         except:
             pass
 
-        try:
-            os.remove(f'./local_database/player_sessions/{self.bot.user.id}/{guild_id}.db')
-        except FileNotFoundError:
-            return
+        for ext in ('.db', '.bk'):
+            try:
+                os.remove(f'./local_database/player_sessions/{self.bot.user.id}/{guild_id}{ext}')
+            except FileNotFoundError:
+                continue
+            except Exception:
+                traceback.print_exc()
 
     def cog_unload(self):
         try:
