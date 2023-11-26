@@ -775,7 +775,7 @@ class Owner(commands.Cog):
 
         os.remove("./.env-temp")
 
-        if (filesize:=os.path.getsize("source.zip")) > 8192:
+        if (filesize:=os.path.getsize("source.zip")) > 25600:
             try:
                 os.remove("./source.zip")
             except:
