@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 import json
+import sys
 import traceback
 from zipfile import ZipFile
 
@@ -189,13 +190,23 @@ class Owner(commands.Cog):
                    alt_name="Carregar/Recarregar módulos.")
     async def reload(self, ctx: Union[CustomContext, disnake.MessageInteraction]):
 
+        for m in list(sys.modules):
+            if not m.startswith("utils.music.skins."):
+                continue
+            try:
+                del sys.modules[m]
+            except:
+                continue
+
         data = self.bot.load_modules()
+        self.bot.load_skins()
 
         await self.bot.sync_app_commands(force=self.bot == self.bot.pool.controller_bot)
 
         for bot in self.bot.pool.bots:
 
             if bot.user.id != self.bot.user.id:
+                bot.load_skins()
                 bot.load_modules()
                 await bot.sync_app_commands(force=bot == self.bot.pool.controller_bot)
 
