@@ -776,6 +776,10 @@ class Owner(commands.Cog):
         os.remove("./.env-temp")
 
         if (filesize:=os.path.getsize("source.zip")) > 8192:
+            try:
+                os.remove("./source.zip")
+            except:
+                pass
             raise GenericError(f"**O tamanho do arquivo ultrapassou do limite de 8MB (tamanho atual: {humanize.naturalsize(filesize)})**")
 
         try:
