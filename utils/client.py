@@ -71,7 +71,7 @@ class BotPool:
 
         return self.local_database
 
-    async def start_lavalink(self):
+    def start_lavalink(self):
 
         if self.lavalink_instance:
             try:
@@ -79,7 +79,7 @@ class BotPool:
             except:
                 traceback.print_exc()
 
-        self.lavalink_instance = await run_lavalink(
+        self.lavalink_instance = run_lavalink(
             lavalink_file_url=self.config['LAVALINK_FILE_URL'],
             lavalink_initial_ram=self.config['LAVALINK_INITIAL_RAM'],
             lavalink_ram_limit=self.config['LAVALINK_RAM_LIMIT'],
@@ -537,10 +537,10 @@ class BotPool:
 
                 print(message)
 
-        loop = asyncio.get_event_loop()
+        elif start_local:
+            self.start_lavalink()
 
-        if start_local:
-            loop.create_task(self.start_lavalink())
+        loop = asyncio.get_event_loop()
 
         self.database.start_task(loop)
 
