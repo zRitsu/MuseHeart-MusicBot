@@ -606,7 +606,24 @@ class PlayerSession(commands.Cog):
                     traceback.print_exc()
                 return
 
-            await player.conn_cursor.execute('INSERT INTO dados (json_data) VALUES (?)', (json_str,))
+            try:
+                await player.conn_cursor.execute('INSERT INTO dados (json_data) VALUES (?)', (json_str,))
+            except aiosqlite.OperationalError:
+
+                try:
+                    await player.conn.close()
+                except:
+                    pass
+                try:
+                    del player.conn_cursor
+                except:
+                    pass
+                try:
+                    del player.conn
+                except:
+                    pass
+                await self.save_session(player, data)
+                return
 
         await player.conn.commit()
 
