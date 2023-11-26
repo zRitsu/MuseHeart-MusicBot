@@ -1446,14 +1446,14 @@ class Music(commands.Cog):
                         player.message = await channel.fetch_message(int(static_player['message_id']))
                     except TypeError:
                         player.message = None
-                    except:
+                    except Exception:
                         traceback.print_exc()
                         if hasattr(channel, 'parent') and isinstance(channel.parent, disnake.ForumChannel) and str(channel.id) == static_player['message_id']:
                             pass
-                        else:
-                            player.message = await send_idle_embed(channel, bot=bot, guild_data=guild_data)
+                        elif player.static:
+                            player.text_channel = None
 
-            if not player.static:
+            if not player.static and player.text_channel:
 
                 if message_inter:
                     player.message = message_inter
@@ -2022,7 +2022,7 @@ class Music(commands.Cog):
         else:
             player.is_previows_music = True
             await player.track_end()
-            await player.process_next(inter=interaction)
+            await player.process_next(inter=interaction, force_np=True)
 
     @check_stage_topic()
     @check_queue_loading()
