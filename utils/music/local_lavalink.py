@@ -36,10 +36,12 @@ def validate_java(cmd: str, debug: bool = False):
 
 async def run_process(cmd: str, wait=True, stdout=None, shell=False):
 
+    kwargs = {}
+
     if shell:
-        p = await asyncio.create_subprocess_shell(cmd, stdout=stdout)
-    else:
-        p = await asyncio.create_subprocess_exec(*cmd.split(" "), stdout=stdout)
+        kwargs["shell"] = True
+
+    p = await asyncio.create_subprocess_exec(*cmd.split(" "), stdout=stdout, **kwargs)
 
     if wait:
         await p.wait()
