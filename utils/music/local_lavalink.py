@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import asyncio
 import os
 import platform
 import re
@@ -7,17 +8,19 @@ import subprocess
 import time
 import zipfile
 
+import aiofiles
+import aiohttp
 import requests
 
 
-def download_file(url, filename):
+async def download_file(url, filename):
     if os.path.isfile(filename):
         return
     print(f"Baixando o arquivo: {filename}")
-    r = requests.get(url, allow_redirects=True)
-    with open(filename, 'wb') as f:
-        f.write(r.content)
-    r.close()
+    async with aiohttp.ClientSession() as session:
+        resp = await session.get(url, allow_redirects=True)
+        async with aiofiles.open(filename, 'wb') as f:
+            await f.write(await resp.read())
     return True
 
 def validate_java(cmd: str, debug: bool = False):
@@ -31,7 +34,19 @@ def validate_java(cmd: str, debug: bool = False):
             print(f"\nFalha ao obter versão do java...\n"
                   f"Path: {cmd} | Erro: {repr(e)}\n")
 
-def run_lavalink(
+async def run_process(cmd: str, wait=True, stdout=None, shell=False):
+
+    if shell:
+        p = await asyncio.create_subprocess_shell(cmd, stdout=stdout)
+    else:
+        p = await asyncio.create_subprocess_exec(*cmd.split(" "), stdout=stdout)
+
+    if wait:
+        await p.wait()
+
+    return p
+
+async def run_lavalink(
         lavalink_file_url: str = None,
         lavalink_initial_ram: int = 30,
         lavalink_ram_limit: int = 100,
@@ -81,7 +96,7 @@ def run_lavalink(
 
                 jdk_filename = "java.zip"
 
-                download_file(jdk_url, jdk_filename)
+                await download_file(jdk_url, jdk_filename)
 
                 with zipfile.ZipFile(jdk_filename, 'r') as zip_ref:
                     zip_ref.extractall("./.java")
@@ -97,9 +112,9 @@ def run_lavalink(
                 except:
                     pass
 
-                download_file("https://github.com/shyiko/jabba/raw/master/install.sh", "install_jabba.sh")
-                subprocess.call("bash install_jabba.sh".split())
-                subprocess.call("~/.jabba/bin/jabba install zulu@>=1.17.0-0", shell=True)
+                await download_file("https://github.com/shyiko/jabba/raw/master/install.sh", "install_jabba.sh")
+                await run_process("bash install_jabba.sh")
+                await run_process("~/.jabba/bin/jabba install zulu@>=1.17.0-0", shell=True)
                 os.remove("install_jabba.sh")
 
                 java_cmd = os.path.expanduser("~/.jabba/jdk/zulu@1.17.0-0/bin/java")
@@ -116,7 +131,7 @@ def run_lavalink(
 
                     jdk_filename = "java.tar.gz"
 
-                    download_file(jdk_url, jdk_filename)
+                    await download_file(jdk_url, jdk_filename)
 
                     try:
                         shutil.rmtree("./.java")
@@ -125,8 +140,7 @@ def run_lavalink(
 
                     os.makedirs("./.java")
 
-                    p = subprocess.Popen(["tar", "-zxvf", "java.tar.gz", "-C", "./.java"])
-                    p.wait()
+                    await run_process("tar -zxvf java.tar.gz -C ./.java")
                     os.remove(f"./{jdk_filename}")
 
                 else:
@@ -140,7 +154,7 @@ def run_lavalink(
         ("Lavalink.jar", lavalink_file_url),
         ("application.yml", "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/application.yml")
     ):
-        if download_file(url, filename):
+        if (await download_file(url, filename)):
             clear_plugins = True
 
     if lavalink_cpu_cores >= 1:
@@ -163,7 +177,7 @@ def run_lavalink(
     print(f"Iniciando o servidor Lavalink (dependendo da hospedagem o lavalink pode demorar iniciar, "
           f"o que pode ocorrer falhas em algumas tentativas de conexão até ele iniciar totalmente).\n{'-' * 30}")
 
-    lavalink_process = subprocess.Popen(java_cmd.split(), stdout=subprocess.DEVNULL)
+    lavalink_process = await run_process(java_cmd, stdout=subprocess.DEVNULL, wait=False)
 
     if lavalink_additional_sleep:
         print(f"Aguarde {lavalink_additional_sleep} segundos...\n{'-' * 30}")
