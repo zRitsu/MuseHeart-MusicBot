@@ -1164,7 +1164,7 @@ class LavalinkPlayer(wavelink.Player):
         except:
             return None
 
-    async def process_next(self, start_position: Union[int, float] = 0, inter: disnake.MessageInteraction = None):
+    async def process_next(self, start_position: Union[int, float] = 0, inter: disnake.MessageInteraction = None, force_np=False):
 
         if self.locked or self.is_closing:
             return
@@ -1321,7 +1321,7 @@ class LavalinkPlayer(wavelink.Player):
         else:
             await self.play(track, start=start_position)
             # TODO: rever essa parte caso adicione função de ativar track loops em músicas da fila
-            if self.loop != "current" or (not self.controller_mode and self.current.track_loops == 0):
+            if self.loop != "current" or force_np or (not self.controller_mode and self.current.track_loops == 0):
 
                 if start_position:
                     await asyncio.sleep(1)
