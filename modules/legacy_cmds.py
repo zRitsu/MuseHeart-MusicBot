@@ -12,7 +12,7 @@ from zipfile import ZipFile
 from typing import Union, Optional
 import disnake
 import dotenv
-import psutil
+import humanize
 import wavelink
 from disnake.ext import commands
 from aiohttp import ClientSession
@@ -774,6 +774,9 @@ class Owner(commands.Cog):
         await self.bot.loop.run_in_executor(None, self.zip_dir, filelist.split("\n"))
 
         os.remove("./.env-temp")
+
+        if (filesize:=os.path.getsize("source.zip")) > 8192:
+            raise GenericError(f"**O tamanho do arquivo ultrapassou do limite de 8MB (tamanho atual: {humanize.naturalsize(filesize)})**")
 
         try:
             embed = disnake.Embed(
