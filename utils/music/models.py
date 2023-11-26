@@ -405,21 +405,32 @@ class LavalinkPlayer(wavelink.Player):
             f"É possível alterar a skin/aparência do player usando o comando /change_skin ou {self.prefix_info}skin "
             f"(Apenas membros com permissão de gerenciar servidor pode usar esse comando).",
 
-            f"Você pode criar links favoritos para ter fácil acesso pra usá-los no comando /play ou {self.prefix_info}play "
-            "dispensando a necessidade de copiar e colar os links pra tocar/adicionar suas músicas favoritas. "
-            f"Experimente usando o comando /fav_manager ou {self.prefix_info}favmanager.",
-            "É possível definir um status automático no canal de voz com informações sobre "
+            "Você pode adicionar links favoritos para ter fácil acesso pra usá-los no comando /play (no preenchimento "
+            f"automático da busca) ou {self.prefix_info}play (sem incluir nome/link) dispensando a necessidade de "
+            "copiar e colar os links pra tocar ou adicionar na fila as suas músicas favoritas. Experimente usando"
+            f"o comando /fav_manager ou {self.prefix_info}favmanager.",
+
+            "É possível definir o status automático no canal de voz com informações sobre "
             "a música que está sendo tocada no momento. Experimente usando o comando /stage_announce ou "
             f"{self.prefix_info}stageannounce (Apenas membros com permissão de gerenciar servidor pode usar esse recurso)."
         ]
 
         self.retry_setup_hints = False
 
-        if self.bot.config["USE_YTDL"] or self.bot.spotify:
+        hint_platforms = []
+
+        if self.bot.config["USE_YTDL"]:
+            hint_platforms.append("youtube, soundcloud")
+
+        if self.bot.spotify:
+            hint_platforms.append("spotify")
+
+        if hint_platforms:
             self.initial_hints.append(
-                "Você pode adicionar/integrar link de canais e perfis do youtube, soundcloud e spotify para tocar "
-                "uma playlist pública que tem nesses canais/perfis de forma bem conveniente. "
-                f"Experimente usando o comando /integrations ou {self.prefix_info}integrations."
+                "Você pode adicionar/integrar link de perfis/canais do " + " e ".join(hint_platforms) + "para tocar "
+                f"uma playlist pública que tem nesses canais/perfis diretamente no comando {self.prefix_info}play ou "
+                f"/play (via preenchimento automático da busca). Experimente usando o comando /integrations ou "
+                f"{self.prefix_info}integrations."
             )
 
         try:
@@ -916,9 +927,9 @@ class LavalinkPlayer(wavelink.Player):
 
         if self.static:
             hints.append("É possível fixar músicas/playlists na mensagem do player quando tiver no modo de "
-                         "espera/oscioso pra permitir membros ouvi-las de forma pública. Pra isso use o "
-                         f"comando /server_playlist ou {self.prefix_info}serverplaylist (apenas membros com permissão de gerenciar "
-                         "servidor pode usar esse comando).")
+                         "espera/oscioso para permitir os membros ouvi-las de forma pública. Pra isso use o "
+                         f"comando /server_playlist ou {self.prefix_info}serverplaylist (apenas membros com permissão "
+                         "de gerenciar servidor pode usar esse comando).")
 
         elif self.bot.intents.message_content and self.controller_mode:
             hints.append("Ao criar uma conversa/thread na mensagem do player, será ativado o modo de song-request "
