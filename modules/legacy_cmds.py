@@ -775,12 +775,12 @@ class Owner(commands.Cog):
 
         os.remove("./.env-temp")
 
-        if (filesize:=os.path.getsize("source.zip")) > 25600:
+        if (filesize:=(os.path.getsize("source.zip")) / 1024) > 25600:
             try:
                 os.remove("./source.zip")
             except:
                 pass
-            raise GenericError(f"**O tamanho do arquivo ultrapassou do limite de 8MB (tamanho atual: {humanize.naturalsize(filesize)})**")
+            raise GenericError(f"**O tamanho do arquivo ultrapassou do limite de 25MB (tamanho atual: {humanize.naturalsize(filesize)})**")
 
         try:
             embed = disnake.Embed(
