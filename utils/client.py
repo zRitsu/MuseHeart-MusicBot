@@ -910,6 +910,11 @@ class BotCore(commands.AutoShardedBot):
 
         ctx: CustomContext = await self.get_context(message, cls=CustomContext)
 
+        try:
+            ctx.player = self.music.players[message.guild.id]
+        except:
+            pass
+
         self.dispatch("song_request", ctx, message)
 
         if not ctx.valid:
