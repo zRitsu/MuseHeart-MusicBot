@@ -11,13 +11,36 @@ import requests
 
 
 def download_file(url, filename):
+
     if os.path.isfile(filename):
         return
-    print(f"Baixando o arquivo: {filename}")
-    r = requests.get(url, allow_redirects=True)
+
+    r = requests.get(url, stream=True)
+    total_size = int(r.headers.get('content-length', 0))
+    bytes_downloaded = 0
+    previows_progress = 0
+    start_time = time.time()
+
     with open(filename, 'wb') as f:
-        f.write(r.content)
+
+        for data in r.iter_content(chunk_size=2500*1024):
+            f.write(data)
+            bytes_downloaded += len(data)
+            current_progress = int((bytes_downloaded / total_size) * 100)
+
+            if current_progress != previows_progress:
+                previows_progress = current_progress
+                time_elapsed = time.time() - start_time
+                download_speed = bytes_downloaded / time_elapsed / 1024
+                if download_speed >= 1:
+                    download_speed = download_speed / 1024
+                    speed_txt = "MB/s"
+                else:
+                    speed_txt = "KB/s"
+                print(f"Download do arquivo {filename} {current_progress}% concluído ({download_speed:.2f} {speed_txt})")
+
     r.close()
+
     return True
 
 def validate_java(cmd: str, debug: bool = False):
