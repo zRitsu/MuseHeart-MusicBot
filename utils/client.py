@@ -622,12 +622,19 @@ class BotCore(commands.AutoShardedBot):
         for skin in os.listdir("./utils/music/skins/normal_player"):
             if not skin.endswith(".py"):
                 continue
+
+            skin = skin[:-3]
+
+            if skin in self.config["IGNORE_SKINS"].split() and skin != "default":
+                print(f"{self.user} | Skin {skin}.py ignorada")
+                continue
+
             try:
-                skin_file = import_module(f"utils.music.skins.normal_player.{skin[:-3]}")
+                skin_file = import_module(f"utils.music.skins.normal_player.{skin}")
                 if not hasattr(skin_file, "load"):
-                    print(f"Skin ignorada: {skin} | Função load() não configurada/encontrada...")
+                    print(f"Skin ignorada: {skin}.py | Função load() não configurada/encontrada...")
                     continue
-                self.player_skins[skin[:-3]] = skin_file.load()
+                self.player_skins[skin] = skin_file.load()
             except Exception:
                 print(f"Falha ao carregar skin [normal_player]: {traceback.format_exc()}")
         if self.default_skin not in self.player_skins:
@@ -636,12 +643,19 @@ class BotCore(commands.AutoShardedBot):
         for skin in os.listdir("./utils/music/skins/static_player"):
             if not skin.endswith(".py"):
                 continue
+
+            skin = skin[:-3]
+
+            if skin in self.config["IGNORE_STATIC_SKINS"].split() and skin != "default":
+                print(f"{self.user} | Skin {skin}.py ignorada")
+                continue
+
             try:
-                skin_file = import_module(f"utils.music.skins.static_player.{skin[:-3]}")
+                skin_file = import_module(f"utils.music.skins.static_player.{skin}")
                 if not hasattr(skin_file, "load"):
-                    print(f"Skin ignorada: {skin} | Função load() não configurada/encontrada...")
+                    print(f"Skin ignorada: {skin}.py | Função load() não configurada/encontrada...")
                     continue
-                self.player_static_skins[skin[:-3]] = skin_file.load()
+                self.player_static_skins[skin] = skin_file.load()
             except Exception:
                 print(f"Falha ao carregar skin [static_player]: {traceback.format_exc()}")
         if self.default_static_skin not in self.player_static_skins:
