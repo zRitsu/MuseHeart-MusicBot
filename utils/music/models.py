@@ -651,7 +651,7 @@ class LavalinkPlayer(wavelink.Player):
                         if self.auto_pause:
                             self.update = True
                         else:
-                            await self.play(track, start=get_start_pos(self, track, self.bot.pool.config.get("ERROR_403_ADDITIONAL_MILLISECONDS", 580)))
+                            await self.play(track, start=get_start_pos(self, track, self.bot.pool.config.get("ERROR_403_ADDITIONAL_MILLISECONDS", 430)))
                             await asyncio.sleep(3)
                         self.locked = False
                         self.update = True
@@ -671,7 +671,7 @@ class LavalinkPlayer(wavelink.Player):
                         if not self.auto_pause:
                             self.update = True
                         else:
-                            await self.play(track, start=get_start_pos(self, track, self.bot.pool.config.get("ERROR_403_ADDITIONAL_MILLISECONDS", 580)))
+                            await self.play(track, start=get_start_pos(self, track, self.bot.pool.config.get("ERROR_403_ADDITIONAL_MILLISECONDS", 430)))
                             self.update = True
                         await send_report()
                         return
