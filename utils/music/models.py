@@ -35,9 +35,9 @@ thread_archive_time = {
 }
 
 
-def get_start_pos(player, track, extra_seconds=0):
+def get_start_pos(player, track, extra_milliseconds=0):
     if not track.is_stream:
-        difference = ((time() * 1000)+(extra_seconds*1000)) - player.last_update
+        difference = (((disnake.utils.utcnow() + datetime.timedelta(milliseconds=int(extra_milliseconds))).timestamp() * 1000)) - player.last_update
         position = player.last_position + difference
         if 0 < position < track.duration:
             return min(position, track.duration)
@@ -651,8 +651,8 @@ class LavalinkPlayer(wavelink.Player):
                         if self.auto_pause:
                             self.update = True
                         else:
-                            await self.play(track, start=get_start_pos(self, track, self.bot.pool.config.get("ERROR_403_ADDITIONAL_SECONDS", 1)))
-                            await asyncio.sleep(1)
+                            await self.play(track, start=get_start_pos(self, track, self.bot.pool.config.get("ERROR_403_ADDITIONAL_MILLISECONDS", 580)))
+                            await asyncio.sleep(3)
                         self.locked = False
                         self.update = True
                         return
@@ -671,8 +671,8 @@ class LavalinkPlayer(wavelink.Player):
                         if not self.auto_pause:
                             self.update = True
                         else:
-                            await self.play(track, start=get_start_pos(self, track, self.bot.pool.config.get("ERROR_403_ADDITIONAL_SECONDS", 2)))
-                            await self.invoke_np()
+                            await self.play(track, start=get_start_pos(self, track, self.bot.pool.config.get("ERROR_403_ADDITIONAL_MILLISECONDS", 580)))
+                            self.update = True
                         await send_report()
                         return
 
