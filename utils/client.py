@@ -433,7 +433,7 @@ class BotPool:
                 async def command_log(ctx: CustomContext):
                     print(
                         f"cmd (prefix) log: [user: {ctx.author} - {ctx.author.id}] - [guild: {ctx.guild.name} - {ctx.guild.id}]"
-                        f" - [cmd: {ctx.message}] {datetime.datetime.utcnow().strftime('%d/%m/%Y - %H:%M:%S')} (UTC)\n" + ("-" * 15)
+                        f" - [cmd: {ctx.message.content}] {datetime.datetime.utcnow().strftime('%d/%m/%Y - %H:%M:%S')} (UTC)\n" + ("-" * 15)
                     )
 
             @bot.listen()
