@@ -376,7 +376,7 @@ class PlayerSession(commands.Cog):
                         message=message or message_without_thread,
                         last_message_id=last_message_id,
                         skin=data["skin"] if data["skin"] in self.bot.player_skins else "default",
-                        skin_static=data["skin_static"] if data["skin_static"] in self.bot.player_static_skins else "default_static",
+                        skin_static=data["skin_static"] if data["skin_static"] in self.bot.player_static_skins else "default",
                         player_creator=creator,
                         keep_connected=data.get("keep_connected"),
                         autoplay=data.get("autoplay", False),
