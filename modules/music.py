@@ -1869,7 +1869,7 @@ class Music(commands.Cog):
         if query:
 
             try:
-                index = queue_track_index(inter, bot, query, case_sensitive=case_sensitive)[0][0]
+                index, has_id = queue_track_index(inter, bot, query, case_sensitive=case_sensitive)[0][0]
             except IndexError:
                 raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
 
@@ -2630,7 +2630,7 @@ class Music(commands.Cog):
         except AttributeError:
             bot = inter.bot
 
-        index = queue_track_index(inter, bot, query, case_sensitive=case_sensitive)
+        index, has_id = queue_track_index(inter, bot, query, case_sensitive=case_sensitive)
 
         if not index:
             raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
@@ -3583,6 +3583,11 @@ class Music(commands.Cog):
 
         indexes = None
 
+        try:
+            has_id = song_name.split(" || ID > ")[1]
+        except:
+            has_id = isinstance(inter, CustomContext)
+
         if range_start > 0 and range_end > 0:
 
             if range_start >= range_end:
@@ -3598,7 +3603,7 @@ class Music(commands.Cog):
         elif range_end > 0:
             song_list = list(player.queue)[:-(range_end - 1)]
             txt.append(f"**Posição final da fila:** `{range_end}`")
-        elif song_name and filters == ["song_name"] and amount is None:
+        elif song_name and has_id and filters == ["song_name"] and amount is None:
             indexes = queue_track_index(inter, bot, song_name, match_count=1, case_sensitive=case_sensitive)
             for index, track in reversed(indexes):
                 player.queue.remove(track)
