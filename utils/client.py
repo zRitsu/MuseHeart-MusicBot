@@ -427,6 +427,15 @@ class BotPool:
 
                 return True
 
+            if self.config["COMMAND_LOG"]:
+
+                @bot.listen("on_command")
+                async def command_log(ctx: CustomContext):
+                    print(
+                        f"cmd log: [user: {ctx.author} - {ctx.author.id}] - [guild: {ctx.guild.name} - {ctx.guild.id}]"
+                        f" - [cmd: {ctx.message}] {datetime.datetime.utcnow().strftime('%d/%m/%Y - %H:%M:%S')} (UTC)\n" + ("-" * 15)
+                    )
+
             @bot.listen()
             async def on_ready():
 
