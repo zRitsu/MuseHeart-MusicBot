@@ -383,7 +383,7 @@ class BotPool:
 
                     return True
 
-            if bot.pool.single_bot:
+            if not bot.pool.single_bot:
 
                 @bot.listen("on_command")
                 async def message_id_cleanup(ctx: CustomContext):
