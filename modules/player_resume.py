@@ -484,10 +484,10 @@ class PlayerSession(commands.Cog):
         if not os.path.isdir(f"./local_database/player_sessions_bin/{self.bot.user.id}"):
             os.makedirs(f"./local_database/player_sessions_bin/{self.bot.user.id}")
 
-        path = f'./local_database/player_sessions_bin/{self.bot.user.id}/{player.guild.id}.pkl'
+        path = f'./local_database/player_sessions_bin/{self.bot.user.id}/{player.guild.id}'
 
         try:
-            async with aiofiles.open(path, "wb") as f:
+            async with aiofiles.open(f"{path}.pkl", "wb") as f:
                 await f.write(pickle.dumps(data))
         except Exception:
             traceback.print_exc()
