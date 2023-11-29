@@ -310,7 +310,7 @@ class IntegrationModal(disnake.ui.Modal):
             ), view=None
         )
 
-        view = IntegrationsView(self.bot, self.ctx, user_data, log = f"[{data['title']}]({data['url']}) foi adicionado nas suas integrações.", prefix = self.prefix)
+        view = IntegrationsView(self.bot, self.ctx, user_data, log = f"[`{data['title']}`]({data['url']}) foi adicionado nas suas integrações.", prefix = self.prefix)
         view.message = self.message
 
         if not isinstance(self.ctx, CustomContext):
@@ -466,7 +466,7 @@ class IntegrationsView(disnake.ui.View):
             inter.global_user_data = user_data
 
         try:
-            url = f'[{self.current}]({user_data["integration_links"][self.current]})'
+            url = f'[`{self.current}`]({user_data["integration_links"][self.current]})'
             del user_data["integration_links"][self.current]
         except:
             await inter.send(f"**Não há integração na lista com o nome:** {self.current}", ephemeral=True)
@@ -475,7 +475,9 @@ class IntegrationsView(disnake.ui.View):
         await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
 
         self.log = f"Integração {url} foi removida com sucesso!"
-        await inter.edit_original_message(embed=self.build_embed(user_data, self.prefix))
+        view = IntegrationsView(bot=self.bot, ctx=self.ctx, data=user_data, log=self.log, prefix=self.prefix)
+        view.message = self.message
+        await inter.edit_original_message(embed=self.build_embed(user_data, self.prefix), view=view)
 
     async def clear_callback(self, inter: disnake.MessageInteraction):
 
