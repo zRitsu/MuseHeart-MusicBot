@@ -276,16 +276,16 @@ class UserFavView(disnake.ui.View):
 
         while True:
 
-            user, data, url = await self.bot.wait_for("fav_add", check=lambda u, d: u.id == self.ctx.author.id)
+            user, data, url = await self.bot.wait_for("fav_add", check=lambda user, data, url: user.id == self.ctx.author.id)
 
             self.clear_items()
             self.update_components(data)
             self.log = f"{url} foi adicionado nos seus favoritos."
 
             if not isinstance(self.ctx, CustomContext):
-                await self.ctx.edit_original_message(embed=self.build_embed(data, self.prefix))
+                await self.ctx.edit_original_message(embed=self.build_embed(data, self.prefix), view=self)
             elif self.message:
-                await self.message.edit(embed=self.build_embed(data, self.prefix))
+                await self.message.edit(embed=self.build_embed(data, self.prefix), view=self)
 
     async def on_timeout(self):
 
