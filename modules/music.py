@@ -4657,6 +4657,8 @@ class Music(commands.Cog):
 
                     await self.bot.update_global_data(interaction.author.id, user_data, db_name=DBModel.users)
 
+                    self.bot.dispatch("fav_add", interaction.user, user_data, f"[`{info['name']}`]({info['url']})")
+
                     global_data = await self.bot.get_global_data(interaction.author.id, db_name=DBModel.guilds)
 
                     try:

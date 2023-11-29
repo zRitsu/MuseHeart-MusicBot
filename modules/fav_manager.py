@@ -222,6 +222,11 @@ class UserFavView(disnake.ui.View):
         self.log = log
         self.prefix = prefix
 
+        self.update_components(data)
+        self.components_updater_task = bot.loop.create_task(self.auto_update())
+
+    def update_components(self, data: dict):
+
         if data["fav_links"]:
 
             fav_select = disnake.ui.Select(options=[
@@ -267,7 +272,27 @@ class UserFavView(disnake.ui.View):
         cancel_button.callback = self.cancel_callback
         self.add_item(cancel_button)
 
+    async def auto_update(self):
+
+        while True:
+
+            user, data, url = await self.bot.wait_for("fav_add", check=lambda u, d: u.id == self.ctx.author.id)
+
+            self.clear_items()
+            self.update_components(data)
+            self.log = f"{url} foi adicionado nos seus favoritos."
+
+            if not isinstance(self.ctx, CustomContext):
+                await self.ctx.edit_original_message(embed=self.build_embed(data, self.prefix))
+            elif self.message:
+                await self.message.edit(embed=self.build_embed(data, self.prefix))
+
     async def on_timeout(self):
+
+        try:
+            self.components_updater_task.cancel()
+        except:
+            pass
 
         try:
             for i in self.children[0].options:
@@ -414,6 +439,10 @@ class UserFavView(disnake.ui.View):
                 color=self.bot.get_color(),
             ), view=None
         )
+        try:
+            self.components_updater_task.cancel()
+        except:
+            pass
         self.stop()
 
     async def select_callback(self, inter: disnake.MessageInteraction):
@@ -438,14 +467,15 @@ class FavManager(commands.Cog):
         self.bot = bot
 
     fav_cd = commands.CooldownMapping.from_cooldown(3, 15, commands.BucketType.member)
+    fav_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
     @commands.command(name="favmanager", aliases=["favs", "favoritos", "fvmgr", "favlist"],
-                      description="Gerenciar suas playlists/favoritos.", cooldown=fav_cd)
+                      description="Gerenciar suas playlists/favoritos.", cooldown=fav_cd, max_concurrency=fav_mc)
     async def favmanager_legacy(self, ctx: CustomContext):
         await self.fav_manager.callback(self=self, inter=ctx)
 
     @commands.slash_command(description=f"{desc_prefix}Gerenciar suas playlists/favoritos.", cooldown=fav_cd,
-                            dm_permission=False)
+                            dm_permission=False, max_concurrency=fav_mc)
     async def fav_manager(self, inter: disnake.AppCmdInter):
 
         await inter.response.defer(ephemeral=True)
