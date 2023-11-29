@@ -9,7 +9,6 @@ from io import BytesIO
 from typing import TYPE_CHECKING, Union, Optional
 
 import disnake
-from disnake import ModalInteraction
 from disnake.ext import commands
 
 from utils.db import DBModel
@@ -47,7 +46,7 @@ class InteractionModalImport(disnake.ui.Modal):
             ]
         )
 
-    async def callback(self, inter: ModalInteraction, /) -> None:
+    async def callback(self, inter: disnake.ModalInteraction, /) -> None:
 
         try:
             json_data = json.loads(inter.text_values["json_data"])
