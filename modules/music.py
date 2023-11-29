@@ -1869,7 +1869,7 @@ class Music(commands.Cog):
         if query:
 
             try:
-                index, has_id = queue_track_index(inter, bot, query, case_sensitive=case_sensitive)[0][0]
+                index = queue_track_index(inter, bot, query, case_sensitive=case_sensitive)[0][0]
             except IndexError:
                 raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
 
@@ -2630,7 +2630,7 @@ class Music(commands.Cog):
         except AttributeError:
             bot = inter.bot
 
-        index, has_id = queue_track_index(inter, bot, query, case_sensitive=case_sensitive)
+        index = queue_track_index(inter, bot, query, case_sensitive=case_sensitive)
 
         if not index:
             raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
