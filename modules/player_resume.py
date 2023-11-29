@@ -2,19 +2,19 @@
 
 # nota: este sistema é totalmente experimental.
 import asyncio
-import json
 import os
+import pickle
 import shutil
 import traceback
+from base64 import b64encode, b64decode
 from typing import Union
 
-import aiosqlite
+import aiofiles
 import disnake
 from disnake.ext import commands
 
 import wavelink
 from utils.client import BotCore
-from utils.db import DBModel
 from utils.music.checks import can_connect, can_send_message
 from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialTrack, PartialPlaylist, LavalinkPlaylist
 from utils.others import SongRequestPurgeMode
@@ -62,103 +62,49 @@ class PlayerSession(commands.Cog):
         if not player.guild.me.voice:
             return
 
-        tracks = []
-        played = []
-        autoqueue = []
-        failed_tracks = []
-
-        if player.current:
-            player.current.info["id"] = player.current.id
-            if player.current.playlist_name:
-                player.current.info["playlist"] = {"name": player.current.playlist_name, "url": player.current.playlist_url}
-            tracks.append(player.current.info)
-
-        for t in player.queue:
-            t.info["id"] = t.id
-            if t.playlist:
-                t.info["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
-            tracks.append(t.info)
-
-        for t in player.played:
-            t.info["id"] = t.id
-            if t.playlist:
-                t.info["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
-            played.append(t.info)
-
-        for t in player.queue_autoplay:
-            t.info["id"] = t.id
-            autoqueue.append(t.info)
-
-        for t in player.failed_tracks:
-            t.info["id"] = t.id
-            if t.playlist:
-                t.info["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
-            failed_tracks.append(t.info)
-
-        if player.skin.startswith("> custom_skin: "):
-
-            custom_skin = player.skin[15:]
-
-            if player.static:
-                custom_skin_data = {}
-                custom_skin_static_data = {custom_skin: player.custom_skin_static_data[custom_skin]}
-
-            else:
-                custom_skin_data = {custom_skin: player.custom_skin_data[custom_skin]}
-                custom_skin_static_data = {}
-
-        else:
-            custom_skin_data = {}
-            custom_skin_static_data = {}
-
         try:
-            text_channel = str(player.message.channel.id)
-            message = str(player.message.id)
+            message_id = player.message.id
         except:
-            text_channel = str(player.text_channel.id) if player.text_channel else None
-            message = None
+            message_id = None
 
         try:
-            prefix = player.prefix_info
-        except AttributeError:
-            prefix = ""
-
-        try:
-            purge_mode = player.purge_mode
-        except AttributeError:
-            purge_mode = SongRequestPurgeMode.on_message
+            text_channel_id = player.text_channel.id
+        except:
+            text_channel_id = None
+            message_id = None
 
         data = {
-            "_id": str(player.guild.id),
-            "volume": str(player.volume),
+            "_id": player.guild.id,
+            "volume": player.volume,
             "nightcore": player.nightcore,
-            "position": str(player.position),
-            "voice_channel": str(player.guild.me.voice.channel.id),
-            "dj": list(player.dj),
-            "player_creator": str(player.player_creator) if player.player_creator else None,
+            "position": player.position,
+            "voice_channel": player.guild.me.voice.channel.id,
+            "dj": player.dj,
+            "player_creator": player.player_creator,
             "static": player.static,
             "paused": player.paused and not player.auto_pause,
-            "text_channel": text_channel,
+            "text_channel_id": text_channel_id,
+            "message_id": message_id,
             "keep_connected": player.keep_connected,
-            "message": message,
             "loop": player.loop,
             "autoplay": player.autoplay,
             "stage_title_event": player.stage_title_event,
             "stage_title_template": player.stage_title_template,
             "skin": player.skin,
             "skin_static": player.skin_static,
-            "custom_skin_data": custom_skin_data,
-            "custom_skin_static_data": custom_skin_static_data,
+            "custom_skin_data": player.custom_skin_data,
+            "custom_skin_static_data": player.custom_skin_static_data,
             "uptime": player.uptime,
             "restrict_mode": player.restrict_mode,
             "mini_queue_enabled": player.mini_queue_enabled,
             "listen_along_invite": player.listen_along_invite,
-            "tracks": tracks,
-            "played": played,
-            "queue_autoplay": autoqueue,
-            "failed_tracks": failed_tracks,
-            "prefix_info": prefix,
-            "purge_mode": purge_mode,
+            "current": player.current,
+            "queue": player.queue,
+            "played": player.played,
+            "queue_autoplay": player.queue_autoplay,
+            "failed_tracks": player.failed_tracks,
+            "prefix_info": player.prefix_info,
+            "purge_mode": player.purge_mode,
         }
 
         try:
@@ -251,7 +197,7 @@ class PlayerSession(commands.Cog):
 
             hints = self.bot.config["EXTRA_HINTS"].split("||")
         except Exception:
-            traceback.print_exc()
+            print(traceback.format_exc())
             self.bot.player_resuming = False
             return
 
@@ -261,16 +207,14 @@ class PlayerSession(commands.Cog):
 
             for data in data_list:
 
-                guild = self.bot.get_guild(int(data["_id"]))
+                guild = self.bot.get_guild(data["_id"])
 
                 if not guild:
                     print(f"{self.bot.user} - Player Ignorado: {data['_id']} | Servidor inexistente...")
                     await self.delete_data(data['_id'])
                     continue
 
-                voice_channel = self.bot.get_channel(int(data["voice_channel"]))
-
-                message = None
+                voice_channel = self.bot.get_channel(data["voice_channel"])
 
                 if not voice_channel:
                     print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\nO canal de voz não existe...")
@@ -284,20 +228,24 @@ class PlayerSession(commands.Cog):
                     await self.delete_data(guild.id)
                     continue
 
-                try:
-                    text_channel = self.bot.get_channel(int(data["text_channel"])) or \
-                               await self.bot.fetch_channel(int(data["text_channel"]))
-                except (disnake.NotFound, TypeError):
+                message = None
+
+                if not data["text_channel_id"]:
                     text_channel = None
+                elif not isinstance(data["text_channel_id"], disnake.Thread):
+                    text_channel = self.bot.get_channel(data["text_channel_id"])
+                else:
+                    try:
+                        text_channel = self.bot.get_channel(int(data["text_channel_id"])) or \
+                                   await self.bot.fetch_channel(int(data["text_channel_id"]))
+                    except (disnake.NotFound, TypeError):
+                        text_channel = None
+                        data["message_id"] = None
 
                 if not text_channel:
-
-                    message = False
-
-                    if data["text_channel"] != str(voice_channel.id) and data['static']:
-                        data['static'] = False
-
+                    data['static'] = False
                     text_channel = voice_channel
+                    data["message_id"] = None
 
                 if text_channel:
                     try:
@@ -305,63 +253,40 @@ class PlayerSession(commands.Cog):
                     except Exception:
                         print(f"{self.bot.user} - Controller Ignorado (falta de permissão) [Canal: {text_channel.name} | ID: {text_channel.id}] - [ {guild.name} - {guild.id} ]")
                         text_channel = None
-
-                try:
-                    creator = int(data["player_creator"])
-                except:
-                    creator = None
+                    else:
+                        if data["message_id"]:
+                            try:
+                                message = await text_channel.fetch_message(data["message_id"])
+                            except (disnake.NotFound, disnake.Forbidden):
+                                pass
 
                 message_without_thread = None
 
-                if message is None and text_channel:
-
+                if text_channel and not message and text_channel.permissions_for(guild.me).read_message_history:
                     try:
-                        message = await text_channel.fetch_message(int(data["message"]))
-                    except:
-                        if not text_channel.permissions_for(guild.me).read_message_history:
-                            print(f"{self.bot.user} - Não foi possível obter a mensagem e não tem permissão para "
-                                  f"ler o histórico de mensagens. O player controller será reenviado.\n"
-                                  f"Servidor: {guild} [{guild.id}]\n"
-                                  f"Canal: {text_channel.name} [{text_channel.id}]")
-                        else:
-                            try:
-                                async for msg in text_channel.history(limit=100):
+                        async for msg in text_channel.history(limit=100):
 
-                                    if not message:
-                                        continue
+                            if msg.author.id != self.bot.user.id:
+                                continue
 
-                                    if message.author.id != self.bot.user.id:
-                                        continue
+                            if msg.reference:
+                                continue
 
-                                    if msg.reference:
-                                        continue
+                            if msg.thread:
+                                message = msg
+                                break
 
-                                    if msg.thread:
-                                        message = msg
-                                        break
+                            if message_without_thread:
+                                continue
 
-                                    if message_without_thread:
-                                        continue
+                            message_without_thread = msg
 
-                                    message_without_thread = msg
+                    except Exception as e:
+                        print(f"{self.bot.user} - Falha ao obter mensagem: {repr(e)}\n"
+                              f"channel_id: {text_channel.id} | message_id {data['message']}")
 
-                            except Exception as e:
-                                print(f"{self.bot.user} - Falha ao obter mensagem: {repr(e)}\n"
-                                      f"channel_id: {text_channel.id} | message_id {data['message']}")
-
-                try:
-                    last_message_id = message.id
-                except AttributeError:
-                    last_message_id = None
-
-                if not (prefix:=data.get("prefix_info")):
-                    global_data = await self.bot.get_global_data(guild.id, db_name=DBModel.guilds)
-                    prefix = global_data["prefix"] or self.bot.default_prefix
-
-                purge_mode = data.get("purge_mode", SongRequestPurgeMode.on_message)
-
-                if purge_mode == SongRequestPurgeMode.on_player_start:
-                    purge_mode = SongRequestPurgeMode.no_purge
+                if data["purge_mode"] == SongRequestPurgeMode.on_player_start:
+                    data["purge_mode"] = SongRequestPurgeMode.no_purge
                     temp_purge_mode = True
                 else:
                     temp_purge_mode = False
@@ -374,10 +299,10 @@ class PlayerSession(commands.Cog):
                         guild=guild,
                         channel=text_channel,
                         message=message or message_without_thread,
-                        last_message_id=last_message_id,
+                        last_message_id=data["message_id"],
                         skin=data["skin"] if data["skin"] in self.bot.player_skins else "default",
                         skin_static=data["skin_static"] if data["skin_static"] in self.bot.player_static_skins else "default",
-                        player_creator=creator,
+                        player_creator=data["player_creator"],
                         keep_connected=data.get("keep_connected"),
                         autoplay=data.get("autoplay", False),
                         static=data['static'],
@@ -388,8 +313,8 @@ class PlayerSession(commands.Cog):
                         stage_title_template=data.get("stage_title_template"),
                         restrict_mode=data["restrict_mode"],
                         volume=int(data["volume"]),
-                        prefix=prefix,
-                        purge_mode=purge_mode,
+                        prefix=data["prefix_info"],
+                        purge_mode=data["purge_mode"],
                     )
                 except Exception:
                     print(f"{self.bot.user} - Falha ao criar player: {guild.name} [{guild.id}]\n{traceback.format_exc()}")
@@ -414,7 +339,7 @@ class PlayerSession(commands.Cog):
                 if player.nightcore:
                     await player.set_timescale(pitch=1.2, speed=1.1)
 
-                tracks, playlists = self.process_track_cls(data["tracks"])
+                """tracks, playlists = self.process_track_cls(data["tracks"])
 
                 player.queue.extend(tracks)
 
@@ -434,7 +359,15 @@ class PlayerSession(commands.Cog):
                 tracks.clear()
                 played_tracks.clear()
                 queue_autoplay_tracks.clear()
-                failed_tracks.clear()
+                failed_tracks.clear()"""
+
+                if data["current"]:
+                    player.queue.append(data["current"])
+
+                player.queue.extend(data["queue"])
+                player.played.extend(data["played"])
+                player.failed_tracks.extend(data["failed_tracks"])
+                player.queue_autoplay.extend(data["queue_autoplay"])
 
                 await player.connect(voice_channel.id)
 
@@ -504,10 +437,10 @@ class PlayerSession(commands.Cog):
     async def get_player_sessions(self):
 
         if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
-            return await self.bot.pool.mongo_database.query_data(db_name=str(self.bot.user.id), collection="player_sessions")
+            return [pickle.loads(b64decode(d["data"])) for d in await self.bot.pool.mongo_database.query_data(db_name=str(self.bot.user.id), collection="player_sessions_bin")]
 
         try:
-            files = os.listdir(f"./local_database/player_sessions/{self.bot.user.id}")
+            files = os.listdir(f"./local_database/player_sessions_bin/{self.bot.user.id}")
         except FileNotFoundError:
             return []
 
@@ -515,36 +448,18 @@ class PlayerSession(commands.Cog):
 
         for file in files:
 
-            if not file.endswith(".db"):
+            if not file.endswith(".pkl"):
                 continue
 
-            guild_id = file[:-3]
+            guild_id = file[:-4]
 
-            conn = await aiosqlite.connect(f'./local_database/player_sessions/{self.bot.user.id}/{guild_id}.db')
-            c = await conn.cursor()
-
-            await c.execute('SELECT json_data FROM dados')
-            data = await c.fetchone()
-
-            await conn.close()
+            async with aiofiles.open(f'./local_database/player_sessions_bin/{self.bot.user.id}/{guild_id}.pkl', 'rb') as f:
+                data = pickle.loads(await f.read())
 
             if data:
-                guild_data.append(json.loads(data[0]))
+                guild_data.append(data)
 
         return guild_data
-
-    async def check_session(self, player: LavalinkPlayer):
-
-        try:
-            player.conn_cursor
-        except AttributeError:
-            try:
-                conn = await aiosqlite.connect(f'./local_database/player_sessions/{self.bot.user.id}/{player.guild.id}.db')
-            except aiosqlite.OperationalError:
-                os.makedirs(f"./local_database/player_sessions/{self.bot.user.id}/")
-                conn = await aiosqlite.connect(f'./local_database/player_sessions/{self.bot.user.id}/{player.guild.id}.db')
-            player.conn = conn
-            player.conn_cursor = await conn.cursor()
 
     async def save_session(self, player: LavalinkPlayer, data: dict):
 
@@ -560,72 +475,34 @@ class PlayerSession(commands.Cog):
         if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
             await self.bot.pool.mongo_database.update_data(
                 id_=str(player.guild.id),
-                data=data,
-                collection="player_sessions",
+                data={"data": b64encode(pickle.dumps(data)).decode('utf-8')},
+                collection="player_sessions_bin",
                 db_name=str(self.bot.user.id)
             )
             return
 
-        await self.check_session(player)
+        if not os.path.isdir(f"./local_database/player_sessions_bin/{self.bot.user.id}"):
+            os.makedirs(f"./local_database/player_sessions_bin/{self.bot.user.id}")
 
-        json_str = json.dumps(data)
-
-        path = f'./local_database/player_sessions/{self.bot.user.id}/{player.guild.id}'
+        path = f'./local_database/player_sessions_bin/{self.bot.user.id}/{player.guild.id}.pkl'
 
         try:
-            shutil.copy(f'{path}.db', f'{path}.bk')
+            async with aiofiles.open(path, "wb") as f:
+                await f.write(pickle.dumps(data))
+        except Exception:
+            traceback.print_exc()
+            try:
+                os.rename(f"{path}.bak", f"{path}.pkl")
+            except:
+                pass
+            return
+
+        try:
+            shutil.copy(f'{path}.pkl', f'{path}.bak')
         except FileNotFoundError:
             pass
         except Exception:
             traceback.print_exc()
-
-        try:
-            await player.conn_cursor.execute('UPDATE dados SET json_data = ? WHERE id = ?', (json_str, 1))
-        except:
-            try:
-                await player.conn_cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS dados (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        json_data TEXT
-                    )
-                ''')
-            except (ValueError, AttributeError):
-                try:
-                    player.conn.close()
-                except:
-                    pass
-                player.conn_cursor = None
-                await self.save_session(player, data)
-                return
-            except Exception:
-                try:
-                    shutil.copy(f'{path}.bk', f'{path}.db')
-                except FileNotFoundError:
-                    pass
-                except Exception:
-                    traceback.print_exc()
-                return
-
-            try:
-                await player.conn_cursor.execute('INSERT INTO dados (json_data) VALUES (?)', (json_str,))
-            except aiosqlite.OperationalError:
-
-                try:
-                    await player.conn.close()
-                except:
-                    pass
-                try:
-                    del player.conn_cursor
-                except:
-                    pass
-                try:
-                    del player.conn
-                except:
-                    pass
-                await self.save_session(player, data)
-                return
-
-        await player.conn.commit()
 
     async def delete_data(self, player: Union[LavalinkPlayer, int]):
 
@@ -642,17 +519,12 @@ class PlayerSession(commands.Cog):
             guild_id = player.guild.id
 
         if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
-            await self.bot.pool.mongo_database.delete_data(id_=str(guild_id), db_name=str(self.bot.user.id), collection="player_sessions")
+            await self.bot.pool.mongo_database.delete_data(id_=str(guild_id), db_name=str(self.bot.user.id), collection="player_sessions_bin")
             return
 
-        try:
-            await player.conn.close()
-        except:
-            pass
-
-        for ext in ('.db', '.bk'):
+        for ext in ('.pkl', '.bak'):
             try:
-                os.remove(f'./local_database/player_sessions/{self.bot.user.id}/{guild_id}{ext}')
+                os.remove(f'./local_database/player_sessions_bin/{self.bot.user.id}/{guild_id}{ext}')
             except FileNotFoundError:
                 continue
             except Exception:
