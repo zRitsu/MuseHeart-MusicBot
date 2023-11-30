@@ -75,6 +75,7 @@ class PlayerSession(commands.Cog):
 
         data = {
             "_id": player.guild.id,
+            "version": getattr(player, "version", 1),
             "volume": player.volume,
             "nightcore": player.nightcore,
             "position": player.position,
@@ -119,53 +120,53 @@ class PlayerSession(commands.Cog):
 
         tracks = []
 
-        for info in data:
+        for track in data:
 
-            if info["sourceName"] == "spotify":
+            if track.info["sourceName"] == "spotify":
 
-                if playlist := info.pop("playlist", None):
+                if playlist:=track.playlist:
 
                     try:
-                        playlist = playlists[playlist["url"]]
+                        playlist = playlists[track.playlist_url]
                     except KeyError:
                         playlist_cls = PartialPlaylist(
                             {
                                 'loadType': 'PLAYLIST_LOADED',
                                 'playlistInfo': {
-                                    'name': playlist["name"],
+                                    'name': track.playlist_name,
                                     'selectedTrack': -1
                                 },
                                 'tracks': []
-                            }, url=playlist["url"]
+                            }, url=track.playlist_url
                         )
-                        playlists[playlist["url"]] = playlist_cls
+                        playlists[track.playlist_url] = playlist_cls
                         playlist = playlist_cls
 
-                t = PartialTrack(info=info, playlist=playlist)
+                t = PartialTrack(info=track.info, playlist=playlist)
+                t.id = ""
 
             else:
 
-                if playlist := info.pop("playlist", None):
+                if playlist := track.playlist:
 
                     try:
-                        playlist = playlists[playlist["url"]]
+                        playlist = playlists[track.playlist_url]
                     except KeyError:
                         playlist_cls = LavalinkPlaylist(
                             {
                                 'loadType': 'PLAYLIST_LOADED',
                                 'playlistInfo': {
-                                    'name': playlist["name"],
+                                    'name': track.playlist_name,
                                     'selectedTrack': -1
                                 },
                                 'tracks': []
-                            }, url=playlist["url"]
+                            }, url=track.playlist_url
                         )
-                        playlists[playlist["url"]] = playlist_cls
+                        playlists[track.playlist_url] = playlist_cls
                         playlist = playlist_cls
 
-                t = LavalinkTrack(id_=info["id"], info=info, playlist=playlist)
+                t = LavalinkTrack(id_=track.id, info=track.info, playlist=playlist)
 
-            del t.info["id"]
             tracks.append(t)
 
         return tracks, playlists
@@ -339,35 +340,38 @@ class PlayerSession(commands.Cog):
                 if player.nightcore:
                     await player.set_timescale(pitch=1.2, speed=1.1)
 
-                """tracks, playlists = self.process_track_cls(data["tracks"])
-
-                player.queue.extend(tracks)
-
-                played_tracks, playlists = self.process_track_cls(data["played"], playlists)
-
-                player.played.extend(played_tracks)
-
-                queue_autoplay_tracks, playlists = self.process_track_cls(data.get("queue_autoplay", []))
-
-                player.queue_autoplay.extend(queue_autoplay_tracks)
-
-                failed_tracks, playlists = self.process_track_cls(data.get("failed_tracks", []), playlists)
-
-                player.queue.extend(failed_tracks)
-
-                playlists.clear()
-                tracks.clear()
-                played_tracks.clear()
-                queue_autoplay_tracks.clear()
-                failed_tracks.clear()"""
-
                 if data["current"]:
-                    player.queue.append(data["current"])
+                    data["queue"].insert(0, data["current"])
 
-                player.queue.extend(data["queue"])
-                player.played.extend(data["played"])
-                player.failed_tracks.extend(data["failed_tracks"])
-                player.queue_autoplay.extend(data["queue_autoplay"])
+                if data.get("version", 1) < player.version:
+
+                    tracks, playlists = self.process_track_cls(data["queue"])
+
+                    player.queue.extend(tracks)
+
+                    played_tracks, playlists = self.process_track_cls(data["played"], playlists)
+
+                    player.played.extend(played_tracks)
+
+                    queue_autoplay_tracks, playlists = self.process_track_cls(data.get("queue_autoplay", []))
+
+                    player.queue_autoplay.extend(queue_autoplay_tracks)
+
+                    failed_tracks, playlists = self.process_track_cls(data.get("failed_tracks", []), playlists)
+
+                    player.queue.extend(failed_tracks)
+
+                    playlists.clear()
+                    tracks.clear()
+                    played_tracks.clear()
+                    queue_autoplay_tracks.clear()
+                    failed_tracks.clear()
+
+                else:
+                    player.queue.extend(data["queue"])
+                    player.played.extend(data["played"])
+                    player.queue_autoplay.extend(data["queue_autoplay"])
+                    player.failed_tracks.extend(data["failed_tracks"])
 
                 await player.connect(voice_channel.id)
 
