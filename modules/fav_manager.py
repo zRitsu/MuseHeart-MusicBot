@@ -204,11 +204,11 @@ class UserFavView(disnake.ui.View):
         self.message = None
         self.log = log
         self.prefix = prefix
-
-        self.update_components()
         self.components_updater_task = bot.loop.create_task(self.auto_update())
 
     def update_components(self):
+
+        self.clear_items()
 
         if self.data["fav_links"]:
 
