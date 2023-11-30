@@ -343,7 +343,7 @@ class PlayerSession(commands.Cog):
                 if data["current"]:
                     data["queue"].insert(0, data["current"])
 
-                if data.get("version", 1) < player.version:
+                if data.get("version", 1) < getattr(player, "version", 1):
 
                     tracks, playlists = self.process_track_cls(data["queue"])
 
