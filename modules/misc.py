@@ -114,6 +114,12 @@ class Misc(commands.Cog):
 
             while True:
 
+                try:
+                    if self.bot._presence_loop_started:
+                        await asyncio.sleep(self.bot.config["PRESENCE_INTERVAL"])
+                except AttributeError:
+                    self.bot._presence_loop_started = True
+
                 await self.bot.wait_until_ready()
 
                 activity_data = next(activities)
