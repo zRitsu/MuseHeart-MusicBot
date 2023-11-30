@@ -24,13 +24,9 @@ if TYPE_CHECKING:
 
 class InteractionModalImport(disnake.ui.Modal):
 
-    def __init__(self, bot: BotCore, ctx: Union[disnake.Interaction, CustomContext],
-                 message: Optional[disnake.Message], prefix: str):
+    def __init__(self, view: IntegrationsView):
 
-        self.bot = bot
-        self.ctx = ctx
-        self.message = message
-        self.prefix = prefix
+        self.view = view
 
         super().__init__(
             title="Importar integração",
@@ -55,7 +51,7 @@ class InteractionModalImport(disnake.ui.Modal):
                                f"em formato json.**\n\n`{repr(e)}`", ephemeral=True)
             return
 
-        cog = self.bot.get_cog("IntegrationManager")
+        cog = self.view.bot.get_cog("IntegrationManager")
 
         retry_after = cog.integration_import_export_cd.get_bucket(inter).update_rate_limit()
         if retry_after:
@@ -81,57 +77,51 @@ class InteractionModalImport(disnake.ui.Modal):
 
         await inter.response.defer(ephemeral=True)
 
-        user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+        self.view.data = await self.view.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
         for name in json_data.keys():
             try:
-                del user_data["integration_links"][name.lower()[:90]]
+                del self.view.data["integration_links"][name.lower()[:90]]
             except KeyError:
                 continue
 
-        if self.bot.config["MAX_USER_INTEGRATIONS"] > 0 and not (await self.bot.is_owner(inter.author)):
+        if self.view.bot.config["MAX_USER_INTEGRATIONS"] > 0 and not (await self.view.bot.is_owner(inter.author)):
 
-            if (json_size := len(json_data)) > self.bot.config["MAX_USER_INTEGRATIONS"]:
+            if (json_size := len(json_data)) > self.view.bot.config["MAX_USER_INTEGRATIONS"]:
                 await inter.edit_original_message(f"A quantidade de itens no seu arquivo de integrações excede "
-                                   f"a quantidade máxima permitida ({self.bot.config['MAX_USER_INTEGRATIONS']}).")
+                                   f"a quantidade máxima permitida ({self.view.bot.config['MAX_USER_INTEGRATIONS']}).")
                 return
 
-            if (json_size + (user_integrations := len(user_data["integration_links"]))) > self.bot.config[
+            if (json_size + (user_integrations := len(self.view.data["integration_links"]))) > self.view.bot.config[
                 "MAX_USER_INTEGRATIONS"]:
                 await inter.edit_original_message(
                     "Você não possui espaço suficiente para adicionar todos as integrações de seu arquivo...\n"
-                    f"Limite atual: {self.bot.config['MAX_USER_INTEGRATIONS']}\n"
+                    f"Limite atual: {self.view.bot.config['MAX_USER_INTEGRATIONS']}\n"
                     f"Quantidade de integrações salvas: {user_integrations}\n"
-                    f"Você precisa de: {(json_size + user_integrations) - self.bot.config['MAX_USER_INTEGRATIONS']}")
+                    f"Você precisa de: {(json_size + user_integrations) - self.view.bot.config['MAX_USER_INTEGRATIONS']}")
                 return
 
-        user_data["integration_links"].update(json_data)
+        self.view.data["integration_links"].update(json_data)
 
-        await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
+        await self.view.bot.update_global_data(inter.author.id, self.view.data, db_name=DBModel.users)
 
         await inter.edit_original_message(
             content="**Integrações importadas com sucesso!**"
         )
 
-        view = IntegrationsView(self.bot, self.ctx, user_data, prefix=self.prefix, log="Os links foram importados com sucesso!")
-        view.message = self.message
+        self.view.log = "Os links foram importados com sucesso!"
 
-        if not isinstance(self.ctx, CustomContext):
-            await self.ctx.edit_original_message(embed=view.build_embed(user_data, self.prefix), view=view)
-        elif self.message:
-            await self.message.edit(embed=view.build_embed(user_data, self.prefix), view=view)
+        if not isinstance(self.view.ctx, CustomContext):
+            await self.view.ctx.edit_original_message(embed=self.view.build_embed(), view=self.view)
+        elif self.view.message:
+            await self.view.message.edit(embed=self.view.build_embed(), view=self.view)
 
 
 class IntegrationModal(disnake.ui.Modal):
-    def __init__(self, bot: BotCore, name: Optional[str], url: Optional[str],
-                 ctx: Union[disnake.Interaction, CustomContext],
-                 message: Optional[disnake.Message], prefix: str):
+    def __init__(self, name: Optional[str], url: Optional[str], view: IntegrationsView):
 
-        self.bot = bot
+        self.view = view
         self.name = name
-        self.ctx = ctx
-        self.message = message
-        self.prefix = prefix
 
         super().__init__(
             title="Adicionar integração",
@@ -165,7 +155,7 @@ class IntegrationModal(disnake.ui.Modal):
 
         if (matches := spotify_regex_w_user.match(url)):
 
-            if not self.bot.spotify:
+            if not self.view.bot.spotify:
                 await inter.send(
                     embed=disnake.Embed(
                         description="**O suporte ao spotify não está disponível no momento...**",
@@ -191,13 +181,13 @@ class IntegrationModal(disnake.ui.Modal):
                 pass
 
             try:
-                result = await self.bot.spotify.get_user(user_id)
+                result = await self.view.bot.spotify.get_user(user_id)
             except Exception as e:
                 await inter.send(
                     embed=disnake.Embed(
                         description="**Ocorreu um erro ao obter informações do spotify:** ```py\n"
                                     f"{repr(e)}```",
-                        color=self.bot.get_color()
+                        color=self.view.bot.get_color()
                     )
                 )
                 traceback.print_exc()
@@ -207,7 +197,7 @@ class IntegrationModal(disnake.ui.Modal):
                 await inter.send(
                     embed=disnake.Embed(
                         description="**O usuário do link informado não possui playlists públicas...**",
-                        color=self.bot.get_color()
+                        color=self.view.bot.get_color()
                     )
                 )
                 return
@@ -216,11 +206,11 @@ class IntegrationModal(disnake.ui.Modal):
 
         else:
 
-            if not self.bot.config["USE_YTDL"]:
+            if not self.view.bot.config["USE_YTDL"]:
                 await inter.send(
                     embed=disnake.Embed(
                         description="**Não há suporte a esse tipo de link no momento...**",
-                        color=self.bot.get_color()
+                        color=self.view.bot.get_color()
                     )
                 )
                 return
@@ -246,7 +236,7 @@ class IntegrationModal(disnake.ui.Modal):
 
                 source = "[SC]:"
 
-            loop = self.bot.loop or asyncio.get_event_loop()
+            loop = self.view.bot.loop or asyncio.get_event_loop()
 
             try:
                 await inter.response.defer(ephemeral=True)
@@ -254,7 +244,7 @@ class IntegrationModal(disnake.ui.Modal):
                 pass
 
             try:
-                info = await loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(base_url, download=False))
+                info = await loop.run_in_executor(None, lambda: self.view.bot.pool.ytdl.extract_info(base_url, download=False))
             except Exception as e:
                 traceback.print_exc()
                 await inter.edit_original_message(f"**Ocorreu um erro ao obter informação da url:** ```py\n{repr(e)}```")
@@ -286,16 +276,16 @@ class IntegrationModal(disnake.ui.Modal):
 
             data = {"title": f"{source} {info['title']}", "url": info["original_url"]}
 
-        user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+        self.view.data = await self.view.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
         title = fix_characters(data['title'], 80)
 
-        user_data["integration_links"][title] = data['url']
+        self.view.data["integration_links"][title] = data['url']
 
-        await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
+        await self.view.bot.update_global_data(inter.author.id, self.view.data, db_name=DBModel.users)
 
         try:
-            me = (inter.guild or self.bot.get_guild(inter.guild_id)).me
+            me = (inter.guild or self.view.bot.get_guild(inter.guild_id)).me
         except AttributeError:
             me = None
 
@@ -306,17 +296,16 @@ class IntegrationModal(disnake.ui.Modal):
                             "- Ao usar o comando /play (no preenchimento automático da busca)\n"
                             "- Ao clicar no botão de tocar favorito do player.\n"
                             "- Ao usar o comando play (prefixed) sem nome ou link.```",
-                color=self.bot.get_color(me)
+                color=self.view.bot.get_color(me)
             ), view=None
         )
 
-        view = IntegrationsView(self.bot, self.ctx, user_data, log = f"[`{data['title']}`]({data['url']}) foi adicionado nas suas integrações.", prefix = self.prefix)
-        view.message = self.message
+        self.view.log = f"[`{data['title']}`]({data['url']}) foi adicionado nas suas integrações."
 
-        if not isinstance(self.ctx, CustomContext):
-            await self.ctx.edit_original_message(embed=view.build_embed(user_data, self.prefix), view=view)
-        elif self.message:
-            await self.message.edit(embed=view.build_embed(user_data, self.prefix), view=view)
+        if not isinstance(self.view.ctx, CustomContext):
+            await self.view.ctx.edit_original_message(embed=self.view.build_embed(), view=self.view)
+        elif self.view.message:
+            await self.view.message.edit(embed=self.view.build_embed(), view=self.view)
 
 
 class IntegrationsView(disnake.ui.View):
@@ -330,11 +319,16 @@ class IntegrationsView(disnake.ui.View):
         self.message = None
         self.log = log
         self.prefix = prefix
+        self.update_components()
 
-        if data["integration_links"]:
+    def update_components(self):
+
+        self.clear_items()
+
+        if self.data["integration_links"]:
 
             integration_select = disnake.ui.Select(options=[
-                disnake.SelectOption(label=k, emoji=music_source_emoji_id(k)) for k, v in data["integration_links"].items()
+                disnake.SelectOption(label=k, emoji=music_source_emoji_id(k)) for k, v in self.data["integration_links"].items()
             ], min_values=1, max_values=1)
             integration_select.options[0].default = True
             self.current = integration_select.options[0].label
@@ -345,7 +339,7 @@ class IntegrationsView(disnake.ui.View):
         integrationadd_button.callback = self.integrationadd_callback
         self.add_item(integrationadd_button)
 
-        if data["integration_links"]:
+        if self.data["integration_links"]:
 
             remove_button = disnake.ui.Button(label="Remover", emoji="♻️")
             remove_button.callback = self.remove_callback
@@ -363,7 +357,7 @@ class IntegrationsView(disnake.ui.View):
         import_button.callback = self.import_callback
         self.add_item(import_button)
 
-        if data["integration_links"]:
+        if self.data["integration_links"]:
             play_button = disnake.ui.Button(label="Tocar a integração selecionada", emoji="▶")
             play_button.callback = self.play_callback
             self.add_item(play_button)
@@ -397,7 +391,7 @@ class IntegrationsView(disnake.ui.View):
 
         self.stop()
 
-    def build_embed(self, user_data: dict, prefix: str):
+    def build_embed(self):
 
         supported_platforms = []
 
@@ -410,18 +404,20 @@ class IntegrationsView(disnake.ui.View):
         if not supported_platforms:
             return
 
+        self.update_components()
+
         embed = disnake.Embed(
             title="Gerenciador de integrações de canais/perfis com playlists públicas.",
             colour=self.bot.get_color(),
         )
 
-        if not user_data["integration_links"]:
+        if not self.data["integration_links"]:
             embed.description = "**Você não possui integrações no momento...**"
 
-        if user_data["integration_links"]:
+        if self.data["integration_links"]:
 
             embed.description = f"**Suas integrações atuais:**\n\n" + "\n".join(
-                f"> ` {n + 1} ` [`{f[0]}`]({f[1]})" for n, f in enumerate(user_data["integration_links"].items()))
+                f"> ` {n + 1} ` [`{f[0]}`]({f[1]})" for n, f in enumerate(self.data["integration_links"].items()))
 
             cog = self.bot.get_cog("Music")
 
@@ -436,7 +432,7 @@ class IntegrationsView(disnake.ui.View):
                 embed.add_field(name="**Como tocar a playlist de uma integração?**", inline=False,
                                 value=f"* Usando o comando {cmd} (no preenchimento automático da busca)\n"
                                       "* Clicando no botão/select de tocar favorito/integração do player.\n"
-                                      f"* Usando o comando {prefix}{cog.play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n"
+                                      f"* Usando o comando {self.prefix}{cog.play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n"
                                       "* Usando o botão de tocar integração abaixo.")
 
         if self.log:
@@ -449,7 +445,7 @@ class IntegrationsView(disnake.ui.View):
         return embed
 
     async def integrationadd_callback(self, inter: disnake.MessageInteraction):
-        await inter.response.send_modal(IntegrationModal(bot=self.bot, ctx=inter, name=None, message=inter.message, url=None, prefix=self.prefix))
+        await inter.response.send_modal(IntegrationModal(name=None, url=None, view=self))
 
     async def remove_callback(self, inter: disnake.MessageInteraction):
 
@@ -460,52 +456,50 @@ class IntegrationsView(disnake.ui.View):
         await inter.response.defer(ephemeral=True)
 
         try:
-            user_data = inter.global_user_data
+            self.data = inter.global_user_data
         except AttributeError:
-            user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
-            inter.global_user_data = user_data
+            self.data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+            inter.global_user_data = self.data
 
         try:
-            url = f'[`{self.current}`]({user_data["integration_links"][self.current]})'
-            del user_data["integration_links"][self.current]
+            url = f'[`{self.current}`]({self.data["integration_links"][self.current]})'
+            del self.data["integration_links"][self.current]
         except:
             await inter.send(f"**Não há integração na lista com o nome:** {self.current}", ephemeral=True)
             return
 
-        await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
+        await self.bot.update_global_data(inter.author.id, self.data, db_name=DBModel.users)
 
         self.log = f"Integração {url} foi removida com sucesso!"
-        view = IntegrationsView(bot=self.bot, ctx=self.ctx, data=user_data, log=self.log, prefix=self.prefix)
-        view.message = self.message
-        await inter.edit_original_message(embed=self.build_embed(user_data, self.prefix), view=view)
+        await inter.edit_original_message(embed=self.build_embed(), view=self)
 
     async def clear_callback(self, inter: disnake.MessageInteraction):
 
         await inter.response.defer(ephemeral=True)
 
         try:
-            user_data = inter.global_user_data
+            self.data = inter.global_user_data
         except AttributeError:
-            user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
-            inter.global_user_data = user_data
+            self.data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+            inter.global_user_data = self.data
 
-        if not user_data["integration_links"]:
+        if not self.data["integration_links"]:
             await inter.response.edit_message(content="**Você não possui integrações salvas!**", view=None)
             return
 
-        user_data["integration_links"].clear()
+        self.data["integration_links"].clear()
 
-        await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
+        await self.bot.update_global_data(inter.author.id, self.data, db_name=DBModel.users)
 
         self.log = "Sua lista de integrações foi limpa com sucesso!"
 
-        await inter.edit_original_message(embed=self.build_embed(user_data, self.prefix))
+        await inter.edit_original_message(embed=self.build_embed(), view=self)
 
     async def import_callback(self, inter: disnake.MessageInteraction):
-        await inter.response.send_modal(InteractionModalImport(self.bot, self.ctx, self.message, prefix=self.prefix))
+        await inter.response.send_modal(InteractionModalImport(view=self))
 
     async def play_callback(self, inter: disnake.MessageInteraction):
-        await self.bot.get_cog("Music").player_controller(inter, PlayerControls.enqueue_fav, query=f"> itg: {self.current}" )
+        await self.bot.get_cog("Music").player_controller(inter, PlayerControls.enqueue_fav, query=f"> itg: {self.current}")
 
     async def export_callback(self, inter: disnake.MessageInteraction):
         await self.bot.get_cog("IntegrationManager").export_(inter)
@@ -579,7 +573,7 @@ class IntegrationManager(commands.Cog):
 
         view = IntegrationsView(bot=self.bot, ctx=inter, data=user_data, prefix=prefix)
 
-        embed = view.build_embed(user_data, prefix)
+        embed = view.build_embed()
 
         if not embed:
             await inter.send("**Não há suporte a esse recurso no momento...**\n\n"

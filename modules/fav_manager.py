@@ -18,13 +18,9 @@ if TYPE_CHECKING:
 
 class UserFavModalImport(disnake.ui.Modal):
 
-    def __init__(self, bot: BotCore, ctx: Union[disnake.Interaction, CustomContext],
-                 message: Optional[disnake.Message], prefix: str):
+    def __init__(self, view: UserFavView):
 
-        self.bot = bot
-        self.ctx = ctx
-        self.message = message
-        self.prefix = prefix
+        self.view = view
 
         super().__init__(
             title="Importar integração",
@@ -42,7 +38,7 @@ class UserFavModalImport(disnake.ui.Modal):
 
     async def callback(self, inter: disnake.ModalInteraction, /) -> None:
 
-        cog = self.bot.get_cog("FavManager")
+        cog = self.view.bot.get_cog("FavManager")
 
         retry_after = cog.fav_import_export_cd.get_bucket(inter).update_rate_limit()
         if retry_after:
@@ -65,7 +61,7 @@ class UserFavModalImport(disnake.ui.Modal):
             if "> fav:" in name.lower():
                 continue
 
-            if len(url) > (max_url_chars := self.bot.config["USER_FAV_MAX_URL_LENGTH"]):
+            if len(url) > (max_url_chars := self.view.bot.config["USER_FAV_MAX_URL_LENGTH"]):
                 await inter.send(
                     f"**Um item de seu arquivo {url} ultrapassa a quantidade de caracteres permitido:{max_url_chars}**",
                     ephemeral=True)
@@ -77,61 +73,51 @@ class UserFavModalImport(disnake.ui.Modal):
 
         await inter.response.defer(ephemeral=True)
 
-        user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+        self.view.data = await self.view.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
         for name in json_data.keys():
-            if len(name) > (max_name_chars := self.bot.config["USER_FAV_MAX_NAME_LENGTH"]):
+            if len(name) > (max_name_chars := self.view.bot.config["USER_FAV_MAX_NAME_LENGTH"]):
                 await inter.edit_original_message(
                     f"**Um item de seu arquivo ({name}) ultrapassa a quantidade de caracteres permitido:{max_name_chars}**")
                 return
             try:
-                del user_data["fav_links"][name.lower()]
+                del self.view.data["fav_links"][name.lower()]
             except KeyError:
                 continue
 
-        if self.bot.config["MAX_USER_FAVS"] > 0 and not (await self.bot.is_owner(inter.author)):
+        if self.view.bot.config["MAX_USER_FAVS"] > 0 and not (await self.view.bot.is_owner(inter.author)):
 
-            if (json_size := len(json_data)) > self.bot.config["MAX_USER_FAVS"]:
+            if (json_size := len(json_data)) > self.view.bot.config["MAX_USER_FAVS"]:
                 await inter.edit_original_message(f"A quantidade de itens no seu arquivo de favorito excede "
-                                                  f"a quantidade máxima permitida ({self.bot.config['MAX_USER_FAVS']}).")
+                                                  f"a quantidade máxima permitida ({self.view.bot.config['MAX_USER_FAVS']}).")
                 return
 
-            if (json_size + (user_favs := len(user_data["fav_links"]))) > self.bot.config["MAX_USER_FAVS"]:
+            if (json_size + (user_favs := len(self.view.data["fav_links"]))) > self.view.bot.config["MAX_USER_FAVS"]:
                 await inter.edit_original_message(
                     "Você não possui espaço suficiente para adicionar todos os favoritos de seu arquivo...\n"
-                    f"Limite atual: {self.bot.config['MAX_USER_FAVS']}\n"
+                    f"Limite atual: {self.view.bot.config['MAX_USER_FAVS']}\n"
                     f"Quantidade de favoritos salvos: {user_favs}\n"
-                    f"Você precisa de: {(json_size + user_favs) - self.bot.config['MAX_USER_FAVS']}")
+                    f"Você precisa de: {(json_size + user_favs) - self.view.bot.config['MAX_USER_FAVS']}")
                 return
 
-        user_data["fav_links"].update(json_data)
+        self.view.data["fav_links"].update(json_data)
 
-        await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
+        await self.view.bot.update_global_data(inter.author.id, self.view.data, db_name=DBModel.users)
 
         await inter.edit_original_message(
             content="**Integrações importadas com sucesso!**"
         )
 
-        view = UserFavView(self.bot, self.ctx, user_data, prefix=self.prefix,
-                                log="Os links foram importados com sucesso!")
-        view.message = self.message
-
-        if not isinstance(self.ctx, CustomContext):
-            await self.ctx.edit_original_message(embed=view.build_embed(user_data, self.prefix), view=view)
-        elif self.message:
-            await self.message.edit(embed=view.build_embed(user_data, self.prefix), view=view)
+        if not isinstance(self.view.ctx, CustomContext):
+            await self.view.ctx.edit_original_message(embed=self.view.build_embed(), view=self.view)
+        elif self.view.message:
+            await self.view.message.edit(embed=self.view.build_embed(), view=self.view)
 
 class UserFavModal(disnake.ui.Modal):
-    def __init__(self, bot: BotCore, name: Optional[str], url: Optional[str],
-                 ctx: Union[disnake.Interaction, CustomContext],
-                 message: Optional[disnake.Message], prefix: str):
-
-        self.bot = bot
+    def __init__(self, name: Optional[str], url: Optional[str], view: UserFavView):
         self.name = name
-        self.prefix = prefix
-        self.ctx = ctx
-        self.message = message
-        self.prefix = prefix
+        self.url = url
+        self.view = view
 
         super().__init__(
             title="Adicionar/Editar playlist/favorito",
@@ -172,22 +158,22 @@ class UserFavModal(disnake.ui.Modal):
 
         await inter.response.defer(ephemeral=True)
 
-        user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+        self.view.data = await self.view.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
         name = inter.text_values["user_fav_name"].strip()
 
         try:
             if name != self.name:
-                del user_data["fav_links"][self.name]
+                del self.view.data["fav_links"][self.name]
         except KeyError:
             pass
 
-        user_data["fav_links"][name] = valid_url
+        self.view.data["fav_links"][name] = valid_url
 
-        await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
+        await self.view.bot.update_global_data(inter.author.id, self.view.data, db_name=DBModel.users)
 
         try:
-            me = (inter.guild or self.bot.get_guild(inter.guild_id)).me
+            me = (inter.guild or self.view.bot.get_guild(inter.guild_id)).me
         except AttributeError:
             me = None
 
@@ -198,17 +184,14 @@ class UserFavModal(disnake.ui.Modal):
                             "- Ao usar o comando /play (no preenchimento automático da busca)\n"
                             "- Ao clicar no botão de tocar favorito do player.\n"
                             "- Ao usar o comando play (prefixed) sem nome ou link.```",
-                color=self.bot.get_color(me)
+                color=self.view.bot.get_color(me)
             )
         )
 
-        view = UserFavView(self.bot, self.ctx, user_data, log = f"[`{name}`]({valid_url}) foi adicionado nos seus favoritos.", prefix = self.prefix)
-        view.message = self.message
-
-        if not isinstance(self.ctx, CustomContext):
-            await self.ctx.edit_original_message(embed=view.build_embed(user_data, self.prefix), view=view)
-        elif self.message:
-            await self.message.edit(embed=view.build_embed(user_data, self.prefix), view=view)
+        if not isinstance(self.view.ctx, CustomContext):
+            await self.view.ctx.edit_original_message(embed=self.view.build_embed(), view=self.view)
+        elif self.view.message:
+            await self.view.message.edit(embed=self.view.build_embed(), view=self.view)
 
 class UserFavView(disnake.ui.View):
 
@@ -222,15 +205,15 @@ class UserFavView(disnake.ui.View):
         self.log = log
         self.prefix = prefix
 
-        self.update_components(data)
+        self.update_components()
         self.components_updater_task = bot.loop.create_task(self.auto_update())
 
-    def update_components(self, data: dict):
+    def update_components(self):
 
-        if data["fav_links"]:
+        if self.data["fav_links"]:
 
             fav_select = disnake.ui.Select(options=[
-                disnake.SelectOption(label=k, emoji=music_source_emoji_url(v)) for k, v in data["fav_links"].items()
+                disnake.SelectOption(label=k, emoji=music_source_emoji_url(v)) for k, v in self.data["fav_links"].items()
             ], min_values=1, max_values=1)
             fav_select.options[0].default = True
             self.current = fav_select.options[0].label
@@ -241,7 +224,7 @@ class UserFavView(disnake.ui.View):
         favadd_button.callback = self.favadd_callback
         self.add_item(favadd_button)
 
-        if data["fav_links"]:
+        if self.data["fav_links"]:
 
             edit_button = disnake.ui.Button(label="Editar", emoji="✍️")
             edit_button.callback = self.edit_callback
@@ -263,7 +246,7 @@ class UserFavView(disnake.ui.View):
         import_button.callback = self.import_callback
         self.add_item(import_button)
 
-        if data["fav_links"]:
+        if self.data["fav_links"]:
             play_button = disnake.ui.Button(label="Tocar o favorito selecionado", emoji="▶")
             play_button.callback = self.play_callback
             self.add_item(play_button)
@@ -278,14 +261,12 @@ class UserFavView(disnake.ui.View):
 
             user, data, url = await self.bot.wait_for("fav_add", check=lambda user, data, url: user.id == self.ctx.author.id)
 
-            self.clear_items()
-            self.update_components(data)
             self.log = f"{url} foi adicionado nos seus favoritos."
 
             if not isinstance(self.ctx, CustomContext):
-                await self.ctx.edit_original_message(embed=self.build_embed(data, self.prefix), view=self)
+                await self.ctx.edit_original_message(embed=self.build_embed(), view=self)
             elif self.message:
-                await self.message.edit(embed=self.build_embed(data, self.prefix), view=self)
+                await self.message.edit(embed=self.build_embed(), view=self)
 
     async def on_timeout(self):
 
@@ -315,19 +296,21 @@ class UserFavView(disnake.ui.View):
             except:
                 pass
 
-    def build_embed(self, user_data: dict, prefix: str):
+    def build_embed(self):
+
+        self.update_components()
 
         embed = disnake.Embed(
             title="Gerenciador de favoritos.",
             colour=self.bot.get_color(),
         )
 
-        if not user_data["fav_links"]:
+        if not self.data["fav_links"]:
             embed.description = "Você não possui favoritos (clique no botão de adicionar abaixo)."
 
         else:
             embed.description = f"**Seus favoritos atuais:**\n\n" + "\n".join(
-                f"> ` {n + 1} ` [`{f[0]}`]({f[1]})" for n, f in enumerate(user_data["fav_links"].items())
+                f"> ` {n + 1} ` [`{f[0]}`]({f[1]})" for n, f in enumerate(self.data["fav_links"].items())
             )
 
         cog = self.bot.get_cog("Music")
@@ -343,7 +326,7 @@ class UserFavView(disnake.ui.View):
             embed.add_field(name="**Como usá-los?**", inline=False,
                             value=f"* Usando o comando {cmd} (no preenchimento automático da busca)\n"
                                   "* Clicando no botão/select de tocar favorito/integração do player.\n"
-                                  f"* Usando o comando {prefix}{cog.play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n"
+                                  f"* Usando o comando {self.prefix}{cog.play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n"
                                   "* Usando o botão de tocar favorito abaixo.")
 
         if self.log:
@@ -352,7 +335,7 @@ class UserFavView(disnake.ui.View):
         return embed
 
     async def favadd_callback(self, inter: disnake.MessageInteraction):
-        await inter.response.send_modal(UserFavModal(bot=self.bot, url="", name="", ctx=self.ctx, message=self.message, prefix=self.prefix))
+        await inter.response.send_modal(UserFavModal(url="", name="", view=self))
 
     async def edit_callback(self, inter: disnake.MessageInteraction):
 
@@ -362,10 +345,7 @@ class UserFavView(disnake.ui.View):
 
         try:
             await inter.response.send_modal(
-                UserFavModal(
-                    bot=self.bot, name=self.current, ctx=self.ctx, message=self.message,
-                    url=self.data["fav_links"][self.current], prefix=self.prefix
-                )
+                UserFavModal(name=self.current, url=self.data["fav_links"][self.current], view=self)
             )
         except KeyError:
             await inter.send(f"**Não há favorito com o nome:** {self.current}", ephemeral=True)
@@ -379,52 +359,48 @@ class UserFavView(disnake.ui.View):
         await inter.response.defer(ephemeral=True)
 
         try:
-            user_data = inter.global_user_data
+            self.data = inter.global_user_data
         except AttributeError:
-            user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
-            inter.global_user_data = user_data
+            self.data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+            inter.global_user_data = self.data
 
         try:
-            url = f'[`{self.current}`]({user_data["fav_links"][self.current]})'
-            del user_data["fav_links"][self.current]
+            url = f'[`{self.current}`]({self.data["fav_links"][self.current]})'
+            del self.data["fav_links"][self.current]
         except:
             await inter.edit_original_message(f"**Não há favorito na lista com o nome:** {self.current}")
             return
 
-        await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
+        await self.bot.update_global_data(inter.author.id, self.data, db_name=DBModel.users)
 
         self.log = f"Integração {url} foi removida com sucesso!"
 
-        view = UserFavView(bot=self.bot, ctx=self.ctx, data=user_data, log=self.log, prefix=self.prefix)
-        view.message = self.message
-        await inter.edit_original_message(embed=self.build_embed(user_data, self.prefix), view=view)
+        await inter.edit_original_message(embed=self.build_embed(), view=self)
 
     async def clear_callback(self, inter: disnake.MessageInteraction):
 
         await inter.response.defer(ephemeral=True)
 
         try:
-            user_data = inter.global_user_data
+            self.data = inter.global_user_data
         except AttributeError:
-            user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
-            inter.global_user_data = user_data
+            self.data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+            inter.global_user_data = self.data
 
-        if not user_data["fav_links"]:
+        if not self.data["fav_links"]:
             await inter.send("**Você não possui links favoritos!**", ephemeral=True)
             return
 
-        user_data["fav_links"].clear()
+        self.data["fav_links"].clear()
 
-        await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
+        await self.bot.update_global_data(inter.author.id, self.data, db_name=DBModel.users)
 
         self.log = "Sua lista de favoritos foi limpa com sucesso!"
 
-        view = UserFavView(bot=self.bot, ctx=self.ctx, data=user_data, log=self.log, prefix=self.prefix)
-        view.message = self.message
-        await inter.edit_original_message(embed=self.build_embed(user_data, self.prefix), view=view)
+        await inter.edit_original_message(embed=self.build_embed(), view=self)
 
     async def import_callback(self, inter: disnake.MessageInteraction):
-        await inter.response.send_modal(UserFavModalImport(bot=self.bot, ctx=self.ctx, message=self.message, prefix=self.prefix))
+        await inter.response.send_modal(UserFavModalImport(view=self))
 
     async def play_callback(self, inter: disnake.MessageInteraction):
         await self.bot.get_cog("Music").player_controller(inter, PlayerControls.enqueue_fav, query=f"> fav: {self.current}" )
@@ -501,7 +477,7 @@ class FavManager(commands.Cog):
 
         view = UserFavView(bot=self.bot, ctx=inter, data=user_data, prefix=prefix)
 
-        embed = view.build_embed(user_data, prefix)
+        embed = view.build_embed()
 
         if isinstance(inter, CustomContext):
             try:
