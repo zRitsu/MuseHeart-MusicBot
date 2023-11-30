@@ -23,8 +23,8 @@ class UserFavModalImport(disnake.ui.Modal):
         self.view = view
 
         super().__init__(
-            title="Importar integração",
-            custom_id="integration_import",
+            title="Importar Favoritos",
+            custom_id="fav_import",
             components=[
                 disnake.ui.TextInput(
                     style=disnake.TextInputStyle.long,
@@ -105,8 +105,14 @@ class UserFavModalImport(disnake.ui.Modal):
         await self.view.bot.update_global_data(inter.author.id, self.view.data, db_name=DBModel.users)
 
         await inter.edit_original_message(
-            content="**Integrações importadas com sucesso!**"
+            content="**Favoritos importados com sucesso!**"
         )
+
+        if s := len(json_data) > 1:
+            self.view.log = f"{s} favoritos foram importados com sucesso."
+        else:
+            name = next(iter(json_data))
+            self.view.log = f"O favorito [`{name}`]({json_data[name]}) foi importado com sucesso."
 
         if not isinstance(self.view.ctx, CustomContext):
             await self.view.ctx.edit_original_message(embed=self.view.build_embed(), view=self.view)
@@ -324,7 +330,7 @@ class UserFavView(disnake.ui.View):
                 cmd = "/play"
 
             embed.add_field(name="**Como usá-los?**", inline=False,
-                            value=f"* Usando o comando {cmd} (no preenchimento automático da busca)\n"
+                            value=f"* Usando o comando {cmd} (selecionando o favorito no preenchimento automático da busca)\n"
                                   "* Clicando no botão/select de tocar favorito/integração do player.\n"
                                   f"* Usando o comando {self.prefix}{cog.play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n"
                                   "* Usando o botão de tocar favorito abaixo.")
@@ -373,7 +379,7 @@ class UserFavView(disnake.ui.View):
 
         await self.bot.update_global_data(inter.author.id, self.data, db_name=DBModel.users)
 
-        self.log = f"Integração {url} foi removida com sucesso!"
+        self.log = f"Favorito {url} foi removido com sucesso!"
 
         await inter.edit_original_message(embed=self.build_embed(), view=self)
 
@@ -391,13 +397,23 @@ class UserFavView(disnake.ui.View):
             await inter.send("**Você não possui links favoritos!**", ephemeral=True)
             return
 
+        fp = BytesIO(bytes(json.dumps(self.data["fav_links"], indent=4), 'utf-8'))
+
         self.data["fav_links"].clear()
 
         await self.bot.update_global_data(inter.author.id, self.data, db_name=DBModel.users)
 
         self.log = "Sua lista de favoritos foi limpa com sucesso!"
 
-        await inter.edit_original_message(embed=self.build_embed(), view=self)
+        await inter.send("### Seus favoritos foram excluídos com sucesso!\n"
+                         "`Um arquivo de backup foi gerado e caso queira reverter essa exclusão, copie o "
+                         "conteúdo do arquivo e clique no botão \"importar\" e cole o conteudo no campo indicado.`",
+                         ephemeral=True, file=disnake.File(fp, filename="favs.json"))
+
+        if not isinstance(self.ctx, CustomContext):
+            await self.ctx.edit_original_message(embed=self.build_embed(), view=self)
+        elif self.message:
+            await self.message.edit(embed=self.build_embed(), view=self)
 
     async def import_callback(self, inter: disnake.MessageInteraction):
         await inter.response.send_modal(UserFavModalImport(view=self))

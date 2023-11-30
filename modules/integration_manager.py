@@ -109,7 +109,11 @@ class InteractionModalImport(disnake.ui.Modal):
             content="**Integrações importadas com sucesso!**"
         )
 
-        self.view.log = "Os links foram importados com sucesso!"
+        if s := len(json_data) > 1:
+            self.view.log = f"{s} integrações foram importadas com sucesso."
+        else:
+            name = next(iter(json_data))
+            self.view.log = f"A integração [`{name}`]({json_data[name]}) foi importada com sucesso."
 
         if not isinstance(self.view.ctx, CustomContext):
             await self.view.ctx.edit_original_message(embed=self.view.build_embed(), view=self.view)
@@ -293,7 +297,7 @@ class IntegrationModal(disnake.ui.Modal):
             embed=disnake.Embed(
                 description=f"**Integração adicionada/editada com sucesso:** [`{title}`]({data['url']})\n"
                             "**Ela vai aparecer nas seguintes ocasições:** ```\n"
-                            "- Ao usar o comando /play (no preenchimento automático da busca)\n"
+                            "- Ao usar o comando /play (selecionando a integração no preenchimento automático da busca)\n"
                             "- Ao clicar no botão de tocar favorito do player.\n"
                             "- Ao usar o comando play (prefixed) sem nome ou link.```",
                 color=self.view.bot.get_color(me)
@@ -358,11 +362,11 @@ class IntegrationsView(disnake.ui.View):
         self.add_item(import_button)
 
         if self.data["integration_links"]:
-            play_button = disnake.ui.Button(label="Tocar a integração selecionada", emoji="▶")
+            play_button = disnake.ui.Button(label="Tocar uma playlist da integração selecionada", emoji="▶")
             play_button.callback = self.play_callback
             self.add_item(play_button)
 
-        cancel_button = disnake.ui.Button(label="Cancelar", emoji="❌")
+        cancel_button = disnake.ui.Button(label="Fechar", emoji="❌")
         cancel_button.callback = self.cancel_callback
         self.add_item(cancel_button)
 
@@ -487,13 +491,23 @@ class IntegrationsView(disnake.ui.View):
             await inter.response.edit_message(content="**Você não possui integrações salvas!**", view=None)
             return
 
+        fp = BytesIO(bytes(json.dumps(self.data["integration_links"], indent=4), 'utf-8'))
+
         self.data["integration_links"].clear()
 
         await self.bot.update_global_data(inter.author.id, self.data, db_name=DBModel.users)
 
         self.log = "Sua lista de integrações foi limpa com sucesso!"
 
-        await inter.edit_original_message(embed=self.build_embed(), view=self)
+        await inter.send("### Suas integrações foram excluídas com sucesso!\n"
+                         "`um arquivo de backup foi gerado e caso queira reverter essa exclusão, copie o "
+                         "conteúdo do arquivo e clique no botão \"importar\" e cole o conteudo no campo indicado.`",
+                         ephemeral=True, file=disnake.File(fp, filename="integrations.json"))
+
+        if not isinstance(self.ctx, CustomContext):
+            await self.ctx.edit_original_message(embed=self.build_embed(), view=self)
+        elif self.message:
+            await self.message.edit(embed=self.build_embed(), view=self)
 
     async def import_callback(self, inter: disnake.MessageInteraction):
         await inter.response.send_modal(InteractionModalImport(view=self))
