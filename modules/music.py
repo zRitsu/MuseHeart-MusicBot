@@ -3058,8 +3058,10 @@ class Music(commands.Cog):
 
         try:
             bot = inter.music_bot
+            guild = inter.music_guild
         except AttributeError:
             bot = inter.bot
+            guild = bot.get_guild(inter.guild_id)
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
@@ -3085,7 +3087,7 @@ class Music(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        global_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.guilds)
+        global_data = await self.bot.get_global_data(guild.id, db_name=DBModel.guilds)
 
         try:
             slashcmd = f"</play:" + str(self.bot.pool.controller_bot.get_global_command_named("play", cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
@@ -3093,7 +3095,7 @@ class Music(commands.Cog):
             slashcmd = "/play"
 
         embed = disnake.Embed(
-            color=bot.get_color(inter.guild.me),
+            color=bot.get_color(guild.me),
             description=f"### {inter.author.mention}: A fila foi salva com sucesso!!\n"
                         f"**Músicas salvas:** `{len(tracks)}`\n"
                         f"### Como usar?\n"
