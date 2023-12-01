@@ -895,7 +895,7 @@ class Music(commands.Cog):
         query = query.replace("\n", " ").strip()
         ephemeral = None
         warn_message = None
-        playlists = None
+        queue_loaded = False
 
         try:
             if isinstance(inter.message, disnake.Message):
@@ -1085,7 +1085,7 @@ class Music(commands.Cog):
             is_pin = True
             query = query[7:]
 
-        elif query.startswith(("> fav: ", "> itg: ", "> svq: ")):
+        elif query.startswith(("> fav: ", "> itg: ")):
             try:
                 user_data = inter.global_user_data
             except AttributeError:
@@ -1206,8 +1206,9 @@ class Music(commands.Cog):
             except FileNotFoundError:
                 raise GenericError("**A sua fila salva já foi excluída...**")
 
-            tracks, playlists = self.bot.get_cog("PlayerSession").process_track_cls(data["tracks"])
+            tracks = self.bot.get_cog("PlayerSession").process_track_cls(data["tracks"])[0]
             node = await self.get_best_node(bot)
+            queue_loaded = True
 
         else:
 
@@ -1313,7 +1314,7 @@ class Music(commands.Cog):
         if not inter.response.is_done():
             await inter.response.defer(ephemeral=ephemeral)
 
-        if not playlists:
+        if not queue_loaded:
             tracks, node = await self.get_tracks(query, inter.user, node=node, track_loops=repeat_amount)
 
         try:
@@ -1496,7 +1497,7 @@ class Music(commands.Cog):
 
         if isinstance(tracks, list):
 
-            if manual_selection and not playlists and len(tracks) > 1:
+            if manual_selection and not queue_loaded and len(tracks) > 1:
 
                 embed.description = f"**Selecione a(s) música(s) desejada(s) abaixo:**"
 
@@ -1568,7 +1569,7 @@ class Music(commands.Cog):
                 if isinstance(inter, CustomContext):
                     inter.message = msg
 
-            elif not playlists:
+            elif not queue_loaded:
 
                 tracks = tracks[0]
 
@@ -1625,7 +1626,7 @@ class Music(commands.Cog):
 
                     pos_txt = f" (Pos. {position + 1})"
 
-                if playlists:
+                if queue_loaded:
                     log_text = f"{inter.author.mention} adicionou `{len(tracks)} músicas` via: {query[7:]}."
                     title = "Músicas salvas adicionadas à fila"
                     icon_url = "https://i.ibb.co/51yMNPw/floppydisk.png"
