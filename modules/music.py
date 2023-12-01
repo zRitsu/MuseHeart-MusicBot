@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import datetime
 import json
+import os.path
+import pickle
 import re
 import traceback
 import asyncio
@@ -890,12 +892,10 @@ class Music(commands.Cog):
             raise GenericError(f"**O canal {inter.author.voice.channel.mention} está lotado!**")
 
         msg = None
-
         query = query.replace("\n", " ").strip()
-
         ephemeral = None
-
         warn_message = None
+        playlists = None
 
         try:
             if isinstance(inter.message, disnake.Message):
@@ -1000,6 +1000,9 @@ class Music(commands.Cog):
             for k, v in user_data["fav_links"].items():
                 db_favs[f"> fav: {k}"] = v
 
+            if os.path.isfile(f"./local_database/saved_queues/users/{inter.author.id}.pkl"):
+                db_favs["> svq: Fila Salva"] = ">> saved_queue <<"
+
             if not db_favs:
                 raise EmptyFavIntegration()
 
@@ -1009,7 +1012,7 @@ class Music(commands.Cog):
             else:
                 embed = disnake.Embed(
                     color=self.bot.get_color(guild.me),
-                    description="**Selecione um favorito ou integração abaixo:**\n"
+                    description="**Selecione um item abaixo abaixo:**\n"
                                 f'Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para escolher!'
                 )
 
@@ -1082,7 +1085,7 @@ class Music(commands.Cog):
             is_pin = True
             query = query[7:]
 
-        if query.startswith(("> fav: ", "> itg: ")):
+        elif query.startswith(("> fav: ", "> itg: ", "> svq: ")):
             try:
                 user_data = inter.global_user_data
             except AttributeError:
@@ -1195,6 +1198,17 @@ class Music(commands.Cog):
                     else:
                         inter = view.inter
 
+        elif query.startswith("> svq: "):
+
+            try:
+                async with aiofiles.open(f"./local_database/saved_queues/users/{inter.author.id}.pkl", 'rb') as f:
+                    data = pickle.loads(await f.read())
+            except FileNotFoundError:
+                raise GenericError("**A sua fila salva já foi excluída...**")
+
+            tracks, playlists = self.bot.get_cog("PlayerSession").process_track_cls(data["tracks"])
+            node = await self.get_best_node(bot)
+
         else:
 
             query = query.strip("<>")
@@ -1299,7 +1313,8 @@ class Music(commands.Cog):
         if not inter.response.is_done():
             await inter.response.defer(ephemeral=ephemeral)
 
-        tracks, node = await self.get_tracks(query, inter.user, node=node, track_loops=repeat_amount)
+        if not playlists:
+            tracks, node = await self.get_tracks(query, inter.user, node=node, track_loops=repeat_amount)
 
         try:
             player = bot.music.players[inter.guild_id]
@@ -1481,7 +1496,7 @@ class Music(commands.Cog):
 
         if isinstance(tracks, list):
 
-            if manual_selection and len(tracks) > 1:
+            if manual_selection and not playlists and len(tracks) > 1:
 
                 embed.description = f"**Selecione a(s) música(s) desejada(s) abaixo:**"
 
@@ -1553,7 +1568,7 @@ class Music(commands.Cog):
                 if isinstance(inter, CustomContext):
                     inter.message = msg
 
-            else:
+            elif not playlists:
 
                 tracks = tracks[0]
 
@@ -1610,9 +1625,16 @@ class Music(commands.Cog):
 
                     pos_txt = f" (Pos. {position + 1})"
 
-                query = fix_characters(query.replace(f"{source}:", '', 1), 25)
+                if playlists:
+                    log_text = f"{inter.author.mention} adicionou `{len(tracks)} músicas` via: {query[7:]}."
+                    title = "Músicas salvas adicionadas à fila"
+                    icon_url = "https://i.ibb.co/51yMNPw/floppydisk.png"
 
-                log_text = f"{inter.author.mention} adicionou `{len(tracks)} músicas` via busca: `{query}`{pos_txt}."
+                else:
+                    query = fix_characters(query.replace(f"{source}:", '', 1), 25)
+                    title = f"Busca: {query}"
+                    icon_url = music_source_image(tracks[0].info['sourceName'])
+                    log_text = f"{inter.author.mention} adicionou `{len(tracks)} músicas` via busca: `{query}`{pos_txt}."
 
                 total_duration = 0
 
@@ -1620,7 +1642,7 @@ class Music(commands.Cog):
                     if not t.is_stream:
                         total_duration += t.duration
 
-                embed.set_author(name=f"Busca: {query}", icon_url=music_source_image(tracks[0].info['sourceName']))
+                embed.set_author(name=title, icon_url=icon_url)
                 embed.set_thumbnail(url=tracks[0].thumb)
                 embed.description = f"`{len(tracks)} música(s)`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
                 emoji = "🎶"
@@ -3007,6 +3029,79 @@ class Music(commands.Cog):
                 ephemeral=player.static and player.text_channel.id == inter.channel_id
             )
             await player.destroy()
+
+    @check_queue_loading()
+    @has_player()
+    @check_voice()
+    @pool_command(
+        name="savequeue", aliases=["sq", "svq"],
+        only_voiced=True, cooldown=queue_manipulation_cd, max_concurrency=remove_mc,
+        description="Experimental: Salvar a música e fila atual pra reusá-los a qualquer momento."
+    )
+    async def savequeue_legacy(self, ctx: CustomContext):
+        await self.save_queue.callback(self=self, inter=ctx)
+
+    @check_queue_loading()
+    @has_player()
+    @check_voice()
+    @commands.slash_command(
+        description=f"{desc_prefix}Experimental: Salvar a música e fila atual pra reusá-los a qualquer momento.",
+        extras={"only_voiced": True}, dm_permission=False, cooldown=queue_manipulation_cd, max_concurrency=remove_mc
+    )
+    async def save_queue(self, inter: disnake.AppCmdInter):
+
+        try:
+            bot = inter.music_bot
+        except AttributeError:
+            bot = inter.bot
+
+        player: LavalinkPlayer = bot.music.players[inter.guild_id]
+
+        tracks = []
+
+        if player.current:
+            tracks.append(player.current)
+
+        tracks.extend(player.queue)
+
+        if len(tracks) < 3:
+            raise GenericError(f"**É necessário ter no mínimo 3 músicas pra salvar (atual e/ou na fila)**")
+
+        if not os.path.isdir(f"./local_database/saved_queues/users"):
+            os.makedirs(f"./local_database/saved_queues/users")
+
+        async with aiofiles.open(f"./local_database/saved_queues/users/{inter.author.id}.pkl", "wb") as f:
+            await f.write(pickle.dumps({
+                "tracks": tracks,
+                "created_at": disnake.utils.utcnow(),
+                "guild_id": inter.guild_id,
+            }))
+
+        await inter.response.defer(ephemeral=True)
+
+        global_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.guilds)
+
+        try:
+            slashcmd = f"</play:" + str(self.bot.pool.controller_bot.get_global_command_named("play", cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+        except AttributeError:
+            slashcmd = "/play"
+
+        embed = disnake.Embed(
+            color=bot.get_color(inter.guild.me),
+            description=f"### {inter.author.mention}: A fila foi salva com sucesso!!\n"
+                        f"**Músicas salvas:** `{len(tracks)}`\n"
+                        f"### Como usar?\n"
+                        f"* Usando o comando {slashcmd} (no preenchimento automático da busca)\n"
+                        f"* Clicando no botão/select de tocar favorito/integração do player.\n"
+                        f"* Usando o comando {global_data['prefix'] or self.bot.default_prefix}{self.play_legacy.name} "
+                        "sem incluir um nome ou link de uma música/vídeo."
+        )
+
+        if isinstance(inter, CustomContext):
+            await inter.reply(embed=embed)
+        else:
+            await inter.edit_original_response(embed=embed)
+
 
     @has_player()
     @check_voice()

@@ -557,11 +557,14 @@ def music_source_emoji_url(url: str):
     if tw_url_regex.match(url):
         return music_source_emoji_data["twitch"]
 
+    if url == ">> saved_queue <<":
+        return "💾"
+
     return "<:play:734221719774035968>"
 
 def music_source_emoji_id(id_: str):
 
-    id_ = id_.replace("> itg: ", "").replace("> fav: ", "").split()[0]
+    id_ = id_.replace("> itg: ", "").replace("> fav: ", "").replace("> svq: ", "").split()[0]
 
     if id_ == "【YT】:":
         return music_source_emoji_data["youtube"]
