@@ -1773,7 +1773,12 @@ class Music(commands.Cog):
         if URL_REG.match(query):
             return [query] if len(query) < 100 else []
 
-        favs: list = await fav_list(inter, query)
+        favs = []
+
+        if os.path.isfile(f"./local_database/saved_queues/users/{inter.author.id}.pkl"):
+            favs.append("> svq: Fila Salva")
+
+        favs.extend(await fav_list(inter, query))
 
         if not inter.guild:
             try:
