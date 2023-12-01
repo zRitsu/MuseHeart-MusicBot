@@ -1656,7 +1656,7 @@ class Music(commands.Cog):
 
                 if queue_loaded:
                     log_text = f"{inter.author.mention} adicionou `{len(tracks)} músicas` via: {query[7:]}."
-                    title = "Músicas salvas adicionadas à fila"
+                    title = f"Usando músicas salvas de {inter.author.display_name}"
                     icon_url = "https://i.ibb.co/51yMNPw/floppydisk.png"
 
                 else:
@@ -3126,12 +3126,15 @@ class Music(commands.Cog):
             color=bot.get_color(guild.me),
             description=f"### {inter.author.mention}: A fila foi salva com sucesso!!\n"
                         f"**Músicas salvas:** `{len(tracks)}`\n"
-                        f"### Como usar?\n"
-                        f"* Usando o comando {slashcmd} (no preenchimento automático da busca)\n"
-                        f"* Clicando no botão/select de tocar favorito/integração do player.\n"
+                        "### Como usar?\n"
+                        f"* Usando o comando {slashcmd} (selecionando no preenchimento automático da busca)\n"
+                        "* Clicando no botão/select de tocar favorito/integração do player.\n"
                         f"* Usando o comando {global_data['prefix'] or self.bot.default_prefix}{self.play_legacy.name} "
                         "sem incluir um nome ou link de uma música/vídeo."
         )
+
+        embed.set_footer(text="Nota: Esse é um recurso muito experimental, a fila salva pode sofrer alterações ou ser "
+                              "removida em futuros updates")
 
         if isinstance(inter, CustomContext):
             await inter.reply(embed=embed)

@@ -187,7 +187,7 @@ class UserFavModal(disnake.ui.Modal):
             embed=disnake.Embed(
                 description="**Link salvo/atualizado com sucesso nos seus favoritos!\n"
                             "Ele vai aparecer nas seguintes ocasições:** ```\n"
-                            "- Ao usar o comando /play (no preenchimento automático da busca)\n"
+                            "- Ao usar o comando /play (selecionando no preenchimento automático da busca)\n"
                             "- Ao clicar no botão de tocar favorito do player.\n"
                             "- Ao usar o comando play (prefixed) sem nome ou link.```",
                 color=self.view.bot.get_color(me)
