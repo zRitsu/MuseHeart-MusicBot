@@ -841,6 +841,31 @@ class Music(commands.Cog):
         await self.play.callback(self=self, inter=inter, query="", position=position, options=False, force_play=force_play,
                                  manual_selection=False, source="ytsearch", repeat_amount=repeat_amount, server=server)
 
+    async def check_player_queue(self, user: disnake.User, bot: BotCore, guild_id: int, tracks: Union[list, LavalinkPlaylist] = None):
+
+        count = self.bot.config["QUEUE_MAX_ENTRIES"]
+
+        try:
+            player: LavalinkPlayer = bot.music.players[guild_id]
+        except KeyError:
+            if count < 1:
+                return tracks
+            count += 1
+        else:
+            if count < 1:
+                return tracks
+            if len(player.queue) >= count and not (await bot.is_owner(user)):
+                raise GenericError(f"**A fila está cheia ({self.bot.config['QUEUE_MAX_ENTRIES']} músicas).**")
+
+        if tracks:
+
+            if isinstance(tracks, list):
+                tracks = tracks[:count]
+            else:
+                tracks.tracks = tracks.tracks[:count]
+
+        return tracks
+
     @can_send_message_check()
     @check_voice()
     @commands.slash_command(
@@ -890,6 +915,8 @@ class Music(commands.Cog):
 
         if not guild.voice_client and not check_channel_limit(guild.me, inter.author.voice.channel):
             raise GenericError(f"**O canal {inter.author.voice.channel.mention} está lotado!**")
+
+        await self.check_player_queue(inter.author, bot, guild.id)
 
         msg = None
         query = query.replace("\n", " ").strip()
@@ -1206,7 +1233,7 @@ class Music(commands.Cog):
             except FileNotFoundError:
                 raise GenericError("**A sua fila salva já foi excluída...**")
 
-            tracks = self.bot.get_cog("PlayerSession").process_track_cls(data["tracks"])[0]
+            tracks = await self.check_player_queue(inter.author, bot, guild.id, self.bot.get_cog("PlayerSession").process_track_cls(data["tracks"])[0])
             node = await self.get_best_node(bot)
             queue_loaded = True
 
@@ -1315,7 +1342,8 @@ class Music(commands.Cog):
             await inter.response.defer(ephemeral=ephemeral)
 
         if not queue_loaded:
-            tracks, node = await self.get_tracks(query, inter.user, node=node, track_loops=repeat_amount)
+            tracks, node = await self.get_tracks(query, inter.author, node=node, track_loops=repeat_amount)
+            tracks = await self.check_player_queue(inter.author, bot, guild.id, tracks)
 
         try:
             player = bot.music.players[inter.guild_id]
@@ -5200,6 +5228,7 @@ class Music(commands.Cog):
             pass
 
         tracks, node = await self.get_tracks(message.content, message.author)
+        tracks = await self.check_player_queue(message.author, self.bot, message.guild.id, tracks)
 
         try:
             message_id = int(data['player_controller']['message_id'])

@@ -63,6 +63,7 @@ DEFAULT_CONFIG = {
     "ENABLE_DISCORD_URLS_PLAYBACK": True,
     "PLAYER_INFO_BACKUP_INTERVAL": 45,
     "PLAYER_SESSIONS_MONGODB": False,
+    "QUEUE_MAX_ENTRIES": 0,
 
     ##############################################
     ### Sistema de música - Suporte ao spotify ###
@@ -183,6 +184,7 @@ def load_config():
         "PREFIXED_POOL_TIMEOUT",
         "PLAYER_INFO_BACKUP_INTERVAL",
         "LAVALINK_RECONNECT_RETRIES",
+        "QUEUE_MAX_ENTRIES",
     ]:
         try:
             CONFIG[i] = int(CONFIG[i])
