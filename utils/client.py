@@ -255,8 +255,10 @@ class BotPool:
                     else:
                         self.config["AUTO_DOWNLOAD_LAVALINK_SERVERLIST"] = not start_local
                         self.config['USE_YTDL'] = int(square_cfg["MEMORY"]) >= 512
+                        if not square_cfg.get("SUBDOMAIN"):
+                            self.config["RUN_RPC_SERVER"] = False
                         print("Usando a configuração automática do lavalink na squarecloud\n"
-                              f"Lavalink local: {start_local} | YTDL: {self.config['USE_YTDL']} | Memória: {square_cfg['MEMORY']}")
+                              f"Lavalink local: {start_local} | YTDL: {self.config['USE_YTDL']} | Memória: {square_cfg['MEMORY']} | Run RPC Server: {self.config['RUN_RPC_SERVER']}")
                     break
 
         if start_local is None:
