@@ -178,9 +178,12 @@ class LocalDatabase(BaseDB):
                           collection: str, default_model: dict = None):
 
         id_ = str(id_)
+        data["_id"] = id_
 
-        if not self._connect[collection][db_name].update_one({'_id': id_}, {'$set': data}).raw_result:
-            data["_id"] = id_
+        try:
+            if not self._connect[collection][db_name].update_one({'_id': id_}, {'$set': data}).raw_result:
+                self._connect[collection][db_name].insert_one(data)
+        except PermissionError:
             self._connect[collection][db_name].insert_one(data)
 
         return data
