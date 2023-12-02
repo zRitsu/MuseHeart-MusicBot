@@ -264,7 +264,11 @@ class MongoDatabase(BaseDB):
 
         id_ = str(id_)
 
-        data = self.cache._connect[collection][db_name].find_one({"_id": id_})
+        try:
+            data = self.cache._connect[collection][db_name].find_one({"_id": id_})
+        except:
+            traceback.print_exc()
+            data = {}
 
         if not data:
             data = await self._connect[collection][db_name].find_one({"_id": id_})
