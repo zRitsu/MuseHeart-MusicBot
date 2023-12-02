@@ -282,7 +282,7 @@ class MongoDatabase(BaseDB):
                 await self.cache.update_data(id_, data, db_name=db_name, collection=collection, default_model=default_model)
             except PermissionError:
                 try:
-                    shutil.rmtree("./.db_cache")
+                    shutil.rmtree("./.db_cache"); os.makedirs("./.db_cache")
                     await self.cache.update_data(id_, data, db_name=db_name, collection=collection,
                                                  default_model=default_model)
                 except:
