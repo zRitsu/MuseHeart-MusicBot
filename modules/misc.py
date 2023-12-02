@@ -183,7 +183,7 @@ class Misc(commands.Cog):
         components = [disnake.ui.Button(custom_id="bot_invite", label="Precisa de mais bots de música? Clique aqui.")] if [b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public] else []
 
         if self.bot.pool.controller_bot != self.bot:
-            interaction_invite = f"[`{disnake.utils.escape_markdown(str(self.bot.user.name))}`]({disnake.utils.oauth_url(self.bot.user.id, scopes=['applications.commands'])})"
+            interaction_invite = f"[`{disnake.utils.escape_markdown(str(self.bot.pool.controller_bot.user.name))}`]({disnake.utils.oauth_url(self.bot.pool.controller_bot.user.id, scopes=['applications.commands'])})"
 
         if cmd:=self.bot.get_command("setup"):
             cmd_text = f"Se desejar, use o comando **/{cmd.name}** para criar um canal dedicado pra pedir " \
