@@ -183,8 +183,8 @@ class LocalDatabase(BaseDB):
         try:
             if not self._connect[collection][db_name].update_one({'_id': id_}, {'$set': data}).raw_result:
                 self._connect[collection][db_name].insert_one(data)
-        except PermissionError:
-            self._connect[collection][db_name].insert_one(data)
+        except:
+            traceback.print_exc()
 
         return data
 
@@ -280,13 +280,6 @@ class MongoDatabase(BaseDB):
             data = default_model[db_name].copy()
             try:
                 await self.cache.update_data(id_, data, db_name=db_name, collection=collection, default_model=default_model)
-            except PermissionError:
-                try:
-                    shutil.rmtree("./.db_cache"); os.makedirs("./.db_cache")
-                    await self.cache.update_data(id_, data, db_name=db_name, collection=collection,
-                                                 default_model=default_model)
-                except:
-                    traceback.print_exc()
             except:
                 traceback.print_exc()
             return data
