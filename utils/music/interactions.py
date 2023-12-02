@@ -11,6 +11,7 @@ import disnake
 from disnake.ext import commands
 
 from utils.db import DBModel
+from utils.music.checks import check_pool_bots
 from utils.music.converters import time_format, fix_characters, URL_REG
 from utils.music.errors import GenericError
 from utils.music.spotify import spotify_regex_w_user
@@ -1120,13 +1121,13 @@ class FavMenuView(disnake.ui.View):
         self.add_item(import_button)
 
         if self.mode == ViewMode.fav_manager:
-            play_button = disnake.ui.Button(label="Tocar o favorito selecionado", emoji="▶")
+            play_button = disnake.ui.Button(label="Tocar o favorito selecionado", emoji="▶", custom_id="favmanager_play_button")
             play_button.callback = self.play_callback
             self.add_item(play_button)
 
         elif self.mode == ViewMode.integrations_manager:
             if self.data["integration_links"]:
-                play_button = disnake.ui.Button(label="Tocar uma playlist da integração selecionada", emoji="▶")
+                play_button = disnake.ui.Button(label="Tocar uma playlist da integração selecionada", emoji="▶", custom_id="favmanager_play_button")
                 play_button.callback = self.play_callback
                 self.add_item(play_button)
 
@@ -1481,7 +1482,8 @@ class FavMenuView(disnake.ui.View):
         await inter.response.send_modal(FavModalImport(view=self))
 
     async def play_callback(self, inter: disnake.MessageInteraction):
-        await self.bot.get_cog("Music").player_controller(inter, PlayerControls.enqueue_fav, query=f"> itg: {self.current}")
+        await check_pool_bots(inter, check_player=False)
+        await self.bot.get_cog("Music").player_controller(inter, PlayerControls.enqueue_fav, query=f"> itg: {self.current}" if self.mode == ViewMode.integrations_manager else f"> fav: {self.current}")
 
     async def export_callback(self, inter: disnake.MessageInteraction):
         cog = self.bot.get_cog("Music")

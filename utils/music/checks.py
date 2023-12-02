@@ -84,7 +84,11 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
     except AttributeError:
         pass
 
-    if isinstance(inter, (disnake.MessageInteraction, disnake.ModalInteraction)):
+    if isinstance(inter, disnake.MessageInteraction):
+        if inter.data.custom_id != "favmanager_play_button":
+            return
+
+    elif isinstance(inter, disnake.ModalInteraction):
         return
 
     if len(inter.bot.pool.bots) < 2:
