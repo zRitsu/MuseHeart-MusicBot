@@ -275,7 +275,17 @@ class MongoDatabase(BaseDB):
 
         if not data:
             data = default_model[db_name].copy()
-            await self.cache.update_data(id_, data, db_name=db_name, collection=collection, default_model=default_model)
+            try:
+                await self.cache.update_data(id_, data, db_name=db_name, collection=collection, default_model=default_model)
+            except PermissionError:
+                try:
+                    shutil.rmtree("./.dbcache")
+                    await self.cache.update_data(id_, data, db_name=db_name, collection=collection,
+                                                 default_model=default_model)
+                except:
+                    traceback.print_exc()
+            except:
+                traceback.print_exc()
             return data
 
         elif data["ver"] != default_model[db_name]["ver"]:
