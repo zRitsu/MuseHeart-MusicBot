@@ -29,7 +29,7 @@ from utils.music.checks import check_voice, has_player, has_source, is_requester
 from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, google_search, percentage, music_source_image, perms_translations
-from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction
+from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction, FavMenuView, ViewMode
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, fav_list, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, SongRequestPurgeMode, song_request_buttons, \
     update_vc_status
@@ -4214,6 +4214,84 @@ class Music(commands.Cog):
             ), fail_if_not_exists=False
         )
 
+    fav_import_export_cd = commands.CooldownMapping.from_cooldown(1, 15, commands.BucketType.member)
+    fav_cd = commands.CooldownMapping.from_cooldown(3, 15, commands.BucketType.member)
+
+    @commands.command(name="favmanager", aliases=["favs", "favoritos", "fvmgr", "favlist",
+                                                  "integrations", "integrationmanager", "itg", "itgmgr", "itglist", "integrationlist",
+                                                  "serverplaylist", "spl", "svp", "svpl"],
+                      description="Gerenciar seus favoritos/integrações e links do server.", cooldown=fav_cd)
+    async def fav_manager_legacy(self, ctx: CustomContext):
+        await self.fav_manager.callback(self=self, inter=ctx)
+
+    @commands.max_concurrency(1, commands.BucketType.member, wait=False)
+    @commands.slash_command(
+        description=f"{desc_prefix}Gerenciar seus favoritos/integrações e links do server.",
+        cooldown=fav_cd, dm_permission=False)
+    async def fav_manager(self, inter: disnake.AppCmdInter):
+
+        await inter.response.defer(ephemeral=True)
+
+        try:
+            user_data = inter.global_user_data
+        except AttributeError:
+            user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+            inter.global_user_data = user_data
+
+        mode = ViewMode.fav_manager
+
+        guild_data = None
+
+        if isinstance(inter, CustomContext):
+            prefix = inter.clean_prefix
+
+            if inter.invoked_with in ("serverplaylist", "spl", "svp", "svpl") and inter.author.guild_permissions.manage_guild:
+                mode = ViewMode.guild_fav_manager
+
+                try:
+                    guild_data = inter.guild_data
+                except AttributeError:
+                    guild_data = await self.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                    inter.guild_data = guild_data
+
+            elif inter.invoked_with in ("integrations", "integrationmanager", "itg", "itgmgr", "itglist", "integrationlist"):
+                mode = ViewMode.integrations_manager
+
+        else:
+            try:
+                global_data = inter.global_guild_data
+            except AttributeError:
+                global_data = await self.bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
+                try:
+                    inter.global_guild_data = global_data
+                except:
+                    pass
+            prefix = global_data['prefix'] or self.bot.default_prefix
+
+        view = FavMenuView(bot=self.bot, ctx=inter, data=user_data, prefix=prefix, mode=mode)
+        view.guild_data = guild_data
+
+        embed = view.build_embed()
+
+        if not embed:
+            await inter.send("**Não há suporte a esse recurso no momento...**\n\n"
+                             "`Suporte ao spotify e YTDL não estão ativados.`", ephemeral=True)
+            return
+
+        if isinstance(inter, CustomContext):
+            try:
+                view.message = inter.store_message
+                await inter.store_message.edit(embed=embed, view=view)
+            except:
+                view.message = await inter.send(embed=embed, view=view)
+        else:
+            try:
+                await inter.edit_original_message(embed=embed, view=view)
+            except:
+                await inter.response.edit_message(embed=embed, view=view)
+
+        await view.wait()
+
     @commands.Cog.listener("on_message_delete")
     async def player_message_delete(self, message: disnake.Message):
 
@@ -5956,4 +6034,43 @@ class Music(commands.Cog):
 
 
 def setup(bot: BotCore):
+
+    if bot.config["USE_YTDL"] and not hasattr(bot.pool, 'ytdl'):
+
+        from yt_dlp import YoutubeDL
+
+        bot.pool.ytdl = YoutubeDL(
+            {
+                'extract_flat': True,
+                'quiet': True,
+                'no_warnings': True,
+                'lazy_playlist': True,
+                'simulate': True,
+                'cachedir': False,
+                'allowed_extractors': [
+                    r'.*youtube.*',
+                    r'.*soundcloud.*',
+                ],
+                'extractor_args': {
+                    'youtube': {
+                        'skip': [
+                            'hls',
+                            'dash',
+                            'translated_subs'
+                        ],
+                        'player_skip': [
+                            'js',
+                            'configs',
+                            'webpage'
+                        ],
+                        'player_client': ['android_creator'],
+                        'max_comments': [0],
+                    },
+                    'youtubetab': {
+                        "skip": ["webpage"]
+                    }
+                }
+            }
+        )
+
     bot.add_cog(Music(bot))
