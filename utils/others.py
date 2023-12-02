@@ -577,7 +577,7 @@ def music_source_emoji_id(id_: str):
 
     return "<:play:734221719774035968>"
 
-async def select_bot_pool(inter, first=False, return_new=False):
+async def select_bot_pool(inter: Union[CustomContext, disnake.MessageInteraction], first=False, return_new=False, edit_original=False):
 
     if isinstance(inter, CustomContext):
         if len(inter.bot.pool.bots) < 2:
@@ -618,15 +618,17 @@ async def select_bot_pool(inter, first=False, return_new=False):
                         f'Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para escolher!'
         )
 
-        msg = await inter.send(
-            inter.author.mention, embed=embed, ephemeral=True,
-            components=[
-                disnake.ui.Select(
-                    custom_id=f"select_bot{add_id}",
-                    options=opts
-                )
-            ]
-        )
+        components = [
+            disnake.ui.Select(
+                custom_id=f"select_bot{add_id}",
+                options=opts
+            )
+        ]
+
+        if edit_original:
+            msg = await inter.response.edit_message(embed=embed, components=components)
+        else:
+            msg = await inter.send(inter.author.mention, embed=embed, ephemeral=True, components=components)
 
         def check_bot_selection(i: Union[CustomContext, disnake.MessageInteraction]):
 

@@ -32,7 +32,7 @@ from utils.music.converters import time_format, fix_characters, string_to_second
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction, FavMenuView, ViewMode
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, fav_list, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, SongRequestPurgeMode, song_request_buttons, \
-    update_vc_status
+    update_vc_status, select_bot_pool
 
 
 class Music(commands.Cog):
@@ -4230,28 +4230,28 @@ class Music(commands.Cog):
         cooldown=fav_cd, dm_permission=False)
     async def fav_manager(self, inter: disnake.AppCmdInter):
 
-        await inter.response.defer(ephemeral=True)
-
-        try:
-            user_data = inter.global_user_data
-        except AttributeError:
-            user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
-            inter.global_user_data = user_data
+        bot = self.bot
 
         mode = ViewMode.fav_manager
 
         guild_data = None
+        interaction = None
 
         if isinstance(inter, CustomContext):
             prefix = inter.clean_prefix
 
             if inter.invoked_with in ("serverplaylist", "spl", "svp", "svpl") and inter.author.guild_permissions.manage_guild:
+
+                interaction, bot = await select_bot_pool(inter, return_new=True)
+
                 mode = ViewMode.guild_fav_manager
+
+                await interaction.response.defer(ephemeral=True)
 
                 try:
                     guild_data = inter.guild_data
                 except AttributeError:
-                    guild_data = await self.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                    guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
                     inter.guild_data = guild_data
 
             elif inter.invoked_with in ("integrations", "integrationmanager", "itg", "itgmgr", "itglist", "integrationlist"):
@@ -4261,14 +4261,26 @@ class Music(commands.Cog):
             try:
                 global_data = inter.global_guild_data
             except AttributeError:
-                global_data = await self.bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
+                global_data = await bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
                 try:
                     inter.global_guild_data = global_data
                 except:
                     pass
-            prefix = global_data['prefix'] or self.bot.default_prefix
+            prefix = global_data['prefix'] or bot.default_prefix
 
-        view = FavMenuView(bot=self.bot, ctx=inter, data=user_data, prefix=prefix, mode=mode)
+        if not interaction:
+            interaction = inter
+
+        if not interaction.response.is_done():
+            await inter.response.defer(ephemeral=True)
+
+        try:
+            user_data = inter.global_user_data
+        except AttributeError:
+            user_data = await bot.get_global_data(inter.author.id, db_name=DBModel.users)
+            inter.global_user_data = user_data
+
+        view = FavMenuView(bot=bot, ctx=inter, data=user_data, prefix=prefix, mode=mode)
         view.guild_data = guild_data
 
         embed = view.build_embed()

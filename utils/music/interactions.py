@@ -1570,7 +1570,7 @@ class FavMenuView(disnake.ui.View):
             self.components_updater_task = self.bot.loop.create_task(self.auto_update())
 
         elif self.mode == ViewMode.guild_fav_manager:
-            inter, bot = await select_bot_pool(inter, return_new=True)
+            inter, bot = await select_bot_pool(inter, edit_original=True)
             self.bot = bot
             if not self.guild_data:
                 await inter.response.defer()
