@@ -72,21 +72,32 @@ def run_lavalink(
         except KeyError:
             pass
 
-        try:
-            shutil.rmtree("./.java" if use_jabba else "./.jabba")
-        except:
-            pass
-
         if os.name == "nt":
             dirs.append(os.path.realpath("./.java/zulu17.44.15-ca-jdk17.0.8-win_x64/bin/java"))
+            try:
+                shutil.rmtree("./.jabba")
+            except:
+                pass
+
         else:
-            dirs.extend(
-                [
-                    os.path.realpath("./.java/jdk-13/bin/java"),
-                    os.path.realpath("./.jabba/jdk/zulu@1.17.0-0/bin/java"),
-                    os.path.expanduser("~/.jabba/jdk/zulu@1.17.0-0/bin/java"),
-                ]
-            )
+            if use_jabba:
+                dirs.extend(
+                    [
+                        os.path.realpath("./.jabba/jdk/zulu@1.17.0-0/bin/java"),
+                        os.path.expanduser("~/.jabba/jdk/zulu@1.17.0-0/bin/java")
+                    ]
+                )
+                try:
+                    shutil.rmtree("./.java")
+                except:
+                    pass
+
+            else:
+                dirs.append(os.path.realpath("./.java/jdk-13/bin/java"))
+                try:
+                    shutil.rmtree("./.jabba")
+                except:
+                    pass
 
         for cmd in dirs:
             if validate_java(cmd):
