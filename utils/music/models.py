@@ -1685,17 +1685,34 @@ class LavalinkPlayer(wavelink.Player):
 
         if not self.controller_mode:
 
-            await self.destroy_message()
-
-            self.message = None
-
             if self.temp_embed:
                 self.last_data["embeds"].insert(0, self.temp_embed)
                 self.temp_embed = None
 
             self.updating = True
 
-            await self.text_channel.send(allowed_mentions=self.allowed_mentions, **self.last_data)
+            if self.keep_connected:
+                if not self.is_last_message():
+                    await self.destroy_message()
+                elif self.text_channel:
+                    if not self.text_channel.permissions_for(self.guild.me).send_messages:
+                        self.text_channel = None
+                        self.message = None
+                    else:
+                        try:
+                            await self.message.edit(allowed_mentions=self.allowed_mentions, **self.last_data)
+                        except disnake.Forbidden:
+                            self.message = None
+                            self.text_channel = None
+                        except:
+                            self.message = await self.text_channel.send(allowed_mentions=self.allowed_mentions, **self.last_data)
+
+            else:
+                await self.destroy_message()
+
+                self.message = await self.text_channel.send(allowed_mentions=self.allowed_mentions, **self.last_data)
+
+            self.updating = False
 
         else:
 
