@@ -812,9 +812,15 @@ class MusicSettings(commands.Cog):
 
             if not thread:
 
-                if not target.permissions_for(guild.me).create_forum_threads:
+                if not target.permissions_for(guild.me).manage_threads:
                     raise GenericError(
-                        f"**{bot.user.mention} não possui permissão para postar no canal {target.mention}.**")
+                        f"**{bot.user.mention} não possui permissão de gerenciar tópicos no canal {target.mention}.**\n"
+                        f"`Nota: Você pode me conceder temporariamente essa permissão e após usar o comando novamente "
+                        f"você pode remover essa permissão.`")
+
+                """if not target.permissions_for(guild.me).create_forum_threads:
+                    raise GenericError(
+                        f"**{bot.user.mention} não possui permissão para postar no canal {target.mention}.**")"""
 
                 thread_wmessage = await target.create_thread(
                     name=channel_name,
