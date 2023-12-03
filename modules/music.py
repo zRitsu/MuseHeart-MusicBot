@@ -5041,7 +5041,7 @@ class Music(commands.Cog):
                 if player.message.id != message.channel.id:
                     return
             except AttributeError:
-                pass
+                return
 
             if not player.controller_mode:
                 return
