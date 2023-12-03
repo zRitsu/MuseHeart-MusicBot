@@ -1267,7 +1267,7 @@ class FavMenuView(disnake.ui.View):
                     f"> ` {n + 1} ` [`{f[0]}`]({f[1]})" for n, f in enumerate(self.data["integration_links"].items()))
 
                 embed.add_field(name="**Como tocar a playlist de uma integração?**", inline=False,
-                                value=f"* Usando o comando {cmd} (no preenchimento automático da busca)\n"
+                                value=f"* Usando o comando {cmd} (selecionando a integração no preenchimento automático da busca)\n"
                                       "* Clicando no botão/select de tocar favorito/integração do player.\n"
                                       f"* Usando o comando {self.prefix}{self.bot.get_cog('Music').play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n"
                                       "* Usando o botão de tocar integração abaixo.")
