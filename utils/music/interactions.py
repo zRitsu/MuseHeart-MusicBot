@@ -15,7 +15,7 @@ from utils.music.checks import check_pool_bots
 from utils.music.converters import time_format, fix_characters, URL_REG
 from utils.music.errors import GenericError
 from utils.music.spotify import spotify_regex_w_user
-from utils.others import check_cmd, CustomContext, send_idle_embed, select_bot_pool, music_source_emoji_url, \
+from utils.others import check_cmd, CustomContext, send_idle_embed, music_source_emoji_url, \
     music_source_emoji_id, PlayerControls
 
 if TYPE_CHECKING:
@@ -492,8 +492,6 @@ class FavModalImport(disnake.ui.Modal):
 
         elif self.view.mode == ViewMode.guild_fav_manager:
 
-            inter, bot = select_bot_pool(inter)
-
             if retry_after := self.view.bot.get_cog("Music").fav_import_export_cd.get_bucket(inter).update_rate_limit():
                 if retry_after < 1:
                     retry_after = 1
@@ -506,7 +504,7 @@ class FavModalImport(disnake.ui.Modal):
                 if "> fav:" in name.lower():
                     continue
 
-                if len(data['url']) > (max_url_chars := bot.config["USER_FAV_MAX_URL_LENGTH"]):
+                if len(data['url']) > (max_url_chars := self.view.bot.config["USER_FAV_MAX_URL_LENGTH"]):
                     await inter.send(
                         f"**Um item de seu arquivo ultrapassa a quantidade de caracteres permitido:{max_url_chars}\nURL:** {data['url']}",
                         ephemeral=True)
@@ -524,9 +522,9 @@ class FavModalImport(disnake.ui.Modal):
 
             await inter.response.defer(ephemeral=True)
 
-            self.view.guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+            self.view.guild_data = await self.view.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
-            if not self.view.guild_data["player_controller"]["channel"] or not bot.get_channel(
+            if not self.view.guild_data["player_controller"]["channel"] or not self.view.bot.get_channel(
                     int(self.view.guild_data["player_controller"]["channel"])):
                 await inter.edit_original_message("**Não há player configurado no servidor! Use o comando /setup**")
                 return
@@ -556,9 +554,9 @@ class FavModalImport(disnake.ui.Modal):
 
             self.view.guild_data["player_controller"]["fav_links"].update(json_data)
 
-            await bot.update_data(inter.guild_id, self.view.guild_data, db_name=DBModel.guilds)
+            await self.view.bot.update_data(inter.guild_id, self.view.guild_data, db_name=DBModel.guilds)
 
-            guild = bot.get_guild(inter.guild_id)
+            guild = self.view.bot.get_guild(inter.guild_id)
 
             await inter.edit_original_message(content="**Links fixos do servidor foram importados com sucesso!**")
 
@@ -568,7 +566,7 @@ class FavModalImport(disnake.ui.Modal):
                 name = next(iter(json_data))
                 self.view.log = f"O link [`{name}`]({json_data[name]}) foi importado com sucesso para a lista de links do servidor.."
 
-            await process_idle_embed(bot, guild, guild_data=self.view.guild_data)
+            await process_idle_embed(self.view.bot, guild, guild_data=self.view.guild_data)
 
         elif self.view.mode == ViewMode.integrations_manager:
 
@@ -1042,6 +1040,20 @@ class FavMenuView(disnake.ui.View):
 
         elif self.mode == ViewMode.guild_fav_manager:
 
+            bots_in_guild = []
+
+            for b in sorted(self.bot.pool.bots, key=lambda b: b.identifier):
+                if b.bot_ready and b.user in self.ctx.guild.members:
+                    bots_in_guild.append(disnake.SelectOption(emoji="🎶",
+                                                              label=f"Bot: {b.user.display_name}"[:25],
+                                                              value=f"bot_select_{b.user.id}",
+                                                              description=f"ID: {b.user.id}", default=b == self.bot))
+
+            if bots_in_guild:
+                bot_select = disnake.ui.Select(options=bots_in_guild, min_values=1, max_values=1)
+                bot_select.callback = self.bot_select
+                self.add_item(bot_select)
+
             if self.guild_data["player_controller"]["fav_links"]:
                 fav_select = disnake.ui.Select(options=[
                     disnake.SelectOption(label=k, emoji=music_source_emoji_url(v['url']),
@@ -1384,6 +1396,21 @@ class FavMenuView(disnake.ui.View):
 
         await inter.edit_original_message(embed=self.build_embed(), view=self)
 
+    async def bot_select(self, inter: disnake.MessageInteraction):
+
+        value = int(inter.values[0][11:])
+        for b in self.bot.pool.bots:
+            try:
+                if b.user.id == value:
+                    self.bot = b
+                    break
+            except AttributeError:
+                continue
+
+        self.guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
+
+        await inter.response.edit_message(embed=self.build_embed(), view=self)
+
     async def clear_callback(self, inter: disnake.MessageInteraction):
 
         guild = None
@@ -1572,8 +1599,6 @@ class FavMenuView(disnake.ui.View):
             self.components_updater_task = self.bot.loop.create_task(self.auto_update())
 
         elif self.mode == ViewMode.guild_fav_manager:
-            inter, bot = await select_bot_pool(inter, edit_original=True)
-            self.bot = bot
             if not self.guild_data:
                 await inter.response.defer()
                 self.guild_data = await self.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
