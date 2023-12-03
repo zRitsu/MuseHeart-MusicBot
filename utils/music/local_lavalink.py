@@ -157,6 +157,11 @@ def run_lavalink(
                         if platform.architecture()[0] != "64bit" else \
                         "./.java/zulu17.44.17-ca-crac-jdk17.0.8-linux_x64/bin/java")
 
+        try:
+            shutil.rmtree("./.java" if use_jabba else "./.jabba")
+        except:
+            pass
+
     clear_plugins = False
 
     for filename, url in (
