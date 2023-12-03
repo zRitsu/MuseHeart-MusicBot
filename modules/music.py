@@ -5038,7 +5038,7 @@ class Music(commands.Cog):
         if player and isinstance(message.channel, disnake.Thread) and not player.static:
 
             try:
-                if player.text_channel.id != message.channel.id:
+                if player.text_channel.id != message.id:
                     return
             except AttributeError:
                 return
