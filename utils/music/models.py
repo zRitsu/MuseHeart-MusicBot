@@ -1939,7 +1939,7 @@ class LavalinkPlayer(wavelink.Player):
             if not self.text_channel or not self.controller_mode:
                 pass
 
-            elif self.auto_update:
+            elif self.auto_update and not self.current.is_stream:
 
                 await asyncio.sleep(self.auto_update)
 
