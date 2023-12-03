@@ -1211,7 +1211,7 @@ class LavalinkPlayer(wavelink.Player):
 
                 track = None
 
-                if self.autoplay:
+                if self.autoplay or self.keep_connected:
                     try:
                         track = await self.get_autoqueue_tracks()
                     except:
@@ -1227,7 +1227,6 @@ class LavalinkPlayer(wavelink.Player):
             except Exception as e:
                 clear_autoqueue = False
                 traceback.print_exc()
-                print("test", type(e))
                 track = None
 
         if not track:
@@ -2455,7 +2454,7 @@ class LavalinkPlayer(wavelink.Player):
             elif self.last_track.track_loops:
                 self.last_track.info["extra"]["track_loops"] -= 1
                 self.queue.insert(0, self.last_track)
-            elif self.loop == "queue" or self.keep_connected:
+            elif self.loop == "queue": # or self.keep_connected:
                 if self.is_previows_music:
                     self.queue.insert(1, self.last_track)
                     self.is_previows_music = False
