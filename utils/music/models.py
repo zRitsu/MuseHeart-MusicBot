@@ -404,7 +404,7 @@ class LavalinkPlayer(wavelink.Player):
 
         self.initial_hints = [
             f"É possível alterar a skin/aparência do player usando o comando /change_skin ou {self.prefix_info}skin "
-            f"(Apenas membros com permissão de gerenciar servidor pode usar esse comando).",
+            f"(Apenas membros com permissão de gerenciar servidor podem usar esse comando).",
 
             "Você pode adicionar links favoritos para ter fácil acesso pra usá-los no comando /play (no preenchimento "
             f"automático da busca) ou {self.prefix_info}play (sem incluir nome/link) dispensando a necessidade de "
@@ -413,7 +413,7 @@ class LavalinkPlayer(wavelink.Player):
 
             "É possível definir o status automático no canal de voz com informações sobre "
             "a música que está sendo tocada no momento. Experimente usando o comando /stage_announce ou "
-            f"{self.prefix_info}stageannounce (Apenas membros com permissão de gerenciar servidor pode usar esse recurso)."
+            f"{self.prefix_info}stageannounce (Apenas membros com permissão de gerenciar servidor podem usar esse recurso)."
         ]
 
         self.retry_setup_hints = False
@@ -431,7 +431,7 @@ class LavalinkPlayer(wavelink.Player):
                 "Você pode adicionar/integrar link de perfis/canais do " + " e ".join(hint_platforms) + " para tocar "
                 f"playlists pública que tem no canal/perfil via no comando {self.prefix_info}play (sem incluir "
                 "nome/link) ou no comando /play (via preenchimento automático da busca). Experimente usando o "
-                f"comando /integrations ou {self.prefix_info}integrations."
+                f"comando /fav_manager ou {self.prefix_info}favmanager."
             )
 
         try:
@@ -929,8 +929,8 @@ class LavalinkPlayer(wavelink.Player):
         if self.static:
             hints.append("É possível fixar músicas/playlists na mensagem do player quando tiver no modo de "
                          "espera/oscioso para permitir os membros ouvi-las de forma pública. Pra isso use o "
-                         f"comando /server_playlist ou {self.prefix_info}serverplaylist (apenas membros com permissão "
-                         "de gerenciar servidor pode usar esse comando).")
+                         f"comando /fav_manager ou {self.prefix_info}favmanager (apenas membros com permissão "
+                         "de gerenciar servidor podem usar esse recurso).")
 
         elif self.bot.intents.message_content and self.controller_mode:
             hints.append("Ao criar uma conversa/thread na mensagem do player, será ativado o modo de song-request "
