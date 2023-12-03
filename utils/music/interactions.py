@@ -625,7 +625,7 @@ class FavModalImport(disnake.ui.Modal):
                 content="**Integrações importadas com sucesso!**"
             )
 
-            if s := len(json_data) > 1:
+            if (s := len(json_data)) > 1:
                 self.view.log = f"{s} integrações foram importadas com sucesso."
             else:
                 name = next(iter(json_data))
