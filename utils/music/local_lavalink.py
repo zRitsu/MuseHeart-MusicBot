@@ -72,6 +72,11 @@ def run_lavalink(
         except KeyError:
             pass
 
+        try:
+            shutil.rmtree("./.java" if use_jabba else "./.jabba")
+        except:
+            pass
+
         if os.name == "nt":
             dirs.append(os.path.realpath("./.java/zulu17.44.15-ca-jdk17.0.8-win_x64/bin/java"))
         else:
@@ -156,11 +161,6 @@ def run_lavalink(
                     java_cmd = os.path.realpath("./.java/zulu17.44.15-ca-jdk17.0.8-linux_i686/bin/java" \
                         if platform.architecture()[0] != "64bit" else \
                         "./.java/zulu17.44.17-ca-crac-jdk17.0.8-linux_x64/bin/java")
-
-        try:
-            shutil.rmtree("./.java" if use_jabba else "./.jabba")
-        except:
-            pass
 
     clear_plugins = False
 
