@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-import asyncio
 import collections.abc
 import json
 import os
@@ -146,16 +145,11 @@ class LocalDatabase(BaseDB):
 
     def __init__(self, dir_="./local_database"):
         super().__init__()
-        self.loop = None
 
         if not os.path.isdir(dir_):
             os.makedirs(dir_)
 
         self._connect = CustomTinyMongoClient(dir_)
-
-    def check_loop(self):
-        if not self.loop:
-            self.loop = asyncio.get_running_loop()
 
     async def get_data(self, id_: int, *, db_name: Union[DBModel.guilds, DBModel.users],
                        collection: str, default_model: dict = None):
@@ -165,14 +159,12 @@ class LocalDatabase(BaseDB):
 
         id_ = str(id_)
 
-        self.check_loop()
-
-        data = await self.loop.run_in_executor(None, lambda: self._connect[collection][db_name].find_one({"_id": id_}))
+        data = self._connect[collection][db_name].find_one({"_id": id_})
 
         if not data:
             data = default_model[db_name].copy()
             data["_id"] = str(id_)
-            await self.loop.run_in_executor(None, lambda: self._connect[collection][db_name].insert_one(data))
+            self._connect[collection][db_name].insert_one(data)
 
         elif data["ver"] != default_model[db_name]["ver"]:
             data = update_values(default_model[db_name].copy(), data)
@@ -188,23 +180,19 @@ class LocalDatabase(BaseDB):
         id_ = str(id_)
         data["_id"] = id_
 
-        self.check_loop()
-
         try:
-            if not await self.loop.run_in_executor(None, lambda: self._connect[collection][db_name].update_one({'_id': id_}, {'$set': data}).raw_result):
-                self.loop.run_in_executor(None, lambda: self._connect[collection][db_name].insert_one(data))
+            if not self._connect[collection][db_name].update_one({'_id': id_}, {'$set': data}).raw_result:
+                self._connect[collection][db_name].insert_one(data)
         except:
             traceback.print_exc()
 
         return data
 
     async def query_data(self, db_name: str, collection: str, filter: dict = None, limit=500) -> list:
-        self.check_loop()
-        return await self.loop.run_in_executor(None, lambda: self._connect[collection][db_name].find(filter or {}))
+        return self._connect[collection][db_name].find(filter or {})
 
     async def delete_data(self, id_, db_name: str, collection: str):
-        self.check_loop()
-        return await self.loop.run_in_executor(None, lambda: self._connect[collection][db_name].delete_one({'_id': str(id_)}))
+        return self._connect[collection][db_name].delete_one({'_id': str(id_)})
 
 
 class MongoDatabase(BaseDB):
@@ -216,8 +204,6 @@ class MongoDatabase(BaseDB):
             shutil.rmtree("./.db_cache")
         except:
             pass
-
-        self.loop = None
 
         self.cache = LocalDatabase(dir_="./.db_cache")
 
@@ -281,12 +267,8 @@ class MongoDatabase(BaseDB):
 
         id_ = str(id_)
 
-        if not self.loop:
-            self.loop = asyncio.get_running_loop()
-
         try:
-
-            data = await self.loop.run_in_executor(None, lambda: self.cache._connect[collection][db_name].find_one({"_id": id_}))
+            data = self.cache._connect[collection][db_name].find_one({"_id": id_})
         except:
             traceback.print_exc()
             data = {}
