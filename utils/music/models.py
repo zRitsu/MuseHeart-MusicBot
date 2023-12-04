@@ -459,7 +459,7 @@ class LavalinkPlayer(wavelink.Player):
         if hint_platforms:
             self.initial_hints.append(
                 "Você pode adicionar/integrar link de perfis/canais do " + " e ".join(hint_platforms) + " para tocar "
-                f"playlists pública que tem no canal/perfil via no comando {self.prefix_info}play (sem incluir "
+                f"playlists pública que tem no canal/perfil via comando {self.prefix_info}play (sem incluir "
                 "nome/link) ou no comando /play (via preenchimento automático da busca). Experimente usando o "
                 f"comando /fav_manager ou {self.prefix_info}favmanager."
             )
