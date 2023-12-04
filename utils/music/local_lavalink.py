@@ -21,6 +21,11 @@ def download_file(url, filename):
     previows_progress = 0
     start_time = time.time()
 
+    if total_size >= 1024 * 1024:
+        total_txt = f"{total_size / (1024 * 1024):.2f} MB"
+    else:
+        total_txt = f"{total_size / 1024:.2f} KB"
+
     with open(filename, 'wb') as f:
 
         for data in r.iter_content(chunk_size=2500*1024):
@@ -37,7 +42,7 @@ def download_file(url, filename):
                     speed_txt = "MB/s"
                 else:
                     speed_txt = "KB/s"
-                print(f"Download do arquivo {filename} {current_progress}% concluído ({download_speed:.2f} {speed_txt})")
+                print(f"Download do arquivo {filename} {current_progress}% concluído ({download_speed:.2f} {speed_txt} / {total_txt})")
 
     r.close()
 
