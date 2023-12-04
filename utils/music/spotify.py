@@ -153,6 +153,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
             duration=t["duration_ms"],
             source_name="spotify",
             original_id=t["id"],
+            playlist=playlist,
             requester=requester
         )
 
