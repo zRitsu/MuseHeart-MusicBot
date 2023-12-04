@@ -1131,26 +1131,70 @@ class LavalinkPlayer(wavelink.Player):
 
             for track_data in tracks_search:
 
-                if track_data.info["sourceName"] == "youtube":
-                    query = f"https://music.youtube.com/watch?v={track_data.ytid}&list=RD{track_data.ytid}"
-                else:
-                    query = f"ytmsearch:{track_data.author}"
+                if track_data.info["sourceName"] == "spotify" and self.bot.spotify:
+                    track_ids = [t.original_id for t in tracks_search if t.info["sourceName"] == "spotify"]
+                    result = await self.bot.loop.run_in_executor(None, lambda: self.bot.spotify.recommendations(seed_tracks=track_ids))
 
-                try:
-                    tracks = await self.node.get_tracks(query)
-                except Exception as e:
-                    if "Could not find tracks from mix" in str(e):
+                    tracks = []
+
+                    for t in result["tracks"]:
+
                         try:
-                            tracks_ytsearch = await self.node.get_tracks(f"ytsearch:\"{track_data.author}\"")
-                            track = track_data
-                        except Exception as e:
-                            exception = e
-                            continue
+                            thumb = t["album"]["images"][0]["url"]
+                        except (IndexError,KeyError):
+                            thumb = ""
+
+                        partial_track = PartialTrack(
+                                uri=t["external_urls"]["spotify"],
+                                author=t["artists"][0]["name"] or "Unknown Artist",
+                                title=t["name"],
+                                thumb=thumb,
+                                duration=t["duration_ms"],
+                                source_name="spotify",
+                                original_id=t["id"],
+                                requester=self.bot.user.id,
+                                autoplay=True,
+                            )
+
+                        partial_track.info["extra"]["authors"] = [fix_characters(i['name']) for i in t['artists'] if
+                                                      f"feat. {i['name'].lower()}"
+                                                      not in t['name'].lower()]
+
+                        partial_track.info["extra"]["authors_md"] = ", ".join(
+                            f"[`{a['name']}`]({a['external_urls']['spotify']})" for a in t["artists"])
+
+                        try:
+                            if t["album"]["name"] != t["name"]:
+                                partial_track.info["extra"]["album"] = {
+                                    "name": t["album"]["name"],
+                                    "url": t["album"]["external_urls"]["spotify"]
+                                }
+                        except (AttributeError, KeyError):
+                            pass
+
+                        tracks.append(partial_track)
+
+                else:
+                    if track_data.info["sourceName"] == "youtube":
+                        query = f"https://music.youtube.com/watch?v={track_data.ytid}&list=RD{track_data.ytid}"
                     else:
-                        print(traceback.format_exc())
-                        exception = e
-                        await asyncio.sleep(1.5)
-                        continue
+                        query = f"ytmsearch:{track_data.author}"
+
+                    try:
+                        tracks = await self.node.get_tracks(query)
+                    except Exception as e:
+                        if "Could not find tracks from mix" in str(e):
+                            try:
+                                tracks_ytsearch = await self.node.get_tracks(f"ytsearch:\"{track_data.author}\"")
+                                track = track_data
+                            except Exception as e:
+                                exception = e
+                                continue
+                        else:
+                            print(traceback.format_exc())
+                            exception = e
+                            await asyncio.sleep(1.5)
+                            continue
 
                 track = track_data
                 break
@@ -1210,9 +1254,11 @@ class LavalinkPlayer(wavelink.Player):
                 if t.duration < 90000:
                     continue
 
-                lavalink_track = LavalinkTrack(id_=t.id, info=t.info, autoplay=True, requester=self.bot.user.id)
-                lavalink_track.info["extra"]["related"] = info
-                tracks_final.append(lavalink_track)
+                if not isinstance(t, PartialTrack):
+                    t = LavalinkTrack(id_=t.id, info=t.info, autoplay=True, requester=self.bot.user.id)
+
+                t.info["extra"]["related"] = info
+                tracks_final.append(t)
 
             tracks.clear()
             self.queue_autoplay.extend(tracks_final)
