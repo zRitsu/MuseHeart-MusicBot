@@ -1132,7 +1132,7 @@ class LavalinkPlayer(wavelink.Player):
             for track_data in tracks_search:
 
                 if track_data.info["sourceName"] == "spotify" and self.bot.spotify:
-                    track_ids = [t.original_id for t in tracks_search if t.info["sourceName"] == "spotify"]
+                    track_ids = list(set(t.original_id for t in tracks_search if t.info["sourceName"] == "spotify"))[:5]
                     result = await self.bot.loop.run_in_executor(None, lambda: self.bot.spotify.recommendations(seed_tracks=track_ids))
 
                     tracks = []
