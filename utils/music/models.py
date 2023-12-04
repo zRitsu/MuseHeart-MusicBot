@@ -1091,6 +1091,7 @@ class LavalinkPlayer(wavelink.Player):
 
         track = None
         tracks = []
+        tracks_ytsearch = []
 
         exception = None
 
@@ -1101,26 +1102,30 @@ class LavalinkPlayer(wavelink.Player):
             for track_data in tracks_search:
 
                 if track_data.info["sourceName"] == "youtube":
-                    query = f'https://music.youtube.com/watch?v={track_data.ytid}&list=RD{track_data.ytid}'
+                    query = f"https://music.youtube.com/watch?v={track_data.ytid}&list=RD{track_data.ytid}"
                 else:
                     query = f"ytmsearch:{track_data.author}"
 
                 try:
                     tracks = await self.node.get_tracks(query)
-
-                    try:
-                        tracks = tracks.tracks
-                    except AttributeError:
-                        pass
-
-                    tracks = [t for t in tracks if not [u for u in tracks_search if t.uri.startswith(u.uri)]]
-                    track = track_data
-                    break
                 except Exception as e:
-                    traceback.print_exc()
-                    exception = e
+                    if "Could not find tracks from mix" in str(e):
+                        try:
+                            tracks_ytsearch = await self.node.get_tracks(f"ytsearch:\"{track_data.author}\"")
+                        except Exception as e:
+                            exception = e
+                            continue
+                    else:
+                        print(traceback.format_exc())
+                        exception = e
+                        await asyncio.sleep(1.5)
+                        continue
 
-                await asyncio.sleep(1.5)
+                track = track_data
+                break
+
+            if not tracks:
+                tracks = tracks_ytsearch
 
             if not tracks:
                 self.locked = False
@@ -1147,6 +1152,16 @@ class LavalinkPlayer(wavelink.Player):
                 await asyncio.sleep(7)
                 return
 
+        try:
+            tracks = tracks.tracks
+        except AttributeError:
+            pass
+
+        try:
+            tracks = [t for t in tracks if not [u for u in tracks_search if t.uri.startswith(u.uri)]]
+        except:
+            pass
+
         if track:
 
             info = {
@@ -1170,6 +1185,8 @@ class LavalinkPlayer(wavelink.Player):
 
             tracks.clear()
             self.queue_autoplay.extend(tracks_final)
+
+        self.locked = False
 
         try:
             return self.queue_autoplay.popleft()
