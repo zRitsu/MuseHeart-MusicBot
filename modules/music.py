@@ -1143,7 +1143,7 @@ class Music(commands.Cog):
 
                     result = await self.bot.loop.run_in_executor(None, lambda: self.bot.spotify.user_playlists(user_id))
 
-                    info = {"entries": [{"title": t.name, "url": t.external_urls["spotify"]} for t in result]}
+                    info = {"entries": [{"title": t["name"], "url": t["external_urls"]["spotify"]} for t in result["items"]]}
 
                 elif not self.bot.config["USE_YTDL"]:
                     raise GenericError("**Não há suporte a esse tipo de requisição no momento...**")

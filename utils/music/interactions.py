@@ -863,7 +863,7 @@ class FavModalAdd(disnake.ui.Modal):
                     pass
 
                 try:
-                    result = await self.view.bot.spotify.get_user(user_id)
+                    result = await self.view.bot.loop.run_in_executor(None, lambda: self.view.bot.spotify.user(user_id))
                 except Exception as e:
                     await inter.send(
                         embed=disnake.Embed(
@@ -884,7 +884,7 @@ class FavModalAdd(disnake.ui.Modal):
                     )
                     return
 
-                data = {"title": f"[SP]: {result.name[:90]}", "url": url}
+                data = {"title": f"[SP]: {result['display_name'][:90]}", "url": result["external_urls"]["spotify"]}
 
             else:
 
