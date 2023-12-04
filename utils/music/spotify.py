@@ -4,8 +4,8 @@ from __future__ import annotations
 import re
 from typing import Optional, TYPE_CHECKING
 
-import asyncspotify
-from asyncspotify import Client, ClientCredentialsFlow
+import spotipy
+from spotipy import SpotifyClientCredentials
 
 from utils.music.converters import fix_characters
 from utils.music.errors import MissingSpotifyClient, GenericError
@@ -38,28 +38,30 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
     url_type, url_id = matches.groups()
 
     if url_type == "track":
-        result = await bot.spotify.get_track(url_id)
+
+        result = await bot.loop.run_in_executor(None, lambda: bot.spotify.track(url_id))
 
         t = PartialTrack(
-            uri=result.link,
-            author=result.artists[0].name,
-            title=result.name,
-            thumb=result.album.images[1].url,
-            duration=result.duration.total_seconds() * 1000,
+            uri=result["external_urls"]["spotify"],
+            author=result["artists"][0]["name"] or "Unknown Artist",
+            title=result["name"],
+            thumb=result["album"]["images"][0]["url"],
+            duration=result["duration_ms"],
             source_name="spotify",
+            original_id=result["id"],
             requester=requester
         )
 
-        t.info["extra"]["authors"] = [fix_characters(i.name) for i in result.artists if f"feat. {i.name.lower()}"
-                                      not in result.name.lower()]
+        t.info["extra"]["authors"] = [fix_characters(i['name']) for i in result['artists'] if f"feat. {i['name'].lower()}"
+                                      not in result['name'].lower()]
 
-        t.info["extra"]["authors_md"] = ", ".join(f"[`{a.name}`]({a.link})" for a in result.artists)
+        t.info["extra"]["authors_md"] = ", ".join(f"[`{a['name']}`]({a['external_urls']['spotify']})" for a in result["artists"])
 
         try:
-            if result.album.name != result.name:
+            if result["album"]["name"] != result["name"]:
                 t.info["extra"]["album"] = {
-                    "name": result.album.name,
-                    "url": result.album.external_urls["spotify"]
+                    "name": result["album"]["name"],
+                    "url": result["album"]["external_urls"]["spotify"]
                 }
         except (AttributeError, KeyError):
             pass
@@ -70,53 +72,61 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
         'loadType': 'PLAYLIST_LOADED',
         'playlistInfo': {'name': ''},
         'sourceName': "spotify",
-        'tracks_data': []
+        'tracks_data': [],
+        'is_album': False,
+        "thumb": ""
     }
 
     if url_type == "album":
 
-        result = await bot.spotify.get_album(url_id)
+        result = await bot.loop.run_in_executor(None, lambda: bot.spotify.album(url_id))
 
-        if len(result.tracks) < 2:
+        try:
+            thumb = result["tracks"][0]["album"]["images"][0]["url"]
+        except:
+            thumb = ""
 
-            track = result.tracks[0]
+        if len(result["tracks"]) < 2:
 
-            try:
-                thumb = result.images[1].url
-            except IndexError:
-                thumb = ""
+            track = result["tracks"][0]
 
             return [PartialTrack(
-                uri=track.link,
-                author=track.artists[0].name or "Unknown Artist",
-                title=track.name,
+                uri=track["external_urls"]["spotify"],
+                author=track["artists"][0]["name"] or "Unknown Artist",
+                title=track["name"],
                 thumb=thumb,
-                duration=track.duration.total_seconds() * 1000,
+                duration=track["duration_ms"],
+                source_name="spotify",
+                original_id=track["id"],
                 requester=requester
             )]
 
-        data["playlistInfo"]["name"] = result.name
+        data["playlistInfo"]["name"] = result["name"]
+        data["playlistInfo"]["is_album"] = True
 
-        for t in result.tracks:
-            t.album = result
+        for t in result["tracks"]["items"]:
+            t["album"] = result
 
-        tracks_data = result.tracks
+        tracks_data = result["tracks"]["items"]
 
     elif url_type == "artist":
 
-        result = await bot.spotify.get_artist_top_tracks(url_id)
+        result = await bot.loop.run_in_executor(None, lambda: bot.spotify.artist_top_tracks(url_id))
 
         data["playlistInfo"]["name"] = "As mais tocadas de: " + \
-                                       [a.name for a in result[0].artists if a.id == url_id][0]
-        tracks_data = result
+                                       [a["name"] for a in result["tracks"][0]["artists"] if a["id"] == url_id][0]
+        tracks_data = result["tracks"]
 
     elif url_type == "playlist":
+
         try:
-            result = await bot.spotify.get_playlist(url_id)
-        except asyncspotify.NotFound:
-            raise GenericError("**Playlist não encontrada (ou está disponível apenas em contas logadas na plataforma).**")
-        data["playlistInfo"]["name"] = result.name
-        tracks_data = result.tracks
+            result = await bot.loop.run_in_executor(None, lambda: bot.spotify.playlist(url_id))
+        except spotipy.SpotifyException as e:
+            raise GenericError("**Ocorreu um erro ao processar a playlist:** ```py"
+                               f"{repr(e)}```")
+        data["playlistInfo"]["name"] = result["name"]
+        data["playlistInfo"]["thumb"] = result["images"][0]["url"]
+        tracks_data = [t["track"] for t in result["tracks"]["items"]]
 
     else:
         raise GenericError(f"**Link do spotify não reconhecido/suportado:**\n{query}")
@@ -131,19 +141,19 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
     for t in tracks_data:
 
         try:
-            thumb = t.album.images[1].url
-        except IndexError:
+            thumb = t["album"]["images"][0]["url"]
+        except (IndexError, KeyError):
             thumb = ""
 
         track = PartialTrack(
-            uri=t.link,
-            author=t.artists[0].name or "Unknown Artist",
-            title=t.name,
+            uri=t["external_urls"]["spotify"],
+            author=t["artists"][0]["name"] or "Unknown Artist",
+            title=t["name"],
             thumb=thumb,
-            duration=t.duration.total_seconds() * 1000,
+            duration=t["duration_ms"],
             source_name="spotify",
-            requester=requester,
-            playlist=playlist
+            original_id=t["id"],
+            requester=requester
         )
 
         try:
@@ -154,9 +164,9 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
         except (AttributeError, KeyError):
             pass
 
-        if t.artists[0].name:
-            track.info["extra"]["authors"] = [fix_characters(i.name) for i in t.artists if f"feat. {i.name.lower()}" not in t.name.lower()]
-            track.info["extra"]["authors_md"] = ", ".join(f"[`{a.name}`]({a.link})" for a in t.artists)
+        if t["artists"][0]["name"]:
+            track.info["extra"]["authors"] = [fix_characters(i['name']) for i in t['artists'] if f"feat. {i['name'].lower()}" not in t['name'].lower()]
+            track.info["extra"]["authors_md"] = ", ".join(f"[`{fix_characters(a['name'])}`]({a['external_urls']['spotify']})" for a in t['artists'])
         else:
             track.info["extra"]["authors"] = ["Unknown Artist"]
             track.info["extra"]["authors_md"] = "`Unknown Artist`"
@@ -166,7 +176,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
     return playlist
 
 
-def spotify_client(config: dict) -> Optional[Client]:
+def spotify_client(config: dict) -> Optional[spotipy.Spotify]:
     if not config['SPOTIFY_CLIENT_ID']:
         print(
             f"[IGNORADO] - Spotify Support: SPOTIFY_CLIENT_ID não foi configurado na ENV da host (ou no arquivo .env)."
@@ -180,10 +190,10 @@ def spotify_client(config: dict) -> Optional[Client]:
         return
 
     try:
-        return Client(
-            ClientCredentialsFlow(
+        return spotipy.Spotify(
+            auth_manager=SpotifyClientCredentials(
                 client_id=config['SPOTIFY_CLIENT_ID'],
-                client_secret=config["SPOTIFY_CLIENT_SECRET"]
+                client_secret=config['SPOTIFY_CLIENT_SECRET']
             )
         )
 

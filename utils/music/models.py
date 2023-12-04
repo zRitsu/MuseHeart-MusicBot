@@ -59,13 +59,24 @@ class PartialPlaylist:
         except KeyError:
             return
 
+    @property
+    def thumb(self):
+        try:
+            return self.data["playlistInfo"]["thumb"]
+        except KeyError:
+            pass
+        try:
+            return self.tracks[0].thumb
+        except:
+            return ""
+
 
 class PartialTrack:
     __slots__ = ('id', 'thumb', 'source_name', 'info', 'playlist', 'unique_id', 'ytid')
 
     def __init__(self, *, uri: str = "", title: str = "", author="", thumb: str = "", duration: int = 0,
                  requester: int = 0, track_loops: int = 0, source_name: str = "", autoplay: bool = False,
-                 info: dict = None, playlist: PartialPlaylist = None):
+                 original_id: str = "", info: dict = None, playlist: PartialPlaylist = None):
 
         self.info = info or {
             "author": fix_characters(author)[:97],
@@ -76,6 +87,7 @@ class PartialTrack:
             "isSeekable": True,
             "sourceName": source_name,
             "extra": {
+                "original_id": original_id,
                 "requester": requester,
                 "track_loops": track_loops,
                 "thumb": thumb,
@@ -103,6 +115,13 @@ class PartialTrack:
     @property
     def title(self) -> str:
         return f"{self.author} - {self.single_title}"
+
+    @property
+    def original_id(self) -> str:
+        try:
+            return self.info["extra"]["original_id"]
+        except KeyError:
+            return ""
 
     @property
     def single_title(self) -> str:
@@ -202,6 +221,17 @@ class LavalinkPlaylist:
     @property
     def name(self):
         return self.data["playlistInfo"]["name"]
+
+    @property
+    def thumb(self):
+        try:
+            return self.data["playlistInfo"]["thumb"]
+        except KeyError:
+            pass
+        try:
+            return self.tracks[0].thumb
+        except:
+            return ""
 
 
 class LavalinkTrack(wavelink.Track):
@@ -328,7 +358,7 @@ class LavalinkPlayer(wavelink.Player):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.version = 1.0
+        self.version = 1.1
         self.volume = kwargs.get("volume", 100)
         self.guild: disnake.Guild = kwargs.pop('guild')
         self.text_channel: Union[disnake.TextChannel,

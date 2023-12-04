@@ -1714,7 +1714,7 @@ class Music(commands.Cog):
                     name="⠂ Spotify Playlist",
                     icon_url=music_source_image(tracks.tracks[0].info['sourceName'])
                 )
-            embed.set_thumbnail(url=tracks.tracks[0].thumb)
+            embed.set_thumbnail(url=tracks.thumb)
             embed.description = f"`{len(tracks.tracks)} música(s)`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
             emoji = "🎶"
 

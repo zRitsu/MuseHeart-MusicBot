@@ -16,7 +16,7 @@ from typing import Optional, Union, List
 import aiohttp
 import disnake
 import requests
-from asyncspotify import Client as SpotifyClient
+import spotipy
 from disnake.ext import commands
 from dotenv import dotenv_values
 from user_agent import generate_user_agent
@@ -45,7 +45,7 @@ class BotPool:
         self.mongo_database: Optional[MongoDatabase] = None
         self.local_database: Optional[LocalDatabase] = None
         self.ws_client: Optional[WSClient] = None
-        self.spotify: Optional[SpotifyClient] = None
+        self.spotify: Optional[spotipy.Spotify] = None
         self.lavalink_instance: Optional[subprocess.Popen] = None
         self.config = {}
         self.commit = ""
@@ -167,13 +167,6 @@ class BotPool:
                 self.playlist_cache = json.load(file)
         except FileNotFoundError:
             return
-
-    async def connect_spotify(self):
-
-        if not self.spotify:
-            return
-
-        await self.spotify.authorize()
 
     async def connect_rpc_ws(self):
 
@@ -305,7 +298,7 @@ class BotPool:
 
         self.ws_client = WSClient(self.config["RPC_SERVER"], pool=self)
 
-        self.spotify = spotify_client(self.config)
+        self.spotify: Optional[spotipy.Spotify] = spotify_client(self.config)
 
         all_tokens = {}
 
@@ -577,7 +570,6 @@ class BotPool:
                     loop.create_task(self.start_bot(bot))
 
                 loop.create_task(self.connect_rpc_ws())
-                loop.create_task(self.connect_spotify())
 
             try:
                 start(self, message=message)
@@ -590,7 +582,6 @@ class BotPool:
         else:
 
             loop.create_task(self.connect_rpc_ws())
-            loop.create_task(self.connect_spotify())
             try:
                 loop.run_until_complete(
                     self.run_bots(self.bots)
@@ -605,7 +596,7 @@ class BotCore(commands.AutoShardedBot):
         self.session: Optional[aiohttp.ClientError] = None
         self.pool: BotPool = kwargs.pop('pool')
         self.default_prefix = kwargs.pop("default_prefix", "!!")
-        self.spotify: Optional[SpotifyClient] = self.pool.spotify
+        self.spotify: Optional[spotipy.Spotify] = self.pool.spotify
         self.session = aiohttp.ClientSession()
         self.color = kwargs.pop("embed_color", None)
         self.identifier = kwargs.pop("identifier", "")
