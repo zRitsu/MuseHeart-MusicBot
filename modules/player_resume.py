@@ -480,28 +480,37 @@ class PlayerSession(commands.Cog):
 
     async def get_player_sessions(self):
 
-        if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
-            return [pickle.loads(b64decode(d["data"])) for d in await self.bot.pool.mongo_database.query_data(db_name=str(self.bot.user.id), collection="player_sessions")]
-
-        try:
-            files = os.listdir(f"./local_database/player_sessions/{self.bot.user.id}")
-        except FileNotFoundError:
-            return []
-
         guild_data = []
 
-        for file in files:
+        if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
 
-            if not file.endswith(".pkl"):
-                continue
+            for d in (await self.bot.pool.mongo_database.query_data(db_name=str(self.bot.user.id), collection="player_sessions")):
 
-            guild_id = file[:-4]
+                try:
+                    data = d["data"]
+                except KeyError:
+                    await self.delete_data(int(d["_id"]))
+                    continue
+                guild_data.append(pickle.loads(b64decode(data)))
 
-            async with aiofiles.open(f'./local_database/player_sessions/{self.bot.user.id}/{guild_id}.pkl', 'rb') as f:
-                data = pickle.loads(await f.read())
+        else:
+            try:
+                files = os.listdir(f"./local_database/player_sessions/{self.bot.user.id}")
+            except FileNotFoundError:
+                return guild_data
 
-            if data:
-                guild_data.append(data)
+            for file in files:
+
+                if not file.endswith(".pkl"):
+                    continue
+
+                guild_id = file[:-4]
+
+                async with aiofiles.open(f'./local_database/player_sessions/{self.bot.user.id}/{guild_id}.pkl', 'rb') as f:
+                    data = pickle.loads(await f.read())
+
+                if data:
+                    guild_data.append(data)
 
         return guild_data
 
