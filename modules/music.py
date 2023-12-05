@@ -860,9 +860,11 @@ class Music(commands.Cog):
         if tracks:
 
             if isinstance(tracks, list):
-                tracks = tracks[:count]
+                if not await bot.is_owner(user):
+                    tracks = tracks[:count]
             else:
-                tracks.tracks = tracks.tracks[:count]
+                if not await bot.is_owner(user):
+                    tracks.tracks = tracks.tracks[:count]
 
         return tracks
 
@@ -1027,7 +1029,7 @@ class Music(commands.Cog):
             for k, v in user_data["fav_links"].items():
                 db_favs[f"> fav: {k}"] = v
 
-            if os.path.isfile(f"./local_database/saved_queues/users/{inter.author.id}.pkl"):
+            if os.path.isfile(f"./local_database/saved_queues_v1_v1/users/{inter.author.id}.pkl"):
                 db_favs["> svq: Fila Salva"] = ">> saved_queue <<"
 
             if not db_favs:
@@ -1228,7 +1230,7 @@ class Music(commands.Cog):
         elif query.startswith("> svq: "):
 
             try:
-                async with aiofiles.open(f"./local_database/saved_queues/users/{inter.author.id}.pkl", 'rb') as f:
+                async with aiofiles.open(f"./local_database/saved_queues_v1/users/{inter.author.id}.pkl", 'rb') as f:
                     data = pickle.loads(await f.read())
             except FileNotFoundError:
                 raise GenericError("**A sua fila salva já foi excluída...**")
@@ -1811,7 +1813,7 @@ class Music(commands.Cog):
 
         favs = []
 
-        if os.path.isfile(f"./local_database/saved_queues/users/{inter.author.id}.pkl"):
+        if os.path.isfile(f"./local_database/saved_queues_v1/users/{inter.author.id}.pkl"):
             favs.append("> svq: Fila Salva")
 
         favs.extend(await fav_list(inter, query))
@@ -3104,17 +3106,24 @@ class Music(commands.Cog):
         tracks = []
 
         if player.current:
-            tracks.append(player.current)
+            player.current.info["id"] = player.current.id
+            if player.current.playlist:
+                player.current.info["playlist"] = {"name": player.current.playlist_name, "url": player.current.playlist_url}
+            tracks.append(player.current.info)
 
-        tracks.extend(player.queue)
+        for t in player.queue:
+            t.info["id"] = t.id
+            if t.playlist:
+                t.info["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
+            tracks.append(t.info)
 
         if len(tracks) < 3:
             raise GenericError(f"**É necessário ter no mínimo 3 músicas pra salvar (atual e/ou na fila)**")
 
-        if not os.path.isdir(f"./local_database/saved_queues/users"):
-            os.makedirs(f"./local_database/saved_queues/users")
+        if not os.path.isdir(f"./local_database/saved_queues_v1/users"):
+            os.makedirs(f"./local_database/saved_queues_v1/users")
 
-        async with aiofiles.open(f"./local_database/saved_queues/users/{inter.author.id}.pkl", "wb") as f:
+        async with aiofiles.open(f"./local_database/saved_queues_v1/users/{inter.author.id}.pkl", "wb") as f:
             await f.write(pickle.dumps({
                 "tracks": tracks,
                 "created_at": disnake.utils.utcnow(),

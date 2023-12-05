@@ -59,7 +59,7 @@ class PlayerSession(commands.Cog):
 
     async def save_info(self, player: LavalinkPlayer):
 
-        if not player.guild.me.voice:
+        if not player.guild.me.voice or player.is_closing:
             return
 
         try:
@@ -72,6 +72,55 @@ class PlayerSession(commands.Cog):
         except:
             text_channel_id = None
             message_id = None
+
+        tracks = []
+        played = []
+        autoqueue = []
+        failed_tracks = []
+
+        if player.current:
+            player.current.info["id"] = player.current.id
+            if player.current.playlist_name:
+                player.current.info["playlist"] = {"name": player.current.playlist_name, "url": player.current.playlist_url}
+            tracks.append(player.current.info)
+
+        for t in player.queue:
+            t.info["id"] = t.id
+            if t.playlist:
+                t.info["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
+            tracks.append(t.info)
+
+        for t in player.played:
+            t.info["id"] = t.id
+            if t.playlist:
+                t.info["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
+            played.append(t.info)
+
+        for t in player.queue_autoplay:
+            t.info["id"] = t.id
+            autoqueue.append(t.info)
+
+        for t in player.failed_tracks:
+            t.info["id"] = t.id
+            if t.playlist:
+                t.info["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
+            failed_tracks.append(t.info)
+
+        if player.skin.startswith("> custom_skin: "):
+
+            custom_skin = player.skin[15:]
+
+            if player.static:
+                custom_skin_data = {}
+                custom_skin_static_data = {custom_skin: player.custom_skin_static_data[custom_skin]}
+
+            else:
+                custom_skin_data = {custom_skin: player.custom_skin_data[custom_skin]}
+                custom_skin_static_data = {}
+
+        else:
+            custom_skin_data = {}
+            custom_skin_static_data = {}
 
         data = {
             "_id": player.guild.id,
@@ -93,17 +142,16 @@ class PlayerSession(commands.Cog):
             "stage_title_template": player.stage_title_template,
             "skin": player.skin,
             "skin_static": player.skin_static,
-            "custom_skin_data": player.custom_skin_data,
-            "custom_skin_static_data": player.custom_skin_static_data,
+            "custom_skin_data": custom_skin_data,
+            "custom_skin_static_data": custom_skin_static_data,
             "uptime": player.uptime,
             "restrict_mode": player.restrict_mode,
             "mini_queue_enabled": player.mini_queue_enabled,
             "listen_along_invite": player.listen_along_invite,
-            "current": player.current,
-            "queue": player.queue,
-            "played": player.played,
-            "queue_autoplay": player.queue_autoplay,
-            "failed_tracks": player.failed_tracks,
+            "queue": tracks,
+            "played": played,
+            "queue_autoplay": autoqueue,
+            "failed_tracks": failed_tracks,
             "prefix_info": player.prefix_info,
             "purge_mode": player.purge_mode,
         }
@@ -120,53 +168,53 @@ class PlayerSession(commands.Cog):
 
         tracks = []
 
-        for track in data:
+        for info in data:
 
-            if track.info["sourceName"] == "spotify":
+            if info["sourceName"] == "spotify":
 
-                if playlist:=track.playlist:
+                if playlist := info.pop("playlist", None):
 
                     try:
-                        playlist = playlists[track.playlist_url]
+                        playlist = playlists[playlist["url"]]
                     except KeyError:
                         playlist_cls = PartialPlaylist(
                             {
                                 'loadType': 'PLAYLIST_LOADED',
                                 'playlistInfo': {
-                                    'name': track.playlist_name,
+                                    'name': playlist["name"],
                                     'selectedTrack': -1
                                 },
                                 'tracks': []
-                            }, url=track.playlist_url
+                            }, url=playlist["url"]
                         )
-                        playlists[track.playlist_url] = playlist_cls
+                        playlists[playlist["url"]] = playlist_cls
                         playlist = playlist_cls
 
-                t = PartialTrack(info=track.info, playlist=playlist)
-                t.id = ""
+                t = PartialTrack(info=info, playlist=playlist)
 
             else:
 
-                if playlist := track.playlist:
+                if playlist := info.pop("playlist", None):
 
                     try:
-                        playlist = playlists[track.playlist_url]
+                        playlist = playlists[playlist["url"]]
                     except KeyError:
                         playlist_cls = LavalinkPlaylist(
                             {
                                 'loadType': 'PLAYLIST_LOADED',
                                 'playlistInfo': {
-                                    'name': track.playlist_name,
+                                    'name': playlist["name"],
                                     'selectedTrack': -1
                                 },
                                 'tracks': []
-                            }, url=track.playlist_url
+                            }, url=playlist["url"]
                         )
-                        playlists[track.playlist_url] = playlist_cls
+                        playlists[playlist["url"]] = playlist_cls
                         playlist = playlist_cls
 
-                t = LavalinkTrack(id_=track.id, info=track.info, playlist=playlist)
+                t = LavalinkTrack(id_=info["id"], info=info, playlist=playlist)
 
+            del t.info["id"]
             tracks.append(t)
 
         return tracks, playlists
@@ -340,38 +388,30 @@ class PlayerSession(commands.Cog):
                 if player.nightcore:
                     await player.set_timescale(pitch=1.2, speed=1.1)
 
-                if data["current"]:
-                    data["queue"].insert(0, data["current"])
+                if player.nightcore:
+                    await player.set_timescale(pitch=1.2, speed=1.1)
 
-                if data.get("version", 1) < getattr(player, "version", 1):
+                tracks, playlists = self.process_track_cls(data["queue"])
 
-                    tracks, playlists = self.process_track_cls(data["queue"])
+                player.queue.extend(tracks)
 
-                    player.queue.extend(tracks)
+                played_tracks, playlists = self.process_track_cls(data["played"], playlists)
 
-                    played_tracks, playlists = self.process_track_cls(data["played"], playlists)
+                player.played.extend(played_tracks)
 
-                    player.played.extend(played_tracks)
+                queue_autoplay_tracks, playlists = self.process_track_cls(data.get("queue_autoplay", []))
 
-                    queue_autoplay_tracks, playlists = self.process_track_cls(data.get("queue_autoplay", []))
+                player.queue_autoplay.extend(queue_autoplay_tracks)
 
-                    player.queue_autoplay.extend(queue_autoplay_tracks)
+                failed_tracks, playlists = self.process_track_cls(data.get("failed_tracks", []), playlists)
 
-                    failed_tracks, playlists = self.process_track_cls(data.get("failed_tracks", []), playlists)
+                player.queue.extend(failed_tracks)
 
-                    player.queue.extend(failed_tracks)
-
-                    playlists.clear()
-                    tracks.clear()
-                    played_tracks.clear()
-                    queue_autoplay_tracks.clear()
-                    failed_tracks.clear()
-
-                else:
-                    player.queue.extend(data["queue"])
-                    player.played.extend(data["played"])
-                    player.queue_autoplay.extend(data["queue_autoplay"])
-                    player.failed_tracks.extend(data["failed_tracks"])
+                playlists.clear()
+                tracks.clear()
+                played_tracks.clear()
+                queue_autoplay_tracks.clear()
+                failed_tracks.clear()
 
                 await player.connect(voice_channel.id)
 
@@ -441,10 +481,10 @@ class PlayerSession(commands.Cog):
     async def get_player_sessions(self):
 
         if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
-            return [pickle.loads(b64decode(d["data"])) for d in await self.bot.pool.mongo_database.query_data(db_name=str(self.bot.user.id), collection="player_sessions_bin")]
+            return [pickle.loads(b64decode(d["data"])) for d in await self.bot.pool.mongo_database.query_data(db_name=str(self.bot.user.id), collection="player_sessions")]
 
         try:
-            files = os.listdir(f"./local_database/player_sessions_bin/{self.bot.user.id}")
+            files = os.listdir(f"./local_database/player_sessions/{self.bot.user.id}")
         except FileNotFoundError:
             return []
 
@@ -457,7 +497,7 @@ class PlayerSession(commands.Cog):
 
             guild_id = file[:-4]
 
-            async with aiofiles.open(f'./local_database/player_sessions_bin/{self.bot.user.id}/{guild_id}.pkl', 'rb') as f:
+            async with aiofiles.open(f'./local_database/player_sessions/{self.bot.user.id}/{guild_id}.pkl', 'rb') as f:
                 data = pickle.loads(await f.read())
 
             if data:
@@ -480,15 +520,15 @@ class PlayerSession(commands.Cog):
             await self.bot.pool.mongo_database.update_data(
                 id_=str(player.guild.id),
                 data={"data": b64encode(pickle.dumps(data)).decode('utf-8')},
-                collection="player_sessions_bin",
+                collection="player_sessions",
                 db_name=str(self.bot.user.id)
             )
             return
 
-        if not os.path.isdir(f"./local_database/player_sessions_bin/{self.bot.user.id}"):
-            os.makedirs(f"./local_database/player_sessions_bin/{self.bot.user.id}")
+        if not os.path.isdir(f"./local_database/player_sessions/{self.bot.user.id}"):
+            os.makedirs(f"./local_database/player_sessions/{self.bot.user.id}")
 
-        path = f'./local_database/player_sessions_bin/{self.bot.user.id}/{player.guild.id}'
+        path = f'./local_database/player_sessions/{self.bot.user.id}/{player.guild.id}'
 
         try:
             async with aiofiles.open(f"{path}.pkl", "wb") as f:
@@ -523,12 +563,12 @@ class PlayerSession(commands.Cog):
             guild_id = player.guild.id
 
         if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
-            await self.bot.pool.mongo_database.delete_data(id_=str(guild_id), db_name=str(self.bot.user.id), collection="player_sessions_bin")
+            await self.bot.pool.mongo_database.delete_data(id_=str(guild_id), db_name=str(self.bot.user.id), collection="player_sessions")
             return
 
         for ext in ('.pkl', '.bak'):
             try:
-                os.remove(f'./local_database/player_sessions_bin/{self.bot.user.id}/{guild_id}{ext}')
+                os.remove(f'./local_database/player_sessions/{self.bot.user.id}/{guild_id}{ext}')
             except FileNotFoundError:
                 continue
             except Exception:
