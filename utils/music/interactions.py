@@ -1012,11 +1012,15 @@ class FavMenuView(disnake.ui.View):
         mode_select = disnake.ui.Select(
             options=[
                 disnake.SelectOption(label="Gerenciador de Favoritos", value="fav_view_mode_0", emoji="⭐",
-                                     default=self.mode == ViewMode.fav_manager),
-                disnake.SelectOption(label="Gerenciador de Integrações", value="fav_view_mode_2", emoji="💠",
-                                     default=self.mode == ViewMode.integrations_manager)
+                                     default=self.mode == ViewMode.fav_manager)
             ], min_values=1, max_values=1
         )
+
+        if self.bot.config["USE_YTDL"] or self.bot.spotify:
+            mode_select.append_option(
+                disnake.SelectOption(label="Gerenciador de Integrações", value="fav_view_mode_2", emoji="💠",
+                                     default=self.mode == ViewMode.integrations_manager)
+            )
 
         if self.ctx.author.guild_permissions.manage_guild:
             mode_select.options.insert(1, disnake.SelectOption(label="Gerenciador de Playlists do Servidor",
