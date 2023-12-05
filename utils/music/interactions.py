@@ -1027,6 +1027,9 @@ class FavMenuView(disnake.ui.View):
                                                                value="fav_view_mode_1", emoji="📌",
                                                                default=self.mode == ViewMode.guild_fav_manager))
 
+        if len(mode_select.options) < 2:
+            mode_select.disabled = True
+
         mode_select.callback = self.mode_callback
         self.add_item(mode_select)
 
