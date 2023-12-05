@@ -140,6 +140,9 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
 
     for t in tracks_data:
 
+        if not t:
+            continue
+
         try:
             thumb = t["album"]["images"][0]["url"]
         except (IndexError, KeyError):
