@@ -525,37 +525,40 @@ class PlayerSession(commands.Cog):
                 pass
             return
 
-        if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
-            await self.bot.pool.mongo_database.update_data(
-                id_=str(player.guild.id),
-                data={"data": b64encode(pickle.dumps(data)).decode('utf-8')},
-                collection="player_sessions",
-                db_name=str(self.bot.user.id)
-            )
-            return
-
-        if not os.path.isdir(f"./local_database/player_sessions/{self.bot.user.id}"):
-            os.makedirs(f"./local_database/player_sessions/{self.bot.user.id}")
-
-        path = f'./local_database/player_sessions/{self.bot.user.id}/{player.guild.id}'
-
         try:
-            async with aiofiles.open(f"{path}.pkl", "wb") as f:
-                await f.write(pickle.dumps(data))
-        except Exception:
-            traceback.print_exc()
+            if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
+                await self.bot.pool.mongo_database.update_data(
+                    id_=str(player.guild.id),
+                    data={"data": b64encode(pickle.dumps(data)).decode('utf-8')},
+                    collection="player_sessions",
+                    db_name=str(self.bot.user.id)
+                )
+                return
+
+            if not os.path.isdir(f"./local_database/player_sessions/{self.bot.user.id}"):
+                os.makedirs(f"./local_database/player_sessions/{self.bot.user.id}")
+
+            path = f'./local_database/player_sessions/{self.bot.user.id}/{player.guild.id}'
+
             try:
-                os.rename(f"{path}.bak", f"{path}.pkl")
-            except:
-                pass
-            return
+                async with aiofiles.open(f"{path}.pkl", "wb") as f:
+                    await f.write(pickle.dumps(data))
+            except Exception:
+                traceback.print_exc()
+                try:
+                    os.rename(f"{path}.bak", f"{path}.pkl")
+                except:
+                    pass
+                return
 
-        try:
-            shutil.copy(f'{path}.pkl', f'{path}.bak')
-        except FileNotFoundError:
-            pass
-        except Exception:
-            traceback.print_exc()
+            try:
+                shutil.copy(f'{path}.pkl', f'{path}.bak')
+            except FileNotFoundError:
+                pass
+            except Exception:
+                traceback.print_exc()
+        except asyncio.CancelledError as e:
+            print(f"❌ - {self.bot.user} - Salvamento cancelado: {repr(e)}")
 
     async def delete_data(self, player: Union[LavalinkPlayer, int]):
 
