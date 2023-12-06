@@ -37,6 +37,13 @@ class BotPool:
 
     bots: List[BotCore] = []
     killing_state = False
+    command_sync_config = commands.CommandSyncFlags(
+                    allow_command_deletion=True,
+                    sync_commands=True,
+                    sync_commands_debug=True,
+                    sync_global_commands=True,
+                    sync_guild_commands=True
+                )
 
     def __init__(self):
         self.playlist_cache = {}
@@ -458,7 +465,7 @@ class BotPool:
                             bot.interaction_id = bot.user.id
                             self.controller_bot = bot
 
-                            self._command_sync_flags = commands.CommandSyncFlags.all()
+                            bot._command_sync_flags = self.command_sync_config
 
                             bot.load_modules()
 
@@ -761,7 +768,7 @@ class BotCore(commands.AutoShardedBot):
                 print(f"{self.user} - Os comandos já estão sincronizados.")
             return
 
-        self._command_sync_flags = commands.CommandSyncFlags.all()
+        self._command_sync_flags = self.pool.command_sync_config
         await self._sync_application_commands()
         self._command_sync_flags = commands.CommandSyncFlags.none()
 
