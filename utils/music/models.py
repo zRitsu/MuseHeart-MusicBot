@@ -1329,6 +1329,13 @@ class LavalinkPlayer(wavelink.Player):
 
         self.locked = True
 
+        if not self.guild.me.voice:
+            if self.last_channel:
+                await self.connect(self.last_channel.id)
+            else:
+                await self.destroy(force=True)
+                return
+
         if isinstance(track, PartialTrack):
 
             if not track.id:
