@@ -46,7 +46,7 @@ class TrackEnd:
     def __init__(self, data: dict):
         self.track = data.get('track')
         self.player = data.get('player')
-        self.reason = data.get('reason')
+        self.reason = data.get('reason', '').upper()
 
     def __str__(self):
         return 'TrackEndEvent'

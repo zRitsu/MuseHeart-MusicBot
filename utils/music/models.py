@@ -210,13 +210,16 @@ class LavalinkPlaylist:
     def __init__(self, data: dict, **kwargs):
         self.data = data
         self.url = kwargs.pop("url")
+
+        encoded_name = kwargs.pop("encoded_name", "track")
+
         try:
             if self.data['tracks'][0]['info'].get("sourceName") == "youtube":
                 self.url = f"https://www.youtube.com/playlist?list={parse.parse_qs(parse.urlparse(self.url).query)['list'][0]}"
         except IndexError:
             pass
         self.tracks = [LavalinkTrack(
-            id_=track['track'], info=track['info'], playlist=self, **kwargs) for track in data['tracks']]
+            id_=track[encoded_name], info=track['info'], playlist=self, **kwargs) for track in data['tracks']]
 
     @property
     def name(self):
@@ -1181,11 +1184,17 @@ class LavalinkPlayer(wavelink.Player):
                         query = f"ytmsearch:{track_data.author}"
 
                     try:
-                        tracks = await self.node.get_tracks(query)
+                        tracks = await self.node.get_tracks(
+                            query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, autoplay=True,
+                            requester=self.bot.user.id
+                        )
                     except Exception as e:
                         if "Could not find tracks from mix" in str(e):
                             try:
-                                tracks_ytsearch = await self.node.get_tracks(f"ytsearch:\"{track_data.author}\"")
+                                tracks_ytsearch = await self.node.get_tracks(
+                                    f"ytsearch:\"{track_data.author}\"",
+                                    track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, autoplay=True,
+                                    requester=self.bot.user.id)
                                 track = track_data
                             except Exception as e:
                                 exception = e
@@ -1284,7 +1293,7 @@ class LavalinkPlayer(wavelink.Player):
             return
 
         if not self.is_connected:
-            self.bot.loop.create_task(self.destroy(force=True))
+            await self.destroy(force=True)
             return
 
         try:
@@ -1382,7 +1391,7 @@ class LavalinkPlayer(wavelink.Player):
             else:
                 query = track.uri
 
-            t = await self.node.get_tracks(query)
+            t = await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
 
             try:
                 t = t.tracks
@@ -1604,7 +1613,7 @@ class LavalinkPlayer(wavelink.Player):
         except:
             traceback.print_exc()
 
-        self.bot.loop.create_task(self.destroy())
+        await self.destroy()
 
     def set_command_log(self, text="", emoji=""):
         self.command_log = text
@@ -2107,23 +2116,6 @@ class LavalinkPlayer(wavelink.Player):
         except:
             traceback.print_exc()
 
-        try:
-            self.idle_task.cancel()
-        except:
-            pass
-        self.idle_task = None
-
-        try:
-            self._new_node_task.cancel()
-        except:
-            pass
-        self._new_node_task = None
-
-        try:
-            self.message_updater_task.cancel()
-        except:
-            pass
-
         if self.guild.me:
 
             try:
@@ -2136,6 +2128,7 @@ class LavalinkPlayer(wavelink.Player):
                 try:
                     await send_idle_embed(inter or self.message, self.command_log, bot=self.bot)
                 except:
+                    traceback.print_exc()
                     pass
 
                 if self.purge_mode == SongRequestPurgeMode.on_player_stop:
@@ -2143,65 +2136,86 @@ class LavalinkPlayer(wavelink.Player):
 
             else:
 
-                if self.has_thread:
+                try:
+                    if self.has_thread:
 
-                    try:
-                        if inter.message.id == self.message.id:
-                            func = inter.response.edit_message
-                        else:
-                            func = self.message.edit
-                    except AttributeError:
                         try:
-                            func = self.message.edit
-                        except AttributeError:
-                            func = None
-
-                    if func:
-                        try:
-                            await func(
-                                embed=disnake.Embed(
-                                    description=self.command_log,
-                                    color=self.bot.get_color(self.guild.me)
-                                ), allowed_mentions=self.allowed_mentions,
-                                components=song_request_buttons
-                            )
-                            channel: disnake.Thread = self.bot.get_channel(self.message.id)
-
-                            if channel.parent.permissions_for(self.guild.me).send_messages_in_threads:
-                                try:
-                                    await channel.send(
-                                        embed=disnake.Embed(
-                                            color=self.bot.get_color(self.guild.me),
-                                            description="**A sessão de pedido de música da conversa atual foi encerrada.**",
-                                        )
-                                    )
-                                except:
-                                    pass
-
-                            if channel.owner.id == self.bot.user.id or channel.parent.permissions_for(
-                                    self.guild.me).manage_threads:
-                                kwargs = {"archived": True, "locked": True}
+                            if inter.message.id == self.message.id:
+                                func = inter.response.edit_message
                             else:
-                                kwargs = {}
+                                func = self.message.edit
+                        except AttributeError:
+                            try:
+                                func = self.message.edit
+                            except AttributeError:
+                                func = None
 
-                            await channel.edit(**kwargs)
-                        except Exception:
-                            print(
-                                f"Falha ao arquivar thread do servidor: {self.guild.name}\n{traceback.format_exc()}")
+                        if func:
+                            try:
+                                await func(
+                                    embed=disnake.Embed(
+                                        description=self.command_log,
+                                        color=self.bot.get_color(self.guild.me)
+                                    ), allowed_mentions=self.allowed_mentions,
+                                    components=song_request_buttons
+                                )
+                                channel: disnake.Thread = self.bot.get_channel(self.message.id)
 
-                elif inter:
+                                if channel.parent.permissions_for(self.guild.me).send_messages_in_threads:
+                                    try:
+                                        await channel.send(
+                                            embed=disnake.Embed(
+                                                color=self.bot.get_color(self.guild.me),
+                                                description="**A sessão de pedido de música da conversa atual foi encerrada.**",
+                                            )
+                                        )
+                                    except:
+                                        pass
 
-                    await inter.response.edit_message(
-                        content=None,
-                        embed=disnake.Embed(
-                            description=f"🛑 ⠂{self.command_log}",
-                            color=self.bot.get_color(self.guild.me)),
-                        components=song_request_buttons
-                    )
+                                if channel.owner.id == self.bot.user.id or channel.parent.permissions_for(
+                                        self.guild.me).manage_threads:
+                                    kwargs = {"archived": True, "locked": True}
+                                else:
+                                    kwargs = {}
 
-                else:
+                                await channel.edit(**kwargs)
+                            except Exception:
+                                print(
+                                    f"Falha ao arquivar thread do servidor: {self.guild.name}\n{traceback.format_exc()}")
 
-                    await self.destroy_message()
+                    elif inter:
+
+                        await inter.response.edit_message(
+                            content=None,
+                            embed=disnake.Embed(
+                                description=f"🛑 ⠂{self.command_log}",
+                                color=self.bot.get_color(self.guild.me)),
+                            components=song_request_buttons
+                        )
+
+                    else:
+
+                        await self.destroy_message()
+                except Exception:
+                    traceback.print_exc()
+
+        try:
+            self.message_updater_task.cancel()
+        except:
+            pass
+        self.message_updater_task = None
+
+        try:
+            self._new_node_task.cancel()
+        except:
+            pass
+        self._new_node_task = None
+
+        try:
+            self.idle_task.cancel()
+        except:
+            pass
+        self.idle_task = None
 
         try:
             self.members_timeout_task.cancel()
@@ -2269,13 +2283,14 @@ class LavalinkPlayer(wavelink.Player):
                 check_duration = True
 
             try:
-                tracks = (await self.node.get_tracks(to_search))
+                tracks = (await self.node.get_tracks(to_search, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist))
             except wavelink.TrackNotFound:
                 tracks = None
 
             if not tracks and self.bot.config['SEARCH_PROVIDER'] not in ("ytsearch", "ytmsearch", "scsearch"):
                 tracks = await self.node.get_tracks(
-                    f"ytsearch:{track.single_title.replace(' - ', ' ')} - {track.authors_string}")
+                    f"ytsearch:{track.single_title.replace(' - ', ' ')} - {track.authors_string}",
+                    track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
 
             try:
                 tracks = tracks.tracks
@@ -2570,10 +2585,16 @@ class LavalinkPlayer(wavelink.Player):
         self.locked = False
 
     async def destroy(self, *, force: bool = False, inter: disnake.MessageInteraction = None):
+        self.bot.loop.create_task(self.process_destroy(force=force, inter=inter))
 
-        await self.cleanup(inter)
+    async def process_destroy(self, force: bool = False, inter: disnake.MessageInteraction = None):
+
+        if self.is_closing:
+            return
 
         self.is_closing = True
+
+        await self.cleanup(inter)
 
         try:
             channel = self.guild.voice_client.channel
@@ -2596,67 +2617,6 @@ class LavalinkPlayer(wavelink.Player):
     #######################
     #### Filter Stuffs ####
     #######################
-
-    async def change_node(self, identifier: str = None, force: bool = False):
-
-        if identifier:
-            node = self.bot.music.get_node(identifier)
-
-            if not node:
-                raise wavelink.WavelinkException(f'No Nodes matching identifier:: {identifier}')
-            elif node == self.node and force is False:
-                raise wavelink.WavelinkException('Node identifiers must not be the same while changing.')
-        else:
-            self.node.close()
-            node = None
-
-            if self.node.region:
-                node = self.bot.music.get_node_by_region(self.node.region)
-
-            if not node and self.node.shard_id:
-                node = self.bot.music.get_node_by_shard(self.node.shard_id)
-
-            if not node:
-                node = self.bot.music.get_best_node()
-
-            if not node:
-                self.node.open()
-                raise wavelink.WavelinkException('No Nodes available for changeover.')
-
-        self.node.open()
-
-        if self.node != node:
-            old = self.node
-            del old.players[self.guild_id]
-            await old._send(op='destroy', guildId=str(self.guild_id))
-
-        self.node = node
-        self.node.players[int(self.guild_id)] = self
-
-        if self._voice_state:
-            await self._dispatch_voice_update()
-
-        if self.current:
-
-            if self.auto_pause:
-                self.last_update = time() * 1000
-
-            else:
-                await self.node._send(op='play', guildId=str(self.guild_id), track=self.current.id, startTime=int(self.position))
-                self.last_update = time() * 1000
-
-                if self.paused:
-                    await self.node._send(op='pause', guildId=str(self.guild_id), pause=self.paused)
-
-        if self.volume != 100:
-            await self.node._send(op='volume', guildId=str(self.guild_id), volume=self.volume)
-
-        await self.node._send(op="filters", **self.filters, guildId=str(self.guild_id))
-
-    async def set_volume(self, vol: int) -> None:
-
-        self.volume = max(min(vol, 1000), 0)
-        await self.node._send(op='volume', guildId=str(self.guild_id), volume=self.volume)
 
     async def seek(self, position: int = 0) -> None:
         self.last_position = position
@@ -2767,7 +2727,10 @@ class LavalinkPlayer(wavelink.Player):
         self._equalizer = equalizer
 
     async def update_filters(self):
-        await self.node._send(op="filters", **self.filters, guildId=str(self.guild_id))
+        if self.node.v3:
+            await self.node._send(op="filters", **self.filters, guildId=str(self.guild_id))
+        else:
+            await self.node.update_player(guild_id=self.guild_id, data={"filters": self.filters})
 
     async def set_filter(self, filter_type: AudioFilter):
 

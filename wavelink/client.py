@@ -105,7 +105,7 @@ class Client:
         if fut.exception():
             self.loop.create_task(cog.on_wavelink_error(listener, fut.exception()))
 
-    async def get_tracks(self, query: str, *, retry_on_failure: bool = True) -> Optional[list]:
+    async def get_tracks(self, query: str, *, retry_on_failure: bool = True, **kwargs) -> Optional[list]:
         """|coro|
 
         Search for and return a list of Tracks for the given query.
@@ -136,7 +136,7 @@ class Client:
         if node is None:
             raise ZeroConnectedNodes
 
-        return await node.get_tracks(query, retry_on_failure=retry_on_failure)
+        return await node.get_tracks(query, retry_on_failure=retry_on_failure, **kwargs)
 
     async def build_track(self, identifier: str):
         """|coro|
@@ -341,7 +341,7 @@ class Client:
 
     async def initiate_node(self, host: str, port: int, *, rest_uri: str, password: str, region: str, identifier: str,
                             shard_id: int = None, secure: bool = False, heartbeat: float = None,
-                            user_agent: str = None, auto_reconnect: bool = True) -> Node:
+                            user_agent: str = None, auto_reconnect: bool = True, v3: bool = True) -> Node:
         """|coro|
 
         Initiate a Node and connect to the provided server.
@@ -395,7 +395,8 @@ class Client:
                     heartbeat=heartbeat,
                     user_agent=user_agent,
                     auto_reconnect=auto_reconnect,
-                    dumps=self._dumps)
+                    dumps=self._dumps,
+                    v3=v3)
 
         await node.connect(bot=self.bot)
 

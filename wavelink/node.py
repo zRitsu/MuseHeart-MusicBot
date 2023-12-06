@@ -75,7 +75,8 @@ class Node:
                  user_agent: str = None,
                  auto_reconnect: bool = True,
                  resume_key: Optional[str] = None,
-                 dumps: Callable[[Dict[str, Any]], Union[str, bytes]] = json.dumps
+                 dumps: Callable[[Dict[str, Any]], Union[str, bytes]] = json.dumps,
+                 v3: bool = False
                  ):
 
         self.host = host
@@ -91,6 +92,8 @@ class Node:
         self.user_agent = user_agent
         self.auto_reconnect = auto_reconnect
         self.resume_key = resume_key or str(os.urandom(8).hex())
+        self.v3 = v3
+        self.session_id: Optional[int] = None
 
         self._dumps = dumps
 
@@ -118,6 +121,7 @@ class Node:
 
     def close(self) -> None:
         """Close the node and make it unavailable."""
+        self.session_id = None
         self.available = False
 
     def open(self) -> None:
@@ -131,6 +135,14 @@ class Node:
             return 9e30
 
         return self.stats.penalty.total
+
+    @property
+    def headers(self) -> dict[str, str]:
+        return {
+            "Authorization": self.password,
+            "User-Id": str(self.uid),
+            "Client-Name": f"Wavelink/custom",
+        }
 
     async def connect(self, bot: Union[commands.Bot, commands.AutoShardedBot]) -> None:
 
@@ -150,6 +162,24 @@ class Node:
         await self._websocket._connect()
 
         __log__.info(f'NODE | {self.identifier} connected:: {self.__repr__()}')
+
+    async def update_player(self, guild_id: int, data: dict, replace: bool = False):
+
+        no_replace: bool = not replace
+
+        uri: str = f"{self.rest_uri}/v4/sessions/{self.session_id}/players/{guild_id}?noReplace={no_replace}"
+
+        async with self.session.patch(url=uri, json=data, headers=self._websocket.headers) as resp:
+
+            try:
+                resp_data = await resp.json()
+            except:
+                resp_data = await resp.text()
+
+            if resp.status == 200:
+                return resp_data
+
+            raise WavelinkException(f"UpdatePlayer Failed: {resp.status}: {resp_data}")
 
     async def get_tracks(self, query: str, *, retry_on_failure: bool = True, **kwargs) -> Union[list, TrackPlaylist, None]:
         """|coro|
@@ -174,14 +204,16 @@ class Node:
         """
         backoff = ExponentialBackoff(base=1)
 
-        mode = "loadtracks?identifier" if not kwargs.get('channels') else "searchchannels?query"
+        if self.v3:
+            base_uri = self.rest_uri
+        else:
+            base_uri = f'{self.rest_uri}/v4'
 
         for attempt in range(2):
 
-            async with self.session.get(f'{self.rest_uri}/{mode}={quote(query)}',
-                                        headers={'Authorization': self.password}) as resp:
+            async with self.session.get(f"{base_uri}/loadtracks?identifier={quote(query)}", headers={'Authorization': self.password}) as resp:
 
-                if not resp.status == 200 and retry_on_failure:
+                if resp.status != 200 and retry_on_failure:
                     retry = backoff.delay()
 
                     __log__.info(f'REST | {self.identifier} | Status code ({resp.status}) while retrieving tracks. '
@@ -204,6 +236,11 @@ class Node:
 
                 loadtype = data.get('loadType')
 
+                try:
+                    data = data.pop('data')
+                except KeyError:
+                    pass
+
                 if not loadtype:
                     raise WavelinkException('There was an error while trying to load this track.')
 
@@ -222,17 +259,31 @@ class Node:
                         e.message = data['exception']['error']
                     raise e
 
-                if not data.get('tracks'):
+                try:
+                    tracks = data.get('tracks')
+                except AttributeError:
+                    tracks = data
+
+                if loadtype == 'track':
+                    tracks = [data]
+
+                if not tracks:
                     __log__.info(f'REST | {self.identifier} | No tracks with query:: <{query}> found.')
                     raise WavelinkException("Track not found...")
 
-                if loadtype == 'PLAYLIST_LOADED':
+                encoded_name = "track" if self.v3 else "encoded"
+
+                if loadtype in ('PLAYLIST_LOADED', 'playlist'):
+                    try:
+                        data['playlistInfo'] = data.pop('info')
+                    except KeyError:
+                        pass
                     playlist_cls = kwargs.pop('playlist_cls', TrackPlaylist)
-                    return playlist_cls(data=data, url=query, **kwargs)
+                    return playlist_cls(data=data, url=query, encoded_name=encoded_name, **kwargs)
 
                 track_cls = kwargs.pop('track_cls', Track)
 
-                tracks = [track_cls(id_=track['track'], info=track['info'], **kwargs) for track in data['tracks']]
+                tracks = [track_cls(id_=track[encoded_name], info=track['info'], **kwargs) for track in tracks]
 
                 return tracks
 

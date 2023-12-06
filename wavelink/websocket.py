@@ -77,16 +77,22 @@ class WebSocket:
     async def _connect(self):
         await self.bot.wait_until_ready()
 
+        if self._node.v3:
+            base_uri = f"{self.host}:{self.port}"
+        else:
+            base_uri = f"{self.host.removesuffix('/')}:{self.port}/v4/websocket"
+
         try:
             if self.secure is True:
-                uri = f'wss://{self.host}:{self.port}'
+                uri = f'wss://{base_uri}'
             else:
-                uri = f'ws://{self.host}:{self.port}'
+                uri = f'ws://{base_uri}'
 
             if not self.is_connected:
                 self._websocket = await self._node.session.ws_connect(uri, headers=self.headers, heartbeat=self._node.heartbeat)
 
         except Exception as error:
+            self._node.session_id = None
             self._last_exc = error
             self._node.available = False
 
@@ -94,7 +100,6 @@ class WebSocket:
                 print(f'\nAuthorization Failed for Node:: {self._node}\n', file=sys.stderr)
             else:
                 __log__.error(f'WEBSOCKET | Connection Failure:: {error}')
-                print(repr(error))
                 #traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
             return
 
@@ -106,7 +111,8 @@ class WebSocket:
         self._node.available = True
 
         if self.is_connected:
-            self.bot.dispatch('wavelink_node_ready', self._node)
+            if self._node.v3:
+                self.bot.dispatch('wavelink_node_ready', self._node)
             __log__.debug('WEBSOCKET | Connection established...%s', self._node.__repr__())
 
     async def _listen(self):
@@ -120,6 +126,7 @@ class WebSocket:
                 self._closed = True
 
                 if not self.auto_reconnect:
+                    self._node.session_id = None
                     self.bot.dispatch('wavelink_node_connection_closed', self._node)
                     self._task = None
                     return
@@ -149,9 +156,17 @@ class WebSocket:
         if not op:
             return
 
-        if op == 'stats':
+        if op == 'ready':
+            if self._node.v3:
+                return
+            self._node.session_id = data["sessionId"]
+            self.bot.dispatch("wavelink_node_ready", self._node)
+
+        elif op == 'stats':
             self._node.stats = Stats(self._node, data)
-        if op == 'event':
+
+        elif op == 'event':
+
             try:
                 data['player'] = self._node.players[int(data['guildId'])]
             except KeyError:
@@ -174,6 +189,8 @@ class WebSocket:
                 await self._node.players[int(data['guildId'])].update_state(data)
             except KeyError:
                 pass
+        else:
+            __log__.warn(f"Unknown op: {op} | {data}")
 
     def _get_event_payload(self, name: str, data):
         if name == 'TrackEndEvent':

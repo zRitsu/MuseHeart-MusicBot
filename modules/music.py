@@ -4753,7 +4753,7 @@ class Music(commands.Cog):
                 try:
                     vc = player.guild.me.voice.channel
                 except AttributeError:
-                    self.bot.loop.create_task(player.destroy(force=True))
+                    await player.destroy(force=True)
                     return
 
                 if control == PlayerControls.help_button:
@@ -5701,6 +5701,7 @@ class Music(commands.Cog):
         region = data.pop('region', 'us_central')
         heartbeat = int(data.pop('heartbeat', 30))
         retry_403 = data.pop('retry_403', False)
+        v3 = data.pop('v3', False)
 
         try:
             max_retries = int(data.pop('retries'))
@@ -5712,6 +5713,7 @@ class Music(commands.Cog):
             backoff = 9
             retries = 1
             exception = None
+            test_url = data['rest_uri'] if v3 else f"{data['rest_uri']}/v4/info"
 
             print(f"{self.bot.user} - Iniciando servidor de música: {data['identifier']}")
 
@@ -5724,7 +5726,7 @@ class Music(commands.Cog):
                 else:
                     await asyncio.sleep(backoff)
                     try:
-                        async with self.bot.session.get(data['rest_uri'], timeout=10) as r:
+                        async with self.bot.session.get(test_url, timeout=10) as r:
                             break
                     except Exception as e:
                         exception = e
@@ -5736,7 +5738,7 @@ class Music(commands.Cog):
                         continue
 
         data["identifier"] = data["identifier"].replace(" ", "_")
-        node = await self.bot.music.initiate_node(auto_reconnect=False, region=region, heartbeat=heartbeat, **data)
+        node = await self.bot.music.initiate_node(auto_reconnect=False, region=region, heartbeat=heartbeat, v3=v3, **data)
         node.search = search
         node.website = node_website
         node.retry_403 = retry_403
@@ -5835,6 +5837,7 @@ class Music(commands.Cog):
                 'region': 'us_central',
                 'retries': 25,
                 'retry_403': True,
+                'v3': True,
             }
 
             self.bot.loop.create_task(self.connect_node(localnode))

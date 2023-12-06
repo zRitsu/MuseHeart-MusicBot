@@ -6,6 +6,7 @@ import datetime
 import json
 import logging
 import os
+import pickle
 import subprocess
 import traceback
 from configparser import ConfigParser
@@ -465,8 +466,6 @@ class BotPool:
                             bot.interaction_id = bot.user.id
                             self.controller_bot = bot
 
-                            bot._command_sync_flags = self.command_sync_config
-
                             bot.load_modules()
 
                             if bot.config["AUTO_SYNC_COMMANDS"]:
@@ -752,14 +751,16 @@ class BotCore(commands.AutoShardedBot):
 
     async def sync_app_commands(self, force=False):
 
+        await self.wait_until_ready()
+
         if not self.command_sync_flags.sync_commands and not force:
             return
 
         current_cmds = sorted([sort_dict_recursively(cmd.body.to_dict()) for cmd in self.application_commands], key=lambda k: k["name"])
 
         try:
-            with open(f"./local_database/{self.user.id}_app_cmds.json") as f:
-                synced_cmds = json.load(f)
+            with open(f"./.app_commands_sync_data/{self.user.id}.pkl", "rb") as f:
+                synced_cmds = pickle.load(f)
         except FileNotFoundError:
             synced_cmds = None
 
@@ -773,11 +774,11 @@ class BotCore(commands.AutoShardedBot):
         self._command_sync_flags = commands.CommandSyncFlags.none()
 
         try:
-            if not os.path.isdir("./local_database"):
-                os.makedirs("./local_database")
+            if not os.path.isdir("./.app_commands_sync_data/"):
+                os.makedirs("./.app_commands_sync_data/")
 
-            with open(f"./local_database/{self.user.id}_app_cmds.json", "w") as f:
-                json.dump(current_cmds, f, indent=4)
+            with open(f"./.app_commands_sync_data/{self.user.id}.pkl", "wb") as f:
+                pickle.dump(current_cmds, f)
         except:
             traceback.print_exc()
 
