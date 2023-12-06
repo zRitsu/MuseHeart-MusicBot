@@ -118,6 +118,9 @@ class Node:
     @property
     def is_available(self) -> bool:
         """Return whether the Node is available or not."""
+        if not self.v3 and not self.session_id:
+            return False
+
         return self._websocket.is_connected and self.available
 
     def close(self) -> None:
