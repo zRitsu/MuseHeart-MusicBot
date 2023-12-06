@@ -5701,7 +5701,7 @@ class Music(commands.Cog):
         region = data.pop('region', 'us_central')
         heartbeat = int(data.pop('heartbeat', 30))
         retry_403 = data.pop('retry_403', False)
-        v3 = data.pop('v3', False)
+        v3 = data.pop('v3', True)
 
         try:
             max_retries = int(data.pop('retries'))
