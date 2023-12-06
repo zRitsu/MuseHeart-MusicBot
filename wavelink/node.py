@@ -76,7 +76,8 @@ class Node:
                  auto_reconnect: bool = True,
                  resume_key: Optional[str] = None,
                  dumps: Callable[[Dict[str, Any]], Union[str, bytes]] = json.dumps,
-                 v3: bool = False
+                 v3: bool = False,
+                 **kwargs
                  ):
 
         self.host = host
@@ -144,7 +145,7 @@ class Node:
             "Client-Name": f"Wavelink/custom",
         }
 
-    async def connect(self, bot: Union[commands.Bot, commands.AutoShardedBot]) -> None:
+    async def connect(self, bot: Union[commands.Bot, commands.AutoShardedBot], **kwargs) -> None:
 
         if not self._websocket:
 
@@ -157,7 +158,9 @@ class Node:
                                         user_agent=self.user_agent,
                                         secure=self.secure,
                                         dumps=self._dumps,
-                                        auto_reconnect=self.auto_reconnect)
+                                        auto_reconnect=self.auto_reconnect,
+                                        **kwargs,
+                                        )
 
         await self._websocket._connect()
 
