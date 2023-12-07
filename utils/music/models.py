@@ -857,6 +857,9 @@ class LavalinkPlayer(wavelink.Player):
 
             if event.code == 4014:
 
+                if self.guild.me.voice.channel:
+                    return
+
                 if self.static:
                     self.command_log = "Desliguei o player por perca de conexão com o canal de voz."
                     await self.destroy()
