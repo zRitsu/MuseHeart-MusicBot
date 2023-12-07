@@ -5653,12 +5653,7 @@ class Music(commands.Cog):
 
             player._new_node_task = self.bot.loop.create_task(player._wait_for_new_node())
 
-        await asyncio.sleep(backoff)
-
-        status_codes = [401, 200, 400, 404]
-
-        if not node.v3:
-            status_codes.append(404)
+        await asyncio.sleep(2)
 
         while True:
 
@@ -5672,11 +5667,14 @@ class Music(commands.Cog):
             await self.bot.wait_until_ready()
 
             try:
-                async with self.bot.session.get(node.rest_uri) as r:
-                    if r.status in status_codes:
-                        await node.connect(self.bot)
-                        return
-                    error = r.status
+                async with self.bot.session.get(f"{node.rest_uri}/v4/info", timeout=45, headers=node.headers) as r:
+                    if r.status == 200:
+                        node.v3 = False
+                        node.info = await r.json()
+                    elif r.status != 404:
+                        raise Exception(f"{r.status}: {await r.text()}")
+                    else:
+                        node.v3 = True
             except Exception as e:
                 error = repr(e)
 
@@ -5686,7 +5684,6 @@ class Music(commands.Cog):
                 f' segundos. Erro: {error}')
             await asyncio.sleep(backoff)
             retries += 1
-            continue
 
     @commands.Cog.listener("on_wavelink_node_ready")
     async def node_ready(self, node: wavelink.Node):
@@ -5739,7 +5736,8 @@ class Music(commands.Cog):
                             if r.status == 200:
                                 info = await r.json()
                                 data["v3"] = False
-                            break
+                            elif r.status != 404:
+                                raise Exception(f"{r.status}: {await r.text()}")
                     except Exception as e:
                         exception = e
                         if data["identifier"] != "LOCAL":
@@ -5755,6 +5753,8 @@ class Music(commands.Cog):
                     if r.status == 200:
                         data["v3"] = False
                         info = await r.json()
+                    elif r.status != 404:
+                        raise Exception(f"{r.status}: {await r.text()}")
             except Exception as e:
                 print(f"Falha ao conectar no servidor {data['identifier']}: {repr(e)}")
                 return
