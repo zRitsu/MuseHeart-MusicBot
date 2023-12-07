@@ -5652,6 +5652,11 @@ class Music(commands.Cog):
 
         await asyncio.sleep(backoff)
 
+        status_codes = [401, 200, 400, 404]
+
+        if not node.v3:
+            status_codes.append(404)
+
         while True:
 
             if node.is_available:
@@ -5665,7 +5670,7 @@ class Music(commands.Cog):
 
             try:
                 async with self.bot.session.get(node.rest_uri) as r:
-                    if r.status in [401, 200, 400, 404]:
+                    if r.status in status_codes:
                         await node.connect(self.bot)
                         return
                     error = r.status
