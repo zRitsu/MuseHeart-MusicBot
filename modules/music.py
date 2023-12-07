@@ -5715,6 +5715,7 @@ class Music(commands.Cog):
             retries = 1
             exception = None
             test_url = data['rest_uri'] if v3 else f"{data['rest_uri']}/v4/info"
+            headers = {'Authorization': data['password']} if not v3 else None
 
             print(f"{self.bot.user} - Iniciando servidor de música: {data['identifier']}")
 
@@ -5727,7 +5728,7 @@ class Music(commands.Cog):
                 else:
                     await asyncio.sleep(backoff)
                     try:
-                        async with self.bot.session.get(test_url, timeout=45, headers={'Authorization': data['password']}) as r:
+                        async with self.bot.session.get(test_url, timeout=45, headers=headers) as r:
                             if r.status == 200:
                                 info = await r.json()
                             break
