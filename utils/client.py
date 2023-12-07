@@ -238,7 +238,6 @@ class BotPool:
                 value["identifier"] = key.replace(" ", "_")
                 value["secure"] = value.get("secure") == "true"
                 value["search"] = value.get("search") != "false"
-                value["v3"] = value.get("v3", "true") == "true"
                 value["retry_403"] = value.get("retry_403") == "true"
                 LAVALINK_SERVERS[key] = value
 
