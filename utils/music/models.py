@@ -857,7 +857,7 @@ class LavalinkPlayer(wavelink.Player):
 
             if event.code == 4014:
 
-                if self.guild.me.voice.channel:
+                if self.guild.me.voice:
                     return
 
                 if self.static:
