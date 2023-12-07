@@ -1192,7 +1192,7 @@ class LavalinkPlayer(wavelink.Player):
                             requester=self.bot.user.id
                         )
                     except Exception as e:
-                        if "Could not find tracks from mix" in str(e):
+                        if [err for err in ("Could not find tracks from mix", "Could not read mix page") if err in str(e)]:
                             try:
                                 tracks_ytsearch = await self.node.get_tracks(
                                     f"ytsearch:\"{track_data.author}\"",
