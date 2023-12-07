@@ -428,7 +428,7 @@ class Player:
             payload = {
                 "encodedTrack": track.id,
                 "volume": vol,
-                "position": start,
+                "position": int(start),
                 "paused": pause,
                 "filters": self.filters,
             }
