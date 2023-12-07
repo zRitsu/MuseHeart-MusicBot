@@ -111,6 +111,7 @@ class Node:
         self.restarting = False
 
         self.stats = None
+        self.info = None
 
     def __repr__(self):
         return f'{self.identifier} | {self.region} | (Shard: {self.shard_id})'

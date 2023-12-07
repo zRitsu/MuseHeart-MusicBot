@@ -5702,6 +5702,7 @@ class Music(commands.Cog):
         heartbeat = int(data.pop('heartbeat', 30))
         retry_403 = data.pop('retry_403', False)
         v3 = data.pop('v3', True)
+        info = None
 
         try:
             max_retries = int(data.pop('retries'))
@@ -5726,7 +5727,9 @@ class Music(commands.Cog):
                 else:
                     await asyncio.sleep(backoff)
                     try:
-                        async with self.bot.session.get(test_url, timeout=10) as r:
+                        async with self.bot.session.get(test_url, timeout=45, headers={'Authorization': data['password']}) as r:
+                            if r.status == 200:
+                                info = await r.json()
                             break
                     except Exception as e:
                         exception = e
@@ -5739,6 +5742,7 @@ class Music(commands.Cog):
 
         data["identifier"] = data["identifier"].replace(" ", "_")
         node = await self.bot.music.initiate_node(auto_reconnect=False, region=region, heartbeat=heartbeat, v3=v3, **data)
+        node.info = info
         node.search = search
         node.website = node_website
         node.retry_403 = retry_403
