@@ -25,6 +25,7 @@ import inspect
 import json
 import os
 import logging
+
 from disnake.ext import commands
 from typing import Any, Callable, Dict, Optional, Union
 from urllib.parse import quote
@@ -255,7 +256,10 @@ class Node:
                     __log__.info(f'REST | {self.identifier} | No tracks with query:: <{query}> found.')
                     raise TrackNotFound("Track not found...")
 
-                if loadtype == 'LOAD_FAILED':
+                if loadtype in ('LOAD_FAILED', 'error'):
+
+                    if not self.v3:
+                        data['exception'] = data
 
                     try:
                         error = f"There was an error of severity '{data['exception']['severity']}' while loading tracks.\n\n{data['exception']['message']}"
