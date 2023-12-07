@@ -280,7 +280,7 @@ class Node:
 
                 if not tracks:
                     __log__.info(f'REST | {self.identifier} | No tracks with query:: <{query}> found.')
-                    raise WavelinkException(f"{self.identifier}: Track not found... | {query}")
+                    raise TrackNotFound(f"{self.identifier}: Track not found... | {query}")
 
                 encoded_name = "track" if self.v3 else "encoded"
 
