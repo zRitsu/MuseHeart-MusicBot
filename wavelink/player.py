@@ -613,7 +613,7 @@ class Player:
             del old.players[self.guild_id]
             if self.node.v3:
                 await old._send(op='destroy', guildId=str(self.guild_id))
-            else:
+            elif self.node.session_id:
                 try:
                     uri: str = f"{self.node.rest_uri}/v4/sessions/{self.node.session_id}/players/{self.guild_id}"
                     async with self.node.session.delete(url=uri, headers=self.node.headers) as resp:

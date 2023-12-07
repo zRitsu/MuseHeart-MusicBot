@@ -9,7 +9,7 @@ from disnake.utils import escape_mentions
 from pymongo.errors import ServerSelectionTimeoutError
 
 from utils.music.converters import time_format, perms_translations
-from wavelink import WavelinkException, TrackNotFound
+from wavelink import WavelinkException, TrackNotFound, MissingSessionID
 
 
 class PoolException(commands.CheckFailure):
@@ -138,6 +138,9 @@ def parse_error(
 
     elif isinstance(error, commands.NoPrivateMessage):
         error_txt = "Esse comando não pode ser executado em mensagens privadas."
+
+    elif isinstance(error, MissingSessionID):
+        error_txt = f"**O servidor de música {error.node.identifier} está desconectado, por favor aguarde alguns segundos e tente novamente.**"
 
     elif isinstance(error, commands.CommandOnCooldown):
         remaing = int(error.retry_after)

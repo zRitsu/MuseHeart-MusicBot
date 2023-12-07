@@ -20,7 +20,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import pprint
 
 
 class WavelinkException(Exception):
@@ -48,6 +47,13 @@ class BuildTrackError(WavelinkException):
 
 class TrackNotFound(WavelinkException):
     pass
+
+class MissingSessionID(WavelinkException):
+
+    __slots__ = ('node')
+
+    def __init__(self, node):
+        self.node = node
 
 class TrackLoadError(WavelinkException):
     """There was an error while loading a track."""
