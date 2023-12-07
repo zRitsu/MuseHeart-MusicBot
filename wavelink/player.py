@@ -475,17 +475,20 @@ class Player:
             await self.stop()
             await self.node._send(op='destroy', guildId=str(self.guild_id))
         else:
-            uri: str = f"{self.node.rest_uri}/v4/sessions/{self.node.session_id}/players/{self.guild_id}"
 
-            async with self.node.session.delete(url=uri, headers=self.node.headers) as resp:
-                if resp.status != 204:
+            if self.node.session_id:
 
-                    try:
-                        data = await resp.json()
-                    except:
-                        data = await resp.text()
+                uri: str = f"{self.node.rest_uri}/v4/sessions/{self.node.session_id}/players/{self.guild_id}"
 
-                    raise WavelinkException(f"Ocorreu um erro ao destruir player: {resp.status} | {data}")
+                async with self.node.session.delete(url=uri, headers=self.node.headers) as resp:
+                    if resp.status != 204:
+
+                        try:
+                            data = await resp.json()
+                        except:
+                            data = await resp.text()
+
+                        raise WavelinkException(f"Ocorreu um erro ao destruir player: {resp.status} | {data}")
 
         try:
             del self.node.players[self.guild_id]

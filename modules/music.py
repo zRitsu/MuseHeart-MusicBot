@@ -5665,7 +5665,7 @@ class Music(commands.Cog):
 
             try:
                 async with self.bot.session.get(node.rest_uri) as r:
-                    if r.status in [401, 200, 400]:
+                    if r.status in [401, 200, 400, 404]:
                         await node.connect(self.bot)
                         return
                     error = r.status
