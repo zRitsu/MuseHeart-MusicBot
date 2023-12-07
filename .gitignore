@@ -162,3 +162,4 @@ application.yml
 /.local_database_sqlite
 /.db_cache/
 /.app_commands_sync_data/
+/.gitbak/

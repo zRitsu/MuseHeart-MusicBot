@@ -272,6 +272,13 @@ class Owner(commands.Cog):
 
         else:
 
+            if os.environ.get("HOSTNAME") == "squarecloud.app" and os.path.isdir("./.gitbak"):
+                try:
+                    shutil.rmtree("./.git")
+                except:
+                    pass
+                os.rename("./.gitbak", "./.git")
+
             try:
                 await ctx.response.defer()
             except:
@@ -309,6 +316,13 @@ class Owner(commands.Cog):
             data = (await run_command(f"git log {commit} {self.git_format}")).split("\n")
 
             git_log += format_git_log(data)
+
+        if os.environ.get("HOSTNAME") == "squarecloud.app":
+            try:
+                shutil.rmtree("./.gitbak")
+            except:
+                pass
+            shutil.copytree("./.git", "./.gitbak")
 
         text = "`Será necessário me reiniciar após as alterações.`"
 
