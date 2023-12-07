@@ -2110,6 +2110,11 @@ class LavalinkPlayer(wavelink.Player):
         self.played.clear()
 
         try:
+            self.auto_skip_track_task.cancel()
+        except:
+            pass
+
+        try:
             vc = self.guild.voice_client.channel
         except:
             vc = self.last_channel
@@ -2245,7 +2250,10 @@ class LavalinkPlayer(wavelink.Player):
                 except AttributeError:
                     pass
 
-                await asyncio.sleep((self.current.duration - self.position) / 1000)
+                try:
+                    await asyncio.sleep((self.current.duration - self.position) / 1000)
+                except AttributeError:
+                    return
 
                 self.set_command_log()
 
