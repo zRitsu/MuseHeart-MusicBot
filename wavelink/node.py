@@ -150,7 +150,7 @@ class Node:
             "Client-Name": f"Wavelink/custom",
         }
 
-    async def connect(self, bot: Union[commands.Bot, commands.AutoShardedBot], **kwargs) -> None:
+    async def connect(self, *args, **kwargs) -> None:
 
         if not self._websocket:
 

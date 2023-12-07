@@ -5675,7 +5675,7 @@ class Music(commands.Cog):
                         raise Exception(f"{r.status}: {await r.text()}")
                     else:
                         node.v3 = True
-                    await node.connect(self.bot)
+                    await node.connect()
                     return
             except Exception as e:
                 error = repr(e)
@@ -5696,7 +5696,7 @@ class Music(commands.Cog):
         if data["identifier"] in self.bot.music.nodes:
             node = self.bot.music.nodes[data['identifier']]
             if not node.is_connected:
-                await node.connect(self.bot)
+                await node.connect()
             return
 
         data = deepcopy(data)
@@ -6075,7 +6075,7 @@ class Music(commands.Cog):
                 pass
             else:
                 if not node._websocket.is_connected:
-                    await node.connect(bot)
+                    await node.connect()
                 return node
 
             raise GenericError("**Não há servidores de música disponível.**")

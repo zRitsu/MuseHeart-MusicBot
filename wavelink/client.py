@@ -399,7 +399,7 @@ class Client:
                     v3=kwargs.pop("v3", True),
                     **kwargs)
 
-        await node.connect(bot=self.bot)
+        await node.connect()
 
         node.available = True
         self.nodes[identifier] = node
