@@ -1699,11 +1699,11 @@ class Music(commands.Cog):
 
             if tracks.tracks[0].info["sourceName"] == "youtube":
                 try:
-                    async with bot.session.get("https://www.youtube.com/oembed?url=" + quote(tracks.url) + "&format=json") as r:
+                    async with bot.session.get((oembed_url:="https://www.youtube.com/oembed?url=" + quote(tracks.url) + "&format=json")) as r:
                         playlist_data = await r.json()
                     tracks.data["playlistInfo"]["thumb"] = playlist_data["thumbnail_url"]
-                except:
-                    traceback.print_exc()
+                except Exception as e:
+                    print(f"Falha ao obter artwork da playlist: {oembed_url} | {repr(e)}")
 
             log_text = f"{inter.author.mention} adicionou a playlist [`{fix_characters(tracks.name, 20)}`]({tracks.url}){pos_txt} `({len(tracks.tracks)})`."
 
