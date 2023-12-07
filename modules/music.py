@@ -5675,6 +5675,8 @@ class Music(commands.Cog):
                         raise Exception(f"{r.status}: {await r.text()}")
                     else:
                         node.v3 = True
+                    await node.connect(self.bot)
+                    return
             except Exception as e:
                 error = repr(e)
 
