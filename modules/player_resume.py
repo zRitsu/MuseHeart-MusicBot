@@ -214,7 +214,13 @@ class PlayerSession(commands.Cog):
 
                 t = LavalinkTrack(id_=info["id"], info=info, playlist=playlist, requester=info["extra"]["requester"])
 
-            del t.info["id"]
+            try:
+                del t.info["id"]
+            except:
+                try:
+                    del t.info["encodedTrack"]
+                except:
+                    pass
             tracks.append(t)
 
         return tracks, playlists
