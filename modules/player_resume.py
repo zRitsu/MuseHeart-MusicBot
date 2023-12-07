@@ -212,7 +212,7 @@ class PlayerSession(commands.Cog):
                         playlists[playlist["url"]] = playlist_cls
                         playlist = playlist_cls
 
-                t = LavalinkTrack(id_=info["id"], info=info, playlist=playlist, requester=info["extra"]["requester"])
+                t = LavalinkTrack(id_=info.get("id", ""), info=info, playlist=playlist, requester=info["extra"]["requester"])
 
             try:
                 del t.info["id"]
