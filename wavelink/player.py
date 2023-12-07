@@ -611,7 +611,20 @@ class Player:
         if self.node != node:
             old = self.node
             del old.players[self.guild_id]
-            await old._send(op='destroy', guildId=str(self.guild_id))
+            if self.node.v3:
+                await old._send(op='destroy', guildId=str(self.guild_id))
+            else:
+                try:
+                    uri: str = f"{self.node.rest_uri}/v4/sessions/{self.node.session_id}/players/{self.guild_id}"
+                    async with self.node.session.delete(url=uri, headers=self.node.headers) as resp:
+                        if resp.status != 204:
+                            try:
+                                data = await resp.json()
+                            except:
+                                data = await resp.text()
+                            print(f"Ocorreu um erro ao finalizar player: {data}")
+                except Exception:
+                    traceback.print_exc()
 
         self.node = node
         self.node.players[int(self.guild_id)] = self
