@@ -5701,7 +5701,6 @@ class Music(commands.Cog):
         region = data.pop('region', 'us_central')
         heartbeat = int(data.pop('heartbeat', 30))
         retry_403 = data.pop('retry_403', False)
-        v3 = data.pop('v3', True)
         info = None
 
         try:
@@ -5709,13 +5708,13 @@ class Music(commands.Cog):
         except (TypeError, KeyError):
             max_retries = 0
 
+        headers = {'Authorization': data['password']}
+
         if max_retries:
 
             backoff = 9
             retries = 1
             exception = None
-            test_url = data['rest_uri'] if v3 else f"{data['rest_uri']}/v4/info"
-            headers = {'Authorization': data['password']} if not v3 else None
 
             print(f"{self.bot.user} - Iniciando servidor de música: {data['identifier']}")
 
@@ -5728,9 +5727,10 @@ class Music(commands.Cog):
                 else:
                     await asyncio.sleep(backoff)
                     try:
-                        async with self.bot.session.get(test_url, timeout=45, headers=headers) as r:
+                        async with self.bot.session.get(f"{data['rest_uri']}/v4/info", timeout=45, headers=headers) as r:
                             if r.status == 200:
                                 info = await r.json()
+                                data["v3"] = False
                             break
                     except Exception as e:
                         exception = e
@@ -5741,8 +5741,18 @@ class Music(commands.Cog):
                         retries += 1
                         continue
 
+        else:
+            try:
+                async with self.bot.session.get(f"{data['rest_uri']}/v4/info", timeout=45, headers=headers) as r:
+                    if r.status == 200:
+                        data["v3"] = False
+                        info = await r.json()
+            except Exception as e:
+                print(f"Falha ao conectar no servidor {data['identifier']}: {repr(e)}")
+                return
+
         data["identifier"] = data["identifier"].replace(" ", "_")
-        node = await self.bot.music.initiate_node(auto_reconnect=False, region=region, heartbeat=heartbeat, v3=v3, **data)
+        node = await self.bot.music.initiate_node(auto_reconnect=False, region=region, heartbeat=heartbeat, **data)
         node.info = info
         node.search = search
         node.website = node_website
