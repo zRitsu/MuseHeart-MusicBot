@@ -488,13 +488,15 @@ class Misc(commands.Cog):
 
             for n in b.music.nodes.values():
 
-                if not n.identifier in node_data:
-                    node_data[n.identifier] = {"total": 0, "available": 0, "website": n.website}
+                identifier = f"{n.identifier} (v{3 if n.v3 else 4})"
 
-                node_data[n.identifier]["total"] += 1
+                if not identifier in node_data:
+                    node_data[identifier] = {"total": 0, "available": 0, "website": n.website}
+
+                node_data[identifier]["total"] += 1
 
                 if n.is_available:
-                    node_data[n.identifier]["available"] += 1
+                    node_data[identifier]["available"] += 1
 
             for p in b.music.players.values():
 

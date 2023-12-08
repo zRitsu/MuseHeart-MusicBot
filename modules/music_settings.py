@@ -1654,6 +1654,7 @@ class MusicSettings(commands.Cog):
                    f'RAM Total: `{total}`\n' \
                    f'CPU Cores: `{cpu_cores}`\n' \
                    f'Uso de CPU: `{cpu_usage}%`\n' \
+                   f'Versão do Lavalink: `v{3 if node.v3 else 4}`\n' \
                    f'Uptime: <t:{int((disnake.utils.utcnow() - datetime.timedelta(milliseconds=node.stats.uptime)).timestamp())}:R>\n'
 
             if started:
