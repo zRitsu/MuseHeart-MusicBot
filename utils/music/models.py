@@ -891,7 +891,7 @@ class LavalinkPlayer(wavelink.Player):
             self.update = False
 
             try:
-                self.set_command_log(text=f"A música [{fix_characters(self.current.single_title, 25)}]({self.current.uri}) travou.", emoji="⚠")
+                self.set_command_log(text=f"A música [{fix_characters(self.current.single_title, 25)}]({self.current.uri}) travou.", emoji="⚠️")
             except:
                 pass
 

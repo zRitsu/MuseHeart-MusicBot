@@ -28,7 +28,7 @@ class ErrorHandler(commands.Cog):
                 disnake.ui.Button(
                     label="Reporte esse erro",
                     custom_id="report_error",
-                    emoji="⚠"
+                    emoji="⚠️"
                 )
             )
 
