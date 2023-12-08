@@ -1139,48 +1139,62 @@ class LavalinkPlayer(wavelink.Player):
 
                 if track_data.info["sourceName"] == "spotify" and self.bot.spotify:
                     track_ids = list(set(t.original_id for t in tracks_search if t.info["sourceName"] == "spotify"))[:5]
-                    result = await self.bot.loop.run_in_executor(None, lambda: self.bot.spotify.recommendations(seed_tracks=track_ids))
 
-                    tracks = []
+                    result = None
 
-                    for t in result["tracks"]:
-
+                    for i in range(3):
                         try:
-                            thumb = t["album"]["images"][0]["url"]
-                        except (IndexError,KeyError):
-                            thumb = ""
+                            result = await self.bot.loop.run_in_executor(None, lambda: self.bot.spotify.recommendations(seed_tracks=track_ids))
+                            break
+                        except Exception as e:
+                            self.set_command_log(emoji="⚠️", text=f"Falha ao obter músicas recomendadas do spotify, tentativa {i+1} de 3.")
+                            self.update = True
+                            traceback.print_exc()
+                            exception = e
+                            await asyncio.sleep(5)
 
-                        partial_track = PartialTrack(
-                                uri=t["external_urls"]["spotify"],
-                                author=t["artists"][0]["name"] or "Unknown Artist",
-                                title=t["name"],
-                                thumb=thumb,
-                                duration=t["duration_ms"],
-                                source_name="spotify",
-                                original_id=t["id"],
-                                requester=self.bot.user.id,
-                                autoplay=True,
-                            )
+                    if result:
 
-                        partial_track.info["extra"]["authors"] = [fix_characters(i['name']) for i in t['artists'] if
-                                                      f"feat. {i['name'].lower()}"
-                                                      not in t['name'].lower()]
+                        tracks = []
 
-                        partial_track.info["extra"]["authors_md"] = ", ".join(
-                            f"[`{a['name']}`]({a['external_urls']['spotify']})" for a in t["artists"])
+                        for t in result["tracks"]:
 
-                        try:
-                            if t["album"]["name"] != t["name"]:
-                                partial_track.info["extra"]["album"] = {
-                                    "name": t["album"]["name"],
-                                    "url": t["album"]["external_urls"]["spotify"]
-                                }
-                        except (AttributeError, KeyError):
-                            pass
+                            try:
+                                thumb = t["album"]["images"][0]["url"]
+                            except (IndexError,KeyError):
+                                thumb = ""
 
-                        tracks.append(partial_track)
+                            partial_track = PartialTrack(
+                                    uri=t["external_urls"]["spotify"],
+                                    author=t["artists"][0]["name"] or "Unknown Artist",
+                                    title=t["name"],
+                                    thumb=thumb,
+                                    duration=t["duration_ms"],
+                                    source_name="spotify",
+                                    original_id=t["id"],
+                                    requester=self.bot.user.id,
+                                    autoplay=True,
+                                )
 
-                else:
+                            partial_track.info["extra"]["authors"] = [fix_characters(i['name']) for i in t['artists'] if
+                                                          f"feat. {i['name'].lower()}"
+                                                          not in t['name'].lower()]
+
+                            partial_track.info["extra"]["authors_md"] = ", ".join(
+                                f"[`{a['name']}`]({a['external_urls']['spotify']})" for a in t["artists"])
+
+                            try:
+                                if t["album"]["name"] != t["name"]:
+                                    partial_track.info["extra"]["album"] = {
+                                        "name": t["album"]["name"],
+                                        "url": t["album"]["external_urls"]["spotify"]
+                                    }
+                            except (AttributeError, KeyError):
+                                pass
+
+                            tracks.append(partial_track)
+
+                if not tracks:
                     if track_data.info["sourceName"] == "youtube":
                         query = f"https://music.youtube.com/watch?v={track_data.ytid}&list=RD{track_data.ytid}"
                     else:
