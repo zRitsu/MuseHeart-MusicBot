@@ -67,6 +67,11 @@ class Misc(commands.Cog):
         except AttributeError:
             pass
 
+        if "{players_count}" in text:
+            if not (active_players:=[p for p in self.bot.music.players.values() if not p.auto_pause and not p.paused]):
+                return ""
+            text = text.replace("{players_count}", str(len(active_players)))
+
         return text \
             .replace("{users}", f'{len([m for m in self.bot.users if not m.bot]):,}'.replace(",", ".")) \
             .replace("{playing}", f'{len(self.bot.music.players):,}'.replace(",", ".")) \
@@ -124,33 +129,39 @@ class Misc(commands.Cog):
 
                 activity_data = next(activities)
 
+                activity_name = self.placeholders(activity_data["name"])
+
+                if not activity_name:
+                    await asyncio.sleep(15)
+                    continue
+
                 if activity_data["type"] == "listening":
                     activity = disnake.Activity(
                         type=disnake.ActivityType.listening,
-                        name=self.placeholders(activity_data["name"])
+                        name=activity_name,
                     )
 
                 elif activity_data["type"] == "watching":
                     activity = disnake.Activity(
                         type=disnake.ActivityType.watching,
-                        name=self.placeholders(activity_data["name"])
+                        name=activity_name,
                     )
 
                 elif activity_data["type"] == "streaming":
                     activity = disnake.Activity(
                         type=disnake.ActivityType.streaming,
-                        name=self.placeholders(activity_data["name"]),
+                        name=activity_name,
                         url=activity_data["url"]
                     )
 
                 elif activity_data["type"] == "playing":
-                    activity = disnake.Game(name=self.placeholders(activity_data["name"]))
+                    activity = disnake.Game(name=activity_name)
 
                 else:
                     activity = disnake.Activity(
                         name="customstatus",
                         type=disnake.ActivityType.custom,
-                        state=self.placeholders(activity_data["name"]),
+                        state=activity_name,
                     )
 
                 await self.bot.change_presence(activity=activity)
