@@ -1324,6 +1324,7 @@ class LavalinkPlayer(wavelink.Player):
                         track = await self.get_autoqueue_tracks()
                     except:
                         traceback.print_exc()
+                        self.locked = False
                         await asyncio.sleep(60)
                         if not self.current:
                             await self.process_next()
