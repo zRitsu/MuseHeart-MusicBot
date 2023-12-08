@@ -5669,12 +5669,12 @@ class Music(commands.Cog):
             try:
                 async with self.bot.session.get(f"{node.rest_uri}/v4/info", timeout=45, headers=node.headers) as r:
                     if r.status == 200:
-                        node.v3 = False
+                        node.version = 4
                         node.info = await r.json()
                     elif r.status != 404:
                         raise Exception(f"{r.status}: {await r.text()}")
                     else:
-                        node.v3 = True
+                        node.version = 3
                     await node.connect()
                     return
             except Exception as e:
@@ -5737,7 +5737,7 @@ class Music(commands.Cog):
                         async with self.bot.session.get(f"{data['rest_uri']}/v4/info", timeout=45, headers=headers) as r:
                             if r.status == 200:
                                 info = await r.json()
-                                data["v3"] = False
+                                data["version"] = 4
                             elif r.status != 404:
                                 raise Exception(f"{r.status}: {await r.text()}")
                             break
@@ -5754,7 +5754,7 @@ class Music(commands.Cog):
             try:
                 async with self.bot.session.get(f"{data['rest_uri']}/v4/info", timeout=45, headers=headers) as r:
                     if r.status == 200:
-                        data["v3"] = False
+                        data["version"] = 4
                         info = await r.json()
                     elif r.status != 404:
                         raise Exception(f"{r.status}: {await r.text()}")
@@ -5863,7 +5863,7 @@ class Music(commands.Cog):
                 'region': 'us_central',
                 'retries': 25,
                 'retry_403': True,
-                'v3': True,
+                'version': 3,
             }
 
             self.bot.loop.create_task(self.connect_node(localnode))

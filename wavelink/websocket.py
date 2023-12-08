@@ -77,7 +77,7 @@ class WebSocket:
     async def _connect(self):
         await self.bot.wait_until_ready()
 
-        if self._node.v3:
+        if self._node.version == 3:
             base_uri = f"{self.host}:{self.port}"
         else:
             base_uri = f"{self.host.removesuffix('/')}:{self.port}/v4/websocket"
@@ -111,7 +111,7 @@ class WebSocket:
         self._node.available = True
 
         if self.is_connected:
-            if self._node.v3:
+            if self._node.version == 3:
                 self.bot.dispatch('wavelink_node_ready', self._node)
             __log__.debug('WEBSOCKET | Connection established...%s', self._node.__repr__())
 
@@ -157,7 +157,7 @@ class WebSocket:
             return
 
         if op == 'ready':
-            if self._node.v3:
+            if self._node.version == 3:
                 return
             self._node.session_id = data["sessionId"]
             self.bot.dispatch("wavelink_node_ready", self._node)

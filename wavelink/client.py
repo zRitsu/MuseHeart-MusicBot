@@ -396,7 +396,7 @@ class Client:
                     user_agent=user_agent,
                     auto_reconnect=auto_reconnect,
                     dumps=self._dumps,
-                    v3=kwargs.pop("v3", True),
+                    version=kwargs.pop("version", 3),
                     **kwargs)
 
         await node.connect()

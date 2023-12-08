@@ -291,7 +291,7 @@ class Player:
 
         __log__.debug(f'PLAYER | Dispatching voice update:: {self.channel_id}')
 
-        if self.node.v3:
+        if self.node.version == 3:
             if {'sessionId', 'event'} == self._voice_state.keys():
                 await self.node._send(op='voiceUpdate', guildId=str(self.guild_id), **self._voice_state)
         else:
@@ -396,7 +396,7 @@ class Player:
 
         self.current = track
 
-        if self.node.v3:
+        if self.node.version == 3:
 
             payload = {
                 'op': 'play',
@@ -446,7 +446,7 @@ class Player:
 
         Stop the Player's currently playing song.
         """
-        if self.node.v3:
+        if self.node.version == 3:
             await self.node._send(op='stop', guildId=str(self.guild_id))
         else:
             await self.node.update_player(self.guild_id, {"encodedTrack": None}, replace=True)
@@ -472,7 +472,7 @@ class Player:
         except:
             pass
 
-        if self.node.v3:
+        if self.node.version == 3:
             await self.stop()
             await self.node._send(op='destroy', guildId=str(self.guild_id))
         else:
@@ -509,7 +509,7 @@ class Player:
         equalizer: :class:`Equalizer`
             The Equalizer to set.
         """
-        if self.node.v3:
+        if self.node.version == 3:
             await self.node._send(op='equalizer', guildId=str(self.guild_id), bands=equalizer.eq)
         else:
             raise Exception("Não implementado para lavalink v4 (ainda)")
@@ -532,7 +532,7 @@ class Player:
         pause: bool
             A bool indicating if the player's paused state should be set to True or False.
         """
-        if self.node.v3:
+        if self.node.version == 3:
             await self.node._send(op='pause', guildId=str(self.guild_id), pause=pause)
         else:
             await self.node.update_player(guild_id=self.guild_id, data={"paused": pause})
@@ -550,7 +550,7 @@ class Player:
             The volume to set the player to.
         """
         self.volume = max(min(vol, 1000), 0)
-        if self.node.v3:
+        if self.node.version == 3:
             await self.node._send(op='volume', guildId=str(self.guild_id), volume=self.volume)
         else:
             await self.node.update_player(guild_id=self.guild_id, data={"volume": vol})
@@ -565,7 +565,7 @@ class Player:
             The position as an int in milliseconds to seek to. Could be None to seek to beginning.
         """
 
-        if self.node.v3:
+        if self.node.version == 3:
             await self.node._send(op='seek', guildId=str(self.guild_id), position=position)
         else:
             await self.node.update_player(self.guild_id, data={"position": int(position)})
@@ -612,7 +612,7 @@ class Player:
         if self.node != node:
             old = self.node
             del old.players[self.guild_id]
-            if self.node.v3:
+            if self.node.version == 3:
                 await old._send(op='destroy', guildId=str(self.guild_id))
             elif self.node.session_id:
                 try:
@@ -634,7 +634,7 @@ class Player:
             await self._dispatch_voice_update()
 
         if self.current:
-            if self.node.v3:
+            if self.node.version == 3:
                 await self.node._send(op='play', guildId=str(self.guild_id), track=self.current.id, startTime=int(self.position))
                 if self.paused:
                     await self.node._send(op='pause', guildId=str(self.guild_id), pause=self.paused)
@@ -650,5 +650,5 @@ class Player:
 
             self.last_update = time.time() * 1000
 
-        if self.volume != 100 and self.node.v3:
+        if self.volume != 100 and self.node.version == 3:
             await self.node._send(op='volume', guildId=str(self.guild_id), volume=self.volume)

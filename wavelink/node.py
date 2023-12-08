@@ -77,7 +77,7 @@ class Node:
                  auto_reconnect: bool = True,
                  resume_key: Optional[str] = None,
                  dumps: Callable[[Dict[str, Any]], Union[str, bytes]] = json.dumps,
-                 v3: bool = False,
+                 version: int = 3,
                  **kwargs
                  ):
 
@@ -94,7 +94,7 @@ class Node:
         self.user_agent = user_agent
         self.auto_reconnect = auto_reconnect
         self.resume_key = resume_key or str(os.urandom(8).hex())
-        self.v3 = v3
+        self.version = version
         self.session_id: Optional[int] = None
 
         self._dumps = dumps
@@ -120,7 +120,7 @@ class Node:
     @property
     def is_available(self) -> bool:
         """Return whether the Node is available or not."""
-        if not self.v3 and not self.session_id:
+        if self.version == 4 and not self.session_id:
             return False
 
         return self._websocket.is_connected and self.available
@@ -215,10 +215,7 @@ class Node:
         """
         backoff = ExponentialBackoff(base=1)
 
-        if self.v3:
-            base_uri = self.rest_uri
-        else:
-            base_uri = f'{self.rest_uri}/v4'
+        base_uri = f'{self.rest_uri}/v4' if self.version == 4 else self.rest_uri
 
         for attempt in range(2):
 
@@ -261,7 +258,7 @@ class Node:
 
                 if loadtype in ('LOAD_FAILED', 'error'):
 
-                    if not self.v3:
+                    if self.version == 4:
                         data['exception'] = data
 
                     try:
@@ -285,7 +282,7 @@ class Node:
                     __log__.info(f'REST | {self.identifier} | No tracks with query:: <{query}> found.')
                     raise TrackNotFound(f"{self.identifier}: Track not found... | {query}")
 
-                encoded_name = "track" if self.v3 else "encoded"
+                encoded_name = "track" if self.version == 3 else "encoded"
 
                 if loadtype in ('PLAYLIST_LOADED', 'playlist'):
                     try:

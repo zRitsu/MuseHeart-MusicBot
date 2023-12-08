@@ -484,7 +484,7 @@ class LavalinkPlayer(wavelink.Player):
         self.bot.dispatch("player_create", player=self)
 
     def __str__(self) -> str:
-        return f"Servidor de música atual: {self.node.identifier}"
+        return f"Servidor de música atual: {self.node.identifier} (v{self.node.version})"
 
     def __repr__(self):
         return f"<volume={self.volume} " \
@@ -2738,7 +2738,7 @@ class LavalinkPlayer(wavelink.Player):
         self._equalizer = equalizer
 
     async def update_filters(self):
-        if self.node.v3:
+        if self.node.version == 3:
             await self.node._send(op="filters", **self.filters, guildId=str(self.guild_id))
         else:
             await self.node.update_player(guild_id=self.guild_id, data={"filters": self.filters})
