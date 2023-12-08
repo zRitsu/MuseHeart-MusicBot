@@ -1295,6 +1295,8 @@ class LavalinkPlayer(wavelink.Player):
             self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node())
             return
 
+        await self.bot.wait_until_ready()
+
         if not self.is_connected:
             await self.destroy(force=True)
             return
@@ -1322,6 +1324,10 @@ class LavalinkPlayer(wavelink.Player):
                         track = await self.get_autoqueue_tracks()
                     except:
                         traceback.print_exc()
+                        await asyncio.sleep(60)
+                        if not self.current:
+                            await self.process_next()
+                        return
 
                 if not track:
                     await self.stop()
