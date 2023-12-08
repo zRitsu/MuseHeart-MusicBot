@@ -5740,6 +5740,7 @@ class Music(commands.Cog):
                                 data["v3"] = False
                             elif r.status != 404:
                                 raise Exception(f"{r.status}: {await r.text()}")
+                            break
                     except Exception as e:
                         exception = e
                         if data["identifier"] != "LOCAL":
