@@ -1326,7 +1326,7 @@ class LavalinkPlayer(wavelink.Player):
                         traceback.print_exc()
                         self.locked = False
                         await asyncio.sleep(60)
-                        if not self.current:
+                        if not self.current and (self.autoplay or self.keep_connected):
                             await self.process_next()
                         return
 
@@ -1337,7 +1337,7 @@ class LavalinkPlayer(wavelink.Player):
                     self.idle_task = self.bot.loop.create_task(self.idling_mode())
                     return
 
-            except Exception as e:
+            except Exception:
                 clear_autoqueue = False
                 traceback.print_exc()
                 track = None
