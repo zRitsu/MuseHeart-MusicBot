@@ -5666,13 +5666,15 @@ class Music(commands.Cog):
 
             await self.bot.wait_until_ready()
 
+            error = None
+
             try:
                 async with self.bot.session.get(f"{node.rest_uri}/v4/info", timeout=45, headers=node.headers) as r:
                     if r.status == 200:
                         node.version = 4
                         node.info = await r.json()
                     elif r.status != 404:
-                        raise Exception(f"{r.status}: {await r.text()}")
+                        raise Exception(f"{self.bot.user} - [{r.status}]: {await r.text()}"[:50])
                     else:
                         node.version = 3
                     await node.connect()
@@ -5683,7 +5685,7 @@ class Music(commands.Cog):
             backoff *= 1.5
             print(
                 f'{self.bot.user} - Falha ao reconectar no servidor [{node.identifier}] nova tentativa em {int(backoff)}'
-                f' segundos. Erro: {error}')
+                f' segundos. Erro: {error}'[:50])
             await asyncio.sleep(backoff)
             retries += 1
 
@@ -5739,7 +5741,7 @@ class Music(commands.Cog):
                                 info = await r.json()
                                 data["version"] = 4
                             elif r.status != 404:
-                                raise Exception(f"{r.status}: {await r.text()}")
+                                raise Exception(f"{self.bot.user} - [{r.status}]: {await r.text()}"[:50])
                             break
                     except Exception as e:
                         exception = e
@@ -5757,7 +5759,7 @@ class Music(commands.Cog):
                         data["version"] = 4
                         info = await r.json()
                     elif r.status != 404:
-                        raise Exception(f"{r.status}: {await r.text()}")
+                        raise Exception(f"{self.bot.user} - [{r.status}]: {await r.text()}"[:50])
             except Exception as e:
                 print(f"Falha ao conectar no servidor {data['identifier']}: {repr(e)}")
                 return
