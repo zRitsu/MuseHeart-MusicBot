@@ -5971,6 +5971,13 @@ class Music(commands.Cog):
             except Exception:
                 traceback.print_exc()
 
+        if member.bot and isinstance(after.channel, disnake.StageChannel) and after.channel.permissions_for(member).manage_permissions:
+            await asyncio.sleep(1.5)
+            try:
+                await member.guild.me.edit(suppress=False)
+            except Exception:
+                traceback.print_exc()
+
         player.members_timeout_task = player.bot.loop.create_task(player.members_timeout(check=bool(check)))
 
         if check:
