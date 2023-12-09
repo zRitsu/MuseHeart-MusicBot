@@ -266,23 +266,30 @@ class Owner(commands.Cog):
 
         args, unknown = self.bot.get_command("update").extras['flags'].parse_known_args(opts.split())
 
-        if not os.path.isdir("./.git") or args.force:
+        try:
+            await ctx.response.defer()
+        except:
+            pass
 
-            out_git += await self.cleanup_git(force=args.force)
+        update_git = True
+        rename_git_bak = False
 
-        else:
+        if args.force or not os.path.exists("./.git"):
 
-            if os.environ.get("HOSTNAME") == "squarecloud.app" and os.path.isdir("./.gitbak"):
+            if rename_git_bak:=os.path.exists("./.gitbak") and os.environ.get("HOSTNAME") == "squarecloud.app":
+                pass
+            else:
+                update_git = False
+                out_git += await self.cleanup_git(force=args.force)
+
+        if update_git:
+
+            if rename_git_bak or os.environ.get("HOSTNAME") == "squarecloud.app" and os.path.isdir("./.gitbak"):
                 try:
                     shutil.rmtree("./.git")
                 except:
                     pass
                 os.rename("./.gitbak", "./.git")
-
-            try:
-                await ctx.response.defer()
-            except:
-                pass
 
             try:
                 await run_command("git reset --hard")
