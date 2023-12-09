@@ -5642,7 +5642,7 @@ class Music(commands.Cog):
         retries = 0
         backoff = 7
 
-        print(f"{self.bot.user} - [{node.identifier}] Conexão perdida - reconectando em {int(backoff)} segundos.")
+        print(f"{self.bot.user} - [{node.identifier} / v{node.version}] Conexão perdida - reconectando em {int(backoff)} segundos.")
 
         for player in list(node.players.values()):
 
@@ -5691,7 +5691,7 @@ class Music(commands.Cog):
 
     @commands.Cog.listener("on_wavelink_node_ready")
     async def node_ready(self, node: wavelink.Node):
-        print(f'{self.bot.user} - Servidor de música: [{node.identifier}] está pronto para uso!')
+        print(f'{self.bot.user} - Servidor de música: [{node.identifier} / v{node.version}] está pronto para uso!')
 
     async def connect_node(self, data: dict):
 
