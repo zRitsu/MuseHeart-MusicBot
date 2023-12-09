@@ -5674,7 +5674,7 @@ class Music(commands.Cog):
                         node.version = 4
                         node.info = await r.json()
                     elif r.status != 404:
-                        raise Exception(f"{self.bot.user} - [{r.status}]: {await r.text()}"[:50])
+                        raise Exception(f"{self.bot.user} - [{r.status}]: {await r.text()}"[:300])
                     else:
                         node.version = 3
                     await node.connect()
@@ -5685,7 +5685,7 @@ class Music(commands.Cog):
             backoff *= 1.5
             print(
                 f'{self.bot.user} - Falha ao reconectar no servidor [{node.identifier}] nova tentativa em {int(backoff)}'
-                f' segundos. Erro: {error}'[:50])
+                f' segundos. Erro: {error}'[:300])
             await asyncio.sleep(backoff)
             retries += 1
 
@@ -5741,7 +5741,7 @@ class Music(commands.Cog):
                                 info = await r.json()
                                 data["version"] = 4
                             elif r.status != 404:
-                                raise Exception(f"{self.bot.user} - [{r.status}]: {await r.text()}"[:50])
+                                raise Exception(f"{self.bot.user} - [{r.status}]: {await r.text()}"[:300])
                             break
                     except Exception as e:
                         exception = e
@@ -5759,9 +5759,9 @@ class Music(commands.Cog):
                         data["version"] = 4
                         info = await r.json()
                     elif r.status != 404:
-                        raise Exception(f"{self.bot.user} - [{r.status}]: {await r.text()}"[:50])
+                        raise Exception(f"{self.bot.user} - [{r.status}]: {await r.text()}"[:300])
             except Exception as e:
-                print(f"Falha ao conectar no servidor {data['identifier']}: {repr(e)}")
+                print(f"Falha ao conectar no servidor {data['identifier']}: {repr(e)}"[:300])
                 return
 
         data["identifier"] = data["identifier"].replace(" ", "_")
