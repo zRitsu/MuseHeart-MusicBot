@@ -313,6 +313,9 @@ class Owner(commands.Cog):
                 elif not "Fast-forward" in str(e):
                     out_git += await self.cleanup_git(force=True)
 
+                elif "Need to specify how to reconcile divergent branches" in str(e):
+                    out_git += await run_command("git rebase --no-ff")
+
             commit = ""
 
             for l in out_git.split("\n"):
