@@ -10,6 +10,7 @@ from disnake.ext import commands
 
 from utils.db import DBModel
 from utils.music.errors import GenericError
+from utils.music.interactions import AskView
 from utils.music.models import LavalinkPlayer
 from utils.music.skin_utils import skin_converter
 from utils.others import CustomContext
@@ -70,26 +71,19 @@ class CustomSkin(commands.Cog):
 
         preview_data = skin_converter(data, ctx, player)
 
-        msg = await ctx.reply(fail_if_not_exists=False, **preview_data)
+        view = AskView(ctx=ctx, timeout=120)
 
-        emojis = ["✅", "❌"]
+        await ctx.reply(view=view,fail_if_not_exists=False, **preview_data)
 
-        for e in emojis:
-            await msg.add_reaction(e)
+        await view.wait()
 
-        try:
-            reaction, user = await self.bot.wait_for("reaction_add", check=lambda r, u: r.message.id == msg.id and u.id == ctx.author.id and str(r.emoji) in emojis, timeout=120)
-        except asyncio.TimeoutError:
-            await msg.clear_reactions()
+        if view.selected is None:
             raise GenericError("**Tempo esgotado!**")
 
-        emoji = str(reaction.emoji)
-
-        if emoji == "❌":
-            await msg.clear_reactions()
-            await ctx.reply(
-                embed=disnake.Embed(description=f"**Cancelado pelo usuário.**", color=disnake.Color.red()),
-                fail_if_not_exists=False
+        if view.selected is False:
+            await view.interaction_resp.response.edit_message(
+                view=None,
+                embed=disnake.Embed(description=f"**Cancelado pelo usuário.**", color=disnake.Color.red())
             )
             return
 
