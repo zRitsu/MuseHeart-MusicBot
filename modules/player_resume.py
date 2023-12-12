@@ -439,29 +439,33 @@ class PlayerSession(commands.Cog):
                 except:
                     check = None
 
-                if data.get("paused") and check:
+                try:
+                    if data.get("paused") and check:
 
-                    try:
-                        track = player.queue.popleft()
-                    except:
-                        track = None
+                        try:
+                            track = player.queue.popleft()
+                        except:
+                            track = None
 
-                    if track:
-                        player.current = track
-                        position = int(float(data.get("position", 0)))
-                        await player.play(track, start=position if not track.is_stream else 0)
-                        player.last_position = position
-                        player.last_track = track
-                        await player.set_pause(True)
-                        await player.invoke_np(rpc_update=True)
-                        await player.update_stage_topic()
+                        if track:
+                            player.current = track
+                            position = int(float(data.get("position", 0)))
+                            await player.play(track, start=position if not track.is_stream else 0)
+                            player.last_position = position
+                            player.last_track = track
+                            await player.set_pause(True)
+                            await player.invoke_np(rpc_update=True)
+                            await player.update_stage_topic()
+
+                        else:
+                            await player.process_next()
 
                     else:
-                        await player.process_next()
-
-                else:
-                    position = int(float(data.get("position", 0)))
-                    await player.process_next(start_position=position)
+                        position = int(float(data.get("position", 0)))
+                        await player.process_next(start_position=position)
+                except Exception as e:
+                    print(f"{self.bot.user} - Falha na reprodução da música ao retomar player:\n{traceback.format_exc()}")
+                    continue
 
                 try:
                     player.members_timeout_task.cancel()
