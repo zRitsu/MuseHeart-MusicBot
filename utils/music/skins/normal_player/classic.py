@@ -102,6 +102,11 @@ class ClassicSkin:
 
         if player.current_hint:
             embed.set_footer(text=f"💡 Dica: {player.current_hint}")
+        else:
+            embed.set_footer(
+                text=str(player),
+                icon_url="https://i.ibb.co/QXtk5VB/neon-circle.gif"
+            )
 
         data["embeds"] = [embed_top, embed] if embed_top else [embed]
 

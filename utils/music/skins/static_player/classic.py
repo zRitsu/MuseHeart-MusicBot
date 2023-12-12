@@ -84,6 +84,11 @@ class ClassicStaticSkin:
 
         if player.current_hint:
             embed.set_footer(text=f"💡 Dica: {player.current_hint}")
+        else:
+            embed.set_footer(
+                text=str(player),
+                icon_url="https://i.ibb.co/QXtk5VB/neon-circle.gif"
+            )
 
         if player.current.autoplay:
             try:
