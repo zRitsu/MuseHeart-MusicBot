@@ -463,8 +463,8 @@ class PlayerSession(commands.Cog):
                     else:
                         position = int(float(data.get("position", 0)))
                         await player.process_next(start_position=position)
-                except Exception as e:
-                    print(f"{self.bot.user} - Falha na reprodução da música ao retomar player:\n{traceback.format_exc()}")
+                except Exception:
+                    print(f"{self.bot.user} - Falha na reprodução da música ao retomar player do servidor {guild.name} [{guild.id}]:\n{traceback.format_exc()}")
                     continue
 
                 try:
