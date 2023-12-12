@@ -5989,6 +5989,14 @@ class Music(commands.Cog):
             except AttributeError:
                 pass
 
+        if not member.guild.me.voice:
+            await asyncio.sleep(1)
+            if not player.is_closing:
+                try:
+                    await player.destroy(force=True)
+                except Exception:
+                    traceback.print_exc()
+
         # rich presence stuff
 
         if player.auto_pause:
