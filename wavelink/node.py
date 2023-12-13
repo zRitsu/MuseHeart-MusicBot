@@ -114,6 +114,8 @@ class Node:
         self.stats = None
         self.info = None
 
+        self._closing = False
+
     def __repr__(self):
         return f'{self.identifier} | {self.region} | (Shard: {self.shard_id})'
 
@@ -377,6 +379,7 @@ class Node:
 
     async def destroy(self, *, force: bool = False) -> None:
         """Destroy the node and all it's players."""
+        self._closing = True
         players = self.players.copy()
 
         for player in players.values():
