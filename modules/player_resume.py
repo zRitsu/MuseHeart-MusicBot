@@ -17,7 +17,7 @@ import wavelink
 from utils.client import BotCore
 from utils.music.checks import can_connect, can_send_message
 from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialTrack, PartialPlaylist, LavalinkPlaylist
-from utils.others import SongRequestPurgeMode
+from utils.others import SongRequestPurgeMode, send_idle_embed
 
 
 class PlayerSession(commands.Cog):
@@ -250,20 +250,6 @@ class PlayerSession(commands.Cog):
                     await self.delete_data(data['_id'])
                     continue
 
-                voice_channel = self.bot.get_channel(data["voice_channel"])
-
-                if not voice_channel:
-                    print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\nO canal de voz não existe...")
-                    await self.delete_data(guild.id)
-                    continue
-
-                try:
-                    can_connect(voice_channel, guild=guild, bot=self.bot)
-                except Exception as e:
-                    print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\n{repr(e)}")
-                    await self.delete_data(guild.id)
-                    continue
-
                 message = None
 
                 if not data["text_channel_id"]:
@@ -277,6 +263,8 @@ class PlayerSession(commands.Cog):
                     except (disnake.NotFound, TypeError):
                         text_channel = None
                         data["message_id"] = None
+
+                voice_channel = self.bot.get_channel(data["voice_channel"])
 
                 if not text_channel:
                     data['static'] = False
@@ -320,6 +308,28 @@ class PlayerSession(commands.Cog):
                     except Exception as e:
                         print(f"{self.bot.user} - Falha ao obter mensagem: {repr(e)}\n"
                               f"channel_id: {text_channel.id} | message_id {data['message']}")
+
+                if not voice_channel:
+                    print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\nO canal de voz não existe...")
+                    try:
+                        await send_idle_embed(text_channel, bot=self.bot,
+                            text="Player finalizado pois o canal de voz não existe ou foi deletado.")
+                    except Exception:
+                        traceback.print_exc()
+                    await self.delete_data(guild.id)
+                    continue
+
+                try:
+                    can_connect(voice_channel, guild=guild, bot=self.bot)
+                except Exception as e:
+                    print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\n{repr(e)}")
+                    await self.delete_data(guild.id)
+                    try:
+                        await send_idle_embed(text_channel, bot=self.bot,
+                            text=f"O player foi finalizado devido a falta da permissão de conectar no canal {voice_channel.mention}.")
+                    except Exception:
+                        traceback.print_exc()
+                    continue
 
                 if data["purge_mode"] == SongRequestPurgeMode.on_player_start:
                     data["purge_mode"] = SongRequestPurgeMode.no_purge
