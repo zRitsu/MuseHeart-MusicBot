@@ -2018,10 +2018,10 @@ class LavalinkPlayer(wavelink.Player):
                                     else:
                                         await self.text_channel.send("Desarquivando o tópico.", delete_after=2)
 
-                                elif ((
-                                              self.text_channel.archive_timestamp - disnake.utils.utcnow()).total_seconds() / 60) < (
-                                thread_archive_time[self.text_channel.auto_archive_duration]):
-                                    await self.text_channel.send("Evitando o tópico auto-arquivar...", delete_after=2)
+                                #elif ((
+                                #              self.text_channel.archive_timestamp - disnake.utils.utcnow()).total_seconds() / 60) < (
+                                #thread_archive_time[self.text_channel.auto_archive_duration]):
+                                #    await self.text_channel.send("Evitando o tópico auto-arquivar...", delete_after=2)
 
                             elif not self.text_channel.permissions_for(
                                     self.guild.me).send_messages or not self.text_channel.permissions_for(
