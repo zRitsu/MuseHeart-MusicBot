@@ -26,7 +26,6 @@ import json
 import os
 import logging
 
-from disnake.ext import commands
 from typing import Any, Callable, Dict, Optional, Union
 from urllib.parse import quote
 
@@ -145,7 +144,7 @@ class Node:
         return self.stats.penalty.total
 
     @property
-    def headers(self) -> dict[str, str]:
+    def headers(self) -> Dict[str, str]:
         return {
             "Authorization": self.password,
             "User-Id": str(self.uid),
