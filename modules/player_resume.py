@@ -154,6 +154,7 @@ class PlayerSession(commands.Cog):
             "failed_tracks": failed_tracks,
             "prefix_info": player.prefix_info,
             "purge_mode": player.purge_mode,
+            "voice_state": player._voice_state
         }
 
         try:
@@ -384,6 +385,11 @@ class PlayerSession(commands.Cog):
                     print(f"{self.bot.user} - Falha ao criar player: {guild.name} [{guild.id}]\n{traceback.format_exc()}")
                     # await self.delete_data(guild.id)
                     continue
+
+                try:
+                    player._voice_state = data["voice_state"]
+                except KeyError:
+                    pass
 
                 try:
                     player.mini_queue_enabled = data["mini_queue_enabled"]
