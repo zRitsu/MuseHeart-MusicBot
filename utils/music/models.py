@@ -414,7 +414,6 @@ class LavalinkPlayer(wavelink.Player):
         self.is_resuming = False
         self.is_purging = False
         self.auto_pause = False
-
         self.last_channel: Optional[disnake.VoiceChannel] = None
         self._rpc_update_task: Optional[asyncio.Task] = None
         self._new_node_task: Optional[asyncio.Task] = None
@@ -478,6 +477,7 @@ class LavalinkPlayer(wavelink.Player):
         self.hints: cycle = []
         self.current_hint: str = ""
         self.last_data: dict = {}
+        self.check_skins()
         self.setup_features()
         self.setup_hints()
 
@@ -1029,6 +1029,19 @@ class LavalinkPlayer(wavelink.Player):
 
         random.shuffle(hints)
         self.hints = cycle(hints)
+
+    def check_skins(self):
+        if self.skin.startswith("> custom_skin: "):
+            if self.skin[15:] not in  self.custom_skin_data:
+                self.skin = self.bot.default_skin
+        elif self.skin not in self.bot.player_skins:
+            self.skin = self.bot.default_skin
+
+        if self.skin_static.startswith("> custom_skin: "):
+            if self.skin_static[15:] not in  self.custom_skin_static_data:
+                self.skin_static = self.bot.default_static_skin
+        elif self.skin_static not in self.bot.player_static_skins:
+            self.skin_static = self.bot.default_static_skin
 
     async def members_timeout(self, check: bool, force: bool = False, idle_timeout = None):
 

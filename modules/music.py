@@ -6,10 +6,11 @@ import pickle
 import re
 import traceback
 import asyncio
+from base64 import b64decode
 from copy import deepcopy
 from typing import Union, Optional
 from random import shuffle
-from urllib.parse import urlparse, parse_qs, quote
+from urllib.parse import urlparse, parse_qs
 
 import aiofiles
 import aiohttp
@@ -1427,6 +1428,14 @@ class Music(commands.Cog):
                     del global_data["listen_along_invites"][str(inter.channel.id)]
                     await self.bot.update_global_data(inter.guild_id, global_data, db_name=DBModel.guilds)
 
+            for n, s in global_data["custom_skins"].items():
+                if isinstance(s, str):
+                    global_data["custom_skins"][n] = pickle.loads(b64decode(s))
+
+            for n, s in global_data["custom_skins_static"].items():
+                if isinstance(s, str):
+                    global_data["custom_skins_static"][n] = pickle.loads(b64decode(s))
+
             player: LavalinkPlayer = bot.music.get_player(
                 guild_id=inter.guild_id,
                 cls=LavalinkPlayer,
@@ -1437,9 +1446,9 @@ class Music(commands.Cog):
                 node_id=node.identifier,
                 static=bool(static_player['channel']),
                 skin=bot.check_skin(skin),
+                skin_static=bot.check_static_skin(static_skin),
                 custom_skin_data=global_data["custom_skins"],
                 custom_skin_static_data=global_data["custom_skins_static"],
-                skin_static=bot.check_static_skin(static_skin),
                 extra_hints=self.extra_hints,
                 restrict_mode=guild_data['enable_restrict_mode'],
                 listen_along_invite=invite,
@@ -5384,6 +5393,14 @@ class Music(commands.Cog):
                     invite = None
                     del global_data["listen_along_invites"][str(message.author.voice.channel.id)]
                     await self.bot.update_global_data(message.guild.id, global_data, db_name=DBModel.guilds)
+
+            for n, s in global_data["custom_skins"].items():
+                if isinstance(s, str):
+                    global_data["custom_skins"][n] = pickle.loads(b64decode(s))
+
+            for n, s in global_data["custom_skins_static"].items():
+                if isinstance(s, str):
+                    global_data["custom_skins_static"][n] = pickle.loads(b64decode(s))
 
             player: LavalinkPlayer = self.bot.music.get_player(
                 guild_id=message.guild.id,

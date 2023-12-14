@@ -2,8 +2,10 @@
 from __future__ import annotations
 import asyncio
 import os
+import pickle
 import random
 import string
+from base64 import b64decode
 from typing import TYPE_CHECKING, Union, Optional
 import datetime
 import traceback
@@ -15,6 +17,7 @@ from disnake.ext import commands
 from utils.db import DBModel
 from utils.music.converters import perms_translations, time_format
 from utils.music.errors import GenericError, NoVoice
+from utils.music.interactions import SkinEditorMenu
 from utils.others import send_idle_embed, CustomContext, select_bot_pool, pool_command, CommandArgparse, \
     SongRequestPurgeMode, update_inter
 from utils.music.models import LavalinkPlayer
@@ -71,8 +74,14 @@ class SkinSelector(disnake.ui.View):
             self.skin_selected = [s.value for s in select_opts if s.default][0]
             self.static_skin_selected = [s.value for s in static_select_opts if s.default][0]
         else:
-            self.skin_selected = [s.value for s in global_select_opts if s.default][0]
-            self.static_skin_selected = [s.value for s in global_static_select_opts if s.default][0]
+            try:
+                self.skin_selected = [s.value for s in global_select_opts if s.default][0]
+            except IndexError:
+                self.skin_selected = self.ctx.bot.default_skin
+            try:
+                self.static_skin_selected = [s.value for s in global_static_select_opts if s.default][0]
+            except IndexError:
+                self.static_skin_selected = self.ctx.bot.default_static_skin
 
         self.rebuild_selects()
 
@@ -1407,6 +1416,17 @@ class MusicSettings(commands.Cog):
 
             player.skin = select_view.skin_selected
             player.skin_static = select_view.static_skin_selected
+
+            for n, s in global_data["custom_skins"].items():
+                if isinstance(s, str):
+                    global_data["custom_skins"][n] = pickle.loads(b64decode(s))
+
+            for n, s in global_data["custom_skins_static"].items():
+                if isinstance(s, str):
+                    global_data["custom_skins_static"][n] = pickle.loads(b64decode(s))
+
+            player.custom_skin_data = global_data["custom_skins"]
+            player.custom_skin_static_data = global_data["custom_skins_static"]
             player.setup_features()
 
             player.setup_hints()
@@ -1691,6 +1711,78 @@ class MusicSettings(commands.Cog):
             await inter.response.edit_message(embeds=embeds, view=None)
         else:
             await inter.send(embeds=embeds, ephemeral=True)
+
+    customskin_cd = commands.CooldownMapping.from_cooldown(1, 10, commands.BucketType.guild)
+    customskin__mc =commands.MaxConcurrency(1, per=commands.BucketType.guild, wait=False)
+
+    @commands.has_guild_permissions(administrator=True)
+    @commands.command(name="customskin", aliases=["setskin", "cskin", "cs", "ss"],
+                      description="Criar suas próprias skins/templates para usar no player de música.",
+                      cooldown=customskin_cd, max_concurrency=customskin__mc)
+    async def customskin_legacy(self, ctx: CustomContext):
+        await self.custom_skin.callback(self=self, inter=ctx)
+
+    @commands.slash_command(cooldown=customskin_cd, max_concurrency=customskin__mc,
+                            description=f"{desc_prefix}Criar suas próprias skins/templates para o player de música.",
+                            default_member_permissions=disnake.Permissions(administrator=True))
+    async def custom_skin(self, inter: disnake.AppCmdInter):
+
+        inter, bot = await select_bot_pool(inter, return_new=True)
+
+        if not bot:
+            return
+
+        await inter.response.defer()
+
+        global_data = await bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
+
+        view = SkinEditorMenu(inter, bot, global_data=global_data)
+        view.message = await inter.send(view=view, **view.build_embeds())
+        await view.wait()
+
+    @commands.Cog.listener("on_button_click")
+    async def editor_placeholders(self, inter: disnake.MessageInteraction):
+
+        if inter.data.custom_id != "skin_editor_placeholders" or not inter.guild:
+            return
+
+        await inter.send(
+            ephemeral=True,
+            embed=disnake.Embed(
+                color=self.bot.get_color(inter.guild.me),
+                description="### Placeholders para custom skins:\n```ansi\n"
+                            "[34;1m{track.title}[0m -> Nome da música\n"
+                            "[34;1m{track.title_25}[0m -> Nome da música (até 25 caracteres)\n"
+                            "[34;1m{track.title_42}[0m -> Nome da música (até 42 caracteres)\n"
+                            "[34;1m{track.title_25}[0m -> Nome da música (até 58 caracteres)\n"
+                            "[34;1m{track.url}[0m -> Link da música\n"
+                            "[34;1m{track.author}[0m -> Nome do Uploader/Artista da música\n"
+                            "[34;1m{track.duration}[0m -> Tempo/Duração da música\n"
+                            "[34;1m{track.thumb}[0m -> Link da miniatura/artowkr da música\n"
+                            "[34;1m{playlist.name}[0m -> Nome da playlist de origem da música\n"
+                            "[34;1m{playlist.url}[0m -> Link/Url da playlist de origem da música\n"
+                            "[34;1m{player.loop.mode}[0m -> Modo de repetição do player\n"
+                            "[34;1m{player.queue.size}[0m -> Quantidade de músicas na fila\n"
+                            "[34;1m{player.volume}[0m -> Volume do player\n"
+                            "[34;1m{player.autoplay}[0m -> Reprodução automática (Ativado/Desativado)\n"
+                            "[34;1m{player.nightcore}[0m -> Efeito nightcore (Ativado/Desativado)\n"
+                            "[34;1m{player.hint}[0m -> Dicas de uso do player\n"
+                            "[34;1m{player.log.text}[0m -> Log do player\n"
+                            "[34;1m{player.log.emoji}[0m -> Emoji do log do player\n"
+                            "[34;1m{requester.global_name}[0m -> Nome global do membro que pediu a música.\n"
+                            "[34;1m{requester.display_name}[0m -> Nome de exibição do membro que pediu a música.\n"
+                            "[34;1m{requester.mention}[0m -> Menção do membro que pediu a música\n"
+                            "[34;1m{requester.avatar}[0m -> Link do avatar do membro que pediu a música\n"
+                            "[34;1m{guild.color}[0m -> Cor do maior cargo do bot no servidor\n"
+                            "[34;1m{guild.icon}[0m -> Link do icone do servidor\n"
+                            "[34;1m{guild.name}[0m -> Nome do servidor\n"
+                            "[34;1m{guild.id}[0m -> ID do servidor\n"
+                            "[34;1m{queue_format}[0m -> Músicas da fila pré-formatada (use o botão de configurar "
+                            "placeholder caso queira alterar o estilo)\n"
+                            "[34;1m{track.number}[0m -> Número da posição da música na fila (funcional junto com "
+                            "o placeholder: [31;1m{queue_format}[0m)```"
+            )
+        )
 
 class RPCCog(commands.Cog):
 

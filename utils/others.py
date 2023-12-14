@@ -577,7 +577,7 @@ def music_source_emoji_id(id_: str):
 
     return "<:play:734221719774035968>"
 
-async def select_bot_pool(inter: Union[CustomContext, disnake.MessageInteraction], first=False, return_new=False, edit_original=False):
+async def select_bot_pool(inter: Union[CustomContext, disnake.MessageInteraction, disnake.AppCmdInter], first=False, return_new=False, edit_original=False):
 
     if isinstance(inter, CustomContext):
         if len(inter.bot.pool.bots) < 2:
