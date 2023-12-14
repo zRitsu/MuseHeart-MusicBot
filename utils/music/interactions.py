@@ -1724,7 +1724,7 @@ class SkinEditorModal(disnake.ui.Modal):
 class SkinEditorMenu(disnake.ui.View):
 
     def __init__(self, ctx: Union[CustomContext, disnake.AppCmdInter], bot: BotCore, global_data: dict):
-        super().__init__()
+        super().__init__(timeout=600)
         self.ctx = ctx
         self.bot = bot
         self.message: Optional[disnake.Message] = None
