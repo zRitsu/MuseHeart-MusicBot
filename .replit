@@ -10,7 +10,7 @@ hidden = ["venv", ".config", "**/__pycache__", "**/.mypy_cache", "**/*.pyc", "La
 
 # Specifies which nix channel to use when building the environment.
 [nix]
-channel = "unstable"
+channel = "stable-22_11"
 
 # The command to start the interpreter.
 #[interpreter]
