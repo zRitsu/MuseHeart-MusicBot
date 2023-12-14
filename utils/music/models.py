@@ -732,11 +732,11 @@ class LavalinkPlayer(wavelink.Player):
 
                     for p in self.node.players.values():
 
-                        node = p.bot.music.get_best_node()
+                        node = [n for n in self.bot.music.nodes.values() if n.identifier != self.node.identifier and n.available and n.is_available]
                         p.current = p.last_track
                         if node:
-                            await p.change_node(node)
-                            p.set_command_log(f"O player foi reconectado em um novo servidor de música: **{node.identifier}**.")
+                            await p.change_node(node[0].identifier)
+                            p.set_command_log(f"O player foi reconectado em um novo servidor de música: **{p.node.identifier}**.")
                             p.update = True
                         else:
                             try:
