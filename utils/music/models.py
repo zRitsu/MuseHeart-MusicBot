@@ -444,8 +444,8 @@ class LavalinkPlayer(wavelink.Player):
             f"o comando /fav_manager ou {self.prefix_info}favmanager.",
 
             "Dê uma nova cara para o player de música no servidor criando skins personalizadas. Experimente usando"
-            f"o comando /custom_skin ou {self.prefix_info}customskin (Apenas membros com permissão de gerenciar "
-            "servidor podem usar esse comando).",
+            f"o comando /custom_skin ou {self.prefix_info}customskin (Apenas membros com permissão de administrador "
+            "podem usar esse comando).",
 
             "É possível definir o status automático no canal de voz com informações sobre "
             "a música que está sendo tocada no momento. Experimente usando o comando /stage_announce ou "
