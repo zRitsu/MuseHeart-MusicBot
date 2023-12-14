@@ -100,12 +100,12 @@ Hospedando no seu próprio PC/VPS (windows/linux)
 
 ### Requisitos:
 
-* Python 3.8 ou superior:<br/>
+* Python 3.9, 3.10 ou 3.11<br/>
 [Download pela Microsoft Store](https://apps.microsoft.com/store/detail/9PJPW5LDXLZ5?hl=pt-br&gl=BR) (Recomendável para usuários do windows 10/11).<br/>
-[Download direto do site oficial](https://www.python.org/downloads/) (Marque esta opção ao instalar: **Add python to the PATH**)
+[Download direto do site oficial](https://www.python.org/downloads/release/python-3117/) (Marque esta opção ao instalar: **Add python to the PATH**)
 * [Git](https://git-scm.com/downloads) (Não escolha a versão portable)</br>
 
-* [JDK 11](https://www.azul.com/downloads) ou superior (Windows e Linux não é necessário instalar, ele é baixado automaticamente)</br>
+* [JDK 17](https://www.azul.com/downloads) ou superior (Windows e Linux não é necessário instalar, ele é baixado automaticamente)</br>
 
 `Nota: esta source requer no mínimo 512mb de RAM E 1Ghz de CPU para rodar normalmente (caso rode o Lavalink na mesma instância do bot considerando que o bot seja privado).`
 
