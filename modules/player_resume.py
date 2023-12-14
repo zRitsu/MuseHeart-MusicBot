@@ -312,8 +312,11 @@ class PlayerSession(commands.Cog):
                 if not voice_channel:
                     print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\nO canal de voz não existe...")
                     try:
-                        await send_idle_embed(text_channel, bot=self.bot,
-                            text="Player finalizado pois o canal de voz não existe ou foi deletado.")
+                        msg = "Player finalizado pois o canal de voz não existe ou foi deletado."
+                        if not data["skin_static"]:
+                            await text_channel.send(embed=disnake.Embed(description=msg, color=self.bot.get_color(guild.me)))
+                        else:
+                            await send_idle_embed(text_channel, bot=self.bot, text=msg)
                     except Exception:
                         traceback.print_exc()
                     await self.delete_data(guild.id)
@@ -325,8 +328,11 @@ class PlayerSession(commands.Cog):
                     print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\n{repr(e)}")
                     await self.delete_data(guild.id)
                     try:
-                        await send_idle_embed(text_channel, bot=self.bot,
-                            text=f"O player foi finalizado devido a falta da permissão de conectar no canal {voice_channel.mention}.")
+                        msg = f"O player foi finalizado devido a falta da permissão de conectar no canal {voice_channel.mention}."
+                        if not data["skin_static"]:
+                            await text_channel.send(embed=disnake.Embed(description=msg, color=self.bot.get_color(guild.me)))
+                        else:
+                            await send_idle_embed(text_channel, bot=self.bot, text=msg)
                     except Exception:
                         traceback.print_exc()
                     continue
