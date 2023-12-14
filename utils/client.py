@@ -738,6 +738,9 @@ class BotCore(commands.AutoShardedBot):
 
     def check_static_skin(self, skin: str):
 
+        if skin is None:
+            return self.default_static_skin
+
         if skin.startswith("> custom_skin: "):
             return skin
 
