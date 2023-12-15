@@ -730,11 +730,13 @@ class LavalinkPlayer(wavelink.Player):
 
                     await asyncio.sleep(3)
 
+                    current_identifier = str(self.node.identifier)
+
                     for player_id in list(self.node.players):
 
                         p = self.node.players[player_id]
 
-                        node = [n for n in self.bot.music.nodes.values() if n.identifier != self.node.identifier and n.available and n.is_available]
+                        node = [n for n in self.bot.music.nodes.values() if n.identifier != current_identifier and n.available and n.is_available]
                         p.current = p.last_track
                         if node:
                             await p.change_node(node[0].identifier)
@@ -746,8 +748,8 @@ class LavalinkPlayer(wavelink.Player):
                             except:
                                 pass
                             p._new_node_task = p.bot.loop.create_task(p._wait_for_new_node(
-                                f"O servidor **{p.node.identifier}** tomou ratelimit do youtube está indisponível "
-                                f"no momento (aguardando um novo servidor ficar disponível).", ignore_node=self.node.identifier))
+                                f"O servidor **{current_identifier}** tomou ratelimit do youtube está indisponível "
+                                f"no momento (aguardando um novo servidor ficar disponível).", ignore_node=current_identifier))
 
                     await self.node.destroy()
                     return
