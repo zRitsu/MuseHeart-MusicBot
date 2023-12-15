@@ -732,7 +732,7 @@ class LavalinkPlayer(wavelink.Player):
 
                     for player_id in list(self.node.players):
 
-                        p = self.bot.music.players[player_id]
+                        p = self.node.players[player_id]
 
                         node = [n for n in self.bot.music.nodes.values() if n.identifier != self.node.identifier and n.available and n.is_available]
                         p.current = p.last_track
