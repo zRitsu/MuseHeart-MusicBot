@@ -147,10 +147,12 @@ class Misc(commands.Cog):
 
             activities = cycle(activities)
 
+            ignore_sleep = False
+
             while True:
 
                 try:
-                    if self.bot._presence_loop_started:
+                    if self.bot._presence_loop_started and ignore_sleep is False:
                         await asyncio.sleep(self.bot.config["PRESENCE_INTERVAL"])
                 except AttributeError:
                     self.bot._presence_loop_started = True
@@ -163,7 +165,10 @@ class Misc(commands.Cog):
 
                 if not activity_name:
                     await asyncio.sleep(15)
+                    ignore_sleep = True
                     continue
+
+                ignore_sleep = False
 
                 if activity_data["type"] == "listening":
                     activity = disnake.Activity(
