@@ -78,7 +78,7 @@ def run_lavalink(
             pass
 
         if os.name == "nt":
-            dirs.append(os.path.realpath("./.java/zulu17.44.15-ca-jdk17.0.8-win_x64/bin/java"))
+            dirs.append(os.path.realpath("./.java/jdk-17.0.9/bin/java"))
             try:
                 shutil.rmtree("./.jabba")
             except:
@@ -98,7 +98,7 @@ def run_lavalink(
                     pass
 
             else:
-                dirs.append(os.path.realpath("./.java/jdk-13/bin/java"))
+                dirs.append(os.path.realpath("./.java/jdk-17.0.9/bin/java"))
                 try:
                     shutil.rmtree("./.jabba")
                 except:
@@ -119,9 +119,9 @@ def run_lavalink(
                     pass
 
                 if platform.architecture()[0] != "64bit":
-                    jdk_url = "https://cdn.azul.com/zulu/bin/zulu17.44.15-ca-jdk17.0.8-win_i686.zip"
+                    jdk_url = "https://download.bell-sw.com/java/17.0.9+11/bellsoft-jdk17.0.9+11-windows-i586.zip"
                 else:
-                    jdk_url = "https://cdn.azul.com/zulu/bin/zulu17.44.15-ca-jdk17.0.8-win_x64.zip"
+                    jdk_url = "https://download.bell-sw.com/java/17.0.9+11/bellsoft-jdk17.0.9+11-windows-amd64.zip"
 
                 jdk_filename = "java.zip"
 
@@ -132,7 +132,7 @@ def run_lavalink(
 
                 os.remove(jdk_filename)
 
-                java_cmd = os.path.realpath("./.java/zulu17.44.15-ca-jdk17.0.8-win_x64/bin/java")
+                java_cmd = os.path.realpath("./.java/jdk-17.0.9/bin/java")
 
             elif use_jabba:
 
@@ -152,11 +152,11 @@ def run_lavalink(
                 if not os.path.isdir("./.java"):
 
                     if platform.architecture()[0] != "64bit":
-                        jdk_url = "https://cdn.azul.com/zulu/bin/zulu17.44.15-ca-jdk17.0.8-linux_i686.tar.gz"
-                        java_cmd = os.path.realpath("./.java/zulu17.44.15-ca-jdk17.0.8-linux_i686/bin/java")
+                        jdk_url = "https://download.bell-sw.com/java/17.0.9+11/bellsoft-jdk17.0.9+11-linux-i586.tar.gz"
                     else:
-                        jdk_url = "https://cdn.azul.com/zulu/bin/zulu17.44.17-ca-crac-jdk17.0.8-linux_x64.tar.gz"
-                        java_cmd = os.path.realpath("./.java/zulu17.44.17-ca-crac-jdk17.0.8-linux_x64/bin/java")
+                        jdk_url = "https://download.bell-sw.com/java/17.0.9+11/bellsoft-jdk17.0.9+11-linux-amd64.tar.gz"
+
+                    java_cmd = os.path.realpath("./.java/jdk-17.0.9/bin/java")
 
                     jdk_filename = "java.tar.gz"
 
@@ -174,9 +174,7 @@ def run_lavalink(
                     os.remove(f"./{jdk_filename}")
 
                 else:
-                    java_cmd = os.path.realpath("./.java/zulu17.44.15-ca-jdk17.0.8-linux_i686/bin/java" \
-                        if platform.architecture()[0] != "64bit" else \
-                        "./.java/zulu17.44.17-ca-crac-jdk17.0.8-linux_x64/bin/java")
+                    java_cmd = os.path.realpath("./.java/jdk-17.0.9/bin/java")
 
     clear_plugins = False
 
