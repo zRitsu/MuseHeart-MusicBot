@@ -124,7 +124,7 @@ class Node:
         if self.version == 4 and not self.session_id:
             return False
 
-        return self._websocket.is_connected and self.available
+        return self._websocket.is_connected and self.available and not self._closing
 
     def close(self) -> None:
         """Close the node and make it unavailable."""

@@ -610,10 +610,9 @@ class Player:
         self.node.open()
 
         if self.node != node:
-            old = self.node
-            del old.players[self.guild_id]
+            del self.node.players[self.guild_id]
             if self.node.version == 3:
-                await old._send(op='destroy', guildId=str(self.guild_id))
+                await self.node._send(op='destroy', guildId=str(self.guild_id))
             elif self.node.session_id:
                 try:
                     uri: str = f"{self.node.rest_uri}/v4/sessions/{self.node.session_id}/players/{self.guild_id}"
