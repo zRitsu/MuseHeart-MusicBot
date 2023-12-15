@@ -730,7 +730,9 @@ class LavalinkPlayer(wavelink.Player):
 
                     await asyncio.sleep(3)
 
-                    for p in self.node.players.values():
+                    for player_id in list(self.node.players):
+
+                        p = self.bot.music.players[player_id]
 
                         node = [n for n in self.bot.music.nodes.values() if n.identifier != self.node.identifier and n.available and n.is_available]
                         p.current = p.last_track
