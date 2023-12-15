@@ -67,10 +67,40 @@ class Misc(commands.Cog):
         except AttributeError:
             pass
 
-        if "{players_count}" in text:
-            if not (active_players:=[p for p in self.bot.music.players.values() if not p.auto_pause and not p.paused]):
-                return ""
-            text = text.replace("{players_count}", str(len(active_players)))
+        if [i for i in ("{players_count}", "{players_count_allbotchannels}", "{players_count_allbotservers}") if i in text]:
+
+            channels = set()
+            guilds = set()
+
+            for bot in self.bot.pool.bots:
+
+                player_count = 0
+
+                for player in bot.music.players.values():
+                    if not player.auto_pause and not player.paused:
+                        if bot == self.bot:
+                            player_count += 1
+                        try:
+                            vc = player.guild.me.voice.channel
+                        except AttributeError:
+                            continue
+                        channels.add(vc.id)
+                        guilds.add(player.guild.id)
+
+                if "{players_count}" in text:
+                    if not player_count:
+                        return
+                    text = text.replace("{players_count}", str(player_count))
+
+            if "{players_count_allbotchannels}" in text:
+                if not channels:
+                    return
+                text = text.replace("{players_count_allbotchannels}", str(len(channels)))
+
+            if "{players_count_allbotservers}" in text:
+                if not guilds:
+                    return
+                text = text.replace("{players_count_allbotservers}", str(len(guilds)))
 
         return text \
             .replace("{users}", f'{len([m for m in self.bot.users if not m.bot]):,}'.replace(",", ".")) \
