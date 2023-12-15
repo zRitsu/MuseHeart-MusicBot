@@ -1318,6 +1318,9 @@ class LavalinkPlayer(wavelink.Player):
                 if t.duration < 90000:
                     continue
 
+                if track.ytid and track.ytid == t.ytid:
+                    continue
+
                 if not isinstance(t, PartialTrack):
                     t = LavalinkTrack(id_=t.id, info=t.info, autoplay=True, requester=self.bot.user.id)
 
