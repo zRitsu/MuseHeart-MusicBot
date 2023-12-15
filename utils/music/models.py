@@ -747,7 +747,7 @@ class LavalinkPlayer(wavelink.Player):
                                 pass
                             p._new_node_task = p.bot.loop.create_task(p._wait_for_new_node(
                                 f"O servidor **{p.node.identifier}** tomou ratelimit do youtube está indisponível "
-                                f"no momento (aguardando um novo servidor ficar disponível).", ignore_node=p.node.identifier))
+                                f"no momento (aguardando um novo servidor ficar disponível).", ignore_node=self.node.identifier))
 
                     await self.node.destroy()
                     return
