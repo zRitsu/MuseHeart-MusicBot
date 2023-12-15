@@ -742,6 +742,7 @@ class LavalinkPlayer(wavelink.Player):
                             await p.change_node(node[0].identifier)
                             p.set_command_log(f"O player foi reconectado em um novo servidor de música: **{p.node.identifier}**.")
                             p.update = True
+                            p.locked = False
                         else:
                             try:
                                 p._new_node_task.cancel()
