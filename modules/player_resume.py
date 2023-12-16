@@ -248,7 +248,7 @@ class PlayerSession(commands.Cog):
 
                 if not guild:
                     print(f"{self.bot.user} - Player Ignorado: {data['_id']} | Servidor inexistente...")
-                    await self.delete_data(data['_id'])
+                    #await self.delete_data(data['_id'])
                     continue
 
                 message = None
@@ -320,14 +320,14 @@ class PlayerSession(commands.Cog):
                             await send_idle_embed(text_channel, bot=self.bot, text=msg)
                     except Exception:
                         traceback.print_exc()
-                    await self.delete_data(guild.id)
+                    #await self.delete_data(guild.id)
                     continue
 
                 try:
                     can_connect(voice_channel, guild=guild, bot=self.bot)
                 except Exception as e:
                     print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\n{repr(e)}")
-                    await self.delete_data(guild.id)
+                    #await self.delete_data(guild.id)
                     try:
                         msg = f"O player foi finalizado devido a falta da permissão de conectar no canal {voice_channel.mention}."
                         if not data["skin_static"]:
