@@ -741,17 +741,7 @@ def queue_track_index(inter: disnake.AppCmdInter, bot: BotCore, query: str, matc
 
 async def update_vc_status(bot, channel: disnake.VoiceChannel, status: str = ""):
 
-    return
-
-    x = bot.config.get("X_SUPER_PROPERTIES")
-
-    if not x:
-        return
-
-    headers = {
-        "Authorization": f"Bot {bot.http.token}",
-        "X-Super-Properties": x
-    }
+    headers = {"Authorization": f"Bot {bot.http.token}"}
 
     url = f'https://discord.com/api/v9/channels/{channel.id}/voice-status'
 

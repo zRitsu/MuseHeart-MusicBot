@@ -322,9 +322,6 @@ class Music(commands.Cog):
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
-        if isinstance(player.guild.me.voice, disnake.VoiceChannel):
-            raise GenericError("**Esse sistema está desativado temporariamente em canais de voz (Experimente ativar em palcos).**")
-
         if not author.guild_permissions.manage_guild and not (await bot.is_owner(author)):
             raise GenericError("**Você não possui permissão de gerenciar servidor para ativar/desativar esse sistema.**")
 
