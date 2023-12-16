@@ -1882,8 +1882,10 @@ class LavalinkPlayer(wavelink.Player):
                             self.message = await self.text_channel.send(allowed_mentions=self.allowed_mentions, **self.last_data)
 
             else:
-                await self.destroy_message()
-
+                try:
+                    self.message_updater_task.cancel()
+                except:
+                    pass
                 self.message = await self.text_channel.send(allowed_mentions=self.allowed_mentions, **self.last_data)
 
             self.updating = False
