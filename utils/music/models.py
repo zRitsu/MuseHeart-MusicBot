@@ -443,7 +443,7 @@ class LavalinkPlayer(wavelink.Player):
             "copiar e colar os links pra tocar ou adicionar na fila as suas músicas favoritas. Experimente usando"
             f"o comando /fav_manager ou {self.prefix_info}favmanager.",
 
-            "Dê uma nova cara para o player de música no servidor criando skins personalizadas. Experimente usando"
+            "Dê uma nova cara para o player de música no servidor criando skins personalizadas. Experimente usando "
             f"o comando /custom_skin ou {self.prefix_info}customskin (Apenas membros com permissão de administrador "
             "podem usar esse comando).",
 
