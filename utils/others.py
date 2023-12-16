@@ -739,7 +739,7 @@ def queue_track_index(inter: disnake.AppCmdInter, bot: BotCore, query: str, matc
 
     return tracklist
 
-async def update_vc_status(bot, channel: disnake.VoiceChannel, status: str = ""):
+async def update_vc_status(bot: BotCore, channel: disnake.VoiceChannel, status: str = ""):
 
     headers = {"Authorization": f"Bot {bot.http.token}"}
 

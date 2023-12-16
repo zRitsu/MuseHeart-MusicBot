@@ -1766,7 +1766,7 @@ class LavalinkPlayer(wavelink.Player):
 
             retries = 3
 
-            while retries > 0:
+            while retries:
 
                 try:
                     await update_vc_status(self.bot, self.guild.me.voice.channel, msg)
@@ -1778,7 +1778,7 @@ class LavalinkPlayer(wavelink.Player):
                         self.update = True
                         return
                     else:
-                        traceback.print_exc()
+                        print(repr(e))
                         retries -= 1
                         await asyncio.sleep(1)
 
