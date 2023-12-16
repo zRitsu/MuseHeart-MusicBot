@@ -64,6 +64,7 @@ DEFAULT_CONFIG = {
     "PLAYER_INFO_BACKUP_INTERVAL": 45,
     "PLAYER_SESSIONS_MONGODB": False,
     "QUEUE_MAX_ENTRIES": 0,
+    "ENABLE_DEFER_TYPING": True,
 
     ##############################################
     ### Sistema de música - Suporte ao spotify ###
@@ -209,6 +210,7 @@ def load_config():
         "ENABLE_DISCORD_URLS_PLAYBACK",
         "PLAYER_SESSIONS_MONGODB",
         "SENSITIVE_INFO_WARN",
+        "ENABLE_DEFER_TYPING",
 
         "BANS_INTENT",
         "DM_MESSAGES_INTENT",
