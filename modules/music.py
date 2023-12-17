@@ -6,6 +6,7 @@ import pickle
 import re
 import traceback
 import asyncio
+import zlib
 from base64 import b64decode
 from copy import deepcopy
 from typing import Union, Optional
@@ -1229,7 +1230,12 @@ class Music(commands.Cog):
 
             try:
                 async with aiofiles.open(f"./local_database/saved_queues_v1/users/{inter.author.id}.pkl", 'rb') as f:
-                    data = pickle.loads(await f.read())
+                    f_content = await f.read()
+                    try:
+                        f_content = zlib.decompress(f_content)
+                    except zlib.error:
+                        pass
+                    data = pickle.loads(f_content)
             except FileNotFoundError:
                 raise GenericError("**A sua fila salva já foi excluída...**")
 
@@ -3133,11 +3139,15 @@ class Music(commands.Cog):
             os.makedirs(f"./local_database/saved_queues_v1/users")
 
         async with aiofiles.open(f"./local_database/saved_queues_v1/users/{inter.author.id}.pkl", "wb") as f:
-            await f.write(pickle.dumps({
-                "tracks": tracks,
-                "created_at": disnake.utils.utcnow(),
-                "guild_id": inter.guild_id,
-            }))
+            await f.write(
+                zlib.compress(
+                    pickle.dumps(
+                        {
+                            "tracks": tracks, "created_at": disnake.utils.utcnow(), "guild_id": inter.guild_id
+                        }
+                    )
+                )
+            )
 
         await inter.response.defer(ephemeral=True)
 

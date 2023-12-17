@@ -6,7 +6,8 @@ import os
 import pickle
 import shutil
 import traceback
-from base64 import b64encode, b64decode
+import zlib
+from base64 import b64decode
 from typing import Union
 
 import aiofiles
@@ -531,7 +532,11 @@ class PlayerSession(commands.Cog):
                 except KeyError:
                     await self.delete_data(int(d["_id"]))
                     continue
-                guild_data.append(pickle.loads(b64decode(data)))
+                try:
+                    data = zlib.decompress(data)
+                except zlib.error:
+                    data = b64decode(data)
+                guild_data.append(pickle.loads(data))
 
         else:
             try:
@@ -539,15 +544,20 @@ class PlayerSession(commands.Cog):
             except FileNotFoundError:
                 return guild_data
 
-            for file in files:
+            for file_content in files:
 
-                if not file.endswith(".pkl"):
+                if not file_content.endswith(".pkl"):
                     continue
 
-                guild_id = file[:-4]
+                guild_id = file_content[:-4]
 
                 async with aiofiles.open(f'./local_database/player_sessions/{self.bot.user.id}/{guild_id}.pkl', 'rb') as f:
-                    data = pickle.loads(await f.read())
+                    file_content = await f.read()
+                    try:
+                        file_content = zlib.decompress(file_content)
+                    except zlib.error:
+                        pass
+                    data = pickle.loads(file_content)
 
                 if data:
                     guild_data.append(data)
@@ -569,7 +579,7 @@ class PlayerSession(commands.Cog):
             if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
                 await self.bot.pool.mongo_database.update_data(
                     id_=str(player.guild.id),
-                    data={"data": b64encode(pickle.dumps(data)).decode('utf-8')},
+                    data={"data": zlib.compress(pickle.dumps(data))},
                     collection="player_sessions",
                     db_name=str(self.bot.user.id)
                 )
@@ -582,7 +592,7 @@ class PlayerSession(commands.Cog):
 
             try:
                 async with aiofiles.open(f"{path}.pkl", "wb") as f:
-                    await f.write(pickle.dumps(data))
+                    await f.write(zlib.compress(pickle.dumps(data)))
             except Exception:
                 traceback.print_exc()
                 try:
