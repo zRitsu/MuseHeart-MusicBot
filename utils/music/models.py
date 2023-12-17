@@ -389,7 +389,6 @@ class LavalinkPlayer(wavelink.Player):
         self.filters: dict = {}
         self.idle_task: Optional[asyncio.Task] = None
         self.members_timeout_task: Optional[asyncio.Task] = None
-        self.idle_timeout = self.bot.config["IDLE_TIMEOUT"]
         self.idle_endtime: Optional[datetime.datetime] = None
         self.hint_rate = self.bot.config["HINT_RATE"]
         self.command_log: str = ""
@@ -1102,7 +1101,7 @@ class LavalinkPlayer(wavelink.Player):
                     pass
                 return
 
-            await asyncio.sleep(idle_timeout or self.idle_timeout)
+            await asyncio.sleep(idle_timeout or self.bot.config["IDLE_TIMEOUT"])
 
             if [m for m in vc.members if not m.bot]:
                 try:
@@ -1387,7 +1386,7 @@ class LavalinkPlayer(wavelink.Player):
 
                 if not track:
                     await self.stop()
-                    self.idle_endtime = disnake.utils.utcnow() + datetime.timedelta(seconds=self.idle_timeout)
+                    self.idle_endtime = disnake.utils.utcnow() + datetime.timedelta(seconds=self.bot.config["IDLE_TIMEOUT"])
                     self.last_track = None
                     self.idle_task = self.bot.loop.create_task(self.idling_mode())
                     return
@@ -1530,7 +1529,7 @@ class LavalinkPlayer(wavelink.Player):
                     description=f"**As músicas acabaram... Use um dos comandos abaixo para adicionar músicas ou parar "
                                 f"o player.**\n\n`{cmds}`\n\n"
                                 f"**Nota:** `O Player será desligado automaticamente` "
-                                f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=self.idle_timeout)).timestamp())}:R> "
+                                f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=self.bot.config['IDLE_TIMEOUT'])).timestamp())}:R> "
                                 f"`caso nenhum comando seja usado...`",
                     color=self.bot.get_color(self.guild.me)
                 )
@@ -1607,7 +1606,7 @@ class LavalinkPlayer(wavelink.Player):
         embed = disnake.Embed(
             description=f"**Não há músicas na fila... Adicione uma música ou use uma das opções abaixo.\n\n"
                         f"Nota:** `O Player será desligado automaticamente` "
-                        f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=self.idle_timeout)).timestamp())}:R> "
+                        f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=self.bot.config['IDLE_TIMEOUT'])).timestamp())}:R> "
                         f"`caso nenhuma ação seja executada...`",
             color=self.bot.get_color(self.guild.me)
         )
@@ -1663,7 +1662,7 @@ class LavalinkPlayer(wavelink.Player):
         except:
             pass
 
-        await asyncio.sleep(self.idle_timeout)
+        await asyncio.sleep(self.bot.config["IDLE_TIMEOUT"])
 
         msg = "💤 **⠂O player foi desligado por inatividade...**"
 
