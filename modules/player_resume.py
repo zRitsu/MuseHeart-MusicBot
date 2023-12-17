@@ -162,7 +162,8 @@ class PlayerSession(commands.Cog):
             "failed_tracks": failed_tracks,
             "prefix_info": player.prefix_info,
             "purge_mode": player.purge_mode,
-            "voice_state": player._voice_state
+            "voice_state": player._voice_state,
+            "time": disnake.utils.utcnow(),
         }
 
         try:
@@ -256,7 +257,8 @@ class PlayerSession(commands.Cog):
 
                 if not guild:
                     print(f"{self.bot.user} - Player Ignorado: {data['_id']} | Servidor inexistente...")
-                    #await self.delete_data(data['_id'])
+                    if (disnake.utils.utcnow() - data.get("time", disnake.utils.utcnow())).total_seconds() > 172800:
+                        await self.delete_data(data["_id"])
                     continue
 
                 message = None
@@ -328,14 +330,16 @@ class PlayerSession(commands.Cog):
                             await send_idle_embed(text_channel, bot=self.bot, text=msg)
                     except Exception:
                         traceback.print_exc()
-                    #await self.delete_data(guild.id)
+                    if (disnake.utils.utcnow() - data.get("time", disnake.utils.utcnow())).total_seconds() > 172800:
+                        await self.delete_data(guild.id)
                     continue
 
                 try:
                     can_connect(voice_channel, guild=guild, bot=self.bot)
                 except Exception as e:
                     print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\n{repr(e)}")
-                    #await self.delete_data(guild.id)
+                    if not data.get("autoplay") and (disnake.utils.utcnow() - data.get("time", disnake.utils.utcnow())).total_seconds() > 172800:
+                        await self.delete_data(guild.id)
                     try:
                         msg = f"O player foi finalizado devido a falta da permissão de conectar no canal {voice_channel.mention}."
                         if not data["skin_static"]:
@@ -392,7 +396,8 @@ class PlayerSession(commands.Cog):
                     )
                 except Exception:
                     print(f"{self.bot.user} - Falha ao criar player: {guild.name} [{guild.id}]\n{traceback.format_exc()}")
-                    # await self.delete_data(guild.id)
+                    if not data.get("autoplay") and (disnake.utils.utcnow() - data.get("time", disnake.utils.utcnow())).total_seconds() > 172800:
+                        await self.delete_data(guild.id)
                     continue
 
                 try:
