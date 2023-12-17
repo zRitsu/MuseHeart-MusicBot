@@ -1107,7 +1107,7 @@ class LavalinkPlayer(wavelink.Player):
                 return
 
             if not idle_timeout:
-                idle_timeout = self.bot.config["POWERSAVE_MODE_TIMEOUT"] if self.auto_pause else self.bot.config["IDLE_TIMEOUT"]
+                idle_timeout = self.bot.config["WAIT_FOR_MEMBERS_TIMEOUT"]
 
             await asyncio.sleep(idle_timeout)
 
