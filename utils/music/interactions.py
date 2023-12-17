@@ -793,7 +793,7 @@ class FavModalAdd(disnake.ui.Modal):
 
             self.view.guild_data = await self.view.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
-            if not self.view.guild_data["player_controller"]["channel"] or not self.bot.get_channel(
+            if not self.view.guild_data["player_controller"]["channel"] or not self.view.bot.get_channel(
                     int(self.view.guild_data["player_controller"]["channel"])):
                 await inter.edit_original_message("**Não há player configurado no servidor! Use o comando /setup**")
                 return
