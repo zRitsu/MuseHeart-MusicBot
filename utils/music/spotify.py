@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import re
 from typing import Optional, TYPE_CHECKING
+from urllib.parse import quote
 
 import spotipy
 from spotipy import SpotifyClientCredentials
@@ -149,7 +150,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
             thumb = ""
 
         track = PartialTrack(
-            uri=t["external_urls"]["spotify"],
+            uri=t["external_urls"].get("spotify", f"https://www.youtube.com/results?search_query={quote(t['name'])}"),
             author=t["artists"][0]["name"] or "Unknown Artist",
             title=t["name"],
             thumb=thumb,
@@ -170,7 +171,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
 
         if t["artists"][0]["name"]:
             track.info["extra"]["authors"] = [fix_characters(i['name']) for i in t['artists'] if f"feat. {i['name'].lower()}" not in t['name'].lower()]
-            track.info["extra"]["authors_md"] = ", ".join(f"[`{fix_characters(a['name'])}`]({a['external_urls']['spotify']})" for a in t['artists'])
+            track.info["extra"]["authors_md"] = ", ".join(f"[`{fix_characters(a['name'])}`](" + a['external_urls'].get('spotify', f'https://www.youtube.com/results?search_query={quote(t["name"])})') for a in t['artists'])
         else:
             track.info["extra"]["authors"] = ["Unknown Artist"]
             track.info["extra"]["authors_md"] = "`Unknown Artist`"
