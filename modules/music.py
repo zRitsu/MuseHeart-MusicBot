@@ -1027,7 +1027,7 @@ class Music(commands.Cog):
             for k, v in user_data["fav_links"].items():
                 db_favs[f"> fav: {k}"] = v
 
-            if os.path.isfile(f"./local_database/saved_queues_v1_v1/users/{inter.author.id}.pkl"):
+            if os.path.isfile(f"./local_database/saved_queues_v1/users/{inter.author.id}.pkl"):
                 db_favs["> svq: Fila Salva"] = ">> saved_queue <<"
 
             if not db_favs:
