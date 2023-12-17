@@ -627,7 +627,7 @@ class LavalinkPlayer(wavelink.Player):
             track = self.last_track
             embed = disnake.Embed(
                 description=f"**Falha ao reproduzir música:\n[{track.title}]({track.uri or track.search_uri})** ```java\n{event.message}```\n"
-                            f"**Causa:** ```java\n{event.cause}```\n"
+                            f"**Causa:** ```java\n{event.cause[:200]}```\n"
                             f"**Nível:** `{event.severity}`\n"
                             f"**Servidor de música:** `{self.node.identifier}`",
                 color=disnake.Colour.red())
@@ -661,7 +661,7 @@ class LavalinkPlayer(wavelink.Player):
 
             if self.locked:
                 self.set_command_log(
-                    text=f"A reprodução da música falhou (tentando tocar novamente): [`{fix_characters(track.title, 15)}`]({track.uri or track.search_uri}). **Causa:** `{event.cause}`")
+                    text=f"A reprodução da música falhou (tentando tocar novamente): [`{fix_characters(track.title, 15)}`]({track.uri or track.search_uri}). **Causa:** `{event.cause[:50]}`")
                 self.update = True
                 await send_report()
                 return
@@ -676,7 +676,10 @@ class LavalinkPlayer(wavelink.Player):
 
             await self.bot.wait_until_ready()
 
-            if event.error == "This IP address has been blocked by YouTube (429)" or (error_403 := event.cause.startswith("java.lang.RuntimeException: Not success status code: 403")):
+            if (event.error == "This IP address has been blocked by YouTube (429)" or
+                event.message == "Video returned by YouTube isn't what was requested" or
+                (error_403 := event.cause.startswith("java.lang.RuntimeException: Not success status code: 403"))
+            ):
 
                 if error_403 and self.node.retry_403:
 
