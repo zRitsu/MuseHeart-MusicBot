@@ -50,6 +50,7 @@ DEFAULT_CONFIG = {
     "DEFAULT_IDLING_SKIN": "default",
     "VOTE_SKIP_AMOUNT": 3,
     "IDLE_TIMEOUT": 180,
+    "POWERSAVE_MODE_TIMEOUT": 180,
     "MAX_USER_FAVS": 10,
     "USER_FAV_MAX_NAME_LENGTH": 35,
     "USER_FAV_MAX_URL_LENGTH": 90,
@@ -171,6 +172,7 @@ def load_config():
     for i in [
         "MAX_USER_FAVS",
         "IDLE_TIMEOUT",
+        "POWERSAVE_MODE_TIMEOUT",
         "VOTE_SKIP_AMOUNT",
         "LAVALINK_ADDITIONAL_SLEEP",
         "LAVALINK_INITIAL_RAM",
@@ -243,6 +245,12 @@ def load_config():
             raise Exception(f"Você usou uma configuração inválida! {i}: {CONFIG[i]}")
 
     CONFIG["RPC_SERVER"] = CONFIG["RPC_SERVER"].replace("$PORT", CONFIG.get("PORT") or environ.get("PORT", "80"))
+
+    if CONFIG["IDLE_TIMEOUT"] < 60:
+        CONFIG["IDLE_TIMEOUT"] = 60
+
+    if CONFIG["POWERSAVE_MODE_TIMEOUT"] < 60:
+        CONFIG["POWERSAVE_MODE_TIMEOUT"] = 60
 
     if CONFIG["PRESENCE_INTERVAL"] < 300:
         CONFIG["PRESENCE_INTERVAL"] = 300
