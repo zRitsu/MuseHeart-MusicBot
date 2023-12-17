@@ -7,7 +7,7 @@ import pickle
 import shutil
 import traceback
 import zlib
-from base64 import b64decode
+from base64 import b64decode, b64encode
 from typing import Union
 
 import aiofiles
@@ -532,10 +532,11 @@ class PlayerSession(commands.Cog):
                 except KeyError:
                     await self.delete_data(int(d["_id"]))
                     continue
+                data = b64decode(data)
                 try:
                     data = zlib.decompress(data)
                 except zlib.error:
-                    data = b64decode(data)
+                    pass
                 guild_data.append(pickle.loads(data))
 
         else:
@@ -579,7 +580,7 @@ class PlayerSession(commands.Cog):
             if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
                 await self.bot.pool.mongo_database.update_data(
                     id_=str(player.guild.id),
-                    data={"data": zlib.compress(pickle.dumps(data))},
+                    data={"data": b64encode(zlib.compress(pickle.dumps(data))).decode('utf-8')},
                     collection="player_sessions",
                     db_name=str(self.bot.user.id)
                 )
