@@ -602,17 +602,10 @@ class PlayerSession(commands.Cog):
 
     async def delete_data(self, player: Union[LavalinkPlayer, int]):
 
-        if not isinstance(player, LavalinkPlayer):
-
-            guild_id = int(player)
-
-            try:
-                self.bot.music.players[guild_id]
-            except KeyError:
-                pass
-
-        else:
+        try:
             guild_id = player.guild.id
+        except AttributeError:
+            guild_id = int(player)
 
         if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
             await self.bot.pool.mongo_database.delete_data(id_=str(guild_id), db_name=str(self.bot.user.id), collection="player_sessions")
