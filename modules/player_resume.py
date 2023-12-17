@@ -607,9 +607,9 @@ class PlayerSession(commands.Cog):
             guild_id = int(player)
 
             try:
-                player = self.bot.music.players[guild_id]
+                self.bot.music.players[guild_id]
             except KeyError:
-                player = None
+                pass
 
         else:
             guild_id = player.guild.id
