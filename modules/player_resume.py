@@ -54,8 +54,16 @@ class PlayerSession(commands.Cog):
     async def queue_updater_task(self, player: LavalinkPlayer):
 
         while True:
-            await asyncio.sleep(self.bot.config["PLAYER_INFO_BACKUP_INTERVAL"])
-            await self.save_info(player)
+
+            if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
+                await asyncio.sleep(self.bot.config["PLAYER_INFO_BACKUP_INTERVAL_MONGO"])
+            else:
+                await asyncio.sleep(self.bot.config["PLAYER_INFO_BACKUP_INTERVAL"])
+
+            try:
+                await self.save_info(player)
+            except:
+                traceback.print_exc()
 
     async def save_info(self, player: LavalinkPlayer):
 
@@ -380,6 +388,7 @@ class PlayerSession(commands.Cog):
                         volume=int(data["volume"]),
                         prefix=data["prefix_info"],
                         purge_mode=data["purge_mode"],
+                        session_resuming=True,
                     )
                 except Exception:
                     print(f"{self.bot.user} - Falha ao criar player: {guild.name} [{guild.id}]\n{traceback.format_exc()}")
@@ -485,6 +494,7 @@ class PlayerSession(commands.Cog):
                     else:
                         position = int(float(data.get("position", 0)))
                         await player.process_next(start_position=position)
+                        player._session_resuming = False
                 except Exception:
                     print(f"{self.bot.user} - Falha na reprodução da música ao retomar player do servidor {guild.name} [{guild.id}]:\n{traceback.format_exc()}")
                     continue

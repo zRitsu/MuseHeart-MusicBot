@@ -413,9 +413,11 @@ class LavalinkPlayer(wavelink.Player):
         self.is_resuming = False
         self.is_purging = False
         self.auto_pause = False
+        self._session_resuming = kwargs.pop("session_resuming", False)
         self.last_channel: Optional[disnake.VoiceChannel] = None
         self._rpc_update_task: Optional[asyncio.Task] = None
         self._new_node_task: Optional[asyncio.Task] = None
+        self._queue_updater_task: Optional[asyncio.Task] = None
 
         stage_template = kwargs.pop("stage_title_template", None)
 
@@ -2184,6 +2186,11 @@ class LavalinkPlayer(wavelink.Player):
             pass
 
         try:
+            self._queue_updater_task.cancel()
+        except:
+            pass
+
+        try:
             vc = self.guild.voice_client.channel
         except:
             vc = self.last_channel
@@ -2614,20 +2621,28 @@ class LavalinkPlayer(wavelink.Player):
 
     async def process_save_queue(self, create_task=True):
 
+        if self._session_resuming:
+            await asyncio.sleep(10)
+            self._session_resuming = False
+            return
+
+        if self._queue_updater_task and self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
+            return
+
         cog = self.bot.get_cog("PlayerSession")
 
         if not cog:
             return
 
         try:
-            self.queue_updater_task.cancel()
+            self._queue_updater_task.cancel()
         except:
             pass
 
         await cog.save_info(self)
 
         if create_task:
-            self.queue_updater_task = self.bot.loop.create_task(cog.queue_updater_task(self))
+            self._queue_updater_task = self.bot.loop.create_task(cog.queue_updater_task(self))
 
     async def track_end(self):
 
