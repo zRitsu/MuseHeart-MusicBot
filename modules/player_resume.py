@@ -649,6 +649,8 @@ class PlayerSession(commands.Cog):
             print(f"❌ - {self.bot.user} - Salvamento cancelado: {repr(e)}")
 
     async def delete_data_mongo(self, id_: Union[LavalinkPlayer, int]):
+        if not self.bot.config["MONGO"]:
+            return
         await self.bot.pool.mongo_database.delete_data(id_=str(id_), db_name=str(self.bot.user.id),
                                                        collection="player_sessions")
 
