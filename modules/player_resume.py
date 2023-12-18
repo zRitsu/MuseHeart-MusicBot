@@ -545,7 +545,7 @@ class PlayerSession(commands.Cog):
 
     async def get_player_sessions_mongo(self):
 
-        if not self.bot.config["PLAYER_SESSIONS_MONGODB"] or not self.bot.config["MONGO"]:
+        if not self.bot.config["MONGO"]:
             return []
 
         guild_data = []
