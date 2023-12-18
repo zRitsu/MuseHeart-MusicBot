@@ -416,7 +416,7 @@ class FavModalImport(disnake.ui.Modal):
             )
             return
 
-        raise GenericError(f"Modo atual ainda não implementado: {self.view.mode}")
+        raise GenericError(f"Modo atual ainda não implementado: {self.view.mode} | {type(self.view.mode)}")
 
     async def callback(self, inter: disnake.ModalInteraction, /) -> None:
 
@@ -636,7 +636,7 @@ class FavModalImport(disnake.ui.Modal):
                 self.view.log = f"A integração [`{name}`]({json_data[name]}) foi importada com sucesso."
 
         else:
-            raise GenericError(f"**Modo ainda não implementado: {self.view.mode}**")
+            raise GenericError(f"**Modo ainda não implementado: {self.view.mode} | {type(self.view.mode)}**")
 
         if not isinstance(self.view.ctx, CustomContext):
             await self.view.ctx.edit_original_message(embed=self.view.build_embed(), view=self.view)
@@ -723,7 +723,7 @@ class FavModalAdd(disnake.ui.Modal):
             )
             return
 
-        raise GenericError(f"**Modo ainda não implementado: {self.view.mode}**")
+        raise GenericError(f"**Modo ainda não implementado: {self.view.mode} | {type(self.view.mode)}**")
 
 
     async def callback(self, inter: disnake.ModalInteraction):
@@ -1015,20 +1015,20 @@ class FavMenuView(disnake.ui.View):
 
         mode_select = disnake.ui.Select(
             options=[
-                disnake.SelectOption(label="Gerenciador de Favoritos", value="fav_view_mode_0", emoji="⭐",
+                disnake.SelectOption(label="Gerenciador de Favoritos", value=f"fav_view_mode_{ViewMode.fav_manager}", emoji="⭐",
                                      default=self.mode == ViewMode.fav_manager)
             ], min_values=1, max_values=1
         )
 
         if self.bot.config["USE_YTDL"] or self.bot.spotify:
             mode_select.append_option(
-                disnake.SelectOption(label="Gerenciador de Integrações", value="fav_view_mode_2", emoji="💠",
+                disnake.SelectOption(label="Gerenciador de Integrações", value=f"fav_view_mode_{ViewMode.integrations_manager}", emoji="💠",
                                      default=self.mode == ViewMode.integrations_manager)
             )
 
         if self.ctx.author.guild_permissions.manage_guild:
             mode_select.options.insert(1, disnake.SelectOption(label="Gerenciador de Playlists do Servidor",
-                                                               value="fav_view_mode_1", emoji="📌",
+                                                               value=f"fav_view_mode_{ViewMode.guild_fav_manager}", emoji="📌",
                                                                default=self.mode == ViewMode.guild_fav_manager))
 
         if len(mode_select.options) < 2:
@@ -1284,7 +1284,7 @@ class FavMenuView(disnake.ui.View):
                                       "* Usando o botão de tocar integração abaixo.")
 
         else:
-            raise GenericError(f"**Modo não implementado:** {self.mode}")
+            raise GenericError(f"**Modo não implementado:** {self.mode} | {type(self.mode)}")
 
         if self.log:
             embed.add_field(name="Última interação:", value=self.log)
