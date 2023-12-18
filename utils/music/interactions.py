@@ -400,6 +400,7 @@ class FavModalImport(disnake.ui.Modal):
                     )
                 ]
             )
+            return
 
         if self.view.mode == ViewMode.integrations_manager:
             super().__init__(
