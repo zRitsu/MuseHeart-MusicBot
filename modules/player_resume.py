@@ -250,9 +250,33 @@ class PlayerSession(commands.Cog):
 
         try:
 
-            data_list = await self.get_player_sessions()
+            mongo_sessions = await self.get_player_sessions_mongo()
+            local_sessions = await self.get_player_sessions_local()
 
-            for data in data_list:
+            data_list = {}
+
+            if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
+                for d in local_sessions:
+                    data_list[d["_id"]] = d
+                    print(f"{self.bot.user} - Migrando dados de sessões do server: {d['_id']} | DB Local -> Mongo")
+                    await self.save_session_mongo(d["_id"], d)
+                    self.delete_data_local(d["_id"])
+                for d in mongo_sessions:
+                    data_list[d["_id"]] = d
+
+            else:
+                for d in mongo_sessions:
+                    data_list[d["_id"]] = d
+                    print(f"{self.bot.user} - Migrando dados de sessões do server: {d['_id']} | Mongo -> DB Local")
+                    await self.save_session_local(d["_id"], d)
+                    await self.delete_data_mongo(d["_id"])
+                for d in local_sessions:
+                    data_list[d["_id"]] = d
+
+            mongo_sessions.clear()
+            local_sessions.clear()
+
+            for data in data_list.values():
 
                 guild = self.bot.get_guild(data["_id"])
 
@@ -519,51 +543,90 @@ class PlayerSession(commands.Cog):
 
         self.bot.player_resumed = True
 
-    async def get_player_sessions(self):
+    async def get_player_sessions_mongo(self):
+
+        if not self.bot.config["PLAYER_SESSIONS_MONGODB"] or not self.bot.config["MONGO"]:
+            return []
 
         guild_data = []
 
-        if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
+        for d in (await self.bot.pool.mongo_database.query_data(db_name=str(self.bot.user.id), collection="player_sessions")):
 
-            for d in (await self.bot.pool.mongo_database.query_data(db_name=str(self.bot.user.id), collection="player_sessions")):
-
-                try:
-                    data = d["data"]
-                except KeyError:
-                    await self.delete_data(int(d["_id"]))
-                    continue
-                data = b64decode(data)
-                try:
-                    data = zlib.decompress(data)
-                except zlib.error:
-                    pass
-                guild_data.append(pickle.loads(data))
-
-        else:
             try:
-                files = os.listdir(f"./local_database/player_sessions/{self.bot.user.id}")
-            except FileNotFoundError:
-                return guild_data
-
-            for file_content in files:
-
-                if not file_content.endswith(".pkl"):
-                    continue
-
-                guild_id = file_content[:-4]
-
-                async with aiofiles.open(f'./local_database/player_sessions/{self.bot.user.id}/{guild_id}.pkl', 'rb') as f:
-                    file_content = await f.read()
-                    try:
-                        file_content = zlib.decompress(file_content)
-                    except zlib.error:
-                        pass
-                    data = pickle.loads(file_content)
-
-                if data:
-                    guild_data.append(data)
+                data = d["data"]
+            except KeyError:
+                await self.delete_data(int(d["_id"]))
+                continue
+            data = b64decode(data)
+            try:
+                data = zlib.decompress(data)
+            except zlib.error:
+                pass
+            guild_data.append(pickle.loads(data))
 
         return guild_data
+
+    async def get_player_sessions_local(self):
+
+        guild_data = []
+
+        try:
+            files = os.listdir(f"./local_database/player_sessions/{self.bot.user.id}")
+        except FileNotFoundError:
+            return guild_data
+
+        for file_content in files:
+
+            if not file_content.endswith(".pkl"):
+                continue
+
+            guild_id = file_content[:-4]
+
+            async with aiofiles.open(f'./local_database/player_sessions/{self.bot.user.id}/{guild_id}.pkl', 'rb') as f:
+                file_content = await f.read()
+                try:
+                    file_content = zlib.decompress(file_content)
+                except zlib.error:
+                    pass
+                data = pickle.loads(file_content)
+
+            if data:
+                guild_data.append(data)
+
+        return guild_data
+
+    async def save_session_mongo(self, id_: Union[int, str], data: dict):
+        await self.bot.pool.mongo_database.update_data(
+            id_=str(id_),
+            data={"data": b64encode(zlib.compress(pickle.dumps(data))).decode('utf-8')},
+            collection="player_sessions",
+            db_name=str(self.bot.user.id)
+        )
+
+    async def save_session_local(self, id_: Union[int, str], data: dict):
+
+        if not os.path.isdir(f"./local_database/player_sessions/{self.bot.user.id}"):
+            os.makedirs(f"./local_database/player_sessions/{self.bot.user.id}")
+
+        path = f'./local_database/player_sessions/{self.bot.user.id}/{id_}'
+
+        try:
+            async with aiofiles.open(f"{path}.pkl", "wb") as f:
+                await f.write(zlib.compress(pickle.dumps(data)))
+        except Exception:
+            traceback.print_exc()
+            try:
+                os.rename(f"{path}.bak", f"{path}.pkl")
+            except:
+                pass
+            return
+
+        try:
+            shutil.copy(f'{path}.pkl', f'{path}.bak')
+        except FileNotFoundError:
+            pass
+        except Exception:
+            traceback.print_exc()
 
     async def save_session(self, player: LavalinkPlayer, data: dict):
 
@@ -578,38 +641,25 @@ class PlayerSession(commands.Cog):
 
         try:
             if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
-                await self.bot.pool.mongo_database.update_data(
-                    id_=str(player.guild.id),
-                    data={"data": b64encode(zlib.compress(pickle.dumps(data))).decode('utf-8')},
-                    collection="player_sessions",
-                    db_name=str(self.bot.user.id)
-                )
-                return
+                await self.save_session_mongo(player.guild.id, data)
+            else:
+                await self.save_session_local(player.guild.id, data)
 
-            if not os.path.isdir(f"./local_database/player_sessions/{self.bot.user.id}"):
-                os.makedirs(f"./local_database/player_sessions/{self.bot.user.id}")
-
-            path = f'./local_database/player_sessions/{self.bot.user.id}/{player.guild.id}'
-
-            try:
-                async with aiofiles.open(f"{path}.pkl", "wb") as f:
-                    await f.write(zlib.compress(pickle.dumps(data)))
-            except Exception:
-                traceback.print_exc()
-                try:
-                    os.rename(f"{path}.bak", f"{path}.pkl")
-                except:
-                    pass
-                return
-
-            try:
-                shutil.copy(f'{path}.pkl', f'{path}.bak')
-            except FileNotFoundError:
-                pass
-            except Exception:
-                traceback.print_exc()
         except asyncio.CancelledError as e:
             print(f"❌ - {self.bot.user} - Salvamento cancelado: {repr(e)}")
+
+    async def delete_data_mongo(self, id_: Union[LavalinkPlayer, int]):
+        await self.bot.pool.mongo_database.delete_data(id_=str(id_), db_name=str(self.bot.user.id),
+                                                       collection="player_sessions")
+
+    def delete_data_local(self, id_: Union[LavalinkPlayer, int]):
+        for ext in ('.pkl', '.bak'):
+            try:
+                os.remove(f'./local_database/player_sessions/{self.bot.user.id}/{id_}{ext}')
+            except FileNotFoundError:
+                continue
+            except Exception:
+                traceback.print_exc()
 
     async def delete_data(self, player: Union[LavalinkPlayer, int]):
 
@@ -619,16 +669,9 @@ class PlayerSession(commands.Cog):
             guild_id = int(player)
 
         if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
-            await self.bot.pool.mongo_database.delete_data(id_=str(guild_id), db_name=str(self.bot.user.id), collection="player_sessions")
-            return
-
-        for ext in ('.pkl', '.bak'):
-            try:
-                os.remove(f'./local_database/player_sessions/{self.bot.user.id}/{guild_id}{ext}')
-            except FileNotFoundError:
-                continue
-            except Exception:
-                traceback.print_exc()
+            await self.delete_data_mongo(guild_id)
+        else:
+            self.delete_data_local(guild_id)
 
     def cog_unload(self):
         try:
