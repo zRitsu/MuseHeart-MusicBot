@@ -269,7 +269,8 @@ class PlayerSession(commands.Cog):
                     data_list[d["_id"]] = d
                     print(f"{self.bot.user} - Migrando dados de sessões do server: {d['_id']} | Mongo -> DB Local")
                     await self.save_session_local(d["_id"], d)
-                    await self.delete_data_mongo(d["_id"])
+                    if self.bot.config["MONGO"]:
+                        await self.delete_data_mongo(d["_id"])
                 for d in local_sessions:
                     data_list[d["_id"]] = d
 
@@ -649,8 +650,6 @@ class PlayerSession(commands.Cog):
             print(f"❌ - {self.bot.user} - Salvamento cancelado: {repr(e)}")
 
     async def delete_data_mongo(self, id_: Union[LavalinkPlayer, int]):
-        if not self.bot.config["MONGO"]:
-            return
         await self.bot.pool.mongo_database.delete_data(id_=str(id_), db_name=str(self.bot.user.id),
                                                        collection="player_sessions")
 
