@@ -423,8 +423,6 @@ class Music(commands.Cog):
                    f"**Modelo usado:** `{disnake.utils.escape_markdown(template, as_needed=True)}`"]
 
         elif isinstance(guild.me.voice.channel, disnake.VoiceChannel):
-            if not bot.config.get("X_SUPER_PROPERTIES"):
-                raise GenericError("**Você deve estar em um canal de voz/palco para ativar/desativar esse sistema.**")
 
             txt = [f"ativou/alterou o sistema de status automático do canal de voz.",
                    f"📢 **⠂{inter.author.mention} ativou/alterou o sistema de status automático do canal de voz "
