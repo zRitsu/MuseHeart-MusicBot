@@ -192,7 +192,10 @@ class LocalDatabase(BaseDB):
         return self._connect[collection][db_name].find(filter or {})
 
     async def delete_data(self, id_, db_name: str, collection: str):
-        return self._connect[collection][db_name].delete_one({'_id': str(id_)})
+        try:
+            return self._connect[collection][db_name].delete_one({'_id': str(id_)})
+        except TypeError:
+            return
 
 
 class MongoDatabase(BaseDB):
