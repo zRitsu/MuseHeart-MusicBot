@@ -365,7 +365,7 @@ class ErrorHandler(commands.Cog):
                 )
 
             if vcbot := ctx.guild.me.voice:
-                if vcbot.channel != vc.channel:
+                if vc and vcbot.channel != vc.channel:
                     embed.add_field(
                         name="Canal de voz (bot):", inline=False,
                         value=f"{vc.channel.name}" +
