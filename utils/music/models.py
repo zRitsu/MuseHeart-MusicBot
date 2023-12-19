@@ -1634,7 +1634,12 @@ class LavalinkPlayer(wavelink.Player):
 
         try:
             if self.has_thread or self.static or self.text_channel.last_message_id == self.message.id:
-                await self.message.edit(**kwargs)
+                try:
+                    await self.message.edit(**kwargs)
+                except:
+                    traceback.print_exc()
+                    if self.text_channel:
+                        self.message = await self.text_channel.send(**kwargs)
                 send_message = False
             else:
                 send_message = True
