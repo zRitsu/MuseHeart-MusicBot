@@ -53,7 +53,7 @@ class PlayerSession(commands.Cog):
         await self.save_info(payload.player)
 
     @commands.is_owner()
-    @commands.command(hidden=True, description="Salvar informações dos players na database instantaneamente.", aliases=["svp"])
+    @commands.command(hidden=True, description="Salvar informações dos players na database instantaneamente.", aliases=["svplayers"])
     async def saveplayers(self, ctx: CustomContext):
 
         await ctx.defer()
