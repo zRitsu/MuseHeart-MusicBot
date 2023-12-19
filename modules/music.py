@@ -622,7 +622,7 @@ class Music(commands.Cog):
             try:
                 bot = ctx.music_bot
             except AttributeError:
-                bot = self.bot
+                bot = ctx.bot
 
         if not me:
             try:
