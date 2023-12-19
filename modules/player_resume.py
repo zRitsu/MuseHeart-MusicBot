@@ -18,7 +18,7 @@ import wavelink
 from utils.client import BotCore
 from utils.music.checks import can_connect, can_send_message
 from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialTrack, PartialPlaylist, LavalinkPlaylist
-from utils.others import SongRequestPurgeMode, send_idle_embed
+from utils.others import SongRequestPurgeMode, send_idle_embed, CustomContext
 
 
 class PlayerSession(commands.Cog):
@@ -51,6 +51,25 @@ class PlayerSession(commands.Cog):
             return
 
         await self.save_info(payload.player)
+
+    @commands.is_owner()
+    @commands.command(hidden=True, description="Salvar informações dos players na database instantaneamente.", aliases=["svp"])
+    async def saveplayers(self, ctx: CustomContext):
+
+        await ctx.defer()
+
+        player_count = 0
+
+        for bot in self.bot.pool.bots:
+            for player in bot.music.players.values():
+                try:
+                    await player.process_save_queue()
+                    player_count += 1
+                except:
+                    continue
+
+        txt = f"As informações dos players atuais foram salvos com sucesso ({player_count})!" if player_count else "Não há player ativo..."
+        await ctx.send(txt)
 
     async def queue_updater_task(self, player: LavalinkPlayer):
 
