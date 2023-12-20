@@ -610,13 +610,14 @@ class Player:
         self.node.open()
 
         if self.node != node:
-            del self.node.players[self.guild_id]
-            if self.node.version == 3:
-                await self.node._send(op='destroy', guildId=str(self.guild_id))
-            elif self.node.session_id:
+            old = self.node
+            del old.players[self.guild_id]
+            if old.version == 3:
+                await old._send(op='destroy', guildId=str(self.guild_id))
+            elif old.session_id:
                 try:
-                    uri: str = f"{self.node.rest_uri}/v4/sessions/{self.node.session_id}/players/{self.guild_id}"
-                    async with self.node.session.delete(url=uri, headers=self.node.headers) as resp:
+                    uri: str = f"{old.rest_uri}/v4/sessions/{old.session_id}/players/{self.guild_id}"
+                    async with old.session.delete(url=uri, headers=old.headers) as resp:
                         if resp.status != 204:
                             try:
                                 data = await resp.json()

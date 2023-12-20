@@ -1135,6 +1135,10 @@ class LavalinkPlayer(wavelink.Player):
             await self.update_stage_topic()
 
         else:
+
+            if self.is_closing:
+                return
+
             msg = f"**O player foi desligado por falta de membros no canal" + (f"<#{self.guild.me.voice.channel.id}>"
                                                                                if self.guild.me.voice else '') + "...**"
             self.command_log = msg
@@ -2186,6 +2190,11 @@ class LavalinkPlayer(wavelink.Player):
         self.played.clear()
 
         try:
+            self.members_timeout_task.cancel()
+        except:
+            pass
+
+        try:
             self.auto_skip_track_task.cancel()
         except:
             pass
@@ -2305,11 +2314,6 @@ class LavalinkPlayer(wavelink.Player):
         except:
             pass
         self.idle_task = None
-
-        try:
-            self.members_timeout_task.cancel()
-        except:
-            pass
 
     async def auto_skip_track(self):
 
