@@ -312,15 +312,9 @@ class Music(commands.Cog):
             )
     ):
 
-        try:
-            bot = inter.music_bot
-            guild = inter.music_guild
-            author = guild.get_member(inter.author.id)
-        except AttributeError:
-            bot = inter.bot
-            guild = inter.guild
-            author = inter.author
-
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
+        guild: disnake.Guild = getattr(inter, "music_guild", bot.get_guild(inter.guild.id))
+        author: disnake.Member = guild.get_member(inter.author.id)
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         if not author.guild_permissions.manage_guild and not (await bot.is_owner(author)):
@@ -563,11 +557,12 @@ class Music(commands.Cog):
 
         try:
             await check_pool_bots(inter, only_voiced=True)
-            bot = inter.music_bot
         except GenericError:
             return [current[:99]]
         except:
-            bot = inter.bot
+            pass
+
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
 
         try:
             if not inter.author.voice:
@@ -617,24 +612,12 @@ class Music(commands.Cog):
                 channel = ctx.author.voice.channel
 
         if not bot:
-            try:
-                bot = ctx.music_bot
-            except AttributeError:
-                try:
-                    bot = ctx.bot
-                except:
-                    bot = self.bot
+            bot: BotCore = getattr(ctx, "music_bot", getattr(ctx, "bot", self.bot))
 
         if not me:
-            try:
-                me = ctx.music_guild.me
-            except AttributeError:
-                me = ctx.guild.me
+            me = getattr(ctx, "music_guild", ctx.guild).me
 
-        try:
-            guild_id = ctx.guild_id
-        except AttributeError:
-            guild_id = ctx.guild.id
+        guild_id = getattr(ctx, "guild_id", ctx.guild.id)
 
         try:
             text_channel = ctx.music_bot.get_channel(ctx.channel.id)
@@ -904,14 +887,9 @@ class Music(commands.Cog):
                                          default=None),
     ):
 
-        try:
-            bot = inter.music_bot
-            guild = inter.music_guild
-            channel = bot.get_channel(inter.channel.id)
-        except AttributeError:
-            bot = inter.bot
-            guild = inter.guild
-            channel = inter.channel
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
+        guild: disnake.Guild = getattr(inter, "music_guild", bot.get_guild(inter.guild.id))
+        channel = bot.get_channel(inter.channel.id)
 
         can_send_message(channel, bot.user)
 
@@ -1357,14 +1335,9 @@ class Music(commands.Cog):
         except KeyError:
             await check_pool_bots(inter, check_player=False)
 
-            try:
-                bot = inter.music_bot
-                guild = inter.music_guild
-                channel = bot.get_channel(inter.channel.id)
-            except AttributeError:
-                bot = inter.bot
-                guild = inter.guild
-                channel = inter.channel
+            bot: BotCore = getattr(inter, "music_bot", inter.bot)
+            guild: disnake.Guild = getattr(inter, "music_guild", bot.get_guild(inter.guild.id))
+            channel = bot.get_channel(inter.channel.id)
 
             try:
                 player = bot.music.players[inter.guild_id]
@@ -1935,13 +1908,8 @@ class Music(commands.Cog):
             )
     ):
 
-        try:
-            bot = inter.music_bot
-            guild = inter.music_guild
-        except AttributeError:
-            bot = inter.bot
-            guild = bot.get_guild(inter.guild_id)
-
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
+        guild: disnake.Guild = getattr(inter, "music_guild", bot.get_guild(inter.guild.id))
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         ephemeral = await self.is_request_channel(inter)
@@ -2052,10 +2020,7 @@ class Music(commands.Cog):
     )
     async def back(self, inter: disnake.AppCmdInter):
 
-        try:
-            bot = inter.music_bot
-        except AttributeError:
-            bot = inter.bot
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
@@ -2119,13 +2084,8 @@ class Music(commands.Cog):
     )
     async def voteskip(self, inter: disnake.AppCmdInter):
 
-        try:
-            bot = inter.music_bot
-            guild = inter.music_guild
-        except AttributeError:
-            bot = inter.bot
-            guild = inter.guild
-
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
+        guild: disnake.Guild = getattr(inter, "music_guild", bot.get_guild(inter.guild.id))
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         embed = disnake.Embed()
@@ -2176,13 +2136,8 @@ class Music(commands.Cog):
             value: int = commands.Param(name="nível", description="nível entre 5 a 150", min_value=5.0, max_value=150.0)
     ):
 
-        try:
-            bot = inter.music_bot
-            guild = inter.music_guild
-        except AttributeError:
-            bot = inter.bot
-            guild = inter.guild
-
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
+        guild: disnake.Guild = getattr(inter, "music_guild", bot.get_guild(inter.guild.id))
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         embed = disnake.Embed(color=disnake.Colour.red())
@@ -2235,11 +2190,7 @@ class Music(commands.Cog):
     )
     async def pause(self, inter: disnake.AppCmdInter):
 
-        try:
-            bot = inter.music_bot
-        except AttributeError:
-            bot = inter.bot
-
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         if player.paused:
@@ -2269,11 +2220,7 @@ class Music(commands.Cog):
     )
     async def resume(self, inter: disnake.AppCmdInter):
 
-        try:
-            bot = inter.music_bot
-        except AttributeError:
-            bot = inter.bot
-
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         if not player.paused:
@@ -2316,11 +2263,7 @@ class Music(commands.Cog):
             position: str = commands.Param(name="tempo", description="Tempo para avançar/voltar (ex: 1:45 / 40 / 0:30)")
     ):
 
-        try:
-            bot = inter.music_bot
-        except AttributeError:
-            bot = inter.bot
-
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         if player.current.is_stream:
@@ -2382,9 +2325,10 @@ class Music(commands.Cog):
 
         try:
             await check_pool_bots(inter, only_voiced=True)
-            bot = inter.music_bot
         except:
             return
+
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
 
         try:
             player: LavalinkPlayer = bot.music.players[inter.guild_id]
@@ -2498,11 +2442,7 @@ class Music(commands.Cog):
             )
     ):
 
-        try:
-            bot = inter.music_bot
-        except AttributeError:
-            bot = inter.bot
-
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         if mode == player.loop:
@@ -2543,11 +2483,7 @@ class Music(commands.Cog):
             value: int = commands.Param(name="valor", description="número de repetições.")
     ):
 
-        try:
-            bot = inter.music_bot
-        except AttributeError:
-            bot = inter.bot
-
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         player.current.info["extra"]["track_loops"] = value
@@ -2596,10 +2532,7 @@ class Music(commands.Cog):
             )
     ):
 
-        try:
-            bot = inter.music_bot
-        except AttributeError:
-            bot = inter.bot
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
 
         try:
             index = queue_track_index(inter, bot, query, case_sensitive=case_sensitive)[0][0]
@@ -2640,10 +2573,7 @@ class Music(commands.Cog):
     )
     async def readd_songs(self, inter: disnake.AppCmdInter):
 
-        try:
-            bot = inter.music_bot
-        except AttributeError:
-            bot = inter.bot
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
@@ -2707,10 +2637,7 @@ class Music(commands.Cog):
             )
     ):
 
-        try:
-            bot = inter.music_bot
-        except AttributeError:
-            bot = inter.bot
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
 
         index = queue_track_index(inter, bot, query, case_sensitive=case_sensitive)
 
@@ -2756,12 +2683,8 @@ class Music(commands.Cog):
                             description=f"{desc_prefix}Criar uma thread/conversa temporária para song-request (pedido de música)")
     async def song_request_thread(self, inter: disnake.AppCmdInter):
 
-        try:
-            bot = inter.music_bot
-            guild = inter.music_guild
-        except AttributeError:
-            bot = inter.bot
-            guild = inter.guild
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
+        guild: disnake.Guild = getattr(inter, "music_guild", bot.get_guild(inter.guild.id))
 
         if not self.bot.intents.message_content:
             raise GenericError("**Atualmente não tenho a intent de message-content para conferir "
@@ -2827,11 +2750,7 @@ class Music(commands.Cog):
     )
     async def nightcore(self, inter: disnake.AppCmdInter):
 
-        try:
-            bot = inter.music_bot
-        except AttributeError:
-            bot = inter.bot
-
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         player.nightcore = not player.nightcore
@@ -2865,15 +2784,9 @@ class Music(commands.Cog):
                             dm_permission=False)
     async def controller(self, inter: disnake.AppCmdInter):
 
-        try:
-            bot = inter.music_bot
-            guild = inter.music_guild
-            channel = bot.get_channel(inter.channel.id)
-        except AttributeError:
-            bot = inter.bot
-            guild = inter.guild
-            channel = inter.channel
-
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
+        guild: disnake.Guild = getattr(inter, "music_guild", bot.get_guild(inter.guild.id))
+        channel = bot.get_channel(inter.channel.id)
         player: LavalinkPlayer = bot.music.players[guild.id]
 
         if player.static:
@@ -2954,15 +2867,9 @@ class Music(commands.Cog):
 
         error_text = None
 
-        try:
-            bot = inter.music_bot
-            guild = inter.music_guild
-            channel = bot.get_channel(inter.channel.id)
-        except AttributeError:
-            bot = inter.bot
-            guild = inter.guild
-            channel = inter.channel
-
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
+        guild: disnake.Guild = getattr(inter, "music_guild", bot.get_guild(inter.guild.id))
+        channel = bot.get_channel(inter.channel.id)
         player: LavalinkPlayer = bot.music.players[guild.id]
 
         user = guild.get_member(user.id)
@@ -3005,15 +2912,9 @@ class Music(commands.Cog):
             user: disnake.User = commands.Param(name="membro", description="Membro a ser adicionado.")
     ):
 
-        try:
-            bot = inter.music_bot
-            guild = inter.music_guild
-            channel = bot.get_channel(inter.channel.id)
-        except AttributeError:
-            bot = inter.bot
-            guild = inter.guild
-            channel = inter.channel
-
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
+        guild: disnake.Guild = getattr(inter, "music_guild", bot.get_guild(inter.guild.id))
+        channel = bot.get_channel(inter.channel.id)
         player: LavalinkPlayer = bot.music.players[guild.id]
 
         user = guild.get_member(user.id)
@@ -3110,13 +3011,8 @@ class Music(commands.Cog):
     )
     async def save_queue(self, inter: disnake.AppCmdInter):
 
-        try:
-            bot = inter.music_bot
-            guild = inter.music_guild
-        except AttributeError:
-            bot = inter.bot
-            guild = bot.get_guild(inter.guild_id)
-
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
+        guild: disnake.Guild = getattr(inter, "music_guild", bot.get_guild(inter.guild.id))
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         tracks = []
@@ -3200,11 +3096,7 @@ class Music(commands.Cog):
         extras={"only_voiced": True}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
     async def shuffle_(self, inter: disnake.AppCmdInter):
 
-        try:
-            bot = inter.music_bot
-        except AttributeError:
-            bot = inter.bot
-
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         if len(player.queue) < 3:
@@ -3234,11 +3126,7 @@ class Music(commands.Cog):
     )
     async def reverse(self, inter: disnake.AppCmdInter):
 
-        try:
-            bot = inter.music_bot
-        except AttributeError:
-            bot = inter.bot
-
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         if len(player.queue) < 2:
@@ -3268,11 +3156,7 @@ class Music(commands.Cog):
     )
     async def display(self, inter: disnake.AppCmdInter):
 
-        try:
-            bot = inter.music_bot
-        except AttributeError:
-            bot = inter.bot
-
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         if not player.queue:
@@ -3406,11 +3290,7 @@ class Music(commands.Cog):
             raise GenericError(
                 "Você deve escolher apenas uma das opções: **duração_abaixo_de** ou **duração_acima_de**.")
 
-        try:
-            bot = inter.music_bot
-        except AttributeError:
-            bot = inter.bot
-
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         if not player.queue:
@@ -3709,11 +3589,7 @@ class Music(commands.Cog):
             raise GenericError(
                 "Você deve escolher apenas uma das opções: **duração_abaixo_de** ou **duração_acima_de**.")
 
-        try:
-            bot = inter.music_bot
-        except AttributeError:
-            bot = inter.bot
-
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         if not player.queue:
@@ -4056,10 +3932,7 @@ class Music(commands.Cog):
         extras={"only_voiced": True}, cooldown=restrict_cd, max_concurrency=restrict_mc, dm_permission=False)
     async def restrict_mode(self, inter: disnake.AppCmdInter):
 
-        try:
-            bot = inter.music_bot
-        except AttributeError:
-            bot = inter.bot
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
@@ -4095,10 +3968,7 @@ class Music(commands.Cog):
     )
     async def nonstop(self, inter: disnake.AppCmdInter):
 
-        try:
-            bot = inter.music_bot
-        except AttributeError:
-            bot = inter.bot
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
@@ -4144,10 +4014,7 @@ class Music(commands.Cog):
     )
     async def autoplay(self, inter: disnake.AppCmdInter):
 
-        try:
-            bot = inter.music_bot
-        except AttributeError:
-            bot = inter.bot
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
@@ -4179,10 +4046,7 @@ class Music(commands.Cog):
             node: str = commands.Param(name="servidor", description="Servidor de música")
     ):
 
-        try:
-            bot = inter.music_bot
-        except AttributeError:
-            bot = inter.bot
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
 
         if node not in bot.music.nodes:
             raise GenericError(f"O servidor de música **{node}** não foi encontrado.")
@@ -4208,11 +4072,10 @@ class Music(commands.Cog):
 
         try:
             await check_pool_bots(inter)
-            bot = inter.music_bot
         except GenericError:
             return
-        except:
-            bot = inter.bot
+
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
 
         try:
             node = bot.music.players[inter.guild_id].node
@@ -4409,12 +4272,8 @@ class Music(commands.Cog):
         if isinstance(ctx, (CustomContext, disnake.MessageInteraction)):
             return True
 
-        try:
-            bot = ctx.music_bot
-            channel_ctx = bot.get_channel(ctx.channel_id)
-        except AttributeError:
-            bot = ctx.bot
-            channel_ctx = ctx.channel
+        bot = getattr(ctx, "music_bot", ctx.bot)
+        channel_ctx = bot.get_channel(ctx.channel_id)
 
         if not self.bot.check_bot_forum_post(channel_ctx):
             return True
@@ -4431,11 +4290,7 @@ class Music(commands.Cog):
             return player.text_channel == channel_ctx
 
         except KeyError:
-
-            try:
-                guild_data = ctx.guild_data
-            except AttributeError:
-                guild_data = data or await bot.get_data(ctx.guild_id, db_name=DBModel.guilds)
+            guild_data = getattr(ctx, "guild_data", data) or await bot.get_data(ctx.guild_id, db_name=DBModel.guilds)
 
             try:
                 channel = bot.get_channel(int(guild_data["player_controller"]["channel"]))
@@ -5584,13 +5439,8 @@ class Music(commands.Cog):
         except:
             txt_ephemeral = False
 
-        try:
-            bot = inter.music_bot
-            guild = inter.music_guild
-        except AttributeError:
-            bot = inter.bot
-            guild = inter.guild
-
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
+        guild: disnake.Guild = getattr(inter, "music_guild", bot.get_guild(inter.guild.id))
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         component_interaction = isinstance(inter, disnake.MessageInteraction)
@@ -6072,10 +5922,7 @@ class Music(commands.Cog):
 
     async def reset_controller_db(self, guild_id: int, data: dict, inter: disnake.AppCmdInter = None):
 
-        try:
-            bot = inter.music_bot
-        except AttributeError:
-            bot = inter.bot
+        bot: BotCore = getattr(inter, "music_bot", inter.bot)
 
         data['player_controller']['channel'] = None
         data['player_controller']['message_id'] = None
