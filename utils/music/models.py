@@ -672,8 +672,6 @@ class LavalinkPlayer(wavelink.Player):
 
             self.current = None
 
-            error_403 = None
-
             cooldown = 10
 
             await self.bot.wait_until_ready()
@@ -2425,13 +2423,14 @@ class LavalinkPlayer(wavelink.Player):
 
         self.locked = True
 
+        original_log = self.command_log
+        original_log_emoji = self.command_log_emoji
+
         self.set_command_log(
             txt or "Não há servidores de música disponível. Irei fazer algumas tentativas de conectar em um novo servidor de música.",
             emoji="⏰"
         )
         self.update = True
-
-        old_node = self.node.identifier
 
         while True:
 
@@ -2454,12 +2453,8 @@ class LavalinkPlayer(wavelink.Player):
                     await asyncio.sleep(5)
                     continue
 
-                if old_node == node.identifier:
-                    txt = f"A conexão com servidor de música **{node.identifier}** foi restabelecida com sucesso."
-                else:
-                    txt = f"O player foi reconectado em um novo servidor de música: **{node.identifier}**."
+                self.set_command_log(emoji=original_log_emoji, text=original_log)
 
-                self.set_command_log(txt, emoji="📶")
                 try:
                     await self.invoke_np(force=True)
                 except:
