@@ -769,6 +769,7 @@ class LavalinkPlayer(wavelink.Player):
                     "java.net.SocketTimeoutException: Connect timed out",
                     "java.lang.IllegalArgumentException: Invalid bitrate",
                     "java.net.UnknownHostException:",
+                    "java.lang.IllegalStateException: Error from decoder",
                     "java.lang.IllegalStateException: Current position is beyond this element",
                     "com.sedmelluq.discord.lavaplayer.tools.io.PersistentHttpStream$PersistentHttpException: Not success status code: 403",
             )):
