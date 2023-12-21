@@ -159,6 +159,7 @@ class PlayerControls:
     autoplay = "musicplayer_autoplay"
     add_favorite = "musicplayer_add_favorite"
     stage_announce = "musicplayer_stage_announce"
+    lyrics = "musicplayer_lyrics"
 
 
 class SongRequestPurgeMode:

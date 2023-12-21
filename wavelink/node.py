@@ -112,6 +112,7 @@ class Node:
 
         self.stats = None
         self.info = None
+        self.plugins_dict: Optional[dict] = None
 
         self._closing = False
 
@@ -332,6 +333,28 @@ class Node:
 
             track = Track(id_=identifier, info=data)
             return track
+
+    @property
+    def lyric_support(self):
+
+        if self.version < 4:
+            return
+
+        if self.plugins_dict is None:
+            self.plugins_dict = {p.pop("name"): p for p in self.info["plugins"]}
+
+        return "lyrics" in self.plugins_dict
+
+    async def fetch_ytm_lyrics(self, ytid: str):
+
+        if not self.lyric_support:
+            raise Exception(f"Lyrics plugin not available on Node: {self.identifier}")
+
+        async with self.session.get(f"{self.rest_uri}/v4/lyrics/{ytid}", headers=self.headers) as r:
+            if r.status != 200:
+                print(f"Lyrics fetching failed: {r.status} - {await r.text()}")
+                return
+            return await r.json()
 
     def get_player(self, guild_id: int) -> Optional[Player]:
         """Retrieve a player object associated with the Node.

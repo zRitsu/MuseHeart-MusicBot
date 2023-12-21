@@ -174,6 +174,16 @@ class MiniSkin:
             ),
         ]
 
+        if player.current.ytid and player.node.lyric_support:
+            data["components"][5].options.append(
+                disnake.SelectOption(
+                    label= "Visualizar letras", emoji="📃",
+                    value=PlayerControls.lyrics,
+                    description="Obter letra da música atual."
+                )
+            )
+
+
         if player.mini_queue_feature:
             data["components"][5].options.append(
                 disnake.SelectOption(

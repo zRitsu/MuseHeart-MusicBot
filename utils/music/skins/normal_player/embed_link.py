@@ -140,6 +140,16 @@ class EmbedLinkSkin:
             ),
         ]
 
+        if player.current.ytid and player.node.lyric_support:
+            data["components"][5].options.append(
+                disnake.SelectOption(
+                    label= "Visualizar letras", emoji="📃",
+                    value=PlayerControls.lyrics,
+                    description="Obter letra da música atual."
+                )
+            )
+
+
         if isinstance(player.last_channel, disnake.VoiceChannel):
             txt = "Desativar" if player.stage_title_event else "Ativar"
             data["components"][5].options.append(

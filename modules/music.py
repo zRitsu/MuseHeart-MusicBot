@@ -4946,6 +4946,63 @@ class Music(commands.Cog):
 
                     return
 
+                if control == PlayerControls.lyrics:
+                    if not player.current:
+                        try:
+                            await self.player_interaction_concurrency.release(interaction)
+                        except:
+                            pass
+                        await interaction.send("**Não estou tocando algo no momento...**", ephemeral=True)
+                        return
+
+                    if not player.current.ytid:
+                        try:
+                            await self.player_interaction_concurrency.release(interaction)
+                        except:
+                            pass
+                        await interaction.send("No momento apenas músicas do youtube são suportadas.", ephemeral=True)
+                        return
+
+                    not_found_msg = "Não há letras disponíveis para a música atual..."
+
+                    await interaction.response.defer(ephemeral=True, with_message=True)
+
+                    if player.current.info["extra"].get("lyrics") is None:
+                        player.current.info["extra"]["lyrics"] = await player.node.fetch_ytm_lyrics(player.current.ytid)
+                    elif not player.current.info["extra"]["lyrics"]:
+                        try:
+                            await self.player_interaction_concurrency.release(interaction)
+                        except:
+                            pass
+                        await interaction.send(f"**{not_found_msg}**", ephemeral=True)
+                        return
+
+                    if not player.current.info["extra"]["lyrics"]:
+                        try:
+                            await self.player_interaction_concurrency.release(interaction)
+                        except:
+                            pass
+                        player.current.info["extra"]["lyrics"] = {}
+                        await interaction.edit_original_message(f"**{not_found_msg}**")
+                        return
+
+                    player.current.info["extra"]["lyrics"]["track"]["albumArt"] = player.current.info["extra"]["lyrics"]["track"]["albumArt"][:-1]
+
+                    lyrics_string = "\n".join([d['line'] for d in  player.current.info["extra"]["lyrics"]['lines']])
+
+                    try:
+                        await self.player_interaction_concurrency.release(interaction)
+                    except:
+                        pass
+
+                    await interaction.edit_original_message(
+                        embed=disnake.Embed(
+                            description=f"### Letras da música: [{player.current.title}]({player.current.uri})\n{lyrics_string}",
+                            color=self.bot.get_color(player.guild.me)
+                        )
+                    )
+                    return
+
                 if control == PlayerControls.volume:
                     cmd_kwargs = {"value": None}
 

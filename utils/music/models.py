@@ -153,6 +153,14 @@ class PartialTrack:
             return [self.author]
 
     @property
+    def lyrics(self) -> str:
+
+        try:
+            return self.info["extra"]["lyrics"]
+        except KeyError:
+            return ""
+
+    @property
     def requester(self) -> int:
         return self.info["extra"]["requester"]
 
@@ -323,6 +331,13 @@ class LavalinkTrack(wavelink.Track):
     def album_url(self) -> str:
         try:
             return self.info["extra"]["album"]["url"]
+        except KeyError:
+            return ""
+
+    @property
+    def lyrics(self) -> str:
+        try:
+            return self.info["extra"]["lyrics"]
         except KeyError:
             return ""
 
@@ -1991,6 +2006,15 @@ class LavalinkPlayer(wavelink.Player):
                         ]
                     ),
                 ]
+
+                if self.current.ytid and self.node.lyric_support:
+                    data["components"][5].options.append(
+                        disnake.SelectOption(
+                            label="Visualizar letras", emoji="📃",
+                            value=PlayerControls.lyrics,
+                            description="Obter letra da música atual."
+                        )
+                    )
 
                 if self.mini_queue_feature:
                     self.last_data["components"][5].options.append(
