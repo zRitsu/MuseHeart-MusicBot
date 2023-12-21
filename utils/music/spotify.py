@@ -34,6 +34,8 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
         return
 
     if not bot.spotify:
+        if [n for n in bot.music.nodes.values() if n.version > 3 and "spotify" in n.info["sourceManagers"]]:
+            return
         raise MissingSpotifyClient()
 
     url_type, url_id = matches.groups()
