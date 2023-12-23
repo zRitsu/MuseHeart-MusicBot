@@ -687,6 +687,8 @@ class LavalinkPlayer(wavelink.Player):
 
             self.current = None
 
+            error_403 = False
+
             cooldown = 10
 
             await self.bot.wait_until_ready()
