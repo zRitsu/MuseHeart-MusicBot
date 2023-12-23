@@ -5148,12 +5148,22 @@ class Music(commands.Cog):
 
             channel_id = static_player['channel']
 
-            if not channel_id or str(message.channel.id) != channel_id:
+            if not channel_id:
+                return
+
+            if isinstance(message.channel, disnake.Thread):
+                if isinstance(message.channel.parent, disnake.TextChannel):
+                    if str(message.channel.parent.id) != channel_id:
+                        return
+                elif str(message.channel.id) != channel_id:
+                    return
+            elif str(message.channel.id) != channel_id:
                 return
 
             text_channel = self.bot.get_channel(int(channel_id))
 
             if not text_channel:
+                await self.reset_controller_db(message.guild.id, data)
                 return
 
             if isinstance(text_channel, disnake.Thread):
