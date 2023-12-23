@@ -4906,7 +4906,7 @@ class Music(commands.Cog):
                     if self.bot.config["MAX_USER_FAVS"] > 0 and not (await self.bot.is_owner(interaction.author)):
 
                         if len(user_data["fav_links"]) >= self.bot.config["MAX_USER_FAVS"]:
-                            await interaction.response.edit_message(
+                            await interaction.edit_original_message(
                                 embed=disnake.Embed(
                                     color=self.bot.get_color(interaction.guild.me),
                                     description="Você não possui espaço suficiente para adicionar todos os favoritos de seu arquivo...\n"
