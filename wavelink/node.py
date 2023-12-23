@@ -239,7 +239,7 @@ class Node:
                 try:
                     data = await resp.json()
                 except Exception as e:
-                    raise WavelinkException(f"Failed to parse json result. | Error: {repr(e)}")
+                    raise WavelinkException(f"{self.identifier}: Failed to parse json result. | Error: {repr(e)}")
 
                 if isinstance(data, list):
                     return data
