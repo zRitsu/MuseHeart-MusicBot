@@ -5160,7 +5160,7 @@ class Music(commands.Cog):
             elif str(message.channel.id) != channel_id:
                 return
 
-            text_channel = self.bot.get_channel(int(channel_id))
+            text_channel = self.bot.get_channel(int(channel_id)) or await self.bot.fetch_channel(int(channel_id))
 
             if not text_channel:
                 await self.reset_controller_db(message.guild.id, data)
