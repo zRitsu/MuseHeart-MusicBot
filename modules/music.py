@@ -758,7 +758,7 @@ class Music(commands.Cog):
     stage_flags.add_argument('-reverse', '-r', action='store_true', help='Inverter a ordem das músicas adicionadas (efetivo apenas ao adicionar playlist).')
     stage_flags.add_argument('-shuffle', '-sl', action='store_true', help='Misturar as músicas adicionadas (efetivo apenas ao adicionar playlist).')
     stage_flags.add_argument('-select', '-s', action='store_true', help='Escolher a música entre os resultados encontrados.')
-    stage_flags.add_argument('-source', '-src', type=str, default="ytsearch", help='Fazer a busca da música usando uma fonte específica [youtube/soundcloud etc]')
+    stage_flags.add_argument('-source', '-src', type=str, default=None, help='Fazer a busca da música usando uma fonte específica [youtube/soundcloud etc]')
     stage_flags.add_argument('-force', '-now', '-n', '-f', action='store_true', help='Tocar a música adicionada imediatamente (efetivo apenas se houver uma música tocando atualmente.)')
     stage_flags.add_argument('-loop', '-lp', type=int, default=0, help="Definir a quantidade de repetições da música escolhida.\nEx: -loop 5")
     stage_flags.add_argument('-server', '-sv', type=str, default=None, help='Usar um servidor de música específico.')
@@ -782,7 +782,7 @@ class Music(commands.Cog):
             options = "shuffle" if args.shuffle else "reversed" if args.reverse else None,
             force_play = "yes" if args.force else "no",
             manual_selection = args.select,
-            source = self.sources.get(args.source, "ytsearch"),
+            source = self.sources.get(args.source),
             repeat_amount = args.loop,
             server = args.server
         )
@@ -897,7 +897,7 @@ class Music(commands.Cog):
             source: str = commands.Param(name="fonte",
                                          description="Selecionar site para busca de músicas (não links)",
                                          choices=search_sources_opts,
-                                         default="ytsearch"),
+                                         default=None),
             repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.",
                                                 default=0),
             server: str = commands.Param(name="server", desc="Usar um servidor de música específico na busca.",
@@ -912,6 +912,9 @@ class Music(commands.Cog):
             bot = inter.bot
             guild = inter.guild
             channel = inter.channel
+
+        if not source:
+            source = self.bot.pool.config["SEARCH_PROVIDER"]
 
         can_send_message(channel, bot.user)
 
