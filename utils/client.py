@@ -567,8 +567,6 @@ class BotPool:
 
         loop = asyncio.get_event_loop()
 
-        self.database.start_task(loop)
-
         if self.config["RUN_RPC_SERVER"]:
 
             if not message:

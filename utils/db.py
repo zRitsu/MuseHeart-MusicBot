@@ -114,9 +114,6 @@ class BaseDB:
             return deepcopy(global_db_models[db_name])
         return deepcopy(db_models[db_name])
 
-    def start_task(self, loop):
-        pass
-
 
 
 class DatetimeSerializer(Serializer):
