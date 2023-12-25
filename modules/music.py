@@ -5726,7 +5726,7 @@ class Music(commands.Cog):
             self.bot.loop.create_task(self.connect_node(v))
 
         if start_local:
-            self.bot.loop.create_task(self.connect_local_lavalink())
+            self.connect_local_lavalink()
 
     @commands.Cog.listener("on_wavelink_node_connection_closed")
     async def node_connection_closed(self, node: wavelink.Node):
@@ -5945,7 +5945,7 @@ class Music(commands.Cog):
 
         return tracks, node
 
-    async def connect_local_lavalink(self):
+    def connect_local_lavalink(self):
 
         if 'LOCAL' not in self.bot.music.nodes:
 
@@ -5957,7 +5957,6 @@ class Music(commands.Cog):
                 'region': 'us_central',
                 'retries': 25,
                 'retry_403': True,
-                'version': 3,
             }
 
             self.bot.loop.create_task(self.connect_node(localnode))
