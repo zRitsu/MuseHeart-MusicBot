@@ -694,6 +694,7 @@ class LavalinkPlayer(wavelink.Player):
             await self.bot.wait_until_ready()
 
             if (event.error == "This IP address has been blocked by YouTube (429)" or
+                event.message == "Video returned by YouTube isn't what was requested" or
                 (error_403 := event.cause.startswith("java.lang.RuntimeException: Not success status code: 403"))
             ):
 
@@ -788,8 +789,6 @@ class LavalinkPlayer(wavelink.Player):
                     "java.lang.IllegalStateException: Error from decoder",
                     "java.lang.IllegalStateException: Current position is beyond this element",
                     "com.sedmelluq.discord.lavaplayer.tools.io.PersistentHttpStream$PersistentHttpException: Not success status code: 403",
-            )) or event.message.startswith((
-                    "Video returned by YouTube isn't what was requested",
             )):
 
                 if not hasattr(self, 'retries_general_errors'):
