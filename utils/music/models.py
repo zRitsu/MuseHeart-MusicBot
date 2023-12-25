@@ -1583,16 +1583,22 @@ class LavalinkPlayer(wavelink.Player):
         ]
 
         if (played := len(self.played)) or self.last_track:
+
+            try:
+                play_txt = self.played[-1].title
+            except:
+                play_txt = self.last_track.title
+
             controller_opts.extend(
                 [
                     disnake.SelectOption(
                         emoji="⏮️", value=PlayerControls.back, label="Voltar",
-                        description=f"Ouvir novamente: {self.played[-1].title[:31]}"
+                        description=f"Ouvir novamente: {play_txt[:31]}"
                     ),
                     disnake.SelectOption(
                         label="Ativar a reprodução automática", emoji="🔄",
                         value=PlayerControls.autoplay,
-                        description=f"Tocar música relacionadas a: {self.played[-1].title[:19]}"
+                        description=f"Tocar música relacionadas a: {play_txt[:19]}"
                     ),
                 ]
             )
