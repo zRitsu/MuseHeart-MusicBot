@@ -914,7 +914,7 @@ class Music(commands.Cog):
             channel = inter.channel
 
         if not source:
-            source = self.bot.pool.config["SEARCH_PROVIDER"]
+            source = self.bot.pool.config["DEFAULT_SEARCH_PROVIDER"]
 
         can_send_message(channel, bot.user)
 
