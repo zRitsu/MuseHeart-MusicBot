@@ -1547,29 +1547,6 @@ class LavalinkPlayer(wavelink.Player):
 
     async def process_idle_message(self):
 
-        if not self.static and not self.controller_mode:
-
-            try:
-                cmds = " | ".join(f"{self.bot.get_slash_command(c).name}" for c in [
-                    'play', 'back', 'readd_songs', 'stop', 'autoplay'])
-
-                embed = disnake.Embed(
-                    description=f"**As músicas acabaram... Use um dos comandos abaixo para adicionar músicas ou parar "
-                                f"o player.**\n\n`{cmds}`\n\n"
-                                f"**Nota:** `O Player será desligado automaticamente` "
-                                f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=self.bot.config['IDLE_TIMEOUT'])).timestamp())}:R> "
-                                f"`caso nenhum comando seja usado...`",
-                    color=self.bot.get_color(self.guild.me)
-                )
-
-                embed.set_thumbnail(
-                    url=self.guild.me.display_avatar.replace(size=256).url)
-
-                self.message = await self.text_channel.send(embed=embed)
-            except Exception:
-                traceback.print_exc()
-            return
-
         controller_opts = [
             disnake.SelectOption(
                 emoji="<:add_music:588172015760965654>", value=PlayerControls.add_song, label="Adicionar música",
