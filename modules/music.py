@@ -4977,7 +4977,7 @@ class Music(commands.Cog):
                             await self.player_interaction_concurrency.release(interaction)
                         except:
                             pass
-                        await interaction.send(f"**{not_found_msg}**", ephemeral=True)
+                        await interaction.edit_original_message(f"**{not_found_msg}**")
                         return
 
                     if not player.current.info["extra"]["lyrics"]:
@@ -4991,7 +4991,10 @@ class Music(commands.Cog):
 
                     player.current.info["extra"]["lyrics"]["track"]["albumArt"] = player.current.info["extra"]["lyrics"]["track"]["albumArt"][:-1]
 
-                    lyrics_string = "\n".join([d['line'] for d in  player.current.info["extra"]["lyrics"]['lines']])
+                    try:
+                        lyrics_string = "\n".join([d['line'] for d in  player.current.info["extra"]["lyrics"]['lines']])
+                    except KeyError:
+                        lyrics_string = player.current.info["extra"]["lyrics"]["text"]
 
                     try:
                         await self.player_interaction_concurrency.release(interaction)
