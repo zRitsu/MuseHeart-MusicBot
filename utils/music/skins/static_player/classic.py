@@ -62,6 +62,12 @@ class ClassicStaticSkin:
 
         if not player.current.autoplay:
             f"🎧 **⠂Pedido por:** <@{player.current.requester}>\n"
+        else:
+            try:
+                mode = f" [`recomendação`]({player.current.info['extra']['related']['uri']})"
+            except:
+                mode = "`recomendação`"
+            txt += f"\n> 👍 **⠂Pedido por:** {mode}\n"
 
         if player.current.playlist_name:
             txt += f"📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=20)}`]({player.current.playlist_url})\n"
@@ -89,13 +95,6 @@ class ClassicStaticSkin:
                 text=str(player),
                 icon_url="https://i.ibb.co/QXtk5VB/neon-circle.gif"
             )
-
-        if player.current.autoplay:
-            try:
-                mode = f" [`reprodução automática`]({player.current.info['extra']['related']['uri']})"
-            except:
-                mode = "`reprodução automática`"
-            txt += f"\n`No momento estou usando a` {mode} `enquanto aguardo algum membro do canal` {player.guild.me.voice.channel.mention} `adicionar novas músicas.`\n\n"
 
         data["embeds"] = [embed_top, embed] if embed_top else [embed]
 
