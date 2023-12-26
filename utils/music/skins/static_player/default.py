@@ -76,7 +76,7 @@ class DefaultStaticSkin:
                 mode = f" [`recomendação`]({player.current.info['extra']['related']['uri']})"
             except:
                 mode = "`recomendação`"
-            txt += f"\n> 👍 **⠂Pedido por:** {mode}\n"
+            txt += f"\n> 👍 **⠂Pedido por:** {mode}"
 
         try:
             vc_txt = f"\n> *️⃣ **⠂Canal de voz:** {player.guild.me.voice.channel.mention}"

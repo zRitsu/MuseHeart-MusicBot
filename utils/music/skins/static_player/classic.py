@@ -67,7 +67,7 @@ class ClassicStaticSkin:
                 mode = f" [`recomendação`]({player.current.info['extra']['related']['uri']})"
             except:
                 mode = "`recomendação`"
-            txt += f"\n> 👍 **⠂Pedido por:** {mode}\n"
+            txt += f"👍 **⠂Pedido por:** {mode}\n"
 
         if player.current.playlist_name:
             txt += f"📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=20)}`]({player.current.playlist_url})\n"

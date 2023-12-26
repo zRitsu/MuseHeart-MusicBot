@@ -76,7 +76,7 @@ class DefaultSkin:
                 mode = f" [`recomendação`]({player.current.info['extra']['related']['uri']})"
             except:
                 mode = "`recomendação`"
-            txt += f"\n> 👍 **⠂** {mode}\n"
+            txt += f"\n> 👍 **⠂** {mode}"
 
         if player.current.track_loops:
             txt += f"\n> 🔂 **⠂** `Repetições restantes: {player.current.track_loops}`"

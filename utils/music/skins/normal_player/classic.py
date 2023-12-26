@@ -75,7 +75,7 @@ class ClassicSkin:
                 mode = f" [`recomendação`]({player.current.info['extra']['related']['uri']})"
             except:
                 mode = "`recomendação`"
-            txt += f"\n> 👍 **⠂** {mode}\n"
+            txt += f"> 👍 **⠂** {mode}\n"
 
         if player.current.playlist_name:
             txt += f"📑 **⠂** [`{fix_characters(player.current.playlist_name, limit=19)}`]({player.current.playlist_url})\n"
