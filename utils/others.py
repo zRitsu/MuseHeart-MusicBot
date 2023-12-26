@@ -70,8 +70,10 @@ class CustomContext(commands.Context):
     async def defer(self, ephemeral: bool = False):
         if self.bot.config["ENABLE_DEFER_TYPING"]:
             await self.trigger_typing()
-        elif self.message.author.id != self.bot.user.id and self.channel.permissions_for(self.guild.me).add_reactions:
-            await self.message.add_reaction("⌛")
+        else:
+            perms = self.channel.permissions_for(self.guild.me)
+            if self.message.author.id != self.bot.user.id and perms.send_messages and perms.add_reactions:
+                await self.message.add_reaction("⌛")
         return
 
     async def send(self, content: Optional[str] = None, **kwargs):
