@@ -56,10 +56,10 @@ class EmbedLinkStaticSkin:
             txt += f"\n> ✋ **⠂Pedido por:** <@{player.current.requester}>\n"
         else:
             try:
-                mode = f" [`recomendação`]({player.current.info['extra']['related']['uri']})"
+                mode = f" [`Música Recomendada`]({player.current.info['extra']['related']['uri']})"
             except:
-                mode = "`recomendação`"
-            txt += f"\n> 👍 **⠂Pedido por:** {mode}\n"
+                mode = "`Música Recomendada`"
+            txt += f"\n> 👍 **⠂Adicionado via:** {mode}\n"
 
         try:
             vc_txt += f"> *️⃣ **⠂Canal de voz:** {player.guild.me.voice.channel.mention}\n"

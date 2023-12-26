@@ -72,9 +72,9 @@ class ClassicSkin:
             txt += f"🎧 **⠂** <@{player.current.requester}>\n"
         else:
             try:
-                mode = f" [`recomendação`]({player.current.info['extra']['related']['uri']})"
+                mode = f" [`Recomendada`]({player.current.info['extra']['related']['uri']})"
             except:
-                mode = "`recomendação`"
+                mode = "`Recomendada`"
             txt += f"> 👍 **⠂** {mode}\n"
 
         if player.current.playlist_name:

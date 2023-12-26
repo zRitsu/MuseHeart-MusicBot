@@ -42,9 +42,9 @@ class MicroController:
             embed.description += f"<@{player.current.requester}>"
         else:
             try:
-                embed.description = f"[`[recomendação]`]({player.current.info['extra']['related']['uri']})"
+                embed.description = f"[`[Recomendada]`]({player.current.info['extra']['related']['uri']})"
             except:
-                embed.description = "`[recomendação]`"
+                embed.description = "`[Recomendada]`"
 
         embed.set_author(
             name="Tocando Agora:",

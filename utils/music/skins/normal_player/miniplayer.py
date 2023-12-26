@@ -45,9 +45,9 @@ class MiniPlayer:
             embed.description += f"**Pedido por:** <@{player.current.requester}>\n"
         else:
             try:
-                embed.description = f"**Pedidor por:** [`[recomendação]`]({player.current.info['extra']['related']['uri']})"
+                embed.description = f"**Adicionado via:** [`[Recomendação]`]({player.current.info['extra']['related']['uri']})"
             except:
-                embed.description = "**Pedidor por:** `[recomendação]`"
+                embed.description = "**Adicionado via:** `[Recomendação]`"
 
         embed.set_author(
             name="Tocando Agora:",

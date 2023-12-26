@@ -73,9 +73,9 @@ class DefaultSkin:
             txt += f"\n> ✋ **⠂** <@{player.current.requester}>"
         else:
             try:
-                mode = f" [`recomendação`]({player.current.info['extra']['related']['uri']})"
+                mode = f" [`Recomendada`]({player.current.info['extra']['related']['uri']})"
             except:
-                mode = "`recomendação`"
+                mode = "`Recomendada`"
             txt += f"\n> 👍 **⠂** {mode}"
 
         if player.current.track_loops:
