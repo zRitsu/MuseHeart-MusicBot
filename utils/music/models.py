@@ -1745,9 +1745,6 @@ class LavalinkPlayer(wavelink.Player):
 
         if isinstance(self.guild.me.voice.channel, disnake.StageChannel):
 
-            if not self.stage_title_event:
-                return
-
             if not self.guild.me.guild_permissions.manage_guild:
                 return
 
@@ -2351,6 +2348,11 @@ class LavalinkPlayer(wavelink.Player):
                 try:
                     await self.invoke_np(force=True)
                 except:
+                    traceback.print_exc()
+
+                try:
+                    await self.update_stage_topic()
+                except Exception:
                     traceback.print_exc()
 
             except asyncio.CancelledError:
