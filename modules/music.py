@@ -6047,12 +6047,12 @@ class Music(commands.Cog):
         except:
             check = None
 
-        if player.stage_title_event:
+        if player.stage_title_event and member.bot:
 
             try:
                 if isinstance(before.channel, disnake.StageChannel):
 
-                    if before.channel.instance and player.bot.user.id not in before.channel.voice_states:
+                    if before.channel.instance and member not in before.channel.members:
                         try:
                             await before.channel.instance.edit(topic="atualização automática desativada")
                         except:
@@ -6060,13 +6060,10 @@ class Music(commands.Cog):
                         player.stage_title_event = False
 
                 else:
-                    if isinstance(before.channel, disnake.VoiceChannel) and player.bot.user.id not in before.channel.voice_states:
+                    if isinstance(before.channel, disnake.VoiceChannel) and member not in before.channel.members:
                         player.stage_title_event = False
                         if player.last_stage_title:
                             await player.bot.edit_voice_channel_status(status=None, channel_id=player.guild.me.voice.channel.id)
-
-                    if isinstance(after.channel, disnake.VoiceChannel) and before.channel and self.bot.user.id in before.channel.voice_states:
-                        await player.update_stage_topic()
             except Exception:
                 traceback.print_exc()
 
