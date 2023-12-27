@@ -1779,23 +1779,10 @@ class LavalinkPlayer(wavelink.Player):
             if msg == self.last_stage_title:
                 return
 
-            retries = 3
-
-            while retries:
-
-                try:
-                    await self.bot.edit_voice_channel_status(status=msg, channel_id=self.guild.me.voice.channel.id)
-                    break
-                except Exception as e:
-                    if str(e).startswith("403"):
-                        self.set_command_log(text=f"O status automático foi desativado devido ao erro: {e}", emoji="⚠️")
-                        self.stage_title_event = False
-                        self.update = True
-                        return
-                    else:
-                        print(repr(e))
-                        retries -= 1
-                        await asyncio.sleep(1)
+            try:
+                await self.bot.edit_voice_channel_status(status=msg, channel_id=self.guild.me.voice.channel.id)
+            except Exception:
+                print(traceback.format_exc())
 
         self.last_stage_title = msg
 
