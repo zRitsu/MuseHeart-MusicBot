@@ -6047,7 +6047,7 @@ class Music(commands.Cog):
         except:
             check = None
 
-        if player.stage_title_event and member.bot:
+        if player.stage_title_event and member.bot and not player.is_closing:
 
             try:
                 if isinstance(before.channel, disnake.StageChannel):
@@ -6063,7 +6063,7 @@ class Music(commands.Cog):
                     if isinstance(before.channel, disnake.VoiceChannel) and member not in before.channel.members:
                         player.stage_title_event = False
                         if player.last_stage_title:
-                            await player.bot.edit_voice_channel_status(status=None, channel_id=before.channel.id)
+                            self.bot.loop.create_task(player.bot.edit_voice_channel_status(status=None, channel_id=before.channel.id))
             except Exception:
                 traceback.print_exc()
 

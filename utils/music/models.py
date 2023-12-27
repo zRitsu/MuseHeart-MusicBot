@@ -2209,10 +2209,7 @@ class LavalinkPlayer(wavelink.Player):
 
         if self.guild.me:
 
-            try:
-                await self.update_stage_topic(reconnect=False, clear=True)
-            except:
-                pass
+            self.bot.loop.create_task(self.update_stage_topic(reconnect=False, clear=True))
 
             if self.static:
 
