@@ -636,6 +636,7 @@ class LavalinkPlayer(wavelink.Player):
             except:
                 traceback.print_exc()
 
+            await asyncio.sleep(2)
             await self.update_stage_topic()
             return
 
