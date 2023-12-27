@@ -4562,7 +4562,7 @@ class Music(commands.Cog):
                     channel = bot.get_channel(inter.channel.id)
 
                     if isinstance(channel, disnake.Thread):
-                        send_message_perm = channel_db.parent.permissions_for(channel.guild.me).send_messages_in_threads
+                        send_message_perm = getattr(channel_db, "parent", channel_db).permissions_for(channel.guild.me).send_messages_in_threads
                     else:
                         send_message_perm = channel_db.permissions_for(channel.guild.me).send_messages
 
