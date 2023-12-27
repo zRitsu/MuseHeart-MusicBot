@@ -163,3 +163,4 @@ application.yml
 /.db_cache/
 /.app_commands_sync_data/
 /.gitbak/
+/.tempjar/

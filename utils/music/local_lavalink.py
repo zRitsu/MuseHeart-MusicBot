@@ -194,7 +194,14 @@ def run_lavalink(
     if 0 < lavalink_initial_ram < lavalink_ram_limit:
         java_cmd += f" -Xms{lavalink_ram_limit}m"
 
-    java_cmd += " -jar Lavalink.jar"
+    try:
+        shutil.rmtree("./.tempjar")
+    except:
+        pass
+
+    os.makedirs("./.tempjar/undertow-docbase.80.2258596138812103750")
+
+    java_cmd += f" -Djava.io.tmpdir={os.getcwd()}/.tempjar -jar Lavalink.jar"
 
     if clear_plugins:
         try:
