@@ -19,6 +19,7 @@ import disnake
 import requests
 import spotipy
 from disnake.ext import commands
+from disnake.http import Route
 from dotenv import dotenv_values
 from user_agent import generate_user_agent
 
@@ -632,6 +633,14 @@ class BotCore(commands.AutoShardedBot):
                 self.env_owner_ids.add(int(i))
             except ValueError:
                 print(f"Owner_ID inválido: {i}")
+
+    def edit_voice_channel_status(
+            self, status: Optional[str], *, channel_id: int, reason: Optional[str] = None
+    ):
+        # Obtido do discord.py: https://github.com/Rapptz/discord.py/blob/9ce733321b445db245924bfd21fedf20a01a570b/discord/http.py#L1166
+        r = Route('PUT', '/channels/{channel_id}/voice-status', channel_id=channel_id)
+        payload = {'status': status}
+        return self.http.request(r, reason=reason, json=payload)
 
     def load_skins(self):
 

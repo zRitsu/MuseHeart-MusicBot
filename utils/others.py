@@ -744,19 +744,6 @@ def queue_track_index(inter: disnake.AppCmdInter, bot: BotCore, query: str, matc
 
     return tracklist
 
-async def update_vc_status(bot: BotCore, channel: disnake.VoiceChannel, status: str = None):
-
-    headers = {"Authorization": f"Bot {bot.http.token}"}
-
-    url = f'https://discord.com/api/v9/channels/{channel.id}/voice-status'
-
-    params = {"status": status}
-
-    async with ClientSession() as session:
-        async with session.put(url, headers=headers, json=params) as resp:
-            if resp.status != 204:
-                raise Exception(f"{resp.status} - {await resp.text()}")
-
 def update_inter(old: Union[disnake.Interaction, CustomContext], new: disnake.Interaction):
 
     if isinstance(old, CustomContext):

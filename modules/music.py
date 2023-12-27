@@ -34,7 +34,7 @@ from utils.music.converters import time_format, fix_characters, string_to_second
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction, FavMenuView, ViewMode
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, fav_list, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, SongRequestPurgeMode, song_request_buttons, \
-    update_vc_status, select_bot_pool
+    select_bot_pool
 
 
 class Music(commands.Cog):
@@ -6063,7 +6063,7 @@ class Music(commands.Cog):
                     if isinstance(before.channel, disnake.VoiceChannel) and player.bot.user.id not in before.channel.voice_states:
                         player.stage_title_event = False
                         if player.last_stage_title:
-                            await update_vc_status(player.bot, before.channel, status=None)
+                            await player.bot.edit_voice_channel_status(status=None, channel_id=player.guild.me.voice.channel.id)
 
                     if isinstance(after.channel, disnake.VoiceChannel) and before.channel and self.bot.user.id in before.channel.voice_states:
                         await player.update_stage_topic()

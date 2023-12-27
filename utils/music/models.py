@@ -17,7 +17,7 @@ from utils.music.skin_utils import skin_converter
 from utils.music.filters import AudioFilter
 from utils.db import DBModel
 from utils.others import music_source_emoji, send_idle_embed, PlayerControls, SongRequestPurgeMode, \
-    song_request_buttons, update_vc_status
+    song_request_buttons
 import traceback
 from collections import deque
 from typing import Optional, Union, TYPE_CHECKING, List
@@ -1711,7 +1711,7 @@ class LavalinkPlayer(wavelink.Player):
 
         if clear:
             if isinstance(self.guild.me.voice.channel, disnake.VoiceChannel) and self.last_stage_title:
-                await update_vc_status(self.bot, self.guild.me.voice.channel)
+                await self.bot.edit_voice_channel_status(status=None, channel_id=self.guild.me.voice.channel.id)
             return
 
         msg = None
@@ -1784,7 +1784,7 @@ class LavalinkPlayer(wavelink.Player):
             while retries:
 
                 try:
-                    await update_vc_status(self.bot, self.guild.me.voice.channel, msg)
+                    await self.bot.edit_voice_channel_status(status=msg, channel_id=self.guild.me.voice.channel.id)
                     break
                 except Exception as e:
                     if str(e).startswith("403"):
