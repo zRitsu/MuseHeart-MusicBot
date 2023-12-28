@@ -1423,8 +1423,11 @@ class Music(commands.Cog):
                     invite = (await self.bot.fetch_invite(invite)).url
                 except disnake.NotFound:
                     invite = None
+                except Exception:
+                    traceback.print_exc()
+                    invite = ""
 
-                if not invite:
+                if invite is None:
                     print(
                         f'{"-"*15}\n'
                         f'Removendo invite: {invite} \n'
@@ -5474,6 +5477,8 @@ class Music(commands.Cog):
                     invite = None
                     del global_data["listen_along_invites"][str(message.author.voice.channel.id)]
                     await self.bot.update_global_data(message.guild.id, global_data, db_name=DBModel.guilds)
+                except Exception:
+                    traceback.print_exc()
 
             for n, s in global_data["custom_skins"].items():
                 if isinstance(s, str):
