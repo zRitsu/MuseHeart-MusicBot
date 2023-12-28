@@ -6079,9 +6079,9 @@ class Music(commands.Cog):
         if check:
             try:
                 player.auto_skip_track_task.cancel()
-                player.auto_skip_track_task = None
             except AttributeError:
                 pass
+            player.auto_skip_track_task = None
 
         if not member.guild.me.voice:
             await asyncio.sleep(1)

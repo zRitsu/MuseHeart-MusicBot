@@ -433,6 +433,7 @@ class LavalinkPlayer(wavelink.Player):
         self._rpc_update_task: Optional[asyncio.Task] = None
         self._new_node_task: Optional[asyncio.Task] = None
         self._queue_updater_task: Optional[asyncio.Task] = None
+        self.auto_skip_track_task: Optional[asyncio.Task] = None
 
         stage_template = kwargs.pop("stage_title_template", None)
 
@@ -2419,6 +2420,11 @@ class LavalinkPlayer(wavelink.Player):
     async def _wait_for_new_node(self, txt: str = None, ignore_node=None):
 
         self.locked = True
+
+        try:
+            self.auto_skip_track_task.cancel()
+        except:
+            pass
 
         original_log = self.command_log
         original_log_emoji = self.command_log_emoji
