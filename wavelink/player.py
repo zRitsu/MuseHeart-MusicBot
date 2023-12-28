@@ -586,9 +586,11 @@ class Player:
         if identifier:
             node = client.get_node(identifier)
 
+            if not node.is_available:
+                raise WavelinkException(f"Node unavailable:: {identifier}")
             if not node:
                 raise WavelinkException(f'No Nodes matching identifier:: {identifier}')
-            elif node == self.node and force is False:
+            if node == self.node and force is False:
                 raise WavelinkException('Node identifiers must not be the same while changing.')
         else:
             self.node.close()
@@ -607,7 +609,7 @@ class Player:
                 self.node.open()
                 raise WavelinkException('No Nodes available for changeover.')
 
-        self.node.open()
+        #self.node.open()
 
         if self.node != node:
             old = self.node

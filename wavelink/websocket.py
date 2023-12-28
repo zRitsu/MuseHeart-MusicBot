@@ -108,7 +108,7 @@ class WebSocket:
 
         self._last_exc = None
         self._closed = False
-        self._node.available = True
+        #self._node.available = True
 
         if self.is_connected:
             if self._node.version == 3:

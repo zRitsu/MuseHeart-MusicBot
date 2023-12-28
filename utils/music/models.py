@@ -751,7 +751,7 @@ class LavalinkPlayer(wavelink.Player):
 
                     await asyncio.sleep(3)
 
-                    current_node = self.bot.music.nodes[self.node.identifier]
+                    current_node: wavelink.Node = self.bot.music.nodes[self.node.identifier]
 
                     for player_id in list(self.node.players):
 
@@ -775,7 +775,7 @@ class LavalinkPlayer(wavelink.Player):
                                 ignore_node=current_node.identifier))
 
 
-                    await current_node.destroy()
+                    current_node.close()
                     return
 
             await send_report()
