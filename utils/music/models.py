@@ -752,12 +752,13 @@ class LavalinkPlayer(wavelink.Player):
                     await asyncio.sleep(3)
 
                     current_node: wavelink.Node = self.bot.music.nodes[self.node.identifier]
+                    current_node.close()
 
                     for player_id in list(self.node.players):
 
                         p = self.node.players[player_id]
 
-                        node = [n for n in self.bot.music.nodes.values() if n.identifier != current_node.identifier and n.available and n.is_available]
+                        node = [n for n in self.bot.music.nodes.values() if n.available and n.is_available]
                         p.current = p.last_track
                         if node:
                             await p.change_node(node[0].identifier)
@@ -771,11 +772,7 @@ class LavalinkPlayer(wavelink.Player):
                                 pass
                             p._new_node_task = p.bot.loop.create_task(p._wait_for_new_node(
                                 f"O servidor **{current_node.identifier}** tomou ratelimit do youtube está indisponível "
-                                f"no momento (aguardando um novo servidor ficar disponível).",
-                                ignore_node=current_node.identifier))
-
-
-                    current_node.close()
+                                f"no momento (aguardando um novo servidor ficar disponível)."))
                     return
 
             await send_report()
@@ -2437,33 +2434,30 @@ class LavalinkPlayer(wavelink.Player):
 
         while True:
 
-            try:
-                node = sorted([n for n in self.bot.music.nodes.values() if n.stats and n.is_available
+            nodes = sorted([n for n in self.bot.music.nodes.values() if n.is_available
                                and n.available and n.identifier != ignore_node],
-                              key=lambda n: n.stats.players
-                              )[0]
-            except:
+                              key=lambda n: n.stats.players)
+            if not nodes:
                 await asyncio.sleep(5)
                 continue
 
-            else:
-                try:
-                    self.locked = False
-                    await self.change_node(node.identifier, force=True)
-                except:
-                    traceback.print_exc()
-                    self.locked = True
-                    await asyncio.sleep(5)
-                    continue
+            node = nodes[0]
 
+            try:
+                await self.change_node(node.identifier)
+                self.locked = False
+            except:
+                traceback.print_exc()
+                await asyncio.sleep(5)
+                continue
+
+            try:
                 self.set_command_log(emoji=original_log_emoji, text=original_log)
+                await self.invoke_np(force=True)
+            except:
+                traceback.print_exc()
 
-                try:
-                    await self.invoke_np(force=True)
-                except:
-                    traceback.print_exc()
-
-                return
+            return
 
     async def _send_rpc_data(self, users: List[int], stats: dict):
 

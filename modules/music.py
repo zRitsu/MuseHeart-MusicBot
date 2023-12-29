@@ -5754,7 +5754,7 @@ class Music(commands.Cog):
             except:
                 pass
 
-            player._new_node_task = self.bot.loop.create_task(player._wait_for_new_node())
+            player._new_node_task = player.bot.loop.create_task(player._wait_for_new_node())
 
         await asyncio.sleep(2)
 
@@ -5795,6 +5795,20 @@ class Music(commands.Cog):
     @commands.Cog.listener("on_wavelink_node_ready")
     async def node_ready(self, node: wavelink.Node):
         print(f'{self.bot.user} - Servidor de música: [{node.identifier} / v{node.version}] está pronto para uso!')
+        retries = 25
+        while retries > 0:
+
+            if not node._websocket._websocket.is_connected:
+                return
+
+            if not node.stats:
+                await asyncio.sleep(5)
+                retries -= 1
+                continue
+
+            if node.stats.uptime < 600000:
+                node.open()
+            return
 
     async def connect_node(self, data: dict):
 
