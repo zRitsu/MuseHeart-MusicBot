@@ -5798,7 +5798,7 @@ class Music(commands.Cog):
         retries = 25
         while retries > 0:
 
-            if not node._websocket._websocket.is_connected:
+            if not node._websocket.is_connected:
                 return
 
             if not node.stats:
