@@ -1715,8 +1715,6 @@ class LavalinkPlayer(wavelink.Player):
 
         msg = None
 
-        timestamp = ""
-
         if self.current:
 
             requester = self.guild.get_member(self.current.requester)
@@ -1727,9 +1725,12 @@ class LavalinkPlayer(wavelink.Player):
                 requester_name = "Membro desconhecido"
 
             if not self.current.is_stream and (not self.auto_pause or not self.paused):
-                timestamp = f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=self.current.duration - self.position)).timestamp())}:R>"
+                if isinstance(self.guild.me.voice.channel, disnake.StageChannel):
+                    timestamp = str(self.current.duration)
+                else:
+                    timestamp = f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=self.current.duration - self.position)).timestamp())}:R>"
             else:
-                timestamp = ("pausado " if (self.paused) else "🔴 ") + f"<t:{int(disnake.utils.utcnow().timestamp())}:R>"
+                timestamp = ("pausado" if (self.paused) else "🔴") + (f" <t:{int(disnake.utils.utcnow().timestamp())}:R>") if not self.current.is_stream else ""
 
             msg = self.stage_title_template \
                 .replace("{track.title}", self.current.single_title) \
@@ -1739,18 +1740,22 @@ class LavalinkPlayer(wavelink.Player):
                 .replace("{track.source}", self.current.info.get("sourceName", "desconhecido")) \
                 .replace("{track.playlist}", self.current.playlist_name or "Sem playlist") \
                 .replace("{requester.name}", requester_name) \
-                .replace("{requester.id}", str(self.current.requester))
+                .replace("{requester.id}", str(self.current.requester)) \
+                .replace("{track.timestamp}", timestamp)
 
         if isinstance(self.guild.me.voice.channel, disnake.StageChannel):
 
             if not self.guild.me.guild_permissions.manage_guild:
                 return
 
+            if msg is not None:
+                msg = msg.replace("{track.emoji}", "♪")
+
+                if len(msg) > 110:
+                    msg = msg[:107] + "..."
+
             if not msg:
                 msg = "Status: Aguardando por novas músicas."
-
-            elif len(msg) > 110:
-                msg = msg[:107] + "..."
 
             if not self.guild.me.voice.channel.instance:
                 func = self.guild.me.voice.channel.create_instance
@@ -1765,9 +1770,7 @@ class LavalinkPlayer(wavelink.Player):
 
             if msg is not None:
 
-                msg = msg \
-                    .replace("{track.timestamp}", timestamp) \
-                    .replace("{track.emoji}", music_source_emoji(self.current.info["sourceName"]))
+                msg = msg.replace("{track.emoji}", music_source_emoji(self.current.info["sourceName"]))
 
                 if len(msg) > 496:
                     msg = msg[:496] + "..."
