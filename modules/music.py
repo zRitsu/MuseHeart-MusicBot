@@ -32,7 +32,7 @@ from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, google_search, percentage, music_source_image, perms_translations
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction, FavMenuView, ViewMode
-from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, fav_list, queue_track_index, \
+from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, SongRequestPurgeMode, song_request_buttons, \
     select_bot_pool
 
@@ -1020,7 +1020,10 @@ class Music(commands.Cog):
             user_data = inter.global_user_data
         except:
             user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
-            inter.global_user_data = user_data
+            try:
+                inter.global_user_data = user_data
+            except:
+                pass
 
         if not query:
 
@@ -1246,7 +1249,10 @@ class Music(commands.Cog):
                 user_data = inter.global_user_data
             except AttributeError:
                 user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
-                inter.global_user_data = user_data
+                try:
+                    inter.global_user_data = user_data
+                except:
+                    pass
 
             if query.startswith("> fav:"):
                 query = user_data["fav_links"][query[7:]]
@@ -4443,7 +4449,10 @@ class Music(commands.Cog):
             user_data = inter.global_user_data
         except AttributeError:
             user_data = await bot.get_global_data(inter.author.id, db_name=DBModel.users)
-            inter.global_user_data = user_data
+            try:
+                inter.global_user_data = user_data
+            except:
+                pass
 
         view = FavMenuView(bot=bot, ctx=inter, data=user_data, prefix=prefix, mode=mode)
         view.guild_data = guild_data
