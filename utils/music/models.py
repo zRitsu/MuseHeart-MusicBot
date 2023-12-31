@@ -1614,12 +1614,14 @@ class LavalinkPlayer(wavelink.Player):
             )
 
         embed = disnake.Embed(
-            description=f"**Não há músicas na fila... Adicione uma música ou use uma das opções abaixo.\n\n"
-                        f"Nota:** `O Player será desligado automaticamente` "
-                        f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=self.bot.config['IDLE_TIMEOUT'])).timestamp())}:R> "
-                        f"`caso nenhuma ação seja executada...`",
+            description=f"**Não há músicas na fila... Adicione uma música ou use uma das opções abaixo.",
             color=self.bot.get_color(self.guild.me)
         )
+
+        if not self.keep_connected:
+            embed.description += "\n\nNota:** `O Player será desligado automaticamente` " \
+                        f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=self.bot.config['IDLE_TIMEOUT'])).timestamp())}:R> " \
+                        f"`caso nenhuma ação seja executada...`"
 
         kwargs = {
             "embed": embed,
@@ -1676,6 +1678,9 @@ class LavalinkPlayer(wavelink.Player):
             await self.update_stage_topic()
         except:
             pass
+
+        if self.keep_connected:
+            return
 
         await asyncio.sleep(self.bot.config["IDLE_TIMEOUT"])
 

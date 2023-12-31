@@ -487,6 +487,14 @@ class PlayerSession(commands.Cog):
 
                 player.queue.extend(failed_tracks)
 
+                if player.keep_connected and not player.queue:
+                    if player.failed_tracks:
+                        player.queue.extend(reversed(player.failed_tracks))
+                        player.failed_tracks.clear()
+                    else:
+                        player.queue.extend(player.played)
+                        player.played.clear()
+
                 playlists.clear()
                 tracks.clear()
                 played_tracks.clear()
