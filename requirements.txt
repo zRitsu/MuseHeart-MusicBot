@@ -11,7 +11,7 @@ aiofiles
 disnake-jishaku
 packaging
 aiosqlite
-yt-dlp>=2023.11.14
+yt-dlp>=2023.12.30
 tornado
 emoji
 spotipy
