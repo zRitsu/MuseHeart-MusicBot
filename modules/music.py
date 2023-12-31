@@ -1016,30 +1016,136 @@ class Music(commands.Cog):
                 except IndexError:
                     pass
 
+        try:
+            user_data = inter.global_user_data
+        except:
+            user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+            inter.global_user_data = user_data
+
         if not query:
 
+            embed = disnake.Embed(
+                color=self.bot.get_color(guild.me),
+                description="**Selecione um item abaixo abaixo:**\n"
+                            f'Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para escolher!'
+            )
+
             try:
-                user_data = inter.global_user_data
-            except:
-                user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
-                inter.global_user_data = user_data
+                if bot.user.id != self.bot.user.id:
+                    embed.set_footer(text=f"Via: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
+            except AttributeError:
+                pass
 
-            db_favs = {}
+            kwargs = {
+                "content": "",
+                "embed": embed
+            }
 
-            for k, v in user_data["integration_links"].items():
-                db_favs[f"> itg: {k}"] = v
+            try:
+                if inter.message.author.bot:
+                    kwargs["content"] = inter.author.mention
+            except AttributeError:
+                pass
 
-            for k, v in user_data["fav_links"].items():
-                db_favs[f"> fav: {k}"] = v
-
+            opts = [
+                disnake.SelectOption(label="Usar favorito", value=">> [⭐ Favoritos ⭐] <<", emoji="⭐"),
+                disnake.SelectOption(label="Usar integração", value=">> [💠 Integrações 💠] <<", emoji="💠"),
+            ]
+            
             if os.path.isfile(f"./local_database/saved_queues_v1/users/{inter.author.id}.pkl"):
-                db_favs["> svq: Fila Salva"] = ">> saved_queue <<"
+                opts.append(">> [💾 Fila Salva 💾] <<")
+                
+            if guild_data["player_controller"]["fav_links"]:
+                disnake.SelectOption(label="Usar favorito do servidor", value=">> [📌 Favoritos do servidor 📌] <<", emoji="📌"),
 
-            if not db_favs:
-                raise EmptyFavIntegration()
+            view = SelectInteraction(user=inter.author, timeout=45, opts=opts)
 
-            if len(db_favs) == 1:
-                query = list(db_favs)[0]
+            if isinstance(inter, disnake.MessageInteraction) and not inter.response.is_done():
+                await inter.response.defer(ephemeral=ephemeral)
+
+            try:
+                msg = await inter.followup.send(ephemeral=ephemeral, view=view, wait=True, **kwargs)
+            except (disnake.InteractionTimedOut, AttributeError):
+                msg = await inter.channel.send(view=view, **kwargs)
+
+            await view.wait()
+
+            select_interaction = view.inter
+
+            if not select_interaction or view.selected is False:
+
+                text = "### Tempo de seleção esgotado!" if view.selected is not False else "### Cancelado pelo usuário."
+
+                try:
+                    await msg.edit(embed=disnake.Embed(description=text, color=self.bot.get_color(guild.me)),
+                                   components=song_request_buttons)
+                except AttributeError:
+                    traceback.print_exc()
+                    pass
+                return
+
+            if select_interaction.data.values[0] == "cancel":
+                await msg.edit(
+                    embed=disnake.Embed(
+                        description="**Seleção cancelada!**",
+                        color=self.bot.get_color(guild.me)
+                    ),
+                    components=None
+                )
+                return
+
+            try:
+                inter.store_message = msg
+            except AttributeError:
+                pass
+
+            inter.token = select_interaction.token
+            inter.id = select_interaction.id
+            inter.response = select_interaction.response
+            query = select_interaction.data.values[0]
+            await inter.response.defer()
+
+        fav_opts = []
+
+        if query.startswith(">> [💠 Integrações 💠] <<"):
+            query = ""
+            for k, v in user_data["integration_links"].items():
+                fav_opts.append(disnake.SelectOption(label=k[5:], value=f"> itg: {k}", description="[💠 Integração 💠]", emoji=music_source_emoji_url(v)))
+
+        elif query.startswith(">> [⭐ Favoritos ⭐] <<"):
+            query = ""
+            for k, v in user_data["fav_links"].items():
+                fav_opts.append(disnake.SelectOption(label=k, value=f"> fav: {k}", description="[⭐ Favorito ⭐]", emoji=music_source_emoji_url(v)))
+
+        elif query.startswith(">> [📌 Favoritos do servidor 📌] <<"):
+
+            if not guild_data:
+
+                if inter.bot == bot:
+                    try:
+                        guild_data = inter.guild_data
+                    except AttributeError:
+                        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                        try:
+                            inter.guild_data = guild_data
+                        except AttributeError:
+                            pass
+
+                if not guild_data:
+                    guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+
+            if not guild_data["player_controller"]["fav_links"]:
+                raise GenericError("**O servidor não possui links fixos/favoritos.**")
+            
+            for name, v in guild_data["player_controller"]["fav_links"].items():
+                fav_opts.append(disnake.SelectOption(label=name, value=f"> pin: {name}", description="[📌 Favorito do servidor 📌]", emoji=music_source_emoji_url(v['url'])))
+
+            is_pin = False
+
+        if fav_opts:
+
+            if len(fav_opts) == 1:
+                query = list(fav_opts)[0]
 
             else:
                 embed = disnake.Embed(
@@ -1066,17 +1172,29 @@ class Music(commands.Cog):
                     pass
 
                 view = SelectInteraction(
-                    user=inter.author,  timeout=45,
-                    opts=[disnake.SelectOption(label=k, value=k, emoji=music_source_emoji_url(v)) for k, v in db_favs.items()]
+                    user=inter.author,  timeout=45, opts=fav_opts
                 )
 
                 if isinstance(inter, disnake.MessageInteraction) and not inter.response.is_done():
                     await inter.response.defer(ephemeral=ephemeral)
 
                 try:
-                    msg = await inter.followup.send(ephemeral=ephemeral, view=view, wait=True, **kwargs)
-                except (disnake.InteractionTimedOut, AttributeError):
-                    msg = await inter.channel.send(view=view, **kwargs)
+                    func = msg.edit
+                except AttributeError:
+                    try:
+                        if inter.response.is_done():
+                            func = inter.edit_original_message
+                        else:
+                            func = inter.response.send_message
+                            kwargs["ephemeral"] = ephemeral
+                    except AttributeError:
+                        kwargs["ephemeral"] = ephemeral
+                        try:
+                            func = inter.followup.send
+                        except AttributeError:
+                            func = inter.send
+
+                msg = await func(view=view, **kwargs)
 
                 await view.wait()
 
@@ -1084,13 +1202,15 @@ class Music(commands.Cog):
 
                 if not select_interaction or view.selected is False:
 
-                    text = "### Tempo de seleção esgotado!" if view.selected is not False else "### Cancelado pelo usuário."
+                    embed = disnake.Embed(description="### Tempo de seleção esgotado!" if view.selected is not False else "### Cancelado pelo usuário.", color=self.bot.get_color(guild.me))
 
                     try:
-                        await msg.edit(embed=disnake.Embed(description=text, color=self.bot.get_color(guild.me)), components=song_request_buttons)
+                        await msg.edit(embed=embed, components=song_request_buttons)
                     except AttributeError:
-                        traceback.print_exc()
-                        pass
+                        try:
+                            await select_interaction.response.edit_message(embed=embed, components=song_request_buttons)
+                        except AttributeError:
+                            traceback.print_exc()
                     return
 
                 if select_interaction.data.values[0] == "cancel":
@@ -1113,9 +1233,13 @@ class Music(commands.Cog):
                 inter.response = select_interaction.response
                 query = select_interaction.data.values[0]
 
+        elif not query:
+            raise EmptyFavIntegration()
+
         if query.startswith("> pin: "):
-            is_pin = True
-            query = query[7:]
+            if is_pin is None:
+                is_pin = True
+            query = guild_data["player_controller"]["fav_links"][query[7:]]['url']
 
         elif query.startswith(("> fav: ", "> itg: ")):
             try:
@@ -1230,7 +1354,7 @@ class Music(commands.Cog):
                     else:
                         inter = view.inter
 
-        elif query.startswith("> svq: "):
+        elif query.startswith(">> [💾 Fila Salva 💾] <<"):
 
             try:
                 async with aiofiles.open(f"./local_database/saved_queues_v1/users/{inter.author.id}.pkl", 'rb') as f:
@@ -1833,12 +1957,10 @@ class Music(commands.Cog):
         if URL_REG.match(query):
             return [query] if len(query) < 100 else []
 
-        favs = []
+        favs = [">> [⭐ Favoritos ⭐] <<", ">> [💠 Integrações 💠] <<", ">> [📌 Favoritos do servidor 📌] <<"]
 
         if os.path.isfile(f"./local_database/saved_queues_v1/users/{inter.author.id}.pkl"):
-            favs.append("> svq: Fila Salva")
-
-        favs.extend(await fav_list(inter, query))
+            favs.append(">> [💾 Fila Salva 💾] <<")
 
         if not inter.guild:
             try:
@@ -1851,10 +1973,10 @@ class Music(commands.Cog):
         except AttributeError:
             vc = True
 
-        if not vc or not query or (favs_size := len(favs)) >= 20:
-            return favs[:20]
+        if not vc or not query:
+            return favs
 
-        return await google_search(self.bot, query, max_entries=20 - favs_size) + favs
+        return await google_search(self.bot, query, max_entries=20) or favs
 
     skip_back_cd = commands.CooldownMapping.from_cooldown(2, 13, commands.BucketType.member)
     skip_back_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
@@ -4631,7 +4753,7 @@ class Music(commands.Cog):
         guild_data = await self.bot.get_data(interaction.guild_id, db_name=DBModel.guilds)
 
         try:
-            query = guild_data["player_controller"]["fav_links"][interaction.data.values[0]]['url']
+            query = interaction.data.values[0]
         except KeyError:
             await interaction.send("**O item selecionado não foi encontrado na base de dados...**", ephemeral=True)
             await send_idle_embed(interaction.message, bot=self.bot, guild_data=guild_data, force=True)
