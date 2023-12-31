@@ -199,7 +199,10 @@ def run_lavalink(
     except:
         pass
 
-    os.makedirs("./.tempjar/undertow-docbase.80.2258596138812103750")
+    try:
+        os.makedirs("./.tempjar/undertow-docbase.80.2258596138812103750")
+    except:
+        pass
 
     java_cmd += f" -Djava.io.tmpdir={os.getcwd()}/.tempjar -jar Lavalink.jar"
 
