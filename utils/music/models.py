@@ -321,8 +321,8 @@ class LavalinkTrack(wavelink.Track):
         return self.title
 
     @property
-    def uri(self) -> str:
-        return  self.uri
+    def url(self) -> str:
+        return self.info["uri"]
 
     @property
     def search_uri(self):
