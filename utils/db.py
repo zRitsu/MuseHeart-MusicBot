@@ -53,11 +53,12 @@ db_models = {
 
 global_db_models = {
     DBModel.users: {
-        "ver": 1.3,
+        "ver": 1.4,
         "fav_links": {},
         "integration_links": {},
         "token": "",
         "custom_prefix": "",
+        "last_tracks": [],
     },
     DBModel.guilds: {
         "ver": 1.4,

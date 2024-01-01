@@ -928,6 +928,7 @@ class Music(commands.Cog):
         ephemeral = None
         warn_message = None
         queue_loaded = False
+        reg_query = None
 
         try:
             if isinstance(inter.message, disnake.Message):
@@ -1057,7 +1058,25 @@ class Music(commands.Cog):
             
             if os.path.isfile(f"./local_database/saved_queues_v1/users/{inter.author.id}.pkl"):
                 opts.append(disnake.SelectOption(label="Usar fila salva", value=">> [💾 Fila Salva 💾] <<", emoji="💾"))
+
+            if user_data["last_tracks"]:
+                opts.append(disnake.SelectOption(label="Adicionar música recente", value=">> [📑 Músicas recentes 📑] <<", emoji="📑"))
                 
+            if not guild_data:
+
+                if inter.bot == bot:
+                    try:
+                        guild_data = inter.guild_data
+                    except AttributeError:
+                        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                        try:
+                            inter.guild_data = guild_data
+                        except AttributeError:
+                            pass
+
+                if not guild_data:
+                    guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+
             if guild_data["player_controller"]["fav_links"]:
                 disnake.SelectOption(label="Usar favorito do servidor", value=">> [📌 Favoritos do servidor 📌] <<", emoji="📌"),
 
@@ -1119,6 +1138,17 @@ class Music(commands.Cog):
             query = ""
             for k, v in user_data["fav_links"].items():
                 fav_opts.append(disnake.SelectOption(label=k, value=f"> fav: {k}", description="[⭐ Favorito ⭐]", emoji=music_source_emoji_url(v)))
+
+        elif query.startswith(">> [📑 Músicas recentes 📑] <<"):
+
+            if not user_data["last_tracks"]:
+                raise GenericError("**Você não possui músicas registradas no seu histórico...**\n"
+                                   "Elas vão aparecer a medida que for adicionando músicas via busca ou link.")
+
+            query = ""
+            for i, d in enumerate(user_data["last_tracks"]):
+                fav_opts.append(disnake.SelectOption(label=d["name"], value=f"> lst: {i}", description="[📑 Músicas recentes 📑]",
+                                                     emoji=music_source_emoji_url(d["url"])))
 
         elif query.startswith(">> [📌 Favoritos do servidor 📌] <<"):
 
@@ -1243,6 +1273,9 @@ class Music(commands.Cog):
             if is_pin is None:
                 is_pin = True
             query = guild_data["player_controller"]["fav_links"][query[7:]]['url']
+
+        elif query.startswith("> lst: "):
+            query = user_data["last_tracks"][int(query[7:])]["url"]
 
         elif query.startswith(("> fav: ", "> itg: ")):
             try:
@@ -1383,12 +1416,12 @@ class Music(commands.Cog):
 
             urls = URL_REG.findall(query)
 
-            if not urls:
+            reg_query = {}
 
+            if not urls:
                 query = f"{source}:{query}"
 
             else:
-
                 query = urls[0]
 
                 if query.startswith("https://www.youtube.com/results"):
@@ -1748,6 +1781,9 @@ class Music(commands.Cog):
                 if isinstance(inter, CustomContext):
                     inter.message = msg
 
+                if reg_query is not None:
+                    reg_query = {"name": tracks.name, "url": tracks.url}
+
             elif not queue_loaded:
 
                 tracks = tracks[0]
@@ -1785,6 +1821,8 @@ class Music(commands.Cog):
                 embed.set_thumbnail(url=tracks.thumb)
                 embed.description = f"`{fix_characters(tracks.author, 15)}`**┃**`{time_format(tracks.duration) if not tracks.is_stream else '🔴 Livestream'}`**┃**{inter.author.mention}"
                 emoji = "🎵"
+                if reg_query is not None:
+                    reg_query = {"name": tracks.title, "url": tracks.uri}
 
             else:
 
@@ -1880,6 +1918,9 @@ class Music(commands.Cog):
             embed.description = f"`{len(tracks.tracks)} música(s)`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
             emoji = "🎶"
 
+            if reg_query is not None:
+                reg_query = {"name": tracks.name, "url": tracks.url}
+
         embed.description += player.controller_link
 
         if not is_pin:
@@ -1957,13 +1998,28 @@ class Music(commands.Cog):
                 player.set_command_log(text=log_text, emoji=emoji)
             player.update = True
 
+        if reg_query is not None:
+
+            try:
+                user_data["last_tracks"].remove(reg_query)
+            except:
+                pass
+
+            if len(user_data["last_tracks"]) > 6:
+                user_data["last_tracks"].pop(0)
+
+            user_data["last_tracks"].append(reg_query)
+
+            await bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
+
     @play.autocomplete("busca")
     async def fav_add_autocomplete(self, inter: disnake.Interaction, query: str):
 
         if URL_REG.match(query):
             return [query] if len(query) < 100 else []
 
-        favs = [">> [⭐ Favoritos ⭐] <<", ">> [💠 Integrações 💠] <<", ">> [📌 Favoritos do servidor 📌] <<"]
+        favs = [">> [⭐ Favoritos ⭐] <<", ">> [💠 Integrações 💠] <<", ">> [📌 Favoritos do servidor 📌] <<",
+                ">> [📑 Músicas recentes 📑] <<"]
 
         if os.path.isfile(f"./local_database/saved_queues_v1/users/{inter.author.id}.pkl"):
             favs.append(">> [💾 Fila Salva 💾] <<")
