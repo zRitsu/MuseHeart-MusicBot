@@ -1481,10 +1481,12 @@ class LavalinkPlayer(wavelink.Player):
                             description=f"A música [{track.title}]({track.uri}) não está disponível...\n"
                                         f"Pulando para a próxima música...",
                             color=self.bot.get_color()
-                        ), delete_after=30
+                        ), delete_after=10
                     )
                 except:
                     traceback.print_exc()
+
+                await asyncio.sleep(10)
 
                 self.locked = False
 
@@ -1510,12 +1512,14 @@ class LavalinkPlayer(wavelink.Player):
                     await self.text_channel.send(
                         embed=disnake.Embed(
                             description=f"A música [{track.title}]({track.uri}) não está disponível...\n"
-                                        f"Pulando para a próxima música...",
+                                        "Pulando para a próxima música...",
                             color=self.bot.get_color()
-                        ), delete_after=30
+                        ), delete_after=10
                     )
                 except:
                     traceback.print_exc()
+
+                await asyncio.sleep(10)
 
                 self.locked = False
 
