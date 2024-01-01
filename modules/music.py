@@ -1056,7 +1056,7 @@ class Music(commands.Cog):
             ]
             
             if os.path.isfile(f"./local_database/saved_queues_v1/users/{inter.author.id}.pkl"):
-                opts.append(">> [💾 Fila Salva 💾] <<")
+                opts.append(disnake.SelectOption(label="Usar fila salva", value=">> [💾 Fila Salva 💾] <<", emoji="💾"))
                 
             if guild_data["player_controller"]["fav_links"]:
                 disnake.SelectOption(label="Usar favorito do servidor", value=">> [📌 Favoritos do servidor 📌] <<", emoji="📌"),
