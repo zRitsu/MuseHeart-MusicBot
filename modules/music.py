@@ -1782,7 +1782,7 @@ class Music(commands.Cog):
                     inter.message = msg
 
                 if reg_query is not None:
-                    reg_query = {"name": tracks.title, "url": tracks.url}
+                    reg_query = {"name": tracks.title, "url": tracks.uri}
 
             elif not queue_loaded:
 

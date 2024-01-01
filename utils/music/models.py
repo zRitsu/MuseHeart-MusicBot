@@ -109,12 +109,20 @@ class PartialTrack:
         return self.info["uri"]
 
     @property
+    def url(self) -> str:
+        return self.uri
+
+    @property
     def search_uri(self):
         return f"https://www.youtube.com/results?search_query={quote(self.title)}"
 
     @property
     def title(self) -> str:
         return f"{self.author} - {self.single_title}"
+
+    @property
+    def name(self) -> str:
+        return self.title
 
     @property
     def original_id(self) -> str:
@@ -305,8 +313,16 @@ class LavalinkTrack(wavelink.Track):
         return f"{self.info['sourceName']} - {self.duration if not self.is_stream else 'stream'} - {self.authors_string} - {self.title}"
 
     @property
+    def name(self) -> str:
+        return self.title
+
+    @property
     def single_title(self) -> str:
         return self.title
+
+    @property
+    def uri(self) -> str:
+        return  self.uri
 
     @property
     def search_uri(self):
