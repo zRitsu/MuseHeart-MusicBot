@@ -3691,9 +3691,24 @@ class Music(commands.Cog):
                     temp_filter.remove('time_above')
                     final_filters.add('time_above')
 
-                if 'song_name' in temp_filter and song_name.lower() in t.title.replace("️", "").lower():
-                    temp_filter.remove('song_name')
-                    final_filters.add('song_name')
+                if 'song_name' in temp_filter:
+
+                    title = t.title.replace("️", "").lower().split()
+
+                    query_words = song_name.lower().split()
+
+                    word_count = 0
+
+                    for query_word in song_name.lower().split():
+                        for title_word in title:
+                            if query_word in title_word:
+                                title.remove(title_word)
+                                word_count += 1
+                                break
+
+                    if word_count == len(query_words):
+                        temp_filter.remove('song_name')
+                        final_filters.add('song_name')
 
                 if 'song_author' in temp_filter and song_author.lower() in t.author.replace("️", "").lower():
                     temp_filter.remove('song_author')
@@ -4005,9 +4020,24 @@ class Music(commands.Cog):
                     temp_filter.remove('time_above')
                     final_filters.add('time_above')
 
-                if 'song_name' in temp_filter and song_name.lower() in t.title.replace("️", "").lower():
-                    temp_filter.remove('song_name')
-                    final_filters.add('song_name')
+                if 'song_name' in temp_filter:
+
+                    title = t.title.replace("️", "").lower().split()
+
+                    query_words = song_name.lower().split()
+
+                    word_count = 0
+
+                    for query_word in song_name.lower().split():
+                        for title_word in title:
+                            if query_word in title_word:
+                                title.remove(title_word)
+                                word_count += 1
+                                break
+
+                    if word_count == len(query_words):
+                        temp_filter.remove('song_name')
+                        final_filters.add('song_name')
 
                 if 'song_author' in temp_filter and song_author.lower() in t.author.replace("️", "").lower():
                     temp_filter.remove('song_author')
