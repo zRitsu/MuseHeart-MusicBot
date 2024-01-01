@@ -1148,7 +1148,7 @@ class Music(commands.Cog):
         if fav_opts:
 
             if len(fav_opts) == 1:
-                query = list(fav_opts)[0]
+                query = list(fav_opts)[0].value
 
             else:
                 embed = disnake.Embed(
