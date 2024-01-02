@@ -1174,6 +1174,8 @@ class Music(commands.Cog):
 
         if fav_opts:
 
+            source = False
+
             if len(fav_opts) == 1:
                 query = list(fav_opts)[0].value
 
@@ -1270,9 +1272,11 @@ class Music(commands.Cog):
             if is_pin is None:
                 is_pin = True
             query = guild_data["player_controller"]["fav_links"][query[7:]]['url']
+            source = False
 
         elif query.startswith("> lst: "):
             query = user_data["last_tracks"][int(query[7:])]["url"]
+            source = False
 
         elif query.startswith(("> fav: ", "> itg: ")):
             try:
@@ -1390,6 +1394,8 @@ class Music(commands.Cog):
                     else:
                         inter = view.inter
 
+            source = False
+
         elif query.startswith(">> [💾 Fila Salva 💾] <<"):
 
             try:
@@ -1406,6 +1412,7 @@ class Music(commands.Cog):
             tracks = await self.check_player_queue(inter.author, bot, guild.id, self.bot.get_cog("PlayerSession").process_track_cls(data["tracks"])[0])
             node = await self.get_best_node(bot)
             queue_loaded = True
+            source = False
 
         else:
 
