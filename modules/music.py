@@ -4966,7 +4966,7 @@ class Music(commands.Cog):
                     "query": kwargs.get("query", ""),
                     "position": 0,
                     "options": False,
-                    "source": "ytsearch",
+                    "source": None,
                     "repeat_amount": 0,
                     "server": None,
                     "force_play": "no"
@@ -5303,7 +5303,7 @@ class Music(commands.Cog):
                     "position": position or 0,
                     "options": False,
                     "manual_selection": True,
-                    "source": "ytsearch",
+                    "source": None,
                     "repeat_amount": 0,
                     "server": None,
                     "force_play": "no",
