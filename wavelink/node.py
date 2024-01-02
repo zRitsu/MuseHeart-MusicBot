@@ -256,7 +256,7 @@ class Node:
 
                 if loadtype == 'NO_MATCHES':
                     __log__.info(f'REST | {self.identifier} | No tracks with query:: <{query}> found.')
-                    raise TrackNotFound(f"{self.identifier}: Track not found... | {query}")
+                    return []
 
                 if loadtype in ('LOAD_FAILED', 'error'):
 
