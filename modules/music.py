@@ -6155,7 +6155,8 @@ class Music(commands.Cog):
                     ignore_search = True
                 else:
                     ignore_search = False
-                    providers = node.search_providers
+                    providers = [s for s in node.search_providers if s != source]
+                    providers.insert(0, source)
 
                 for search_provider in providers:
 
