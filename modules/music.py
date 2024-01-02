@@ -1415,12 +1415,9 @@ class Music(commands.Cog):
 
             reg_query = {}
 
-            if not urls:
-                if not source:
-                    source = self.bot.pool.config["DEFAULT_SEARCH_PROVIDER"]
-            else:
+            if urls:
                 query = urls[0]
-                source = None
+                source = False
 
                 if query.startswith("https://www.youtube.com/results"):
                     try:
@@ -6152,17 +6149,14 @@ class Music(commands.Cog):
                     except IndexError:
                         node_search = node
 
-                if not source:
+                if source is False:
                     providers = [node.search_providers[:1]]
-                    ignore_search = True
                 else:
-                    ignore_search = False
-                    providers = [s for s in node.search_providers if s != source]
-                    providers.insert(0, source)
+                    providers = node.search_providers or [self.bot.config["DEFAULT_SEARCH_PROVIDER"]]
 
                 for search_provider in providers:
 
-                    if not ignore_search:
+                    if source is not False:
                         query = f"{search_provider}:{query}"
 
                     try:
@@ -6193,13 +6187,13 @@ class Music(commands.Cog):
                     except Exception as e:
                         exceptions.add(repr(e))
 
-                    if tracks or ignore_search:
+                    if tracks or source is False:
                         break
 
         if not tracks:
             if exceptions:
-                raise GenericError("Ocorreu um erro ao processar sua busca: ```py\n" + "\n".join(exceptions) + "```")
-            raise GenericError("Não houve resultados para sua busca.")
+                raise GenericError("**Ocorreu um erro ao processar sua busca:** ```py\n" + "\n".join(exceptions) + "```")
+            raise GenericError("**Não houve resultados para sua busca.**")
 
         if isinstance(tracks, list):
             tracks[0].info["extra"]["track_loops"] = track_loops
