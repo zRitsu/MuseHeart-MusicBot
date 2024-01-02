@@ -501,7 +501,7 @@ class Music(commands.Cog):
             position=0,
             options="",
             manual_selection=False,
-            source="ytsearch",
+            source=None,
             repeat_amount=0,
             force_play="no",
         )
@@ -532,7 +532,7 @@ class Music(commands.Cog):
             source: str = commands.Param(name="fonte",
                                          description="Selecionar site para busca de músicas (não links)",
                                          choices=search_sources_opts,
-                                         default="ytsearch"),
+                                         default=None),
             repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.",
                                                 default=0),
             server: str = commands.Param(name="server", desc="Usar um servidor de música específico na busca.",
@@ -749,7 +749,7 @@ class Music(commands.Cog):
 
         await self.play.callback(self=self, inter=ctx, query=query, position=position, options=False,
                                  force_play="no", manual_selection=False,
-                                 source="ytsearch", repeat_amount=0, server=None)
+                                 source=None, repeat_amount=0, server=None)
 
     stage_flags = CommandArgparse()
     stage_flags.add_argument('query', nargs='*', help="nome ou link da música")
@@ -796,7 +796,7 @@ class Music(commands.Cog):
     async def search_legacy(self, ctx: CustomContext, *, query):
 
         await self.play.callback(self=self, inter=ctx, query=query, position=0, options=False, force_play="no",
-                                 manual_selection=True, source="ytsearch", repeat_amount=0, server=None)
+                                 manual_selection=True, source=None, repeat_amount=0, server=None)
 
     @can_send_message_check()
     @check_voice()
@@ -839,7 +839,7 @@ class Music(commands.Cog):
         inter.message.thread = thread
 
         await self.play.callback(self=self, inter=inter, query="", position=position, options=False, force_play=force_play,
-                                 manual_selection=False, source="ytsearch", repeat_amount=repeat_amount, server=server)
+                                 manual_selection=False, source=None, repeat_amount=repeat_amount, server=server)
 
     async def check_player_queue(self, user: disnake.User, bot: BotCore, guild_id: int, tracks: Union[list, LavalinkPlaylist] = None):
 
@@ -912,9 +912,6 @@ class Music(commands.Cog):
             bot = inter.bot
             guild = inter.guild
             channel = inter.channel
-
-        if not source:
-            source = self.bot.pool.config["DEFAULT_SEARCH_PROVIDER"]
 
         can_send_message(channel, bot.user)
 
@@ -1419,10 +1416,11 @@ class Music(commands.Cog):
             reg_query = {}
 
             if not urls:
-                query = f"{source}:{query}"
-
+                if not source:
+                    source = self.bot.pool.config["DEFAULT_SEARCH_PROVIDER"]
             else:
                 query = urls[0]
+                source = None
 
                 if query.startswith("https://www.youtube.com/results"):
                     try:
@@ -1515,7 +1513,7 @@ class Music(commands.Cog):
             await inter.response.defer(ephemeral=ephemeral)
 
         if not queue_loaded:
-            tracks, node = await self.get_tracks(query, inter.author, node=node, track_loops=repeat_amount)
+            tracks, node = await self.get_tracks(query, inter.author, node=node, track_loops=repeat_amount, source=source)
             tracks = await self.check_player_queue(inter.author, bot, guild.id, tracks)
 
         try:
@@ -5490,9 +5488,10 @@ class Music(commands.Cog):
             urls = URL_REG.findall(message.content)
 
             if not urls:
-                message.content = f"ytsearch:{message.content}"
+                source = self.bot.config["DEFAULT_SEARCH_PROVIDER"]
 
             else:
+                source = None
                 message.content = urls[0]
 
                 if "&list=" in message.content:
@@ -5524,7 +5523,7 @@ class Music(commands.Cog):
                     if view.selected == "music":
                         message.content = YOUTUBE_VIDEO_REG.match(message.content).group()
 
-            await self.parse_song_request(message, text_channel, data, response=msg)
+            await self.parse_song_request(message, text_channel, data, response=msg, source=source)
 
         except GenericError as e:
             error = f"{message.author.mention}. {e}"
@@ -5634,7 +5633,7 @@ class Music(commands.Cog):
                 pass
 
 
-    async def parse_song_request(self, message: disnake.Message, text_channel, data, *, response=None, attachment: disnake.Attachment=None):
+    async def parse_song_request(self, message: disnake.Message, text_channel, data, *, response=None, attachment: disnake.Attachment=None, source=None):
 
         if not message.author.voice:
             raise GenericError("Você deve entrar em um canal de voz para pedir uma música.")
@@ -5653,7 +5652,7 @@ class Music(commands.Cog):
         except AttributeError:
             pass
 
-        tracks, node = await self.get_tracks(message.content, message.author)
+        tracks, node = await self.get_tracks(message.content, message.author, source=source)
         tracks = await self.check_player_queue(message.author, self.bot, message.guild.id, tracks)
 
         try:
@@ -6043,6 +6042,7 @@ class Music(commands.Cog):
         node_website = data.pop('website', '')
         region = data.pop('region', 'us_central')
         heartbeat = int(data.pop('heartbeat', 30))
+        search_providers = data.pop("search_providers", [s for s in ("ytsearch", "scsearch") if s != self.bot.pool.config["DEFAULT_SEARCH_PROVIDER"]])
         retry_403 = data.pop('retry_403', False)
         info = None
 
@@ -6104,10 +6104,11 @@ class Music(commands.Cog):
         node.search = search
         node.website = node_website
         node.retry_403 = retry_403
+        node.search_providers = search_providers
 
     async def get_tracks(
             self, query: str, user: disnake.Member, node: wavelink.Node = None,
-            track_loops=0, use_cache=True):
+            track_loops=0, use_cache=True, source=None):
 
         if not node:
             node = await self.get_best_node()
@@ -6149,30 +6150,45 @@ class Music(commands.Cog):
                     except IndexError:
                         node_search = node
 
-                try:
-                    tracks = await node_search.get_tracks(
-                        query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
-                    )
-                except ClientConnectorCertificateError:
-                    node_search.available = False
+                if not source:
+                    providers = [node.search_providers[:1]]
+                    ignore_search = True
+                else:
+                    ignore_search = False
+                    providers = node.search_providers
 
-                    for n in self.bot.music.nodes.values():
+                for search_provider in providers:
 
-                        if not n.available or not n.is_available:
-                            continue
+                    if not ignore_search:
+                        query = f"{search_provider}:{query}"
 
-                        try:
-                            tracks = await n.get_tracks(
-                                query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
-                            )
-                            node_search = n
-                            break
-                        except ClientConnectorCertificateError:
-                            n.available = False
-                            continue
+                    try:
+                        tracks = await node_search.get_tracks(
+                            query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
+                        )
+                    except ClientConnectorCertificateError:
+                        node_search.available = False
 
-                    if not node_search:
-                        raise GenericError("**Não há servidores de música disponível.**")
+                        for n in self.bot.music.nodes.values():
+
+                            if not n.available or not n.is_available:
+                                continue
+
+                            try:
+                                tracks = await n.get_tracks(
+                                    query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
+                                )
+                                node_search = n
+                                break
+                            except ClientConnectorCertificateError:
+                                n.available = False
+                                continue
+
+                        if not node_search:
+                            raise GenericError("**Não há servidores de música disponível.**")
+
+                    if tracks or ignore_search:
+                        break
 
         if not tracks:
             raise GenericError("Não houve resultados para sua busca.")

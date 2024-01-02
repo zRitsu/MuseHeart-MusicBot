@@ -6,11 +6,12 @@ host=lava.link
 port=80
 password=youshallnotpass
 secure=false
-region=us_central
 # os 2 itens abaixo não são obrigatórios (você pode simplesmente não incluir as linhas abaixo)
+region=us_central
 website=https://support.something.host/en/article/lavalink-hosting-okm26z/
 search=true
 retry_403=false
+search_providers=ytsearch scsearch
 
 #######################
 
@@ -21,6 +22,7 @@ password=glasshost1984
 secure=false
 region=us_central
 website=https://discord.glasshost.net/
+search_providers=ytsearch scsearch
 
 # Lembrando que os servidores acima são públicos, eles podem não estar disponíveis sempre ou ter problemas etc.
 # Caso queira procurar por outros nodes públicos, só pesquise por: free lavalink node

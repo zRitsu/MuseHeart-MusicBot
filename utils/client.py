@@ -240,6 +240,7 @@ class BotPool:
                 value["secure"] = value.get("secure") == "true"
                 value["search"] = value.get("search") != "false"
                 value["retry_403"] = value.get("retry_403") == "true"
+                value["search_providers"] = value.get("search_providers", "").strip().split()
                 LAVALINK_SERVERS[key] = value
 
         start_local = None
