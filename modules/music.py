@@ -6115,6 +6115,8 @@ class Music(commands.Cog):
 
         tracks = await process_spotify(self.bot, user.id, query)
 
+        exceptions = set()
+
         if not tracks:
 
             if use_cache:
@@ -6188,10 +6190,15 @@ class Music(commands.Cog):
                         if not node_search:
                             raise GenericError("**Não há servidores de música disponível.**")
 
+                    except Exception as e:
+                        exceptions.add(repr(e))
+
                     if tracks or ignore_search:
                         break
 
         if not tracks:
+            if exceptions:
+                raise GenericError("Ocorreu um erro ao processar sua busca: ```py\n" + "\n".join(exceptions) + "```")
             raise GenericError("Não houve resultados para sua busca.")
 
         if isinstance(tracks, list):
