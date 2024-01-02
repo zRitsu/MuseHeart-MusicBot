@@ -6151,6 +6151,9 @@ class Music(commands.Cog):
 
                 if source is False:
                     providers = [node.search_providers[:1]]
+                elif source:
+                    providers = [s for s in (node.search_providers or [self.bot.config["DEFAULT_SEARCH_PROVIDER"]]) if s != source]
+                    providers.insert(0, source)
                 else:
                     providers = node.search_providers or [self.bot.config["DEFAULT_SEARCH_PROVIDER"]]
 
