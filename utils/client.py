@@ -240,7 +240,7 @@ class BotPool:
                 value["secure"] = value.get("secure") == "true"
                 value["search"] = value.get("search") != "false"
                 value["retry_403"] = value.get("retry_403") == "true"
-                value["search_providers"] = value.get("search_providers", "").strip().split()
+                value["search_providers"] = value.get("search_providers", "").strip().split() or [self.config["DEFAULT_SEARCH_PROVIDER"]] + [s for s in ("ytsearch", "scsearch") if s != self.config["DEFAULT_SEARCH_PROVIDER"]]
                 LAVALINK_SERVERS[key] = value
 
         start_local = None
