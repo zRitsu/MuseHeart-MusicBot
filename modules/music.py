@@ -6042,7 +6042,7 @@ class Music(commands.Cog):
         node_website = data.pop('website', '')
         region = data.pop('region', 'us_central')
         heartbeat = int(data.pop('heartbeat', 30))
-        search_providers = data.pop("search_providers", [s for s in ("ytsearch", "scsearch") if s != self.bot.pool.config["DEFAULT_SEARCH_PROVIDER"]])
+        search_providers = data.pop("search_providers", [self.bot.pool.config["DEFAULT_SEARCH_PROVIDER"]] + [s for s in ("ytsearch", "scsearch") if s != self.bot.pool.config["DEFAULT_SEARCH_PROVIDER"]])
         retry_403 = data.pop('retry_403', False)
         info = None
 
