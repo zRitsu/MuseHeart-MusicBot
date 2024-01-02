@@ -1404,21 +1404,21 @@ class LavalinkPlayer(wavelink.Player):
         except:
             pass
 
+        clear_autoqueue = True
+
         if len(self.queue):
             track = self.queue.popleft()
-            clear_autoqueue = bool(track.ytid)
 
         else:
 
             try:
-
-                clear_autoqueue = False
 
                 track = None
 
                 if self.autoplay or self.keep_connected:
                     try:
                         track = await self.get_autoqueue_tracks()
+                        clear_autoqueue = False
                     except:
                         traceback.print_exc()
                         self.locked = False
