@@ -6156,12 +6156,11 @@ class Music(commands.Cog):
 
                 for search_provider in providers:
 
-                    if source is not False:
-                        query = f"{search_provider}:{query}"
+                    search_query = f"{search_provider}:{query}" if source is not False else query
 
                     try:
                         tracks = await node_search.get_tracks(
-                            query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
+                            search_query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
                         )
                     except ClientConnectorCertificateError:
                         node_search.available = False
@@ -6173,7 +6172,7 @@ class Music(commands.Cog):
 
                             try:
                                 tracks = await n.get_tracks(
-                                    query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
+                                    search_query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
                                 )
                                 node_search = n
                                 break
