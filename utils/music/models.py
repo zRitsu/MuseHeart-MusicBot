@@ -2479,12 +2479,17 @@ class LavalinkPlayer(wavelink.Player):
                 await asyncio.sleep(5)
                 continue
 
+            self.set_command_log(emoji=original_log_emoji, text=original_log)
+
             try:
-                self.set_command_log(emoji=original_log_emoji, text=original_log)
-                await self.invoke_np(force=True)
+                if self.auto_pause:
+                    self.auto_skip_track_task = self.bot.loop.create_task(self.auto_skip_track())
+                else:
+                    await self.invoke_np(force=True)
             except:
                 traceback.print_exc()
 
+            self._new_node_task = None
             return
 
     async def _send_rpc_data(self, users: List[int], stats: dict):
