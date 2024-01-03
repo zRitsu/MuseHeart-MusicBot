@@ -1820,18 +1820,21 @@ class SetStageTitle(disnake.ui.View):
             await self.bot.update_global_data(inter.guild_id, self.data, db_name=DBModel.guilds)
 
             for b in self.bot.pool.bots:
-                for p in b.music.players.values():
-                    p.stage_title_event = True
-                    p.stage_title_template = inter.text_values["status_voice_value"]
-                    p.start_time = disnake.utils.utcnow()
-                    p.set_command_log(
-                        text=("ativou" if inter.text_values["status_voice_value"] else "desativou") + "o status automático",
-                        emoji="📢",
-                    )
-                    p.update = True
-                    await p.update_stage_topic()
-                    await p.process_save_queue()
-                    await asyncio.sleep(3)
+                try:
+                    p = b.music.players[inter.guild_id]
+                except KeyError:
+                    continue
+                p.stage_title_event = True
+                p.stage_title_template = inter.text_values["status_voice_value"]
+                p.start_time = disnake.utils.utcnow()
+                p.set_command_log(
+                    text=("ativou" if inter.text_values["status_voice_value"] else "desativou") + "o status automático",
+                    emoji="📢",
+                )
+                p.update = True
+                await p.update_stage_topic()
+                await p.process_save_queue()
+                await asyncio.sleep(3)
 
             await inter.edit_original_message("**Status permanente foi " + ("salvo" if inter.text_values["status_voice_value"] else "desativado") + "com sucesso!**" )
 
