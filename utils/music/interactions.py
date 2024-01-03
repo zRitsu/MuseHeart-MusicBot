@@ -1836,7 +1836,7 @@ class SetStageTitle(disnake.ui.View):
                 await p.process_save_queue()
                 await asyncio.sleep(3)
 
-            await inter.edit_original_message("**Status permanente foi " + ("salvo" if inter.text_values["status_voice_value"] else "desativado") + "com sucesso!**" )
+            await inter.edit_original_message("**Status permanente foi " + ("salvo" if inter.text_values["status_voice_value"] else "desativado") + " com sucesso!**" )
 
         elif inter.data.custom_id == "status_voice_channel_temp":
 
@@ -1857,7 +1857,7 @@ class SetStageTitle(disnake.ui.View):
             await player.process_save_queue()
 
             player.set_command_log(
-                text=("ativou" if inter.text_values["status_voice_value"] else "desativou") + "o status automático",
+                text=("ativou" if inter.text_values["status_voice_value"] else "desativou") + " o status automático",
                 emoji="📢",
             )
 
