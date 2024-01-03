@@ -5058,10 +5058,6 @@ class Music(commands.Cog):
                     cmd = self.bot.get_slash_command("seek")
                     cmd_kwargs = {"position": "0"}
 
-                elif control == PlayerControls.stage_announce:
-                    cmd = self.bot.get_slash_command("stage_announce")
-                    cmd_kwargs = {"clear": player.stage_title_event, "save": False, "disable": False, "template": ""}
-
                 elif control == PlayerControls.pause_resume:
                     control = PlayerControls.pause if not player.paused else PlayerControls.resume
 
