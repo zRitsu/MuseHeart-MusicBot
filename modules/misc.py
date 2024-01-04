@@ -95,7 +95,7 @@ class Misc(commands.Cog):
                 if not channels:
                     return
 
-                if player_count == (count:=len(channels)):
+                if player_count == (count:=len(channels)) or len(guilds) == count:
                     return
 
                 text = text.replace("{players_count_allbotchannels}", str(count))
