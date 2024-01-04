@@ -71,10 +71,9 @@ class Misc(commands.Cog):
 
             channels = set()
             guilds = set()
+            player_count = 0
 
             for bot in self.bot.pool.bots:
-
-                player_count = 0
 
                 for player in bot.music.players.values():
                     if not player.auto_pause and not player.paused:
@@ -95,12 +94,21 @@ class Misc(commands.Cog):
             if "{players_count_allbotchannels}" in text:
                 if not channels:
                     return
-                text = text.replace("{players_count_allbotchannels}", str(len(channels)))
+
+                if player_count == (count:=len(channels)):
+                    return
+
+                text = text.replace("{players_count_allbotchannels}", str(count))
 
             if "{players_count_allbotservers}" in text:
+
                 if not guilds:
                     return
-                text = text.replace("{players_count_allbotservers}", str(len(guilds)))
+
+                if player_count == (count:=len(channels)):
+                    return
+
+                text = text.replace("{players_count_allbotservers}", str(count))
 
         return text \
             .replace("{users}", f'{len([m for m in self.bot.users if not m.bot]):,}'.replace(",", ".")) \
