@@ -12,10 +12,10 @@ from utils.db import DBModel
 from utils.music.converters import time_format
 from utils.music.errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, \
     GenericError, MissingVoicePerms, DiffVoiceChannel, PoolException
-from utils.music.models import LavalinkPlayer
 from utils.others import CustomContext
 
 if TYPE_CHECKING:
+    from utils.music.models import LavalinkPlayer
     from utils.client import BotCore
 
 
