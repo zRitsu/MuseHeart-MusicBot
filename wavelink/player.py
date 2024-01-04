@@ -590,8 +590,8 @@ class Player:
                 raise WavelinkException(f"Node unavailable:: {identifier}")
             if not node:
                 raise WavelinkException(f'No Nodes matching identifier:: {identifier}')
-            if node == self.node and force is False:
-                raise WavelinkException('Node identifiers must not be the same while changing.')
+            #if node == self.node and force is False:
+            #    raise WavelinkException('Node identifiers must not be the same while changing.')
         else:
             self.node.close()
             node = None
