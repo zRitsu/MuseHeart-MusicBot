@@ -2462,8 +2462,7 @@ class LavalinkPlayer(wavelink.Player):
 
         while True:
 
-            nodes = sorted([n for n in self.bot.music.nodes.values() if n.is_available
-                               and n.available and n.identifier != ignore_node],
+            nodes = sorted([n for n in self.bot.music.nodes.values() if n.is_available and n.identifier != ignore_node],
                               key=lambda n: n.stats.players)
             if not nodes:
                 await asyncio.sleep(5)
