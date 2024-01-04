@@ -919,7 +919,7 @@ class LavalinkPlayer(wavelink.Player):
 
             if event.code == 4014:
 
-                if self.guild.me.voice:
+                if self.guild.me.voice or self._new_node_task:
                     return
 
                 if self.static:
