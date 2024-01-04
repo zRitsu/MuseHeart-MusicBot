@@ -25,7 +25,7 @@ Mais previews:
 
 - Player controller: modo fixo/estendido com canal de song-request em forum com suporte a status automático no canal de voz e palco
 
-[![](https://github.com/zRitsu/MuseHeart-MusicBot/assets/74823568/aec5cf5c-40da-46c3-aeda-6bb59624441c)](https://github.com/zRitsu/MuseHeart-MusicBot/assets/74823568/aec5cf5c-40da-46c3-aeda-6bb59624441c)
+[![](https://i.ibb.co/9Hm5cyG/playercontrollerforum.png)](https://i.ibb.co/9Hm5cyG/playercontrollerforum.png)
 
 
 * Há diversas outras skins, veja todas usando o comando /change_skin (você também pode criar outras, use os modelos padrões que estão na pasta [skins](utils/music/skins/) como referência, crie uma cópia com outro nome e modifique a seu gosto).
