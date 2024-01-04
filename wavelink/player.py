@@ -570,7 +570,7 @@ class Player:
         else:
             await self.node.update_player(self.guild_id, data={"position": int(position)})
 
-    async def change_node(self, identifier: str = None, force: bool = False) -> None:
+    async def change_node(self, identifier: str = None) -> None:
         """|coro|
 
         Change the players current :class:`wavelink.node.Node`. Useful when a Node fails or when changing regions.
@@ -590,8 +590,6 @@ class Player:
                 raise WavelinkException(f"Node unavailable:: {identifier}")
             if not node:
                 raise WavelinkException(f'No Nodes matching identifier:: {identifier}')
-            #if node == self.node and force is False:
-            #    raise WavelinkException('Node identifiers must not be the same while changing.')
         else:
             self.node.close()
             node = None
