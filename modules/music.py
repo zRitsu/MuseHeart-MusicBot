@@ -6158,7 +6158,7 @@ class Music(commands.Cog):
 
         if not member.guild.me.voice:
             await asyncio.sleep(1)
-            if not player.is_closing:
+            if not player.is_closing and not player._wait_for_new_node:
                 try:
                     await player.destroy(force=True)
                 except Exception:

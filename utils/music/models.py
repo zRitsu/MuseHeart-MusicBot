@@ -12,6 +12,8 @@ import disnake
 import asyncio
 import wavelink
 from urllib import parse
+
+from utils.music.checks import can_connect
 from utils.music.converters import fix_characters, time_format, get_button_style, YOUTUBE_VIDEO_REG
 from utils.music.skin_utils import skin_converter
 from utils.music.filters import AudioFilter
@@ -2477,6 +2479,15 @@ class LavalinkPlayer(wavelink.Player):
                 traceback.print_exc()
                 await asyncio.sleep(5)
                 continue
+
+            if not self.guild.me.voice:
+                try:
+                    can_connect(self.last_channel, self.guild, bot=self.bot)
+                except Exception as e:
+                    self.set_command_log(f"O player foi finalizado devido ao erro: {e}")
+                    await self.destroy()
+                    return
+                await self.connect(self.last_channel.id)
 
             self.set_command_log(emoji=original_log_emoji, text=original_log)
 
