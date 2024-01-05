@@ -116,8 +116,11 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
 
         result = await bot.loop.run_in_executor(None, lambda: bot.spotify.artist_top_tracks(url_id))
 
-        data["playlistInfo"]["name"] = "As mais tocadas de: " + \
-                                       [a["name"] for a in result["tracks"][0]["artists"] if a["id"] == url_id][0]
+        try:
+            data["playlistInfo"]["name"] = "As mais tocadas de: " + \
+                                           [a["name"] for a in result["tracks"][0]["artists"] if a["id"] == url_id][0]
+        except IndexError:
+            data["playlistInfo"]["name"] = "As mais tocadas de: " + result["tracks"][0]["artists"][0]["name"]
         tracks_data = result["tracks"]
 
     elif url_type == "playlist":
