@@ -164,6 +164,11 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
         )
 
         try:
+            track.info["isrc"] = t["external_ids"]["isrc"]
+        except KeyError:
+            pass
+
+        try:
             track.info["extra"]["album"] = {
                 "name": t["album"]["name"],
                 "url": t["album"]["external_urls"]["spotify"]
