@@ -300,6 +300,10 @@ class PlayerSession(commands.Cog):
 
                 guild = self.bot.get_guild(data["_id"])
 
+                if self.bot.music.players.get(int(data["_id"])):
+                    print(f"{self.bot.user} - Ignorando player já existente: {data['_id']}")
+                    continue
+
                 if not guild:
                     print(f"{self.bot.user} - Player Ignorado: {data['_id']} | Servidor inexistente...")
                     if (disnake.utils.utcnow() - data.get("time", disnake.utils.utcnow())).total_seconds() > 172800:
@@ -511,7 +515,11 @@ class PlayerSession(commands.Cog):
 
                     await asyncio.sleep(3)
 
-                    await guild.me.edit(suppress=False)
+                    try:
+                        await guild.me.edit(suppress=False)
+                    except Exception as e:
+                        print(f"{self.bot.user} - Falha ao falar no palco do servidor {guild.name}. Erro: {repr(e)}")
+                        continue
 
                 player.set_command_log(
                     text="O player foi restaurado com sucesso!",
