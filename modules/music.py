@@ -4,6 +4,7 @@ import json
 import os.path
 import pickle
 import re
+import sys
 import traceback
 import asyncio
 import zlib
@@ -5681,6 +5682,15 @@ class Music(commands.Cog):
             self.error_report_task.cancel()
         except:
             pass
+
+        module_path = "utils.music"
+
+        for m in ("checks", "converters", "errors", "filters", "interactions", "local_lavalink", "models", "skin_utils",
+                  "spotify"):
+            try:
+                del sys.modules[f"{module_path}.{m}"]
+            except KeyError:
+                pass
 
 
     async def interaction_message(self, inter: Union[disnake.Interaction, CustomContext], txt, emoji: str = "✅",
