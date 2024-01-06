@@ -201,13 +201,15 @@ def run_lavalink(
 
         os.makedirs("./.tempjar/undertow-docbase.80.2258596138812103750")
 
-        java_cmd += f" -Djava.io.tmpdir={os.getcwd()}/.tempjar -jar Lavalink.jar"
+        java_cmd += f" -Djava.io.tmpdir={os.getcwd()}/.tempjar"
 
     if clear_plugins:
         try:
             shutil.rmtree("./plugins")
         except:
             pass
+
+    java_cmd += " -jar Lavalink.jar"
 
     print(f"Iniciando o servidor Lavalink (dependendo da hospedagem o lavalink pode demorar iniciar, "
           f"o que pode ocorrer falhas em algumas tentativas de conexão até ele iniciar totalmente).\n{'-' * 30}")
