@@ -1598,7 +1598,10 @@ class Music(commands.Cog):
                     inter.message = msg
 
                 if reg_query is not None:
-                    reg_query = {"name": tracks.title, "url": tracks.uri}
+                    try:
+                        reg_query = {"name": tracks.title, "url": tracks.uri}
+                    except AttributeError:
+                        reg_query = {"name": tracks[0].title, "url": tracks[0].uri}
 
             elif not queue_loaded:
 
