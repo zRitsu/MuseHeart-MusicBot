@@ -1679,7 +1679,7 @@ class Music(commands.Cog):
                                 tracks_playlists[t.playlist_url] = {"name": t.playlist_name, "count": 1}
 
                     if tracks_playlists:
-                        embed_description += "\n\n**🎶 Playlists carregadas:**\n" + "\n".join(f"[`{info['name']}`]({url}) `[{info['count']}]` " for url, info in tracks_playlists.items()) + "\n"
+                        embed_description += "\n\n**🎶⠂Playlists carregadas⠂🎶**\n" + "\n".join(f"[`{info['name']}`]({url}) `[{info['count']}]` " for url, info in tracks_playlists.items()) + "\n"
 
                 else:
                     query = fix_characters(query.replace(f"{source}:", '', 1), 25)
