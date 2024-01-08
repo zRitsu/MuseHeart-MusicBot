@@ -1215,6 +1215,8 @@ class LavalinkPlayer(wavelink.Player):
 
         if tracks_search:
 
+            tracks_search.reverse()
+
             self.locked = True
 
             for track_data in tracks_search:
@@ -1309,6 +1311,7 @@ class LavalinkPlayer(wavelink.Player):
 
             if not tracks:
                 tracks = tracks_ytsearch
+                tracks.reverse()
 
             if not tracks:
                 self.locked = False
