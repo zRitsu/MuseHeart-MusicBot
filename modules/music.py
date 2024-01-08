@@ -1523,6 +1523,8 @@ class Music(commands.Cog):
 
         position -= 1
 
+        embed_description = ""
+
         if isinstance(tracks, list):
 
             if manual_selection and not queue_loaded and len(tracks) > 1:
@@ -1667,6 +1669,18 @@ class Music(commands.Cog):
                     title = f"Usando músicas salvas de {inter.author.display_name}"
                     icon_url = "https://i.ibb.co/51yMNPw/floppydisk.png"
 
+                    tracks_playlists = {}
+
+                    for t in tracks:
+                        if t.playlist_name:
+                            try:
+                                tracks_playlists[t.playlist_url]["count"] += 1
+                            except KeyError:
+                                tracks_playlists[t.playlist_url] = {"name": t.playlist_name, "count": 1}
+
+                    if tracks_playlists:
+                        embed_description += "\n\n**🎶 Playlists carregadas:**\n" + "\n".join(f"[`{info['name']}`]({url}) `[{info['count']}]` " for url, info in tracks_playlists.items()) + "\n"
+
                 else:
                     query = fix_characters(query.replace(f"{source}:", '', 1), 25)
                     title = f"Busca: {query}"
@@ -1749,6 +1763,8 @@ class Music(commands.Cog):
                     embed.description += f"\n`Canal de voz:` {voice_channel.mention}"
                 except AttributeError:
                     pass
+
+            embed.description += embed_description
 
             try:
                 func = inter.edit_original_message
