@@ -6053,6 +6053,7 @@ class Music(commands.Cog):
                             raise GenericError("**Não há servidores de música disponível.**")
 
                     except Exception as e:
+                        print(f"Falha ao processar busca...\n{query}\n{traceback.format_exc()}")
                         exceptions.add(repr(e))
 
                     if tracks or source is False:
