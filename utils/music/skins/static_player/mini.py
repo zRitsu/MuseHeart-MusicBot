@@ -87,7 +87,7 @@ class MiniStaticSkin:
 
         if queue_size:
 
-            current_time = disnake.utils.utcnow()
+            current_time = disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.position)
 
             queue_txt = ""
 

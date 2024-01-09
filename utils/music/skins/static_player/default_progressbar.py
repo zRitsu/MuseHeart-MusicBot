@@ -119,7 +119,7 @@ class DefaultProgressbarStaticSkin:
 
         if qlenght:=len(player.queue):
 
-            current_time = disnake.utils.utcnow()
+            current_time = disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.position)
 
             queue_txt = ""
 
