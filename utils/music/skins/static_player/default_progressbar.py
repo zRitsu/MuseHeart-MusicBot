@@ -119,35 +119,32 @@ class DefaultProgressbarStaticSkin:
 
         if qlenght:=len(player.queue):
 
-            current_time = disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.position)
-
             queue_txt = ""
 
             has_stream = False
+
+            current_time = disnake.utils.utcnow() - datetime.timedelta(milliseconds=player.position + player.current.duration)
+
+            queue_duration = 0
 
             for n, t in (enumerate(itertools.islice(player.queue, 20))):
 
                 if t.is_stream:
                     has_stream = True
+                elif n != 0:
+                    queue_duration += t.duration
 
                 if has_stream:
                     queue_txt += f"`{(n + 1):02})` [`{fix_characters(t.title, 33)}`]({t.uri}) `[{time_format(t.duration) if not t.is_stream else '🔴 Live'}]`\n"
                 else:
-                    current_time += datetime.timedelta(milliseconds=t.duration)
-                    queue_txt += f"`{(n + 1):02})` [`{fix_characters(t.title, 33)}`]({t.uri}) - <t:{int(current_time.timestamp())}:R>\n"
+                    queue_txt += f"`{(n + 1):02})` [`{fix_characters(t.title, 26)}`]({t.uri}) <t:{int((current_time + datetime.timedelta(milliseconds=queue_duration)).timestamp())}:R>\n"
 
-            embed_queue = disnake.Embed(title=f"Músicas na fila: {qlenght}", color=player.bot.get_color(player.guild.me),
+            embed_queue = disnake.Embed(title=f"Músicas na fila: {qlenght}",
+                                        color=player.bot.get_color(player.guild.me),
                                         description=f"\n{queue_txt}")
 
             if not player.loop and not player.keep_connected and not player.paused and not player.current.is_stream:
-
-                queue_duration = 0
-
-                for t in player.queue:
-                    if not t.is_stream:
-                        queue_duration += t.duration
-
-                embed_queue.description += f"\n`[⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + (player.current.duration if not player.current.is_stream else 0)) - player.position)).timestamp())}:R> `⌛]`"
+                embed_queue.description += f"`[⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + (player.current.duration if not player.current.is_stream else 0)) - player.position)).timestamp())}:R> `⌛]`"
 
             embed_queue.set_image(url=queue_img)
 
