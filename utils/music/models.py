@@ -1811,7 +1811,7 @@ class LavalinkPlayer(wavelink.Player):
             try:
                 await self.bot.edit_voice_channel_status(status=msg, channel_id=self.guild.me.voice.channel.id)
             except Exception as e:
-                if isinstance(e, disnake.Forbidden) and e.code == 403:
+                if isinstance(e, disnake.Forbidden):
                     self.stage_title_event = False
                     self.set_command_log(emoji="❌", text="O status automático foi desativado devido a falta de permissão pra alterar status.")
                     self.update = True
