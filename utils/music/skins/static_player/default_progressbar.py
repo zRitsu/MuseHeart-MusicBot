@@ -119,10 +119,22 @@ class DefaultProgressbarStaticSkin:
 
         if qlenght:=len(player.queue):
 
-            queue_txt = "\n".join(
-                f"`{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 33)}`]({t.uri})"
-                for n, t in (enumerate(itertools.islice(player.queue, 20)))
-            )
+            current_time = disnake.utils.utcnow()
+
+            queue_txt = ""
+
+            has_stream = False
+
+            for n, t in (enumerate(itertools.islice(player.queue, 20))):
+
+                if t.is_stream:
+                    has_stream = True
+
+                if has_stream:
+                    queue_txt += f"`{(n + 1):02})` [`{fix_characters(t.title, 33)}`]({t.uri}) `[{time_format(t.duration) if not t.is_stream else '🔴 Live'}]`\n"
+                else:
+                    current_time += datetime.timedelta(milliseconds=t.duration)
+                    queue_txt += f"`{(n + 1):02})` [`{fix_characters(t.title, 33)}`]({t.uri}) - <t:{int(current_time.timestamp())}:R>\n"
 
             embed_queue = disnake.Embed(title=f"Músicas na fila: {qlenght}", color=player.bot.get_color(player.guild.me),
                                         description=f"\n{queue_txt}")
