@@ -233,7 +233,10 @@ class LavalinkPlaylist:
 
         try:
             if self.data['tracks'][0]['info'].get("sourceName") == "youtube":
-                self.url = f"https://www.youtube.com/playlist?list={parse.parse_qs(parse.urlparse(self.url).query)['list'][0]}"
+                try:
+                    self.url = f"https://www.youtube.com/playlist?list={parse.parse_qs(parse.urlparse(self.url).query)['list'][0]}"
+                except KeyError:
+                    pass
         except IndexError:
             pass
         self.tracks = [LavalinkTrack(
