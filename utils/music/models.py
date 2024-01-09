@@ -918,6 +918,10 @@ class LavalinkPlayer(wavelink.Player):
                 return
 
             if event.code == 4014:
+                await asyncio.sleep(5)
+                if not self.guild.me.voice:
+                    await self.last_channel.connect()
+                return
 
                 if self.guild.me.voice or self._new_node_task:
                     return
