@@ -260,8 +260,8 @@ class Music(commands.Cog):
         cooldown=stage_cd, max_concurrency=stage_mc, extras={"exclusive_cooldown": True},
         usage="{prefix}{cmd} <placeholders>\nEx: {track.author} - {track.title}"
     )
-    async def stageannounce_legacy(self, ctx: CustomContext):
-        await self.stage_announce.callback(self=self, inter=ctx)
+    async def stageannounce_legacy(self, ctx: CustomContext, *, template = ""):
+        await self.stage_announce.callback(self=self, inter=ctx, template=template)
 
     @is_dj()
     @has_source()
@@ -270,7 +270,13 @@ class Music(commands.Cog):
         extras={"only_voiced": True, "exclusive_cooldown": True}, cooldown=stage_cd, max_concurrency=stage_mc,
         default_member_permissions=disnake.Permissions(manage_guild=True), dm_permission=False
     )
-    async def stage_announce(self, inter: disnake.AppCmdInter):
+    async def stage_announce(
+            self, inter: disnake.AppCmdInter,
+            template: str = commands.Param(name="modelo", default="")
+    ):
+
+        if isinstance(template, commands.ParamInfo):
+            template = ""
 
         try:
             bot = inter.music_bot
@@ -288,9 +294,33 @@ class Music(commands.Cog):
 
         global_data = await self.bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
 
-        view = SetStageTitle(ctx=inter, bot=bot, data=global_data, guild=guild)
-        view.message = await inter.send(view=view, embed=view.build_embed())
-        await view.wait()
+        if not template:
+            view = SetStageTitle(ctx=inter, bot=bot, data=global_data, guild=guild)
+            view.message = await inter.send(view=view, embed=view.build_embed())
+            await view.wait()
+        else:
+            if not any(p in template for p in SetStageTitle.placeholders):
+                raise GenericError(f"**Você deve usar pelo menos um placeholder válido:** {SetStageTitle.placeholder_text}")
+
+            await inter.response.defer(ephemeral=True)
+
+            player = bot.music.players[inter.guild_id]
+            player.stage_title_event = True
+            player.stage_title_template = template
+            player.start_time = disnake.utils.utcnow()
+
+            await player.update_stage_topic()
+
+            await player.process_save_queue()
+
+            player.set_command_log(text="ativou o status automático", emoji="📢")
+
+            player.update = True
+
+            if isinstance(inter, CustomContext):
+                await inter.send("**O status automático foi definido com sucesso!**")
+            else:
+                await inter.edit_original_message("**O status automático foi definido com sucesso!**")
 
 
     play_cd = commands.CooldownMapping.from_cooldown(3, 12, commands.BucketType.member)
