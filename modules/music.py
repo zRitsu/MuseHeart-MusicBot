@@ -5354,7 +5354,7 @@ class Music(commands.Cog):
                 source = self.bot.config["DEFAULT_SEARCH_PROVIDER"]
 
             else:
-                source = None
+                source = False
                 message.content = urls[0]
 
                 if "&list=" in message.content:
@@ -6021,11 +6021,12 @@ class Music(commands.Cog):
                     providers = [s for s in (node.search_providers or [self.bot.config["DEFAULT_SEARCH_PROVIDER"]]) if s != source]
                     providers.insert(0, source)
                 else:
+                    source = True
                     providers = node.search_providers or [self.bot.config["DEFAULT_SEARCH_PROVIDER"]]
 
                 for search_provider in providers:
 
-                    search_query = f"{search_provider}:{query}" if source is not False else query
+                    search_query = f"{search_provider}:{query}" if source else query
 
                     try:
                         tracks = await node_search.get_tracks(
@@ -6056,7 +6057,7 @@ class Music(commands.Cog):
                         print(f"Falha ao processar busca...\n{query}\n{traceback.format_exc()}")
                         exceptions.add(repr(e))
 
-                    if tracks or source is False:
+                    if tracks or not source:
                         break
 
         if not tracks:
