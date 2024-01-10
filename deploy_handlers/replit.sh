@@ -8,7 +8,7 @@ if [ "${SOURCE_AUTO_UPDATE,,}" == "true" ]; then
 fi
 
 if [ ! -d "venv" ] || [ ! -f "./venv/bin/requirements.txt" ] || [ ! "$REPL_SLUG-$REPL_OWNER" == "$(cat ./venv/.deployed)" ]; then
-  rm -rf venv .config .cache local_database .logs Lavalink.jar pyproject.toml poetry.lock
+  rm -rf venv .config .cache local_database .logs Lavalink.jar plugins pyproject.toml poetry.lock
   echo -e "\n####################################" \
           "\n### Inicializando virtual_env... ###" \
           "\n####################################\n"
