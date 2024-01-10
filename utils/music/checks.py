@@ -311,7 +311,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
     components = []
 
-    if not inter.guild_id:
+    if not inter.guild:
 
         msg = "**Não há bots de música compatível no servidor...**"
 
