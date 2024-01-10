@@ -268,11 +268,14 @@ class MongoDatabase(BaseDB):
 
         id_ = str(id_)
 
+        update_cache = False
+
         try:
             data = self.cache._connect[collection][db_name].find_one({"_id": id_})
         except:
             traceback.print_exc()
             data = {}
+            update_cache = True
 
         if not data:
             data = await self._connect[collection][db_name].find_one({"_id": id_})
@@ -289,6 +292,12 @@ class MongoDatabase(BaseDB):
             data = update_values(default_model[db_name].copy(), data)
             data["ver"] = default_model[db_name]["ver"]
             await self.update_data(id_, data, db_name=db_name, collection=collection)
+
+        elif update_cache:
+            try:
+                await self.cache.update_data(id_, data, db_name=db_name, collection=collection, default_model=default_model)
+            except:
+                traceback.print_exc()
 
         return data
 
