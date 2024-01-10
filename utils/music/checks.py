@@ -292,6 +292,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         raise NoPlayer()
 
     extra_bots_counter = 0
+    bot_in_guild = False
 
     for bot in inter.bot.pool.bots:
 
@@ -305,13 +306,14 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
             continue
 
         if bot.get_guild(inter.guild_id):
+            bot_in_guild = True
             continue
 
         extra_bots_counter += 1
 
     components = []
 
-    if not inter.guild:
+    if not bot_in_guild:
 
         msg = "**Não há bots de música compatível no servidor...**"
 
