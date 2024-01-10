@@ -143,8 +143,8 @@ class DefaultProgressbarStaticSkin:
                                         color=player.bot.get_color(player.guild.me),
                                         description=f"\n{queue_txt}")
 
-            if not player.loop and not player.keep_connected and not player.paused and not player.current.is_stream:
-                embed_queue.description += f"`[⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + (player.current.duration if not player.current.is_stream else 0)) - player.position)).timestamp())}:R> `⌛]`"
+            if not has_stream and not player.loop and not player.keep_connected and not player.paused and not player.current.is_stream:
+                embed_queue.description += f"`[⌛ As músicas acabam` <t:{int((current_time + datetime.timedelta(milliseconds=player.current.duration)).timestamp())}:R> `⌛]`"
 
             embed_queue.set_image(url=queue_img)
 
