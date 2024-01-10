@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-import disnake
-from disnake.ext import commands
-from aiohttp import ClientSession
 import asyncio
 import traceback
+from typing import TYPE_CHECKING, Optional
+
+import disnake
+from aiohttp import ClientSession
+from disnake.ext import commands
 
 from utils.music.converters import URL_REG
 from utils.music.errors import parse_error, PoolException
 from utils.others import send_message, CustomContext, string_to_file, paginator
-from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from utils.client import BotCore

@@ -23,9 +23,8 @@ SOFTWARE.
 import asyncio
 import inspect
 import json
-import os
 import logging
-
+import os
 from typing import Any, Callable, Dict, Optional, Union
 from urllib.parse import quote
 
@@ -33,7 +32,6 @@ from .backoff import ExponentialBackoff
 from .errors import *
 from .player import Player, Track, TrackPlaylist
 from .websocket import WebSocket
-
 
 __log__ = logging.getLogger(__name__)
 

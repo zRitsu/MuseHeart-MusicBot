@@ -212,7 +212,7 @@ class BotPool:
         if self.config["AUTO_DOWNLOAD_LAVALINK_SERVERLIST"]:
             ini_file = "auto_lavalink.ini"
             print(f"Baixando lista de servidores lavalink (arquivo: {ini_file})")
-            r = requests.get(self.config["LAVALINK_SERVER_LIST"], allow_redirects=True)
+            r = requests.get(self.config["LAVALINK_SERVER_LIST"], allow_redirects=False)
             with open("auto_lavalink.ini", 'wb') as f:
                 f.write(r.content)
             r.close()

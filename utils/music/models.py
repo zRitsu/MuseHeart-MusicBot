@@ -1,28 +1,29 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+
+import asyncio
 import datetime
 import pprint
 import random
+import traceback
 import uuid
+from collections import deque
 from itertools import cycle
 from time import time
+from typing import Optional, Union, TYPE_CHECKING, List
+from urllib import parse
 from urllib.parse import quote
 
 import disnake
-import asyncio
-import wavelink
-from urllib import parse
 
+import wavelink
+from utils.db import DBModel
 from utils.music.checks import can_connect
 from utils.music.converters import fix_characters, time_format, get_button_style, YOUTUBE_VIDEO_REG
-from utils.music.skin_utils import skin_converter
 from utils.music.filters import AudioFilter
-from utils.db import DBModel
+from utils.music.skin_utils import skin_converter
 from utils.others import music_source_emoji, send_idle_embed, PlayerControls, SongRequestPurgeMode, \
     song_request_buttons
-import traceback
-from collections import deque
-from typing import Optional, Union, TYPE_CHECKING, List
 
 if TYPE_CHECKING:
     from utils.client import BotCore

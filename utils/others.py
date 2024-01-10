@@ -11,7 +11,6 @@ from io import BytesIO
 from typing import TYPE_CHECKING, Union, Optional
 
 import disnake
-from aiohttp import ClientSession
 from disnake.ext import commands
 
 from utils.db import DBModel

@@ -20,18 +20,17 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import aiohttp
 import asyncio
 import logging
-from disnake.ext import commands
-from functools import partial
 from json import dumps
 from typing import Optional, Union
 
-from .errors import *
-from .player import Player
-from .node import Node
+import aiohttp
+from disnake.ext import commands
 
+from .errors import *
+from .node import Node
+from .player import Player
 
 __log__ = logging.getLogger(__name__)
 

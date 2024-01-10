@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import asyncio
 import datetime
 import json
 import os.path
+import platform
 import traceback
 from copy import deepcopy
 from itertools import cycle
-from random import shuffle
 from os import getpid
-import platform
-import asyncio
+from random import shuffle
 from typing import TYPE_CHECKING
 
 import aiofiles
 import disnake
-import psutil
 import humanize
-from disnake.ext import commands
+import psutil
 from aiohttp import ClientSession
+from disnake.ext import commands
 
 from utils.db import DBModel, db_models
 from utils.music.checks import check_requester_channel

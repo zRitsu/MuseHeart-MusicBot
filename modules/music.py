@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
+import asyncio
 import datetime
 import json
 import os.path
 import pickle
 import re
 import traceback
-import asyncio
 import zlib
 from base64 import b64decode
 from copy import deepcopy
-from typing import Union, Optional
 from random import shuffle
+from typing import Union, Optional
 from urllib.parse import urlparse, parse_qs
 
 import aiofiles
@@ -20,19 +20,18 @@ from aiohttp import ClientConnectorCertificateError
 from disnake.ext import commands
 
 import wavelink
-
 from utils.client import BotCore
 from utils.db import DBModel
-from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolException, parse_error, EmptyFavIntegration
-from utils.music.spotify import process_spotify, spotify_regex_w_user
 from utils.music.checks import check_voice, has_player, has_source, is_requester, is_dj, \
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen, check_pool_bots, \
     check_channel_limit, check_stage_topic, check_queue_loading
-from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
-    YOUTUBE_VIDEO_REG, google_search, percentage, music_source_image, perms_translations
+    YOUTUBE_VIDEO_REG, google_search, percentage, music_source_image
+from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolException, parse_error, EmptyFavIntegration
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction, FavMenuView, ViewMode, \
     SetStageTitle
+from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist
+from utils.music.spotify import process_spotify, spotify_regex_w_user
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, SongRequestPurgeMode, song_request_buttons, \
     select_bot_pool

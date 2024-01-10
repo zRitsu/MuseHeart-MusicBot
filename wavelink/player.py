@@ -22,20 +22,19 @@ SOFTWARE.
 """
 import logging
 import pprint
-import time
 import re
+import time
 import traceback
-
-import disnake
-from disnake.ext import commands
-from disnake.gateway import DiscordWebSocket
-from disnake import VoiceChannel, VoiceClient
 from typing import Optional, Union
 
-from .errors import *
-from .eqs import *
-from .events import *
+import disnake
+from disnake import VoiceChannel, VoiceClient
+from disnake.ext import commands
+from disnake.gateway import DiscordWebSocket
 
+from .eqs import *
+from .errors import *
+from .events import *
 
 __all__ = ('Track', 'TrackPlaylist', 'Player')
 __log__ = logging.getLogger(__name__)
