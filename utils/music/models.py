@@ -923,25 +923,29 @@ class LavalinkPlayer(wavelink.Player):
 
             if event.code == 4014:
                 await asyncio.sleep(5)
-                if not self.guild.me.voice and (channel := self.bot.get_channel(self.last_channel.id)):
-                    await self.connect(channel.id)
-                return
 
-                if self.guild.me.voice or self._new_node_task:
-                    return
+                vc = self.bot.get_channel(self.last_channel.id)
 
-                if self.static:
-                    self.command_log = "Desliguei o player por perca de conexão com o canal de voz."
-                    await self.destroy()
+                if not vc:
 
-                else:
-                    embed = disnake.Embed(description="**Desliguei o player por perca de conexão com o canal de voz.**",
-                                          color=self.bot.get_color(self.guild.me))
-                    try:
-                        self.bot.loop.create_task(self.text_channel.send(embed=embed, delete_after=7))
-                    except:
-                        traceback.print_exc()
-                    await self.destroy()
+                    msg = "O canal de voz foi excluido..."
+
+                    if self.static:
+                        self.command_log = msg
+                        await self.destroy()
+
+                    else:
+                        embed = disnake.Embed(
+                            description=msg,
+                            color=self.bot.get_color(self.guild.me))
+                        try:
+                            self.bot.loop.create_task(self.text_channel.send(embed=embed, delete_after=7))
+                        except:
+                            traceback.print_exc()
+                        await self.destroy()
+
+                elif not self.guild.me.voice:
+                    await self.connect(vc.id)
 
                 return
 
