@@ -923,8 +923,8 @@ class LavalinkPlayer(wavelink.Player):
 
             if event.code == 4014:
                 await asyncio.sleep(5)
-                if not self.guild.me.voice:
-                    await self.connect(self.last_channel.id)
+                if not self.guild.me.voice and (channel := self.bot.get_channel(self.last_channel.id)):
+                    await self.connect(channel.id)
                 return
 
                 if self.guild.me.voice or self._new_node_task:
