@@ -1903,9 +1903,9 @@ class Music(commands.Cog):
         favs.extend([(f"{rec['url']} || {rec['name']}"[:100] if len(rec['url']) < 101 else rec['name'][:100]) for rec in user_data["last_tracks"]])
 
         if not vc or not query:
-            return favs[:25]
+            return favs[:20]
 
-        return await google_search(self.bot, query, max_entries=20) or favs
+        return await google_search(self.bot, query, max_entries=20) or favs[:20]
 
     skip_back_cd = commands.CooldownMapping.from_cooldown(2, 13, commands.BucketType.member)
     skip_back_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
