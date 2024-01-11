@@ -278,10 +278,14 @@ class PlayerSettings(disnake.ui.View):
         await interaction.response.edit_message(view=self)
 
     async def close_callback(self, interaction: disnake.MessageInteraction):
-        if isinstance(self.ctx, CustomContext):
-            await interaction.message.delete()
-        else:
-            await interaction.response.edit_message(content="Alterações salvas com sucesso!", view=None, embed=None)
+
+        try:
+            if isinstance(self.ctx, CustomContext):
+                await self.message.edit(content="Alterações salvas com sucesso!", view=None, embed=None)
+            else:
+                await self.ctx.edit_original_message(content="Alterações salvas com sucesso!", view=None, embed=None)
+        except Exception:
+            traceback.print_exc()
         await self.save_data()
         self.stop()
 
@@ -355,7 +359,7 @@ class MusicSettings(commands.Cog):
     )
     async def player_settings(self, interaction: disnake.AppCmdInter):
 
-        inter, bot = await select_bot_pool(interaction)
+        inter, bot = await select_bot_pool(interaction, return_new=True)
 
         if not bot:
             return
