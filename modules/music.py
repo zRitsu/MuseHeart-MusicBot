@@ -1117,6 +1117,13 @@ class Music(commands.Cog):
             query = guild_data["player_controller"]["fav_links"][query[7:]]['url']
             source = False
 
+        elif query.startswith("> rec: "):
+            query = query[7:].split("||")[0]
+            urls = URL_REG.findall(query)
+            if urls:
+                query = urls[0]
+                source = False
+
         elif query.startswith("> lst: "):
             query = user_data["last_tracks"][int(query[7:])]["url"]
             source = False
@@ -1882,8 +1889,7 @@ class Music(commands.Cog):
         if URL_REG.match(query):
             return [query] if len(query) < 100 else []
 
-        favs = [">> [⭐ Favoritos ⭐] <<", ">> [💠 Integrações 💠] <<", ">> [📌 Favoritos do servidor 📌] <<",
-                ">> [📑 Músicas recentes 📑] <<"]
+        favs = [">> [⭐ Favoritos ⭐] <<", ">> [💠 Integrações 💠] <<", ">> [📌 Favoritos do servidor 📌] <<"]
 
         if os.path.isfile(f"./local_database/saved_queues_v1/users/{inter.author.id}.pkl"):
             favs.append(">> [💾 Fila Salva 💾] <<")
@@ -1899,8 +1905,12 @@ class Music(commands.Cog):
         except AttributeError:
             vc = True
 
+        user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+
+        favs.extend([f"> rec: {rec['url']} || {rec['name']}"[:100] for rec in user_data["last_tracks"]])
+
         if not vc or not query:
-            return favs
+            return favs[:25]
 
         return await google_search(self.bot, query, max_entries=20) or favs
 
