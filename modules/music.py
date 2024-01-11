@@ -1117,13 +1117,6 @@ class Music(commands.Cog):
             query = guild_data["player_controller"]["fav_links"][query[7:]]['url']
             source = False
 
-        elif query.startswith("> rec: "):
-            query = query[7:].split("||")[0]
-            urls = URL_REG.findall(query)
-            if urls:
-                query = urls[0]
-                source = False
-
         elif query.startswith("> lst: "):
             query = user_data["last_tracks"][int(query[7:])]["url"]
             source = False
@@ -1907,7 +1900,7 @@ class Music(commands.Cog):
 
         user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
-        favs.extend([f"> rec: {rec['url']} || {rec['name']}"[:100] for rec in user_data["last_tracks"]])
+        favs.extend([(f"{rec['url']} || {rec['name']}"[:100] if len(rec['url']) < 101 else rec['name'][:100]) for rec in user_data["last_tracks"]])
 
         if not vc or not query:
             return favs[:25]
