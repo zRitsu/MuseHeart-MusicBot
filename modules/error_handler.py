@@ -86,7 +86,7 @@ class ErrorHandler(commands.Cog):
 
         error_msg, full_error_msg, kill_process, components, mention_author = parse_error(inter, error)
 
-        if isinstance(error, disnake.NotificationLevel) and str(error).endswith("Unknown Interaction"):
+        if isinstance(error, disnake.NotFound) and str(error).endswith("Unknown Interaction"):
             return
 
         kwargs = {"text": ""}
