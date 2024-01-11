@@ -95,24 +95,39 @@ class MiniStaticSkin:
 
             queue_duration = 0
 
-            for n, t in (enumerate(itertools.islice(player.queue, 20))):
+            for n, t in enumerate(player.queue):
 
                 if t.is_stream:
                     has_stream = True
+
                 elif n != 0:
                     queue_duration += t.duration
 
+                if n == 10:
+                    if has_stream:
+                        break
+                    continue
+
                 if has_stream:
-                    queue_txt += f"`{(n + 1):02})` [`{fix_characters(t.title, 33)}`]({t.uri}) `[{time_format(t.duration) if not t.is_stream else '🔴 Live'}]`\n"
+                    duration = time_format(t.duration) if not t.is_stream else '🔴 Ao vivo'
+
+                    queue_txt += f"`┌ {n + 1})` [`{fix_characters(t.title, limit=34)}`]({t.uri})\n" \
+                                 f"`└ ⏲️ {duration}`" + (f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
+                                 f" **|** `✋` <@{t.requester}>\n"
+
                 else:
-                    queue_txt += f"`{(n + 1):02})` [`{fix_characters(t.title, 26)}`]({t.uri}) <t:{int((current_time + datetime.timedelta(milliseconds=queue_duration)).timestamp())}:R>\n"
+                    duration = f"<t:{int((current_time + datetime.timedelta(milliseconds=queue_duration)).timestamp())}:R>"
+
+                    queue_txt += f"`┌ {n + 1})` [`{fix_characters(t.title, limit=34)}`]({t.uri})\n" \
+                                 f"`└ ⏲️` {duration}" + (f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
+                                 f" **|** `✋` <@{t.requester}>\n"
 
             embed_queue = disnake.Embed(title=f"Músicas na fila: {queue_size}",
                                         color=player.bot.get_color(player.guild.me),
                                         description=f"\n{queue_txt}")
 
             if not has_stream and not player.loop and not player.keep_connected and not player.paused and not player.current.is_stream:
-                embed_queue.description += f"`[⌛ As músicas acabam` <t:{int((current_time + datetime.timedelta(milliseconds=player.current.duration)).timestamp())}:R> `⌛]`"
+                embed_queue.description += f"\n`[ ⌛ As músicas acabam` <t:{int((current_time + datetime.timedelta(milliseconds=queue_duration + player.current.duration)).timestamp())}:R> `⌛ ]`"
 
         if player.current_hint:
             embed.set_footer(text=f"💡 Dica: {player.current_hint}")
