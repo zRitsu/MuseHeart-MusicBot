@@ -125,7 +125,7 @@ class DefaultStaticSkin:
                 elif n != 0:
                     queue_duration += t.duration
 
-                if n == 10:
+                if n > 9:
                     if has_stream:
                         break
                     continue
