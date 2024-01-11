@@ -337,8 +337,8 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
             if inter.author.guild_permissions.manage_guild:
                 msg += "\n\n**Ou se preferir: Adicione mais bots de música no servidor atual clicando no botão abaixo:**"
             else:
-                msg += "\n\n**Ou se preferir: Peça a um administrador/manager do servidor para clicar no botão abaixo " \
-                        "pra adicionar mais bots de música no servidor atual.**"
+                msg += "\n\n**Ou, se preferir: Peça a um administrador/manager do servidor para clicar no botão abaixo " \
+                        "para adicionar mais bots de música no servidor atual.**"
             components = [disnake.ui.Button(custom_id="bot_invite", label="Adicione mais bots de música clicando aqui")]
 
     inter.bot.dispatch("pool_dispatch", inter, None)
