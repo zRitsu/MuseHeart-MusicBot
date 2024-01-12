@@ -2449,7 +2449,7 @@ class SkinEditorMenu(disnake.ui.View):
                         style=disnake.TextInputStyle.short,
                         label="Nome:",
                         custom_id="skin_name",
-                        value="" if self.skin_selected is None else self.skin_selected.replace("> css: ", "", 1).replace("> cs: ", "", 1),
+                        value=self.skin_selected.replace("> css: ", "", 1).replace("> cs: ", "", 1),
                         max_length=15,
                         required=True
                     )
@@ -2480,14 +2480,14 @@ class SkinEditorMenu(disnake.ui.View):
         await self.bot.update_global_data(id_=inter.guild_id, data=self.global_data, db_name=DBModel.guilds)
 
         self.mode = "select"
-        self.skin_selected = None
+        self.skin_selected = ""
         self.update_components()
 
         await inter.edit_original_message(view=self, **self.build_embeds())
 
     async def back(self, inter: disnake.MessageInteraction):
         self.mode = "select"
-        self.skin_selected = None
+        self.skin_selected = ""
         self.message_data = {}
         self.update_components()
         await self.update_message(inter)
