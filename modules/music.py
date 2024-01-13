@@ -1111,7 +1111,11 @@ class Music(commands.Cog):
         elif not query:
             raise EmptyFavIntegration()
 
+        add_fav_button = True
+        tracks = []
+
         if query.startswith("> pin: "):
+            add_fav_button = False
             if is_pin is None:
                 is_pin = True
             query = guild_data["player_controller"]["fav_links"][query[7:]]['url']
@@ -1122,6 +1126,7 @@ class Music(commands.Cog):
             source = False
 
         elif query.startswith(("> fav: ", "> itg: ")):
+            add_fav_button = False
             try:
                 user_data = inter.global_user_data
             except AttributeError:
@@ -1554,6 +1559,8 @@ class Music(commands.Cog):
 
         embed_description = ""
 
+        components = None
+
         if isinstance(tracks, list):
 
             if manual_selection and not queue_loaded and len(tracks) > 1:
@@ -1779,6 +1786,8 @@ class Music(commands.Cog):
             embed.set_thumbnail(url=tracks.thumb)
             embed.description = f"`{len(tracks.tracks)} música(s)`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
             emoji = "🎶"
+            if add_fav_button:
+                components = [disnake.ui.Button(emoji="💗", label="Adicione nos seus favoritos", custom_id=PlayerControls.embed_add_fav)]
 
             if reg_query is not None:
                 reg_query = {"name": tracks.name, "url": tracks.url}
@@ -1811,7 +1820,7 @@ class Music(commands.Cog):
             except AttributeError:
                 pass
 
-            await func(embed=embed, view=None)
+            await func(embed=embed, **{"components": components} if components else {"view": None})
 
         if not player.is_connected:
 
@@ -4780,6 +4789,42 @@ class Music(commands.Cog):
                 await self.process_player_interaction(interaction, cmd, cmd_kwargs)
                 return
 
+            if control == PlayerControls.embed_add_fav:
+
+                try:
+                    embed = interaction.message.embeds[0]
+                except IndexError:
+                    await interaction.response.edit_message(components=None, content="Embed excluida...")
+                    return
+
+                await interaction.response.defer(with_message=True, ephemeral=True)
+
+                user_data = await self.bot.get_global_data(interaction.author.id, db_name=DBModel.users)
+
+                if self.bot.config["MAX_USER_FAVS"] > 0 and not (await self.bot.is_owner(interaction.author)):
+
+                    if (current_favs_size := len(user_data["fav_links"])) > self.bot.config["MAX_USER_FAVS"]:
+                        await interaction.edit_original_message(f"A quantidade de itens no seu arquivo de favorito excede "
+                                                          f"a quantidade máxima permitida ({self.bot.config['MAX_USER_FAVS']}).")
+                        return
+
+                    if (current_favs_size + (user_favs := len(user_data["fav_links"]))) > self.bot.config["MAX_USER_FAVS"]:
+                        await interaction.edit_original_message(
+                            "Você não possui espaço suficiente para adicionar todos os favoritos de seu arquivo...\n"
+                            f"Limite atual: {self.bot.config['MAX_USER_FAVS']}\n"
+                            f"Quantidade de favoritos salvos: {user_favs}\n"
+                            f"Você precisa de: {(current_favs_size + user_favs) - self.bot.config['MAX_USER_FAVS']}")
+                        return
+
+                fav_name = embed.author.name[1:]
+
+                user_data["fav_links"][fav_name] = embed.author.url
+
+                await self.bot.update_global_data(interaction.author.id, user_data, db_name=DBModel.users)
+
+                await interaction.edit_original_message(f"[`{fav_name}`](<{embed.author.url}>) foi adicionado nos seus favoritos.")
+                return
+
             if control == PlayerControls.fav_manager:
 
                 if str(interaction.user.id) not in interaction.message.content:
@@ -5624,6 +5669,8 @@ class Music(commands.Cog):
                     embed.description += f"\n🔊 **⠂ Canal de voz:** {message.author.voice.channel.mention}"
                 except AttributeError:
                     pass
+
+                components.append(disnake.ui.Button(emoji="💗", label="Adicione nos seus favoritos", custom_id=PlayerControls.embed_add_fav))
 
                 if response:
                     await response.edit(content=None, embed=embed, components=components)

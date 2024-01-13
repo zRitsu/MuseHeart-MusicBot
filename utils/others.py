@@ -161,6 +161,7 @@ class PlayerControls:
     add_favorite = "musicplayer_add_favorite"
     stage_announce = "musicplayer_stage_announce"
     lyrics = "musicplayer_lyrics"
+    embed_add_fav = "musicplayer_embed_add_fav"
 
 
 class SongRequestPurgeMode:
