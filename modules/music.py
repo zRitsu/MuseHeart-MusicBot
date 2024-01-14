@@ -4795,7 +4795,7 @@ class Music(commands.Cog):
                     cmd = "/play"
 
                 try:
-                    interaction.message.embeds[0].fields[0].value = interaction.message.embeds[0].fields[0].value.replace(interaction.author.mention, "") + f" {interaction.author.mention}"
+                    interaction.message.embeds[0].fields[0].value = f"{interaction.author.mention} " + interaction.message.embeds[0].fields[0].value.replace(interaction.author.mention, "")
                 except IndexError:
                     interaction.message.embeds[0].add_field(name="**Membros que curtiram a playlist:**", value=interaction.author.mention)
 
