@@ -1,7 +1,7 @@
 disnake>=2.9.1
 python-dotenv
 user-agent
-requests
+requests>=2.31.0
 humanize
 motor[srv]
 tinymongo
@@ -15,3 +15,4 @@ yt-dlp>=2023.12.30
 tornado
 emoji
 spotipy
+urllib3>=2.1.0
