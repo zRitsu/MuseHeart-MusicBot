@@ -135,7 +135,7 @@ class DefaultProgressbarStaticSkin:
                 elif n != 0:
                     queue_duration += t.duration
 
-                if n > 9:
+                if n > 7:
                     if has_stream:
                         break
                     continue
