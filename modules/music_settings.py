@@ -21,7 +21,7 @@ from utils.music.errors import GenericError, NoVoice
 from utils.music.interactions import SkinEditorMenu
 from utils.music.models import LavalinkPlayer
 from utils.others import send_idle_embed, CustomContext, select_bot_pool, pool_command, CommandArgparse, \
-    SongRequestPurgeMode, update_inter
+    SongRequestPurgeMode, update_inter, get_inter_guild_data
 
 if TYPE_CHECKING:
     from utils.client import BotCore
@@ -998,14 +998,7 @@ class MusicSettings(commands.Cog):
         guild_data = None
 
         if inter.bot == bot:
-            try:
-                guild_data = inter.guild_data
-            except AttributeError:
-                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-                try:
-                    inter.guild_data = guild_data
-                except AttributeError:
-                    pass
+            inter, guild_data = await get_inter_guild_data(inter, bot)
 
         if not guild_data:
             guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
@@ -1129,14 +1122,7 @@ class MusicSettings(commands.Cog):
         guild_data = None
 
         if inter.bot == bot:
-            try:
-                guild_data = inter.guild_data
-            except AttributeError:
-                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-                try:
-                    inter.guild_data = guild_data
-                except AttributeError:
-                    pass
+            inter, guild_data = await get_inter_guild_data(inter, bot)
 
         if not guild_data:
             guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
@@ -1173,19 +1159,9 @@ class MusicSettings(commands.Cog):
         if not bot:
             return
 
-        guild_data = None
-
         if inter.bot == bot:
-            try:
-                guild_data = inter.guild_data
-            except AttributeError:
-                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-                try:
-                    inter.guild_data = guild_data
-                except AttributeError:
-                    pass
-
-        if not guild_data:
+            inter, guild_data = await get_inter_guild_data(inter, bot)
+        else:
             guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         if not guild_data['djroles']:
@@ -1240,14 +1216,7 @@ class MusicSettings(commands.Cog):
         guild_data = None
 
         if inter.bot == bot:
-            try:
-                guild_data = inter.guild_data
-            except AttributeError:
-                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-                try:
-                    inter.guild_data = guild_data
-                except AttributeError:
-                    pass
+            inter, guild_data = await get_inter_guild_data(inter, bot)
 
         if not guild_data:
             guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)

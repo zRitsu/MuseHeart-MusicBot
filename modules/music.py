@@ -34,7 +34,7 @@ from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist
 from utils.music.spotify import process_spotify, spotify_regex_w_user
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, SongRequestPurgeMode, song_request_buttons, \
-    select_bot_pool
+    select_bot_pool, get_inter_guild_data
 
 
 class Music(commands.Cog):
@@ -813,14 +813,7 @@ class Music(commands.Cog):
             guild_data = None
 
             if inter.bot == bot:
-                try:
-                    guild_data = inter.guild_data
-                except AttributeError:
-                    guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-                    try:
-                        inter.guild_data = guild_data
-                    except AttributeError:
-                        pass
+                inter, guild_data = await get_inter_guild_data(bot, inter)
 
             if not guild_data:
                 guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
@@ -908,17 +901,9 @@ class Music(commands.Cog):
             if not guild_data:
 
                 if inter.bot == bot:
-                    try:
-                        guild_data = inter.guild_data
-                    except AttributeError:
-                        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-                        try:
-                            inter.guild_data = guild_data
-                        except AttributeError:
-                            pass
-
-                if not guild_data:
-                    guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                    inter, guild_data = await get_inter_guild_data(bot, inter)
+                else:
+                    inter, guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
             if guild_data["player_controller"]["fav_links"]:
                 disnake.SelectOption(label="Usar favorito do servidor", value=">> [📌 Favoritos do servidor 📌] <<", emoji="📌"),
@@ -998,16 +983,8 @@ class Music(commands.Cog):
             if not guild_data:
 
                 if inter.bot == bot:
-                    try:
-                        guild_data = inter.guild_data
-                    except AttributeError:
-                        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-                        try:
-                            inter.guild_data = guild_data
-                        except AttributeError:
-                            pass
-
-                if not guild_data:
+                    inter, guild_data = await get_inter_guild_data(bot, inter)
+                else:
                     guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
             if not guild_data["player_controller"]["fav_links"]:
@@ -1393,16 +1370,8 @@ class Music(commands.Cog):
                 if not guild_data:
 
                     if inter.bot == bot:
-                        try:
-                            guild_data = inter.guild_data
-                        except AttributeError:
-                            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-                            try:
-                                inter.guild_data = guild_data
-                            except AttributeError:
-                                pass
-
-                    if not guild_data:
+                        inter, guild_data = await get_inter_guild_data(bot, inter)
+                    else:
                         guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
                 static_player = guild_data['player_controller']
@@ -1830,19 +1799,9 @@ class Music(commands.Cog):
             try:
                 guild_data["check_other_bots_in_vc"]
             except KeyError:
-                guild_data = None
-
                 if inter.bot == bot:
-                    try:
-                        guild_data = inter.guild_data
-                    except AttributeError:
-                        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-                        try:
-                            inter.guild_data = guild_data
-                        except AttributeError:
-                            pass
-
-                if not guild_data:
+                    inter, guild_data = await get_inter_guild_data(bot, inter)
+                else:
                     guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
             if not inter.author.voice:
@@ -4385,11 +4344,7 @@ class Music(commands.Cog):
 
                 await interaction.response.defer(ephemeral=True)
 
-                try:
-                    guild_data = inter.guild_data
-                except AttributeError:
-                    guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-                    inter.guild_data = guild_data
+                inter, guild_data = await get_inter_guild_data(bot, inter)
 
             elif inter.invoked_with in ("integrations", "integrationmanager", "itg", "itgmgr", "itglist", "integrationlist"):
                 mode = ViewMode.integrations_manager

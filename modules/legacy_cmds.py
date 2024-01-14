@@ -23,7 +23,7 @@ from utils.db import DBModel
 from utils.music.checks import check_voice, check_requester_channel
 from utils.music.errors import GenericError
 from utils.music.models import LavalinkPlayer
-from utils.others import sync_message, CustomContext, string_to_file, token_regex, CommandArgparse
+from utils.others import sync_message, CustomContext, string_to_file, token_regex, CommandArgparse, get_inter_guild_data
 from utils.owner_panel import panel_command, PanelView
 
 
@@ -951,7 +951,7 @@ class Owner(commands.Cog):
     async def summon(self, ctx: CustomContext):
 
         try:
-            self.bot.music.players[ctx.guild.id]  # type ignore
+            ctx.bot.music.players[ctx.guild.id]  # type ignore
             raise GenericError("**Já há um player iniciado no servidor.**")
         except KeyError:
             pass
@@ -961,11 +961,7 @@ class Owner(commands.Cog):
         if not node:
             raise GenericError("**Não há servidores de música disponível!**")
 
-        try:
-            guild_data = ctx.guild_data
-        except AttributeError:
-            guild_data = await self.bot.get_data(ctx.guild.id, db_name=DBModel.guilds)
-            ctx.guild_data = guild_data
+        ctx, guild_data = get_inter_guild_data(ctx, ctx.bot)
 
         try:
             global_data = ctx.global_guild_data

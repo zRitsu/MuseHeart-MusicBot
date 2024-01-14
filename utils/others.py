@@ -781,3 +781,17 @@ def sort_dict_recursively(d):
             return d
     else:
         return d
+
+async def get_inter_guild_data(inter, bot):
+    try:
+        guild_data = inter.guild_data
+    except AttributeError:
+        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+        try:
+            inter.guild_data = guild_data
+        except AttributeError:
+            pass
+    if not guild_data:
+        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+
+    return inter, guild_data

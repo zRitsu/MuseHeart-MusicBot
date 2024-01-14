@@ -12,7 +12,7 @@ from utils.db import DBModel
 from utils.music.converters import time_format
 from utils.music.errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, \
     GenericError, MissingVoicePerms, DiffVoiceChannel, PoolException
-from utils.others import CustomContext
+from utils.others import CustomContext, get_inter_guild_data
 
 if TYPE_CHECKING:
     from utils.music.models import LavalinkPlayer
@@ -39,11 +39,7 @@ def can_send_message(
 
 
 async def check_requester_channel(ctx: CustomContext):
-    try:
-        guild_data = ctx.guild_data
-    except AttributeError:
-        guild_data = await ctx.bot.get_data(ctx.guild_id, db_name=DBModel.guilds)
-        ctx.guild_data = guild_data
+    ctx, guild_data = await get_inter_guild_data(ctx, ctx.bot)
 
     if guild_data['player_controller']["channel"] == str(ctx.channel.id):
 
@@ -593,15 +589,7 @@ async def has_perm(inter):
 
     user_roles = [r.id for r in inter.author.roles]
 
-    try:
-        guild_data = inter.guild_data
-    except AttributeError:
-        guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
-        if bot == inter.bot:
-            try:
-                inter.guild_data = guild_data
-            except AttributeError:
-                pass
+    inter, guild_data = await get_inter_guild_data(inter, bot)
 
     if [r for r in guild_data['djroles'] if int(r) in user_roles]:
         return True
