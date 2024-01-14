@@ -4758,7 +4758,7 @@ class Music(commands.Cog):
                     return
 
                 if (retry_after:=self.add_fav_embed_cooldown.get_bucket(interaction).update_rate_limit()):
-                    await interaction.send(f"**Você terá que aguardar {retry_after} segundo(s) para adicionar um novo favorito.**", ephemeral=True)
+                    await interaction.send(f"**Você terá que aguardar {int(retry_after)} segundo(s) para adicionar um novo favorito.**", ephemeral=True)
                     return
 
                 await interaction.response.defer(with_message=True, ephemeral=True)
