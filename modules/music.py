@@ -4733,11 +4733,11 @@ class Music(commands.Cog):
             await interaction.send("Ainda estou inicializando...", ephemeral=True)
             return
 
-        if control == PlayerControls.embed_add_fav:
+        if not interaction.guild_id:
+            await interaction.response.edit_message(components=None)
+            return
 
-            if not interaction.guild_id:
-                await interaction.response.edit_message(components=None)
-                return
+        if control == PlayerControls.embed_add_fav:
 
             try:
                 embed = interaction.message.embeds[0]
