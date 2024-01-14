@@ -4794,6 +4794,11 @@ class Music(commands.Cog):
                 except AttributeError:
                     cmd = "/play"
 
+                try:
+                    interaction.message.embeds[0].fields[0].value = interaction.message.embeds[0].fields[0].value.replace(interaction.author.mention, "") + f" {interaction.author.mention}"
+                except IndexError:
+                    interaction.message.embeds[0].add_field(name="**Membros que curtiram a playlist:**", value=interaction.author.mention)
+
                 await interaction.edit_original_message(embed=disnake.Embed(
                     description=f"[`{fav_name}`](<{embed.author.url}>) **foi adicionado nos seus favoritos!**\n\n"
                                 "**Como usar?**\n"
@@ -4802,6 +4807,10 @@ class Music(commands.Cog):
                                 f"* Usando o comando {global_data['prefix'] or self.bot.default_prefix}{self.bot.get_cog('Music').play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n"
 
                 ))
+
+                if not interaction.message.flags.ephemeral:
+                    await interaction.message.edit(embed=interaction.message.embeds[0])
+
                 return
 
             if control == PlayerControls.fav_manager:
