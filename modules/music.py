@@ -4776,7 +4776,7 @@ class Music(commands.Cog):
 
             await self.bot.update_global_data(interaction.author.id, user_data, db_name=DBModel.users)
 
-            global_data = await self.bot.get_global_data(interaction.guild.id, db_name=DBModel.guilds)
+            global_data = await self.bot.get_global_data(interaction.guild_id, db_name=DBModel.guilds)
 
             try:
                 cmd = f"</play:" + str(self.bot.pool.controller_bot.get_global_command_named("play",
