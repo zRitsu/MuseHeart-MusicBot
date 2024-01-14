@@ -4754,7 +4754,7 @@ class Music(commands.Cog):
                 try:
                     embed = interaction.message.embeds[0]
                 except IndexError:
-                    await interaction.response.edit_message(components=None, content="Embed excluida...")
+                    await interaction.send("A embed da mensagem foi removida...", ephemeral=True)
                     return
 
                 if (retry_after:=self.add_fav_embed_cooldown.get_bucket(interaction).update_rate_limit()):
