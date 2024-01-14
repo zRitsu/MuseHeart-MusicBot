@@ -80,6 +80,9 @@ class Music(commands.Cog):
 
         self.player_interaction_concurrency = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
+        self.add_fav_embed_cooldown = commands.CooldownMapping.from_cooldown(rate=1, per=13,
+                                                                            type=commands.BucketType.user)
+
         self.song_request_cooldown = commands.CooldownMapping.from_cooldown(rate=1, per=300,
                                                                             type=commands.BucketType.member)
 
@@ -4795,6 +4798,10 @@ class Music(commands.Cog):
                     embed = interaction.message.embeds[0]
                 except IndexError:
                     await interaction.response.edit_message(components=None, content="Embed excluida...")
+                    return
+
+                if (retry_after:=self.add_fav_embed_cooldown.get_bucket(interaction).update_rate_limit()):
+                    await interaction.send(f"**Você terá que aguardar {retry_after} segundo(s) para adicionar um novo favorito.**", ephemeral=True)
                     return
 
                 await interaction.response.defer(with_message=True, ephemeral=True)
