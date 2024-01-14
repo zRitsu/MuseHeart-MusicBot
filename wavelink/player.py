@@ -348,6 +348,16 @@ class Player:
             await channel.connect(cls=WavelinkVoiceClient, reconnect=False)
             __log__.info(f'PLAYER | Connected to voice channel:: {self.channel_id}')
 
+        elif not guild.me.voice:
+            try:
+                guild.voice_client.cleanup()
+            except:
+                pass
+            try:
+                await channel.connect(cls=WavelinkVoiceClient, reconnect=False)
+            except:
+                traceback.print_exc()
+
         elif guild.voice_client.channel.id != channel_id:
             await guild.voice_client.move_to(channel)
 
