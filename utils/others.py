@@ -34,7 +34,10 @@ class CommandArgparse(argparse.ArgumentParser):
         kwargs.pop('allow_abbrev', None)
         kwargs.pop('add_help', None)
 
-        super().__init__(*args, exit_on_error=False, allow_abbrev=False, add_help=False, **kwargs)
+        try:
+            super().__init__(*args, exit_on_error=False, allow_abbrev=False, add_help=False, **kwargs)
+        except TypeError:
+            super().__init__(*args, allow_abbrev=False, add_help=False, **kwargs)
 
     def parse_known_args(
         self, args = None, namespace = None

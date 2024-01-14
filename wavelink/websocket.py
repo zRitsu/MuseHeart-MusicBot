@@ -34,6 +34,10 @@ from .stats import Stats
 
 __log__ = logging.getLogger(__name__)
 
+def remove_suffix(input_string, suffix):
+    if suffix and input_string.endswith(suffix):
+        return input_string[:-len(suffix)]
+    return input_string
 
 class WebSocket:
 
@@ -80,7 +84,7 @@ class WebSocket:
         if self._node.version == 3:
             base_uri = f"{self.host}:{self.port}"
         else:
-            base_uri = f"{self.host.removesuffix('/')}:{self.port}/v4/websocket"
+            base_uri = f"{remove_suffix(self.host, '/')}:{self.port}/v4/websocket"
 
         try:
             if self.secure is True:
