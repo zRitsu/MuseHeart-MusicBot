@@ -4751,7 +4751,7 @@ class Music(commands.Cog):
                     ephemeral=True)
                 return
 
-            await interaction.response.defer(with_message=True, ephemeral=True)
+            await interaction.response.defer()
 
             user_data = await self.bot.get_global_data(interaction.author.id, db_name=DBModel.users)
 
@@ -4792,18 +4792,20 @@ class Music(commands.Cog):
                 interaction.message.embeds[0].add_field(name="**Membros que curtiram a playlist:**",
                                                         value=interaction.author.mention)
 
-            await interaction.edit_original_message(embed=disnake.Embed(
+            await interaction.send(embed=disnake.Embed(
                 description=f"[`{fav_name}`](<{embed.author.url}>) **foi adicionado nos seus favoritos!**\n\n"
                             "**Como usar?**\n"
                             f"* Usando o comando {cmd} (selecionando o favorito no preenchimento automático da busca)\n"
                             "* Clicando no botão/select de tocar favorito/integração do player.\n"
                             f"* Usando o comando {global_data['prefix'] or self.bot.default_prefix}{self.bot.get_cog('Music').play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n"
 
-            ))
+            ), ephemeral=True)
 
             if not interaction.message.flags.ephemeral:
-                await interaction.message.edit(embed=interaction.message.embeds[0])
-
+                if not interaction.guild:
+                    await (await interaction.original_response()).edit(embed=interaction.message.embeds[0])
+                else:
+                    await interaction.message.edit(embed=interaction.message.embeds[0])
             return
 
         if not interaction.guild:
