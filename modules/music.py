@@ -4733,6 +4733,79 @@ class Music(commands.Cog):
             await interaction.send("Ainda estou inicializando...", ephemeral=True)
             return
 
+        if control == PlayerControls.embed_add_fav:
+
+            if not interaction.guild_id:
+                await interaction.response.edit_message(components=None)
+                return
+
+            try:
+                embed = interaction.message.embeds[0]
+            except IndexError:
+                await interaction.send("A embed da mensagem foi removida...", ephemeral=True)
+                return
+
+            if (retry_after := self.add_fav_embed_cooldown.get_bucket(interaction).update_rate_limit()):
+                await interaction.send(
+                    f"**Você terá que aguardar {int(retry_after)} segundo(s) para adicionar um novo favorito.**",
+                    ephemeral=True)
+                return
+
+            await interaction.response.defer(with_message=True, ephemeral=True)
+
+            user_data = await self.bot.get_global_data(interaction.author.id, db_name=DBModel.users)
+
+            if self.bot.config["MAX_USER_FAVS"] > 0 and not (await self.bot.is_owner(interaction.author)):
+
+                if (current_favs_size := len(user_data["fav_links"])) > self.bot.config["MAX_USER_FAVS"]:
+                    await interaction.edit_original_message(f"A quantidade de itens no seu arquivo de favorito excede "
+                                                            f"a quantidade máxima permitida ({self.bot.config['MAX_USER_FAVS']}).")
+                    return
+
+                if (current_favs_size + (user_favs := len(user_data["fav_links"]))) > self.bot.config["MAX_USER_FAVS"]:
+                    await interaction.edit_original_message(
+                        "Você não possui espaço suficiente para adicionar todos os favoritos de seu arquivo...\n"
+                        f"Limite atual: {self.bot.config['MAX_USER_FAVS']}\n"
+                        f"Quantidade de favoritos salvos: {user_favs}\n"
+                        f"Você precisa de: {(current_favs_size + user_favs) - self.bot.config['MAX_USER_FAVS']}")
+                    return
+
+            fav_name = embed.author.name[1:]
+
+            user_data["fav_links"][fav_name] = embed.author.url
+
+            await self.bot.update_global_data(interaction.author.id, user_data, db_name=DBModel.users)
+
+            global_data = await self.bot.get_global_data(interaction.guild.id, db_name=DBModel.guilds)
+
+            try:
+                cmd = f"</play:" + str(self.bot.pool.controller_bot.get_global_command_named("play",
+                                                                                             cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+            except AttributeError:
+                cmd = "/play"
+
+            try:
+                interaction.message.embeds[0].fields[0].value = f"{interaction.author.mention} " + \
+                                                                interaction.message.embeds[0].fields[0].value.replace(
+                                                                    interaction.author.mention, "")
+            except IndexError:
+                interaction.message.embeds[0].add_field(name="**Membros que curtiram a playlist:**",
+                                                        value=interaction.author.mention)
+
+            await interaction.edit_original_message(embed=disnake.Embed(
+                description=f"[`{fav_name}`](<{embed.author.url}>) **foi adicionado nos seus favoritos!**\n\n"
+                            "**Como usar?**\n"
+                            f"* Usando o comando {cmd} (selecionando o favorito no preenchimento automático da busca)\n"
+                            "* Clicando no botão/select de tocar favorito/integração do player.\n"
+                            f"* Usando o comando {global_data['prefix'] or self.bot.default_prefix}{self.bot.get_cog('Music').play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n"
+
+            ))
+
+            if not interaction.message.flags.ephemeral:
+                await interaction.message.edit(embed=interaction.message.embeds[0])
+
+            return
+
         if not interaction.guild:
             await interaction.response.edit_message(components=None)
             return
@@ -4747,70 +4820,6 @@ class Music(commands.Cog):
                 cmd = self.bot.get_slash_command("setup")
                 cmd_kwargs = {"target": interaction.channel}
                 await self.process_player_interaction(interaction, cmd, cmd_kwargs)
-                return
-
-            if control == PlayerControls.embed_add_fav:
-
-                try:
-                    embed = interaction.message.embeds[0]
-                except IndexError:
-                    await interaction.send("A embed da mensagem foi removida...", ephemeral=True)
-                    return
-
-                if (retry_after:=self.add_fav_embed_cooldown.get_bucket(interaction).update_rate_limit()):
-                    await interaction.send(f"**Você terá que aguardar {int(retry_after)} segundo(s) para adicionar um novo favorito.**", ephemeral=True)
-                    return
-
-                await interaction.response.defer(with_message=True, ephemeral=True)
-
-                user_data = await self.bot.get_global_data(interaction.author.id, db_name=DBModel.users)
-
-                if self.bot.config["MAX_USER_FAVS"] > 0 and not (await self.bot.is_owner(interaction.author)):
-
-                    if (current_favs_size := len(user_data["fav_links"])) > self.bot.config["MAX_USER_FAVS"]:
-                        await interaction.edit_original_message(f"A quantidade de itens no seu arquivo de favorito excede "
-                                                          f"a quantidade máxima permitida ({self.bot.config['MAX_USER_FAVS']}).")
-                        return
-
-                    if (current_favs_size + (user_favs := len(user_data["fav_links"]))) > self.bot.config["MAX_USER_FAVS"]:
-                        await interaction.edit_original_message(
-                            "Você não possui espaço suficiente para adicionar todos os favoritos de seu arquivo...\n"
-                            f"Limite atual: {self.bot.config['MAX_USER_FAVS']}\n"
-                            f"Quantidade de favoritos salvos: {user_favs}\n"
-                            f"Você precisa de: {(current_favs_size + user_favs) - self.bot.config['MAX_USER_FAVS']}")
-                        return
-
-                fav_name = embed.author.name[1:]
-
-                user_data["fav_links"][fav_name] = embed.author.url
-
-                await self.bot.update_global_data(interaction.author.id, user_data, db_name=DBModel.users)
-
-                global_data = await self.bot.get_global_data(interaction.guild.id, db_name=DBModel.guilds)
-
-                try:
-                    cmd = f"</play:" + str(self.bot.pool.controller_bot.get_global_command_named("play",
-                                                                                                 cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
-                except AttributeError:
-                    cmd = "/play"
-
-                try:
-                    interaction.message.embeds[0].fields[0].value = f"{interaction.author.mention} " + interaction.message.embeds[0].fields[0].value.replace(interaction.author.mention, "")
-                except IndexError:
-                    interaction.message.embeds[0].add_field(name="**Membros que curtiram a playlist:**", value=interaction.author.mention)
-
-                await interaction.edit_original_message(embed=disnake.Embed(
-                    description=f"[`{fav_name}`](<{embed.author.url}>) **foi adicionado nos seus favoritos!**\n\n"
-                                "**Como usar?**\n"
-                                f"* Usando o comando {cmd} (selecionando o favorito no preenchimento automático da busca)\n"
-                                "* Clicando no botão/select de tocar favorito/integração do player.\n"
-                                f"* Usando o comando {global_data['prefix'] or self.bot.default_prefix}{self.bot.get_cog('Music').play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n"
-
-                ))
-
-                if not interaction.message.flags.ephemeral:
-                    await interaction.message.edit(embed=interaction.message.embeds[0])
-
                 return
 
             if control == PlayerControls.fav_manager:
