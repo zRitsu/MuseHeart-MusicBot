@@ -1098,6 +1098,8 @@ class Music(commands.Cog):
             add_fav_button = False
             if is_pin is None:
                 is_pin = True
+            if not guild_data:
+                inter, guild_data = await get_inter_guild_data(inter, bot)
             query = guild_data["player_controller"]["fav_links"][query[7:]]['url']
             source = False
 
