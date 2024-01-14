@@ -4822,7 +4822,22 @@ class Music(commands.Cog):
 
                 await self.bot.update_global_data(interaction.author.id, user_data, db_name=DBModel.users)
 
-                await interaction.edit_original_message(f"[`{fav_name}`](<{embed.author.url}>) foi adicionado nos seus favoritos.")
+                global_data = await self.bot.get_global_data(interaction.guild.id, db_name=DBModel.guilds)
+
+                try:
+                    cmd = f"</play:" + str(self.bot.pool.controller_bot.get_global_command_named("play",
+                                                                                                 cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+                except AttributeError:
+                    cmd = "/play"
+
+                await interaction.edit_original_message(embed=disnake.Embed(
+                    description=f"[`{fav_name}`](<{embed.author.url}>) **foi adicionado nos seus favoritos!**\n\n"
+                                "**Como usar?**\n"
+                                f"* Usando o comando {cmd} (selecionando o favorito no preenchimento automático da busca)\n"
+                                "* Clicando no botão/select de tocar favorito/integração do player.\n"
+                                f"* Usando o comando {global_data['prefix'] or self.bot.default_prefix}{self.bot.get_cog('Music').play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n"
+
+                ))
                 return
 
             if control == PlayerControls.fav_manager:
