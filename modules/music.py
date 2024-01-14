@@ -813,7 +813,7 @@ class Music(commands.Cog):
             guild_data = None
 
             if inter.bot == bot:
-                inter, guild_data = await get_inter_guild_data(bot, inter)
+                inter, guild_data = await get_inter_guild_data(inter, bot)
 
             if not guild_data:
                 guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
@@ -901,7 +901,7 @@ class Music(commands.Cog):
             if not guild_data:
 
                 if inter.bot == bot:
-                    inter, guild_data = await get_inter_guild_data(bot, inter)
+                    inter, guild_data = await get_inter_guild_data(inter, bot)
                 else:
                     inter, guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
@@ -983,7 +983,7 @@ class Music(commands.Cog):
             if not guild_data:
 
                 if inter.bot == bot:
-                    inter, guild_data = await get_inter_guild_data(bot, inter)
+                    inter, guild_data = await get_inter_guild_data(inter, bot)
                 else:
                     guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
@@ -1372,7 +1372,7 @@ class Music(commands.Cog):
                 if not guild_data:
 
                     if inter.bot == bot:
-                        inter, guild_data = await get_inter_guild_data(bot, inter)
+                        inter, guild_data = await get_inter_guild_data(inter, bot)
                     else:
                         guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
@@ -1802,7 +1802,7 @@ class Music(commands.Cog):
                 guild_data["check_other_bots_in_vc"]
             except KeyError:
                 if inter.bot == bot:
-                    inter, guild_data = await get_inter_guild_data(bot, inter)
+                    inter, guild_data = await get_inter_guild_data(inter, bot)
                 else:
                     guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
@@ -4346,7 +4346,7 @@ class Music(commands.Cog):
 
                 await interaction.response.defer(ephemeral=True)
 
-                inter, guild_data = await get_inter_guild_data(bot, inter)
+                inter, guild_data = await get_inter_guild_data(inter, bot)
 
             elif inter.invoked_with in ("integrations", "integrationmanager", "itg", "itgmgr", "itglist", "integrationlist"):
                 mode = ViewMode.integrations_manager

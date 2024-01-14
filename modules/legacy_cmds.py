@@ -961,7 +961,7 @@ class Owner(commands.Cog):
         if not node:
             raise GenericError("**Não há servidores de música disponível!**")
 
-        ctx, guild_data = get_inter_guild_data(ctx, ctx.bot)
+        ctx, guild_data = await get_inter_guild_data(ctx, ctx.bot)
 
         try:
             global_data = ctx.global_guild_data
