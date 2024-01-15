@@ -238,7 +238,7 @@ class BotPool:
             for key, value in {section: dict(config.items(section)) for section in config.sections()}.items():
                 value["identifier"] = key.replace(" ", "_")
                 value["secure"] = value.get("secure") == "true"
-                value["port"] = value["port"].replace("{SERVER_PORT}", os.environ.get("SERVER_PORT") or 8090)
+                value["port"] = value["port"].replace("{SERVER_PORT}", os.environ.get("SERVER_PORT") or "8090")
                 value["search"] = value.get("search") != "false"
                 value["retry_403"] = value.get("retry_403") == "true"
                 value["search_providers"] = value.get("search_providers", "").strip().split() or [self.config["DEFAULT_SEARCH_PROVIDER"]] + [s for s in ("ytsearch", "scsearch") if s != self.config["DEFAULT_SEARCH_PROVIDER"]]
