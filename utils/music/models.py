@@ -2596,7 +2596,9 @@ class LavalinkPlayer(wavelink.Player):
 
             listen_along_invite = self.listen_along_invite
 
-            if not listen_along_invite and "DISCOVERABLE" in self.guild.features and self.guild.me.voice.channel.permissions_for(self.guild.default_role).connect:
+            if (not listen_along_invite and self.guild.verification_level == disnake.VerificationLevel.none
+                    and "DISCOVERABLE" in self.guild.features and
+                    self.guild.me.voice.channel.permissions_for(self.guild.default_role).connect):
                 listen_along_invite = self.guild.me.voice.channel.jump_url
 
             stats = {
