@@ -6214,6 +6214,7 @@ class Music(commands.Cog):
             # tempfix para channel do voice_client não ser setado ao mover bot do canal.
             player.guild.voice_client.channel = after.channel
             player.last_channel = after.channel
+            player.set_voice_invite_url()
 
         try:
             check = [m for m in player.guild.me.voice.channel.members if not m.bot]

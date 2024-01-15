@@ -1014,6 +1014,7 @@ class LavalinkPlayer(wavelink.Player):
     async def connect(self, channel_id: int, self_mute: bool = False, self_deaf: bool = False):
         self.last_channel = self.bot.get_channel(channel_id)
         await super().connect(channel_id, self_mute=self_mute, self_deaf=True)
+        self.set_voice_invite_url()
 
     def process_hint(self):
 
@@ -1838,6 +1839,12 @@ class LavalinkPlayer(wavelink.Player):
             pass
         self.message_updater_task = self.bot.loop.create_task(self.message_updater())
 
+    def set_voice_invite_url(self):
+        if (not self.listen_along_invite and self.guild.verification_level == disnake.VerificationLevel.none
+                and "DISCOVERABLE" in self.guild.features and
+                self.guild.me.voice.channel.permissions_for(self.guild.default_role).connect):
+            self.listen_along_invite = self.guild.me.voice.channel.jump_url
+
     async def invoke_np(self, force=False, interaction=None, rpc_update=False):
 
         if not self.text_channel:
@@ -1868,11 +1875,6 @@ class LavalinkPlayer(wavelink.Player):
             return
 
         if rpc_update:
-
-            if (not self.listen_along_invite and self.guild.verification_level == disnake.VerificationLevel.none
-                    and "DISCOVERABLE" in self.guild.features and
-                    self.guild.me.voice.channel.permissions_for(self.guild.default_role).connect):
-                self.listen_along_invite = self.guild.me.voice.channel.jump_url
 
             try:
                 await self.process_rpc()
