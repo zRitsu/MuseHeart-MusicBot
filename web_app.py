@@ -115,11 +115,7 @@ class IndexHandler(tornado.web.RequestHandler):
                    f"na inicialização:</p>" \
                    f"{failed_table_style}\n<table cellpadding=\"10\">{''.join(failed_bots)}</table>"
 
-        try:
-            # repl.it stuff
-            ws_url = f"<p style=\"color:blue\">wss://{environ['REPL_SLUG']}.{environ['REPL_OWNER']}.repl.co:443/ws</p>"
-        except KeyError:
-            ws_url = "<Body onLoad=\" rpcUrl()\" ><p id=\"url\" style=\"color:blue\"></p><script>function rpcUrl(){document." \
+        ws_url = "<Body onLoad=\" rpcUrl()\" ><p id=\"url\" style=\"color:blue\"></p><script>function rpcUrl(){document." \
                      "getElementById(\"url\").innerHTML = window.location.href.replace(\"http\", \"ws\")" \
                      ".replace(\"https\", \"wss\") + \"ws\"}</script></body>"
 
