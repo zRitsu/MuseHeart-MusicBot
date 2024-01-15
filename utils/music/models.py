@@ -2594,6 +2594,11 @@ class LavalinkPlayer(wavelink.Player):
             if self.is_closing:
                 return
 
+            listen_along_invite = self.listen_along_invite
+
+            if not listen_along_invite and "DISCOVERABLE" in self.guild.features and self.guild.me.voice.channel.permissions_for(self.guild.default_role).connect:
+                listen_along_invite = self.guild.me.voice.channel.jump_url
+
             stats = {
                 "op": "update",
                 "track": None,
@@ -2601,7 +2606,7 @@ class LavalinkPlayer(wavelink.Player):
                 "bot_name": str(self.bot.user),
                 "thumb": thumb,
                 "auth_enabled": self.bot.config["ENABLE_RPC_AUTH"],
-                "listen_along_invite": self.listen_along_invite
+                "listen_along_invite": listen_along_invite
             }
 
             if not self.current:
