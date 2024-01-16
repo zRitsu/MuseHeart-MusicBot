@@ -1433,8 +1433,8 @@ class MusicSettings(commands.Cog):
             bot = ctx.bot
             guild = bot.get_guild(ctx.guild_id)
 
-        if not guild.me.guild_permissions.create_instant_invite:
-            raise GenericError(f"**{bot.user.mention} não possui permissão de criar convites instantâneos...**")
+        #if not guild.me.guild_permissions.create_instant_invite:
+        #    raise GenericError(f"**{bot.user.mention} não possui permissão de criar convites instantâneos...**")
 
         if not ctx.author.voice:
             raise NoVoice()
