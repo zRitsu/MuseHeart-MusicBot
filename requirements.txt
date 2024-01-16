@@ -8,7 +8,7 @@ tinymongo
 dnspython==2.4.0
 psutil
 aiofiles
-git+https://github.com/Kraots/jishaku.git
+disnake-jishaku
 packaging
 aiosqlite
 yt-dlp>=2023.12.30
