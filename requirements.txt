@@ -1,6 +1,6 @@
 disnake>=2.9.1
 python-dotenv
-user-agent
+git+https://github.com/lorien/user_agent.git
 requests>=2.31.0
 humanize
 motor[srv]
@@ -8,7 +8,7 @@ tinymongo
 dnspython==2.4.0
 psutil
 aiofiles
-disnake-jishaku
+git+https://github.com/Kraots/jishaku.git
 packaging
 aiosqlite
 yt-dlp>=2023.12.30
