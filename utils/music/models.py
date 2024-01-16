@@ -1517,7 +1517,22 @@ class LavalinkPlayer(wavelink.Player):
             else:
                 query = track.uri
 
-            t = await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
+            try:
+                t = await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
+            except Exception as e:
+                traceback.print_exc()
+                try:
+                    await self.text_channel.send(
+                        embed=disnake.Embed(
+                            description=f"**Ocorreu um erro ao obter informações da música:** [{track.title}]({track.uri}) ```py\n{repr(e)}```"
+                        )
+                    )
+                except:
+                    pass
+                await asyncio.sleep(7)
+                self.locked = False
+                await self.process_next()
+                return
 
             try:
                 t = t.tracks
