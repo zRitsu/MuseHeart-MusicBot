@@ -1840,8 +1840,7 @@ class LavalinkPlayer(wavelink.Player):
         self.message_updater_task = self.bot.loop.create_task(self.message_updater())
 
     def set_voice_invite_url(self):
-        if (not self.listen_along_invite and self.guild.verification_level == disnake.VerificationLevel.none
-                and "DISCOVERABLE" in self.guild.features and
+        if (not self.listen_along_invite and "DISCOVERABLE" in self.guild.features and
                 self.guild.me.voice.channel.permissions_for(self.guild.default_role).connect):
             self.listen_along_invite = self.guild.me.voice.channel.jump_url
 
