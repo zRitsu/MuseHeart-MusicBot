@@ -2439,6 +2439,8 @@ class LavalinkPlayer(wavelink.Player):
 
         try:
 
+            exceptions = []
+
             try:
                 to_search = track.info["search_uri"]
                 check_duration = False
@@ -2449,13 +2451,16 @@ class LavalinkPlayer(wavelink.Player):
             try:
                 tracks = (await self.node.get_tracks(to_search, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist))
             except wavelink.TrackNotFound as e:
-                print(f"Falha ao obter partialtrack: {repr(e)}")
+                exceptions.append(e)
                 tracks = []
 
             if not tracks and self.bot.config['PARTIALTRACK_SEARCH_PROVIDER'] not in ("ytsearch", "ytmsearch", "scsearch"):
-                tracks = await self.node.get_tracks(
-                    "ytsearch:" + (f"\"{track.info['isrc']}\"" if track.info.get("isrc") else f"{track.single_title.replace(' - ', ' ')} - {track.authors_string}"),
-                    track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
+                try:
+                    tracks = await self.node.get_tracks(
+                        "ytsearch:" + (f"\"{track.info['isrc']}\"" if track.info.get("isrc") else f"{track.single_title.replace(' - ', ' ')} - {track.authors_string}"),
+                        track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
+                except Exception as e:
+                    exceptions.append(e)
 
             try:
                 tracks = tracks.tracks
@@ -2465,6 +2470,8 @@ class LavalinkPlayer(wavelink.Player):
             selected_track = None
 
             if not tracks:
+                if exceptions:
+                    print("Falha ao resolver PartialTrack:\n" + "\n".join(repr(e) for e in exceptions))
                 return
 
             for t in tracks:
