@@ -456,6 +456,8 @@ class Misc(commands.Cog):
         try:
             await channel.send(embeds=embeds, components=components, **kwargs)
             if send_video:
+                if "delete_after" in kwargs:
+                    kwargs["delete_after"] = 600
                 await asyncio.sleep(1)
                 await channel.send(f"{send_video}\n\nConfira o [**vídeo**]({self.bot.config['MULTIVOICE_VIDEO_DEMO_URL']}) demonstrando essa funcionalidade.", **kwargs)
         except:
