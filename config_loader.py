@@ -37,6 +37,7 @@ DEFAULT_CONFIG = {
     ### Database ###
     ################
     "MONGO": "",
+    "MONGO_TIMEOUT": 30,
     "SENSITIVE_INFO_WARN": True,
 
     #########################
@@ -185,6 +186,7 @@ def load_config():
         "MAX_USER_INTEGRATIONS",
         "PRESENCE_INTERVAL",
         "HINT_RATE",
+        "MONGO_TIMEOUT",
         "INVITE_PERMISSIONS",
         "PREFIXED_POOL_TIMEOUT",
         "PLAYER_INFO_BACKUP_INTERVAL",

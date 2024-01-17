@@ -198,7 +198,7 @@ class LocalDatabase(BaseDB):
 
 class MongoDatabase(BaseDB):
 
-    def __init__(self, token: str):
+    def __init__(self, token: str, timeout=30):
         super().__init__()
 
         try:
@@ -223,7 +223,7 @@ class MongoDatabase(BaseDB):
 
             token = urlunparse(parse_result._replace(query=urlencode(parameters, doseq=True)))
 
-        self._connect = AsyncIOMotorClient(token.strip("<>"), connectTimeoutMS=30000)
+        self._connect = AsyncIOMotorClient(token.strip("<>"), connectTimeoutMS=timeout*1000)
 
     async def push_data(self, data, *, db_name: Union[DBModel.guilds, DBModel.users], collection: str):
         await self._connect[collection][db_name].insert_one(data)

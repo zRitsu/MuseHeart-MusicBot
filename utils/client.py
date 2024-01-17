@@ -287,7 +287,7 @@ class BotPool:
         mongo_key = self.config.get("MONGO")
 
         if mongo_key:
-            self.mongo_database = MongoDatabase(mongo_key)
+            self.mongo_database = MongoDatabase(mongo_key, timeout=self.config["MONGO_TIMEOUT"])
             print("Database em uso: MongoDB")
         else:
             print("Database em uso: TinyMongo | Nota: Os arquivos da database serão salvos localmente na pasta: local_database")
