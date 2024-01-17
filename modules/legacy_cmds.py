@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import asyncio
-import gc
 import json
 import os
 import re
@@ -224,8 +223,6 @@ class Owner(commands.Cog):
             txt = "**Nenhum módulo encontrado...**"
 
         self.bot.pool.config = load_config()
-
-        gc.collect()
 
         if isinstance(ctx, CustomContext):
             embed = disnake.Embed(colour=self.bot.get_color(ctx.me), description=txt)
