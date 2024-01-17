@@ -2464,6 +2464,9 @@ class LavalinkPlayer(wavelink.Player):
 
             selected_track = None
 
+            if not tracks:
+                return
+
             for t in tracks:
 
                 if t.is_stream:
