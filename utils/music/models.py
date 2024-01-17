@@ -2455,24 +2455,31 @@ class LavalinkPlayer(wavelink.Player):
                 tracks = []
 
             if not tracks and self.bot.config['PARTIALTRACK_SEARCH_PROVIDER'] not in ("ytsearch", "ytmsearch", "scsearch"):
-                try:
-                    tracks = await self.node.get_tracks(
-                        "ytsearch:" + (f"\"{track.info['isrc']}\"" if track.info.get("isrc") else f"{track.single_title.replace(' - ', ' ')} - {track.authors_string}"),
-                        track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
-                except Exception as e:
-                    exceptions.append(e)
+
+                if track.info.get("isrc"):
+                    try:
+                        tracks = await self.node.get_tracks(f"ytsearch:\"{track.info['isrc']}\"",track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
+                    except Exception as e:
+                        exceptions.append(e)
+
+                if not tracks:
+                    try:
+                        tracks = await self.node.get_tracks(
+                            f"ytsearch:{track.single_title.replace(' - ', ' ')} - {track.authors_string}")
+                    except Exception as e:
+                        exceptions.append(e)
 
             try:
                 tracks = tracks.tracks
             except AttributeError:
                 pass
 
-            selected_track = None
-
             if not tracks:
                 if exceptions:
                     print("Falha ao resolver PartialTrack:\n" + "\n".join(repr(e) for e in exceptions))
                 return
+
+            selected_track = None
 
             for t in tracks:
 
