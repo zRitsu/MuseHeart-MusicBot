@@ -68,6 +68,7 @@ class BotPool:
         self.failed_bots: dict = {}
         self.controller_bot: Optional[BotCore] = None
         self.current_useragent = self.reset_useragent()
+        self.processing_gc: bool = False
 
     def reset_useragent(self):
         self.current_useragent = generate_user_agent()
@@ -413,18 +414,16 @@ class BotPool:
                     except:
                         pass
 
-            bot.processing_gc = False
-
             @bot.listen("on_resumed")
             async def clear_gc():
 
-                if bot.processing_gc:
+                if self.processing_gc:
                     return
 
-                bot.processing_gc = True
+                self.processing_gc = True
                 await asyncio.sleep(2)
                 gc.collect()
-                bot.processing_gc = False
+                self.processing_gc = False
 
             @bot.application_command_check(slash_commands=True, message_commands=True, user_commands=True)
             async def check(inter: disnake.ApplicationCommandInteraction):
