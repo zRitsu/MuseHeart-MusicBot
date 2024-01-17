@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import datetime
+import gc
 import json
 import logging
 import os
@@ -411,6 +412,19 @@ class BotPool:
                         ctx.bot.pool.message_ids.remove(id_)
                     except:
                         pass
+
+            bot.processing_gc = False
+
+            @bot.listen("on_resumed")
+            async def clear_gc():
+
+                if bot.processing_gc:
+                    return
+
+                bot.processing_gc = True
+                await asyncio.sleep(2)
+                gc.collect()
+                bot.processing_gc = False
 
             @bot.application_command_check(slash_commands=True, message_commands=True, user_commands=True)
             async def check(inter: disnake.ApplicationCommandInteraction):
