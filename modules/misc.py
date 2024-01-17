@@ -92,23 +92,18 @@ class Misc(commands.Cog):
                     text = text.replace("{players_count}", str(player_count))
 
             if "{players_count_allbotchannels}" in text:
+
                 if not channels:
                     return
 
-                if player_count == (count:=len(channels)) or len(guilds) == count:
-                    return
-
-                text = text.replace("{players_count_allbotchannels}", str(count))
+                text = text.replace("{players_count_allbotchannels}", str(len(channels)))
 
             if "{players_count_allbotservers}" in text:
 
                 if not guilds:
                     return
 
-                if player_count == (count:=len(guilds)):
-                    return
-
-                text = text.replace("{players_count_allbotservers}", str(count))
+                text = text.replace("{players_count_allbotservers}", str(len(guilds)))
 
         return text \
             .replace("{users}", f'{len([m for m in self.bot.users if not m.bot]):,}'.replace(",", ".")) \
