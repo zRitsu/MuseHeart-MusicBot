@@ -457,7 +457,7 @@ class Misc(commands.Cog):
             await channel.send(embeds=embeds, components=components, **kwargs)
             if send_video:
                 await asyncio.sleep(1)
-                await channel.send(f"{send_video}\n\nConfira o [**vídeo**]({self.bot.config['MULTIVOICE_VIDEO_DEMO_URL']}) demonstrando essa funcionalidade.")
+                await channel.send(f"{send_video}\n\nConfira o [**vídeo**]({self.bot.config['MULTIVOICE_VIDEO_DEMO_URL']}) demonstrando essa funcionalidade.", **kwargs)
         except:
             print(f"Falha ao enviar mensagem de novo servidor no canal: {channel}\n"
                   f"ID do canal: {channel.id}\n"
