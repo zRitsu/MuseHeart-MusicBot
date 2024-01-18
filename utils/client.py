@@ -840,7 +840,7 @@ class BotCore(commands.AutoShardedBot):
                 if c.extras.get("exclusive_cooldown"): continue
                 c._buckets = cmd._buckets
 
-    async def can_send_message(self, message: disnake.Message, dm_user=True):
+    async def can_send_message(self, message: disnake.Message):
 
         if isinstance(message.channel, disnake.Thread):
             perm_check = message.channel.parent.permissions_for(message.guild.me).send_messages_in_threads
@@ -848,23 +848,7 @@ class BotCore(commands.AutoShardedBot):
             perm_check = message.channel.permissions_for(message.guild.me).send_messages
 
         if not perm_check:
-
             print(f"Can't send message in: {message.channel.name} [{message.channel.id}] (Missing permissions)")
-
-            if not dm_user:
-                return
-
-            bucket = self.dm_cooldown.get_bucket(message)
-            retry_after = bucket.update_rate_limit()
-
-            if retry_after:
-                return
-
-            try:
-                await message.author.send(f"Não tenho permissão para enviar mensagens no canal {message.channel.mention}...")
-            except disnake.HTTPException:
-                pass
-
             return
 
         return True
@@ -895,7 +879,7 @@ class BotCore(commands.AutoShardedBot):
             if message.author.bot:
                 return
 
-            if not await self.can_send_message(message, dm_user=False):
+            if not await self.can_send_message(message):
                 return
 
             embed = disnake.Embed(color=self.get_color(message.guild.me))
