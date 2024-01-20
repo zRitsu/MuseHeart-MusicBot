@@ -115,7 +115,8 @@ class BotPool:
 
                     self.killing_state = "ratelimit"
                     print("Aplicação com ratelimit do discord!")
-                    return
+                    await asyncio.sleep(10)
+                    raise e
 
                 if self.killing_state is True:
                     return
