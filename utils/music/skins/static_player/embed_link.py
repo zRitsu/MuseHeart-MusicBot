@@ -5,7 +5,6 @@ import re
 from os.path import basename
 
 import disnake
-from emoji import replace_emoji
 
 from utils.music.converters import time_format, fix_characters, get_button_style
 from utils.music.models import LavalinkPlayer
@@ -38,7 +37,7 @@ class EmbedLinkStaticSkin:
         else:
             duration_txt = f"\n> ⏰ **⠂Duração:** `{time_format(player.current.duration)}`"
 
-        title = fix_characters(player.current.title) if not player.current.uri else f"[{replace_emoji(fix_characters(player.current.title))}]({player.current.uri})"
+        title = fix_characters(player.current.title) if not player.current.uri else f"[{fix_characters(player.current.title)}]({player.current.uri})"
 
         if player.paused:
             emoji = "`⏸️`"
@@ -67,7 +66,7 @@ class EmbedLinkStaticSkin:
             pass
 
         if player.current.playlist_name:
-            txt += f"> 📑 **⠂Playlist:** [`{replace_emoji(fix_characters(player.current.playlist_name)) or 'Visualizar'}`](<{player.current.playlist_url}>)\n"
+            txt += f"> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name) or 'Visualizar'}`](<{player.current.playlist_url}>)\n"
 
         if player.current.track_loops:
             txt += f"> 🔂 **⠂Repetições restantes:** `{player.current.track_loops}`\n"
