@@ -1745,7 +1745,8 @@ class SetStageTitle(disnake.ui.View):
                "[34;1m{track.playlist}[0m -> Nome da playlist de origem da música (caso tenha)\n" \
                "[34;1m{requester.name}[0m -> Nome/Nick do membro que pediu a música\n" \
                "[34;1m{requester.id}[0m -> ID do membro que pediu a música```\n" \
-               "Exemplo: Tocando {track.title} | Por: {track.author}"
+               "Exemplo: Tocando {track.title} | Por: {track.author}\n" \
+               "`Nota: Você pode usar custom emojis na mensagem do status (incluindo emoji de servers que eu não estou e de servers que você não está)`"
 
     def __init__(self, ctx: Union[CustomContext, disnake.Interaction], bot: BotCore, guild: disnake.Guild, data: dict):
         super().__init__(timeout=180)
@@ -1804,7 +1805,7 @@ class SetStageTitle(disnake.ui.View):
         if self.data['voice_channel_status']:
             txt += f"**Modelo permanente atual:**\n{self.data['voice_channel_status']}"
 
-        txt += f"**Placeholders:** `(Pelo menos 1 deve ser incluso no status)`\n{self.placeholder_text}"
+        txt += f"**Placeholders:** `(Pelo menos um placeholder deve ser incluso na mensagem de status)`\n{self.placeholder_text}"
 
         return disnake.Embed(description=txt, color=self.bot.get_color(self.guild.me))
 
