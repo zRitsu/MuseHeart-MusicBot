@@ -82,7 +82,7 @@ class BotPool:
 
         return self.local_database
 
-    def start_lavalink(self):
+    async def start_lavalink(self, loop=None):
 
         if self.lavalink_instance:
             try:
@@ -90,12 +90,17 @@ class BotPool:
             except:
                 traceback.print_exc()
 
-        self.lavalink_instance = run_lavalink(
-            lavalink_file_url=self.config['LAVALINK_FILE_URL'],
-            lavalink_initial_ram=self.config['LAVALINK_INITIAL_RAM'],
-            lavalink_ram_limit=self.config['LAVALINK_RAM_LIMIT'],
-            lavalink_additional_sleep=int(self.config['LAVALINK_ADDITIONAL_SLEEP']),
-            use_jabba=self.config["USE_JABBA"]
+        if not loop:
+            loop = asyncio.get_event_loop()
+
+        self.lavalink_instance = await loop.run_in_executor(
+            None, lambda: run_lavalink(
+                lavalink_file_url=self.config['LAVALINK_FILE_URL'],
+                lavalink_initial_ram=self.config['LAVALINK_INITIAL_RAM'],
+                lavalink_ram_limit=self.config['LAVALINK_RAM_LIMIT'],
+                lavalink_additional_sleep=int(self.config['LAVALINK_ADDITIONAL_SLEEP']),
+                use_jabba=self.config["USE_JABBA"]
+            )
         )
 
     async def start_bot(self, bot: BotCore):
@@ -579,10 +584,10 @@ class BotPool:
 
                 print(message)
 
-        elif start_local:
-            self.start_lavalink()
-
         loop = asyncio.get_event_loop()
+
+        if start_local:
+            loop.create_task(self.start_lavalink(loop=loop))
 
         if self.config["RUN_RPC_SERVER"]:
 

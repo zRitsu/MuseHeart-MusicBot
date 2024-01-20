@@ -6134,7 +6134,7 @@ class Music(commands.Cog):
                 'password': 'youshallnotpass',
                 'identifier': 'LOCAL',
                 'region': 'us_central',
-                'retries': 25,
+                'retries': 120,
                 'retry_403': True,
             }
 

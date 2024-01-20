@@ -165,6 +165,8 @@ class PlayerControls:
     stage_announce = "musicplayer_stage_announce"
     lyrics = "musicplayer_lyrics"
     embed_add_fav = "musicplayer_embed_add_fav"
+    embed_enqueue_track = "musicplayer_embed_enqueue_track"
+    embed_forceplay = "musicplayer_embed_forceplay"
 
 
 class SongRequestPurgeMode:
