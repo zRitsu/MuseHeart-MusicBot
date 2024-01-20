@@ -1419,6 +1419,12 @@ class LavalinkPlayer(wavelink.Player):
         if not self.is_connected:
             return
 
+        if not self.guild.me.voice:
+            if self.last_channel:
+                await self.connect(self.last_channel.id)
+            else:
+                return
+
         try:
             self.idle_task.cancel()
             self.idle_task = None
@@ -1465,11 +1471,6 @@ class LavalinkPlayer(wavelink.Player):
             return
 
         self.locked = True
-
-        if not self.guild.me.voice:
-            if self.last_channel:
-                await self.connect(self.last_channel.id)
-            return
 
         if isinstance(track, PartialTrack):
 
