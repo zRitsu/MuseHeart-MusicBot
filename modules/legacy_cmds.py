@@ -160,7 +160,7 @@ class Owner(commands.Cog):
                         with open(url.split("/")[-1], "wb") as f:
                             f.write(lavalink_jar)
 
-        await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.start_lavalink())
+        await self.bot.pool.start_lavalink()
 
         await ctx.send(
             embed=disnake.Embed(
