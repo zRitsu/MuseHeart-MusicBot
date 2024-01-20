@@ -1417,7 +1417,6 @@ class LavalinkPlayer(wavelink.Player):
         await self.bot.wait_until_ready()
 
         if not self.is_connected:
-            await self.destroy(force=True)
             return
 
         try:
@@ -1470,9 +1469,7 @@ class LavalinkPlayer(wavelink.Player):
         if not self.guild.me.voice:
             if self.last_channel:
                 await self.connect(self.last_channel.id)
-            else:
-                await self.destroy(force=True)
-                return
+            return
 
         if isinstance(track, PartialTrack):
 
