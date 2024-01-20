@@ -489,13 +489,13 @@ class PlayerSession(commands.Cog):
 
                 failed_tracks, playlists = self.process_track_cls(data.get("failed_tracks", []), playlists)
 
-                player.queue.extend(failed_tracks)
+                player.failed_tracks.extend(failed_tracks)
 
                 if player.keep_connected and not player.queue:
                     if player.failed_tracks:
                         player.queue.extend(reversed(player.failed_tracks))
                         player.failed_tracks.clear()
-                    else:
+                    if not player.queue:
                         player.queue.extend(player.played)
                         player.played.clear()
 
