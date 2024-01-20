@@ -181,9 +181,9 @@ def run_lavalink(
                     except:
                         pass
 
-                    os.makedirs("./.java")
+                    os.makedirs(f"./.java/{jdk_platform}")
 
-                    p = subprocess.Popen(["tar", "--strip-components=1", "-zxvf", "java.tar.gz", "-C", "./.java"])
+                    p = subprocess.Popen(["tar", "--strip-components=1", "-zxvf", "java.tar.gz", "-C", f"./.java/{jdk_platform}"])
                     p.wait()
                     os.remove(f"./{jdk_filename}")
 
