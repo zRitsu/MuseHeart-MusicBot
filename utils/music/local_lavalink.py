@@ -67,6 +67,8 @@ def run_lavalink(
         lavalink_cpu_cores: int = 1,
         use_jabba: bool = True
 ):
+    arch, osname = platform.architecture()
+    jdk_platform = f"{platform.system()}-{arch}-{osname}"
 
     if not (java_cmd := validate_java("java")):
 
@@ -78,7 +80,7 @@ def run_lavalink(
             pass
 
         if os.name == "nt":
-            dirs.append(os.path.realpath("./.java/jdk-17.0.9/bin/java"))
+            dirs.append(os.path.realpath(f"./.java/{jdk_platform}/bin/java"))
             try:
                 shutil.rmtree("./.jabba")
             except:
@@ -98,7 +100,7 @@ def run_lavalink(
                     pass
 
             else:
-                dirs.append(os.path.realpath("./.java/jdk-17.0.9/bin/java"))
+                dirs.append(os.path.realpath(f"./.java/{jdk_platform}/bin/java"))
                 try:
                     shutil.rmtree("./.jabba")
                 except:
@@ -128,11 +130,18 @@ def run_lavalink(
                 download_file(jdk_url, jdk_filename)
 
                 with zipfile.ZipFile(jdk_filename, 'r') as zip_ref:
-                    zip_ref.extractall("./.java")
+                    zip_ref.extractall(f"./.java/{jdk_platform}")
+
+                extracted_folder = os.path.join(f"./.java/{jdk_platform}", os.listdir(f"./.java/{jdk_platform}")[0])
+
+                for item in os.listdir(extracted_folder):
+                    item_path = os.path.join(extracted_folder, item)
+                    dest_path = os.path.join(f"./.java/{jdk_platform}", item)
+                    os.rename(item_path, dest_path)
 
                 os.remove(jdk_filename)
 
-                java_cmd = os.path.realpath("./.java/jdk-17.0.9/bin/java")
+                java_cmd = os.path.realpath(f"./.java/{jdk_platform}/bin/java")
 
             elif use_jabba:
 
@@ -149,14 +158,19 @@ def run_lavalink(
                 java_cmd = os.path.expanduser("~/.jabba/jdk/zulu@1.17.0-0/bin/java")
 
             else:
-                if not os.path.isdir("./.java"):
+                if not os.path.isdir(f"./.java/{jdk_platform}"):
+
+                    try:
+                        shutil.rmtree("./.java")
+                    except:
+                        pass
 
                     if platform.architecture()[0] != "64bit":
                         jdk_url = "https://download.bell-sw.com/java/17.0.9+11/bellsoft-jdk17.0.9+11-linux-i586.tar.gz"
                     else:
                         jdk_url = "https://download.bell-sw.com/java/17.0.9+11/bellsoft-jdk17.0.9+11-linux-amd64.tar.gz"
 
-                    java_cmd = os.path.realpath("./.java/jdk-17.0.9/bin/java")
+                    java_cmd = os.path.realpath(f"./.java/{jdk_platform}/bin/java")
 
                     jdk_filename = "java.tar.gz"
 
@@ -169,12 +183,12 @@ def run_lavalink(
 
                     os.makedirs("./.java")
 
-                    p = subprocess.Popen(["tar", "-zxvf", "java.tar.gz", "-C", "./.java"])
+                    p = subprocess.Popen(["tar", "--strip-components=1", "-zxvf", "java.tar.gz", "-C", "./.java"])
                     p.wait()
                     os.remove(f"./{jdk_filename}")
 
                 else:
-                    java_cmd = os.path.realpath("./.java/jdk-17.0.9/bin/java")
+                    java_cmd = os.path.realpath(f"./.java/{jdk_platform}/bin/java")
 
     clear_plugins = False
 
