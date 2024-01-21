@@ -1931,6 +1931,7 @@ class SkinEditorMenu(disnake.ui.View):
                 c.disabled = True
 
     async def new_skin(self, inter: disnake.MessageInteraction):
+        self.ctx = inter
         self.message_data = deepcopy(base_skin)
         self.mode = "editor"
         self.update_components()
@@ -1938,6 +1939,7 @@ class SkinEditorMenu(disnake.ui.View):
 
     async def load_skin(self, inter: disnake.MessageInteraction):
 
+        self.ctx = inter
         self.skin_selected = inter.values[0]
         self.mode = "editor"
 
@@ -2116,14 +2118,17 @@ class SkinEditorMenu(disnake.ui.View):
         return {"content": data.get("content", ""), "embeds": data.get("embeds", [])}
 
     async def embed_select_callback(self, inter: disnake.MessageInteraction):
+        self.ctx = inter
         self.embed_index = int(inter.values[0][11:])
         await inter.response.defer()
 
     async def embed_value_select_callback(self, inter: disnake.MessageInteraction):
+        self.ctx = inter
         self.embed_field_index = int(inter.values[0][17:])
         await inter.response.defer()
 
     async def edit_content(self, inter: disnake.MessageInteraction):
+        self.ctx = inter
         await inter.response.send_modal(
             ViewModal(
                 view=self, title="Editar/Adicionar conteúdo da mensagem", custom_id="skin_editor_message_content",
@@ -2141,16 +2146,7 @@ class SkinEditorMenu(disnake.ui.View):
         )
 
     async def add_embed(self, inter: disnake.MessageInteraction):
-
-        try:
-            image_url = self.message_data["embeds"][self.embed_index]["image"]["url"]
-        except KeyError:
-            image_url = ""
-
-        try:
-            thumb_url = self.message_data["embeds"][self.embed_index]["thumbnail"]["url"]
-        except KeyError:
-            thumb_url = ""
+        self.ctx = inter
 
         await inter.response.send_modal(
             ViewModal(
@@ -2175,14 +2171,13 @@ class SkinEditorMenu(disnake.ui.View):
                         label="Cor da embed:",
                         placeholder="Exemplo: #000fff ou {guild.color}",
                         custom_id="skin_embed_color",
-                        max_length=7,
+                        max_length=15,
                         required=False
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
                         label="Link/Placeholder da imagem:",
                         custom_id="image_url",
-                        value=image_url,
                         max_length=400,
                         required=False
                     ),
@@ -2190,7 +2185,6 @@ class SkinEditorMenu(disnake.ui.View):
                         style=disnake.TextInputStyle.short,
                         label="Link/Placeholder da miniatura:",
                         custom_id="thumbnail_url",
-                        value=thumb_url,
                         max_length=400,
                         required=False
                     ),
@@ -2199,6 +2193,8 @@ class SkinEditorMenu(disnake.ui.View):
         )
 
     async def edit_embed_button(self, inter: disnake.MessageInteraction):
+
+        self.ctx = inter
 
         embed = self.message_data["embeds"][self.embed_index]
 
@@ -2262,12 +2258,14 @@ class SkinEditorMenu(disnake.ui.View):
         )
 
     async def remove_embed(self, inter: disnake.MessageInteraction):
+        self.ctx = inter
         del self.message_data["embeds"][self.embed_index]
         self.embed_index = 0
         self.update_components()
         await inter.response.edit_message(view=self, **self.build_embeds())
 
     async def add_field(self, inter: disnake.MessageInteraction):
+        self.ctx = inter
         await inter.response.send_modal(
             ViewModal(
                 view=self, title="Adicionar field na embed", custom_id="skin_editor_add_field",
@@ -2291,6 +2289,8 @@ class SkinEditorMenu(disnake.ui.View):
         )
 
     async def edit_embed_field_button(self, inter: disnake.MessageInteraction):
+
+        self.ctx = inter
 
         field = self.message_data["embeds"][self.embed_index]["fields"][self.embed_field_index]
 
@@ -2319,12 +2319,15 @@ class SkinEditorMenu(disnake.ui.View):
         )
 
     async def delete_embed_field_button(self, inter: disnake.MessageInteraction):
+        self.ctx = inter
         del self.message_data["embeds"][self.embed_index]["fields"][self.embed_field_index]
         self.embed_field_index = 0
         self.update_components()
         await inter.response.edit_message(view=self, **self.build_embeds())
 
     async def set_author_footer(self, inter: disnake.MessageInteraction):
+
+        self.ctx = inter
 
         try:
             author_name = self.message_data["embeds"][self.embed_index]["author"]["name"]
@@ -2400,6 +2403,9 @@ class SkinEditorMenu(disnake.ui.View):
         )
 
     async def setup_queue(self, inter: disnake.MessageInteraction):
+
+        self.ctx = inter
+
         await inter.response.send_modal(
             ViewModal(
                 view=self, title="Placeholder da lista de músicas da fila", custom_id="skin_editor_setup_queue",
@@ -2425,10 +2431,12 @@ class SkinEditorMenu(disnake.ui.View):
         )
 
     async def export(self, inter: disnake.MessageInteraction):
+        self.ctx = inter
         fp = BytesIO(bytes(json.dumps(self.message_data, indent=4), 'utf-8'))
         await inter.response.send_message(file=disnake.File(fp=fp, filename="skin.json"), ephemeral=True)
 
     async def import_(self, inter: disnake.MessageInteraction):
+        self.ctx = inter
         await inter.response.send_modal(
             ViewModal(
                 view=self, title="Importar skin", custom_id="skin_editor_import_skin",
@@ -2445,7 +2453,7 @@ class SkinEditorMenu(disnake.ui.View):
         )
 
     async def save(self, inter: disnake.MessageInteraction):
-
+        self.ctx = inter
         await inter.response.send_modal(
             ViewModal(
                 view=self, title="Informe o nome da skin", custom_id="skin_editor_save",
@@ -2463,6 +2471,8 @@ class SkinEditorMenu(disnake.ui.View):
         )
 
     async def delete_skin(self, inter: disnake.MessageInteraction):
+
+        self.ctx = inter
 
         await inter.response.defer()
 
@@ -2491,6 +2501,7 @@ class SkinEditorMenu(disnake.ui.View):
         await inter.edit_original_message(view=self, **self.build_embeds())
 
     async def back(self, inter: disnake.MessageInteraction):
+        self.ctx = inter
         self.mode = "select"
         self.skin_selected = ""
         self.message_data = {}
@@ -2498,6 +2509,7 @@ class SkinEditorMenu(disnake.ui.View):
         await self.update_message(inter)
 
     async def update_message(self, inter: disnake.MessageInteraction):
+        self.ctx = inter
         try:
             if isinstance(self.ctx, CustomContext):
                 await inter.response.edit_message(view=self, **self.build_embeds())
@@ -2507,26 +2519,26 @@ class SkinEditorMenu(disnake.ui.View):
                 await inter.edit_original_message(view=self, **self.build_embeds())
         except Exception as e:
             traceback.print_exc()
-            await inter.send(f"**Ocorreu um erro ao processar a mensagem:** ```py\n{repr(e)}```")
+            await inter.send(f"**Ocorreu um erro ao processar a mensagem:** ```py\n{repr(e)}```", ephemeral=True)
 
     async def modal_handler(self, inter: disnake.ModalInteraction):
+
+        self.ctx = inter
 
         if inter.custom_id == "skin_editor_message_content":
             self.message_data["content"] = inter.text_values["message_content"]
 
         elif inter.custom_id == "skin_editor_add_embed":
-            try:
-                color = disnake.Color(int(inter.text_values["skin_embed_color"].strip("#"), 16)).value
-            except:
-                color = disnake.Color.darker_grey().value
-            self.message_data["embeds"].append(
-                disnake.Embed(
-                    title=inter.text_values["skin_embed_title"],
-                    description=inter.text_values["skin_embed_description"],
-                    color=color
-                ).set_image(url=inter.text_values["image_url"])
-                .set_thumbnail(inter.text_values["thumbnail_url"]).to_dict()
-            )
+
+            e = disnake.Embed(
+                title=inter.text_values["skin_embed_title"],
+                description=inter.text_values["skin_embed_description"],
+            ).set_image(url=inter.text_values["image_url"]).set_thumbnail(inter.text_values["thumbnail_url"]).\
+                to_dict()
+
+            e["color"] = inter.text_values["skin_embed_color"].strip("#")
+
+            self.message_data["embeds"].append(e)
             self.embed_index = len(self.message_data["embeds"]) - 1
 
         elif inter.custom_id == "skin_editor_edit_embed":
@@ -2549,10 +2561,7 @@ class SkinEditorMenu(disnake.ui.View):
             else:
                 self.message_data["embeds"][self.embed_index]["thumbnail"] = {"url": inter.text_values["thumbnail_url"]}
 
-            try:
-                self.message_data["embeds"][self.embed_index]["color"] = disnake.Color(int(inter.text_values["skin_embed_color"].strip("#"), 16))
-            except:
-                pass
+            self.message_data["embeds"][self.embed_index]["color"] = inter.text_values["skin_embed_color"].strip("#")
 
         elif inter.custom_id == "skin_editor_add_field":
 

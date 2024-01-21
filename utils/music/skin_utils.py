@@ -82,13 +82,6 @@ def replaces(
 
         queue_max_entries = info.pop("queue_max_entries", 3) or 3
 
-        color = ctx.bot.get_color(ctx.guild.me)
-
-        try:
-            color = hex(ctx.bot.get_color(ctx.guild.me).value)[2:]
-        except AttributeError:
-            color = hex(color)
-
         txt = track_title_format(
             track_title=track['title'],
             track_author=track['author'],
@@ -110,7 +103,7 @@ def replaces(
             replace('{requester.display_name}', ctx.author.display_name). \
             replace('{requester.mention}', ctx.author.mention). \
             replace('{requester.avatar}', ctx.author.display_avatar.with_static_format("png").url). \
-            replace('{guild.color}', color). \
+            replace('{guild.color}', hex(ctx.bot.get_color(ctx.guild.me).value)[2:]). \
             replace('{guild.icon}', ctx.guild.icon.with_static_format("png").url if ctx.guild.icon else ""). \
             replace('{guild.name}', ctx.guild.name). \
             replace('{guild.id}', str(ctx.guild.id)). \
@@ -213,14 +206,15 @@ def skin_converter(info: dict, ctx: Union[CustomContext, disnake.ModalInteractio
                 d["thumbnail"]["url"] = replaces(d["thumbnail"]["url"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track)
             except KeyError:
                 pass
-            try:
-                d["color"] = int(replaces(d["color"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track), 16)
-            except (KeyError, AttributeError):
-                pass
 
             for n, f in enumerate(d.get("fields", [])):
                 f["name"] = replaces(f["name"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track)
                 f["value"] = replaces(f["value"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track)
+
+            try:
+                d["color"] = int(replaces(d["color"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track), 16)
+            except (KeyError, AttributeError):
+                pass
 
         info["embeds"] = [disnake.Embed.from_dict(e) for e in embeds]
 
