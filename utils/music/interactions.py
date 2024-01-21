@@ -2692,7 +2692,6 @@ class SkinEditorMenu(disnake.ui.View):
 
                 player.custom_skin_data = global_data["custom_skins"]
                 player.custom_skin_static_data = global_data["custom_skins_static"]
-                player.check_skin()
                 player.setup_features()
                 player.setup_hints()
                 player.process_hint()
