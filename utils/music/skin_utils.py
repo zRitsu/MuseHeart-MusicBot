@@ -58,8 +58,8 @@ def replaces(
             data=txt
         ). \
             replace('{track.thumb}', player.current.thumb). \
-            replace('{playlist.name}', player.current.playlist_name or "Nenhuma"). \
-            replace('{playlist.url}', player.current.playlist_url). \
+            replace('{playlist.name}', player.current.playlist_name or "Sem playlist"). \
+            replace('{playlist.url}', player.current.playlist_url or player.controller_link). \
             replace('{player.loop.mode}', 'Desativado' if not player.loop else 'Música atual' if player.loop == "current" else "Fila"). \
             replace('{player.queue.size}', str(len(player.queue))). \
             replace('{player.volume}', str(player.volume)). \
@@ -76,7 +76,7 @@ def replaces(
             replace('{guild.icon}', player.guild.icon.with_static_format("png").url if player.guild.icon else ""). \
             replace('{guild.name}', player.guild.name). \
             replace('{guild.id}', str(player.guild.id)). \
-            replace('{queue_format}', queue_text or "Sem músicas.")
+            replace('{queue_format}', queue_text or "Fila vazia...")
 
     else:
 
@@ -107,7 +107,7 @@ def replaces(
             replace('{guild.icon}', ctx.guild.icon.with_static_format("png").url if ctx.guild.icon else ""). \
             replace('{guild.name}', ctx.guild.name). \
             replace('{guild.id}', str(ctx.guild.id)). \
-            replace('{queue_format}', queue_text or "Sem músicas.")
+            replace('{queue_format}', queue_text or "(Sem músicas).")
 
     return txt
 
