@@ -1711,7 +1711,12 @@ class MusicSettings(commands.Cog):
         global_data = await bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
 
         view = SkinEditorMenu(inter, bot, global_data=global_data)
-        view.message = await inter.send(view=view, **view.build_embeds())
+
+        if isinstance(inter, disnake.MessageInteraction):
+            func = inter.edit_original_message
+        else:
+            func = inter.send
+        view.message = await func(view=view, **view.build_embeds())
         await view.wait()
 
     @commands.Cog.listener("on_button_click")
