@@ -166,6 +166,7 @@ class PlayerControls:
     lyrics = "musicplayer_lyrics"
     embed_add_fav = "musicplayer_embed_add_fav"
     embed_enqueue_track = "musicplayer_embed_enqueue_track"
+    embed_enqueue_playlist = "musicplayer_embed_enqueue_playlist"
     embed_forceplay = "musicplayer_embed_forceplay"
 
 

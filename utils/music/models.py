@@ -656,6 +656,9 @@ class LavalinkPlayer(wavelink.Player):
             if self.auto_pause:
                 return
 
+            if not self.text_channel:
+                return
+
             if isinstance(self.text_channel, disnake.Thread):
                 send_message_perm = self.text_channel.parent.permissions_for(self.guild.me).send_messages_in_threads
             else:

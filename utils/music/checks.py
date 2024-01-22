@@ -81,7 +81,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         pass
 
     if isinstance(inter, disnake.MessageInteraction):
-        if inter.data.custom_id != "favmanager_play_button":
+        if inter.data.custom_id not in ("favmanager_play_button", "musicplayer_embed_enqueue_track", "musicplayer_embed_forceplay"):
             return
 
     elif isinstance(inter, disnake.ModalInteraction):
@@ -293,7 +293,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
     for bot in inter.bot.pool.bots:
 
         try:
-            if not bot.appinfo.bot_public:
+            if not bot.appinfo.bot_public and not await bot.is_owner(inter.author):
                 continue
         except AttributeError:
             continue
