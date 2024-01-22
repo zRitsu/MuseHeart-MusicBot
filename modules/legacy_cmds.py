@@ -19,9 +19,8 @@ import wavelink
 from config_loader import DEFAULT_CONFIG, load_config
 from utils.client import BotCore
 from utils.db import DBModel
-from utils.music.checks import check_voice, check_requester_channel
+from utils.music.checks import check_voice, check_requester_channel, can_connect
 from utils.music.errors import GenericError
-from utils.music.models import LavalinkPlayer
 from utils.others import sync_message, CustomContext, string_to_file, token_regex, CommandArgparse, get_inter_guild_data
 from utils.owner_panel import panel_command, PanelView
 
@@ -953,88 +952,27 @@ class Owner(commands.Cog):
         except KeyError:
             pass
 
+        can_connect(channel=ctx.author.voice.channel, guild=ctx.guild)
+
         node: wavelink.Node = self.bot.music.get_best_node()
 
         if not node:
             raise GenericError("**Não há servidores de música disponível!**")
 
-        ctx, guild_data = await get_inter_guild_data(ctx, ctx.bot)
-
-        try:
-            global_data = ctx.global_guild_data
-        except AttributeError:
-            global_data = await self.bot.get_global_data(ctx.guild.id, db_name=DBModel.guilds)
-            ctx.global_guild_data = global_data
-
-        static_player = guild_data['player_controller']
-
-        skin = guild_data["player_controller"]["skin"]
-        static_skin = guild_data["player_controller"]["static_skin"]
-
-        if global_data["global_skin"]:
-            skin = global_data["player_skin"] or skin
-            static_skin = global_data["player_skin_static"] or guild_data["player_controller"]["static_skin"]
-
-        try:
-            channel = self.bot.get_channel(int(static_player['channel'])) or await self.bot.fetch_channel(int(static_player['channel'])) or ctx.channel
-        except (KeyError, TypeError, disnake.NotFound):
-            channel = ctx.channel
-            message = None
-            static_player = False
-        else:
-            try:
-                message = await channel.fetch_message(int(static_player.get('message_id')))
-            except (TypeError, disnake.NotFound):
-                message = None
-            static_player = True
-
-        try:
-            invite = global_data["listen_along_invites"][str(ctx.channel.id)]
-        except KeyError:
-            invite = None
-
-        else:
-            try:
-                invite = (await self.bot.fetch_invite(invite)).url
-            except disnake.NotFound:
-                invite = None
-                del global_data["listen_along_invites"][str(ctx.channel.id)]
-                await self.bot.update_global_data(ctx.guild_id, global_data, db_name=DBModel.guilds)
-
-        player: LavalinkPlayer = self.bot.music.get_player(
-            guild_id=ctx.guild_id,
-            cls=LavalinkPlayer,
-            player_creator=ctx.author.id,
-            guild=ctx.guild,
-            channel=channel or ctx.channel,
-            last_message_id=guild_data['player_controller']['message_id'],
-            node_id=node.identifier,
-            static=static_player,
-            skin=self.bot.check_skin(skin),
-            custom_skin_data=global_data["custom_skins"],
-            custom_skin_static_data=global_data["custom_skins_static"],
-            skin_static=self.bot.check_static_skin(static_skin),
-            extra_hints=self.extra_hints,
-            restrict_mode=guild_data['enable_restrict_mode'],
-            listen_along_invite=invite,
-            volume=int(guild_data['default_player_volume']),
-            autoplay=guild_data["autoplay"]
+        player = await ctx.bot.get_cog("Music").create_player(
+            inter=ctx, bot=ctx.bot, guild=ctx.guild, channel=ctx.channel
         )
 
-        player.message = message
-
-        channel = ctx.author.voice.channel
-
-        await player.connect(channel.id)
+        await player.connect(ctx.author.voice.channel.id)
 
         self.bot.loop.create_task(ctx.message.add_reaction("👍"))
 
         while not ctx.guild.me.voice:
             await asyncio.sleep(1)
 
-        if isinstance(channel, disnake.StageChannel):
+        if isinstance(ctx.author.voice.channel, disnake.StageChannel):
 
-            stage_perms = channel.permissions_for(ctx.guild.me)
+            stage_perms = ctx.author.voice.channel.permissions_for(ctx.guild.me)
             if stage_perms.manage_permissions:
                 await ctx.guild.me.edit(suppress=False)
 
