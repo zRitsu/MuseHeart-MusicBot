@@ -60,7 +60,7 @@ class EmbedLinkSkin:
             txt += f" <@{player.current.requester}>\n"
         else:
             try:
-                txt += f" [`[Música Recomendada]`]({player.current.info['extra']['related']['uri']})"
+                txt += f" [`[Música Recomendada]`](<{player.current.info['extra']['related']['uri']}>)"
             except:
                 txt += " `[Música Recomendada]`"
 
