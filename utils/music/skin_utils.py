@@ -159,10 +159,11 @@ def skin_converter(info: dict, ctx: Union[CustomContext, disnake.ModalInteractio
             track_number=n + 1
         ) for n, t in enumerate([track] * queue_max_entries))
 
-    try:
-        info["content"] = replaces(info["content"], info=info, ctx=ctx, player=player, queue_text=queue_text, track=track)
-    except KeyError:
-        pass
+    if info["content"]:
+        try:
+            info["content"] = replaces(info["content"], info=info, ctx=ctx, player=player, queue_text=queue_text, track=track)
+        except KeyError:
+            pass
 
     if embeds := info.get("embeds"):
 
