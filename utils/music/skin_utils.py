@@ -30,7 +30,7 @@ def track_title_format(
         replace('{track.title}', track_title). \
         replace('{track.url}', track_url). \
         replace('{track.author}', track_author). \
-        replace('{track.duration}', time_format(track_duration)). \
+        replace('{track.duration}', time_format(track_duration)) if track_duration else "🔴 Ao vivo". \
         replace('{track.number}', str(track_number))
 
 
@@ -54,7 +54,7 @@ def replaces(
             track_title=player.current.title,
             track_author=player.current.author,
             track_url=player.current.uri,
-            track_duration=player.current.duration if not player.current.is_stream else "🔴 Ao vivo",
+            track_duration=player.current.duration if not player.current.is_stream else 0,
             data=txt
         ). \
             replace('{track.thumb}', player.current.thumb). \
