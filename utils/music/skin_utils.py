@@ -30,7 +30,7 @@ def track_title_format(
         replace('{track.title}', track_title). \
         replace('{track.url}', track_url). \
         replace('{track.author}', track_author). \
-        replace('{track.duration}', time_format(track_duration)) if track_duration else "🔴 Ao vivo". \
+        replace('{track.duration}', time_format(track_duration) if track_duration else "🔴 Ao vivo"). \
         replace('{track.number}', str(track_number))
 
 
