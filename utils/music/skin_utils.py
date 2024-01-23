@@ -41,10 +41,15 @@ def replaces(
     if player:
 
         try:
-            requester = player.guild.get_member(player.current.requester)
-            requester_global_name = requester.global_name
-            requester_display_name = requester.display_name
-            requester_avatar = requester.display_avatar.replace(static_format="png", size=512).url
+            if not player.current.autoplay:
+                requester = player.guild.get_member(player.current.requester)
+                requester_global_name = requester.global_name
+                requester_display_name = requester.display_name
+                requester_avatar = requester.display_avatar.replace(static_format="png", size=512).url
+            else:
+                requester_global_name = "Recomendação"
+                requester_display_name = "Recomendação"
+                requester_avatar = player.guild.me.display_avatar.replace(static_format="png", size=512).url
         except:
             requester_global_name = "Desconhecido..."
             requester_display_name = "Desconhecido..."
@@ -61,7 +66,7 @@ def replaces(
             replace('{playlist.name}', player.current.playlist_name or "Sem playlist"). \
             replace('{playlist.url}', player.current.playlist_url or player.controller_link). \
             replace('{player.loop.mode}', 'Desativado' if not player.loop else 'Música atual' if player.loop == "current" else "Fila"). \
-            replace('{player.queue.size}', str(len(player.queue)) if player.queue else "Nenhuma"). \
+            replace('{player.queue.size}', str(len(player.queue))). \
             replace('{player.volume}', str(player.volume)). \
             replace('{player.autoplay}', "Ativado" if player.autoplay else "Desativado"). \
             replace('{player.nightcore}', "Ativado" if player.nightcore else "Desativado"). \
