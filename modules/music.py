@@ -4706,7 +4706,7 @@ class Music(commands.Cog):
                             if control == PlayerControls.embed_enqueue_track:
                                 await self.check_player_queue(interaction.author, bot, interaction.guild_id)
 
-                            if (retry_after := self.bot.pool.add_fav_embed_cooldown.get_bucket(interaction).update_rate_limit()):
+                            if (retry_after := self.bot.pool.enqueue_track_embed_cooldown.get_bucket(interaction).update_rate_limit()):
                                 await interaction.send(
                                     f"**Você terá que aguardar {int(retry_after)} segundo(s) para adicionar uma nova música na fila.**",
                                     ephemeral=True)
@@ -5897,6 +5897,11 @@ class Music(commands.Cog):
                 try:
                     embed.description += f"\n🔊 **⠂ Canal de voz:** {message.author.voice.channel.mention}"
                 except AttributeError:
+                    pass
+
+                try:
+                    self.bot.pool.enqueue_track_embed_cooldown.get_bucket(message).update_rate_limit()
+                except:
                     pass
 
                 components.extend(
