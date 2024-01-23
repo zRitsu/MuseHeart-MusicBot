@@ -4608,7 +4608,6 @@ class Music(commands.Cog):
                 bot: Optional[BotCore] = None
                 player: Optional[LavalinkPlayer] = None
                 channel: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.StageChannel, disnake.Thread] = None
-                vc_id: int = interaction.author.voice.channel.id
                 author: Optional[disnake.Member] = None
 
                 for b in sorted(self.bot.pool.bots, key=lambda b: b.identifier, reverse=True):
@@ -4636,6 +4635,8 @@ class Music(commands.Cog):
                 if not author.voice:
                     await interaction.send("Você deve entrar em um canal de voz pra usar esse botão....", ephemeral=True)
                     return
+
+                vc_id: int = author.voice.channel.id
 
                 can_connect(channel=author.voice.channel, guild=channel.guild)
 
