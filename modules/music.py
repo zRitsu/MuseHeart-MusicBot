@@ -5812,7 +5812,7 @@ class Music(commands.Cog):
         embed = disnake.Embed(color=self.bot.get_color(message.guild.me))
 
         try:
-            components = [disnake.ui.Button(emoji="🎛️", label="Ir para o player-controller", url=player.message.jump_url)]
+            components = [disnake.ui.Button(emoji="🎛️", label="Player-controller", url=player.message.jump_url)]
         except AttributeError:
             components = []
 
@@ -5902,7 +5902,9 @@ class Music(commands.Cog):
                 components.extend(
                     [
                         disnake.ui.Button(emoji="💗", label="Favoritar", custom_id=PlayerControls.embed_add_fav),
-                        disnake.ui.Button(emoji="<:play:914841137938829402>", label="Tocar", custom_id=PlayerControls.embed_forceplay)
+                        disnake.ui.Button(emoji="<:play:914841137938829402>", label="Tocar", custom_id=PlayerControls.embed_forceplay),
+                        disnake.ui.Button(emoji="<:add_music:588172015760965654>", label="Adicionar na fila",
+                                          custom_id=PlayerControls.embed_enqueue_track)
                     ]
                 )
 
