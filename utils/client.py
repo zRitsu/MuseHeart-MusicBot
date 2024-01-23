@@ -48,6 +48,15 @@ class BotPool:
                     sync_guild_commands=True
                 )
 
+    add_fav_embed_cooldown = commands.CooldownMapping.from_cooldown(rate=1, per=15,
+                                                                         type=commands.BucketType.user)
+
+    enqueue_track_embed_cooldown = commands.CooldownMapping.from_cooldown(rate=2, per=9,
+                                                                               type=commands.BucketType.user)
+
+    enqueue_playlist_embed_cooldown = commands.CooldownMapping.from_cooldown(rate=1, per=14,
+                                                                                  type=commands.BucketType.user)
+
     def __init__(self):
         self.playlist_cache = {}
         self.user_prefix_cache = {}

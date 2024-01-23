@@ -81,15 +81,6 @@ class Music(commands.Cog):
 
         self.player_interaction_concurrency = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
-        self.add_fav_embed_cooldown = commands.CooldownMapping.from_cooldown(rate=1, per=15,
-                                                                            type=commands.BucketType.user)
-
-        self.enqueue_track_embed_cooldown = commands.CooldownMapping.from_cooldown(rate=2, per=9,
-                                                                            type=commands.BucketType.user)
-
-        self.enqueue_playlist_embed_cooldown = commands.CooldownMapping.from_cooldown(rate=1, per=14,
-                                                                            type=commands.BucketType.user)
-
         self.song_request_cooldown = commands.CooldownMapping.from_cooldown(rate=1, per=300,
                                                                             type=commands.BucketType.member)
 
@@ -1673,7 +1664,7 @@ class Music(commands.Cog):
 
             elif loadtype == "playlist":
                 try:
-                    self.enqueue_playlist_embed_cooldown.get_bucket(inter).update_rate_limit()
+                    self.bot.pool.enqueue_playlist_embed_cooldown.get_bucket(inter).update_rate_limit()
                 except:
                     pass
                 components = [
@@ -4663,9 +4654,9 @@ class Music(commands.Cog):
 
                 if control == PlayerControls.embed_enqueue_playlist:
 
-                    if (retry_after := self.enqueue_playlist_embed_cooldown.get_bucket(interaction).update_rate_limit()):
+                    if (retry_after := self.bot.pool.enqueue_playlist_embed_cooldown.get_bucket(interaction).update_rate_limit()):
                         await interaction.send(
-                            f"**Você terá que aguardar {int(retry_after)} segundo(s) pra adicionar uma playlist na fila.**",
+                            f"**Você terá que aguardar {int(retry_after)} segundo(s) pra adicionar uma playlist no player atual.**",
                             ephemeral=True)
                         try:
                             await self.player_interaction_concurrency.release(interaction)
@@ -4714,7 +4705,7 @@ class Music(commands.Cog):
                             if control == PlayerControls.embed_enqueue_track:
                                 await self.check_player_queue(interaction.author, bot, interaction.guild_id)
 
-                            if (retry_after := self.add_fav_embed_cooldown.get_bucket(interaction).update_rate_limit()):
+                            if (retry_after := self.bot.pool.add_fav_embed_cooldown.get_bucket(interaction).update_rate_limit()):
                                 await interaction.send(
                                     f"**Você terá que aguardar {int(retry_after)} segundo(s) para adicionar uma nova música na fila.**",
                                     ephemeral=True)
@@ -4764,7 +4755,7 @@ class Music(commands.Cog):
                 await interaction.send("A embed da mensagem foi removida...", ephemeral=True)
                 return
 
-            if (retry_after := self.add_fav_embed_cooldown.get_bucket(interaction).update_rate_limit()):
+            if (retry_after := self.bot.pool.add_fav_embed_cooldown.get_bucket(interaction).update_rate_limit()):
                 await interaction.send(
                     f"**Você terá que aguardar {int(retry_after)} segundo(s) para adicionar um novo favorito.**",
                     ephemeral=True)
@@ -5841,7 +5832,7 @@ class Music(commands.Cog):
                     pass
 
                 try:
-                    self.enqueue_playlist_embed_cooldown.get_bucket(message).update_rate_limit()
+                    self.bot.pool.enqueue_playlist_embed_cooldown.get_bucket(message).update_rate_limit()
                 except:
                     pass
 
