@@ -4711,47 +4711,47 @@ class Music(commands.Cog):
                                             break
 
 
-                    if not track:
+                            if not track:
 
-                        if control == PlayerControls.embed_enqueue_track:
-                            await self.check_player_queue(interaction.author, bot, interaction.guild_id)
+                                if control == PlayerControls.embed_enqueue_track:
+                                    await self.check_player_queue(interaction.author, bot, interaction.guild_id)
 
-                        if (retry_after := self.bot.pool.enqueue_track_embed_cooldown.get_bucket(interaction).update_rate_limit()):
-                            await interaction.send(
-                                f"**Você terá que aguardar {int(retry_after)} segundo(s) para adicionar uma nova música na fila.**",
-                                ephemeral=True)
-                            try:
-                                await self.player_interaction_concurrency.release(interaction)
-                            except:
-                                pass
-                            return
+                                if (retry_after := self.bot.pool.enqueue_track_embed_cooldown.get_bucket(interaction).update_rate_limit()):
+                                    await interaction.send(
+                                        f"**Você terá que aguardar {int(retry_after)} segundo(s) para adicionar uma nova música na fila.**",
+                                        ephemeral=True)
+                                    try:
+                                        await self.player_interaction_concurrency.release(interaction)
+                                    except:
+                                        pass
+                                    return
 
-                        result, node = await self.get_tracks(url, author, source=False)
+                                result, node = await self.get_tracks(url, author, source=False)
 
-                        try:
-                            track = result.tracks[0]
-                        except:
-                            track = result[0]
+                                try:
+                                    track = result.tracks[0]
+                                except:
+                                    track = result[0]
 
-                    if not player:
-                        player = await self.create_player(inter=interaction, bot=bot, guild=channel.guild,
-                                                          channel=channel)
+                            if not player:
+                                player = await self.create_player(inter=interaction, bot=bot, guild=channel.guild,
+                                                                  channel=channel)
 
-                    if control == PlayerControls.embed_enqueue_track:
-                        await self.check_player_queue(interaction.author, bot, interaction.guild_id)
-                        player.queue.append(track)
-                        player.update = True
-                        await interaction.send(f"{author.mention}, a música [`{track.title}`](<{track.uri}>) foi adicionada na fila.{player.controller_link}", ephemeral=True)
-                        if not player.is_connected:
-                            await player.connect(vc_id)
-                        if not player.current:
-                            await player.process_next()
+                            if control == PlayerControls.embed_enqueue_track:
+                                await self.check_player_queue(interaction.author, bot, interaction.guild_id)
+                                player.queue.append(track)
+                                player.update = True
+                                await interaction.send(f"{author.mention}, a música [`{track.title}`](<{track.uri}>) foi adicionada na fila.{player.controller_link}", ephemeral=True)
+                                if not player.is_connected:
+                                    await player.connect(vc_id)
+                                if not player.current:
+                                    await player.process_next()
 
-                    else:
-                        player.queue.insert(0, track)
-                        if not player.is_connected:
-                            await player.connect(vc_id)
-                        await self.process_music(inter=interaction, player=player, force_play="yes")
+                            else:
+                                player.queue.insert(0, track)
+                                if not player.is_connected:
+                                    await player.connect(vc_id)
+                                await self.process_music(inter=interaction, player=player, force_play="yes")
 
             except Exception as e:
                 self.bot.dispatch('interaction_player_error', interaction, e)
