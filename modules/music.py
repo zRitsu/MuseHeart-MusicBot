@@ -4629,10 +4629,18 @@ class Music(commands.Cog):
                         break
 
                 if not channel:
+                    try:
+                        await self.player_interaction_concurrency.release(interaction)
+                    except:
+                        pass
                     await interaction.send("Não há bots disponíveis no momento.", ephemeral=True)
                     return
 
                 if not author.voice:
+                    try:
+                        await self.player_interaction_concurrency.release(interaction)
+                    except:
+                        pass
                     await interaction.send("Você deve entrar em um canal de voz pra usar esse botão....", ephemeral=True)
                     return
 
