@@ -560,17 +560,7 @@ def user_cooldown(rate: int, per: int):
 
 #######################################################################
 
-
-async def has_perm(inter):
-
-    try:
-        bot = inter.music_bot
-        guild = inter.music_guild
-        channel = bot.get_channel(inter.channel.id)
-    except AttributeError:
-        bot = inter.bot
-        guild = inter.guild
-        channel = inter.channel
+async def check_player_perm(inter, bot: BotCore, channel):
 
     try:
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
@@ -610,7 +600,21 @@ async def has_perm(inter):
         player.dj.add(inter.author.id)
         await channel.send(embed=disnake.Embed(
             description=f"{inter.author.mention} foi adicionado à lista de DJ's por não haver um no canal <#{vc.id}>.",
-            color=player.bot.get_color(guild.me)), delete_after=10)
+            color=player.bot.get_color(channel.guild.me)), delete_after=10)
+
+    return True
+
+
+async def has_perm(inter):
+
+    try:
+        bot = inter.music_bot
+        channel = bot.get_channel(inter.channel.id)
+    except AttributeError:
+        bot = inter.bot
+        channel = inter.channel
+
+    await check_player_perm(inter=inter, bot=bot, channel=channel)
 
     return True
 

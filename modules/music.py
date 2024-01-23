@@ -24,7 +24,7 @@ from utils.client import BotCore
 from utils.db import DBModel
 from utils.music.checks import check_voice, has_player, has_source, is_requester, is_dj, \
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen, check_pool_bots, \
-    check_channel_limit, check_stage_topic, check_queue_loading
+    check_channel_limit, check_stage_topic, check_queue_loading, check_player_perm
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, google_search, percentage, music_source_image
 from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolException, parse_error, \
@@ -756,6 +756,14 @@ class Music(commands.Cog):
             bot = inter.bot
             guild = inter.guild
             channel = inter.channel
+
+        try:
+            bot.music.players[guild.id]
+        except KeyError:
+            pass
+        else:
+            if force_play == "yes":
+                await check_player_perm(inter=inter, bot=bot, channel=channel)
 
         can_send_message(channel, bot.user)
 
@@ -4642,6 +4650,9 @@ class Music(commands.Cog):
 
                 if not author.voice:
                     raise GenericError("Você deve entrar em um canal de voz pra usar esse botão....")
+
+                if player and PlayerControls.embed_forceplay:
+                    await check_player_perm(inter=interaction, bot=bot, channel=channel)
 
                 vc_id: int = author.voice.channel.id
 
