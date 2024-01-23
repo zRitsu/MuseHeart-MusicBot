@@ -4572,6 +4572,16 @@ class Music(commands.Cog):
 
         await self.player_controller(interaction, interaction.data.custom_id)
 
+    async def check_stage_title(self, inter, bot: BotCore, player: LavalinkPlayer):
+
+        time_limit = 30 if isinstance(player.guild.me.voice.channel, disnake.VoiceChannel) else 120
+
+        if player.stage_title_event and (time_:=int((disnake.utils.utcnow() - player.start_time).total_seconds())) < time_limit and not (await bot.is_owner(inter.author)):
+            raise GenericError(
+                f"**Você terá que aguardar {time_format((time_limit - time_) * 1000, use_names=True)} para usar essa função "
+                f"com o anúncio automático do palco ativo...**"
+            )
+
     async def player_controller(self, interaction: disnake.MessageInteraction, control: str, **kwargs):
 
         if not self.bot.bot_ready:
@@ -4602,8 +4612,7 @@ class Music(commands.Cog):
                 try:
                     await self.player_interaction_concurrency.acquire(interaction)
                 except:
-                    await interaction.send("Há uma música sendo processada no momento...", ephemeral=True)
-                    return
+                    raise GenericError("Há uma música sendo processada no momento...")
 
                 bot: Optional[BotCore] = None
                 player: Optional[LavalinkPlayer] = None
@@ -4629,20 +4638,10 @@ class Music(commands.Cog):
                         break
 
                 if not channel:
-                    try:
-                        await self.player_interaction_concurrency.release(interaction)
-                    except:
-                        pass
-                    await interaction.send("Não há bots disponíveis no momento.", ephemeral=True)
-                    return
+                    raise GenericError("Não há bots disponíveis no momento.")
 
                 if not author.voice:
-                    try:
-                        await self.player_interaction_concurrency.release(interaction)
-                    except:
-                        pass
-                    await interaction.send("Você deve entrar em um canal de voz pra usar esse botão....", ephemeral=True)
-                    return
+                    raise GenericError("Você deve entrar em um canal de voz pra usar esse botão....")
 
                 vc_id: int = author.voice.channel.id
 
@@ -4653,14 +4652,8 @@ class Music(commands.Cog):
                 if control == PlayerControls.embed_enqueue_playlist:
 
                     if (retry_after := self.bot.pool.enqueue_playlist_embed_cooldown.get_bucket(interaction).update_rate_limit()):
-                        await interaction.send(
-                            f"**Você terá que aguardar {int(retry_after)} segundo(s) pra adicionar uma playlist no player atual.**",
-                            ephemeral=True)
-                        try:
-                            await self.player_interaction_concurrency.release(interaction)
-                        except:
-                            pass
-                        return
+                        raise GenericError(
+                            f"**Você terá que aguardar {int(retry_after)} segundo(s) pra adicionar uma playlist no player atual.**")
 
                     if not player:
                         player = await self.create_player(inter=interaction, bot=bot, guild=channel.guild,
@@ -4683,9 +4676,12 @@ class Music(commands.Cog):
                     if player:
 
                         if control == PlayerControls.embed_forceplay and player.current and (player.current.uri.startswith(url) or url.startswith(player.current.uri)):
+                            await self.check_stage_title(inter=interaction, bot=bot, player=player)
                             await player.seek(0)
                             player.set_command_log("voltou para o início da música.", emoji="⏪")
-                            await asyncio.sleep(10)
+                            await asyncio.sleep(3)
+                            await player.update_stage_topic()
+                            await asyncio.sleep(7)
 
                         else:
 
@@ -4710,21 +4706,14 @@ class Music(commands.Cog):
                                             player.failed_tracks.remove(t)
                                             break
 
-
                             if not track:
 
                                 if control == PlayerControls.embed_enqueue_track:
                                     await self.check_player_queue(interaction.author, bot, interaction.guild_id)
 
                                 if (retry_after := self.bot.pool.enqueue_track_embed_cooldown.get_bucket(interaction).update_rate_limit()):
-                                    await interaction.send(
-                                        f"**Você terá que aguardar {int(retry_after)} segundo(s) para adicionar uma nova música na fila.**",
-                                        ephemeral=True)
-                                    try:
-                                        await self.player_interaction_concurrency.release(interaction)
-                                    except:
-                                        pass
-                                    return
+                                    raise GenericError(
+                                        f"**Você terá que aguardar {int(retry_after)} segundo(s) para adicionar uma nova música na fila.**")
 
                                 result, node = await self.get_tracks(url, author, source=False)
 
@@ -4733,11 +4722,10 @@ class Music(commands.Cog):
                                 except:
                                     track = result[0]
 
-                            if not player:
-                                player = await self.create_player(inter=interaction, bot=bot, guild=channel.guild,
-                                                                  channel=channel)
-
                             if control == PlayerControls.embed_enqueue_track:
+                                if not player:
+                                    player = await self.create_player(inter=interaction, bot=bot, guild=channel.guild,
+                                                                      channel=channel)
                                 await self.check_player_queue(interaction.author, bot, interaction.guild_id)
                                 player.queue.append(track)
                                 player.update = True
@@ -4748,6 +4736,11 @@ class Music(commands.Cog):
                                     await player.process_next()
 
                             else:
+                                if not player:
+                                    player = await self.create_player(inter=interaction, bot=bot, guild=channel.guild,
+                                                                      channel=channel)
+                                else:
+                                    await self.check_stage_title(inter=interaction, bot=bot, player=player)
                                 player.queue.insert(0, track)
                                 if not player.is_connected:
                                     await player.connect(vc_id)
@@ -4755,7 +4748,8 @@ class Music(commands.Cog):
 
             except Exception as e:
                 self.bot.dispatch('interaction_player_error', interaction, e)
-                await asyncio.sleep(7)
+                if not isinstance(e, GenericError):
+                    await asyncio.sleep(5)
             try:
                 await self.player_interaction_concurrency.release(interaction)
             except:
