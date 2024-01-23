@@ -757,13 +757,8 @@ class Music(commands.Cog):
             guild = inter.guild
             channel = inter.channel
 
-        try:
-            bot.music.players[guild.id]
-        except KeyError:
-            pass
-        else:
-            if force_play == "yes":
-                await check_player_perm(inter=inter, bot=bot, channel=channel)
+        if force_play == "yes":
+            await check_player_perm(inter=inter, bot=bot, channel=channel)
 
         can_send_message(channel, bot.user)
 
@@ -4651,7 +4646,7 @@ class Music(commands.Cog):
                 if not author.voice:
                     raise GenericError("Você deve entrar em um canal de voz pra usar esse botão....")
 
-                if player and PlayerControls.embed_forceplay:
+                if PlayerControls.embed_forceplay:
                     await check_player_perm(inter=interaction, bot=bot, channel=channel)
 
                 vc_id: int = author.voice.channel.id
