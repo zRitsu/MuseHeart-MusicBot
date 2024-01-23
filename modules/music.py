@@ -5670,7 +5670,10 @@ class Music(commands.Cog):
             if isinstance(s, str):
                 global_data["custom_skins_static"][n] = pickle.loads(b64decode(s))
 
-        guild_id = getattr(inter, 'guild_id', inter.guild.id)
+        try:
+            guild_id =inter.guild.id
+        except AttributeError:
+            guild_id = inter.guild_id
 
         player: LavalinkPlayer = bot.music.get_player(
             guild_id=guild_id,
