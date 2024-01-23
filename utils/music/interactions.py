@@ -1687,11 +1687,12 @@ class SkinSettingsButton(disnake.ui.View):
         select_mode.callback = self.player_mode
         self.add_item(select_mode)
 
-        controller_btn = disnake.ui.Button(emoji="💠",
-            label="Ativar Player-Controller" if not self.controller_enabled else "Desativar Player-Controller"
-        )
-        controller_btn.callback = self.controller_buttons
-        self.add_item(controller_btn)
+        if self.mode == "custom_skins":
+            controller_btn = disnake.ui.Button(emoji="💠",
+                label="Ativar Player-Controller" if not self.controller_enabled else "Desativar Player-Controller"
+            )
+            controller_btn.callback = self.controller_buttons
+            self.add_item(controller_btn)
 
         save_btn = disnake.ui.Button(label="Salvar", emoji="💾")
         save_btn.callback = self.save
@@ -2671,7 +2672,8 @@ class SkinEditorMenu(disnake.ui.View):
 
             self.message_data["controller_enabled"] = view.controller_enabled
 
-            await view.inter.response.defer(ephemeral=True)
+            if view.inter:
+                await view.inter.response.defer(ephemeral=True)
 
             self.global_data = await self.bot.get_global_data(self.ctx.guild_id, db_name=DBModel.guilds)
 
@@ -2720,6 +2722,9 @@ class SkinEditorMenu(disnake.ui.View):
 
             if not guild_prefix:
                 guild_prefix = self.bot.config.get("DEFAULT_PREFIX") or "!!"
+
+            if not view.inter:
+                view.inter = inter
 
             await view.inter.edit_original_message("**A skin foi salva/editada com sucesso!**\n"
                                                    f"Você pode aplicá-la usando o comando {cmd} ou {guild_prefix}skin",
