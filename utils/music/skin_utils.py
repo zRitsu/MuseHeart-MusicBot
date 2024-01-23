@@ -61,7 +61,7 @@ def replaces(
             replace('{playlist.name}', player.current.playlist_name or "Sem playlist"). \
             replace('{playlist.url}', player.current.playlist_url or player.controller_link). \
             replace('{player.loop.mode}', 'Desativado' if not player.loop else 'Música atual' if player.loop == "current" else "Fila"). \
-            replace('{player.queue.size}', str(len(player.queue))) if player.queue else "Nenhuma". \
+            replace('{player.queue.size}', str(len(player.queue)) if player.queue else "Nenhuma"). \
             replace('{player.volume}', str(player.volume)). \
             replace('{player.autoplay}', "Ativado" if player.autoplay else "Desativado"). \
             replace('{player.nightcore}', "Ativado" if player.nightcore else "Desativado"). \
