@@ -4652,6 +4652,8 @@ class Music(commands.Cog):
                 if not author.voice:
                     raise GenericError("Você deve entrar em um canal de voz pra usar esse botão....")
 
+                node: Optional[wavelink.Node] = None
+
                 if PlayerControls.embed_forceplay:
                     await check_player_perm(inter=interaction, bot=bot, channel=channel)
 
@@ -4667,9 +4669,12 @@ class Music(commands.Cog):
                         raise GenericError(
                             f"**Você terá que aguardar {int(retry_after)} segundo(s) pra adicionar uma playlist no player atual.**")
 
+                    if not node:
+                        node = await self.get_best_node(bot)
+
                     if not player:
                         player = await self.create_player(inter=interaction, bot=bot, guild=channel.guild,
-                                                          channel=channel)
+                                                          channel=channel, node=node)
 
                     await self.check_player_queue(interaction.author, bot, interaction.guild_id)
                     result, node = await self.get_tracks(url, author, source=False, node=player.node)
@@ -4736,8 +4741,12 @@ class Music(commands.Cog):
 
                             if control == PlayerControls.embed_enqueue_track:
                                 if not player:
+
+                                    if not node:
+                                        node = await self.get_best_node(bot)
+
                                     player = await self.create_player(inter=interaction, bot=bot, guild=channel.guild,
-                                                                      channel=channel)
+                                                                      channel=channel, node=node)
                                 await self.check_player_queue(interaction.author, bot, interaction.guild_id)
                                 player.queue.append(track)
                                 player.update = True
@@ -4749,8 +4758,10 @@ class Music(commands.Cog):
 
                             else:
                                 if not player:
+                                    if not node:
+                                        node = await self.get_best_node(bot)
                                     player = await self.create_player(inter=interaction, bot=bot, guild=channel.guild,
-                                                                      channel=channel)
+                                                                      channel=channel, node=node)
                                 else:
                                     await self.check_stage_title(inter=interaction, bot=bot, player=player)
                                 player.queue.insert(0, track)
