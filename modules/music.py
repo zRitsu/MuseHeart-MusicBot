@@ -4634,6 +4634,12 @@ class Music(commands.Cog):
                         continue
 
                     if p.guild.me.voice and interaction.author.id in p.guild.me.voice.channel.voice_states:
+
+                        if p.locked:
+                            raise GenericError(
+                                "**Não é possível executar essa ação com o processamento da música em andamento "
+                                "(por favor aguarde mais alguns segundos e tente novamente).**")
+
                         player = p
                         bot = b
                         channel = player.text_channel
