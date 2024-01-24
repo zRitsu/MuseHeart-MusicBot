@@ -1346,7 +1346,7 @@ class Music(commands.Cog):
             await inter.response.defer(ephemeral=ephemeral)
 
         if not queue_loaded:
-            tracks, node = await self.get_tracks(query, inter.author, node=node, track_loops=repeat_amount, source=source)
+            tracks, node = await self.get_tracks(query, inter.author, node=node, track_loops=repeat_amount, source=source, bot=bot)
             tracks = await self.check_player_queue(inter.author, bot, guild.id, tracks)
 
         try:
@@ -4652,12 +4652,10 @@ class Music(commands.Cog):
                 if not author.voice:
                     raise GenericError("Você deve entrar em um canal de voz pra usar esse botão....")
 
-                node: Optional[wavelink.Node] = None
-
                 try:
                     node = player.node
                 except:
-                    pass
+                    node: Optional[wavelink.Node] = None
 
                 if PlayerControls.embed_forceplay:
                     await check_player_perm(inter=interaction, bot=bot, channel=channel)
@@ -4674,15 +4672,12 @@ class Music(commands.Cog):
                         raise GenericError(
                             f"**Você terá que aguardar {int(retry_after)} segundo(s) pra adicionar uma playlist no player atual.**")
 
-                    if not node:
-                        node = await self.get_best_node(bot)
-
                     if not player:
                         player = await self.create_player(inter=interaction, bot=bot, guild=channel.guild,
                                                           channel=channel, node=node)
 
                     await self.check_player_queue(interaction.author, bot, interaction.guild_id)
-                    result, node = await self.get_tracks(url, author, source=False, node=player.node)
+                    result, node = await self.get_tracks(url, author, source=False, node=player.node, bot=bot)
                     result = await self.check_player_queue(interaction.author, bot, interaction.guild_id, tracks=result)
                     player.queue.extend(result.tracks)
                     await interaction.send(f"{interaction.author.mention}, a playlist [`{result.name}`](<{url}>) foi adicionada com sucesso!{player.controller_link}", ephemeral=True)
@@ -4741,7 +4736,7 @@ class Music(commands.Cog):
                             if control == PlayerControls.embed_enqueue_track:
                                 await self.check_player_queue(interaction.author, bot, interaction.guild_id)
 
-                            result, node = await self.get_tracks(url, author, source=False)
+                            result, node = await self.get_tracks(url, author, source=False, node=node, bot=bot)
 
                             try:
                                 track = result.tracks[0]
@@ -4751,10 +4746,6 @@ class Music(commands.Cog):
                         if control == PlayerControls.embed_enqueue_track:
 
                             if not player:
-
-                                if not node:
-                                    node = await self.get_best_node(bot)
-
                                 player = await self.create_player(inter=interaction, bot=bot, guild=channel.guild,
                                                                   channel=channel, node=node)
                             await self.check_player_queue(interaction.author, bot, interaction.guild_id)
@@ -4768,8 +4759,6 @@ class Music(commands.Cog):
 
                         else:
                             if not player:
-                                if not node:
-                                    node = await self.get_best_node(bot)
                                 player = await self.create_player(inter=interaction, bot=bot, guild=channel.guild,
                                                                   channel=channel, node=node)
                             else:
@@ -5657,7 +5646,7 @@ class Music(commands.Cog):
         try:
             global_data = inter.global_guild_data
         except AttributeError:
-            global_data = await self.bot.get_global_data(guild.id, db_name=DBModel.guilds)
+            global_data = await bot.get_global_data(guild.id, db_name=DBModel.guilds)
             try:
                 inter.global_guild_data = global_data
             except:
@@ -5675,7 +5664,7 @@ class Music(commands.Cog):
         else:
 
             try:
-                invite = (await self.bot.fetch_invite(invite)).url
+                invite = (await bot.fetch_invite(invite)).url
             except disnake.NotFound:
                 invite = None
             except Exception:
@@ -5798,7 +5787,7 @@ class Music(commands.Cog):
             if not player.has_thread:
                 player.message = None
             else:
-                await self.thread_song_request(message_inter.thread, reopen=True)
+                await self.thread_song_request(message_inter.thread, reopen=True, bot=bot)
 
         return player
 
@@ -6246,10 +6235,13 @@ class Music(commands.Cog):
 
     async def get_tracks(
             self, query: str, user: disnake.Member, node: wavelink.Node = None,
-            track_loops=0, use_cache=True, source=None):
+            track_loops=0, use_cache=True, source=None, bot: BotCore = None):
+
+        if not bot:
+            bot = self.bot
 
         if not node:
-            node = await self.get_best_node()
+            node = await self.get_best_node(bot)
 
         tracks = await process_spotify(self.bot, user.id, query)
 
@@ -6285,7 +6277,7 @@ class Music(commands.Cog):
                     try:
                         node_search = \
                             sorted(
-                                [n for n in self.bot.music.nodes.values() if n.search and n.available and n.is_available],
+                                [n for n in bot.music.nodes.values() if n.search and n.available and n.is_available],
                                 key=lambda n: len(n.players))[0]
                     except IndexError:
                         node_search = node
@@ -6367,10 +6359,13 @@ class Music(commands.Cog):
             self.bot.loop.create_task(self.connect_node(localnode))
 
     @commands.Cog.listener("on_thread_create")
-    async def thread_song_request(self, thread: disnake.Thread, reopen: bool = False):
+    async def thread_song_request(self, thread: disnake.Thread, reopen: bool = False, bot: BotCore = None):
+
+        if not bot:
+            bot=self.bot
 
         try:
-            player: LavalinkPlayer = self.bot.music.players[thread.guild.id]
+            player: LavalinkPlayer = bot.music.players[thread.guild.id]
         except KeyError:
             return
 
@@ -6388,9 +6383,9 @@ class Music(commands.Cog):
             )
             return
 
-        embed = disnake.Embed(color=self.bot.get_color(thread.guild.me))
+        embed = disnake.Embed(color=bot.get_color(thread.guild.me))
 
-        if not self.bot.intents.message_content:
+        if not bot.intents.message_content:
             embed.description = "**Aviso! Não estou com a intent de message_content ativada por meu desenvolvedor...\n" \
                                 "A funcionalidade de pedir música aqui pode não ter um resultado esperado...**"
 
