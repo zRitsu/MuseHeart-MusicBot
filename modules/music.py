@@ -4654,6 +4654,11 @@ class Music(commands.Cog):
 
                 node: Optional[wavelink.Node] = None
 
+                try:
+                    node = player.node
+                except:
+                    pass
+
                 if PlayerControls.embed_forceplay:
                     await check_player_perm(inter=interaction, bot=bot, channel=channel)
 
