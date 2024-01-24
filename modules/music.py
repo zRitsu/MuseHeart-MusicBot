@@ -4672,7 +4672,7 @@ class Music(commands.Cog):
                                                           channel=channel)
 
                     await self.check_player_queue(interaction.author, bot, interaction.guild_id)
-                    result, node = await self.get_tracks(url, author, source=False)
+                    result, node = await self.get_tracks(url, author, source=False, node=player.node)
                     result = await self.check_player_queue(interaction.author, bot, interaction.guild_id, tracks=result)
                     player.queue.extend(result.tracks)
                     await interaction.send(f"{interaction.author.mention}, a playlist [`{result.name}`](<{url}>) foi adicionada com sucesso!{player.controller_link}", ephemeral=True)
@@ -4720,12 +4720,12 @@ class Music(commands.Cog):
 
                             if not track:
 
-                                if control == PlayerControls.embed_enqueue_track:
-                                    await self.check_player_queue(interaction.author, bot, interaction.guild_id)
-
                                 if (retry_after := self.bot.pool.enqueue_track_embed_cooldown.get_bucket(interaction).update_rate_limit()):
                                     raise GenericError(
                                         f"**Você terá que aguardar {int(retry_after)} segundo(s) para adicionar uma nova música na fila.**")
+
+                                if control == PlayerControls.embed_enqueue_track:
+                                    await self.check_player_queue(interaction.author, bot, interaction.guild_id)
 
                                 result, node = await self.get_tracks(url, author, source=False)
 
@@ -5631,9 +5631,7 @@ class Music(commands.Cog):
             channel = bot.get_channel(getattr(inter, 'channel_id', inter.channel.id))
 
         if not node:
-            node = bot.music.get_best_node()
-            if not node:
-                raise wavelink.ZeroConnectedNodes()
+            node = await self.get_best_node(bot)
 
         try:
             global_data = inter.global_guild_data
