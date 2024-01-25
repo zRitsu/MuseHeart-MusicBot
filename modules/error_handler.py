@@ -403,7 +403,7 @@ class ErrorHandler(commands.Cog):
         except AttributeError:
             if self.bot.intents.message_content and not ctx.author.bot:
                 embed.description = f"**Commando:**```\n" \
-                                    f"{ctx.message.content.replace(str(ctx.bot.user.mention), f'@{ctx.guild.me.display_name}')}" \
+                                    f"{ctx.message.content}" \
                                     f"```"
 
         return embed
