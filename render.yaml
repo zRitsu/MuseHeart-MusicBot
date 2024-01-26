@@ -1,13 +1,17 @@
 services:
   - type: web
-    name: disnake_music
+    name: museheart_music
     env: python
     plan: free
     repo: https://github.com/zRitsu/MuseHeart-MusicBot.git
     buildCommand: pip3 install -r requirements.txt --no-cache-dir
     startCommand: python3 main.py
     envVars:
-      - key: TOKEN
+      - key: TOKEN_BOT_1
+        sync: false
+      - key: TOKEN_BOT_2
+        sync: false
+      - key: TOKEN_BOT_3
         sync: false
       - key: DEFAULT_PREFIX
         sync: false
@@ -18,7 +22,7 @@ services:
       - key: MONGO
         sync: false
       - key: PYTHON_VERSION
-        value: 3.11.1
+        value: 3.11.7
       - key: AUTO_DOWNLOAD_LAVALINK_SERVERLIST
         value: true
       - key: MONGO_SSL_FIX
