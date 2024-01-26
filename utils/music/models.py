@@ -477,11 +477,6 @@ class LavalinkPlayer(wavelink.Player):
             f"É possível alterar a skin/aparência do player usando o comando /change_skin ou {self.prefix_info}skin "
             f"(Apenas membros com permissão de gerenciar servidor podem usar esse comando).",
 
-            "Você pode adicionar links favoritos para ter fácil acesso pra usá-los no comando /play (no preenchimento "
-            f"automático da busca) ou {self.prefix_info}play (sem incluir nome/link) dispensando a necessidade de "
-            "copiar e colar os links pra tocar ou adicionar na fila as suas músicas favoritas. Experimente usando"
-            f"o comando /fav_manager ou {self.prefix_info}favmanager.",
-
             "Dê uma nova cara para o player de música no servidor criando skins personalizadas. Experimente usando "
             f"o comando /custom_skin ou {self.prefix_info}customskin (Apenas membros com permissão de administrador "
             "podem usar esse comando).",
@@ -506,7 +501,7 @@ class LavalinkPlayer(wavelink.Player):
                 "Você pode adicionar/integrar link de perfis/canais do " + " e ".join(hint_platforms) + " para tocar "
                 f"playlists pública que tem no canal/perfil via comando {self.prefix_info}play (sem incluir "
                 "nome/link) ou no comando /play (via preenchimento automático da busca). Experimente usando o "
-                f"comando /fav_manager ou {self.prefix_info}favmanager."
+                f"comando /fav_manager ou {self.prefix_info}favmanager selecionando a opção \"integrações\"."
             )
 
         try:

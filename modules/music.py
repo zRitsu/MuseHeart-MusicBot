@@ -4843,9 +4843,10 @@ class Music(commands.Cog):
                             "**Como usar?**\n"
                             f"* Usando o comando {cmd} (selecionando o favorito no preenchimento automático da busca)\n"
                             "* Clicando no botão/select de tocar favorito/integração do player.\n"
-                            f"* Usando o comando {global_data['prefix'] or self.bot.default_prefix}{self.bot.get_cog('Music').play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n"
+                            f"* Usando o comando {global_data['prefix'] or self.bot.default_prefix}{self.play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n"
 
-            ), ephemeral=True)
+
+            ).set_footer(text=f"Caso queira ver todos os seus favoritos use o comando {global_data['prefix'] or self.bot.default_prefix}{self.fav_manager_legacy.name}"), ephemeral=True)
 
             if not interaction.message.flags.ephemeral:
                 if not interaction.guild:
