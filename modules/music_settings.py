@@ -1710,7 +1710,7 @@ class MusicSettings(commands.Cog):
 
         global_data = await bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
 
-        view = SkinEditorMenu(inter, bot, global_data=global_data)
+        view = SkinEditorMenu(inter, bot, guild=bot.get_guild(inter.guild_id), global_data=global_data)
 
         if isinstance(inter, disnake.MessageInteraction):
             func = inter.edit_original_message
