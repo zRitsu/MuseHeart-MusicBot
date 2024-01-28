@@ -58,6 +58,7 @@ class WebSocket:
         self._websocket = None
         self._last_exc = None
         self._task = None
+        self._closed = True
 
     @property
     def headers(self):
@@ -123,6 +124,11 @@ class WebSocket:
         backoff = ExponentialBackoff(base=7)
 
         while True:
+
+            while self._closed:
+                await asyncio.sleep(3)
+                continue
+
             msg = await self._websocket.receive()
 
             if msg.type is aiohttp.WSMsgType.CLOSED or not self.is_connected:
@@ -132,8 +138,7 @@ class WebSocket:
                 if not self.auto_reconnect:
                     self._node.session_id = None
                     self.bot.dispatch('wavelink_node_connection_closed', self._node)
-                    self._task = None
-                    return
+                    continue
 
                 __log__.debug(f'WEBSOCKET | Close data: {msg.extra}')
 
