@@ -42,14 +42,12 @@ class MiniStaticSkin:
         queue_size = len(player.queue)
 
         if not player.paused:
-            emoji = "▶️"
             embed.set_author(
                 name="Tocando Agora:",
                 icon_url=music_source_image(player.current.info["sourceName"]),
             )
 
         else:
-            emoji = "⏸️"
             embed.set_author(
                 name="Em Pausa:",
                 icon_url="https://cdn.discordapp.com/attachments/480195401543188483/896013933197013002/pause.png"
@@ -232,12 +230,6 @@ class MiniStaticSkin:
                     description="Criar uma thread/conversa temporária para pedir músicas usando apenas o nome/link."
                 )
             )
-
-        try:
-            if isinstance(player.text_channel.parent, disnake.ForumChannel):
-                data["content"] = f"`{emoji} {fix_characters(player.current.title, 50)}`"
-        except:
-            pass
 
         return data
 

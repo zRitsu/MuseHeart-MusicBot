@@ -1926,6 +1926,12 @@ class LavalinkPlayer(wavelink.Player):
 
         self.last_data = data
 
+        try:
+            if isinstance(self.text_channel.parent, disnake.ForumChannel):
+                data["content"] = f"`{'▶️' if not self.paused else '⏸️'} {fix_characters(self.current.title, 50)}` |\n\n" + data.get("content", "")
+        except:
+            pass
+
         if not self.controller_mode:
 
             if self.temp_embed:
