@@ -1004,6 +1004,7 @@ class FavMenuView(disnake.ui.View):
         self.mode = mode
         self.bot = bot
         self.ctx = ctx
+        self.guild = ctx.guild
         self.current = None
         self.data = data
         self.guild_data = {}
@@ -1012,11 +1013,18 @@ class FavMenuView(disnake.ui.View):
         self.prefix = prefix
         self.components_updater_task = bot.loop.create_task(self.auto_update())
 
+        if not self.guild:
+            for b in self.bot.pool.bots:
+                guild = b.get_guild(ctx.guild_id)
+                if guild:
+                    self.guild = guild
+                    break
+
     def update_components(self):
 
         self.clear_items()
 
-        if not self.ctx.guild:
+        if not self.guild:
             self.bot.loop.create_task(self.on_timeout())
             return
 
@@ -1061,7 +1069,7 @@ class FavMenuView(disnake.ui.View):
             bots_in_guild = []
 
             for b in sorted(self.bot.pool.bots, key=lambda b: b.identifier):
-                if b.bot_ready and b.user in self.ctx.guild.members:
+                if b.bot_ready and b.user in self.guild.members:
                     bots_in_guild.append(disnake.SelectOption(emoji="🎶",
                                                               label=f"Bot: {b.user.display_name}"[:25],
                                                               value=f"bot_select_{b.user.id}",
