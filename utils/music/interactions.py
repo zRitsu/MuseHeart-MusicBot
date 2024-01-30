@@ -1255,7 +1255,7 @@ class FavMenuView(disnake.ui.View):
                     name, url = data
                     e = get_source_emoji_cfg(self.bot, url)
                     if e:
-                        return f"{e} ` {index + 1} ` [`{name}`]({url})"
+                        return f"` {index} ` {e} [`{name}`]({url})"
                     return f"` {index} ` [`{name}`]({url})"
 
                 embed.description = f"**Seus favoritos atuais:**\n\n" + "\n".join(
