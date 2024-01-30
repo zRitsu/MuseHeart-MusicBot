@@ -22,7 +22,7 @@ from utils.music.models import LavalinkPlayer
 from utils.music.skin_utils import skin_converter
 from utils.music.spotify import spotify_regex_w_user
 from utils.others import check_cmd, CustomContext, send_idle_embed, music_source_emoji_url, \
-    music_source_emoji_id, PlayerControls
+    music_source_emoji_id, PlayerControls, get_source_emoji_cfg
 
 if TYPE_CHECKING:
     from utils.client import BotCore
@@ -1243,8 +1243,15 @@ class FavMenuView(disnake.ui.View):
                 embed.description = "Você não possui favoritos (clique no botão de adicionar abaixo)."
 
             else:
+                def format_fav(index, data):
+                    name, url = data
+                    e = get_source_emoji_cfg(self.bot, url)
+                    if e:
+                        return f"{e} ` {index + 1} ` [`{name}`]({url})"
+                    return f"` {index} ` [`{name}`]({url})"
+
                 embed.description = f"**Seus favoritos atuais:**\n\n" + "\n".join(
-                    f"> ` {n + 1} ` [`{f[0]}`]({f[1]})" for n, f in enumerate(self.data["fav_links"].items())
+                    f"> {format_fav(n+1, d)}" for n, d in enumerate(self.data["fav_links"].items())
                 )
 
             embed.add_field(name="**Como usá-los?**", inline=False,
@@ -1264,8 +1271,15 @@ class FavMenuView(disnake.ui.View):
                 embed.description = f"Não há links adicionados no bot {self.bot.user.mention} (clique no botão de adicionar abaixo)."
 
             else:
+                def format_gfav(index, data):
+                    name, data = data
+                    e = get_source_emoji_cfg(self.bot, data['url'])
+                    if e:
+                        return f"` {index} ` {e} [`{name}`]({data['url']})"
+                    return f"` {index} ` [`{name}`]({data['url']})"
+
                 embed.description = f"**Links atuais no bot {self.bot.user.mention}:**\n\n" + "\n".join(
-                    f"> ` {n + 1} ` [`{f[0]}`]({f[1]['url']})" for n, f in enumerate(self.guild_data["player_controller"]["fav_links"].items())
+                    f"> {format_gfav(n+1, d)}" for n, d in enumerate(self.guild_data["player_controller"]["fav_links"].items())
                 )
 
             embed.add_field(name="**Como usá-los?**", inline=False,
@@ -1281,8 +1295,15 @@ class FavMenuView(disnake.ui.View):
                 embed.description = "**Você não possui integrações no momento (clique no botão de adicionar abaixo).**"
 
             else:
+                def format_itg(bot, index, data):
+                    name, url = data
+                    e = get_source_emoji_cfg(bot, url)
+                    if e:
+                        return f"` {index} ` {e} [`{name[5:]}`]({url})"
+                    return f"` {index} ` [`{name}`]({url})"
+
                 embed.description = f"**Suas integrações atuais:**\n\n" + "\n".join(
-                    f"> ` {n + 1} ` [`{f[0]}`]({f[1]})" for n, f in enumerate(self.data["integration_links"].items()))
+                    f"> {format_itg(self.bot, n+1, d)}" for n, d in enumerate(self.data["integration_links"].items()))
 
                 embed.add_field(name="**Como tocar a playlist de uma integração?**", inline=False,
                                 value=f"* Usando o comando {cmd} (selecionando a integração no preenchimento automático da busca)\n"

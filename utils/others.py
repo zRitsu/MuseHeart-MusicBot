@@ -556,6 +556,24 @@ music_source_emoji_data = {
 def music_source_emoji(name: str):
     return music_source_emoji_data.get(name, "<:play:734221719774035968>")
 
+def get_source_emoji_cfg(bot: BotCore, url: str):
+
+    if yt_url_regex.match(url):
+        source = "youtube"
+    elif sc_url_regex.match(url):
+        source = "soundcloud"
+    elif sp_url_regex.match(url):
+        source = "spotify"
+    elif tw_url_regex.match(url):
+        source = "twitch"
+    else:
+        return None
+
+    try:
+        return bot.pool.emoji_data["music_sources"][source]
+    except:
+        return None
+
 def music_source_emoji_url(url: str):
 
     if yt_url_regex.match(url):
