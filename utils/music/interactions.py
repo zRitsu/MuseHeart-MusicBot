@@ -1454,7 +1454,7 @@ class FavMenuView(disnake.ui.View):
             except AttributeError:
                 continue
 
-        self.guild_data = await self.bot.get_data(inter.guild.id, db_name=DBModel.guilds)
+        self.guild_data = await self.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         await inter.response.edit_message(embed=self.build_embed(), view=self)
 
