@@ -134,6 +134,22 @@ class PlayerSession(commands.Cog):
                 t.info["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
             failed_tracks.append(t.info)
 
+        if player.skin.startswith("> custom_skin: "):
+
+            custom_skin = player.skin[15:]
+
+            if player.static:
+                custom_skin_data = {}
+                custom_skin_static_data = {custom_skin: player.custom_skin_static_data[custom_skin]}
+
+            else:
+                custom_skin_data = {custom_skin: player.custom_skin_data[custom_skin]}
+                custom_skin_static_data = {}
+
+        else:
+            custom_skin_data = {}
+            custom_skin_static_data = {}
+
         data = {
             "_id": player.guild.id,
             "version": getattr(player, "version", 1),
@@ -154,8 +170,8 @@ class PlayerSession(commands.Cog):
             "stage_title_template": player.stage_title_template,
             "skin": player.skin,
             "skin_static": player.skin_static,
-            "custom_skin_data": player.custom_skin_data,
-            "custom_skin_static_data": player.custom_skin_static_data,
+            "custom_skin_data": custom_skin_data,
+            "custom_skin_static_data": custom_skin_static_data,
             "uptime": player.uptime,
             "restrict_mode": player.restrict_mode,
             "mini_queue_enabled": player.mini_queue_enabled,
