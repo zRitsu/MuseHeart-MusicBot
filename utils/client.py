@@ -67,6 +67,7 @@ class BotPool:
         self.spotify: Optional[spotipy.Spotify] = None
         self.lavalink_instance: Optional[subprocess.Popen] = None
         self.config = {}
+        self.emoji_data = {}
         self.commit = ""
         self.remote_git_url = ""
         self.max_counter: int = 0
@@ -208,6 +209,14 @@ class BotPool:
     def load_cfg(self):
 
         self.config = load_config()
+
+        try:
+            with open("emojis.json") as f:
+                self.emoji_data = json.load(f)
+        except FileNotFoundError:
+            pass
+        except:
+            traceback.print_exc()
 
         if not self.config["DEFAULT_PREFIX"]:
             self.config["DEFAULT_PREFIX"] = "!!"
@@ -722,6 +731,10 @@ class BotCore(commands.AutoShardedBot):
     @property
     def config(self):
         return self.pool.config
+
+    @property
+    def emoji_data(self):
+        return self.pool.emoji_data
 
     @property
     def ws_client(self):

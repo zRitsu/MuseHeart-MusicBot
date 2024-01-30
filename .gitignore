@@ -164,3 +164,4 @@ application.yml
 /.app_commands_sync_data/
 /.gitbak/
 /.tempjar/
+/emojis.json
