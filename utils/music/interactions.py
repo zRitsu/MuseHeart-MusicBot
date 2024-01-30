@@ -2721,7 +2721,12 @@ class SkinEditorMenu(disnake.ui.View):
 
             await self.bot.update_global_data(id_=inter.guild_id, data=self.global_data, db_name=DBModel.guilds)
 
-            for player in self.bot.music.players.values():
+            for bot in self.bot.pool.bots:
+
+                try:
+                    player = bot.music.players[inter.guild_id]
+                except KeyError:
+                    continue
 
                 global_data = self.global_data.copy()
 
