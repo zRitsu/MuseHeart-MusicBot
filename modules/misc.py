@@ -67,10 +67,11 @@ class Misc(commands.Cog):
         except AttributeError:
             pass
 
-        if [i for i in ("{players_count}", "{players_count_allbotchannels}", "{players_count_allbotservers}") if i in text]:
+        if [i for i in ("{players_count}", "{players_user_count}","{players_count_allbotchannels}", "{players_count_allbotservers}") if i in text]:
 
             channels = set()
             guilds = set()
+            users = set()
             player_count = 0
 
             for bot in self.bot.pool.bots:
@@ -85,6 +86,9 @@ class Misc(commands.Cog):
                             continue
                         channels.add(vc.id)
                         guilds.add(player.guild.id)
+                        for u in vc.members:
+                            if not u.bot:
+                                users.add(u.id)
 
                 if "{players_count}" in text:
                     if not player_count:
@@ -104,6 +108,13 @@ class Misc(commands.Cog):
                     return
 
                 text = text.replace("{players_count_allbotservers}", str(len(guilds)))
+
+            if "{players_user_count}" in text:
+
+                if not users:
+                    return
+
+                text = text.replace("{players_user_count}", str(len(users)))
 
         return text \
             .replace("{users}", f'{len([m for m in self.bot.users if not m.bot]):,}'.replace(",", ".")) \
