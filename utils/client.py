@@ -364,7 +364,7 @@ class BotPool:
             elif (token := tokens.pop()) not in all_tokens.values():
                 all_tokens[k] = token
 
-        if self.config["INTERACTION_BOTS"] or self.config["INTERACTION_BOTS_CONTROLLER"]:
+        if self.config["INTERACTION_BOTS"]:
             interaction_bot_reg = None
         else:
             try:
@@ -502,6 +502,9 @@ class BotPool:
 
                     bot.initializing = True
 
+                    if str(bot.user.id) in bot.config["INTERACTION_BOTS_CONTROLLER"]:
+                        self.bots.remove(bot)
+
                     try:
                         if str(bot.user.id) in bot.config["INTERACTION_BOTS"] or \
                                 str(bot.user.id) in bot.config["INTERACTION_BOTS_CONTROLLER"] or \
@@ -572,9 +575,6 @@ class BotPool:
                         traceback.print_exc()
 
                     await bot.update_appinfo()
-
-                    if str(bot.user.id) in bot.config["INTERACTION_BOTS_CONTROLLER"]:
-                        self.bots.remove(bot)
 
                     bot.bot_ready = True
 

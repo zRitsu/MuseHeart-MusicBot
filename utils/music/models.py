@@ -1056,10 +1056,12 @@ class LavalinkPlayer(wavelink.Player):
 
             for b in self.bot.pool.bots:
 
+                if b == self.bot:
+                    continue
+
                 try:
-                    if b == self.bot or str(b.user.id) in self.bot.pool.config["INTERACTION_BOTS_CONTROLLER"]:
-                        continue
-                except:
+                    self.bot.user.id
+                except AttributeError:
                     self.retry_setup_hints = True
                     continue
 

@@ -241,9 +241,6 @@ class Misc(commands.Cog):
             if not bot.bot_ready:
                 continue
 
-            if str(bot.user.id) in self.bot.config["INTERACTION_BOTS_CONTROLLER"]:
-                continue
-
             if bot.user in guild.members:
                 bots_in_guild.append(bot)
             else:
@@ -527,13 +524,6 @@ class Misc(commands.Cog):
         all_guilds_ids = set()
 
         for b in bot.pool.bots:
-
-            try:
-                if str(b.user.id) in self.bot.config["INTERACTION_BOTS_CONTROLLER"]:
-                    continue
-            except:
-                pass
-
             for g in b.guilds:
                 all_guilds_ids.add(g.id)
 
@@ -561,12 +551,6 @@ class Misc(commands.Cog):
                 user_count += 1
 
         for b in bot.pool.bots:
-
-            try:
-                if str(b.user.id) in self.bot.config["INTERACTION_BOTS_CONTROLLER"]:
-                    continue
-            except:
-                pass
 
             for user in b.users:
 
@@ -759,14 +743,11 @@ class Misc(commands.Cog):
             except:
                 continue
 
-            if str(bot.user.id) in bot.config['INTERACTION_BOTS_CONTROLLER']:
-                continue
-
             kwargs = {"redirect_uri": self.bot.config['INVITE_REDIRECT_URL']} if self.bot.config['INVITE_REDIRECT_URL'] else {}
 
             invite = f"[`{disnake.utils.escape_markdown(str(bot.user.name))}`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'), **kwargs)})"
 
-            if not str(bot.user.id) not in self.bot.config["INTERACTION_BOTS_CONTROLLER"] and bot.appinfo.flags.gateway_message_content_limited:
+            if bot.appinfo.flags.gateway_message_content_limited:
                 invite += f" ({len(bot.guilds)}/100)"
             else:
                 invite += f" ({len(bot.guilds)})"
