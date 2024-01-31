@@ -6418,13 +6418,26 @@ class Music(commands.Cog):
             before: disnake.VoiceState,
             after: disnake.VoiceState
     ):
-
-        if before.channel == after.channel:
-            return
-
         try:
             player: LavalinkPlayer = self.bot.music.players[member.guild.id]
         except KeyError:
+            return
+
+        if before.channel == after.channel:
+            try:
+                vc = player.guild.me.voice.channel
+            except AttributeError:
+                pass
+            else:
+                try:
+                    player.members_timeout_task.cancel()
+                except:
+                    pass
+                try:
+                    check = (m for m in vc.members if not m.bot and not (m.voice.deaf or m.voice.self_deaf))
+                except:
+                    check = None
+                player.members_timeout_task = player.bot.loop.create_task(player.members_timeout(check=bool(check)))
             return
 
         if member.bot and player.bot.user.id != member.id:
@@ -6443,7 +6456,7 @@ class Music(commands.Cog):
             player.last_channel = after.channel
 
         try:
-            check = [m for m in player.guild.me.voice.channel.members if not m.bot]
+            check = [m for m in player.guild.me.voice.channel.members if not m.bot and not (m.voice.deaf or m.voice.self_deaf)]
         except:
             check = None
 

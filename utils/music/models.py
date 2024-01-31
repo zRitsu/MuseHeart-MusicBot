@@ -1149,7 +1149,7 @@ class LavalinkPlayer(wavelink.Player):
             except AttributeError:
                 vc = self.last_channel
 
-            if [m for m in vc.members if not m.bot]:
+            if [m for m in vc.members if not m.bot and not (m.voice.deaf or m.voice.self_deaf)]:
                 try:
                     self.auto_skip_track_task.cancel()
                 except:
@@ -1161,7 +1161,7 @@ class LavalinkPlayer(wavelink.Player):
 
             await asyncio.sleep(idle_timeout)
 
-            if [m for m in vc.members if not m.bot]:
+            if [m for m in vc.members if not m.bot and not (m.voice.deaf or m.voice.self_deaf)]:
                 try:
                     self.auto_skip_track_task.cancel()
                 except:
