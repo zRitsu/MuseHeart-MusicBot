@@ -535,6 +535,7 @@ class Misc(commands.Cog):
 
         users = set()
         bots = set()
+        listeners = set()
 
         user_count = 0
         bot_count = 0
@@ -591,6 +592,14 @@ class Misc(commands.Cog):
 
                 else:
                     active_players_other_bots += 1
+                    try:
+                        vc = p.guild.me.voice.channel
+                    except AttributeError:
+                        continue
+                    for u in vc.members:
+                        if u.bot or u.voice.deaf or u.voice.self_deaf:
+                            continue
+                        listeners.add(u.id)
 
             if not b.appinfo or not b.appinfo.bot_public:
                 private_bot_count += 1
@@ -649,6 +658,9 @@ class Misc(commands.Cog):
 
         if inactive_players_other_bots:
             embed.description += f"> 💤 **⠂Players inativos:** `{inactive_players_other_bots:,}`\n"
+
+        if listeners:
+            embed.description += f"> 🎧 **⠂Ouvintes atuais:** `{len(listeners):,}`\n"
 
         if bot.pool.commit:
             embed.description += f"> 📥 **⠂Commit atual:** [`{bot.pool.commit[:7]}`]({bot.pool.remote_git_url}/commit/{bot.pool.commit})\n"
