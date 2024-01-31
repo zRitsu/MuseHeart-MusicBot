@@ -87,8 +87,9 @@ class Misc(commands.Cog):
                         channels.add(vc.id)
                         guilds.add(player.guild.id)
                         for u in vc.members:
-                            if not u.bot:
-                                users.add(u.id)
+                            if u.bot or u.voice.deaf or u.voice.self_deaf:
+                                continue
+                            users.add(u.id)
 
                 if "{players_count}" in text:
                     if not player_count:
