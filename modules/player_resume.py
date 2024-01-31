@@ -436,6 +436,7 @@ class PlayerSession(commands.Cog):
                         custom_skin_static_data=data.get("custom_skin_static_data", {}),
                         extra_hints=hints,
                         uptime=data.get("uptime"),
+                        stage_title_event=data.get("stage_title_event", False),
                         stage_title_template=data.get("stage_title_template"),
                         restrict_mode=data["restrict_mode"],
                         volume=int(data["volume"]),
@@ -525,11 +526,6 @@ class PlayerSession(commands.Cog):
                     text="O player foi restaurado com sucesso!",
                     emoji="🔰"
                 )
-
-                try:
-                    player.stage_title_event = data["stage_title_event"]
-                except:
-                    pass
 
                 try:
                     check = any(m for m in player.guild.me.voice.channel.members if not m.bot)

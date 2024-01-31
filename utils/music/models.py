@@ -459,7 +459,11 @@ class LavalinkPlayer(wavelink.Player):
 
         stage_template = kwargs.pop("stage_title_template", None)
 
-        self.stage_title_event = bool(stage_template)
+        self.stage_title_event = kwargs.pop("stage_title_event", None)
+
+        if self.stage_title_event is None:
+            self.stage_title_event = bool(stage_template)
+
         self.stage_title_template: str = stage_template or "Tocando: {track.title} | {track.author}"
         self.last_stage_title = ""
 
