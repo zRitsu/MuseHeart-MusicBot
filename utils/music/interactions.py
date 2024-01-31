@@ -1096,7 +1096,7 @@ class FavMenuView(disnake.ui.View):
             if self.data["integration_links"]:
 
                 integration_select = disnake.ui.Select(options=[
-                    disnake.SelectOption(label=k, emoji=music_source_emoji_id(k)) for k, v in self.data["integration_links"].items()
+                    disnake.SelectOption(label=k[5:], value=k, emoji=music_source_emoji_id(k)) for k, v in self.data["integration_links"].items()
                 ], min_values=1, max_values=1)
                 integration_select.options[0].default = True
                 self.current = integration_select.options[0].label
