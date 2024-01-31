@@ -116,7 +116,7 @@ class IndexHandler(tornado.web.RequestHandler):
                    f"{failed_table_style}\n<table cellpadding=\"10\">{''.join(failed_bots)}</table>"
 
         ws_url = "<Body onLoad=\" rpcUrl()\" ><p id=\"url\" style=\"color:blue\"></p><script>function rpcUrl(){document." \
-                     "getElementById(\"url\").innerHTML = window.location.href.replace(\"http\", \"ws\")" \
+                     "getElementById(\"url\").innerHTML = window.location.href.replace(\".replit.dev\", \".replit.dev:443\").replace(\"http\", \"ws\")" \
                      ".replace(\"https\", \"wss\") + \"ws\"}</script></body>"
 
         msg += f"<p><a href=\"https://github.com/zRitsu/DC-MusicBot-RPC" \
