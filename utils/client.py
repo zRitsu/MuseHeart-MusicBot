@@ -573,6 +573,9 @@ class BotPool:
 
                     await bot.update_appinfo()
 
+                    if str(bot.user.id) in bot.config["INTERACTION_BOTS_CONTROLLER"]:
+                        self.bots.remove(bot)
+
                     bot.bot_ready = True
 
                 print(f'{bot.user} - [{bot.user.id}] Online.')
