@@ -1405,7 +1405,8 @@ class LavalinkPlayer(wavelink.Player):
         except:
             return None
 
-    async def process_next(self, start_position: Union[int, float] = 0, inter: disnake.MessageInteraction = None, force_np=False):
+    async def process_next(self, start_position: Union[int, float] = 0, inter: disnake.MessageInteraction = None,
+                           force_np=False, clear_autoqueue = True):
 
         if self.locked or self.is_closing:
             return
@@ -1434,8 +1435,6 @@ class LavalinkPlayer(wavelink.Player):
             self.idle_task = None
         except:
             pass
-
-        clear_autoqueue = True
 
         if len(self.queue):
             track = self.queue.popleft()

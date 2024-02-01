@@ -551,11 +551,11 @@ class PlayerSession(commands.Cog):
                             await player.update_stage_topic()
 
                         else:
-                            await player.process_next()
+                            await player.process_next(clear_autoqueue=False)
 
                     else:
                         position = int(float(data.get("position", 0)))
-                        await player.process_next(start_position=position)
+                        await player.process_next(start_position=position, clear_autoqueue=False)
                         player._session_resuming = False
                 except Exception:
                     print(f"{self.bot.user} - Falha na reprodução da música ao retomar player do servidor {guild.name} [{guild.id}]:\n{traceback.format_exc()}")
