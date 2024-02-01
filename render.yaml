@@ -27,4 +27,6 @@ services:
         value: true
       - key: MONGO_SSL_FIX
         value: true
+      - key: PLAYER_SESSIONS_MONGODB
+        value: true
     autoDeploy: false # optional
