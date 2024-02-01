@@ -57,7 +57,7 @@ def replaces(
 
         txt = track_title_format(
             track_title=player.current.title,
-            track_author=player.current.author,
+            track_author=player.current.author if not player.current.autoplay else "Recomendação",
             track_url=player.current.uri,
             track_duration=player.current.duration if not player.current.is_stream else 0,
             data=txt
@@ -147,7 +147,7 @@ def skin_converter(info: dict, ctx: Union[CustomContext, disnake.ModalInteractio
             track_duration=t.duration,
             data=queue_format,
             track_number=n + 1
-        ) for n, t in enumerate(itertools.islice(player.queue, queue_max_entries)))
+        ) for n, t in enumerate(itertools.islice(player.queue or player.queue_autoplay, queue_max_entries)))
     else:
         track = {
             'title': 'Sekai - Burn Me Down [NCS Release]',

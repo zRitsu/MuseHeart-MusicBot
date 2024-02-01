@@ -94,6 +94,13 @@ class ClassicSkin:
                 if qsize > 3:
                     queue_txt += f"\n`╚══════ E mais {qsize - 3} música(s) ══════╝`"
 
+        elif len(player.queue_autoplay):
+            queue_txt += "```ansi\n[0;33mPróximas Músicas:[0m```" + "\n".join(
+                f"`👍⠂{(n + 1):02}) [{time_format(t.duration) if t.duration else '🔴 Livestream'}]` "
+                f"[`{fix_characters(t.title, 29)}`]({t.uri})" for n, t in
+                enumerate(itertools.islice(player.queue_autoplay, 3))
+            )
+
         if player.command_log:
             txt += f"{player.command_log_emoji} **⠂Última Interação:** {player.command_log}\n"
 

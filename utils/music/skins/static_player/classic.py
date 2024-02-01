@@ -81,6 +81,12 @@ class ClassicStaticSkin:
 
             data["content"] += "```"
 
+        elif len(player.queue_autoplay):
+
+            data["content"] = "**Próximas músicas recomendadas:**\n```ansi\n" + \
+                              "\n".join(f"[0;33m{(n+1):02}[0m [0;34m[{time_format(t.duration) if not t.is_stream else '🔴 stream'}][0m [0;36m{fix_characters(t.title, 45)}[0m" for n, t in enumerate(
+                                  itertools.islice(player.queue_autoplay, 15))) + "```"
+
         if player.command_log:
             txt += f"{player.command_log_emoji} **⠂Última Interação:** {player.command_log}\n"
 

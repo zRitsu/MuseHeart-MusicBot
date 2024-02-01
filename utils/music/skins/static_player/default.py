@@ -149,6 +149,48 @@ class DefaultStaticSkin:
 
             embed_queue.set_image(url=queue_img)
 
+        elif len(player.queue_autoplay):
+
+            queue_txt = ""
+
+            has_stream = False
+
+            current_time += datetime.timedelta(milliseconds=player.current.duration)
+
+            queue_duration = 0
+
+            for n, t in enumerate(player.queue_autoplay):
+
+                if t.is_stream:
+                    has_stream = True
+
+                elif n != 0:
+                    queue_duration += t.duration
+
+                if n > 7:
+                    if has_stream:
+                        break
+                    continue
+
+                if has_stream:
+                    duration = time_format(t.duration) if not t.is_stream else '🔴 Ao vivo'
+
+                    queue_txt += f"`┌ {n+1})` [`{fix_characters(t.title, limit=34)}`]({t.uri})\n" \
+                           f"`└ ⏲️ {duration}`" + (f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
+                           f" **|** `👍⠂Recomendada`\n"
+
+                else:
+                    duration = f"<t:{int((current_time + datetime.timedelta(milliseconds=queue_duration)).timestamp())}:R>"
+
+                    queue_txt += f"`┌ {n+1})` [`{fix_characters(t.title, limit=34)}`]({t.uri})\n" \
+                           f"`└ ⏲️` {duration}" + (f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
+                           f" **|** `👍⠂Recomendada`\n"
+
+            embed_queue = disnake.Embed(title="Próximas músicas recomendadas:", color=player.bot.get_color(player.guild.me),
+                                        description=f"\n{queue_txt}")
+
+            embed_queue.set_image(url=queue_img)
+
         embed.description = txt
 
         embed.set_image(url=player.current.thumb or "https://media.discordapp.net/attachments/480195401543188483/987830071815471114/musicequalizer.gif")

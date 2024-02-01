@@ -114,28 +114,39 @@ class DefaultProgressbarSkin:
 
         rainbow_bar = "https://cdn.discordapp.com/attachments/554468640942981147/1127294696025227367/rainbow_bar3.gif"
 
-        if qlenght and player.mini_queue_enabled:
+        if player.mini_queue_enabled:
 
-            queue_txt = "\n".join(
-                f"`{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 21)}`]({t.uri})"
-                for n, t in (enumerate(itertools.islice(player.queue, 3)))
-            )
+            if qlenght:
 
-            embed_queue = disnake.Embed(title=f"Músicas na fila: {qlenght}", color=player.bot.get_color(player.guild.me),
-                                        description=f"\n{queue_txt}")
+                queue_txt = "\n".join(
+                    f"`{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 21)}`]({t.uri})"
+                    for n, t in (enumerate(itertools.islice(player.queue, 3)))
+                )
 
-            if not player.loop and not player.keep_connected and not player.paused and not player.current.is_stream:
+                embed_queue = disnake.Embed(title=f"Músicas na fila: {qlenght}", color=player.bot.get_color(player.guild.me),
+                                            description=f"\n{queue_txt}")
 
-                queue_duration = 0
+                if not player.loop and not player.keep_connected and not player.paused and not player.current.is_stream:
 
-                for t in player.queue:
-                    if not t.is_stream:
-                        queue_duration += t.duration
+                    queue_duration = 0
 
-                if queue_duration:
-                    embed_queue.description += f"\n`[⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + (player.current.duration if not player.current.is_stream else 0)) - player.position)).timestamp())}:R> `⌛]`"
+                    for t in player.queue:
+                        if not t.is_stream:
+                            queue_duration += t.duration
 
-            embed_queue.set_image(url=rainbow_bar)
+                    if queue_duration:
+                        embed_queue.description += f"\n`[⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + (player.current.duration if not player.current.is_stream else 0)) - player.position)).timestamp())}:R> `⌛]`"
+
+                embed_queue.set_image(url=rainbow_bar)
+
+            elif len(player.queue_autoplay):
+                queue_txt = "\n".join(
+                    f"`👍⠂{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 21)}`]({t.uri})"
+                    for n, t in (enumerate(itertools.islice(player.queue_autoplay, 3)))
+                )
+                embed_queue = disnake.Embed(title="Próximas músicas recomendadas:", color=player.bot.get_color(player.guild.me),
+                                            description=f"\n{queue_txt}")
+                embed_queue.set_image(url=rainbow_bar)
 
         embed.description = txt
         embed.set_image(url=rainbow_bar)
