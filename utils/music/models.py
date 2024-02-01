@@ -1934,7 +1934,7 @@ class LavalinkPlayer(wavelink.Player):
 
         try:
             if self.static and isinstance(self.text_channel.parent, disnake.ForumChannel):
-                data["content"] = f"`{'▶️' if not self.paused else '⏸️'} {fix_characters(self.current.title, 50)}` |\n\n" + data.get("content", "")
+                data["content"] = f"`{'▶️' if not self.paused else '⏸️'} {fix_characters(self.current.title, 50)}` |\n\n" + (data.get("content") or "")
         except:
             pass
 
