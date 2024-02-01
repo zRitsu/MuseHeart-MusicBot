@@ -531,7 +531,7 @@ class PlayerSession(commands.Cog):
                 )
 
                 try:
-                    check = any(m for m in player.guild.me.voice.channel.members if not m.bot)
+                    check = any(m for m in player.guild.me.voice.channel.members if not m.bot or not (m.voice.deaf or m.voice.self_deaf))
                 except:
                     check = None
 
