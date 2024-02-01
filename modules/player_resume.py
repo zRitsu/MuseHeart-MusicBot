@@ -476,36 +476,6 @@ class PlayerSession(commands.Cog):
                 if player.nightcore:
                     await player.set_timescale(pitch=1.2, speed=1.1)
 
-                tracks, playlists = self.process_track_cls(data["queue"])
-
-                player.queue.extend(tracks)
-
-                played_tracks, playlists = self.process_track_cls(data["played"], playlists)
-
-                player.played.extend(played_tracks)
-
-                queue_autoplay_tracks, playlists = self.process_track_cls(data.get("queue_autoplay", []))
-
-                player.queue_autoplay.extend(queue_autoplay_tracks)
-
-                failed_tracks, playlists = self.process_track_cls(data.get("failed_tracks", []), playlists)
-
-                player.failed_tracks.extend(failed_tracks)
-
-                if player.keep_connected and not player.queue:
-                    if player.failed_tracks:
-                        player.queue.extend(reversed(player.failed_tracks))
-                        player.failed_tracks.clear()
-                    if not player.queue:
-                        player.queue.extend(player.played)
-                        player.played.clear()
-
-                playlists.clear()
-                tracks.clear()
-                played_tracks.clear()
-                queue_autoplay_tracks.clear()
-                failed_tracks.clear()
-
                 await player.connect(voice_channel.id)
 
                 wait_counter = 60
@@ -530,6 +500,30 @@ class PlayerSession(commands.Cog):
                     except Exception as e:
                         print(f"{self.bot.user} - Falha ao falar no palco do servidor {guild.name}. Erro: {repr(e)}")
                         continue
+
+                tracks, playlists = self.process_track_cls(data["queue"])
+
+                player.queue.extend(tracks)
+
+                played_tracks, playlists = self.process_track_cls(data["played"], playlists)
+
+                player.played.extend(played_tracks)
+
+                queue_autoplay_tracks, playlists = self.process_track_cls(data.get("queue_autoplay", []))
+
+                player.queue_autoplay.extend(queue_autoplay_tracks)
+
+                failed_tracks, playlists = self.process_track_cls(data.get("failed_tracks", []), playlists)
+
+                player.failed_tracks.extend(failed_tracks)
+
+                if player.keep_connected and not player.queue:
+                    if player.failed_tracks:
+                        player.queue.extend(reversed(player.failed_tracks))
+                        player.failed_tracks.clear()
+                    if not player.queue:
+                        player.queue.extend(player.played)
+                        player.played.clear()
 
                 player.set_command_log(
                     text="O player foi restaurado com sucesso!",
