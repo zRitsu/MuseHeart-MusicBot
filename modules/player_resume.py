@@ -508,8 +508,17 @@ class PlayerSession(commands.Cog):
 
                 await player.connect(voice_channel.id)
 
-                while not guild.me.voice:
-                    await asyncio.sleep(1)
+                wait_counter = 60
+
+                while wait_counter > 1:
+                    if not guild.me.voice:
+                        await asyncio.sleep(1)
+                        continue
+                    break
+
+                if not wait_counter:
+                    print(f"{self.bot.user} - {guild.name}: Player ignorado devido a demora para conectar no canal de voz.")
+                    continue
 
                 if isinstance(voice_channel, disnake.StageChannel) and \
                         voice_channel.permissions_for(guild.me).mute_members:
