@@ -1698,7 +1698,7 @@ class MusicSettings(commands.Cog):
 
     @commands.slash_command(cooldown=customskin_cd, max_concurrency=customskin__mc,
                             description=f"{desc_prefix}Criar suas próprias skins/templates para o player de música.",
-                            default_member_permissions=disnake.Permissions(administrator=True))
+                            default_member_permissions=disnake.Permissions(administrator=True), dm_permission=False)
     async def custom_skin(self, inter: disnake.AppCmdInter):
 
         inter, bot = await select_bot_pool(inter, return_new=True)
