@@ -4919,6 +4919,9 @@ class Music(commands.Cog):
 
             if control == PlayerControls.enqueue_fav:
 
+                if not interaction.user.voice:
+                    raise GenericError("**Você deve entrar em um canal de voz para usar esse botão.**")
+
                 cmd_kwargs = {
                     "query": kwargs.get("query", ""),
                     "position": 0,
