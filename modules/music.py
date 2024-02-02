@@ -6423,6 +6423,10 @@ class Music(commands.Cog):
         except KeyError:
             return
 
+        if member.bot and player.bot.user.id != member.id:
+            # ignorar outros bots
+            return
+
         if before.channel == after.channel:
             try:
                 vc = player.guild.me.voice.channel
@@ -6438,10 +6442,6 @@ class Music(commands.Cog):
                 except:
                     check = None
                 player.members_timeout_task = player.bot.loop.create_task(player.members_timeout(check=bool(check)))
-            return
-
-        if member.bot and player.bot.user.id != member.id:
-            # ignorar outros bots
             return
 
         try:
