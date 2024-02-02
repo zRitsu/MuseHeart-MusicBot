@@ -1106,8 +1106,11 @@ class BotCore(commands.AutoShardedBot):
 
     async def on_application_command_autocomplete(self, inter: disnake.ApplicationCommandInteraction):
 
-        if not self.bot_ready or not inter.guild_id:
-            return
+        if not self.bot_ready:
+            return []
+
+        if not inter.guild_id:
+            return []
 
         await super().on_application_command_autocomplete(inter)
 
@@ -1128,6 +1131,22 @@ class BotCore(commands.AutoShardedBot):
                       f" - [cmd: {inter.data.name}] {datetime.datetime.utcnow().strftime('%d/%m/%Y - %H:%M:%S')} (UTC) - {inter.filled_options}\n" + ("-" * 15))
             except:
                 traceback.print_exc()
+
+
+
+        if str(self.user.id) in self.config["INTERACTION_BOTS_CONTROLLER"]:
+
+            available_bot = False
+
+            for bot in self.pool.bots:
+                if bot.get_guild(inter.guild_id) and bot.appinfo and (bot.appinfo.bot_public or await bot.is_owner(inter.author)):
+                    available_bot = True
+                    break
+
+            if not available_bot:
+                await inter.send("**Não há bots disponíveis no servidor, Adicione pelo menos um clicando no botão abaixo.**",
+                                 ephemeral=True, components=[disnake.ui.Button(custom_id="bot_invite", label="Adicionar bots")])
+                return
 
         await super().on_application_command(inter)
 
