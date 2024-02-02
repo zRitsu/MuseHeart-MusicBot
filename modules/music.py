@@ -608,10 +608,9 @@ class Music(commands.Cog):
     stage_flags.add_argument('-server', '-sv', type=str, default=None, help='Usar um servidor de música específico.')
 
     @can_send_message_check()
-    @check_voice()
     @commands.bot_has_guild_permissions(send_messages=True)
     @commands.max_concurrency(1, commands.BucketType.member)
-    @pool_command(name="play", description="Tocar música em um canal de voz.", aliases=["p"], check_player=False,
+    @pool_command(name="play", description="Tocar música em um canal de voz.", aliases=["p"], return_first=True,
                   cooldown=play_cd, max_concurrency=play_mc, extras={"flags": stage_flags},
                   usage="{prefix}{cmd} [nome|link]\nEx: {prefix}{cmd} sekai - burn me down")
     async def play_legacy(self, ctx: CustomContext, *, flags: str = ""):
@@ -632,10 +631,9 @@ class Music(commands.Cog):
         )
 
     @can_send_message_check()
-    @check_voice()
     @commands.bot_has_guild_permissions(send_messages=True)
     @pool_command(name="search", description="Pesquisar por músicas e escolher uma entre os resultados para tocar.",
-                  aliases=["sc"], check_player=False, cooldown=play_cd, max_concurrency=play_mc,
+                  aliases=["sc"], return_first=True, cooldown=play_cd, max_concurrency=play_mc,
                   usage="{prefix}{cmd} [nome]\nEx: {prefix}{cmd} sekai - burn me down")
     async def search_legacy(self, ctx: CustomContext, *, query):
 
@@ -643,11 +641,10 @@ class Music(commands.Cog):
                                  manual_selection=True, source=None, repeat_amount=0, server=None)
 
     @can_send_message_check()
-    @check_voice()
     @commands.slash_command(
         name="play_music_file", dm_permission=False,
         description=f"{desc_prefix}Tocar arquivo de música em um canal de voz.",
-        extras={"check_player": False}, cooldown=play_cd, max_concurrency=play_mc
+        extras={"return_first": True}, cooldown=play_cd, max_concurrency=play_mc
     )
     async def play_file(
             self,
@@ -713,10 +710,9 @@ class Music(commands.Cog):
         return tracks
 
     @can_send_message_check()
-    @check_voice()
     @commands.slash_command(
         description=f"{desc_prefix}Tocar música em um canal de voz.", dm_permission=False,
-        extras={"check_player": False}, cooldown=play_cd, max_concurrency=play_mc
+        extras={"return_first": True}, cooldown=play_cd, max_concurrency=play_mc
     )
     async def play(
             self,
@@ -751,11 +747,106 @@ class Music(commands.Cog):
         try:
             bot = inter.music_bot
             guild = inter.music_guild
-            channel = bot.get_channel(inter.channel.id)
         except AttributeError:
             bot = inter.bot
             guild = inter.guild
-            channel = inter.channel
+
+        msg = None
+        inter, guild_data = await get_inter_guild_data(inter, bot)
+        ephemeral = None
+
+        if not inter.response.is_done():
+            ephemeral = await self.is_request_channel(inter, data=guild_data, ignore_thread=True)
+            await inter.response.defer(ephemeral=ephemeral)
+
+        if not inter.author.voice:
+            color = self.bot.get_color(guild.me)
+            if isinstance(inter, CustomContext):
+                func = inter.send
+            else:
+                func = inter.edit_original_message
+            msg = await func(
+                embed=disnake.Embed(
+                    description=f"**{inter.author.mention}, entre em um canal de voz para prosseguir sua música.**", color=color
+                )
+            )
+
+            if msg:
+                inter.store_message = msg
+
+            try:
+                await bot.wait_for("voice_state_update", timeout=20, check=lambda m, b, a: m.id == inter.author.id and m.voice)
+            except asyncio.TimeoutError:
+                try:
+                    func = msg.edit
+                except:
+                    func = inter.edit_original_message
+                await func(
+                    embed=disnake.Embed(
+                        description=f"{inter.author.mention}, o tempo de espera para conectar em um canal de voz foi esgotado...", color=color
+                    )
+                )
+                return
+
+            await asyncio.sleep(1)
+
+            # TODO: Criar função dedicada para reaproveitar esse loop na função check_pool_bots
+
+            bot = None
+
+            bot_missing_perms = []
+
+            for b in sorted(inter.bot.pool.bots, key=lambda b: b.identifier):
+
+                if not b.bot_ready:
+                    continue
+
+                if not (guild := b.get_guild(inter.guild_id)):
+                    continue
+
+                if not (author := guild.get_member(inter.author.id)):
+                    continue
+
+                inter.author = author
+
+                if b.user.id in author.voice.channel.voice_states:
+                    inter.music_bot = b
+                    inter.music_guild = guild
+                    bot = b
+                    break
+
+                channel = b.get_channel(inter.channel.id)
+
+                if isinstance(channel, disnake.Thread):
+                    send_message_perm = channel.parent.permissions_for(channel.guild.me).send_messages_in_threads
+                else:
+                    send_message_perm = channel.permissions_for(channel.guild.me).send_messages
+
+                if not send_message_perm:
+                    if not guild.me.voice:
+                        bot_missing_perms.append(b)
+                    continue
+
+                if not guild.me.voice:
+                    bot = b
+                    break
+
+            if bot_missing_perms:
+                raise GenericError(f"**Há bots de música disponíveis no servidor mas estão sem permissão de enviar mensagens no canal <#{inter.channel_id}>**:\n\n" + \
+                ", ".join(b.user.mention for b in bot_missing_perms))
+
+            if not bot:
+                raise GenericError("**Não há bots disponíveis...**")
+
+            try:
+                inter.music_bot = bot
+                inter.music_guild = guild
+            except:
+                pass
+
+        else:
+            channel = bot.get_channel(inter.channel.id)
+            await check_pool_bots(inter, check_player=False)
 
         if force_play == "yes":
             await check_player_perm(inter=inter, bot=bot, channel=channel)
@@ -767,9 +858,7 @@ class Music(commands.Cog):
 
         await self.check_player_queue(inter.author, bot, guild.id)
 
-        msg = None
         query = query.replace("\n", " ").strip()
-        ephemeral = None
         warn_message = None
         queue_loaded = False
         reg_query = None
@@ -899,6 +988,9 @@ class Music(commands.Cog):
             if user_data["last_tracks"]:
                 opts.append(disnake.SelectOption(label="Adicionar música recente", value=">> [📑 Músicas recentes 📑] <<", emoji="📑"))
                 
+            if isinstance(inter, disnake.MessageInteraction) and not inter.response.is_done():
+                await inter.response.defer(ephemeral=ephemeral)
+
             if not guild_data:
 
                 if inter.bot == bot:
@@ -911,13 +1003,13 @@ class Music(commands.Cog):
 
             view = SelectInteraction(user=inter.author, timeout=45, opts=opts)
 
-            if isinstance(inter, disnake.MessageInteraction) and not inter.response.is_done():
-                await inter.response.defer(ephemeral=ephemeral)
-
             try:
-                msg = await inter.followup.send(ephemeral=ephemeral, view=view, wait=True, **kwargs)
-            except (disnake.InteractionTimedOut, AttributeError):
-                msg = await inter.channel.send(view=view, **kwargs)
+                await msg.edit(view=view, **kwargs)
+            except AttributeError:
+                try:
+                    await inter.edit_original_message(view=view, **kwargs)
+                except AttributeError:
+                    await inter.send(view=view, **kwargs)
 
             await view.wait()
 

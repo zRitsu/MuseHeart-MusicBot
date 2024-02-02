@@ -70,6 +70,10 @@ class CustomContext(commands.Context):
         self.application_command = None
 
     async def defer(self, ephemeral: bool = False):
+
+        if ephemeral:
+            return
+
         if self.bot.config["ENABLE_DEFER_TYPING"]:
             await self.trigger_typing()
         else:
