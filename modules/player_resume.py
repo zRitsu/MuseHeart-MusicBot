@@ -475,6 +475,7 @@ class PlayerSession(commands.Cog):
 
                 while wait_counter > 1:
                     if not guild.me.voice:
+                        wait_counter -= 1
                         await asyncio.sleep(1)
                         continue
                     break
