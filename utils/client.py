@@ -1139,7 +1139,7 @@ class BotCore(commands.AutoShardedBot):
             available_bot = False
 
             for bot in self.pool.bots:
-                if bot.get_guild(inter.guild_id) and bot.appinfo and (bot.appinfo.bot_public or await bot.is_owner(inter.author)):
+                if bot.appinfo and (bot.appinfo.bot_public or await bot.is_owner(inter.author)) and bot.get_guild(inter.guild_id):
                     available_bot = True
                     break
 
