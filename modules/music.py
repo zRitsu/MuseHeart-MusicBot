@@ -760,14 +760,23 @@ class Music(commands.Cog):
             await inter.response.defer(ephemeral=ephemeral)
 
         if not inter.author.voice:
+
+            if not (c for c in guild.channels if c.permissions_for(inter.author).connect):
+                raise GenericError(f"**Você não está conectado a um canal de voz, e não há canais de voz/palcos "
+                                   "disponíveis no servidor que concedam a permissão para você se conectar.**")
+
             color = self.bot.get_color(guild.me)
+
             if isinstance(inter, CustomContext):
                 func = inter.send
             else:
                 func = inter.edit_original_message
+
             msg = await func(
                 embed=disnake.Embed(
-                    description=f"**{inter.author.mention}, entre em um canal de voz para prosseguir sua música.**", color=color
+                    description=f"**{inter.author.mention} entre em um canal de voz para tocar sua música.**\n"
+                                f"**Caso não conecte em um canal em até 25 segundos essa operação será cancelada.**",
+                    color=color
                 )
             )
 
@@ -775,7 +784,7 @@ class Music(commands.Cog):
                 inter.store_message = msg
 
             try:
-                await bot.wait_for("voice_state_update", timeout=20, check=lambda m, b, a: m.id == inter.author.id and m.voice)
+                await bot.wait_for("voice_state_update", timeout=25, check=lambda m, b, a: m.id == inter.author.id and m.voice)
             except asyncio.TimeoutError:
                 try:
                     func = msg.edit
@@ -783,7 +792,8 @@ class Music(commands.Cog):
                     func = inter.edit_original_message
                 await func(
                     embed=disnake.Embed(
-                        description=f"{inter.author.mention}, o tempo de espera para conectar em um canal de voz foi esgotado...", color=color
+                        description=f"**{inter.author.mention} operação cancelada.**\n"
+                                    f"**Você demorou para conectar em um canal de voz/palco.**", color=color
                     )
                 )
                 return
