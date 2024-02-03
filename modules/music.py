@@ -827,6 +827,9 @@ class Music(commands.Cog):
 
                 channel = b.get_channel(inter.channel.id)
 
+                if not channel:
+                    continue
+
                 if isinstance(channel, disnake.Thread):
                     send_message_perm = channel.parent.permissions_for(channel.guild.me).send_messages_in_threads
                 else:
