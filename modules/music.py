@@ -1142,7 +1142,6 @@ class Music(commands.Cog):
                         except AttributeError:
                             func = inter.send
 
-                func = msg.edit
                 msg = await func(view=view, **kwargs)
 
                 await view.wait()
