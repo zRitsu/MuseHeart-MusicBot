@@ -448,8 +448,12 @@ async def send_idle_embed(
         channel = bot.get_channel(target.id)
 
         if isinstance(channel, disnake.Thread) and guild_data["player_controller"]["channel"] == str(channel.id):
+            if is_forum:
+                func = channel.fetch_message
+            else:
+                func = channel.parent.fetch_message
             try:
-                message = await channel.parent.fetch_message(channel.id)
+                message = await func(channel.id)
             except disnake.NotFound:
                 message = None
                 if isinstance(channel.parent, disnake.ForumChannel):
