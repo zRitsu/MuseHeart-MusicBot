@@ -1009,7 +1009,7 @@ class Music(commands.Cog):
                 try:
                     await inter.edit_original_message(view=view, **kwargs)
                 except AttributeError:
-                    await inter.send(view=view, **kwargs)
+                    msg = await inter.send(view=view, **kwargs)
 
             await view.wait()
 
@@ -1142,6 +1142,7 @@ class Music(commands.Cog):
                         except AttributeError:
                             func = inter.send
 
+                func = msg.edit
                 msg = await func(view=view, **kwargs)
 
                 await view.wait()
@@ -6726,7 +6727,7 @@ def setup(bot: BotCore):
                 'no_warnings': True,
                 'lazy_playlist': True,
                 'simulate': True,
-                'cachedir': False,
+                'cachedir': "./.ytdl_cache",
                 'allowed_extractors': [
                     r'.*youtube.*',
                     r'.*soundcloud.*',
