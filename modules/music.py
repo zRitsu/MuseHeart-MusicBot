@@ -6555,10 +6555,35 @@ class Music(commands.Cog):
         except AttributeError:
             pass
 
-        if member.id == player.bot.user.id and member.guild.voice_client and after.channel:
-            # tempfix para channel do voice_client não ser setado ao mover bot do canal.
-            player.guild.voice_client.channel = after.channel
-            player.last_channel = after.channel
+        if member.id == player.bot.user.id:
+
+            for b in self.bot.pool.bots:
+                if b == player.bot:
+                    continue
+                try:
+                    try:
+                        after.channel.voice_states[b.user.id]
+                    except KeyError:
+                        continue
+                    if before.channel.permissions_for(member.guild.me).connect:
+                        await asyncio.sleep(1)
+                        await player.guild.voice_client.move_to(before.channel)
+                    else:
+                        player.set_command_log(text="O player foi finalizado porque me moveram ao canal "
+                                                    f"{after.channel.mention} no qual o bot {b.user.mention} "
+                                                    "também estava conectado gerando incompatibilidade com "
+                                                    "meu sistema de multi-voice.", emoji="⚠️")
+                        await player.destroy()
+                    return
+                except AttributeError:
+                    pass
+                except Exception:
+                    traceback.print_exc()
+
+            if member.guild.voice_client and after.channel:
+                # tempfix para channel do voice_client não ser setado ao mover bot do canal.
+                player.guild.voice_client.channel = after.channel
+                player.last_channel = after.channel
 
         try:
             check = [m for m in player.guild.me.voice.channel.members if not m.bot and not (m.voice.deaf or m.voice.self_deaf)]
