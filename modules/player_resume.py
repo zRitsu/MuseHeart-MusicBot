@@ -137,13 +137,18 @@ class PlayerSession(commands.Cog):
                 t.info["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
             failed_tracks.append(t.info)
 
+        try:
+            vc_id = player.guild.me.voice.channel.id
+        except AttributeError:
+            vc_id = player.last_channel.id
+
         data = {
             "_id": player.guild.id,
             "version": getattr(player, "version", 1),
             "volume": player.volume,
             "nightcore": player.nightcore,
             "position": player.position,
-            "voice_channel": player.guild.me.voice.channel.id,
+            "voice_channel": vc_id,
             "dj": player.dj,
             "player_creator": player.player_creator,
             "static": player.static,
