@@ -928,36 +928,6 @@ class LavalinkPlayer(wavelink.Player):
                 await self.connect(vc_id)
                 return
 
-            if event.code == 4014:
-                await asyncio.sleep(5)
-
-                vc = self.bot.get_channel(self.last_channel.id)
-
-                if not vc:
-
-                    msg = "O canal de voz foi excluido..."
-
-                    if self.static:
-                        self.command_log = msg
-                        await self.destroy()
-
-                    else:
-                        embed = disnake.Embed(
-                            description=msg,
-                            color=self.bot.get_color(self.guild.me))
-                        try:
-                            self.bot.loop.create_task(self.text_channel.send(embed=embed, delete_after=7))
-                        except:
-                            traceback.print_exc()
-                        await self.destroy()
-
-                elif not self.guild.me.voice:
-                    await self.connect(vc.id)
-
-                return
-
-            return
-
         if isinstance(event, wavelink.TrackStuck):
 
             await self.bot.wait_until_ready()
@@ -978,6 +948,9 @@ class LavalinkPlayer(wavelink.Player):
 
             await self.process_next()
 
+            return
+
+        elif isinstance(event, wavelink.WebsocketClosed):
             return
 
         print(f"Unknown Wavelink event: {repr(event)}")

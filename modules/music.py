@@ -6498,8 +6498,45 @@ class Music(commands.Cog):
         except KeyError:
             return
 
-        if member.bot and player.bot.user.id != member.id:
+        if member.bot:
             # ignorar outros bots
+            if player.bot.user.id == member.id and not after.channel and not player.is_closing:
+
+                last_channel_id = int(player.last_channel.id)
+
+                await asyncio.sleep(3)
+
+                vc = self.bot.get_channel(last_channel_id)
+
+                if not vc:
+
+                    msg = "O canal de voz foi excluido..."
+
+                    if player.static:
+                        player.set_command_log(msg)
+                        await player.destroy()
+
+                    else:
+                        embed = disnake.Embed(
+                            description=msg,
+                            color=self.bot.get_color(member))
+                        try:
+                            self.bot.loop.create_task(self.text_channel.send(embed=embed, delete_after=7))
+                        except:
+                            traceback.print_exc()
+                        await player.destroy()
+
+                else:
+                    while not member.voice:
+                        if not player._new_node_task:
+                            try:
+                                await player.connect(vc.id)
+                                break
+                            except Exception:
+                                traceback.print_exc()
+                        if player.is_closing:
+                            return
+                        await asyncio.sleep(30)
             return
 
         if before.channel == after.channel:
