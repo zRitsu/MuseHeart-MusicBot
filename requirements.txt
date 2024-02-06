@@ -1,6 +1,6 @@
 disnake>=2.9.1
 python-dotenv
-git+https://github.com/lorien/user_agent.git
+user_agent
 requests>=2.31.0
 humanize
 motor[srv]
