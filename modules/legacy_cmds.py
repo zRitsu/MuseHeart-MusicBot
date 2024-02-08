@@ -20,8 +20,10 @@ from config_loader import DEFAULT_CONFIG, load_config
 from utils.client import BotCore
 from utils.db import DBModel
 from utils.music.checks import check_voice, check_requester_channel, can_connect
+from utils.music.converters import URL_REG
 from utils.music.errors import GenericError
-from utils.others import sync_message, CustomContext, string_to_file, token_regex, CommandArgparse, get_inter_guild_data
+from utils.others import sync_message, CustomContext, string_to_file, token_regex, CommandArgparse, \
+    select_bot_pool
 from utils.owner_panel import panel_command, PanelView
 
 
@@ -979,6 +981,38 @@ class Owner(commands.Cog):
             await asyncio.sleep(1.5)
 
         await player.process_next()
+
+    @commands.is_owner()
+    @commands.command(hidden=True, aliases=["setbotavatar"], description="Alterar o avatar do bot usando link direto de uma imagem jpg ou gif.")
+    async def setavatar(self, ctx: CustomContext, url: str = None):
+
+        if not url:
+            raise GenericError("Você deve informar um link de uma imagem ou gif no comando.")
+
+        if not URL_REG.match(url):
+            raise GenericError("Você não informou um link válido.")
+
+        inter, bot = await select_bot_pool(ctx, return_new=True)
+
+        if not bot:
+            return
+
+        await inter.response.defer(ephemeral=True)
+
+        async with ctx.bot.session.get(url) as r:
+            image_bytes = await r.read()
+
+        await bot.user.edit(avatar=image_bytes)
+
+        try:
+            func = inter.edit_original_message
+        except AttributeError:
+            try:
+                func = inter.response.edit_message
+            except AttributeError:
+                func = inter.send
+
+        await func(f"O [avatar]({bot.user.display_avatar.with_static_format('png').url}) do bot {bot.user.mention} foi alterado com sucesso.")
 
     async def cog_check(self, ctx: CustomContext) -> bool:
         return await check_requester_channel(ctx)
