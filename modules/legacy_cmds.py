@@ -984,13 +984,15 @@ class Owner(commands.Cog):
 
     @commands.is_owner()
     @commands.command(hidden=True, aliases=["setbotavatar"], description="Alterar o avatar do bot usando link direto de uma imagem jpg ou gif.")
-    async def setavatar(self, ctx: CustomContext, url: str = None):
+    async def setavatar(self, ctx: CustomContext, url: str = ""):
+
+        url = url.strip("<>")
 
         if not url:
             raise GenericError("Você deve informar um link de uma imagem ou gif no comando.")
 
         if not URL_REG.match(url):
-            raise GenericError("Você não informou um link válido.")
+            raise GenericError("Você informou um link inválido.")
 
         inter, bot = await select_bot_pool(ctx, return_new=True)
 
