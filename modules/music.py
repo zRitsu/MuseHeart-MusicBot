@@ -754,6 +754,7 @@ class Music(commands.Cog):
         msg = None
         inter, guild_data = await get_inter_guild_data(inter, bot)
         ephemeral = None
+        channel = None
 
         if not inter.response.is_done():
             ephemeral = await self.is_request_channel(inter, data=guild_data, ignore_thread=True)
