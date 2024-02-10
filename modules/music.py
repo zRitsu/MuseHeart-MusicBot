@@ -859,6 +859,8 @@ class Music(commands.Cog):
 
         else:
             channel = bot.get_channel(inter.channel.id)
+            if not channel:
+                raise GenericError(f"**O canal <#{inter.channel.id}> não foi encontrado (ou foi excluido).**")
             await check_pool_bots(inter, check_player=False)
 
         if force_play == "yes":
