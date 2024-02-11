@@ -825,9 +825,9 @@ class Music(commands.Cog):
 
                 if p:
                     try:
-                        vc = p.last_channel
-                    except AttributeError:
                         vc = g.me.voice.channel
+                    except AttributeError:
+                        vc = p.last_channel
                     if vc and inter.author.id not in vc.voice_states:
                         continue
 
