@@ -2874,10 +2874,24 @@ class SelectBotVoice(disnake.ui.View):
 
         player = bot.music.players.get(inter.guild_id)
 
-        if player and inter.author.id not in (player.guild.me.voice or player.last_channel).voice_states:
-            await inter.send(f"{bot.user.mention} já está em uso no canal {guild.me.voice.channel.mention}", ephemeral=True)
-            await self.update_message()
-            return
+        if player:
+
+            try:
+                vc = player.guild.me.voice.channel
+            except AttributeError:
+                vc = player.last_channel
+
+            if not vc:
+                await inter.send(
+                    f"{bot.user.mention} está com player ativo mas não está conectado em um canal de voz...",
+                    ephemeral=True)
+                await self.update_message()
+                return
+
+            if inter.author.id not in vc.voice_states:
+                await inter.send(f"{bot.user.mention} já está em uso no canal {vc.mention}", ephemeral=True)
+                await self.update_message()
+                return
 
         inter.author = guild.get_member(inter.author.id)
 
