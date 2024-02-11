@@ -21,7 +21,7 @@ from utils.client import BotCore
 from utils.db import DBModel
 from utils.music.checks import check_voice, check_requester_channel, can_connect
 from utils.music.converters import URL_REG
-from utils.music.errors import GenericError
+from utils.music.errors import GenericError, NoVoice
 from utils.music.interactions import SelectBotVoice
 from utils.music.models import LavalinkPlayer
 from utils.others import sync_message, CustomContext, string_to_file, token_regex, CommandArgparse, \
@@ -991,6 +991,9 @@ class Owner(commands.Cog):
                         description=f"**Escolha qual bot você deseja usar no canal {ctx.author.voice.channel.mention}**",
                         color=self.bot.get_color(guild.me)), view=v
                 )
+
+                ctx.store_message = msg
+
                 await v.wait()
 
                 if v.status is None:
@@ -1006,6 +1009,9 @@ class Owner(commands.Cog):
                     await msg.edit(embed=disnake.Embed(description="### Você não está conectado em um canal de voz...",
                                                    color=self.bot.get_color(guild.me)), view=None)
                     return
+
+                if not v.inter.author.voice:
+                    raise NoVoice()
 
                 bot = v.bot
                 ctx = v.inter
