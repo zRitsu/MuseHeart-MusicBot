@@ -828,7 +828,7 @@ class Music(commands.Cog):
                         vc = g.me.voice.channel
                     except AttributeError:
                         vc = p.last_channel
-                    if vc and inter.author.id not in vc.voice_states:
+                    if not vc or inter.author.id not in vc.voice_states:
                         continue
 
                 free_bots.append(b)
