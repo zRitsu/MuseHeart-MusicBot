@@ -30,12 +30,12 @@ from utils.music.converters import time_format, fix_characters, string_to_second
 from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolException, parse_error, \
     EmptyFavIntegration
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction, FavMenuView, ViewMode, \
-    SetStageTitle
+    SetStageTitle, SelectBotVoice
 from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, PartialTrack
 from utils.music.spotify import process_spotify, spotify_regex_w_user
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, SongRequestPurgeMode, song_request_buttons, \
-    select_bot_pool, get_inter_guild_data
+    select_bot_pool, get_inter_guild_data, update_inter
 
 
 class Music(commands.Cog):
@@ -801,68 +801,89 @@ class Music(commands.Cog):
 
             await asyncio.sleep(1)
 
-            # TODO: Criar função dedicada para reaproveitar esse loop na função check_pool_bots
-
-            bot = None
-
-            bot_missing_perms = []
-
-            for b in sorted(inter.bot.pool.bots, key=lambda b: b.identifier):
-
-                if not b.bot_ready:
-                    continue
-
-                if not (guild := b.get_guild(inter.guild_id)):
-                    continue
-
-                if not (author := guild.get_member(inter.author.id)):
-                    continue
-
-                inter.author = author
-
-                if b.user.id in author.voice.channel.voice_states:
-                    inter.music_bot = b
-                    inter.music_guild = guild
-                    bot = b
-                    break
-
-                channel = b.get_channel(inter.channel.id)
-
-                if not channel:
-                    continue
-
-                if isinstance(channel, disnake.Thread):
-                    send_message_perm = channel.parent.permissions_for(channel.guild.me).send_messages_in_threads
-                else:
-                    send_message_perm = channel.permissions_for(channel.guild.me).send_messages
-
-                if not send_message_perm:
-                    if not guild.me.voice:
-                        bot_missing_perms.append(b)
-                    continue
-
-                if not guild.me.voice:
-                    bot = b
-                    break
-
-            if bot_missing_perms:
-                raise GenericError(f"**Há bots de música disponíveis no servidor mas estão sem permissão de enviar mensagens no canal <#{inter.channel_id}>**:\n\n" + \
-                ", ".join(b.user.mention for b in bot_missing_perms))
-
-            if not bot:
-                raise GenericError("**Não há bots disponíveis...**")
-
-            try:
-                inter.music_bot = bot
-                inter.music_guild = guild
-            except:
-                pass
-
         else:
             channel = bot.get_channel(inter.channel.id)
             if not channel:
                 raise GenericError(f"**O canal <#{inter.channel.id}> não foi encontrado (ou foi excluido).**")
             await check_pool_bots(inter, check_player=False)
+
+        if bot.user.id not in inter.author.voice.channel.voice_states:
+
+            free_bots = []
+
+            for b in self.bot.pool.bots:
+
+                if not b.bot_ready:
+                    continue
+
+                g = b.get_guild(inter.guild_id)
+
+                if not g:
+                    continue
+
+                p: LavalinkPlayer = b.music.players.get(inter.guild_id)
+
+                if p and inter.author.id not in p.last_channel.voice_states:
+                    continue
+
+                free_bots.append(b)
+
+            if len(free_bots) > 1:
+
+                v = SelectBotVoice(inter, guild, free_bots)
+
+                try:
+                    func = msg.edit
+                except AttributeError:
+                    try:
+                        func = inter.edit_original_message
+                    except AttributeError:
+                        func = inter.send
+
+                newmsg = await func(
+                    embed=disnake.Embed(
+                        description=f"**Escolha qual bot você deseja usar no canal {inter.author.voice.channel.mention}**",
+                        color=self.bot.get_color(guild.me)), view=v
+                )
+                await v.wait()
+
+                if newmsg:
+                    msg = newmsg
+
+                if v.status is None:
+                    try:
+                        func = msg.edit
+                    except AttributeError:
+                        func = inter.edit_original_message
+                    await func(embed=disnake.Embed(description="### Tempo esgotado...", color=self.bot.get_color(guild.me)), view=None)
+                    return
+
+                if v.status is False:
+                    try:
+                        func = msg.edit
+                    except AttributeError:
+                        func = inter.edit_original_message
+                    await func(embed=disnake.Embed(description="### Operação cancelada.",
+                                                   color=self.bot.get_color(guild.me)), view=None)
+                    return
+
+                if not v.inter.author.voice:
+                    try:
+                        func = msg.edit
+                    except AttributeError:
+                        func = inter.edit_original_message
+                    await func(embed=disnake.Embed(description="### Você não está conectado em um canal de voz...",
+                                                   color=self.bot.get_color(guild.me)), view=None)
+                    return
+
+                bot = v.bot
+                inter = v.inter
+                guild = v.guild
+                channel = bot.get_channel(inter.channel.id)
+                await inter.response.defer()
+
+        if not channel:
+            channel = bot.get_channel(inter.channel.id)
 
         if force_play == "yes":
             await check_player_perm(inter=inter, bot=bot, channel=channel)

@@ -2777,3 +2777,118 @@ class SkinEditorMenu(disnake.ui.View):
 
         self.update_components()
         await self.update_message(inter)
+
+class SelectBotVoice(disnake.ui.View):
+
+    def __init__(
+            self,
+            inter: Union[disnake.AppCmdInter, disnake.MessageInteraction, disnake.ModalInteraction, CustomContext],
+            guild: disnake.Guild, freebots: List[BotCore]
+    ):
+        super().__init__(timeout=45)
+        self.inter = inter
+        self.message: Optional[disnake.Message] = None
+        self.voice_channel = inter.author.voice.channel
+        self.guild = guild
+        self.build_interactions(freebots)
+        self.bot: Optional[BotCore] = None
+        self.status = None
+
+    def build_interactions(self, freebots: List[BotCore] = None):
+
+        self.clear_items()
+
+        bot_select_opts = []
+
+        if freebots:
+            bot_select_opts.extend([disnake.SelectOption(label=b.user.display_name, value=f"bot_voice_{b.user.id}") for b in freebots])
+
+        else:
+            for b in self.inter.bot.pool.bots:
+
+                if not b.bot_ready:
+                    continue
+
+                guild = b.get_guild(self.inter.guild_id)
+
+                if not guild:
+                    continue
+
+                player: LavalinkPlayer = b.music.players.get(self.inter.guild_id)
+
+                if player and self.inter.author.id not in player.last_channel.voice_states:
+                    continue
+
+                bot_select_opts.append(disnake.SelectOption(label=b.user.display_name, value=f"bot_voice_{b.user.id}"))
+
+        if not bot_select_opts:
+            self.status = False
+            self.stop()
+            return
+
+        bot_select = disnake.ui.Select(min_values=0, max_values=1, options=bot_select_opts)
+        bot_select.callback = self.bot_select_callback
+        self.add_item(bot_select)
+
+        refresh_btn = disnake.ui.Button(label="Atualizar lista", emoji="🔄", style=disnake.ButtonStyle.blurple)
+        refresh_btn.callback = self.reload_callback
+        self.add_item(refresh_btn)
+
+        cancel_btn = disnake.ui.Button(label="Cancelar", emoji="❌")
+        cancel_btn.callback = self.cancel_callback
+        self.add_item(cancel_btn)
+
+    async def update_message(self):
+        self.build_interactions()
+        if self.message:
+            await self.message.edit(view=self)
+        else:
+            await self.inter.edit_original_message(view=self)
+
+    async def reload_callback(self, inter: disnake.MessageInteraction):
+        self.build_interactions()
+        await inter.response.edit_message(view=self)
+
+    async def cancel_callback(self, inter: disnake.MessageInteraction):
+        self.status = False
+        self.inter = inter
+        self.stop()
+
+    async def bot_select_callback(self, inter: disnake.MessageInteraction):
+
+        bot_id = int(inter.values[0][10:])
+
+        try:
+            bot = [b for b in self.inter.bot.pool.bots if b.bot_ready and b.user.id == bot_id][0]
+        except IndexError:
+            await inter.send(f"<@{bot_id}> não está mais presente no servidor...", ephemeral=True)
+            await self.update_message()
+            return
+
+        guild = bot.get_guild(inter.guild_id)
+
+        if not guild:
+            await inter.send(f"{bot.user.mention} não está mais no servidor...", ephemeral=True)
+            await self.update_message()
+            return
+
+        player = bot.music.players.get(inter.guild_id)
+
+        if player and inter.author.id not in (player.guild.me.voice or player.last_channel).voice_states:
+            await inter.send(f"{bot.user.mention} já está em uso no canal {guild.me.voice.channel.mention}", ephemeral=True)
+            await self.update_message()
+            return
+
+        inter.author = guild.get_member(inter.author.id)
+
+        try:
+            inter.music_guild = guild
+            inter.music_bot = bot
+        except AttributeError:
+            pass
+
+        self.bot = bot
+        self.inter = inter
+        self.guild = guild
+        self.status = True
+        self.stop()

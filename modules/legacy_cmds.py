@@ -22,6 +22,8 @@ from utils.db import DBModel
 from utils.music.checks import check_voice, check_requester_channel, can_connect
 from utils.music.converters import URL_REG
 from utils.music.errors import GenericError
+from utils.music.interactions import SelectBotVoice
+from utils.music.models import LavalinkPlayer
 from utils.others import sync_message, CustomContext, string_to_file, token_regex, CommandArgparse, \
     select_bot_pool
 from utils.owner_panel import panel_command, PanelView
@@ -954,29 +956,91 @@ class Owner(commands.Cog):
         except KeyError:
             pass
 
-        can_connect(channel=ctx.author.voice.channel, guild=ctx.guild)
+        bot = ctx.bot
+        guild = ctx.guild
+        channel = ctx.channel
+        msg = None
 
-        node: wavelink.Node = self.bot.music.get_best_node()
+        if bot.user.id not in ctx.author.voice.channel.voice_states:
+
+            free_bots = []
+
+            for b in self.bot.pool.bots:
+
+                if not b.bot_ready:
+                    continue
+
+                g = b.get_guild(ctx.guild_id)
+
+                if not g:
+                    continue
+
+                p = b.music.players.get(ctx.guild_id)
+
+                if p and ctx.author.id not in p.last_channel.voice_states:
+                    continue
+
+                free_bots.append(b)
+
+            if len(free_bots) > 1:
+
+                v = SelectBotVoice(ctx, guild, free_bots)
+
+                msg = await ctx.send(
+                    embed=disnake.Embed(
+                        description=f"**Escolha qual bot você deseja usar no canal {ctx.author.voice.channel.mention}**",
+                        color=self.bot.get_color(guild.me)), view=v
+                )
+                await v.wait()
+
+                if v.status is None:
+                    await msg.edit(embed=disnake.Embed(description="### Tempo esgotado...", color=self.bot.get_color(guild.me)), view=None)
+                    return
+
+                if v.status is False:
+                    await msg.edit(embed=disnake.Embed(description="### Operação cancelada.",
+                                                   color=self.bot.get_color(guild.me)), view=None)
+                    return
+
+                if not v.inter.author.voice:
+                    await msg.edit(embed=disnake.Embed(description="### Você não está conectado em um canal de voz...",
+                                                   color=self.bot.get_color(guild.me)), view=None)
+                    return
+
+                bot = v.bot
+                ctx = v.inter
+                guild = v.guild
+                channel = bot.get_channel(ctx.channel.id)
+
+        can_connect(channel=ctx.author.voice.channel, guild=guild)
+
+        node: wavelink.Node = bot.music.get_best_node()
 
         if not node:
             raise GenericError("**Não há servidores de música disponível!**")
 
-        player = await ctx.bot.get_cog("Music").create_player(
-            inter=ctx, bot=ctx.bot, guild=ctx.guild, channel=ctx.channel
+        player: LavalinkPlayer = await bot.get_cog("Music").create_player(
+            inter=ctx, bot=bot, guild=guild, channel=channel
         )
 
         await player.connect(ctx.author.voice.channel.id)
 
-        self.bot.loop.create_task(ctx.message.add_reaction("👍"))
+        if msg:
+            await msg.edit(
+                f"Sessão de música iniciada no canal {ctx.author.voice.channel.mention}\nVia: {bot.user.mention}{player.controller_link}",
+                components=None, embed=None
+            )
+        else:
+            self.bot.loop.create_task(ctx.message.add_reaction("👍"))
 
         while not ctx.guild.me.voice:
             await asyncio.sleep(1)
 
         if isinstance(ctx.author.voice.channel, disnake.StageChannel):
 
-            stage_perms = ctx.author.voice.channel.permissions_for(ctx.guild.me)
+            stage_perms = ctx.author.voice.channel.permissions_for(guild.me)
             if stage_perms.manage_permissions:
-                await ctx.guild.me.edit(suppress=False)
+                await guild.me.edit(suppress=False)
 
             await asyncio.sleep(1.5)
 
