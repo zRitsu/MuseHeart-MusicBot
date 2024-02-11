@@ -823,8 +823,13 @@ class Music(commands.Cog):
 
                 p: LavalinkPlayer = b.music.players.get(inter.guild_id)
 
-                if p and inter.author.id not in p.last_channel.voice_states:
-                    continue
+                if p:
+                    try:
+                        vc = p.last_channel
+                    except AttributeError:
+                        vc = g.me.voice.channel
+                    if inter.author.id not in vc.voice_states:
+                        continue
 
                 free_bots.append(b)
 
