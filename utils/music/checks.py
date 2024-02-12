@@ -87,7 +87,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
     elif isinstance(inter, disnake.ModalInteraction):
         return
 
-    if len(inter.bot.pool.bots) < 2:
+    if len(inter.bot.pool.bots) < 2 and inter.guild:
         try:
             inter.music_bot = inter.bot
             inter.music_guild = inter.guild
