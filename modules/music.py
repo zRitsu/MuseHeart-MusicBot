@@ -3295,7 +3295,7 @@ class Music(commands.Cog):
         if not player.queue:
             raise GenericError("**Não há músicas na fila.**")
 
-        view = QueueInteraction(player, inter.author)
+        view = QueueInteraction(bot, inter.author)
         embed = view.embed
 
         try:

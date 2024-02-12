@@ -18,7 +18,7 @@ from utils.db import DBModel
 from utils.music.checks import check_pool_bots
 from utils.music.converters import time_format, fix_characters, URL_REG
 from utils.music.errors import GenericError
-from utils.music.models import LavalinkPlayer
+from utils.music.models import LavalinkPlayer, LavalinkTrack
 from utils.music.skin_utils import skin_converter
 from utils.music.spotify import spotify_regex_w_user
 from utils.others import check_cmd, CustomContext, send_idle_embed, music_source_emoji_url, \
@@ -60,16 +60,17 @@ class VolumeInteraction(disnake.ui.View):
 
 class QueueInteraction(disnake.ui.View):
 
-    def __init__(self, player, user: disnake.Member, timeout=60):
+    def __init__(self, bot: BotCore, user: disnake.Member, timeout=60):
 
-        self.player = player
-        self.bot = player.bot
+        self.bot = bot
         self.user = user
-        self.pages = []
-        self.select_pages = []
-        self.current = 0
-        self.max_page = len(self.pages) - 1
+        self.track_pages = []
+        self.select_options = []
+        self.current_page = 0
+        self.max_page = 1
+        self.max_items = 8
         self.message: Optional[disnake.Message] = None
+        self.current_track: Optional[LavalinkTrack] = None
         super().__init__(timeout=timeout)
         self.embed = disnake.Embed(color=self.bot.get_color(user.guild.me))
         self.update_pages()
@@ -77,41 +78,38 @@ class QueueInteraction(disnake.ui.View):
 
     def update_pages(self):
 
-        counter = 1
+        player: LavalinkPlayer = self.bot.music.players[self.user.guild.id]
 
-        self.pages = list(disnake.utils.as_chunks(self.player.queue, max_size=12))
-        self.select_pages.clear()
+        self.current_page = 0
+        self.track_pages.clear()
+        self.track_pages = list(disnake.utils.as_chunks(player.queue, max_size=self.max_items))
+        self.current_track = self.track_pages[self.current_page][0]
+        self.max_page = len(self.track_pages) - 1
+        self.update_components()
+
+    async def on_timeout(self) -> None:
+
+        if not self.message:
+            return
+
+        self.embed.set_footer(text="Tempo para interagir esgotado!")
+
+        for c in self.children:
+            c.disabled = True
+
+        await self.message.edit(embed=self.embed, view=self)
+
+
+    def update_components(self):
+
+        if not self.select_options:
+            return
 
         self.clear_items()
 
-        for n, page in enumerate(self.pages):
-
-            txt = "\n"
-            opts = []
-
-            for t in page:
-
-                duration = time_format(t.duration) if not t.is_stream else '🔴 Livestream'
-
-                txt += f"`┌ {counter})` [`{fix_characters(t.title, limit=50)}`]({t.uri})\n" \
-                       f"`└ ⏲️ {duration}`" + (f" - `Repetições: {t.track_loops}`" if t.track_loops else  "") + \
-                       f" **|** `✋` <@{t.requester}>\n"
-
-                opts.append(
-                    disnake.SelectOption(
-                        label=f"{counter}. {t.author}"[:25], description=f"[{duration}] | {t.title}"[:50],
-                        value=f"queue_select_{t.unique_id}",
-                    )
-                )
-
-                counter += 1
-
-            self.pages[n] = txt
-            self.select_pages.append(opts)
-
         track_select = disnake.ui.Select(
             placeholder="Tocar uma música específica da página:",
-            options=self.select_pages[self.current],
+            options=self.select_options,
             custom_id="queue_track_selection",
             max_values=1
         )
@@ -140,35 +138,52 @@ class QueueInteraction(disnake.ui.View):
         stop_interaction.callback = self.stop_interaction
         self.add_item(stop_interaction)
 
-        update_q = disnake.ui.Button(emoji='🔄', label="Refresh", style=disnake.ButtonStyle.grey)
+        play = disnake.ui.Button(emoji='▶️', label="Tocar", style=disnake.ButtonStyle.grey, custom_id="queue_skip")
+        play.callback = self.invoke_command
+        self.add_item(play)
+
+        rotate_q = disnake.ui.Button(emoji='🔃', label="Rotacionar Fila", style=disnake.ButtonStyle.grey, custom_id="queue_rotate")
+        rotate_q.callback = self.invoke_command
+        self.add_item(rotate_q)
+
+        update_q = disnake.ui.Button(emoji='🔄', label="Recarregar", style=disnake.ButtonStyle.grey)
         update_q.callback = self.update_q
         self.add_item(update_q)
 
-        self.current = 0
-        self.max_page = len(self.pages) - 1
-
-    async def on_timeout(self) -> None:
-
-        if not self.message:
-            return
-
-        embed = self.message.embeds[0]
-        embed.set_footer(text="Tempo para interagir esgotado!")
-
-        for c in self.children:
-            c.disabled = True
-
-        await self.message.edit(embed=embed, view=self)
-
-
     def update_embed(self):
-        self.embed.title = f"**Músicas da fila [{self.current+1} / {self.max_page+1}]**"
-        self.embed.description = self.pages[self.current]
-        self.children[0].options = self.select_pages[self.current]
 
-        for n, c in enumerate(self.children):
-            if isinstance(c, disnake.ui.StringSelect):
-                self.children[n].options = self.select_pages[self.current]
+        self.embed.title = f"**Músicas da fila [Página: {self.current_page+1} / {self.max_page+1}]**"
+
+        opts = []
+
+        txt = ""
+
+        for n, t in enumerate(self.track_pages[self.current_page]):
+
+            duration = time_format(t.duration) if not t.is_stream else '🔴 Livestream'
+
+            index = (self.max_items*self.current_page) + n + 1
+
+            if self.current_track == t:
+                txt += f"`╔{'='*50}`\n`║` **{index}º) [{fix_characters(t.title, limit=37)}]({t.uri})**\n" \
+                       f"`║ ⏲️`  **{duration}**" + (f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
+                       f" **|** `✋` <@{t.requester}>\n`╚{'='*50}`\n"
+            else:
+                txt += f"`┌ {index})` [`{fix_characters(t.title, limit=45)}`]({t.uri})\n" \
+                       f"`└ ⏲️ {duration}`" + (f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
+                       f" **|** `✋` <@{t.requester}>\n"
+
+            opts.append(
+                disnake.SelectOption(
+                    label=f"{index}. {t.author}"[:25], description=f"[{duration}] | {t.title}"[:50],
+                    value=f"queue_select_{t.unique_id}", default=t == self.current_track
+                )
+            )
+
+        self.embed.description = txt
+        self.select_options = opts
+        self.embed.set_thumbnail(self.current_track.thumb)
+        self.update_components()
 
     async def track_select_callback(self, interaction: disnake.MessageInteraction):
 
@@ -176,7 +191,13 @@ class QueueInteraction(disnake.ui.View):
 
         track = None
 
-        for t in  self.player.queue:
+        try:
+            player: LavalinkPlayer = self.bot.music.players[self.user.guild.id]
+        except KeyError:
+            self.stop()
+            return
+
+        for t in  player.queue:
             if t.unique_id == track_id:
                 track = t
                 break
@@ -185,45 +206,85 @@ class QueueInteraction(disnake.ui.View):
             await interaction.send(f"Música com id \"{track_id}\" não encontrada na fila do player...", ephemeral=True)
             return
 
-        command = self.bot.get_slash_command("skip")
+        self.current_track = track
+        self.update_embed()
 
-        interaction.music_bot = self.bot
-        interaction.music_guild = self.user.guild
+        if self.message:
+            await interaction.response.edit_message(embed=self.embed, view=self)
+        else:
+            await interaction.edit_original_message(embed=self.embed, view=self)
+
+    async def invoke_command(self, interaction: disnake.MessageInteraction):
 
         try:
-            await check_cmd(command, interaction)
-            await command(interaction, query=f"{track.title} || ID > {track.unique_id}")
+            player = self.bot.music.players[self.user.guild.id]
+        except KeyError:
+            await interaction.send("O player já foi finalizado...", ephemeral=True)
             self.stop()
+            return
+
+        try:
+            if self.current_track is None:
+                await interaction.send("Nenhuma música selecionada...", ephemeral=True)
+                return
+
+            if interaction.data.custom_id == "queue_skip":
+                if player.current and player.current.unique_id == self.current_track.unique_id:
+                    await check_cmd(self.bot.get_slash_command("seek"), interaction)
+                    await player.seek(0)
+                    player.set_command_log(emoji="⏪", text=f"{interaction.author.mention} retrocedeu da música para: `0:00`")
+                    player.update = True
+                    await interaction.response.defer()
+                    return
+                else:
+                    command = self.bot.get_slash_command("skip")
+                    kwargs = {"query": f"{self.current_track.title} || ID > {self.current_track.unique_id}"}
+
+            elif interaction.data.custom_id == "queue_rotate":
+                command = self.bot.get_slash_command("rotate")
+                kwargs = {"query": f"{self.current_track.title} || ID > {self.current_track.unique_id}"}
+
+            else:
+                await interaction.send(f"Comando não implementado: {interaction.data.custom_id}", ephemeral=True)
+                return
+
+            interaction.music_bot = self.bot
+            interaction.music_guild = self.user.guild
+
+            await check_cmd(command, interaction)
+            await command(interaction, **kwargs)
         except Exception as e:
             self.bot.dispatch('interaction_player_error', interaction, e)
 
     async def first(self, interaction: disnake.MessageInteraction):
 
-        self.current = 0
+        self.current_page = 0
         self.update_embed()
         await interaction.response.edit_message(embed=self.embed, view=self)
 
     async def back(self, interaction: disnake.MessageInteraction):
 
-        if self.current == 0:
-            self.current = self.max_page
+        if self.current_page == 0:
+            self.current_page = self.max_page
         else:
-            self.current -= 1
+            self.current_page -= 1
+        self.current_track = self.track_pages[self.current_page][0]
         self.update_embed()
         await interaction.response.edit_message(embed=self.embed, view=self)
 
     async def next(self, interaction: disnake.MessageInteraction):
 
-        if self.current == self.max_page:
-            self.current = 0
+        if self.current_page == self.max_page:
+            self.current_page = 0
         else:
-            self.current += 1
+            self.current_page += 1
+        self.current_track = self.track_pages[self.current_page][0]
         self.update_embed()
         await interaction.response.edit_message(embed=self.embed, view=self)
 
     async def last(self, interaction: disnake.MessageInteraction):
 
-        self.current = self.max_page
+        self.current_page = self.max_page
         self.update_embed()
         await interaction.response.edit_message(embed=self.embed, view=self)
 
@@ -235,12 +296,26 @@ class QueueInteraction(disnake.ui.View):
 
     async def update_q(self, interaction: disnake.MessageInteraction):
 
-        self.current = 0
-        self.max_page = len(self.pages) - 1
+        self.current_page = 0
+        self.max_page = len(self.track_pages) - 1
         self.update_pages()
         self.update_embed()
         await interaction.response.edit_message(embed=self.embed, view=self)
 
+    async def interaction_check(self, interaction: disnake.MessageInteraction):
+
+        if interaction.author != self.user:
+            await interaction.send(f"Apenas o membro {self.user.mention} pode interagir aqui.", ephemeral=True)
+            return
+
+        try:
+            self.bot.music.players[self.user.guild.id]
+        except KeyError:
+            await interaction.response.edit_message(content="O player foi finalizado...", embed=None, view=None)
+            self.stop()
+            return
+
+        return True
 
 class SelectInteraction(disnake.ui.View):
 
