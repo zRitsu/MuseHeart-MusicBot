@@ -223,6 +223,8 @@ class QueueInteraction(disnake.ui.View):
             self.stop()
             return
 
+        update_inter = False
+
         try:
             if self.current_track is None:
                 await interaction.send("Nenhuma música selecionada...", ephemeral=True)
@@ -243,6 +245,7 @@ class QueueInteraction(disnake.ui.View):
             elif interaction.data.custom_id == "queue_rotate":
                 command = self.bot.get_slash_command("rotate")
                 kwargs = {"query": f"{self.current_track.title} || ID > {self.current_track.unique_id}"}
+                update_inter = True
 
             else:
                 await interaction.send(f"Comando não implementado: {interaction.data.custom_id}", ephemeral=True)
@@ -253,6 +256,15 @@ class QueueInteraction(disnake.ui.View):
 
             await check_cmd(command, interaction)
             await command(interaction, **kwargs)
+
+            if update_inter:
+                self.update_pages()
+                self.update_embed()
+                if self.message:
+                    await interaction.response.edit_message(embed=self.embed, view=self)
+                else:
+                    await interaction.edit_original_message(embed=self.embed, view=self)
+
         except Exception as e:
             self.bot.dispatch('interaction_player_error', interaction, e)
 

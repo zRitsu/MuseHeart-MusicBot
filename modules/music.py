@@ -2750,7 +2750,10 @@ class Music(commands.Cog):
             f"🔃 **⠂{inter.author.mention} rotacionou a fila para a música:**\n╰[`{track.title}`]({track.uri or track.search_uri})."
         ]
 
-        await self.interaction_message(inter, txt, emoji="🔃")
+        if isinstance(inter, disnake.MessageInteraction):
+            player.set_command_log(text=f"{inter.author.mention} " + txt[0], emoji="🔃")
+        else:
+            await self.interaction_message(inter, txt, emoji="🔃")
 
         await player.update_message()
 
