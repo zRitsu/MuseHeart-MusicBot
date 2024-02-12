@@ -60,7 +60,7 @@ class VolumeInteraction(disnake.ui.View):
 
 class QueueInteraction(disnake.ui.View):
 
-    def __init__(self, bot: BotCore, user: disnake.Member, timeout=60):
+    def __init__(self, bot: BotCore, user: disnake.Member, timeout=120):
 
         self.bot = bot
         self.user = user
