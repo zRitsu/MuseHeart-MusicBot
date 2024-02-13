@@ -201,7 +201,7 @@ class BotPool:
     async def connect_rpc_ws(self):
 
         if not self.config["RUN_RPC_SERVER"] and (
-                not self.config["RPC_SERVER"] or self.config["RPC_SERVER"].replace("$PORT", port := os.environ.get("PORT", 80)) == f"ws://localhost:{port}/ws"):
+                not self.config["RPC_SERVER"] or self.config["RPC_SERVER"].replace("$PORT", port := os.environ.get("PORT", "80")) == f"ws://localhost:{port}/ws"):
             pass
         else:
             await self.ws_client.ws_loop()
