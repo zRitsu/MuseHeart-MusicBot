@@ -1972,20 +1972,31 @@ class Music(commands.Cog):
             except IndexError:
                 raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
 
-            track = player.queue[index]
-
-            player.queue.append(player.last_track)
+            if player.last_track.autoplay:
+                track: LavalinkTrack = player.queue_autoplay[index - len(player.queue)]
+                index += 1
+                player.queue_autoplay.appendleft(player.last_track)
+            else:
+                track: LavalinkTrack = player.queue[index]
+                player.queue.append(player.last_track)
             player.last_track = None
 
             if player.loop == "current":
                 player.loop = False
 
             if play_only == "yes":
-                del player.queue[index]
-                player.queue.appendleft(track)
+                if track.autoplay:
+                    del player.queue_autoplay[index]
+                    player.queue_autoplay.appendleft(track)
+                else:
+                    del player.queue[index]
+                    player.queue.appendleft(track)
 
             elif index > 0:
-                player.queue.rotate(0 - index)
+                if track.autoplay:
+                    player.queue_autoplay.rotate(0 - index)
+                else:
+                    player.queue.rotate(0 - index)
 
             player.set_command_log(emoji="⤵️", text=f"{inter.author.mention} pulou para a música atual.")
 
@@ -2738,12 +2749,15 @@ class Music(commands.Cog):
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
-        track = player.queue[index]
+        track = (player.queue + player.queue_autoplay)[index]
 
         if index <= 0:
             raise GenericError(f"**A música **[`{track.title}`]({track.uri or track.search_uri}) já é a próxima da fila.")
 
-        player.queue.rotate(0 - (index))
+        if track.autoplay:
+            player.queue_autoplay.rotate(0 - (index - len(player.queue)))
+        else:
+            player.queue.rotate(0 - (index))
 
         txt = [
             f"rotacionou a fila para a música [`{(fix_characters(track.title, limit=25))}`]({track.uri or track.search_uri}).",
@@ -3295,7 +3309,7 @@ class Music(commands.Cog):
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
-        if not player.queue:
+        if not player.queue and not player.queue_autoplay:
             raise GenericError("**Não há músicas na fila.**")
 
         view = QueueInteraction(bot, inter.author)
@@ -4031,7 +4045,7 @@ class Music(commands.Cog):
             return
 
         try:
-            player = inter.music_bot.music.players[inter.guild_id]
+            player: LavalinkPlayer = inter.music_bot.music.players[inter.guild_id]
         except KeyError:
             return
 
@@ -4039,7 +4053,7 @@ class Music(commands.Cog):
 
         count = 0
 
-        for track in player.queue:
+        for track in player.queue + player.queue_autoplay:
 
             if count == 20:
                 break
@@ -4061,7 +4075,7 @@ class Music(commands.Cog):
                 results.append(f"{track.title[:81]} || ID > {track.unique_id}")
                 count += 1
 
-        return results or [f"{track.title[:81]} || ID > {track.unique_id}" for n, track in enumerate(player.queue)
+        return results or [f"{track.title[:81]} || ID > {track.unique_id}" for n, track in enumerate(player.queue + player.queue_autoplay)
                            if query.lower() in track.title.lower()][:20]
 
     @move.autocomplete("nome_do_uploader")

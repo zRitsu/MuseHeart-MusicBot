@@ -82,7 +82,7 @@ class QueueInteraction(disnake.ui.View):
 
         self.current_page = 0
         self.track_pages.clear()
-        self.track_pages = list(disnake.utils.as_chunks(player.queue, max_size=self.max_items))
+        self.track_pages = list(disnake.utils.as_chunks(player.queue + player.queue_autoplay, max_size=self.max_items))
         self.current_track = self.track_pages[self.current_page][0]
         self.max_page = len(self.track_pages) - 1
         self.update_components()
@@ -167,11 +167,11 @@ class QueueInteraction(disnake.ui.View):
             if self.current_track == t:
                 txt += f"`╔{'='*50}`\n`║` **{index}º) [{fix_characters(t.title, limit=37)}]({t.uri})**\n" \
                        f"`║ ⏲️`  **{duration}**" + (f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
-                       f" **|** `✋` <@{t.requester}>\n`╚{'='*50}`\n"
+                       " **|** " + (f"`✋` <@{t.requester}>" if not t.autoplay else f"`👍⠂Recomendada`") + f"\n`╚{'='*50}`\n"
             else:
                 txt += f"`┌ {index})` [`{fix_characters(t.title, limit=45)}`]({t.uri})\n" \
                        f"`└ ⏲️ {duration}`" + (f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
-                       f" **|** `✋` <@{t.requester}>\n"
+                       f" **|** " + (f"`✋` <@{t.requester}>" if not t.autoplay else f"`👍⠂Recomendada`") + "\n"
 
             opts.append(
                 disnake.SelectOption(
@@ -197,7 +197,7 @@ class QueueInteraction(disnake.ui.View):
             self.stop()
             return
 
-        for t in  player.queue:
+        for t in  player.queue + player.queue_autoplay:
             if t.unique_id == track_id:
                 track = t
                 break

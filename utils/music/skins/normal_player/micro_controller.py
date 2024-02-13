@@ -66,7 +66,7 @@ class MicroController:
             disnake.ui.Button(emoji="⏮️", label="Voltar", custom_id=PlayerControls.back),
             disnake.ui.Button(emoji="⏹️", label="Parar", custom_id=PlayerControls.stop, style=disnake.ButtonStyle.red),
             disnake.ui.Button(emoji="⏭️", label="Pular", custom_id=PlayerControls.skip),
-            disnake.ui.Button(emoji="<:music_queue:703761160679194734>", label="Fila", custom_id=PlayerControls.queue,disabled=not player.queue),
+            disnake.ui.Button(emoji="<:music_queue:703761160679194734>", label="Fila", custom_id=PlayerControls.queue,disabled=not (player.queue or player.queue_autoplay)),
             disnake.ui.Button(emoji="💗", label="Adicionar nos seus favoritos", custom_id=PlayerControls.add_favorite),
             disnake.ui.Button(emoji="⭐", label="Tocar favorito", custom_id=PlayerControls.enqueue_fav),
         ]
