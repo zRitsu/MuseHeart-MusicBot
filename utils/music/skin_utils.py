@@ -45,14 +45,17 @@ def replaces(
                 requester = player.guild.get_member(player.current.requester)
                 requester_global_name = requester.global_name
                 requester_display_name = requester.display_name
+                requester_mention = requester.mention
                 requester_avatar = requester.display_avatar.replace(static_format="png", size=512).url
             else:
                 requester_global_name = "Recomendação"
                 requester_display_name = "Recomendação"
+                requester_mention = "Recomendação"
                 requester_avatar = player.guild.me.display_avatar.replace(static_format="png", size=512).url
         except:
             requester_global_name = "Desconhecido..."
             requester_display_name = "Desconhecido..."
+            requester_mention = f"<@{player.current.requester}>"
             requester_avatar = "https://i.ibb.co/LNpG5TM/unknown.png"
 
         txt = track_title_format(
@@ -75,7 +78,7 @@ def replaces(
             replace('{player.log.emoji}', player.command_log_emoji or ""). \
             replace('{requester.global_name}', requester_global_name). \
             replace('{requester.display_name}', requester_display_name). \
-            replace('{requester.mention}', f'<@{player.current.requester}>'). \
+            replace('{requester.mention}', requester_mention). \
             replace('{requester.avatar}', requester_avatar). \
             replace('{guild.color}', hex(player.guild.me.color.value)[2:]). \
             replace('{guild.icon}', player.guild.icon.with_static_format("png").url if player.guild.icon else ""). \
