@@ -6577,6 +6577,10 @@ class Music(commands.Cog):
                         if not player._new_node_task:
                             try:
                                 await player.connect(vc.id)
+                                player.set_command_log(text="Notei uma tentativa de me desconectar do canal. "
+                                                            "Caso queira me desconectar use o comando/botão: **stop**.",
+                                                       emoji="⚠️")
+                                player.update = True
                                 break
                             except Exception:
                                 traceback.print_exc()
