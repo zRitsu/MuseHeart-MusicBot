@@ -70,7 +70,7 @@ class CustomContext(commands.Context):
         self.store_message = None
         self.application_command = None
 
-    async def defer(self, ephemeral: bool = False):
+    async def defer(self, ephemeral: bool = False, *args, **kwargs):
 
         if ephemeral:
             return

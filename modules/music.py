@@ -758,7 +758,7 @@ class Music(commands.Cog):
 
         if not inter.response.is_done():
             ephemeral = await self.is_request_channel(inter, data=guild_data, ignore_thread=True)
-            await inter.response.defer(ephemeral=ephemeral)
+            await inter.response.defer(ephemeral=ephemeral, with_message=True)
 
         if not inter.author.voice:
 
@@ -1057,12 +1057,17 @@ class Music(commands.Cog):
 
             select_interaction = view.inter
 
+            try:
+                func = inter.edit_original_message
+            except AttributeError:
+                func = msg.edit
+
             if not select_interaction or view.selected is False:
 
                 text = "### Tempo de seleção esgotado!" if view.selected is not False else "### Cancelado pelo usuário."
 
                 try:
-                    await msg.edit(embed=disnake.Embed(description=text, color=self.bot.get_color(guild.me)),
+                    await func(embed=disnake.Embed(description=text, color=self.bot.get_color(guild.me)),
                                    components=song_request_buttons)
                 except AttributeError:
                     traceback.print_exc()
@@ -1070,7 +1075,7 @@ class Music(commands.Cog):
                 return
 
             if select_interaction.data.values[0] == "cancel":
-                await msg.edit(
+                await func(
                     embed=disnake.Embed(
                         description="**Seleção cancelada!**",
                         color=self.bot.get_color(guild.me)
