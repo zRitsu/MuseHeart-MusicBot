@@ -81,7 +81,7 @@ def parse_error(
     error = getattr(error, 'original', error)
 
     if isinstance(error, NotDJorStaff):
-        error_txt = "**Você deve estar na lista de DJ ou ter a permissão de **Gerenciar canais** " \
+        error_txt = "**Você deve estar na lista de DJ ou ter a permissão de **Mover Membros** " \
                     "para usar este comando.**"
 
     elif isinstance(error, MissingVoicePerms):
