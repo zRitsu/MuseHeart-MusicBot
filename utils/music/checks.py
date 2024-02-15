@@ -575,14 +575,17 @@ async def check_player_perm(inter, bot: BotCore, channel):
     except AttributeError:
         vc = player.last_channel
 
-    if vc.permissions_for(inter.author).move_members:
-        return True
+    try:
+        if vc.permissions_for(inter.author).move_members:
+            return True
+    except AttributeError:
+        pass
 
     if inter.author.guild_permissions.manage_channels:
         return True
 
     if player.keep_connected and not (await bot.is_owner(inter.author)):
-        raise GenericError("Apenas membros com a permissão de **gerenciar servidor** "
+        raise GenericError("Apenas membros com a permissão de **mover membros** "
                            "podem usar esse comando/botão com o **modo 24/7 ativo**...")
 
     user_roles = [r.id for r in inter.author.roles]
@@ -593,7 +596,7 @@ async def check_player_perm(inter, bot: BotCore, channel):
         return True
 
     if player.restrict_mode:
-        raise GenericError("Apenas DJ's ou membros com a permissão de **gerenciar servidor** "
+        raise GenericError("Apenas DJ's ou membros com a permissão de **mover membros** "
                            "podem usar este comando/botão com o **modo restrito ativo**...")
 
     if not vc and inter.author.voice:
