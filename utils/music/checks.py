@@ -573,9 +573,9 @@ async def check_player_perm(inter, bot: BotCore, channel):
     if inter.author.guild_permissions.manage_channels:
         return True
 
-    if player.keep_connected:
+    if player.keep_connected and not (await bot.is_owner(inter.author)):
         raise GenericError(f"**Erro!** Apenas membros com a permissão de **gerenciar servidor** "
-                           "podem usar este comando/botão com o **modo 24/7 ativo**...")
+                           "podem usar esse comando/botão com o **modo 24/7 ativo**...")
 
     user_roles = [r.id for r in inter.author.roles]
 
