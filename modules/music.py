@@ -1615,6 +1615,10 @@ class Music(commands.Cog):
                     except AttributeError:
                         reg_query = {"name": tracks[0].title, "url": tracks[0].uri}
 
+                await select_interaction.response.defer()
+
+                inter = select_interaction
+
             elif not queue_loaded:
 
                 tracks = tracks[0]
