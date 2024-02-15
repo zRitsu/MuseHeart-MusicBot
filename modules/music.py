@@ -6587,7 +6587,19 @@ class Music(commands.Cog):
                         await player.destroy()
 
                 else:
-                    while not member.voice:
+                    while True:
+
+                        try:
+                            player = self.bot.music.players[member.guild.id]
+                        except KeyError:
+                            return
+
+                        if player.guild.me.voice:
+                            return
+
+                        if player.is_closing:
+                            return
+
                         if not player._new_node_task:
                             try:
                                 await player.connect(vc.id)
@@ -6598,8 +6610,7 @@ class Music(commands.Cog):
                                 break
                             except Exception:
                                 traceback.print_exc()
-                        if player.is_closing:
-                            return
+
                         await asyncio.sleep(30)
             return
 
