@@ -426,6 +426,7 @@ class LavalinkPlayer(wavelink.Player):
         self.filters: dict = {}
         self.idle_task: Optional[asyncio.Task] = None
         self.members_timeout_task: Optional[asyncio.Task] = None
+        self.reconnect_voice_channel_task: Optional[asyncio.Task] = None
         self.idle_endtime: Optional[datetime.datetime] = None
         self.hint_rate = self.bot.config["HINT_RATE"]
         self.command_log: str = ""
@@ -607,6 +608,72 @@ class LavalinkPlayer(wavelink.Player):
 
             await cog.error_report_queue.put({"embed": embed})
 
+    async def reconnect_voice_channel(self):
+
+        try:
+            vc = self.bot.get_channel(self.last_channel.id)
+        except AttributeError:
+            vc = None
+
+        if not vc:
+
+            msg = "O canal de voz foi excluido..."
+
+            if self.static:
+                self.set_command_log(msg)
+                await self.destroy()
+
+            else:
+                try:
+                    self.bot.loop.create_task(self.text_channel.send(embed=disnake.Embed(
+                    description=msg,
+                    color=self.bot.get_color(self.guild.me)), delete_after=7))
+                except:
+                    traceback.print_exc()
+                await self.destroy()
+                return
+
+        while True:
+
+            try:
+                self.bot.music.players[self.guild_id]
+            except KeyError:
+                return
+
+            if self.guild.me.voice:
+                if isinstance(vc, disnake.StageChannel) \
+                        and self.guild.me not in vc.speakers \
+                        and vc.permissions_for(self.guild.me).manage_permissions:
+                    try:
+                        await self.guild.me.edit(suppress=False)
+                    except Exception:
+                        traceback.print_exc()
+                return
+
+            if self.is_closing:
+                return
+
+            if not self._new_node_task:
+
+                try:
+                    can_connect(vc, self.guild, bot=self.bot)
+                except Exception as e:
+                    self.set_command_log(f"O player foi finalizado devido ao erro: {e}")
+                    await self.destroy()
+                    return
+
+                try:
+                    await self.connect(vc.id)
+                    self.set_command_log(text="Notei uma tentativa de me desconectar do canal. "
+                                                "Caso queira me desconectar use o comando/botão: **stop**.",
+                                           emoji="⚠️")
+                    self.update = True
+                    await asyncio.sleep(5)
+                    continue
+                except Exception:
+                    traceback.print_exc()
+
+            await asyncio.sleep(30)
 
     async def hook(self, event) -> None:
 

@@ -6666,73 +6666,13 @@ class Music(commands.Cog):
         if member.bot:
             # ignorar outros bots
             if player.bot.user.id == member.id and not after.channel and not player.is_closing:
-
-                last_channel_id = int(player.last_channel.id)
-
                 await asyncio.sleep(3)
+                try:
+                    player.reconnect_voice_channel_task.cancel()
+                except:
+                    pass
+                player.reconnect_voice_channel_task = player.bot.loop.create_task(player.reconnect_voice_channel())
 
-                vc = self.bot.get_channel(last_channel_id)
-
-                if not vc:
-
-                    msg = "O canal de voz foi excluido..."
-
-                    if player.static:
-                        player.set_command_log(msg)
-                        await player.destroy()
-
-                    else:
-                        embed = disnake.Embed(
-                            description=msg,
-                            color=self.bot.get_color(member))
-                        try:
-                            self.bot.loop.create_task(self.text_channel.send(embed=embed, delete_after=7))
-                        except:
-                            traceback.print_exc()
-                        await player.destroy()
-
-                else:
-                    while True:
-
-                        try:
-                            player = self.bot.music.players[member.guild.id]
-                        except KeyError:
-                            return
-
-                        if player.guild.me.voice:
-                            if isinstance(before.channel, disnake.StageChannel) \
-                                    and member not in before.channel.speakers \
-                                    and before.channel.permissions_for(member).manage_permissions:
-                                try:
-                                    await member.guild.me.edit(suppress=False)
-                                except Exception:
-                                    traceback.print_exc()
-                            return
-
-                        if player.is_closing:
-                            return
-
-                        if not player._new_node_task:
-
-                            try:
-                                can_connect(before.channel, player.guild, bot=player.bot)
-                            except Exception as e:
-                                player.set_command_log(f"O player foi finalizado devido ao erro: {e}")
-                                await player.destroy()
-                                return
-
-                            try:
-                                await player.connect(vc.id)
-                                player.set_command_log(text="Notei uma tentativa de me desconectar do canal. "
-                                                            "Caso queira me desconectar use o comando/botão: **stop**.",
-                                                       emoji="⚠️")
-                                player.update = True
-                                await asyncio.sleep(5)
-                                continue
-                            except Exception:
-                                traceback.print_exc()
-
-                        await asyncio.sleep(30)
             return
 
         if before.channel == after.channel:
