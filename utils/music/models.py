@@ -652,6 +652,9 @@ class LavalinkPlayer(wavelink.Player):
 
             self.start_time = disnake.utils.utcnow()
 
+            if not self.current.autoplay:
+                self.queue_autoplay.clear()
+
             if self.auto_pause:
                 return
 
@@ -1409,10 +1412,10 @@ class LavalinkPlayer(wavelink.Player):
         except:
             pass
 
-        if len(self.queue):
+        try:
             track = self.queue.popleft()
 
-        else:
+        except:
 
             try:
 
