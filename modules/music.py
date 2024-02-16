@@ -6608,6 +6608,14 @@ class Music(commands.Cog):
                             return
 
                         if not player._new_node_task:
+
+                            try:
+                                can_connect(player.last_channel, player.guild, bot=player.bot)
+                            except Exception as e:
+                                player.set_command_log(f"O player foi finalizado devido ao erro: {e}")
+                                await player.destroy()
+                                return
+
                             try:
                                 await player.connect(vc.id)
                                 player.set_command_log(text="Notei uma tentativa de me desconectar do canal. "
