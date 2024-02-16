@@ -2935,6 +2935,9 @@ class Music(commands.Cog):
 
         txt += f"> `👤` **⠂Uploader/Artista(s):** `{player.current.authors_md}`\n"
 
+        if player.current.album_name:
+            txt += f"> 💽 **⠂Álbum:** [`{fix_characters(player.current.album_name, limit=20)}`]({player.current.album_url})"
+
         if not player.current.autoplay:
             txt += f"> `✋` **⠂Solicitado por:** <@{player.current.requester}>\n"
         else:
@@ -2943,6 +2946,9 @@ class Music(commands.Cog):
             except:
                 mode = "`Recomendação`"
             txt += f"> `👍` **⠂Adicionado via:** {mode}\n"
+
+        if player.current.playlist_name:
+            txt += f"> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=20)}`]({player.current.playlist_url})"
 
         if player.queue or player.queue_autoplay:
             txt += "### 🎶 ⠂Próximas músicas:\n" + "\n".join(f"> `{n+1}) [{time_format(t.duration) if not t.is_stream else '🔴 Ao vivo'}]` [`{fix_characters(t.title, 30)}`]({t.uri})" for n, t in enumerate(itertools.islice(player.queue + player.queue_autoplay, 5)))
