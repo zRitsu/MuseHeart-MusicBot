@@ -2914,12 +2914,14 @@ class Music(commands.Cog):
 
         player: LavalinkPlayer = bot.music.players[guild.id]
 
-        txt = f"### Tocando agora: [{player.current.title}]({player.current.uri or player.current.search_uri})\n"
+        txt = f"### [{player.current.title}]({player.current.uri or player.current.search_uri})\n"
 
         if player.current.is_stream:
             txt += "> `🔴` **⠂Transmissão ao vivo**\n"
         else:
             txt += f"> `⏰` **⠂Duração:** `{time_format(player.current.duration)}`\n"
+
+        txt += f"> `👤` **⠂Uploader/Artista(s):** `{player.current.authors_md}`\n"
 
         if not player.current.autoplay:
             txt += f"> `✋` **⠂Solicitado por:** <@{player.current.requester}>\n"
@@ -2931,7 +2933,7 @@ class Music(commands.Cog):
             txt += f"> 👍 **⠂Adicionado via:** {mode}\n"
 
         if player.queue or player.queue_autoplay:
-            txt += "### Próximas músicas:\n" + "\n".join(f"> `{n+1}) [{time_format(t.duration) if not t.is_stream else '🔴 Ao vivo'}]` [`{t.title}`]({t.uri})" for n, t in enumerate(itertools.islice(player.queue + player.queue_autoplay, 5)))
+            txt += "### 🎶 ⠂Próximas músicas:\n" + "\n".join(f"> `{n+1}) [{time_format(t.duration) if not t.is_stream else '🔴 Ao vivo'}]` [`{t.title}`]({t.uri})" for n, t in enumerate(itertools.islice(player.queue + player.queue_autoplay, 5)))
 
         if player.static:
             if player.message:
@@ -2942,7 +2944,9 @@ class Music(commands.Cog):
         await inter.send(
             embed=disnake.Embed(
                 description=txt, color=self.bot.get_color(guild.me)
-            ).set_thumbnail(url=player.current.thumb),
+            ).set_author(name="⠂Tocando agora:" if not player.paused else "⠂Música atual:",
+                         icon_url=music_source_image(player.current.info["sourceName"])).
+            set_thumbnail(url=player.current.thumb),
             ephemeral=True
         )
 
