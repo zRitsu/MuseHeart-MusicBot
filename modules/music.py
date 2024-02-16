@@ -2892,17 +2892,22 @@ class Music(commands.Cog):
 
         await self.interaction_message(inter, txt, emoji="🇳")
 
+
+    np_cd = commands.CooldownMapping.from_cooldown(1, 5, commands.BucketType.member)
+    np_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
+
     @has_source()
     @check_voice()
     @pool_command(name="nowplaying", aliases=["np", "npl", "current", "tocando", "playing"], only_voiced=True,
-                 description="Exibir informações da música que está tocando no momento.")
+                 description="Exibir informações da música que está tocando no momento.", cooldown=np_cd,
+                  max_concurrency=np_mc)
     async def now_playing_legacy(self, ctx: CustomContext):
         await self.now_playing.callback(self=self, inter=ctx)
 
     @has_source()
     @check_voice()
     @commands.slash_command(description=f"{desc_prefix}Exibir informações da música que está tocando no momento.",
-                            extras={"only_voiced": True}, dm_permission=False)
+                            extras={"only_voiced": True}, dm_permission=False, cooldown=np_cd, max_concurrency=np_mc)
     async def now_playing(self, inter: disnake.AppCmdInter):
 
         try:
@@ -2937,25 +2942,50 @@ class Music(commands.Cog):
                 mode = f" [`Recomendação`]({player.current.info['extra']['related']['uri']})"
             except:
                 mode = "`Recomendação`"
-            txt += f"> 👍 **⠂Adicionado via:** {mode}\n"
+            txt += f"> `👍` **⠂Adicionado via:** {mode}\n"
 
         if player.queue or player.queue_autoplay:
             txt += "### 🎶 ⠂Próximas músicas:\n" + "\n".join(f"> `{n+1}) [{time_format(t.duration) if not t.is_stream else '🔴 Ao vivo'}]` [`{fix_characters(t.title, 30)}`]({t.uri})" for n, t in enumerate(itertools.islice(player.queue + player.queue_autoplay, 5)))
 
+        components = [disnake.ui.Button(custom_id=f"np_{inter.author.id}", label="Atualizar", emoji="🔄")]
+
         if player.static:
             if player.message:
-                txt += f"\n\n`Acesse o player-controller` [`clicando aqui`]({player.message.jump_url})"
+                components.append(disnake.ui.Button(url=player.message.jump_url, label="Ir p/ player-controller", emoji="🔳"))
             elif player.text_channel:
                 txt += f"\n\n`Acesse o player-controller no canal:` {player.text_channel.mention}"
 
-        await inter.send(
-            embed=disnake.Embed(
-                description=txt, color=self.bot.get_color(guild.me)
-            ).set_author(name="⠂Tocando agora:" if not player.paused else "⠂Música atual:",
-                         icon_url=music_source_image(player.current.info["sourceName"])).
-            set_thumbnail(url=player.current.thumb),
-            ephemeral=True
-        )
+        embed = disnake.Embed(description=txt, color=self.bot.get_color(guild.me))
+
+        embed.set_author(name="⠂Tocando agora:" if not player.paused else "⠂Música atual:",
+                         icon_url=music_source_image(player.current.info["sourceName"]))
+
+        embed.set_thumbnail(url=player.current.thumb)
+
+        try:
+            if bot.user.id != self.bot.user.id:
+                embed.set_footer(text=f"Via: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
+        except AttributeError:
+            pass
+
+        if isinstance(inter, disnake.MessageInteraction):
+            await inter.response.edit_message(embed=embed, components=components)
+        else:
+            await inter.send(embed=embed, ephemeral=True, components=components)
+
+    @commands.Cog.listener("on_button_click")
+    async def relaod_np(self, inter: disnake.MessageInteraction):
+
+        if inter.data.custom_id != f"np_{inter.author.id}":
+            await inter.send("Você não pode clicar nesse botão...", ephemeral=True)
+            return
+
+        try:
+            await check_cmd(self.now_playing_legacy, inter)
+            await self.now_playing_legacy(inter)
+        except Exception as e:
+            self.bot.dispatch('interaction_player_error', inter, e)
+
 
     controller_cd = commands.CooldownMapping.from_cooldown(1, 10, commands.BucketType.member)
     controller_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
