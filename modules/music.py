@@ -6595,9 +6595,9 @@ class Music(commands.Cog):
                             return
 
                         if player.guild.me.voice:
-                            if isinstance(after.channel, disnake.StageChannel) \
-                                    and member not in after.channel.speakers \
-                                    and after.channel.permissions_for(member).manage_permissions:
+                            if isinstance(before.channel, disnake.StageChannel) \
+                                    and member not in before.channel.speakers \
+                                    and before.channel.permissions_for(member).manage_permissions:
                                 try:
                                     await member.guild.me.edit(suppress=False)
                                 except Exception:
@@ -6610,7 +6610,7 @@ class Music(commands.Cog):
                         if not player._new_node_task:
 
                             try:
-                                can_connect(player.last_channel, player.guild, bot=player.bot)
+                                can_connect(before.channel, player.guild, bot=player.bot)
                             except Exception as e:
                                 player.set_command_log(f"O player foi finalizado devido ao erro: {e}")
                                 await player.destroy()
