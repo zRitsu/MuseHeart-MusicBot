@@ -2940,7 +2940,7 @@ class Music(commands.Cog):
             txt += f"> 👍 **⠂Adicionado via:** {mode}\n"
 
         if player.queue or player.queue_autoplay:
-            txt += "### 🎶 ⠂Próximas músicas:\n" + "\n".join(f"> `{n+1}) [{time_format(t.duration) if not t.is_stream else '🔴 Ao vivo'}]` [`{t.title}`]({t.uri})" for n, t in enumerate(itertools.islice(player.queue + player.queue_autoplay, 5)))
+            txt += "### 🎶 ⠂Próximas músicas:\n" + "\n".join(f"> `{n+1}) [{time_format(t.duration) if not t.is_stream else '🔴 Ao vivo'}]` [`{fix_characters(t.title, 30)}`]({t.uri})" for n, t in enumerate(itertools.islice(player.queue + player.queue_autoplay, 5)))
 
         if player.static:
             if player.message:
