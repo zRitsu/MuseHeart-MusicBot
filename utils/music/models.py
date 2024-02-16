@@ -1653,7 +1653,7 @@ class LavalinkPlayer(wavelink.Player):
             )
 
         embed = disnake.Embed(
-            description=f"**Não há músicas na fila... Adicione uma música ou use uma das opções abaixo.",
+            description="**Não há músicas na fila... Adicione uma música ou use uma das opções abaixo.**",
             color=self.bot.get_color(self.guild.me)
         )
 
