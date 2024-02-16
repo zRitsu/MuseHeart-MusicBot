@@ -2950,10 +2950,25 @@ class Music(commands.Cog):
         if player.current.playlist_name:
             txt += f"> `📑` **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=20)}`]({player.current.playlist_url})\n"
 
-        if player.queue or player.queue_autoplay:
-            txt += "### 🎶 ⠂Próximas músicas:\n" + "\n".join(f"> `{n+1}) [{time_format(t.duration) if not t.is_stream else '🔴 Ao vivo'}]` [`{fix_characters(t.title, 30)}`]({t.uri})" for n, t in enumerate(itertools.islice(player.queue + player.queue_autoplay, 5)))
+        try:
+            txt += f"> `*️⃣` **⠂Canal de voz:** {player.guild.me.voice.channel.mention}\n"
+        except AttributeError:
+            pass
+
+        txt += f"> `🔊` **⠂Volume:** `{player.volume}%`\n"
 
         components = [disnake.ui.Button(custom_id=f"np_{inter.author.id}", label="Atualizar", emoji="🔄")]
+
+        if player.queue or player.queue_autoplay:
+            txt += f"### 🎶 ⠂Próximas músicas ({(qsize:=len(player.queue + player.queue_autoplay))}):\n" + "\n".join(
+                f"`┌ {n+1})` [`{fix_characters(t.title, limit=38)}`]({t.uri})\n" \
+                f"`└ ⏲️ {time_format(t.duration) if not t.is_stream else '🔴 Ao vivo'}`" + (f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
+                f" **|** " + (f"`✋` <@{t.requester}>" if not t.autoplay else f"`👍⠂Recomendada`") for n, t in enumerate(itertools.islice(player.queue + player.queue_autoplay, 3))
+            )
+
+            if qsize > 3:
+                components.append(disnake.ui.Button(custom_id=PlayerControls.queue, label="Ver lista completa",
+                                                    emoji="<:music_queue:703761160679194734>"))
 
         if player.static:
             if player.message:
@@ -5178,7 +5193,8 @@ class Music(commands.Cog):
                     return
 
                 if interaction.message != player.message:
-                    return
+                    if control != PlayerControls.queue:
+                        return
 
                 if player.interaction_cooldown:
                     raise GenericError("O player está em cooldown, tente novamente em instantes.")
