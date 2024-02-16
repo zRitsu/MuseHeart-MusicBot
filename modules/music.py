@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import asyncio
 import datetime
+import itertools
 import json
 import os.path
 import pickle
@@ -2891,12 +2892,66 @@ class Music(commands.Cog):
 
         await self.interaction_message(inter, txt, emoji="🇳")
 
+    @has_source()
+    @check_voice()
+    @pool_command(name="nowplaying", aliases=["np", "npl", "current", "tocando", "playing"], only_voiced=True,
+                 description="Exibir informações da música que está tocando no momento.")
+    async def now_playing_legacy(self, ctx: CustomContext):
+        await self.now_playing.callback(self=self, inter=ctx)
+
+    @has_source()
+    @check_voice()
+    @commands.slash_command(description=f"{desc_prefix}Exibir informações da música que está tocando no momento.",
+                            extras={"only_voiced": True}, dm_permission=False)
+    async def now_playing(self, inter: disnake.AppCmdInter):
+
+        try:
+            bot = inter.music_bot
+            guild = inter.music_guild
+        except AttributeError:
+            bot = inter.bot
+            guild = inter.guild
+
+        player: LavalinkPlayer = bot.music.players[guild.id]
+
+        txt = f"### Tocando agora: [{player.current.title}]({player.current.uri or player.current.search_uri})\n"
+
+        if player.current.is_stream:
+            txt += "> `🔴` **⠂Transmissão ao vivo**\n"
+        else:
+            txt += f"> `⏰` **⠂Duração:** `{time_format(player.current.duration)}`\n"
+
+        if not player.current.autoplay:
+            txt += f"> `✋` **⠂Solicitado por:** <@{player.current.requester}>\n"
+        else:
+            try:
+                mode = f" [`Recomendação`]({player.current.info['extra']['related']['uri']})"
+            except:
+                mode = "`Recomendação`"
+            txt += f"> 👍 **⠂Adicionado via:** {mode}\n"
+
+        if player.queue or player.queue_autoplay:
+            txt += "### Próximas músicas:\n" + "\n".join(f"> `{n+1}) [{time_format(t.duration) if not t.is_stream else '🔴 Ao vivo'}]` [`{t.title}`]({t.uri})" for n, t in enumerate(itertools.islice(player.queue + player.queue_autoplay, 5)))
+
+        if player.static:
+            if player.message:
+                txt += f"\n\n`Acesse o player-controller` [`clicando aqui`]({player.message.jump_url})"
+            elif player.text_channel:
+                txt += f"\n\n`Acesse o player-controller no canal:` {player.text_channel.mention}"
+
+        await inter.send(
+            embed=disnake.Embed(
+                description=txt, color=self.bot.get_color(guild.me)
+            ).set_thumbnail(url=player.current.thumb),
+            ephemeral=True
+        )
+
     controller_cd = commands.CooldownMapping.from_cooldown(1, 10, commands.BucketType.member)
     controller_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
     @has_source()
     @check_voice()
-    @pool_command(name="controller", aliases=["np", "ctl"], only_voiced=True, cooldown=controller_cd,
+    @pool_command(name="controller", aliases=["ctl"], only_voiced=True, cooldown=controller_cd,
                   max_concurrency=controller_mc, description="Enviar player controller para um canal específico/atual.")
     async def controller_legacy(self, ctx: CustomContext):
         await self.controller.callback(self=self, inter=ctx)
