@@ -1326,7 +1326,7 @@ class LavalinkPlayer(wavelink.Player):
 
                 try:
                     embed = disnake.Embed(
-                        description=f"**Falha ao obter dados do autoplay:\n"
+                        description=f"**Falha ao obter dados do autoplay:**\n"
                                     f"{error_msg}",
                         color=disnake.Colour.red())
                     await self.text_channel.send(embed=embed, delete_after=10)
