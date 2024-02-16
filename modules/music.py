@@ -36,7 +36,7 @@ from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, 
 from utils.music.spotify import process_spotify, spotify_regex_w_user
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, SongRequestPurgeMode, song_request_buttons, \
-    select_bot_pool, get_inter_guild_data, update_inter
+    select_bot_pool, get_inter_guild_data, update_inter, ProgressBar
 
 
 class Music(commands.Cog):
@@ -2919,7 +2919,14 @@ class Music(commands.Cog):
         if player.current.is_stream:
             txt += "> `🔴` **⠂Transmissão ao vivo**\n"
         else:
-            txt += f"> `⏰` **⠂Duração:** `{time_format(player.current.duration)}`\n"
+            progress = ProgressBar(
+                player.position,
+                player.current.duration,
+                bar_count=24
+            )
+
+            txt += f"```ansi\n[34;1m[{time_format(player.position)}] {('=' * progress.start)}[0m🔴️[36;1m{'-' * progress.end} " \
+                       f"[{time_format(player.current.duration)}][0m```\n"
 
         txt += f"> `👤` **⠂Uploader/Artista(s):** `{player.current.authors_md}`\n"
 
