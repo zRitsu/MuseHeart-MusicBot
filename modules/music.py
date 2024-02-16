@@ -6595,6 +6595,13 @@ class Music(commands.Cog):
                             return
 
                         if player.guild.me.voice:
+                            if isinstance(after.channel, disnake.StageChannel) \
+                                    and member not in after.channel.speakers \
+                                    and after.channel.permissions_for(member).manage_permissions:
+                                try:
+                                    await member.guild.me.edit(suppress=False)
+                                except Exception:
+                                    traceback.print_exc()
                             return
 
                         if player.is_closing:
@@ -6607,7 +6614,8 @@ class Music(commands.Cog):
                                                             "Caso queira me desconectar use o comando/botão: **stop**.",
                                                        emoji="⚠️")
                                 player.update = True
-                                break
+                                await asyncio.sleep(5)
+                                continue
                             except Exception:
                                 traceback.print_exc()
 
@@ -6694,10 +6702,11 @@ class Music(commands.Cog):
 
         if member.bot and isinstance(after.channel, disnake.StageChannel) and after.channel.permissions_for(member).manage_permissions:
             await asyncio.sleep(1.5)
-            try:
-                await member.guild.me.edit(suppress=False)
-            except Exception:
-                traceback.print_exc()
+            if member not in after.channel.speakers:
+                try:
+                    await member.guild.me.edit(suppress=False)
+                except Exception:
+                    traceback.print_exc()
 
         player.members_timeout_task = player.bot.loop.create_task(player.members_timeout(check=bool(check)))
 
