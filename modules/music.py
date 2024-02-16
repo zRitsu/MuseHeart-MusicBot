@@ -2976,6 +2976,9 @@ class Music(commands.Cog):
     @commands.Cog.listener("on_button_click")
     async def relaod_np(self, inter: disnake.MessageInteraction):
 
+        if not inter.data.custom_id.startswith("np_"):
+            return
+
         if inter.data.custom_id != f"np_{inter.author.id}":
             await inter.send("Você não pode clicar nesse botão...", ephemeral=True)
             return
