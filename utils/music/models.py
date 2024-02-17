@@ -792,7 +792,8 @@ class LavalinkPlayer(wavelink.Player):
 
             if (event.error == "This IP address has been blocked by YouTube (429)" or
                 event.message == "Video returned by YouTube isn't what was requested" or
-                (error_403 := event.cause.startswith("java.lang.RuntimeException: Not success status code: 403"))
+                (error_403 := event.cause.startswith(("java.lang.RuntimeException: Not success status code: 403",
+                                                      "java.io.IOException: Invalid status code for video page response: 400")))
             ):
 
                 if error_403 and self.node.retry_403:
