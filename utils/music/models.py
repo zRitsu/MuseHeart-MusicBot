@@ -680,6 +680,8 @@ class LavalinkPlayer(wavelink.Player):
         if self.is_closing:
             return
 
+        await self.bot.wait_until_ready()
+
         if isinstance(event, wavelink.TrackEnd):
 
             self.bot.dispatch("wavelink_track_end", self.node, event)
@@ -704,9 +706,6 @@ class LavalinkPlayer(wavelink.Player):
                 self.message_updater_task.cancel()
             except:
                 pass
-
-            while self.bot.is_closed():
-                await asyncio.sleep(3)
 
             await self.track_end()
 
@@ -737,9 +736,6 @@ class LavalinkPlayer(wavelink.Player):
             if not send_message_perm:
                 self.text_channel = None
                 return
-
-            while self.bot.is_closed():
-                await asyncio.sleep(3)
 
             if not self.guild.me.voice:
                 try:
@@ -1005,9 +1001,6 @@ class LavalinkPlayer(wavelink.Player):
                 self.message_updater_task.cancel()
             except:
                 pass
-
-            while self.bot.is_closed():
-                await asyncio.sleep(3)
 
             await self.track_end()
 
@@ -1464,8 +1457,7 @@ class LavalinkPlayer(wavelink.Player):
             self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node())
             return
 
-        while self.bot.is_closed():
-            await asyncio.sleep(3)
+        await self.bot.wait_until_ready()
 
         if not self.is_connected:
             return
@@ -1728,7 +1720,7 @@ class LavalinkPlayer(wavelink.Player):
         )
 
         if not self.keep_connected:
-            embed.description += "\n\nNota:** `O Player será desligado automaticamente` " \
+            embed.description += "\n\n**Nota:** `O Player será desligado automaticamente` " \
                         f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=self.bot.config['IDLE_TIMEOUT'])).timestamp())}:R> " \
                         f"`caso nenhuma ação seja executada...`"
 

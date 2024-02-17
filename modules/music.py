@@ -4558,6 +4558,47 @@ class Music(commands.Cog):
         player.message = None
         await thread.edit(archived=True, locked=True, name=f"arquivado: {thread.name}")
 
+    @commands.Cog.listener('on_ready')
+    async def resume_players_ready(self):
+
+        if not self.bot.bot_ready:
+            return
+
+        for guild_id in list(self.bot.music.players):
+
+            try:
+
+                player: LavalinkPlayer = self.bot.music.players[guild_id]
+
+                try:
+                    channel_id = player.guild.me.voice.channel.id
+                except AttributeError:
+                    channel_id = player.channel_id
+
+                vc = self.bot.get_channel(channel_id) or player.last_channel
+
+                try:
+                    player.guild.voice_client.cleanup()
+                except:
+                    pass
+
+                if not vc:
+                    print(
+                        f"{self.bot.user} - {player.guild.name} [{guild_id}] - Player finalizado por falta de canal de voz")
+                    try:
+                        await player.destroy()
+                    except:
+                        traceback.print_exc()
+                    continue
+
+                await player.connect(vc.id)
+
+                if not player.is_paused and not player.is_playing:
+                    await player.process_next()
+                print(f"{self.bot.user} - {player.guild.name} [{guild_id}] - Player Reconectado no canal de voz")
+            except:
+                traceback.print_exc()
+
     async def is_request_channel(self, ctx: Union[disnake.AppCmdInter, disnake.MessageInteraction, CustomContext], *,
                                  data: dict = None, ignore_thread=False) -> bool:
 
@@ -6372,8 +6413,7 @@ class Music(commands.Cog):
                 print(f"{self.bot.user} - [{node.identifier}] Todas as tentativas de reconectar falharam...")
                 return
 
-            while self.bot.is_closed():
-                await asyncio.sleep(3)
+            await self.bot.wait_until_ready()
 
             error = None
 
