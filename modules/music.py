@@ -2960,9 +2960,9 @@ class Music(commands.Cog):
         components = [disnake.ui.Button(custom_id=f"np_{inter.author.id}", label="Atualizar", emoji="🔄")]
 
         if player.queue or player.queue_autoplay:
-            txt += f"### 🎶 ⠂Próximas músicas ({(qsize:=len(player.queue + player.queue_autoplay))}):\n" + "\n".join(
-                f"`┌ {n+1})` [`{fix_characters(t.title, limit=38)}`]({t.uri})\n" \
-                f"`└ ⏲️ {time_format(t.duration) if not t.is_stream else '🔴 Ao vivo'}`" + (f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
+            txt += f"### 🎶 ⠂Próximas músicas ({(qsize:=len(player.queue + player.queue_autoplay))}):\n" + ("\n> `" + ("-"*38) + "`\n").join(
+                f"> `{n+1})` [`{fix_characters(t.title, limit=38)}`]({t.uri})\n" \
+                f"> `⏲️ {time_format(t.duration) if not t.is_stream else '🔴 Ao vivo'}`" + (f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
                 f" **|** " + (f"`✋` <@{t.requester}>" if not t.autoplay else f"`👍⠂Recomendada`") for n, t in enumerate(itertools.islice(player.queue + player.queue_autoplay, 3))
             )
 
