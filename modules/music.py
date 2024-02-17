@@ -2995,7 +2995,7 @@ class Music(commands.Cog):
             await inter.send(embed=embed, ephemeral=True, components=components)
 
     @commands.Cog.listener("on_button_click")
-    async def relaod_np(self, inter: disnake.MessageInteraction):
+    async def reload_np(self, inter: disnake.MessageInteraction):
 
         if not inter.data.custom_id.startswith("np_"):
             return
