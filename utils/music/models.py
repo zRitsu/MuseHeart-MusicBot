@@ -1353,7 +1353,7 @@ class LavalinkPlayer(wavelink.Player):
                         if [err for err in ("Could not find tracks from mix", "Could not read mix page") if err in str(e)]:
                             try:
                                 tracks_ytsearch = await self.node.get_tracks(
-                                    f"ytsearch:\"{track_data.author}\"",
+                                    f"ytsearch:{track_data.author}",
                                     track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, autoplay=True,
                                     requester=self.bot.user.id)
                                 track = track_data
@@ -2504,7 +2504,7 @@ class LavalinkPlayer(wavelink.Player):
 
                 if track.info.get("isrc"):
                     try:
-                        tracks = await self.node.get_tracks(f"ytsearch:\"{track.info['isrc']}\"",track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
+                        tracks = await self.node.get_tracks(f"ytsearch:{track.info['isrc']}",track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
                     except Exception as e:
                         exceptions.append(e)
 
