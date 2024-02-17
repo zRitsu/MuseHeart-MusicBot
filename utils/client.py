@@ -892,7 +892,7 @@ class BotCore(commands.AutoShardedBot):
 
     async def on_message(self, message: disnake.Message):
 
-        if not self.bot_ready or not self.appinfo:
+        if not self.bot_ready or not self.appinfo or self.is_closed():
             return
 
         if not message.guild:
@@ -1106,7 +1106,7 @@ class BotCore(commands.AutoShardedBot):
 
     async def on_application_command_autocomplete(self, inter: disnake.ApplicationCommandInteraction):
 
-        if not self.bot_ready:
+        if not self.bot_ready or self.is_closed():
             return []
 
         if not inter.guild_id:
@@ -1121,7 +1121,7 @@ class BotCore(commands.AutoShardedBot):
                              "Use em algum servidor que estou presente.")
             return
 
-        if not self.bot_ready:
+        if not self.bot_ready or self.is_closed():
             await inter.send("Ainda estou inicializando...\nPor favor aguarde mais um pouco...", ephemeral=True)
             return
 
@@ -1131,8 +1131,6 @@ class BotCore(commands.AutoShardedBot):
                       f" - [cmd: {inter.data.name}] {datetime.datetime.utcnow().strftime('%d/%m/%Y - %H:%M:%S')} (UTC) - {inter.filled_options}\n" + ("-" * 15))
             except:
                 traceback.print_exc()
-
-
 
         if str(self.user.id) in self.config["INTERACTION_BOTS_CONTROLLER"]:
 

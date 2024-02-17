@@ -4834,7 +4834,7 @@ class Music(commands.Cog):
 
     async def player_controller(self, interaction: disnake.MessageInteraction, control: str, **kwargs):
 
-        if not self.bot.bot_ready:
+        if not self.bot.bot_ready and not not self.bot.is_closed():
             await interaction.send("Ainda estou inicializando...", ephemeral=True)
             return
 
@@ -6372,7 +6372,8 @@ class Music(commands.Cog):
                 print(f"{self.bot.user} - [{node.identifier}] Todas as tentativas de reconectar falharam...")
                 return
 
-            await self.bot.wait_until_ready()
+            while self.bot.is_closed():
+                await asyncio.sleep(3)
 
             error = None
 

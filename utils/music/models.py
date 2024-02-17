@@ -705,7 +705,8 @@ class LavalinkPlayer(wavelink.Player):
             except:
                 pass
 
-            await self.bot.wait_until_ready()
+            while self.bot.is_closed():
+                await asyncio.sleep(3)
 
             await self.track_end()
 
@@ -737,7 +738,8 @@ class LavalinkPlayer(wavelink.Player):
                 self.text_channel = None
                 return
 
-            await self.bot.wait_until_ready()
+            while self.bot.is_closed():
+                await asyncio.sleep(3)
 
             if not self.guild.me.voice:
                 try:
@@ -791,8 +793,6 @@ class LavalinkPlayer(wavelink.Player):
             error_403 = False
 
             cooldown = 10
-
-            await self.bot.wait_until_ready()
 
             if (event.error == "This IP address has been blocked by YouTube (429)" or
                 event.message == "Video returned by YouTube isn't what was requested" or
@@ -1001,12 +1001,13 @@ class LavalinkPlayer(wavelink.Player):
 
         if isinstance(event, wavelink.TrackStuck):
 
-            await self.bot.wait_until_ready()
-
             try:
                 self.message_updater_task.cancel()
             except:
                 pass
+
+            while self.bot.is_closed():
+                await asyncio.sleep(3)
 
             await self.track_end()
 
@@ -1463,7 +1464,8 @@ class LavalinkPlayer(wavelink.Player):
             self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node())
             return
 
-        await self.bot.wait_until_ready()
+        while self.bot.is_closed():
+            await asyncio.sleep(3)
 
         if not self.is_connected:
             return
