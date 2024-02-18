@@ -643,7 +643,7 @@ class LavalinkPlayer(wavelink.Player):
             if self.guild.me.voice:
                 if isinstance(vc, disnake.StageChannel) \
                         and self.guild.me not in vc.speakers \
-                        and vc.permissions_for(self.guild.me).manage_permissions:
+                        and vc.permissions_for(self.guild.me).mute_members:
                     try:
                         await self.guild.me.edit(suppress=False)
                     except Exception:
