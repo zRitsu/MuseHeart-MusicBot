@@ -112,7 +112,7 @@ Heroku
 * **[ 3 ]** - Clique em Manage e depois vá em resources.
 
 
-* **[ 4 ]** - Desative o dyno web e ative o autoupdate (ou o quickfix, não ative os 2 ao mesmo tempo!) e aguarde o bot logar. `(no canto superior clique em more e em view logs para acompanhar os logs)`
+* **[ 4 ]** - Desative o dyno web e ative o autoupdate (ou o quickboot, não ative os 2 ao mesmo tempo!) e aguarde o bot logar. `(no canto superior clique em more e em view logs para acompanhar os logs)`
 
 
 * **Nota:** Caso queira alterar as configs usadas no passo 1, vá em settings e clique em Reveal Config Vars, crie/altere a key e o valor desejado da config, consulte o arquivo .example.env para ver todas as configs disponíveis.
