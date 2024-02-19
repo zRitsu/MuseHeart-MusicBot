@@ -166,7 +166,7 @@ class DefaultProgressbarStaticSkin:
 
             has_stream = False
 
-            current_time = datetime.timedelta(milliseconds=player.current.duration)
+            current_time = disnake.utils.utcnow() - datetime.timedelta(milliseconds=player.position + player.current.duration)
 
             queue_duration = 0
 
