@@ -6,8 +6,7 @@ import traceback
 from typing import Optional, TYPE_CHECKING
 from urllib.parse import quote
 
-import spotipy
-from spotipy import SpotifyClientCredentials
+from spotipy import SpotifyClientCredentials, CacheFileHandler, Spotify, SpotifyException
 
 from utils.music.converters import fix_characters
 from utils.music.errors import MissingSpotifyClient, GenericError
@@ -128,7 +127,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
 
         try:
             result = await bot.loop.run_in_executor(None, lambda: bot.spotify.playlist(url_id))
-        except spotipy.SpotifyException as e:
+        except SpotifyException as e:
             raise GenericError("**Ocorreu um erro ao processar a playlist:** ```py"
                                f"{repr(e)}```")
         data["playlistInfo"]["name"] = result["name"]
@@ -192,7 +191,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
     return playlist
 
 
-def spotify_client(config: dict) -> Optional[spotipy.Spotify]:
+def spotify_client(config: dict) -> Optional[Spotify]:
     if not config['SPOTIFY_CLIENT_ID']:
         print(
             f"[IGNORADO] - Spotify Support: SPOTIFY_CLIENT_ID não foi configurado na ENV da host (ou no arquivo .env)."
@@ -206,10 +205,11 @@ def spotify_client(config: dict) -> Optional[spotipy.Spotify]:
         return
 
     try:
-        return spotipy.Spotify(
+        return Spotify(
             auth_manager=SpotifyClientCredentials(
                 client_id=config['SPOTIFY_CLIENT_ID'],
-                client_secret=config['SPOTIFY_CLIENT_SECRET']
+                client_secret=config['SPOTIFY_CLIENT_SECRET'],
+                cache_handler=CacheFileHandler(cache_path="./.spotipy_cache")
             )
         )
 
