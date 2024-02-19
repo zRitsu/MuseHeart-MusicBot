@@ -149,18 +149,19 @@ class Owner(commands.Cog):
         if not node and not args.force:
             raise GenericError("**O servidor LOCAL não está sendo usado!**")
 
-        download_urls = [self.bot.config["LAVALINK_FILE_URL"]]
+        download_list = [["Lavalink.jar", self.bot.config["LAVALINK_FILE_URL"]]]
 
         if args.yml:
-            download_urls.append("https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/application.yml")
+            download_list.append(["application.yml", "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/application.yml"])
 
         async with ctx.typing():
 
-            for url in download_urls:
+            for download_data in download_list:
                 async with ClientSession() as session:
+                    filename, url = download_data
                     async with session.get(url) as r:
                         lavalink_jar = await r.read()
-                        with open(url.split("/")[-1], "wb") as f:
+                        with open(filename, "wb") as f:
                             f.write(lavalink_jar)
 
         await self.bot.pool.start_lavalink()
