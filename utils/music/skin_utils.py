@@ -38,7 +38,7 @@ def replaces(
     txt: str, info: dict, ctx: disnake.MessageInteraction, player: LavalinkPlayer, queue_text: str, track: dict
 ):
 
-    if player:
+    if player and ctx.guild:
 
         try:
             if not player.current.autoplay:
@@ -90,6 +90,13 @@ def replaces(
 
         queue_max_entries = info.pop("queue_max_entries", 3) or 3
 
+        c = ctx.bot.get_color(ctx.guild.me)
+
+        try:
+            color = c.value
+        except AttributeError:
+            color = c
+
         txt = track_title_format(
             track_title=track['title'],
             track_author=track['author'],
@@ -106,12 +113,12 @@ def replaces(
             replace('{player.autoplay}', "Ativado"). \
             replace('{player.nightcore}', "Ativado"). \
             replace('{player.log.emoji}', "⏭️"). \
-            replace('{player.log.text}', f"{random.choice(ctx.guild.members)} pulou a música."). \
+            replace('{player.log.text}', f"{random.choice(ctx.author)} pulou a música."). \
             replace('{requester.global_name}', ctx.author.global_name). \
             replace('{requester.display_name}', ctx.author.display_name). \
             replace('{requester.mention}', ctx.author.mention). \
             replace('{requester.avatar}', ctx.author.display_avatar.with_static_format("png").url). \
-            replace('{guild.color}', hex(ctx.bot.get_color(ctx.guild.me).value)[2:]). \
+            replace('{guild.color}', hex(color)[2:]). \
             replace('{guild.icon}', ctx.guild.icon.with_static_format("png").url if ctx.guild.icon else ""). \
             replace('{guild.name}', ctx.guild.name). \
             replace('{guild.id}', str(ctx.guild.id)). \
