@@ -38,7 +38,7 @@ def replaces(
     txt: str, info: dict, ctx: disnake.MessageInteraction, player: LavalinkPlayer, queue_text: str, track: dict
 ):
 
-    if player and ctx.guild:
+    if player and player.guild:
 
         try:
             if not player.current.autoplay:
@@ -90,7 +90,7 @@ def replaces(
 
         queue_max_entries = info.pop("queue_max_entries", 3) or 3
 
-        c = ctx.bot.get_color(ctx.guild.me)
+        c = player.bot.get_color(player.guild.me)
 
         try:
             color = c.value
@@ -113,15 +113,15 @@ def replaces(
             replace('{player.autoplay}', "Ativado"). \
             replace('{player.nightcore}', "Ativado"). \
             replace('{player.log.emoji}', "⏭️"). \
-            replace('{player.log.text}', f"{random.choice(ctx.author)} pulou a música."). \
+            replace('{player.log.text}', f"{ctx.author} pulou a música."). \
             replace('{requester.global_name}', ctx.author.global_name). \
             replace('{requester.display_name}', ctx.author.display_name). \
             replace('{requester.mention}', ctx.author.mention). \
             replace('{requester.avatar}', ctx.author.display_avatar.with_static_format("png").url). \
             replace('{guild.color}', hex(color)[2:]). \
-            replace('{guild.icon}', ctx.guild.icon.with_static_format("png").url if ctx.guild.icon else ""). \
-            replace('{guild.name}', ctx.guild.name). \
-            replace('{guild.id}', str(ctx.guild.id)). \
+            replace('{guild.icon}', player.guild.icon.with_static_format("png").url if player.guild.icon else ""). \
+            replace('{guild.name}', player.guild.name). \
+            replace('{guild.id}', str(player.guild.id)). \
             replace('{queue_format}', queue_text or "(Sem músicas).")
 
     return txt
