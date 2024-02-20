@@ -271,6 +271,7 @@ class QueueInteraction(disnake.ui.View):
     async def first(self, interaction: disnake.MessageInteraction):
 
         self.current_page = 0
+        self.current_track = self.track_pages[self.current_page][0]
         self.update_embed()
         await interaction.response.edit_message(embed=self.embed, view=self)
 
@@ -297,6 +298,7 @@ class QueueInteraction(disnake.ui.View):
     async def last(self, interaction: disnake.MessageInteraction):
 
         self.current_page = self.max_page
+        self.current_track = self.track_pages[self.current_page][0]
         self.update_embed()
         await interaction.response.edit_message(embed=self.embed, view=self)
 
