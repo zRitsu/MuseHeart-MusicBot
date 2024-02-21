@@ -806,7 +806,7 @@ class Music(commands.Cog):
             channel = bot.get_channel(inter.channel.id)
             if not channel:
                 raise GenericError(f"**O canal <#{inter.channel.id}> não foi encontrado (ou foi excluido).**")
-            await check_pool_bots(inter, check_player=False)
+            await check_pool_bots(inter, check_player=False, bypass_prefix=True)
 
         if bot.user.id not in inter.author.voice.channel.voice_states and str(inter.channel.id) != guild_data['player_controller']['channel']:
 
@@ -1492,7 +1492,7 @@ class Music(commands.Cog):
         try:
             player = bot.music.players[inter.guild_id]
         except KeyError:
-            await check_pool_bots(inter, check_player=False)
+            await check_pool_bots(inter, check_player=False, bypass_prefix=True)
 
             try:
                 bot = inter.music_bot

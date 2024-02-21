@@ -72,7 +72,8 @@ def check_forum(inter, bot):
         else:
             raise PoolException()
 
-async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool = True, return_first=False):
+async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool = True, return_first=False,
+                          bypass_prefix=False):
 
     try:
         inter.music_bot
@@ -108,7 +109,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
     mention_prefixed = False
 
-    if isinstance(inter, CustomContext):
+    if isinstance(inter, CustomContext) and not bypass_prefix:
 
         is_forum = check_forum(inter, inter.bot)
 
