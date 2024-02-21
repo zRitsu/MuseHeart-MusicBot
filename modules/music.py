@@ -1378,7 +1378,7 @@ class Music(commands.Cog):
             except FileNotFoundError:
                 raise GenericError("**A sua fila salva já foi excluída...**")
 
-            tracks = await self.check_player_queue(inter.author, bot, guild.id, self.bot.get_cog("PlayerSession").process_track_cls(data["tracks"])[0])
+            tracks = await self.check_player_queue(inter.author, bot, guild.id, self.bot.pool.process_track_cls(data["tracks"])[0])
             node = await self.get_best_node(bot)
             queue_loaded = True
             source = False
