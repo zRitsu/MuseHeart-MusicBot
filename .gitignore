@@ -166,3 +166,4 @@ application.yml
 /.tempjar/
 /emojis.json
 /.spotipy_cache
+/.playlist_cache.pkl

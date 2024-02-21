@@ -96,8 +96,22 @@ class Music(commands.Cog):
 
     async def update_cache(self):
 
-        async with aiofiles.open("./playlist_cache.json", "w") as f:
-            await f.write(json.dumps(self.bot.pool.playlist_cache))
+        tracks_final = {}
+
+        for url, data in self.bot.pool.playlist_cache.items():
+
+            tracks = []
+
+            for t in data:
+                t.info["id"] = t.id
+                if t.playlist:
+                    t.info["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
+                tracks.append(t.info)
+
+            tracks_final[url] = tracks
+
+        async with aiofiles.open(f"./.playlist_cache.pkl", "wb") as f:
+            await f.write(zlib.compress(pickle.dumps(tracks_final)))
 
     @commands.is_owner()
     @commands.command(hidden=True, aliases=["ac"])
@@ -106,21 +120,14 @@ class Music(commands.Cog):
         url = url.strip("<>")
 
         async with ctx.typing():
-            tracks, node = await self.get_tracks(url, ctx.author, use_cache=False)
-
-        tracks_info = []
+            result, node = await self.get_tracks(url, ctx.author, use_cache=False, source=False)
 
         try:
-            tracks = tracks.tracks
+            result = result.tracks
         except AttributeError:
             pass
 
-        for t in tracks:
-            tinfo = {"track": t.id, "info": t.info}
-            tinfo["info"]["extra"]["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
-            tracks_info.append(tinfo)
-
-        self.bot.pool.playlist_cache[url] = tracks_info
+        self.bot.pool.playlist_cache[url] = result
 
         await self.update_cache()
 
@@ -172,21 +179,14 @@ class Music(commands.Cog):
 
             else:
 
-                tracks_info = []
-
                 try:
                     tracks = tracks.tracks
                 except AttributeError:
                     pass
 
-                for t in tracks:
-                    tinfo = {"track": t.id, "info": t.info}
-                    tinfo["info"]["extra"]["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
-                    tracks_info.append(tinfo)
+                self.bot.pool.playlist_cache[url] = tracks
 
-                self.bot.pool.playlist_cache[url] = tracks_info
-
-                txt += f"[`{tracks_info[0]['info']['extra']['playlist']['name']}`]({url})\n"
+                txt += f"[`{tracks[0].playlist_name}`]({url})\n"
 
             counter += 1
 
@@ -232,7 +232,7 @@ class Music(commands.Cog):
     @commands.command(hidden=True, aliases=["ec"])
     async def exportcache(self, ctx: CustomContext):
 
-        await ctx.send(file=disnake.File("playlist_cache.json"))
+        await ctx.send(file=disnake.File(".playlist_cache.pkl"))
 
     @commands.is_owner()
     @commands.command(hidden=True, aliases=["ic"])
@@ -241,7 +241,7 @@ class Music(commands.Cog):
         async with ctx.typing():
             async with aiohttp.ClientSession() as session:
                 async with session.get(url) as r:
-                    self.bot.pool.playlist_cache.update(json.loads((await r.read()).decode('utf-8')))
+                    self.bot.pool.playlist_cache.update(pickle.loads(await r.content.read()))
 
         await self.update_cache()
 
@@ -6554,23 +6554,13 @@ class Music(commands.Cog):
 
             if use_cache:
                 try:
-                    cached_tracks = self.bot.pool.playlist_cache[query]
+                    tracks = self.bot.pool.playlist_cache[query]
                 except KeyError:
                     pass
                 else:
-
-                    tracks = LavalinkPlaylist(
-                        {
-                            'loadType': 'PLAYLIST_LOADED',
-                            'playlistInfo': {
-                                'name': cached_tracks[0]["info"]["extra"]["playlist"]["name"],
-                                'selectedTrack': -1
-                            },
-                            'tracks': cached_tracks
-                        },
-                        requester=user.id,
-                        url=cached_tracks[0]["info"]["extra"]["playlist"]["url"]
-                    )
+                    playlist = tracks[0].playlist
+                    playlist.tracks = tracks
+                    tracks = playlist
 
             if not tracks:
 
