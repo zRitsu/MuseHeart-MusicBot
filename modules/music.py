@@ -1804,7 +1804,7 @@ class Music(commands.Cog):
             if loadtype == "track":
                 components = [
                     disnake.ui.Button(emoji="💗", label="Favoritar", custom_id=PlayerControls.embed_add_fav),
-                    disnake.ui.Button(emoji="▶️", label="Tocar", custom_id=PlayerControls.embed_forceplay),
+                    disnake.ui.Button(emoji="▶️", label="Tocar" + " agora" if (player.current and player.current.autoplay) else "", custom_id=PlayerControls.embed_forceplay),
                     disnake.ui.Button(emoji="<:add_music:588172015760965654>", label="Adicionar na fila",
                                       custom_id=PlayerControls.embed_enqueue_track),
                 ]
@@ -6263,7 +6263,7 @@ class Music(commands.Cog):
                 components.extend(
                     [
                         disnake.ui.Button(emoji="💗", label="Favoritar", custom_id=PlayerControls.embed_add_fav),
-                        disnake.ui.Button(emoji="<:play:914841137938829402>", label="Tocar", custom_id=PlayerControls.embed_forceplay),
+                        disnake.ui.Button(emoji="<:play:914841137938829402>", label="Tocar" + (" agora" if (player.current and player.current.autoplay) else ""), custom_id=PlayerControls.embed_forceplay),
                         disnake.ui.Button(emoji="<:add_music:588172015760965654>", label="Adicionar na fila",
                                           custom_id=PlayerControls.embed_enqueue_track)
                     ]
