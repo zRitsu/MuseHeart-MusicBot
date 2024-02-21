@@ -267,9 +267,11 @@ class PlayerSession(commands.Cog):
                 return
 
             if not guild:
-                print(f"{self.bot.user} - Player Ignorado: {data['_id']} | Servidor inexistente...")
-                if (disnake.utils.utcnow() - data.get("time", disnake.utils.utcnow())).total_seconds() > 172800:
+                if not (db_date:=data.get("time")) or (disnake.utils.utcnow() - db_date).total_seconds() > 172800:
+                    print(f"{self.bot.user} - Limpando informações do player: {data['_id']} | Servidor inexistente...")
                     await self.delete_data(data["_id"])
+                else:
+                    print(f"{self.bot.user} - Player Ignorado: {data['_id']} | Servidor inexistente...")
                 return
 
             message = None
