@@ -180,7 +180,7 @@ class Owner(commands.Cog):
 
         self.bot.pool.load_cfg()
 
-        txt = "Config do bot foi recarregado com sucesso!"
+        txt = "**AS Configurações do bot foram recarregadas com sucesso!**"
 
         if isinstance(ctx, CustomContext):
             embed = disnake.Embed(colour=self.bot.get_color(ctx.me), description=txt)
@@ -191,7 +191,7 @@ class Owner(commands.Cog):
     @commands.is_owner()
     @panel_command(aliases=["rd", "recarregar"], description="Recarregar os módulos.", emoji="🔄",
                    alt_name="Carregar/Recarregar módulos.")
-    async def reload(self, ctx: Union[CustomContext, disnake.MessageInteraction]):
+    async def reload(self, ctx: Union[CustomContext, disnake.MessageInteraction], *modules):
 
         for m in list(sys.modules):
             if not m.startswith("utils.music.skins."):
@@ -201,7 +201,9 @@ class Owner(commands.Cog):
             except:
                 continue
 
-        data = self.bot.load_modules()
+        modules = [f"{m}.py" for m in modules]
+
+        data = self.bot.load_modules(modules)
         self.bot.load_skins()
 
         await self.bot.sync_app_commands(force=self.bot == self.bot.pool.controller_bot)
@@ -210,7 +212,7 @@ class Owner(commands.Cog):
 
             if bot.user.id != self.bot.user.id:
                 bot.load_skins()
-                bot.load_modules()
+                bot.load_modules(modules)
                 await bot.sync_app_commands(force=bot == self.bot.pool.controller_bot)
 
         self.bot.sync_command_cooldowns()

@@ -1211,7 +1211,7 @@ class BotCore(commands.AutoShardedBot):
 
         await super().on_application_command(inter)
 
-    def load_modules(self):
+    def load_modules(self, module_list: list = None):
 
         modules_dir = "modules"
 
@@ -1225,6 +1225,8 @@ class BotCore(commands.AutoShardedBot):
         for item in os.walk(modules_dir):
             files = filter(lambda f: f.endswith('.py'), item[-1])
             for file in files:
+                if module_list and file not in module_list:
+                    continue
                 filename, _ = os.path.splitext(file)
                 module_filename = os.path.join(modules_dir, filename).replace('\\', '.').replace('/', '.')
                 try:
