@@ -3026,6 +3026,7 @@ class Music(commands.Cog):
                         continue
                     inter.music_guild = player.guild
                     inter.music_bot = player.bot
+                    break
 
                 if not hasattr(inter, "music_guild"):
                     raise GenericError(f"**Você deve entrar em um canal onde há player ativo...**")
