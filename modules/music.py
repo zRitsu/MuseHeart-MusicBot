@@ -297,7 +297,7 @@ class Music(commands.Cog):
 
         if not template:
             view = SetStageTitle(ctx=inter, bot=bot, data=global_data, guild=guild)
-            view.message = await inter.send(view=view, embed=view.build_embed())
+            view.message = await inter.send(view=view, embed=view.build_embed(), ephemeral=True)
             await view.wait()
         else:
             if not any(p in template for p in SetStageTitle.placeholders):
@@ -1804,7 +1804,7 @@ class Music(commands.Cog):
             if loadtype == "track":
                 components = [
                     disnake.ui.Button(emoji="💗", label="Favoritar", custom_id=PlayerControls.embed_add_fav),
-                    disnake.ui.Button(emoji="▶️", label="Tocar" + " agora" if (player.current and player.current.autoplay) else "", custom_id=PlayerControls.embed_forceplay),
+                    disnake.ui.Button(emoji="▶️", label="Tocar" + (" agora" if (player.current and player.current.autoplay) else ""), custom_id=PlayerControls.embed_forceplay),
                     disnake.ui.Button(emoji="<:add_music:588172015760965654>", label="Adicionar na fila",
                                       custom_id=PlayerControls.embed_enqueue_track),
                 ]
