@@ -2917,6 +2917,13 @@ class Music(commands.Cog):
             bot = inter.bot
             guild = inter.guild
 
+        inter, guild_data = await get_inter_guild_data(inter, bot)
+
+        ephemeral = await self.is_request_channel(inter, data = guild_data)
+
+        if not inter.response.is_done():
+            await inter.response.defer(ephemeral=ephemeral)
+
         player: LavalinkPlayer = bot.music.players[guild.id]
 
         txt = f"### [{player.current.title}]({player.current.uri or player.current.search_uri})\n"
@@ -3005,11 +3012,25 @@ class Music(commands.Cog):
             return
 
         try:
+            if inter.message.type == disnake.MessageType.application_command:
+
+                for bot in self.bot.pool.bots:
+                    try:
+                        player = bot.music.players[inter.guild_id]
+                    except KeyError:
+                        continue
+                    if not player.last_channel or inter.author.id not in player.last_channel.voice_states:
+                        continue
+                    inter.music_guild = player.guild
+                    inter.music_bot = player.bot
+
+                if not hasattr(inter, "music_guild"):
+                    raise GenericError(f"**Você deve entrar em um canal onde há player ativo...**")
+
             await check_cmd(self.now_playing_legacy, inter)
             await self.now_playing_legacy(inter)
         except Exception as e:
             self.bot.dispatch('interaction_player_error', inter, e)
-
 
     controller_cd = commands.CooldownMapping.from_cooldown(1, 10, commands.BucketType.member)
     controller_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
