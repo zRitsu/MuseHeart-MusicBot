@@ -2576,10 +2576,6 @@ class LavalinkPlayer(wavelink.Player):
 
         while True:
 
-            if self.node.is_available:
-                self._new_node_task = None
-                return
-
             nodes = sorted([n for n in self.bot.music.nodes.values() if n.is_available and n.identifier != ignore_node],
                               key=lambda n: n.stats.players)
             if not nodes:
