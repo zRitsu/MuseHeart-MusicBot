@@ -2997,9 +2997,12 @@ class Music(commands.Cog):
             pass
 
         if isinstance(inter, disnake.MessageInteraction):
-            await inter.response.edit_message(embed=embed, components=components)
+            await inter.edit_original_message(embed=embed, components=components)
         else:
-            await inter.send(embed=embed, ephemeral=True, components=components)
+            try:
+                await inter.edit_original_message(embed=embed, components=components)
+            except AttributeError:
+                await inter.send(embed=embed, ephemeral=ephemeral, components=components)
 
     @commands.Cog.listener("on_button_click")
     async def reload_np(self, inter: disnake.MessageInteraction):
