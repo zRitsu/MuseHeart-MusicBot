@@ -4582,10 +4582,10 @@ class Music(commands.Cog):
                 except AttributeError:
                     continue
 
-                if not player.current:
-                    raise GenericError(f"**No momento não estou tocando algo no canal {vc.mention}**")
-
                 if inter.author.id in vc.voice_states:
+
+                    if not player.current:
+                        raise GenericError(f"**No momento não estou tocando algo no canal {vc.mention}**")
 
                     if "DISCOVERABLE" in player.guild.features and vc.permissions_for(player.guild.default_role).connect:
                         vc_name = vc.mention
