@@ -36,7 +36,7 @@ from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, 
 from utils.music.spotify import process_spotify, spotify_regex_w_user
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, SongRequestPurgeMode, song_request_buttons, \
-    select_bot_pool, get_inter_guild_data, update_inter, ProgressBar
+    select_bot_pool, get_inter_guild_data, ProgressBar
 
 
 class Music(commands.Cog):
@@ -4558,6 +4558,80 @@ class Music(commands.Cog):
                 await inter.response.edit_message(embed=embed, view=view)
 
         await view.wait()
+
+
+    playerinfo_cd = commands.CooldownMapping.from_cooldown(1, 7, commands.BucketType.member)
+
+    @commands.command(name="playerinfo", aliases=["pinfo"], cooldown=playerinfo_cd,
+                      description="Exibir informações do player que você está ativo.")
+    async def playerinfo_legacy(self, ctx: CustomContext):
+        await self.player_info.callback(self=self, inter=ctx)
+
+    @commands.slash_command(description=f"{desc_prefix}Exibir informações do player que você está ativo.",
+                            cooldown=playerinfo_cd, dm_permission=False)
+    async def player_info(self, inter: disnake.AppCmdInter):
+
+        for bot in self.bot.pool.bots:
+
+            for player_id in bot.music.players:
+
+                player = bot.music.players[player_id]
+
+                try:
+                    vc = player.guild.me.voice.channel
+                except AttributeError:
+                    continue
+
+                if not player.current:
+                    raise GenericError(f"**No momento não estou tocando algo no canal {vc.mention}**")
+
+                if inter.author.id in vc.voice_states:
+
+                    if "DISCOVERABLE" in player.guild.features and vc.permissions_for(player.guild.default_role).connect:
+                        vc_name = vc.mention
+                    else:
+                        vc_name = f"[`{fix_characters(vc.name)}`]({vc.jump_url})"
+
+                    embed = disnake.Embed(
+                        description=f"### Informações do player que o usuário {inter.author.mention} está ativo:\n\n"
+                                    f"> `🎶` **⠂Música Atual:** [`{fix_characters(player.current.title, 30)}`]({player.current.uri or player.current.search_uri})\n"
+                                    f"> `📄` **⠂Músicas na fila:** {len(player.queue or player.queue_autoplay)}\n"
+                                    f"> `🔊` **⠂{'Canal de voz' if isinstance(vc, disnake.VoiceChannel) else 'Palco'}:** {vc_name}\n"
+                                    f"> `🎧` **⠂Ouvintes atuais:** `{len([m for m in vc.members if not m.bot and (not m.voice.self_deaf or not m.voice.deaf)])}`\n"
+                                    f"> `⏱️` **⠂Player uptime:** <t:{player.uptime}:R>\n",
+                        color=self.bot.get_color(player.guild.me),
+                    )
+
+                    if player.current.is_stream:
+                        txt = "`🔴` [34;1m⠂Transmissão ao vivo[0m"
+                    else:
+                        progress = ProgressBar(
+                            player.position,
+                            player.current.duration,
+                            bar_count=26
+                        )
+                        txt = f"[34;1m[{time_format(player.position)}] {('=' * progress.start)}[0m🔴️[36;1m{'-' * progress.end} " \
+                               f"[{time_format(player.current.duration)}][0m"
+
+                    embed.description += f"```ansi\n{txt}```\n"
+
+                    embed.set_author(name=bot.user.display_name,
+                                     icon_url=bot.user.display_avatar.with_static_format("png").url)
+
+                    embed.set_thumbnail(url=player.current.thumb)
+
+                    try:
+                        footer_kw = {"icon_url": player.guild.icon.with_static_format("png").url}
+                    except AttributeError:
+                        footer_kw = {}
+
+                    embed.set_footer(text=f"Servidor: {player.guild.name}", **footer_kw)
+
+                    await inter.send(embed=embed)
+
+                    return
+
+        raise GenericError("**Você não está conectado em um canal de voz com player ativo...**")
 
     @commands.Cog.listener("on_message_delete")
     async def player_message_delete(self, message: disnake.Message):
