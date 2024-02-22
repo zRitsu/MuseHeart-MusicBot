@@ -4596,7 +4596,7 @@ class Music(commands.Cog):
                         f"> `▶️` **⠂Música Atual:** [`{fix_characters(player.current.title, 30)}`]({player.current.uri or player.current.search_uri})\n"
 
                     if player.current.playlist:
-                        txt += f"> `🎶` **⠂Playlist Atual:** {fix_characters(player.current.playlist)}\n"
+                        txt += f"> `🎶` **⠂Playlist Atual:** [`{fix_characters(player.current.playlist_name, 28)}`]({player.current.playlist_url})\n"
 
                     if player.queue:
                         txt += f"> `📄` **⠂Músicas na fila:** {len(player.queue)}\n"
