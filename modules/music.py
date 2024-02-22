@@ -4625,7 +4625,7 @@ class Music(commands.Cog):
                     except AttributeError:
                         footer_kw = {}
 
-                    embed.set_footer(text=f"Servidor: {player.guild.name}", **footer_kw)
+                    embed.set_footer(text=f"Servidor: {player.guild.name} [ID: {player.guild.id}]", **footer_kw)
 
                     await inter.send(embed=embed)
 
