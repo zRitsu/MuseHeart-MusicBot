@@ -4603,7 +4603,7 @@ class Music(commands.Cog):
 
                     txt += f"> `🔊` **⠂{'Canal de voz' if isinstance(vc, disnake.VoiceChannel) else 'Palco'}:** {vc_name}\n"\
                            f"> `🎧` **⠂Ouvintes atuais:** `{len([m for m in vc.members if not m.bot and (not m.voice.self_deaf or not m.voice.deaf)])}`\n"\
-                           f"> `⏱️` **⠂Player uptime:** <t:{player.uptime}:R>\n"
+                           f"> `⏱️` **⠂Ativo desde:** <t:{player.uptime}:f> - <t:{player.uptime}:R>\n"
 
                     embed = disnake.Embed(description=txt, color=self.bot.get_color(player.guild.me),)
 
