@@ -4592,15 +4592,20 @@ class Music(commands.Cog):
                     else:
                         vc_name = f"[`{fix_characters(vc.name)}`]({vc.jump_url})"
 
-                    embed = disnake.Embed(
-                        description=f"### Informações do player que o usuário {inter.author.mention} está ativo:\n\n"
-                                    f"> `🎶` **⠂Música Atual:** [`{fix_characters(player.current.title, 30)}`]({player.current.uri or player.current.search_uri})\n"
-                                    f"> `📄` **⠂Músicas na fila:** {len(player.queue or player.queue_autoplay)}\n"
-                                    f"> `🔊` **⠂{'Canal de voz' if isinstance(vc, disnake.VoiceChannel) else 'Palco'}:** {vc_name}\n"
-                                    f"> `🎧` **⠂Ouvintes atuais:** `{len([m for m in vc.members if not m.bot and (not m.voice.self_deaf or not m.voice.deaf)])}`\n"
-                                    f"> `⏱️` **⠂Player uptime:** <t:{player.uptime}:R>\n",
-                        color=self.bot.get_color(player.guild.me),
-                    )
+                    txt = f"### Informações do player que o usuário {inter.author.mention} está ativo:\n\n" \
+                        f"> `▶️` **⠂Música Atual:** [`{fix_characters(player.current.title, 30)}`]({player.current.uri or player.current.search_uri})\n"
+
+                    if player.current.playlist:
+                        txt += f"> `🎶` **⠂Playlist Atual:** {fix_characters(player.current.playlist)}\n"
+
+                    if player.queue:
+                        txt += f"> `📄` **⠂Músicas na fila:** {len(player.queue)}\n"
+
+                    txt += f"> `🔊` **⠂{'Canal de voz' if isinstance(vc, disnake.VoiceChannel) else 'Palco'}:** {vc_name}\n"\
+                           f"> `🎧` **⠂Ouvintes atuais:** `{len([m for m in vc.members if not m.bot and (not m.voice.self_deaf or not m.voice.deaf)])}`\n"\
+                           f"> `⏱️` **⠂Player uptime:** <t:{player.uptime}:R>\n"
+
+                    embed = disnake.Embed(description=txt, color=self.bot.get_color(player.guild.me),)
 
                     if player.current.is_stream:
                         txt = "`🔴` [34;1m⠂Transmissão ao vivo[0m"
