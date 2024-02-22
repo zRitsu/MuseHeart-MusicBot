@@ -4610,7 +4610,7 @@ class Music(commands.Cog):
                         if not public_vc and not member.guild_permissions.manage_guild:
                             raise GenericError(f"**Você não possui permissão de gerenciar servidor no [canal]({vc.jump_url}) no qual você está conectado atualmente.**")
 
-                    vc_name = vc.mention if public_vc else f"[`{fix_characters(vc.name)}`]({vc.jump_url})"
+                    vc_name = vc.jump_url if public_vc else f"[`{fix_characters(vc.name)}`]({vc.jump_url})"
 
                     txt = f"### Informações do player que o usuário {inter.author.mention} está ativo:\n\n" \
                         f"> `▶️` **⠂Música Atual:** [`{fix_characters(player.current.title, 30)}`]({player.current.uri or player.current.search_uri})\n"
