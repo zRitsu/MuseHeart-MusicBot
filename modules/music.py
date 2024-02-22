@@ -4613,7 +4613,7 @@ class Music(commands.Cog):
                         progress = ProgressBar(
                             player.position,
                             player.current.duration,
-                            bar_count=26
+                            bar_count=20
                         )
                         txt = f"[34;1m[{time_format(player.position)}] {('=' * progress.start)}[0m🔴️[36;1m{'-' * progress.end} " \
                                f"[{time_format(player.current.duration)}][0m"
