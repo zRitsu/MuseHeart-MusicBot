@@ -4582,12 +4582,12 @@ class Music(commands.Cog):
                 except AttributeError:
                     continue
 
+                public_vc = "DISCOVERABLE" in player.guild.features and vc.permissions_for(player.guild.default_role).connect
+
                 if inter.author.id in vc.voice_states:
 
                     if not player.current:
                         raise GenericError(f"**No momento não estou tocando algo no canal {vc.mention}**")
-
-                    public_vc = "DISCOVERABLE" in player.guild.features and vc.permissions_for(player.guild.default_role).connect
 
                     if not await bot.is_owner(inter.author):
 
@@ -4602,18 +4602,15 @@ class Music(commands.Cog):
 
                         member = current_guild.get_member(inter.author.id)
 
-                        if not public_vc and not member.guild_permissions.manage_guild:
+                        if not member.guild_permissions.manage_guild:
                             raise GenericError("**Você não possui permissão de gerenciar servidor no servidor atual**")
 
                         member = player.guild.get_member(inter.author.id)
 
-                        if not member.guild_permissions.manage_guild:
+                        if not public_vc and not member.guild_permissions.manage_guild:
                             raise GenericError(f"**Você não possui permissão de gerenciar servidor no [canal]({vc.jump_url}) no qual você está conectado atualmente.**")
 
-                    if "DISCOVERABLE" in player.guild.features and vc.permissions_for(player.guild.default_role).connect:
-                        vc_name = vc.mention
-                    else:
-                        vc_name = f"[`{fix_characters(vc.name)}`]({vc.jump_url})"
+                    vc_name = vc.mention if public_vc else f"[`{fix_characters(vc.name)}`]({vc.jump_url})"
 
                     txt = f"### Informações do player que o usuário {inter.author.mention} está ativo:\n\n" \
                         f"> `▶️` **⠂Música Atual:** [`{fix_characters(player.current.title, 30)}`]({player.current.uri or player.current.search_uri})\n"
