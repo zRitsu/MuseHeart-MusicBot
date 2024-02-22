@@ -4589,7 +4589,7 @@ class Music(commands.Cog):
                     if not player.current:
                         raise GenericError(f"**No momento não estou tocando algo no canal {vc.mention}**")
 
-                    if not await bot.is_owner(inter.author):
+                    if player.guild_id != inter.guild_id and not (await bot.is_owner(inter.author)):
 
                         current_guild = None
 
