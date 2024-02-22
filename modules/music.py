@@ -4587,6 +4587,11 @@ class Music(commands.Cog):
                     if not player.current:
                         raise GenericError(f"**No momento não estou tocando algo no canal {vc.mention}**")
 
+                    member = player.guild.get_member(inter.author.id)
+
+                    if not member.guild_permissions.manage_guild and not (await bot.is_owner(inter.author)):
+                        raise GenericError(f"**Você não possui permissão de gerenciar servidor no [canal]({vc.jump_url}) no qual você está conectado atualmente.**")
+
                     if "DISCOVERABLE" in player.guild.features and vc.permissions_for(player.guild.default_role).connect:
                         vc_name = vc.mention
                     else:
