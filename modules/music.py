@@ -1652,7 +1652,7 @@ class Music(commands.Cog):
                 loadtype = "track"
 
                 embed.set_author(
-                    name="⠂" + fix_characters(tracks.title, 35),
+                    name="⠂" + fix_characters(tracks.single_title, 35),
                     url=tracks.uri or tracks.search_uri,
                     icon_url=music_source_image(tracks.info['sourceName'])
                 )
