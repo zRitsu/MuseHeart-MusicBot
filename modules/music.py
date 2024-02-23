@@ -3001,9 +3001,9 @@ class Music(commands.Cog):
 
         else:
             try:
-                if bot.user.id != self.bot.user.id:
-                    footer_kw["text"] = f"Via: {bot.user.display_name}"
-                    footer_kw["icon_url"] = bot.user.display_avatar.url
+                if player.bot.user.id != self.bot.user.id:
+                    footer_kw["text"] = f"Via: {player.bot.user.display_name}"
+                    footer_kw["icon_url"] = player.bot.user.display_avatar.url
             except AttributeError:
                 pass
 
