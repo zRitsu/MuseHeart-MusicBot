@@ -2893,116 +2893,156 @@ class Music(commands.Cog):
         await self.interaction_message(inter, txt, emoji="🇳")
 
 
-    np_cd = commands.CooldownMapping.from_cooldown(1, 5, commands.BucketType.member)
+    np_cd = commands.CooldownMapping.from_cooldown(1, 7, commands.BucketType.member)
     np_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
-    @has_source()
-    @check_voice()
-    @pool_command(name="nowplaying", aliases=["np", "npl", "current", "tocando", "playing"], only_voiced=True,
+    @commands.command(name="nowplaying", aliases=["np", "npl", "current", "tocando", "playing"],
                  description="Exibir informações da música que está tocando no momento.", cooldown=np_cd,
                   max_concurrency=np_mc)
     async def now_playing_legacy(self, ctx: CustomContext):
         await self.now_playing.callback(self=self, inter=ctx)
 
-    @has_source()
-    @check_voice()
     @commands.slash_command(description=f"{desc_prefix}Exibir informações da música que está tocando no momento.",
-                            extras={"only_voiced": True}, dm_permission=False, cooldown=np_cd, max_concurrency=np_mc)
+                            dm_permission=False, cooldown=np_cd, max_concurrency=np_mc)
     async def now_playing(self, inter: disnake.AppCmdInter):
 
-        try:
-            bot = inter.music_bot
-            guild = inter.music_guild
-        except AttributeError:
-            bot = inter.bot
-            guild = inter.guild
+        for bot in self.bot.pool.bots:
 
-        inter, guild_data = await get_inter_guild_data(inter, bot)
+            for player_id in bot.music.players:
 
-        ephemeral = await self.is_request_channel(inter, data = guild_data)
+                player = bot.music.players[player_id]
 
-        if not inter.response.is_done():
-            await inter.response.defer(ephemeral=ephemeral)
+                try:
+                    vc = player.guild.me.voice.channel
+                except AttributeError:
+                    continue
 
-        player: LavalinkPlayer = bot.music.players[guild.id]
+                if inter.author.id in vc.voice_states:
 
-        txt = f"### [{player.current.title}]({player.current.uri or player.current.search_uri})\n"
+                    inter, guild_data = await get_inter_guild_data(inter, bot)
 
-        if player.current.is_stream:
-            txt += "> `🔴` **⠂Transmissão ao vivo**\n"
-        else:
-            progress = ProgressBar(
-                player.position,
-                player.current.duration,
-                bar_count=24
-            )
+                    ephemeral = await self.is_request_channel(inter, data=guild_data)
 
-            txt += f"```ansi\n[34;1m[{time_format(player.position)}] {('=' * progress.start)}[0m🔴️[36;1m{'-' * progress.end} " \
-                       f"[{time_format(player.current.duration)}][0m```\n"
+                    if not inter.response.is_done():
+                        await inter.response.defer(ephemeral=ephemeral)
 
-        txt += f"> `👤` **⠂Uploader/Artista(s):** `{player.current.authors_md}`\n"
+                    if not player.current:
+                        raise GenericError(f"**No momento não estou tocando algo no canal {vc.mention}**")
 
-        if player.current.album_name:
-            txt += f"> `💽` **⠂Álbum:** [`{fix_characters(player.current.album_name, limit=20)}`]({player.current.album_url})\n"
+                    txt = f"### [{player.current.title}]({player.current.uri or player.current.search_uri})\n"
 
-        if not player.current.autoplay:
-            txt += f"> `✋` **⠂Solicitado por:** <@{player.current.requester}>\n"
-        else:
-            try:
-                mode = f" [`Recomendação`]({player.current.info['extra']['related']['uri']})"
-            except:
-                mode = "`Recomendação`"
-            txt += f"> `👍` **⠂Adicionado via:** {mode}\n"
+                    footer_kw = {}
 
-        if player.current.playlist_name:
-            txt += f"> `📑` **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=20)}`]({player.current.playlist_url})\n"
+                    if player.current.is_stream:
+                        txt += "> `🔴` **⠂Transmissão ao vivo**\n"
+                    else:
+                        progress = ProgressBar(
+                            player.position,
+                            player.current.duration,
+                            bar_count=24
+                        )
 
-        try:
-            txt += f"> `*️⃣` **⠂Canal de voz:** {player.guild.me.voice.channel.mention}\n"
-        except AttributeError:
-            pass
+                        txt += f"```ansi\n[34;1m[{time_format(player.position)}] {('=' * progress.start)}[0m🔴️[36;1m{'-' * progress.end} " \
+                               f"[{time_format(player.current.duration)}][0m```\n"
 
-        txt += f"> `🔊` **⠂Volume:** `{player.volume}%`\n"
+                    txt += f"> 👤 **⠂Uploader/Artista(s):** `{player.current.authors_md}`\n"
 
-        components = [disnake.ui.Button(custom_id=f"np_{inter.author.id}", label="Atualizar", emoji="🔄")]
+                    if player.current.album_name:
+                        txt += f"> 💽 **⠂Álbum:** [`{fix_characters(player.current.album_name, limit=20)}`]({player.current.album_url})\n"
 
-        if player.queue or player.queue_autoplay:
-            txt += f"### 🎶 ⠂Próximas músicas ({(qsize:=len(player.queue + player.queue_autoplay))}):\n" + ("\n> `" + ("-"*38) + "`\n").join(
-                f"> `{n+1})` [`{fix_characters(t.title, limit=38)}`]({t.uri})\n" \
-                f"> `⏲️ {time_format(t.duration) if not t.is_stream else '🔴 Ao vivo'}`" + (f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
-                f" **|** " + (f"`✋` <@{t.requester}>" if not t.autoplay else f"`👍⠂Recomendada`") for n, t in enumerate(itertools.islice(player.queue + player.queue_autoplay, 3))
-            )
+                    if not player.current.autoplay:
+                        txt += f"> ✋ **⠂Solicitado por:** <@{player.current.requester}>\n"
+                    else:
+                        try:
+                            mode = f" [`Recomendação`]({player.current.info['extra']['related']['uri']})"
+                        except:
+                            mode = "`Recomendação`"
+                        txt += f"> 👍 **⠂Adicionado via:** {mode}\n"
 
-            if qsize > 3:
-                components.append(disnake.ui.Button(custom_id=PlayerControls.queue, label="Ver lista completa",
-                                                    emoji="<:music_queue:703761160679194734>"))
+                    if player.current.playlist_name:
+                        txt += f"> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=20)}`]({player.current.playlist_url})\n"
 
-        if player.static:
-            if player.message:
-                components.append(disnake.ui.Button(url=player.message.jump_url, label="Ir p/ player-controller", emoji="🔳"))
-            elif player.text_channel:
-                txt += f"\n\n`Acesse o player-controller no canal:` {player.text_channel.mention}"
+                    try:
+                        txt += f"> *️⃣ **⠂Canal de voz:** {player.guild.me.voice.channel.jump_url}\n"
+                    except AttributeError:
+                        pass
 
-        embed = disnake.Embed(description=txt, color=self.bot.get_color(guild.me))
+                    txt += f"> 🔊 **⠂Volume:** `{player.volume}%`\n"
 
-        embed.set_author(name="⠂Tocando agora:" if not player.paused else "⠂Música atual:",
-                         icon_url=music_source_image(player.current.info["sourceName"]))
+                    components = [disnake.ui.Button(custom_id=f"np_{inter.author.id}", label="Atualizar", emoji="🔄")]
 
-        embed.set_thumbnail(url=player.current.thumb)
+                    if player.guild_id != inter.guild_id:
 
-        try:
-            if bot.user.id != self.bot.user.id:
-                embed.set_footer(text=f"Via: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
-        except AttributeError:
-            pass
+                        txt += f"> 🎧 **⠂Ouvintes atuais:** `{len([m for m in vc.members if not m.bot and (not m.voice.self_deaf or not m.voice.deaf)])}`\n" \
+                            f"> ⏱️ **⠂Player ativo:** <t:{player.uptime}:R>\n"
 
-        if isinstance(inter, disnake.MessageInteraction):
-            await inter.edit_original_message(embed=embed, components=components)
-        else:
-            try:
-                await inter.edit_original_message(embed=embed, components=components)
-            except AttributeError:
-                await inter.send(embed=embed, ephemeral=ephemeral, components=components)
+                        try:
+                            footer_kw = {"icon_url": player.guild.icon.with_static_format("png").url}
+                        except AttributeError:
+                            pass
+
+                        footer_kw["text"] = f"Ouvindo no servidor: {player.guild.name} [ ID: {player.guild.id} ]"
+
+                    else:
+                        try:
+                            if bot.user.id != self.bot.user.id:
+                                footer_kw["text"] = f"Via: {bot.user.display_name}"
+                                footer_kw["icon_url"] = bot.user.display_avatar.url
+                        except AttributeError:
+                            pass
+
+                    if player.keep_connected:
+                        txt += "> ♾️ **⠂Modo 24/7:** `Ativado`\n"
+
+                    if player.queue or player.queue_autoplay:
+
+                        if player.guild_id == inter.guild_id:
+
+                            txt += f"### 🎶 ⠂Próximas músicas ({(qsize := len(player.queue + player.queue_autoplay))}):\n" + (
+                                        "\n> `" + ("-" * 38) + "`\n").join(
+                                f"> `{n + 1})` [`{fix_characters(t.title, limit=38)}`]({t.uri})\n" \
+                                f"> `⏲️ {time_format(t.duration) if not t.is_stream else '🔴 Ao vivo'}`" + (
+                                    f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
+                                f" **|** " + (f"`✋` <@{t.requester}>" if not t.autoplay else f"`👍⠂Recomendada`") for n, t in
+                                enumerate(itertools.islice(player.queue + player.queue_autoplay, 3))
+                            )
+
+                            if qsize > 3:
+                                components.append(
+                                    disnake.ui.Button(custom_id=PlayerControls.queue, label="Ver lista completa",
+                                                      emoji="<:music_queue:703761160679194734>"))
+
+                        elif player.queue:
+                            txt += f"> 🎶 **⠂Músicas na fila:** `{len(player.queue)}`\n"
+
+                    if player.static and player.guild_id == inter.guild_id:
+                        if player.message:
+                            components.append(
+                                disnake.ui.Button(url=player.message.jump_url, label="Ir p/ player-controller",
+                                                  emoji="🔳"))
+                        elif player.text_channel:
+                            txt += f"\n\n`Acesse o player-controller no canal:` {player.text_channel.mention}"
+
+                    embed = disnake.Embed(description=txt, color=self.bot.get_color(guild.me))
+
+                    embed.set_author(name="⠂Tocando agora:" if not player.paused else "⠂Música atual:",
+                                     icon_url=music_source_image(player.current.info["sourceName"]))
+
+                    embed.set_thumbnail(url=player.current.thumb)
+
+                    if footer_kw:
+                        embed.set_footer(**footer_kw)
+
+                    if isinstance(inter, disnake.MessageInteraction):
+                        await inter.edit_original_message(embed=embed, components=components)
+                    else:
+                        try:
+                            await inter.edit_original_message(embed=embed, components=components)
+                        except AttributeError:
+                            await inter.send(embed=embed, ephemeral=ephemeral, components=components)
+                    return
+
+        raise GenericError("**Você não está conectado em um canal de voz com player ativo...**")
 
     @commands.Cog.listener("on_button_click")
     async def reload_np(self, inter: disnake.MessageInteraction):
@@ -4558,105 +4598,6 @@ class Music(commands.Cog):
                 await inter.response.edit_message(embed=embed, view=view)
 
         await view.wait()
-
-
-    playerinfo_cd = commands.CooldownMapping.from_cooldown(1, 7, commands.BucketType.member)
-
-    @commands.command(name="playerinfo", aliases=["pinfo"], cooldown=playerinfo_cd,
-                      description="Exibir informações do player que você está ativo.")
-    async def playerinfo_legacy(self, ctx: CustomContext):
-        await self.player_info.callback(self=self, inter=ctx)
-
-    @commands.slash_command(description=f"{desc_prefix}Exibir informações do player que você está ativo.",
-                            cooldown=playerinfo_cd, dm_permission=False)
-    async def player_info(self, inter: disnake.AppCmdInter):
-
-        for bot in self.bot.pool.bots:
-
-            for player_id in bot.music.players:
-
-                player = bot.music.players[player_id]
-
-                try:
-                    vc = player.guild.me.voice.channel
-                except AttributeError:
-                    continue
-
-                public_vc = "DISCOVERABLE" in player.guild.features and vc.permissions_for(player.guild.default_role).connect
-
-                if inter.author.id in vc.voice_states:
-
-                    if not player.current:
-                        raise GenericError(f"**No momento não estou tocando algo no canal {vc.mention}**")
-
-                    if player.guild_id != inter.guild_id and not (await bot.is_owner(inter.author)):
-
-                        current_guild = None
-
-                        for b in self.bot.pool.bots:
-                            if current_guild:=b.get_guild(inter.guild_id):
-                                break
-
-                        if not current_guild:
-                            raise GenericError("**É necessário ter pelo menos 1 bot compatível adicionado no servidor atual.**")
-
-                        member = current_guild.get_member(inter.author.id)
-
-                        if not member.guild_permissions.manage_guild:
-                            raise GenericError("**Você não possui permissão de gerenciar servidor no servidor atual**")
-
-                        member = player.guild.get_member(inter.author.id)
-
-                        if not public_vc and not member.guild_permissions.manage_guild:
-                            raise GenericError(f"**Você não possui permissão de gerenciar servidor no [canal]({vc.jump_url}) no qual você está conectado atualmente.**")
-
-                    vc_name = vc.jump_url if public_vc else f"[`{fix_characters(vc.name)}`]({vc.jump_url})"
-
-                    txt = f"### Informações do player que o usuário {inter.author.mention} está ativo:\n\n" \
-                        f"> `▶️` **⠂Música Atual:** [`{fix_characters(player.current.title, 30)}`]({player.current.uri or player.current.search_uri})\n"
-
-                    if player.current.playlist:
-                        txt += f"> `🎶` **⠂Playlist Atual:** [`{fix_characters(player.current.playlist_name, 28)}`]({player.current.playlist_url})\n"
-
-                    if player.queue:
-                        txt += f"> `📄` **⠂Músicas na fila:** {len(player.queue)}\n"
-
-                    txt += f"> `🔊` **⠂{'Canal de voz' if isinstance(vc, disnake.VoiceChannel) else 'Palco'}:** {vc_name}\n"\
-                           f"> `🎧` **⠂Ouvintes atuais:** `{len([m for m in vc.members if not m.bot and (not m.voice.self_deaf or not m.voice.deaf)])}`\n"\
-                           f"> `⏱️` **⠂Ativo desde:** <t:{player.uptime}:f> - <t:{player.uptime}:R>\n"
-
-                    embed = disnake.Embed(description=txt, color=self.bot.get_color(player.guild.me),)
-
-                    if player.current.is_stream:
-                        txt = "`🔴` [34;1m⠂Transmissão ao vivo[0m"
-                    else:
-                        progress = ProgressBar(
-                            player.position,
-                            player.current.duration,
-                            bar_count=20
-                        )
-                        txt = f"[34;1m[{time_format(player.position)}] {('=' * progress.start)}[0m🔴️[36;1m{'-' * progress.end} " \
-                               f"[{time_format(player.current.duration)}][0m"
-
-                    embed.description += f"```ansi\n{txt}```\n"
-
-                    embed.set_author(name=bot.user.display_name,
-                                     icon_url=bot.user.display_avatar.with_static_format("png").url)
-
-                    embed.set_thumbnail(url=player.current.thumb)
-
-                    try:
-                        footer_kw = {"icon_url": player.guild.icon.with_static_format("png").url}
-                    except AttributeError:
-                        footer_kw = {}
-
-                    embed.set_footer(text=f"Servidor: {player.guild.name} [ID: {player.guild.id}]", **footer_kw)
-
-                    await inter.send(embed=embed)
-
-                    return
-
-        raise GenericError("**Você não está conectado em um canal de voz com player ativo...**")
 
     @commands.Cog.listener("on_message_delete")
     async def player_message_delete(self, message: disnake.Message):
