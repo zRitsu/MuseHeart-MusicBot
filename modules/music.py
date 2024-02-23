@@ -3050,12 +3050,12 @@ class Music(commands.Cog):
             embed.set_footer(**footer_kw)
 
         if isinstance(inter, disnake.MessageInteraction):
-            await inter.edit_original_message(embed=embed, components=components)
+            await inter.edit_original_message(content=inter.author.mention, embed=embed, components=components)
         else:
             try:
-                await inter.edit_original_message(embed=embed, components=components)
+                await inter.edit_original_message(content=inter.author.mention, embed=embed, components=components)
             except AttributeError:
-                await inter.send(embed=embed, ephemeral=ephemeral, components=components)
+                await inter.send(inter.author.mention, embed=embed, ephemeral=ephemeral, components=components, mention_author=False)
 
     @commands.Cog.listener("on_button_click")
     async def reload_np(self, inter: disnake.MessageInteraction):
