@@ -3023,7 +3023,7 @@ class Music(commands.Cog):
                         elif player.text_channel:
                             txt += f"\n\n`Acesse o player-controller no canal:` {player.text_channel.mention}"
 
-                    embed = disnake.Embed(description=txt, color=self.bot.get_color(guild.me))
+                    embed = disnake.Embed(description=txt, color=self.bot.get_color(player.guild.me))
 
                     embed.set_author(name="⠂Tocando agora:" if not player.paused else "⠂Música atual:",
                                      icon_url=music_source_image(player.current.info["sourceName"]))
