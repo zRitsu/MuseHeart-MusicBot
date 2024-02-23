@@ -141,7 +141,6 @@ class WebSocket:
                 self._closed = True
 
                 if not self.auto_reconnect:
-                    self._node.session_id = None
                     self.bot.dispatch('wavelink_node_connection_closed', self._node)
                     continue
 
