@@ -2897,12 +2897,12 @@ class Music(commands.Cog):
     np_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
     @commands.command(name="nowplaying", aliases=["np", "npl", "current", "tocando", "playing"],
-                 description="Exibir informações da música que está tocando no momento.", cooldown=np_cd,
+                 description="Exibir informações da música que você está ouvindo no momento.", cooldown=np_cd,
                   max_concurrency=np_mc)
     async def now_playing_legacy(self, ctx: CustomContext):
         await self.now_playing.callback(self=self, inter=ctx)
 
-    @commands.slash_command(description=f"{desc_prefix}Exibir informações da música que está tocando no momento.",
+    @commands.slash_command(description=f"{desc_prefix}Exibir informações da música que que você está ouvindo no momento.",
                             dm_permission=False, cooldown=np_cd, max_concurrency=np_mc)
     async def now_playing(self, inter: disnake.AppCmdInter):
 
