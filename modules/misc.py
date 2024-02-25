@@ -7,6 +7,7 @@ import json
 import os.path
 import platform
 import traceback
+from asyncio import timeout
 from copy import deepcopy
 from itertools import cycle
 from os import getpid
@@ -125,9 +126,19 @@ class Misc(commands.Cog):
                                              use_names=True))
 
 
+    async def check_bots(self):
+        for bot in self.bot.pool.bots:
+            await bot.wait_until_ready()
+
     async def presences(self):
 
         try:
+
+            try:
+                async with timeout(180):
+                    await self.check_bots()
+            except asyncio.TimeoutError:
+                pass
 
             activities = []
 
