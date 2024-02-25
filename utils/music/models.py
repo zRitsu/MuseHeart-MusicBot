@@ -996,6 +996,10 @@ class LavalinkPlayer(wavelink.Player):
                 await self.connect(vc_id)
                 return
 
+            if event.code == 4014:
+                await self.destroy(force=True)
+                return
+
         if isinstance(event, wavelink.TrackStuck):
 
             try:
@@ -1014,9 +1018,6 @@ class LavalinkPlayer(wavelink.Player):
 
             await self.process_next()
 
-            return
-
-        elif isinstance(event, wavelink.WebsocketClosed):
             return
 
         print(f"Unknown Wavelink event: {repr(event)}")
@@ -2300,6 +2301,11 @@ class LavalinkPlayer(wavelink.Player):
 
         self.queue.clear()
         self.played.clear()
+
+        try:
+            self.reconnect_voice_channel_task.cancel()
+        except:
+            pass
 
         try:
             self.members_timeout_task.cancel()

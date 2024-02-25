@@ -6770,8 +6770,13 @@ class Music(commands.Cog):
 
         if member.bot:
             # ignorar outros bots
-            if player.bot.user.id == member.id and not after.channel and not player.is_closing:
+            if player.bot.user.id == member.id and not after.channel:
+
                 await asyncio.sleep(3)
+
+                if player.is_closing:
+                    return
+
                 try:
                     player.reconnect_voice_channel_task.cancel()
                 except:
