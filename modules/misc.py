@@ -7,7 +7,6 @@ import json
 import os.path
 import platform
 import traceback
-from asyncio import timeout
 from copy import deepcopy
 from itertools import cycle
 from os import getpid
