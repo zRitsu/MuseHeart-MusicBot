@@ -134,12 +134,6 @@ class Misc(commands.Cog):
 
         try:
 
-            try:
-                async with timeout(180):
-                    await self.check_bots()
-            except asyncio.TimeoutError:
-                pass
-
             activities = []
 
             for i in self.bot.config["LISTENING_PRESENCES"].split("||"):
@@ -174,6 +168,12 @@ class Misc(commands.Cog):
             activities = cycle(activities)
 
             ignore_sleep = False
+
+            try:
+                async with timeout(180):
+                    await self.check_bots()
+            except asyncio.TimeoutError:
+                pass
 
             while True:
 
