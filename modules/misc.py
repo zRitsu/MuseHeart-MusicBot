@@ -125,11 +125,6 @@ class Misc(commands.Cog):
             .replace("{uptime}", time_format((disnake.utils.utcnow() - self.bot.uptime).total_seconds() * 1000,
                                              use_names=True))
 
-
-    async def check_bots(self):
-        for bot in self.bot.pool.bots:
-            await bot.wait_until_ready()
-
     async def presences(self):
 
         try:
@@ -169,11 +164,7 @@ class Misc(commands.Cog):
 
             ignore_sleep = False
 
-            try:
-                async with timeout(180):
-                    await self.check_bots()
-            except asyncio.TimeoutError:
-                pass
+            await asyncio.sleep(120)
 
             while True:
 
