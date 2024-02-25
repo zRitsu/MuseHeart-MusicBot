@@ -1035,11 +1035,7 @@ class Music(commands.Cog):
                 await inter.response.defer(ephemeral=ephemeral)
 
             if not guild_data:
-
-                if inter.bot == bot:
-                    inter, guild_data = await get_inter_guild_data(inter, bot)
-                else:
-                    inter, guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                nter, guild_data = await get_inter_guild_data(inter, bot)
 
             if guild_data["player_controller"]["fav_links"]:
                 disnake.SelectOption(label="Usar favorito do servidor", value=">> [📌 Favoritos do servidor 📌] <<", emoji="📌"),
