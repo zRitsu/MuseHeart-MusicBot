@@ -997,6 +997,10 @@ class LavalinkPlayer(wavelink.Player):
                 return
 
             if event.code == 4014:
+                await asyncio.sleep(1)
+                if self.guild and self.guild.me.voice:
+                    return
+                self.set_command_log(f"O player foi desligado por perca de conexão com o canal {self.last_channel.mention}...")
                 await self.destroy(force=True)
                 return
 
