@@ -2944,7 +2944,7 @@ class Music(commands.Cog):
         footer_kw = {}
 
         if player.current.is_stream:
-            txt += "> `🔴` **⠂Transmissão ao vivo**\n"
+            txt += "> 🔴 **⠂Transmissão ao vivo**\n"
         else:
             progress = ProgressBar(
                 player.position,
