@@ -2898,7 +2898,7 @@ class Music(commands.Cog):
     async def now_playing_legacy(self, ctx: CustomContext):
         await self.now_playing.callback(self=self, inter=ctx)
 
-    @commands.slash_command(description=f"{desc_prefix}Exibir informações da música que que você está ouvindo no momento.",
+    @commands.slash_command(description=f"{desc_prefix}Exibir info da música que que você está ouvindo (em qualquer servidor).",
                             dm_permission=False, cooldown=np_cd, max_concurrency=np_mc)
     async def now_playing(self, inter: disnake.AppCmdInter):
 
@@ -2993,7 +2993,7 @@ class Music(commands.Cog):
             except AttributeError:
                 pass
 
-            footer_kw["text"] = f"Ouvindo no servidor: {player.guild.name} [ ID: {player.guild.id} ]"
+            footer_kw["text"] = f"No servidor: {player.guild.name} [ ID: {player.guild.id} ]"
 
         else:
             try:
@@ -3037,7 +3037,7 @@ class Music(commands.Cog):
 
         embed = disnake.Embed(description=txt, color=self.bot.get_color(player.guild.me))
 
-        embed.set_author(name="⠂Tocando agora:" if not player.paused else "⠂Música atual:",
+        embed.set_author(name=("⠂Tocando agora:" if inter.guild_id == player.guild_id else "Você está ouvindo agora:") if not player.paused else "⠂Música atual:",
                          icon_url=music_source_image(player.current.info["sourceName"]))
 
         embed.set_thumbnail(url=player.current.thumb)
