@@ -122,8 +122,6 @@ class Owner(commands.Cog):
         )
 
     updatelavalink_flags = CommandArgparse()
-    updatelavalink_flags.add_argument('-force', '--force', action='store_true',
-                                      help="Ignorar a execução/uso do servidor LOCAL.")
     updatelavalink_flags.add_argument('-yml', '--yml', action='store_true',
                                       help="Fazer download do arquivo application.yml.")
     updatelavalink_flags.add_argument("-resetids", "-reset", "--resetids", "--reset",
@@ -131,44 +129,36 @@ class Owner(commands.Cog):
                                            "mudanças do lavaplayer/lavalink).", action="store_true")
 
     @commands.is_owner()
-    @commands.max_concurrency(1, commands.BucketType.user)
+    @commands.max_concurrency(1, commands.BucketType.default)
     @commands.command(hidden=True, aliases=["ull", "updatell", "llupdate", "llu"], extras={"flags": updatelavalink_flags})
     async def updatelavalink(self, ctx: CustomContext, flags: str = ""):
 
-        args, unknown = ctx.command.extras['flags'].parse_known_args(flags.split())
-
-        node: Optional[wavelink.Node] = None
-
-        for bot in self.bot.pool.bots:
-            try:
-                node = bot.music.nodes["LOCAL"]
-                break
-            except KeyError:
-                continue
-
-        if not node and not args.force:
+        if not self.bot.pool.lavalink_instance:
             raise GenericError("**O servidor LOCAL não está sendo usado!**")
 
-        download_list = [["Lavalink.jar", self.bot.config["LAVALINK_FILE_URL"]]]
+        args, unknown = ctx.command.extras['flags'].parse_known_args(flags.split())
 
-        if args.yml:
-            download_list.append(["application.yml", "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/application.yml"])
+        try:
+            self.bot.pool.lavalink_instance.kill()
+        except:
+            pass
 
         async with ctx.typing():
 
-            for download_data in download_list:
-                async with ClientSession() as session:
-                    filename, url = download_data
-                    async with session.get(url) as r:
-                        lavalink_jar = await r.read()
-                        with open(filename, "wb") as f:
-                            f.write(lavalink_jar)
+            await asyncio.sleep(1.5)
 
-        await self.bot.pool.start_lavalink()
+            if os.path.isfile("./Lavalink.jar"):
+                os.remove("./Lavalink.jar")
+
+            if args.yml and os.path.isfile("./application.yml"):
+                os.remove("./application.yml")
+
+            await self.bot.pool.start_lavalink()
 
         await ctx.send(
             embed=disnake.Embed(
-                description="**O arquivo Lavalink.jar foi atualizado com sucesso!**",
+                description="**O arquivo Lavalink.jar será atualizado "
+                            "e o servidor lavalink LOCAL será reiniciado.**",
                 color=self.bot.get_color(ctx.guild.me)
             )
         )
