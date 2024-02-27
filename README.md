@@ -115,27 +115,27 @@ Hospedando no seu próprio PC/VPS (windows/linux)
 ```shell
 git clone https://github.com/zRitsu/MuseHeart-MusicBot.git
 ```
-* dê clique-duplo no arquivo setup.sh (ou apenas setup caso o seu windows não esteja exibindo extensões de arquivo) e aguarde.</br>
+* dê clique-duplo no arquivo source_setup.sh (ou apenas setup caso o seu windows não esteja exibindo extensões de arquivo) e aguarde.</br>
 `Caso esteja usando linux use o comando no terminal:` 
 ```shell
-bash setup.sh
+bash source_setup.sh
 ```
 * Vai aparecer um arquivo com nome **.env**, edite ele e coloque o token do bot no campo apropriado (você também pode editar outras coisas deste mesmo arquivo caso queira fazer ajustes específicos no bot).</br>
 `Nota: Caso não tenha criado uma conta de bot,` [veja este tutorial](https://www.youtube.com/watch?v=lfdmZQySTXE) `para criar seu bot e obter o token necessário.`</br>`Também altamente recomendo usar mongodb, procure onde tem MONGO= no arquivo .env e nele coloque o link da sua db do mongodb (caso não tenha, veja como obter por este` [tutorial](https://www.youtube.com/watch?v=x1Gq5beRx9k)`). ` 
-* Agora basta apenas abrir o arquivo start_win.bat para iniciar o bot se o seu sistema for windows, caso seja linux dê clique duplo no start.sh (ou se preferir execute o bot usando o comando abaixo):
+* Agora basta apenas abrir o arquivo source_start_win.bat para iniciar o bot se o seu sistema for windows, caso seja linux dê clique duplo no start.sh (ou se preferir execute o bot usando o comando abaixo):
 ```shell
-bash start.sh
+bash source_start.sh
 ```
 
 ### Notas:
 
 * Para atualizar seu bot dê um clique duplo no update.sh (windows), p/ Linux use o comando no shell/terminal:
 ```shell
-bash update.sh
+bash source_update.sh
 ```
 `Ao atualizar, há chance de qualquer alteração manual feita ser perdida (caso não seja um fork desta source)...`<br/>
 
-`Obs: Caso esteja rodando a source diretamente de uma máquina com windows (e que tenha git instalado) apenas dê um duplo-click no arquivo update.sh`
+`Obs: Caso esteja rodando a source diretamente de uma máquina com windows (e que tenha git instalado) apenas dê um duplo-click no arquivo source_update.sh`
 </details>
 
 ---
