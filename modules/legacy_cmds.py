@@ -130,6 +130,23 @@ class Owner(commands.Cog):
 
     @commands.is_owner()
     @commands.max_concurrency(1, commands.BucketType.default)
+    @commands.command(hidden=True, aliases=["restartll", "rtll", "rll"])
+    async def restartlavalink(self, ctx: CustomContext):
+
+        if not self.bot.pool.lavalink_instance:
+            raise GenericError("**O servidor LOCAL não está sendo usado!**")
+
+        await self.bot.pool.start_lavalink()
+
+        await ctx.send(
+            embed=disnake.Embed(
+                description="**Reiniciando o servidor lavalink LOCAL.**",
+                color=self.bot.get_color(ctx.guild.me)
+            )
+        )
+
+    @commands.is_owner()
+    @commands.max_concurrency(1, commands.BucketType.default)
     @commands.command(hidden=True, aliases=["ull", "updatell", "llupdate", "llu"], extras={"flags": updatelavalink_flags})
     async def updatelavalink(self, ctx: CustomContext, flags: str = ""):
 
