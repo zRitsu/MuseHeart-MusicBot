@@ -1068,6 +1068,8 @@ class Owner(commands.Cog):
 
         url = url.strip("<>")
 
+        use_hyperlink = False
+
         if not url:
 
             if not ctx.message.attachments:
@@ -1080,6 +1082,9 @@ class Owner(commands.Cog):
 
         elif not URL_REG.match(url):
             raise GenericError("Você informou um link inválido.")
+
+        elif re.match(r'^<.*>$', url):
+            use_hyperlink = True
 
         inter, bot = await select_bot_pool(ctx, return_new=True)
 
@@ -1101,7 +1106,9 @@ class Owner(commands.Cog):
             except AttributeError:
                 func = inter.send
 
-        await func(f"O [avatar]({bot.user.display_avatar.with_static_format('png').url}) do bot {bot.user.mention} foi alterado com sucesso.", view=None, embed=None)
+        avatar_txt = "avatar" if not use_hyperlink else f"[avatar]({bot.user.display_avatar.with_static_format('png').url})"
+
+        await func(f"O {avatar_txt} do bot {bot.user.mention} foi alterado com sucesso.", view=None, embed=None)
 
     async def cog_check(self, ctx: CustomContext) -> bool:
         return await check_requester_channel(ctx)
