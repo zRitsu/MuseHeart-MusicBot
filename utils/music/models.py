@@ -2459,6 +2459,13 @@ class LavalinkPlayer(wavelink.Player):
                 except AttributeError:
                     return
 
+                if not self.last_channel:
+                    await asyncio.sleep(2)
+                    continue
+
+                if [m for m in self.last_channel.members if not m.bot and not (m.voice.deaf or m.voice.self_deaf)]:
+                    return
+
                 self.set_command_log()
 
                 try:
