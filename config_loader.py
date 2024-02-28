@@ -32,6 +32,7 @@ DEFAULT_CONFIG = {
     "KILL_ON_429": True,
     "PREFIXED_POOL_TIMEOUT": 4,
     "INVITE_REDIRECT_URL": "",
+    "ENABLE_COMMANDS_COOLDOWN": True,
 
     ################
     ### Database ###
@@ -218,6 +219,7 @@ def load_config():
         "PLAYER_SESSIONS_MONGODB",
         "SENSITIVE_INFO_WARN",
         "ENABLE_DEFER_TYPING",
+        "ENABLE_COMMANDS_COOLDOWN",
 
         "BANS_INTENT",
         "DM_MESSAGES_INTENT",

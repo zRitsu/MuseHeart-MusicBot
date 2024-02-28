@@ -917,28 +917,41 @@ class BotCore(commands.AutoShardedBot):
 
             for cmd in b.commands:
                 if cmd.extras.get("exclusive_cooldown"): continue
-                self.get_command(cmd.name)._buckets = cmd._buckets
+                c = self.get_command(cmd.name)
+                if self.pool.config["ENABLE_COMMANDS_COOLDOWN"] is False:
+                    c._buckets._cooldown = None
+                else:
+                    c._buckets = cmd._buckets
 
             for cmd in b.slash_commands:
                 c = self.get_slash_command(cmd.name)
                 if not c: continue
                 c.body.dm_permission = False
-                if c.extras.get("exclusive_cooldown"): continue
-                c._buckets = cmd._buckets
+                if self.pool.config["ENABLE_COMMANDS_COOLDOWN"] is False:
+                    c._buckets._cooldown = None
+                else:
+                    if c.extras.get("exclusive_cooldown"): continue
+                    c._buckets = cmd._buckets
 
             for cmd in b.user_commands:
                 c = self.get_user_command(cmd.name)
                 if not c: continue
                 c.body.dm_permission = False
-                if c.extras.get("exclusive_cooldown"): continue
-                c._buckets = cmd._buckets
+                if self.pool.config["ENABLE_COMMANDS_COOLDOWN"] is False:
+                    c._buckets._cooldown = None
+                else:
+                    if c.extras.get("exclusive_cooldown"): continue
+                    c._buckets = cmd._buckets
 
             for cmd in b.message_commands:
                 c = self.get_message_command(cmd.name)
                 if not c: continue
                 c.body.dm_permission = False
-                if c.extras.get("exclusive_cooldown"): continue
-                c._buckets = cmd._buckets
+                if self.pool.config["ENABLE_COMMANDS_COOLDOWN"] is False:
+                    c._buckets._cooldown = None
+                else:
+                    if c.extras.get("exclusive_cooldown"): continue
+                    c._buckets = cmd._buckets
 
     async def can_send_message(self, message: disnake.Message):
 
