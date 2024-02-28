@@ -49,11 +49,12 @@ async def run_command(cmd: str):
         cmd, stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.STDOUT,
+        env=os.environ
     )
     stdout, stderr = await p.communicate()
     r = ShellResult(p.returncode, stdout, stderr)
     if r.status != 0:
-        raise GenericError(f"{r.stderr or r.stdout}\n\nStatus Code: {r.status}")
+        raise Exception(f"{r.stderr or r.stdout}\n\nStatus Code: {r.status}")
     return str(r.stdout)
 
 
@@ -282,68 +283,44 @@ class Owner(commands.Cog):
         except:
             pass
 
-        update_git = True
-        rename_git_bak = False
+        if args.force or not os.path.exists(os.environ["GIT_DIR"]):
+            out_git += await self.cleanup_git(force=args.force)
 
-        if args.force or not os.path.exists("./.git"):
+        try:
+            await run_command("git reset --hard")
+        except:
+            pass
 
-            if rename_git_bak:=os.path.exists("./.gitbak") and os.environ.get("HOSTNAME") == "squarecloud.app":
-                pass
-            else:
-                update_git = False
-                out_git += await self.cleanup_git(force=args.force)
+        try:
+            pull_log = await run_command("git pull --allow-unrelated-histories -X theirs")
+            if "Already up to date" in pull_log:
+                raise GenericError("**Já estou com os ultimos updates instalados...**")
+            out_git += pull_log
 
-        if update_git:
+        except GenericError as e:
+            raise e
 
-            if rename_git_bak or os.environ.get("HOSTNAME") == "squarecloud.app" and os.path.isdir("./.gitbak"):
-                try:
-                    shutil.rmtree("./.git")
-                except:
-                    pass
-                os.rename("./.gitbak", "./.git")
+        except Exception as e:
 
-            try:
-                await run_command("git reset --hard")
-            except:
-                pass
+            if "Already up to date" in str(e):
+                raise GenericError("Já estou com os ultimos updates instalados...")
 
-            try:
-                pull_log = await run_command("git pull --allow-unrelated-histories -X theirs")
-                if "Already up to date" in pull_log:
-                    raise GenericError("**Já estou com os ultimos updates instalados...**")
-                out_git += pull_log
+            elif not "Fast-forward" in str(e):
+                out_git += await self.cleanup_git(force=True)
 
-            except GenericError as e:
-                raise e
+            elif "Need to specify how to reconcile divergent branches" in str(e):
+                out_git += await run_command("git rebase --no-ff")
 
-            except Exception as e:
+        commit = ""
 
-                if "Already up to date" in str(e):
-                    raise GenericError("Já estou com os ultimos updates instalados...")
+        for l in out_git.split("\n"):
+            if l.startswith("Updating"):
+                commit = l.replace("Updating ", "").replace("..", "...")
+                break
 
-                elif not "Fast-forward" in str(e):
-                    out_git += await self.cleanup_git(force=True)
+        data = (await run_command(f"git log {commit} {self.git_format}")).split("\n")
 
-                elif "Need to specify how to reconcile divergent branches" in str(e):
-                    out_git += await run_command("git rebase --no-ff")
-
-            commit = ""
-
-            for l in out_git.split("\n"):
-                if l.startswith("Updating"):
-                    commit = l.replace("Updating ", "").replace("..", "...")
-                    break
-
-            data = (await run_command(f"git log {commit} {self.git_format}")).split("\n")
-
-            git_log += format_git_log(data)
-
-        if os.environ.get("HOSTNAME") == "squarecloud.app":
-            try:
-                shutil.rmtree("./.gitbak")
-            except:
-                pass
-            shutil.copytree("./.git", "./.gitbak")
+        git_log += format_git_log(data)
 
         text = "`Será necessário me reiniciar após as alterações.`"
 
@@ -473,7 +450,7 @@ class Owner(commands.Cog):
 
         if force:
             try:
-                shutil.rmtree("./.git")
+                shutil.rmtree(os.environ["GIT_DIR"])
             except FileNotFoundError:
                 pass
 
@@ -496,7 +473,7 @@ class Owner(commands.Cog):
                    alt_name="Ultimas atualizações", hidden=False)
     async def updatelog(self, ctx: Union[CustomContext, disnake.MessageInteraction], amount: int = 10):
 
-        if not os.path.isdir("./.git"):
+        if not os.path.isdir(os.environ["GIT_DIR"]):
             raise GenericError("Não há repositorio iniciado no diretório do bot...\nNota: Use o comando update.")
 
         if not self.bot.pool.remote_git_url:
@@ -730,7 +707,7 @@ class Owner(commands.Cog):
                    alt_name="Exportar source/código-fonte.")
     async def exportsource(self, ctx:Union[CustomContext, disnake.MessageInteraction], *, flags: str = ""):
 
-        if not os.path.isdir("./.git"):
+        if not os.path.isdir(os.environ['GIT_DIR']):
             await self.cleanup_git(force=True)
 
         try:
