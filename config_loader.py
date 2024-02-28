@@ -33,6 +33,7 @@ DEFAULT_CONFIG = {
     "PREFIXED_POOL_TIMEOUT": 4,
     "INVITE_REDIRECT_URL": "",
     "ENABLE_COMMANDS_COOLDOWN": True,
+    "GIT_DIR": "./.git",
 
     ################
     ### Database ###
