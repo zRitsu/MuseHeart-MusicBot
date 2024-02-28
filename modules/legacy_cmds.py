@@ -1075,7 +1075,7 @@ class Owner(commands.Cog):
 
             url = ctx.message.attachments[0].url
 
-            if not url.endswith((".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp")):
+            if not url.split("?ex=")[0].endswith((".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp")):
                 raise GenericError("Você deve anexar um arquivo válido: png, jpg, jpeg, webp, gif, bmp.")
 
         elif not URL_REG.match(url):
