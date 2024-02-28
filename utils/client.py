@@ -384,7 +384,7 @@ class BotPool:
 
         self.local_database = LocalDatabase()
 
-        os.environ.update({"GIT_DIR ": self.config["GIT_DIR"]})
+        os.environ.update({"GIT_DIR": self.config["GIT_DIR"]})
 
         try:
             self.commit = check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
