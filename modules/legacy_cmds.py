@@ -14,6 +14,7 @@ import dotenv
 import humanize
 from aiohttp import ClientSession
 from disnake.ext import commands
+from disnake.http import Route
 
 import wavelink
 from config_loader import DEFAULT_CONFIG, load_config
@@ -1097,6 +1098,10 @@ class Owner(commands.Cog):
             image_bytes = await r.read()
 
         await bot.user.edit(avatar=image_bytes)
+
+        await bot.http.request(Route('PATCH', '/applications/@me'), json={
+            "icon": disnake.utils._bytes_to_base64_data(image_bytes)
+        })
 
         try:
             func = inter.edit_original_message
