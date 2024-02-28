@@ -912,7 +912,7 @@ class BotCore(commands.AutoShardedBot):
 
         for b in self.pool.bots:
 
-            if not b.bot_ready or b == self:
+            if b == self:
                 continue
 
             for cmd in b.commands:
