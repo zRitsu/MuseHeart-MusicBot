@@ -1872,7 +1872,7 @@ class Music(commands.Cog):
 
         return await google_search(self.bot, query, max_entries=20) or favs[:20]
 
-    skip_back_cd = commands.CooldownMapping.from_cooldown(2, 13, commands.BucketType.member)
+    skip_back_cd = commands.CooldownMapping.from_cooldown(4, 13, commands.BucketType.member)
     skip_back_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
     case_sensitive_args = CommandArgparse()
