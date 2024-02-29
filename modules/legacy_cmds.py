@@ -94,7 +94,7 @@ class Owner(commands.Cog):
             "git init",
             f'git remote add origin {self.bot.config["SOURCE_REPO"]}',
             'git fetch origin',
-            'git checkout -b main -f --track origin/main'
+            'git --work-tree=. checkout -b main -f --track origin/main'
         ]
         self.owner_view: Optional[PanelView] = None
         self.extra_hints = bot.config["EXTRA_HINTS"].split("||")
