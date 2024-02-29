@@ -1046,6 +1046,10 @@ class Owner(commands.Cog):
 
         use_hyperlink = False
 
+        if re.match(r'^<.*>$', url):
+            use_hyperlink = True
+            url = url.strip("<>")
+
         if not url:
 
             if not ctx.message.attachments:
@@ -1058,10 +1062,6 @@ class Owner(commands.Cog):
 
         elif not URL_REG.match(url):
             raise GenericError("Você informou um link inválido.")
-
-        elif re.match(r'^<.*>$', url):
-            use_hyperlink = True
-            url = url.strip("<>")
 
         inter, bot = await select_bot_pool(ctx, return_new=True)
 
