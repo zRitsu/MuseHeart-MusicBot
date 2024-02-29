@@ -287,12 +287,12 @@ class Owner(commands.Cog):
             out_git += await self.cleanup_git(force=args.force)
 
         try:
-            await run_command("git reset --hard")
+            await run_command("git --work-tree=. reset --hard")
         except:
             pass
 
         try:
-            pull_log = await run_command("git pull --allow-unrelated-histories -X theirs")
+            pull_log = await run_command("git --work-tree=. pull --allow-unrelated-histories -X theirs")
             if "Already up to date" in pull_log:
                 raise GenericError("**Já estou com os ultimos updates instalados...**")
             out_git += pull_log
@@ -309,7 +309,7 @@ class Owner(commands.Cog):
                 out_git += await self.cleanup_git(force=True)
 
             elif "Need to specify how to reconcile divergent branches" in str(e):
-                out_git += await run_command("git rebase --no-ff")
+                out_git += await run_command("git --work-tree=. rebase --no-ff")
 
         commit = ""
 
@@ -318,7 +318,7 @@ class Owner(commands.Cog):
                 commit = l.replace("Updating ", "").replace("..", "...")
                 break
 
-        data = (await run_command(f"git log {commit} {self.git_format}")).split("\n")
+        data = (await run_command(f"git --work-tree=. log {commit} {self.git_format}")).split("\n")
 
         git_log += format_git_log(data)
 
@@ -1104,7 +1104,6 @@ class Owner(commands.Cog):
                 ini_file = await r.read()
                 with open("lavalink.ini", "wb") as f:
                     f.write(ini_file)
-
 
 def setup(bot: BotCore):
     bot.add_cog(Owner(bot))
