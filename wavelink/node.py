@@ -180,17 +180,25 @@ class Node:
 
         uri: str = f"{self.rest_uri}/v4/sessions/{self.session_id}/players/{guild_id}?noReplace={no_replace}"
 
-        async with self.session.patch(url=uri, json=data, headers=self._websocket.headers) as resp:
+        retries = 3
 
-            try:
-                resp_data = await resp.json()
-            except:
-                resp_data = await resp.text()
+        while retries > 0:
 
-            if resp.status == 200:
-                return resp_data
+            async with self.session.patch(url=uri, json=data, headers=self._websocket.headers) as resp:
 
-            raise WavelinkException(f"UpdatePlayer Failed: {resp.status}: {resp_data}")
+                try:
+                    resp_data = await resp.json()
+                except:
+                    resp_data = await resp.text()
+
+                if resp.status == 200:
+                    return resp_data
+
+                retries -= 1
+
+                await asyncio.sleep(1.5)
+
+        raise WavelinkException(f"UpdatePlayer Failed: {resp.status}: {resp_data}")
 
     async def get_tracks(self, query: str, *, retry_on_failure: bool = True, **kwargs) -> Union[list, TrackPlaylist, None]:
         """|coro|
