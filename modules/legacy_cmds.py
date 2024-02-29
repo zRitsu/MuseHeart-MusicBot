@@ -1044,8 +1044,6 @@ class Owner(commands.Cog):
     @commands.command(hidden=True, aliases=["setbotavatar"], description="Alterar o avatar do bot usando anexo ou link direto de uma imagem jpg ou gif.")
     async def setavatar(self, ctx: CustomContext, url: str = ""):
 
-        url = url.strip("<>")
-
         use_hyperlink = False
 
         if not url:
@@ -1063,6 +1061,7 @@ class Owner(commands.Cog):
 
         elif re.match(r'^<.*>$', url):
             use_hyperlink = True
+            url = url.strip("<>")
 
         inter, bot = await select_bot_pool(ctx, return_new=True)
 
