@@ -4447,12 +4447,23 @@ class Music(commands.Cog):
 
         await player.change_node(node)
 
-        await self.interaction_message(
-            inter,
-            [f"Migrou o player para o servidor de música **{node}**",
-             f"**O player foi migrado para o servidor de música:** `{node}`"],
+        embed = disnake.Embed(description=f"**O player foi migrado para o servidor de música:** `{node}`",
+                              color=self.bot.get_color(player.guild.me))
+
+        try:
+            if bot.user.id != self.bot.user.id:
+                embed.set_footer(text=f"Via: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
+        except AttributeError:
+            pass
+
+        player.set_command_log(
+            text=f"{inter.author.mention} migrou o player para o servidor de música **{node}**",
             emoji="🌎"
         )
+
+        player.update = True
+
+        await inter.edit_original_message(embed=embed)
 
     @search.autocomplete("server")
     @play.autocomplete("server")
