@@ -94,8 +94,8 @@ class BotPool:
         try:
             while True:
                 async with asyncio.timeout(600):
-                    bot, lavalink_kw = await self.lavalink_connect_queue.get()
-                    await bot.get_cog("Music").process_nodes({bot.user.id: lavalink_kw})
+                    bot, data = await self.lavalink_connect_queue.get()
+                    await bot.get_cog("Music").connect_node(data)
                     await asyncio.sleep(delay_secs)
         except asyncio.TimeoutError:
             pass
