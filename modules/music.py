@@ -6439,7 +6439,10 @@ class Music(commands.Cog):
             return
 
         for k, v in data.items():
-            self.bot.loop.create_task(self.connect_node(v))
+            if v.pop("enqueue_connect", None):
+                await self.bot.pool.lavalink_connect_queue.put([self.bot, v])
+            else:
+                self.bot.loop.create_task(self.connect_node(v))
 
         if start_local:
             self.connect_local_lavalink()

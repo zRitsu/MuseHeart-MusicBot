@@ -82,10 +82,20 @@ class BotPool:
         self.controller_bot: Optional[BotCore] = None
         self.current_useragent = self.reset_useragent()
         self.processing_gc: bool = False
+        self.lavalink_connect_queue: asyncio.Queue = asyncio.Queue()
 
     def reset_useragent(self):
         self.current_useragent = generate_user_agent()
 
+    async def connect_lavalink_queue_task(self):
+        try:
+            while True:
+                async with asyncio.timeout(600):
+                    bot, lavalink_kw = await self.lavalink_connect_queue.get()
+                    await bot.get_cog("Music").process_nodes({bot.user.id: lavalink_kw})
+                    await asyncio.sleep(1)
+        except asyncio.TimeoutError:
+            pass
 
     @property
     def database(self) -> Union[LocalDatabase, MongoDatabase]:
@@ -329,10 +339,11 @@ class BotPool:
         else:
             for key, value in {section: dict(config.items(section)) for section in config.sections()}.items():
                 value["identifier"] = key.replace(" ", "_")
-                value["secure"] = value.get("secure") == "true"
+                value["secure"] = value.get("secure", "").lower() == "true"
                 value["port"] = value["port"].replace("{SERVER_PORT}", os.environ.get("SERVER_PORT") or "8090")
-                value["search"] = value.get("search") != "false"
-                value["retry_403"] = value.get("retry_403") == "true"
+                value["search"] = value.get("search", "").lower() != "false"
+                value["retry_403"] = value.get("retry_403", "").lower() == "true"
+                value["enqueue_connect"] = value.get("enqueue_connect", "").lower() == "true"
                 value["search_providers"] = value.get("search_providers", "").strip().split() or [self.config["DEFAULT_SEARCH_PROVIDER"]] + [s for s in ("ytsearch", "scsearch") if s != self.config["DEFAULT_SEARCH_PROVIDER"]]
                 LAVALINK_SERVERS[key] = value
 
@@ -384,7 +395,14 @@ class BotPool:
 
         self.local_database = LocalDatabase()
 
-        os.environ.update({"GIT_DIR": self.config["GIT_DIR"]})
+        os.environ.update(
+            {
+                "GIT_DIR": self.config["GIT_DIR"],
+                "JISHAKU_HIDE": "true",
+                "JISHAKU_NO_DM_TRACEBACK": "true",
+                "JISHAKU_NO_UNDERSCORE": "true",
+             }
+        )
 
         try:
             self.commit = check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
@@ -465,14 +483,6 @@ class BotPool:
             )
 
             bot.http.token = token
-
-            os.environ.update(
-                {
-                    "JISHAKU_HIDE": "true",
-                    "JISHAKU_NO_DM_TRACEBACK": "true",
-                    "JISHAKU_NO_UNDERSCORE": "true",
-                }
-            )
 
             bot.load_extension("jishaku")
 
@@ -674,6 +684,8 @@ class BotPool:
         loop = asyncio.get_event_loop()
 
         loop.create_task(self.load_playlist_cache())
+
+        loop.create_task(self.connect_lavalink_queue_task())
 
         if start_local:
             loop.create_task(self.start_lavalink(loop=loop))
