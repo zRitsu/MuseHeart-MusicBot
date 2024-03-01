@@ -88,12 +88,15 @@ class BotPool:
         self.current_useragent = generate_user_agent()
 
     async def connect_lavalink_queue_task(self):
+
+        delay_secs = int(self.config.get("LAVALINK_QUEUE_DELAY", 1.5))
+
         try:
             while True:
                 async with asyncio.timeout(600):
                     bot, lavalink_kw = await self.lavalink_connect_queue.get()
                     await bot.get_cog("Music").process_nodes({bot.user.id: lavalink_kw})
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(delay_secs)
         except asyncio.TimeoutError:
             pass
 
