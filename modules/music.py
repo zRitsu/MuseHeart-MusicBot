@@ -6500,8 +6500,7 @@ class Music(commands.Cog):
                         node.version = 3
                     await node.connect()
                     for player in node.players.values():
-                        if player._voice_state:
-                            await player._dispatch_voice_update()
+                        await player.change_node(node.identifier)
                     return
             except Exception as e:
                 error = repr(e)
