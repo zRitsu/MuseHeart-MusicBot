@@ -6466,15 +6466,6 @@ class Music(commands.Cog):
 
         print(f"{self.bot.user} - [{node.identifier} / v{node.version}] Conexão perdida - reconectando em {int(backoff)} segundos.")
 
-        for player in list(node.players.values()):
-
-            try:
-                player._new_node_task.cancel()
-            except:
-                pass
-
-            player._new_node_task = player.bot.loop.create_task(player._wait_for_new_node())
-
         await asyncio.sleep(2)
 
         while True:
@@ -6482,7 +6473,15 @@ class Music(commands.Cog):
             if node.is_available:
                 return
 
-            if self.bot.config["LAVALINK_RECONNECT_RETRIES"] and retries == self.bot.config["LAVALINK_RECONNECT_RETRIES"]:
+            if retries == 1:
+                for player in list(node.players.values()):
+                    try:
+                        player._new_node_task.cancel()
+                    except:
+                        pass
+                    player._new_node_task = player.bot.loop.create_task(player._wait_for_new_node())
+
+            elif self.bot.config["LAVALINK_RECONNECT_RETRIES"] and retries == self.bot.config["LAVALINK_RECONNECT_RETRIES"]:
                 print(f"{self.bot.user} - [{node.identifier}] Todas as tentativas de reconectar falharam...")
                 return
 
