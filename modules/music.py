@@ -4443,6 +4443,8 @@ class Music(commands.Cog):
         if node == player.node.identifier:
             raise GenericError(f"O player já está no servidor de música **{node}**.")
 
+        await inter.response.defer(ephemeral=True)
+
         await player.change_node(node)
 
         await self.interaction_message(
