@@ -451,7 +451,6 @@ class Music(commands.Cog):
             check_other_bots_in_vc: bool = False,
             bot: BotCore = None,
             me: disnake.Member = None,
-            check_pool: bool = True,
     ):
 
         if not channel:
@@ -1829,13 +1828,10 @@ class Music(commands.Cog):
                 else:
                     guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
-            if not inter.author.voice:
-                raise NoVoice()
-
             await self.do_connect(
                 inter, channel=voice_channel,
                 check_other_bots_in_vc=guild_data["check_other_bots_in_vc"],
-                bot=bot, me=guild.me, check_pool=True
+                bot=bot, me=guild.me
             )
 
         await self.process_music(inter=inter, force_play=force_play, ephemeral=ephemeral, user_data=user_data, player=player,
