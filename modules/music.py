@@ -35,7 +35,7 @@ from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, 
 from utils.music.spotify import process_spotify, spotify_regex_w_user
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, SongRequestPurgeMode, song_request_buttons, \
-    select_bot_pool, get_inter_guild_data, ProgressBar
+    select_bot_pool, get_inter_guild_data, ProgressBar, update_inter
 
 
 class Music(commands.Cog):
@@ -880,10 +880,13 @@ class Music(commands.Cog):
                                                    color=self.bot.get_color(guild.me)), view=None)
                     return
 
+                update_inter(inter, v.inter)
+
                 bot = v.bot
                 inter = v.inter
                 guild = v.guild
                 channel = bot.get_channel(inter.channel.id)
+
                 await inter.response.defer()
 
         if not channel:
