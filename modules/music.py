@@ -2892,7 +2892,7 @@ class Music(commands.Cog):
 
     @commands.command(name="nowplaying", aliases=["np", "npl", "current", "tocando", "playing"],
                  description="Exibir informações da música que você está ouvindo no momento.", cooldown=np_cd,
-                  max_concurrency=np_mc, hidden=True)
+                  max_concurrency=np_mc)
     async def now_playing_legacy(self, ctx: CustomContext):
         await self.now_playing.callback(self=self, inter=ctx)
 
