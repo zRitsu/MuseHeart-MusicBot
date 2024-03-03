@@ -214,21 +214,21 @@ def skin_converter(info: dict, guild: disnake.Guild, ctx: Union[CustomContext, d
                 pass
 
             try:
-                d["image"]["url"] = replaces(d["image"]["url"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track)
+                d["image"]["url"] = replaces(d["image"]["url"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track, guild=guild)
             except KeyError:
                 pass
 
             try:
-                d["thumbnail"]["url"] = replaces(d["thumbnail"]["url"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track)
+                d["thumbnail"]["url"] = replaces(d["thumbnail"]["url"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track, guild=guild)
             except KeyError:
                 pass
 
             for n, f in enumerate(d.get("fields", [])):
-                f["name"] = replaces(f["name"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track)
-                f["value"] = replaces(f["value"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track)
+                f["name"] = replaces(f["name"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track, guild=guild)
+                f["value"] = replaces(f["value"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track, guild=guild)
 
             try:
-                d["color"] = int(replaces(d["color"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track), 16)
+                d["color"] = int(replaces(d["color"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track, guild=guild), 16)
             except (KeyError, AttributeError):
                 pass
 
