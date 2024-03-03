@@ -1954,7 +1954,7 @@ class SetStageTitle(disnake.ui.View):
                     p = b.music.players[inter.guild_id]
                 except KeyError:
                     continue
-                p.stage_title_event = True
+                p.stage_title_event = bool(inter.text_values["status_voice_value"])
                 p.stage_title_template = inter.text_values["status_voice_value"]
                 p.start_time = disnake.utils.utcnow()
                 p.set_command_log(
@@ -1976,7 +1976,7 @@ class SetStageTitle(disnake.ui.View):
                 await inter.send("**Não estou tocando música em um canal de voz/palco...**", ephemeral=True)
                 return
 
-            player.stage_title_event = True
+            player.stage_title_event = bool(inter.text_values["status_voice_value"])
             player.stage_title_template = inter.text_values["status_voice_value"]
             player.start_time = disnake.utils.utcnow()
 

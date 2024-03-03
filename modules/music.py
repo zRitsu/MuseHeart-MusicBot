@@ -290,7 +290,7 @@ class Music(commands.Cog):
         if not author.guild_permissions.manage_guild and not (await bot.is_owner(author)):
             raise GenericError("**Você não possui permissão de gerenciar servidor para ativar/desativar esse sistema.**")
 
-        await inter.response.defer(ephemeral=True)
+        await inter.response.defer(ephemeral=True, with_message=True)
 
         global_data = await self.bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
 
@@ -301,8 +301,6 @@ class Music(commands.Cog):
         else:
             if not any(p in template for p in SetStageTitle.placeholders):
                 raise GenericError(f"**Você deve usar pelo menos um placeholder válido:** {SetStageTitle.placeholder_text}")
-
-            await inter.response.defer(ephemeral=True)
 
             player = bot.music.players[inter.guild_id]
             player.stage_title_event = True
