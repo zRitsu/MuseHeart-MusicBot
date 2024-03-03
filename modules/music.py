@@ -2890,12 +2890,14 @@ class Music(commands.Cog):
     np_cd = commands.CooldownMapping.from_cooldown(1, 7, commands.BucketType.member)
     np_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
+    @commands.is_owner()
     @commands.command(name="nowplaying", aliases=["np", "npl", "current", "tocando", "playing"],
                  description="Exibir informações da música que você está ouvindo no momento.", cooldown=np_cd,
-                  max_concurrency=np_mc)
+                  max_concurrency=np_mc, hidden=True)
     async def now_playing_legacy(self, ctx: CustomContext):
         await self.now_playing.callback(self=self, inter=ctx)
 
+    @commands.is_owner()
     @commands.slash_command(description=f"{desc_prefix}Exibir info da música que que você está ouvindo (em qualquer servidor).",
                             dm_permission=False, cooldown=np_cd, max_concurrency=np_mc)
     async def now_playing(self, inter: disnake.AppCmdInter):
