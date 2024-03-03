@@ -127,7 +127,6 @@ class Node:
 
     def close(self) -> None:
         """Close the node and make it unavailable."""
-        self.session_id = None
         self.available = False
 
     def open(self) -> None:
