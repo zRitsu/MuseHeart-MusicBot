@@ -1958,11 +1958,16 @@ class SetStageTitle(disnake.ui.View):
                 p.stage_title_template = inter.text_values["status_voice_value"]
                 p.start_time = disnake.utils.utcnow()
                 p.set_command_log(
-                    text=("ativou" if inter.text_values["status_voice_value"] else "desativou") + "o status automático",
+                    text=f"{inter.author.mention} " + ("ativou" if inter.text_values["status_voice_value"] else "desativou") + "o status automático",
                     emoji="📢",
                 )
                 p.update = True
-                await p.update_stage_topic()
+
+                if p.stage_title_event:
+                    await p.update_stage_topic()
+                else:
+                    await p.update_stage_topic(clear=True)
+
                 await p.process_save_queue()
                 await asyncio.sleep(3)
 
@@ -1982,12 +1987,15 @@ class SetStageTitle(disnake.ui.View):
 
             await inter.response.defer(ephemeral=True)
 
-            await player.update_stage_topic()
+            if player.stage_title_event:
+                await player.update_stage_topic()
+            else:
+                await player.update_stage_topic(clear=True)
 
             await player.process_save_queue()
 
             player.set_command_log(
-                text=("ativou" if inter.text_values["status_voice_value"] else "desativou") + " o status automático",
+                text=f"{inter.author.mention} " + ("ativou" if inter.text_values["status_voice_value"] else "desativou") + " o status automático",
                 emoji="📢",
             )
 
