@@ -1951,13 +1951,13 @@ class LavalinkPlayer(wavelink.Player):
         try:
             if self.static:
                 if self.skin_static.startswith("> custom_skin: "):
-                    data = skin_converter(self.custom_skin_static_data[self.skin_static[15:]], player=self)
+                    data = skin_converter(self.custom_skin_static_data[self.skin_static[15:]], player=self, guild=self.guild)
                 else:
                     data = self.bot.player_static_skins[self.skin_static].load(self)
 
             else:
                 if self.skin.startswith("> custom_skin: "):
-                    data = skin_converter(self.custom_skin_data[self.skin[15:]], player=self)
+                    data = skin_converter(self.custom_skin_data[self.skin[15:]], player=self, guild=self.guild)
                 else:
                     data = self.bot.player_skins[self.skin].load(self)
         except OverflowError:

@@ -2242,7 +2242,7 @@ class SkinEditorMenu(disnake.ui.View):
             except KeyError:
                 continue
 
-        data = skin_converter(self.message_data, ctx=self.ctx, player=player)
+        data = skin_converter(self.message_data, guild=self.guild, ctx=self.ctx, player=player)
         return {"content": data.get("content", ""), "embeds": data.get("embeds", [])}
 
     async def embed_select_callback(self, inter: disnake.MessageInteraction):

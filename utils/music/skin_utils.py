@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import itertools
-import random
 from copy import deepcopy
 from typing import Optional, TYPE_CHECKING, Union
 
@@ -35,14 +34,15 @@ def track_title_format(
 
 
 def replaces(
-    txt: str, info: dict, ctx: disnake.MessageInteraction, player: LavalinkPlayer, queue_text: str, track: dict
+    txt: str, info: dict, ctx: disnake.MessageInteraction, player: LavalinkPlayer, queue_text: str, track: dict,
+        guild: disnake.Guild
 ):
 
-    if player and player.guild:
+    if player:
 
         try:
             if not player.current.autoplay:
-                requester = player.guild.get_member(player.current.requester)
+                requester = guild.get_member(player.current.requester)
                 requester_global_name = requester.global_name
                 requester_display_name = requester.display_name
                 requester_mention = requester.mention
@@ -51,7 +51,7 @@ def replaces(
                 requester_global_name = "Recomendação"
                 requester_display_name = "Recomendação"
                 requester_mention = "Recomendação"
-                requester_avatar = player.guild.me.display_avatar.replace(static_format="png", size=512).url
+                requester_avatar = guild.me.display_avatar.replace(static_format="png", size=512).url
         except:
             requester_global_name = "Desconhecido..."
             requester_display_name = "Desconhecido..."
@@ -80,17 +80,17 @@ def replaces(
             replace('{requester.display_name}', requester_display_name). \
             replace('{requester.mention}', requester_mention). \
             replace('{requester.avatar}', requester_avatar). \
-            replace('{guild.color}', hex(player.guild.me.color.value)[2:]). \
-            replace('{guild.icon}', player.guild.icon.with_static_format("png").url if player.guild.icon else ""). \
-            replace('{guild.name}', player.guild.name). \
-            replace('{guild.id}', str(player.guild.id)). \
+            replace('{guild.color}', hex(guild.me.color.value)[2:]). \
+            replace('{guild.icon}', guild.icon.with_static_format("png").url if guild.icon else ""). \
+            replace('{guild.name}', guild.name). \
+            replace('{guild.id}', str(guild.id)). \
             replace('{queue_format}', queue_text or "Fila vazia...")
 
     else:
 
         queue_max_entries = info.pop("queue_max_entries", 3) or 3
 
-        c = player.bot.get_color(player.guild.me)
+        c = ctx.bot.get_color(guild.me)
 
         try:
             color = c.value
@@ -119,15 +119,15 @@ def replaces(
             replace('{requester.mention}', ctx.author.mention). \
             replace('{requester.avatar}', ctx.author.display_avatar.with_static_format("png").url). \
             replace('{guild.color}', hex(color)[2:]). \
-            replace('{guild.icon}', player.guild.icon.with_static_format("png").url if player.guild.icon else ""). \
-            replace('{guild.name}', player.guild.name). \
-            replace('{guild.id}', str(player.guild.id)). \
+            replace('{guild.icon}', guild.icon.with_static_format("png").url if guild.icon else ""). \
+            replace('{guild.name}', guild.name). \
+            replace('{guild.id}', str(guild.id)). \
             replace('{queue_format}', queue_text or "(Sem músicas).")
 
     return txt
 
 
-def skin_converter(info: dict, ctx: Union[CustomContext, disnake.ModalInteraction] = None, player: Optional[LavalinkPlayer] = None) -> dict:
+def skin_converter(info: dict, guild: disnake.Guild, ctx: Union[CustomContext, disnake.ModalInteraction] = None, player: Optional[LavalinkPlayer] = None) -> dict:
 
     info = deepcopy(info)
 
@@ -176,7 +176,7 @@ def skin_converter(info: dict, ctx: Union[CustomContext, disnake.ModalInteractio
 
     try:
         if info["content"]:
-            info["content"] = replaces(info["content"], info=info, ctx=ctx, player=player, queue_text=queue_text, track=track)
+            info["content"] = replaces(info["content"], info=info, ctx=ctx, player=player, queue_text=queue_text, track=track, guild=guild)
     except KeyError:
         pass
 
@@ -184,32 +184,32 @@ def skin_converter(info: dict, ctx: Union[CustomContext, disnake.ModalInteractio
 
         for d in embeds:
             try:
-                d["description"] = replaces(d["description"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track)
+                d["description"] = replaces(d["description"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track, guild=guild)
             except KeyError:
                 pass
 
             try:
-                d["footer"]["text"] = replaces(d["footer"]["text"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track)
+                d["footer"]["text"] = replaces(d["footer"]["text"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track, guild=guild)
             except KeyError:
                 pass
 
             try:
-                d["footer"]["icon_url"] = replaces(d["footer"]["icon_url"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track)
+                d["footer"]["icon_url"] = replaces(d["footer"]["icon_url"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track, guild=guild)
             except KeyError:
                 pass
 
             try:
-                d["author"]["name"] = replaces(d["author"]["name"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track)
+                d["author"]["name"] = replaces(d["author"]["name"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track, guild=guild)
             except KeyError:
                 pass
 
             try:
-                d["author"]["url"] = replaces(d["author"]["url"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track)
+                d["author"]["url"] = replaces(d["author"]["url"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track, guild=guild)
             except KeyError:
                 pass
 
             try:
-                d["author"]["icon_url"] = replaces(d["author"]["icon_url"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track)
+                d["author"]["icon_url"] = replaces(d["author"]["icon_url"], info=d, ctx=ctx, player=player, queue_text=queue_text, track=track, guild=guild)
             except KeyError:
                 pass
 
