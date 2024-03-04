@@ -6858,6 +6858,7 @@ class Music(commands.Cog):
                 # tempfix para channel do voice_client não ser setado ao mover bot do canal.
                 player.guild.voice_client.channel = after.channel
                 player.last_channel = after.channel
+                player.update = True
 
         try:
             check = [m for m in player.guild.me.voice.channel.members if not m.bot and not (m.voice.deaf or m.voice.self_deaf)]
