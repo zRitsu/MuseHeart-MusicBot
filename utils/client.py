@@ -936,7 +936,7 @@ class BotCore(commands.AutoShardedBot):
                 if cmd.extras.get("exclusive_cooldown"): continue
                 c = self.get_command(cmd.name)
                 if self.pool.config["ENABLE_COMMANDS_COOLDOWN"] is False:
-                    c._buckets = None
+                    c._buckets._cooldown = None
                 else:
                     c._buckets = cmd._buckets
 
@@ -945,7 +945,7 @@ class BotCore(commands.AutoShardedBot):
                 if not c: continue
                 c.body.dm_permission = False
                 if self.pool.config["ENABLE_COMMANDS_COOLDOWN"] is False:
-                    c._buckets = None
+                    c._buckets._cooldown = None
                 else:
                     if c.extras.get("exclusive_cooldown"): continue
                     c._buckets = cmd._buckets
@@ -955,7 +955,7 @@ class BotCore(commands.AutoShardedBot):
                 if not c: continue
                 c.body.dm_permission = False
                 if self.pool.config["ENABLE_COMMANDS_COOLDOWN"] is False:
-                    c._buckets = None
+                    c._buckets._cooldown = None
                 else:
                     if c.extras.get("exclusive_cooldown"): continue
                     c._buckets = cmd._buckets
@@ -965,7 +965,7 @@ class BotCore(commands.AutoShardedBot):
                 if not c: continue
                 c.body.dm_permission = False
                 if self.pool.config["ENABLE_COMMANDS_COOLDOWN"] is False:
-                    c._buckets = None
+                    c._buckets._cooldown = None
                 else:
                     if c.extras.get("exclusive_cooldown"): continue
                     c._buckets = cmd._buckets
