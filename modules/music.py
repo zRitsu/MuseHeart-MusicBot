@@ -6451,7 +6451,7 @@ class Music(commands.Cog):
 
         for k, v in data.items():
             if v.get("enqueue_connect"):
-                await self.bot.pool.lavalink_connect_queue.put([self.bot, v])
+                await self.bot.pool.lavalink_connect_queue[v["identifier"]].put([self.bot, v])
             else:
                 self.bot.loop.create_task(self.connect_node(v))
 

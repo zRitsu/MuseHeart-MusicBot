@@ -82,19 +82,19 @@ class BotPool:
         self.controller_bot: Optional[BotCore] = None
         self.current_useragent = self.reset_useragent()
         self.processing_gc: bool = False
-        self.lavalink_connect_queue: asyncio.Queue = asyncio.Queue()
+        self.lavalink_connect_queue = {}
 
     def reset_useragent(self):
         self.current_useragent = generate_user_agent()
 
-    async def connect_lavalink_queue_task(self):
+    async def connect_lavalink_queue_task(self, identifier: str):
 
         delay_secs = int(self.config.get("LAVALINK_QUEUE_DELAY", 1.5))
 
         try:
             while True:
                 async with asyncio.timeout(600):
-                    bot, data = await self.lavalink_connect_queue.get()
+                    bot, data = await self.lavalink_connect_queue[identifier].get()
                     await bot.get_cog("Music").connect_node(data)
                     await asyncio.sleep(delay_secs)
         except asyncio.TimeoutError:
@@ -688,7 +688,9 @@ class BotPool:
 
         loop.create_task(self.load_playlist_cache())
 
-        loop.create_task(self.connect_lavalink_queue_task())
+        for lserver in LAVALINK_SERVERS.values():
+            self.lavalink_connect_queue[lserver["identifier"]] = asyncio.Queue()
+            loop.create_task(self.connect_lavalink_queue_task(lserver["identifier"]))
 
         if start_local:
             loop.create_task(self.start_lavalink(loop=loop))
