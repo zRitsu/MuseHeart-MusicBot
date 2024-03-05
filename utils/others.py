@@ -785,7 +785,11 @@ def update_inter(old: Union[disnake.Interaction, CustomContext], new: disnake.In
     else:
         old.token = new.token
         old.id = new.id
-        old.response = new.response
+
+        try:
+            old.response = new.response
+        except AttributeError:
+            pass
 
         try:
             old.self_mod = True
