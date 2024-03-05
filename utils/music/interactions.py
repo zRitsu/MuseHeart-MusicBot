@@ -191,6 +191,7 @@ class QueueInteraction(disnake.ui.View):
                     pass
                 else:
                     player.queue.insert((int(inter.text_values["queue_move_position"]) or 1)-1, self.current_track)
+                    player.update = True
 
                 self.update_pages(reset_page=False)
 
