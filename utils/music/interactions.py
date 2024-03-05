@@ -76,11 +76,13 @@ class QueueInteraction(disnake.ui.View):
         self.update_pages()
         self.update_embed()
 
-    def update_pages(self):
+    def update_pages(self, reset_page=True):
 
         player: LavalinkPlayer = self.bot.music.players[self.user.guild.id]
 
-        self.current_page = 0
+        if reset_page:
+            self.current_page = 0
+
         self.track_pages.clear()
         self.track_pages = list(disnake.utils.as_chunks(player.queue + player.queue_autoplay, max_size=self.max_items))
         self.current_track = self.track_pages[self.current_page][0]
@@ -142,6 +144,10 @@ class QueueInteraction(disnake.ui.View):
         play.callback = self.invoke_command
         self.add_item(play)
 
+        move = disnake.ui.Button(emoji="↪️", label="Mover", style=disnake.ButtonStyle.grey, custom_id="queue_move")
+        move.callback = self.move_callback
+        self.add_item(move)
+
         rotate_q = disnake.ui.Button(emoji='🔃', label="Rotacionar Fila", style=disnake.ButtonStyle.grey, custom_id="queue_rotate")
         rotate_q.callback = self.invoke_command
         self.add_item(rotate_q)
@@ -149,6 +155,63 @@ class QueueInteraction(disnake.ui.View):
         update_q = disnake.ui.Button(emoji='🔄', label="Recarregar", style=disnake.ButtonStyle.grey)
         update_q.callback = self.update_q
         self.add_item(update_q)
+
+    async def move_callback(self, inter: disnake.MessageInteraction):
+        await inter.response.send_modal(
+            ViewModal(
+                view=self, title="Mover música selecionada", custom_id="queue_move_modal",
+                components=[
+                    disnake.ui.TextInput(
+                        style=disnake.TextInputStyle.short,
+                        label="Posição da fila:",
+                        custom_id="queue_move_position",
+                        max_length=4,
+                        required=True
+                    ),
+                ]
+            )
+        )
+
+    async def modal_handler(self, inter: disnake.ModalInteraction):
+
+        try:
+            if inter.data.custom_id == "queue_move_modal":
+
+                try:
+                    position = int(inter.text_values["queue_move_position"])
+                except:
+                    await inter.send("Você deve usar um número válido...", ephemeral=True)
+                    return
+
+                await check_cmd(self.bot.get_slash_command("move"), inter)
+
+                player: LavalinkPlayer = self.bot.music.players[self.user.guild.id]
+
+                try:
+                    player.queue.remove(self.current_track)
+                except ValueError:
+                    pass
+                else:
+                    player.queue.insert(position-1, self.current_track)
+
+                self.update_pages(reset_page=False)
+
+                if self.current_page > self.max_page:
+                    self.current_page = 0
+
+                self.update_embed()
+
+                if self.message:
+                    await inter.response.edit_message(embed=self.embed, view=self)
+                else:
+                    await inter.edit_original_message(embed=self.embed, view=self)
+
+            else:
+                await inter.send(f"Método ainda não implementado: {inter.data.custom_id}", ephemeral=True)
+
+        except Exception as e:
+            self.bot.dispatch('interaction_player_error', inter, e)
+
 
     def update_embed(self):
 
@@ -1841,7 +1904,7 @@ class SkinSettingsButton(disnake.ui.View):
 
 class ViewModal(disnake.ui.Modal):
 
-    def __init__(self, view: SkinEditorMenu, title: str, components: List[disnake.TextInput], custom_id: str):
+    def __init__(self, view: Union[SkinEditorMenu, QueueInteraction], title: str, components: List[disnake.TextInput], custom_id: str):
         self.view = view
         super().__init__(title=title, components=components, custom_id=custom_id)
     async def callback(self, inter: disnake.ModalInteraction, /) -> None:
