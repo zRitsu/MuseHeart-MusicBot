@@ -4,7 +4,7 @@ rm -rf poetry.lock pyproject.toml .upm
 pip3 uninstall poetry -y
 
 if [ "${SOURCE_AUTO_UPDATE,,}" == "true" ]; then
-  bash quick_update.sh
+  bash source_quick_update.sh
 fi
 
 if [ ! -d "venv" ] || [ ! -f "./venv/bin/requirements.txt" ] || [ ! "$REPL_SLUG-$REPL_OWNER" == "$(cat ./venv/.deployed)" ]; then
