@@ -177,9 +177,7 @@ class QueueInteraction(disnake.ui.View):
         try:
             if inter.data.custom_id == "queue_move_modal":
 
-                try:
-                    position = int(inter.text_values["queue_move_position"])
-                except:
+                if not inter.text_values["queue_move_position"].isdigit():
                     await inter.send("Você deve usar um número válido...", ephemeral=True)
                     return
 
@@ -192,7 +190,7 @@ class QueueInteraction(disnake.ui.View):
                 except ValueError:
                     pass
                 else:
-                    player.queue.insert(position-1, self.current_track)
+                    player.queue.insert((int(inter.text_values["queue_move_position"]) or 1)-1, self.current_track)
 
                 self.update_pages(reset_page=False)
 
