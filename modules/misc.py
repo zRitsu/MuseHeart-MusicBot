@@ -764,9 +764,9 @@ class Misc(commands.Cog):
             invite = f"[`{disnake.utils.escape_markdown(str(bot.user.name))}`]({disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'), **kwargs)})"
 
             if bot.appinfo.flags.gateway_message_content_limited:
-                invite += f" ({len(bot.guilds)}/100)"
+                invite += f" `[{len(bot.guilds)}/100]`"
             else:
-                invite += f" ({len(bot.guilds)})"
+                invite += f" `[{len(bot.guilds)}]`"
 
             if guild and inter.author.guild_permissions.manage_guild and bot.user in guild.members:
                 bots_in_guild.append(invite)
@@ -776,13 +776,13 @@ class Misc(commands.Cog):
         txt = ""
 
         if bots_invites:
-            txt += "**Bots de música disponíveis:**\n"
+            txt += "## Bots de música disponíveis:\n"
             for i in disnake.utils.as_chunks(bots_invites, 2):
                 txt += " | ".join(i) + "\n"
             txt += "\n"
 
         if bots_in_guild:
-            txt += "**Bots de música que já estão no servidor atual:**\n"
+            txt += "## Bots de música que já estão no servidor atual:\n"
             for i in disnake.utils.as_chunks(bots_in_guild, 2):
                 txt += " | ".join(i) + "\n"
 
@@ -792,7 +792,7 @@ class Misc(commands.Cog):
                     colour=self.bot.get_color(
                         inter.guild.me if inter.guild else guild.me if guild else None
                     ),
-                    title="**Não há bots públicos disponível...**",
+                    title="## Não há bots públicos disponível...",
                 ), ephemeral=True
             )
             return
@@ -801,7 +801,7 @@ class Misc(commands.Cog):
 
         if (len(bots_in_guild) + len(bots_invites)) > 1 and f"client_id={controller_bot.user.id}" not in txt:
             invite = f"[`{disnake.utils.escape_markdown(str(controller_bot.user.name))}`]({disnake.utils.oauth_url(controller_bot.user.id, scopes=['applications.commands'])})"
-            txt = f"**Registrar os comandos de barra no servidor:**\n{invite}\n\n" + txt
+            txt = f"## Registrar os comandos de barra no servidor:\n{invite}\n\n" + txt
 
         color = self.bot.get_color(inter.guild.me if inter.guild else guild.me if guild else None)
 
