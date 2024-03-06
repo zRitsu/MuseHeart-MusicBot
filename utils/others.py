@@ -279,11 +279,12 @@ async def check_cmd(cmd, inter: Union[disnake.Interaction, disnake.ModalInteract
             if not c:
                 raise commands.CheckFailure()
 
-    bucket = cmd._buckets.get_bucket(inter)  # type: ignore
-    if bucket:
-        retry_after = bucket.update_rate_limit()
-        if retry_after:
-            raise commands.CommandOnCooldown(cooldown=bucket, retry_after=retry_after, type=cmd._buckets.type)
+    if cmd._buckets._cooldown:
+        bucket = cmd._buckets.get_bucket(inter)  # type: ignore
+        if bucket:
+            retry_after = bucket.update_rate_limit()
+            if retry_after:
+                raise commands.CommandOnCooldown(cooldown=bucket, retry_after=retry_after, type=cmd._buckets.type)
 
     """try:
         chkcmd = list(cmd.children.values())[0]
