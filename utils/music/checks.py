@@ -8,7 +8,6 @@ from typing import Union, Optional, TYPE_CHECKING
 import disnake
 from disnake.ext import commands
 
-from utils.db import DBModel
 from utils.music.converters import time_format
 from utils.music.errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, \
     GenericError, MissingVoicePerms, DiffVoiceChannel, PoolException
@@ -321,7 +320,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
         if extra_bots_counter:
             msg += f"\n\nVocê terá que adicionar pelo menos um bot compatível clicando no botão abaixo:"
-            components = [disnake.ui.Button(custom_id="bot_invite", label="Adicionar bot(s).")]
+            components = [disnake.ui.Button(custom_id="bot_invite", label=f"Adicionar bot{'s'[:extra_bots_counter^1]}.")]
 
     else:
 

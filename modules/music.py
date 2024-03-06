@@ -1691,7 +1691,7 @@ class Music(commands.Cog):
                                 tracks_playlists[t.playlist_url] = {"name": t.playlist_name, "count": 1}
 
                     if tracks_playlists:
-                        embed_description += "\n### Playlists carregadas:\n" + "\n".join(f"[`{info['name']}`]({url}) `- {info['count']} música(s)` " for url, info in tracks_playlists.items()) + "\n"
+                        embed_description += "\n### Playlists carregadas:\n" + "\n".join(f"[`{info['name']}`]({url}) `- {info['count']} música{'s'[:info['count']^1]}` " for url, info in tracks_playlists.items()) + "\n"
 
                 else:
                     query = fix_characters(query.replace(f"{source}:", '', 1), 25)
@@ -1707,7 +1707,7 @@ class Music(commands.Cog):
 
                 embed.set_author(name="⠂" + title, icon_url=icon_url)
                 embed.set_thumbnail(url=tracks[0].thumb)
-                embed.description = f"`{len(tracks)} música(s)`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
+                embed.description = f"`{(tcount:=len(tracks))} música{'s'[:tcount^1]}`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
                 emoji = "🎶"
 
         else:
@@ -1762,7 +1762,7 @@ class Music(commands.Cog):
                     icon_url=music_source_image(tracks.tracks[0].info['sourceName'])
                 )
             embed.set_thumbnail(url=tracks.thumb)
-            embed.description = f"`{len(tracks.tracks)} música(s)`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
+            embed.description = f"`{(tcount:=len(tracks.tracks))} música{'s'[:tcount^1]}`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
             emoji = "🎶"
 
             if reg_query is not None:
@@ -2690,8 +2690,8 @@ class Music(commands.Cog):
         player.failed_tracks.clear()
 
         txt = [
-            f"readicionou [{qsize}] música(s) tocada(s) na fila.",
-            f"🎶 **⠂{inter.author.mention} readicionou {qsize} música(s) na fila.**"
+            f"readicionou [{qsize}] música{(s:='s'[:qsize^1])} tocada{s} na fila.",
+            f"🎶 **⠂{inter.author.mention} readicionou {qsize} música{s} na fila.**"
         ]
 
         await self.interaction_message(inter, txt, emoji="🎶")
@@ -3824,14 +3824,14 @@ class Music(commands.Cog):
             except:
                 pass
 
-            msg_txt = f"### ♻️ ⠂{inter.author.mention} removeu {deleted_tracks} música(s) da fila:\n" + "\n".join(f"[`{fix_characters(t.title, 45)}`]({t.uri})" for t in tracklist[:7])
+            msg_txt = f"### ♻️ ⠂{inter.author.mention} removeu {deleted_tracks} música{'s'[:deleted_tracks^1]} da fila:\n" + "\n".join(f"[`{fix_characters(t.title, 45)}`]({t.uri})" for t in tracklist[:7])
 
             if (trackcount:=(len(tracklist) - 7)) > 0:
-                msg_txt += f"\n`e mais {trackcount} música(s).`"
+                msg_txt += f"\n`e mais {trackcount} música{'s'[:trackcount^1]}.`"
 
-            msg_txt += f"\n### ✅ ⠂Filtro(s) usado(s):\n" + '\n'.join(txt)
+            msg_txt += f"\n### ✅ ⠂Filtro{(t:='s'[:len(txt)^1])} usado{t}:\n" + '\n'.join(txt)
 
-            txt = [f"removeu {deleted_tracks} música(s) da fila via clear.", msg_txt]
+            txt = [f"removeu {deleted_tracks} música{'s'[:deleted_tracks^1]} da fila via clear.", msg_txt]
 
         try:
             kwargs = {"thumb": tracklist[0].thumb}
@@ -4173,14 +4173,14 @@ class Music(commands.Cog):
 
             moved_tracks_txt = moved_tracks if moved_tracks == 1 else f"[{position}-{position+moved_tracks-1}]"
 
-            msg_txt = f"### ↪️ ⠂{inter.author.mention} moveu {moved_tracks} música(s) para a posição {moved_tracks_txt} da fila:\n" + "\n".join(f"`{position+n}.` [`{fix_characters(t.title, 45)}`]({t.uri})" for n, t in enumerate(tracklist[:7]))
+            msg_txt = f"### ↪️ ⠂{inter.author.mention} moveu {moved_tracks} música{'s'[:moved_tracks^1]} para a posição {moved_tracks_txt} da fila:\n" + "\n".join(f"`{position+n}.` [`{fix_characters(t.title, 45)}`]({t.uri})" for n, t in enumerate(tracklist[:7]))
 
             if (track_extra:=(moved_tracks - 7)) > 0:
-                msg_txt += f"\n`e mais {track_extra} música(s).`"
+                msg_txt += f"\n`e mais {track_extra} música{'s'[:track_extra^1]}.`"
 
-            msg_txt += f"\n### ✅ ⠂Filtro(s) usado(s):\n" + '\n'.join(txt)
+            msg_txt += f"\n### ✅ ⠂Filtro{(t:='s'[:len(txt)^1])} usado{t}:\n" + '\n'.join(txt)
 
-            txt = [f"moveu {moved_tracks} música(s) pra posição **[{position}]** da fila.", msg_txt]
+            txt = [f"moveu {moved_tracks} música{'s'[:moved_tracks^1]} para a posição **[{position}]** da fila.", msg_txt]
 
             await self.interaction_message(inter, txt, emoji="↪️", force=True, thumb=tracklist[0].thumb)
 
@@ -5033,7 +5033,7 @@ class Music(commands.Cog):
 
                     if (retry_after := self.bot.pool.enqueue_playlist_embed_cooldown.get_bucket(interaction).update_rate_limit()):
                         raise GenericError(
-                            f"**Você terá que aguardar {int(retry_after)} segundo(s) pra adicionar uma playlist no player atual.**")
+                            f"**Você terá que aguardar {(rta:=int(retry_after))} segundo{'s'[:rta^1]} pra adicionar uma playlist no player atual.**")
 
                     if not player:
                         player = await self.create_player(inter=interaction, bot=bot, guild=channel.guild,
@@ -5094,7 +5094,7 @@ class Music(commands.Cog):
 
                             if (retry_after := self.bot.pool.enqueue_track_embed_cooldown.get_bucket(interaction).update_rate_limit()):
                                 raise GenericError(
-                                    f"**Você terá que aguardar {int(retry_after)} segundo(s) para adicionar uma nova música na fila.**")
+                                    f"**Você terá que aguardar {(rta:=int(retry_after))} segundo{'s'[:rta^1]} para adicionar uma nova música na fila.**")
 
                             if control == PlayerControls.embed_enqueue_track:
                                 await self.check_player_queue(interaction.author, bot, interaction.guild_id)
@@ -5151,7 +5151,7 @@ class Music(commands.Cog):
 
             if (retry_after := self.bot.pool.add_fav_embed_cooldown.get_bucket(interaction).update_rate_limit()):
                 await interaction.send(
-                    f"**Você terá que aguardar {int(retry_after)} segundo(s) para adicionar um novo favorito.**",
+                    f"**Você terá que aguardar {(rta:=int(retry_after))} segundo{'s'[:rta^1]} para adicionar um novo favorito.**",
                     ephemeral=True)
                 return
 
@@ -6222,8 +6222,9 @@ class Music(commands.Cog):
             if (isinstance(message.channel, disnake.Thread) and
                     (not isinstance(message.channel.parent, disnake.ForumChannel) or
                      data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message)):
+                tcount = len(tracks.tracks)
                 embed.description = f"✋ **⠂ Pedido por:** {message.author.mention}\n" \
-                                    f"🎼 **⠂ Música(s):** `[{len(tracks.tracks)}]`"
+                                    f"🎼 **⠂ Música{'s'[:tcount^1]}:** `[{tcount}]`"
                 embed.set_thumbnail(url=tracks.tracks[0].thumb)
                 embed.set_author(name="⠂" + fix_characters(tracks.tracks[0].playlist_name, 35), url=message.content,
                                  icon_url=music_source_image(tracks.tracks[0].info["sourceName"]))
@@ -6252,7 +6253,7 @@ class Music(commands.Cog):
 
             elif data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message:
 
-                txt = f"> 🎼 **⠂** [`{fix_characters(tracks.tracks[0].playlist_name, 35)}`](<{message.content}>) `[{len(tracks.tracks)} música(s)]` {message.author.mention}"
+                txt = f"> 🎼 **⠂** [`{fix_characters(tracks.tracks[0].playlist_name, 35)}`](<{message.content}>) `[{(tcount:=len(tracks.tracks))} música{'s'[:tcount^1]}]` {message.author.mention}"
 
                 try:
                     txt += f" `|` {message.author.voice.channel.mention}"

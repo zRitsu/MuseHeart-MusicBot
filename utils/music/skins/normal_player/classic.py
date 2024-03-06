@@ -83,7 +83,7 @@ class ClassicSkin:
         if qsize := len(player.queue):
 
             if not player.mini_queue_enabled:
-                txt += f"🎶 **⠂** `{qsize} música(s) na fila`\n"
+                txt += f"🎶 **⠂** `{qsize} música{'s'[:qsize^1]} na fila`\n"
             else:
                 queue_txt += "```ansi\n[0;33mPróximas Músicas:[0m```" + "\n".join(
                     f"`{(n + 1):02}) [{time_format(t.duration) if t.duration else '🔴 Livestream'}]` "
@@ -92,7 +92,7 @@ class ClassicSkin:
                 )
 
                 if qsize > 3:
-                    queue_txt += f"\n`╚══════ E mais {qsize - 3} música(s) ══════╝`"
+                    queue_txt += f"\n`╚══════ E mais {(t:=qsize - 3)} música{'s'[:t^1]} ══════╝`"
 
         elif len(player.queue_autoplay):
             queue_txt += "```ansi\n[0;33mPróximas Músicas:[0m```" + "\n".join(

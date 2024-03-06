@@ -632,10 +632,10 @@ async def select_bot_pool(inter: Union[CustomContext, disnake.MessageInteraction
 
     if not bots:
 
-        if [b for b in inter.bot.pool.bots if b.appinfo and b.appinfo.bot_public]:
+        if (bcount:=len([b for b in inter.bot.pool.bots if b.appinfo and b.appinfo.bot_public])):
             raise GenericError(
                 f"**Será necessário adicionar no servidor pelo menos um bot compatível clicando no botão abaixo:**",
-                components=[disnake.ui.Button(custom_id="bot_invite", label="Adicionar bot(s)")]
+                components=[disnake.ui.Button(custom_id="bot_invite", label=f"Adicionar bot{'s'[:bcount^1]}")]
             )
         else:
             raise GenericError("**Não há bots compatíveis com meus comandos no servidor...**")
