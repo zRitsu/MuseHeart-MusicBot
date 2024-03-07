@@ -15,7 +15,7 @@ class MiniStaticSkin:
 
     def __init__(self):
         self.name = basename(__file__)[:-3] + "_static"
-        self.preview = "https://i.ibb.co/gWJw276/mini-static-skin.png"
+        self.preview = "https://i.ibb.co/F3NTnPc/mini-static-skin.png"
 
     def setup_features(self, player: LavalinkPlayer):
         player.mini_queue_feature = False
@@ -88,7 +88,7 @@ class MiniStaticSkin:
 
             has_stream = False
 
-            current_time = disnake.utils.utcnow() - datetime.timedelta(milliseconds=player.position + player.current.duration)
+            current_time = disnake.utils.utcnow() - datetime.timedelta(milliseconds=player.position) + datetime.timedelta(milliseconds=player.current.duration)
 
             queue_duration = 0
 
@@ -132,7 +132,7 @@ class MiniStaticSkin:
 
             has_stream = False
 
-            current_time = disnake.utils.utcnow() - datetime.timedelta(milliseconds=player.position + player.current.duration)
+            current_time = disnake.utils.utcnow() - datetime.timedelta(milliseconds=player.position) + datetime.timedelta(milliseconds=player.current.duration)
 
             queue_duration = 0
 
