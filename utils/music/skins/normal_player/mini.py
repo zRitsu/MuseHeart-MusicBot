@@ -15,7 +15,7 @@ class MiniSkin:
 
     def __init__(self):
         self.name = basename(__file__)[:-3]
-        self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1119823641190858792/image.png"
+        self.preview = "https://i.ibb.co/ZBTbdvT/mini.png"
 
     def setup_features(self, player: LavalinkPlayer):
         player.mini_queue_feature = True

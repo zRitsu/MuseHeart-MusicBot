@@ -11,7 +11,7 @@ class Minimalist:
 
     def __init__(self):
         self.name = basename(__file__)[:-3]
-        self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1136339237046845471/minimalist.png"
+        self.preview = "https://i.ibb.co/ynN9F4V/minimalist.png"
 
     def setup_features(self, player: LavalinkPlayer):
         player.mini_queue_feature = False

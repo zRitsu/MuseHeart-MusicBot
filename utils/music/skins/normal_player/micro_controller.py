@@ -14,7 +14,7 @@ class MicroController:
 
     def __init__(self):
         self.name = basename(__file__)[:-3]
-        self.preview = "https://cdn.discordapp.com/attachments/554468640942981147/1139395692658446336/micro_controller.png"
+        self.preview = "https://i.ibb.co/R0SsBxq/micro-controller.png"
 
     def setup_features(self, player: LavalinkPlayer):
         player.mini_queue_feature = False

@@ -7,7 +7,7 @@
 
 - Player controller: modo normal/mini-player (skin: default) e suporte a [RPC (Rich Presence)](https://github.com/zRitsu/MuseHeart-MusicBot-RPC-app)
 
-[![](https://media.discordapp.net/attachments/554468640942981147/1089678647230726185/rpc_support.png)](https://media.discordapp.net/attachments/554468640942981147/1089678647230726185/rpc_support.png)
+[![](https://i.ibb.co/6tVbfFH/image.png)](https://media.discordapp.net/attachments/554468640942981147/1089678647230726185/rpc_support.png)
 
 <details>
 <summary>
@@ -17,11 +17,11 @@ Mais previews:
 
 - Comandos de barra / Slash commands
 
-[![](https://cdn.discordapp.com/attachments/554468640942981147/1125158772608876565/slash_commands.png)](https://cdn.discordapp.com/attachments/554468640942981147/1125158772608876565/slash_commands.png)
+[![](https://i.ibb.co/t8yKKr9/image.png)](https://i.ibb.co/t8yKKr9/image.png)
 
 - Player controller: modo fixo/estendido com canal e conversa de song requests (skin: default), configurável com o comando: /setup
 
-[![](https://cdn.discordapp.com/attachments/554468640942981147/1125154702569504768/player_controller_textchannel.png)](https://cdn.discordapp.com/attachments/554468640942981147/1125154702569504768/player_controller_textchannel.png)
+[![](https://i.ibb.co/5cZ7JGs/image.png)](https://i.ibb.co/5cZ7JGs/image.png)
 
 - Player controller: modo fixo/estendido com canal de song-request em forum com suporte a status automático no canal de voz e palco
 
