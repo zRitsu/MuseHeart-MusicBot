@@ -7,7 +7,7 @@
 
 - Player controller: modo normal/mini-player (skin: default) e suporte a [RPC (Rich Presence)](https://github.com/zRitsu/MuseHeart-MusicBot-RPC-app)
 
-[![](https://i.ibb.co/6tVbfFH/image.png)](https://media.discordapp.net/attachments/554468640942981147/1089678647230726185/rpc_support.png)
+[![](https://i.ibb.co/6tVbfFH/image.png)](https://i.ibb.co/6tVbfFH/image.png)
 
 <details>
 <summary>
