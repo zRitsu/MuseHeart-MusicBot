@@ -3067,8 +3067,18 @@ class Music(commands.Cog):
             return
 
         try:
+            inter.application_command = self.now_playing_legacy
+            await self.now_playing_legacy._max_concurrency.acquire(inter)
+        except AttributeError:
+            pass
+
+        try:
             await check_cmd(self.now_playing_legacy, inter)
             await self.now_playing_legacy(inter)
+            try:
+                await self.now_playing_legacy._max_concurrency.release(inter)
+            except AttributeError:
+                pass
         except Exception as e:
             self.bot.dispatch('interaction_player_error', inter, e)
 
@@ -4858,6 +4868,12 @@ class Music(commands.Cog):
 
         if not command:
             raise GenericError("comando não encontrado/implementado.")
+
+        try:
+            interaction.application_command = command
+            await command._max_concurrency.acquire(interaction)
+        except AttributeError:
+            pass
 
         await check_cmd(command, interaction)
 
