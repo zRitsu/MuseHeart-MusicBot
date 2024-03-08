@@ -149,17 +149,27 @@ class ErrorHandler(commands.Cog):
             traceback.print_exc()
 
     async def do_playcmd(self, ctx: CustomContext):
-        play_cmd = self.bot.get_slash_command("play")
-        try:
-            await play_cmd.callback(
-                inter=ctx, query=ctx.message.content.replace(ctx.bot.user.mention, "", 1),
-                self=play_cmd.cog, position=0, options=False, force_play="no",
-                manual_selection=False, source=None, repeat_amount=0, server=None
-            )
-        except commands.CommandNotFound:
-            return
-        except Exception as e:
-            await self.on_legacy_command_error(ctx, e)
+        query = str(ctx.message.content)
+
+        for m in ctx.message.mentions:
+            query = query.replace(m.mention, "", 1)
+
+        query = query.strip()
+
+        if query:
+
+            play_cmd = self.bot.get_slash_command("play")
+
+            try:
+                await play_cmd.callback(
+                    inter=ctx, query=query,
+                    self=play_cmd.cog, position=0, options=False, force_play="no",
+                    manual_selection=False, source=None, repeat_amount=0, server=None
+                )
+            except commands.CommandNotFound:
+                return
+            except Exception as e:
+                await self.on_legacy_command_error(ctx, e)
 
     @commands.Cog.listener("on_command_error")
     async def on_legacy_command_error(self, ctx: CustomContext, error: Exception):
