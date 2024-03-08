@@ -5352,11 +5352,12 @@ class Music(commands.Cog):
                     await player.invoke_np(interaction=interaction)
                     return
 
-                try:
-                    await self.player_interaction_concurrency.acquire(interaction)
-                except commands.MaxConcurrencyReached:
-                    raise GenericError(
-                        "**Você tem uma interação em aberto!**\n`Se for uma mensagem oculta, evite clicar em \"ignorar\".`")
+                if control != PlayerControls.queue:
+                    try:
+                        await self.player_interaction_concurrency.acquire(interaction)
+                    except commands.MaxConcurrencyReached:
+                        raise GenericError(
+                            "**Você tem uma interação em aberto!**\n`Se for uma mensagem oculta, evite clicar em \"ignorar\".`")
 
                 if control == PlayerControls.add_favorite:
 
