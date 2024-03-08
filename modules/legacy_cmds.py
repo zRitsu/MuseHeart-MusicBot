@@ -224,7 +224,7 @@ class Owner(commands.Cog):
                 bot.load_modules(modules)
                 await bot.sync_app_commands(force=bot == self.bot.pool.controller_bot)
 
-        self.bot.sync_command_cooldowns()
+        self.bot.sync_command_cooldowns(force=True)
 
         txt = ""
 

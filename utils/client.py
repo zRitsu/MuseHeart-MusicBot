@@ -927,14 +927,15 @@ class BotCore(commands.AutoShardedBot):
         except:
             traceback.print_exc()
 
-    def sync_command_cooldowns(self):
+    def sync_command_cooldowns(self, force=False):
 
         for b in self.pool.bots:
 
-            if b == self:
+            if b == self and force is False:
                 continue
 
             for cmd in b.commands:
+                cmd.ignore_extra = False
                 if cmd.extras.get("exclusive_cooldown"): continue
                 c = self.get_command(cmd.name)
                 c.ignore_extra = False
