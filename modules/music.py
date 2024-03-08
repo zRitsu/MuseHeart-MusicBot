@@ -813,6 +813,10 @@ class Music(commands.Cog):
                 if not b.bot_ready:
                     continue
 
+                if b.user.id in inter.author.voice.channel.voice_states:
+                    bot = b
+                    break
+
                 g = b.get_guild(inter.guild_id)
 
                 if not g:

@@ -937,6 +937,7 @@ class BotCore(commands.AutoShardedBot):
             for cmd in b.commands:
                 if cmd.extras.get("exclusive_cooldown"): continue
                 c = self.get_command(cmd.name)
+                c.ignore_extra = False
                 if self.pool.config["ENABLE_COMMANDS_COOLDOWN"] is False:
                     c._buckets._cooldown = None
                 else:
@@ -1097,6 +1098,27 @@ class BotCore(commands.AutoShardedBot):
             ctx.player = self.music.players[message.guild.id]
         except:
             pass
+
+        if not ctx.valid and message.content.startswith(self.user.mention) and message.author.voice:
+
+            query = str(message.content)
+
+            for m in message.mentions:
+                query = query.replace(m.mention, "", 1)
+
+            query = query.strip()
+
+            if query:
+                play_cmd = self.get_slash_command("play")
+                self.dispatch("pool_dispatch", ctx, self.user.id)
+                try:
+                    await play_cmd.callback(
+                        inter=ctx, query=query, self=play_cmd.cog, position=0, options=False, force_play="no",
+                        manual_selection=False, source=None, repeat_amount=0, server=None
+                    )
+                except Exception as e:
+                    self.dispatch("command_error", ctx, e)
+                return
 
         self.dispatch("song_request", ctx, message)
 

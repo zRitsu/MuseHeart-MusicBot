@@ -264,7 +264,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
     if free_bot:
         inter.music_bot, inter.music_guild = free_bot.pop(0)
 
-        if isinstance(inter, CustomContext) and not mention_prefixed and inter.music_bot.user.id != inter.bot.user.id:
+        if isinstance(inter, CustomContext) and not mention_prefixed and not bypass_prefix and inter.music_bot.user.id != inter.bot.user.id:
             try:
                 await inter.music_bot.wait_for(
                     "pool_payload_ready", timeout=10,
