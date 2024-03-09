@@ -5706,14 +5706,6 @@ class Music(commands.Cog):
 
         player: Optional[LavalinkPlayer] = self.bot.music.players.get(message.guild.id)
 
-        if player and player.static and player.keep_connected and ((player.message and message.channel == player.message.thread) or player.text_channel == message.channel):
-            try:
-                await check_player_perm(message, self.bot, message.channel)
-            except Exception as e:
-                await self.delete_message(message, delay=3)
-                await message.channel.send(f"{message.author.mention}, {e}", delete_after=10)
-                return
-
         if player and isinstance(message.channel, disnake.Thread) and not player.static:
 
             try:
@@ -6230,9 +6222,6 @@ class Music(commands.Cog):
         except AttributeError:
             pass
 
-        tracks, node = await self.get_tracks(message.content, message.author, source=source)
-        tracks = await self.check_player_queue(message.author, self.bot, message.guild.id, tracks)
-
         try:
             message_id = int(data['player_controller']['message_id'])
         except TypeError:
@@ -6240,11 +6229,15 @@ class Music(commands.Cog):
 
         try:
             player = self.bot.music.players[message.guild.id]
+            await check_player_perm(message, self.bot, message.channel)
             destroy_message = True
         except KeyError:
             destroy_message = False
             player = await self.create_player(inter=message, bot=self.bot, guild=message.guild, channel=text_channel,
-                                              node=node, guild_data=data)
+                                              guild_data=data)
+
+        tracks, node = await self.get_tracks(message.content, message.author, source=source)
+        tracks = await self.check_player_queue(message.author, self.bot, message.guild.id, tracks)
 
         if not player.message:
             try:
