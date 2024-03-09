@@ -567,9 +567,6 @@ async def check_player_perm(inter, bot: BotCore, channel):
     except KeyError:
         return True
 
-    if inter.author.id == player.player_creator or inter.author.id in player.dj:
-        return True
-
     try:
         vc = player.guild.me.voice.channel
     except AttributeError:
@@ -581,6 +578,9 @@ async def check_player_perm(inter, bot: BotCore, channel):
     if player.keep_connected and not (await bot.is_owner(inter.author)):
         raise GenericError("Apenas membros com a permissão de **gerenciar canais** "
                            "podem usar esse comando/botão com o **modo 24/7 ativo**...")
+
+    if inter.author.id == player.player_creator or inter.author.id in player.dj:
+        return True
 
     try:
         if vc.permissions_for(inter.author).move_members:
