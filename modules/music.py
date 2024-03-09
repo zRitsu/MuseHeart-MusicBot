@@ -5706,7 +5706,7 @@ class Music(commands.Cog):
 
         player: Optional[LavalinkPlayer] = self.bot.music.players.get(message.guild.id)
 
-        if player and player.keep_connected and ((player.message and message.channel == player.message.thread) or player.text_channel == message.channel):
+        if player and player.static and player.keep_connected and ((player.message and message.channel == player.message.thread) or player.text_channel == message.channel):
             try:
                 await check_player_perm(message, self.bot, message.channel)
             except Exception as e:
