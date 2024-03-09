@@ -5706,12 +5706,13 @@ class Music(commands.Cog):
 
         player: Optional[LavalinkPlayer] = self.bot.music.players.get(message.guild.id)
 
-        if player and player.keep_connected and not message.author.bot and not message.author.guild_permissions.manage_channels and not (await self.bot.is_owner(message.author)):
-            await self.delete_message(message)
-            await message.channel.send(f"{message.author.mention}, apenas membros com a permissão de "
-                                       "**Gerenciar Canais** podem solicitar músicas com o **modo 24/7 ativo**...",
-                                       delete_after=10)
-            return
+        if player and player.keep_connected and ((player.message and message.channel == player.message.thread) or player.text_channel == message.channel):
+            try:
+                await check_player_perm(message, self.bot, message.channel)
+            except Exception as e:
+                await self.delete_message(message, delay=3)
+                await message.channel.send(f"{message.author.mention}, {e}", delete_after=10)
+                return
 
         if player and isinstance(message.channel, disnake.Thread) and not player.static:
 
