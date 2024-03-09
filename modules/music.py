@@ -1443,7 +1443,14 @@ class Music(commands.Cog):
                         except AttributeError:
                             pass
 
-                        msg = await inter.send(embed=embed, view=view, ephemeral=ephemeral)
+                        try:
+                            func = inter.edit_original_message
+                            kwargs = {}
+                        except AttributeError:
+                            func = inter.send
+                            kwargs = {"ephemeral": ephemeral}
+
+                        msg = await func(embed=embed, view=view, **kwargs)
 
                         await view.wait()
 
