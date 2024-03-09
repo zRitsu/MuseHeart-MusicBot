@@ -563,7 +563,12 @@ def user_cooldown(rate: int, per: int):
 async def check_player_perm(inter, bot: BotCore, channel):
 
     try:
-        player: LavalinkPlayer = bot.music.players[inter.guild_id]
+        guild_id = inter.guild_id
+    except AttributeError:
+        guild_id = inter.guild.id
+
+    try:
+        player: LavalinkPlayer = bot.music.players[guild_id]
     except KeyError:
         return True
 
