@@ -971,6 +971,8 @@ class Music(commands.Cog):
 
         is_pin = None
 
+        original_query = query or ""
+
         if not query:
 
             if self.bot.config["ENABLE_DISCORD_URLS_PLAYBACK"]:
@@ -1636,8 +1638,8 @@ class Music(commands.Cog):
 
                     tracks.uri = ""
 
-                elif URL_REG.match(query):
-                    track_url = query
+                elif url_check:=URL_REG.match(original_query.strip("<>")):
+                    track_url = url_check.group()
 
             if not isinstance(tracks, list):
 
