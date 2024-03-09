@@ -1535,6 +1535,8 @@ class Music(commands.Cog):
 
         embed_description = ""
 
+        track_url = ""
+
         if isinstance(tracks, list):
 
             if manual_selection and not queue_loaded and len(tracks) > 1:
@@ -1634,6 +1636,9 @@ class Music(commands.Cog):
 
                     tracks.uri = ""
 
+                elif URL_REG.match(query):
+                    track_url = query
+
             if not isinstance(tracks, list):
 
                 if force_play == "yes":
@@ -1646,13 +1651,16 @@ class Music(commands.Cog):
 
                 duration = time_format(tracks.duration) if not tracks.is_stream else '🔴 Livestream'
 
-                log_text = f"{inter.author.mention} adicionou [`{fix_characters(tracks.title, 20)}`]({tracks.uri or tracks.search_uri}){pos_txt} `({duration})`."
+                if not track_url:
+                    track_url = tracks.uri or tracks.search_uri
+
+                log_text = f"{inter.author.mention} adicionou [`{fix_characters(tracks.title, 20)}`]({track_url}){pos_txt} `({duration})`."
 
                 loadtype = "track"
 
                 embed.set_author(
                     name="⠂" + fix_characters(tracks.single_title, 35),
-                    url=tracks.uri or tracks.search_uri,
+                    url=track_url,
                     icon_url=music_source_image(tracks.info['sourceName'])
                 )
                 embed.set_thumbnail(url=tracks.thumb)
