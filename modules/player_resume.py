@@ -17,7 +17,7 @@ from disnake.ext import commands
 import wavelink
 from utils.client import BotCore
 from utils.music.checks import can_connect, can_send_message
-from utils.music.models import LavalinkPlayer, LavalinkTrack, PartialTrack, PartialPlaylist, LavalinkPlaylist
+from utils.music.models import LavalinkPlayer
 from utils.others import SongRequestPurgeMode, send_idle_embed, CustomContext
 
 
@@ -475,9 +475,11 @@ class PlayerSession(commands.Cog):
 
             player.played.extend(played_tracks)
 
-            queue_autoplay_tracks, playlists = self.bot.pool.process_track_cls(data.get("queue_autoplay", []))
+            if player.autoplay:
 
-            player.queue_autoplay.extend(queue_autoplay_tracks)
+                queue_autoplay_tracks, playlists = self.bot.pool.process_track_cls(data.get("queue_autoplay", []))
+
+                player.queue_autoplay.extend(queue_autoplay_tracks)
 
             failed_tracks, playlists = self.bot.pool.process_track_cls(data.get("failed_tracks", []), playlists)
 
@@ -491,7 +493,7 @@ class PlayerSession(commands.Cog):
                 player.update = True
 
             else:
-                if player.keep_connected and not player.queue:
+                if player.keep_connected and not player.queue and not player.queue_autoplay:
                     if player.failed_tracks:
                         player.queue.extend(reversed(player.failed_tracks))
                         player.failed_tracks.clear()
