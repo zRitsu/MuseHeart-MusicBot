@@ -915,17 +915,26 @@ class Music(commands.Cog):
 
                 update_inter(inter, v.inter)
 
-                bot = v.bot
+                current_bot = v.bot
                 inter = v.inter
                 guild = v.guild
-                channel = bot.get_channel(inter.channel.id)
+                channel = current_bot.get_channel(inter.channel.id)
 
                 await inter.response.defer()
 
             else:
-                bot = free_bots.pop()
+                current_bot = free_bots.pop()
 
-            inter, guild_data = await get_inter_guild_data(inter, bot)
+            if bot != current_bot:
+                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                try:
+                    inter.guild_data = guild_data
+                except AttributeError:
+                    pass
+            else:
+                inter, guild_data = await get_inter_guild_data(inter, bot)
+
+            bot = current_bot
 
         if not channel:
             channel = bot.get_channel(inter.channel.id)
