@@ -4645,7 +4645,7 @@ class Music(commands.Cog):
             interaction = inter
 
         if not interaction.response.is_done():
-            await inter.response.defer(ephemeral=True)
+            await interaction.response.defer(ephemeral=True)
 
         try:
             user_data = inter.global_user_data
@@ -4656,27 +4656,19 @@ class Music(commands.Cog):
             except:
                 pass
 
-        view = FavMenuView(bot=bot, ctx=inter, data=user_data, prefix=prefix, mode=mode, is_owner=await bot.is_owner(inter.author))
+        view = FavMenuView(bot=bot, ctx=interaction, data=user_data, prefix=prefix, mode=mode, is_owner=await bot.is_owner(inter.author))
         view.guild_data = guild_data
 
         embed = view.build_embed()
 
         if not embed:
-            await inter.send("**Não há suporte a esse recurso no momento...**\n\n"
-                             "`Suporte ao spotify e YTDL não estão ativados.`", ephemeral=True)
-            return
+            raise GenericError("**Não há suporte a esse recurso no momento...**\n\n"
+                             "`Suporte ao spotify e YTDL não estão ativados.`")
 
-        if isinstance(inter, CustomContext):
-            try:
-                view.message = inter.store_message
-                await inter.store_message.edit(embed=embed, view=view)
-            except:
-                view.message = await inter.send(embed=embed, view=view)
-        else:
-            try:
-                await inter.edit_original_message(embed=embed, view=view)
-            except:
-                await inter.response.edit_message(embed=embed, view=view)
+        try:
+            await interaction.edit_original_message(embed=embed, view=view)
+        except AttributeError:
+            view.message = await inter.send(embed=embed, view=view, ephemeral=True)
 
         await view.wait()
 

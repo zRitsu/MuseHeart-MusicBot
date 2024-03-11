@@ -1193,7 +1193,7 @@ class FavMenuView(disnake.ui.View):
                                      default=self.mode == ViewMode.integrations_manager)
             )
 
-        if self.ctx.author.guild_permissions.manage_guild and self.is_owner:
+        if self.ctx.author.guild_permissions.manage_guild or self.is_owner:
             mode_select.options.insert(1, disnake.SelectOption(label="Gerenciador de Playlists do Servidor",
                                                                value=f"fav_view_mode_{ViewMode.guild_fav_manager}", emoji="📌",
                                                                default=self.mode == ViewMode.guild_fav_manager))
