@@ -6229,7 +6229,7 @@ class Music(commands.Cog):
 
         try:
             player = self.bot.music.players[message.guild.id]
-            await check_player_perm(message, self.bot, message.channel)
+            await check_player_perm(message, self.bot, message.channel, guild_data=data)
             destroy_message = True
         except KeyError:
             destroy_message = False

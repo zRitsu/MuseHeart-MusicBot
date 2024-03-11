@@ -560,7 +560,7 @@ def user_cooldown(rate: int, per: int):
 
 #######################################################################
 
-async def check_player_perm(inter, bot: BotCore, channel):
+async def check_player_perm(inter, bot: BotCore, channel, guild_data: dict = None):
 
     try:
         guild_id = inter.guild_id
@@ -595,7 +595,8 @@ async def check_player_perm(inter, bot: BotCore, channel):
 
     user_roles = [r.id for r in inter.author.roles]
 
-    inter, guild_data = await get_inter_guild_data(inter, bot)
+    if not guild_data:
+        inter, guild_data = await get_inter_guild_data(inter, bot)
 
     if [r for r in guild_data['djroles'] if int(r) in user_roles]:
         return True
