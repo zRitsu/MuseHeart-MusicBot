@@ -837,6 +837,8 @@ class Music(commands.Cog):
                     if inter.author in vc.members:
                         bot = b
                         break
+                    else:
+                        continue
 
                 free_bots.append(b)
 
