@@ -4656,7 +4656,7 @@ class Music(commands.Cog):
             except:
                 pass
 
-        view = FavMenuView(bot=bot, ctx=inter, data=user_data, prefix=prefix, mode=mode)
+        view = FavMenuView(bot=bot, ctx=inter, data=user_data, prefix=prefix, mode=mode, is_owner=await bot.is_owner(inter.author))
         view.guild_data = guild_data
 
         embed = view.build_embed()

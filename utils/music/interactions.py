@@ -1150,7 +1150,7 @@ class FavModalAdd(disnake.ui.Modal):
 class FavMenuView(disnake.ui.View):
 
     def __init__(self, bot: BotCore, ctx: Union[disnake.AppCmdInter, CustomContext], data: dict, log: str = "",
-                 prefix="", mode: str = ViewMode.fav_manager):
+                 prefix="", mode: str = ViewMode.fav_manager, is_owner=False):
         super().__init__(timeout=180)
         self.mode = mode
         self.bot = bot
@@ -1163,6 +1163,7 @@ class FavMenuView(disnake.ui.View):
         self.log = log
         self.prefix = prefix
         self.components_updater_task = bot.loop.create_task(self.auto_update())
+        self.is_owner = is_owner
 
         if not self.guild:
             for b in self.bot.pool.bots:
@@ -1192,7 +1193,7 @@ class FavMenuView(disnake.ui.View):
                                      default=self.mode == ViewMode.integrations_manager)
             )
 
-        if self.ctx.author.guild_permissions.manage_guild:
+        if self.ctx.author.guild_permissions.manage_guild and self.is_owner:
             mode_select.options.insert(1, disnake.SelectOption(label="Gerenciador de Playlists do Servidor",
                                                                value=f"fav_view_mode_{ViewMode.guild_fav_manager}", emoji="📌",
                                                                default=self.mode == ViewMode.guild_fav_manager))
