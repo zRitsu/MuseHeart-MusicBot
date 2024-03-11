@@ -4617,7 +4617,7 @@ class Music(commands.Cog):
         if isinstance(inter, CustomContext):
             prefix = inter.clean_prefix
 
-            if inter.invoked_with in ("serverplaylist", "spl", "svp", "svpl") and inter.author.guild_permissions.manage_guild:
+            if inter.invoked_with in ("serverplaylist", "spl", "svp", "svpl") and (inter.author.guild_permissions.manage_guild or await bot.is_owner(inter.author)):
 
                 interaction, bot = await select_bot_pool(inter, return_new=True)
 
