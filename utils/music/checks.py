@@ -313,11 +313,6 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
         msg = "**Não há bots de música compatíveis no servidor...**"
 
-        for b in inter.bot.pool.bots:
-
-            if str(b.user.id) in inter.bot.config["INTERACTION_BOTS"]:
-                continue
-
         if extra_bots_counter:
             msg += f"\n\nVocê terá que adicionar pelo menos um bot compatível clicando no botão abaixo:"
             components = [disnake.ui.Button(custom_id="bot_invite", label=f"Adicionar bot{'s'[:extra_bots_counter^1]}.")]

@@ -807,6 +807,8 @@ class Music(commands.Cog):
         if bot.user.id not in inter.author.voice.channel.voice_states:
 
             free_bots = []
+            voice_channels = []
+            bot_count = 0
 
             for b in self.bot.pool.bots:
 
@@ -814,12 +816,13 @@ class Music(commands.Cog):
                     continue
 
                 if b.user in inter.author.voice.channel.members:
-                    bot = b
+                    free_bots.append(b)
                     break
 
                 g = b.get_guild(inter.guild_id)
 
                 if not g:
+                    bot_count += 1
                     continue
 
                 p: LavalinkPlayer = b.music.players.get(inter.guild_id)
@@ -835,12 +838,32 @@ class Music(commands.Cog):
                         continue
 
                     if inter.author in vc.members:
-                        bot = b
+                        free_bots.append(b)
                         break
                     else:
+                        voice_channels.append(vc.mention)
                         continue
 
                 free_bots.append(b)
+
+            if not free_bots:
+
+                if bot_count:
+                    txt = "**Todos os bots estão em uso no nomento...**"
+                    if voice_channels:
+                        txt += "\n\n**Você pode conectar em um dos canais abaixo onde há sessões ativas:**\n" + ", ".join(voice_channels)
+                        if inter.author.guild_permissions.manage_guild:
+                            txt += "\n\n**Ou se preferir: Adicione mais bots de música no servidor atual clicando no botão abaixo:**"
+                        else:
+                            txt += "\n\n**Ou se preferir: Solicite a um administrador/manager do servidor para clicar no botão abaixo " \
+                                   "para adicionar mais bots de música no servidor atual.**"
+                else:
+                    txt = "**Não há bots de música compatíveis no servidor...**" \
+                           "\n\nSerá necessário adicionar pelo menos um bot compatível clicando no botão abaixo:"
+
+                await inter.send(
+                    txt, ephemeral=True, components=[disnake.ui.Button(custom_id="bot_invite", label="Adicionar bots")])
+                return
 
             if len(free_bots) > 1:
 
@@ -898,6 +921,11 @@ class Music(commands.Cog):
                 channel = bot.get_channel(inter.channel.id)
 
                 await inter.response.defer()
+
+            else:
+                bot = free_bots.pop()
+
+            inter, guild_data = await get_inter_guild_data(inter, bot)
 
         if not channel:
             channel = bot.get_channel(inter.channel.id)
