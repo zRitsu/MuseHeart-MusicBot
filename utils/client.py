@@ -750,6 +750,7 @@ class BotCore(commands.AutoShardedBot):
         super().__init__(*args, **kwargs)
         self.music = music_mode(self)
         self.interaction_id: Optional[int] = None
+        self.wavelink_node_reconnect_tasks = {}
 
         for i in self.config["OWNER_IDS"].split("||"):
 

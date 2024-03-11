@@ -6546,6 +6546,15 @@ class Music(commands.Cog):
     @commands.Cog.listener("on_wavelink_node_connection_closed")
     async def node_connection_closed(self, node: wavelink.Node):
 
+        try:
+            self.bot.wavelink_node_reconnect_tasks[node.identifier].cancel()
+        except:
+            pass
+
+        self.bot.wavelink_node_reconnect_tasks[node.identifier] = self.bot.loop.create_task(self.node_reconnect(node))
+
+    async def node_reconnect(self, node: wavelink.Node):
+
         retries = 0
         backoff = 7
         reconnect_players = True
