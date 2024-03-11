@@ -438,9 +438,6 @@ class PlayerSession(commands.Cog):
                 if player.nightcore:
                     await player.set_timescale(pitch=1.2, speed=1.1)
 
-                if player.nightcore:
-                    await player.set_timescale(pitch=1.2, speed=1.1)
-
                 await player.connect(voice_channel.id)
 
                 wait_counter = 30
