@@ -28,7 +28,7 @@ from utils.music.checks import check_voice, has_player, has_source, is_requester
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, google_search, percentage, music_source_image
 from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolException, parse_error, \
-    EmptyFavIntegration
+    EmptyFavIntegration, DiffVoiceChannel
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction, FavMenuView, ViewMode, \
     SetStageTitle, SelectBotVoice
 from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, PartialTrack
@@ -804,137 +804,148 @@ class Music(commands.Cog):
                 raise GenericError(f"**O canal <#{inter.channel.id}> não foi encontrado (ou foi excluido).**")
             await check_pool_bots(inter, check_player=False, bypass_prefix=True)
 
-        if bot.user.id not in inter.author.voice.channel.voice_states and str(inter.channel.id) != guild_data['player_controller']['channel']:
+        if bot.user.id not in inter.author.voice.channel.voice_states:
 
-            free_bots = []
-            voice_channels = []
-            bot_count = 0
+            try:
+                player = bot.music.players[inter.guild.id]
+            except KeyError:
+                player = None
 
-            for b in self.bot.pool.bots:
+            if str(inter.channel.id) == guild_data['player_controller']['channel']:
+                if player and inter.author.id not in player.last_channel.voice_states:
+                    raise DiffVoiceChannel()
 
-                if not b.bot_ready:
-                    continue
+            elif not player:
 
-                if b.user in inter.author.voice.channel.members:
-                    free_bots.append(b)
-                    break
+                free_bots = []
+                voice_channels = []
+                bot_count = 0
 
-                g = b.get_guild(inter.guild_id)
+                for b in self.bot.pool.bots:
 
-                if not g:
-                    bot_count += 1
-                    continue
-
-                p: LavalinkPlayer = b.music.players.get(inter.guild_id)
-
-                if p:
-
-                    try:
-                        vc = g.me.voice.channel
-                    except AttributeError:
-                        vc = p.last_channel
-
-                    if not vc:
+                    if not b.bot_ready:
                         continue
 
-                    if inter.author in vc.members:
+                    if b.user in inter.author.voice.channel.members:
                         free_bots.append(b)
                         break
-                    else:
-                        voice_channels.append(vc.mention)
+
+                    g = b.get_guild(inter.guild_id)
+
+                    if not g:
+                        bot_count += 1
                         continue
 
-                free_bots.append(b)
+                    p: LavalinkPlayer = b.music.players.get(inter.guild_id)
 
-            if not free_bots:
+                    if p:
 
-                if bot_count:
-                    txt = "**Todos os bots estão em uso no nomento...**"
-                    if voice_channels:
-                        txt += "\n\n**Você pode conectar em um dos canais abaixo onde há sessões ativas:**\n" + ", ".join(voice_channels)
-                        if inter.author.guild_permissions.manage_guild:
-                            txt += "\n\n**Ou se preferir: Adicione mais bots de música no servidor atual clicando no botão abaixo:**"
+                        try:
+                            vc = g.me.voice.channel
+                        except AttributeError:
+                            vc = p.last_channel
+
+                        if not vc:
+                            continue
+
+                        if inter.author in vc.members:
+                            free_bots.append(b)
+                            break
                         else:
-                            txt += "\n\n**Ou se preferir: Solicite a um administrador/manager do servidor para clicar no botão abaixo " \
-                                   "para adicionar mais bots de música no servidor atual.**"
+                            voice_channels.append(vc.mention)
+                            continue
+
+                    free_bots.append(b)
+
+                if not free_bots:
+
+                    if bot_count:
+                        txt = "**Todos os bots estão em uso no nomento...**"
+                        if voice_channels:
+                            txt += "\n\n**Você pode conectar em um dos canais abaixo onde há sessões ativas:**\n" + ", ".join(voice_channels)
+                            if inter.author.guild_permissions.manage_guild:
+                                txt += "\n\n**Ou se preferir: Adicione mais bots de música no servidor atual clicando no botão abaixo:**"
+                            else:
+                                txt += "\n\n**Ou se preferir: Solicite a um administrador/manager do servidor para clicar no botão abaixo " \
+                                       "para adicionar mais bots de música no servidor atual.**"
+                    else:
+                        txt = "**Não há bots de música compatíveis no servidor...**" \
+                               "\n\nSerá necessário adicionar pelo menos um bot compatível clicando no botão abaixo:"
+
+                    await inter.send(
+                        txt, ephemeral=True, components=[disnake.ui.Button(custom_id="bot_invite", label="Adicionar bots")])
+                    return
+
+                if len(free_bots) > 1:
+
+                    v = SelectBotVoice(inter, guild, free_bots)
+
+                    try:
+                        func = msg.edit
+                    except AttributeError:
+                        try:
+                            func = inter.edit_original_message
+                        except AttributeError:
+                            func = inter.send
+
+                    newmsg = await func(
+                        embed=disnake.Embed(
+                            description=f"**Escolha qual bot você deseja usar no canal {inter.author.voice.channel.mention}**",
+                            color=self.bot.get_color(guild.me)), view=v
+                    )
+                    await v.wait()
+
+                    if newmsg:
+                        msg = newmsg
+
+                    if v.status is None:
+                        try:
+                            func = msg.edit
+                        except AttributeError:
+                            func = inter.edit_original_message
+                        await func(embed=disnake.Embed(description="### Tempo esgotado...", color=self.bot.get_color(guild.me)), view=None)
+                        return
+
+                    if v.status is False:
+                        try:
+                            func = msg.edit
+                        except AttributeError:
+                            func = inter.edit_original_message
+                        await func(embed=disnake.Embed(description="### Operação cancelada.",
+                                                       color=self.bot.get_color(guild.me)), view=None)
+                        return
+
+                    if not v.inter.author.voice:
+                        try:
+                            func = msg.edit
+                        except AttributeError:
+                            func = inter.edit_original_message
+                        await func(embed=disnake.Embed(description="### Você não está conectado em um canal de voz...",
+                                                       color=self.bot.get_color(guild.me)), view=None)
+                        return
+
+                    update_inter(inter, v.inter)
+
+                    current_bot = v.bot
+                    inter = v.inter
+                    guild = v.guild
+                    channel = current_bot.get_channel(inter.channel.id)
+
+                    await inter.response.defer()
+
                 else:
-                    txt = "**Não há bots de música compatíveis no servidor...**" \
-                           "\n\nSerá necessário adicionar pelo menos um bot compatível clicando no botão abaixo:"
+                    current_bot = free_bots.pop()
 
-                await inter.send(
-                    txt, ephemeral=True, components=[disnake.ui.Button(custom_id="bot_invite", label="Adicionar bots")])
-                return
-
-            if len(free_bots) > 1:
-
-                v = SelectBotVoice(inter, guild, free_bots)
-
-                try:
-                    func = msg.edit
-                except AttributeError:
+                if bot != current_bot:
+                    guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
                     try:
-                        func = inter.edit_original_message
+                        inter.guild_data = guild_data
                     except AttributeError:
-                        func = inter.send
+                        pass
+                else:
+                    inter, guild_data = await get_inter_guild_data(inter, bot)
 
-                newmsg = await func(
-                    embed=disnake.Embed(
-                        description=f"**Escolha qual bot você deseja usar no canal {inter.author.voice.channel.mention}**",
-                        color=self.bot.get_color(guild.me)), view=v
-                )
-                await v.wait()
-
-                if newmsg:
-                    msg = newmsg
-
-                if v.status is None:
-                    try:
-                        func = msg.edit
-                    except AttributeError:
-                        func = inter.edit_original_message
-                    await func(embed=disnake.Embed(description="### Tempo esgotado...", color=self.bot.get_color(guild.me)), view=None)
-                    return
-
-                if v.status is False:
-                    try:
-                        func = msg.edit
-                    except AttributeError:
-                        func = inter.edit_original_message
-                    await func(embed=disnake.Embed(description="### Operação cancelada.",
-                                                   color=self.bot.get_color(guild.me)), view=None)
-                    return
-
-                if not v.inter.author.voice:
-                    try:
-                        func = msg.edit
-                    except AttributeError:
-                        func = inter.edit_original_message
-                    await func(embed=disnake.Embed(description="### Você não está conectado em um canal de voz...",
-                                                   color=self.bot.get_color(guild.me)), view=None)
-                    return
-
-                update_inter(inter, v.inter)
-
-                current_bot = v.bot
-                inter = v.inter
-                guild = v.guild
-                channel = current_bot.get_channel(inter.channel.id)
-
-                await inter.response.defer()
-
-            else:
-                current_bot = free_bots.pop()
-
-            if bot != current_bot:
-                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-                try:
-                    inter.guild_data = guild_data
-                except AttributeError:
-                    pass
-            else:
-                inter, guild_data = await get_inter_guild_data(inter, bot)
-
-            bot = current_bot
+                bot = current_bot
 
         if not channel:
             channel = bot.get_channel(inter.channel.id)
