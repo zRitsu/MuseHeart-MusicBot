@@ -263,7 +263,8 @@ class PlayerSession(commands.Cog):
             position: int
     ):
 
-        player.current = await player.get_next_track()
+        track, clear_autoqueue = await player.get_next_track()
+        player.current = track
         player._temp_data.update(
             {
                 "volume": player.volume,
