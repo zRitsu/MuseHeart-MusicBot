@@ -3,6 +3,8 @@
 
 ## Página com invites e algumas infos/screenshots da Muse Heart e funcionamento dessa source: [clique aqui](https://gist.github.com/zRitsu/4875008554a00c3c372b2df6dcdf437f#file-muse_heart_invites-md).
 
+[![](https://discordapp.com/api/guilds/911370624507707483/embed.png?style=banner2)](https://discord.gg/KM3NS7D6Zj)
+
 ### Algumas Previews:
 
 - Player controller: modo normal/mini-player (skin: default) e suporte a [RPC (Rich Presence)](https://github.com/zRitsu/MuseHeart-MusicBot-RPC-app)
