@@ -1643,7 +1643,6 @@ class LavalinkPlayer(wavelink.Player):
         self.process_hint()
 
         if self.auto_pause:
-            print("aaaaaaaaaaaaa")
             self.last_update = time() * 1000
             self.current = track
         else:
