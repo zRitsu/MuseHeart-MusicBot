@@ -263,20 +263,18 @@ class PlayerSession(commands.Cog):
             position: int
     ):
 
-        track = None
-
-        try:
-            track = player.queue.popleft()
-        except:
-            pass
-
-        if not track and player.autoplay:
+        if not player.current:
             try:
-                track = await player.get_autoqueue_tracks()
+                player.current = player.queue.popleft()
             except:
-                traceback.print_exc()
+                pass
 
-        player.current = track
+            if not player.current and player.autoplay:
+                try:
+                    player.current = await player.get_autoqueue_tracks()
+                except:
+                    traceback.print_exc()
+
         player._temp_data.update(
             {
                 "volume": player.volume,
