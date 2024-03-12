@@ -399,7 +399,7 @@ class LavalinkPlayer(wavelink.Player):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.version = 1.1
-        self.volume = kwargs.get("volume", 100)
+        self.volume = 100
         self.guild: disnake.Guild = kwargs.pop('guild')
         self.text_channel: Union[disnake.TextChannel,
         disnake.VoiceChannel, disnake.Thread] = kwargs.pop('channel')
@@ -513,9 +513,6 @@ class LavalinkPlayer(wavelink.Player):
             self.initial_hints.extend(kwargs.pop("extra_hints"))
         except:
             pass
-
-        if self.volume != 100:
-            self.bot.loop.create_task(self.set_volume(self.volume))
 
         self.hints: cycle = []
         self.current_hint: str = ""
@@ -1449,36 +1446,7 @@ class LavalinkPlayer(wavelink.Player):
         except:
             return None
 
-    async def process_next(self, start_position: Union[int, float] = 0, inter: disnake.MessageInteraction = None,
-                           force_np=False, clear_autoqueue = True):
-
-        if self.locked or self.is_closing:
-            return
-
-        if not self.node or not self.node.is_available:
-            try:
-                self._new_node_task.cancel()
-            except:
-                pass
-            self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node())
-            return
-
-        await self.bot.wait_until_ready()
-
-        if not self.is_connected:
-            return
-
-        if not self.guild.me.voice:
-            if self.last_channel:
-                await self.connect(self.last_channel.id)
-            else:
-                return
-
-        try:
-            self.idle_task.cancel()
-            self.idle_task = None
-        except:
-            pass
+    async def get_next_track(self):
 
         try:
             track = self.queue.popleft()
@@ -1512,6 +1480,41 @@ class LavalinkPlayer(wavelink.Player):
                 clear_autoqueue = False
                 traceback.print_exc()
                 track = None
+
+        return track
+
+    async def process_next(self, start_position: Union[int, float] = 0, inter: disnake.MessageInteraction = None,
+                           force_np=False, clear_autoqueue = True):
+
+        if self.locked or self.is_closing:
+            return
+
+        if not self.node or not self.node.is_available:
+            try:
+                self._new_node_task.cancel()
+            except:
+                pass
+            self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node())
+            return
+
+        await self.bot.wait_until_ready()
+
+        if not self.is_connected:
+            return
+
+        if not self.guild.me.voice:
+            if self.last_channel:
+                await self.connect(self.last_channel.id)
+            else:
+                return
+
+        try:
+            self.idle_task.cancel()
+            self.idle_task = None
+        except:
+            pass
+
+        track = await self.get_next_track()
 
         if not track:
             await self.process_next()
@@ -1636,7 +1639,9 @@ class LavalinkPlayer(wavelink.Player):
         self.process_hint()
 
         if self.auto_pause:
+            print("aaaaaaaaaaaaa")
             self.last_update = time() * 1000
+            self.current = track
         else:
             await self.play(track, start=start_position)
             # TODO: rever essa parte caso adicione função de ativar track loops em músicas da fila

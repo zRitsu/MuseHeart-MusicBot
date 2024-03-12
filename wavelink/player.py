@@ -203,6 +203,8 @@ class Player:
 
         self._voice_state = {}
 
+        self._temp_data = {}
+
         self.volume = 100
         self.paused = False
         self.current = None
@@ -295,15 +297,24 @@ class Player:
                 await self.node._send(op='voiceUpdate', guildId=str(self.guild_id), **self._voice_state)
         else:
             try:
-                session_id: str = self._voice_state["sessionId"]
-                token: str = self._voice_state["event"]["token"]
-                endpoint: str = self._voice_state["event"]["endpoint"]
+                data = {
+                    "voice": {
+                        "sessionId": self._voice_state["sessionId"],
+                        "token": self._voice_state["event"]["token"],
+                        "endpoint": self._voice_state["event"]["endpoint"]
+
+                    }
+                }
             except KeyError:
                 pprint.pprint(self._voice_state)
                 traceback.print_exc()
                 return
 
-            await self.node.update_player(self.guild_id, data={"voice": {"sessionId": session_id, "token": token, "endpoint": endpoint}})
+            if self._temp_data:
+                data.update(self._temp_data.copy())
+                self._temp_data.clear()
+
+            await self.node.update_player(self.guild_id, data=data)
 
     async def hook(self, event) -> None:
         if isinstance(event, TrackEnd) and event.reason in ("STOPPED", "FINISHED"):

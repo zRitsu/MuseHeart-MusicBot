@@ -4621,6 +4621,9 @@ class Music(commands.Cog):
 
                 interaction, bot = await select_bot_pool(inter, return_new=True)
 
+                if not bot:
+                    return
+
                 mode = ViewMode.guild_fav_manager
 
                 await interaction.response.defer(ephemeral=True)
@@ -6154,12 +6157,14 @@ class Music(commands.Cog):
             extra_hints=self.extra_hints,
             restrict_mode=guild_data['enable_restrict_mode'],
             listen_along_invite=invite,
-            volume=int(guild_data['default_player_volume']),
             autoplay=guild_data["autoplay"],
             prefix=global_data["prefix"] or bot.default_prefix,
             purge_mode=guild_data['player_controller']['purge_mode'],
             stage_title_template=global_data['voice_channel_status'],
         )
+
+        if (vol:=int(guild_data['default_player_volume'])) != 100:
+            await player.set_volume(vol)
 
         if static_player['channel']:
 
