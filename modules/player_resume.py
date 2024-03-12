@@ -263,7 +263,19 @@ class PlayerSession(commands.Cog):
             position: int
     ):
 
-        track, clear_autoqueue = await player.get_next_track()
+        track = None
+
+        try:
+            track = player.queue.popleft()
+        except:
+            pass
+
+        if not track and player.autoplay:
+            try:
+                track = await player.get_autoqueue_tracks()
+            except:
+                traceback.print_exc()
+
         player.current = track
         player._temp_data.update(
             {

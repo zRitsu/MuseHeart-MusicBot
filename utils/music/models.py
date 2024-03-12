@@ -1446,40 +1446,6 @@ class LavalinkPlayer(wavelink.Player):
         except:
             return None
 
-    async def get_next_track(self, clear_autoqueue=True):
-
-        try:
-            track = self.queue.popleft()
-
-        except:
-
-            try:
-
-                track = None
-
-                if self.autoplay or self.keep_connected:
-                    try:
-                        track = await self.get_autoqueue_tracks()
-                        clear_autoqueue = False
-                    except:
-                        traceback.print_exc()
-                        self.locked = False
-                        await asyncio.sleep(60)
-                        return None, None
-
-                if not track:
-                    await self.stop()
-                    self.idle_endtime = disnake.utils.utcnow() + datetime.timedelta(seconds=self.bot.config["IDLE_TIMEOUT"])
-                    self.last_track = None
-                    return None, None
-
-            except Exception:
-                clear_autoqueue = False
-                traceback.print_exc()
-                track = None
-
-        return track, clear_autoqueue
-
     async def process_next(self, start_position: Union[int, float] = 0, inter: disnake.MessageInteraction = None,
                            force_np=False, clear_autoqueue = True):
 
@@ -1511,17 +1477,41 @@ class LavalinkPlayer(wavelink.Player):
         except:
             pass
 
-        track, clear_autoqueue = await self.get_next_track(clear_autoqueue=clear_autoqueue)
+        try:
+            track = self.queue.popleft()
+
+        except:
+
+            try:
+
+                track = None
+
+                if self.autoplay or self.keep_connected:
+                    try:
+                        track = await self.get_autoqueue_tracks()
+                        clear_autoqueue = False
+                    except:
+                        traceback.print_exc()
+                        self.locked = False
+                        await asyncio.sleep(60)
+                        if not self.current and (self.autoplay or self.keep_connected):
+                            await self.process_next()
+                        return
+
+                if not track:
+                    await self.stop()
+                    self.idle_endtime = disnake.utils.utcnow() + datetime.timedelta(seconds=self.bot.config["IDLE_TIMEOUT"])
+                    self.last_track = None
+                    self.idle_task = self.bot.loop.create_task(self.idling_mode())
+                    return
+
+            except Exception:
+                clear_autoqueue = False
+                traceback.print_exc()
+                track = None
 
         if not track:
-            if self.queue or self.queue_autoplay:
-                await self.process_next()
-            else:
-                try:
-                    self.idle_task.cancel()
-                except:
-                    pass
-                self.idle_task = self.bot.loop.create_task(self.idling_mode())
+            await self.process_next()
             return
 
         self.locked = True
