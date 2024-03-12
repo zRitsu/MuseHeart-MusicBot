@@ -806,16 +806,15 @@ class Music(commands.Cog):
 
         if bot.user.id not in inter.author.voice.channel.voice_states:
 
-            try:
-                player = bot.music.players[getattr(inter, "guild_id", inter.guild.id)]
-            except KeyError:
-                player = None
-
             if str(inter.channel.id) == guild_data['player_controller']['channel']:
-                if player and inter.author.id not in player.last_channel.voice_states:
-                    raise DiffVoiceChannel()
 
-            elif not player:
+                try:
+                    if inter.author.id not in bot.music.players[getattr(inter, "guild_id", inter.guild.id)].last_channel.voice_states:
+                        raise DiffVoiceChannel()
+                except KeyError:
+                    pass
+
+            else:
 
                 free_bots = []
                 voice_channels = []
