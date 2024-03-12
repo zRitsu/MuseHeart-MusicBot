@@ -807,7 +807,7 @@ class Music(commands.Cog):
         if bot.user.id not in inter.author.voice.channel.voice_states:
 
             try:
-                player = bot.music.players[inter.guild.id]
+                player = bot.music.players[getattr(inter, "guild_id", inter.guild.id)]
             except KeyError:
                 player = None
 
