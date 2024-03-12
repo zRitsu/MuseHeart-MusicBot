@@ -6554,7 +6554,6 @@ class Music(commands.Cog):
 
         retries = 0
         backoff = 7
-        reconnect_players = True
 
         print(f"{self.bot.user} - [{node.identifier} / v{node.version}] Conexão perdida - reconectando em {int(backoff)} segundos.")
 
@@ -6563,20 +6562,16 @@ class Music(commands.Cog):
             if node.is_available:
                 return
 
-            if retries == 1:
+            for player in list(node.players.values()):
 
-                for player in list(node.players.values()):
+                try:
+                    player._new_node_task.cancel()
+                except:
+                    pass
 
-                    try:
-                        player._new_node_task.cancel()
-                    except:
-                        pass
+                player._new_node_task = player.bot.loop.create_task(player._wait_for_new_node())
 
-                    player._new_node_task = player.bot.loop.create_task(player._wait_for_new_node())
-
-                reconnect_players = False
-
-            elif self.bot.config["LAVALINK_RECONNECT_RETRIES"] and retries == self.bot.config["LAVALINK_RECONNECT_RETRIES"]:
+            if self.bot.config["LAVALINK_RECONNECT_RETRIES"] and retries == self.bot.config["LAVALINK_RECONNECT_RETRIES"]:
                 print(f"{self.bot.user} - [{node.identifier}] Todas as tentativas de reconectar falharam...")
                 return
 
@@ -6593,10 +6588,6 @@ class Music(commands.Cog):
                         node.version = 3
 
                 await node.connect()
-
-                if reconnect_players:
-                    for player in node.players.values():
-                        await player.change_node(node.identifier)
                 return
             except Exception as e:
                 error = repr(e)
