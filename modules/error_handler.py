@@ -262,7 +262,7 @@ class ErrorHandler(commands.Cog):
                 func = ctx.inter.edit_original_message
             else:
                 func = ctx.inter.response.edit_message
-                kwargs.pop("delete_after", None)
+            kwargs.pop("delete_after", None)
         else:
             try:
                 func = ctx.store_message.edit
