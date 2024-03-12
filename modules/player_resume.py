@@ -308,6 +308,10 @@ class PlayerSession(commands.Cog):
                 wait_counter -= 1
                 await asyncio.sleep(1)
                 continue
+            try:
+                self.bot.music.players[voice_channel.guild.id].last_channel = voice_channel
+            except KeyError:
+                pass
             break
 
         if not wait_counter:
