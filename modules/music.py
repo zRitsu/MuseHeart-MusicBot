@@ -949,10 +949,9 @@ class Music(commands.Cog):
         if not channel:
             channel = bot.get_channel(inter.channel.id)
 
-        if force_play == "yes":
-            await check_player_perm(inter=inter, bot=bot, channel=channel)
-
         can_send_message(channel, bot.user)
+
+        await check_player_perm(inter=inter, bot=bot, channel=channel)
 
         if not guild.voice_client and not check_channel_limit(guild.me, inter.author.voice.channel):
             raise GenericError(f"**O canal {inter.author.voice.channel.mention} está lotado!**")
