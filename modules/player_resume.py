@@ -597,6 +597,7 @@ class PlayerSession(commands.Cog):
                                 await self.update_player(
                                     player=player, voice_channel=voice_channel, pause=pause, position=0
                                 )
+                                player.update = True
                             else:
                                 await player.process_next(clear_autoqueue=False)
 
@@ -606,6 +607,7 @@ class PlayerSession(commands.Cog):
                             await self.update_player(
                                 player=player, voice_channel=voice_channel, pause=pause, position=position
                             )
+                            player.update = True
                         else:
                             await player.process_next(start_position=position, clear_autoqueue=False)
                         player._session_resuming = False
