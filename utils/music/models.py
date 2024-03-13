@@ -1060,8 +1060,15 @@ class LavalinkPlayer(wavelink.Player):
                 pass
 
     async def connect(self, channel_id: int, self_mute: bool = False, self_deaf: bool = False):
-        self.last_channel = self.bot.get_channel(channel_id)
+        self._last_channel = self.bot.get_channel(channel_id)
         await super().connect(channel_id, self_mute=self_mute, self_deaf=True)
+
+    @property
+    def last_channel(self):
+        try:
+            return self.guild.me.voice.channel
+        except AttributeError:
+            return self._last_channel
 
     def process_hint(self):
 

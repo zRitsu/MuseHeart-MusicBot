@@ -811,7 +811,7 @@ class Music(commands.Cog):
                 try:
                     if inter.author.id not in bot.music.players[getattr(inter, "guild_id", inter.guild.id)].last_channel.voice_states:
                         raise DiffVoiceChannel()
-                except KeyError:
+                except (KeyError, AttributeError):
                     pass
 
             else:
@@ -6921,6 +6921,8 @@ class Music(commands.Cog):
 
             for b in self.bot.pool.bots:
                 if b == player.bot:
+                    if after.channel:
+                        player._last_channel = after.channel
                     continue
                 try:
                     try:
@@ -6945,7 +6947,7 @@ class Music(commands.Cog):
             if member.guild.voice_client and after.channel:
                 # tempfix para channel do voice_client não ser setado ao mover bot do canal.
                 player.guild.voice_client.channel = after.channel
-                player.last_channel = after.channel
+                player._last_channel = after.channel
                 player.update = True
 
         try:

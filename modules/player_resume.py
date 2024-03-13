@@ -309,7 +309,7 @@ class PlayerSession(commands.Cog):
                 await asyncio.sleep(1)
                 continue
             try:
-                self.bot.music.players[voice_channel.guild.id].last_channel = voice_channel
+                self.bot.music.players[voice_channel.guild.id]._last_channel = voice_channel
             except KeyError:
                 pass
             break
