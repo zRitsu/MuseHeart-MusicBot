@@ -5106,9 +5106,6 @@ class Music(commands.Cog):
                 except AttributeError:
                     pass
 
-                if PlayerControls.embed_forceplay:
-                    await check_player_perm(inter=interaction, bot=bot, channel=channel)
-
                 vc_id: int = author.voice.channel.id
 
                 can_connect(channel=author.voice.channel, guild=channel.guild)
