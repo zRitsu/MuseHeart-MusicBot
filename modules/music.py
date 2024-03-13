@@ -951,7 +951,7 @@ class Music(commands.Cog):
 
         can_send_message(channel, bot.user)
 
-        await check_player_perm(inter=inter, bot=bot, channel=channel)
+        await check_player_perm(inter=inter, bot=bot, channel=channel, guild_data=guild_data)
 
         if not guild.voice_client and not check_channel_limit(guild.me, inter.author.voice.channel):
             raise GenericError(f"**O canal {inter.author.voice.channel.mention} está lotado!**")
