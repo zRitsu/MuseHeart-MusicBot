@@ -290,14 +290,14 @@ class PlayerSession(commands.Cog):
                 }
             )
             await player.connect(voice_channel.id)
-            await self.voice_check(voice_channel)
+            await self.voice_check(voice_channel, position)
         else:
             await player.connect(voice_channel.id)
-            await self.voice_check(voice_channel)
+            await self.voice_check(voice_channel, position)
             await player.node.update_player(player.guild.id, data=player._temp_data)
             await player.process_next()
 
-    async def voice_check(self, voice_channel: Union[disnake.VoiceChannel, disnake.StageChannel]):
+    async def voice_check(self, voice_channel: Union[disnake.VoiceChannel, disnake.StageChannel], position: int = 0):
 
         wait_counter = 30
 
@@ -309,7 +309,10 @@ class PlayerSession(commands.Cog):
                 await asyncio.sleep(1)
                 continue
             try:
-                self.bot.music.players[voice_channel.guild.id]._last_channel = voice_channel
+                player = self.bot.music.players[voice_channel.guild.id]
+                player._last_channel = voice_channel
+                if player.node.version > 3:
+                    player.last_position = position
             except KeyError:
                 pass
             break
@@ -597,7 +600,8 @@ class PlayerSession(commands.Cog):
                                 await self.update_player(
                                     player=player, voice_channel=voice_channel, pause=pause, position=0
                                 )
-                                player.update = True
+                                player.last_position = int(float(data.get("position", 0)))
+                                await player.invoke_np()
                             else:
                                 await player.process_next(clear_autoqueue=False)
 
@@ -607,7 +611,7 @@ class PlayerSession(commands.Cog):
                             await self.update_player(
                                 player=player, voice_channel=voice_channel, pause=pause, position=position
                             )
-                            player.update = True
+                            await player.invoke_np()
                         else:
                             await player.process_next(start_position=position, clear_autoqueue=False)
                         player._session_resuming = False
