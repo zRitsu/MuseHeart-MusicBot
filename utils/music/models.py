@@ -452,7 +452,7 @@ class LavalinkPlayer(wavelink.Player):
         self.is_purging = False
         self.auto_pause = False
         self._session_resuming = kwargs.pop("session_resuming", False)
-        self.last_channel: Optional[disnake.VoiceChannel] = None
+        self._last_channel: Optional[disnake.VoiceChannel] = None
         self._rpc_update_task: Optional[asyncio.Task] = None
         self._new_node_task: Optional[asyncio.Task] = None
         self._queue_updater_task: Optional[asyncio.Task] = None
