@@ -1032,7 +1032,7 @@ class BotCore(commands.AutoShardedBot):
 
             bot_count = 0
 
-            if not self.command_sync_flags.sync_commands and self.config["INTERACTION_BOTS"]:
+            if self != self.pool.controller_bot:
 
                 interaction_invites = []
 
@@ -1045,15 +1045,19 @@ class BotCore(commands.AutoShardedBot):
                         if b.appinfo.bot_public and b.user not in message.guild.members:
                             bot_count += 1
                     except AttributeError:
-                        pass
+                        continue
 
                     interaction_invites.append(f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) ")
 
+                if not interaction_invites:
+                    interaction_invites.append(
+                        f"[`{disnake.utils.escape_markdown(str(self.pool.controller_bot.user.name))}`]({disnake.utils.oauth_url(self.pool.controller_bot.user.id, scopes=['applications.commands'])}) ")
+
                 if interaction_invites:
                     embed.description += f"\n\nMeus comandos de barra (/) funcionam através " \
-                                         f"das seguintes aplicações abaixo:\n" \
+                                         f"da{(s:='s'[:len(interaction_invites)^1])} seguinte{s} aplicaç{(s2:='ões'[:len(interaction_invites)^1] or 'ão')} abaixo:\n" \
                                          f"{' **|** '.join(interaction_invites)}\n\n" \
-                                         f"Caso os comandos da aplicação acima não sejam exibidos ao digitar " \
+                                         f"Caso os comandos da{s} aplicaç{s2} acima não sejam exibidos ao digitar " \
                                          f"barra (/), clique no nome acima para integrar os comandos de barra no " \
                                          f"seu servidor."
 
