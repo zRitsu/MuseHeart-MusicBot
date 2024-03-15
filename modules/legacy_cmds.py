@@ -1073,29 +1073,40 @@ class Owner(commands.Cog):
         if not bot:
             return
 
-        await inter.response.defer(ephemeral=True)
+        if isinstance(inter, CustomContext):
+            try:
+                func = inter.store_message.edit
+            except AttributeError:
+                func = inter.send
+        else:
+            await inter.response.defer(ephemeral=True)
+            func = inter.edit_original_message
+
+        await func(f"O {mode} está sendo processado. Por favor aguarde...", embed=None, view=None)
 
         async with ctx.bot.session.get(url) as r:
+            if r.status != 200:
+                raise GenericError(f"Erro {r.status}: {await r.text()}")
             image_bytes = await r.read()
 
+        payload = {mode: await disnake.utils._assetbytes_to_base64_data(image_bytes)}
+        await bot.http.edit_profile(payload)
+
         if mode == "avatar":
-
-            await bot.user.edit(banner=image_bytes)
-
             await bot.http.request(Route('PATCH', '/applications/@me'), json={
                 "icon": disnake.utils._bytes_to_base64_data(image_bytes)
             })
-        else:
-            payload = {"banner": await disnake.utils._assetbytes_to_base64_data(image_bytes)}
-            await bot.http.edit_profile(payload)
 
         try:
-            func = inter.edit_original_message
+            func = inter.store_message.edit
         except AttributeError:
             try:
-                func = inter.response.edit_message
+                func = inter.edit_original_message
             except AttributeError:
-                func = inter.send
+                try:
+                    func = inter.response.edit_message
+                except AttributeError:
+                    func = inter.send
 
         avatar_txt = mode if not use_hyperlink else f"[{mode}]({url})"
 
