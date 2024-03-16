@@ -1365,7 +1365,7 @@ class MusicSettings(commands.Cog):
         else:
             await inter.send(ephemeral=True, **kwargs)
 
-        for b in self.bot.pool.bots:
+        for b in self.bot.pool.get_guild_bots(interaction.guild.id):
 
             try:
                 player: LavalinkPlayer = b.music.players[inter.guild_id]
@@ -1511,7 +1511,7 @@ class MusicSettings(commands.Cog):
 
         channel = None
 
-        for bot in self.bot.pool.bots:
+        for bot in self.bot.pool.get_guild_bots(inter.guild_id):
 
             channel = bot.get_channel(invite.channel.id)
 
@@ -1556,7 +1556,7 @@ class MusicSettings(commands.Cog):
             f"obter mais informações.`"
         )
 
-        for bot in self.bot.pool.bots:
+        for bot in self.bot.pool.get_guild_bots(inter.guild_id):
 
             try:
                 p = bot.music.players[inter.guild_id]
@@ -1786,7 +1786,7 @@ class RPCCog(commands.Cog):
     )
     async def rich_presence(self, inter: disnake.AppCmdInter):
 
-        if not self.bot.config["ENABLE_RPC_COMMAND"] and not any([await b.is_owner(inter.author) for b in self.bot.pool.bots]):
+        if not self.bot.config["ENABLE_RPC_COMMAND"] and not any([await b.is_owner(inter.author) for b in self.bot.pool.get_guild_bots(inter.guild_id)]):
             raise GenericError("**Este comando está desativado nas minhas configurações...**\n"
                                "Apenas o meu desenvolvedor pode ativar este comando publicamente.")
 
@@ -1941,7 +1941,7 @@ class RPCCog(commands.Cog):
 
     async def close_presence(self, inter: Union[disnake.MessageInteraction, disnake.ModalInteraction]):
 
-        for b in self.bot.pool.bots:
+        for b in self.bot.pool.get_guild_bots(inter.guild_id):
             try:
                 player: LavalinkPlayer = b.music.players[inter.guild_id]
             except KeyError:

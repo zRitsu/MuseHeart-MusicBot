@@ -217,7 +217,7 @@ class Owner(commands.Cog):
 
         await self.bot.sync_app_commands(force=self.bot == self.bot.pool.controller_bot)
 
-        for bot in set(self.bot.pool.bots + [self.bot.pool.controller_bot]):
+        for bot in set(self.bot.pool.get_all_bots() + [self.bot.pool.controller_bot]):
 
             if bot.user.id != self.bot.user.id:
                 bot.load_skins()
@@ -953,7 +953,7 @@ class Owner(commands.Cog):
 
             free_bots = []
 
-            for b in self.bot.pool.bots:
+            for b in self.bot.pool.get_guild_bots(ctx.guild.id):
 
                 if not b.bot_ready:
                     continue

@@ -1101,12 +1101,12 @@ class LavalinkPlayer(wavelink.Player):
             hints.append("Ao criar uma conversa/thread na mensagem do player, será ativado o modo de song-request "
                          "nela (possibilitando pedir música apenas enviando o nome/link da música na conversa).")
 
-        if len(self.bot.pool.bots) > 1:
+        if len(self.bot.pool.get_guild_bots(self.guild.id)) > 1:
 
             bots_in_guild = 0
             bots_outside_guild = 0
 
-            for b in self.bot.pool.bots:
+            for b in self.bot.pool.get_guild_bots(self.guild.id):
 
                 if b == self.bot:
                     continue

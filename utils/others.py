@@ -621,19 +621,19 @@ def music_source_emoji_id(id_: str):
 async def select_bot_pool(inter: Union[CustomContext, disnake.MessageInteraction, disnake.AppCmdInter], first=False, return_new=False, edit_original=False):
 
     if isinstance(inter, CustomContext):
-        if len(inter.bot.pool.bots) < 2:
+        if len(inter.bot.pool.get_guild_bots(inter.guild_id)) < 2:
             return inter, inter.bot
 
     bots = {}
 
-    for pb in inter.bot.pool.bots:
+    for pb in inter.bot.pool.get_guild_bots(inter.guild_id):
 
         if pb.get_guild(inter.guild_id):
             bots[pb.user.id] = pb
 
     if not bots:
 
-        if (bcount:=len([b for b in inter.bot.pool.bots if b.appinfo and b.appinfo.bot_public])):
+        if (bcount:=len([b for b in inter.bot.pool.get_guild_bots(inter.guild_id) if b.appinfo and b.appinfo.bot_public])):
             raise GenericError(
                 f"**Será necessário adicionar no servidor pelo menos um bot compatível clicando no botão abaixo:**",
                 components=[disnake.ui.Button(custom_id="bot_invite", label=f"Adicionar bot{'s'[:bcount^1]}")]

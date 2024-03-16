@@ -87,7 +87,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
     elif isinstance(inter, disnake.ModalInteraction):
         return
 
-    if len(inter.bot.pool.bots) < 2 and inter.guild:
+    if len(inter.bot.pool.get_guild_bots(inter.guild_id)) < 2 and inter.guild:
         try:
             inter.music_bot = inter.bot
             inter.music_guild = inter.guild
@@ -179,7 +179,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
     voice_channels = []
 
-    for bot in sorted(inter.bot.pool.bots, key=lambda b: b.identifier):
+    for bot in sorted(inter.bot.pool.get_guild_bots(inter.guild_id), key=lambda b: b.identifier):
 
         if not bot.bot_ready:
             continue
@@ -290,7 +290,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
     extra_bots_counter = 0
     bot_in_guild = False
 
-    for bot in inter.bot.pool.bots:
+    for bot in inter.bot.pool.get_guild_bots(inter.guild_id):
 
         try:
             if not bot.appinfo.bot_public and not await bot.is_owner(inter.author):
@@ -660,7 +660,7 @@ def can_connect(
             raise GenericError(f"**O canal {channel.mention} está lotado!**")
 
     if bot:
-        for b in bot.pool.bots:
+        for b in bot.pool.get_guild_bots(channel.guild.id):
             if b == bot:
                 continue
             if b.bot_ready and b.user.id in channel.voice_states:

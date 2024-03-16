@@ -1166,7 +1166,7 @@ class FavMenuView(disnake.ui.View):
         self.is_owner = is_owner
 
         if not self.guild:
-            for b in self.bot.pool.bots:
+            for b in self.bot.pool.get_guild_bots(ctx.guild_id):
                 guild = b.get_guild(ctx.guild_id)
                 if guild:
                     self.guild = guild
@@ -1220,7 +1220,7 @@ class FavMenuView(disnake.ui.View):
 
             bots_in_guild = []
 
-            for b in sorted(self.bot.pool.bots, key=lambda b: b.identifier):
+            for b in sorted(self.bot.pool.get_guild_bots(self.guild.id), key=lambda b: b.identifier):
                 if b.bot_ready and b.user in self.guild.members:
                     bots_in_guild.append(disnake.SelectOption(emoji="🎶",
                                                               label=f"Bot: {b.user.display_name}"[:25],
@@ -1598,7 +1598,7 @@ class FavMenuView(disnake.ui.View):
     async def bot_select(self, inter: disnake.MessageInteraction):
 
         value = int(inter.values[0][11:])
-        for b in self.bot.pool.bots:
+        for b in self.bot.pool.get_guild_bots(inter.guild_id):
             try:
                 if b.user.id == value:
                     self.bot = b
@@ -2012,7 +2012,7 @@ class SetStageTitle(disnake.ui.View):
 
             await self.bot.update_global_data(inter.guild_id, self.data, db_name=DBModel.guilds)
 
-            for b in self.bot.pool.bots:
+            for b in self.bot.pool.get_guild_bots(inter.guild_id):
                 try:
                     p = b.music.players[inter.guild_id]
                 except KeyError:
@@ -2298,7 +2298,7 @@ class SkinEditorMenu(disnake.ui.View):
     def build_embeds(self) -> dict:
 
         player = None
-        for b in self.bot.pool.bots:
+        for b in self.bot.pool.get_guild_bots(self.ctx.guild_id):
             try:
                 player = b.music.players[self.ctx.guild_id]
                 break
@@ -2881,7 +2881,7 @@ class SkinEditorMenu(disnake.ui.View):
 
             await self.bot.update_global_data(id_=inter.guild_id, data=self.global_data, db_name=DBModel.guilds)
 
-            for bot in self.bot.pool.bots:
+            for bot in self.bot.pool.get_guild_bots(inter.guild_id):
 
                 try:
                     player = bot.music.players[inter.guild_id]
@@ -2964,7 +2964,7 @@ class SelectBotVoice(disnake.ui.View):
             bot_select_opts.extend([disnake.SelectOption(label=b.user.display_name, value=f"bot_voice_{b.user.id}") for b in freebots])
 
         else:
-            for b in self.inter.bot.pool.bots:
+            for b in self.inter.bot.pool.get_guild_bots(self.guild.id):
 
                 if not b.bot_ready:
                     continue
@@ -3019,7 +3019,7 @@ class SelectBotVoice(disnake.ui.View):
         bot_id = int(inter.values[0][10:])
 
         try:
-            bot = [b for b in self.inter.bot.pool.bots if b.bot_ready and b.user.id == bot_id][0]
+            bot = [b for b in self.inter.bot.pool.get_guild_bots(inter.guild_id) if b.bot_ready and b.user.id == bot_id][0]
         except IndexError:
             await inter.send(f"<@{bot_id}> não está mais presente no servidor...", ephemeral=True)
             await self.update_message()

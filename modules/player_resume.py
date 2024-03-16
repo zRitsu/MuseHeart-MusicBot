@@ -64,7 +64,7 @@ class PlayerSession(commands.Cog):
 
         player_count = 0
 
-        for bot in self.bot.pool.bots:
+        for bot in self.bot.pool.get_all_bots():
             for player in bot.music.players.values():
                 try:
                     await player.process_save_queue()

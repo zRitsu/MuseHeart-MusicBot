@@ -14,7 +14,7 @@ import zlib
 from configparser import ConfigParser
 from importlib import import_module
 from subprocess import check_output
-from typing import Optional, Union, List
+from typing import Optional, Union, List, Dict
 
 import aiofiles
 import aiohttp
@@ -42,6 +42,7 @@ from web_app import WSClient, start
 class BotPool:
 
     bots: List[BotCore] = []
+    guild_bots: Dict[str, List[BotCore]] = {}
     killing_state = False
     command_sync_config = commands.CommandSyncFlags(
                     allow_command_deletion=True,
@@ -99,6 +100,21 @@ class BotPool:
                     await asyncio.sleep(delay_secs)
         except asyncio.TimeoutError:
             pass
+
+    def get_guild_bots(self, guild_id: int) -> list:
+        return self.bots + self.guild_bots.get(str(guild_id), [])
+
+    def get_all_bots(self) -> list:
+
+        allbots = set()
+
+        for botlist in self.guild_bots.values():
+
+            allbots.update(botlist)
+
+        allbots.update(self.bots)
+
+        return list(allbots)
 
     @property
     def database(self) -> Union[LocalDatabase, MongoDatabase]:
@@ -199,7 +215,10 @@ class BotPool:
                 traceback.print_tb(e.__traceback__)
                 e = repr(e)
             self.failed_bots[bot.identifier] = e
-            self.bots.remove(bot)
+            try:
+                self.bots.remove(bot)
+            except:
+                pass
 
     async def run_bots(self, bots: List[BotCore]):
         await asyncio.wait(
@@ -456,7 +475,7 @@ class BotPool:
             except:
                 interaction_bot_reg = None
 
-        def load_bot(bot_name: str, token: str):
+        def load_bot(bot_name: str, token: str, guild_id: str = None):
 
             try:
                 token = token.split().pop()
@@ -656,13 +675,31 @@ class BotPool:
 
                 print(f'{bot.user} - [{bot.user.id}] Online.')
 
-            self.bots.append(bot)
+            if guild_id:
+                try:
+                    self.guild_bots[guild_id].append(bot)
+                except KeyError:
+                    self.guild_bots = {guild_id: [bot]}
+            else:
+                self.bots.append(bot)
 
         if len(all_tokens) > 1:
             self.single_bot = False
 
         for k, v in all_tokens.items():
             load_bot(k, v)
+
+        try:
+            with open("guild_bots.json") as f:
+                guild_bots = json.load(f)
+        except FileNotFoundError:
+            pass
+        except Exception:
+            traceback.print_exc()
+        else:
+            for guild_id, guildbotsdata in guild_bots.items():
+                for n, guildbottoken in enumerate(guildbotsdata):
+                    load_bot(f"{guild_id}_{n}", guildbottoken, guild_id)
 
         message = ""
 
@@ -699,7 +736,7 @@ class BotPool:
 
             if not message:
 
-                for bot in self.bots:
+                for bot in self.get_all_bots():
                     loop.create_task(self.start_bot(bot))
 
                 loop.create_task(self.connect_rpc_ws())
@@ -930,7 +967,7 @@ class BotCore(commands.AutoShardedBot):
 
     def sync_command_cooldowns(self, force=False):
 
-        for b in self.pool.bots:
+        for b in self.pool.get_all_bots():
 
             if b == self and force is False:
                 continue
@@ -1036,7 +1073,7 @@ class BotCore(commands.AutoShardedBot):
 
                 interaction_invites = []
 
-                for b in self.pool.bots:
+                for b in self.pool.get_guild_bots(message.guild.id):
 
                     if not b.interaction_id:
                         continue
@@ -1160,7 +1197,7 @@ class BotCore(commands.AutoShardedBot):
         try:
             if isinstance(channel.parent, disnake.ForumChannel):
 
-                if channel.owner_id in (bot.user.id for bot in self.pool.bots if bot.bot_ready):
+                if channel.owner_id in (bot.user.id for bot in self.pool.get_guild_bots(channel.guild.id) if bot.bot_ready):
 
                     if raise_error is False:
                         return False
@@ -1259,7 +1296,7 @@ class BotCore(commands.AutoShardedBot):
 
             available_bot = False
 
-            for bot in self.pool.bots:
+            for bot in self.pool.get_guild_bots(inter.guild_id):
                 if bot.appinfo and (bot.appinfo.bot_public or await bot.is_owner(inter.author)) and bot.get_guild(inter.guild_id):
                     available_bot = True
                     break

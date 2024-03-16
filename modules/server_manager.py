@@ -18,7 +18,7 @@ class ServerManagerView(disnake.ui.View):
         super().__init__(timeout=300)
         self.message: Optional[disnake.Message] = None
         self.inter = inter
-        self.bot = [b for b in inter.bot.pool.bots if b.guilds][0]
+        self.bot = [b for b in inter.bot.pool.get_guild_bots(inter.guild.id) if b.guilds][0]
         self.pages = list(disnake.utils.as_chunks([g for g in self.bot.guilds], 25))
         self.current_page = 0
         self.current_guild = self.pages[self.current_page][0]
@@ -43,7 +43,7 @@ class ServerManagerView(disnake.ui.View):
                 label=f"{bot.user}", value=str(bot.user.id),
                 description=f"{bot.user.id} / Servers: {len(bot.guilds)}",
                 default=bot.user.id == self.bot.user.id
-            ) for bot in self.bot.pool.bots if bot.guilds
+            ) for bot in self.bot.pool.get_guild_bots(self.inter.guild_id) if bot.guilds
         ]
 
         select = disnake.ui.Select(
@@ -111,7 +111,7 @@ class ServerManagerView(disnake.ui.View):
 
             self.add_item(self.build_select())
 
-        if len(self.bot.pool.bots) > 1:
+        if len(self.bot.pool.get_guild_bots(self.inter.guild_id)) > 1:
             self.add_item(self.build_bot_select())
 
         if has_server_select and len(self.pages) > 1:
@@ -154,7 +154,7 @@ class ServerManagerView(disnake.ui.View):
         await func(embeds=self.build_embed(interaction), view=self)
 
     async def select_bot(self, interaction: disnake.MessageInteraction):
-        self.bot = [b for b in self.bot.pool.bots if str(b.user.id) == interaction.values[0]][0]
+        self.bot = [b for b in self.bot.pool.get_guild_bots(interaction.guild_id) if str(b.user.id) == interaction.values[0]][0]
         await self.update_data(interaction)
 
     async def leave_guild(self, interaction: disnake.MessageInteraction):

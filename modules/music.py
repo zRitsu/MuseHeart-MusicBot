@@ -820,7 +820,7 @@ class Music(commands.Cog):
                 voice_channels = []
                 bot_count = 0
 
-                for b in self.bot.pool.bots:
+                for b in self.bot.pool.get_guild_bots(inter.guild.id):
 
                     if not b.bot_ready:
                         continue
@@ -2975,7 +2975,7 @@ class Music(commands.Cog):
 
         player: Optional[LavalinkPlayer] = None
 
-        for bot in self.bot.pool.bots:
+        for bot in self.bot.pool.get_guild_bots(inter.guild_id):
             try:
                 p = bot.music.players[inter.guild_id]
             except KeyError:
@@ -2989,7 +2989,7 @@ class Music(commands.Cog):
             if not (await self.bot.is_owner(inter.author)):
                 raise GenericError("**Você deve estar conectado em um canal de voz onde há player ativo...**")
 
-            for bot in self.bot.pool.bots:
+            for bot in self.bot.pool.get_guild_bots(inter.guild_id):
 
                 for player_id in bot.music.players:
 
@@ -4580,7 +4580,7 @@ class Music(commands.Cog):
     async def playeruptime(self, ctx: CustomContext):
 
         uptime_info = []
-        for bot in self.bot.pool.bots:
+        for bot in self.bot.pool.get_guild_bots(ctx.guild.id):
             try:
                 player = bot.music.players[ctx.guild.id]
                 uptime_info.append(f"**Bot:** {bot.user.mention}\n"
@@ -5066,7 +5066,7 @@ class Music(commands.Cog):
                 channel: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.StageChannel, disnake.Thread] = None
                 author: Optional[disnake.Member] = None
 
-                for b in sorted(self.bot.pool.bots, key=lambda b: b.identifier, reverse=True):
+                for b in sorted(self.bot.pool.get_guild_bots(interaction.guild_id), key=lambda b: b.identifier, reverse=True):
 
                     try:
                         p = b.music.players[interaction.guild_id]
@@ -6922,7 +6922,7 @@ class Music(commands.Cog):
 
         if member.id == player.bot.user.id:
 
-            for b in self.bot.pool.bots:
+            for b in self.bot.pool.get_guild_bots(member.guild.id):
                 if b == player.bot:
                     if after.channel:
                         player._last_channel = after.channel
