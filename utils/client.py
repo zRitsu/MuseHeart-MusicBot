@@ -1293,6 +1293,10 @@ class BotCore(commands.AutoShardedBot):
             await inter.send("Ainda estou inicializando...\nPor favor aguarde mais um pouco...", ephemeral=True)
             return
 
+        if self.exclusive_guild_id and inter.guild_id != self.exclusive_guild_id:
+            await inter.send("Esse servidor não está autorizado para usar meus comandos...", ephemeral=True)
+            return
+
         if self.config["COMMAND_LOG"] and inter.guild and not (await self.is_owner(inter.author)):
             try:
                 print(f"cmd log: [user: {inter.author} - {inter.author.id}] - [guild: {inter.guild.name} - {inter.guild.id}]"
