@@ -315,11 +315,8 @@ class WSClient:
 
         for bot in self.all_bots:
 
-            try:
-                bot_ids.append(bot.user.id)
-            except:
-                await bot.wait_until_ready()
-                bot_ids.append(bot.user.id)
+            await bot.wait_until_ready()
+            bot_ids.append(bot.user.id)
 
         await self.send({"user_ids": bot_ids, "bot": True, "auth_enabled": self.pool.config["ENABLE_RPC_AUTH"]})
 
