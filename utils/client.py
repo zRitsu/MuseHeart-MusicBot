@@ -676,6 +676,7 @@ class BotPool:
                 print(f'{bot.user} - [{bot.user.id}] Online.')
 
             if guild_id:
+                bot.exclusive_guild_id = int(guild_id)
                 try:
                     self.guild_bots[guild_id].append(bot)
                 except KeyError:
@@ -771,6 +772,7 @@ class BotCore(commands.AutoShardedBot):
         self.color = kwargs.pop("embed_color", None)
         self.identifier = kwargs.pop("identifier", "")
         self.appinfo: Optional[disnake.AppInfo] = None
+        self.exclusive_guild_id: Optional[int] = None
         self.bot_ready = False
         self.initializing = False
         self.player_skins = {}
@@ -1033,11 +1035,8 @@ class BotCore(commands.AutoShardedBot):
         if not message.guild:
             return
 
-        try:
-            self.pool.guild_bots[str(message.guild.id)]
-        except KeyError:
-            if self not in self.pool.bots:
-                return
+        if self.exclusive_guild_id and message.guild.id != self.exclusive_guild_id:
+            return
 
         try:
             player: LavalinkPlayer = self.music.players[message.guild.id]
@@ -1278,11 +1277,8 @@ class BotCore(commands.AutoShardedBot):
         if not inter.guild_id:
             return []
 
-        try:
-            self.pool.guild_bots[str(inter.guild_id)]
-        except KeyError:
-            if self not in self.pool.bots:
-                return []
+        if self.exclusive_guild_id and inter.guild_id != self.exclusive_guild_id:
+            return []
 
         await super().on_application_command_autocomplete(inter)
 
