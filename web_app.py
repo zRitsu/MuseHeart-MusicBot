@@ -285,7 +285,7 @@ class WSClient:
     def __init__(self, url: str, pool: BotPool):
         self.url: str = url
         self.pool = pool
-        self.all_bots = pool.get_all_bots()
+        self.all_bots = None
         self.connection = None
         self.backoff: int = 7
         self.data: dict = {}
@@ -303,6 +303,9 @@ class WSClient:
 
         print("RPC client conectado, sincronizando rpc dos bots...")
 
+        if not self.all_bots:
+            self.all_bots = self.pool.get_all_bots()
+
         self.connect_task = [asyncio.create_task(self.connect_bot_rpc())]
 
     @property
@@ -311,14 +314,17 @@ class WSClient:
 
     async def connect_bot_rpc(self):
 
-        bot_ids = []
+        bot_ids = set()
 
         for bot in self.all_bots:
-
             await bot.wait_until_ready()
-            bot_ids.append(bot.user.id)
+            bot_ids.add(bot.user.id)
 
-        await self.send({"user_ids": bot_ids, "bot": True, "auth_enabled": self.pool.config["ENABLE_RPC_AUTH"]})
+        if not bot_ids:
+            print("Conexão com servidor RPC ignorado: Lista de bots vazia...")
+            return
+
+        await self.send({"user_ids": list(bot_ids), "bot": True, "auth_enabled": self.pool.config["ENABLE_RPC_AUTH"]})
 
         await asyncio.sleep(1)
 
