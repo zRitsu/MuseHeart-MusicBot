@@ -235,7 +235,9 @@ class Misc(commands.Cog):
         bots_in_guild = []
         bots_outside_guild = []
 
-        for bot in self.bot.pool.get_guild_bots(guild.id):
+        guild_bots = self.bot.pool.get_guild_bots(guild.id)
+
+        for bot in guild_bots:
 
             if bot == self.bot:
                 continue
@@ -248,7 +250,7 @@ class Misc(commands.Cog):
             else:
                 bots_outside_guild.append(bot)
 
-        components = [disnake.ui.Button(custom_id="bot_invite", label="Precisa de mais bots de música? Clique aqui.")] if [b for b in self.bot.pool.get_guild_bots(guild.id) if b.appinfo and b.appinfo.bot_public] else []
+        components = [disnake.ui.Button(custom_id="bot_invite", label="Precisa de mais bots de música? Clique aqui.")] if [b for b in guild_bots if b.appinfo and b.appinfo.bot_public] else []
 
         if self.bot.pool.controller_bot != self.bot:
             interaction_invite = f"[`{disnake.utils.escape_markdown(str(self.bot.pool.controller_bot.user.name))}`]({disnake.utils.oauth_url(self.bot.pool.controller_bot.user.id, scopes=['applications.commands'])})"
@@ -525,7 +527,9 @@ class Misc(commands.Cog):
 
         all_guilds_ids = set()
 
-        for b in bot.pool.get_guild_bots(interaction.guild_id):
+        allbots = self.bot.pool.get_all_bots()
+
+        for b in allbots:
             for g in b.guilds:
                 all_guilds_ids.add(g.id)
 
@@ -541,7 +545,7 @@ class Misc(commands.Cog):
         user_count = 0
         bot_count = 0
 
-        botpool_ids = [b.user.id for b in self.bot.pool.get_guild_bots(interaction.guild_id)]
+        botpool_ids = [b.user.id for b in allbots]
 
         node_data = {}
         nodes_available = set()
@@ -553,7 +557,7 @@ class Misc(commands.Cog):
             else:
                 user_count += 1
 
-        for b in bot.pool.get_guild_bots(interaction.guild.id):
+        for b in allbots:
 
             for user in b.users:
 
@@ -624,7 +628,7 @@ class Misc(commands.Cog):
             node_txt_final += "\n"
         node_txt_final += "\n".join(nodes_unavailable)
 
-        if len(bot.pool.get_guild_bots(inter.guild.id)) < 2:
+        if len(allbots) < 2:
 
             embed.description += "### Estatíticas (bot atual):\n" \
                                  f"> 🏙️ **⠂Servidores:** `{len(bot.guilds)}`\n" \
@@ -722,7 +726,7 @@ class Misc(commands.Cog):
             text=f"Dono(a): {owner} [{owner.id}]"
         )
 
-        components = [disnake.ui.Button(custom_id="bot_invite", label="Me adicione no seu servidor")] if [b for b in bot.pool.get_guild_bots(interaction.guild.id) if b.appinfo and (b.appinfo.bot_public or await b.is_owner(inter.author))] else None
+        components = [disnake.ui.Button(custom_id="bot_invite", label="Me adicione no seu servidor")] if [b for b in allbots if b.appinfo and (b.appinfo.bot_public or await b.is_owner(inter.author))] else None
 
         try:
             await inter.edit_original_message(embed=embed, components=components)
@@ -744,14 +748,16 @@ class Misc(commands.Cog):
 
         guild = None
 
+        guild_bots = self.bot.pool.get_guild_bots(inter.guild_id)
+
         if inter.guild_id:
             guild = inter.guild
         else:
-            for bot in self.bot.pool.get_guild_bots(inter.guild_id):
+            for bot in guild_bots:
                 if (guild:=bot.get_guild(inter.guild_id)):
                     break
 
-        for bot in sorted(self.bot.pool.get_guild_bots(inter.guild_id), key=lambda b: len(b.guilds)):
+        for bot in sorted(guild_bots, key=lambda b: len(b.guilds)):
 
             try:
                 if not bot.appinfo.bot_public and not await bot.is_owner(inter.author):
