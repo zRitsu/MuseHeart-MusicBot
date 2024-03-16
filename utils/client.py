@@ -1034,6 +1034,12 @@ class BotCore(commands.AutoShardedBot):
             return
 
         try:
+            self.pool.guild_bots[str(message.guild.id)]
+        except KeyError:
+            if self not in self.pool.bots:
+                return
+
+        try:
             player: LavalinkPlayer = self.music.players[message.guild.id]
             if player.text_channel == message.channel and not message.flags.ephemeral:
                 player.last_message_id = message.id
@@ -1266,11 +1272,17 @@ class BotCore(commands.AutoShardedBot):
 
     async def on_application_command_autocomplete(self, inter: disnake.ApplicationCommandInteraction):
 
-        if not self.bot_ready or self.is_closed():
+        if not self.bot_ready or not self.is_ready():
             return []
 
         if not inter.guild_id:
             return []
+
+        try:
+            self.pool.guild_bots[str(inter.guild_id)]
+        except KeyError:
+            if self not in self.pool.bots:
+                return []
 
         await super().on_application_command_autocomplete(inter)
 
