@@ -755,7 +755,7 @@ class BotPool:
             loop.create_task(self.connect_rpc_ws())
             try:
                 loop.run_until_complete(
-                    self.run_bots(self.bots)
+                    self.run_bots(self.get_all_bots())
                 )
             except KeyboardInterrupt:
                 return
