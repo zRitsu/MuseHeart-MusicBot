@@ -6177,6 +6177,9 @@ class Music(commands.Cog):
             try:
                 static_channel = bot.get_channel(int(static_player['channel'])) or await bot.fetch_channel(
                     int(static_player['channel']))
+            except disnake.Forbidden:
+                player.static = False
+                static_channel = None
             except disnake.NotFound:
                 await self.reset_controller_db(inter.guild_id, guild_data, inter)
                 player.static = False
