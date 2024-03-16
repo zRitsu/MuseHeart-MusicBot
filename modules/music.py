@@ -809,7 +809,7 @@ class Music(commands.Cog):
             if str(inter.channel.id) == guild_data['player_controller']['channel']:
 
                 try:
-                    if inter.author.id not in bot.music.players[getattr(inter, "guild_id", inter.guild.id)].last_channel.voice_states:
+                    if inter.author.id not in bot.music.players[guild.id].last_channel.voice_states:
                         raise DiffVoiceChannel()
                 except (KeyError, AttributeError):
                     pass
@@ -820,7 +820,7 @@ class Music(commands.Cog):
                 voice_channels = []
                 bot_count = 0
 
-                for b in self.bot.pool.get_guild_bots(inter.guild.id):
+                for b in self.bot.pool.get_guild_bots(guild.id):
 
                     if not b.bot_ready:
                         continue
@@ -829,13 +829,13 @@ class Music(commands.Cog):
                         free_bots.append(b)
                         break
 
-                    g = b.get_guild(inter.guild_id)
+                    g = b.get_guild(guild.id)
 
                     if not g:
                         bot_count += 1
                         continue
 
-                    p: LavalinkPlayer = b.music.players.get(inter.guild_id)
+                    p: LavalinkPlayer = b.music.players.get(guild.id)
 
                     if p:
 
@@ -936,7 +936,7 @@ class Music(commands.Cog):
                     current_bot = free_bots.pop()
 
                 if bot != current_bot:
-                    guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                    guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
                     try:
                         inter.guild_data = guild_data
                     except AttributeError:
@@ -1006,7 +1006,7 @@ class Music(commands.Cog):
                 inter, guild_data = await get_inter_guild_data(inter, bot)
 
             if not guild_data:
-                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
 
             if not guild.me.voice:
                 can_connect(voice_channel, guild, guild_data["check_other_bots_in_vc"], bot=bot)
@@ -1181,7 +1181,7 @@ class Music(commands.Cog):
                 if inter.bot == bot:
                     inter, guild_data = await get_inter_guild_data(inter, bot)
                 else:
-                    guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                    guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
 
             if not guild_data["player_controller"]["fav_links"]:
                 raise GenericError("**O servidor não possui links fixos/favoritos.**")
@@ -1552,7 +1552,7 @@ class Music(commands.Cog):
             tracks = await self.check_player_queue(inter.author, bot, guild.id, tracks)
 
         try:
-            player = bot.music.players[inter.guild_id]
+            player = bot.music.players[guild.id]
         except KeyError:
             await check_pool_bots(inter, check_player=False, bypass_prefix=True)
 
@@ -1566,7 +1566,7 @@ class Music(commands.Cog):
                 channel = inter.channel
 
             try:
-                player = bot.music.players[inter.guild_id]
+                player = bot.music.players[guild.id]
             except KeyError:
                 player = None
 
@@ -1575,7 +1575,7 @@ class Music(commands.Cog):
                     if inter.bot == bot:
                         inter, guild_data = await get_inter_guild_data(inter, bot)
                     else:
-                        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                        guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
 
                 static_player = guild_data['player_controller']
 
@@ -1902,7 +1902,7 @@ class Music(commands.Cog):
                 if inter.bot == bot:
                     inter, guild_data = await get_inter_guild_data(inter, bot)
                 else:
-                    guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+                    guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
 
             await self.do_connect(
                 inter, channel=voice_channel,
