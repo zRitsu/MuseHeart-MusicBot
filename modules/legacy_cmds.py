@@ -1082,7 +1082,7 @@ class Owner(commands.Cog):
             await inter.response.defer(ephemeral=True)
             func = inter.edit_original_message
 
-        await func(f"O {mode} está sendo processado. Por favor aguarde...", embed=None, view=None)
+        await func(f"O novo {mode} do bot {bot.user.mention} está sendo processado. Por favor aguarde...", embed=None, view=None)
 
         async with ctx.bot.session.get(url) as r:
             if r.status != 200:
