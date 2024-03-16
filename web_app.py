@@ -285,6 +285,7 @@ class WSClient:
     def __init__(self, url: str, pool: BotPool):
         self.url: str = url
         self.pool = pool
+        self.all_bots = pool.get_all_bots()
         self.connection = None
         self.backoff: int = 7
         self.data: dict = {}
@@ -312,7 +313,7 @@ class WSClient:
 
         bot_ids = []
 
-        for bot in self.pool.bots:
+        for bot in self.all_bots:
 
             try:
                 bot_ids.append(bot.user.id)
@@ -324,7 +325,7 @@ class WSClient:
 
         await asyncio.sleep(1)
 
-        for bot in self.pool.bots:
+        for bot in self.all_bots:
             for player in bot.music.players.values():
 
                 if not player.guild.me.voice:
@@ -397,7 +398,7 @@ class WSClient:
 
             if op == "rpc_update":
 
-                for bot in self.pool.bots:
+                for bot in self.all_bots:
                     for player in bot.music.players.values():
                         if not player.guild.me.voice:
                             continue
