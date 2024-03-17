@@ -235,9 +235,7 @@ class Misc(commands.Cog):
         bots_in_guild = []
         bots_outside_guild = []
 
-        guild_bots = self.bot.pool.get_guild_bots(guild.id)
-
-        for bot in guild_bots:
+        for bot in self.bot.pool.bots:
 
             if bot == self.bot:
                 continue
@@ -250,7 +248,7 @@ class Misc(commands.Cog):
             else:
                 bots_outside_guild.append(bot)
 
-        components = [disnake.ui.Button(custom_id="bot_invite", label="Precisa de mais bots de música? Clique aqui.")] if [b for b in guild_bots if b.appinfo and b.appinfo.bot_public] else []
+        components = [disnake.ui.Button(custom_id="bot_invite", label="Precisa de mais bots de música? Clique aqui.")] if [b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public] else []
 
         if self.bot.pool.controller_bot != self.bot:
             interaction_invite = f"[`{disnake.utils.escape_markdown(str(self.bot.pool.controller_bot.user.name))}`]({disnake.utils.oauth_url(self.bot.pool.controller_bot.user.id, scopes=['applications.commands'])})"
@@ -726,7 +724,7 @@ class Misc(commands.Cog):
             text=f"Dono(a): {owner} [{owner.id}]"
         )
 
-        components = [disnake.ui.Button(custom_id="bot_invite", label="Me adicione no seu servidor")] if [b for b in allbots if b.appinfo and (b.appinfo.bot_public or await b.is_owner(inter.author))] else None
+        components = [disnake.ui.Button(custom_id="bot_invite", label="Me adicione no seu servidor")] if [b for b in self.bot.pool.bots if b.appinfo and (b.appinfo.bot_public or await b.is_owner(inter.author))] else None
 
         try:
             await inter.edit_original_message(embed=embed, components=components)
@@ -753,11 +751,11 @@ class Misc(commands.Cog):
         if inter.guild_id:
             guild = inter.guild
         else:
-            for bot in guild_bots:
+            for bot in self.bot.pool.bots:
                 if (guild:=bot.get_guild(inter.guild_id)):
                     break
 
-        for bot in sorted(guild_bots, key=lambda b: len(b.guilds)):
+        for bot in sorted(self.bot.pool.bots, key=lambda b: len(b.guilds)):
 
             try:
                 if not bot.appinfo.bot_public and not await bot.is_owner(inter.author):
