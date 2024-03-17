@@ -629,43 +629,43 @@ class Misc(commands.Cog):
         if len(allbots) < 2:
 
             embed.description += "### Estatíticas (bot atual):\n" \
-                                 f"> 🏙️ **⠂Servidores:** `{len(bot.guilds)}`\n" \
-                                 f"> 👥 **⠂Usuários:** `{user_count:,}`\n"
+                                 f"> 🏙️ **⠂Servidor{'es'[:(svcount:=len(bot.guilds))^1]}:** `{svcount:,}`\n" \
+                                 f"> 👥 **⠂Usuário{'s'[:user_count^1]}:** `{user_count:,}`\n"
 
             if bot_count:
-                embed.description += f"> 🤖 **⠂Bots:** `{bot_count:,}`\n"
+                embed.description += f"> 🤖 **⠂Bot{'s'[:bot_count^1]}:** `{bot_count:,}`\n"
 
         else:
 
             embed.description += "### Estatísticas (totais em todos os bots):\n"
 
             if public_bot_count:
-                embed.description += f"> 🤖 **⠂Bot(s) adicionais público(s):** `{public_bot_count:,}`\n"
+                embed.description += f"> 🤖 **⠂Bot{(s:='s'[:public_bot_count^1])} adiciona{'is'[:public_bot_count^1] or 'l'} público{s}:** `{public_bot_count:,}`\n"
 
             if private_bot_count:
-                embed.description += f"> 🤖 **⠂Bot(s) adicionais privado(s):** `{private_bot_count:,}`\n"
+                embed.description += f"> 🤖 **⠂Bot{(s:='s'[:private_bot_count^1])} adiciona{'is'[:private_bot_count^1] or 'l'} privado{s}:** `{private_bot_count:,}`\n"
 
-            embed.description += f"> 🏙️ **⠂Servidores:** `{guilds_size}`\n"
+            embed.description += f"> 🏙️ **⠂Servidor{'es'[:guilds_size^1]}:** `{guilds_size,}`\n"
 
             if users_amount := len(users):
-                embed.description += f"> 👥 **⠂Usuários:** `{users_amount:,}`\n"
+                embed.description += f"> 👥 **⠂Usuário{'s'[:users_amount^1]}:** `{users_amount:,}`\n"
 
             if bots_amount := len(bots):
-                embed.description += f"> 🤖 **⠂Bots:** `{bots_amount:,}`\n"
+                embed.description += f"> 🤖 **⠂Bot{'s'[:bots_amount^1]}:** `{bots_amount:,}`\n"
 
         embed.description += "### Outras informações:\n"
 
         if active_players_other_bots:
-            embed.description += f"> ▶️ **⠂Players ativos:** `{active_players_other_bots:,}`\n"
+            embed.description += f"> ▶️ **⠂Player{(s:='s'[:active_players_other_bots^1])} ativo{s}:** `{active_players_other_bots:,}`\n"
 
         if paused_players_other_bots:
-            embed.description += f"> ⏸️ **⠂Players em pausa:** `{paused_players_other_bots:,}`\n"
+            embed.description += f"> ⏸️ **⠂Player{'s'[:paused_players_other_bots^1]} em pausa:** `{paused_players_other_bots:,}`\n"
 
         if inactive_players_other_bots:
-            embed.description += f"> 💤 **⠂Players inativos:** `{inactive_players_other_bots:,}`\n"
+            embed.description += f"> 💤 **⠂Player{(s:='s'[:inactive_players_other_bots^1])} inativo{s}:** `{inactive_players_other_bots:,}`\n"
 
         if listeners:
-            embed.description += f"> 🎧 **⠂Ouvintes atuais:** `{len(listeners):,}`\n"
+            embed.description += f"> 🎧 **⠂Ouvinte{'s'[:(lcount:=len(listeners))^1]} atua{'is'[:inactive_players_other_bots^1] or 'l'}:** `{lcount:,}`\n"
 
         if bot.pool.commit:
             embed.description += f"> 📥 **⠂Commit atual:** [`{bot.pool.commit[:7]}`]({bot.pool.remote_git_url}/commit/{bot.pool.commit})\n"
@@ -745,8 +745,6 @@ class Misc(commands.Cog):
         bots_in_guild = []
 
         guild = None
-
-        guild_bots = self.bot.pool.get_guild_bots(inter.guild_id)
 
         if inter.guild_id:
             guild = inter.guild
