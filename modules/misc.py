@@ -645,7 +645,7 @@ class Misc(commands.Cog):
             if private_bot_count:
                 embed.description += f"> 🤖 **⠂Bot{(s:='s'[:private_bot_count^1])} adiciona{'is'[:private_bot_count^1] or 'l'} privado{s}:** `{private_bot_count:,}`\n"
 
-            embed.description += f"> 🏙️ **⠂Servidor{'es'[:guilds_size^1]}:** `{guilds_size,}`\n"
+            embed.description += f"> 🏙️ **⠂Servidor{'es'[:guilds_size^1]}:** `{guilds_size:,}`\n"
 
             if users_amount := len(users):
                 embed.description += f"> 👥 **⠂Usuário{'s'[:users_amount^1]}:** `{users_amount:,}`\n"
