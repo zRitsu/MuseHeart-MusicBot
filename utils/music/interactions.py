@@ -907,7 +907,10 @@ class FavModalAdd(disnake.ui.Modal):
                 if name != self.name:
                     del self.view.data["fav_links"][self.name]
             except KeyError:
-                pass
+                if len(self.view.data["fav_links"]) >= self.view.bot.config["MAX_USER_FAVS"]:
+                    await inter.edit_original_message(
+                        "**Não há espaço disponível para adicionar novos favorito (remova algum e tente novamente).**")
+                    return
 
             self.view.data["fav_links"][name] = valid_url
 
@@ -964,7 +967,9 @@ class FavModalAdd(disnake.ui.Modal):
                 if name != self.name:
                     del self.view.guild_data["player_controller"]["fav_links"][self.name]
             except KeyError:
-                pass
+                if len(self.view.guild_data["player_controller"]["fav_links"]) > 24:
+                    await inter.edit_original_message("**Não há espaço disponível para adicionar novos favorito (remova algum e tente novamente).**")
+                    return
 
             self.view.guild_data["player_controller"]["fav_links"][name] = {'url': valid_url, "description": description}
 
@@ -980,50 +985,58 @@ class FavModalAdd(disnake.ui.Modal):
             await process_idle_embed(self.view.bot, guild, guild_data=self.view.guild_data)
 
         elif self.view.mode == ViewMode.integrations_manager:
+
+            try:
+                await inter.response.defer(ephemeral=True, with_message=True)
+            except:
+                pass
+
+            self.view.data = await self.view.bot.get_global_data(inter.author.id, db_name=DBModel.users)
+
+            if len(self.view.data["integration_links"]) >= self.view.bot.config["MAX_USER_FAVS"]:
+                await inter.edit_original_message(
+                    "**Não há espaço disponível para adicionar novas integrações (remova alguma e tente novamente).**")
+                return
+
             url = inter.text_values["user_integration_url"].strip()
 
             try:
                 url = URL_REG.findall(url)[0]
             except IndexError:
-                await inter.send(
+                await inter.edit_original_message(
                     embed=disnake.Embed(
                         description=f"**Nenhum link válido encontrado:** {url}",
                         color=disnake.Color.red()
-                    ), ephemeral=True
+                    )
                 )
                 return
 
             if (matches := spotify_regex_w_user.match(url)):
 
                 if not self.view.bot.spotify:
-                    await inter.send(
+                    await inter.edit_original_message(
                         embed=disnake.Embed(
                             description="**O suporte ao spotify não está disponível no momento...**",
                             color=disnake.Color.red()
-                        ), ephemeral=True
+                        )
                     )
                     return
 
                 url_type, user_id = matches.groups()
 
                 if url_type != "user":
-                    await inter.send(
+                    await inter.edit_original_message(
                         embed=disnake.Embed(
                             description=f"**Você deve usar link de um perfil de usuário do spotify.** {url}",
                             color=disnake.Color.red()
-                        ), ephemeral=True
+                        )
                     )
                     return
 
                 try:
-                    await inter.response.defer(ephemeral=True)
-                except:
-                    pass
-
-                try:
                     result = await self.view.bot.loop.run_in_executor(None, lambda: self.view.bot.spotify.user(user_id))
                 except Exception as e:
-                    await inter.send(
+                    await inter.edit_original_message(
                         embed=disnake.Embed(
                             description="**Ocorreu um erro ao obter informações do spotify:** ```py\n"
                                         f"{repr(e)}```",
@@ -1034,7 +1047,7 @@ class FavModalAdd(disnake.ui.Modal):
                     return
 
                 if not result:
-                    await inter.send(
+                    await inter.edit_original_message(
                         embed=disnake.Embed(
                             description="**O usuário do link informado não possui playlists públicas...**",
                             color=self.view.bot.get_color()
@@ -1047,7 +1060,7 @@ class FavModalAdd(disnake.ui.Modal):
             else:
 
                 if not self.view.bot.config["USE_YTDL"]:
-                    await inter.send(
+                    await inter.edit_original_message(
                         embed=disnake.Embed(
                             description="**Não há suporte a esse tipo de link no momento...**",
                             color=self.view.bot.get_color()
@@ -1066,22 +1079,17 @@ class FavModalAdd(disnake.ui.Modal):
                         group = match.group(1)
                         base_url = f"https://soundcloud.com/{group}/sets"
                     else:
-                        await inter.send(
+                        await inter.edit_original_message(
                             embed=disnake.Embed(
                                 description=f"**Link informado não é suportado:** {url}",
                                 color=disnake.Color.red()
-                            ), ephemeral=True
+                            )
                         )
                         return
 
                     source = "[SC]:"
 
                 loop = self.view.bot.loop or asyncio.get_event_loop()
-
-                try:
-                    await inter.response.defer(ephemeral=True)
-                except:
-                    pass
 
                 try:
                     info = await loop.run_in_executor(None, lambda: self.view.bot.pool.ytdl.extract_info(base_url, download=False))
@@ -1115,8 +1123,6 @@ class FavModalAdd(disnake.ui.Modal):
                     return
 
                 data = {"title": f"{source} {info['title']}", "url": info["original_url"]}
-
-            self.view.data = await self.view.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
             title = fix_characters(data['title'], 80)
 
@@ -1209,7 +1215,7 @@ class FavMenuView(disnake.ui.View):
             if self.data["fav_links"]:
                 fav_select = disnake.ui.Select(options=[
                     disnake.SelectOption(label=k, emoji=music_source_emoji_url(v)) for k, v in
-                    self.data["fav_links"].items()
+                    list(self.data["fav_links"].items())[:25] # TODO: Lidar depois com os dados existentes que excedem a quantidade permitida
                 ], min_values=1, max_values=1)
                 fav_select.options[0].default = True
                 self.current = fav_select.options[0].label
@@ -1236,7 +1242,7 @@ class FavMenuView(disnake.ui.View):
                 fav_select = disnake.ui.Select(options=[
                     disnake.SelectOption(label=k, emoji=music_source_emoji_url(v['url']),
                                          description=v.get("description")) for k, v in
-                    self.guild_data["player_controller"]["fav_links"].items()
+                    list(self.guild_data["player_controller"]["fav_links"].items())[:25] # TODO: Lidar depois com os dados existentes que excedem a quantidade permitida
                 ], min_values=1, max_values=1)
                 fav_select.options[0].default = True
                 self.current = fav_select.options[0].label
@@ -1248,7 +1254,9 @@ class FavMenuView(disnake.ui.View):
             if self.data["integration_links"]:
 
                 integration_select = disnake.ui.Select(options=[
-                    disnake.SelectOption(label=k[5:], value=k, emoji=music_source_emoji_id(k)) for k, v in self.data["integration_links"].items()
+                    disnake.SelectOption(
+                        label=k[5:], value=k,
+                        emoji=music_source_emoji_id(k)) for k, v in list(self.data["integration_links"].items())[:25] # TODO: Lidar depois com os dados existentes que excedem a quantidade permitida
                 ], min_values=1, max_values=1)
                 integration_select.options[0].default = True
                 self.current = integration_select.options[0].label
