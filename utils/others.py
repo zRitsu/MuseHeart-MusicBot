@@ -427,7 +427,7 @@ async def send_idle_embed(
     components.extend(song_request_buttons)
 
     if is_forum:
-        content = "🎶 Peça sua música aqui."
+        content = "🎶 Entre em um canal de voz e peça sua música aqui."
     else:
         content = None
 
