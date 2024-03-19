@@ -1228,6 +1228,8 @@ class FavMenuView(disnake.ui.View):
 
             for b in sorted(self.bot.pool.get_guild_bots(self.guild.id), key=lambda b: b.identifier):
                 if b.bot_ready and b.user in self.guild.members:
+                    if not bots_in_guild:
+                        self.bot = b
                     bots_in_guild.append(disnake.SelectOption(emoji="🎶",
                                                               label=f"Bot: {b.user.display_name}"[:25],
                                                               value=f"bot_select_{b.user.id}",
