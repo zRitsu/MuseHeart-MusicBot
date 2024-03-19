@@ -1056,19 +1056,18 @@ class BotCore(commands.AutoShardedBot):
                     except AttributeError:
                         continue
 
-                    interaction_invites.append(f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) ")
+                    interaction_invites.append(f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id)}) ")
 
                 if not interaction_invites:
                     interaction_invites.append(
-                        f"[`{disnake.utils.escape_markdown(str(self.pool.controller_bot.user.name))}`]({disnake.utils.oauth_url(self.pool.controller_bot.user.id, scopes=['applications.commands'])}) ")
+                        f"[`{disnake.utils.escape_markdown(str(self.pool.controller_bot.user.name))}`]({disnake.utils.oauth_url(self.pool.controller_bot.user.id)}) ")
 
                 if interaction_invites:
                     embed.description += f"\n\nMeus comandos de barra (/) funcionam através " \
                                          f"da{(s:='s'[:len(interaction_invites)^1])} seguinte{s} aplicaç{(s2:='ões'[:len(interaction_invites)^1] or 'ão')} abaixo:\n" \
                                          f"{' **|** '.join(interaction_invites)}\n\n" \
                                          f"Caso os comandos da{s} aplicaç{s2} acima não sejam exibidos ao digitar " \
-                                         f"barra (/), clique no nome acima para integrar os comandos de barra no " \
-                                         f"seu servidor."
+                                         f"barra (/), clique no nome acima para integrar/registrar os comandos de barra."
 
                 else:
                     embed.description += "\n\n**Pra ver todos os meus comandos use: /**"
@@ -1096,7 +1095,7 @@ class BotCore(commands.AutoShardedBot):
                     "components": [
                         disnake.ui.Button(
                             label="Me adicione no seu servidor.",
-                            url=disnake.utils.oauth_url(self.user.id, permissions=disnake.Permissions(self.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'))
+                            url=disnake.utils.oauth_url(self.user.id, permissions=disnake.Permissions(self.config['INVITE_PERMISSIONS']), scopes=('bot'))
                         )
                     ]
                 }
