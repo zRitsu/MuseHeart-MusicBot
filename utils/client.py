@@ -1056,11 +1056,11 @@ class BotCore(commands.AutoShardedBot):
                     except AttributeError:
                         continue
 
-                    interaction_invites.append(f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id)}) ")
+                    interaction_invites.append(f"[`{disnake.utils.escape_markdown(str(b.user.name))}`](https://discord.com/oauth2/authorize?client_id={b.user.id}) ")
 
                 if not interaction_invites:
                     interaction_invites.append(
-                        f"[`{disnake.utils.escape_markdown(str(self.pool.controller_bot.user.name))}`]({disnake.utils.oauth_url(self.pool.controller_bot.user.id)}) ")
+                        f"[`{disnake.utils.escape_markdown(str(self.pool.controller_bot.user.name))}`](https://discord.com/oauth2/authorize?client_id={self.pool.controller_bot.user.id}) ")
 
                 if interaction_invites:
                     embed.description += f"\n\nMeus comandos de barra (/) funcionam através " \

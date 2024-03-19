@@ -802,7 +802,7 @@ class Misc(commands.Cog):
         controller_bot = self.bot.pool.controller_bot
 
         if (len(bots_in_guild) + len(bots_invites)) > 1 and f"client_id={controller_bot.user.id}" not in txt:
-            invite = f"[`{disnake.utils.escape_markdown(str(controller_bot.user.name))}`]({disnake.utils.oauth_url(controller_bot.user.id)})"
+            invite = f"[`{disnake.utils.escape_markdown(str(controller_bot.user.name))}`](https://discord.com/oauth2/authorize?client_id={controller_bot.user.id})"
             txt = f"## Registrar/Integrar os comandos de barra:\n{invite}\n\n" + txt
 
         color = self.bot.get_color(inter.guild.me if inter.guild else guild.me if guild else None)
