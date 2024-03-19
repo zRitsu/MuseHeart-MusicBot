@@ -617,39 +617,6 @@ class BotPool:
 
                             self._command_sync_flags = commands.CommandSyncFlags.none()
 
-                            if self.config["INTERACTION_BOTS"] and self.config["ADD_REGISTER_COMMAND"]:
-
-                                @bot.slash_command(
-                                    name=disnake.Localized("register_commands",data={disnake.Locale.pt_BR: "registrar_comandos"}),
-                                    description="Use este comando caso meus outros comandos de barra (/) não estejam disponíveis..."
-                                )
-                                async def register_commands(
-                                        inter: disnake.AppCmdInter,
-                                ):
-                                    interaction_invites = ""
-
-                                    for b in self.bots:
-
-                                        if not b.interaction_id:
-                                            continue
-
-                                        interaction_invites += f"[`{disnake.utils.escape_markdown(str(b.user.name))}`]({disnake.utils.oauth_url(b.user.id, scopes=['applications.commands'])}) "
-
-                                    embed = disnake.Embed(
-                                        description="**Atenção!** Todos os meus comandos de barra (/) funcionam através da aplicação "
-                                                    f"com um dos nomes abaixo:**\n{interaction_invites}\n\n"
-                                                    "**Caso os comandos da aplicação acima não sejam exibidos ao digitar barra (/), "
-                                                    "clique no nome acima para integrar os comandos de barra no seu "
-                                                    "servidor.",
-                                        color=bot.get_color()
-                                    )
-
-                                    if not inter.author.guild_permissions.manage_guild:
-                                        embed.description += "\n\n**Nota:** Será necessário ter a permissão de **Gerenciar " \
-                                                             "Servidor** para integrar os comandos no servidor atual."
-
-                                    await inter.send(embed=embed, ephemeral=True)
-
                             if bot.config["AUTO_SYNC_COMMANDS"]:
                                 await bot.sync_app_commands(force=True)
 
