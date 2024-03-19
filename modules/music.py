@@ -2049,7 +2049,7 @@ class Music(commands.Cog):
             except IndexError:
                 raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
 
-            if player.last_track.autoplay:
+            if player.current.autoplay:
                 track: LavalinkTrack = player.queue_autoplay[index - len(player.queue)]
                 index += 1
                 player.queue_autoplay.appendleft(player.last_track)
