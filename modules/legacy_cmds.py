@@ -25,7 +25,7 @@ from utils.music.converters import URL_REG
 from utils.music.errors import GenericError, NoVoice
 from utils.music.interactions import SelectBotVoice
 from utils.music.models import LavalinkPlayer
-from utils.others import sync_message, CustomContext, string_to_file, token_regex, CommandArgparse, \
+from utils.others import CustomContext, string_to_file, token_regex, CommandArgparse, \
     select_bot_pool
 from utils.owner_panel import panel_command, PanelView
 
@@ -510,44 +510,6 @@ class Owner(commands.Cog):
         )
         embed.set_footer(text="Clique em uma tarefa que deseja executar.")
         await ctx.send(embed=embed, view=PanelView(self.bot))
-
-    @commands.has_guild_permissions(manage_guild=True)
-    @commands.command(description="Sincronizar/Registrar os comandos de barra no servidor.", hidden=True)
-    async def syncguild(self, ctx: Union[CustomContext, disnake.MessageInteraction]):
-
-        embed = disnake.Embed(
-            color=self.bot.get_color(ctx.guild.me),
-            description="**Esse comando não é mais necessário ser usado (A sincronização dos comandos agora "
-                        f"é automática).**\n\n{sync_message(self.bot)}"
-        )
-
-        await ctx.send(embed=embed)
-
-    @commands.is_owner()
-    @panel_command(aliases=["sync"], description="Sincronizar os comandos de barra manualmente.",
-                   emoji="<:slash:944875586839527444>",
-                   alt_name="Sincronizar comandos manualmente.")
-    async def synccmds(self, ctx: Union[CustomContext, disnake.MessageInteraction]):
-
-        if self.bot.config["AUTO_SYNC_COMMANDS"] is True:
-            raise GenericError(
-                f"**Isso não pode ser usado com a sincronização automática ativada...**\n\n{sync_message(self.bot)}")
-
-        await self.bot._sync_application_commands()
-
-        txt = f"**Os comandos de barra foram sincronizados com sucesso!**\n\n{sync_message(self.bot)}"
-
-        if isinstance(ctx, CustomContext):
-
-            embed = disnake.Embed(
-                color=self.bot.get_color(ctx.guild.me),
-                description=txt
-            )
-
-            await ctx.send(embed=embed, view=self.owner_view)
-
-        else:
-            return txt
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.cooldown(1, 10, commands.BucketType.guild)
