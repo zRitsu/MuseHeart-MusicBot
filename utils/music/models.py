@@ -621,12 +621,13 @@ class LavalinkPlayer(wavelink.Player):
                 await self.destroy()
 
             else:
-                try:
-                    self.bot.loop.create_task(self.text_channel.send(embed=disnake.Embed(
-                    description=msg,
-                    color=self.bot.get_color(self.guild.me)), delete_after=7))
-                except:
-                    traceback.print_exc()
+                if self.text_channel:
+                    try:
+                        self.bot.loop.create_task(self.text_channel.send(embed=disnake.Embed(
+                        description=msg,
+                        color=self.bot.get_color(self.guild.me)), delete_after=7))
+                    except:
+                        traceback.print_exc()
                 await self.destroy()
                 return
 
@@ -1802,10 +1803,11 @@ class LavalinkPlayer(wavelink.Player):
             if self.static or self.has_thread:
                 self.command_log = msg
             else:
-                embed = disnake.Embed(
-                    description=msg, color=self.bot.get_color(self.guild.me))
-                self.bot.loop.create_task(self.text_channel.send(
-                    embed=embed, delete_after=120, allowed_mentions=self.allowed_mentions))
+                if self.text_channel:
+                    embed = disnake.Embed(
+                        description=msg, color=self.bot.get_color(self.guild.me))
+                    self.bot.loop.create_task(self.text_channel.send(
+                        embed=embed, delete_after=120, allowed_mentions=self.allowed_mentions))
         except:
             traceback.print_exc()
 
