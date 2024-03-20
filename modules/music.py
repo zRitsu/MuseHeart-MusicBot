@@ -1630,7 +1630,7 @@ class Music(commands.Cog):
                                 disnake.SelectOption(
                                     label=f"{n+1}. {t.title[:96]}",
                                     value=f"track_select_{n}",
-                                    description=f"{t.author} [{time_format(t.duration)}]")
+                                    description=f"{t.author[:70]} [{time_format(t.duration)}]")
                                 for n, t in enumerate(tracks)
                             ]
                         )
