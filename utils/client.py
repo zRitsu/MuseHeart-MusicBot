@@ -1095,7 +1095,7 @@ class BotCore(commands.AutoShardedBot):
                     "components": [
                         disnake.ui.Button(
                             label="Me adicione no seu servidor.",
-                            url=disnake.utils.oauth_url(self.user.id, permissions=disnake.Permissions(self.config['INVITE_PERMISSIONS']), scopes=('bot'))
+                            url=disnake.utils.oauth_url(self.user.id, permissions=disnake.Permissions(self.config['INVITE_PERMISSIONS']), scopes=('bot',))
                         )
                     ]
                 }
