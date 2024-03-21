@@ -754,8 +754,8 @@ class Music(commands.Cog):
         channel = None
 
         if not inter.response.is_done():
-            await inter.response.defer(ephemeral=True, with_message=True)
             ephemeral = await self.is_request_channel(inter, data=guild_data, ignore_thread=True)
+            await inter.response.defer(ephemeral=ephemeral, with_message=True)
 
         if not inter.author.voice:
 
@@ -4774,10 +4774,10 @@ class Music(commands.Cog):
 
         except KeyError:
 
-            try:
-                guild_data = ctx.guild_data
-            except AttributeError:
-                guild_data = data or await bot.get_data(ctx.guild_id, db_name=DBModel.guilds)
+            if data:
+                guild_data = data
+            else:
+                ctx, guild_data = await get_inter_guild_data(ctx, bot)
 
             try:
                 channel = bot.get_channel(int(guild_data["player_controller"]["channel"]))
