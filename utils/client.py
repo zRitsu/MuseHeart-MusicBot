@@ -896,11 +896,11 @@ class BotCore(commands.AutoShardedBot):
 
     async def is_owner(self, user: Union[disnake.User, disnake.Member]) -> bool:
 
+        if self.exclusive_guild_id:
+            return await self.pool.controller_bot.is_owner(user)
+
         if user.id in self.env_owner_ids:
             return True
-
-        if self.exclusive_guild_id:
-            return await super(self.pool.controller_bot).is_owner(user)
 
         return await super().is_owner(user)
 
