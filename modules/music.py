@@ -400,7 +400,7 @@ class Music(commands.Cog):
         if not current:
             return []
 
-        if URL_REG.match(current):
+        if not self.bot.bot_ready or not self.bot.is_ready() or URL_REG.match(current):
             return [current] if len(current) < 100 else []
 
         try:
@@ -1916,7 +1916,7 @@ class Music(commands.Cog):
     @play.autocomplete("busca")
     async def fav_add_autocomplete(self, inter: disnake.Interaction, query: str):
 
-        if URL_REG.match(query):
+        if not self.bot.is_ready() or URL_REG.match(query) or URL_REG.match(query):
             return [query] if len(query) < 100 else []
 
         favs = [">> [⭐ Favoritos ⭐] <<", ">> [💠 Integrações 💠] <<", ">> [📌 Favoritos do servidor 📌] <<"]
@@ -2477,6 +2477,9 @@ class Music(commands.Cog):
                 return
         except AttributeError:
             pass
+
+        if not self.bot.bot_ready or not self.bot.is_ready():
+            return []
 
         if query:
             return [time_format(string_to_seconds(query)*1000)]
@@ -4275,6 +4278,9 @@ class Music(commands.Cog):
         except:
             pass
 
+        if not self.bot.bot_ready or not self.bot.is_ready():
+            return [query]
+
         try:
             await check_pool_bots(inter, only_voiced=True)
             bot = inter.music_bot
@@ -4302,6 +4308,9 @@ class Music(commands.Cog):
                 return
         except AttributeError:
             pass
+
+        if not self.bot.bot_ready or not self.bot.is_ready():
+            return [query]
 
         try:
             if not await check_pool_bots(inter, only_voiced=True):
@@ -4348,6 +4357,9 @@ class Music(commands.Cog):
     @move.autocomplete("nome_do_uploader")
     @clear.autocomplete("nome_do_uploader")
     async def queue_author(self, inter: disnake.Interaction, query: str):
+
+        if not self.bot.bot_ready or not self.bot.is_ready():
+            return [query]
 
         try:
             await check_pool_bots(inter, only_voiced=True)
@@ -4550,6 +4562,9 @@ class Music(commands.Cog):
     @play.autocomplete("server")
     @change_node.autocomplete("servidor")
     async def node_suggestions(self, inter: disnake.Interaction, query: str):
+
+        if not self.bot.bot_ready or not self.bot.is_ready():
+            return []
 
         try:
             await check_pool_bots(inter)
@@ -5027,7 +5042,7 @@ class Music(commands.Cog):
 
     async def player_controller(self, interaction: disnake.MessageInteraction, control: str, **kwargs):
 
-        if not self.bot.bot_ready and not not self.bot.is_closed():
+        if not self.bot.bot_ready or not self.bot.is_ready():
             await interaction.send("Ainda estou inicializando...", ephemeral=True)
             return
 
