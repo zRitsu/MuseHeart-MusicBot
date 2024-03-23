@@ -2984,7 +2984,15 @@ class Music(commands.Cog):
         if not player:
 
             if isinstance(inter, CustomContext) and not (await self.bot.is_owner(inter.author)):
-                raise GenericError("**Você deve estar conectado em um canal de voz onde há player ativo...**")
+
+                try:
+                    slashcmd = f"</now_playing:" + str(self.bot.pool.controller_bot.get_global_command_named("now_playing",
+                                                                                                      cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+                except AttributeError:
+                    slashcmd = "/now_playing"
+
+                raise GenericError("**Você deve estar conectado em um canal de voz do servidor atual onde há player ativo...**\n"
+                                   f"`Nota: Caso esteja ouvindo em outro servidor você pode usar o comando` {slashcmd}")
 
             for bot in self.bot.pool.get_guild_bots(inter.guild_id):
 
