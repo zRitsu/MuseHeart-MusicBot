@@ -322,6 +322,8 @@ class Owner(commands.Cog):
 
         git_log += format_git_log(data)
 
+        self.bot.pool.commit = commit
+
         text = "`Será necessário me reiniciar após as alterações.`"
 
         txt = f"`✅` **[Atualização realizada com sucesso!]({self.bot.pool.remote_git_url}/commits/main)**"
