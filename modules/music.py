@@ -2960,16 +2960,14 @@ class Music(commands.Cog):
 
 
     np_cd = commands.CooldownMapping.from_cooldown(1, 7, commands.BucketType.member)
-    np_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
     @commands.command(name="nowplaying", aliases=["np", "npl", "current", "tocando", "playing"],
-                 description="Exibir informações da música que você está ouvindo no momento.", cooldown=np_cd,
-                  max_concurrency=np_mc)
+                 description="Exibir informações da música que você está ouvindo no momento.", cooldown=np_cd)
     async def now_playing_legacy(self, ctx: CustomContext):
         await self.now_playing.callback(self=self, inter=ctx)
 
     @commands.slash_command(description=f"{desc_prefix}Exibir info da música que que você está ouvindo (em qualquer servidor).",
-                            dm_permission=False, cooldown=np_cd, max_concurrency=np_mc)
+                            dm_permission=False, cooldown=np_cd)
     async def now_playing(self, inter: disnake.AppCmdInter):
 
         player: Optional[LavalinkPlayer] = None
@@ -3138,17 +3136,8 @@ class Music(commands.Cog):
 
         try:
             inter.application_command = self.now_playing_legacy
-            await self.now_playing_legacy._max_concurrency.acquire(inter)
-        except AttributeError:
-            pass
-
-        try:
             await check_cmd(self.now_playing_legacy, inter)
             await self.now_playing_legacy(inter)
-            try:
-                await self.now_playing_legacy._max_concurrency.release(inter)
-            except AttributeError:
-                pass
         except Exception as e:
             self.bot.dispatch('interaction_player_error', inter, e)
 
