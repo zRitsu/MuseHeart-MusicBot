@@ -1182,10 +1182,6 @@ class FavMenuView(disnake.ui.View):
 
         self.clear_items()
 
-        if not self.guild:
-            self.bot.loop.create_task(self.on_timeout())
-            return
-
         mode_select = disnake.ui.Select(
             options=[
                 disnake.SelectOption(label="Gerenciador de Favoritos", value=f"fav_view_mode_{ViewMode.fav_manager}", emoji="⭐",
@@ -1199,7 +1195,7 @@ class FavMenuView(disnake.ui.View):
                                      default=self.mode == ViewMode.integrations_manager)
             )
 
-        if self.ctx.author.guild_permissions.manage_guild or self.is_owner:
+        if self.guild and (self.ctx.author.guild_permissions.manage_guild or self.is_owner):
             mode_select.options.insert(1, disnake.SelectOption(label="Gerenciador de Playlists do Servidor",
                                                                value=f"fav_view_mode_{ViewMode.guild_fav_manager}", emoji="📌",
                                                                default=self.mode == ViewMode.guild_fav_manager))
@@ -1222,7 +1218,7 @@ class FavMenuView(disnake.ui.View):
                 fav_select.callback = self.select_callback
                 self.add_item(fav_select)
 
-        elif self.mode == ViewMode.guild_fav_manager:
+        elif self.mode == ViewMode.guild_fav_manager and self.guild:
 
             bots_in_guild = []
 
