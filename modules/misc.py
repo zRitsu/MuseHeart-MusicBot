@@ -486,7 +486,8 @@ class Misc(commands.Cog):
 
 
     @commands.slash_command(
-        description=f"{desc_prefix}Exibir informações sobre mim.", cooldown=about_cd, dm_permission=False
+        description=f"{desc_prefix}Exibir informações sobre mim.", cooldown=about_cd, dm_permission=False,
+        extras={"allow_private": True}
     )
     async def about(
             self,
@@ -515,7 +516,10 @@ class Misc(commands.Cog):
 
         guild = bot.get_guild(inter.guild_id) or inter.guild
 
-        color = bot.get_color(inter.guild.me if inter.guild else guild.me)
+        try:
+            color = bot.get_color(inter.guild.me if inter.guild else guild.me)
+        except:
+            color = bot.get_color()
 
         embed = disnake.Embed(description="", color=color)
 
@@ -794,7 +798,7 @@ class Misc(commands.Cog):
                     colour=self.bot.get_color(
                         inter.guild.me if inter.guild else guild.me if guild else None
                     ),
-                    title="## Não há bots públicos disponível...",
+                    description="## Não há bots públicos disponível...",
                 ), ephemeral=True
             )
             return
@@ -824,7 +828,7 @@ class Misc(commands.Cog):
 
     @commands.slash_command(
         description=f"{desc_prefix}Exibir meu link de convite para você me adicionar no seu servidor.",
-        dm_permission=False
+        dm_permission=False, extras={"allow_private": True}
     )
     async def invite(self, inter: disnake.AppCmdInter):
 

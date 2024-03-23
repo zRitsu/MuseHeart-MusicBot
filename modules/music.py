@@ -4624,7 +4624,7 @@ class Music(commands.Cog):
     @commands.max_concurrency(1, commands.BucketType.member, wait=False)
     @commands.slash_command(
         description=f"{desc_prefix}Gerenciar seus favoritos/integrações e links do server.",
-        cooldown=fav_cd, dm_permission=False)
+        cooldown=fav_cd, dm_permission=False, extras={"allow_private": True})
     async def fav_manager(self, inter: disnake.AppCmdInter):
 
         bot = self.bot

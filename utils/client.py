@@ -1253,11 +1253,6 @@ class BotCore(commands.AutoShardedBot):
 
     async def on_application_command(self, inter: disnake.ApplicationCommandInteraction):
 
-        if not inter.guild_id:
-            await inter.send("Meus comandos não podem ser usados no DM.\n"
-                             "Use em algum servidor que estou presente.")
-            return
-
         if not self.bot_ready or self.is_closed():
             await inter.send("Ainda estou inicializando...\nPor favor aguarde mais um pouco...", ephemeral=True)
             return
@@ -1273,19 +1268,40 @@ class BotCore(commands.AutoShardedBot):
             except:
                 traceback.print_exc()
 
+        if not inter.guild_id:
+
+            try:
+                allow_private = inter.application_command.extras.get("allow_private")
+            except:
+                allow_private = False
+
+            if allow_private:
+                return await super().on_application_command(inter)
+
+            await inter.send("Esse comando não pode ser executado em mensagens privadas.\n"
+                             "Use em algum servidor onde há bot compatível adicionado.")
+            return
+
         if str(self.user.id) in self.config["INTERACTION_BOTS_CONTROLLER"]:
 
-            available_bot = False
+            try:
+                allow_private = inter.application_command.extras.get("allow_private")
+            except:
+                allow_private = False
 
-            for bot in self.pool.get_guild_bots(inter.guild_id):
-                if bot.appinfo and (bot.appinfo.bot_public or await bot.is_owner(inter.author)) and bot.get_guild(inter.guild_id):
-                    available_bot = True
-                    break
+            if not allow_private:
 
-            if not available_bot:
-                await inter.send("**Não há bots disponíveis no servidor, Adicione pelo menos um clicando no botão abaixo.**",
-                                 ephemeral=True, components=[disnake.ui.Button(custom_id="bot_invite", label="Adicionar bots")])
-                return
+                available_bot = False
+
+                for bot in self.pool.get_guild_bots(inter.guild_id):
+                    if bot.appinfo and (bot.appinfo.bot_public or await bot.is_owner(inter.author)) and bot.get_guild(inter.guild_id):
+                        available_bot = True
+                        break
+
+                if not available_bot:
+                    await inter.send("**Não há bots disponíveis no servidor, Adicione pelo menos um clicando no botão abaixo.**",
+                                     ephemeral=True, components=[disnake.ui.Button(custom_id="bot_invite", label="Adicionar bots")])
+                    return
 
         await super().on_application_command(inter)
 

@@ -628,6 +628,15 @@ async def select_bot_pool(inter: Union[CustomContext, disnake.MessageInteraction
                 components=[disnake.ui.Button(custom_id="bot_invite", label=f"Adicionar bot{'s'[:bcount^1]}")]
             )
         else:
+
+            try:
+                allow_private = inter.application_command.extras["allow_private"]
+            except:
+                allow_private = False
+
+            if allow_private:
+                return inter, inter.bot
+
             raise GenericError("**Não há bots compatíveis com meus comandos no servidor...**")
 
     if len(bots) == 1 or first:
