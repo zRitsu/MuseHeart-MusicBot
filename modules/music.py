@@ -2967,7 +2967,7 @@ class Music(commands.Cog):
         await self.now_playing.callback(self=self, inter=ctx)
 
     @commands.slash_command(description=f"{desc_prefix}Exibir info da música que que você está ouvindo (em qualquer servidor).",
-                            dm_permission=False, cooldown=np_cd)
+                            dm_permission=False, cooldown=np_cd, extras={"allow_private": True})
     async def now_playing(self, inter: disnake.AppCmdInter):
 
         player: Optional[LavalinkPlayer] = None
@@ -2983,7 +2983,7 @@ class Music(commands.Cog):
 
         if not player:
 
-            if not (await self.bot.is_owner(inter.author)):
+            if isinstance(inter, CustomContext) and not (await self.bot.is_owner(inter.author)):
                 raise GenericError("**Você deve estar conectado em um canal de voz onde há player ativo...**")
 
             for bot in self.bot.pool.get_guild_bots(inter.guild_id):
@@ -3005,10 +3005,7 @@ class Music(commands.Cog):
 
         inter, guild_data = await get_inter_guild_data(inter, player.bot)
 
-        ephemeral = await self.is_request_channel(inter, data=guild_data)
-
-        if not inter.response.is_done():
-            await inter.response.defer(ephemeral=ephemeral)
+        ephemeral = (player.guild.id != inter.guild_id and not await player.bot.is_owner(inter.author)) or await self.is_request_channel(inter, data=guild_data)
 
         txt = f"### [{player.current.title}]({player.current.uri or player.current.search_uri})\n"
 
@@ -3116,13 +3113,7 @@ class Music(commands.Cog):
         if footer_kw:
             embed.set_footer(**footer_kw)
 
-        if isinstance(inter, disnake.MessageInteraction):
-            await inter.edit_original_message(content=inter.author.mention, embed=embed, components=components)
-        else:
-            try:
-                await inter.edit_original_message(content=inter.author.mention, embed=embed, components=components)
-            except AttributeError:
-                await inter.send(inter.author.mention, embed=embed, ephemeral=ephemeral, components=components, mention_author=False)
+        await inter.send(inter.author.mention, embed=embed, ephemeral=ephemeral, components=components)
 
     @commands.Cog.listener("on_button_click")
     async def reload_np(self, inter: disnake.MessageInteraction):
