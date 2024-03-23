@@ -567,6 +567,49 @@ class BotPool:
                 except KeyError:
                     pass
 
+                try:
+                    allow_private = inter.application_command.extras["allow_private"]
+                except KeyError:
+                    allow_private = False
+
+                if inter.bot.exclusive_guild_id and inter.guild_id != inter.bot.exclusive_guild_id:
+                    raise GenericError("Esse servidor não está autorizado para usar meus comandos...")
+
+                if self.config["COMMAND_LOG"] and inter.guild and not (await inter.bot.is_owner(inter.author)):
+                    try:
+                        print(
+                            f"cmd log: [user: {inter.author} - {inter.author.id}] - [guild: {inter.guild.name} - {inter.guild.id}]"
+                            f" - [cmd: {inter.data.name}] {datetime.datetime.utcnow().strftime('%d/%m/%Y - %H:%M:%S')} (UTC) - {inter.filled_options}\n" + (
+                                        "-" * 15))
+                    except:
+                        traceback.print_exc()
+
+                if not inter.guild_id:
+
+                    if allow_private:
+                        return True
+
+                    raise GenericError("Esse comando não pode ser executado em mensagens privadas.\n"
+                                     "Use em algum servidor onde há bot compatível adicionado.")
+
+                if str(inter.bot.user.id) in self.config["INTERACTION_BOTS_CONTROLLER"]:
+
+                    if not allow_private:
+
+                        available_bot = False
+
+                        for bot in inter.bot.pool.get_guild_bots(inter.guild_id):
+                            if bot.appinfo and (
+                                    bot.appinfo.bot_public or await bot.is_owner(inter.author)) and bot.get_guild(
+                                    inter.guild_id):
+                                available_bot = True
+                                break
+
+                        if not available_bot:
+                            raise GenericError(
+                                "**Não há bots disponíveis no servidor, Adicione pelo menos um clicando no botão abaixo.**",
+                                components=[disnake.ui.Button(custom_id="bot_invite", label="Adicionar bots")])
+
                 if not kwargs:
                     kwargs["return_first"] = True
 
@@ -1256,52 +1299,6 @@ class BotCore(commands.AutoShardedBot):
         if not self.bot_ready or self.is_closed():
             await inter.send("Ainda estou inicializando...\nPor favor aguarde mais um pouco...", ephemeral=True)
             return
-
-        if self.exclusive_guild_id and inter.guild_id != self.exclusive_guild_id:
-            await inter.send("Esse servidor não está autorizado para usar meus comandos...", ephemeral=True)
-            return
-
-        if self.config["COMMAND_LOG"] and inter.guild and not (await self.is_owner(inter.author)):
-            try:
-                print(f"cmd log: [user: {inter.author} - {inter.author.id}] - [guild: {inter.guild.name} - {inter.guild.id}]"
-                      f" - [cmd: {inter.data.name}] {datetime.datetime.utcnow().strftime('%d/%m/%Y - %H:%M:%S')} (UTC) - {inter.filled_options}\n" + ("-" * 15))
-            except:
-                traceback.print_exc()
-
-        if not inter.guild_id:
-
-            try:
-                allow_private = inter.application_command.extras.get("allow_private")
-            except:
-                allow_private = False
-
-            if allow_private:
-                return await super().on_application_command(inter)
-
-            await inter.send("Esse comando não pode ser executado em mensagens privadas.\n"
-                             "Use em algum servidor onde há bot compatível adicionado.")
-            return
-
-        if str(self.user.id) in self.config["INTERACTION_BOTS_CONTROLLER"]:
-
-            try:
-                allow_private = inter.application_command.extras.get("allow_private")
-            except:
-                allow_private = False
-
-            if not allow_private:
-
-                available_bot = False
-
-                for bot in self.pool.get_guild_bots(inter.guild_id):
-                    if bot.appinfo and (bot.appinfo.bot_public or await bot.is_owner(inter.author)) and bot.get_guild(inter.guild_id):
-                        available_bot = True
-                        break
-
-                if not available_bot:
-                    await inter.send("**Não há bots disponíveis no servidor, Adicione pelo menos um clicando no botão abaixo.**",
-                                     ephemeral=True, components=[disnake.ui.Button(custom_id="bot_invite", label="Adicionar bots")])
-                    return
 
         await super().on_application_command(inter)
 
