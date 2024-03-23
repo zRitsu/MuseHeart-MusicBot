@@ -3020,13 +3020,13 @@ class Music(commands.Cog):
             progress = ProgressBar(
                 player.position,
                 player.current.duration,
-                bar_count=24
+                bar_count=8
             )
 
             txt += f"```ansi\n[34;1m[{time_format(player.position)}] {('=' * progress.start)}[0m🔴️[36;1m{'-' * progress.end} " \
                    f"[{time_format(player.current.duration)}][0m```\n"
 
-        txt += f"> 👤 **⠂Uploader/Artista(s):** `{player.current.authors_md}`\n"
+        txt += f"> 👤 **⠂Uploader:** `{player.current.authors_md}`\n"
 
         if player.current.album_name:
             txt += f"> 💽 **⠂Álbum:** [`{fix_characters(player.current.album_name, limit=20)}`]({player.current.album_url})\n"
@@ -3082,8 +3082,8 @@ class Music(commands.Cog):
             if player.guild_id == inter.guild_id:
 
                 txt += f"### 🎶 ⠂Próximas músicas ({(qsize := len(player.queue + player.queue_autoplay))}):\n" + (
-                            "\n> `" + ("-" * 38) + "`\n").join(
-                    f"> `{n + 1})` [`{fix_characters(t.title, limit=38)}`]({t.uri})\n" \
+                            "\n").join(
+                    f"> `{n + 1})` [`{fix_characters(t.title, limit=28)}`]({t.uri})\n" \
                     f"> `⏲️ {time_format(t.duration) if not t.is_stream else '🔴 Ao vivo'}`" + (
                         f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
                     f" **|** " + (f"`✋` <@{t.requester}>" if not t.autoplay else f"`👍⠂Recomendada`") for n, t in
