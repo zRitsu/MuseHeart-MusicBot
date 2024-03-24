@@ -1365,7 +1365,7 @@ class MusicSettings(commands.Cog):
         else:
             await inter.send(ephemeral=True, **kwargs)
 
-        for b in self.bot.pool.get_guild_bots(interaction.guild.id):
+        for b in self.bot.pool.get_guild_bots(interaction.guild_id):
 
             try:
                 player: LavalinkPlayer = b.music.players[inter.guild_id]
