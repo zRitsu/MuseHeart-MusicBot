@@ -792,7 +792,8 @@ class LavalinkPlayer(wavelink.Player):
                 event.message == "Video returned by YouTube isn't what was requested" or
                 event.cause.startswith("java.net.SocketTimeoutException: Read timed out") or
                 (error_403 := event.cause.startswith(("java.lang.RuntimeException: Not success status code: 403",
-                                                      "java.io.IOException: Invalid status code for video page response: 400")))
+                                                      "java.io.IOException: Invalid status code for video page response: 400"
+                                                      "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: This video is not available")))
             ):
 
                 if error_403 and self.node.retry_403:
