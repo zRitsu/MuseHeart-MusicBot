@@ -755,7 +755,7 @@ class LavalinkPlayer(wavelink.Player):
 
         if isinstance(event, wavelink.TrackException):
 
-            track = self.last_track
+            track = self.current or self.last_track
             embed = disnake.Embed(
                 description=f"**Falha ao reproduzir música:\n[{track.title}]({track.uri or track.search_uri})** ```java\n{event.message}```\n"
                             f"**Causa:** ```java\n{event.cause[:200]}```\n"
