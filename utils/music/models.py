@@ -1355,7 +1355,7 @@ class LavalinkPlayer(wavelink.Player):
                     if track_data.info["sourceName"] == "youtube":
                         query = f"https://www.youtube.com/watch?v={track_data.ytid}&list=RD{track_data.ytid}"
                     else:
-                        query = f"ytmsearch:{track_data.author}"
+                        query = f"ytsearch:{track_data.author}"
 
                     try:
                         tracks = await self.node.get_tracks(
