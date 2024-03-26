@@ -178,16 +178,16 @@ class Owner(commands.Cog):
             for b in self.bot.pool.bots:
                 for p in b.music.players.values():
                     for t in p.queue:
-                        t.id = ""
-                        t.info["id"] = ""
+                        t.id = None
+                        t.info["id"] = None
                 for p in b.music.players.values():
                     for t in p.played:
-                        t.id = ""
-                        t.info["id"] = ""
+                        t.id = None
+                        t.info["id"] = None
                 for p in b.music.players.values():
                     for t in p.queue_autoplay:
-                        t.id = ""
-                        t.info["id"] = ""
+                        t.id = None
+                        t.info["id"] = None
 
         await ctx.send(
             embed=disnake.Embed(

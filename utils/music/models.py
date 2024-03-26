@@ -98,7 +98,7 @@ class PartialTrack:
             }
         }
 
-        self.id = ""
+        self.id = None
         self.ytid = ""
         self.unique_id = str(uuid.uuid4().hex)[:10]
         self.thumb = self.info["extra"]["thumb"]
