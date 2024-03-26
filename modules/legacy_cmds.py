@@ -174,6 +174,21 @@ class Owner(commands.Cog):
 
             await self.bot.pool.start_lavalink()
 
+        if args.resetids:
+            for b in self.bot.pool.bots:
+                for p in b.music.players.values():
+                    for t in p.queue:
+                        t.id = ""
+                        t.info["id"] = ""
+                for p in b.music.players.values():
+                    for t in p.played:
+                        t.id = ""
+                        t.info["id"] = ""
+                for p in b.music.players.values():
+                    for t in p.queue_autoplay:
+                        t.id = ""
+                        t.info["id"] = ""
+
         await ctx.send(
             embed=disnake.Embed(
                 description="**O arquivo Lavalink.jar será atualizado "
