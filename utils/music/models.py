@@ -1579,6 +1579,9 @@ class LavalinkPlayer(wavelink.Player):
                 t = await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
             except Exception as e:
                 traceback.print_exc()
+                if str(e) == "Video returned by YouTube isn't what was requested":
+                    self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node(ignore_node=self.node.identifier))
+                    return
                 try:
                     await self.text_channel.send(
                         embed=disnake.Embed(
