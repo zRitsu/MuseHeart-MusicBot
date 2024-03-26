@@ -303,8 +303,7 @@ async def send_message(
 
     try:
         if not kwargs["components"]:
-            kwargs.pop('components')
-            kwargs["view"] = None
+            kwargs["components"] = []
     except KeyError:
         pass
 
