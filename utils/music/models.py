@@ -2611,6 +2611,9 @@ class LavalinkPlayer(wavelink.Player):
 
             node = nodes[0]
 
+            if self.current and not self.current.id:
+                await self.resolve_track(self.current)
+
             try:
                 await self.change_node(node.identifier)
                 self.locked = False
