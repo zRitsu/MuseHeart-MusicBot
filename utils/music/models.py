@@ -1579,15 +1579,18 @@ class LavalinkPlayer(wavelink.Player):
                 t = await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
             except Exception as e:
                 traceback.print_exc()
-                if str(e) == "Video returned by YouTube isn't what was requested":
+                if "Video returned by YouTube isn't what was requested" in str(e):
                     self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node(ignore_node=self.node.identifier))
                     return
+                kwargs = {}
+                if self.purge_mode == SongRequestPurgeMode.on_message:
+                    kwargs["delete_after"] = 11
                 try:
                     await self.text_channel.send(
                         embed=disnake.Embed(
                             description=f"**Ocorreu um erro ao obter informações da música:** [{track.title}]({track.uri}) ```py\n{repr(e)}```"
-                        )
-                    )
+                        ),
+                    **kwargs)
                 except:
                     pass
                 embed = disnake.Embed(
