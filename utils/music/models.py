@@ -2517,12 +2517,15 @@ class LavalinkPlayer(wavelink.Player):
 
             exceptions = []
 
-            try:
-                to_search = track.info["search_uri"]
-                check_duration = False
-            except KeyError:
-                to_search = f"{self.bot.config['PARTIALTRACK_SEARCH_PROVIDER']}:" + (f"\"{track.info['isrc']}\"" if track.info.get("isrc") else f"{track.single_title.replace(' - ', ' ')} - {track.authors_string}")
-                check_duration = True
+            if (is_http:=track.info.get("sourceName") == "http"):
+                to_search = track.uri or track.search_uri
+            else:
+                try:
+                    to_search = track.info["search_uri"]
+                    check_duration = False
+                except KeyError:
+                    to_search = f"{self.bot.config['PARTIALTRACK_SEARCH_PROVIDER']}:" + (f"\"{track.info['isrc']}\"" if track.info.get("isrc") else f"{track.single_title.replace(' - ', ' ')} - {track.authors_string}")
+                    check_duration = True
 
             try:
                 tracks = (await self.node.get_tracks(to_search, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist))
@@ -2530,7 +2533,7 @@ class LavalinkPlayer(wavelink.Player):
                 exceptions.append(e)
                 tracks = []
 
-            if not tracks and self.bot.config['PARTIALTRACK_SEARCH_PROVIDER'] not in ("ytsearch", "ytmsearch", "scsearch"):
+            if not is_http and not tracks and self.bot.config['PARTIALTRACK_SEARCH_PROVIDER'] not in ("ytsearch", "ytmsearch", "scsearch"):
 
                 if track.info.get("isrc"):
                     try:
@@ -2614,12 +2617,15 @@ class LavalinkPlayer(wavelink.Player):
 
             node = nodes[0]
 
-            if self.current and not self.current.id:
-                await self.resolve_track(self.current)
-
             try:
-                await self.change_node(node.identifier)
-                self.locked = False
+                if self.current and not self.current.id:
+                    self.queue.appendleft(self.current)
+                    self.current = None
+                    self.locked = False
+                    await self.process_next(self.position)
+                else:
+                    await self.change_node(node.identifier)
+                    self.locked = False
             except:
                 traceback.print_exc()
                 await asyncio.sleep(5)
