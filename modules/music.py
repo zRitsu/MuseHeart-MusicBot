@@ -3059,7 +3059,7 @@ class Music(commands.Cog):
 
         if player.guild_id != inter.guild_id:
 
-            if (listeners:=len([m for m in player.last_channel.members if not m.bot and (not m.voice.self_deaf or not m.voice.deaf)])) > 1:
+            if player.current and not player.paused and (listeners:=len([m for m in player.last_channel.members if not m.bot and (not m.voice.self_deaf or not m.voice.deaf)])) > 1:
                 txt += f"> 🎧 **⠂Ouvintes atuais:** `{listeners}`\n"
 
             txt += f"> ⏱️ **⠂Player ativo:** <t:{player.uptime}:R>\n"
