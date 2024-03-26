@@ -176,15 +176,19 @@ class Owner(commands.Cog):
 
         if args.resetids:
             for b in self.bot.pool.bots:
-                for p in b.music.players.values():
+                try:
+                    node = b.music.nodes["LOCAL"]
+                except KeyError:
+                    continue
+                for p in node.players.values():
                     for t in p.queue:
                         t.id = None
                         t.info["id"] = None
-                for p in b.music.players.values():
+                for p in node.players.values():
                     for t in p.played:
                         t.id = None
                         t.info["id"] = None
-                for p in b.music.players.values():
+                for p in node.players.values():
                     for t in p.queue_autoplay:
                         t.id = None
                         t.info["id"] = None
