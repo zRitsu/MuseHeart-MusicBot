@@ -902,7 +902,10 @@ class Music(commands.Cog):
                             func = msg.edit
                         except AttributeError:
                             func = inter.edit_original_message
-                        await func(embed=disnake.Embed(description="### Tempo esgotado...", color=self.bot.get_color(guild.me)), view=None)
+                        try:
+                            await func(embed=disnake.Embed(description="### Tempo esgotado...", color=self.bot.get_color(guild.me)), view=None)
+                        except:
+                            traceback.print_exc()
                         return
 
                     if v.status is False:
@@ -1403,10 +1406,13 @@ class Music(commands.Cog):
                         except:
                             func = view.inter.response.edit_message
 
-                        await func(embed=disnake.Embed(color=self.bot.get_color(guild.me),
-                            description="**Tempo esgotado!**" if not view.selected is False else "### Cancelado pelo usuário."),
-                            components=song_request_buttons
-                        )
+                        try:
+                            await func(embed=disnake.Embed(color=self.bot.get_color(guild.me),
+                                description="**Tempo esgotado!**" if not view.selected is False else "### Cancelado pelo usuário."),
+                                components=song_request_buttons
+                            )
+                        except:
+                            traceback.print_exc()
                         return
 
                     query = info["entries"][int(view.selected[14:])]["url"]
@@ -1523,10 +1529,13 @@ class Music(commands.Cog):
                             except AttributeError:
                                 pass
 
-                            await func(
-                                content=f"{mention}{'operação cancelada' if view.selected is not False else 'tempo esgotado'}" if view.selected is not False else "Cancelado pelo usuário.",
-                                embed=None, components=song_request_buttons
-                            )
+                            try:
+                                await func(
+                                    content=f"{mention}{'operação cancelada' if view.selected is not False else 'tempo esgotado'}" if view.selected is not False else "Cancelado pelo usuário.",
+                                    embed=None, components=song_request_buttons
+                                )
+                            except:
+                                traceback.print_exc()
                             return
 
                         if view.selected == "music":
