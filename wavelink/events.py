@@ -70,11 +70,11 @@ class TrackException:
     __slots__ = ('track', 'player', 'node', 'error', 'data', 'exception', 'cause', 'message', 'severity')
 
     def __init__(self, data: dict):
-        self.track = data.pop('track', None)
-        self.player = data.pop('player', None)
-        self.node = data.pop('node', None)
-        self.error = data.pop('error', None)
-        self.exception = data.pop('exception', {})
+        self.track = data.get('track')
+        self.player = data.get('player')
+        self.node = data.get('node')
+        self.error = data.get('error')
+        self.exception = data.get('exception', {})
         self.cause = self.exception.get('cause')
         self.message = self.exception.get('message')
         self.severity = self.exception.get('severity')
