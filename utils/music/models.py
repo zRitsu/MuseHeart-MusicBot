@@ -780,7 +780,7 @@ class LavalinkPlayer(wavelink.Player):
 
                 await self.report_error(embed, track)
 
-            if event.node != self.node:
+            if event.node.identifier != self.node.identifier:
                 await send_report()
                 return
 
