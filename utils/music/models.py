@@ -800,6 +800,7 @@ class LavalinkPlayer(wavelink.Player):
                 self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node(
                     f"O servidor de música **{self.node.identifier}** está indisponível no momento "
                     f"(aguardando um novo servidor ficar disponível)."))
+                await send_report()
                 return
 
             if (event.error == "This IP address has been blocked by YouTube (429)" or
