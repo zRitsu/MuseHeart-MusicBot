@@ -788,12 +788,22 @@ class LavalinkPlayer(wavelink.Player):
 
             cooldown = 10
 
-            if (event.error == "This IP address has been blocked by YouTube (429)" or
-                event.message == "Video returned by YouTube isn't what was requested" or
-                event.cause.startswith((
+            if event.cause.startswith((
                     "java.net.SocketTimeoutException: Read timed out",
                     "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: This video is not available"
-                )) or
+                )):
+                self.node.available = False
+                try:
+                    self._new_node_task.cancel()
+                except:
+                    pass
+                self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node(
+                    f"O servidor de música **{self.node.identifier}** está indisponível no momento "
+                    f"(aguardando um novo servidor ficar disponível)."))
+                return
+
+            if (event.error == "This IP address has been blocked by YouTube (429)" or
+                event.message == "Video returned by YouTube isn't what was requested" or
                 (error_403 := event.cause.startswith(("java.lang.RuntimeException: Not success status code: 403",
                                                       "java.io.IOException: Invalid status code for video page response: 400")))
             ):
