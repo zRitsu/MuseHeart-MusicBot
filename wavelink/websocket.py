@@ -207,6 +207,9 @@ class WebSocket:
             __log__.warn(f"Unknown op: {op} | {data}")
 
     def _get_event_payload(self, name: str, data):
+
+        data["node"] = self._node
+
         if name == 'TrackEndEvent':
             return 'wavelink_track_end', TrackEnd(data)
         elif name == 'TrackStartEvent':

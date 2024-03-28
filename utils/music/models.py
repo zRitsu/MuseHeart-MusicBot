@@ -682,6 +682,9 @@ class LavalinkPlayer(wavelink.Player):
 
         if isinstance(event, wavelink.TrackEnd):
 
+            if event.node != self.node:
+                return
+
             self.bot.dispatch("wavelink_track_end", self.node, event)
 
             if self.locked or self.auto_pause:
@@ -714,6 +717,9 @@ class LavalinkPlayer(wavelink.Player):
             return
 
         if isinstance(event, wavelink.TrackStart):
+
+            if event.node != self.node:
+                return
 
             self.start_time = disnake.utils.utcnow()
 
@@ -756,11 +762,12 @@ class LavalinkPlayer(wavelink.Player):
         if isinstance(event, wavelink.TrackException):
 
             track = self.current or self.last_track
+            node_info = f"`{event.node.identifier}`" if event.node != self.node else f"`{self.node.identifier} | {event.node.identifier}`"
             embed = disnake.Embed(
                 description=f"**Falha ao reproduzir música:\n[{track.title}]({track.uri or track.search_uri})** ```java\n{event.message}```\n"
                             f"**Causa:** ```java\n{event.cause[:200]}```\n"
                             f"**Nível:** `{event.severity}`\n"
-                            f"**Servidor de música:** `{self.node.identifier}`",
+                            f"**Servidor de música:** {node_info}",
                 color=disnake.Colour.red())
 
             error_format = pprint.pformat(event.data)
@@ -772,6 +779,10 @@ class LavalinkPlayer(wavelink.Player):
                                    f"{error_format}\n" + ("-" * 50))
 
                 await self.report_error(embed, track)
+
+            if event.node != self.node:
+                await send_report()
+                return
 
             if self.locked:
                 self.set_command_log(
@@ -785,18 +796,22 @@ class LavalinkPlayer(wavelink.Player):
             self.current = None
 
             error_403 = False
+            video_not_available = False
 
             cooldown = 10
 
-            if event.cause.startswith((
-                    "java.net.SocketTimeoutException: Read timed out",
-                    "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: This video is not available"
-                )):
-                self.node.available = False
+            if event.cause.startswith(
+                    "java.net.SocketTimeoutException: Read timed out") \
+                or (video_not_available:=event.cause.startswith("com.sedmelluq.discord.lavaplayer.tools.FriendlyException: This video is not available")):
+
                 try:
                     self._new_node_task.cancel()
                 except:
                     pass
+
+                if video_not_available:
+                    self.node.available = False
+
                 self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node(
                     f"O servidor de música **{self.node.identifier}** está indisponível no momento "
                     f"(aguardando um novo servidor ficar disponível)."))

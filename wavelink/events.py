@@ -41,12 +41,14 @@ class TrackEnd:
         The reason the TrackEnd event was dispatched.
     """
 
-    __slots__ = ('track', 'player', 'reason')
+    __slots__ = ('track', 'player', 'node', 'reason', 'data')
 
     def __init__(self, data: dict):
-        self.track = data.get('track')
-        self.player = data.get('player')
-        self.reason = data.get('reason', '').upper()
+        self.track = data.pop('track', None)
+        self.player = data.pop('player', None)
+        self.node = data.pop('node', None)
+        self.reason = data.pop('reason', '').upper()
+        self.data = data
 
     def __str__(self):
         return 'TrackEndEvent'
@@ -65,17 +67,18 @@ class TrackException:
         The error reason dispatched with the event.
     """
 
-    __slots__ = ('track', 'player', 'error', 'data', 'exception', 'cause', 'message', 'severity')
+    __slots__ = ('track', 'player', 'node', 'error', 'data', 'exception', 'cause', 'message', 'severity')
 
     def __init__(self, data: dict):
-        self.track = data.get('track')
-        self.player = data.get('player')
-        self.error = data.get('error')
-        self.data = data
-        self.exception = data.get('exception', {})
+        self.track = data.pop('track', None)
+        self.player = data.pop('player', None)
+        self.node = data.pop('node', None)
+        self.error = data.pop('error', None)
+        self.exception = data.pop('exception', {})
         self.cause = self.exception.get('cause')
         self.message = self.exception.get('message')
         self.severity = self.exception.get('severity')
+        self.data = data
 
     def __str__(self):
         return 'TrackExceptionEvent'
@@ -94,12 +97,14 @@ class TrackStuck:
         The threshold associated with the event.
     """
 
-    __slots__ = ('track', 'player', 'threshold')
+    __slots__ = ('track', 'player', 'node', 'threshold', 'data')
 
     def __init__(self, data: dict):
-        self.track = data.get('track')
-        self.player = data.get('player')
-        self.threshold = int(data.get('thresholdMs'))
+        self.track = data.pop('track', None)
+        self.player = data.pop('player', None)
+        self.node = data.pop('node', None)
+        self.threshold = int(data.pop('thresholdMs', 0))
+        self.data = data
 
     def __str__(self):
         return 'TrackStuckEvent'
@@ -116,11 +121,13 @@ class TrackStart:
         The track associated with the event.
     """
 
-    __slots__ = ('track', 'player')
+    __slots__ = ('track', 'player', 'node', 'data')
 
     def __init__(self, data: dict):
-        self.track = data.get('track')
-        self.player = data.get('player')
+        self.track = data.pop('track', None)
+        self.player = data.pop('player', None)
+        self.node = data.pop('node', None)
+        self.data = data
 
     def __str__(self):
         return 'TrackStartEvent'
@@ -141,13 +148,14 @@ class WebsocketClosed:
         The guild ID associated with the disconnect.
     """
 
-    __slots__ = ('player', 'reason', 'code', 'guild_id')
+    __slots__ = ('player', 'reason', 'code', 'guild_id', 'data')
 
     def __init__(self, data: dict):
-        self.player = data.get('player')
-        self.reason = data.get('reason')
-        self.code = data.get('code')
-        self.guild_id = data.get('guildID')
+        self.player = data.pop('player', None)
+        self.reason = data.pop('reason', None)
+        self.code = data.pop('code', None)
+        self.guild_id = data.pop('guildID', None)
+        self.data = data
 
     def __str__(self):
         return 'WebsocketClosedEvent'
