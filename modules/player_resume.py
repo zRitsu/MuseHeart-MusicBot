@@ -282,7 +282,9 @@ class PlayerSession(commands.Cog):
             }
         )
 
-        if player.current and player.current.info["sourceName"] == "youtube" and not self.bot.config.get("ENABLE_YOUTUBE_PLAYBACK", True) and not player.current.info.get("yt_partial_resolved"):
+        temp_id = None
+
+        if player.current and player.current.info["sourceName"] == "youtube" and not self.bot.config.get("ENABLE_YOUTUBE_PLAYBACK", True) and not player.current.info.get("temp_id"):
             result = None
             exceptions = ""
 
@@ -301,17 +303,16 @@ class PlayerSession(commands.Cog):
 
             else:
                 try:
-                    result = result.tracks[0]
+                    temp_id = result.tracks[0].id
                 except:
-                    result = result[0]
+                    temp_id = result[0].id
 
-                player.current.info.update({"id": result.id, "yt_partial_resolved": True})
-                player.current.id = result.id
+                player.current.info["temp_id"] = temp_id
 
         if player.current:
             player._temp_data.update(
                 {
-                    "encodedTrack": player.current.id,
+                    "encodedTrack": temp_id or player.current.id,
                     "position": position,
                     "paused": pause,
                 }

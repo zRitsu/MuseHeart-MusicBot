@@ -802,24 +802,30 @@ class LavalinkPlayer(wavelink.Player):
 
             if event.cause.startswith(
                     "java.net.SocketTimeoutException: Read timed out") \
-                or (video_not_available:=event.cause.startswith("com.sedmelluq.discord.lavaplayer.tools.FriendlyException: This video is not available")):
+                or (video_not_available:=event.cause.startswith("com.sedmelluq.discord.lavaplayer.tools.FriendlyException: This video is not available")
+            or event.message == "Video returned by YouTube isn't what was requested"):
 
                 try:
                     self._new_node_task.cancel()
                 except:
                     pass
 
-                if video_not_available:
-                    self.node.available = False
-
-                self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node(
-                    f"O servidor de música **{self.node.identifier}** está indisponível no momento "
-                    f"(aguardando um novo servidor ficar disponível)."))
                 await send_report()
+
+                if video_not_available:
+                    self.node.native_yt = False
+                    self.current = None
+                    self.queue.appendleft(track)
+                    await self.process_next(start_position=self.position)
+
+                else:
+                    self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node(
+                        f"O servidor de música **{self.node.identifier}** está indisponível no momento "
+                        f"(aguardando um novo servidor ficar disponível)."))
                 return
 
             if (event.error == "This IP address has been blocked by YouTube (429)" or
-                event.message == "Video returned by YouTube isn't what was requested" or
+                #event.message == "Video returned by YouTube isn't what was requested" or
                 (error_403 := event.cause.startswith(("java.lang.RuntimeException: Not success status code: 403",
                                                       "java.io.IOException: Invalid status code for video page response: 400")))
             ):
@@ -1553,6 +1559,8 @@ class LavalinkPlayer(wavelink.Player):
 
         self.locked = True
 
+        temp_id = None
+
         if isinstance(track, PartialTrack):
 
             if not track.id:
@@ -1594,7 +1602,7 @@ class LavalinkPlayer(wavelink.Player):
                 await self.process_next()
                 return
 
-        elif track.info["sourceName"] == "youtube" and not self.bot.config.get("ENABLE_YOUTUBE_PLAYBACK", True) and not track.info.get("yt_partial_resolved"):
+        elif track.info["sourceName"] == "youtube" and not self.node.native_yt and not track.info.get("temp_id"):
 
             result = None
 
@@ -1617,12 +1625,11 @@ class LavalinkPlayer(wavelink.Player):
                 return
 
             try:
-                result = result.tracks[0]
+                temp_id = result.tracks[0].id
             except:
-                result = result[0]
+                temp_id = result[0].id
 
-            track.info.update({"id": result.id, "yt_partial_resolved": True})
-            track.id = result.id
+            track.info["temp_id"] = temp_id
 
         elif not track.id:
 
@@ -1709,7 +1716,7 @@ class LavalinkPlayer(wavelink.Player):
             self.last_update = time() * 1000
             self.current = track
         else:
-            await self.play(track, start=start_position)
+            await self.play(track, start=start_position, temp_id=temp_id)
             # TODO: rever essa parte caso adicione função de ativar track loops em músicas da fila
             if self.loop != "current" or force_np or (not self.controller_mode and self.current.track_loops == 0):
 
