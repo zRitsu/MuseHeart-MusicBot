@@ -1621,6 +1621,7 @@ class LavalinkPlayer(wavelink.Player):
                 result = result[0]
 
             track.info.update({"id": result.id, "yt_partial_resolved": True})
+            track.id = result.id
 
         elif not track.id:
 

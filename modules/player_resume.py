@@ -281,6 +281,33 @@ class PlayerSession(commands.Cog):
                 "filters": player.filters,
             }
         )
+
+        if player.current.info["sourceName"] == "youtube" and not self.bot.config.get("ENABLE_YOUTUBE_PLAYBACK", True) and not player.current.info.get("yt_partial_resolved"):
+            result = None
+            exceptions = ""
+
+            for provider in player.node.search_providers:
+                if provider in ("ytsearch", "ytmsearch"):
+                    continue
+                try:
+                    result = await player.node.get_tracks(f"{provider}:{player.current.track.title}")
+                except:
+                    exceptions += f"{traceback.format_exc()}\n"
+                    await asyncio.sleep(1)
+                    continue
+
+            if not result:
+                player.current = None
+
+            else:
+                try:
+                    result = result.tracks[0]
+                except:
+                    result = result[0]
+
+                player.current.info.update({"id": result.id, "yt_partial_resolved": True})
+                player.current.id = result.id
+
         if player.current:
             player._temp_data.update(
                 {
@@ -580,7 +607,7 @@ class PlayerSession(commands.Cog):
                         except:
                             track = None
 
-                        if track:
+                        if track and track.info["sourceName"] == "youtube" and not self.bot.config.get("ENABLE_YOUTUBE_PLAYBACK", True) and not track.info.get("yt_partial_resolved"):
                             player.current = track
                             position = int(float(data.get("position", 0)))
                             if player.node.version == 3:
