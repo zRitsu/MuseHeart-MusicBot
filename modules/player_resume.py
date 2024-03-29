@@ -282,7 +282,7 @@ class PlayerSession(commands.Cog):
             }
         )
 
-        if player.current.info["sourceName"] == "youtube" and not self.bot.config.get("ENABLE_YOUTUBE_PLAYBACK", True) and not player.current.info.get("yt_partial_resolved"):
+        if player.current and player.current.info["sourceName"] == "youtube" and not self.bot.config.get("ENABLE_YOUTUBE_PLAYBACK", True) and not player.current.info.get("yt_partial_resolved"):
             result = None
             exceptions = ""
 
