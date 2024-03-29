@@ -369,12 +369,13 @@ class PlayerSession(commands.Cog):
         try:
             guild = self.bot.get_guild(data["_id"])
 
+            if not (db_date := data.get("time")) or (disnake.utils.utcnow() - db_date).total_seconds() > 172800:
+                print(f"{self.bot.user} - Limpando informações do player: {data['_id']}")
+                await self.delete_data(data["_id"])
+                return
+
             if not guild:
-                if not (db_date:=data.get("time")) or (disnake.utils.utcnow() - db_date).total_seconds() > 172800:
-                    print(f"{self.bot.user} - Limpando informações do player: {data['_id']} | Servidor inexistente...")
-                    await self.delete_data(data["_id"])
-                else:
-                    print(f"{self.bot.user} - Player Ignorado: {data['_id']} | Servidor inexistente...")
+                print(f"{self.bot.user} - Player Ignorado: {data['_id']} | Servidor inexistente...")
                 return
 
             try:
@@ -457,8 +458,6 @@ class PlayerSession(commands.Cog):
                     can_connect(voice_channel, guild=guild, bot=self.bot)
                 except Exception as e:
                     print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\n{repr(e)}")
-                    if not data.get("autoplay") and (disnake.utils.utcnow() - data.get("time", disnake.utils.utcnow())).total_seconds() > 172800:
-                        await self.delete_data(guild.id)
                     try:
                         msg = f"O player foi finalizado devido a falta da permissão de conectar no canal {voice_channel.mention}."
                         if not data["skin_static"]:
