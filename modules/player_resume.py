@@ -607,7 +607,7 @@ class PlayerSession(commands.Cog):
                         except:
                             track = None
 
-                        if track and track.info["sourceName"] == "youtube" and not self.bot.config.get("ENABLE_YOUTUBE_PLAYBACK", True) and not track.info.get("yt_partial_resolved"):
+                        if track and (track.info["sourceName"] != "youtube" or self.bot.config.get("ENABLE_YOUTUBE_PLAYBACK", True)):
                             player.current = track
                             position = int(float(data.get("position", 0)))
                             if player.node.version == 3:
