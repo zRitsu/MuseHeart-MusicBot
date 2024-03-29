@@ -816,6 +816,7 @@ class LavalinkPlayer(wavelink.Player):
                     self.node.native_yt = False
                     self.current = None
                     self.queue.appendleft(track)
+                    self.locked = False
                     await self.process_next(start_position=self.position)
 
                 else:
