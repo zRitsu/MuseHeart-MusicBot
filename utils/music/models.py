@@ -1601,7 +1601,7 @@ class LavalinkPlayer(wavelink.Player):
             exceptions = ""
 
             for provider in self.node.search_providers:
-                if provider == "youtube":
+                if provider in ("ytsearch", "ytmsearch"):
                     continue
                 try:
                     result = await self.node.get_tracks(f"{provider}:{track.title}")
