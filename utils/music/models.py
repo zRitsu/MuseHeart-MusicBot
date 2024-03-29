@@ -1594,6 +1594,34 @@ class LavalinkPlayer(wavelink.Player):
                 await self.process_next()
                 return
 
+        elif track.info["sourceName"] == "youtube" and not self.bot.config.get("ENABLE_YOUTUBE_PLAYBACK", True) and not track.info.get("yt_partial_resolved"):
+
+            result = None
+
+            exceptions = ""
+
+            for provider in self.node.search_providers:
+                if provider == "youtube":
+                    continue
+                try:
+                    result = await self.node.get_tracks(f"{provider}:{track.title}")
+                except:
+                    exceptions += f"{traceback.format_exc()}\n"
+                    await asyncio.sleep(1)
+                    continue
+
+            if not result:
+                print(exceptions)
+                await self.process_next()
+                return
+
+            try:
+                result = result.tracks[0]
+            except:
+                result = result[0]
+
+            track.info.update({"id": result.id, "yt_partial_resolved": True})
+
         elif not track.id:
 
             if "&list=" in track.uri and (link_re := YOUTUBE_VIDEO_REG.match(track.uri)):
