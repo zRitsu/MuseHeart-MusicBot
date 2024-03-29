@@ -1612,6 +1612,7 @@ class LavalinkPlayer(wavelink.Player):
 
             if not result:
                 print(exceptions)
+                self.locked = False
                 await self.process_next()
                 return
 
