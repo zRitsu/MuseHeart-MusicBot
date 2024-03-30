@@ -2692,7 +2692,7 @@ class LavalinkPlayer(wavelink.Player):
                     self.queue.appendleft(self.current)
                     self.current = None
                     self.locked = False
-                    if self._voice_state:
+                    if self.guild.me.voice and self._voice_state:
                         await self._dispatch_voice_update()
                     await self.process_next(self.position)
                 else:
