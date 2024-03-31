@@ -458,6 +458,7 @@ class LavalinkPlayer(wavelink.Player):
         self._new_node_task: Optional[asyncio.Task] = None
         self._queue_updater_task: Optional[asyncio.Task] = None
         self.auto_skip_track_task: Optional[asyncio.Task] = None
+        self.native_yt: bool = True
 
         stage_template = kwargs.pop("stage_title_template", None)
 
@@ -807,9 +808,8 @@ class LavalinkPlayer(wavelink.Player):
             )) \
                 or (video_not_available:=event.cause.startswith((
                 "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: This video is not available",
-                "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: YouTube WebM streams are currently not supported."
-            ))
-            or event.message == "Video returned by YouTube isn't what was requested"):
+                "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: YouTube WebM streams are currently not supported.",
+            )) or event.message == "Video returned by YouTube isn't what was requested"):
 
                 try:
                     self._new_node_task.cancel()
@@ -819,10 +819,15 @@ class LavalinkPlayer(wavelink.Player):
                 await send_report()
 
                 if video_not_available:
-                    self.node.native_yt = False
+                    self.native_yt = False
                     self.current = None
                     self.queue.appendleft(track)
                     self.locked = False
+                    self.set_command_log(
+                        text="No momento o player está usando o método alternativo de obter músicas do youtube "
+                             "(Talvez a música tocada seja diferente do esperado).",
+                        emoji="⚠️"
+                    )
                     await self.process_next(start_position=self.position)
 
                 else:
@@ -1610,7 +1615,7 @@ class LavalinkPlayer(wavelink.Player):
                 await self.process_next()
                 return
 
-        elif track.info["sourceName"] == "youtube" and not self.node.native_yt and not track.info.get("temp_id"):
+        elif track.info["sourceName"] == "youtube" and not self.native_yt and not track.info.get("temp_id"):
 
             result = None
 

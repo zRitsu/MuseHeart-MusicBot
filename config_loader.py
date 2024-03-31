@@ -139,7 +139,6 @@ DEFAULT_CONFIG = {
     ##############
     "USE_YTDL": False,
     "SILENT_PUBLICBOT_WARNING": False,
-    "ENABLE_YOUTUBE_PLAYBACK": True,
 }
 
 
@@ -242,7 +241,6 @@ def load_config():
 
         "USE_YTDL",
         "SILENT_PUBLICBOT_WARNING",
-        "ENABLE_YOUTUBE_PLAYBACK",
     ]:
         if CONFIG[i] in (True, False, None):
             continue

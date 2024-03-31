@@ -288,37 +288,10 @@ class PlayerSession(commands.Cog):
             }
         )
 
-        temp_id = None
-
-        if player.current and player.current.info["sourceName"] == "youtube" and not self.bot.config.get("ENABLE_YOUTUBE_PLAYBACK", True) and not player.current.info.get("temp_id"):
-            result = None
-            exceptions = ""
-
-            for provider in player.node.search_providers:
-                if provider in ("ytsearch", "ytmsearch"):
-                    continue
-                try:
-                    result = await player.node.get_tracks(f"{provider}:{player.current.track.title}")
-                except:
-                    exceptions += f"{traceback.format_exc()}\n"
-                    await asyncio.sleep(1)
-                    continue
-
-            if not result:
-                player.current = None
-
-            else:
-                try:
-                    temp_id = result.tracks[0].id
-                except:
-                    temp_id = result[0].id
-
-                player.current.info["temp_id"] = temp_id
-
         if player.current:
             player._temp_data.update(
                 {
-                    "encodedTrack": temp_id or player.current.id,
+                    "encodedTrack": player.current.id,
                     "position": position,
                     "paused": pause,
                 }
@@ -621,7 +594,7 @@ class PlayerSession(commands.Cog):
                         except:
                             track = None
 
-                        if track and (track.info["sourceName"] != "youtube" or self.bot.config.get("ENABLE_YOUTUBE_PLAYBACK", True)):
+                        if track:
                             player.current = track
                             position = int(float(data.get("position", 0)))
                             if player.node.version == 3:

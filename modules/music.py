@@ -6718,7 +6718,6 @@ class Music(commands.Cog):
         node.website = node_website
         node.retry_403 = retry_403
         node.search_providers = search_providers
-        node.native_yt = bool(self.bot.config["ENABLE_YOUTUBE_PLAYBACK"])
 
     async def get_tracks(
             self, query: str, user: disnake.Member, node: wavelink.Node = None,
