@@ -179,6 +179,12 @@ class PlayerSession(commands.Cog):
             "time": disnake.utils.utcnow(),
         }
 
+        try:
+            data["last_voice_channel_id"] = player._last_channel_id
+        except AttributeError:
+            player._last_channel_id = vc_id
+            data["last_voice_channel_id"] = vc_id
+
         if player.static:
             if player.skin_static.startswith("> custom_skin: "):
                 custom_skin = player.skin_static[15:]
@@ -439,6 +445,14 @@ class PlayerSession(commands.Cog):
                     except Exception as e:
                         print(f"{self.bot.user} - Falha ao obter mensagem: {repr(e)}\n"
                               f"channel_id: {text_channel.id} | message_id {data['message']}")
+
+                if not voice_channel or not voice_channel.permissions_for(guild.me).connect:
+                    if data["voice_channel"] != (vc:=data.get("last_voice_channel_id", data["voice_channel"])):
+                        voice_channel=vc
+                        try:
+                            del data["voice_state"]
+                        except:
+                            pass
 
                 if not voice_channel:
                     print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\nO canal de voz não existe...")
