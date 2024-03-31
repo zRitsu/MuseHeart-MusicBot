@@ -1572,7 +1572,7 @@ class LavalinkPlayer(wavelink.Player):
 
         self.locked = True
 
-        temp_id = track.info.get("temp_id")
+        temp_id = None
 
         if isinstance(track, PartialTrack):
 
@@ -1615,39 +1615,43 @@ class LavalinkPlayer(wavelink.Player):
                 await self.process_next()
                 return
 
-        elif track.info["sourceName"] == "youtube" and not self.native_yt and not temp_id:
+        elif track.info["sourceName"] == "youtube" and not self.native_yt:
 
-            result = None
+            temp_id = track.info.get("temp_id")
 
-            exceptions = ""
+            if not temp_id:
 
-            for provider in self.node.search_providers:
-                if provider in ("ytsearch", "ytmsearch"):
-                    continue
+                result = None
+
+                exceptions = ""
+
+                for provider in self.node.search_providers:
+                    if provider in ("ytsearch", "ytmsearch"):
+                        continue
+                    try:
+                        result = await self.node.get_tracks(f"{provider}:{track.title}")
+                    except:
+                        exceptions += f"{traceback.format_exc()}\n"
+                        await asyncio.sleep(1)
+                        continue
+
+                if not result:
+                    print(exceptions)
+                    self.failed_tracks.append(track)
+                    self.set_command_log(emoji="⚠️", text=f"Música [`{fix_characters(track.title, 15)}`]({track.uri}) "
+                                                          f"ignorada devido a falta de resultado no modo alternativo de buscas do youtube.")
+                    await self.invoke_np()
+                    await asyncio.sleep(10)
+                    self.locked = False
+                    await self.process_next()
+                    return
+
                 try:
-                    result = await self.node.get_tracks(f"{provider}:{track.title}")
+                    temp_id = result.tracks[0].id
                 except:
-                    exceptions += f"{traceback.format_exc()}\n"
-                    await asyncio.sleep(1)
-                    continue
+                    temp_id = result[0].id
 
-            if not result:
-                print(exceptions)
-                self.failed_tracks.append(track)
-                self.set_command_log(emoji="⚠️", text=f"Música [`{fix_characters(track.title, 15)}`]({track.uri}) "
-                                                      f"ignorada devido a falta de resultado no modo alternativo de buscas do youtube.")
-                await self.invoke_np()
-                await asyncio.sleep(10)
-                self.locked = False
-                await self.process_next()
-                return
-
-            try:
-                temp_id = result.tracks[0].id
-            except:
-                temp_id = result[0].id
-
-            track.info["temp_id"] = temp_id
+                track.info["temp_id"] = temp_id
 
         elif not track.id:
 
