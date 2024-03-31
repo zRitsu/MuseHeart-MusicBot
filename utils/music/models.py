@@ -800,8 +800,10 @@ class LavalinkPlayer(wavelink.Player):
 
             cooldown = 10
 
-            if event.cause.startswith(
-                    "java.net.SocketTimeoutException: Read timed out") \
+            if event.cause.startswith((
+                    "java.net.SocketTimeoutException: Read timed out",
+                    "java.net.SocketException: Network is unreachable"
+            )) \
                 or (video_not_available:=event.cause.startswith((
                 "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: This video is not available",
                 "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: YouTube WebM streams are currently not supported."
