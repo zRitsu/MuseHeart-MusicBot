@@ -7,6 +7,7 @@ import pickle
 import re
 import traceback
 import zlib
+from asyncio import timeout
 from base64 import b64decode
 from copy import deepcopy
 from random import shuffle
@@ -754,7 +755,11 @@ class Music(commands.Cog):
         channel = None
 
         if not inter.response.is_done():
-            ephemeral = await self.is_request_channel(inter, data=guild_data, ignore_thread=True)
+            try:
+                async with timeout(2.4):
+                    ephemeral = await self.is_request_channel(inter, data=guild_data, ignore_thread=True)
+            except asyncio.TimeoutError:
+                ephemeral = True
             await inter.response.defer(ephemeral=ephemeral, with_message=True)
 
         if not inter.author.voice:
