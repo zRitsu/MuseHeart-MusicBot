@@ -1633,6 +1633,11 @@ class LavalinkPlayer(wavelink.Player):
 
             if not result:
                 print(exceptions)
+                self.failed_tracks.append(track)
+                self.set_command_log(emoji="⚠️", text=f"Música [`{fix_characters(track.title, 15)}`]({track.uri}) "
+                                                      f"ignorada devido a falta de resultado no modo alternativo de buscas do youtube.")
+                await self.invoke_np()
+                await asyncio.sleep(10)
                 self.locked = False
                 await self.process_next()
                 return
