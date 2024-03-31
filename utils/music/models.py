@@ -1572,7 +1572,7 @@ class LavalinkPlayer(wavelink.Player):
 
         self.locked = True
 
-        temp_id = None
+        temp_id = track.info.get("temp_id")
 
         if isinstance(track, PartialTrack):
 
@@ -1615,7 +1615,7 @@ class LavalinkPlayer(wavelink.Player):
                 await self.process_next()
                 return
 
-        elif track.info["sourceName"] == "youtube" and not self.native_yt and not track.info.get("temp_id"):
+        elif track.info["sourceName"] == "youtube" and not self.native_yt and not temp_id:
 
             result = None
 
