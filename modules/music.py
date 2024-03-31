@@ -4542,6 +4542,8 @@ class Music(commands.Cog):
 
         await player.change_node(node)
 
+        player.native_yt = True
+
         embed = disnake.Embed(description=f"**O player foi migrado para o servidor de música:** `{node}`",
                               color=self.bot.get_color(player.guild.me))
 
