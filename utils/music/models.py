@@ -2696,6 +2696,8 @@ class LavalinkPlayer(wavelink.Player):
 
             node = nodes[0]
 
+            self.native_yt = True
+
             try:
                 if self.current and not self.current.id:
                     self.queue.appendleft(self.current)
