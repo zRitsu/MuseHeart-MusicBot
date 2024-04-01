@@ -1,4 +1,4 @@
-git+https://github.com/DisnakeDev/disnake.git@cc1776a76788ac684f7f03bde720b5e22b21606c
+git+https://github.com/DisnakeDev/disnake.git@2919c6177aee6bb33ce61260e7213fe0ec6769e9
 python-dotenv
 user_agent
 requests>=2.31.0
@@ -11,7 +11,7 @@ aiofiles
 disnake-jishaku
 packaging
 aiosqlite
-yt-dlp>=2024.03.10
+git+https://github.com/yt-dlp/yt-dlp.git@32abfb00bdbd119ca675fdc6d1719331f0a2741a
 tornado
 emoji
 spotipy
