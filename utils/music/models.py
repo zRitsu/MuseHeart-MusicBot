@@ -824,8 +824,8 @@ class LavalinkPlayer(wavelink.Player):
                     self.queue.appendleft(track)
                     self.locked = False
                     self.set_command_log(
-                        text=f"Devido a problemas técnicos no servidor `{self.node.identifier}` o player está usando o método alternativo de obter músicas do youtube "
-                             "(Talvez a música tocada seja diferente do esperado).",
+                        text=f"Devido a problemas técnicos no servidor `{self.node.identifier}` será usado o método alternativo de obter músicas do youtube "
+                             "na sessão atual (Talvez a música tocada seja diferente do esperado).",
                         emoji="⚠️"
                     )
                     await self.process_next(start_position=self.position)
