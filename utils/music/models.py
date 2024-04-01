@@ -28,7 +28,7 @@ from utils.others import music_source_emoji, send_idle_embed, PlayerControls, So
 if TYPE_CHECKING:
     from utils.client import BotCore
 
-exclude_tags = ["remix", "edit", "extend"]
+exclude_tags = ["remix", "edit", "extend", "compilation"]
 
 thread_archive_time = {
     60: 30,
@@ -1621,7 +1621,7 @@ class LavalinkPlayer(wavelink.Player):
 
             if not temp_id:
 
-                result = None
+                tracks = []
 
                 exceptions = ""
 
@@ -1629,13 +1629,26 @@ class LavalinkPlayer(wavelink.Player):
                     if provider in ("ytsearch", "ytmsearch"):
                         continue
                     try:
-                        result = await self.node.get_tracks(f"{provider}:{track.title}")
+                        tracks = await self.node.get_tracks(f"{provider}:{track.title}")
                     except:
                         exceptions += f"{traceback.format_exc()}\n"
                         await asyncio.sleep(1)
                         continue
 
-                if not result:
+                try:
+                    tracks = tracks.tracks
+                except AttributeError:
+                    pass
+
+                final_result = []
+
+                for t in tracks:
+                    if any((i in t.title.lower() and i not in track.title.lower()) for i in exclude_tags):
+                        if ((t.duration - 10000) < track.duration < (t.duration + 10000)):
+                            final_result.append(t)
+                            break
+
+                if not final_result:
                     print(exceptions)
                     self.failed_tracks.append(track)
                     self.set_command_log(emoji="⚠️", text=f"Música [`{fix_characters(track.title, 15)}`]({track.uri}) "
@@ -1646,10 +1659,7 @@ class LavalinkPlayer(wavelink.Player):
                     await self.process_next()
                     return
 
-                try:
-                    temp_id = result.tracks[0].id
-                except:
-                    temp_id = result[0].id
+                temp_id = final_result[0].id
 
                 track.info["temp_id"] = temp_id
 
