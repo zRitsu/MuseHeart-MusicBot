@@ -6799,10 +6799,6 @@ class Music(commands.Cog):
                             raise GenericError("**Não há servidores de música disponível.**")
 
                     except Exception as e:
-                        if "Video returned by YouTube isn't what was requested" in str(e):
-                            node_search.available = False
-                            return await self.get_tracks(query=query, user=user, track_loops=track_loops, use_cache=use_cache,
-                                                  source=source, bot=bot)
                         print(f"Falha ao processar busca...\n{query}\n{traceback.format_exc()}")
                         exceptions.add(repr(e))
 
