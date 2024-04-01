@@ -1615,7 +1615,7 @@ class LavalinkPlayer(wavelink.Player):
                 await self.process_next()
                 return
 
-        elif track.info["sourceName"] == "youtube" and not self.native_yt:
+        elif (track.info["sourceName"] == "youtube" or track.info.get("sourceNameOrig") == "youtube") and not self.native_yt:
 
             temp_id = track.info.get("temp_id")
 
@@ -2675,6 +2675,7 @@ class LavalinkPlayer(wavelink.Player):
 
             track.id = selected_track.id
             track.info["length"] = selected_track.duration
+            track.info["sourceNameOrig"] = selected_track.info["sourceName"]
 
         except Exception as e:
             traceback.print_exc()
