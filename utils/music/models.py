@@ -1574,6 +1574,8 @@ class LavalinkPlayer(wavelink.Player):
 
         temp_id = None
 
+        #pprint.pprint(track.info)
+
         if isinstance(track, PartialTrack):
 
             if not track.id:
@@ -1596,26 +1598,26 @@ class LavalinkPlayer(wavelink.Player):
                     await self.process_next()
                     return
 
-            if not track.id:
-                try:
-                    await self.text_channel.send(
-                        embed=disnake.Embed(
-                            description=f"A música [{track.title}]({track.uri}) não está disponível...\n"
-                                        f"Pulando para a próxima música...",
-                            color=self.bot.get_color()
-                        ), delete_after=10
-                    )
-                except:
-                    traceback.print_exc()
+                if not track.id:
+                    try:
+                        await self.text_channel.send(
+                            embed=disnake.Embed(
+                                description=f"A música [{track.title}]({track.uri}) não está disponível...\n"
+                                            f"Pulando para a próxima música...",
+                                color=self.bot.get_color()
+                            ), delete_after=10
+                        )
+                    except:
+                        traceback.print_exc()
 
-                await asyncio.sleep(10)
+                    await asyncio.sleep(10)
 
-                self.locked = False
+                    self.locked = False
 
-                await self.process_next()
-                return
+                    await self.process_next()
+                    return
 
-        elif (track.info["sourceName"] == "youtube" or track.info.get("sourceNameOrig") == "youtube") and not self.native_yt:
+        if not self.native_yt and (track.info["sourceName"] == "youtube" or track.info.get("sourceNameOrig") == "youtube"):
 
             temp_id = track.info.get("temp_id")
 
