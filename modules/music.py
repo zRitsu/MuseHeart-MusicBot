@@ -7,7 +7,6 @@ import pickle
 import re
 import traceback
 import zlib
-from asyncio import timeout
 from base64 import b64decode
 from copy import deepcopy
 from random import shuffle
@@ -18,6 +17,7 @@ import aiofiles
 import aiohttp
 import disnake
 from aiohttp import ClientConnectorCertificateError
+from async_timeout import timeout
 from disnake.ext import commands
 
 import wavelink
