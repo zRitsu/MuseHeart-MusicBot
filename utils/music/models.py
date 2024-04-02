@@ -28,7 +28,7 @@ from utils.others import music_source_emoji, send_idle_embed, PlayerControls, So
 if TYPE_CHECKING:
     from utils.client import BotCore
 
-exclude_tags = ["remix", "edit", "extend", "compilation"]
+exclude_tags = ["remix", "edit", "extend", "compilation", "mashup"]
 
 thread_archive_time = {
     60: 30,
@@ -1574,8 +1574,6 @@ class LavalinkPlayer(wavelink.Player):
 
         temp_id = None
 
-        #pprint.pprint(track.info)
-
         if isinstance(track, PartialTrack):
 
             if not track.id:
@@ -1619,6 +1617,11 @@ class LavalinkPlayer(wavelink.Player):
 
         if not self.native_yt and (track.info["sourceName"] == "youtube" or track.info.get("sourceNameOrig") == "youtube"):
 
+            if track.is_stream or track.duration > 600000:
+                self.failed_tracks.append(track)
+                await self.process_next()
+                return
+
             temp_id = track.info.get("temp_id")
 
             if not temp_id:
@@ -1642,25 +1645,28 @@ class LavalinkPlayer(wavelink.Player):
                 except AttributeError:
                     pass
 
-                final_result = []
-
-                for t in tracks:
-                    if any((i in t.title.lower() and i not in track.title.lower()) for i in exclude_tags):
-                        if ((t.duration - 10000) < track.duration < (t.duration + 10000)):
+                if not [i in track.title.lower() for i in exclude_tags]:
+                    final_result = []
+                    for t in tracks:
+                        if not any((i in t.title.lower()) for i in exclude_tags):
                             final_result.append(t)
                             break
+                    tracks = final_result or tracks
 
-                if not final_result:
-                    print(exceptions)
+                if not tracks:
+                    if exceptions:
+                        print(exceptions)
                     self.failed_tracks.append(track)
-                    self.set_command_log(emoji="⚠️", text=f"Música [`{fix_characters(track.title, 15)}`]({track.uri}) "
-                                                          f"ignorada devido a falta de resultado no modo alternativo de buscas do youtube.")
-                    await asyncio.sleep(2)
+                    self.current = track
+                    self.set_command_log(emoji="⚠️", text="A música atual será ignorada devido a falta de resultado "
+                                                          "no modo alternativo de buscas do youtube.")
+                    await self.invoke_np()
+                    await asyncio.sleep(13)
                     self.locked = False
                     await self.process_next()
                     return
 
-                temp_id = final_result[0].id
+                temp_id = tracks[0].id
 
                 track.info["temp_id"] = temp_id
 
