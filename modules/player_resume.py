@@ -281,27 +281,27 @@ class PlayerSession(commands.Cog):
                 except:
                     traceback.print_exc()
 
-        player._temp_data.update(
-            {
-                "volume": player.volume,
-                "filters": player.filters,
-            }
-        )
+
+        data = {
+            "volume": player.volume,
+            "filters": player.filters,
+        }
 
         if player.current:
-            player._temp_data.update(
+            data.update(
                 {
-                    "encodedTrack": player.current.id,
+                    "encodedTrack": player.current.info.get("temp_id") or player.current.id,
                     "position": position,
                     "paused": pause,
                 }
             )
-            await player.connect(voice_channel.id)
             await self.voice_check(voice_channel, position)
+            await player.connect(voice_channel.id)
+            await player.node.update_player(player.guild.id, data=data)
         else:
             await player.connect(voice_channel.id)
             await self.voice_check(voice_channel, position)
-            await player.node.update_player(player.guild.id, data=player._temp_data)
+            await player.node.update_player(player.guild.id, data=data)
             await player.process_next()
 
     async def voice_check(self, voice_channel: Union[disnake.VoiceChannel, disnake.StageChannel], position: int = 0):
