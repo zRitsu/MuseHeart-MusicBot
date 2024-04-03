@@ -287,6 +287,9 @@ class PlayerSession(commands.Cog):
             "filters": player.filters,
         }
 
+        await player.connect(voice_channel.id)
+        await self.voice_check(voice_channel, position)
+
         if player.current:
             data.update(
                 {
@@ -295,12 +298,8 @@ class PlayerSession(commands.Cog):
                     "paused": pause,
                 }
             )
-            await self.voice_check(voice_channel, position)
-            await player.connect(voice_channel.id)
             await player.node.update_player(player.guild.id, data=data)
         else:
-            await player.connect(voice_channel.id)
-            await self.voice_check(voice_channel, position)
             await player.node.update_player(player.guild.id, data=data)
             await player.process_next()
 
