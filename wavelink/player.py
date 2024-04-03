@@ -197,7 +197,7 @@ class Player:
         self.node = node
 
         self.last_update = time.time() * 1000
-        self.last_position = None
+        self.last_position = 0
         self.position_timestamp = None
         self.ping = None
 

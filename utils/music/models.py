@@ -580,7 +580,7 @@ class LavalinkPlayer(wavelink.Player):
         state = state['state']
 
         if not self.auto_pause:
-            self.last_position = state.get('position', 0)
+            self.last_position = state.get('position') or 0
 
         self.last_update = time() * 1000
         self.position_timestamp = state.get('time', 0)
