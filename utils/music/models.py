@@ -2265,10 +2265,11 @@ class LavalinkPlayer(wavelink.Player):
                     else:
                         await interaction.response.edit_message(allowed_mentions=self.allowed_mentions,
                                                                 **data)
+                    self.updating = False
                 except:
                     traceback.print_exc()
-                self.updating = False
-                self.start_message_updater_task()
+                else:
+                    self.start_message_updater_task()
                 return
 
             else:
