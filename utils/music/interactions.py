@@ -185,12 +185,20 @@ class QueueInteraction(disnake.ui.View):
 
                 player: LavalinkPlayer = self.bot.music.players[self.user.guild.id]
 
+                move_func = None
+
                 try:
                     player.queue.remove(self.current_track)
+                    move_func = player.queue.insert
                 except ValueError:
-                    pass
-                else:
-                    player.queue.insert((int(inter.text_values["queue_move_position"]) or 1)-1, self.current_track)
+                    try:
+                        player.queue_autoplay.remove(self.current_track)
+                        move_func = player.queue_autoplay.insert
+                    except ValueError:
+                        pass
+
+                if move_func:
+                    move_func((int(inter.text_values["queue_move_position"]) or 1)-1, self.current_track)
                     player.update = True
 
                 self.update_pages(reset_page=False)

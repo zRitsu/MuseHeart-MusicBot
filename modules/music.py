@@ -4038,7 +4038,7 @@ class Music(commands.Cog):
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
-        if not player.queue:
+        if not player.queue and not player.queue_autoplay:
             raise GenericError("**Não há musicas na fila.**")
 
         filters = []
@@ -4081,6 +4081,8 @@ class Music(commands.Cog):
         except:
             has_id = isinstance(inter, CustomContext)
 
+        insert_func = player.queue.insert
+
         if range_start > 0 and range_end > 0:
 
             if range_start >= range_end:
@@ -4099,7 +4101,11 @@ class Music(commands.Cog):
         elif song_name and has_id and filters == ["song_name"] and amount is None:
             indexes = queue_track_index(inter, bot, song_name, match_count=1, case_sensitive=case_sensitive)
             for index, track in reversed(indexes):
-                player.queue.remove(track)
+                try:
+                    player.queue.remove(track)
+                except ValueError:
+                    player.queue_autoplay.remove(track)
+                    insert_func = player.queue_autoplay.insert
                 tracklist.append(track)
             song_list = []
 
@@ -4193,7 +4199,7 @@ class Music(commands.Cog):
             raise GenericError("Nenhuma música encontrada com os filtros selecionados!")
 
         for t in reversed(tracklist):
-            player.queue.insert(position-1, t)
+            insert_func(position-1, t)
 
         try:
             final_filters.remove("song_name")
