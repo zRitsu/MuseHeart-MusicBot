@@ -3045,7 +3045,7 @@ class Music(commands.Cog):
             txt += f"```ansi\n[34;1m[{time_format(player.position)}] {('=' * progress.start)}[0m🔴️[36;1m{'-' * progress.end} " \
                    f"[{time_format(player.current.duration)}][0m```\n"
 
-        txt += f"> 👤 **⠂Uploader:** `{player.current.authors_md}`\n"
+        txt += f"> 👤 **⠂Uploader:** {player.current.authors_md}\n"
 
         if player.current.album_name:
             txt += f"> 💽 **⠂Álbum:** [`{fix_characters(player.current.album_name, limit=20)}`]({player.current.album_url})\n"

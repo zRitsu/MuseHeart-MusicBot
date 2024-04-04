@@ -154,7 +154,7 @@ class PartialTrack:
         try:
             return self.info["extra"]["authors_md"]
         except KeyError:
-            return ""
+            return f"`{self.author}`"
 
     @property
     def authors(self) -> List[str]:
