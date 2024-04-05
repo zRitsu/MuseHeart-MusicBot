@@ -364,8 +364,8 @@ class LavalinkTrack(wavelink.Track):
     @property
     def authors_md(self) -> str:
         try:
-            if (md:=f"[`{self.author}`](<{self.info['pluginInfo']['artistUrl']}>)"):
-                return md
+            if self.info['pluginInfo']['artistUrl']:
+                return f"[`{self.author}`](<{self.info['pluginInfo']['artistUrl']}>)"
         except KeyError:
             pass
         return f"`{self.author}`"
