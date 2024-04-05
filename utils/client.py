@@ -38,6 +38,7 @@ from utils.others import CustomContext, token_regex, sort_dict_recursively
 from utils.owner_panel import PanelView
 from web_app import WSClient, start
 
+native_sources = ("http", "youtube", "soundcloud", "deezer", "tts", "reddit", "ocremix", "tiktok", "mixcloud", "soundgasm", "flowerytts", "vimeo", "twitch", "bandcamp", "local")
 
 class BotPool:
 
@@ -262,6 +263,12 @@ class BotPool:
                     )
                     playlists[playlist["url"]] = playlist_cls
                     playlist = playlist_cls
+
+            if info["sourceName"] not in native_sources:
+                try:
+                    del info["id"]
+                except KeyError:
+                    pass
 
             tracks.append(LavalinkTrack(id_=info.get("id", ""), info=info, playlist=playlist, requester=info["extra"]["requester"]))
 
