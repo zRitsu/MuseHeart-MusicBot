@@ -549,6 +549,7 @@ music_source_emoji_data = {
     "soundcloud": "<:soundcloud:721530214764773427>",
     "spotify": "<:spotify:715717523626000445>",
     "deezer": "<:deezer:1190802442053505025>",
+    "applemusic": "<:applemusic:1225631877658968164>",
     "twitch": "<:Twitch:803656463695478804>",
 }
 
