@@ -343,6 +343,13 @@ class LavalinkTrack(wavelink.Track):
         return self.title
 
     @property
+    def original_id(self) -> str:
+        try:
+            return self.info["extra"]["original_id"]
+        except KeyError:
+            return ""
+
+    @property
     def single_title(self) -> str:
         return self.title
 
