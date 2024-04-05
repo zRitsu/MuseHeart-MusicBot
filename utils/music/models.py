@@ -1258,6 +1258,7 @@ class LavalinkPlayer(wavelink.Player):
 
             try:
                 if update_log:
+                    self.set_command_log(emoji="🔋", text="O modo **[economia de recursos]** foi desativado.")
                     try:
                         self.auto_skip_track_task.cancel()
                     except:
@@ -1311,6 +1312,12 @@ class LavalinkPlayer(wavelink.Player):
                 self.auto_skip_track_task.cancel()
             except:
                 pass
+            self.set_command_log(
+                emoji="🪫",
+                text="O player está no modo economia de recursos (esse modo será desativado automaticamente quando "
+                     f"um membro entrar no canal <#{self.channel_id}>)."
+            )
+            self.update = True
             self.auto_skip_track_task = self.bot.loop.create_task(self.auto_skip_track())
             await self.update_stage_topic()
 
@@ -2613,8 +2620,6 @@ class LavalinkPlayer(wavelink.Player):
 
                 if [m for m in self.last_channel.members if not m.bot and not (m.voice.deaf or m.voice.self_deaf)]:
                     return
-
-                self.set_command_log()
 
                 try:
                     await self.track_end()
