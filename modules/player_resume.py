@@ -294,10 +294,15 @@ class PlayerSession(commands.Cog):
         await player.connect(voice_channel.id)
         await self.voice_check(voice_channel, position)
 
-        if player.current:
+        try:
+            track_id = player.current.info.get("temp_id") or player.current.id
+        except:
+            track_id = None
+
+        if track_id:
             data.update(
                 {
-                    "encodedTrack": player.current.info.get("temp_id") or player.current.id,
+                    "encodedTrack": track_id,
                     "position": position,
                     "paused": pause,
                 }
