@@ -89,6 +89,7 @@ class PartialTrack:
             "isStream": False,
             "isSeekable": True,
             "sourceName": source_name,
+            "pluginInfo": {},
             "extra": {
                 "original_id": original_id,
                 "requester": requester,
@@ -199,14 +200,20 @@ class PartialTrack:
         try:
             return self.info["extra"]["album"]["name"]
         except KeyError:
-            return ""
+            try:
+                self.info["pluginInfo"]["albumName"]
+            except KeyError:
+                return ""
 
     @property
     def album_url(self) -> str:
         try:
             return self.info["extra"]["album"]["url"]
         except KeyError:
-            return ""
+            try:
+                self.info["pluginInfo"]["albumUrl"]
+            except KeyError:
+                return ""
 
     @property
     def playlist_name(self) -> str:
@@ -230,6 +237,18 @@ class LavalinkPlaylist:
         self.data = data
         self.url = kwargs.pop("url")
 
+        plugininfo = kwargs.pop("pluginInfo", {})
+
+        try:
+            self.data["playlistInfo"]["thumb"] = plugininfo["artworkUrl"]
+        except KeyError:
+            pass
+
+        try:
+            self.data["type"] = plugininfo["type"]
+        except KeyError:
+            pass
+
         encoded_name = kwargs.pop("encoded_name", "track")
 
         try:
@@ -241,7 +260,7 @@ class LavalinkPlaylist:
         except IndexError:
             pass
         self.tracks = [LavalinkTrack(
-            id_=track[encoded_name], info=track['info'], playlist=self, **kwargs) for track in data['tracks']]
+            id_=track[encoded_name], info=track['info'], pluginInfo=track.get('pluginInfo', {}), playlist=self, **kwargs) for track in data['tracks']]
 
     @property
     def name(self):
@@ -270,6 +289,7 @@ class LavalinkTrack(wavelink.Track):
         super().__init__(*args, **kwargs)
         self.title = fix_characters(self.title)
         self.info["title"] = self.title
+        self.info["pluginInfo"] = kwargs.pop("pluginInfo", {})
         self.unique_id = str(uuid.uuid4().hex)[:10]
 
         try:
@@ -336,7 +356,10 @@ class LavalinkTrack(wavelink.Track):
 
     @property
     def authors_md(self) -> str:
-        return f"`{self.author}`"
+        try:
+            return f"[`{self.author}`](<{self.info['pluginInfo']['artistUrl']}>)"
+        except KeyError:
+            return f"`{self.author}`"
 
     @property
     def authors_string(self) -> str:
@@ -347,14 +370,20 @@ class LavalinkTrack(wavelink.Track):
         try:
             return self.info["extra"]["album"]["name"]
         except KeyError:
-            return ""
+            try:
+                return self.info["pluginInfo"]["albumName"]
+            except KeyError:
+                return ""
 
     @property
     def album_url(self) -> str:
         try:
             return self.info["extra"]["album"]["url"]
         except KeyError:
-            return ""
+            try:
+                return self.info["pluginInfo"]["albumUrl"]
+            except KeyError:
+                return ""
 
     @property
     def lyrics(self) -> str:

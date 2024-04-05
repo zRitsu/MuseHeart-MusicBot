@@ -32,8 +32,7 @@ from utils.db import MongoDatabase, LocalDatabase, get_prefix, DBModel, global_d
 from utils.music.checks import check_pool_bots
 from utils.music.errors import GenericError
 from utils.music.local_lavalink import run_lavalink
-from utils.music.models import music_mode, LavalinkPlayer, PartialTrack, LavalinkPlaylist, LavalinkTrack, \
-    PartialPlaylist
+from utils.music.models import music_mode, LavalinkPlayer, LavalinkPlaylist, LavalinkTrack
 from utils.music.spotify import spotify_client
 from utils.others import CustomContext, token_regex, sort_dict_recursively
 from utils.owner_panel import PanelView
@@ -246,51 +245,25 @@ class BotPool:
 
         for info in data:
 
-            if info["sourceName"] == "spotify":
+            if playlist := info.pop("playlist", None):
 
-                if playlist := info.pop("playlist", None):
+                try:
+                    playlist = playlists[playlist["url"]]
+                except KeyError:
+                    playlist_cls = LavalinkPlaylist(
+                        {
+                            'loadType': 'PLAYLIST_LOADED',
+                            'playlistInfo': {
+                                'name': playlist["name"],
+                                'selectedTrack': -1
+                            },
+                            'tracks': []
+                        }, url=playlist["url"]
+                    )
+                    playlists[playlist["url"]] = playlist_cls
+                    playlist = playlist_cls
 
-                    try:
-                        playlist = playlists[playlist["url"]]
-                    except KeyError:
-                        playlist_cls = PartialPlaylist(
-                            {
-                                'loadType': 'PLAYLIST_LOADED',
-                                'playlistInfo': {
-                                    'name': playlist["name"],
-                                    'selectedTrack': -1
-                                },
-                                'tracks': []
-                            }, url=playlist["url"]
-                        )
-                        playlists[playlist["url"]] = playlist_cls
-                        playlist = playlist_cls
-
-                t = PartialTrack(info=info, playlist=playlist)
-
-            else:
-
-                if playlist := info.pop("playlist", None):
-
-                    try:
-                        playlist = playlists[playlist["url"]]
-                    except KeyError:
-                        playlist_cls = LavalinkPlaylist(
-                            {
-                                'loadType': 'PLAYLIST_LOADED',
-                                'playlistInfo': {
-                                    'name': playlist["name"],
-                                    'selectedTrack': -1
-                                },
-                                'tracks': []
-                            }, url=playlist["url"]
-                        )
-                        playlists[playlist["url"]] = playlist_cls
-                        playlist = playlist_cls
-
-                t = LavalinkTrack(id_=info.get("id", ""), info=info, playlist=playlist, requester=info["extra"]["requester"])
-
-            tracks.append(t)
+            tracks.append(LavalinkTrack(id_=info.get("id", ""), info=info, playlist=playlist, requester=info["extra"]["requester"]))
 
         return tracks, playlists
 

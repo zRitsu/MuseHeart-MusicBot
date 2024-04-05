@@ -169,7 +169,7 @@ class TrackPlaylist:
     def __init__(self, data: dict, **kwargs):
         self.data = data
         encoded_name = kwargs.pop("encoded_name", "track")
-        self.tracks = [kwargs.pop("track_cls", Track)(id_=track[encoded_name], info=track['info']) for track in data['tracks']]
+        self.tracks = [kwargs.pop("track_cls", Track)(id_=track[encoded_name], info=track['info'], **kwargs) for track in data['tracks']]
 
 
 class Player:

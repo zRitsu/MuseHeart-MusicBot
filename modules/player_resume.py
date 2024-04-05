@@ -114,6 +114,10 @@ class PlayerSession(commands.Cog):
             player.current.info["id"] = player.current.id
             if player.current.playlist_name:
                 player.current.info["playlist"] = {"name": player.current.playlist_name, "url": player.current.playlist_url}
+                try:
+                    player.current.info["playlist"]["thumb"] = player.current.playlist.thumb
+                except:
+                    pass
             tracks.append(player.current.info)
 
         for t in player.queue:

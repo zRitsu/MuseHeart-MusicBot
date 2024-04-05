@@ -297,11 +297,11 @@ class Node:
                     except KeyError:
                         pass
                     playlist_cls = kwargs.pop('playlist_cls', TrackPlaylist)
-                    return playlist_cls(data=data, url=query, encoded_name=encoded_name, **kwargs)
+                    return playlist_cls(data=data, url=query, encoded_name=encoded_name, pluginInfo=data.pop("pluginInfo", {}), **kwargs)
 
                 track_cls = kwargs.pop('track_cls', Track)
 
-                tracks = [track_cls(id_=track[encoded_name], info=track['info'], **kwargs) for track in tracks]
+                tracks = [track_cls(id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo", {}), **kwargs) for track in tracks]
 
                 return tracks
 
