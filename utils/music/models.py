@@ -245,7 +245,7 @@ class LavalinkPlaylist:
             pass
 
         try:
-            self.data["type"] = plugininfo["type"]
+            self.data["playlistInfo"]["type"] = plugininfo["type"]
         except KeyError:
             pass
 

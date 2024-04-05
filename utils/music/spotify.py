@@ -143,6 +143,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
         raise GenericError(f"**Não houve resultados no link do spotify informado...**")
 
     data["playlistInfo"]["selectedTrack"] = -1
+    data["playlistInfo"]["type"] = url_type
 
     playlist = PartialPlaylist(data, url=query)
 
