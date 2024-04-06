@@ -84,7 +84,7 @@ class QueueInteraction(disnake.ui.View):
             self.current_page = 0
 
         self.track_pages.clear()
-        self.track_pages = list(disnake.utils.as_chunks(player.queue + player.queue_autoplay, max_size=self.max_items))
+        self.track_pages = list(disnake.utils.as_chunks(player.queue or player.queue_autoplay, max_size=self.max_items))
         self.current_track = self.track_pages[self.current_page][0]
         self.max_page = len(self.track_pages) - 1
         self.update_components()
