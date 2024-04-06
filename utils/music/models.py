@@ -1480,13 +1480,13 @@ class LavalinkPlayer(wavelink.Player):
                             await asyncio.sleep(1.5)
                             continue
 
-                if not [i in track.title.lower() for i in exclude_tags_2]:
-                    final_tracks = []
-                    for t in tracks:
-                        if not any((i in t.title.lower()) for i in exclude_tags_2):
-                            final_tracks.append(t)
-                            break
-                    tracks = final_tracks or tracks
+                    if not [i in track_data.title.lower() for i in exclude_tags_2]:
+                        final_tracks = []
+                        for t in tracks:
+                            if not any((i in t.title.lower()) for i in exclude_tags_2):
+                                final_tracks.append(t)
+                                break
+                        tracks = final_tracks or tracks
 
                 track = track_data
                 break
