@@ -1888,6 +1888,8 @@ class LavalinkPlayer(wavelink.Player):
             color=self.bot.get_color(self.guild.me)
         )
 
+        embed.set_thumbnail(url=self.bot.user.display_avatar.replace(size=512, static_format="png").url)
+
         if not self.keep_connected:
             embed.description += "\n\n**Nota:** `O Player será desligado automaticamente` " \
                         f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=self.bot.config['IDLE_TIMEOUT'])).timestamp())}:R> " \
