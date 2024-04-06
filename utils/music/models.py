@@ -29,6 +29,7 @@ if TYPE_CHECKING:
     from utils.client import BotCore
 
 exclude_tags = ["remix", "edit", "extend", "compilation", "mashup"]
+exclude_tags_2 = ["extend", "compilation", "mashup", "nightcore", "8d"]
 
 thread_archive_time = {
     60: 30,
@@ -1478,6 +1479,14 @@ class LavalinkPlayer(wavelink.Player):
                             exception = e
                             await asyncio.sleep(1.5)
                             continue
+
+                if not [i in track.title.lower() for i in exclude_tags_2]:
+                    final_tracks = []
+                    for t in tracks:
+                        if not any((i in t.title.lower()) for i in exclude_tags_2):
+                            final_tracks.append(t)
+                            break
+                    tracks = final_tracks or tracks
 
                 track = track_data
                 break
