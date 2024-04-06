@@ -1485,7 +1485,6 @@ class LavalinkPlayer(wavelink.Player):
                         for t in tracks:
                             if not any((i in t.title.lower()) for i in exclude_tags_2):
                                 final_tracks.append(t)
-                                break
                         tracks = final_tracks or tracks
 
                 track = track_data
