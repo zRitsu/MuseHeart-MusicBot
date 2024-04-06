@@ -297,17 +297,14 @@ class LavalinkTrack(wavelink.Track):
         except:
             self.info['sourceName'] = 'LavalinkTrack'
 
-        if (albumname:=fix_characters(self.info["pluginInfo"]["albumName"])) == self.title:
-            try:
+        try:
+            if (albumname:=fix_characters(self.info["pluginInfo"]["albumName"])) == self.title:
                 del self.info["pluginInfo"]["albumName"]
-            except KeyError:
-                pass
-            try:
                 del self.info["pluginInfo"]["albumUrl"]
-            except KeyError:
-                pass
-        else:
-            self.info["pluginInfo"]["albumName"] = albumname
+            else:
+                self.info["pluginInfo"]["albumName"] = albumname
+        except KeyError:
+            pass
 
         try:
             self.info["extra"]
