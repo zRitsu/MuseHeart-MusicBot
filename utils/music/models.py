@@ -1370,8 +1370,8 @@ class LavalinkPlayer(wavelink.Player):
 
         tracks_search = []
 
-        if self.current and self.current.duration < 9000:
-            tracks_search.append(self.current)
+        if self.last_track and self.last_track.duration < 9000:
+            tracks_search.append(self.last_track)
 
         for t in reversed(self.failed_tracks + self.played):
 
