@@ -6137,7 +6137,6 @@ class Music(commands.Cog):
             invite = None
 
         else:
-
             try:
                 invite = (await bot.fetch_invite(invite)).url
             except disnake.NotFound:
@@ -6170,30 +6169,7 @@ class Music(commands.Cog):
         except AttributeError:
             guild_id = inter.guild_id
 
-        player: LavalinkPlayer = bot.music.get_player(
-            guild_id=guild_id,
-            cls=LavalinkPlayer,
-            player_creator=inter.author.id,
-            guild=guild,
-            channel=channel,
-            last_message_id=guild_data['player_controller']['message_id'],
-            node_id=node.identifier,
-            static=bool(static_player['channel']),
-            skin=bot.check_skin(skin),
-            skin_static=bot.check_static_skin(static_skin),
-            custom_skin_data=global_data["custom_skins"],
-            custom_skin_static_data=global_data["custom_skins_static"],
-            extra_hints=self.extra_hints,
-            restrict_mode=guild_data['enable_restrict_mode'],
-            listen_along_invite=invite,
-            autoplay=guild_data["autoplay"],
-            prefix=global_data["prefix"] or bot.default_prefix,
-            purge_mode=guild_data['player_controller']['purge_mode'],
-            stage_title_template=global_data['voice_channel_status'],
-        )
-
-        if (vol:=int(guild_data['default_player_volume'])) != 100:
-            await player.set_volume(vol)
+        static_channel = None
 
         if static_player['channel']:
 
@@ -6201,11 +6177,9 @@ class Music(commands.Cog):
                 static_channel = bot.get_channel(int(static_player['channel'])) or await bot.fetch_channel(
                     int(static_player['channel']))
             except disnake.Forbidden:
-                player.static = False
                 static_channel = None
             except disnake.NotFound:
                 await self.reset_controller_db(inter.guild_id, guild_data, inter)
-                player.static = False
                 static_channel = None
 
             allowed_channel = None
@@ -6244,20 +6218,46 @@ class Music(commands.Cog):
                     allowed_channel = ch
                     break
 
-            player.text_channel = allowed_channel
+            channel = allowed_channel
 
-            if not player.message and player.text_channel:
-                try:
-                    player.message = await player.text_channel.fetch_message(int(static_player['message_id']))
-                except TypeError:
-                    player.message = None
-                except Exception:
-                    traceback.print_exc()
-                    if hasattr(player.text_channel, 'parent') and isinstance(player.text_channel.parent, disnake.ForumChannel) and str(
-                            player.text_channel.id) == static_player['message_id']:
-                        pass
-                    elif player.static:
-                        player.text_channel = None
+        player: LavalinkPlayer = bot.music.get_player(
+            guild_id=guild_id,
+            cls=LavalinkPlayer,
+            player_creator=inter.author.id,
+            guild=guild,
+            channel=channel,
+            last_message_id=guild_data['player_controller']['message_id'],
+            node_id=node.identifier,
+            static=bool(static_channel),
+            skin=bot.check_skin(skin),
+            skin_static=bot.check_static_skin(static_skin),
+            custom_skin_data=global_data["custom_skins"],
+            custom_skin_static_data=global_data["custom_skins_static"],
+            extra_hints=self.extra_hints,
+            restrict_mode=guild_data['enable_restrict_mode'],
+            listen_along_invite=invite,
+            autoplay=guild_data["autoplay"],
+            prefix=global_data["prefix"] or bot.default_prefix,
+            purge_mode=guild_data['player_controller']['purge_mode'],
+            stage_title_template=global_data['voice_channel_status'],
+        )
+
+        if (vol:=int(guild_data['default_player_volume'])) != 100:
+            await player.set_volume(vol)
+
+        if not player.message and player.text_channel:
+            try:
+                player.message = await player.text_channel.fetch_message(int(static_player['message_id']))
+            except TypeError:
+                player.message = None
+            except Exception:
+                traceback.print_exc()
+                if hasattr(player.text_channel, 'parent') and isinstance(player.text_channel.parent,
+                                                                         disnake.ForumChannel) and str(
+                        player.text_channel.id) == static_player['message_id']:
+                    pass
+                elif player.static:
+                    player.text_channel = None
 
         if not player.static and player.text_channel:
 
