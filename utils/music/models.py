@@ -1286,7 +1286,7 @@ class LavalinkPlayer(wavelink.Player):
                         await asyncio.sleep(1.5)
                         await self.invoke_np(rpc_update=True)
                     else:
-                        await self.process_next(clear_autoqueue=False)
+                        await self.process_next()
                 await self.update_stage_topic()
             except Exception:
                 traceback.print_exc()
@@ -1566,7 +1566,7 @@ class LavalinkPlayer(wavelink.Player):
             return None
 
     async def process_next(self, start_position: Union[int, float] = 0, inter: disnake.MessageInteraction = None,
-                           force_np=False, clear_autoqueue = True):
+                           force_np=False):
 
         if self.locked or self.is_closing:
             return
@@ -1608,7 +1608,6 @@ class LavalinkPlayer(wavelink.Player):
                 if self.autoplay or self.keep_connected:
                     try:
                         track = await self.get_autoqueue_tracks()
-                        clear_autoqueue = False
                     except:
                         traceback.print_exc()
                         self.locked = False
@@ -1625,7 +1624,6 @@ class LavalinkPlayer(wavelink.Player):
                     return
 
             except Exception:
-                clear_autoqueue = False
                 traceback.print_exc()
                 track = None
 
@@ -1793,9 +1791,6 @@ class LavalinkPlayer(wavelink.Player):
                 return
 
             track.id = t[0].id
-
-        if clear_autoqueue:
-            self.queue_autoplay.clear()
 
         self.last_track = track
 

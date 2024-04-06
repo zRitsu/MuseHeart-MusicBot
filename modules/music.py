@@ -1859,6 +1859,8 @@ class Music(commands.Cog):
 
         embed.description += player.controller_link
 
+        player.queue_autoplay.clear()
+
         if not is_pin:
 
             if not player.is_connected:
