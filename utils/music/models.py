@@ -1286,7 +1286,7 @@ class LavalinkPlayer(wavelink.Player):
                         await asyncio.sleep(1.5)
                         await self.invoke_np(rpc_update=True)
                     else:
-                        await self.process_next()
+                        await self.process_next(clear_autoqueue=False)
                 await self.update_stage_topic()
             except Exception:
                 traceback.print_exc()
@@ -1333,7 +1333,7 @@ class LavalinkPlayer(wavelink.Player):
                 pass
             self.set_command_log(
                 emoji="🪫",
-                text="O player está no modo economia de recursos (esse modo será desativado automaticamente quando "
+                text="O player está no modo **[economia de recursos]** (esse modo será desativado automaticamente quando "
                      f"um membro entrar no canal <#{self.channel_id}>)."
             )
             self.update = True
