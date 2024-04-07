@@ -773,9 +773,6 @@ class LavalinkPlayer(wavelink.Player):
 
             self.start_time = disnake.utils.utcnow()
 
-            if not self.current.autoplay or self.current.requester == self.bot.user.id:
-                self.queue_autoplay.clear()
-
             if self.auto_pause:
                 return
 
