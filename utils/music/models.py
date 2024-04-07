@@ -537,7 +537,7 @@ class LavalinkPlayer(wavelink.Player):
             "podem usar esse comando).",
 
             "É possível definir o status automático no canal de voz com informações sobre "
-            "a música que está sendo tocada no momento. Experimente usando o comando /stage_announce ou "
+            "a música que está sendo tocada no momento. Experimente usando o comando /set_voice_status ou "
             f"{self.prefix_info}stageannounce (Apenas membros com permissão de gerenciar servidor podem usar esse recurso)."
         ]
 
@@ -2296,7 +2296,7 @@ class LavalinkPlayer(wavelink.Player):
                     data["components"][5].options.append(
                         disnake.SelectOption(
                             label=f"{txt} status automático", emoji="📢",
-                            value=PlayerControls.stage_announce,
+                            value=PlayerControls.set_voice_status,
                             description=f"{txt} o status automático do canal de voz."
                         )
                     )

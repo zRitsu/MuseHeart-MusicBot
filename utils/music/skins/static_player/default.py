@@ -281,7 +281,7 @@ class DefaultStaticSkin:
             data["components"][5].options.append(
                 disnake.SelectOption(
                     label= f"{txt} status automático", emoji="📢",
-                    value=PlayerControls.stage_announce,
+                    value=PlayerControls.set_voice_status,
                     description=f"{txt} o status automático do canal de voz."
                 )
             )

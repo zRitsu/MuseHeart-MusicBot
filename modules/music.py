@@ -254,15 +254,14 @@ class Music(commands.Cog):
     @has_source()
     @commands.has_guild_permissions(manage_guild=True)
     @pool_command(
-        only_voiced=True, name="stageannounce", aliases=["stagevc", "togglestageannounce", "announce", "vcannounce",
-                                                         "voicestatus", "setvcstatus", "setvoicestatus", "statusvc",
-                                                         "vcstatus"],
+        only_voiced=True, name="setvoicestatus", aliases=["stagevc", "togglestageannounce", "announce", "vcannounce",
+                                                         "voicestatus", "setvcstatus", "statusvc", "vcstatus", "stageannounce"],
         description="Ativar o sistema de anuncio/status automático do canal com o nome da música.",
         cooldown=stage_cd, max_concurrency=stage_mc, extras={"exclusive_cooldown": True},
         usage="{prefix}{cmd} <placeholders>\nEx: {track.author} - {track.title}"
     )
-    async def stageannounce_legacy(self, ctx: CustomContext, *, template = ""):
-        await self.stage_announce.callback(self=self, inter=ctx, template=template)
+    async def setvoicestatus_legacy(self, ctx: CustomContext, *, template = ""):
+        await self.set_voice_status.callback(self=self, inter=ctx, template=template)
 
     @is_dj()
     @has_source()
@@ -271,7 +270,7 @@ class Music(commands.Cog):
         extras={"only_voiced": True, "exclusive_cooldown": True}, cooldown=stage_cd, max_concurrency=stage_mc,
         default_member_permissions=disnake.Permissions(manage_guild=True), dm_permission=False
     )
-    async def stage_announce(
+    async def set_voice_status(
             self, inter: disnake.AppCmdInter,
             template: str = commands.Param(name="modelo", default="")
     ):
