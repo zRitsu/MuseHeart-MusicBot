@@ -928,38 +928,17 @@ class LavalinkPlayer(wavelink.Player):
 
                 if track.info["sourceName"] == "youtube" or (self.bot.config["PARTIALTRACK_SEARCH_PROVIDER"] == "ytsearch" and
                                                              track.info["sourceName"] == "spotify"):
-
+                    self.native_yt = False
+                    self.current = None
+                    self.queue.appendleft(track)
+                    self.locked = False
+                    self.set_command_log(
+                        text=f"Devido a problemas técnicos no servidor `{self.node.identifier}` será usado o método alternativo de obter músicas do youtube "
+                             "na sessão atual (Talvez a música tocada seja diferente do esperado).",
+                        emoji="⚠️"
+                    )
+                    await self.process_next(start_position=self.position)
                     await send_report()
-
-                    self.node.available = False
-
-                    if self.node._closing:
-                        return
-
-                    await asyncio.sleep(3)
-
-                    current_node: wavelink.Node = self.bot.music.nodes[self.node.identifier]
-                    current_node.close()
-
-                    for player_id in list(self.node.players):
-
-                        p = self.node.players[player_id]
-
-                        node = [n for n in self.bot.music.nodes.values() if n.available and n.is_available]
-                        p.current = p.last_track
-                        if node:
-                            await p.change_node(node[0].identifier)
-                            p.set_command_log(f"O player foi reconectado em um novo servidor de música: **{p.node.identifier}**.")
-                            p.update = True
-                            p.locked = False
-                        else:
-                            try:
-                                p._new_node_task.cancel()
-                            except:
-                                pass
-                            p._new_node_task = p.bot.loop.create_task(p._wait_for_new_node(
-                                f"O servidor **{current_node.identifier}** tomou ratelimit do youtube está indisponível "
-                                f"no momento (aguardando um novo servidor ficar disponível)."))
                     return
 
             await send_report()
