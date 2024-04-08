@@ -29,7 +29,7 @@ from utils.music.checks import check_voice, has_player, has_source, is_requester
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, google_search, percentage, music_source_image
 from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolException, parse_error, \
-    EmptyFavIntegration, DiffVoiceChannel
+    EmptyFavIntegration, DiffVoiceChannel, NoPlayer
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction, FavMenuView, ViewMode, \
     SetStageTitle, SelectBotVoice
 from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, PartialTrack
@@ -250,8 +250,6 @@ class Music(commands.Cog):
     stage_cd = commands.CooldownMapping.from_cooldown(2, 45, commands.BucketType.guild)
     stage_mc = commands.MaxConcurrency(1, per=commands.BucketType.guild, wait=False)
 
-    @is_dj()
-    @has_source()
     @commands.has_guild_permissions(manage_guild=True)
     @pool_command(
         only_voiced=True, name="setvoicestatus", aliases=["stagevc", "togglestageannounce", "announce", "vcannounce",
@@ -263,8 +261,6 @@ class Music(commands.Cog):
     async def setvoicestatus_legacy(self, ctx: CustomContext, *, template = ""):
         await self.set_voice_status.callback(self=self, inter=ctx, template=template)
 
-    @is_dj()
-    @has_source()
     @commands.slash_command(
         description=f"{desc_prefix}Ativar/editar o sistema de anúncio/status automático do canal com o nome da música.",
         extras={"only_voiced": True, "exclusive_cooldown": True}, cooldown=stage_cd, max_concurrency=stage_mc,
@@ -290,19 +286,27 @@ class Music(commands.Cog):
         if not author.guild_permissions.manage_guild and not (await bot.is_owner(author)):
             raise GenericError("**Você não possui permissão de gerenciar servidor para ativar/desativar esse sistema.**")
 
-        await inter.response.defer(ephemeral=True, with_message=True)
-
-        global_data = await self.bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
-
         if not template:
+            await inter.response.defer(ephemeral=True, with_message=True)
+            global_data = await self.bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
             view = SetStageTitle(ctx=inter, bot=bot, data=global_data, guild=guild)
-            view.message = await inter.send(view=view, embed=view.build_embed(), ephemeral=True)
+            view.message = await inter.send(view=view, embeds=view.build_embeds(), ephemeral=True)
             await view.wait()
         else:
             if not any(p in template for p in SetStageTitle.placeholders):
                 raise GenericError(f"**Você deve usar pelo menos um placeholder válido:** {SetStageTitle.placeholder_text}")
 
-            player = bot.music.players[inter.guild_id]
+            try:
+                player = bot.music.players[inter.guild_id]
+            except KeyError:
+                raise NoPlayer()
+
+            if not inter.author.voice:
+                raise NoVoice()
+
+            if inter.author.id not in guild.me.voice.channel.voice_states:
+                raise DiffVoiceChannel()
+
             player.stage_title_event = True
             player.stage_title_template = template
             player.start_time = disnake.utils.utcnow()

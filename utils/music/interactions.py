@@ -1941,7 +1941,7 @@ class SetStageTitle(disnake.ui.View):
                "[34;1m{track.playlist}[0m -> Nome da playlist de origem da música (caso tenha)\n" \
                "[34;1m{requester.name}[0m -> Nome/Nick do membro que pediu a música\n" \
                "[34;1m{requester.id}[0m -> ID do membro que pediu a música```\n" \
-               "Exemplo: Tocando {track.title} | Por: {track.author}\n" \
+               "Exemplo: Tocando {track.title} | Por: {track.author}\n\n" \
                "`Nota: No canal de voz você pode usar custom emojis na mensagem do status (incluindo emoji de servers que eu não estou e de servers que você não está).`"
 
     def __init__(self, ctx: Union[CustomContext, disnake.Interaction], bot: BotCore, guild: disnake.Guild, data: dict):
@@ -1994,16 +1994,26 @@ class SetStageTitle(disnake.ui.View):
             )
         )
 
-    def build_embed(self):
+    def build_embeds(self):
 
-        txt = "### Definir status automático no canal de voz ou palco\n"
+        embeds = []
+
+        color = self.bot.get_color(self.guild.me)
+
+        embeds.append(
+            disnake.Embed(
+                description="### Definir status automático no canal de voz ou palco\n"
+                            "**Placeholders:** `(Pelo menos um placeholder deve ser incluso na mensagem de status)`\n"
+                            f"{self.placeholder_text}",
+                color=color)
+        )
 
         if self.data['voice_channel_status']:
-            txt += f"**Modelo permanente atual:**\n{self.data['voice_channel_status']}"
+            embeds.append(
+                disnake.Embed(title="**Modelo permanente atual:**", description=self.data['voice_channel_status'])
+            )
 
-        txt += f"**Placeholders:** `(Pelo menos um placeholder deve ser incluso na mensagem de status)`\n{self.placeholder_text}"
-
-        return disnake.Embed(description=txt, color=self.bot.get_color(self.guild.me))
+        return embeds
 
     async def modal_handler(self, inter: disnake.ModalInteraction):
 
@@ -2018,6 +2028,23 @@ class SetStageTitle(disnake.ui.View):
 
             if self.data["voice_channel_status"] == inter.text_values["status_voice_value"]:
                 await inter.send("**O status permanente atual é o mesmo do informado...**", ephemeral=True)
+                return
+
+            guild: Optional[disnake.Guild] = None
+
+            for b in self.bot.pool.get_guild_bots(inter.guild_id):
+                if (guild:=b.get_guild(inter.guild_id)):
+                    break
+
+            if not guild:
+                await inter.send("**Não há bots disponíveis no servidor, Adicione pelo menos um clicando no botão abaixo.**",
+                                components=[disnake.ui.Button(custom_id="bot_invite", label="Adicionar bots")], ephemeral=True)
+                return
+
+            inter.author = guild.get_member(inter.author.id)
+
+            if not inter.author.guild_permissions.manage_guild:
+                await inter.send("**Você não possui a permissão de gerenciar servidor para alterar o status do canal de voz**", ephemeral=True)
                 return
 
             self.data["voice_channel_status"] = inter.text_values["status_voice_value"]
@@ -2052,10 +2079,27 @@ class SetStageTitle(disnake.ui.View):
 
         elif inter.data.custom_id == "status_voice_channel_temp":
 
-            try:
-                player: LavalinkPlayer = self.bot.music.players[inter.guild_id]
-            except KeyError:
+            player: Optional[LavalinkPlayer] = None
+
+            for bot in self.bot.pool.get_guild_bots(inter.guild_id):
+                try:
+                    player = bot.music.players[inter.guild_id]
+                except KeyError:
+                    continue
+
+                if inter.author.id not in player.guild.me.voice.channel.voice_states:
+                    continue
+
+                break
+
+            if not player:
                 await inter.send("**Não estou tocando música em um canal de voz/palco...**", ephemeral=True)
+                return
+
+            inter.author = player.guild.get_member(inter.author.id)
+
+            if not inter.author.guild_permissions.manage_guild:
+                await inter.send("Você não possui a permissão de gerenciar servidor para alterar o status do canal de voz", ephemeral=True)
                 return
 
             player.stage_title_event = bool(inter.text_values["status_voice_value"])
