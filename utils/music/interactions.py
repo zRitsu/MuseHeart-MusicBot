@@ -2062,7 +2062,7 @@ class SetStageTitle(disnake.ui.View):
                 p.stage_title_template = inter.text_values["status_voice_value"]
                 p.start_time = disnake.utils.utcnow()
                 p.set_command_log(
-                    text=f"{inter.author.mention} " + ("ativou" if inter.text_values["status_voice_value"] else "desativou") + "o status automático",
+                    text=f"{inter.author.mention} " + ("ativou" if inter.text_values["status_voice_value"] else "desativou") + " o status automático",
                     emoji="📢",
                 )
                 p.update = True
