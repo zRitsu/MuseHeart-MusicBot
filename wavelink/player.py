@@ -371,6 +371,13 @@ class Player:
 
         elif guild.voice_client.channel.id != channel_id:
             await guild.voice_client.move_to(channel)
+        else:
+            try:
+                player = self.bot.music.players[self.guild_id]
+            except KeyError:
+                return
+            if player._voice_state:
+                await player._dispatch_voice_update()
 
     async def disconnect(self, *, force: bool = False) -> None:
         """|coro|
@@ -650,9 +657,6 @@ class Player:
         self.node = node
         self.node.players[int(self.guild_id)] = self
 
-        if self._voice_state:
-            await self._dispatch_voice_update()
-
         if self.current:
             if self.node.version == 3:
                 await self.node._send(op='play', guildId=str(self.guild_id), track=self.current.id, startTime=int(self.position))
@@ -669,6 +673,9 @@ class Player:
                 await self.node.update_player(self.guild_id, payload, replace=True)
 
             self.last_update = time.time() * 1000
+
+        if self._voice_state:
+            await self._dispatch_voice_update()
 
         if self.volume != 100 and self.node.version == 3:
             await self.node._send(op='volume', guildId=str(self.guild_id), volume=self.volume)
