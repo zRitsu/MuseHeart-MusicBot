@@ -206,12 +206,11 @@ class ClassicSkin:
             )
 
         if isinstance(player.last_channel, disnake.VoiceChannel):
-            txt = "Desativar" if player.stage_title_event else "Ativar"
             data["components"][5].options.append(
                 disnake.SelectOption(
-                    label= f"{txt} status automático", emoji="📢",
+                    label="Status automático", emoji="📢",
                     value=PlayerControls.set_voice_status,
-                    description=f"{txt} o status automático do canal de voz."
+                    description="Configurar o status automático do canal de voz."
                 )
             )
 
