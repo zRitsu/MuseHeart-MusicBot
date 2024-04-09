@@ -11,7 +11,7 @@ aiofiles
 disnake-jishaku
 packaging
 aiosqlite
-git+https://github.com/yt-dlp/yt-dlp.git@32abfb00bdbd119ca675fdc6d1719331f0a2741a
+yt-dlp>=2024.04.09
 tornado
 emoji
 spotipy
