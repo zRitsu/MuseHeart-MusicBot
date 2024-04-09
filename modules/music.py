@@ -16,7 +16,6 @@ from urllib.parse import urlparse, parse_qs
 import aiofiles
 import aiohttp
 import disnake
-from aiohttp import ClientConnectorCertificateError
 from async_timeout import timeout
 from disnake.ext import commands
 
@@ -6738,7 +6737,15 @@ class Music(commands.Cog):
             bot = self.bot
 
         if not node:
-            node = await self.get_best_node(bot)
+            nodes = sorted([n for n in bot.music.nodes.values() if n.is_available and n.available],
+                           key=lambda n: len(n.players))
+        else:
+            nodes = sorted([n for n in bot.music.nodes.values() if n != node and n.is_available and n.available],
+                           key=lambda n: len(n.players))
+            nodes.append(node)
+
+        if not nodes:
+            raise GenericError("**Não há servidores de música disponível!**")
 
         tracks = await process_spotify(self.bot, user.id, query)
 
@@ -6758,60 +6765,38 @@ class Music(commands.Cog):
 
             if not tracks:
 
-                if node.search:
-                    node_search = node
-                else:
-                    try:
-                        node_search = \
-                            sorted(
-                                [n for n in bot.music.nodes.values() if n.search and n.available and n.is_available],
-                                key=lambda n: len(n.players))[0]
-                    except IndexError:
-                        node_search = node
+                for n in nodes:
 
-                if source is False:
-                    providers = [node.search_providers[:1]]
-                elif source:
-                    providers = [s for s in (node.search_providers or [self.bot.config["DEFAULT_SEARCH_PROVIDER"]]) if s != source]
-                    providers.insert(0, source)
-                else:
-                    source = True
-                    providers = node.search_providers or [self.bot.config["DEFAULT_SEARCH_PROVIDER"]]
+                    node_retry = False
 
-                for search_provider in providers:
+                    if source is False:
+                        providers = [n.search_providers[:1]]
+                    elif source:
+                        providers = [s for s in (n.search_providers or [self.bot.config["DEFAULT_SEARCH_PROVIDER"]]) if s != source]
+                        providers.insert(0, source)
+                    else:
+                        source = True
+                        providers = n.search_providers or [self.bot.config["DEFAULT_SEARCH_PROVIDER"]]
 
-                    search_query = f"{search_provider}:{query}" if source else query
+                    for search_provider in providers:
 
-                    try:
-                        tracks = await node_search.get_tracks(
-                            search_query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
-                        )
-                    except ClientConnectorCertificateError:
-                        node_search.available = False
+                        search_query = f"{search_provider}:{query}" if source else query
 
-                        for n in self.bot.music.nodes.values():
-
-                            if not n.available or not n.is_available:
-                                continue
-
-                            try:
-                                tracks = await n.get_tracks(
-                                    search_query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
-                                )
-                                node_search = n
+                        try:
+                            tracks = await n.get_tracks(
+                                search_query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
+                            )
+                        except Exception as e:
+                            exceptions.add(repr(e))
+                            if "Video returned by YouTube isn't what was requested" in str(e):
+                                node_retry = True
                                 break
-                            except ClientConnectorCertificateError:
-                                n.available = False
-                                continue
+                            print(f"Falha ao processar busca...\n{query}\n{traceback.format_exc()}")
 
-                        if not node_search:
-                            raise GenericError("**Não há servidores de música disponível.**")
+                        if tracks or not source:
+                            break
 
-                    except Exception as e:
-                        print(f"Falha ao processar busca...\n{query}\n{traceback.format_exc()}")
-                        exceptions.add(repr(e))
-
-                    if tracks or not source:
+                    if not node_retry:
                         break
 
         if not tracks:
