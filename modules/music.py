@@ -6625,9 +6625,10 @@ class Music(commands.Cog):
                 error = repr(e)
 
             backoff *= 1.5
-            print(
-                f'{self.bot.user} - Falha ao reconectar no servidor [{node.identifier}] nova tentativa em {int(backoff)}'
-                f' segundos. Erro: {error}'[:300])
+            if node.identifier != "LOCAL":
+                print(
+                    f'{self.bot.user} - Falha ao reconectar no servidor [{node.identifier}] nova tentativa em {int(backoff)}'
+                    f' segundos. Erro: {error}'[:300])
             await asyncio.sleep(backoff)
             retries += 1
 
