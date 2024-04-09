@@ -6742,7 +6742,7 @@ class Music(commands.Cog):
         else:
             nodes = sorted([n for n in bot.music.nodes.values() if n != node and n.is_available and n.available],
                            key=lambda n: len(n.players))
-            nodes.append(node)
+            nodes.insert(0, node)
 
         if not nodes:
             raise GenericError("**Não há servidores de música disponível!**")
