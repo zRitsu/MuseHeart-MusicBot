@@ -2759,6 +2759,11 @@ class LavalinkPlayer(wavelink.Player):
             self.native_yt = True
 
             try:
+                self.node.players[self.guild_id]
+            except KeyError:
+                return
+
+            try:
                 if self.current and not self.current.id:
                     self.queue.appendleft(self.current)
                     self.current = None
@@ -2787,6 +2792,15 @@ class LavalinkPlayer(wavelink.Player):
 
             try:
                 if self.auto_pause:
+                    self.set_command_log(
+                        emoji="🪫",
+                        text="O player está no modo **[economia de recursos]** (esse modo será desativado automaticamente quando "
+                             f"um membro entrar no canal <#{self.channel_id}>)."
+                    )
+                    try:
+                        self.auto_skip_track_task.cancel()
+                    except:
+                        pass
                     self.auto_skip_track_task = self.bot.loop.create_task(self.auto_skip_track())
                 else:
                     await self.invoke_np(force=True)
