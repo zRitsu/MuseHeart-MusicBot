@@ -1050,7 +1050,6 @@ class LavalinkPlayer(wavelink.Player):
                     1001,
                     4016,  # Connection started elsewhere
                     4005,  # Already authenticated.
-                    4006,  # Session is no longer valid.
             ):
                 try:
                     vc_id = self.guild.me.voice.channel.id
@@ -1065,7 +1064,10 @@ class LavalinkPlayer(wavelink.Player):
                 await self.connect(vc_id)
                 return
 
-            if event.code == 4014:
+            if event.code in (
+                    4014,
+                    4006,  # Session is no longer valid.
+            ):
                 #await asyncio.sleep(1)
                 #if self.guild and self.guild.me.voice:
                 #    return
