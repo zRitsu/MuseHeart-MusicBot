@@ -6661,7 +6661,7 @@ class Music(commands.Cog):
         data = deepcopy(data)
 
         data['rest_uri'] = ("https" if data.get('secure') else "http") + f"://{data['host']}:{data['port']}"
-        data['user_agent'] = self.bot.pool.current_useragent
+        #data['user_agent'] = self.bot.pool.current_useragent
         search = data.pop("search", True)
         node_website = data.pop('website', '')
         region = data.pop('region', 'us_central')
