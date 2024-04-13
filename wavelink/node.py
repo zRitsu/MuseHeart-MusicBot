@@ -146,7 +146,7 @@ class Node:
         return {
             "Authorization": self.password,
             "User-Id": str(self.uid),
-            "Client-Name": f"Wavelink/custom",
+            "Client-Name": "Wavelink/custom",
         }
 
     async def connect(self, *args, **kwargs) -> None:
@@ -166,7 +166,7 @@ class Node:
                                         **kwargs,
                                         )
 
-        await self._websocket._connect()
+        await self._websocket._connect(**kwargs)
 
         __log__.info(f'NODE | {self.identifier} connected:: {self.__repr__()}')
 

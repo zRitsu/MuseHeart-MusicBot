@@ -59,21 +59,27 @@ class WebSocket:
         self._last_exc = None
         self._task = None
         self._closed = True
+        self._node_started = False
 
     @property
     def headers(self):
 
         data = {
-            'Authorization': self.password,
-            'User-Id': str(self.user_id),
-            'Client-Name': 'Wavelink'
+            "Authorization": self._node.password,
+            "User-Id": str(self._node.uid),
+            "Client-Name": "Wavelink/custom",
         }
 
         if self._node.version == 3:
             data['Resume-Key'] = self._node.resume_key
 
-        elif self._node.session_id:
-            data["Session-Id"] = self._node.session_id
+        else:
+
+            if self._node_started:
+                data['Session-Resumed'] = 'true'
+
+            if self._node.session_id:
+                data["Session-Id"] = self._node.session_id
 
         if self.user_agent:
             data['User-Agent'] = self.user_agent
@@ -118,6 +124,7 @@ class WebSocket:
 
         self._last_exc = None
         self._closed = False
+        self._node_started = True
         #self._node.available = True
 
         if self.is_connected:
