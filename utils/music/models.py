@@ -2737,8 +2737,7 @@ class LavalinkPlayer(wavelink.Player):
         except:
             pass
 
-        original_log = self.command_log
-        original_log_emoji = self.command_log_emoji
+        original_identifier = str(self.node.identifier)
 
         self.set_command_log(
             txt or "Não há servidores de música disponível. Irei fazer algumas tentativas de conectar em um novo servidor de música.",
@@ -2788,8 +2787,6 @@ class LavalinkPlayer(wavelink.Player):
                     return
                 await self.connect(self.last_channel.id)
 
-            self.set_command_log(emoji=original_log_emoji, text=original_log)
-
             try:
                 if self.auto_pause:
                     self.set_command_log(
@@ -2803,6 +2800,13 @@ class LavalinkPlayer(wavelink.Player):
                         pass
                     self.auto_skip_track_task = self.bot.loop.create_task(self.auto_skip_track())
                 else:
+                    if original_identifier != node.identifier:
+                        txt = f"O player foi movido para o servidor de música **{node.identifier}**."
+                    else:
+                        txt = f"O player foi reconectado no servidor de músca **{self.node.identifier}**"
+
+                    self.set_command_log(emoji="📶", text=txt)
+
                     await self.invoke_np(force=True)
             except:
                 traceback.print_exc()
