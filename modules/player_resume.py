@@ -558,15 +558,13 @@ class PlayerSession(commands.Cog):
 
             player.played.extend(played_tracks)
 
-            if player.autoplay:
+            queue_autoplay_tracks, playlists = self.bot.pool.process_track_cls(data.get("queue_autoplay", []))
 
-                queue_autoplay_tracks, playlists = self.bot.pool.process_track_cls(data.get("queue_autoplay", []))
-
-                player.queue_autoplay.extend(queue_autoplay_tracks)
+            player.queue_autoplay.extend(queue_autoplay_tracks)
 
             failed_tracks, playlists = self.bot.pool.process_track_cls(data.get("failed_tracks", []), playlists)
 
-            player.failed_tracks.extend(failed_tracks)
+            player.queue.extend(failed_tracks)
 
             if started:
                 player.set_command_log(
