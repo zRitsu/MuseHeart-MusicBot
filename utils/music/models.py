@@ -1653,8 +1653,9 @@ class LavalinkPlayer(wavelink.Player):
 
         if not self.native_yt and (track.info["sourceName"] == "youtube" or track.info.get("sourceNameOrig") == "youtube"):
 
-            if track.is_stream or track.duration > 600000:
+            if track.is_stream or track.duration > 480000:
                 self.failed_tracks.append(track)
+                self.locked = False
                 await self.process_next()
                 return
 
