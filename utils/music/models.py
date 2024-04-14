@@ -867,12 +867,18 @@ class LavalinkPlayer(wavelink.Player):
                     self.native_yt = False
                     self.current = None
                     self.queue.appendleft(track)
+
+                    txt = f"Devido a problemas com o suporte nativo ao youtube no servidor `{self.node.identifier}` " \
+                             "em todas as músicas do youtube da sessão atual será feita uma tentativa de obter a mesma " \
+                             "música em outras plataformas usando o nome da música (talvez a música tocada seja " \
+                             "diferente do esperado)."
+
+                    try:
+                        await self.text_channel.send(embed=disnake.Embed(description=txt), delete_after=20)
+                    except:
+                        self.set_command_log(text=txt, emoji="⚠️")
+                    await asyncio.sleep(3)
                     self.locked = False
-                    self.set_command_log(
-                        text=f"Devido a problemas técnicos no servidor `{self.node.identifier}` será usado o método alternativo de obter músicas do youtube "
-                             "na sessão atual (Talvez a música tocada seja diferente do esperado).",
-                        emoji="⚠️"
-                    )
                     await self.process_next(start_position=self.position)
 
                 else:
