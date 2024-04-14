@@ -346,7 +346,6 @@ class Music(commands.Cog):
             position=0,
             options="",
             manual_selection=False,
-            source=None,
             repeat_amount=0,
             force_play="no",
         )
@@ -392,7 +391,6 @@ class Music(commands.Cog):
             force_play=force_play,
             options=options,
             manual_selection=True,
-            source=source,
             repeat_amount=repeat_amount,
             server=server
         )
@@ -593,7 +591,7 @@ class Music(commands.Cog):
 
         await self.play.callback(self=self, inter=ctx, query=query, position=position, options=False,
                                  force_play="no", manual_selection=False,
-                                 source=None, repeat_amount=0, server=None)
+                                 repeat_amount=0, server=None)
 
     stage_flags = CommandArgparse()
     stage_flags.add_argument('query', nargs='*', help="nome ou link da música")
@@ -602,7 +600,6 @@ class Music(commands.Cog):
     stage_flags.add_argument('-reverse', '-r', action='store_true', help='Inverter a ordem das músicas adicionadas (efetivo apenas ao adicionar playlist).')
     stage_flags.add_argument('-shuffle', '-sl', action='store_true', help='Misturar as músicas adicionadas (efetivo apenas ao adicionar playlist).')
     stage_flags.add_argument('-select', '-s', action='store_true', help='Escolher a música entre os resultados encontrados.')
-    stage_flags.add_argument('-source', '-src', type=str, default=None, help='Fazer a busca da música usando uma fonte específica [youtube/soundcloud etc]')
     stage_flags.add_argument('-force', '-now', '-n', '-f', action='store_true', help='Tocar a música adicionada imediatamente (efetivo apenas se houver uma música tocando atualmente.)')
     stage_flags.add_argument('-loop', '-lp', type=int, default=0, help="Definir a quantidade de repetições da música escolhida.\nEx: -loop 5")
     stage_flags.add_argument('-server', '-sv', type=str, default=None, help='Usar um servidor de música específico.')
@@ -625,7 +622,6 @@ class Music(commands.Cog):
             options = "shuffle" if args.shuffle else "reversed" if args.reverse else None,
             force_play = "yes" if args.force else "no",
             manual_selection = args.select,
-            source = self.sources.get(args.source),
             repeat_amount = args.loop,
             server = args.server
         )
@@ -638,7 +634,7 @@ class Music(commands.Cog):
     async def search_legacy(self, ctx: CustomContext, *, query):
 
         await self.play.callback(self=self, inter=ctx, query=query, position=0, options=False, force_play="no",
-                                 manual_selection=True, source=None, repeat_amount=0, server=None)
+                                 manual_selection=True, repeat_amount=0, server=None)
 
     @can_send_message_check()
     @commands.slash_command(
@@ -680,7 +676,7 @@ class Music(commands.Cog):
         inter.message.thread = thread
 
         await self.play.callback(self=self, inter=inter, query="", position=position, options=False, force_play=force_play,
-                                 manual_selection=False, source=None, repeat_amount=repeat_amount, server=server)
+                                 manual_selection=False, repeat_amount=repeat_amount, server=server)
 
     async def check_player_queue(self, user: disnake.User, bot: BotCore, guild_id: int, tracks: Union[list, LavalinkPlaylist] = None):
 
@@ -734,10 +730,6 @@ class Music(commands.Cog):
                                                     default=False),
             options: str = commands.Param(name="opções", description="Opções para processar playlist",
                                           choices=playlist_opts, default=False),
-            source: str = commands.Param(name="fonte",
-                                         description="Selecionar site para busca de músicas (não links)",
-                                         choices=search_sources_opts,
-                                         default=None),
             repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.",
                                                 default=0),
             server: str = commands.Param(name="server", desc="Usar um servidor de música específico na busca.",
@@ -1299,6 +1291,8 @@ class Music(commands.Cog):
 
         loadtype = None
         tracks = []
+
+        source = None
 
         if query.startswith("> pin: "):
             if is_pin is None:
@@ -5013,7 +5007,6 @@ class Music(commands.Cog):
             "position": 0,
             "options": False,
             "manual_selection": True,
-            "source": "ytsearch",
             "repeat_amount": 0,
             "server": None,
             "force_play": "no"
@@ -5392,7 +5385,6 @@ class Music(commands.Cog):
                     "query": kwargs.get("query", ""),
                     "position": 0,
                     "options": False,
-                    "source": None,
                     "repeat_amount": 0,
                     "server": None,
                     "force_play": "no"
@@ -5727,7 +5719,6 @@ class Music(commands.Cog):
                     "position": position or 0,
                     "options": False,
                     "manual_selection": True,
-                    "source": None,
                     "repeat_amount": 0,
                     "server": None,
                     "force_play": "no",
@@ -5911,7 +5902,7 @@ class Music(commands.Cog):
             urls = URL_REG.findall(message.content)
 
             if not urls:
-                source = self.bot.config["DEFAULT_SEARCH_PROVIDER"]
+                source = None
 
             else:
                 source = False

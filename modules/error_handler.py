@@ -164,7 +164,7 @@ class ErrorHandler(commands.Cog):
                 await play_cmd.callback(
                     inter=ctx, query=query,
                     self=play_cmd.cog, position=0, options=False, force_play="no",
-                    manual_selection=False, source=None, repeat_amount=0, server=None
+                    manual_selection=False, repeat_amount=0, server=None
                 )
             except commands.CommandNotFound:
                 return
