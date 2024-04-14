@@ -1616,34 +1616,151 @@ class LavalinkPlayer(wavelink.Player):
 
         temp_id = None
 
-        if isinstance(track, PartialTrack):
+        if not self.auto_pause:
 
-            if not track.id:
-                try:
-                    await self.resolve_track(track)
-                except Exception as e:
+            if isinstance(track, PartialTrack):
+
+                if not track.id:
                     try:
-                        await self.text_channel.send(
-                            embed=disnake.Embed(
-                                description=f"Houve um problema ao tentar processar a música [{track.title}]({track.uri})... "
-                                            f"```py\n{repr(e)}```",
-                                color=self.bot.get_color()
+                        await self.resolve_track(track)
+                    except Exception as e:
+                        try:
+                            await self.text_channel.send(
+                                embed=disnake.Embed(
+                                    description=f"Houve um problema ao tentar processar a música [{track.title}]({track.uri})... "
+                                                f"```py\n{repr(e)}```",
+                                    color=self.bot.get_color()
+                                )
                             )
-                        )
-                    except:
-                        traceback.print_exc()
+                        except:
+                            traceback.print_exc()
 
+                        self.locked = False
+
+                        await self.process_next()
+                        return
+
+                    if not track.id:
+                        try:
+                            await self.text_channel.send(
+                                embed=disnake.Embed(
+                                    description=f"A música [{track.title}]({track.uri}) não está disponível...\n"
+                                                f"Pulando para a próxima música...",
+                                    color=self.bot.get_color()
+                                ), delete_after=10
+                            )
+                        except:
+                            traceback.print_exc()
+
+                        await asyncio.sleep(10)
+
+                        self.locked = False
+
+                        await self.process_next()
+                        return
+
+            if not self.native_yt and (track.info["sourceName"] == "youtube" or track.info.get("sourceNameOrig") == "youtube"):
+
+                if track.is_stream or track.duration > 480000:
+                    self.failed_tracks.append(track)
                     self.locked = False
-
                     await self.process_next()
                     return
 
-                if not track.id:
+                temp_id = track.info.get("temp_id")
+
+                if not temp_id:
+
+                    tracks = []
+
+                    exceptions = ""
+
+                    for provider in self.node.search_providers:
+                        if provider in ("ytsearch", "ytmsearch"):
+                            continue
+                        try:
+                            tracks = await self.node.get_tracks(f"{provider}:{track.title}")
+                        except:
+                            exceptions += f"{traceback.format_exc()}\n"
+                            await asyncio.sleep(1)
+                            continue
+
+                    try:
+                        tracks = tracks.tracks
+                    except AttributeError:
+                        pass
+
+                    if not [i in track.title.lower() for i in exclude_tags]:
+                        final_result = []
+                        for t in tracks:
+                            if not any((i in t.title.lower()) for i in exclude_tags):
+                                final_result.append(t)
+                                break
+                        tracks = final_result or tracks
+
+                    if not tracks:
+                        if exceptions:
+                            print(exceptions)
+                        self.failed_tracks.append(track)
+                        self.current = track
+                        self.set_command_log(emoji="⚠️", text="A música atual será ignorada devido a falta de resultado "
+                                                              "no modo alternativo de buscas do youtube.")
+                        await self.invoke_np()
+                        await asyncio.sleep(13)
+                        self.locked = False
+                        await self.process_next()
+                        return
+
+                    temp_id = tracks[0].id
+
+                    track.info["temp_id"] = temp_id
+
+            elif not track.id:
+
+                if "&list=" in track.uri and (link_re := YOUTUBE_VIDEO_REG.match(track.uri)):
+                    query = link_re.group()
+                else:
+                    query = track.uri
+
+                try:
+                    t = await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
+                except Exception as e:
+                    traceback.print_exc()
+                    if "Video returned by YouTube isn't what was requested" in str(e):
+                        self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node(ignore_node=self.node.identifier))
+                        return
+                    kwargs = {}
+                    if self.purge_mode == SongRequestPurgeMode.on_message:
+                        kwargs["delete_after"] = 11
+                    try:
+                        await self.text_channel.send(
+                            embed=disnake.Embed(
+                                description=f"**Ocorreu um erro ao obter informações da música:** [{track.title}]({track.uri}) ```py\n{repr(e)}```"
+                            ),
+                        **kwargs)
+                    except:
+                        pass
+                    embed = disnake.Embed(
+                        description=f"**Falha ao obter informação de PartialTrack:\n[{track.title}]({track.uri or track.search_uri})** ```py\n{repr(e)}```\n"
+                                    f"**Servidor de música:** `{self.node.identifier}`",
+                        color=disnake.Colour.red())
+                    await self.report_error(embed, track)
+                    await asyncio.sleep(7)
+                    self.locked = False
+                    await self.process_next()
+                    return
+
+                try:
+                    t = t.tracks
+                except:
+                    pass
+
+                if not t:
                     try:
                         await self.text_channel.send(
                             embed=disnake.Embed(
                                 description=f"A música [{track.title}]({track.uri}) não está disponível...\n"
-                                            f"Pulando para a próxima música...",
+                                            "Pulando para a próxima música...",
                                 color=self.bot.get_color()
                             ), delete_after=10
                         )
@@ -1657,122 +1774,7 @@ class LavalinkPlayer(wavelink.Player):
                     await self.process_next()
                     return
 
-        if not self.native_yt and (track.info["sourceName"] == "youtube" or track.info.get("sourceNameOrig") == "youtube"):
-
-            if track.is_stream or track.duration > 480000:
-                self.failed_tracks.append(track)
-                self.locked = False
-                await self.process_next()
-                return
-
-            temp_id = track.info.get("temp_id")
-
-            if not temp_id:
-
-                tracks = []
-
-                exceptions = ""
-
-                for provider in self.node.search_providers:
-                    if provider in ("ytsearch", "ytmsearch"):
-                        continue
-                    try:
-                        tracks = await self.node.get_tracks(f"{provider}:{track.title}")
-                    except:
-                        exceptions += f"{traceback.format_exc()}\n"
-                        await asyncio.sleep(1)
-                        continue
-
-                try:
-                    tracks = tracks.tracks
-                except AttributeError:
-                    pass
-
-                if not [i in track.title.lower() for i in exclude_tags]:
-                    final_result = []
-                    for t in tracks:
-                        if not any((i in t.title.lower()) for i in exclude_tags):
-                            final_result.append(t)
-                            break
-                    tracks = final_result or tracks
-
-                if not tracks:
-                    if exceptions:
-                        print(exceptions)
-                    self.failed_tracks.append(track)
-                    self.current = track
-                    self.set_command_log(emoji="⚠️", text="A música atual será ignorada devido a falta de resultado "
-                                                          "no modo alternativo de buscas do youtube.")
-                    await self.invoke_np()
-                    await asyncio.sleep(13)
-                    self.locked = False
-                    await self.process_next()
-                    return
-
-                temp_id = tracks[0].id
-
-                track.info["temp_id"] = temp_id
-
-        elif not track.id:
-
-            if "&list=" in track.uri and (link_re := YOUTUBE_VIDEO_REG.match(track.uri)):
-                query = link_re.group()
-            else:
-                query = track.uri
-
-            try:
-                t = await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
-            except Exception as e:
-                traceback.print_exc()
-                if "Video returned by YouTube isn't what was requested" in str(e):
-                    self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node(ignore_node=self.node.identifier))
-                    return
-                kwargs = {}
-                if self.purge_mode == SongRequestPurgeMode.on_message:
-                    kwargs["delete_after"] = 11
-                try:
-                    await self.text_channel.send(
-                        embed=disnake.Embed(
-                            description=f"**Ocorreu um erro ao obter informações da música:** [{track.title}]({track.uri}) ```py\n{repr(e)}```"
-                        ),
-                    **kwargs)
-                except:
-                    pass
-                embed = disnake.Embed(
-                    description=f"**Falha ao obter informação de PartialTrack:\n[{track.title}]({track.uri or track.search_uri})** ```py\n{repr(e)}```\n"
-                                f"**Servidor de música:** `{self.node.identifier}`",
-                    color=disnake.Colour.red())
-                await self.report_error(embed, track)
-                await asyncio.sleep(7)
-                self.locked = False
-                await self.process_next()
-                return
-
-            try:
-                t = t.tracks
-            except:
-                pass
-
-            if not t:
-                try:
-                    await self.text_channel.send(
-                        embed=disnake.Embed(
-                            description=f"A música [{track.title}]({track.uri}) não está disponível...\n"
-                                        "Pulando para a próxima música...",
-                            color=self.bot.get_color()
-                        ), delete_after=10
-                    )
-                except:
-                    traceback.print_exc()
-
-                await asyncio.sleep(10)
-
-                self.locked = False
-
-                await self.process_next()
-                return
-
-            track.id = t[0].id
+                track.id = t[0].id
 
         self.last_track = track
 
