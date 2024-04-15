@@ -874,7 +874,7 @@ class LavalinkPlayer(wavelink.Player):
                              "diferente do esperado)."
 
                     try:
-                        await self.text_channel.send(embed=disnake.Embed(description=txt), delete_after=20)
+                        await self.text_channel.send(embed=disnake.Embed(description=txt), delete_after=60)
                     except:
                         self.set_command_log(text=txt, emoji="⚠️")
                     await asyncio.sleep(3)
