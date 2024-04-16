@@ -373,14 +373,18 @@ class Music(commands.Cog):
             ),
             options: str = commands.Param(name="opções", description="Opções para processar playlist",
                                           choices=playlist_opts, default=False),
-            source: str = commands.Param(name="fonte",
-                                         description="Selecionar site para busca de músicas (não links)",
-                                         choices=search_sources_opts,
-                                         default=None),
             repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.",
                                                 default=0),
             server: str = commands.Param(name="server", desc="Usar um servidor de música específico na busca.",
-                                         default=None)
+                                         default=None),
+            manual_bot_choice: str = commands.Param(
+                name="selecionar_bot",
+                description="Selecionar um bot disponível manualmente.",
+                default="no",
+                choices=[
+                    disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
+                ]
+            ),
     ):
 
         await self.play.callback(
@@ -392,7 +396,8 @@ class Music(commands.Cog):
             options=options,
             manual_selection=True,
             repeat_amount=repeat_amount,
-            server=server
+            server=server,
+            manual_bot_choice=manual_bot_choice
         )
 
     @search.autocomplete("busca")
@@ -603,6 +608,7 @@ class Music(commands.Cog):
     stage_flags.add_argument('-force', '-now', '-n', '-f', action='store_true', help='Tocar a música adicionada imediatamente (efetivo apenas se houver uma música tocando atualmente.)')
     stage_flags.add_argument('-loop', '-lp', type=int, default=0, help="Definir a quantidade de repetições da música escolhida.\nEx: -loop 5")
     stage_flags.add_argument('-server', '-sv', type=str, default=None, help='Usar um servidor de música específico.')
+    stage_flags.add_argument('-selectbot', '-sb', action="store_true", help="Selecionar um bot disponível manualmente.")
 
     @can_send_message_check()
     @commands.bot_has_guild_permissions(send_messages=True)
@@ -623,7 +629,8 @@ class Music(commands.Cog):
             force_play = "yes" if args.force else "no",
             manual_selection = args.select,
             repeat_amount = args.loop,
-            server = args.server
+            server = args.server,
+            manual_bot_choice = "yes" if args.selectbot else "no",
         )
 
     @can_send_message_check()
@@ -663,6 +670,14 @@ class Music(commands.Cog):
                                                 default=0),
             server: str = commands.Param(name="server", desc="Usar um servidor de música específico na busca.",
                                          default=None),
+            manual_bot_choice: str = commands.Param(
+                name="selecionar_bot",
+                description="Selecionar um bot disponível manualmente.",
+                default="no",
+                choices=[
+                    disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
+                ]
+            ),
     ):
 
         class DummyMessage:
@@ -676,7 +691,8 @@ class Music(commands.Cog):
         inter.message.thread = thread
 
         await self.play.callback(self=self, inter=inter, query="", position=position, options=False, force_play=force_play,
-                                 manual_selection=False, repeat_amount=repeat_amount, server=server)
+                                 manual_selection=False, repeat_amount=repeat_amount, server=server,
+                                 manual_bot_choice=manual_bot_choice)
 
     async def check_player_queue(self, user: disnake.User, bot: BotCore, guild_id: int, tracks: Union[list, LavalinkPlaylist] = None):
 
@@ -722,7 +738,6 @@ class Music(commands.Cog):
                 default="no",
                 choices=[
                     disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
-                    disnake.OptionChoice(disnake.Localized("No", data={disnake.Locale.pt_BR: "Não"}), "no")
                 ]
             ),
             manual_selection: bool = commands.Param(name="selecionar_manualmente",
@@ -734,6 +749,14 @@ class Music(commands.Cog):
                                                 default=0),
             server: str = commands.Param(name="server", desc="Usar um servidor de música específico na busca.",
                                          default=None),
+            manual_bot_choice: str = commands.Param(
+                name="selecionar_bot",
+                description="Selecionar um bot disponível manualmente.",
+                default="no",
+                choices=[
+                    disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
+                ]
+            ),
     ):
 
         try:
@@ -874,7 +897,7 @@ class Music(commands.Cog):
                         txt, ephemeral=True, components=[disnake.ui.Button(custom_id="bot_invite", label="Adicionar bots")])
                     return
 
-                if len(free_bots) > 1:
+                if len(free_bots) > 1 and manual_bot_choice == "yes":
 
                     v = SelectBotVoice(inter, guild, free_bots)
 
@@ -935,7 +958,7 @@ class Music(commands.Cog):
                     await inter.response.defer()
 
                 else:
-                    current_bot = free_bots.pop()
+                    current_bot = free_bots.pop(0)
 
                 if bot != current_bot:
                     guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
