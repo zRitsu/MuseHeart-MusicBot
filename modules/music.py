@@ -1083,7 +1083,7 @@ class Music(commands.Cog):
 
             embed = disnake.Embed(
                 color=self.bot.get_color(guild.me),
-                description="**Selecione um item abaixo abaixo:**\n"
+                description="**Selecione um item abaixo:**\n"
                             f'Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para escolher!'
             )
 
@@ -1226,7 +1226,7 @@ class Music(commands.Cog):
             else:
                 embed = disnake.Embed(
                     color=self.bot.get_color(guild.me),
-                    description="**Selecione um item abaixo abaixo:**\n"
+                    description="**Selecione um item abaixo:**\n"
                                 f'Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para escolher!'
                 )
 
