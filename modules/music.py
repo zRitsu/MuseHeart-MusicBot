@@ -6921,7 +6921,7 @@ class Music(commands.Cog):
 
             return
 
-        if before.channel == after.channel:
+        if before.channel == after.channel and player.last_channel == after.channel:
             try:
                 vc = player.guild.me.voice.channel
             except AttributeError:
