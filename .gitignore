@@ -168,3 +168,4 @@ application.yml
 /.spotipy_cache
 /.playlist_cache.pkl
 /guild_bots.json
+/modules_dev/
