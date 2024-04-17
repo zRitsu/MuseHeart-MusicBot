@@ -6905,7 +6905,7 @@ class Music(commands.Cog):
             return
 
         try:
-            if player.last_channel != before.channel and player.last_channel != after.channel:
+            if player.last_channel.id != before.channel.id and player.last_channel.id != after.channel.id:
                 return
         except AttributeError:
             pass
