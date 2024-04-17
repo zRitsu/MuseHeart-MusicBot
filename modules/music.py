@@ -6904,6 +6904,12 @@ class Music(commands.Cog):
         except KeyError:
             return
 
+        try:
+            if player.last_channel != before.channel and player.last_channel != after.channel:
+                return
+        except AttributeError:
+            pass
+
         if member.bot:
             # ignorar outros bots
             if player.bot.user.id == member.id and not after.channel:
@@ -6921,7 +6927,7 @@ class Music(commands.Cog):
 
             return
 
-        if before.channel == after.channel and player.last_channel == after.channel:
+        if before.channel == after.channel:
             try:
                 vc = player.guild.me.voice.channel
             except AttributeError:
