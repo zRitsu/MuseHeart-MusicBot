@@ -18,7 +18,7 @@ import wavelink
 from utils.client import BotCore
 from utils.music.checks import can_connect, can_send_message
 from utils.music.filters import AudioFilter
-from utils.music.models import LavalinkPlayer
+from utils.music.models import LavalinkPlayer, PartialTrack
 from utils.others import SongRequestPurgeMode, send_idle_embed, CustomContext
 
 
@@ -118,18 +118,24 @@ class PlayerSession(commands.Cog):
                     player.current.info["playlist"]["thumb"] = player.current.playlist.thumb
                 except:
                     pass
+            if isinstance(player.current, PartialTrack):
+                player.current.info["is_partial"] = True
             tracks.append(player.current.info)
 
         for t in player.queue:
             t.info["id"] = t.id
             if t.playlist:
                 t.info["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
+            if isinstance(t, PartialTrack):
+                t.info["is_partial"] = True
             tracks.append(t.info)
 
         for t in player.played:
             t.info["id"] = t.id
             if t.playlist:
                 t.info["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
+            if isinstance(t, PartialTrack):
+                t.info["is_partial"] = True
             played.append(t.info)
 
         for t in player.queue_autoplay:
@@ -140,6 +146,8 @@ class PlayerSession(commands.Cog):
             t.info["id"] = t.id
             if t.playlist:
                 t.info["playlist"] = {"name": t.playlist_name, "url": t.playlist_url}
+            if isinstance(t, PartialTrack):
+                t.info["is_partial"] = True
             failed_tracks.append(t.info)
 
         try:

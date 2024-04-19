@@ -32,7 +32,7 @@ from utils.db import MongoDatabase, LocalDatabase, get_prefix, DBModel, global_d
 from utils.music.checks import check_pool_bots
 from utils.music.errors import GenericError
 from utils.music.local_lavalink import run_lavalink
-from utils.music.models import music_mode, LavalinkPlayer, LavalinkPlaylist, LavalinkTrack
+from utils.music.models import music_mode, LavalinkPlayer, LavalinkPlaylist, LavalinkTrack, PartialTrack
 from utils.music.spotify import spotify_client
 from utils.others import CustomContext, token_regex, sort_dict_recursively
 from utils.owner_panel import PanelView
@@ -270,7 +270,11 @@ class BotPool:
                 except KeyError:
                     pass
 
-            tracks.append(LavalinkTrack(id_=info.get("id", ""), info=info, playlist=playlist, requester=info["extra"]["requester"]))
+            if info.get("is_partial"):
+                track = PartialTrack(info=info)
+            else:
+                track = LavalinkTrack(id_=info.get("id", ""), info=info, playlist=playlist, requester=info["extra"]["requester"])
+            tracks.append(track)
 
         return tracks, playlists
 
