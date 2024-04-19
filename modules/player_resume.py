@@ -299,7 +299,7 @@ class PlayerSession(commands.Cog):
         except:
             track_id = None
 
-        if track_id:
+        if track_id and not player.auto_pause:
             data.update(
                 {
                     "encodedTrack": track_id,
@@ -604,11 +604,12 @@ class PlayerSession(commands.Cog):
                             player.current = track
                             position = int(float(data.get("position", 0)))
                             if player.node.version == 3:
-                                await player.play(track, start=position if not track.is_stream else 0)
-                                await player.set_pause(True)
+                                if check:
+                                    await player.play(track, start=position if not track.is_stream else 0)
+                                    await player.set_pause(True)
                             else:
                                 await self.update_player(
-                                    player=player, voice_channel=voice_channel, pause=pause, position=position
+                                    player=player, voice_channel=voice_channel, pause=pause, position=position, has_listeners=check
                                 )
                             player.last_position = position
                             player.last_track = track
@@ -618,22 +619,24 @@ class PlayerSession(commands.Cog):
                         else:
                             if player.node.version > 3:
                                 await self.update_player(
-                                    player=player, voice_channel=voice_channel, pause=pause, position=0
+                                    player=player, voice_channel=voice_channel, pause=pause, position=0, has_listeners=check
                                 )
                                 player.last_position = int(float(data.get("position", 0)))
                                 await player.invoke_np()
                             else:
-                                await player.process_next()
+                                if check:
+                                    await player.process_next()
 
                     else:
                         position = int(float(data.get("position", 0)))
                         if player.node.version > 3:
                             await self.update_player(
-                                player=player, voice_channel=voice_channel, pause=pause, position=position
+                                player=player, voice_channel=voice_channel, pause=pause, position=position, has_listeners=check
                             )
                             await player.invoke_np()
                         else:
-                            await player.process_next(start_position=position)
+                            if check:
+                                await player.process_next(start_position=position)
                         player._session_resuming = False
                 except Exception:
                     print(f"{self.bot.user} - Falha na reprodução da música ao retomar player do servidor {guild.name} [{guild.id}]:\n{traceback.format_exc()}")

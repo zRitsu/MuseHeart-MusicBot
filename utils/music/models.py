@@ -38,6 +38,14 @@ thread_archive_time = {
     10080: 2880,
 }
 
+providers_dict = {
+    "youtube": "ytmsearch",
+    "soundcloud": "scsearch",
+    "applemusic": "amsearch",
+    "deezer": "dzsearch",
+    "spotify": "spsearch",
+}
+
 
 def get_start_pos(player, track, extra_milliseconds=0):
     if not track.is_stream:
@@ -864,14 +872,27 @@ class LavalinkPlayer(wavelink.Player):
                 await send_report()
 
                 if video_not_available:
+
+                    if self.node.version > 3:
+
+                        try:
+                            self.node.search_providers.remove("ytsearch")
+                        except:
+                            pass
+
+                        try:
+                            self.node.search_providers.remove("ytmsearch")
+                        except:
+                            pass
+
                     self.native_yt = False
                     self.current = None
                     self.queue.appendleft(track)
 
-                    txt = f"Devido a problemas com o suporte nativo do youtube no servidor **{self.node.identifier}**. " \
-                             "em todas as músicas do youtube será feita uma tentativa de obter a mesma " \
-                             "música em outras plataformas usando o nome do mesmo (talvez a música tocada seja " \
-                             "diferente do esperado ou ignorada caso não retorne resultados)."
+                    txt = f"Devido a limitações do youtube no servidor `{self.node.identifier}`. Durante a sessão atual " \
+                             "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome " \
+                             "das músicas do youtube que estão na fila (talvez a música tocada seja diferente do esperado " \
+                             "ou até mesmo ignoradas caso não retorne resultados)."
 
                     try:
                         await self.text_channel.send(embed=disnake.Embed(description=txt, color=self.bot.get_color(self.guild.me)), delete_after=60)
@@ -934,13 +955,27 @@ class LavalinkPlayer(wavelink.Player):
 
                 if track.info["sourceName"] == "youtube" or (self.bot.config["PARTIALTRACK_SEARCH_PROVIDER"] == "ytsearch" and
                                                              track.info["sourceName"] == "spotify"):
+                    if self.node.version > 3:
+
+                        try:
+                            self.node.search_providers.remove("ytsearch")
+                        except:
+                            pass
+
+                        try:
+                            self.node.search_providers.remove("ytmsearch")
+                        except:
+                            pass
+
                     self.native_yt = False
                     self.current = None
                     self.queue.appendleft(track)
                     self.locked = False
                     self.set_command_log(
-                        text=f"Devido a problemas técnicos no servidor `{self.node.identifier}` será usado o método alternativo de obter músicas do youtube "
-                             "na sessão atual (Talvez a música tocada seja diferente do esperado).",
+                        text=f"Devido a limitações do youtube no servidor `{self.node.identifier}`. Durante a sessão atual "
+                             "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome "
+                             "das músicas do youtube que estão na fila (talvez a música tocada seja diferente do esperado "
+                             "ou até mesmo ignoradas caso não retorne resultados).",
                         emoji="⚠️"
                     )
                     await self.process_next(start_position=self.position)
@@ -1434,37 +1469,54 @@ class LavalinkPlayer(wavelink.Player):
                             tracks.append(partial_track)
 
                 if not tracks:
-                    if track_data.info["sourceName"] == "youtube":
-                        query = f"https://www.youtube.com/watch?v={track_data.ytid}&list=RD{track_data.ytid}"
+                    if track_data.info["sourceName"] == "youtube" and self.native_yt:
+                        queries = [f"https://www.youtube.com/watch?v={track_data.ytid}&list=RD{track_data.ytid}"]
                     else:
-                        query = f"ytsearch:{track_data.author}"
-
-                    try:
-                        tracks = await self.node.get_tracks(
-                            query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, autoplay=True,
-                            requester=self.bot.user.id
-                        )
-                    except Exception as e:
-                        if [err for err in ("Could not find tracks from mix", "Could not read mix page") if err in str(e)]:
-                            try:
-                                tracks_ytsearch = await self.node.get_tracks(
-                                    f"ytsearch:\"{track_data.author}\"",
-                                    track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, autoplay=True,
-                                    requester=self.bot.user.id)
-                                track = track_data
-                            except Exception as e:
-                                exception = e
-                                continue
+                        if p_dict:=providers_dict.get(track_data.info["sourceName"]):
+                            providers = [p_dict] + [p for p in self.node.search_providers if p != p_dict]
                         else:
-                            print(traceback.format_exc())
-                            exception = e
-                            await asyncio.sleep(1.5)
+                            providers = self.node.search_providers
+
+                        queries = [f"{sp}:{track_data.author}" for sp in providers]
+
+                    for query in queries:
+
+                        try:
+                            tracks = await self.node.get_tracks(
+                                query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, autoplay=True,
+                                requester=self.bot.user.id
+                            )
+                        except Exception as e:
+                            if [err for err in ("Could not find tracks from mix", "Could not read mix page") if err in str(e)]:
+                                try:
+                                    tracks_ytsearch = await self.node.get_tracks(
+                                        f"{query}:\"{track_data.author}\"",
+                                        track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, autoplay=True,
+                                        requester=self.bot.user.id)
+                                    break
+                                except Exception as e:
+                                    exception = e
+                                    continue
+                            else:
+                                print(traceback.format_exc())
+                                exception = e
+                                await asyncio.sleep(1.5)
+                                continue
+
+                        try:
+                            tracks = tracks.tracks
+                        except:
+                            pass
+
+                        if not tracks:
                             continue
+
+                        break
 
                     if not [i in track_data.title.lower() for i in exclude_tags_2]:
                         final_tracks = []
                         for t in tracks:
-                            if not any((i in t.title.lower()) for i in exclude_tags_2):
+                            if not any((i in t.title.lower()) for i in exclude_tags_2) and not track_data.uri.startswith(t.uri):
                                 final_tracks.append(t)
                         tracks = final_tracks or tracks
 
@@ -2757,7 +2809,7 @@ class LavalinkPlayer(wavelink.Player):
         while True:
 
             nodes = sorted([n for n in self.bot.music.nodes.values() if n.is_available and n.identifier != ignore_node],
-                              key=lambda n: n.stats.players)
+                              key=lambda n: len(n.players))
             if not nodes:
                 await asyncio.sleep(5)
                 continue

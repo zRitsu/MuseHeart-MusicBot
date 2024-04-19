@@ -211,6 +211,8 @@ class Player:
         self._equalizer = Equalizer.flat()
         self.channel_id = None
 
+        self.auto_pause = False
+
     @property
     def equalizer(self):
         """The currently applied Equalizer."""
@@ -657,7 +659,7 @@ class Player:
         self.node = node
         self.node.players[int(self.guild_id)] = self
 
-        if self.current:
+        if self.current and not self.auto_pause:
             if self.node.version == 3:
                 await self.node._send(op='play', guildId=str(self.guild_id), track=self.current.id, startTime=int(self.position))
                 if self.paused:

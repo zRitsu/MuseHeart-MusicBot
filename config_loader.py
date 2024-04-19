@@ -69,14 +69,13 @@ DEFAULT_CONFIG = {
     "PLAYER_SESSIONS_MONGODB": False,
     "QUEUE_MAX_ENTRIES": 0,
     "ENABLE_DEFER_TYPING": True,
-    "DEFAULT_SEARCH_PROVIDER": "ytsearch",
 
     ##############################################
     ### Sistema de música - Suporte ao spotify ###
     ##############################################
     "SPOTIFY_CLIENT_ID": '',
     "SPOTIFY_CLIENT_SECRET": '',
-    "PARTIALTRACK_SEARCH_PROVIDER": "ytsearch",
+    "PARTIALTRACK_SEARCH_PROVIDER": "scsearch",
 
     ################################################
     ### Sistema de música - RPC (Rich Presence): ###
@@ -99,6 +98,7 @@ DEFAULT_CONFIG = {
     "LAVALINK_RAM_LIMIT": 120,
     "LAVALINK_CPU_CORES": 2,
     "LAVALINK_FILE_URL": "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/Lavalink.jar",
+    "SEARCH_PROVIDERS": "scsearch",
 
     ##########################
     ##### Bot presences: #####

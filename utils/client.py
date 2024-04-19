@@ -347,7 +347,7 @@ class BotPool:
                 value["search"] = value.get("search", "").lower() != "false"
                 value["retry_403"] = value.get("retry_403", "").lower() == "true"
                 value["enqueue_connect"] = value.get("enqueue_connect", "").lower() == "true"
-                value["search_providers"] = value.get("search_providers", "").strip().split() or [self.config["DEFAULT_SEARCH_PROVIDER"]] + [s for s in ("ytsearch", "scsearch") if s != self.config["DEFAULT_SEARCH_PROVIDER"]]
+                value["search_providers"] = value.get("search_providers", "").strip().split()
                 LAVALINK_SERVERS[key] = value
 
         start_local = None
@@ -1285,7 +1285,7 @@ class BotCore(commands.AutoShardedBot):
 
     def load_modules(self, module_list: list = None):
 
-        modules_dir = "modules"
+        modules_dir = ["modules", "modules_dev"]
 
         load_status = {
             "reloaded": [],
@@ -1294,34 +1294,36 @@ class BotCore(commands.AutoShardedBot):
 
         bot_name = self.user or self.identifier
 
-        for item in os.walk(modules_dir):
-            files = filter(lambda f: f.endswith('.py'), item[-1])
-            for file in files:
-                if module_list and file not in module_list:
-                    continue
-                filename, _ = os.path.splitext(file)
-                module_filename = os.path.join(modules_dir, filename).replace('\\', '.').replace('/', '.')
-                try:
-                    self.reload_extension(module_filename)
-                    if self.pool.controller_bot == self and not self.bot_ready:
-                        print(f"{'=' * 48}\n[OK] {bot_name} - {filename}.py Recarregado.")
-                    load_status["reloaded"].append(f"{filename}.py")
-                except (commands.ExtensionAlreadyLoaded, commands.ExtensionNotLoaded):
+        for module_dir in modules_dir:
+
+            for item in os.walk(module_dir):
+                files = filter(lambda f: f.endswith('.py'), item[-1])
+                for file in files:
+                    if module_list and file not in module_list:
+                        continue
+                    filename, _ = os.path.splitext(file)
+                    module_filename = os.path.join(module_dir, filename).replace('\\', '.').replace('/', '.')
                     try:
-                        self.load_extension(module_filename)
+                        self.reload_extension(module_filename)
                         if self.pool.controller_bot == self and not self.bot_ready:
-                            print(f"{'=' * 48}\n[OK] {bot_name} - {filename}.py Carregado.")
-                        load_status["loaded"].append(f"{filename}.py")
+                            print(f"{'=' * 48}\n[OK] {bot_name} - {filename}.py Recarregado.")
+                        load_status["reloaded"].append(f"{filename}.py")
+                    except (commands.ExtensionAlreadyLoaded, commands.ExtensionNotLoaded):
+                        try:
+                            self.load_extension(module_filename)
+                            if self.pool.controller_bot == self and not self.bot_ready:
+                                print(f"{'=' * 48}\n[OK] {bot_name} - {filename}.py Carregado.")
+                            load_status["loaded"].append(f"{filename}.py")
+                        except Exception as e:
+                            if self.pool.controller_bot == self and not self.bot_ready:
+                                print(f"{'=' * 48}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename}")
+                                raise e
+                            return load_status
                     except Exception as e:
                         if self.pool.controller_bot == self and not self.bot_ready:
                             print(f"{'=' * 48}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename}")
                             raise e
                         return load_status
-                except Exception as e:
-                    if self.pool.controller_bot == self and not self.bot_ready:
-                        print(f"{'=' * 48}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename}")
-                        raise e
-                    return load_status
 
         if self.pool.controller_bot == self and not self.bot_ready:
             print(f"{'=' * 48}")

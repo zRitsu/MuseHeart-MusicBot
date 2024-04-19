@@ -8,6 +8,7 @@ import re
 import traceback
 import zlib
 from base64 import b64decode
+from contextlib import suppress
 from copy import deepcopy
 from random import shuffle
 from typing import Union, Optional
@@ -28,7 +29,7 @@ from utils.music.checks import check_voice, has_player, has_source, is_requester
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, google_search, percentage, music_source_image
 from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolException, parse_error, \
-    EmptyFavIntegration, DiffVoiceChannel, NoPlayer
+    EmptyFavIntegration, DiffVoiceChannel, NoPlayer, YoutubeSourceDisabled
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction, FavMenuView, ViewMode, \
     SetStageTitle, SelectBotVoice
 from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, PartialTrack
@@ -44,30 +45,10 @@ class Music(commands.Cog):
     name = "Música"
     desc_prefix = f"[{emoji} {name}] | "
 
-    search_sources_opts = [
-        disnake.OptionChoice("Youtube", "ytsearch"),
-        disnake.OptionChoice("Youtube Music", "ytmsearch"),
-        disnake.OptionChoice("Soundcloud", "scsearch"),
-    ]
-
     playlist_opts = [
         disnake.OptionChoice("Misturar Playlist", "shuffle"),
         disnake.OptionChoice("Inverter Playlist", "reversed"),
     ]
-
-    sources = {
-        "yt": "ytsearch",
-        "y": "ytsearch",
-        "ytb": "ytsearch",
-        "youtube": "ytsearch",
-        "ytm": "ytmsearch",
-        "ytmsc": "ytmsearch",
-        "ytmusic": "ytmsearch",
-        "youtubemusic": "ytmsearch",
-        "sc": "scsearch",
-        "scd": "scsearch",
-        "soundcloud": "scsearch",
-    }
 
     audio_formats = ("audio/mpeg", "audio/ogg", "audio/mp4", "audio/aac")
 
@@ -6660,6 +6641,37 @@ class Music(commands.Cog):
                 retries -= 1
                 continue
 
+            if node.version > 3:
+
+                with suppress(IndexError):
+
+                    if "youtube" not in node.info["sourceManagers"] and ("ytsearch" not in node.original_providers or "ytmsearch" not in node.original_providers):
+                        node.search_providers.remove("ytsearch")
+                        node.search_providers.remove("ytmsearch")
+                    elif "ytsearch" not in node.search_providers  and "ytmsearch" not in node.search_providers:
+                        if "ytsearch" in node.original_providers or "ytmsearch" in node.original_providers:
+                            node.search_providers.append("ytmsearch")
+
+                    if "deezer" not in node.info["sourceManagers"]:
+                        node.search_providers.remove("dzsearch")
+                    elif "dzsearch" not in node.search_providers:
+                        node.search_providers.append("dzsearch")
+
+                    if "applemusic" not in node.info["sourceManagers"]:
+                        node.search_providers.remove("amsearch")
+                    elif "amsearch" not in node.search_providers:
+                        node.search_providers.append("amsearch")
+
+                    if "spotify" not in node.info["sourceManagers"]:
+                        node.search_providers.remove("spsearch")
+                    elif "spsearch" not in node.search_providers:
+                        node.search_providers.append("spsearch")
+
+                    if "soundcloud" not in node.info["sourceManagers"]:
+                        node.search_providers.remove("scsearch")
+                    elif "scsearch" not in node.search_providers:
+                        node.search_providers.append("scsearch")
+
             if node.stats.uptime < 600000:
                 node.open()
             return
@@ -6680,7 +6692,7 @@ class Music(commands.Cog):
         node_website = data.pop('website', '')
         region = data.pop('region', 'us_central')
         heartbeat = int(data.pop('heartbeat', 30))
-        search_providers = data.pop("search_providers", [self.bot.pool.config["DEFAULT_SEARCH_PROVIDER"]] + [s for s in ("ytsearch", "scsearch") if s != self.bot.pool.config["DEFAULT_SEARCH_PROVIDER"]])
+        search_providers = data.pop("search_providers", None) or ["dzsearch", "scsearch", "amsearch", "spsearch"]
         retry_403 = data.pop('retry_403', False)
         info = None
 
@@ -6743,6 +6755,7 @@ class Music(commands.Cog):
         node.website = node_website
         node.retry_403 = retry_403
         node.search_providers = search_providers
+        node.original_providers = set(node.search_providers)
 
     async def get_tracks(
             self, query: str, user: disnake.Member, node: wavelink.Node = None,
@@ -6766,6 +6779,8 @@ class Music(commands.Cog):
 
         exceptions = set()
 
+        is_yt_source = False
+
         if not tracks:
 
             if use_cache:
@@ -6780,18 +6795,31 @@ class Music(commands.Cog):
 
             if not tracks:
 
+                is_yt_source = query.lower().startswith(
+                    ("https://youtu.be", "https://www.youtube.com", "https://music.youtube.com")
+                )
+
                 for n in nodes:
+
+                    if is_yt_source:
+
+                        if n.version > 3:
+                            if "youtube" not in n.info["sourceManagers"]:
+                                raise YoutubeSourceDisabled()
+
+                        if "ytsearch" not in n.original_providers or "ytmsearch" not in n.original_providers:
+                            raise YoutubeSourceDisabled()
 
                     node_retry = False
 
                     if source is False:
                         providers = [n.search_providers[:1]]
                     elif source:
-                        providers = [s for s in (n.search_providers or [self.bot.config["DEFAULT_SEARCH_PROVIDER"]]) if s != source]
+                        providers = [s for s in n.search_providers if s != source]
                         providers.insert(0, source)
                     else:
                         source = True
-                        providers = n.search_providers or [self.bot.config["DEFAULT_SEARCH_PROVIDER"]]
+                        providers = n.search_providers
 
                     for search_provider in providers:
 
@@ -6804,6 +6832,19 @@ class Music(commands.Cog):
                         except Exception as e:
                             exceptions.add(repr(e))
                             if "Video returned by YouTube isn't what was requested" in str(e):
+
+                                is_yt_source = True
+
+                                if node.version > 3:
+                                    try:
+                                        node.search_providers.remove("ytsearch")
+                                    except:
+                                        pass
+                                    try:
+                                        node.search_providers.remove("ytmsearch")
+                                    except:
+                                        pass
+
                                 node_retry = True
                                 break
                             print(f"Falha ao processar busca...\n{query}\n{traceback.format_exc()}")
@@ -6815,6 +6856,10 @@ class Music(commands.Cog):
                         break
 
         if not tracks:
+
+            if is_yt_source:
+                raise YoutubeSourceDisabled()
+
             if exceptions:
                 raise GenericError("**Ocorreu um erro ao processar sua busca:** ```py\n" + "\n".join(exceptions) + "```")
             raise GenericError("**Não houve resultados para sua busca.**")
@@ -6841,6 +6886,7 @@ class Music(commands.Cog):
                 'region': 'us_central',
                 'retries': 120,
                 'retry_403': True,
+                'search_providers': self.bot.pool.config["SEARCH_PROVIDERS"].strip().split() or ["scsearch"]
             }
 
             self.bot.loop.create_task(self.connect_node(localnode))
@@ -6929,19 +6975,20 @@ class Music(commands.Cog):
 
         if before.channel == after.channel:
             try:
-                vc = player.guild.me.voice.channel
+                vc = player.last_channel
             except AttributeError:
                 pass
             else:
-                try:
-                    player.members_timeout_task.cancel()
-                except:
-                    pass
-                try:
-                    check = (m for m in vc.members if not m.bot and not (m.voice.deaf or m.voice.self_deaf))
-                except:
-                    check = None
-                player.members_timeout_task = player.bot.loop.create_task(player.members_timeout(check=bool(check)))
+                if after.channel == vc:
+                    try:
+                        player.members_timeout_task.cancel()
+                    except:
+                        pass
+                    try:
+                        check = (m for m in vc.members if not m.bot and not (m.voice.deaf or m.voice.self_deaf))
+                    except:
+                        check = None
+                    player.members_timeout_task = player.bot.loop.create_task(player.members_timeout(check=bool(check)))
             return
 
         try:
