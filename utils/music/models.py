@@ -2712,19 +2712,23 @@ class LavalinkPlayer(wavelink.Player):
         if track.id:
             return
 
+        check_duration = False
+
         try:
 
             exceptions = []
 
-            if (is_http:=track.info.get("sourceName") == "http"):
+            if (is_http:=track.info["sourceName"] == "http"):
                 to_search = track.uri or track.search_uri
             else:
-                try:
-                    to_search = track.info["search_uri"]
-                    check_duration = False
-                except KeyError:
-                    to_search = f"{self.bot.config['PARTIALTRACK_SEARCH_PROVIDER']}:" + (f"\"{track.info['isrc']}\"" if track.info.get("isrc") else f"{track.single_title.replace(' - ', ' ')} - {track.authors_string}")
-                    check_duration = True
+                if track.info["sourceName"] in self.node.info.get("sourceManagers", []):
+                    to_search = track.uri
+                else:
+                    try:
+                        to_search = track.info["search_uri"]
+                    except KeyError:
+                        to_search = f"{self.bot.config['PARTIALTRACK_SEARCH_PROVIDER']}:" + (f"\"{track.info['isrc']}\"" if track.info.get("isrc") else f"{track.single_title.replace(' - ', ' ')} - {track.authors_string}")
+                        check_duration = True
 
             try:
                 tracks = (await self.node.get_tracks(to_search, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist))
