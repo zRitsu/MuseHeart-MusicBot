@@ -6643,7 +6643,7 @@ class Music(commands.Cog):
 
             if node.version > 3:
 
-                with suppress(IndexError):
+                with suppress(IndexError, ValueError):
 
                     if "youtube" not in node.info["sourceManagers"] and ("ytsearch" not in node.original_providers or "ytmsearch" not in node.original_providers):
                         node.search_providers.remove("ytsearch")
