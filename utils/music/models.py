@@ -1666,6 +1666,10 @@ class LavalinkPlayer(wavelink.Player):
 
         if not self.auto_pause:
 
+            if self.node.version > 3:
+                if track.info["sourceName"] not in self.node.info["sourceManagers"] and not isinstance(track, PartialTrack):
+                    track.id = ""
+
             if isinstance(track, PartialTrack):
 
                 if not track.id:
