@@ -6627,6 +6627,19 @@ class Music(commands.Cog):
             await asyncio.sleep(backoff)
             retries += 1
 
+    def remove_provider(self, lst, queries: list):
+        for q in queries:
+            try:
+                lst.remove(q)
+            except:
+                continue
+
+    def add_provider(self, lst, queries: list):
+        for q in queries:
+            if q in lst:
+                lst.remove(q)
+            lst.append(q)
+
     @commands.Cog.listener("on_wavelink_node_ready")
     async def node_ready(self, node: wavelink.Node):
         print(f'{self.bot.user} - Servidor de música: [{node.identifier} / v{node.version}] está pronto para uso!')
@@ -6646,47 +6659,48 @@ class Music(commands.Cog):
                 with suppress(IndexError, ValueError):
 
                     if "deezer" not in node.info["sourceManagers"]:
-                        node.search_providers.remove("dzsearch")
-                        node.partial_providers.remove("dzisrc:{isrc}")
-                        node.partial_providers.remove("dzsearch:{author} - {title}")
+                        self.remove_provider(node.search_providers, ["dzsearch"])
+                        self.remove_provider(node.partial_providers, ["dzisrc:{isrc}", "dzsearch:{author} - {title}"])
                     elif "dzsearch" not in node.search_providers:
-                        node.search_providers.append("dzsearch")
-                        node.partial_providers.append("dzisrc:{isrc}")
-                        node.partial_providers.append("dzsearch:{author} - {title}")
+                        self.add_provider(node.search_providers, ["dzsearch"])
+                        self.add_provider(node.partial_providers, ["dzisrc:{isrc}", "dzsearch:{author} - {title}"])
 
                     if "applemusic" not in node.info["sourceManagers"]:
-                        node.search_providers.remove("amsearch")
-                        node.partial_providers.remove("amsearch:{author} - {title}")
+                        self.remove_provider(node.search_providers, ["amsearch"])
+                        self.remove_provider(node.partial_providers, ["amsearch:{author} - {title}"])
                     elif "amsearch" not in node.search_providers:
-                        node.search_providers.append("amsearch")
-                        node.partial_providers.append("amsearch:{author} - {title}")
+                        self.add_provider(node.search_providers, ["amsearch"])
+                        self.add_provider(node.partial_providers, ["amsearch:{author} - {title}"])
 
                     if "spotify" not in node.info["sourceManagers"]:
-                        node.search_providers.remove("spsearch")
-                        node.partial_providers.remove("spsearch:{author} - {title}")
+                        self.remove_provider(node.search_providers, ["spsearch"])
+                        self.remove_provider(node.partial_providers, ["spsearch:{author} - {title}"])
                     elif "spsearch" not in node.search_providers:
-                        node.search_providers.append("spsearch")
-                        node.partial_providers.append("spsearch:{author} - {title}")
+                        self.add_provider(node.search_providers, ["spsearch"])
+                        self.add_provider(node.partial_providers, ["spsearch:{author} - {title}"])
 
-                    if "youtube" not in node.info["sourceManagers"] and ("ytsearch" not in node.original_providers or "ytmsearch" not in node.original_providers):
-                        node.search_providers.remove("ytsearch")
-                        node.search_providers.remove("ytmsearch")
-                        node.partial_providers.remove("ytsearch:\"{isrc}\"")
-                        node.partial_providers.remove("ytsearch:\"{title} - {author}\"")
-                        node.partial_providers.remove("ytmsearch:\"{isrc}\"")
-                        node.partial_providers.remove("ytmsearch:\"{title} - {author}\"")
-                    elif "ytsearch" not in node.search_providers  and "ytmsearch" not in node.search_providers:
-                        if "ytsearch" in node.original_providers or "ytmsearch" in node.original_providers:
-                            node.search_providers.append("ytmsearch")
-                            node.partial_providers.append("ytsearch:\"{isrc}\"")
-                            node.partial_providers.append("ytsearch:\"{title} - {author}\"")
+                    if "youtube" not in node.info["sourceManagers"] and "ytsearch" not in node.original_providers:
+                        self.remove_provider(node.search_providers, ["ytsearch"])
+                        self.remove_provider(node.partial_providers, ["ytsearch:\"{isrc}\"", "ytsearch:\"{title} - {author}\""])
+                    elif "ytsearch" not in node.search_providers:
+                        if "ytsearch" in node.original_providers:
+                            self.add_provider(node.search_providers, ["ytsearch"])
+                            self.add_provider(node.partial_providers, ["ytsearch:\"{isrc}\"", "ytsearch:\"{title} - {author}\""])
+
+                    if "youtube" not in node.info["sourceManagers"] and "ytmsearch" not in node.original_providers:
+                        self.remove_provider(node.search_providers, ["ytmsearch"])
+                        self.remove_provider(node.partial_providers, ["ytmsearch:\"{isrc}\"", "ytmsearch:\"{title} - {author}\""])
+                    elif "ytmsearch" not in node.search_providers:
+                        if "ytmsearch" in node.original_providers:
+                            self.add_provider(node.search_providers, ["ytmsearch"])
+                            self.add_provider(node.partial_providers, ["ytmsearch:\"{isrc}\"", "ytmsearch:\"{title} - {author}\""])
 
                     if "soundcloud" not in node.info["sourceManagers"]:
-                        node.search_providers.remove("scsearch")
-                        node.partial_providers.remove("scsearch:{title} - {author}")
+                        self.remove_provider(node.search_providers, ["scsearch"])
+                        self.remove_provider(node.partial_providers, ["scsearch:{title} - {author}"])
                     elif "scsearch" not in node.search_providers:
-                        node.search_providers.append("scsearch")
-                        node.partial_providers.append("scsearch:{title} - {author}")
+                        self.add_provider(node.search_providers, ["scsearch"])
+                        self.add_provider(node.partial_providers, ["scsearch:{title} - {author}"])
 
             if node.stats.uptime < 600000:
                 node.open()
