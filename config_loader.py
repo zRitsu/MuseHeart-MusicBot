@@ -97,7 +97,7 @@ DEFAULT_CONFIG = {
     "LAVALINK_RAM_LIMIT": 120,
     "LAVALINK_CPU_CORES": 2,
     "LAVALINK_FILE_URL": "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/Lavalink.jar",
-    "SEARCH_PROVIDERS": "scsearch",
+    "SEARCH_PROVIDERS": "ytsearch scsearch",
 
     ##########################
     ##### Bot presences: #####

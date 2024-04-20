@@ -6934,7 +6934,7 @@ class Music(commands.Cog):
                 'region': 'us_central',
                 'retries': 120,
                 'retry_403': True,
-                'search_providers': self.bot.pool.config["SEARCH_PROVIDERS"].strip().split() or ["scsearch"]
+                'search_providers': self.bot.pool.config["SEARCH_PROVIDERS"].strip().split() or ["ytsearch", "scsearch"]
             }
 
             self.bot.loop.create_task(self.connect_node(localnode))
