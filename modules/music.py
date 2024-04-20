@@ -6841,7 +6841,7 @@ class Music(commands.Cog):
                             if "youtube" not in n.info["sourceManagers"]:
                                 raise YoutubeSourceDisabled()
 
-                        if "ytsearch" not in n.original_providers or "ytmsearch" not in n.original_providers:
+                        if "ytsearch" not in n.original_providers and "ytmsearch" not in n.original_providers:
                             raise YoutubeSourceDisabled()
 
                     node_retry = False
