@@ -75,7 +75,6 @@ DEFAULT_CONFIG = {
     ##############################################
     "SPOTIFY_CLIENT_ID": '',
     "SPOTIFY_CLIENT_SECRET": '',
-    "PARTIALTRACK_SEARCH_PROVIDER": "scsearch",
 
     ################################################
     ### Sistema de música - RPC (Rich Presence): ###

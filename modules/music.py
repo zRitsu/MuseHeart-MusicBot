@@ -6645,32 +6645,48 @@ class Music(commands.Cog):
 
                 with suppress(IndexError, ValueError):
 
-                    if "youtube" not in node.info["sourceManagers"] and ("ytsearch" not in node.original_providers or "ytmsearch" not in node.original_providers):
-                        node.search_providers.remove("ytsearch")
-                        node.search_providers.remove("ytmsearch")
-                    elif "ytsearch" not in node.search_providers  and "ytmsearch" not in node.search_providers:
-                        if "ytsearch" in node.original_providers or "ytmsearch" in node.original_providers:
-                            node.search_providers.append("ytmsearch")
-
                     if "deezer" not in node.info["sourceManagers"]:
                         node.search_providers.remove("dzsearch")
+                        node.partial_providers.remove("dzisrc:{isrc}")
+                        node.partial_providers.remove("dzsearch:{author} - {title}")
                     elif "dzsearch" not in node.search_providers:
                         node.search_providers.append("dzsearch")
+                        node.partial_providers.append("dzisrc:{isrc}")
+                        node.partial_providers.append("dzsearch:{author} - {title}")
 
                     if "applemusic" not in node.info["sourceManagers"]:
                         node.search_providers.remove("amsearch")
+                        node.partial_providers.remove("amsearch:{author} - {title}")
                     elif "amsearch" not in node.search_providers:
                         node.search_providers.append("amsearch")
+                        node.partial_providers.append("amsearch:{author} - {title}")
 
                     if "spotify" not in node.info["sourceManagers"]:
                         node.search_providers.remove("spsearch")
+                        node.partial_providers.remove("spsearch:{author} - {title}")
                     elif "spsearch" not in node.search_providers:
                         node.search_providers.append("spsearch")
+                        node.partial_providers.append("spsearch:{author} - {title}")
+
+                    if "youtube" not in node.info["sourceManagers"] and ("ytsearch" not in node.original_providers or "ytmsearch" not in node.original_providers):
+                        node.search_providers.remove("ytsearch")
+                        node.search_providers.remove("ytmsearch")
+                        node.partial_providers.remove("ytsearch:\"{isrc}\"")
+                        node.partial_providers.remove("ytsearch:\"{title} - {author}\"")
+                        node.partial_providers.remove("ytmsearch:\"{isrc}\"")
+                        node.partial_providers.remove("ytmsearch:\"{title} - {author}\"")
+                    elif "ytsearch" not in node.search_providers  and "ytmsearch" not in node.search_providers:
+                        if "ytsearch" in node.original_providers or "ytmsearch" in node.original_providers:
+                            node.search_providers.append("ytmsearch")
+                            node.partial_providers.append("ytsearch:\"{isrc}\"")
+                            node.partial_providers.append("ytsearch:\"{title} - {author}\"")
 
                     if "soundcloud" not in node.info["sourceManagers"]:
                         node.search_providers.remove("scsearch")
+                        node.partial_providers.remove("scsearch:{title} - {author}")
                     elif "scsearch" not in node.search_providers:
                         node.search_providers.append("scsearch")
+                        node.partial_providers.append("scsearch:{title} - {author}")
 
             if node.stats.uptime < 600000:
                 node.open()
@@ -6756,6 +6772,24 @@ class Music(commands.Cog):
         node.retry_403 = retry_403
         node.search_providers = search_providers
         node.original_providers = set(node.search_providers)
+        node.partial_providers = []
+
+        for p in node.original_providers:
+            if p == "dzsearch":
+                node.partial_providers.append("dzisrc:{isrc}")
+                node.partial_providers.append("dzsearch:{author} - {title}")
+            elif p == "amsearch":
+                node.partial_providers.append("amsearch:{author} - {title}")
+            elif p == "spotify":
+                node.partial_providers.append("spsearch:{author} - {title}")
+            elif p == "ytsearch":
+                node.partial_providers.append("ytsearch:\"{isrc}\"")
+                node.partial_providers.append("ytsearch:\"{title} - {author}\"")
+            elif p == "ytmsearch":
+                node.partial_providers.append("ytmsearch:\"{isrc}\"")
+                node.partial_providers.append("ytmsearch:\"{title} - {author}\"")
+            elif p == "scsearch":
+                node.partial_providers.append("scsearch:{title} - {author}")
 
     async def get_tracks(
             self, query: str, user: disnake.Member, node: wavelink.Node = None,

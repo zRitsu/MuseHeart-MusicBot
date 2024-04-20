@@ -8,6 +8,7 @@ import random
 import traceback
 import uuid
 from collections import deque
+from contextlib import suppress
 from itertools import cycle
 from time import time
 from typing import Optional, Union, TYPE_CHECKING, List
@@ -850,7 +851,7 @@ class LavalinkPlayer(wavelink.Player):
 
             self.current = None
 
-            error_403 = False
+            youtube_exception = False
             video_not_available = False
 
             cooldown = 10
@@ -875,15 +876,13 @@ class LavalinkPlayer(wavelink.Player):
 
                     if self.node.version > 3:
 
-                        try:
+                        with suppress(IndexError, ValueError):
                             self.node.search_providers.remove("ytsearch")
-                        except:
-                            pass
-
-                        try:
                             self.node.search_providers.remove("ytmsearch")
-                        except:
-                            pass
+                            self.node.partial_providers.remove("ytsearch:\"{isrc}\"")
+                            self.node.partial_providers.remove("ytsearch:\"{title} - {author}\"")
+                            self.node.partial_providers.remove("ytmsearch:\"{isrc}\"")
+                            self.node.partial_providers.remove("ytmsearch:\"{title} - {author}\"")
 
                     self.native_yt = False
                     self.current = None
@@ -908,13 +907,13 @@ class LavalinkPlayer(wavelink.Player):
                         f"(aguardando um novo servidor ficar disponível)."))
                 return
 
-            if (event.error == "This IP address has been blocked by YouTube (429)" or
+            if (youtube_exception := (event.error == "This IP address has been blocked by YouTube (429)" or
                 #event.message == "Video returned by YouTube isn't what was requested" or
-                (error_403 := event.cause.startswith(("java.lang.RuntimeException: Not success status code: 403",
-                                                      "java.io.IOException: Invalid status code for video page response: 400")))
-            ):
+                event.cause.startswith(("java.lang.RuntimeException: Not success status code: 403",
+                                                      "java.io.IOException: Invalid status code for video page response: 400"))
+            )):
 
-                if error_403 and self.node.retry_403:
+                if youtube_exception and self.node.retry_403:
 
                     if not hasattr(self, 'retries_403'):
                         self.retries_403 = {"last_time": None, 'counter': 0}
@@ -953,19 +952,16 @@ class LavalinkPlayer(wavelink.Player):
 
                 self.retries_403 = {"last_time": None, 'counter': 0}
 
-                if track.info["sourceName"] == "youtube" or (self.bot.config["PARTIALTRACK_SEARCH_PROVIDER"] == "ytsearch" and
-                                                             track.info["sourceName"] == "spotify"):
+                if youtube_exception:
                     if self.node.version > 3:
 
-                        try:
+                        with suppress(IndexError, ValueError):
                             self.node.search_providers.remove("ytsearch")
-                        except:
-                            pass
-
-                        try:
                             self.node.search_providers.remove("ytmsearch")
-                        except:
-                            pass
+                            self.node.partial_providers.remove("ytsearch:\"{isrc}\"")
+                            self.node.partial_providers.remove("ytsearch:\"{title} - {author}\"")
+                            self.node.partial_providers.remove("ytmsearch:\"{isrc}\"")
+                            self.node.partial_providers.remove("ytmsearch:\"{title} - {author}\"")
 
                     self.native_yt = False
                     self.current = None
@@ -2717,39 +2713,34 @@ class LavalinkPlayer(wavelink.Player):
         try:
 
             exceptions = []
+            tracks = []
 
-            if (is_http:=track.info["sourceName"] == "http"):
-                to_search = track.uri or track.search_uri
+            if track.info["sourceName"] == "http":
+                search_queries = [track.uri or track.search_uri]
             else:
                 if track.info["sourceName"] in self.node.info.get("sourceManagers", []):
-                    to_search = track.uri
+                    search_queries = [track.uri]
                 else:
-                    try:
-                        to_search = track.info["search_uri"]
-                    except KeyError:
-                        to_search = f"{self.bot.config['PARTIALTRACK_SEARCH_PROVIDER']}:" + (f"\"{track.info['isrc']}\"" if track.info.get("isrc") else f"{track.single_title.replace(' - ', ' ')} - {track.authors_string}")
-                        check_duration = True
+                    search_queries = []
+                    for sp in self.node.partial_providers:
+                        if "{isrc}" in sp:
+                            if track.info['isrc']:
+                                search_queries.append(sp.replace("{isrc}", track.info['isrc']))
+                            continue
+                        search_queries.append(sp.replace("{title}", track.single_title).replace("{author}", ", ".join(track.authors)))
 
-            try:
-                tracks = (await self.node.get_tracks(to_search, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist))
-            except wavelink.TrackNotFound as e:
-                exceptions.append(e)
-                tracks = []
+            for query in search_queries:
 
-            if not is_http and not tracks and self.bot.config['PARTIALTRACK_SEARCH_PROVIDER'] not in ("ytsearch", "ytmsearch", "scsearch"):
-
-                if track.info.get("isrc"):
-                    try:
-                        tracks = await self.node.get_tracks(f"ytsearch:\"{track.info['isrc']}\"",track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
-                    except Exception as e:
-                        exceptions.append(e)
+                try:
+                    tracks = (await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist))
+                except wavelink.TrackNotFound as e:
+                    exceptions.append(e)
+                    continue
 
                 if not tracks:
-                    try:
-                        tracks = await self.node.get_tracks(
-                            f"ytsearch:{track.single_title.replace(' - ', ' ')} - {track.authors_string}")
-                    except Exception as e:
-                        exceptions.append(e)
+                    continue
+
+                break
 
             try:
                 tracks = tracks.tracks
