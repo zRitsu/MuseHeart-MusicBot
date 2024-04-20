@@ -6780,7 +6780,7 @@ class Music(commands.Cog):
                 node.partial_providers.append("dzsearch:{author} - {title}")
             elif p == "amsearch":
                 node.partial_providers.append("amsearch:{author} - {title}")
-            elif p == "spotify":
+            elif p == "spsearch":
                 node.partial_providers.append("spsearch:{author} - {title}")
             elif p == "ytsearch":
                 node.partial_providers.append("ytsearch:\"{isrc}\"")
