@@ -6774,7 +6774,7 @@ class Music(commands.Cog):
         node.original_providers = set(node.search_providers)
         node.partial_providers = []
 
-        for p in node.original_providers:
+        for p in node.search_providers:
             if p == "dzsearch":
                 node.partial_providers.append("dzisrc:{isrc}")
                 node.partial_providers.append("dzsearch:{author} - {title}")
