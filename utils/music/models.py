@@ -2728,8 +2728,8 @@ class LavalinkPlayer(wavelink.Player):
                     search_queries = []
                     for sp in self.node.partial_providers:
                         if "{isrc}" in sp:
-                            if track.info['isrc']:
-                                search_queries.append(sp.replace("{isrc}", track.info['isrc']))
+                            if isrc:=track.info.get('isrc'):
+                                search_queries.append(sp.replace("{isrc}", isrc))
                             continue
                         search_queries.append(sp.replace("{title}", track.single_title).replace("{author}", ", ".join(track.authors)))
 
