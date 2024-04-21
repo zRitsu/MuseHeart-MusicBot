@@ -278,7 +278,8 @@ class PlayerSession(commands.Cog):
             player: LavalinkPlayer,
             voice_channel: Union[disnake.VoiceChannel, disnake.StageChannel],
             pause: bool,
-            position: int
+            position: int,
+            has_members = None
     ):
 
         if not player.current:
@@ -307,7 +308,7 @@ class PlayerSession(commands.Cog):
         except:
             track_id = None
 
-        if track_id and not player.auto_pause:
+        if track_id and has_members:
             data.update(
                 {
                     "encodedTrack": track_id,
@@ -617,7 +618,7 @@ class PlayerSession(commands.Cog):
                                     await player.set_pause(True)
                             else:
                                 await self.update_player(
-                                    player=player, voice_channel=voice_channel, pause=pause, position=position
+                                    player=player, voice_channel=voice_channel, pause=pause, position=position, has_members=check
                                 )
                             player.last_position = position
                             player.last_track = track
@@ -627,7 +628,7 @@ class PlayerSession(commands.Cog):
                         else:
                             if player.node.version > 3:
                                 await self.update_player(
-                                    player=player, voice_channel=voice_channel, pause=pause, position=0
+                                    player=player, voice_channel=voice_channel, pause=pause, position=0, has_members=check
                                 )
                                 player.last_position = int(float(data.get("position", 0)))
                                 await player.invoke_np()
@@ -639,7 +640,7 @@ class PlayerSession(commands.Cog):
                         position = int(float(data.get("position", 0)))
                         if player.node.version > 3:
                             await self.update_player(
-                                player=player, voice_channel=voice_channel, pause=pause, position=position
+                                player=player, voice_channel=voice_channel, pause=pause, position=position, has_members=check
                             )
                             await player.invoke_np()
                         else:
