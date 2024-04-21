@@ -6153,7 +6153,7 @@ class Music(commands.Cog):
             print(
                 f'{"-" * 15}\n'
                 f'Removendo invite: {invite} \n'
-                f'Servidor: {inter.guild.name} [{inter.guild_id}]\n' + 
+                f'Servidor: {vc.guild.name} [{vc.guild.id}]\n' + 
                 (f"Canal: {vc.name} [{vc.id}]" if vc else "") +
                 f'{"-" * 15}'
             )
