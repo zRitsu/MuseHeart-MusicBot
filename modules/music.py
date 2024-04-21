@@ -6139,16 +6139,17 @@ class Music(commands.Cog):
         except KeyError:
             invite = None
 
-        try:
-            invite = (await bot.fetch_invite(invite)).url
-        except disnake.NotFound:
-            invite = None
-        except Exception:
-            traceback.print_exc()
-        else:
-            if vc:
-              if invite.channel.id != vc.id:
-                invite = ""
+        if invite:
+            try:
+                invite = (await bot.fetch_invite(invite)).url
+            except disnake.NotFound:
+                invite = None
+            except Exception:
+                traceback.print_exc()
+            else:
+                if vc:
+                  if invite.channel.id != vc.id:
+                    invite = ""
 
         if invite is None:
             print(
