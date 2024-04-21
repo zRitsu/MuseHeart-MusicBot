@@ -6146,7 +6146,8 @@ class Music(commands.Cog):
         except Exception:
             traceback.print_exc()
         else:
-            if vc and invite.channel.id != vc.id:
+            if vc:
+              if invite.channel.id != vc.id:
                 invite = ""
 
         if invite is None:
@@ -6156,8 +6157,11 @@ class Music(commands.Cog):
                 (f"Servidor: {vc.guild.name} [{vc.guild.id}]\nCanal: {vc.name} [{vc.id}]" if vc else "") +
                 f'{"-" * 15}'
             )
-            if vc:
+            try:
                 del global_data["listen_along_invites"][str(vc.id)]
+            except KeyError:
+                pass
+            else:
                 await self.bot.update_global_data(inter.guild_id, global_data, db_name=DBModel.guilds)
 
         for n, s in global_data["custom_skins"].items():
