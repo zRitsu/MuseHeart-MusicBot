@@ -5,6 +5,7 @@ import asyncio
 import datetime
 import pprint
 import random
+import re
 import traceback
 import uuid
 from collections import deque
@@ -31,6 +32,7 @@ if TYPE_CHECKING:
 
 exclude_tags = ["remix", "edit", "extend", "compilation", "mashup"]
 exclude_tags_2 = ["extend", "compilation", "mashup", "nightcore", "8d"]
+emoji_pattern = re.compile('<a?:.+?:\d+?>')
 
 thread_archive_time = {
     60: 30,
@@ -2096,6 +2098,10 @@ class LavalinkPlayer(wavelink.Player):
 
             if not msg:
                 msg = "Status: Aguardando por novas músicas."
+            else:
+                emojis = emoji_pattern.findall(msg)
+                for emoji in emojis:
+                    msg = msg.replace(emoji, '')
 
             if not self.guild.me.voice.channel.instance:
                 func = self.guild.me.voice.channel.create_instance
