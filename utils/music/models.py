@@ -1530,6 +1530,10 @@ class LavalinkPlayer(wavelink.Player):
                 break
 
             if not tracks:
+                try:
+                    tracks_ytsearch = tracks_ytsearch.tracks
+                except AttributeError:
+                    pass
                 tracks = tracks_ytsearch
                 tracks.reverse()
 
