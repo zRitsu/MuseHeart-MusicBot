@@ -6152,7 +6152,7 @@ class Music(commands.Cog):
         if invite is None:
             print(
                 f'{"-" * 15}\n'
-                f'Removendo invite: {invite} \n'
+                f'Removendo invite: {invite} \n' +
                 (f"Servidor: {vc.guild.name} [{vc.guild.id}]\nCanal: {vc.name} [{vc.id}]" if vc else "") +
                 f'{"-" * 15}'
             )
