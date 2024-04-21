@@ -1545,7 +1545,7 @@ class MusicSettings(commands.Cog):
                 )
             )
 
-        global_data["listen_along_invites"][str(inter.channel.id)] = invite.url
+        global_data["listen_along_invites"][str(channel.id)] = invite.url
 
         await self.bot.update_global_data(inter.guild_id, global_data, db_name=DBModel.guilds)
 
