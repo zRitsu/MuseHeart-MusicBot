@@ -6122,35 +6122,43 @@ class Music(commands.Cog):
                 inter.global_guild_data = global_data
             except:
                 pass
+        
+        try:
+            vc = inter.author.voice.channel
+        except AttributeError:
+            vc = None
 
         if global_data["global_skin"]:
             skin = global_data["player_skin"] or skin
             static_skin = global_data["player_skin_static"] or guild_data["player_controller"]["static_skin"]
 
+        invite = ""
+
         try:
-            invite = global_data["listen_along_invites"][str(inter.channel.id)]
+            invite = global_data["listen_along_invites"][str(vc.id)]
         except KeyError:
             invite = None
 
+        try:
+            invite = (await bot.fetch_invite(invite)).url
+        except disnake.NotFound:
+            invite = None
+        except Exception:
+            traceback.print_exc()
         else:
-            try:
-                invite = (await bot.fetch_invite(invite)).url
-            except disnake.NotFound:
+            if vc and invite.channel.id != vc.id:
                 invite = None
-            except Exception:
-                traceback.print_exc()
-                invite = ""
 
-            if invite is None:
-                print(
-                    f'{"-" * 15}\n'
-                    f'Removendo invite: {invite} \n'
-                    f'Servidor: {inter.guild.name} [{inter.guild_id}]\n'
-                    f'Canal: {inter.channel.name} [{inter.channel.id}]\n'
-                    f'{"-" * 15}'
-                )
-                del global_data["listen_along_invites"][str(inter.channel.id)]
-                await self.bot.update_global_data(inter.guild_id, global_data, db_name=DBModel.guilds)
+        if invite is None:
+            print(
+                f'{"-" * 15}\n'
+                f'Removendo invite: {invite} \n'
+                f'Servidor: {inter.guild.name} [{inter.guild_id}]\n' + 
+                (f"Canal: {vc.channel.name} [{vc.channel.id}]" if vc else "") +
+                f'{"-" * 15}'
+            )
+            del global_data["listen_along_invites"][str(inter.channel.id)]
+            await self.bot.update_global_data(inter.guild_id, global_data, db_name=DBModel.guilds)
 
         for n, s in global_data["custom_skins"].items():
             if isinstance(s, str):
