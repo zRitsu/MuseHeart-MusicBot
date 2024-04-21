@@ -6154,7 +6154,7 @@ class Music(commands.Cog):
                 f'{"-" * 15}\n'
                 f'Removendo invite: {invite} \n'
                 f'Servidor: {inter.guild.name} [{inter.guild_id}]\n' + 
-                (f"Canal: {vc.channel.name} [{vc.channel.id}]" if vc else "") +
+                (f"Canal: {vc.channel.name} [{vc.id}]" if vc else "") +
                 f'{"-" * 15}'
             )
             del global_data["listen_along_invites"][str(inter.channel.id)]
