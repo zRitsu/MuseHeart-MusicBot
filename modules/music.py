@@ -6147,7 +6147,7 @@ class Music(commands.Cog):
             traceback.print_exc()
         else:
             if vc and invite.channel.id != vc.id:
-                invite = None
+                invite = ""
 
         if invite is None:
             print(
@@ -6156,8 +6156,9 @@ class Music(commands.Cog):
                 (f"Servidor: {vc.guild.name} [{vc.guild.id}]\nCanal: {vc.name} [{vc.id}]" if vc else "") +
                 f'{"-" * 15}'
             )
-            del global_data["listen_along_invites"][str(inter.channel.id)]
-            await self.bot.update_global_data(inter.guild_id, global_data, db_name=DBModel.guilds)
+            if vc:
+                del global_data["listen_along_invites"][str(vc.id)]
+                await self.bot.update_global_data(inter.guild_id, global_data, db_name=DBModel.guilds)
 
         for n, s in global_data["custom_skins"].items():
             if isinstance(s, str):
