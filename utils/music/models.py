@@ -269,7 +269,7 @@ class LavalinkPlaylist:
                     pass
         except IndexError:
             pass
-        pluginInfo = kwargs.pop("pluginInfo")
+        pluginInfo = kwargs.pop("pluginInfo", {})
         self.tracks = [LavalinkTrack(
             id_=track[encoded_name], info=track['info'], pluginInfo=pluginInfo, playlist=self, **kwargs) for track in data['tracks']]
 
