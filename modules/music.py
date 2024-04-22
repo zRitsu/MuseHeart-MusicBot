@@ -6150,13 +6150,6 @@ class Music(commands.Cog):
                     invite = ""
 
         if invite is None:
-            print(
-                f'{"-" * 15}\n'
-                f'Removendo invite: {invite} \n' +
-                (f"Servidor: {vc.guild.name} [{vc.guild.id}]\n"
-                 f"Canal: {vc.name} [{vc.id}]\n" if vc else "") +
-                f'{"-" * 15}'
-            )
             try:
                 del global_data["listen_along_invites"][str(vc.id)]
             except KeyError:
@@ -6743,55 +6736,8 @@ class Music(commands.Cog):
         except (TypeError, KeyError):
             max_retries = 0
 
-        headers = {'Authorization': data['password']}
-
-        if max_retries:
-
-            backoff = 9
-            retries = 1
-            exception = None
-
-            print(f"{self.bot.user} - Iniciando servidor de música: {data['identifier']}")
-
-            while not self.bot.is_closed():
-                if retries >= max_retries:
-                    print(
-                        f"❌ - {self.bot.user} - Todas as tentativas de conectar ao servidor [{data['identifier']}] falharam.\n"
-                        f"Causa: {repr(exception)}")
-                    return
-                else:
-                    await asyncio.sleep(backoff)
-                    try:
-                        async with self.bot.session.get(f"{data['rest_uri']}/v4/info", timeout=45, headers=headers) as r:
-                            if r.status == 200:
-                                info = await r.json()
-                                data["version"] = 4
-                            elif r.status != 404:
-                                raise Exception(f"{self.bot.user} - [{r.status}]: {await r.text()}"[:300])
-                            break
-                    except Exception as e:
-                        exception = e
-                        if data["identifier"] != "LOCAL":
-                            print(f'⚠️ - {self.bot.user} - Falha ao conectar no servidor [{data["identifier"]}], '
-                                  f'nova tentativa [{retries}/{max_retries}] em {backoff} segundos.')
-                        backoff += 2
-                        retries += 1
-                        continue
-
-        else:
-            try:
-                async with self.bot.session.get(f"{data['rest_uri']}/v4/info", timeout=45, headers=headers) as r:
-                    if r.status == 200:
-                        data["version"] = 4
-                        info = await r.json()
-                    elif r.status != 404:
-                        raise Exception(f"{self.bot.user} - [{r.status}]: {await r.text()}"[:300])
-            except Exception as e:
-                print(f"❌ - {self.bot.user} - Falha ao conectar no servidor {data['identifier']}: {repr(e)}"[:300])
-                return
-
         data["identifier"] = data["identifier"].replace(" ", "_")
-        node = await self.bot.music.initiate_node(auto_reconnect=False, region=region, heartbeat=heartbeat, **data)
+        node = await self.bot.music.initiate_node(auto_reconnect=False, region=region, heartbeat=heartbeat, max_retries=max_retries, **data)
         node.info = info
         node.search = search
         node.website = node_website
@@ -6816,6 +6762,8 @@ class Music(commands.Cog):
                 node.partial_providers.append("ytmsearch:\"{title} - {author}\"")
             elif p == "scsearch":
                 node.partial_providers.append("scsearch:{title} - {author}")
+
+        await node.connect()
 
     async def get_tracks(
             self, query: str, user: disnake.Member, node: wavelink.Node = None,

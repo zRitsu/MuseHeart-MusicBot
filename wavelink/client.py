@@ -398,8 +398,6 @@ class Client:
                     version=kwargs.pop("version", 3),
                     **kwargs)
 
-        await node.connect()
-
         node.available = True
         self.nodes[identifier] = node
 

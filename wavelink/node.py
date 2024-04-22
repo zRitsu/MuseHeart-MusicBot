@@ -111,8 +111,10 @@ class Node:
         self.stats = None
         self.info = None
         self.plugins_dict: Optional[dict] = None
+        self.max_retries = kwargs.pop("max_retries")
 
         self._closing = False
+        self._is_connecting = False
 
     def __repr__(self):
         return f'{self.identifier} | {self.region} | (Shard: {self.shard_id})'
@@ -123,7 +125,12 @@ class Node:
         if self.version == 4 and not self.session_id:
             return False
 
-        return self._websocket.is_connected and self.available and not self._closing
+        try:
+            ws_connected = self._websocket.is_connected
+        except AttributeError:
+            ws_connected = False
+
+        return ws_connected and self.available and not self._closing
 
     def close(self) -> None:
         """Close the node and make it unavailable."""
@@ -165,6 +172,60 @@ class Node:
                                         auto_reconnect=self.auto_reconnect,
                                         **kwargs,
                                         )
+
+        elif self._websocket.is_connected or self._is_connecting:
+            return
+
+        self._is_connecting = True
+
+        if self.max_retries:
+
+            backoff = 9
+            retries = 1
+            exception = None
+            max_retries = int(self.max_retries)
+
+            print(f"{self._client.bot.user} - Iniciando servidor de música: {self.identifier}")
+
+            while not self._client.bot.is_closed():
+                if retries >= max_retries:
+                    self._is_connecting = False
+                    print(
+                        f"❌ - {self._client.bot.user} - Todas as tentativas de conectar ao servidor [{self.identifier}] falharam.\n"
+                        f"Causa: {repr(exception)}")
+                    return
+                else:
+                    await asyncio.sleep(backoff)
+                    try:
+                        async with self._client.bot.session.get(f"{self.rest_uri}/v4/info", timeout=45, headers={'Authorization': self.password}) as r:
+                            if r.status == 200:
+                                self.version = 4
+                                self.info = await r.json()
+                            elif r.status != 404:
+                                raise Exception(f"{self._client.bot.user} - [{r.status}]: {await r.text()}"[:300])
+                            break
+                    except Exception as e:
+                        exception = e
+                        if self.identifier != "LOCAL":
+                            print(f'⚠️ - {self._client.bot.user} - Falha ao conectar no servidor [{self.identifier}], '
+                                  f'nova tentativa [{retries}/{max_retries}] em {backoff} segundos.')
+                        backoff += 2
+                        retries += 1
+                        continue
+
+        else:
+            try:
+                async with self._client.bot.session.get(f"{self.identifier}/v4/info", timeout=45, headers={'Authorization': self.password}) as r:
+                    if r.status == 200:
+                        self.version = 4
+                        self.info = await r.json()
+                    elif r.status != 404:
+                        self._is_connecting = False
+                        raise Exception(f"{self._client.bot.user} - [{r.status}]: {await r.text()}"[:300])
+            except Exception as e:
+                print(f"❌ - {self._client.bot.user} - Falha ao conectar no servidor {self.identifier}: {repr(e)}"[:300])
+                self._is_connecting = False
+                return
 
         await self._websocket._connect(**kwargs)
 
