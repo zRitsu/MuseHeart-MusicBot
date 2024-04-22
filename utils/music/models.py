@@ -101,7 +101,7 @@ class PartialTrack:
             "isStream": False,
             "isSeekable": True,
             "sourceName": source_name,
-            "pluginInfo": {},
+            "is_partial": True,
             "extra": {
                 "original_id": original_id,
                 "requester": requester,
