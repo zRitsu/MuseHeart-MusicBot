@@ -215,7 +215,7 @@ class Node:
 
         else:
             try:
-                async with self._client.bot.session.get(f"{self.identifier}/v4/info", timeout=45, headers={'Authorization': self.password}) as r:
+                async with self._client.bot.session.get(f"{self.rest_uri}/v4/info", timeout=45, headers={'Authorization': self.password}) as r:
                     if r.status == 200:
                         self.version = 4
                         self.info = await r.json()
