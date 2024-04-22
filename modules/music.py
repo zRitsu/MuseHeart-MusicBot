@@ -6132,12 +6132,10 @@ class Music(commands.Cog):
             skin = global_data["player_skin"] or skin
             static_skin = global_data["player_skin_static"] or guild_data["player_controller"]["static_skin"]
 
-        invite = ""
-
         try:
             invite = global_data["listen_along_invites"][str(vc.id)]
         except KeyError:
-            invite = None
+            invite = ""
 
         if invite:
             try:
@@ -6155,7 +6153,8 @@ class Music(commands.Cog):
             print(
                 f'{"-" * 15}\n'
                 f'Removendo invite: {invite} \n' +
-                (f"Servidor: {vc.guild.name} [{vc.guild.id}]\nCanal: {vc.name} [{vc.id}]" if vc else "") +
+                (f"Servidor: {vc.guild.name} [{vc.guild.id}]\n"
+                 f"Canal: {vc.name} [{vc.id}]\n" if vc else "") +
                 f'{"-" * 15}'
             )
             try:

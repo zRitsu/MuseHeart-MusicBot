@@ -273,7 +273,7 @@ class BotPool:
             if info.get("is_partial"):
                 track = PartialTrack(info=info)
             else:
-                track = LavalinkTrack(id_=info.get("id", ""), info=info, playlist=playlist, requester=info["extra"]["requester"])
+                track = LavalinkTrack(id_=info.get("id", ""), info=info, playlist=playlist, requester=info["extra"]["requester"], pluginInfo=info.get("pluginInfo", {}))
             tracks.append(track)
 
         return tracks, playlists

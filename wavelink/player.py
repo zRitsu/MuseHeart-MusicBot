@@ -130,6 +130,7 @@ class Track:
         self.id = id_
         self.info = info
         self.query = query
+        self.info["pluginInfo"] = kwargs.get("pluginInfo", {})
 
         self.title = info.get('title', '')[:97]
         self.identifier = info.get('identifier', '')

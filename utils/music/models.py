@@ -249,15 +249,13 @@ class LavalinkPlaylist:
         self.data = data
         self.url = kwargs.pop("url")
 
-        plugininfo = kwargs.pop("pluginInfo", {})
-
         try:
-            self.data["playlistInfo"]["thumb"] = plugininfo["artworkUrl"]
+            self.data["playlistInfo"]["thumb"] = kwargs["pluginInfo"]["artworkUrl"]
         except KeyError:
             pass
 
         try:
-            self.data["playlistInfo"]["type"] = plugininfo["type"]
+            self.data["playlistInfo"]["type"] = kwargs["pluginInfo"]["type"]
         except KeyError:
             pass
 
