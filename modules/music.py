@@ -6628,7 +6628,7 @@ class Music(commands.Cog):
                     else:
                         node.version = 3
 
-                await node.connect()
+                await node._websocket._connect()
                 return
             except Exception as e:
                 error = repr(e)

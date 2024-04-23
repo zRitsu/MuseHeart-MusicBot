@@ -227,7 +227,7 @@ class Node:
                 self._is_connecting = False
                 return
 
-        await self._websocket._connect(**kwargs)
+        await self._websocket._connect()
 
         __log__.info(f'NODE | {self.identifier} connected:: {self.__repr__()}')
 
