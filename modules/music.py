@@ -6848,7 +6848,7 @@ class Music(commands.Cog):
                             )
                         except Exception as e:
                             exceptions.add(repr(e))
-                            if "Video returned by YouTube isn't what was requested" in str(e):
+                            if [e for e in ("Video returned by YouTube isn't what was requested", "The video returned is not what was requested.") if e in str(e)]:
 
                                 is_yt_source = True
 

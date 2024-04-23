@@ -874,7 +874,7 @@ class LavalinkPlayer(wavelink.Player):
                 or (video_not_available:=event.cause.startswith((
                 "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: This video is not available",
                 "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: YouTube WebM streams are currently not supported.",
-            )) or event.message == "Video returned by YouTube isn't what was requested"):
+            )) or event.message in ("Video returned by YouTube isn't what was requested", "The video returned is not what was requested.")):
 
                 try:
                     self._new_node_task.cancel()
@@ -1396,8 +1396,8 @@ class LavalinkPlayer(wavelink.Player):
 
         tracks_search = []
 
-        if self.last_track:
-            tracks_search.append(self.last_track)
+        if current_track := self.current or self.last_track:
+            tracks_search.append(current_track)
 
         for t in reversed(self.failed_tracks + self.played):
 
