@@ -6852,13 +6852,13 @@ class Music(commands.Cog):
 
                                 is_yt_source = True
 
-                                if node.version > 3:
+                                if n.version > 3:
                                     try:
-                                        node.search_providers.remove("ytsearch")
+                                        n.search_providers.remove("ytsearch")
                                     except:
                                         pass
                                     try:
-                                        node.search_providers.remove("ytmsearch")
+                                        n.search_providers.remove("ytmsearch")
                                     except:
                                         pass
 
