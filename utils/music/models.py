@@ -1285,16 +1285,27 @@ class LavalinkPlayer(wavelink.Player):
 
     async def members_timeout(self, check: bool, force: bool = False, idle_timeout = None):
 
+        update_msg = True
+
         if self.auto_pause:
-            self.auto_pause = False
             update_log = True
+            self.auto_pause = False
+            self.set_command_log(emoji="🔋", text="O modo **[economia de recursos]** foi desativado.")
             if self.current:
                 try:
                     await self.resolve_track(self.current)
                     if self.current.id:
-                        await self.play(self.current, start=0 if self.current.is_stream else self.position)
+                        if self.current.info["sourceName"] == "youtube" and not self.native_yt:
+                            stream = self.current.is_stream
+                            self.queue.appendleft(self.current)
+                            self.current = None
+                            await self.process_next(start_position=0 if stream else self.position)
+                            update_msg = False
+                        else:
+                            await self.play(self.current, start=0 if self.current.is_stream else self.position)
                     else:
                         await self.process_next()
+                        update_msg = False
                 except Exception:
                     traceback.print_exc()
 
@@ -1313,7 +1324,7 @@ class LavalinkPlayer(wavelink.Player):
                     if self.current:
                         await asyncio.sleep(1.5)
                         await self.invoke_np(rpc_update=True)
-                    else:
+                    elif update_msg:
                         await self.process_next()
                 await self.update_stage_topic()
             except Exception:
