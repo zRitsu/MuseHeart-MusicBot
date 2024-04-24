@@ -650,7 +650,7 @@ class PlayerSession(commands.Cog):
 
                 player.members_timeout_task = self.bot.loop.create_task(player.members_timeout(check=check, idle_timeout=10))
 
-            print(f"{self.bot.user} - Player Retomado: {guild.name} [{guild.id}]")
+            print(f"{self.bot.user} - Player Retomado: {guild.name} [{guild.id}] - Server: {player.node.identifier}")
 
         except Exception:
             print(f"{self.bot.user} - Falha Crítica ao retomar players:\n{traceback.format_exc()}")
