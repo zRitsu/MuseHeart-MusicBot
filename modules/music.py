@@ -6967,11 +6967,13 @@ class Music(commands.Cog):
         except KeyError:
             return
 
-        try:
-            if player.last_channel != before.channel and player.last_channel != after.channel:
+        if before.channel and not after.channel:
+            if player.last_channel != before.channel:
                 return
-        except AttributeError:
-            pass
+
+        elif after.channel and not before.channel:
+            if player.last_channel != after.channel:
+                return
 
         if member.bot:
             # ignorar outros bots
@@ -6993,6 +6995,8 @@ class Music(commands.Cog):
         if before.channel == after.channel:
             try:
                 vc = player.last_channel
+                if vc != after.channel:
+                    return
             except AttributeError:
                 pass
             else:
