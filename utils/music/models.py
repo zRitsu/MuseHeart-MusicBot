@@ -1741,10 +1741,17 @@ class LavalinkPlayer(wavelink.Player):
                 exceptions = ""
 
                 for provider in self.node.search_providers:
+
                     if provider in ("ytsearch", "ytmsearch"):
                         continue
+
+                    if track.author.endswith(" - topic"):
+                        query = f"{provider}:{track.title} - {track.author[:-8]}"
+                    else:
+                        query = f"{provider}:{track.title}"
+
                     try:
-                        tracks = await self.node.get_tracks(f"{provider}:{track.title}", track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
+                        tracks = await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
                     except:
                         exceptions += f"{traceback.format_exc()}\n"
                         await asyncio.sleep(1)
@@ -1763,7 +1770,17 @@ class LavalinkPlayer(wavelink.Player):
                             break
                     tracks = final_result or tracks
 
-                if not tracks:
+                min_duration = track.duration - 7000
+                max_duration = track.duration + 7000
+
+                final_result = []
+
+                for t in tracks:
+                    if t.is_stream or not min_duration < t.duration < max_duration:
+                        continue
+                    final_result.append(t)
+
+                if not (tracks:=final_result):
                     if exceptions:
                         print(exceptions)
                     self.failed_tracks.append(track)
