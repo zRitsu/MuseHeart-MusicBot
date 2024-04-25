@@ -6850,9 +6850,7 @@ class Music(commands.Cog):
                             exceptions.add(repr(e))
                             if [e for e in ("Video returned by YouTube isn't what was requested", "The video returned is not what was requested.") if e in str(e)]:
 
-                                is_yt_source = True
-
-                                if n.version > 3:
+                                if is_yt_source and n.version > 3:
                                     try:
                                         n.search_providers.remove("ytsearch")
                                     except:
@@ -6878,7 +6876,12 @@ class Music(commands.Cog):
                 raise YoutubeSourceDisabled()
 
             if exceptions:
-                raise GenericError("**Ocorreu um erro ao processar sua busca:** ```py\n" + "\n".join(exceptions) + "```")
+
+                txt = "\n".join(exceptions)
+
+                if "This track is not readable. Available countries:" in txt:
+                    txt = "A música informada não está disponível na minha região atual..."
+                raise GenericError(f"**Ocorreu um erro ao processar sua busca:** \n{txt}")
             raise GenericError("**Não houve resultados para sua busca.**")
 
         if isinstance(tracks, list):
