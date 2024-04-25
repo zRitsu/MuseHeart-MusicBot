@@ -1285,14 +1285,20 @@ class LavalinkPlayer(wavelink.Player):
 
     async def members_timeout(self, check: bool, force: bool = False, idle_timeout = None):
 
-        update_msg = True
+        if check:
 
-        if self.auto_pause:
-            update_log = True
-            self.auto_pause = False
-            self.set_command_log(emoji="🔋", text="O modo **[economia de recursos]** foi desativado.")
-            if self.current:
+            try:
+                self.auto_skip_track_task.cancel()
+            except:
+                pass
+            self.auto_skip_track_task = None
+
+            if self.current and self.auto_pause:
+
+                self.auto_pause = False
+
                 try:
+                    self.set_command_log(emoji="🔋", text="O modo **[economia de recursos]** foi desativado.")
                     await self.resolve_track(self.current)
                     if self.current.id:
                         if self.current.info["sourceName"] == "youtube" and not self.native_yt:
@@ -1300,35 +1306,17 @@ class LavalinkPlayer(wavelink.Player):
                             self.queue.appendleft(self.current)
                             self.current = None
                             await self.process_next(start_position=0 if stream else self.position)
-                            update_msg = False
                         else:
                             await self.play(self.current, start=0 if self.current.is_stream else self.position)
+                            await asyncio.sleep(1.5)
+                            await self.invoke_np(rpc_update=True)
+                            await self.update_stage_topic()
                     else:
                         await self.process_next()
-                        update_msg = False
                 except Exception:
                     traceback.print_exc()
-
-        else:
-            update_log = False
-
-        if check:
-
-            try:
-                if update_log:
-                    self.set_command_log(emoji="🔋", text="O modo **[economia de recursos]** foi desativado.")
-                    try:
-                        self.auto_skip_track_task.cancel()
-                    except:
-                        pass
-                    if self.current:
-                        await asyncio.sleep(1.5)
-                        await self.invoke_np(rpc_update=True)
-                    elif update_msg:
-                        await self.process_next()
-                await self.update_stage_topic()
-            except Exception:
-                traceback.print_exc()
+            else:
+                self.auto_pause = False
             return
 
         if not force:
@@ -1364,7 +1352,8 @@ class LavalinkPlayer(wavelink.Player):
 
             self.auto_pause = True
             track = self.current
-            await self.stop()
+            if self.is_playing:
+                await self.stop()
             self.current = track
             try:
                 self.auto_skip_track_task.cancel()
@@ -1690,8 +1679,6 @@ class LavalinkPlayer(wavelink.Player):
 
         self.locked = True
 
-        temp_id = None
-
         if not self.auto_pause:
 
             if self.node.version > 3:
@@ -1889,7 +1876,7 @@ class LavalinkPlayer(wavelink.Player):
             self.last_update = time() * 1000
             self.current = track
         else:
-            await self.play(track, start=start_position, temp_id=temp_id)
+            await self.play(track, start=start_position)
             # TODO: rever essa parte caso adicione função de ativar track loops em músicas da fila
             if self.loop != "current" or force_np or (not self.controller_mode and self.current.track_loops == 0):
 

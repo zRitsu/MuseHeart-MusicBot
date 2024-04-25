@@ -130,7 +130,7 @@ class Node:
         except AttributeError:
             ws_connected = False
 
-        return ws_connected and self.available and not self._closing
+        return ws_connected and self.available and not self._closing and not self._is_connecting
 
     def close(self) -> None:
         """Close the node and make it unavailable."""
@@ -228,6 +228,9 @@ class Node:
                 return
 
         await self._websocket._connect()
+
+        self.available = True
+        self._is_connecting = False
 
         __log__.info(f'NODE | {self.identifier} connected:: {self.__repr__()}')
 

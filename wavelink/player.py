@@ -204,8 +204,6 @@ class Player:
 
         self._voice_state = {}
 
-        self._temp_data = {}
-
         self.volume = 100
         self.paused = False
         self.current = None
@@ -313,10 +311,6 @@ class Player:
                 traceback.print_exc()
                 return
 
-            if self._temp_data:
-                data.update(self._temp_data.copy())
-                self._temp_data.clear()
-
             await self.node.update_player(self.guild_id, data=data)
 
     async def hook(self, event) -> None:
@@ -399,7 +393,7 @@ class Player:
         self.channel_id = None
         await self._get_shard_socket(guild.shard_id).voice_state(self.guild_id, None)
 
-    async def play(self, track: Track, *, replace: bool = True, start: int = 0, end: int = 0, temp_id: str = None, **kwargs) -> None:
+    async def play(self, track: Track, *, replace: bool = True, start: int = 0, end: int = 0, **kwargs) -> None:
         """|coro|
 
         Play a WaveLink Track.
@@ -431,7 +425,7 @@ class Player:
             payload = {
                 'op': 'play',
                 'guildId': str(self.guild_id),
-                'track': temp_id or track.id,
+                'track': track.id,
                 'noReplace': not replace,
                 'startTime': start,
             }
@@ -457,7 +451,7 @@ class Player:
                 pause = self.paused
 
             payload = {
-                "encodedTrack": temp_id or track.id,
+                "encodedTrack": track.id,
                 "volume": vol,
                 "position": int(start),
                 "paused": pause,

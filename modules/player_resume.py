@@ -286,7 +286,6 @@ class PlayerSession(commands.Cog):
                 except:
                     traceback.print_exc()
 
-
         data = {
             "volume": player.volume,
             "filters": player.filters,
@@ -311,7 +310,8 @@ class PlayerSession(commands.Cog):
             await player.node.update_player(player.guild.id, data=data)
         else:
             await player.node.update_player(player.guild.id, data=data)
-            await player.process_next()
+            if has_members:
+                await player.process_next()
 
     async def voice_check(self, voice_channel: Union[disnake.VoiceChannel, disnake.StageChannel], position: int = 0):
 
@@ -588,8 +588,10 @@ class PlayerSession(commands.Cog):
                     emoji="🔰"
                 )
 
+                player._last_channel = voice_channel
+
                 try:
-                    check = any(m for m in player.guild.me.voice.channel.members if not m.bot or not (m.voice.deaf or m.voice.self_deaf))
+                    check = any(m for m in voice_channel.members if not m.bot or not (m.voice.deaf or m.voice.self_deaf))
                 except:
                     check = None
 
@@ -626,6 +628,7 @@ class PlayerSession(commands.Cog):
                                 await player.invoke_np()
                             else:
                                 if check:
+                                    player.queue.appendleft(track)
                                     await player.process_next()
 
                     else:
@@ -648,7 +651,7 @@ class PlayerSession(commands.Cog):
                 except:
                     pass
 
-                player.members_timeout_task = self.bot.loop.create_task(player.members_timeout(check=check, idle_timeout=10))
+                player.members_timeout_task = self.bot.loop.create_task(player.members_timeout(check=check, force=player.keep_connected and not check))
 
             print(f"{self.bot.user} - Player Retomado: {guild.name} [{guild.id}] - Server: {player.node.identifier}")
 
