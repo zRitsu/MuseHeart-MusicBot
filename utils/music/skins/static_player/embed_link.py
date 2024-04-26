@@ -40,10 +40,10 @@ class EmbedLinkStaticSkin:
         title = fix_characters(player.current.title) if not player.current.uri else f"[{fix_characters(player.current.title)}]({player.current.uri})"
 
         if player.paused:
-            txt += f"\n\n> ### ⏸️ ⠂Em Pausa: {title}\n{duration_txt}"
+            txt += f"\n> ### ⏸️ ⠂Em Pausa: {title}\n{duration_txt}"
 
         else:
-            txt += f"\n\n> ### ▶️ ⠂Tocando Agora: {title}\n{duration_txt}"
+            txt += f"\n> ### ▶️ ⠂Tocando Agora: {title}\n{duration_txt}"
             if not player.current.is_stream and not player.paused:
                 txt += f" `[`<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`"
 
@@ -95,7 +95,7 @@ class EmbedLinkStaticSkin:
                                   for n, t in enumerate(
                                       itertools.islice(player.queue, 4)))
 
-            txt = qtext + txt
+            txt = f"{qtext}\n{txt}"
 
         elif len(player.queue_autoplay):
 
@@ -103,7 +103,7 @@ class EmbedLinkStaticSkin:
                               "\n".join(
                                   f"`{(n + 1)} [{time_format(t.duration) if not t.is_stream else '🔴 stream'}]` [`{fix_characters(t.title, 30)}`](<{t.uri}>)"
                                   for n, t in enumerate(
-                                      itertools.islice(player.queue_autoplay, 4))) + txt
+                                      itertools.islice(player.queue_autoplay, 4))) + f"\n{txt}"
 
         data = {
             "content": txt,
