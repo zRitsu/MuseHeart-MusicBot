@@ -40,10 +40,10 @@ class EmbedLinkStaticSkin:
         title = fix_characters(player.current.title) if not player.current.uri else f"[{fix_characters(player.current.title)}]({player.current.uri})"
 
         if player.paused:
-            txt += f"\n> ### `⏸️` Em Pausa: {title}\n{duration_txt}"
+            txt += f"\n\n> ### ⏸️ ⠂Em Pausa: {title}\n{duration_txt}"
 
         else:
-            txt += f"\n> ### `▶️` Tocando Agora: {title}\n{duration_txt}"
+            txt += f"\n\n> ### ▶️ ⠂Tocando Agora: {title}\n{duration_txt}"
             if not player.current.is_stream and not player.paused:
                 txt += f" `[`<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`"
 
@@ -85,24 +85,25 @@ class EmbedLinkStaticSkin:
 
         if qsize := len(player.queue):
 
-            qtext = "**Músicas na fila:**\n```ansi\n" + \
-                              "\n".join(
-                                  f"[0;33m{(n + 1):02}[0m [0;34m[{time_format(t.duration) if not t.is_stream else '🔴 stream'}][0m [0;36m{fix_characters(t.title, 45)}[0m"
+            qtext = "> **Músicas na lista"
+
+            if qsize  > 4:
+                qtext += f" [{qsize}]:"
+
+            qtext += "**\n" + "\n".join(
+                                  f"> `{(n + 1)} [{time_format(t.duration) if not t.is_stream else '🔴 stream'}]` [`{fix_characters(t.title, 30)}`](<{t.uri}>)"
                                   for n, t in enumerate(
                                       itertools.islice(player.queue, 4)))
 
-            if qsize  > 4:
-                qtext += f"\n╚═ [0;37mE mais[0m [0;35m{qsize}[0m [0;37mmúsicas{'s'[:qsize^1]}.[0m"
-
-            txt = qtext + "```" + txt
+            txt = qtext + txt
 
         elif len(player.queue_autoplay):
 
             txt = "**Próximas músicas recomendadas:**\n```ansi\n" + \
                               "\n".join(
-                                  f"[0;33m{(n + 1):02}[0m [0;34m[{time_format(t.duration) if not t.is_stream else '🔴 stream'}][0m [0;36m{fix_characters(t.title, 45)}[0m"
+                                  f"`{(n + 1)} [{time_format(t.duration) if not t.is_stream else '🔴 stream'}]` [`{fix_characters(t.title, 30)}`](<{t.uri}>)"
                                   for n, t in enumerate(
-                                      itertools.islice(player.queue_autoplay, 4))) + "```" + txt
+                                      itertools.islice(player.queue_autoplay, 4))) + txt
 
         data = {
             "content": txt,

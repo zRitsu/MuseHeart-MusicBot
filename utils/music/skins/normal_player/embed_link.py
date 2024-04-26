@@ -45,10 +45,10 @@ class EmbedLinkSkin:
         title = f"`{player.current.title}`" if not player.current.uri else f"[`{fix_characters(player.current.title, 40)}`]({player.current.uri})"
 
         if player.paused:
-            txt += f"\n> `⏸️` **⠂Em Pausa:** {title}{duration_txt}"
+            txt += f"\n> ⏸️ **⠂Em Pausa:** {title}{duration_txt}"
 
         else:
-            txt += f"\n> `▶️` **⠂Tocando Agora:** {title}{duration_txt}"
+            txt += f"\n> ▶️ **⠂Tocando Agora:** {title}{duration_txt}"
             if not player.current.is_stream:
                 txt += f" `[`<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`" \
                 if not player.paused else ''
