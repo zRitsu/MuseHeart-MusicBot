@@ -16,6 +16,7 @@ from disnake.ext import commands
 
 import wavelink
 from utils.client import BotCore
+from utils.db import DBModel
 from utils.music.checks import can_connect, can_send_message
 from utils.music.filters import AudioFilter
 from utils.music.models import LavalinkPlayer
@@ -373,17 +374,32 @@ class PlayerSession(commands.Cog):
                 message = None
                 started = False
 
-                if not data["text_channel_id"]:
-                    text_channel = None
-                elif not isinstance(data["text_channel_id"], disnake.Thread):
-                    text_channel = self.bot.get_channel(data["text_channel_id"])
-                else:
+                guild_data = await self.bot.get_data(guild.id, db_name=DBModel.guilds)
+
+                text_channel = None
+
+                if guild_data['player_controller']["channel"]:
                     try:
-                        text_channel = self.bot.get_channel(int(data["text_channel_id"])) or \
-                                   await self.bot.fetch_channel(int(data["text_channel_id"]))
-                    except (disnake.NotFound, TypeError):
-                        text_channel = None
-                        data["message_id"] = None
+                        text_channel = self.bot.get_channel(int(guild_data['player_controller']["channel"])) or await self.bot.fetch_channel(
+                            int(guild_data['player_controller']["channel"]))
+                    except:
+                        pass
+                    else:
+                        data["message_id"] = int(guild_data['player_controller']['message_id'])
+
+                if not text_channel:
+
+                    if not data["text_channel_id"]:
+                        pass
+                    elif not isinstance(data["text_channel_id"], disnake.Thread):
+                        text_channel = self.bot.get_channel(data["text_channel_id"])
+                    else:
+                        try:
+                            text_channel = self.bot.get_channel(int(data["text_channel_id"])) or \
+                                       await self.bot.fetch_channel(int(data["text_channel_id"]))
+                        except (disnake.NotFound, TypeError):
+                            text_channel = None
+                            data["message_id"] = None
 
                 if not text_channel:
                     data['static'] = False
