@@ -99,7 +99,7 @@ class EmbedLinkStaticSkin:
 
         elif len(player.queue_autoplay):
 
-            txt = "**Próximas músicas recomendadas:**\n```ansi\n" + \
+            txt = "**Próximas músicas recomendadas:**\n" + \
                               "\n".join(
                                   f"`{(n + 1)} [{time_format(t.duration) if not t.is_stream else '🔴 stream'}]` [`{fix_characters(t.title, 30)}`](<{t.uri}>)"
                                   for n, t in enumerate(
