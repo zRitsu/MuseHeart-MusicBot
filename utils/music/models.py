@@ -852,16 +852,6 @@ class LavalinkPlayer(wavelink.Player):
 
             self.current = None
 
-            if event.cause == "com.github.topi314.lavasrc.mirror.TrackNotFoundException: Playlist is empty":
-                await send_report()
-                self.set_command_log(text=f"A música [`{fix_characters(track.title, limit=20)}`]({track.uri}) "
-                                          "foi ignorada devido a indisponibilidade da música em outras fontes "
-                                          "de música com suporte a reprodução nativa...", emoji="⚠️")
-                await asyncio.sleep(3)
-                self.locked = False
-                await self.process_next()
-                return
-
             youtube_exception = False
             video_not_available = False
 
@@ -1000,6 +990,7 @@ class LavalinkPlayer(wavelink.Player):
                     "java.lang.IllegalArgumentException: Invalid bitrate",
                     "java.net.UnknownHostException:",
                     "java.lang.IllegalStateException: Error from decoder",
+                    "com.github.topi314.lavasrc.mirror.TrackNotFoundException: Playlist is empty",
                     "java.lang.IllegalStateException: Current position is beyond this element",
                     "com.sedmelluq.discord.lavaplayer.tools.io.PersistentHttpStream$PersistentHttpException: Not success status code: 403",
             )):
