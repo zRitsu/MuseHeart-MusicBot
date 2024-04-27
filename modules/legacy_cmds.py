@@ -341,7 +341,7 @@ class Owner(commands.Cog):
 
         git_log += format_git_log(data)
 
-        self.bot.pool.commit = commit
+        self.bot.pool.commit = commit.split("...")[-1]
 
         text = "`Será necessário me reiniciar após as alterações.`"
 
