@@ -983,17 +983,20 @@ class LavalinkPlayer(wavelink.Player):
 
             start_position = 0
 
+            skip_track = False
+
             if event.cause.startswith((
-                    "java.lang.IllegalStateException: Failed to get media URL: 2000: An error occurred while decoding track token",
                     "java.lang.RuntimeException: Not success status code: 204",
-                    "java.net.SocketTimeoutException: Connect timed out",
                     "java.lang.IllegalArgumentException: Invalid bitrate",
+                    "java.lang.IllegalStateException: Current position is beyond this element",
+                    "com.sedmelluq.discord.lavaplayer.tools.io.PersistentHttpStream$PersistentHttpException: Not success status code: 403",
+            )) or (skip_track:=event.cause.startswith((
+                    "java.net.SocketTimeoutException: Connect timed out",
+                    "java.lang.IllegalStateException: Failed to get media URL: 2000: An error occurred while decoding track token",
                     "java.net.UnknownHostException:",
                     "java.lang.IllegalStateException: Error from decoder",
                     "com.github.topi314.lavasrc.mirror.TrackNotFoundException: Playlist is empty",
-                    "java.lang.IllegalStateException: Current position is beyond this element",
-                    "com.sedmelluq.discord.lavaplayer.tools.io.PersistentHttpStream$PersistentHttpException: Not success status code: 403",
-            )):
+            ))):
 
                 if not hasattr(self, 'retries_general_errors'):
                     self.retries_general_errors = {'counter': 6, 'last_node': self.node.identifier, "last_time": disnake.utils.utcnow()}
@@ -1003,6 +1006,12 @@ class LavalinkPlayer(wavelink.Player):
                 self.queue.appendleft(track)
 
                 if self.retries_general_errors["counter"] < 1 and self.node.identifier == self.retries_general_errors["last_node"] and (disnake.utils.utcnow() - self.retries_general_errors["last_time"]).total_seconds() < 180:
+
+                    if skip_track:
+                        self.failed_tracks.append(track)
+                        self.locked = False
+                        await self.process_next()
+                        return
 
                     try:
                         self._new_node_task.cancel()
