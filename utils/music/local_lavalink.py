@@ -197,12 +197,11 @@ def run_lavalink(
 
     clear_plugins = False
 
-    for filename, url in (
-        ("Lavalink.jar", lavalink_file_url),
-        ("application.yml", "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/application.yml")
-    ):
-        if download_file(url, filename):
-            clear_plugins = True
+    if download_file("Lavalink.jar", lavalink_file_url):
+        clear_plugins = True
+
+    if not os.path.isfile("./application.yml"):
+        shutil.copy("./.example.application.yml", "./application.yml")
 
     if lavalink_cpu_cores >= 1:
         java_cmd += f" -XX:ActiveProcessorCount={lavalink_cpu_cores}"
