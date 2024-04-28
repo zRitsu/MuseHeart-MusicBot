@@ -2714,6 +2714,12 @@ class LavalinkPlayer(wavelink.Player):
                 except:
                     print(traceback.format_exc())
 
+                self.set_command_log(
+                    emoji="🪫",
+                    text="O player está no modo **[economia de recursos]** (esse modo será desativado automaticamente quando "
+                         f"um membro entrar no canal <#{self.channel_id}>)."
+                )
+
                 try:
                     await self.invoke_np(force=True)
                 except:
