@@ -956,8 +956,7 @@ class Music(commands.Cog):
 
                 bot = current_bot
 
-        if not channel:
-            channel = bot.get_channel(inter.channel.id)
+        channel = bot.get_channel(inter.channel.id)
 
         can_send_message(channel, bot.user)
 
