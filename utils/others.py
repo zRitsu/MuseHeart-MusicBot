@@ -347,7 +347,7 @@ async def send_message(
 
         try:
             await inter.send(text, ephemeral=True, **kwargs)
-        except disnake.InteractionTimedOut:
+        except (disnake.InteractionTimedOut, disnake.HTTPException):
 
             try:
                 if isinstance(inter.channel, disnake.Thread):
