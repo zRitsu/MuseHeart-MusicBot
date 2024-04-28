@@ -761,8 +761,9 @@ class Music(commands.Cog):
             await inter.response.defer(ephemeral=ephemeral, with_message=True)
 
         if not inter.author.voice:
+            raise NoVoice()
 
-            if not (c for c in guild.channels if c.permissions_for(inter.author).connect):
+            """if not (c for c in guild.channels if c.permissions_for(inter.author).connect):
                 raise GenericError(f"**Você não está conectado a um canal de voz, e não há canais de voz/palcos "
                                    "disponíveis no servidor que concedam a permissão para você se conectar.**")
 
@@ -799,7 +800,7 @@ class Music(commands.Cog):
                 )
                 return
 
-            await asyncio.sleep(1)
+            await asyncio.sleep(1)"""
 
         else:
             channel = bot.get_channel(inter.channel.id)
