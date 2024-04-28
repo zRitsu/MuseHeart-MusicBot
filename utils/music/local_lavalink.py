@@ -197,7 +197,7 @@ def run_lavalink(
 
     clear_plugins = False
 
-    if download_file("Lavalink.jar", lavalink_file_url):
+    if download_file(lavalink_file_url, "Lavalink.jar"):
         clear_plugins = True
 
     if not os.path.isfile("./application.yml"):
