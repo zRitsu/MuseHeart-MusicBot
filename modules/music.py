@@ -593,8 +593,9 @@ class Music(commands.Cog):
 
     @can_send_message_check()
     @commands.bot_has_guild_permissions(send_messages=True)
+    @check_voice()
     @commands.max_concurrency(1, commands.BucketType.member)
-    @pool_command(name="play", description="Tocar música em um canal de voz.", aliases=["p"], return_first=True,
+    @pool_command(name="play", description="Tocar música em um canal de voz.", aliases=["p"], check_player=False,
                   cooldown=play_cd, max_concurrency=play_mc, extras={"flags": stage_flags},
                   usage="{prefix}{cmd} [nome|link]\nEx: {prefix}{cmd} sekai - burn me down")
     async def play_legacy(self, ctx: CustomContext, *, flags: str = ""):
@@ -616,8 +617,9 @@ class Music(commands.Cog):
 
     @can_send_message_check()
     @commands.bot_has_guild_permissions(send_messages=True)
+    @check_voice()
     @pool_command(name="search", description="Pesquisar por músicas e escolher uma entre os resultados para tocar.",
-                  aliases=["sc"], return_first=True, cooldown=play_cd, max_concurrency=play_mc,
+                  aliases=["sc"], check_player=False, cooldown=play_cd, max_concurrency=play_mc,
                   usage="{prefix}{cmd} [nome]\nEx: {prefix}{cmd} sekai - burn me down")
     async def search_legacy(self, ctx: CustomContext, *, query):
 
@@ -625,10 +627,11 @@ class Music(commands.Cog):
                                  manual_selection=True, repeat_amount=0, server=None)
 
     @can_send_message_check()
+    @check_voice()
     @commands.slash_command(
         name="play_music_file", dm_permission=False,
         description=f"{desc_prefix}Tocar arquivo de música em um canal de voz.",
-        extras={"return_first": True}, cooldown=play_cd, max_concurrency=play_mc
+        extras={"check_player": False}, cooldown=play_cd, max_concurrency=play_mc
     )
     async def play_file(
             self,
@@ -703,9 +706,10 @@ class Music(commands.Cog):
         return tracks
 
     @can_send_message_check()
+    @check_voice()
     @commands.slash_command(
         description=f"{desc_prefix}Tocar música em um canal de voz.", dm_permission=False,
-        extras={"return_first": True}, cooldown=play_cd, max_concurrency=play_mc
+        extras={"check_player": False}, cooldown=play_cd, max_concurrency=play_mc
     )
     async def play(
             self,
@@ -750,7 +754,6 @@ class Music(commands.Cog):
         msg = None
         inter, guild_data = await get_inter_guild_data(inter, bot)
         ephemeral = None
-        channel = None
 
         if not inter.response.is_done():
             try:
@@ -760,10 +763,10 @@ class Music(commands.Cog):
                 ephemeral = True
             await inter.response.defer(ephemeral=ephemeral, with_message=True)
 
-        if not inter.author.voice:
+        """if not inter.author.voice:
             raise NoVoice()
 
-            """if not (c for c in guild.channels if c.permissions_for(inter.author).connect):
+            if not (c for c in guild.channels if c.permissions_for(inter.author).connect):
                 raise GenericError(f"**Você não está conectado a um canal de voz, e não há canais de voz/palcos "
                                    "disponíveis no servidor que concedam a permissão para você se conectar.**")
 
@@ -800,13 +803,13 @@ class Music(commands.Cog):
                 )
                 return
 
-            await asyncio.sleep(1)"""
+            await asyncio.sleep(1)
 
         else:
             channel = bot.get_channel(inter.channel.id)
             if not channel:
                 raise GenericError(f"**O canal <#{inter.channel.id}> não foi encontrado (ou foi excluido).**")
-            await check_pool_bots(inter, check_player=False, bypass_prefix=True)
+            await check_pool_bots(inter, check_player=False, bypass_prefix=True)"""
 
         if bot.user.id not in inter.author.voice.channel.voice_states:
 

@@ -108,6 +108,8 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
     mention_prefixed = False
 
+    user_vc = False
+
     if isinstance(inter, CustomContext) and not bypass_prefix:
 
         is_forum = check_forum(inter, inter.bot)
@@ -149,7 +151,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
             if not check_player and not only_voiced:
 
                 if inter.author.voice:
-                    pass
+                    user_vc = True
                 else:
                     return True
 
@@ -159,6 +161,8 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
                     return True
 
                 raise NoVoice()
+            else:
+                user_vc = True
 
             if inter.bot.user.id in inter.author.voice.channel.voice_states:
                 inter.music_bot = inter.bot
@@ -182,8 +186,6 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
     extra_bots_counter = 0
 
     bot_in_guild = False
-
-    user_vc = False
 
     for bot in sorted(inter.bot.pool.get_guild_bots(inter.guild_id), key=lambda b: b.identifier):
 
@@ -237,8 +239,6 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
                 raise PoolException()
 
             return True
-
-        user_vc = True
 
         if only_voiced:
             continue
