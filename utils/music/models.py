@@ -2707,6 +2707,10 @@ class LavalinkPlayer(wavelink.Player):
                         continue
 
                 if not sleep_time:
+                    if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
+                        await asyncio.sleep(self.bot.config["PLAYER_INFO_BACKUP_INTERVAL_MONGO"] - 25)
+                    else:
+                        await asyncio.sleep(self.bot.config["PLAYER_INFO_BACKUP_INTERVAL"] - 25)
                     continue
 
                 await asyncio.sleep(sleep_time)
