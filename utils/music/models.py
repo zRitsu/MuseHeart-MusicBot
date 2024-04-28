@@ -2692,10 +2692,24 @@ class LavalinkPlayer(wavelink.Player):
                 except AttributeError:
                     pass
 
-                try:
-                    await asyncio.sleep((self.current.duration - self.position) / 1000)
-                except AttributeError:
-                    return
+                retries = 5
+
+                sleep_time = None
+
+                while retries > 0:
+
+                    try:
+                        sleep_time = (self.current.duration - self.position) / 1000
+                        break
+                    except AttributeError:
+                        await asyncio.sleep(5)
+                        retries -= 1
+                        continue
+
+                if not sleep_time:
+                    continue
+
+                await asyncio.sleep(sleep_time)
 
                 if not self.last_channel:
                     await asyncio.sleep(2)
