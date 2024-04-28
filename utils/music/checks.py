@@ -179,6 +179,12 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
     voice_channels = []
 
+    extra_bots_counter = 0
+
+    bot_in_guild = False
+
+    user_vc = False
+
     for bot in sorted(inter.bot.pool.get_guild_bots(inter.guild_id), key=lambda b: b.identifier):
 
         if not bot.bot_ready:
@@ -189,6 +195,15 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
         if not (guild := bot.get_guild(inter.guild_id)):
             continue
+
+        try:
+            if not bot.appinfo.bot_public and not await bot.is_owner(inter.author):
+                continue
+        except AttributeError:
+            continue
+
+        if bot.user.id != inter.bot.user.id:
+            extra_bots_counter += 1
 
         if not (author := guild.get_member(inter.author.id)):
             continue
@@ -222,6 +237,8 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
                 raise PoolException()
 
             return True
+
+        user_vc = True
 
         if only_voiced:
             continue
@@ -287,27 +304,10 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
         raise NoPlayer()
 
-    extra_bots_counter = 0
-    bot_in_guild = False
-
-    for bot in inter.bot.pool.get_guild_bots(inter.guild_id):
-
-        try:
-            if not bot.appinfo.bot_public and not await bot.is_owner(inter.author):
-                continue
-        except AttributeError:
-            continue
-
-        if (bot.user.id == inter.bot.user.id):
-            continue
-
-        if bot.get_guild(inter.guild_id):
-            bot_in_guild = True
-            continue
-
-        extra_bots_counter += 1
-
     components = []
+
+    if not user_vc:
+        raise NoVoice()
 
     if not bot_in_guild:
 
