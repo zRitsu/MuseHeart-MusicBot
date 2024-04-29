@@ -425,7 +425,7 @@ class Player:
             payload = {
                 'op': 'play',
                 'guildId': str(self.guild_id),
-                'track': track.id,
+                'track': kwargs.get("temp_id") or track.id,
                 'noReplace': not replace,
                 'startTime': start,
             }
@@ -451,7 +451,7 @@ class Player:
                 pause = self.paused
 
             payload = {
-                "encodedTrack": track.id,
+                "encodedTrack": kwargs.get("temp_id") or track.id,
                 "volume": vol,
                 "position": int(start),
                 "paused": pause,

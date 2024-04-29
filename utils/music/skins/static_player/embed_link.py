@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
 import itertools
-import re
 from os.path import basename
 
 import disnake
@@ -79,9 +78,7 @@ class EmbedLinkStaticSkin:
 
         if player.command_log:
 
-            log = re.sub(r"\[(.+)]\(.+\)", r"\1", player.command_log.replace("`", "")) # remover links do command_log p/ evitar gerar mais de uma preview.
-
-            txt += f"> {player.command_log_emoji} **⠂Última Interação:** {log}\n"
+            txt += f"> {player.command_log_emoji} **⠂Última Interação:** {player.command_log}\n"
 
         if qsize := len(player.queue):
 

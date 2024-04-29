@@ -1734,7 +1734,7 @@ class Music(commands.Cog):
                 if not track_url:
                     track_url = tracks.uri or tracks.search_uri
 
-                log_text = f"{inter.author.mention} adicionou [`{fix_characters(tracks.title, 20)}`]({track_url}){pos_txt} `({duration})`."
+                log_text = f"{inter.author.mention} adicionou [`{fix_characters(tracks.title, 20)}`](<{track_url}>){pos_txt} `({duration})`."
 
                 loadtype = "track"
 
@@ -2099,7 +2099,7 @@ class Music(commands.Cog):
             embed = disnake.Embed(
                 color=self.bot.get_color(guild.me),
                 description= f"⤵️ **⠂{inter.author.mention} pulou para a música:**\n"
-                             f"╰[`{fix_characters(track.title, 43)}`]({track.uri or track.search_uri}){player.controller_link}"
+                             f"╰[`{fix_characters(track.title, 43)}`](<{track.uri or track.search_uri}>){player.controller_link}"
             )
 
             try:
@@ -2130,7 +2130,7 @@ class Music(commands.Cog):
                 embed = disnake.Embed(
                     color=self.bot.get_color(guild.me),
                     description=f"⏭️ **⠂{inter.author.mention} pulou a música:\n"
-                                f"╰[`{fix_characters(player.current.title, 43)}`]({player.current.uri or player.current.search_uri})**"
+                                f"╰[`{fix_characters(player.current.title, 43)}`](<{player.current.uri or player.current.search_uri}>)**"
                                 f"{player.controller_link}"
                 )
 
@@ -2212,7 +2212,7 @@ class Music(commands.Cog):
 
             txt = [
                 "voltou para a música atual.",
-                f"⏮️ **⠂{inter.author.mention} voltou para a música:\n╰[`{fix_characters(t.title, 43)}`]({t.uri or t.search_uri})**"
+                f"⏮️ **⠂{inter.author.mention} voltou para a música:\n╰[`{fix_characters(t.title, 43)}`](<{t.uri or t.search_uri}>)**"
             ]
 
             await self.interaction_message(inter, txt, emoji="⏮️", store_embed=True)
@@ -2677,9 +2677,9 @@ class Music(commands.Cog):
 
         txt = [
             f"definiu a quantidade de repetições da música "
-            f"[`{(fix_characters(player.current.title, 25))}`]({player.current.uri or player.current.search_uri}) para **{value}**.",
+            f"[`{(fix_characters(player.current.title, 25))}`](<{player.current.uri or player.current.search_uri}>) para **{value}**.",
             f"🔄 **⠂{inter.author.mention} definiu a quantidade de repetições da música para [{value}]:**\n"
-            f"╰[`{player.current.title}`]({player.current.uri or player.current.search_uri})"
+            f"╰[`{player.current.title}`](<{player.current.uri or player.current.search_uri}>)"
         ]
 
         await self.interaction_message(inter, txt, rpc_update=True, emoji="🔄")
@@ -2736,8 +2736,8 @@ class Music(commands.Cog):
         player.queue.remove(track)
 
         txt = [
-            f"removeu a música [`{(fix_characters(track.title, 25))}`]({track.uri or track.search_uri}) da fila.",
-            f"♻️ **⠂{inter.author.mention} removeu a música da fila:**\n╰[`{track.title}`]({track.uri or track.search_uri})"
+            f"removeu a música [`{(fix_characters(track.title, 25))}`](<{track.uri or track.search_uri}>) da fila.",
+            f"♻️ **⠂{inter.author.mention} removeu a música da fila:**\n╰[`{track.title}`](<{track.uri or track.search_uri}>)"
         ]
 
         await self.interaction_message(inter, txt, emoji="♻️")
@@ -2847,7 +2847,7 @@ class Music(commands.Cog):
         track = (player.queue + player.queue_autoplay)[index]
 
         if index <= 0:
-            raise GenericError(f"**A música **[`{track.title}`]({track.uri or track.search_uri}) já é a próxima da fila.")
+            raise GenericError(f"**A música **[`{track.title}`](<{track.uri or track.search_uri}>) já é a próxima da fila.")
 
         if track.autoplay:
             player.queue_autoplay.rotate(0 - (index - len(player.queue)))
@@ -2855,8 +2855,8 @@ class Music(commands.Cog):
             player.queue.rotate(0 - (index))
 
         txt = [
-            f"rotacionou a fila para a música [`{(fix_characters(track.title, limit=25))}`]({track.uri or track.search_uri}).",
-            f"🔃 **⠂{inter.author.mention} rotacionou a fila para a música:**\n╰[`{track.title}`]({track.uri or track.search_uri})."
+            f"rotacionou a fila para a música [`{(fix_characters(track.title, limit=25))}`](<{track.uri or track.search_uri}>).",
+            f"🔃 **⠂{inter.author.mention} rotacionou a fila para a música:**\n╰[`{track.title}`](<{track.uri or track.search_uri}>)."
         ]
 
         if isinstance(inter, disnake.MessageInteraction):
@@ -3034,7 +3034,7 @@ class Music(commands.Cog):
 
         ephemeral = (player.guild.id != inter.guild_id and not await player.bot.is_owner(inter.author)) or await self.is_request_channel(inter, data=guild_data)
 
-        txt = f"### [{player.current.title}]({player.current.uri or player.current.search_uri})\n"
+        txt = f"### [{player.current.title}](<{player.current.uri or player.current.search_uri}>)\n"
 
         footer_kw = {}
 
@@ -3107,7 +3107,7 @@ class Music(commands.Cog):
 
                 txt += f"### 🎶 ⠂Próximas músicas ({(qsize := len(player.queue + player.queue_autoplay))}):\n" + (
                             "\n").join(
-                    f"> `{n + 1})` [`{fix_characters(t.title, limit=28)}`]({t.uri})\n" \
+                    f"> `{n + 1})` [`{fix_characters(t.title, limit=28)}`](<{t.uri}>)\n" \
                     f"> `⏲️ {time_format(t.duration) if not t.is_stream else '🔴 Ao vivo'}`" + (
                         f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
                     f" **|** " + (f"`✋` <@{t.requester}>" if not t.autoplay else f"`👍⠂Recomendada`") for n, t in
@@ -3847,7 +3847,7 @@ class Music(commands.Cog):
 
                 if 'playlist' in temp_filter:
                     if playlist == t.playlist_name.replace("️", "") or (isinstance(inter, CustomContext) and playlist.lower() in t.playlist_name.replace("️", "").lower()):
-                        playlist_link = f"[`{fix_characters(t.playlist_name)}`]({t.playlist_url})"
+                        playlist_link = f"[`{fix_characters(t.playlist_name)}`](<{t.playlist_url}>)"
                         temp_filter.remove('playlist')
                         final_filters.add('playlist')
 
@@ -3915,7 +3915,7 @@ class Music(commands.Cog):
             except:
                 pass
 
-            msg_txt = f"### ♻️ ⠂{inter.author.mention} removeu {deleted_tracks} música{'s'[:deleted_tracks^1]} da fila:\n" + "\n".join(f"[`{fix_characters(t.title, 45)}`]({t.uri})" for t in tracklist[:7])
+            msg_txt = f"### ♻️ ⠂{inter.author.mention} removeu {deleted_tracks} música{'s'[:deleted_tracks^1]} da fila:\n" + "\n".join(f"[`{fix_characters(t.title, 45)}`](<{t.uri}>)" for t in tracklist[:7])
 
             if (trackcount:=(len(tracklist) - 7)) > 0:
                 msg_txt += f"\n`e mais {trackcount} música{'s'[:trackcount^1]}.`"
@@ -4257,9 +4257,9 @@ class Music(commands.Cog):
         if indexes:
             track = tracklist[0]
             txt = [
-                f"moveu a música [`{fix_characters(track.title, limit=25)}`]({track.uri or track.search_uri}) para a posição **[{position}]** da fila.",
+                f"moveu a música [`{fix_characters(track.title, limit=25)}`](<{track.uri or track.search_uri}>) para a posição **[{position}]** da fila.",
                 f"↪️ **⠂{inter.author.mention} moveu uma música para a posição [{position}]:**\n"
-                f"╰[`{fix_characters(track.title, limit=43)}`]({track.uri or track.search_uri})"
+                f"╰[`{fix_characters(track.title, limit=43)}`](<{track.uri or track.search_uri}>)"
             ]
 
             await self.interaction_message(inter, txt, emoji="↪️")
@@ -4270,7 +4270,7 @@ class Music(commands.Cog):
 
             moved_tracks_txt = moved_tracks if moved_tracks == 1 else f"[{position}-{position+moved_tracks-1}]"
 
-            msg_txt = f"### ↪️ ⠂{inter.author.mention} moveu {moved_tracks} música{'s'[:moved_tracks^1]} para a posição {moved_tracks_txt} da fila:\n" + "\n".join(f"`{position+n}.` [`{fix_characters(t.title, 45)}`]({t.uri})" for n, t in enumerate(tracklist[:7]))
+            msg_txt = f"### ↪️ ⠂{inter.author.mention} moveu {moved_tracks} música{'s'[:moved_tracks^1]} para a posição {moved_tracks_txt} da fila:\n" + "\n".join(f"`{position+n}.` [`{fix_characters(t.title, 45)}`](<{t.uri}>)" for n, t in enumerate(tracklist[:7]))
 
             if (track_extra:=(moved_tracks - 7)) > 0:
                 msg_txt += f"\n`e mais {track_extra} música{'s'[:track_extra^1]}.`"
@@ -5648,7 +5648,7 @@ class Music(commands.Cog):
 
                     await interaction.edit_original_message(
                         embed=disnake.Embed(
-                            description=f"### Letras da música: [{player.current.title}]({player.current.uri})\n{lyrics_string}",
+                            description=f"### Letras da música: [{player.current.title}](<{player.current.uri}>)\n{lyrics_string}",
                             color=self.bot.get_color(player.guild.me)
                         )
                     )
@@ -6393,7 +6393,7 @@ class Music(commands.Cog):
             else:
                 player.set_command_log(
                     text=f"{message.author.mention} adicionou a playlist [`{fix_characters(tracks.data['playlistInfo']['name'], 20)}`]"
-                         f"({tracks.tracks[0].playlist_url}) `({len(tracks.tracks)})`.",
+                         f"(<{tracks.tracks[0].playlist_url}>) `({len(tracks.tracks)})`.",
                     emoji="🎶"
                 )
                 if destroy_message:
@@ -6464,7 +6464,7 @@ class Music(commands.Cog):
             else:
                 duration = time_format(tracks[0].duration) if not tracks[0].is_stream else '🔴 Livestream'
                 player.set_command_log(
-                    text=f"{message.author.mention} adicionou [`{fix_characters(tracks[0].title, 20)}`]({tracks[0].uri or tracks[0].search_uri}) `({duration})`.",
+                    text=f"{message.author.mention} adicionou [`{fix_characters(tracks[0].title, 20)}`](<{tracks[0].uri or tracks[0].search_uri}>) `({duration})`.",
                     emoji="🎵"
                 )
                 if destroy_message:
