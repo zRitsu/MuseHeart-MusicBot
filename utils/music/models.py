@@ -1793,7 +1793,7 @@ class LavalinkPlayer(wavelink.Player):
                     track.temp_id = alt_track.id
                     self.set_command_log(
                         emoji="▶️",
-                        text=f"Tocando música obtida via metadados: [{fix_characters(alt_track.author + ' - ' + alt_track.title, 40)}](<{alt_track.uri}>)"
+                        text=f"Tocando música obtida via metadados: [`{fix_characters(alt_track.title, 20)}` `| Por: {fix_characters(alt_track.author, 15)}`](<{alt_track.uri}>)"
                     )
 
             elif not track.id:
