@@ -87,7 +87,7 @@ class PartialPlaylist:
 
 
 class PartialTrack:
-    __slots__ = ('id', 'thumb', 'source_name', 'info', 'playlist', 'unique_id', 'ytid')
+    __slots__ = ('id', 'thumb', 'source_name', 'info', 'playlist', 'unique_id', 'ytid', 'temp_id')
 
     def __init__(self, *, uri: str = "", title: str = "", author="", thumb: str = "", duration: int = 0,
                  requester: int = 0, track_loops: int = 0, source_name: str = "", autoplay: bool = False,
@@ -115,6 +115,7 @@ class PartialTrack:
         self.ytid = ""
         self.unique_id = str(uuid.uuid4().hex)[:10]
         self.thumb = self.info["extra"]["thumb"]
+        self.temp_id = None
         self.playlist: Optional[PartialPlaylist] = playlist
 
     def __repr__(self):
@@ -290,7 +291,7 @@ class LavalinkPlaylist:
 
 
 class LavalinkTrack(wavelink.Track):
-    __slots__ = ('extra', 'playlist', 'unique_id')
+    __slots__ = ('extra', 'playlist', 'unique_id', 'temp_id')
 
     def __init__(self, *args, **kwargs):
         try:
@@ -302,6 +303,7 @@ class LavalinkTrack(wavelink.Track):
         self.info["title"] = self.title
         self.info["pluginInfo"] = kwargs.pop("pluginInfo", {})
         self.unique_id = str(uuid.uuid4().hex)[:10]
+        self.temp_id = None
 
         try:
             self.info['sourceName']
@@ -843,7 +845,7 @@ class LavalinkPlayer(wavelink.Player):
 
             if self.locked:
                 self.set_command_log(
-                    text=f"A reprodução da música falhou (tentando tocar novamente): [`{fix_characters(track.title, 15)}`]({track.uri or track.search_uri}). **Causa:** `{event.cause[:50]}`")
+                    text=f"A reprodução da música falhou (tentando tocar novamente): [`{fix_characters(track.title, 15)}`](<{track.uri or track.search_uri}>). **Causa:** `{event.cause[:50]}`")
                 self.update = True
                 await send_report()
                 return
@@ -889,7 +891,7 @@ class LavalinkPlayer(wavelink.Player):
                     self.current = None
                     self.queue.appendleft(track)
 
-                    txt = f"Devido a limitações do youtube no servidor `{self.node.identifier}`. Durante a sessão atual " \
+                    txt = f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual " \
                              "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome " \
                              "das músicas do youtube que estão na fila (talvez a música tocada seja diferente do esperado " \
                              "ou até mesmo ignoradas caso não retorne resultados)."
@@ -969,7 +971,7 @@ class LavalinkPlayer(wavelink.Player):
                     self.queue.appendleft(track)
                     self.locked = False
                     self.set_command_log(
-                        text=f"Devido a limitações do youtube no servidor `{self.node.identifier}`. Durante a sessão atual "
+                        text=f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual "
                              "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome "
                              "das músicas do youtube que estão na fila (talvez a música tocada seja diferente do esperado "
                              "ou até mesmo ignoradas caso não retorne resultados).",
@@ -1128,7 +1130,7 @@ class LavalinkPlayer(wavelink.Player):
             self.update = False
 
             try:
-                self.set_command_log(text=f"A música [{fix_characters(self.current.single_title, 25)}]({self.current.uri}) travou.", emoji="⚠️")
+                self.set_command_log(text=f"A música [{fix_characters(self.current.single_title, 25)}](<{self.current.uri}>) travou.", emoji="⚠️")
             except:
                 pass
 
@@ -1672,6 +1674,8 @@ class LavalinkPlayer(wavelink.Player):
 
         self.locked = True
 
+        temp_id = None
+
         if not self.auto_pause:
 
             if self.node.version > 3:
@@ -1731,61 +1735,66 @@ class LavalinkPlayer(wavelink.Player):
 
                 exceptions = ""
 
-                for provider in self.node.search_providers:
+                if not track.temp_id:
 
-                    if provider in ("ytsearch", "ytmsearch"):
-                        continue
+                    for provider in self.node.search_providers:
 
-                    if track.author.endswith(" - topic"):
-                        query = f"{provider}:{track.title} - {track.author[:-8]}"
-                    else:
-                        query = f"{provider}:{track.title}"
+                        if provider in ("ytsearch", "ytmsearch"):
+                            continue
+
+                        if track.author.endswith(" - topic"):
+                            query = f"{provider}:{track.title} - {track.author[:-8]}"
+                        else:
+                            query = f"{provider}:{track.title}"
+
+                        try:
+                            tracks = await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
+                        except:
+                            exceptions += f"{traceback.format_exc()}\n"
+                            await asyncio.sleep(1)
+                            continue
 
                     try:
-                        tracks = await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
-                    except:
-                        exceptions += f"{traceback.format_exc()}\n"
-                        await asyncio.sleep(1)
-                        continue
+                        tracks = tracks.tracks
+                    except AttributeError:
+                        pass
 
-                try:
-                    tracks = tracks.tracks
-                except AttributeError:
-                    pass
+                    if not [i in track.title.lower() for i in exclude_tags]:
+                        final_result = []
+                        for t in tracks:
+                            if not any((i in t.title.lower()) for i in exclude_tags):
+                                final_result.append(t)
+                                break
+                        tracks = final_result or tracks
 
-                if not [i in track.title.lower() for i in exclude_tags]:
+                    min_duration = track.duration - 7000
+                    max_duration = track.duration + 7000
+
                     final_result = []
+
                     for t in tracks:
-                        if not any((i in t.title.lower()) for i in exclude_tags):
-                            final_result.append(t)
-                            break
-                    tracks = final_result or tracks
+                        if t.is_stream or not min_duration < t.duration < max_duration:
+                            continue
+                        final_result.append(t)
 
-                min_duration = track.duration - 7000
-                max_duration = track.duration + 7000
+                    if not (tracks:=final_result):
+                        if exceptions:
+                            print(exceptions)
+                        self.failed_tracks.append(track)
+                        self.set_command_log(emoji="⚠️", text=f"A música [`{track.title[:15]}`](<{track.uri}>) foi ignorada devido a falta de resultado "
+                                                              "no modo alternativo de buscas do youtube.")
+                        await self.invoke_np()
+                        await asyncio.sleep(13)
+                        self.locked = False
+                        await self.process_next()
+                        return
 
-                final_result = []
-
-                for t in tracks:
-                    if t.is_stream or not min_duration < t.duration < max_duration:
-                        continue
-                    final_result.append(t)
-
-                if not (tracks:=final_result):
-                    if exceptions:
-                        print(exceptions)
-                    self.failed_tracks.append(track)
-                    self.set_command_log(emoji="⚠️", text=f"A música [`{track.title[:15]}`]({track.uri}) foi ignorada devido a falta de resultado "
-                                                          "no modo alternativo de buscas do youtube.")
-                    await self.invoke_np()
-                    await asyncio.sleep(13)
-                    self.locked = False
-                    await self.process_next()
-                    return
-
-                alt_track = tracks[0]
-                alt_track.info["extra"] = track.info["extra"]
-                track = alt_track
+                    alt_track = tracks[0]
+                    track.temp_id = alt_track.id
+                    self.set_command_log(
+                        emoji="▶️",
+                        text=f"Tocando música obtida via metadados: [{fix_characters(alt_track.author + ' - ' + alt_track.title, 40)}](<{alt_track.uri}>)"
+                    )
 
             elif not track.id:
 
@@ -1869,7 +1878,7 @@ class LavalinkPlayer(wavelink.Player):
             self.last_update = time() * 1000
             self.current = track
         else:
-            await self.play(track, start=start_position)
+            await self.play(track, start=start_position, temp_id=track.temp_id)
             # TODO: rever essa parte caso adicione função de ativar track loops em músicas da fila
             if self.loop != "current" or force_np or (not self.controller_mode and self.current.track_loops == 0):
 
