@@ -11,14 +11,14 @@ lavalink:
     - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.0.1"
       repository: "https://maven.lavalink.dev/releases" # this is optional for lavalink v4.0.0-beta.5 or greater
       snapshot: false # set to true if you want to use snapshot builds (see below)
-    - dependency: "dev.schlaubi.lyrics:lavalink:2.3.2"
-      repository: "https://maven.lavalink.dev/releases" # this is optional for lavalink v4.0.0-beta.5 or greater
-      snapshot: false # set to true if you want to use snapshot builds (see below)
+    #- dependency: "dev.schlaubi.lyrics:lavalink:2.3.2"
+    #  repository: "https://maven.lavalink.dev/releases" # this is optional for lavalink v4.0.0-beta.5 or greater
+    #  snapshot: false # set to true if you want to use snapshot builds (see below)
     - dependency: "com.dunctebot:skybot-lavalink-plugin:1.7.0"
       repository : "https://maven.lavalink.dev/releases" # (optional on lavalink 4)
       snapshot: false # (optional, tells lavalink to use the default snaptshot repository instead)
-    - dependency: com.github.devoxin:lavadspx-plugin:0.0.5 # replace {VERSION} with the latest version from the "Releases" tab.
-      repository: https://jitpack.io
+    - dependency: "com.github.devoxin:lavadspx-plugin:0.0.5" # replace {VERSION} with the latest version from the "Releases" tab.
+      repository: "https://jitpack.io"
   server:
     password: "youshallnotpass"
     sources:
