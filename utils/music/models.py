@@ -2792,6 +2792,8 @@ class LavalinkPlayer(wavelink.Player):
                                                                           "ytmsearch:\"{title} - {author}\"",
                                                                           ])
                         self.native_yt = False
+                        await self.resolve_track(track)
+                        return
                     exceptions.append(e)
                     continue
 
