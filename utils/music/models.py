@@ -2776,7 +2776,22 @@ class LavalinkPlayer(wavelink.Player):
 
                 try:
                     tracks = (await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist))
-                except wavelink.TrackNotFound as e:
+                except Exception as e:
+                    if track.info["sourceName"] == "youtube" and any(e in str(e) for e in (
+                        "This video is not available",
+                        "YouTube WebM streams are currently not supported.",
+                        "Video returned by YouTube isn't what was requested",
+                        "The video returned is not what was requested.",
+                    )
+                           ):
+                        cog = self.bot.get_cog("Music")
+                        cog.remove_provider(self.node.search_providers, ["ytsearch", "ytmsearch"])
+                        cog.remove_provider(self.node.partial_providers, ["ytsearch:\"{isrc}\"",
+                                                                          "ytsearch:\"{title} - {author}\"",
+                                                                          "ytmsearch:\"{isrc}\"",
+                                                                          "ytmsearch:\"{title} - {author}\"",
+                                                                          ])
+                        self.native_yt = False
                     exceptions.append(e)
                     continue
 
