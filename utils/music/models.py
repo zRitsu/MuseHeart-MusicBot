@@ -1781,8 +1781,8 @@ class LavalinkPlayer(wavelink.Player):
                         if exceptions:
                             print(exceptions)
                         self.failed_tracks.append(track)
-                        self.set_command_log(emoji="⚠️", text=f"A música [`{track.title[:15]}`](<{track.uri}>) foi ignorada devido a falta de resultado "
-                                                              "no modo alternativo de buscas do youtube.")
+                        self.set_command_log(emoji="⚠️", text=f"A música [`{track.title[:15]}`](<{track.uri}>) será pulada devido a falta de resultado "
+                                                              "em outras plataformas de música.")
                         await self.invoke_np()
                         await asyncio.sleep(13)
                         self.locked = False
@@ -1793,7 +1793,7 @@ class LavalinkPlayer(wavelink.Player):
                     track.temp_id = alt_track.id
                     self.set_command_log(
                         emoji="▶️",
-                        text=f"Tocando música obtida via metadados: [`{fix_characters(alt_track.title, 20)}` `| Por: {fix_characters(alt_track.author, 15)}`](<{alt_track.uri}>)"
+                        text=f"Tocando música obtida via metadados: [`{fix_characters(alt_track.title, 20)}`](<{alt_track.uri}>) `| Por: {fix_characters(alt_track.author, 15)}`"
                     )
 
             elif not track.id:
