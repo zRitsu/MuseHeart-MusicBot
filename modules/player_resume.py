@@ -18,7 +18,6 @@ import wavelink
 from utils.client import BotCore
 from utils.db import DBModel
 from utils.music.checks import can_connect, can_send_message
-from utils.music.filters import AudioFilter
 from utils.music.models import LavalinkPlayer
 from utils.others import SongRequestPurgeMode, send_idle_embed, CustomContext
 
@@ -556,7 +555,7 @@ class PlayerSession(commands.Cog):
                 player.nightcore = data.get("nightcore")
 
                 if player.nightcore:
-                    player.filters.update(AudioFilter.timescale(pitch=1.2, speed=1.1))
+                    await player.set_timescale(pitch=1.2, speed=1.1)
 
                 if node.version == 3:
 
