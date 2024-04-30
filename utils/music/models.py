@@ -750,7 +750,7 @@ class LavalinkPlayer(wavelink.Player):
 
             self.bot.dispatch("wavelink_track_end", self.node, event)
 
-            if self.locked or self.auto_pause:
+            if self.locked:
                 return
 
             if event.reason == "FINISHED":
