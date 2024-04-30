@@ -781,9 +781,6 @@ class LavalinkPlayer(wavelink.Player):
 
             self.start_time = disnake.utils.utcnow()
 
-            if self.auto_pause:
-                return
-
             if not self.text_channel:
                 return
 
@@ -794,7 +791,6 @@ class LavalinkPlayer(wavelink.Player):
 
             if not send_message_perm:
                 self.text_channel = None
-                return
 
             if not self.guild.me.voice:
                 try:
@@ -2714,10 +2710,7 @@ class LavalinkPlayer(wavelink.Player):
                     retries -= 1
                     continue
 
-            if not sleep_time:
-                sleep_time = self.current.duration
-
-            await asyncio.sleep(sleep_time)
+            await asyncio.sleep(sleep_time or (self.current.duration / 1000))
 
             await self.node.on_event(TrackEnd({"track": self.current, "player": self, "node": self.node, "reason": "FINISHED"}))
 
