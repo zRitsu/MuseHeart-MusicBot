@@ -6871,6 +6871,7 @@ class Music(commands.Cog):
                             break
 
                     if not node_retry:
+                        node = n
                         break
 
         if not tracks:
