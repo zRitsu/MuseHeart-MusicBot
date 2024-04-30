@@ -26,6 +26,7 @@ from utils.music.filters import AudioFilter
 from utils.music.skin_utils import skin_converter
 from utils.others import music_source_emoji, send_idle_embed, PlayerControls, SongRequestPurgeMode, \
     song_request_buttons
+from wavelink import TrackStart
 
 if TYPE_CHECKING:
     from utils.client import BotCore
@@ -1674,8 +1675,6 @@ class LavalinkPlayer(wavelink.Player):
 
         self.locked = True
 
-        temp_id = None
-
         if not self.auto_pause:
 
             if self.node.version > 3:
@@ -1872,11 +1871,23 @@ class LavalinkPlayer(wavelink.Player):
         self.position_timestamp = 0
         self.paused = False
 
+        try:
+            self.auto_skip_track_task.cancel()
+        except:
+            pass
+
         self.process_hint()
 
         if self.auto_pause:
             self.last_update = time() * 1000
             self.current = track
+            self.auto_skip_track_task = self.bot.loop.create_task(self.auto_skip_track())
+            await self.node.on_event(TrackStart({"track": track, "player": self,"node": self.node}))
+            await self.invoke_np(
+                interaction=inter,
+                force=True if (self.static or not self.loop or not self.is_last_message()) else False,
+                rpc_update=True
+            )
         else:
             await self.play(track, start=start_position, temp_id=track.temp_id)
             # TODO: rever essa parte caso adicione função de ativar track loops em músicas da fila
@@ -2686,74 +2697,43 @@ class LavalinkPlayer(wavelink.Player):
         if not self.controller_mode or not self.current:
             return
 
-        while True:
+        try:
 
             try:
-
-                try:
-                    if self.current.is_stream:
-                        return
-                except AttributeError:
-                    pass
-
-                retries = 5
-
-                sleep_time = None
-
-                while retries > 0:
-
-                    try:
-                        sleep_time = (self.current.duration - self.position) / 1000
-                        break
-                    except AttributeError:
-                        await asyncio.sleep(5)
-                        retries -= 1
-                        continue
-
-                if not sleep_time:
-                    continue
-
-                await asyncio.sleep(sleep_time)
-
-                if not self.last_channel:
-                    await asyncio.sleep(2)
-                    continue
-
-                if [m for m in self.last_channel.members if not m.bot and not (m.voice.deaf or m.voice.self_deaf)]:
+                if self.current.is_stream:
                     return
+            except AttributeError:
+                pass
+
+            retries = 5
+
+            sleep_time = None
+
+            while retries > 0:
 
                 try:
-                    await self.track_end()
-                except Exception:
-                    traceback.print_exc()
+                    sleep_time = (self.current.duration - self.position) / 1000
+                    break
+                except AttributeError:
+                    await asyncio.sleep(5)
+                    retries -= 1
+                    continue
 
-                try:
-                    await self.process_next()
-                except:
-                    print(traceback.format_exc())
-
-                self.set_command_log(
-                    emoji="🪫",
-                    text="O player está no modo **[economia de recursos]** (esse modo será desativado automaticamente quando "
-                         f"um membro entrar no canal <#{self.channel_id}>)."
-                )
-
-                try:
-                    await self.invoke_np(force=True)
-                except:
-                    traceback.print_exc()
-
-                try:
-                    await self.update_stage_topic()
-                except Exception:
-                    traceback.print_exc()
-
-            except asyncio.CancelledError:
+            if not sleep_time:
                 return
 
-            except Exception:
-                traceback.print_exc()
-                return
+            await asyncio.sleep(sleep_time)
+
+            await self.track_end()
+
+            return
+
+        except asyncio.CancelledError:
+            return
+
+        except Exception:
+            traceback.print_exc()
+            return
 
     async def resolve_track(self, track: PartialTrack):
 
