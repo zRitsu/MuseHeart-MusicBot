@@ -2715,7 +2715,7 @@ class LavalinkPlayer(wavelink.Player):
                     continue
 
             if not sleep_time:
-                return
+                sleep_time = self.current.duration
 
             await asyncio.sleep(sleep_time)
 
