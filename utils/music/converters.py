@@ -145,6 +145,7 @@ sources = {
     "applemusic": "https://i.ibb.co/Dr4hbS5/applemusic.png",
     "twitch": "https://cdn3.iconfinder.com/data/icons/popular-services-brands-vol-2/512/twitch-512.png",
     "jiosaavn": "https://i.ibb.co/Bfh8dW2/jiosaavn.png",
+    "tidal": "https://i.ibb.co/JkBbrXh/tidal.png",
 }
 
 def music_source_image(sourcename):

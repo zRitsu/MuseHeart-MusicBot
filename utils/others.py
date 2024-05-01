@@ -568,6 +568,7 @@ music_source_emoji_data = {
     "applemusic": "<:applemusic:1225631877658968164>",
     "twitch": "<:Twitch:803656463695478804>",
     "jiosaavn": "<:jiosaavn:1235276169473949747>",
+    "tidal": "<:tidal:1235352567048048691>",
 }
 
 def music_source_emoji(name: str):
@@ -587,6 +588,8 @@ def get_source_emoji_cfg(bot: BotCore, url: str):
         source = "applemusic"
     elif js_url_regex.match(url):
         source = "jiosaavn"
+    elif url.startswith(("https://listen.tidal.com/", "http://www.tidal.com/")):
+        source = "tidal"
     else:
         return None
 

@@ -317,7 +317,7 @@ class LavalinkTrack(wavelink.Track):
                 del self.info["pluginInfo"]["albumUrl"]
             else:
                 self.info["pluginInfo"]["albumName"] = albumname
-        except KeyError:
+        except (AttributeError, KeyError):
             pass
 
         try:
