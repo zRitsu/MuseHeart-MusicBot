@@ -6764,6 +6764,8 @@ class Music(commands.Cog):
             if p == "dzsearch":
                 node.partial_providers.append("dzisrc:{isrc}")
                 node.partial_providers.append("dzsearch:{title} - {author}")
+            elif p == "tdsearch":
+                node.partial_providers.append("tdsearch:{title} - {author}")
             elif p == "amsearch":
                 node.partial_providers.append("amsearch:{title} - {author}")
             elif p == "spsearch":
