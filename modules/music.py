@@ -6821,15 +6821,6 @@ class Music(commands.Cog):
 
                 for n in nodes:
 
-                    if is_yt_source:
-
-                        if n.version > 3:
-                            if "youtube" not in n.info["sourceManagers"]:
-                                raise YoutubeSourceDisabled()
-
-                        if "ytsearch" not in n.original_providers and "ytmsearch" not in n.original_providers:
-                            raise YoutubeSourceDisabled()
-
                     node_retry = False
 
                     if source is False:
