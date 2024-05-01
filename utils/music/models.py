@@ -1490,7 +1490,7 @@ class LavalinkPlayer(wavelink.Player):
                                 requester=self.bot.user.id
                             )
                         except Exception as e:
-                            if [err for err in ("Could not find tracks from mix", "Could not read mix page") if err in str(e)]:
+                            if [err for err in ("Could not find tracks from mix", "Could not read mix page") if err in str(e)] and self.native_yt:
                                 try:
                                     tracks_ytsearch = await self.node.get_tracks(
                                         f"{query}:\"{track_data.author}\"",
@@ -1602,7 +1602,10 @@ class LavalinkPlayer(wavelink.Player):
         try:
             return self.queue_autoplay.popleft()
         except:
-            return None
+            try:
+                return self.played.popleft()
+            except:
+                return None
 
     def start_auto_skip(self):
         try:
