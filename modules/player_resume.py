@@ -312,7 +312,9 @@ class PlayerSession(commands.Cog):
             await player.node.update_player(player.guild.id, data=data)
         else:
             await player.node.update_player(player.guild.id, data=data)
-            await player.process_next()
+            if player.current:
+                player.queue.append(player.current)
+            await player.process_next(start_position=position)
 
     async def voice_check(self, voice_channel: Union[disnake.VoiceChannel, disnake.StageChannel], position: int = 0):
 
