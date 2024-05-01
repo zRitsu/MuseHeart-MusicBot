@@ -6663,24 +6663,31 @@ class Music(commands.Cog):
 
                     if "deezer" not in node.info["sourceManagers"]:
                         self.remove_provider(node.search_providers, ["dzsearch"])
-                        self.remove_provider(node.partial_providers, ["dzisrc:{isrc}", "dzsearch:{author} - {title}"])
+                        self.remove_provider(node.partial_providers, ["dzisrc:{isrc}", "dzsearch:{title} - {author}"])
                     elif "dzsearch" not in node.search_providers:
                         self.add_provider(node.search_providers, ["dzsearch"])
-                        self.add_provider(node.partial_providers, ["dzisrc:{isrc}", "dzsearch:{author} - {title}"])
+                        self.add_provider(node.partial_providers, ["dzisrc:{isrc}", "dzsearch:{title} - {author}"])
+                        
+                    if "tidal" not in node.info["sourceManagers"]:
+                        self.remove_provider(node.search_providers, ["tdsearch"])
+                        self.remove_provider(node.partial_providers, ["tdsearch:{title} - {author}"])
+                    elif "tdsearch" not in node.search_providers:
+                        self.add_provider(node.search_providers, ["tdsearch"])
+                        self.add_provider(node.partial_providers, ["tdsearch:{title} - {author}"])
 
                     if "applemusic" not in node.info["sourceManagers"]:
                         self.remove_provider(node.search_providers, ["amsearch"])
-                        self.remove_provider(node.partial_providers, ["amsearch:{author} - {title}"])
+                        self.remove_provider(node.partial_providers, ["amsearch:{title} - {author}"])
                     elif "amsearch" not in node.search_providers:
                         self.add_provider(node.search_providers, ["amsearch"])
-                        self.add_provider(node.partial_providers, ["amsearch:{author} - {title}"])
+                        self.add_provider(node.partial_providers, ["amsearch:{title} - {author}"])
 
                     if "spotify" not in node.info["sourceManagers"]:
                         self.remove_provider(node.search_providers, ["spsearch"])
-                        self.remove_provider(node.partial_providers, ["spsearch:{author} - {title}"])
+                        self.remove_provider(node.partial_providers, ["spsearch:{title} - {author}"])
                     elif "spsearch" not in node.search_providers:
                         self.add_provider(node.search_providers, ["spsearch"])
-                        self.add_provider(node.partial_providers, ["spsearch:{author} - {title}"])
+                        self.add_provider(node.partial_providers, ["spsearch:{title} - {author}"])
 
                     if "youtube" not in node.info["sourceManagers"] and "ytsearch" not in node.original_providers:
                         self.remove_provider(node.search_providers, ["ytsearch"])
@@ -6754,11 +6761,11 @@ class Music(commands.Cog):
         for p in node.search_providers:
             if p == "dzsearch":
                 node.partial_providers.append("dzisrc:{isrc}")
-                node.partial_providers.append("dzsearch:{author} - {title}")
+                node.partial_providers.append("dzsearch:{title} - {author}")
             elif p == "amsearch":
-                node.partial_providers.append("amsearch:{author} - {title}")
+                node.partial_providers.append("amsearch:{title} - {author}")
             elif p == "spsearch":
-                node.partial_providers.append("spsearch:{author} - {title}")
+                node.partial_providers.append("spsearch:{title} - {author}")
             elif p == "ytsearch":
                 node.partial_providers.append("ytsearch:\"{isrc}\"")
                 node.partial_providers.append("ytsearch:\"{title} - {author}\"")
