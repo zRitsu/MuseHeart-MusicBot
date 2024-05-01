@@ -6719,6 +6719,13 @@ class Music(commands.Cog):
                         self.add_provider(node.search_providers, ["scsearch"])
                         self.add_provider(node.partial_providers, ["scsearch:{title} - {author}"])
 
+                    if "jiosaavn" not in node.info["sourceManagers"]:
+                        self.remove_provider(node.search_providers, ["jssearch"])
+                        # self.remove_provider(node.partial_providers, ["jssearch:{title} - {author}"])
+                    elif "jssearch" not in node.search_providers:
+                        self.add_provider(node.search_providers, ["jssearch"])
+                        # self.add_provider(node.partial_providers, ["jssearch:{title} {author}"])
+
             if node.stats.uptime < 600000:
                 node.open()
             return

@@ -19,6 +19,8 @@ lavalink:
       snapshot: false # (optional, tells lavalink to use the default snaptshot repository instead)
     - dependency: "com.github.devoxin:lavadspx-plugin:0.0.5" # replace {VERSION} with the latest version from the "Releases" tab.
       repository: "https://jitpack.io"
+    - dependency: "com.github.appujet:jiosaavn-plugin:0.1.1"
+      repository: "https://jitpack.io"
   server:
     password: "youshallnotpass"
     sources:
@@ -114,6 +116,8 @@ plugins:
       albumLoadLimit: 6 # The number of pages at 300 tracks each
     deezer:
       masterDecryptionKey: "" # the master key used for decrypting the deezer tracks. (yes this is not here you need to get it from somewhere else)
+  jiosaavn:
+    apiURL: "https://saavn.dev/api" # JioSaavn API URL
 
 metrics:
   prometheus:

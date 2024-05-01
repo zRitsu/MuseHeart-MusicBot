@@ -558,6 +558,7 @@ sc_url_regex = re.compile(r"^(https?://)?(www\.)?(soundcloud\.com)/.+")
 sp_url_regex = re.compile(r"^(https?://)?(www\.)?(open\.spotify\.com|spotify\.com)/.+")
 tw_url_regex = re.compile(r"^(https?://)?(www\.)?(twitch\.tv)/([A-Za-z0-9_]{4,25})(/.+)?")
 am_url_regex = re.compile(r"(https?://)?(www\.)?music\.apple\.com/((?P<countrycode>[a-zA-Z]{2})/)?(?P<type>album|playlist|artist|song)(/[a-zA-Z\w\d\-]+)?/(?P<identifier>[a-zA-Z\d\-.]+)(\?i=(?P<identifier2>\d+))?")
+js_url_regex = re.compile(r"(https?://)(www\.)?jiosaavn\.com/(song|album|featured|artist)/([a-zA-Z0-9-_]+)")
 
 music_source_emoji_data = {
     "youtube": "<:youtube:647253940882374656>",
@@ -566,6 +567,7 @@ music_source_emoji_data = {
     "deezer": "<:deezer:1226124676372365402>",
     "applemusic": "<:applemusic:1225631877658968164>",
     "twitch": "<:Twitch:803656463695478804>",
+    "jiosaavn": "<:jiosaavn:1235276169473949747>",
 }
 
 def music_source_emoji(name: str):
@@ -583,6 +585,8 @@ def get_source_emoji_cfg(bot: BotCore, url: str):
         source = "twitch"
     elif am_url_regex.match(url):
         source = "applemusic"
+    elif js_url_regex.match(url):
+        source = "jiosaavn"
     else:
         return None
 

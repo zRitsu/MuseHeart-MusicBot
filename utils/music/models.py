@@ -1481,6 +1481,9 @@ class LavalinkPlayer(wavelink.Player):
 
                     for query in queries:
 
+                        if query.startswith("jssearch"):
+                            continue
+
                         try:
                             tracks = await self.node.get_tracks(
                                 query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, autoplay=True,
@@ -1521,7 +1524,6 @@ class LavalinkPlayer(wavelink.Player):
                         tracks = final_tracks or tracks
 
                 track = track_data
-                break
 
             if not tracks:
                 try:

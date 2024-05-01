@@ -143,7 +143,8 @@ sources = {
     "spotify": "https://i.ibb.co/3SWMXj8/spotify.png",
     "youtube": "https://i.ibb.co/LvX7dQL/yt.png",
     "applemusic": "https://i.ibb.co/Dr4hbS5/applemusic.png",
-    "twitch": "https://cdn3.iconfinder.com/data/icons/popular-services-brands-vol-2/512/twitch-512.png"
+    "twitch": "https://cdn3.iconfinder.com/data/icons/popular-services-brands-vol-2/512/twitch-512.png",
+    "jiosaavn": "https://i.ibb.co/Bfh8dW2/jiosaavn.png",
 }
 
 def music_source_image(sourcename):
