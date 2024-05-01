@@ -871,15 +871,13 @@ class LavalinkPlayer(wavelink.Player):
 
                 if video_not_available:
 
-                    if self.node.version > 3:
-
-                        with suppress(IndexError, ValueError):
-                            self.node.search_providers.remove("ytsearch")
-                            self.node.search_providers.remove("ytmsearch")
-                            self.node.partial_providers.remove("ytsearch:\"{isrc}\"")
-                            self.node.partial_providers.remove("ytsearch:\"{title} - {author}\"")
-                            self.node.partial_providers.remove("ytmsearch:\"{isrc}\"")
-                            self.node.partial_providers.remove("ytmsearch:\"{title} - {author}\"")
+                    with suppress(IndexError, ValueError):
+                        self.node.search_providers.remove("ytsearch")
+                        self.node.search_providers.remove("ytmsearch")
+                        self.node.partial_providers.remove("ytsearch:\"{isrc}\"")
+                        self.node.partial_providers.remove("ytsearch:\"{title} - {author}\"")
+                        self.node.partial_providers.remove("ytmsearch:\"{isrc}\"")
+                        self.node.partial_providers.remove("ytmsearch:\"{title} - {author}\"")
 
                     self.native_yt = False
 
@@ -952,15 +950,14 @@ class LavalinkPlayer(wavelink.Player):
                 self.retries_403 = {"last_time": None, 'counter': 0}
 
                 if youtube_exception:
-                    if self.node.version > 3:
 
-                        with suppress(IndexError, ValueError):
-                            self.node.search_providers.remove("ytsearch")
-                            self.node.search_providers.remove("ytmsearch")
-                            self.node.partial_providers.remove("ytsearch:\"{isrc}\"")
-                            self.node.partial_providers.remove("ytsearch:\"{title} - {author}\"")
-                            self.node.partial_providers.remove("ytmsearch:\"{isrc}\"")
-                            self.node.partial_providers.remove("ytmsearch:\"{title} - {author}\"")
+                    with suppress(IndexError, ValueError):
+                        self.node.search_providers.remove("ytsearch")
+                        self.node.search_providers.remove("ytmsearch")
+                        self.node.partial_providers.remove("ytsearch:\"{isrc}\"")
+                        self.node.partial_providers.remove("ytsearch:\"{title} - {author}\"")
+                        self.node.partial_providers.remove("ytmsearch:\"{isrc}\"")
+                        self.node.partial_providers.remove("ytmsearch:\"{title} - {author}\"")
 
                     self.native_yt = False
                     self.current = None
@@ -1684,9 +1681,8 @@ class LavalinkPlayer(wavelink.Player):
 
         if not self.auto_pause:
 
-            if self.node.version > 3:
-                if track.info["sourceName"] not in self.node.info["sourceManagers"] and not isinstance(track, PartialTrack):
-                    track.id = ""
+            if track.info["sourceName"] not in self.node.info["sourceManagers"] and not isinstance(track, PartialTrack):
+                track.id = ""
 
             if isinstance(track, PartialTrack):
 
@@ -2754,7 +2750,7 @@ class LavalinkPlayer(wavelink.Player):
             if track.info["sourceName"] == "http":
                 search_queries = [track.uri or track.search_uri]
             else:
-                if self.node.version > 3 and track.info["sourceName"] in self.node.info.get("sourceManagers", []):
+                if track.info["sourceName"] in self.node.info.get("sourceManagers", []):
                     search_queries = [track.uri]
                 else:
                     search_queries = []
