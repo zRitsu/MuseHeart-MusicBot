@@ -6618,6 +6618,7 @@ class Music(commands.Cog):
                         raise Exception(f"{self.bot.user} - [{r.status}]: {await r.text()}"[:300])
                     else:
                         node.version = 3
+                        node.info["sourceManagers"] = ["youtube", "soundcloud", "http"]
 
                 await node._websocket._connect()
                 return
@@ -6741,7 +6742,7 @@ class Music(commands.Cog):
         node_website = data.pop('website', '')
         region = data.pop('region', 'us_central')
         heartbeat = int(data.pop('heartbeat', 30))
-        search_providers = data.pop("search_providers", None) or ["dzsearch", "scsearch", "amsearch", "spsearch"]
+        search_providers = data.pop("search_providers", None) or ["ytsearch", "scsearch"]
         retry_403 = data.pop('retry_403', False)
         info = None
 

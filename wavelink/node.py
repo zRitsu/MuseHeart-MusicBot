@@ -203,6 +203,8 @@ class Node:
                                 self.info = await r.json()
                             elif r.status != 404:
                                 raise Exception(f"{self._client.bot.user} - [{r.status}]: {await r.text()}"[:300])
+                            else:
+                                self.info["sourceManagers"] = ["youtube", "soundcloud", "http"]
                             break
                     except Exception as e:
                         exception = e
@@ -222,6 +224,8 @@ class Node:
                     elif r.status != 404:
                         self._is_connecting = False
                         raise Exception(f"{self._client.bot.user} - [{r.status}]: {await r.text()}"[:300])
+                    else:
+                        self.info["sourceManagers"] = ["youtube", "soundcloud", "http"]
             except Exception as e:
                 print(f"❌ - {self._client.bot.user} - Falha ao conectar no servidor {self.identifier}: {repr(e)}"[:300])
                 self._is_connecting = False
