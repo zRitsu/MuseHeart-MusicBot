@@ -1477,7 +1477,7 @@ class LavalinkPlayer(wavelink.Player):
                         else:
                             providers = self.node.search_providers
 
-                        queries = [f"{sp}:{track_data.author}" for sp in providers]
+                        queries = [f"{sp}:{track_data.author.split(',')[0]}" for sp in providers]
 
                     for query in queries:
 
