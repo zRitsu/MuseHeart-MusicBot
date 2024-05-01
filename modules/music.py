@@ -1834,7 +1834,7 @@ class Music(commands.Cog):
 
             loadtype = "playlist"
 
-            log_text = f"{inter.author.mention} adicionou a playlist [`{fix_characters(tracks.name, 20)}`]({tracks.url}){pos_txt} `({len(tracks.tracks)})`."
+            log_text = f"{inter.author.mention} adicionou a playlist [`{fix_characters(tracks.name, 20)}`](<{tracks.url}>){pos_txt} `({len(tracks.tracks)})`."
 
             total_duration = 0
 
