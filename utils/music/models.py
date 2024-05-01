@@ -864,13 +864,10 @@ class LavalinkPlayer(wavelink.Player):
                 "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: This video is not available",
                 "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: YouTube WebM streams are currently not supported.",
             )) or event.message in ("Video returned by YouTube isn't what was requested", "The video returned is not what was requested.")):
-
-                try:
-                    self._new_node_task.cancel()
-                except:
-                    pass
-
                 await send_report()
+
+                self.current = None
+                self.queue.appendleft(track)
 
                 if video_not_available:
 
@@ -885,8 +882,6 @@ class LavalinkPlayer(wavelink.Player):
                             self.node.partial_providers.remove("ytmsearch:\"{title} - {author}\"")
 
                     self.native_yt = False
-                    self.current = None
-                    self.queue.appendleft(track)
 
                     txt = f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual " \
                              "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome " \
@@ -902,6 +897,10 @@ class LavalinkPlayer(wavelink.Player):
                     await self.process_next(start_position=self.position)
 
                 else:
+                    try:
+                        self._new_node_task.cancel()
+                    except:
+                        pass
                     self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node(
                         f"O servidor de música **{self.node.identifier}** está indisponível no momento "
                         f"(aguardando um novo servidor ficar disponível)."))
@@ -1881,6 +1880,11 @@ class LavalinkPlayer(wavelink.Player):
             self.current = track
             self.start_auto_skip()
             self.bot.loop.create_task(self.node.on_event(TrackStart({"track": track, "player": self,"node": self.node})))
+            self.set_command_log(
+                emoji="🪫",
+                text="O player está no modo **[economia de recursos]** (esse modo será desativado automaticamente quando "
+                     f"um membro entrar no canal <#{self.channel_id}>)."
+            )
         else:
             await self.play(track, start=start_position, temp_id=track.temp_id)
 
@@ -2869,9 +2873,10 @@ class LavalinkPlayer(wavelink.Player):
                     self.locked = False
                     if self.guild.me.voice and self._voice_state:
                         await self._dispatch_voice_update()
-                    await self.process_next(self.position)
+                    start_position = self.position_timestamp
                 else:
                     await self.change_node(node.identifier)
+                    start_position = 0
                     self.locked = False
             except:
                 traceback.print_exc()
@@ -2887,15 +2892,10 @@ class LavalinkPlayer(wavelink.Player):
                     return
                 await self.connect(self.last_channel.id)
 
+            await self.process_next(start_position=start_position)
+
             try:
-                if self.auto_pause:
-                    self.set_command_log(
-                        emoji="🪫",
-                        text="O player está no modo **[economia de recursos]** (esse modo será desativado automaticamente quando "
-                             f"um membro entrar no canal <#{self.channel_id}>)."
-                    )
-                    self.start_auto_skip()
-                else:
+                if not self.auto_pause:
                     if original_identifier != node.identifier:
                         txt = f"O player foi movido para o servidor de música **{node.identifier}**."
                     else:
