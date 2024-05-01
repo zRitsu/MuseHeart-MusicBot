@@ -766,6 +766,11 @@ class LavalinkPlayer(wavelink.Player):
             else:
                 return
 
+            try:
+                self.message_updater_task.cancel()
+            except:
+                pass
+
             await self.track_end()
 
             self.update = False
@@ -1352,7 +1357,7 @@ class LavalinkPlayer(wavelink.Player):
                      f"um membro entrar no canal <#{self.channel_id}>)."
             )
             self.update = True
-            self.auto_skip_track_task = self.bot.loop.create_task(self.auto_skip_track())
+            self.start_auto_skip()
             await self.update_stage_topic()
 
         else:
@@ -1597,6 +1602,13 @@ class LavalinkPlayer(wavelink.Player):
             return self.queue_autoplay.popleft()
         except:
             return None
+
+    def start_auto_skip(self):
+        try:
+            self.auto_skip_track_task.cancel()
+        except:
+            pass
+        self.auto_skip_track_task = self.bot.loop.create_task(self.auto_skip_track())
 
     async def process_next(self, start_position: Union[int, float] = 0, inter: disnake.MessageInteraction = None,
                            force_np=False):
@@ -1862,36 +1874,27 @@ class LavalinkPlayer(wavelink.Player):
         self.position_timestamp = 0
         self.paused = False
 
-        try:
-            self.auto_skip_track_task.cancel()
-        except:
-            pass
-
         self.process_hint()
 
         if self.auto_pause:
             self.last_update = time() * 1000
             self.current = track
-            self.auto_skip_track_task = self.bot.loop.create_task(self.auto_skip_track())
-            await self.node.on_event(TrackStart({"track": track, "player": self,"node": self.node}))
+            self.start_auto_skip()
+            self.bot.loop.create_task(self.node.on_event(TrackStart({"track": track, "player": self,"node": self.node})))
+        else:
+            await self.play(track, start=start_position, temp_id=track.temp_id)
+
+        # TODO: rever essa parte caso adicione função de ativar track loops em músicas da fila
+        if self.loop != "current" or force_np or (not self.controller_mode and self.current.track_loops == 0):
+
+            if start_position:
+                await asyncio.sleep(1)
+
             await self.invoke_np(
                 interaction=inter,
                 force=True if (self.static or not self.loop or not self.is_last_message()) else False,
                 rpc_update=True
             )
-        else:
-            await self.play(track, start=start_position, temp_id=track.temp_id)
-            # TODO: rever essa parte caso adicione função de ativar track loops em músicas da fila
-            if self.loop != "current" or force_np or (not self.controller_mode and self.current.track_loops == 0):
-
-                if start_position:
-                    await asyncio.sleep(1)
-
-                await self.invoke_np(
-                    interaction=inter,
-                    force=True if (self.static or not self.loop or not self.is_last_message()) else False,
-                    rpc_update=True
-                )
 
     async def process_idle_message(self):
 
@@ -2413,7 +2416,11 @@ class LavalinkPlayer(wavelink.Player):
 
                         try:
                             await self.message.edit(allowed_mentions=self.allowed_mentions, **data)
+                            await asyncio.sleep(0.5)
+                        except asyncio.CancelledError:
+                            pass
                         except:
+                            traceback.print_exc()
                             self.text_channel = self.bot.get_channel(self.text_channel.id)
 
                             if not self.text_channel:
@@ -2711,9 +2718,9 @@ class LavalinkPlayer(wavelink.Player):
                     continue
 
             await asyncio.sleep(sleep_time or (self.current.duration / 1000))
-
-            await self.node.on_event(TrackEnd({"track": self.current, "player": self, "node": self.node, "reason": "FINISHED"}))
-
+            self.current = None
+            self.last_update = 0
+            self.bot.loop.create_task(self.node.on_event(TrackEnd({"track": self.current, "player": self, "node": self.node, "reason": "FINISHED"})))
             return
 
         except asyncio.CancelledError:
@@ -2887,11 +2894,7 @@ class LavalinkPlayer(wavelink.Player):
                         text="O player está no modo **[economia de recursos]** (esse modo será desativado automaticamente quando "
                              f"um membro entrar no canal <#{self.channel_id}>)."
                     )
-                    try:
-                        self.auto_skip_track_task.cancel()
-                    except:
-                        pass
-                    self.auto_skip_track_task = self.bot.loop.create_task(self.auto_skip_track())
+                    self.start_auto_skip()
                 else:
                     if original_identifier != node.identifier:
                         txt = f"O player foi movido para o servidor de música **{node.identifier}**."

@@ -63,7 +63,8 @@ def get_button_style(enabled: bool, red=True):
 
 def fix_characters(text: str, limit: int = 0):
     for r in replaces:
-        text = text.replace(r[0], r[1])
+        old, new = r
+        text = text.replace(old, new)
 
     if limit:
         text = f"{text[:limit]}..." if len(text) > limit else text

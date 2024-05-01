@@ -1409,11 +1409,7 @@ class MusicSettings(commands.Cog):
 
             try:
                 if player.controller_mode and not [m for m in player.guild.me.voice.channel.members if not m.bot]:
-                    try:
-                        player.auto_skip_track_task.cancel()
-                    except:
-                        pass
-                    player.auto_skip_track_task = b.loop.create_task(player.auto_skip_track())
+                    player.start_auto_skip()
             except:
                 traceback.print_exc()
 

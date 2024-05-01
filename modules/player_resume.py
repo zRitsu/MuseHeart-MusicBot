@@ -18,6 +18,7 @@ import wavelink
 from utils.client import BotCore
 from utils.db import DBModel
 from utils.music.checks import can_connect, can_send_message
+from utils.music.filters import AudioFilter
 from utils.music.models import LavalinkPlayer
 from utils.others import SongRequestPurgeMode, send_idle_embed, CustomContext
 
@@ -283,6 +284,7 @@ class PlayerSession(commands.Cog):
             if not player.current and player.autoplay:
                 try:
                     player.current = await player.get_autoqueue_tracks()
+                    position = 0
                 except:
                     traceback.print_exc()
 
@@ -295,7 +297,7 @@ class PlayerSession(commands.Cog):
         await self.voice_check(voice_channel, position)
 
         try:
-            track_id = player.current.info.get("temp_id") or player.current.id
+            track_id = player.current.id
         except:
             track_id = None
 
@@ -310,8 +312,7 @@ class PlayerSession(commands.Cog):
             await player.node.update_player(player.guild.id, data=data)
         else:
             await player.node.update_player(player.guild.id, data=data)
-            if has_members:
-                await player.process_next()
+            await player.process_next()
 
     async def voice_check(self, voice_channel: Union[disnake.VoiceChannel, disnake.StageChannel], position: int = 0):
 
@@ -555,7 +556,7 @@ class PlayerSession(commands.Cog):
                 player.nightcore = data.get("nightcore")
 
                 if player.nightcore:
-                    await player.set_timescale(pitch=1.2, speed=1.1)
+                    player.filters.update(AudioFilter.timescale(pitch=1.2, speed=1.1).filter)
 
                 if node.version == 3:
 
@@ -610,63 +611,29 @@ class PlayerSession(commands.Cog):
                 except:
                     check = None
 
+                if not check:
+                    player.auto_pause = True
+
                 try:
-                    if (pause:=data.get("paused") and check):
 
-                        try:
-                            track = player.queue.popleft()
-                        except:
-                            track = None
+                    pause = data.get("paused") and check
 
-                        if track:
-                            player.current = track
-                            position = int(float(data.get("position", 0)))
-                            if player.node.version == 3:
-                                if check:
-                                    await player.play(track, start=position if not track.is_stream else 0)
-                                    await player.set_pause(True)
-                            else:
-                                await self.update_player(
-                                    player=player, voice_channel=voice_channel, pause=pause, position=position, has_members=check
-                                )
-                            player.last_position = position
-                            player.last_track = track
-                            await player.invoke_np(rpc_update=True)
-                            await player.update_stage_topic()
+                    start_position = int(float(data.get("position", 0))) if player.queue else 0
 
-                        else:
-                            if player.node.version > 3:
-                                await self.update_player(
-                                    player=player, voice_channel=voice_channel, pause=pause, position=0, has_members=check
-                                )
-                                player.last_position = int(float(data.get("position", 0)))
-                                await player.invoke_np()
-                            else:
-                                if check:
-                                    player.queue.appendleft(track)
-                                    await player.process_next()
-
+                    if player.node.version > 3:
+                        await self.update_player(
+                            player=player, voice_channel=voice_channel, pause=pause, position=start_position, has_members=check
+                        )
+                        await player.invoke_np()
                     else:
-                        position = int(float(data.get("position", 0)))
-                        if player.node.version > 3:
-                            await self.update_player(
-                                player=player, voice_channel=voice_channel, pause=pause, position=position, has_members=check
-                            )
-                            await player.invoke_np()
-                        else:
-                            if check:
-                                await player.process_next(start_position=position)
-                        player._session_resuming = False
+                        await player.process_next(start_position=start_position)
+                        if pause:
+                            await player.set_pause(True)
+
+                    player._session_resuming = False
                 except Exception:
                     print(f"{self.bot.user} - Falha na reprodução da música ao retomar player do servidor {guild.name} [{guild.id}]:\n{traceback.format_exc()}")
                     return
-
-                try:
-                    player.members_timeout_task.cancel()
-                except:
-                    pass
-
-                player.members_timeout_task = self.bot.loop.create_task(player.members_timeout(check=check, force=player.keep_connected and not check))
 
             print(f"{self.bot.user} - Player Retomado: {guild.name} [{guild.id}] - Server: {player.node.identifier}")
 
