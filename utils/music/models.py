@@ -2745,7 +2745,7 @@ class LavalinkPlayer(wavelink.Player):
             if track.info["sourceName"] == "http":
                 search_queries = [track.uri or track.search_uri]
             else:
-                if track.info["sourceName"] in self.node.info.get("sourceManagers", []):
+                if self.node.version > 3 and track.info["sourceName"] in self.node.info.get("sourceManagers", []):
                     search_queries = [track.uri]
                 else:
                     search_queries = []

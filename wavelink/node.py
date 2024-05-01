@@ -109,7 +109,7 @@ class Node:
         self.restarting = False
 
         self.stats = None
-        self.info = None
+        self.info = {}
         self.plugins_dict: Optional[dict] = None
         self.max_retries = kwargs.pop("max_retries")
 
