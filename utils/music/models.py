@@ -394,6 +394,10 @@ class LavalinkTrack(wavelink.Track):
         return f"`{self.author}`"
 
     @property
+    def authors(self) -> str:
+        return f"{self.author}"
+
+    @property
     def authors_string(self) -> str:
         return f"{self.author}"
 
@@ -1800,45 +1804,9 @@ class LavalinkPlayer(wavelink.Player):
 
             elif not track.id:
 
-                if "&list=" in track.uri and (link_re := YOUTUBE_VIDEO_REG.match(track.uri)):
-                    query = link_re.group()
-                else:
-                    query = track.uri
+                await self.resolve_track(track)
 
-                try:
-                    t = await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
-                except Exception as e:
-                    traceback.print_exc()
-                    if "Video returned by YouTube isn't what was requested" in str(e):
-                        self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node(ignore_node=self.node.identifier))
-                        return
-                    kwargs = {}
-                    if self.purge_mode == SongRequestPurgeMode.on_message:
-                        kwargs["delete_after"] = 11
-                    try:
-                        await self.text_channel.send(
-                            embed=disnake.Embed(
-                                description=f"**Ocorreu um erro ao obter informações da música:** [{track.title}]({track.uri}) ```py\n{repr(e)}```"
-                            ),
-                        **kwargs)
-                    except:
-                        pass
-                    embed = disnake.Embed(
-                        description=f"**Falha ao obter informação de PartialTrack:\n[{track.title}]({track.uri or track.search_uri})** ```py\n{repr(e)}```\n"
-                                    f"**Servidor de música:** `{self.node.identifier}`",
-                        color=disnake.Colour.red())
-                    await self.report_error(embed, track)
-                    await asyncio.sleep(7)
-                    self.locked = False
-                    await self.process_next()
-                    return
-
-                try:
-                    t = t.tracks
-                except:
-                    pass
-
-                if not t:
+                if not track.id:
                     try:
                         await self.text_channel.send(
                             embed=disnake.Embed(
@@ -1856,8 +1824,6 @@ class LavalinkPlayer(wavelink.Player):
 
                     await self.process_next()
                     return
-
-                track.id = t[0].id
 
         self.last_track = track
 
