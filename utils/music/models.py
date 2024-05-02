@@ -21,7 +21,7 @@ import disnake
 import wavelink
 from utils.db import DBModel
 from utils.music.checks import can_connect
-from utils.music.converters import fix_characters, time_format, get_button_style, YOUTUBE_VIDEO_REG
+from utils.music.converters import fix_characters, time_format, get_button_style
 from utils.music.filters import AudioFilter
 from utils.music.skin_utils import skin_converter
 from utils.others import music_source_emoji, send_idle_embed, PlayerControls, SongRequestPurgeMode, \
@@ -885,15 +885,16 @@ class LavalinkPlayer(wavelink.Player):
 
                     self.native_yt = False
 
-                    txt = f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual " \
-                             "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome " \
-                             "das músicas do youtube que estão na fila (talvez a música tocada seja diferente do esperado " \
-                             "ou até mesmo ignoradas caso não retorne resultados)."
+                    if track.info["sourceName"] == "youtube":
+                        txt = f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual " \
+                                 "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome " \
+                                 "das músicas do youtube que estão na fila (talvez a música tocada seja diferente do esperado " \
+                                 "ou até mesmo ignoradas caso não retorne resultados)."
 
-                    try:
-                        await self.text_channel.send(embed=disnake.Embed(description=txt, color=self.bot.get_color(self.guild.me)), delete_after=60)
-                    except:
-                        self.set_command_log(text=txt, emoji="⚠️")
+                        try:
+                            await self.text_channel.send(embed=disnake.Embed(description=txt, color=self.bot.get_color(self.guild.me)), delete_after=60)
+                        except:
+                            self.set_command_log(text=txt, emoji="⚠️")
                     await asyncio.sleep(3)
                     self.locked = False
                     await self.process_next(start_position=self.position)
@@ -967,13 +968,14 @@ class LavalinkPlayer(wavelink.Player):
                     self.current = None
                     self.queue.appendleft(track)
                     self.locked = False
-                    self.set_command_log(
-                        text=f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual "
-                             "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome "
-                             "das músicas do youtube que estão na fila (talvez a música tocada seja diferente do esperado "
-                             "ou até mesmo ignoradas caso não retorne resultados).",
-                        emoji="⚠️"
-                    )
+                    if track.info["sourceName"] == "youtube":
+                        self.set_command_log(
+                            text=f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual "
+                                 "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome "
+                                 "das músicas do youtube que estão na fila (talvez a música tocada seja diferente do esperado "
+                                 "ou até mesmo ignoradas caso não retorne resultados).",
+                            emoji="⚠️"
+                        )
                     await self.process_next(start_position=self.position)
                     await send_report()
                     return
