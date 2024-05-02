@@ -2868,17 +2868,10 @@ class LavalinkPlayer(wavelink.Player):
                 return
 
             try:
-                if self.current and not self.current.id:
-                    self.queue.appendleft(self.current)
-                    self.current = None
-                    self.locked = False
-                    if self.guild.me.voice and self._voice_state:
-                        await self._dispatch_voice_update()
-                    start_position = self.position_timestamp
+                if self.guild.me.voice and self._voice_state:
+                    await self._dispatch_voice_update()
                 else:
                     await self.change_node(node.identifier)
-                    start_position = 0
-                    self.locked = False
             except:
                 traceback.print_exc()
                 await asyncio.sleep(5)
@@ -2893,6 +2886,14 @@ class LavalinkPlayer(wavelink.Player):
                     return
                 await self.connect(self.last_channel.id)
 
+            self.locked = False
+
+            if self.current:
+                self.queue.appendleft(self.current)
+                start_position = self.position
+                self.current = None
+            else:
+                start_position = 0
             await self.process_next(start_position=start_position)
 
             try:
