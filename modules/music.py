@@ -6745,7 +6745,7 @@ class Music(commands.Cog):
         heartbeat = int(data.pop('heartbeat', 30))
         search_providers = data.pop("search_providers", None) or ["ytsearch", "scsearch"]
         retry_403 = data.pop('retry_403', False)
-        info = None
+        info = {}
 
         try:
             max_retries = int(data.pop('retries'))
