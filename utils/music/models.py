@@ -48,6 +48,7 @@ providers_dict = {
     "applemusic": "amsearch",
     "deezer": "dzsearch",
     "spotify": "spsearch",
+    "tidal": "tdsearch",
 }
 
 
