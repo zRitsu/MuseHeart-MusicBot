@@ -136,7 +136,7 @@ DEFAULT_CONFIG = {
     ##############
     ### Tests ####
     ##############
-    "USE_YTDL": False,
+    "USE_YTDL": True,
     "SILENT_PUBLICBOT_WARNING": False,
 }
 
