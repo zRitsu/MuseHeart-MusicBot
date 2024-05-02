@@ -1909,6 +1909,9 @@ class Music(commands.Cog):
                 else:
                     guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
 
+            if isinstance(voice_channel, disnake.StageChannel):
+                player.stage_title_event = False
+
             await self.do_connect(
                 inter, channel=voice_channel,
                 check_other_bots_in_vc=guild_data["check_other_bots_in_vc"],
