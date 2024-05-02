@@ -91,7 +91,7 @@ class Node:
         self.user_agent = user_agent
         self.auto_reconnect = auto_reconnect
         self.resume_key = resume_key or str(os.urandom(8).hex())
-        self.version = version
+        self.version = 0
         self.session_id: Optional[int] = None
 
         self._dumps = dumps

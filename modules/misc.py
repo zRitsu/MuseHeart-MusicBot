@@ -573,6 +573,9 @@ class Misc(commands.Cog):
 
             for n in b.music.nodes.values():
 
+                if n.version == 0:
+                    continue
+
                 identifier = f"{n.identifier} (v{n.version})"
 
                 if not identifier in node_data:
