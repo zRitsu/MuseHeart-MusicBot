@@ -241,6 +241,12 @@ class Node:
     async def update_player(self, guild_id: int, data: dict, replace: bool = False):
 
         if not self.session_id:
+            try:
+                player = self._client.bot.music.players[guild_id]
+                player._new_node_task = player.bot.loop.create_task(player._wait_for_new_node())
+                return
+            except:
+                pass
             raise MissingSessionID(self)
 
         no_replace: bool = not replace
