@@ -1475,6 +1475,8 @@ class LavalinkPlayer(wavelink.Player):
                 if not tracks:
                     if track_data.info["sourceName"] == "youtube" and self.native_yt:
                         queries = [f"https://www.youtube.com/watch?v={track_data.ytid}&list=RD{track_data.ytid}"]
+                    elif track_data.info["sourceName"] == "spotify" and "spotfy" in self.node.info["sourceManagers"]:
+                        queries = ["sprec:seed_tracks=" + ",".join(list(set(t.original_id for t in tracks_search if t.info["sourceName"] == "spotify"))[:5])]
                     else:
                         if p_dict:=providers_dict.get(track_data.info["sourceName"]):
                             providers = [p_dict] + [p for p in self.node.search_providers if p != p_dict]
