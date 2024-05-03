@@ -93,10 +93,11 @@ class PartialTrack:
 
     def __init__(self, *, uri: str = "", title: str = "", author="", thumb: str = "", duration: int = 0,
                  requester: int = 0, track_loops: int = 0, source_name: str = "", autoplay: bool = False,
-                 original_id: str = "", info: dict = None, playlist: PartialPlaylist = None):
+                 identifier: str = "", info: dict = None, playlist: PartialPlaylist = None):
 
         self.info = info or {
             "author": fix_characters(author)[:97],
+            "identifier": identifier,
             "title": title[:97],
             "uri": uri,
             "length": duration,
@@ -105,7 +106,6 @@ class PartialTrack:
             "sourceName": source_name,
             "is_partial": True,
             "extra": {
-                "original_id": original_id,
                 "requester": requester,
                 "track_loops": track_loops,
                 "thumb": thumb,
@@ -144,11 +144,14 @@ class PartialTrack:
         return self.title
 
     @property
-    def original_id(self) -> str:
+    def identifier(self) -> str:
         try:
-            return self.info["extra"]["original_id"]
+            return self.info["identifier"]
         except KeyError:
-            return ""
+            try:
+                return self.info["extra"]["original_id"]
+            except KeyError:
+                return ""
 
     @property
     def single_title(self) -> str:
@@ -365,13 +368,6 @@ class LavalinkTrack(wavelink.Track):
     @property
     def name(self) -> str:
         return self.title
-
-    @property
-    def original_id(self) -> str:
-        try:
-            return self.info["extra"]["original_id"]
-        except KeyError:
-            return ""
 
     @property
     def single_title(self) -> str:
@@ -1416,7 +1412,7 @@ class LavalinkPlayer(wavelink.Player):
             for track_data in tracks_search:
 
                 if track_data.info["sourceName"] == "spotify" and self.bot.spotify:
-                    track_ids = list(set(t.original_id for t in tracks_search if t.info["sourceName"] == "spotify"))[:5]
+                    track_ids = list(set(t.identifier for t in tracks_search if t.info["sourceName"] == "spotify"))[:5]
 
                     result = None
 
@@ -1449,7 +1445,7 @@ class LavalinkPlayer(wavelink.Player):
                                     thumb=thumb,
                                     duration=t["duration_ms"],
                                     source_name="spotify",
-                                    original_id=t["id"],
+                                    identifier=t["id"],
                                     requester=self.bot.user.id,
                                     autoplay=True,
                                 )
@@ -1476,7 +1472,7 @@ class LavalinkPlayer(wavelink.Player):
                     if track_data.info["sourceName"] == "youtube" and self.native_yt:
                         queries = [f"https://www.youtube.com/watch?v={track_data.ytid}&list=RD{track_data.ytid}"]
                     elif track_data.info["sourceName"] == "spotify" and "spotfy" in self.node.info["sourceManagers"]:
-                        queries = ["sprec:seed_tracks=" + ",".join(list(set(t.original_id for t in tracks_search if t.info["sourceName"] == "spotify"))[:5])]
+                        queries = ["sprec:seed_tracks=" + ",".join(list(set(t.identifier for t in tracks_search if t.info["sourceName"] == "spotify"))[:5])]
                     else:
                         if p_dict:=providers_dict.get(track_data.info["sourceName"]):
                             providers = [p_dict] + [p for p in self.node.search_providers if p != p_dict]

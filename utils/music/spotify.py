@@ -53,7 +53,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
             thumb=result["album"]["images"][0]["url"],
             duration=result["duration_ms"],
             source_name="spotify",
-            original_id=result["id"],
+            identifier=result["id"],
             requester=requester
         )
 
@@ -102,7 +102,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
                 thumb=thumb,
                 duration=track["duration_ms"],
                 source_name="spotify",
-                original_id=track["id"],
+                identifier=track["id"],
                 requester=requester
             )]
 
@@ -164,7 +164,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
             thumb=thumb,
             duration=t["duration_ms"],
             source_name="spotify",
-            original_id=t["id"],
+            identifier=t["id"],
             playlist=playlist,
             requester=requester
         )
