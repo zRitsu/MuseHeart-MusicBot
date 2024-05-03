@@ -733,7 +733,7 @@ class LavalinkPlayer(wavelink.Player):
                     voice_msg = None
 
                 if not voice_msg:
-                    self.set_command_log(text=f"O plater foi finalizado por perca de conexão no canal <#{vc.id}>.",
+                    self.set_command_log(text=f"O player foi finalizado por perca de conexão no canal <#{vc.id}>.",
                                            emoji="⚠️")
                     await self.destroy()
                     return
