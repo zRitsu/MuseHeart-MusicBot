@@ -725,7 +725,7 @@ class LavalinkPlayer(wavelink.Player):
                     return
 
 
-                if (ping:=round(self.bot.latency * 1000)) > 300:
+                if (ping:=round(self.bot.latency * 1000)) > self.bot.pool.config["VOICE_CHANNEL_LATENCY_RECONNECT"]:
                     voice_msg = f"Reconectei no canal de voz devido a um possível problema de instabilidade ne conexão (ping: {ping}ms)."
                 elif self.keep_connected:
                     voice_msg = f"Notei uma tentativa de me desconectarem do canal <#{vc.id}>."

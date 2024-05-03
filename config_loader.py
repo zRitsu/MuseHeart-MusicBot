@@ -69,6 +69,7 @@ DEFAULT_CONFIG = {
     "PLAYER_SESSIONS_MONGODB": False,
     "QUEUE_MAX_ENTRIES": 0,
     "ENABLE_DEFER_TYPING": True,
+    "VOICE_CHANNEL_LATENCY_RECONNECT": 200,
 
     ##############################################
     ### Sistema de música - Suporte ao spotify ###
@@ -193,6 +194,7 @@ def load_config():
         "PLAYER_INFO_BACKUP_INTERVAL_MONGO",
         "LAVALINK_RECONNECT_RETRIES",
         "QUEUE_MAX_ENTRIES",
+        "VOICE_CHANNEL_LATENCY_RECONNECT",
     ]:
         try:
             CONFIG[i] = int(CONFIG[i])
