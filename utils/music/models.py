@@ -724,10 +724,23 @@ class LavalinkPlayer(wavelink.Player):
                     await self.destroy()
                     return
 
+
+                if (ping:=round(self.bot.latency * 1000)) > 300:
+                    voice_msg = f"Reconectei no canal de voz devido a um possível problema de instabilidade ne conexão (ping: {ping}ms)."
+                elif self.keep_connected:
+                    voice_msg = f"Notei uma tentativa de me desconectarem do canal <#{vc.id}>."
+                else:
+                    voice_msg = None
+
+                if not voice_msg:
+                    self.set_command_log(text=f"O plater foi finalizado por perca de conexão no canal <#{vc.id}>.",
+                                           emoji="⚠️")
+                    await self.destroy()
+                    return
+
                 try:
                     await self.connect(vc.id)
-                    self.set_command_log(text="Notei uma tentativa de me desconectar do canal. "
-                                                "Caso queira me desconectar use o comando/botão: **stop**.",
+                    self.set_command_log(text=f"{voice_msg}\nCaso realmente queira me desconectar, use o comando/botão: **stop**.",
                                            emoji="⚠️")
                     self.update = True
                     await asyncio.sleep(5)
