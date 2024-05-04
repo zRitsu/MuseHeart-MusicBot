@@ -57,6 +57,11 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
             requester=requester
         )
 
+        try:
+            t.info["isrc"] = result["external_ids"]["isrc"]
+        except KeyError:
+            pass
+
         t.info["extra"]["authors"] = [fix_characters(i['name']) for i in result['artists'] if f"feat. {i['name'].lower()}"
                                       not in result['name'].lower()]
 
@@ -95,7 +100,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
 
             track = result["tracks"][0]
 
-            return [PartialTrack(
+            t = PartialTrack(
                 uri=track["external_urls"]["spotify"],
                 author=track["artists"][0]["name"] or "Unknown Artist",
                 title=track["name"],
@@ -104,7 +109,29 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
                 source_name="spotify",
                 identifier=track["id"],
                 requester=requester
-            )]
+            )
+
+            try:
+                t.info["isrc"] = track["external_ids"]["isrc"]
+            except KeyError:
+                pass
+
+            t.info["extra"]["authors"] = [fix_characters(i['name']) for i in track['artists'] if
+                                          f"feat. {i['name'].lower()}"
+                                          not in track['name'].lower()]
+
+            t.info["extra"]["authors_md"] = ", ".join(
+                f"[`{a['name']}`]({a['external_urls']['spotify']})" for a in track["artists"])
+
+            try:
+                t.info["extra"]["album"] = {
+                    "name": result["name"],
+                    "url": result["external_urls"]["spotify"]
+                }
+            except (AttributeError, KeyError):
+                pass
+
+            return [t]
 
         data["playlistInfo"]["name"] = result["name"]
         data["playlistInfo"]["is_album"] = True
