@@ -7124,14 +7124,14 @@ class Music(commands.Cog):
                 except Exception:
                     traceback.print_exc()
 
-        player.members_timeout_task = player.bot.loop.create_task(player.members_timeout(check=bool(check)))
-
         if check:
             try:
                 player.auto_skip_track_task.cancel()
             except AttributeError:
                 pass
             player.auto_skip_track_task = None
+
+        player.members_timeout_task = player.bot.loop.create_task(player.members_timeout(check=bool(check)))
 
         if not member.guild.me.voice:
             await asyncio.sleep(1)
