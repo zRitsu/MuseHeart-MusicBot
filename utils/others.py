@@ -406,7 +406,7 @@ async def send_idle_embed(
                                       ("no post" if is_forum else "no canal ou na conversa abaixo") +
                                       f" (ou clique no botão abaixo ou use o comando {cmd} aqui ou em algum outro canal)**\n\n"
                                       "**Você pode usar um nome ou um link de site compatível:**"
-                                      f" ```ansi\n[31;1mYoutube[0m, [33;1mSoundcloud[0m, [32;1mSpotify[0m, [34;1mTwitch[0m```\n",
+                                      f" ```ansi\n[31;1mYoutube[0m, [33;1mSoundcloud[0m, [32;1mSpotify[0m, [35;1mDeezer[0m,[34;1mTwitch[0m```\n",
                           color=bot.get_color(target.guild.me))
 
     if text:
@@ -416,7 +416,7 @@ async def send_idle_embed(
 
     components = []
 
-    opts = [disnake.SelectOption(label=k, value=k, emoji=music_source_emoji_url(v['url']), description=v.get('description')) for k, v in sorted(guild_data["player_controller"]["fav_links"].items(), key=lambda k: k)]
+    opts = [disnake.SelectOption(label=k, value=k, emoji=music_source_emoji_url(v['url'])[0], description=v.get('description')) for k, v in sorted(guild_data["player_controller"]["fav_links"].items(), key=lambda k: k)]
 
     if opts:
         components.append(
@@ -555,6 +555,7 @@ def paginator(txt: str):
 
 yt_url_regex = re.compile(r"^(https?://)?(www\.)?(youtube\.com|youtu\.be)/.+")
 sc_url_regex = re.compile(r"^(https?://)?(www\.)?(soundcloud\.com)/.+")
+dz_url_regex = re.compile(r"(https?://)?(www\.)?deezer\.com/(?P<countrycode>[a-zA-Z]{2}/)?(?P<type>track|album|playlist|artist|profile)/(?P<identifier>[0-9]+)")
 sp_url_regex = re.compile(r"^(https?://)?(www\.)?(open\.spotify\.com|spotify\.com)/.+")
 tw_url_regex = re.compile(r"^(https?://)?(www\.)?(twitch\.tv)/([A-Za-z0-9_]{4,25})(/.+)?")
 am_url_regex = re.compile(r"(https?://)?(www\.)?music\.apple\.com/((?P<countrycode>[a-zA-Z]{2})/)?(?P<type>album|playlist|artist|song)(/[a-zA-Z\w\d\-]+)?/(?P<identifier>[a-zA-Z\d\-.]+)(\?i=(?P<identifier2>\d+))?")
@@ -582,6 +583,8 @@ def get_source_emoji_cfg(bot: BotCore, url: str):
         source = "soundcloud"
     elif sp_url_regex.match(url):
         source = "spotify"
+    elif dz_url_regex.match(url):
+        source = "deezer"
     elif tw_url_regex.match(url):
         source = "twitch"
     elif am_url_regex.match(url):
@@ -601,24 +604,27 @@ def get_source_emoji_cfg(bot: BotCore, url: str):
 def music_source_emoji_url(url: str):
 
     if yt_url_regex.match(url):
-        return music_source_emoji_data["youtube"]
+        return music_source_emoji_data["youtube"], "youtube"
 
     if sc_url_regex.match(url):
-        return music_source_emoji_data["soundcloud"]
+        return music_source_emoji_data["soundcloud"], "soundcloud"
+
+    if dz_url_regex.match(url):
+        return music_source_emoji_data["deezer"], "deezer"
 
     if sp_url_regex.match(url):
-        return music_source_emoji_data["spotify"]
+        return music_source_emoji_data["spotify"], "spotify"
 
     if tw_url_regex.match(url):
-        return music_source_emoji_data["twitch"]
+        return music_source_emoji_data["twitch"], "twitch"
 
     if am_url_regex.match(url):
-        return music_source_emoji_data["applemusic"]
+        return music_source_emoji_data["applemusic"], "applemusic"
 
     if url == ">> saved_queue <<":
-        return "💾"
+        return "💾", ""
 
-    return "<:play:734221719774035968>"
+    return "<:play:734221719774035968>", "Plat. Desconhecida"
 
 def music_source_emoji_id(id_: str):
 
@@ -632,6 +638,9 @@ def music_source_emoji_id(id_: str):
 
     if id_ == "【SP】:":
         return music_source_emoji_data["spotify"]
+
+    if id_ == "【DZ】:":
+        return music_source_emoji_data["deezer"]
 
     return "<:play:734221719774035968>"
 

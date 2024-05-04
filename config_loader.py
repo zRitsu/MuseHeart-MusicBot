@@ -138,6 +138,7 @@ DEFAULT_CONFIG = {
     ### Tests ####
     ##############
     "USE_YTDL": True,
+    "FORCE_USE_DEEZER_CLIENT": False,
     "SILENT_PUBLICBOT_WARNING": False,
 }
 
@@ -241,6 +242,7 @@ def load_config():
         "MESSAGE_CONTENT_INTENT",
 
         "USE_YTDL",
+        "FORCE_USE_DEEZER_CLIENT",
         "SILENT_PUBLICBOT_WARNING",
     ]:
         if CONFIG[i] in (True, False, None):

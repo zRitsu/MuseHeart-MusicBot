@@ -23,6 +23,7 @@ from disnake.ext import commands
 import wavelink
 from utils.client import BotCore
 from utils.db import DBModel
+from utils.music.audio_sources.deezer import process_deezer, deezer_regex
 from utils.music.audio_sources.spotify import process_spotify, spotify_regex_w_user
 from utils.music.checks import check_voice, has_player, has_source, is_requester, is_dj, \
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen, check_pool_bots, \
@@ -1164,12 +1165,14 @@ class Music(commands.Cog):
         if query.startswith(">> [💠 Integrações 💠] <<"):
             query = ""
             for k, v in user_data["integration_links"].items():
-                fav_opts.append(disnake.SelectOption(label=k[5:], value=f"> itg: {k}", description="[💠 Integração 💠]", emoji=music_source_emoji_url(v)))
+                emoji, platform = music_source_emoji_url(v)
+                fav_opts.append(disnake.SelectOption(label=k[5:], value=f"> itg: {k}", description=f"[💠 Integração 💠] -> {platform}", emoji=emoji))
 
         elif query.startswith(">> [⭐ Favoritos ⭐] <<"):
             query = ""
             for k, v in user_data["fav_links"].items():
-                fav_opts.append(disnake.SelectOption(label=k, value=f"> fav: {k}", description="[⭐ Favorito ⭐]", emoji=music_source_emoji_url(v)))
+                emoji, platform = music_source_emoji_url(v)
+                fav_opts.append(disnake.SelectOption(label=k, value=f"> fav: {k}", description=f"[⭐ Favorito ⭐] -> {platform}", emoji=emoji))
 
         elif query.startswith(">> [📑 Músicas recentes 📑] <<"):
 
@@ -1180,7 +1183,7 @@ class Music(commands.Cog):
             query = ""
             for i, d in enumerate(user_data["last_tracks"]):
                 fav_opts.append(disnake.SelectOption(label=d["name"], value=f"> lst: {i}", description="[📑 Músicas recentes 📑]",
-                                                     emoji=music_source_emoji_url(d["url"])))
+                                                     emoji=music_source_emoji_url(d["url"])[0]))
 
         elif query.startswith(">> [📌 Favoritos do servidor 📌] <<"):
 
@@ -1195,7 +1198,7 @@ class Music(commands.Cog):
                 raise GenericError("**O servidor não possui links fixos/favoritos.**")
             
             for name, v in guild_data["player_controller"]["fav_links"].items():
-                fav_opts.append(disnake.SelectOption(label=name, value=f"> pin: {name}", description="[📌 Favorito do servidor 📌]", emoji=music_source_emoji_url(v['url'])))
+                fav_opts.append(disnake.SelectOption(label=name, value=f"> pin: {name}", description="[📌 Favorito do servidor 📌]", emoji=music_source_emoji_url(v['url'])[0]))
 
             is_pin = False
 
@@ -1348,6 +1351,24 @@ class Music(commands.Cog):
 
                     info = {"entries": [{"title": t["name"], "url": t["external_urls"]["spotify"]} for t in result["items"]]}
 
+                elif (matches := deezer_regex.match(query)):
+
+                    url_type, user_id = matches.groups()[-2:]
+
+                    if url_type != "profile":
+                        raise GenericError("**Link não suportado usando este método...**")
+
+                    try:
+                        await inter.response.defer(ephemeral=True)
+                    except:
+                        pass
+
+                    result = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.deezer._get_paginated_list(
+                        path=f"user/{user_id}/playlists",
+                    ))
+
+                    info = {"entries": [{"title": t.title, "url": t.link} for t in result]}
+
                 elif not self.bot.config["USE_YTDL"]:
                     raise GenericError("**Não há suporte a esse tipo de requisição no momento...**")
 
@@ -1373,12 +1394,12 @@ class Music(commands.Cog):
 
                 else:
 
-                    emoji = music_source_emoji_url(query)
+                    emoji, platform = music_source_emoji_url(query)
 
                     view = SelectInteraction(
                         user=inter.author,
                         opts=[
-                            disnake.SelectOption(label=e['title'][:90], value=f"entrie_select_{c}",
+                            disnake.SelectOption(label=e['title'][:90], value=f"entrie_select_{c}", description=platform,
                                                  emoji=emoji) for c, e in enumerate(info['entries'])
                         ], timeout=30)
 
@@ -6801,7 +6822,7 @@ class Music(commands.Cog):
         if not nodes:
             raise GenericError("**Não há servidores de música disponível!**")
 
-        tracks = await process_spotify(self.bot, user.id, query)
+        tracks = await process_spotify(self.bot, user.id, query) or await process_deezer(self.bot, user.id, query)
 
         exceptions = set()
 

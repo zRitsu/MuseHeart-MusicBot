@@ -1481,6 +1481,45 @@ class LavalinkPlayer(wavelink.Player):
 
                             tracks.append(partial_track)
 
+                elif track_data.info["sourceName"] == "deezer" and (self.bot.pool.config["FORCE_USE_DEEZER_CLIENT"] or "deezer" not in self.node.info["sourceManagers"]) and (artist_id:=track_data.info["extra"].get("artist_id")):
+                    try:
+                        result = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.deezer.request(
+                            "GET",
+                            f"artist/{artist_id}/radio",
+                        ))
+
+                        if result:
+
+                            tracks = []
+
+                            for n, t in enumerate(result[:15]):
+
+                                partial_track = PartialTrack(
+                                    uri=t.link,
+                                    author=t.artist.name,
+                                    title=t.title,
+                                    thumb=f"https://e-cdns-images.dzcdn.net/images/cover/{t.md5_image}/500x500-000000-80-0-0.jpg",
+                                    duration=t.duration * 1000,
+                                    source_name="deezer",
+                                    identifier=t.id,
+                                    requester=self.bot.user.id,
+                                    autoplay=True,
+                                )
+
+                                partial_track.info["isrc"] = t.isrc
+                                partial_track.info["extra"]["authors_md"] = f"[`{fix_characters(t.artist.name)}`]({t.artist.link})"
+                                partial_track.info["extra"]["artist_id"] = t.artist.id
+
+                                if t.album.title != t.title:
+                                    partial_track.info["extra"]["album"] = {
+                                        "name": t.album.title,
+                                        "url": t.album.link
+                                    }
+
+                                tracks.append(partial_track)
+                    except Exception:
+                        traceback.print_exc()
+
                 if not tracks:
                     if track_data.info["sourceName"] == "youtube" and self.native_yt:
                         queries = [f"https://www.youtube.com/watch?v={track_data.ytid}&list=RD{track_data.ytid}"]

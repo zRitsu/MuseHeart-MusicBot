@@ -71,6 +71,7 @@ class BotPool:
         self.local_database: Optional[LocalDatabase] = None
         self.ws_client: Optional[WSClient] = None
         self.spotify: Optional[spotipy.Spotify] = None
+        self.deezer = deezer.Client()
         self.lavalink_instance: Optional[subprocess.Popen] = None
         self.config = {}
         self.emoji_data = {}

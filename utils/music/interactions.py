@@ -15,6 +15,7 @@ import disnake
 from disnake.ext import commands
 
 from utils.db import DBModel
+from utils.music.audio_sources.deezer import deezer_regex
 from utils.music.audio_sources.spotify import spotify_regex_w_user
 from utils.music.checks import check_pool_bots
 from utils.music.converters import time_format, fix_characters, URL_REG
@@ -22,7 +23,7 @@ from utils.music.errors import GenericError
 from utils.music.models import LavalinkPlayer, LavalinkTrack
 from utils.music.skin_utils import skin_converter
 from utils.others import check_cmd, CustomContext, send_idle_embed, music_source_emoji_url, \
-    music_source_emoji_id, PlayerControls, get_source_emoji_cfg
+    PlayerControls, get_source_emoji_cfg
 
 if TYPE_CHECKING:
     from utils.client import BotCore
@@ -1065,6 +1066,34 @@ class FavModalAdd(disnake.ui.Modal):
 
                 data = {"title": f"[SP]: {result['display_name'][:90]}", "url": result["external_urls"]["spotify"]}
 
+            elif (matches:=deezer_regex.match(url)):
+
+                url_type, url_id = matches.groups()[-2:]
+
+                if url_type != "profile":
+                    await inter.edit_original_message(
+                        embed=disnake.Embed(
+                            description=f"**Você deve usar link de um perfil de usuário do deezer.** {url}",
+                            color=disnake.Color.red()
+                        )
+                    )
+                    return
+
+                try:
+                    result = await self.view.bot.loop.run_in_executor(None, lambda: self.view.bot.pool.deezer.get_user(int(url_id)))
+                except Exception as e:
+                    await inter.edit_original_message(
+                        embed=disnake.Embed(
+                            description="**Ocorreu um erro ao obter informações do spotify:** ```py\n"
+                                        f"{repr(e)}```",
+                            color=self.view.bot.get_color()
+                        )
+                    )
+                    traceback.print_exc()
+                    return
+
+                data = {"title": f"[DZ]: {result.name[:90]}", "url": result.link}
+
             else:
 
                 if not self.view.bot.config["USE_YTDL"]:
@@ -1197,11 +1226,10 @@ class FavMenuView(disnake.ui.View):
             ], min_values=1, max_values=1
         )
 
-        if self.bot.config["USE_YTDL"] or self.bot.spotify:
-            mode_select.append_option(
-                disnake.SelectOption(label="Gerenciador de Integrações", value=f"fav_view_mode_{ViewMode.integrations_manager}", emoji="💠",
-                                     default=self.mode == ViewMode.integrations_manager)
-            )
+        mode_select.append_option(
+            disnake.SelectOption(label="Gerenciador de Integrações", value=f"fav_view_mode_{ViewMode.integrations_manager}", emoji="💠",
+                                 default=self.mode == ViewMode.integrations_manager)
+        )
 
         if self.guild and (self.ctx.author.guild_permissions.manage_guild or self.is_owner):
             mode_select.options.insert(1, disnake.SelectOption(label="Gerenciador de Playlists do Servidor",
@@ -1217,10 +1245,11 @@ class FavMenuView(disnake.ui.View):
         if self.mode == ViewMode.fav_manager:
 
             if self.data["fav_links"]:
-                fav_select = disnake.ui.Select(options=[
-                    disnake.SelectOption(label=k, emoji=music_source_emoji_url(v)) for k, v in
-                    list(self.data["fav_links"].items())[:25] # TODO: Lidar depois com os dados existentes que excedem a quantidade permitida
-                ], min_values=1, max_values=1)
+                opts = []
+                for k, v in list(self.data["fav_links"].items())[:25]: # TODO: Lidar depois com os dados existentes que excedem a quantidade permitida
+                    emoji, platform = music_source_emoji_url(v)
+                    opts.append(disnake.SelectOption(label=k, emoji=emoji, description=platform))
+                fav_select = disnake.ui.Select(options=opts, min_values=1, max_values=1)
                 fav_select.options[0].default = True
                 self.current = fav_select.options[0].label
                 fav_select.callback = self.select_callback
@@ -1246,7 +1275,7 @@ class FavMenuView(disnake.ui.View):
 
             if self.guild_data["player_controller"]["fav_links"]:
                 fav_select = disnake.ui.Select(options=[
-                    disnake.SelectOption(label=k, emoji=music_source_emoji_url(v['url']),
+                    disnake.SelectOption(label=k, emoji=music_source_emoji_url(v['url'])[0],
                                          description=v.get("description")) for k, v in
                     list(self.guild_data["player_controller"]["fav_links"].items())[:25] # TODO: Lidar depois com os dados existentes que excedem a quantidade permitida
                 ], min_values=1, max_values=1)
@@ -1258,12 +1287,11 @@ class FavMenuView(disnake.ui.View):
         elif self.mode == ViewMode.integrations_manager:
 
             if self.data["integration_links"]:
-
-                integration_select = disnake.ui.Select(options=[
-                    disnake.SelectOption(
-                        label=k[5:], value=k,
-                        emoji=music_source_emoji_id(k)) for k, v in list(self.data["integration_links"].items())[:25] # TODO: Lidar depois com os dados existentes que excedem a quantidade permitida
-                ], min_values=1, max_values=1)
+                opts = []
+                for k, v in list(self.data["integration_links"].items())[:25]: # TODO: Lidar depois com os dados existentes que excedem a quantidade permitida
+                    emoji, platform = music_source_emoji_url(v)
+                    opts.append(disnake.SelectOption(label=k[5:], emoji=emoji, description=platform, value=k))
+                integration_select = disnake.ui.Select(options=opts, min_values=1, max_values=1)
                 integration_select.options[0].default = True
                 self.current = integration_select.options[0].label
                 integration_select.callback = self.select_callback
@@ -1397,8 +1425,7 @@ class FavMenuView(disnake.ui.View):
             if self.bot.spotify:
                 supported_platforms.append("[32;1mSpotify[0m")
 
-            if not supported_platforms:
-                return
+            supported_platforms.append("[35;1mDeezer[0m")
 
         self.update_components()
 
