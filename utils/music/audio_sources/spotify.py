@@ -36,7 +36,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
         return
 
     if not bot.spotify:
-        if [n for n in bot.music.nodes.values() if "spotify" in n.info["sourceManagers"]]:
+        if [n for n in bot.music.nodes.values() if "spotify" in n.info.get("sourceManagers", [])]:
             return
         raise MissingSpotifyClient()
 

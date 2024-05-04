@@ -15,7 +15,7 @@ deezer_regex = re.compile(r"(https?://)?(www\.)?deezer\.com/(?P<countrycode>[a-z
 
 async def process_deezer(bot: BotCore, requester: int, query: str):
 
-    if not bot.pool.config["FORCE_USE_DEEZER_CLIENT"] and [n for n in bot.music.nodes.values() if "deezer" in n.info["sourceManagers"]]:
+    if not bot.pool.config["FORCE_USE_DEEZER_CLIENT"] and [n for n in bot.music.nodes.values() if "deezer" in n.info.get("sourceManagers", [])]:
         return
 
     if query.startswith("https://deezer.page.link/"):
