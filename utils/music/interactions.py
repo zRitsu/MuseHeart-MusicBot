@@ -15,12 +15,12 @@ import disnake
 from disnake.ext import commands
 
 from utils.db import DBModel
+from utils.music.audio_sources.spotify import spotify_regex_w_user
 from utils.music.checks import check_pool_bots
 from utils.music.converters import time_format, fix_characters, URL_REG
 from utils.music.errors import GenericError
 from utils.music.models import LavalinkPlayer, LavalinkTrack
 from utils.music.skin_utils import skin_converter
-from utils.music.spotify import spotify_regex_w_user
 from utils.others import check_cmd, CustomContext, send_idle_embed, music_source_emoji_url, \
     music_source_emoji_id, PlayerControls, get_source_emoji_cfg
 

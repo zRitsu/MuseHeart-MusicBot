@@ -36,7 +36,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
         return
 
     if not bot.spotify:
-        if [n for n in bot.music.nodes.values() if n.version > 3 and "spotify" in n.info["sourceManagers"]]:
+        if [n for n in bot.music.nodes.values() if "spotify" in n.info["sourceManagers"]]:
             return
         raise MissingSpotifyClient()
 
@@ -140,7 +140,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
         raise GenericError(f"**Link do spotify não reconhecido/suportado:**\n{query}")
 
     if not tracks_data:
-        raise GenericError(f"**Não houve resultados no link do spotify informado...**")
+        raise GenericError("**Não houve resultados no link do spotify informado...**")
 
     data["playlistInfo"]["selectedTrack"] = -1
     data["playlistInfo"]["type"] = url_type
