@@ -172,7 +172,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
     data["playlistInfo"]["selectedTrack"] = -1
     data["playlistInfo"]["type"] = url_type
 
-    playlist = PartialPlaylist(data, url=query)
+    playlist = PartialPlaylist(data, url=query) if url_type != "album" else None
 
     for t in tracks_data:
 

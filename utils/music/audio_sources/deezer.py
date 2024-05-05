@@ -61,7 +61,6 @@ async def process_deezer(bot: BotCore, requester: int, query: str):
         'playlistInfo': {'name': ''},
         'sourceName': "deezer",
         'tracks_data': [],
-        'is_album': False,
         "thumb": ""
     }
 
@@ -120,7 +119,7 @@ async def process_deezer(bot: BotCore, requester: int, query: str):
     data["playlistInfo"]["selectedTrack"] = -1
     data["playlistInfo"]["type"] = url_type
 
-    playlist = PartialPlaylist(data, url=query)
+    playlist = PartialPlaylist(data, url=query) if url_type != "album" else None
 
     for t in tracks_data:
 
@@ -132,6 +131,7 @@ async def process_deezer(bot: BotCore, requester: int, query: str):
             duration=t.duration * 1000,
             source_name="deezer",
             identifier=url_id,
+            playlist=playlist,
             requester=requester
         )
 
