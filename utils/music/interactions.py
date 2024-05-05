@@ -1420,12 +1420,12 @@ class FavMenuView(disnake.ui.View):
         if self.mode == ViewMode.integrations_manager:
 
             if self.bot.config["USE_YTDL"]:
-                supported_platforms.extend(["[31;1mYoutube[0m", "[33;1mSoundcloud[0m"])
+                supported_platforms.extend(["[`Youtube`](<https://www.youtube.com/>)", "[`Soundcloud`](<https://soundcloud.com/>)"])
 
             if self.bot.spotify:
-                supported_platforms.append("[32;1mSpotify[0m")
+                supported_platforms.append("[`Spotify`](<https://open.spotify.com/>)")
 
-            supported_platforms.append("[35;1mDeezer[0m")
+            supported_platforms.append("[`Deezer`](<https://www.deezer.com/>)")
 
         self.update_components()
 
@@ -1521,7 +1521,7 @@ class FavMenuView(disnake.ui.View):
         if self.mode == ViewMode.integrations_manager:
             embed.add_field(
                 name="Links de perfis/canais suportados:", inline=False,
-                value=f"```ansi\n{', '.join(supported_platforms)}```"
+                value=', '.join(supported_platforms)
             )
         return embed
 

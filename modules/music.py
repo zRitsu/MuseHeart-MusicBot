@@ -6990,8 +6990,9 @@ class Music(commands.Cog):
             else:
                 embed.description = "**Essa conversa será usada temporariamente para pedido de músicas.**\n\n" \
                                     "**Peça sua música aqui enviando o nome dela ou o link de uma música/vídeo " \
-                                    "que seja de uma das seguintes plataformas suportadas:** " \
-                                    "```ansi\n[31;1mYoutube[0m, [33;1mSoundcloud[0m, [32;1mSpotify[0m, [34;1mTwitch[0m```"
+                                    "que seja de uma das seguintes plataformas suportadas:**\n" \
+                                    "[`Youtube`](<https://www.youtube.com/>), [`Soundcloud`](<https://soundcloud.com/>), " \
+                                    "[`Spotify`](<https://open.spotify.com/>), [`Twitch`](<https://www.twitch.tv/>)"
 
         await thread.send(embed=embed)
 
