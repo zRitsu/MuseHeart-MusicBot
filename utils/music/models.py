@@ -276,8 +276,12 @@ class LavalinkPlaylist:
         except IndexError:
             pass
         pluginInfo = kwargs.pop("pluginInfo", {})
+        try:
+            playlist = self if pluginInfo["type"] == "playlist" else None
+        except KeyError:
+            playlist = self
         self.tracks = [LavalinkTrack(
-            id_=track[encoded_name], info=track['info'], pluginInfo=pluginInfo, playlist=self, **kwargs) for track in data['tracks']]
+            id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo", {}), playlist=playlist, **kwargs) for track in data['tracks']]
 
     @property
     def name(self):
@@ -306,7 +310,6 @@ class LavalinkTrack(wavelink.Track):
         super().__init__(*args, **kwargs)
         self.title = fix_characters(self.title)
         self.info["title"] = self.title
-        self.info["pluginInfo"] = kwargs.pop("pluginInfo", {})
         self.unique_id = str(uuid.uuid4().hex)[:10]
         self.temp_id = None
 
