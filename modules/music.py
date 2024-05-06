@@ -6771,7 +6771,7 @@ class Music(commands.Cog):
         try:
             max_retries = int(data.pop('retries'))
         except (TypeError, KeyError):
-            max_retries = 0
+            max_retries = 1
 
         data["identifier"] = data["identifier"].replace(" ", "_")
         node = await self.bot.music.initiate_node(auto_reconnect=False, region=region, heartbeat=heartbeat, max_retries=max_retries, **data)
