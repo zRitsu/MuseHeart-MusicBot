@@ -3404,10 +3404,15 @@ class Music(commands.Cog):
             except AttributeError:
                 pass
 
+            try:
+                ephemeral = player.text_channel.id == inter.channel_id and player.static
+            except:
+                ephemeral = player.static
+
             await inter.send(
                 embed=embed,
                 components=song_request_buttons if inter.guild else [],
-                ephemeral=player.static and player.text_channel.id == inter.channel_id
+                ephemeral=ephemeral
             )
             await player.destroy()
 
