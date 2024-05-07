@@ -77,6 +77,10 @@ class PartialPlaylist:
             return
 
     @property
+    def uri(self) -> str:
+        return self.url
+
+    @property
     def thumb(self):
         try:
             return self.data["playlistInfo"]["thumb"]
