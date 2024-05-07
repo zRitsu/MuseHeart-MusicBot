@@ -284,6 +284,10 @@ class LavalinkPlaylist:
             id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo", {}), playlist=playlist, **kwargs) for track in data['tracks']]
 
     @property
+    def uri(self):
+        return self.url
+
+    @property
     def name(self):
         return self.data["playlistInfo"]["name"]
 
