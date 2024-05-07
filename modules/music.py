@@ -1866,7 +1866,7 @@ class Music(commands.Cog):
             emoji = "🎶"
 
             if reg_query is not None and tracks.uri:
-                reg_query = {"name": tracks.name, "url": tracks.url}
+                reg_query = {"name": tracks.name, "url": tracks.uri}
 
         embed.description += player.controller_link
 
