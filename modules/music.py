@@ -1204,8 +1204,6 @@ class Music(commands.Cog):
 
         if fav_opts:
 
-            source = False
-
             if len(fav_opts) == 1:
                 query = list(fav_opts)[0].value
 
@@ -1704,6 +1702,9 @@ class Music(commands.Cog):
                     except AttributeError:
                         reg_query = {"name": tracks[0].title, "url": tracks[0].uri}
 
+                    if not reg_query["url"]:
+                        reg_query = None
+
                 await select_interaction.response.defer()
 
                 inter = select_interaction
@@ -1753,7 +1754,7 @@ class Music(commands.Cog):
                 embed.set_thumbnail(url=tracks.thumb)
                 embed.description = f"`{fix_characters(tracks.author, 15)}`**┃**`{time_format(tracks.duration) if not tracks.is_stream else '🔴 Livestream'}`**┃**{inter.author.mention}"
                 emoji = "🎵"
-                if reg_query is not None:
+                if reg_query is not None and tracks.uri:
                     reg_query = {"name": tracks.title, "url": tracks.uri}
 
             else:
@@ -1864,7 +1865,7 @@ class Music(commands.Cog):
             embed.description = f"`{(tcount:=len(tracks.tracks))} música{'s'[:tcount^1]}`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
             emoji = "🎶"
 
-            if reg_query is not None:
+            if reg_query is not None and tracks.uri:
                 reg_query = {"name": tracks.name, "url": tracks.url}
 
         embed.description += player.controller_link
@@ -6074,7 +6075,7 @@ class Music(commands.Cog):
     async def process_music(
             self, inter: Union[disnake.Message, disnake.MessageInteraction, disnake.AppCmdInter, CustomContext, disnake.ModalInteraction],
             player: LavalinkPlayer, force_play: str = "no", ephemeral=True, log_text = "", emoji="",
-            warn_message: str = "", user_data: dict = None, reg_query: str = None
+            warn_message: str = "", user_data: dict = None, reg_query: dict = None
     ):
 
         if not player.current:
