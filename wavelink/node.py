@@ -21,6 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import asyncio
+import datetime
 import inspect
 import json
 import logging
@@ -116,6 +117,9 @@ class Node:
         self._closing = False
         self._is_connecting = False
 
+        self._retry_count = 0
+        self._retry_dt = datetime.datetime.utcnow()
+
     def __repr__(self):
         return f'{self.identifier} | {self.region} | (Shard: {self.shard_id})'
 
@@ -158,6 +162,46 @@ class Node:
 
     async def connect(self, *args, **kwargs) -> None:
 
+        if self._is_connecting:
+            return
+
+        self._is_connecting = True
+
+        backoff = 9
+        retries = 1
+        exception = None
+        max_retries = int(self.max_retries)
+
+        print(f"📶 - {self._client.bot.user} - Iniciando servidor de música: {self.identifier}")
+
+        while not self._client.bot.is_closed():
+            try:
+                async with self._client.bot.session.get(f"{self.rest_uri}/v4/info", timeout=45, headers={'Authorization': self.password}) as r:
+                    if r.status == 200:
+                        self.info = await r.json()
+                        self.version = 4
+                    elif r.status != 404:
+                        raise Exception(f"{self._client.bot.user} - [{r.status}]: {await r.text()}"[:300])
+                    else:
+                        self.version = 3
+                        self.info["sourceManagers"] = ["youtube", "soundcloud", "http"]
+                    break
+            except Exception as e:
+                if retries >= max_retries:
+                    self._is_connecting = False
+                    print(
+                        f"❌ - {self._client.bot.user} - Falha ao conectar no servidor [{self.identifier}]." +
+                        (f"\nCausa: {repr(exception)}" if exception else ""))
+                    return
+                exception = e
+                if self.identifier != "LOCAL":
+                    print(f'⚠️ - {self._client.bot.user} - Falha ao conectar no servidor [{self.identifier}], '
+                          f'nova tentativa [{retries}/{max_retries}] em {backoff} segundos.')
+                backoff += 2
+                retries += 1
+                await asyncio.sleep(backoff)
+                continue
+
         if not self._websocket:
 
             self._websocket = WebSocket(node=self,
@@ -173,46 +217,8 @@ class Node:
                                         **kwargs,
                                         )
 
-        elif self._websocket.is_connected or self._is_connecting:
-            return
-
-        self._is_connecting = True
-
-        backoff = 9
-        retries = 1
-        exception = None
-        max_retries = int(self.max_retries)
-
-        print(f"{self._client.bot.user} - Iniciando servidor de música: {self.identifier}")
-
-        while not self._client.bot.is_closed():
-            try:
-                async with self._client.bot.session.get(f"{self.rest_uri}/v4/info", timeout=45, headers={'Authorization': self.password}) as r:
-                    if r.status == 200:
-                        self.version = 4
-                        self.info = await r.json()
-                    elif r.status != 404:
-                        raise Exception(f"{self._client.bot.user} - [{r.status}]: {await r.text()}"[:300])
-                    else:
-                        self.info["sourceManagers"] = ["youtube", "soundcloud", "http"]
-                    break
-            except Exception as e:
-                if retries >= max_retries:
-                    self._is_connecting = False
-                    print(
-                        f"❌ - {self._client.bot.user} - Falha ao conectar no servidor [{self.identifier}].\n"
-                        f"Causa: {repr(exception)}")
-                    return
-                exception = e
-                if self.identifier != "LOCAL":
-                    print(f'⚠️ - {self._client.bot.user} - Falha ao conectar no servidor [{self.identifier}], '
-                          f'nova tentativa [{retries}/{max_retries}] em {backoff} segundos.')
-                backoff += 2
-                retries += 1
-                await asyncio.sleep(backoff)
-                continue
-
-        await self._websocket._connect()
+        if not self._websocket.is_connected:
+            await self._websocket._connect()
 
         self.available = True
         self._is_connecting = False

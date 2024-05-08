@@ -35,6 +35,7 @@ from utils.music.checks import check_pool_bots
 from utils.music.errors import GenericError
 from utils.music.local_lavalink import run_lavalink
 from utils.music.models import music_mode, LavalinkPlayer, LavalinkPlaylist, LavalinkTrack, PartialTrack
+from utils.music.remote_lavalink_serverlist import get_lavalink_servers
 from utils.others import CustomContext, token_regex, sort_dict_recursively
 from utils.owner_panel import PanelView
 from web_app import WSClient, start
@@ -321,12 +322,21 @@ class BotPool:
         LAVALINK_SERVERS = {}
 
         if self.config["AUTO_DOWNLOAD_LAVALINK_SERVERLIST"]:
-            ini_file = "auto_lavalink.ini"
-            print(f"Baixando lista de servidores lavalink (arquivo: {ini_file})")
-            r = requests.get(self.config["LAVALINK_SERVER_LIST"], allow_redirects=False)
-            with open("auto_lavalink.ini", 'wb') as f:
-                f.write(r.content)
-            r.close()
+
+            try:
+                LAVALINK_SERVERS = get_lavalink_servers()
+                ini_file = None
+            except Exception:
+                traceback.print_exc()
+                ini_file = "auto_lavalink.ini"
+                print(f"Baixando lista de servidores lavalink (arquivo: {ini_file})")
+                try:
+                    r = requests.get(self.config["LAVALINK_SERVER_LIST"], allow_redirects=False)
+                    with open("auto_lavalink.ini", 'wb') as f:
+                        f.write(r.content)
+                    r.close()
+                except Exception:
+                    traceback.print_exc()
         else:
             ini_file = "lavalink.ini"
 
@@ -338,23 +348,24 @@ class BotPool:
                 except Exception as e:
                     print(f"Falha ao adicionar node: {key}, erro: {repr(e)}")
 
-        config = ConfigParser()
-        try:
-            config.read(ini_file)
-        except FileNotFoundError:
-            pass
-        except Exception:
-            traceback.print_exc()
-        else:
-            for key, value in {section: dict(config.items(section)) for section in config.sections()}.items():
-                value["identifier"] = key.replace(" ", "_")
-                value["secure"] = value.get("secure", "").lower() == "true"
-                value["port"] = value["port"].replace("{SERVER_PORT}", os.environ.get("SERVER_PORT") or "8090")
-                value["search"] = value.get("search", "").lower() != "false"
-                value["retry_403"] = value.get("retry_403", "").lower() == "true"
-                value["enqueue_connect"] = value.get("enqueue_connect", "").lower() == "true"
-                value["search_providers"] = value.get("search_providers", "").strip().split()
-                LAVALINK_SERVERS[key] = value
+        if ini_file:
+            config = ConfigParser()
+            try:
+                config.read(ini_file)
+            except FileNotFoundError:
+                pass
+            except Exception:
+                traceback.print_exc()
+            else:
+                for key, value in {section: dict(config.items(section)) for section in config.sections()}.items():
+                    value["identifier"] = key
+                    value["secure"] = value.get("secure", "").lower() == "true"
+                    value["port"] = value["port"].replace("{SERVER_PORT}", os.environ.get("SERVER_PORT") or "8090")
+                    value["search"] = value.get("search", "").lower() != "false"
+                    value["retry_403"] = value.get("retry_403", "").lower() == "true"
+                    value["enqueue_connect"] = value.get("enqueue_connect", "").lower() == "true"
+                    value["search_providers"] = value.get("search_providers", "").strip().split()
+                    LAVALINK_SERVERS[key] = value
 
         start_local = None
 

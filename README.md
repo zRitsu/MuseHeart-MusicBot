@@ -167,5 +167,6 @@ Nota: há mais alguns guias na [wiki](https://github.com/zRitsu/MuseHeart-MusicB
 * [DisnakeDev](https://github.com/DisnakeDev) (disnake) e ao Rapptz pelo [discord.py](https://github.com/Rapptz/discord.py) original
 * [Pythonista Guild](https://github.com/PythonistaGuild) (wavelink)
 * [Lavalink-Devs](https://github.com/lavalink-devs) (lavalink e lavaplayer)
+* [DarrenOfficial](https://lavalink-list.darrennathanael.com/) Lavalink serverlist (Usuários que publicaram seus servidores lavalink estão listados no comando about junto com website/link).
 * E a todos os membros que me me ajudaram bastante com reports de erros (sendo nas [issues](https://github.com/zRitsu/MuseHeart-MusicBot/issues) e no servidor do discord)
 * Demais atribuições podem ser conferidas no [dependency graph](https://github.com/zRitsu/MuseHeart-MusicBot/network/dependencies)

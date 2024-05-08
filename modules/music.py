@@ -6617,7 +6617,16 @@ class Music(commands.Cog):
         retries = 0
         backoff = 7
 
-        print(f"{self.bot.user} - [{node.identifier} / v{node.version}] Conexão perdida - reconectando em {int(backoff)} segundos.")
+        if ((dt_now:=datetime.datetime.now()) - node._retry_dt).total_seconds() < 7:
+            node._retry_count += 1
+        if node._retry_count >= 4:
+            print(f"❌ - {self.bot.user} - [{node.identifier} / v{node.version}] Reconexão cancelada.")
+            node._retry_count = 0
+            return
+        else:
+            node._retry_dt = dt_now
+
+        print(f"⚠️ - {self.bot.user} - [{node.identifier} / v{node.version}] Conexão perdida - reconectando em {int(backoff)} segundos.")
 
         while True:
 
@@ -6634,7 +6643,7 @@ class Music(commands.Cog):
                 player._new_node_task = player.bot.loop.create_task(player._wait_for_new_node())
 
             if self.bot.config["LAVALINK_RECONNECT_RETRIES"] and retries == self.bot.config["LAVALINK_RECONNECT_RETRIES"]:
-                print(f"{self.bot.user} - [{node.identifier}] Todas as tentativas de reconectar falharam...")
+                print(f"❌ - {self.bot.user} - [{node.identifier}] Todas as tentativas de reconectar falharam...")
                 return
 
             await self.bot.wait_until_ready()
@@ -6658,7 +6667,7 @@ class Music(commands.Cog):
             backoff *= 1.5
             if node.identifier != "LOCAL":
                 print(
-                    f'{self.bot.user} - Falha ao reconectar no servidor [{node.identifier}] nova tentativa em {int(backoff)}'
+                    f'⚠️ - {self.bot.user} - Falha ao reconectar no servidor [{node.identifier}] nova tentativa em {int(backoff)}'
                     f' segundos. Erro: {error}'[:300])
             await asyncio.sleep(backoff)
             retries += 1
@@ -6678,7 +6687,7 @@ class Music(commands.Cog):
 
     @commands.Cog.listener("on_wavelink_node_ready")
     async def node_ready(self, node: wavelink.Node):
-        print(f'{self.bot.user} - Servidor de música: [{node.identifier} / v{node.version}] está pronto para uso!')
+        print(f'✅ - {self.bot.user} - Servidor de música: [{node.identifier} / v{node.version}] está pronto para uso!')
         retries = 25
         while retries > 0:
 
@@ -6779,7 +6788,6 @@ class Music(commands.Cog):
         except (TypeError, KeyError):
             max_retries = 1
 
-        data["identifier"] = data["identifier"].replace(" ", "_")
         node = await self.bot.music.initiate_node(auto_reconnect=False, region=region, heartbeat=heartbeat, max_retries=max_retries, **data)
         node.info = info
         node.search = search
