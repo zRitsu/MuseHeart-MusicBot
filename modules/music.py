@@ -7131,7 +7131,7 @@ class Music(commands.Cog):
             except Exception:
                 traceback.print_exc()
 
-        if member.bot and isinstance(after.channel, disnake.StageChannel) and after.channel.permissions_for(member).manage_permissions:
+        if member.bot and isinstance(after.channel, disnake.StageChannel) and after.channel.permissions_for(member).mute_members:
             await asyncio.sleep(1.5)
             if member not in after.channel.speakers:
                 try:
