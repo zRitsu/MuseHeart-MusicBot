@@ -4988,11 +4988,15 @@ class Music(commands.Cog):
         await command(interaction, **kwargs)
 
         try:
+            await command._max_concurrency.release(interaction)
+        except:
+            pass
+
+        try:
             player: LavalinkPlayer = self.bot.music.players[interaction.guild_id]
             player.interaction_cooldown = True
             await asyncio.sleep(1)
             player.interaction_cooldown = False
-            await command._max_concurrency.release(interaction)
         except (KeyError, AttributeError):
             pass
 
