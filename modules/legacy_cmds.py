@@ -229,7 +229,7 @@ class Owner(commands.Cog):
             except:
                 continue
 
-        modules = [f"{m}.py" for m in modules]
+        modules = [f"{m.lower()}.py" for m in modules]
 
         data = self.bot.load_modules(modules)
         self.bot.load_skins()
@@ -252,6 +252,9 @@ class Owner(commands.Cog):
 
         if data["reloaded"]:
             txt += f'**Módulos recarregados:** ```ansi\n[0;32m{" [0;37m| [0;32m".join(data["reloaded"])}```\n'
+
+        if data["failed"]:
+            txt += f'**Módulos que falharam:** ```ansi\n[0;31m{" [0;37m| [0;31m".join(data["failed"])}```\n'
 
         if not txt:
             txt = "**Nenhum módulo encontrado...**"
