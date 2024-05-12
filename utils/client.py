@@ -236,7 +236,7 @@ class BotPool:
         if music_cog:
             await music_cog.connect_node(data)
 
-    async def check_node(self, data: dict):
+    async def check_node(self, data: dict, loop=None):
 
         data = deepcopy(data)
 
@@ -286,7 +286,7 @@ class BotPool:
                     retries += 1
 
         for bot in self.bots:
-            bot.loop.create_task(self.connect_node(bot, data))
+            loop.create_task(self.connect_node(bot, data))
             await asyncio.sleep(1)
 
     def node_check(self, lavalink_servers: dict, start_local=True, loop = None):
@@ -302,10 +302,10 @@ class BotPool:
                 'retry_403': True,
                 'search_providers': self.config["SEARCH_PROVIDERS"].strip().split() or ["ytsearch", "scsearch"]
             }
-            loop.create_task(self.check_node(localnode))
+            loop.create_task(self.check_node(localnode, loop=loop))
 
         for data in lavalink_servers.values():
-            loop.create_task(self.check_node(data))
+            loop.create_task(self.check_node(data, loop=loop))
 
     async def load_playlist_cache(self):
 
