@@ -231,7 +231,10 @@ class BotPool:
         )
 
     async def connect_node(self, bot: BotCore, data: dict):
-        await bot.wait_until_ready()
+
+        while not bot.bot_ready:
+            await asyncio.sleep(3)
+
         music_cog = bot.get_cog("Music")
         if music_cog:
             await music_cog.connect_node(data)
