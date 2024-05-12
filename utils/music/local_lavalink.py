@@ -158,10 +158,10 @@ def run_lavalink(
                 except:
                     pass
 
-                #download_file("https://github.com/Jabba-Team/jabba/raw/main/install.sh", "install_jabba.sh")
+                download_file("https://github.com/Jabba-Team/jabba/raw/main/install.sh", "install_jabba.sh")
                 subprocess.call("bash install_jabba.sh", shell=True, env={"JABBA_HOME": "./.jabba", "JAVA_HOME": "./.jabba", "HOME": os.getcwd()})
                 subprocess.call("./.jabba/bin/jabba install zulu@>=1.17.0-0", shell=True, env={"JABBA_HOME": "./.jabba", "JAVA_HOME": "./.jabba", "HOME": os.getcwd()})
-                #os.remove("install_jabba.sh")
+                os.remove("install_jabba.sh")
 
                 java_cmd = os.path.expanduser("./.jabba/jdk/zulu@1.17.0-0/bin/java")
 
