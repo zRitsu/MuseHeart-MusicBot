@@ -285,7 +285,7 @@ class BotPool:
                     backoff += 2
                     retries += 1
 
-        for bot in self.bots:
+        for bot in self.get_all_bots():
             loop.create_task(self.connect_node(bot, data))
             await asyncio.sleep(1)
 
