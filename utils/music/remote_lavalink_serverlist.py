@@ -1,3 +1,4 @@
+# pip install requests ou adicione requests no requirements.txt (caso não tenha, crie esse arquivo com o nome requests nele).
 import re
 import traceback
 from configparser import ConfigParser
@@ -73,3 +74,6 @@ def get_lavalink_servers():
         traceback.print_exc()
 
     return lavalink_nodes
+
+if __name__ == "__main__":
+    get_lavalink_servers()
