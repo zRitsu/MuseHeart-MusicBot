@@ -12,6 +12,7 @@ import subprocess
 import traceback
 import zlib
 from configparser import ConfigParser
+from copy import deepcopy
 from importlib import import_module
 from subprocess import check_output
 from typing import Optional, Union, List, Dict
@@ -229,6 +230,83 @@ class BotPool:
             [asyncio.create_task(self.start_bot(bot)) for bot in bots]
         )
 
+    async def connect_node(self, bot: BotCore, data: dict):
+        await bot.wait_until_ready()
+        music_cog = bot.get_cog("Music")
+        if music_cog:
+            await music_cog.connect_node(data)
+
+    async def check_node(self, data: dict):
+
+        data = deepcopy(data)
+
+        data['rest_uri'] = ("https" if data.get('secure') else "http") + f"://{data['host']}:{data['port']}"
+
+        try:
+            max_retries = int(data.get('retries')) or 1
+        except (TypeError, KeyError):
+            max_retries = 1
+
+        headers = {'Authorization': data['password']}
+
+        backoff = 9
+        retries = 0
+        exception = None
+
+        print(f"📶 - Verificando se o servidor de música [{data['identifier']}] está disponível.")
+
+        while True:
+            if retries >= max_retries:
+                print(
+                    f"❌ - Todas as tentativas de verificar o servidor [{data['identifier']}] falharam. Causa: {repr(exception)}")
+                return
+            else:
+                await asyncio.sleep(backoff)
+                try:
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(f"{data['rest_uri']}/v4/info", timeout=45,
+                                                        headers=headers) as r:
+                            if r.status == 200:
+                                data["info"] = await r.json()
+                                data["info"]["check_version"] = 4
+                            elif r.status != 404:
+                                raise Exception(f"❌ - [{r.status}]: {await r.text()}"[:300])
+                            else:
+                                data["info"] = {
+                                    "check_version": 3,
+                                    "sourceManagers": ["youtube", "soundcloud", "http"]
+                                }
+                            break
+                except Exception as e:
+                    exception = e
+                    if data["identifier"] != "LOCAL":
+                        print(f'⚠️ - Falha ao verificar o servidor [{data["identifier"]}], '
+                              f'nova tentativa [{retries}/{max_retries}] em {backoff} segundos.')
+                    backoff += 2
+                    retries += 1
+
+        for bot in self.bots:
+            bot.loop.create_task(self.connect_node(bot, data))
+            await asyncio.sleep(1)
+
+    def node_check(self, lavalink_servers: dict, start_local=True, loop = None):
+
+        if start_local and "LOCAL" not in lavalink_servers:
+            localnode = {
+                'host': '127.0.0.1',
+                'port': os.environ.get("SERVER_PORT") or 8090,
+                'password': 'youshallnotpass',
+                'identifier': 'LOCAL',
+                'region': 'us_central',
+                'retries': 120,
+                'retry_403': True,
+                'search_providers': self.config["SEARCH_PROVIDERS"].strip().split() or ["ytsearch", "scsearch"]
+            }
+            loop.create_task(self.check_node(localnode))
+
+        for data in lavalink_servers.values():
+            loop.create_task(self.check_node(data))
+
     async def load_playlist_cache(self):
 
         try:
@@ -363,7 +441,6 @@ class BotPool:
                     value["port"] = value["port"].replace("{SERVER_PORT}", os.environ.get("SERVER_PORT") or "8090")
                     value["search"] = value.get("search", "").lower() != "false"
                     value["retry_403"] = value.get("retry_403", "").lower() == "true"
-                    value["enqueue_connect"] = value.get("enqueue_connect", "").lower() == "true"
                     value["search_providers"] = value.get("search_providers", "").strip().split()
                     LAVALINK_SERVERS[key] = value
 
@@ -663,10 +740,6 @@ class BotPool:
 
                             bot.load_modules()
 
-                        music_cog = bot.get_cog("Music")
-
-                        if music_cog:
-                            bot.loop.create_task(music_cog.process_nodes(data=LAVALINK_SERVERS, start_local=self.config["CONNECT_LOCAL_LAVALINK"] and start_local))
 
                         bot.add_view(PanelView(bot))
 
@@ -734,12 +807,10 @@ class BotPool:
 
         loop.create_task(self.load_playlist_cache())
 
-        for lserver in LAVALINK_SERVERS.values():
-            self.lavalink_connect_queue[lserver["identifier"]] = asyncio.Queue()
-            loop.create_task(self.connect_lavalink_queue_task(lserver["identifier"]))
-
         if start_local:
             loop.create_task(self.start_lavalink(loop=loop))
+
+        self.node_check(LAVALINK_SERVERS, loop=loop, start_local=start_local)
 
         if self.config["RUN_RPC_SERVER"]:
 

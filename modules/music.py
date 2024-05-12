@@ -6590,22 +6590,6 @@ class Music(commands.Cog):
             elif defered:
                 await inter.edit_original_response(embed=embed)
 
-    async def process_nodes(self, data: dict, start_local: bool = False):
-
-        await self.bot.wait_until_ready()
-
-        if str(self.bot.user.id) in self.bot.config["INTERACTION_BOTS_CONTROLLER"]:
-            return
-
-        for k, v in data.items():
-            if v.get("enqueue_connect"):
-                await self.bot.pool.lavalink_connect_queue[v["identifier"]].put([self.bot, v])
-            else:
-                self.bot.loop.create_task(self.connect_node(v))
-
-        if start_local:
-            self.connect_local_lavalink()
-
     @commands.Cog.listener("on_wavelink_node_connection_closed")
     async def node_connection_closed(self, node: wavelink.Node):
 
@@ -6771,8 +6755,11 @@ class Music(commands.Cog):
 
         if data["identifier"] in self.bot.music.nodes:
             node = self.bot.music.nodes[data['identifier']]
-            if not node.is_connected:
-                await node.connect()
+            try:
+                if not node._websocket.is_connected:
+                    await node.connect()
+            except AttributeError:
+                pass
             return
 
         data = deepcopy(data)
@@ -6785,7 +6772,7 @@ class Music(commands.Cog):
         heartbeat = int(data.pop('heartbeat', 30))
         search_providers = data.pop("search_providers", None) or ["ytsearch", "scsearch"]
         retry_403 = data.pop('retry_403', False)
-        info = {}
+        info = data.pop("info", {})
 
         try:
             max_retries = int(data.pop('retries'))
@@ -6820,7 +6807,7 @@ class Music(commands.Cog):
             elif p == "scsearch":
                 node.partial_providers.append("scsearch:{title} - {author}")
 
-        await node.connect()
+        await node.connect(info=info)
 
     async def get_tracks(
             self, query: str, user: disnake.Member, node: wavelink.Node = None,
@@ -6948,23 +6935,6 @@ class Music(commands.Cog):
                 tracks.tracks = tracks.tracks[selected:] + tracks.tracks[:selected]
 
         return tracks, node
-
-    def connect_local_lavalink(self):
-
-        if 'LOCAL' not in self.bot.music.nodes:
-
-            localnode = {
-                'host': '127.0.0.1',
-                'port': os.environ.get("SERVER_PORT") or 8090,
-                'password': 'youshallnotpass',
-                'identifier': 'LOCAL',
-                'region': 'us_central',
-                'retries': 120,
-                'retry_403': True,
-                'search_providers': self.bot.pool.config["SEARCH_PROVIDERS"].strip().split() or ["ytsearch", "scsearch"]
-            }
-
-            self.bot.loop.create_task(self.connect_node(localnode))
 
     @commands.Cog.listener("on_thread_create")
     async def thread_song_request(self, thread: disnake.Thread, reopen: bool = False, bot: BotCore = None):

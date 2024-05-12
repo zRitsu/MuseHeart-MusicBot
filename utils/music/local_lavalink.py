@@ -31,7 +31,10 @@ def download_file(url, filename):
         for data in r.iter_content(chunk_size=2500*1024):
             f.write(data)
             bytes_downloaded += len(data)
-            current_progress = int((bytes_downloaded / total_size) * 100)
+            try:
+                current_progress = int((bytes_downloaded / total_size) * 100)
+            except ZeroDivisionError:
+                current_progress = 0
 
             if current_progress != previows_progress:
                 previows_progress = current_progress
@@ -96,7 +99,7 @@ def run_lavalink(
                 dirs.extend(
                     [
                         os.path.realpath("./.jabba/jdk/zulu@1.17.0-0/bin/java"),
-                        os.path.expanduser("~/.jabba/jdk/zulu@1.17.0-0/bin/java")
+                        os.path.expanduser("./.jabba/jdk/zulu@1.17.0-0/bin/java")
                     ]
                 )
                 try:
@@ -151,16 +154,16 @@ def run_lavalink(
             elif use_jabba:
 
                 try:
-                    shutil.rmtree("~/.jabba/jdk/zulu@1.17.0-0")
+                    shutil.rmtree("./.jabba/jdk/zulu@1.17.0-0")
                 except:
                     pass
 
-                download_file("https://github.com/shyiko/jabba/raw/master/install.sh", "install_jabba.sh")
-                subprocess.call("bash install_jabba.sh".split())
-                subprocess.call("~/.jabba/bin/jabba install zulu@>=1.17.0-0", shell=True)
-                os.remove("install_jabba.sh")
+                #download_file("https://github.com/Jabba-Team/jabba/raw/main/install.sh", "install_jabba.sh")
+                subprocess.call("bash install_jabba.sh", shell=True, env={"JABBA_HOME": "./.jabba", "JAVA_HOME": "./.jabba", "HOME": os.getcwd()})
+                subprocess.call("./.jabba/bin/jabba install zulu@>=1.17.0-0", shell=True, env={"JABBA_HOME": "./.jabba", "JAVA_HOME": "./.jabba", "HOME": os.getcwd()})
+                #os.remove("install_jabba.sh")
 
-                java_cmd = os.path.expanduser("~/.jabba/jdk/zulu@1.17.0-0/bin/java")
+                java_cmd = os.path.expanduser("./.jabba/jdk/zulu@1.17.0-0/bin/java")
 
             else:
                 if not os.path.isdir(f"./.java/{jdk_platform}"):

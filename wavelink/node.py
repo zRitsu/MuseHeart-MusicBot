@@ -172,35 +172,39 @@ class Node:
         exception = None
         max_retries = int(self.max_retries)
 
-        print(f"📶 - {self._client.bot.user} - Iniciando servidor de música: {self.identifier}")
+        if (info:=kwargs.get("info")):
+            self.version = info["check_version"]
+            self.info = info
 
-        while not self._client.bot.is_closed():
-            try:
-                async with self._client.bot.session.get(f"{self.rest_uri}/v4/info", timeout=45, headers={'Authorization': self.password}) as r:
-                    if r.status == 200:
-                        self.info = await r.json()
-                        self.version = 4
-                    elif r.status != 404:
-                        raise Exception(f"{self._client.bot.user} - [{r.status}]: {await r.text()}"[:300])
-                    else:
-                        self.version = 3
-                        self.info["sourceManagers"] = ["youtube", "soundcloud", "http"]
-                    break
-            except Exception as e:
-                if retries >= max_retries:
-                    self._is_connecting = False
-                    print(
-                        f"❌ - {self._client.bot.user} - Falha ao conectar no servidor [{self.identifier}]." +
-                        (f"\nCausa: {repr(exception)}" if exception else ""))
-                    return
-                exception = e
-                if self.identifier != "LOCAL":
-                    print(f'⚠️ - {self._client.bot.user} - Falha ao conectar no servidor [{self.identifier}], '
-                          f'nova tentativa [{retries}/{max_retries}] em {backoff} segundos.')
-                backoff += 2
-                retries += 1
-                await asyncio.sleep(backoff)
-                continue
+        else:
+            print(f"📶 - {self._client.bot.user} - Iniciando servidor de música: {self.identifier}")
+            while not self._client.bot.is_closed():
+                try:
+                    async with self._client.bot.session.get(f"{self.rest_uri}/v4/info", timeout=45, headers={'Authorization': self.password}) as r:
+                        if r.status == 200:
+                            self.info = await r.json()
+                            self.version = 4
+                        elif r.status != 404:
+                            raise Exception(f"❌ - {self._client.bot.user} - [{r.status}]: {await r.text()}"[:300])
+                        else:
+                            self.version = 3
+                            self.info["sourceManagers"] = ["youtube", "soundcloud", "http"]
+                        break
+                except Exception as e:
+                    if retries >= max_retries:
+                        self._is_connecting = False
+                        print(
+                            f"❌ - {self._client.bot.user} - Falha ao conectar no servidor [{self.identifier}]." +
+                            (f"\nCausa: {repr(exception)}" if exception else ""))
+                        return
+                    exception = e
+                    if self.identifier != "LOCAL":
+                        print(f'⚠️ - {self._client.bot.user} - Falha ao conectar no servidor [{self.identifier}], '
+                              f'nova tentativa [{retries}/{max_retries}] em {backoff} segundos.')
+                    backoff += 2
+                    retries += 1
+                    await asyncio.sleep(backoff)
+                    continue
 
         if not self._websocket:
 
