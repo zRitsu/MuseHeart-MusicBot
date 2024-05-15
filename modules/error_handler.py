@@ -45,6 +45,12 @@ class ErrorHandler(commands.Cog):
     @commands.Cog.listener('on_interaction_player_error')
     async def on_inter_player_error(self, inter: disnake.AppCmdInter, error: Exception):
 
+        if not isinstance(error, commands.MaxConcurrencyReached):
+            try:
+                await inter.application_command._max_concurrency.release(inter)
+            except:
+                pass
+
         await self.process_interaction_error(inter=inter, error=error)
 
     """@commands.Cog.listener('on_user_command_completion')
@@ -74,12 +80,6 @@ class ErrorHandler(commands.Cog):
         await self.process_interaction_error(inter=inter, error=error)
 
     async def process_interaction_error(self, inter: disnake.AppCmdInter, error: Exception):
-
-        """if not isinstance(error, commands.MaxConcurrencyReached):
-            try:
-                await inter.application_command._max_concurrency.release(inter)
-            except:
-                pass"""
 
         if isinstance(error, PoolException):
             return
