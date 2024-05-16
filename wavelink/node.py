@@ -26,7 +26,7 @@ import inspect
 import json
 import logging
 import os
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Dict, Optional, Union, List
 from urllib.parse import quote
 
 from .backoff import ExponentialBackoff
@@ -111,7 +111,7 @@ class Node:
 
         self.stats = None
         self.info = {"sourceManagers": []}
-        self.plugins_dict: Optional[dict] = None
+        self.plugin_names: Optional[List] = None
         self.max_retries = kwargs.pop("max_retries", 1)
 
         self._closing = False
@@ -205,6 +205,8 @@ class Node:
                     retries += 1
                     await asyncio.sleep(backoff)
                     continue
+
+        self.plugin_names = set([p["name"] for p in self.info["plugins"]])
 
         if not self._websocket:
 
@@ -410,10 +412,7 @@ class Node:
         if self.version < 4:
             return
 
-        if self.plugins_dict is None:
-            self.plugins_dict = {p.pop("name"): p for p in self.info["plugins"]}
-
-        return "lyrics" in self.plugins_dict
+        return "java-lyrics-plugin" in self.plugin_names
 
     async def fetch_ytm_lyrics(self, ytid: str):
 
