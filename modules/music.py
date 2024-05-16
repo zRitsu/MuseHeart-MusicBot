@@ -3581,7 +3581,6 @@ class Music(commands.Cog):
 
     queue_show_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
-    @check_voice()
     @has_player()
     @check_voice()
     @pool_command(name="queue", aliases=["q", "fila"], description="Exibir as músicas que estão na fila.",
