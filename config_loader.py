@@ -198,9 +198,11 @@ def load_config():
         "VOICE_CHANNEL_LATENCY_RECONNECT",
     ]:
         try:
-            CONFIG[i] = int(CONFIG[i])
+            new_value = int(CONFIG[i])
         except ValueError:
             raise Exception(f"Você usou uma configuração inválida! {i}: {CONFIG[i]}")
+
+        CONFIG[i] = new_value
 
     # converter strings que requer valor bool/nulo.
     for i in [
@@ -249,9 +251,11 @@ def load_config():
             continue
 
         try:
-            CONFIG[i] = bools[CONFIG[i]]
+            new_value = bools[CONFIG[i]]
         except KeyError:
             raise Exception(f"Você usou uma configuração inválida! {i}: {CONFIG[i]}")
+
+        CONFIG[i] = new_value
 
     CONFIG["RPC_SERVER"] = CONFIG["RPC_SERVER"].replace("$PORT", CONFIG.get("PORT") or environ.get("PORT", "80"))
 
