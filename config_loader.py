@@ -251,7 +251,7 @@ def load_config():
             continue
 
         try:
-            new_value = bools[CONFIG[i]]
+            new_value = bools[CONFIG[i.lower()]]
         except KeyError:
             raise Exception(f"Você usou uma configuração inválida! {i}: {CONFIG[i]}")
 
