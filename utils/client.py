@@ -544,14 +544,6 @@ class BotPool:
             elif (token := tokens.pop()) not in all_tokens.values():
                 all_tokens[k] = token
 
-        if self.config["INTERACTION_BOTS"]:
-            interaction_bot_reg = None
-        else:
-            try:
-                interaction_bot_reg = sorted(list(all_tokens), key=lambda i: i)[0]
-            except:
-                interaction_bot_reg = None
-
         def load_bot(bot_name: str, token: str, guild_id: str = None):
 
             try:

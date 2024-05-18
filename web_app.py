@@ -74,7 +74,7 @@ class IndexHandler(tornado.web.RequestHandler):
         pending_bots = []
         ready_bots = []
 
-        kwargs = {"redirect_uri": self.config['INVITE_REDIRECT_URL']} if self.config['INVITE_REDIRECT_URL'] else {}
+        kwargs = {}
 
         for identifier, exception in self.pool.failed_bots.items():
             failed_bots.append(f"<tr><td>{identifier}</td><td>{exception}</td></tr>")
