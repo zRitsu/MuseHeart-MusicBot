@@ -1430,7 +1430,7 @@ class FavMenuView(disnake.ui.View):
         self.update_components()
 
         try:
-            cmd = f"</play:" + str(self.bot.pool.controller_bot.get_global_command_named("play", cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+            cmd = f"</play:" + str(self.bot.get_global_command_named("play", cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
         except AttributeError:
             cmd = "/play"
 
@@ -1766,7 +1766,7 @@ class FavMenuView(disnake.ui.View):
 
         try:
             cmd = f"</{cog.fav_manager.name}:" + str(
-                self.bot.pool.controller_bot.get_global_command_named(cog.fav_manager.name,
+                self.bot.get_global_command_named(cog.fav_manager.name,
                                                                       cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
         except AttributeError:
             cmd = "/play"
@@ -2990,7 +2990,7 @@ class SkinEditorMenu(disnake.ui.View):
                 player.process_hint()
 
             try:
-                cmd = f"</change_skin:" + str(self.bot.pool.controller_bot.get_global_command_named("change_skin",
+                cmd = f"</change_skin:" + str(self.bot.get_global_command_named("change_skin",
                                                                                              cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
             except AttributeError:
                 cmd = "/change_skin"

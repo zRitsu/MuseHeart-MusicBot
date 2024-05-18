@@ -384,7 +384,7 @@ async def send_idle_embed(
         guild_data = await bot.get_data(guild_id, db_name=DBModel.guilds)
 
     try:
-        cmd = f"</play:" + str(bot.pool.controller_bot.get_global_command_named("play", cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+        cmd = f"</play:" + str(bot.get_global_command_named("play", cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
     except AttributeError:
         cmd = "/play"
 

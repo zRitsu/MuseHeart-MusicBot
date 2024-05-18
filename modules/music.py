@@ -3016,7 +3016,7 @@ class Music(commands.Cog):
             if isinstance(inter, CustomContext) and not (await self.bot.is_owner(inter.author)):
 
                 try:
-                    slashcmd = f"</now_playing:" + str(self.bot.pool.controller_bot.get_global_command_named("now_playing",
+                    slashcmd = f"</now_playing:" + str(self.bot.get_global_command_named("now_playing",
                                                                                                       cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
                 except AttributeError:
                     slashcmd = "/now_playing"
@@ -3482,7 +3482,7 @@ class Music(commands.Cog):
         global_data = await self.bot.get_global_data(guild.id, db_name=DBModel.guilds)
 
         try:
-            slashcmd = f"</play:" + str(self.bot.pool.controller_bot.get_global_command_named("play", cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+            slashcmd = f"</play:" + str(self.bot.get_global_command_named("play", cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
         except AttributeError:
             slashcmd = "/play"
 
@@ -5312,7 +5312,7 @@ class Music(commands.Cog):
             global_data = await self.bot.get_global_data(interaction.guild_id, db_name=DBModel.guilds)
 
             try:
-                cmd = f"</play:" + str(self.bot.pool.controller_bot.get_global_command_named("play",
+                cmd = f"</play:" + str(self.bot.get_global_command_named("play",
                                                                                              cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
             except AttributeError:
                 cmd = "/play"
@@ -5360,7 +5360,7 @@ class Music(commands.Cog):
                     await interaction.send("Você não pode interagir aqui!", ephemeral=True)
                     return
 
-                cmd = self.bot.pool.controller_bot.get_slash_command("fav_manager")
+                cmd = self.bot.get_slash_command("fav_manager")
                 await self.process_player_interaction(interaction, cmd, cmd_kwargs)
                 return
 
@@ -5370,7 +5370,7 @@ class Music(commands.Cog):
                     await interaction.send("Você não pode interagir aqui!", ephemeral=True)
                     return
 
-                cmd = self.bot.pool.controller_bot.get_slash_command("integrations")
+                cmd = self.bot.get_slash_command("integrations")
                 await self.process_player_interaction(interaction, cmd, cmd_kwargs)
                 return
 
@@ -5592,7 +5592,7 @@ class Music(commands.Cog):
                     global_data = await self.bot.get_global_data(interaction.author.id, db_name=DBModel.guilds)
 
                     try:
-                        slashcmd = f"</play:" + str(self.bot.pool.controller_bot.get_global_command_named("play", cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+                        slashcmd = f"</play:" + str(self.bot.get_global_command_named("play", cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
                     except AttributeError:
                         slashcmd = "/play"
 

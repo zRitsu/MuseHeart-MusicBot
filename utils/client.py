@@ -85,7 +85,6 @@ class BotPool:
         self.single_bot = True
         self.rpc_token_cache: dict = {}
         self.failed_bots: dict = {}
-        self.controller_bot: Optional[BotCore] = None
         self.current_useragent = self.reset_useragent()
         self.processing_gc: bool = False
         self.lavalink_connect_queue = {}
@@ -670,23 +669,21 @@ class BotPool:
                     raise GenericError("Esse comando não pode ser executado em mensagens privadas.\n"
                                      "Use em algum servidor onde há bot compatível adicionado.")
 
-                if str(inter.bot.user.id) in self.config["INTERACTION_BOTS_CONTROLLER"]:
+                if not allow_private and not isinstance(inter.guild, disnake.Guild):
 
-                    if not allow_private:
+                    available_bot = False
 
-                        available_bot = False
+                    for bot in inter.bot.pool.get_guild_bots(inter.guild_id):
+                        if bot.appinfo and (
+                                bot.appinfo.bot_public or await bot.is_owner(inter.author)) and bot.get_guild(
+                                inter.guild_id):
+                            available_bot = True
+                            break
 
-                        for bot in inter.bot.pool.get_guild_bots(inter.guild_id):
-                            if bot.appinfo and (
-                                    bot.appinfo.bot_public or await bot.is_owner(inter.author)) and bot.get_guild(
-                                    inter.guild_id):
-                                available_bot = True
-                                break
-
-                        if not available_bot:
-                            raise GenericError(
-                                "**Não há bots disponíveis no servidor, Adicione pelo menos um clicando no botão abaixo.**",
-                                components=[disnake.ui.Button(custom_id="bot_invite", label="Adicionar bots")])
+                    if not available_bot:
+                        raise GenericError(
+                            "**Não há bots disponíveis no servidor, Adicione pelo menos um clicando no botão abaixo.**",
+                            components=[disnake.ui.Button(custom_id="bot_invite", label="Adicionar bots")])
 
                 if not kwargs:
                     kwargs["return_first"] = True
@@ -718,31 +715,13 @@ class BotPool:
 
                     bot.initializing = True
 
-                    if str(bot.user.id) in bot.config["INTERACTION_BOTS_CONTROLLER"]:
-                        self.bots.remove(bot)
-
                     try:
-                        if str(bot.user.id) in bot.config["INTERACTION_BOTS"] or \
-                                str(bot.user.id) in bot.config["INTERACTION_BOTS_CONTROLLER"] or \
-                                interaction_bot_reg == bot.identifier:
+                        bot.interaction_id = bot.user.id
 
-                            bot.interaction_id = bot.user.id
-                            self.controller_bot = bot
+                        bot.load_modules()
 
-                            bot.load_modules()
-
-                            if bot.config["AUTO_SYNC_COMMANDS"]:
-                                await bot.sync_app_commands(force=True)
-
-                        else:
-
-                            self._command_sync_flags = commands.CommandSyncFlags.none()
-
-                            if bot.config["AUTO_SYNC_COMMANDS"]:
-                                await bot.sync_app_commands(force=True)
-
-                            bot.load_modules()
-
+                        if bot.config["AUTO_SYNC_COMMANDS"]:
+                            await bot.sync_app_commands(force=True)
 
                         bot.add_view(PanelView(bot))
 
@@ -1011,9 +990,6 @@ class BotCore(commands.AutoShardedBot):
 
     async def is_owner(self, user: Union[disnake.User, disnake.Member]) -> bool:
 
-        if self.exclusive_guild_id:
-            return await self.pool.controller_bot.is_owner(user)
-
         if user.id in self.env_owner_ids:
             return True
 
@@ -1157,66 +1133,16 @@ class BotCore(commands.AutoShardedBot):
                 embed.description += f"\n\nMeu prefixo no servidor é: **{prefix}** `(minha menção também funciona como prefixo).`\n"\
                                     f"Pra ver todos os meus comandos use **{prefix}help**"
 
-            bot_count = 0
+            embed.description += "\n\n**Pra ver todos os meus comandos use: /**"
 
-            if self != self.pool.controller_bot:
-
-                interaction_invites = []
-
-                for b in self.pool.get_guild_bots(message.guild.id):
-
-                    if not b.interaction_id:
-                        continue
-
-                    try:
-                        if b.appinfo.bot_public and b.user not in message.guild.members:
-                            bot_count += 1
-                    except AttributeError:
-                        continue
-
-                    interaction_invites.append(f"[`{disnake.utils.escape_markdown(str(b.user.name))}`](https://discord.com/oauth2/authorize?client_id={b.user.id}) ")
-
-                if not interaction_invites:
-                    interaction_invites.append(
-                        f"[`{disnake.utils.escape_markdown(str(self.pool.controller_bot.user.name))}`](https://discord.com/oauth2/authorize?client_id={self.pool.controller_bot.user.id}) ")
-
-                if interaction_invites:
-                    embed.description += f"\n\nMeus comandos de barra (/) funcionam através " \
-                                         f"da{(s:='s'[:len(interaction_invites)^1])} seguinte{s} aplicaç{(s2:='ões'[:len(interaction_invites)^1] or 'ão')} abaixo:\n" \
-                                         f"{' **|** '.join(interaction_invites)}\n\n" \
-                                         f"Caso os comandos da{s} aplicaç{s2} acima não sejam exibidos ao digitar " \
-                                         f"barra (/), clique no nome acima para integrar/registrar os comandos de barra."
-
-                else:
-                    embed.description += "\n\n**Pra ver todos os meus comandos use: /**"
-
-            else:
-                embed.description += "\n\n**Pra ver todos os meus comandos use: /**"
-
-            if bot_count:
-
-                if message.author.guild and message.author.guild_permissions.manage_guild:
-                    embed.description += "\n\n`Caso precise de mais bots de música neste servidor ou queira adicionar bots " \
-                                         "de música em outro servidor, clique no botão abaixo.`"
-
-                kwargs = {
-                    "components": [
-                        disnake.ui.Button(
-                            custom_id="bot_invite",
-                            label="Me adicione no seu servidor."
-                        )
-                    ]
-                }
-
-            else:
-                kwargs = {
-                    "components": [
-                        disnake.ui.Button(
-                            label="Me adicione no seu servidor.",
-                            url=disnake.utils.oauth_url(self.user.id, permissions=disnake.Permissions(self.config['INVITE_PERMISSIONS']), scopes=('bot',))
-                        )
-                    ]
-                }
+            kwargs = {
+                "components": [
+                    disnake.ui.Button(
+                        label="Me adicione no seu servidor.",
+                        url=disnake.utils.oauth_url(self.user.id, permissions=disnake.Permissions(self.config['INVITE_PERMISSIONS']), scopes=('bot',))
+                    )
+                ]
+            }
 
             if message.channel.permissions_for(message.guild.me).read_message_history:
                 await message.reply(embed=embed, fail_if_not_exists=False, **kwargs)
@@ -1400,32 +1326,30 @@ class BotCore(commands.AutoShardedBot):
                     module_filename = os.path.join(module_dir, filename).replace('\\', '.').replace('/', '.')
                     try:
                         self.reload_extension(module_filename)
-                        if self.pool.controller_bot == self and not self.bot_ready:
+                        if not self.bot_ready:
                             print(f"{'=' * 48}\n[OK] {bot_name} - {filename}.py Recarregado.")
                         load_status["reloaded"].append(f"{filename}.py")
                     except (commands.ExtensionAlreadyLoaded, commands.ExtensionNotLoaded):
                         try:
                             self.load_extension(module_filename)
-                            if self.pool.controller_bot == self and not self.bot_ready:
+                            if not self.bot_ready:
                                 print(f"{'=' * 48}\n[OK] {bot_name} - {filename}.py Carregado.")
                             load_status["loaded"].append(f"{filename}.py")
                         except Exception as e:
-                            if self.pool.controller_bot == self:
-                                print(f"{'=' * 48}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename}\n")
-                                if not self.bot_ready:
-                                    raise e
+                            print(f"{'=' * 48}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename}\n")
+                            if not self.bot_ready:
+                                raise e
                             load_status["failed"].append(f"{filename}.py")
                             traceback.print_exc()
                     except Exception as e:
-                        if self.pool.controller_bot == self:
-                            print(f"{'=' * 48}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename}")
-                            if not self.bot_ready:
-                                raise e
+                        print(f"{'=' * 48}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename}")
+                        if not self.bot_ready:
+                            raise e
                         load_status["failed"].append(f"{filename}.py")
                         traceback.print_exc()
 
 
-        if self.pool.controller_bot == self and not self.bot_ready:
+        if not self.bot_ready:
             print(f"{'=' * 48}")
 
         if not self.config["ENABLE_DISCORD_URLS_PLAYBACK"]:

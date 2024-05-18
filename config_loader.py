@@ -28,7 +28,6 @@ DEFAULT_CONFIG = {
     "INVITE_PERMISSIONS": 332892794064,
     "ENABLE_LOGGER": False,
     "INTERACTION_BOTS": "",
-    "INTERACTION_BOTS_CONTROLLER": "",
     "KILL_ON_429": True,
     "PREFIXED_POOL_TIMEOUT": 4,
     "INVITE_REDIRECT_URL": "",
@@ -199,8 +198,8 @@ def load_config():
     ]:
         try:
             new_value = int(CONFIG[i])
-        except ValueError:
-            raise Exception(f"Você usou uma configuração inválida! {i}: {CONFIG[i]}")
+        except ValueError as e:
+            raise Exception(f"Você usou uma configuração inválida! {i}: {CONFIG[i]}\n{repr(e)}")
 
         CONFIG[i] = new_value
 
@@ -251,9 +250,9 @@ def load_config():
             continue
 
         try:
-            new_value = bools[CONFIG[i.lower()]]
-        except KeyError:
-            raise Exception(f"Você usou uma configuração inválida! {i}: {CONFIG[i]}")
+            new_value = bools[CONFIG[i]]
+        except KeyError as e:
+            raise Exception(f"Você usou uma configuração inválida! {i}: {CONFIG[i]}\n{repr(e)}")
 
         CONFIG[i] = new_value
 

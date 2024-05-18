@@ -226,12 +226,6 @@ class Misc(commands.Cog):
     @commands.Cog.listener("on_guild_join")
     async def guild_add(self, guild: disnake.Guild):
 
-        if str(self.bot.user.id) in self.bot.config["INTERACTION_BOTS_CONTROLLER"]:
-            await guild.leave()
-            return
-
-        interaction_invite = ""
-
         bots_in_guild = []
         bots_outside_guild = []
 
@@ -249,9 +243,6 @@ class Misc(commands.Cog):
                 bots_outside_guild.append(bot)
 
         components = [disnake.ui.Button(custom_id="bot_invite", label="Precisa de mais bots de música? Clique aqui.")] if [b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public] else []
-
-        if self.bot.pool.controller_bot != self.bot:
-            interaction_invite = f"[`{disnake.utils.escape_markdown(str(self.bot.pool.controller_bot.user.name))}`]({disnake.utils.oauth_url(self.bot.pool.controller_bot.user.id)})"
 
         if cmd:=self.bot.get_command("setup"):
             cmd_text = f"Se desejar, use o comando **/{cmd.name}** para criar um canal dedicado pra pedir " \
@@ -298,28 +289,13 @@ class Misc(commands.Cog):
                             ).set_image(url=image)
                         )
 
-                        if interaction_invite:
-                            embeds.append(
-                                disnake.Embed(
-                                    color=color,
-                                    description=f"**Observação importante:** Meus comandos de barra funcionam através "
-                                                f"da seguinte aplicação: {interaction_invite}\n\n"
-                                                f"Caso os comandos da aplicação acima não sejam exibidos ao digitar "
-                                                f"barra (**/**) em um canal do servidor **{guild.name}** você terá que "
-                                                f"clicar no nome acima para integrar os comandos de barra no servidor "
-                                                f"**{guild.name}**.\n`Nota: Caso os comandos ainda não apareçam após "
-                                                f"integrar os comandos, talvez seu servidor tenha atingido o limite de "
-                                                f"bots com comandos de barra registrados.`"
-                                ).set_image(url=image)
-                            )
-                        else:
-                            embeds.append(
-                                disnake.Embed(
-                                    color=color,
-                                    description=f"Para ver todos os meus comandos use barra (**/**) no servidor " \
-                                                 f"**{guild.name}**"
-                                ).set_image(url=image)
-                            )
+                        embeds.append(
+                            disnake.Embed(
+                                color=color,
+                                description=f"Para ver todos os meus comandos use barra (**/**) no servidor " \
+                                             f"**{guild.name}**"
+                            ).set_image(url=image)
+                        )
 
                         if prefix:
                             prefix_msg = f"Meu prefixo no servidor **{guild.name}** é: **{prefix}**"
@@ -389,29 +365,14 @@ class Misc(commands.Cog):
             if not channel:
                 return
 
-        embeds = []
-
-        if interaction_invite:
-
-            embeds.append(
-                disnake.Embed(
-                    color=color,
-                    description=f"Olá! Para ver todos os meus comandos digite barra (**/**) e confira "
-                                f"os comandos da seguinte aplicação: {interaction_invite}\n\n"
-                                f"Caso os comandos da aplicação acima não sejam exibidos ao digitar barra (**/**) você "
-                                f"terá que clicar no nome acima para integrar os comandos de barra no seu servidor.\n"
-                                f"`Nota: Caso os comandos ainda não apareçam após integrar os comandos, talvez seu "
-                                f"servidor tenha atingido o limite de bots com comandos de barra registrados.`"
-
-                ).set_image(url=image)
-            )
-
-        else:
-            embeds.append(
-                disnake.Embed(
-                    color=color, description="Olá! Para ver todos os meus comandos use barra (**/**)"
-                ).set_image(url=image)
-            )
+        embeds = [
+            disnake.Embed(
+                color=color, description="Olá! Para ver todos os meus comandos use barra (**/**)\n"
+                                         "`Nota: Caso os comandos estejam aparecendo no seu servidor,"
+                                         "talvez o mesmo tenha atingido o limite de bots com comandos de barra "
+                                         "registrados (caso tenha mais de 50 integrações/apps no seu servidor).`"
+            ).set_image(url=image)
+        ]
 
         if prefix:
             prefix_msg = f"Meu prefixo no servidor é: **{prefix}**"
@@ -806,12 +767,6 @@ class Misc(commands.Cog):
             )
             return
 
-        controller_bot = self.bot.pool.controller_bot
-
-        if (len(bots_in_guild) + len(bots_invites)) > 1 and f"client_id={controller_bot.user.id}" not in txt:
-            invite = f"[`{disnake.utils.escape_markdown(str(controller_bot.user.name))}`](https://discord.com/oauth2/authorize?client_id={controller_bot.user.id})"
-            txt = f"## Registrar/Integrar os comandos de barra:\n{invite}\n\n" + txt
-
         color = self.bot.get_color(inter.guild.me if inter.guild else guild.me if guild else None)
 
         embeds = [
@@ -931,9 +886,6 @@ class GuildLog(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: disnake.Guild):
 
-        if str(self.bot.user.id) in self.bot.config["INTERACTION_BOTS_CONTROLLER"]:
-            return
-
         print(f"Removido do servidor: {guild.name} - [{guild.id}]")
 
         try:
@@ -955,9 +907,6 @@ class GuildLog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: disnake.Guild):
-
-        if str(self.bot.user.id) in self.bot.config["INTERACTION_BOTS_CONTROLLER"]:
-            return
 
         print(f"{self.bot.user.name} - Adicionado(a) no servidor: {guild.name} - [{guild.id}]")
 
