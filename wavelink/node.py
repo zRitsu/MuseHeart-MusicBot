@@ -264,6 +264,10 @@ class Node:
 
                 await asyncio.sleep(1.5)
 
+        if new_node := self._client.get_best_node(ignore_node=self):
+            await self.players[guild_id].change_node(new_node.identifier)
+            return
+
         raise WavelinkException(f"{self.identifier}: UpdatePlayer Failed = {resp.status}: {resp_data}")
 
     async def get_tracks(self, query: str, *, retry_on_failure: bool = True, **kwargs) -> Union[list, TrackPlaylist, None]:

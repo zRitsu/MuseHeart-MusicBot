@@ -189,7 +189,7 @@ class Client:
         """
         return self.nodes.get(identifier, None)
 
-    def get_best_node(self) -> Optional[Node]:
+    def get_best_node(self, ignore_node: Node = None) -> Optional[Node]:
         """Return the best available :class:`wavelink.node.Node` across the :class:`.Client`.
 
         Returns
@@ -197,7 +197,7 @@ class Client:
         Optional[:class:`wavelink.node.Node`]
             The best available :class:`wavelink.node.Node` available to the :class:`.Client`.
         """
-        nodes = [n for n in self.nodes.values() if n.available and n.is_available]
+        nodes = [n for n in self.nodes.values() if n != ignore_node and n.available and n.is_available]
         if not nodes:
             return None
 
