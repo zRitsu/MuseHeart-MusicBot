@@ -264,7 +264,7 @@ class Node:
 
                 await asyncio.sleep(1.5)
 
-        raise WavelinkException(f"UpdatePlayer Failed: {resp.status}: {resp_data}")
+        raise WavelinkException(f"{self.identifier}: UpdatePlayer Failed = {resp.status}: {resp_data}")
 
     async def get_tracks(self, query: str, *, retry_on_failure: bool = True, **kwargs) -> Union[list, TrackPlaylist, None]:
         """|coro|
