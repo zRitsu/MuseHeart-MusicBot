@@ -2873,7 +2873,9 @@ class Music(commands.Cog):
         if isinstance(inter, disnake.MessageInteraction):
             player.set_command_log(text=f"{inter.author.mention} " + txt[0], emoji="🔃")
         else:
-            await self.interaction_message(inter, txt, emoji="🔃")
+            await self.interaction_message(inter, txt, emoji="🔃", components=[
+                disnake.ui.Button(emoji="▶️", label="Tocar agora", custom_id=PlayerControls.embed_forceplay),
+            ])
 
         await player.update_message()
 
@@ -4269,6 +4271,10 @@ class Music(commands.Cog):
         except:
             pass
 
+        components = [
+                disnake.ui.Button(emoji="▶️", label="Tocar agora", custom_id=PlayerControls.embed_forceplay),
+            ]
+
         if indexes:
             track = tracklist[0]
             txt = [
@@ -4277,7 +4283,7 @@ class Music(commands.Cog):
                 f"╰[`{fix_characters(track.title, limit=43)}`](<{track.uri or track.search_uri}>)"
             ]
 
-            await self.interaction_message(inter, txt, emoji="↪️")
+            await self.interaction_message(inter, txt, emoji="↪️", components=components)
 
         else:
 
@@ -4294,7 +4300,7 @@ class Music(commands.Cog):
 
             txt = [f"moveu {moved_tracks} música{'s'[:moved_tracks^1]} para a posição **[{position}]** da fila.", msg_txt]
 
-            await self.interaction_message(inter, txt, emoji="↪️", force=True, thumb=tracklist[0].thumb)
+            await self.interaction_message(inter, txt, emoji="↪️", force=True, thumb=tracklist[0].thumb, components=components)
 
     @move.autocomplete("playlist")
     @clear.autocomplete("playlist")
@@ -5096,7 +5102,9 @@ class Music(commands.Cog):
             try:
                 try:
                     if not (url:=interaction.message.embeds[0].author.url):
-                        return
+                        if not (matches:=URL_REG.findall(interaction.message.embeds[0].description)):
+                            return
+                        url = matches[0]
                 except:
                     return
 
@@ -6518,7 +6526,7 @@ class Music(commands.Cog):
 
     async def interaction_message(self, inter: Union[disnake.Interaction, CustomContext], txt, emoji: str = "✅",
                                   rpc_update: bool = False, data: dict = None, store_embed: bool = False, force=False,
-                                  defered=False, thumb=None):
+                                  defered=False, thumb=None, components=None):
 
         try:
             txt, txt_ephemeral = txt
@@ -6562,12 +6570,15 @@ class Music(commands.Cog):
                 player.temp_embed = embed
 
             else:
+                kwargs = {"components": components} if components else {}
                 try:
-                    await inter.store_message.edit(embed=embed, view=None, content=None)
+                    await inter.store_message.edit(embed=embed, view=None, content=None, **kwargs)
                 except AttributeError:
-                    await inter.send(embed=embed)
+                    await inter.send(embed=embed, **kwargs)
 
         elif not component_interaction:
+            
+            kwargs = {"components": components} if components else {}
 
             embed = disnake.Embed(
                 color=self.bot.get_color(guild.me),
@@ -6584,10 +6595,10 @@ class Music(commands.Cog):
                 pass
 
             if not inter.response.is_done():
-                await inter.send(embed=embed, ephemeral=ephemeral)
+                await inter.send(embed=embed, ephemeral=ephemeral, **kwargs)
 
             elif defered:
-                await inter.edit_original_response(embed=embed)
+                await inter.edit_original_response(embed=embed, **kwargs)
 
     @commands.Cog.listener("on_wavelink_node_connection_closed")
     async def node_connection_closed(self, node: wavelink.Node):
