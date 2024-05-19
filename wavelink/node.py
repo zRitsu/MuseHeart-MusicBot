@@ -206,7 +206,10 @@ class Node:
                     await asyncio.sleep(backoff)
                     continue
 
-        self.plugin_names = set([p["name"] for p in self.info["plugins"]])
+        if self.version < 4:
+            self.plugin_names = set()
+        else:
+            self.plugin_names = set([p["name"] for p in self.info["plugins"]])
 
         if not self._websocket:
 
