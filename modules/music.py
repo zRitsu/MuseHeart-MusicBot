@@ -5104,7 +5104,7 @@ class Music(commands.Cog):
                     if not (url:=interaction.message.embeds[0].author.url):
                         if not (matches:=URL_REG.findall(interaction.message.embeds[0].description)):
                             return
-                        url = matches[0]
+                        url = matches[0].strip("<>")
                 except:
                     return
 
