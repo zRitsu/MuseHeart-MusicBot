@@ -7190,13 +7190,21 @@ class Music(commands.Cog):
 
     async def reset_controller_db(self, guild_id: int, data: dict, inter: disnake.AppCmdInter = None):
 
-        try:
-            bot = inter.music_bot
-        except AttributeError:
-            bot = inter.bot
-
         data['player_controller']['channel'] = None
         data['player_controller']['message_id'] = None
+
+        if inter:
+            try:
+                bot = inter.music_bot
+            except AttributeError:
+                bot = inter.bot
+        else:
+            bot = self.bot
+
+        try:
+            await bot.update_data(guild_id, data, db_name=DBModel.guilds)
+        except Exception:
+            traceback.print_exc()
 
         try:
             player: LavalinkPlayer = bot.music.players[guild_id]
@@ -7205,18 +7213,14 @@ class Music(commands.Cog):
 
         player.static = False
 
-        try:
-            if isinstance(inter.channel.parent, disnake.TextChannel):
-                player.text_channel = inter.channel.parent
-            else:
+        if inter:
+            try:
+                if isinstance(inter.channel.parent, disnake.TextChannel):
+                    player.text_channel = inter.channel.parent
+                else:
+                    player.text_channel = inter.channel
+            except AttributeError:
                 player.text_channel = inter.channel
-        except AttributeError:
-            player.text_channel = inter.channel
-
-        try:
-            await bot.update_data(guild_id, data, db_name=DBModel.guilds)
-        except Exception:
-            traceback.print_exc()
 
     async def get_best_node(self, bot: BotCore = None):
 

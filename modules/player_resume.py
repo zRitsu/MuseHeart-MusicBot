@@ -461,6 +461,13 @@ class PlayerSession(commands.Cog):
                         if not data["skin_static"]:
                             await text_channel.send(embed=disnake.Embed(description=msg, color=self.bot.get_color(guild.me)))
                         else:
+                            if isinstance(text_channel, disnake.ForumChannel):
+                                cog = self.bot.get_cog("Music")
+                                if cog:
+                                    await cog.reset_controller_db(guild.id, guild_data)
+                                print(f"{self.bot.user} - Controller resetado por config de canal inválido.\n"
+                                      f"Server: {guild.name} [{guild.id}] | channel: {text_channel.name} [{text_channel.id}] {type(text_channel)}")
+                                return
                             await send_idle_embed(text_channel, bot=self.bot, text=msg)
                     except Exception:
                         traceback.print_exc()
