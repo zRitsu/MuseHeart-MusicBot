@@ -1033,7 +1033,7 @@ class LavalinkPlayer(wavelink.Player):
                     except:
                         pass
                     self._new_node_task = self.bot.loop.create_task(
-                        self._wait_for_new_node(ignore_node=self.node.identifier))
+                        self._wait_for_new_node(ignore_node=self.node))
                     return
 
                 self.retries_general_errors["last_time"] = disnake.utils.utcnow()
@@ -2869,7 +2869,10 @@ class LavalinkPlayer(wavelink.Player):
 
         return
 
-    async def _wait_for_new_node(self, txt: str = None, ignore_node=None):
+    async def _wait_for_new_node(self, txt: str = None, ignore_node: wavelink.Node = None):
+
+        if self.node.is_available:
+            return
 
         self.locked = True
 
@@ -2878,75 +2881,75 @@ class LavalinkPlayer(wavelink.Player):
         except:
             pass
 
-        original_identifier = str(self.node.identifier)
+        try:
 
-        self.set_command_log(
-            txt or "Não há servidores de música disponível. Irei fazer algumas tentativas de conectar em um novo servidor de música.",
-            emoji="⏰"
-        )
-        self.update = True
+            original_identifier = str(self.node.identifier)
 
-        while True:
+            self.set_command_log(
+                txt or "Não há servidores de música disponível. Irei fazer algumas tentativas de conectar em um novo servidor de música.",
+                emoji="⏰"
+            )
+            self.update = True
 
-            nodes = sorted([n for n in self.bot.music.nodes.values() if n.is_available and n.identifier != ignore_node],
-                              key=lambda n: len(n.players))
-            if not nodes:
-                await asyncio.sleep(5)
-                continue
+            while True:
 
-            node = nodes[0]
+                node = self.bot.music.get_best_node(ignore_node=ignore_node)
 
-            self.native_yt = True
+                if not node:
+                    await asyncio.sleep(5)
+                    continue
 
-            try:
-                self.node.players[self.guild_id]
-            except KeyError:
-                return
+                self.native_yt = True
 
-            try:
-                if self.guild.me.voice and self._voice_state:
-                    await self._dispatch_voice_update()
-                else:
-                    await self.change_node(node.identifier)
-            except:
-                traceback.print_exc()
-                await asyncio.sleep(5)
-                continue
-
-            if not self.guild.me.voice:
                 try:
-                    can_connect(self.last_channel, self.guild, bot=self.bot)
-                except Exception as e:
-                    self.set_command_log(f"O player foi finalizado devido ao erro: {e}")
-                    await self.destroy()
+                    self.node.players[self.guild_id]
+                except KeyError:
                     return
-                await self.connect(self.last_channel.id)
 
-            self.locked = False
-
-            if self.current:
-                self.queue.appendleft(self.current)
-                start_position = self.position
-                self.current = None
-            else:
-                start_position = 0
-            await self.process_next(start_position=start_position)
-
-            try:
-                if not self.auto_pause:
-                    if original_identifier != node.identifier:
-                        txt = f"O player foi movido para o servidor de música **{node.identifier}**."
+                try:
+                    if node == self.node and self.guild.me.voice and self._voice_state:
+                        await self._dispatch_voice_update()
                     else:
-                        txt = f"O player foi reconectado no servidor de músca **{self.node.identifier}**"
+                        await self.change_node(node.identifier)
+                except:
+                    await asyncio.sleep(5)
+                    continue
 
-                    self.set_command_log(emoji="📶", text=txt)
+                if not self.guild.me.voice:
+                    try:
+                        can_connect(self.last_channel, self.guild, bot=self.bot)
+                    except Exception as e:
+                        print(traceback.format_exc())
+                        self.set_command_log(f"O player foi finalizado devido ao erro: {e}")
+                        await self.destroy()
+                        return
+                    await self.connect(self.last_channel.id)
 
-                    await self.invoke_np(force=True)
-            except:
-                traceback.print_exc()
+                self.locked = False
 
-            self._new_node_task = None
-            return
+                if self.current:
+                    self.queue.appendleft(self.current)
+                    start_position = self.position
+                    self.current = None
+                else:
+                    start_position = 0
+
+                await self.process_next(start_position=start_position)
+
+                try:
+                    if not self.auto_pause:
+                        if original_identifier != node.identifier:
+                            txt = f"O player foi movido para o servidor de música **{node.identifier}**."
+                        else:
+                            txt = f"O player foi reconectado no servidor de músca **{self.node.identifier}**"
+                        self.set_command_log(emoji="📶", text=txt)
+                        self.update = True
+                except:
+                    print(traceback.format_exc())
+                self._new_node_task = None
+                return
+        except Exception:
+            traceback.print_exc()
 
     async def _send_rpc_data(self, users: List[int], stats: dict):
 
