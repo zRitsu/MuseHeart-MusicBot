@@ -6685,7 +6685,7 @@ class Music(commands.Cog):
 
     @commands.Cog.listener("on_wavelink_node_ready")
     async def node_ready(self, node: wavelink.Node):
-        print(f'✅ - {self.bot.user} - Servidor de música: [{node.identifier} / v{node.version}] está pronto para uso!')
+        print(f'🌋 - {self.bot.user} - Servidor de música: [{node.identifier} / v{node.version}] está pronto para uso!')
         retries = 25
         while retries > 0:
 

@@ -644,7 +644,7 @@ class PlayerSession(commands.Cog):
                     print(f"{self.bot.user} - Falha na reprodução da música ao retomar player do servidor {guild.name} [{guild.id}]:\n{traceback.format_exc()}")
                     return
 
-            print(f"{self.bot.user} - Player Retomado: {guild.name} [{guild.id}] - Server: {player.node.identifier}")
+            print(f"▶️ - {self.bot.user} - Player Retomado: {guild.name} [{guild.id}] - Server: {player.node.identifier}")
 
         except Exception:
             print(f"{self.bot.user} - Falha Crítica ao retomar players:\n{traceback.format_exc()}")

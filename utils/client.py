@@ -728,7 +728,7 @@ class BotPool:
 
                     bot.bot_ready = True
 
-                print(f'{bot.user} - [{bot.user.id}] Online.')
+                print(f'🟢 - {bot.user} - [{bot.user.id}] Online.')
 
             if guild_id:
                 bot.exclusive_guild_id = int(guild_id)
@@ -1004,7 +1004,7 @@ class BotCore(commands.AutoShardedBot):
 
         if current_cmds == synced_cmds:
             if current_cmds:
-                print(f"{self.user} - Os comandos já estão sincronizados.")
+                print(f"⚠️ - {self.user} - Os comandos já estão sincronizados.")
             return
 
         self._command_sync_flags = self.pool.command_sync_config
@@ -1319,22 +1319,22 @@ class BotCore(commands.AutoShardedBot):
                     try:
                         self.reload_extension(module_filename)
                         if not self.bot_ready:
-                            print(f"{'=' * 48}\n[OK] {bot_name} - {filename}.py Recarregado.")
+                            print(f"{'=' * 48}\n🟦 - {bot_name} - {filename}.py Recarregado.")
                         load_status["reloaded"].append(f"{filename}.py")
                     except (commands.ExtensionAlreadyLoaded, commands.ExtensionNotLoaded):
                         try:
                             self.load_extension(module_filename)
                             if not self.bot_ready:
-                                print(f"{'=' * 48}\n[OK] {bot_name} - {filename}.py Carregado.")
+                                print(f"{'=' * 48}\n🟩 - {bot_name} - {filename}.py Carregado.")
                             load_status["loaded"].append(f"{filename}.py")
                         except Exception as e:
-                            print(f"{'=' * 48}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename}\n")
+                            print(f"{'=' * 48}\n❌- {bot_name} - Falha ao carregar/recarregar o módulo: {filename}\n")
                             if not self.bot_ready:
                                 raise e
                             load_status["failed"].append(f"{filename}.py")
                             traceback.print_exc()
                     except Exception as e:
-                        print(f"{'=' * 48}\n[ERRO] {bot_name} - Falha ao carregar/recarregar o módulo: {filename}")
+                        print(f"{'=' * 48}\n\❌ - {bot_name} - Falha ao carregar/recarregar o módulo: {filename}")
                         if not self.bot_ready:
                             raise e
                         load_status["failed"].append(f"{filename}.py")
