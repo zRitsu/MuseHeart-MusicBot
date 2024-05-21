@@ -1440,7 +1440,7 @@ class LavalinkPlayer(wavelink.Player):
 
             for track_data in tracks_search:
 
-                if track_data.info["sourceName"] == "spotify" and self.bot.spotify:
+                if track_data.info["sourceName"] == "spotify" and "spotify" not in self.node.info["sourceManagers"] and self.bot.spotify:
                     track_ids = list(set(t.identifier for t in tracks_search if t.info["sourceName"] == "spotify"))[:5]
 
                     result = None
