@@ -384,10 +384,7 @@ class LavalinkTrack(wavelink.Track):
 
     @property
     def thumb(self) -> str:
-        try:
-            return self.info["extra"]["thumb"] or ""
-        except KeyError:
-            return self.info["artworkUrl"] or ""
+        return self.info["artworkUrl"] or ""
 
     @property
     def name(self) -> str:
