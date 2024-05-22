@@ -123,8 +123,7 @@ class Track:
                  'uri',
                  'author',
                  'is_stream',
-                 'dead',
-                 'thumb')
+                 'dead')
 
     def __init__(self, id_, info: dict, query: str = None, *args, **kwargs):
         self.id = id_
@@ -143,13 +142,12 @@ class Track:
         self.is_stream = info.get('isStream')
         self.dead = False
 
-        if self.ytid:
-            self.thumb = f"https://img.youtube.com/vi/{self.ytid}/hqdefault.jpg"
-        else:
-            self.thumb = None
-
     def __str__(self):
         return self.title
+
+    @property
+    def thumb(self):
+        return f"https://img.youtube.com/vi/{self.ytid}/hqdefault.jpg" if self.ytid else ""
 
     @property
     def is_dead(self):

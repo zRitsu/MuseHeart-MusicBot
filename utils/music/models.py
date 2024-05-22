@@ -93,7 +93,7 @@ class PartialPlaylist:
 
 
 class PartialTrack:
-    __slots__ = ('id', 'thumb', 'source_name', 'info', 'playlist', 'unique_id', 'ytid', 'temp_id')
+    __slots__ = ('id', 'source_name', 'info', 'playlist', 'unique_id', 'ytid', 'temp_id')
 
     def __init__(self, *, uri: str = "", title: str = "", author="", thumb: str = "", duration: int = 0,
                  requester: int = 0, track_loops: int = 0, source_name: str = "", autoplay: bool = False,
@@ -120,12 +120,21 @@ class PartialTrack:
         self.id = None
         self.ytid = ""
         self.unique_id = str(uuid.uuid4().hex)[:10]
-        self.thumb = self.info["extra"]["thumb"]
         self.temp_id = None
         self.playlist: Optional[PartialPlaylist] = playlist
 
     def __repr__(self):
         return f"{self.info['sourceName']} - {self.duration} - {self.authors_string} - {self.title}"
+
+    @property
+    def thumb(self) -> str:
+        try:
+            return self.info["extra"]["thumb"]
+        except KeyError:
+            try:
+                return self.info["artworkUrl"]
+            except KeyError:
+                return ""
 
     @property
     def uri(self) -> str:
@@ -351,7 +360,7 @@ class LavalinkTrack(wavelink.Track):
             "playlist", None)
 
         if self.info["sourceName"] == "youtube":
-            self.info["extra"]["thumb"] = f"https://img.youtube.com/vi/{self.ytid}/mqdefault.jpg"
+            self.info["artworkUrl"] = f"https://img.youtube.com/vi/{self.ytid}/mqdefault.jpg"
             if "list=" not in self.uri:
                 try:
                     self.uri = f"{self.uri}&list={parse.parse_qs(parse.urlparse(self.playlist_url).query)['list'][0]}"
@@ -361,7 +370,7 @@ class LavalinkTrack(wavelink.Track):
 
         elif self.info["sourceName"] == "soundcloud":
 
-            self.info["extra"]["thumb"] = self.info.get("artworkUrl", "").replace('large.jpg', 't500x500.jpg')
+            self.info["artworkUrl"] = self.info.get("artworkUrl", "").replace('large.jpg', 't500x500.jpg')
 
             if "?in=" not in self.uri:
                 try:
@@ -370,13 +379,15 @@ class LavalinkTrack(wavelink.Track):
                 except:
                     pass
 
-        else:
-            self.info["extra"]["thumb"] = self.info.get("artworkUrl", "")
-
-        self.thumb = self.info["extra"]["thumb"] or kwargs.get("thumb") or ""
-
     def __repr__(self):
         return f"{self.info['sourceName']} - {self.duration if not self.is_stream else 'stream'} - {self.authors_string} - {self.title}"
+
+    @property
+    def thumb(self) -> str:
+        try:
+            return self.info["extra"]["thumb"] or ""
+        except KeyError:
+            return self.info["artworkUrl"] or ""
 
     @property
     def name(self) -> str:
