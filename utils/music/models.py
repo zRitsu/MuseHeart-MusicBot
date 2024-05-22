@@ -370,7 +370,7 @@ class LavalinkTrack(wavelink.Track):
 
         elif self.info["sourceName"] == "soundcloud":
 
-            self.info["artworkUrl"] = self.info.get("artworkUrl", "").replace('large.jpg', 't500x500.jpg')
+            self.info["artworkUrl"] = self.info.get("artworkUrl", "").replace('-large.', '-t500x500.')
 
             if "?in=" not in self.uri:
                 try:
