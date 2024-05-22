@@ -545,15 +545,8 @@ class LavalinkPlayer(wavelink.Player):
         self._queue_updater_task: Optional[asyncio.Task] = None
         self.auto_skip_track_task: Optional[asyncio.Task] = None
         self.native_yt: bool = True
-
-        stage_template = kwargs.pop("stage_title_template", None)
-
-        self.stage_title_event = kwargs.pop("stage_title_event", None)
-
-        if self.stage_title_event is None:
-            self.stage_title_event = bool(stage_template)
-
-        self.stage_title_template: str = stage_template or "Tocando: {track.title} | {track.author}"
+        self.stage_title_event = False
+        self.stage_title_template: str = kwargs.pop("stage_title_template", None) or "Tocando: {track.title} | {track.author}"
         self.last_stage_title = ""
 
         self.purge_mode = kwargs.pop("purge_mode", SongRequestPurgeMode.on_message)
