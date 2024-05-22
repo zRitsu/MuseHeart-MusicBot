@@ -284,7 +284,7 @@ class LavalinkPlaylist:
         try:
             playlist = self if pluginInfo["type"] == "playlist" else None
             if pluginInfo["type"] == "album":
-                thumb = self.data["playlistInfo"]["thumb"]
+                thumb = self.thumb
         except KeyError:
             playlist = self
         self.tracks = [LavalinkTrack(
