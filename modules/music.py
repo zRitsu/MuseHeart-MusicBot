@@ -4884,7 +4884,7 @@ class Music(commands.Cog):
                         else:
                             if channel_db.owner != bot.user.id:
 
-                                if not isinstance(channel_db.parent, disnake.ForumChannel):
+                                if not isinstance(channel_db.parent, disnake.ForumChannel) or not channel_db.parent.permissions_for(channel_db.guild.me).create_forum_threads:
                                     await self.reset_controller_db(inter.guild_id, guild_data, inter)
                                     channel_db = None
                                 else:
