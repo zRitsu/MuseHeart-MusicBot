@@ -141,7 +141,9 @@ class Track:
 
         if self.ytid:
             self.info["artworkUrl"] = f"https://img.youtube.com/vi/{self.ytid}/hqdefault.jpg"
-        elif self.info.get("artworkUrl") is None:
+        elif arturl:=self.info["pluginInfo"].get("artworkUrl"):
+            self.info["artworkUrl"] = arturl
+        elif arturl is None:
             self.info["artworkUrl"] = ""
 
         self.is_stream = info.get('isStream')

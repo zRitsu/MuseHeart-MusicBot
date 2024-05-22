@@ -379,6 +379,9 @@ class LavalinkTrack(wavelink.Track):
                 except:
                     pass
 
+        elif thumb:=kwargs.get("thumb"):
+            self.info["artworkUrl"] = thumb
+
     def __repr__(self):
         return f"{self.info['sourceName']} - {self.duration if not self.is_stream else 'stream'} - {self.authors_string} - {self.title}"
 
