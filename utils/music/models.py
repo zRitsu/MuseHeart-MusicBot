@@ -280,12 +280,15 @@ class LavalinkPlaylist:
         except IndexError:
             pass
         pluginInfo = kwargs.pop("pluginInfo", {})
+        thumb = None
         try:
             playlist = self if pluginInfo["type"] == "playlist" else None
+            if pluginInfo["type"] == "album":
+                thumb = self.data["playlistInfo"]["thumb"]
         except KeyError:
             playlist = self
         self.tracks = [LavalinkTrack(
-            id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo", {}), playlist=playlist, **kwargs) for track in data['tracks']]
+            id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo", {}), thumb=thumb, playlist=playlist, **kwargs) for track in data['tracks']]
 
     @property
     def uri(self):
@@ -358,8 +361,7 @@ class LavalinkTrack(wavelink.Track):
 
         elif self.info["sourceName"] == "soundcloud":
 
-            self.info["extra"]["thumb"] = self.info.get(
-                "artworkUrl", "").replace('large.jpg', 't500x500.jpg')
+            self.info["extra"]["thumb"] = self.info.get("artworkUrl", "").replace('large.jpg', 't500x500.jpg')
 
             if "?in=" not in self.uri:
                 try:
@@ -371,7 +373,7 @@ class LavalinkTrack(wavelink.Track):
         else:
             self.info["extra"]["thumb"] = self.info.get("artworkUrl", "")
 
-        self.thumb = self.info["extra"]["thumb"] or ""
+        self.thumb = self.info["extra"]["thumb"] or kwargs.get("thumb") or ""
 
     def __repr__(self):
         return f"{self.info['sourceName']} - {self.duration if not self.is_stream else 'stream'} - {self.authors_string} - {self.title}"
