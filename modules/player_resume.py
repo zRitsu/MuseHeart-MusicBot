@@ -526,7 +526,6 @@ class PlayerSession(commands.Cog):
                         custom_skin_static_data=data.get("custom_skin_static_data", {}),
                         extra_hints=hints,
                         uptime=data.get("uptime"),
-                        stage_title_event=data.get("stage_title_event", False),
                         stage_title_template=data.get("stage_title_template"),
                         restrict_mode=data["restrict_mode"],
                         prefix=data["prefix_info"],
@@ -551,6 +550,8 @@ class PlayerSession(commands.Cog):
 
                 if temp_purge_mode:
                     player.purge_mode = SongRequestPurgeMode.on_player_start
+
+                player.stage_title_event = data.get("stage_title_event", False)
 
                 player.listen_along_invite = data.pop("listen_along_invite", "")
 
