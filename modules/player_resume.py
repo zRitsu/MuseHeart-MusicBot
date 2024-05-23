@@ -14,7 +14,6 @@ import aiofiles
 import disnake
 from disnake.ext import commands
 
-import wavelink
 from utils.client import BotCore
 from utils.db import DBModel
 from utils.music.checks import can_connect, can_send_message
@@ -49,13 +48,13 @@ class PlayerSession(commands.Cog):
 
         await self.delete_data(player)
 
-    @commands.Cog.listener('on_wavelink_track_end')
-    async def track_end(self, node, payload: wavelink.TrackStart):
+    @commands.Cog.listener('wavelink_track_end')
+    async def track_end(self, player: LavalinkPlayer):
 
-        if len(payload.player.queue) > 0:
+        if len(player.queue) > 0:
             return
 
-        await self.save_info(payload.player)
+        await self.save_info(player)
 
     @commands.is_owner()
     @commands.command(hidden=True, description="Salvar informações dos players na database instantaneamente.", aliases=["svplayers"])

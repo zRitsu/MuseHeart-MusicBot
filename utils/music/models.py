@@ -779,7 +779,7 @@ class LavalinkPlayer(wavelink.Player):
             if event.node != self.node:
                 return
 
-            self.bot.dispatch("wavelink_track_end", self.node, event)
+            self.bot.dispatch("wavelink_track_end", player=self)
 
             if self.locked:
                 return
@@ -817,7 +817,7 @@ class LavalinkPlayer(wavelink.Player):
 
             self.start_time = disnake.utils.utcnow()
 
-            self.bot.dispatch("wavelink_track_start", node=self, payload=event)
+            self.bot.dispatch("wavelink_track_start", player=self)
 
             if not self.text_channel:
                 return
