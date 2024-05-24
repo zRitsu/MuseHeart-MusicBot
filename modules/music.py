@@ -350,7 +350,6 @@ class Music(commands.Cog):
                 default="no",
                 choices=[
                     disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
-                    disnake.OptionChoice(disnake.Localized("No", data={disnake.Locale.pt_BR: "Não"}), "no")
                 ]
             ),
             options: str = commands.Param(name="opções", description="Opções para processar playlist",
@@ -648,7 +647,6 @@ class Music(commands.Cog):
                 default="no",
                 choices=[
                     disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
-                    disnake.OptionChoice(disnake.Localized("No", data={disnake.Locale.pt_BR: "Não"}), "no")
                 ]
             ),
             repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.",
@@ -2044,9 +2042,6 @@ class Music(commands.Cog):
                 choices=[
                     disnake.OptionChoice(
                         disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"
-                    ),
-                    disnake.OptionChoice(
-                        disnake.Localized("No", data={disnake.Locale.pt_BR: "Não"}), "no"
                     )
                 ],
                 description="Apenas tocar a música imediatamente (sem rotacionar a flia)",
