@@ -3153,7 +3153,10 @@ class Music(commands.Cog):
         if footer_kw:
             embed.set_footer(**footer_kw)
 
-        await inter.send(inter.author.mention, embed=embed, ephemeral=ephemeral, components=components)
+        if isinstance(inter, disnake.MessageInteraction):
+            await inter.response.edit_message(inter.author.mention, embed=embed, components=components)
+        else:
+            await inter.send(inter.author.mention, embed=embed, ephemeral=ephemeral, components=components)
 
     @commands.Cog.listener("on_button_click")
     async def reload_np(self, inter: disnake.MessageInteraction):
