@@ -138,7 +138,7 @@ class LastFmCog(commands.Cog):
         embed = disnake.Embed(
             description="**Conecte ou crie uma conta no [last.fm](<https://www.last.fm/home>) para registrar todas as músicas "
                         "que você ouvir por aqui no seu perfil do last.fm para obter sugestões de artistas, músicas "
-                        "e econtrar usuários em comum do last.fm que também curtem suas músicas/gêneros favoritos e etc.**",
+                        "e encontrar usuários em comum do last.fm que também curtem suas músicas/gêneros favoritos e etc.**",
             color=self.bot.get_color()
         ).set_thumbnail(url="https://www.last.fm/static/images/lastfm_avatar_twitter.52a5d69a85ac.png")
 
