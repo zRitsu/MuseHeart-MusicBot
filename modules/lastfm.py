@@ -22,6 +22,12 @@ class MyNetWork(pylast.LastFMNetwork):
     last_duration: int = 0
     last_timestamp: Optional[datetime.datetime] = None
 
+class MySessionKeyGenerator(pylast.SessionKeyGenerator):
+
+    def get_web_auth_session_key(self, url, token: str = ""):
+        session_key, _username = self.get_web_auth_session_key_username(url, token)
+        return session_key, _username
+
 
 class LastFMView(disnake.ui.View):
 
@@ -30,6 +36,7 @@ class LastFMView(disnake.ui.View):
         self.ctx = ctx
         self.interaction: Optional[disnake.MessageInteraction] = None
         self.session_key = ""
+        self.username = ""
         self.auth_url = None
         self.skg = None
         self.network = None
@@ -59,7 +66,7 @@ class LastFMView(disnake.ui.View):
         while count > 0:
             try:
                 await asyncio.sleep(15)
-                self.session_key = await self.ctx.bot.loop.run_in_executor(None, lambda: self.skg.get_web_auth_session_key(self.auth_url))
+                self.session_key, self.username = await self.ctx.bot.loop.run_in_executor(None, lambda: self.skg.get_web_auth_session_key(self.auth_url))
                 self.stop()
                 return
             except pylast.WSError:
@@ -91,7 +98,7 @@ class LastFMView(disnake.ui.View):
 
         if not self.skg:
             self.network = pylast.LastFMNetwork(self.ctx.bot.pool.config["LASTFM_KEY"], self.ctx.bot.pool.config["LASTFM_SECRET"])
-            self.skg = pylast.SessionKeyGenerator(self.network)
+            self.skg = MySessionKeyGenerator(self.network)
 
         self.check_loop = self.ctx.bot.loop.create_task(self.check_session_loop())
         self.auth_url = await self.ctx.bot.loop.run_in_executor(None, lambda: self.skg.get_web_auth_url())
@@ -188,9 +195,9 @@ class LastFmCog(commands.Cog):
         self.bot.pool.lastfm_sessions[inter.author.id] = newdata
 
         if view.session_key:
-            embed.description += "\n### A sua conta do [last.fm](<https://www.last.fm/home>) foi " + \
-                                 ("conectada" if not current_session_key else "reconectada") + \
-                                 " com sucesso!\n\n`Agora ao ouvir suas músicas no canal de voz elas serão registradas " \
+
+            embed.description += f"\n### A conta [{view.username}](<https://www.last.fm/user/{view.username}>) foi " + \
+                                 "vinculada com sucesso!\n\n`Agora ao ouvir suas músicas no canal de voz elas serão registradas " \
                                 "na sua conta do last.fm`"
         else:
             embed.description += "\n### Você desconectou sua conta do [last.fm](<https://www.last.fm/home>)."
