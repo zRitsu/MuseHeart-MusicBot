@@ -29,9 +29,6 @@ class LastFMView(disnake.ui.View):
         btn.callback = self.ephemeral_callback
         self.add_item(btn)
 
-    async def on_timeout(self) -> None:
-        for c in self.children:
-            c.disabled = True
 
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
         if interaction.user.id != self.ctx.author.id:
@@ -51,17 +48,16 @@ class LastFmCog(commands.Cog):
         if not hasattr(bot.pool, "lastfm_sessions"):
             bot.pool.lastfm_sessions = {}
 
-        if not self.bot.pool.skg:
-            self.bot.pool.skg = pylast.SessionKeyGenerator(
-                pylast.LastFMNetwork(self.bot.pool.config["LASTFM_KEY"], self.bot.pool.config["LASTFM_SECRET"])
-            )
-
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.max_concurrency(1, commands.BucketType.user)
     @commands.command(hidden=True, name="lastfm", aliases=["scb", "scrobbler", "lfm"])
     async def scrobbler_legacy(self, ctx: CustomContext):
 
-        url = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.skg.get_web_auth_url())
+        network = pylast.LastFMNetwork(self.bot.pool.config["LASTFM_KEY"], self.bot.pool.config["LASTFM_SECRET"])
+
+        skg = pylast.SessionKeyGenerator(network)
+
+        url = await self.bot.loop.run_in_executor(None, lambda: skg.get_web_auth_url())
 
         embed = disnake.Embed(
             description="Integre sua conta do [last.fm](<https://www.last.fm/home>) para registrar todas as músicas "
@@ -77,18 +73,40 @@ class LastFmCog(commands.Cog):
 
         ctx.store_message = msg
 
-        await view.wait()
+        count = 4
 
-        try:
-            session_key = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.skg.get_web_auth_session_key(url))
-        except pylast.WSError as e:
-            if "This token has not been authorized" in e.status:
-                await msg.edit(embed=disnake.Embed(
-                    description="### O tempo para linkar sua conta do last.fm expirou!\n\n"
-                                "Use o comando novamente caso queira repetir o processo.",
-                    color=self.bot.get_color(ctx.guild.me)))
-                return
-            raise e
+        error = None
+
+        session_key = None
+
+        while count > 0:
+            try:
+                await asyncio.sleep(15)
+                session_key = await self.bot.loop.run_in_executor(None, lambda: skg.get_web_auth_session_key(url))
+                break
+            except pylast.WSError:
+                count -= 1
+                continue
+            except Exception as e:
+                error = e
+                break
+
+        view.stop()
+
+        for c in view.children:
+            c.disabled = True
+
+        if not session_key:
+
+            if error:
+                raise error
+
+            await msg.edit(embed=disnake.Embed(
+                description="\n### O tempo para linkar sua conta do last.fm expirou!\n\n"
+                            "Use o comando novamente caso queira repetir o processo.",
+                color=self.bot.get_color(ctx.guild.me)), view=view)
+
+            return
 
         try:
             data = ctx.global_user_data
@@ -102,7 +120,7 @@ class LastFmCog(commands.Cog):
 
         self.bot.pool.lastfm_sessions[ctx.author.id] = newdata
 
-        embed.description = "### Sua conta do [last.fm](<https://www.last.fm/home>) foi conectada com sucesso!"
+        embed.description += "\n### Sua conta do [last.fm](<https://www.last.fm/home>) foi conectada com sucesso!"
 
         await msg.edit(embed=embed, view=view, content=None)
 

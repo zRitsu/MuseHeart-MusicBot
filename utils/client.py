@@ -27,7 +27,6 @@ from async_timeout import timeout
 from disnake.ext import commands
 from disnake.http import Route
 from dotenv import dotenv_values
-from pylast import SessionKeyGenerator
 from user_agent import generate_user_agent
 
 from config_loader import load_config
@@ -90,7 +89,6 @@ class BotPool:
         self.processing_gc: bool = False
         self.lavalink_connect_queue = {}
         self.lastfm_sessions = {}
-        self.skg: Optional[SessionKeyGenerator] = None
 
     def reset_useragent(self):
         self.current_useragent = generate_user_agent()
