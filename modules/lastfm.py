@@ -25,27 +25,87 @@ class MyNetWork(pylast.LastFMNetwork):
 
 class LastFMView(disnake.ui.View):
 
-    def __init__(self, ctx, url):
-        super().__init__(timeout=60)
+    def __init__(self, ctx, session_key: str):
+        super().__init__(timeout=300)
         self.ctx = ctx
-        self.url = url
+        self.interaction: Optional[disnake.MessageInteraction] = None
+        self.session_key = ""
+        self.auth_url = None
+        self.skg = None
+        self.network = None
+        self.clear_session = False
+        self.check_loop = None
+        self.error = None
+        self.cooldown = commands.CooldownMapping.from_cooldown(1, 15, commands.BucketType.user)
 
-        btn = disnake.ui.Button(label="Integrar sua conta do last.fm")
-        btn.callback = self.ephemeral_callback
-        self.add_item(btn)
+        if session_key:
+            btn = disnake.ui.Button(label="Reconectar sua conta do last.fm")
+            btn.callback = self.send_authurl_callback
+            self.add_item(btn)
 
+            btn2 = disnake.ui.Button(label="Desconectar sua conta do last.fm", style=disnake.ButtonStyle.red)
+            btn2.callback = self.disconnect_account
+            self.add_item(btn2)
+
+        else:
+            btn = disnake.ui.Button(label="Conectar sua conta do last.fm")
+            btn.callback = self.send_authurl_callback
+            self.add_item(btn)
+
+    async def check_session_loop(self):
+
+        count = 8
+
+        while count > 0:
+            try:
+                await asyncio.sleep(15)
+                self.session_key = await self.ctx.bot.loop.run_in_executor(None, lambda: self.skg.get_web_auth_session_key(self.auth_url))
+                self.stop()
+                return
+            except pylast.WSError:
+                count -= 1
+                continue
+            except Exception as e:
+                self.error = e
+                self.stop()
+                return
 
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
         if interaction.user.id != self.ctx.author.id:
             await interaction.send("Você não pode usar esse botão", ephemeral=True)
             return False
-
         return True
 
-    async def ephemeral_callback(self, interaction: disnake.MessageInteraction):
-        await interaction.send(f"### [Clique aqui](<{self.url}>) para integrar sua conta do last.fm", ephemeral=True)
+    async def disconnect_account(self, interaction: disnake.MessageInteraction):
+        self.clear_session = True
+        self.session_key = ""
+        self.interaction = interaction
+        self.stop()
+
+    async def send_authurl_callback(self, interaction: disnake.MessageInteraction):
+
+        if bucket := self.cooldown.get_bucket(interaction):  # type: ignore
+            if retry_after := bucket.update_rate_limit():
+                await interaction.send(f"você terá que aguardar {retry_after} segundo{'s'[:retry_after^1]} para gerar um novo link de acesso.", ephemeral=True)
+                return
+
+        if not self.skg:
+            self.network = pylast.LastFMNetwork(self.ctx.bot.pool.config["LASTFM_KEY"], self.ctx.bot.pool.config["LASTFM_SECRET"])
+            self.skg = pylast.SessionKeyGenerator(self.network)
+
+        self.check_loop = self.ctx.bot.loop.create_task(self.check_session_loop())
+        self.auth_url = await self.ctx.bot.loop.run_in_executor(None, lambda: self.skg.get_web_auth_url())
+
+        await interaction.send(f"### [Clique aqui](<{self.auth_url}>) para integrar sua conta do last.fm\n\n"
+                               f"`Nota: O link expira em` <t:{int((disnake.utils.utcnow() + datetime.timedelta(minutes=2)).timestamp())}:R>"
+                               "`. caso já tenha autorizado a aplicação você deve aguardar até 15 segundos para a mensagem acima atualizar.`",
+                               ephemeral=True)
 
 class LastFmCog(commands.Cog):
+
+    emoji = "🎧"
+    name = "LastFM"
+    desc_prefix = f"[{emoji} {name}] | "
 
     def __init__(self, bot: BotCore):
         self.bot = bot
@@ -53,81 +113,94 @@ class LastFmCog(commands.Cog):
         if not hasattr(bot.pool, "lastfm_sessions"):
             bot.pool.lastfm_sessions = {}
 
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    @commands.max_concurrency(1, commands.BucketType.user)
-    @commands.command(hidden=True, name="lastfm", aliases=["scb", "scrobbler", "lfm"])
-    async def scrobbler_legacy(self, ctx: CustomContext):
+    lastfm_cd = commands.CooldownMapping.from_cooldown(1, 13, commands.BucketType.member)
+    lastfm_mc = commands.MaxConcurrency(1, per=commands.BucketType.user, wait=False)
 
-        network = pylast.LastFMNetwork(self.bot.pool.config["LASTFM_KEY"], self.bot.pool.config["LASTFM_SECRET"])
+    @commands.command(hidden=True, name="lastfm", aliases=["lastfmconnect", "lfm"],
+                      description="Conectar sua conta do last.fm.",
+                      cooldown=lastfm_cd, max_concurrency=lastfm_mc)
+    async def lastfmconnect_legacy(self, ctx: CustomContext):
+        await self.lastfmconnect.callback(self=self, inter=ctx)
 
-        skg = pylast.SessionKeyGenerator(network)
 
-        url = await self.bot.loop.run_in_executor(None, lambda: skg.get_web_auth_url())
+    @commands.slash_command(hidden=True, name="lastfm",
+                      description=f"{desc_prefix}Conectar sua conta do last.fm",
+                      cooldown=lastfm_cd, max_concurrency=lastfm_mc)
+    async def lastfmconnect(self, inter: disnake.AppCmdInter):
+
+        cog = self.bot.get_cog("Music")
+
+        if cog:
+            await inter.response.defer(ephemeral=await cog.is_request_channel(inter, ignore_thread=True))
+        else:
+            await inter.response.defer(ephemeral=True)
 
         embed = disnake.Embed(
-            description="Integre sua conta do [last.fm](<https://www.last.fm/home>) para registrar todas as músicas "
-                        "que você ouvir por aqui para obter sugestões de artistas, músicas e etc pelo site do last.fm."
-                        "\n\n`Nota: Você tem apenas 1 minuto para efetuar esse processo (e aguarde até essa mensagem "
-                        "ser atualizada).`",
-            color=self.bot.get_color(ctx.guild.me)
+            description="**Conecte ou crie uma conta no [last.fm](<https://www.last.fm/home>) para registrar todas as músicas "
+                        "que você ouvir por aqui no seu perfil do last.fm para obter sugestões de artistas, músicas "
+                        "e econtrar usuários em comum do last.fm que também curtem suas músicas/gêneros favoritos e etc.**",
+            color=self.bot.get_color()
         ).set_thumbnail(url="https://www.last.fm/static/images/lastfm_avatar_twitter.52a5d69a85ac.png")
 
-        view = LastFMView(ctx, url)
-
-        msg = await ctx.send(embed=embed, view=view)
-
-        ctx.store_message = msg
-
-        count = 4
-
-        error = None
-
-        session_key = None
-
-        while count > 0:
+        try:
+            data = inter.global_user_data
+        except AttributeError:
+            data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
             try:
-                await asyncio.sleep(15)
-                session_key = await self.bot.loop.run_in_executor(None, lambda: skg.get_web_auth_session_key(url))
-                break
-            except pylast.WSError:
-                count -= 1
-                continue
-            except Exception as e:
-                error = e
-                break
+                inter.global_user_data = data
+            except:
+                pass
 
-        view.stop()
+        current_session_key = data["lastfm"]["sessionkey"]
+
+        view = LastFMView(inter, session_key=current_session_key)
+
+        if isinstance(inter, CustomContext):
+            msg = await inter.send(embed=embed, view=view)
+            inter.store_message = msg
+        else:
+            msg = None
+            await inter.edit_original_message(embed=embed, view=view)
+
+        await view.wait()
 
         for c in view.children:
             c.disabled = True
 
-        if not session_key:
+        if not view.session_key and not view.clear_session:
 
-            if error:
-                raise error
+            if view.error:
+                raise view.error
 
-            await msg.edit(embed=disnake.Embed(
-                description="\n### O tempo para linkar sua conta do last.fm expirou!\n\n"
-                            "Use o comando novamente caso queira repetir o processo.",
-                color=self.bot.get_color(ctx.guild.me)), view=view)
+            embed.set_footer(text="O tempo para linkar sua conta do last.fm expirou! Use o comando novamente caso queira repetir o processo.")
+
+            if msg:
+                await msg.edit(embed=embed, view=view)
+            else:
+                await inter.edit_original_message(embed=embed, view=view)
 
             return
 
-        try:
-            data = ctx.global_user_data
-        except AttributeError:
-            data = await self.bot.get_global_data(ctx.author.id, db_name=DBModel.users)
-            ctx.global_user_data = data
-
-        newdata = {"scrobble": True, "sessionkey": session_key}
+        newdata = {"scrobble": True, "sessionkey": view.session_key}
         data["lastfm"].update(newdata)
-        await self.bot.update_global_data(ctx.author.id, data=data, db_name=DBModel.users)
+        await self.bot.update_global_data(inter.author.id, data=data, db_name=DBModel.users)
 
-        self.bot.pool.lastfm_sessions[ctx.author.id] = newdata
+        self.bot.pool.lastfm_sessions[inter.author.id] = newdata
 
-        embed.description += "\n### Sua conta do [last.fm](<https://www.last.fm/home>) foi conectada com sucesso!"
+        if view.session_key:
+            embed.description += "\n### A sua conta do [last.fm](<https://www.last.fm/home>) foi " + \
+                                 ("conectada" if current_session_key != view.session_key else "reconectada") + \
+                                 " com sucesso!\n\n`Agora ao ouvir suas músicas no canal de voz elas serão registradas " \
+                                "na sua conta do last.fm`"
+        else:
+            embed.description += "\n### Você desconectou sua conta do [last.fm](<https://www.last.fm/home>)."
 
-        await msg.edit(embed=embed, view=view, content=None)
+        if view.interaction:
+            await view.interaction.response.edit_message(embed=embed, view=view, content=None)
+        elif msg:
+            await msg.edit(embed=embed, view=view, content=None)
+        else:
+            await inter.edit_original_message(embed=embed, view=view, content=None)
 
     @commands.Cog.listener("on_voice_state_update")
     async def connect_vc_update(self, member: disnake.Member, before: disnake.VoiceState, after: disnake.VoiceState):
