@@ -221,7 +221,7 @@ class LastFmCog(commands.Cog):
             return
 
         try:
-            if not player.current or member.id not in player.last_channel.voice_states:
+            if not player.current or member.id not in after.channel.voice_states:
                 return
         except AttributeError:
             return
