@@ -186,6 +186,8 @@ class LastFmCog(commands.Cog):
         if not users:
             users = player.last_channel.members
 
+        networks = set()
+
         for user in users:
 
             if user.bot:
@@ -208,13 +210,16 @@ class LastFmCog(commands.Cog):
                 continue
 
             try:
-                player.lastfm_networks[user.id]
+                network = player.lastfm_networks[user.id]
             except KeyError:
-                player.lastfm_networks[user.id] = MyNetWork(
+                network = MyNetWork(
                     self.bot.pool.config["LASTFM_KEY"],
                     self.bot.pool.config["LASTFM_SECRET"],
                     session_key=fminfo["sessionkey"]
                 )
+                player.lastfm_networks[user.id] = network
+
+            networks.add(network)
 
         if track.info["sourceName"] in ("youtube", "soundcloud"):
 
@@ -241,7 +246,7 @@ class LastFmCog(commands.Cog):
         duration = int(track.duration / 1000)
         album = track.album_name
 
-        for nw in player.lastfm_networks.values():
+        for nw in networks:
 
             if update_np:
                 func = nw.update_now_playing
