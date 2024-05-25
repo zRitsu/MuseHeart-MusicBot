@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import asyncio
+import datetime
 import traceback
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import disnake
 import pylast
@@ -14,6 +15,12 @@ from utils.others import CustomContext
 
 if TYPE_CHECKING:
     from utils.client import BotCore
+
+
+class MyNetWork(pylast.LastFMNetwork):
+    last_url: str = ""
+    last_duration: int = 0
+    last_timestamp: Optional[datetime.datetime] = None
 
 
 class LastFMView(disnake.ui.View):
@@ -122,12 +129,39 @@ class LastFmCog(commands.Cog):
 
         await msg.edit(embed=embed, view=view, content=None)
 
+    @commands.Cog.listener("on_voice_state_update")
+    async def connect_vc_update(self, member: disnake.Member, before: disnake.VoiceState, after: disnake.VoiceState):
+
+        if member.bot or not after.channel or before.channel == after.channel:
+            return
+
+        try:
+            player: LavalinkPlayer = self.bot.music.players[member.guild.id]
+        except KeyError:
+            return
+
+        try:
+            if not player.current or not member.id not in player.last_channel.voice_states:
+                return
+        except AttributeError:
+            return
+
+        try:
+            nw: MyNetWork = player.lastfm_networks[member.id]
+        except KeyError:
+            pass
+        else:
+            if nw.last_url == player.current.uri and nw.last_timestamp and datetime.datetime.utcnow() < nw.last_timestamp:
+                return
+
+        await self.startscrooble(player=player, users=[member])
+
     @commands.Cog.listener('on_wavelink_track_start')
     async def update_np(self, player: LavalinkPlayer):
         await self.startscrooble(player, track=player.last_track, update_np=True)
 
     @commands.Cog.listener('on_wavelink_track_end')
-    async def startscrooble(self, player: LavalinkPlayer, track: LavalinkTrack, reason: str = None, update_np=False):
+    async def startscrooble(self, player: LavalinkPlayer, track: LavalinkTrack, reason: str = None, update_np=False, users=None):
 
         if not update_np and (reason != "FINISHED" or not track):
             return
@@ -146,7 +180,10 @@ class LastFmCog(commands.Cog):
         if track.is_stream or track.info["sourceName"] in ("local", "http"):
             return
 
-        for user in player.last_channel.members:
+        if not users:
+            users = player.last_channel.members
+
+        for user in users:
 
             if user.bot:
                 continue
@@ -170,7 +207,7 @@ class LastFmCog(commands.Cog):
             try:
                 player.lastfm_networks[user.id]
             except KeyError:
-                player.lastfm_networks[user.id] = pylast.LastFMNetwork(
+                player.lastfm_networks[user.id] = MyNetWork(
                     self.bot.pool.config["LASTFM_KEY"],
                     self.bot.pool.config["LASTFM_SECRET"],
                     session_key=fminfo["sessionkey"]
@@ -216,6 +253,7 @@ class LastFmCog(commands.Cog):
                         artist=artist, title=name, album=album, duration=duration, **kw
                     )
                 )
+                nw.last_timestamp = datetime.datetime.utcnow() + datetime.timedelta(seconds=duration)
             except:
                 traceback.print_exc()
 
