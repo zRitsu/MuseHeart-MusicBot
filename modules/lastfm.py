@@ -154,7 +154,11 @@ class LastFmCog(commands.Cog):
                     name = track.title
                     artist = track.author[:-8]
                 else:
-                    artist, name = track.title.split(" - ", maxsplit=1)
+                    try:
+                        artist, name = track.title.split(" - ", maxsplit=1)
+                    except ValueError:
+                        name = track.title
+                        artist = track.author
             else:
                 name = track.single_title
                 artist = track.author
