@@ -269,7 +269,7 @@ class LastFmCog(commands.Cog):
         if not users:
             users = player.last_channel.members
 
-        networks = set()
+        networks = []
 
         for user in users:
 
@@ -302,7 +302,7 @@ class LastFmCog(commands.Cog):
                 )
                 player.lastfm_networks[user.id] = network
 
-            networks.add([user.id, network])
+            networks.append([user.id, network])
 
         if not networks:
             return
