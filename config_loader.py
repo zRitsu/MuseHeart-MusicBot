@@ -97,6 +97,13 @@ DEFAULT_CONFIG = {
     "LAVALINK_FILE_URL": "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/Lavalink.jar",
     "SEARCH_PROVIDERS": "scsearch",
 
+    ##################################################
+    ### Sistema de música - Integração com Last.fm ###
+    ##################################################
+
+    "LASTFM_KEY": "",
+    "LASTFM_SECRET": "",
+
     ##########################
     ##### Bot presences: #####
     ##########################
