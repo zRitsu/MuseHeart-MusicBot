@@ -633,7 +633,7 @@ class Misc(commands.Cog):
             embed.description += f"> 💤 **⠂Player{(s:='s'[:inactive_players_other_bots^1])} inativo{s}:** `{inactive_players_other_bots:,}`\n"
 
         if listeners:
-            embed.description += f"> 🎧 **⠂Ouvinte{'s'[:(lcount:=len(listeners))^1]} atua{'is'[:inactive_players_other_bots^1] or 'l'}:** `{lcount:,}`\n"
+            embed.description += f"> 🎧 **⠂Ouvinte{'s'[:(lcount:=len(listeners))^1]} atua{'is'[:lcount^1] or 'l'}:** `{lcount:,}`\n"
 
         if bot.pool.commit:
             embed.description += f"> 📥 **⠂Commit atual:** [`{bot.pool.commit[:7]}`]({bot.pool.remote_git_url}/commit/{bot.pool.commit})\n"
