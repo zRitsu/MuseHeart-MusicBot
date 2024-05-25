@@ -582,6 +582,12 @@ class LavalinkPlayer(wavelink.Player):
         if self.bot.spotify:
             hint_platforms.append("spotify")
 
+        if self.bot.config["LASTFM_KEY"] and self.bot.config["LASTFM_SECRET"]:
+            self.initial_hints.append(
+                f"Você pode conectar sua conta do last.fm para registrar as músicas ouvidas aqui na sua lista de tocadas. "
+                f"Experimente usando o comando {self.prefix_info}lastfm."
+            )
+
         if hint_platforms:
             self.initial_hints.append(
                 "Você pode adicionar/integrar link de perfis/canais do " + " e ".join(hint_platforms) + " para tocar "
@@ -594,6 +600,8 @@ class LavalinkPlayer(wavelink.Player):
             self.initial_hints.extend(kwargs.pop("extra_hints"))
         except:
             pass
+
+        self.lastfm_networks = {}
 
         self.hints: cycle = []
         self.current_hint: str = ""
