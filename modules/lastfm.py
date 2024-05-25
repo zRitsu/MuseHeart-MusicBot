@@ -220,6 +220,9 @@ class LastFmCog(commands.Cog):
         except KeyError:
             return
 
+        if player.last_channel != after.channel:
+            return
+
         try:
             if not player.current or member.id not in after.channel.voice_states:
                 return
