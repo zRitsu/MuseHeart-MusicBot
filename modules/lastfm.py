@@ -163,7 +163,7 @@ class LastFmCog(commands.Cog):
     @commands.Cog.listener('on_wavelink_track_end')
     async def startscrooble(self, player: LavalinkPlayer, track: LavalinkTrack, reason: str = None, update_np=False, users=None):
 
-        if not track or reason != "FINISHED":
+        if not track or (not update_np and reason != "FINISHED"):
             return
 
         counter = 3
