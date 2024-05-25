@@ -299,7 +299,7 @@ class LastFmCog(commands.Cog):
                 )
                 player.lastfm_networks[user.id] = network
 
-            networks.add(network)
+            networks.add([user.id, network])
 
         if not networks:
             return
@@ -329,7 +329,7 @@ class LastFmCog(commands.Cog):
         duration = int(track.duration / 1000)
         album = track.album_name
 
-        for nw in networks:
+        for user_id, nw in networks:
 
             if update_np:
                 func = nw.update_now_playing
@@ -345,7 +345,22 @@ class LastFmCog(commands.Cog):
                     )
                 )
                 nw.last_timestamp = datetime.datetime.utcnow() + datetime.timedelta(seconds=duration)
-            except:
+            except pylast.WSError as e:
+                if "Invalid session key" in e.details:
+                    user_data = await self.bot.get_global_data(user_id, db_name=DBModel.users)
+                    user_data["lastfm"]["sessionkey"] = ""
+                    await self.bot.update_global_data(user_id, user_data, db_name=DBModel.users)
+                    try:
+                        del self.bot.pool.lastfm_sessions[user_id]
+                    except KeyError:
+                        pass
+                    try:
+                        del player.lastfm_networks[user_id]
+                    except KeyError:
+                        pass
+                else:
+                    traceback.print_exc()
+            except Exception:
                 traceback.print_exc()
 
 def setup(bot):
