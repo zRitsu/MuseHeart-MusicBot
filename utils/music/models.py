@@ -787,7 +787,7 @@ class LavalinkPlayer(wavelink.Player):
             if event.node != self.node:
                 return
 
-            self.bot.dispatch("wavelink_track_end", player=self, track=self.current, reason=event.reason)
+            self.bot.dispatch("wavelink_track_end", player=self, track=self.last_track, reason=event.reason)
 
             if self.locked:
                 return

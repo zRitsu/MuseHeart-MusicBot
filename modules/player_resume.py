@@ -48,7 +48,7 @@ class PlayerSession(commands.Cog):
 
         await self.delete_data(player)
 
-    @commands.Cog.listener('wavelink_track_end')
+    @commands.Cog.listener('on_wavelink_track_end')
     async def track_end(self, player: LavalinkPlayer, *args, **kwargs):
 
         if len(player.queue) > 0:
