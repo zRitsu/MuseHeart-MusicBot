@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-import time
 import traceback
-from datetime import datetime
 from typing import TYPE_CHECKING
 
 import disnake
@@ -124,10 +122,14 @@ class LastFmCog(commands.Cog):
 
         await msg.edit(embed=embed, view=view, content=None)
 
-    @commands.Cog.listener('on_wavelink_track_end')
-    async def startscrooble(self, player: LavalinkPlayer, track: LavalinkTrack, reason: str = None):
+    @commands.Cog.listener('on_wavelink_track_start')
+    async def update_np(self, player: LavalinkPlayer):
+        await self.startscrooble(player, track=player.last_track, update_np=True)
 
-        if reason != "FINISHED" or not track:
+    @commands.Cog.listener('on_wavelink_track_end')
+    async def startscrooble(self, player: LavalinkPlayer, track: LavalinkTrack, reason: str = None, update_np=False):
+
+        if not update_np and (reason != "FINISHED" or not track):
             return
 
         counter = 3
@@ -201,11 +203,17 @@ class LastFmCog(commands.Cog):
 
         for nw in player.lastfm_networks.values():
 
+            if update_np:
+                func = nw.update_now_playing
+                kw = {}
+            else:
+                func = nw.scrobble
+                kw = {"timestamp": int(disnake.utils.utcnow().timestamp())}
+
             try:
                 await self.bot.loop.run_in_executor(
-                    None, lambda: nw.scrobble(
-                        artist=artist, title=name, timestamp=int(time.mktime(datetime.now().timetuple())),
-                        album=album, duration=duration
+                    None, lambda: func(
+                        artist=artist, title=name, album=album, duration=duration, **kw
                     )
                 )
             except:
