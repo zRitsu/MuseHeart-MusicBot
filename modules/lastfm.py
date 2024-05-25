@@ -128,6 +128,15 @@ class LastFmCog(commands.Cog):
 
         for user in player.last_channel.members:
 
+            if user.bot:
+                continue
+
+            try:
+                if user.voice.self_deaf or user.voice.deaf:
+                    continue
+            except AttributeError:
+                continue
+
             try:
                 fminfo = self.bot.pool.lastfm_sessions[user.id]
             except KeyError:
