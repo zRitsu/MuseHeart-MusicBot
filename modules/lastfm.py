@@ -189,7 +189,7 @@ class LastFmCog(commands.Cog):
 
         if view.session_key:
             embed.description += "\n### A sua conta do [last.fm](<https://www.last.fm/home>) foi " + \
-                                 ("conectada" if current_session_key != view.session_key else "reconectada") + \
+                                 ("conectada" if not current_session_key else "reconectada") + \
                                  " com sucesso!\n\n`Agora ao ouvir suas músicas no canal de voz elas serão registradas " \
                                 "na sua conta do last.fm`"
         else:
