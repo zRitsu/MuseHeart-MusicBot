@@ -221,6 +221,9 @@ class LastFmCog(commands.Cog):
 
             networks.add(network)
 
+        if not networks:
+            return
+
         if track.info["sourceName"] in ("youtube", "soundcloud"):
 
             if track.ytid:
