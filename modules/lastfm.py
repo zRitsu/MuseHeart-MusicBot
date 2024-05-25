@@ -154,7 +154,7 @@ class LastFmCog(commands.Cog):
             if nw.last_url == player.current.uri and nw.last_timestamp and datetime.datetime.utcnow() < nw.last_timestamp:
                 return
 
-        await self.startscrooble(player=player, users=[member])
+        await self.startscrooble(player=player, track=player.last_track, users=[member])
 
     @commands.Cog.listener('on_wavelink_track_start')
     async def update_np(self, player: LavalinkPlayer):
