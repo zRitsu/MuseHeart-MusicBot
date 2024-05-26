@@ -46,16 +46,16 @@ class LastFMView(disnake.ui.View):
         self.cooldown = commands.CooldownMapping.from_cooldown(1, 15, commands.BucketType.user)
 
         if session_key:
-            btn = disnake.ui.Button(label="Reconectar sua conta do last.fm")
+            btn = disnake.ui.Button(label="Revincular conta do last.fm")
             btn.callback = self.send_authurl_callback
             self.add_item(btn)
 
-            btn2 = disnake.ui.Button(label="Desconectar sua conta do last.fm", style=disnake.ButtonStyle.red)
+            btn2 = disnake.ui.Button(label="Desvincular conta do last.fm", style=disnake.ButtonStyle.red)
             btn2.callback = self.disconnect_account
             self.add_item(btn2)
 
         else:
-            btn = disnake.ui.Button(label="Conectar sua conta do last.fm")
+            btn = disnake.ui.Button(label="Vincular conta do last.fm")
             btn.callback = self.send_authurl_callback
             self.add_item(btn)
 
@@ -142,13 +142,6 @@ class LastFmCog(commands.Cog):
         else:
             await inter.response.defer(ephemeral=True)
 
-        embed = disnake.Embed(
-            description="**Conecte ou crie uma conta no [last.fm](<https://www.last.fm/home>) para registrar todas as músicas "
-                        "que você ouvir por aqui no seu perfil do last.fm para obter sugestões de artistas, músicas "
-                        "e encontrar usuários em comum do last.fm que também curtem suas músicas/gêneros favoritos e etc.**",
-            color=self.bot.get_color()
-        ).set_thumbnail(url="https://www.last.fm/static/images/lastfm_avatar_twitter.52a5d69a85ac.png")
-
         try:
             data = inter.global_user_data
         except AttributeError:
@@ -157,6 +150,17 @@ class LastFmCog(commands.Cog):
                 inter.global_user_data = data
             except:
                 pass
+
+        embed = disnake.Embed(
+            description="**Vincule (ou crie) uma conta no [last.fm](<https://www.last.fm/home>) para registrar "
+                        "todas as músicas que você ouvir por aqui no seu perfil do last.fm para obter sugestões de "
+                        "músicas/artistas/álbuns e ter uma estatística geral das músicas que você ouviu alem de ter "
+                        "acesso a uma comunidade incrível da plataforma.**",
+            color=self.bot.get_color()
+        ).set_thumbnail(url="https://www.last.fm/static/images/lastfm_avatar_twitter.52a5d69a85ac.png")
+
+        if username:=data["lastfm"]["username"]:
+            embed.add_field(name="\u200b", value=f"**Conta vinculada atual:** [**{username}**](<https://www.last.fm/user/{username}>)")
 
         current_session_key = data["lastfm"]["sessionkey"]
 
@@ -188,14 +192,14 @@ class LastFmCog(commands.Cog):
 
             return
 
-        newdata = {"scrobble": True, "sessionkey": view.session_key}
+        newdata = {"scrobble": True, "sessionkey": view.session_key, "username": view.username}
         data["lastfm"].update(newdata)
         await self.bot.update_global_data(inter.author.id, data=data, db_name=DBModel.users)
 
         self.bot.pool.lastfm_sessions[inter.author.id] = newdata
 
         if view.session_key:
-
+            embed.clear_fields()
             embed.description += f"\n### A conta [{view.username}](<https://www.last.fm/user/{view.username}>) foi " + \
                                  "vinculada com sucesso!\n\n`Agora ao ouvir suas músicas no canal de voz elas serão registradas " \
                                 "na sua conta do last.fm`"
