@@ -198,13 +198,14 @@ class LastFmCog(commands.Cog):
 
         self.bot.pool.lastfm_sessions[inter.author.id] = newdata
 
+        embed.clear_fields()
+
         if view.session_key:
-            embed.clear_fields()
             embed.description += f"\n### A conta [{view.username}](<https://www.last.fm/user/{view.username}>) foi " + \
                                  "vinculada com sucesso!\n\n`Agora ao ouvir suas músicas no canal de voz elas serão registradas " \
                                 "na sua conta do last.fm`"
         else:
-            embed.description += "\n### Você desconectou sua conta do [last.fm](<https://www.last.fm/home>)."
+            embed.description += "\n### Conta desvinculada com sucesso!"
 
         if view.interaction:
             await view.interaction.response.edit_message(embed=embed, view=view, content=None)
