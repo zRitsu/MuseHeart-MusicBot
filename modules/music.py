@@ -4385,8 +4385,8 @@ class Music(commands.Cog):
         return results or [f"{track.title[:81]} || ID > {track.unique_id}" for n, track in enumerate(player.queue + player.queue_autoplay)
                            if query.lower() in track.title.lower()][:20]
 
-    @move.autocomplete("nome_do_uploader")
-    @clear.autocomplete("nome_do_uploader")
+    @move.autocomplete("uploader")
+    @clear.autocomplete("uploader")
     async def queue_author(self, inter: disnake.Interaction, query: str):
 
         if not self.bot.bot_ready or not self.bot.is_ready():
