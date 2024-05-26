@@ -259,23 +259,43 @@ class LastFmCog(commands.Cog):
         counter = 3
 
         while counter > 0:
-            if not player.last_channel:
+            if not player.guild.me.voice:
                 await asyncio.sleep(2)
                 continue
             break
 
-        if not player.last_channel:
+        if not player.guild.me.voice:
             return
 
         if track.is_stream or track.info["sourceName"] in ("local", "http"):
             return
 
-        if not users:
-            users = player.last_channel.members
+        if track.info["sourceName"] in ("youtube", "soundcloud"):
 
-        networks = []
+            if track.ytid:
+                if track.author.endswith(" - topic") and not track.author.endswith("Release - topic") and not track.title.startswith(track.author[:-8]):
+                    name = track.title
+                    artist = track.author[:-8]
+                else:
+                    try:
+                        artist, name = track.title.split(" - ", maxsplit=1)
+                    except ValueError:
+                        name = track.title
+                        artist = track.author
+            else:
+                name = track.single_title
+                artist = track.author
 
-        for user in users:
+            artist = artist.split(",")[0]
+
+        else:
+            artist = track.author.split(",")[0]
+            name = track.single_title
+
+        duration = int(track.duration / 1000)
+        album = track.album_name
+
+        for user in users or player.last_channel.members:
 
             if user.bot:
                 continue
@@ -304,45 +324,13 @@ class LastFmCog(commands.Cog):
                     self.bot.pool.config["LASTFM_SECRET"],
                     session_key=fminfo["sessionkey"]
                 )
-                player.lastfm_networks[user.id] = network
-
-            networks.append([user.id, network])
-
-        if not networks:
-            return
-
-        if track.info["sourceName"] in ("youtube", "soundcloud"):
-
-            if track.ytid:
-                if track.author.endswith(" - topic") and not track.author.endswith("Release - topic") and not track.title.startswith(track.author[:-8]):
-                    name = track.title
-                    artist = track.author[:-8]
-                else:
-                    try:
-                        artist, name = track.title.split(" - ", maxsplit=1)
-                    except ValueError:
-                        name = track.title
-                        artist = track.author
-            else:
-                name = track.single_title
-                artist = track.author
-
-            artist = artist.split(",")[0]
-
-        else:
-            artist = track.author.split(",")[0]
-            name = track.single_title
-
-        duration = int(track.duration / 1000)
-        album = track.album_name
-
-        for user_id, nw in networks:
+                network.disable_caching()
 
             if update_np:
-                func = nw.update_now_playing
+                func = network.update_now_playing
                 kw = {}
             else:
-                func = nw.scrobble
+                func = network.scrobble
                 kw = {"timestamp": int(disnake.utils.utcnow().timestamp())}
 
             try:
@@ -351,18 +339,18 @@ class LastFmCog(commands.Cog):
                         artist=artist, title=name, album=album, duration=duration, **kw
                     )
                 )
-                nw.last_timestamp = datetime.datetime.utcnow() + datetime.timedelta(seconds=duration)
+                network.last_timestamp = datetime.datetime.utcnow() + datetime.timedelta(seconds=duration)
             except pylast.WSError as e:
                 if "Invalid session key" in e.details:
-                    user_data = await self.bot.get_global_data(user_id, db_name=DBModel.users)
+                    user_data = await self.bot.get_global_data(user.id, db_name=DBModel.users)
                     user_data["lastfm"]["sessionkey"] = ""
-                    await self.bot.update_global_data(user_id, user_data, db_name=DBModel.users)
+                    await self.bot.update_global_data(user.id, user_data, db_name=DBModel.users)
                     try:
-                        del self.bot.pool.lastfm_sessions[user_id]
+                        del self.bot.pool.lastfm_sessions[user.id]
                     except KeyError:
                         pass
                     try:
-                        del player.lastfm_networks[user_id]
+                        del player.lastfm_networks[user.id]
                     except KeyError:
                         pass
                 else:
