@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import datetime
-import os
 import traceback
 from typing import TYPE_CHECKING, Optional
 
@@ -98,10 +97,8 @@ class LastFMView(disnake.ui.View):
                 return
 
         if not self.skg:
-            if not os.path.isdir("./.tmp"):
-                os.makedirs("./.tmp")
             self.network = pylast.LastFMNetwork(self.ctx.bot.pool.config["LASTFM_KEY"], self.ctx.bot.pool.config["LASTFM_SECRET"])
-            self.network.enable_caching(f"./.tmp/lastfm_cache_{self.ctx.author.id}")
+            self.network.disable_caching()
             self.skg = MySessionKeyGenerator(self.network)
 
         self.check_loop = self.ctx.bot.loop.create_task(self.check_session_loop())
@@ -303,9 +300,6 @@ class LastFmCog(commands.Cog):
         duration = int(track.duration / 1000)
         album = track.album_name
 
-        if not os.path.isdir("./.tmp/"):
-            os.makedirs("./.tmp/")
-
         for user in users or player.last_channel.members:
 
             if user.bot:
@@ -335,7 +329,7 @@ class LastFmCog(commands.Cog):
                     self.bot.pool.config["LASTFM_SECRET"],
                     session_key=fminfo["sessionkey"]
                 )
-                network.enable_caching(f"./.tmp/lastfm_cache_{user.id}")
+                network.disable_caching()
                 player.lastfm_networks[user.id] = network
 
             if update_np:
