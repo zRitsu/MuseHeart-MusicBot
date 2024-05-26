@@ -366,10 +366,7 @@ class LastFmCog(commands.Cog):
 
         if method == "track.scrobble":
             params = {
-                "api_key": self.bot.config['LASTFM_KEY'],
                 "artist[0]": artist,
-                "method": method,
-                "sk": session_key,
                 "timestamp[0]": str(int(disnake.utils.utcnow().timestamp())),
                 "track[0]": track,
                 "duration": str(duration)
@@ -377,25 +374,32 @@ class LastFmCog(commands.Cog):
 
         else:
             params = {
-                "api_key": self.bot.config['LASTFM_KEY'],
                 "artist": artist,
-                "method": method,
-                "sk": session_key,
-                "timestamp": str(int(disnake.utils.utcnow().timestamp())),
                 "track": track,
+                "timestamp": str(int(disnake.utils.utcnow().timestamp())),
             }
 
         if album:
             params["album"] = album
 
-        string = ""
+        params.update(
+            {
+                "api_key": self.bot.config['LASTFM_KEY'],
+                "sk": session_key,
+                "method": method,
+            }
+        )
 
-        for k, v in params.items():
-            string += f"{k}{v}"
+        string = ''
+        items = list(params.keys())
+        items.sort()
+        for i in items:
+            string += i
+            string += params[i]
 
         string += self.bot.config['LASTFM_SECRET']
 
-        params['api_sig'] = hashlib.md5(string.encode('utf-8')).hexdigest()
+        params['api_sig'] = hashlib.md5(string.encode('utf8')).hexdigest()
 
         async with self.bot.session.post("https://ws.audioscrobbler.com/2.0/", params=params, headers=lastfm_header) as r:
             return xmltodict.parse(await r.text())
