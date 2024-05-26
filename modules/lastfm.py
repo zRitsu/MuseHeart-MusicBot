@@ -103,7 +103,7 @@ class LastFMView(disnake.ui.View):
         self.check_loop = self.ctx.bot.loop.create_task(self.check_session_loop())
         self.auth_url = await self.ctx.bot.loop.run_in_executor(None, lambda: self.skg.get_web_auth_url())
 
-        await interaction.send(f"### [Clique aqui](<{self.auth_url}>) para integrar sua conta do last.fm\n\n"
+        await interaction.send(f"### [Clique aqui](<{self.auth_url}>) para vincular sua conta do last.fm\n\n"
                                f"`Nota: O link expira em` <t:{int((disnake.utils.utcnow() + datetime.timedelta(minutes=2)).timestamp())}:R>"
                                "`. caso já tenha autorizado a aplicação você deve aguardar até 15 segundos para a mensagem acima atualizar.`",
                                ephemeral=True)
