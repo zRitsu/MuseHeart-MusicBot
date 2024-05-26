@@ -4328,7 +4328,7 @@ class Music(commands.Cog):
                          query.lower() in track.playlist_name.lower()]))[:20]
 
     @rotate.autocomplete("nome")
-    @move.autocomplete("nome_da_música")
+    @move.autocomplete("nome")
     @skip.autocomplete("nome")
     @skipto.autocomplete("nome")
     @remove.autocomplete("nome")
