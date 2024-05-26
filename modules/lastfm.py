@@ -113,7 +113,7 @@ class LastFMView(disnake.ui.View):
                                f"públicos, pois esse link pode conceder acesso a sua conta do last.fm`\n\n"
                                "`Caso já tenha autorizado a aplicação você deve aguardar até 20 segundos para a "
                                "mensagem acima atualizar confirmando o processo.`",
-                               ephemeral=True)
+                               ephemeral=True, delete_after=300)
 
 class LastFmCog(commands.Cog):
 
