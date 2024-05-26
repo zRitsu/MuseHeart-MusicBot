@@ -228,7 +228,7 @@ class LastFmCog(commands.Cog):
             return
 
         try:
-            if not player.current or member.id not in after.channel.voice_states:
+            if not player.current or member not in player.last_channel.members:
                 return
         except AttributeError:
             return
@@ -325,6 +325,7 @@ class LastFmCog(commands.Cog):
                     session_key=fminfo["sessionkey"]
                 )
                 network.disable_caching()
+                player.lastfm_networks[user.id] = network
 
             if update_np:
                 func = network.update_now_playing
