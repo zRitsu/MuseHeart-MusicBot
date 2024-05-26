@@ -62,11 +62,11 @@ class LastFMView(disnake.ui.View):
 
     async def check_session_loop(self):
 
-        count = 8
+        count = 15
 
         while count > 0:
             try:
-                await asyncio.sleep(15)
+                await asyncio.sleep(20)
                 self.session_key, self.username = await self.ctx.bot.loop.run_in_executor(None, lambda: self.skg.get_web_auth_session_key(self.auth_url))
                 self.stop()
                 return
@@ -107,9 +107,12 @@ class LastFMView(disnake.ui.View):
         self.check_loop = self.ctx.bot.loop.create_task(self.check_session_loop())
         self.auth_url = await self.ctx.bot.loop.run_in_executor(None, lambda: self.skg.get_web_auth_url())
 
-        await interaction.send(f"### [Clique aqui](<{self.auth_url}>) para vincular sua conta do last.fm\n\n"
-                               f"`Nota: O link expira em` <t:{int((disnake.utils.utcnow() + datetime.timedelta(minutes=2)).timestamp())}:R>"
-                               "`. caso já tenha autorizado a aplicação você deve aguardar até 15 segundos para a mensagem acima atualizar.`",
+        await interaction.send(f"### [Clique aqui](<{self.auth_url}>) para vincular sua conta do last.fm (clicando em allow)\n\n"
+                               f"`O link expira em` <t:{int((disnake.utils.utcnow() + datetime.timedelta(minutes=5)).timestamp())}:R>\n\n"
+                               f"`Atenção: Não mostre o link do \"clique aqui\" pra ninguem e nem envie em locais "
+                               f"públicos, pois esse link pode conceder acesso a sua conta do last.fm`\n\n"
+                               "`Caso já tenha autorizado a aplicação você deve aguardar até 20 segundos para a "
+                               "mensagem acima atualizar confirmando o processo.`",
                                ephemeral=True)
 
 class LastFmCog(commands.Cog):
