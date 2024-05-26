@@ -169,3 +169,4 @@ application.yml
 /.playlist_cache.pkl
 /guild_bots.json
 /modules_dev/
+/.tmp/
