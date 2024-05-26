@@ -303,7 +303,7 @@ class BotPool:
                 'region': 'us_central',
                 'retries': 120,
                 'retry_403': True,
-                'search_providers': self.config["SEARCH_PROVIDERS"].strip().split() or ["ytsearch", "scsearch"]
+                'search_providers': self.config["SEARCH_PROVIDERS"].strip().split() or ["amsearch", "tdsearch", "spsearch", "ytsearch", "scsearch"]
             }
             loop.create_task(self.check_node(localnode, loop=loop))
 
