@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import datetime
+import hashlib
 import os
 import tempfile
 import traceback
@@ -9,6 +10,7 @@ from typing import TYPE_CHECKING, Optional
 
 import disnake
 import pylast
+import xmltodict
 from disnake.ext import commands
 
 from utils.db import DBModel
@@ -20,6 +22,8 @@ if TYPE_CHECKING:
 
 temp_dir = tempfile.gettempdir()
 
+lastfm_header = {"user-agent" : "mediascrobbler/0.1",
+      "Content-type": "application/x-www-form-urlencoded"}
 
 class MyNetWork(pylast.LastFMNetwork):
     last_url: str = ""
@@ -245,18 +249,18 @@ class LastFmCog(commands.Cog):
             return
 
         try:
-            nw: MyNetWork = player.lastfm_networks[member.id]
+            fm_user = player.lastfm_users[member.id]
         except KeyError:
             pass
         else:
-            if nw.last_url == player.current.uri and nw.last_timestamp and datetime.datetime.utcnow() < nw.last_timestamp:
+            if fm_user["last_url"] == player.current.uri and fm_user["last_timestamp"] and datetime.datetime.utcnow() < fm_user["last_timestamp"]:
                 return
 
         await self.startscrooble(player=player, track=player.last_track, users=[member])
 
     @commands.Cog.listener('on_wavelink_track_start')
     async def update_np(self, player: LavalinkPlayer):
-        await self.startscrooble(player, track=player.last_track, update_np=True)
+        await self.startscrooble(player, track=player.current, update_np=True)
 
     @commands.Cog.listener('on_wavelink_track_end')
     async def startscrooble(self, player: LavalinkPlayer, track: LavalinkTrack, reason: str = None, update_np=False, users=None):
@@ -306,9 +310,6 @@ class LastFmCog(commands.Cog):
         duration = int(track.duration / 1000)
         album = track.album_name
 
-        if not os.path.isdir(f"{temp_dir}/.lastfm_tmp"):
-            os.makedirs(f"{temp_dir}/.lastfm_tmp")
-
         for user in users or player.last_channel.members:
 
             if user.bot:
@@ -331,47 +332,73 @@ class LastFmCog(commands.Cog):
                 continue
 
             try:
-                network = player.lastfm_networks[user.id]
-            except KeyError:
-                network = MyNetWork(
-                    self.bot.pool.config["LASTFM_KEY"],
-                    self.bot.pool.config["LASTFM_SECRET"],
-                    session_key=fminfo["sessionkey"]
+                resp_data = await self.request_lastfm(
+                    artist=artist, track=name, album=album, duration=duration, session_key=fminfo["sessionkey"],
+                    method = "track.updateNowPlaying" if update_np else "track.scrobble"
                 )
-                network.enable_caching(f"{temp_dir}/.lastfm_tmp/lastfm_cache_{user.id}")
-                player.lastfm_networks[user.id] = network
-
-            if update_np:
-                func = network.update_now_playing
-                kw = {}
-            else:
-                func = network.scrobble
-                kw = {"timestamp": int(disnake.utils.utcnow().timestamp())}
-
-            try:
-                await self.bot.loop.run_in_executor(
-                    None, lambda: func(
-                        artist=artist, title=name, album=album, duration=duration, **kw
-                    )
-                )
-                network.last_timestamp = datetime.datetime.utcnow() + datetime.timedelta(seconds=duration)
-            except pylast.WSError as e:
-                if "Invalid session key" in e.details:
-                    user_data = await self.bot.get_global_data(user.id, db_name=DBModel.users)
-                    user_data["lastfm"]["sessionkey"] = ""
-                    await self.bot.update_global_data(user.id, user_data, db_name=DBModel.users)
-                    try:
-                        del self.bot.pool.lastfm_sessions[user.id]
-                    except KeyError:
-                        pass
-                    try:
-                        del player.lastfm_networks[user.id]
-                    except KeyError:
-                        pass
-                else:
-                    traceback.print_exc()
             except Exception:
                 traceback.print_exc()
+            else:
+                if resp_data['lfm']['@status'] == 'failed':
+                    status = resp_data['lfm']['error']['#text']
+                    code = resp_data['lfm']['error']['@code']
+                    print(f"last.fm failed! user: {user.id} - code: {code} - message:{status}")
+                    if "Invalid session key" in status:
+                        user_data = await self.bot.get_global_data(user.id, db_name=DBModel.users)
+                        user_data["lastfm"]["sessionkey"] = ""
+                        await self.bot.update_global_data(user.id, user_data, db_name=DBModel.users)
+                        try:
+                            del self.bot.pool.lastfm_sessions[user.id]
+                        except KeyError:
+                            pass
+                        try:
+                            del player.lastfm_users[user.id]
+                        except KeyError:
+                            pass
+                    return
+
+                player.lastfm_users[user.id] = {
+                    "last_url": player.current.uri,
+                    "last_timestamp": datetime.datetime.utcnow() + datetime.timedelta(seconds=duration)
+                }
+
+    async def request_lastfm(self, artist: str, track: str, album: str, duration: int, session_key: str, method: str):
+
+        if method == "track.scrobble":
+            params = {
+                "api_key": self.bot.config['LASTFM_KEY'],
+                "artist[0]": artist,
+                "method": method,
+                "sk": session_key,
+                "timestamp[0]": str(int(disnake.utils.utcnow().timestamp())),
+                "track[0]": track,
+                "duration": str(duration)
+            }
+
+        else:
+            params = {
+                "api_key": self.bot.config['LASTFM_KEY'],
+                "artist": artist,
+                "method": method,
+                "sk": session_key,
+                "timestamp": str(int(disnake.utils.utcnow().timestamp())),
+                "track": track,
+            }
+
+        if album:
+            params["album"] = album
+
+        string = ""
+
+        for k, v in params.items():
+            string += f"{k}{v}"
+
+        string += self.bot.config['LASTFM_SECRET']
+
+        params['api_sig'] = hashlib.md5(string.encode('utf-8')).hexdigest()
+
+        async with self.bot.session.post("https://ws.audioscrobbler.com/2.0/", params=params, headers=lastfm_header) as r:
+            return xmltodict.parse(await r.text())
 
 def setup(bot):
     if not bot.pool.config["LASTFM_KEY"] or not bot.pool.config["LASTFM_SECRET"]:

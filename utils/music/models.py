@@ -601,7 +601,7 @@ class LavalinkPlayer(wavelink.Player):
         except:
             pass
 
-        self.lastfm_networks = {}
+        self.lastfm_users = {}
 
         self.hints: cycle = []
         self.current_hint: str = ""
