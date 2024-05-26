@@ -21,11 +21,12 @@ class ArgumentParsingError(commands.CommandError):
 
 class GenericError(commands.CheckFailure):
 
-    def __init__(self, text: str, *, self_delete: int = None, delete_original: Optional[int] = None, components: list = None):
+    def __init__(self, text: str, *, self_delete: int = None, delete_original: Optional[int] = None, components: list = None, error: str = None):
         self.text = text
         self.self_delete = self_delete
         self.delete_original = delete_original
         self.components = components
+        self.error = error
 
 
 class EmptyFavIntegration(commands.CheckFailure):
@@ -82,6 +83,8 @@ def parse_error(
 
     components = []
 
+    send_error = False
+
     error = getattr(error, 'original', error)
 
     if isinstance(error, NotDJorStaff):
@@ -105,6 +108,8 @@ def parse_error(
     elif isinstance(error, GenericError):
         error_txt = error.text
         components = error.components
+        if error.text:
+            send_error = True
 
     elif isinstance(error, NotRequester):
         error_txt = "**Você deve ter pedido a música atual ou estar na lista de DJ ou ter a permissão de " \
@@ -215,10 +220,12 @@ def parse_error(
                 "who has blocked it in your country on copyright grounds" in wave_error.lower():
             error_txt = "**O conteúdo deste link não está disponível na região no qual estou funcionando...**"
 
+    full_error_txt = ""
+
     if not error_txt:
         full_error_txt = "".join(traceback.format_exception(type(error), error, error.__traceback__))
         print(full_error_txt)
-    else:
-        full_error_txt = ""
+    elif send_error:
+        full_error_txt = "".join(traceback.format_exception(type(error), error, error.__traceback__))
 
     return error_txt, full_error_txt, kill_process, components, mention_author

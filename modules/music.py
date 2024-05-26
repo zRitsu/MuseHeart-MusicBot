@@ -1952,7 +1952,7 @@ class Music(commands.Cog):
         if os.path.isfile(f"./local_database/saved_queues_v1/users/{inter.author.id}.pkl"):
             favs.append(">> [💾 Fila Salva 💾] <<")
 
-        if not inter.guild:
+        if not inter.guild_id:
             try:
                 await check_pool_bots(inter, return_first=True)
             except:
@@ -6930,7 +6930,7 @@ class Music(commands.Cog):
 
                 if "This track is not readable. Available countries:" in txt:
                     txt = "A música informada não está disponível na minha região atual..."
-                raise GenericError(f"**Ocorreu um erro ao processar sua busca:** \n{txt}")
+                raise GenericError(f"**Ocorreu um erro ao processar sua busca:** \n{txt}", error=txt)
             raise GenericError("**Não houve resultados para sua busca.**")
 
         if isinstance(tracks, list):
