@@ -80,7 +80,7 @@ class BotPool:
         self.commit = ""
         self.remote_git_url = ""
         self.max_counter: int = 0
-        self.message_ids: set = set()
+        self.message_ids: dict = {}
         self.bot_mentions = set()
         self.single_bot = True
         self.rpc_token_cache: dict = {}
@@ -596,14 +596,16 @@ class BotPool:
 
                     id_ = f"{ctx.guild.id}-{ctx.channel.id}-{ctx.message.id}"
 
-                    if id_ not in ctx.bot.pool.message_ids:
+                    try:
+                        ctx.bot.pool.message_ids[id_]
+                    except KeyError:
                         return
 
                     await asyncio.sleep(ctx.bot.config["PREFIXED_POOL_TIMEOUT"])
 
                     try:
-                        ctx.bot.pool.message_ids.remove(id_)
-                    except:
+                        del ctx.bot.pool.message_ids[id_]
+                    except KeyError:
                         pass
 
             @bot.listen("on_resumed")

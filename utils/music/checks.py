@@ -121,8 +121,11 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
             msg_id = f"{inter.guild_id}-{inter.channel.id}-{inter.message.id}"
 
-            if msg_id in inter.bot.pool.message_ids:
-
+            try:
+                inter.bot.pool.message_ids[msg_id]
+            except KeyError:
+                inter.bot.pool.message_ids[msg_id] = None
+            else:
                 def check(ctx, b_id):
                     try:
                         return f"{ctx.guild_id}-{ctx.channel.id}-{ctx.message.id}" == msg_id
@@ -143,8 +146,6 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
                 inter.music_guild = inter.guild
 
                 return True
-
-            inter.bot.pool.message_ids.add(msg_id)
 
         else:
 
