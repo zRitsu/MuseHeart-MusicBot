@@ -309,7 +309,9 @@ class LastFmCog(commands.Cog):
             name = track.single_title
 
         duration = int(track.duration / 1000)
-        album = track.album_name
+
+        if not (album:=track.album_name) and not track.autoplay and track.info["sourceName"] in ("spotify", "deezer", "applemusic", "tidal"):
+            album = track.single_title
 
         for user in users or player.last_channel.members:
 
