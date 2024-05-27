@@ -359,7 +359,7 @@ class LastFmCog(commands.Cog):
                     return
 
                 player.lastfm_users[user.id] = {
-                    "last_url": track,
+                    "last_url": track.url,
                     "last_timestamp": datetime.datetime.utcnow() + datetime.timedelta(seconds=duration)
                 }
 
