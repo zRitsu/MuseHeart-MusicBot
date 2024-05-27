@@ -5,6 +5,7 @@ import datetime
 import hashlib
 import os
 import tempfile
+import time
 import traceback
 from typing import TYPE_CHECKING, Optional
 
@@ -367,20 +368,22 @@ class LastFmCog(commands.Cog):
         if method == "track.scrobble":
             params = {
                 "artist[0]": artist,
-                "timestamp[0]": str(int(disnake.utils.utcnow().timestamp())),
+                "timestamp[0]": str(int(time.time() - 30)),
                 "track[0]": track,
-                "duration": str(duration)
             }
 
         else:
             params = {
                 "artist": artist,
                 "track": track,
-                "timestamp": str(int(disnake.utils.utcnow().timestamp())),
+                "timestamp": str(int(time.time() - 30)),
             }
 
         if album:
             params["album"] = album
+
+        if duration:
+            params["duration"] = str(duration)
 
         params.update(
             {
