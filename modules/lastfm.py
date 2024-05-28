@@ -295,8 +295,13 @@ class LastFmCog(commands.Cog):
         if not track:
             return
 
-        if reason != "FINISHED" and not update_np:
-            return
+        if not update_np:
+
+            if reason != "FINISHED":
+                return
+
+            if (disnake.utils.utcnow() - player.start_time).total_seconds() < 61:
+                return
 
         counter = 3
 
