@@ -3,15 +3,14 @@ from __future__ import annotations
 import asyncio
 import datetime
 import hashlib
-import os
 import tempfile
 import time
 import traceback
 from typing import TYPE_CHECKING, Optional
 
 import disnake
-import pylast
 import xmltodict
+from aiohttp import ClientSession
 from disnake.ext import commands
 
 from utils.db import DBModel
@@ -26,16 +25,37 @@ temp_dir = tempfile.gettempdir()
 lastfm_header = {"user-agent" : "mediascrobbler/0.1",
       "Content-type": "application/x-www-form-urlencoded"}
 
-class MyNetWork(pylast.LastFMNetwork):
-    last_url: str = ""
-    last_duration: int = 0
-    last_timestamp: Optional[datetime.datetime] = None
+async def request_lastfm(params):
+    async with ClientSession() as session:
+        async with session.get("http://ws.audioscrobbler.com/2.0/", params=params) as response:
+            return await response.json()
 
-class MySessionKeyGenerator(pylast.SessionKeyGenerator):
 
-    def get_web_auth_session_key(self, url, token: str = ""):
-        session_key, _username = self.get_web_auth_session_key_username(url, token)
-        return session_key, _username
+async def lastfm_get_token(apikey: str):
+    data = await request_lastfm(
+        params={
+            'method': 'auth.getToken',
+            'api_key': apikey,
+            'format': 'json',
+        }
+    )
+    return data['token']
+
+
+async def lastfm_get_session_key(apikey: str, apisecret: str, token: str):
+    params = {
+        'method': 'auth.getSession',
+        'api_key': apikey,
+        'token': token,
+    }
+    sig = ''.join([f"{key}{params[key]}" for key in sorted(params)])
+    sig += apisecret
+    api_sig = hashlib.md5(sig.encode('utf-8')).hexdigest()
+
+    params['api_sig'] = api_sig
+    params['format'] = 'json'
+
+    return await request_lastfm(params=params)
 
 
 class LastFMView(disnake.ui.View):
@@ -46,6 +66,8 @@ class LastFMView(disnake.ui.View):
         self.interaction: Optional[disnake.MessageInteraction] = None
         self.session_key = ""
         self.username = ""
+        self.token = ""
+        self.last_timestamp = None
         self.auth_url = None
         self.skg = None
         self.network = None
@@ -53,6 +75,7 @@ class LastFMView(disnake.ui.View):
         self.check_loop = None
         self.error = None
         self.cooldown = commands.CooldownMapping.from_cooldown(1, 15, commands.BucketType.user)
+
 
         if session_key:
             btn = disnake.ui.Button(label="Revincular conta do last.fm")
@@ -75,16 +98,27 @@ class LastFMView(disnake.ui.View):
         while count > 0:
             try:
                 await asyncio.sleep(20)
-                self.session_key, self.username = await self.ctx.bot.loop.run_in_executor(None, lambda: self.skg.get_web_auth_session_key(self.auth_url))
+                data = await lastfm_get_session_key(
+                    apikey=self.ctx.bot.config["LASTFM_KEY"],
+                    apisecret=self.ctx.bot.config["LASTFM_SECRET"],
+                    token=self.token
+                )
+                if data.get('error'):
+                    count -= 1
+                    continue
+                self.session_key = data["session"]["key"]
+                self.username = data["session"]["name"]
                 self.stop()
                 return
-            except pylast.WSError:
-                count -= 1
-                continue
             except Exception as e:
                 self.error = e
+                self.auth_url = ""
+                self.token = ""
                 self.stop()
                 return
+
+        self.auth_url = ""
+        self.token = ""
 
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
         if interaction.user.id != self.ctx.author.id:
@@ -100,23 +134,15 @@ class LastFMView(disnake.ui.View):
 
     async def send_authurl_callback(self, interaction: disnake.MessageInteraction):
 
-        if bucket := self.cooldown.get_bucket(interaction):  # type: ignore
-            if retry_after := bucket.update_rate_limit():
-                await interaction.send(f"você terá que aguardar {retry_after} segundo{'s'[:retry_after^1]} para gerar um novo link de acesso.", ephemeral=True)
-                return
-
-        if not self.skg:
-            if not os.path.isdir(f"{temp_dir}/.lastfm_tmp"):
-                os.makedirs(f"{temp_dir}/.lastfm_tmp")
-            self.network = pylast.LastFMNetwork(self.ctx.bot.pool.config["LASTFM_KEY"], self.ctx.bot.pool.config["LASTFM_SECRET"])
-            self.network.enable_caching(f"{temp_dir}/.lastfm_tmp/lastfm_cache_{self.ctx.author.id}")
-            self.skg = MySessionKeyGenerator(self.network)
-
         self.check_loop = self.ctx.bot.loop.create_task(self.check_session_loop())
-        self.auth_url = await self.ctx.bot.loop.run_in_executor(None, lambda: self.skg.get_web_auth_url())
 
-        await interaction.send(f"### [Clique aqui](<{self.auth_url}>) para vincular sua conta do last.fm (clicando em allow)\n\n"
-                               f"`O link expira em` <t:{int((disnake.utils.utcnow() + datetime.timedelta(minutes=5)).timestamp())}:R>\n\n"
+        if not self.auth_url:
+            self.token = await lastfm_get_token(apikey=self.ctx.bot.config["LASTFM_KEY"])
+            self.auth_url = f'http://www.last.fm/api/auth/?api_key={self.ctx.bot.config["LASTFM_KEY"]}&token={self.token}'
+            self.last_timestamp = int((disnake.utils.utcnow() + datetime.timedelta(minutes=5)).timestamp())
+
+        await interaction.send(f"### [Clique aqui](<{self.auth_url}>) para vincular sua conta do last.fm (na página clique em \"allow\")\n\n"
+                               f"`O link expira em` <t:{self.last_timestamp}:R> `(Caso esteja expirado, clique no botão novamente).`\n\n"
                                f"`Atenção: Não mostre o link do \"clique aqui\" pra ninguem e nem envie em locais "
                                f"públicos, pois esse link pode conceder acesso a sua conta do last.fm`\n\n"
                                "`Caso já tenha autorizado a aplicação você deve aguardar até 20 segundos para a "
@@ -406,8 +432,9 @@ class LastFmCog(commands.Cog):
 
         params['api_sig'] = hashlib.md5(string.encode('utf8')).hexdigest()
 
-        async with self.bot.session.post("https://ws.audioscrobbler.com/2.0/", params=params, headers=lastfm_header) as r:
-            return xmltodict.parse(await r.text())
+        async with ClientSession() as session:
+            async with session.post("http://ws.audioscrobbler.com/2.0/", params=params, headers=lastfm_header) as r:
+                return xmltodict.parse(await r.text())
 
 def setup(bot):
     if not bot.pool.config["LASTFM_KEY"] or not bot.pool.config["LASTFM_SECRET"]:
