@@ -1673,7 +1673,7 @@ class LavalinkPlayer(wavelink.Player):
                     continue
 
                 if not isinstance(t, PartialTrack):
-                    t = LavalinkTrack(id_=t.id, info=t.info, autoplay=True, requester=self.bot.user.id)
+                    t.info["extra"].update({"autoplay": True, "requester": self.bot.user.id})
 
                 t.info["extra"]["related"] = info
                 tracks_final.append(t)
