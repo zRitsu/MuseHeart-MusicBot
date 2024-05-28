@@ -292,7 +292,7 @@ class LastFmCog(commands.Cog):
     @commands.Cog.listener('on_wavelink_track_end')
     async def startscrooble(self, player: LavalinkPlayer, track: LavalinkTrack, reason: str = None, update_np=False, users=None):
 
-        if not track:
+        if not track or track.is_stream or track.info["sourceName"] in ("local", "http"):
             return
 
         if not update_np:
@@ -300,7 +300,10 @@ class LastFmCog(commands.Cog):
             if reason != "FINISHED":
                 return
 
-            if (disnake.utils.utcnow() - player.start_time).total_seconds() < 61:
+            if track.duration < 20000:
+                return
+
+            if (disnake.utils.utcnow() - player.start_time).total_seconds() < ((player.current.duration * 0.75) / 1000):
                 return
 
         counter = 3
@@ -312,9 +315,6 @@ class LastFmCog(commands.Cog):
             break
 
         if not player.guild.me.voice:
-            return
-
-        if track.is_stream or track.info["sourceName"] in ("local", "http"):
             return
 
         if track.info["sourceName"] in ("youtube", "soundcloud"):
