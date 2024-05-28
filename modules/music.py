@@ -233,7 +233,7 @@ class Music(commands.Cog):
 
     @commands.has_guild_permissions(manage_guild=True)
     @pool_command(
-        only_voiced=True, name="setvoicestatus", aliases=["stagevc", "togglestageannounce", "announce", "vcannounce",
+        only_voiced=True, name="setvoicestatus", aliases=["stagevc", "togglestageannounce", "announce", "vcannounce", "setstatus",
                                                          "voicestatus", "setvcstatus", "statusvc", "vcstatus", "stageannounce"],
         description="Ativar o sistema de anuncio/status automático do canal com o nome da música.",
         cooldown=stage_cd, max_concurrency=stage_mc, extras={"exclusive_cooldown": True},

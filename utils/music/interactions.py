@@ -1979,8 +1979,29 @@ class SetStageTitle(disnake.ui.View):
         self.guild = guild
         self.message = None
 
-    @disnake.ui.button(emoji='🔊', style=disnake.ButtonStyle.grey, label="Ativar/Desativar status")
-    async def set_status(self, button, interaction: disnake.MessageInteraction):
+        if self.data['voice_channel_status']:
+            setstatus_btn = disnake.ui.Button(label="Usar modelo atual", emoji="🎶",
+                                              style=disnake.ButtonStyle.grey,
+                                              custom_id="status_voice_channel_temp_current")
+            setstatus_btn.callback = self.setstatus_callback
+            self.add_item(setstatus_btn)
+
+        setstatus_modal_btn = disnake.ui.Button(label="Ativar/Desativar status",
+                                                emoji='🔊', style=disnake.ButtonStyle.grey)
+        setstatus_modal_btn.callback = self.set_status_modal
+        self.add_item(setstatus_modal_btn)
+
+        setstatus_perm_btn = disnake.ui.Button(label="Ativar/Desativar status (permanente)",
+                                               emoji='💾', style=disnake.ButtonStyle.grey)
+        setstatus_perm_btn.callback = self.set_status_perm
+        self.add_item(setstatus_perm_btn)
+
+
+    async def setstatus_callback(self, interaction: disnake.MessageInteraction):
+        await self.modal_handler(inter=interaction, values={"status_voice_value": self.data['voice_channel_status']})
+
+
+    async def set_status_modal(self, interaction: disnake.MessageInteraction):
 
         await interaction.response.send_modal(
             ViewModal(
@@ -2000,8 +2021,8 @@ class SetStageTitle(disnake.ui.View):
             )
         )
 
-    @disnake.ui.button(emoji='💾', style=disnake.ButtonStyle.grey, label="Ativar/Desativar status (permanente)")
-    async def set_status_perm(self, button, interaction: disnake.MessageInteraction):
+
+    async def set_status_perm(self, interaction: disnake.MessageInteraction):
 
         await interaction.response.send_modal(
             ViewModal(
@@ -2037,23 +2058,28 @@ class SetStageTitle(disnake.ui.View):
 
         if self.data['voice_channel_status']:
             embeds.append(
-                disnake.Embed(title="**Modelo permanente atual:**", description=self.data['voice_channel_status'])
+                disnake.Embed(title="**Modelo permanente atual:**", description=self.data['voice_channel_status'], color=self.bot.get_color(self.guild.me))
             )
 
         return embeds
 
-    async def modal_handler(self, inter: disnake.ModalInteraction):
+    async def modal_handler(self, inter: disnake.ModalInteraction, values: dict = None):
 
-        inter.text_values["status_voice_value"] = inter.text_values["status_voice_value"].replace("\n", " ").strip()
+        try:
+            values = inter.text_values
+        except AttributeError:
+            pass
 
-        if inter.text_values["status_voice_value"] and not any(
-                p in inter.text_values["status_voice_value"] for p in self.placeholders):
+        values["status_voice_value"] = values["status_voice_value"].replace("\n", " ").strip()
+
+        if values["status_voice_value"] and not any(
+                p in values["status_voice_value"] for p in self.placeholders):
             await inter.send("**Você deve usar pelo menos um placeholder válido...**", ephemeral=True)
             return
 
         if inter.data.custom_id == "status_voice_channel_perm":
 
-            if self.data["voice_channel_status"] == inter.text_values["status_voice_value"]:
+            if self.data["voice_channel_status"] == values["status_voice_value"]:
                 await inter.send("**O status permanente atual é o mesmo do informado...**", ephemeral=True)
                 return
 
@@ -2074,7 +2100,7 @@ class SetStageTitle(disnake.ui.View):
                 await inter.send("**Você não possui a permissão de gerenciar servidor para alterar o status do canal de voz**", ephemeral=True)
                 return
 
-            self.data["voice_channel_status"] = inter.text_values["status_voice_value"]
+            self.data["voice_channel_status"] = values["status_voice_value"]
 
             await inter.response.defer(ephemeral=True)
 
@@ -2085,11 +2111,11 @@ class SetStageTitle(disnake.ui.View):
                     p = b.music.players[inter.guild_id]
                 except KeyError:
                     continue
-                p.stage_title_event = bool(inter.text_values["status_voice_value"])
-                p.stage_title_template = inter.text_values["status_voice_value"]
+                p.stage_title_event = bool(values["status_voice_value"])
+                p.stage_title_template = values["status_voice_value"]
                 p.start_time = disnake.utils.utcnow()
                 p.set_command_log(
-                    text=f"{inter.author.mention} " + ("ativou" if inter.text_values["status_voice_value"] else "desativou") + " o status automático",
+                    text=f"{inter.author.mention} " + ("ativou" if values["status_voice_value"] else "desativou") + " o status automático",
                     emoji="📢",
                 )
                 p.update = True
@@ -2102,9 +2128,9 @@ class SetStageTitle(disnake.ui.View):
                 await p.process_save_queue()
                 await asyncio.sleep(3)
 
-            await inter.edit_original_message("**Status permanente foi " + ("salvo" if inter.text_values["status_voice_value"] else "desativado") + " com sucesso!**" )
+            await inter.edit_original_message("**Status permanente foi " + ("salvo" if values["status_voice_value"] else "desativado") + " com sucesso!**" )
 
-        elif inter.data.custom_id == "status_voice_channel_temp":
+        elif inter.data.custom_id.startswith("status_voice_channel_temp"):
 
             player: Optional[LavalinkPlayer] = None
 
@@ -2129,8 +2155,8 @@ class SetStageTitle(disnake.ui.View):
                 await inter.send("Você não possui a permissão de gerenciar servidor para alterar o status do canal de voz", ephemeral=True)
                 return
 
-            player.stage_title_event = bool(inter.text_values["status_voice_value"])
-            player.stage_title_template = inter.text_values["status_voice_value"]
+            player.stage_title_event = bool(values["status_voice_value"])
+            player.stage_title_template = values["status_voice_value"]
             player.start_time = disnake.utils.utcnow()
 
             await inter.response.defer(ephemeral=True)
@@ -2143,13 +2169,13 @@ class SetStageTitle(disnake.ui.View):
             await player.process_save_queue()
 
             player.set_command_log(
-                text=f"{inter.author.mention} " + ("ativou" if inter.text_values["status_voice_value"] else "desativou") + " o status automático",
+                text=f"{inter.author.mention} " + ("ativou" if values["status_voice_value"] else "desativou") + " o status automático",
                 emoji="📢",
             )
 
             player.update = True
 
-            await inter.edit_original_message("**Status definido com sucesso!**" if inter.text_values["status_voice_value"] else "**Status desativado com sucesso!**")
+            await inter.edit_original_message("**Status definido com sucesso!**" if values["status_voice_value"] else "**Status desativado com sucesso!**")
 
         else:
             await inter.send(f"Não implementado: {inter.data.custom_id}", ephemeral=True)
