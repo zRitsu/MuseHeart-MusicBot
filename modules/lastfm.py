@@ -303,7 +303,7 @@ class LastFmCog(commands.Cog):
             if track.duration < 20000:
                 return
 
-            if (disnake.utils.utcnow() - player.start_time).total_seconds() < ((player.current.duration * 0.75) / 1000):
+            if (disnake.utils.utcnow() - player.start_time).total_seconds() < ((track.duration * 0.75) / 1000):
                 return
 
         counter = 3
