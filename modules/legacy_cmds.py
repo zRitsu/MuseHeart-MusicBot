@@ -231,19 +231,14 @@ class Owner(commands.Cog):
 
         modules = [f"{m.lower()}.py" for m in modules]
 
-        data = self.bot.load_modules(modules)
-        self.bot.load_skins()
-
-        await self.bot.sync_app_commands(force=True)
-
-        for bot in set(self.bot.pool.get_all_bots()):
-
-            if bot.user.id != self.bot.user.id:
-                bot.load_skins()
-                bot.load_modules(modules)
-                await bot.sync_app_commands(force=True)
+        data = {}
 
         self.bot.sync_command_cooldowns(force=True)
+
+        for bot in set(self.bot.pool.get_all_bots()):
+            bot.load_skins()
+            data = bot.load_modules(modules)
+            await bot.sync_app_commands(force=True)
 
         txt = ""
 

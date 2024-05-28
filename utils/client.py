@@ -1000,8 +1000,8 @@ class BotCore(commands.AutoShardedBot):
         current_cmds = sorted([sort_dict_recursively(cmd.body.to_dict()) for cmd in self.application_commands], key=lambda k: k["name"])
 
         try:
-            with open(f"./.app_commands_sync_data/{self.user.id}.pkl", "rb") as f:
-                synced_cmds = pickle.load(f)
+            with open(f"./.app_commands_sync_data/{self.user.id}.json") as f:
+                synced_cmds = await self.loop.run_in_executor(None, lambda: json.load(f))
         except FileNotFoundError:
             synced_cmds = None
 
@@ -1018,8 +1018,12 @@ class BotCore(commands.AutoShardedBot):
             if not os.path.isdir("./.app_commands_sync_data/"):
                 os.makedirs("./.app_commands_sync_data/")
 
-            with open(f"./.app_commands_sync_data/{self.user.id}.pkl", "wb") as f:
-                pickle.dump(current_cmds, f)
+            with open(f"./.app_commands_sync_data/{self.user.id}.json", "w", encoding="utf-8") as f:
+                await self.loop.run_in_executor(None, lambda: json.dump(current_cmds, f, indent=4))
+
+            with open(f"./.app_commands_sync_data/{self.user.id}-old.json", "w", encoding="utf-8") as f:
+                await self.loop.run_in_executor(None, lambda: json.dump(synced_cmds, f, indent=4))
+
         except:
             traceback.print_exc()
 
