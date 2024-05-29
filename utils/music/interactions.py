@@ -9,6 +9,7 @@ import traceback
 from base64 import b64decode, b64encode
 from copy import deepcopy
 from io import BytesIO
+from itertools import islice
 from typing import List, Union, Optional, TYPE_CHECKING, Literal
 
 import disnake
@@ -1353,9 +1354,10 @@ class FavMenuView(disnake.ui.View):
         self.add_item(import_button)
 
         if self.mode == ViewMode.fav_manager:
-            play_button = disnake.ui.Button(label="Tocar o favorito selecionado", emoji="▶", custom_id="favmanager_play_button")
-            play_button.callback = self.play_callback
-            self.add_item(play_button)
+            if self.data["fav_links"]:
+                play_button = disnake.ui.Button(label="Tocar o favorito selecionado", emoji="▶", custom_id="favmanager_play_button")
+                play_button.callback = self.play_callback
+                self.add_item(play_button)
 
         elif self.mode == ViewMode.integrations_manager:
             if self.data["integration_links"]:
@@ -1452,7 +1454,7 @@ class FavMenuView(disnake.ui.View):
                     return f"` {index} ` [`{name}`]({url})"
 
                 embed.description = f"**Seus favoritos atuais:**\n\n" + "\n".join(
-                    f"> {format_fav(n+1, d)}" for n, d in enumerate(self.data["fav_links"].items())
+                    f"> {format_fav(n+1, d)}" for n, d in enumerate(islice(self.data["fav_links"].items(), 25))
                 )
 
             embed.add_field(name="**Como usá-los?**", inline=False,
@@ -1480,7 +1482,7 @@ class FavMenuView(disnake.ui.View):
                     return f"` {index} ` [`{name}`]({data['url']})"
 
                 embed.description = f"**Links atuais no bot {self.bot.user.mention}:**\n\n" + "\n".join(
-                    f"> {format_gfav(n+1, d)}" for n, d in enumerate(self.guild_data["player_controller"]["fav_links"].items())
+                    f"> {format_gfav(n+1, d)}" for n, d in enumerate(islice(self.guild_data["player_controller"]["fav_links"].items(), 25))
                 )
 
             embed.add_field(name="**Como usá-los?**", inline=False,
@@ -1504,7 +1506,7 @@ class FavMenuView(disnake.ui.View):
                     return f"` {index} ` [`{name}`]({url})"
 
                 embed.description = f"**Suas integrações atuais:**\n\n" + "\n".join(
-                    f"> {format_itg(self.bot, n+1, d)}" for n, d in enumerate(self.data["integration_links"].items()))
+                    f"> {format_itg(self.bot, n+1, d)}" for n, d in enumerate(islice(self.data["integration_links"].items(), 25)))
 
                 embed.add_field(name="**Como tocar a playlist de uma integração?**", inline=False,
                                 value=f"* Usando o comando {cmd} (selecionando a integração no preenchimento automático da busca)\n"
@@ -1739,6 +1741,8 @@ class FavMenuView(disnake.ui.View):
                              "`um arquivo de backup foi gerado e caso queira reverter essa exclusão, copie o "
                              "conteúdo do arquivo e clique no botão \"importar\" e cole o conteudo no campo indicado.`",
                              ephemeral=True, file=disnake.File(fp, filename="integrations.json"))
+
+        self.current = None
 
         if not isinstance(self.ctx, CustomContext):
             await self.ctx.edit_original_message(embed=self.build_embed(), view=self)
