@@ -6,13 +6,15 @@ import pprint
 import time
 import traceback
 from typing import TYPE_CHECKING, Optional
+from urllib.parse import quote
 
 import disnake
 from disnake.ext import commands
 
 from utils.db import DBModel
-from utils.music.lastfm_tools import lastfm_get_session_key, lastfm_get_token, generate_api_sig, LastFmException, post_lastfm, \
-    lastfm_update_nowplaying, lastfm_track_scrobble, lastfm_user_info
+from utils.music.lastfm_tools import lastfm_get_session_key, lastfm_get_token, generate_api_sig, LastFmException, \
+    post_lastfm, \
+    lastfm_update_nowplaying, lastfm_track_scrobble, lastfm_user_info, lastfm_user_recent_tracks
 from utils.music.models import LavalinkPlayer, LavalinkTrack
 from utils.others import CustomContext
 
@@ -183,29 +185,49 @@ class LastFmCog(commands.Cog):
             if albums := lastfm_user['album_count']:
                 txt += f"📀 **⠂Álbuns registrados:** [`{albums}`](<https://www.last.fm/user/{lastfm_user['name']}/library/albums>)\n\n"
 
-            embed = disnake.Embed(
+            embed_color = self.bot.get_color()
+
+            embeds = [disnake.Embed(
                 description=txt, color=self.bot.get_color()
             ).set_thumbnail(url=lastfm_user['image'][-1]["#text"]).set_author(
                 name="Last.FM: Informação de usuário",
-                icon_url="https://www.last.fm/static/images/lastfm_avatar_twitter.52a5d69a85ac.png")
+                icon_url="https://www.last.fm/static/images/lastfm_avatar_twitter.52a5d69a85ac.png")]
+
+            recenttracks = await lastfm_user_recent_tracks(lastfm_user['name'], api_key=self.bot.config["LASTFM_KEY"])
+
+            if recenttracks['track']:
+                embeds[0].description += f"### Músicas mais recentes ouvidas por [{lastfm_user['realname']}](<{lastfm_user['url']}>):"
+
+                for n, t in enumerate(recenttracks['track'][:3]):
+                    artist_url = t['url'].split('/_/')[0]
+                    t_embed = disnake.Embed(
+                        color=embed_color,
+                        description=f"[`{t['name']}`]({t['url']}) - <t:{t['date']['uts']}:R>\n"
+                                    f"Artista: [`{t['artist']['#text']}`]({artist_url})"
+                    )
+                    if t['album']['#text']:
+                        t_embed.description += f" **|** Álbum: [`{t['album']['#text']}`]({artist_url}/{quote(t['album']['#text'])})"
+                    t_embed.set_thumbnail(url=t['image'][0]['#text'] or 'https://i.ibb.co/pQPrKdw/lastfm-unknown-image.webp')
+                    embeds.append(t_embed)
+
 
         else:
-            embed = disnake.Embed(
+            embeds = [disnake.Embed(
                 description="**Vincule (ou crie) uma conta no [last.fm](<https://www.last.fm/home>) para registrar "
                             "todas as músicas que você ouvir por aqui no seu perfil do last.fm para obter sugestões de "
                             "músicas/artistas/álbuns e ter uma estatística geral das músicas que você ouviu alem de ter "
                             "acesso a uma comunidade incrível da plataforma.**",
                 color=self.bot.get_color()
-            ).set_thumbnail(url="https://www.last.fm/static/images/lastfm_avatar_twitter.52a5d69a85ac.png")
+            ).set_thumbnail(url="https://www.last.fm/static/images/lastfm_avatar_twitter.52a5d69a85ac.png")]
 
         view = LastFMView(inter, session_key=current_session_key)
 
         if isinstance(inter, CustomContext):
-            msg = await inter.send(embed=embed, view=view)
+            msg = await inter.send(embeds=embeds, view=view)
             inter.store_message = msg
         else:
             msg = None
-            await inter.edit_original_message(embed=embed, view=view)
+            await inter.edit_original_message(embeds=embeds, view=view)
 
         await view.wait()
 
@@ -217,12 +239,13 @@ class LastFmCog(commands.Cog):
             if view.error:
                 raise view.error
 
-            embed.set_footer(text="O tempo para linkar sua conta do last.fm expirou! Use o comando novamente caso queira repetir o processo.")
+            embeds[-1].set_footer(text="O tempo para interagir nessa mensagem expirou! Use o comando novamente caso "
+                                      "queira usar novamente.")
 
             if msg:
-                await msg.edit(embed=embed, view=view)
+                await msg.edit(embeds=embeds, view=view)
             else:
-                await inter.edit_original_message(embed=embed, view=view)
+                await inter.edit_original_message(embeds=embeds, view=view)
 
             return
 
@@ -232,21 +255,21 @@ class LastFmCog(commands.Cog):
 
         self.bot.pool.lastfm_sessions[inter.author.id] = newdata
 
-        embed.clear_fields()
+        embeds[0].clear_fields()
 
         if view.session_key:
-            embed.description += f"\n### A conta [{view.username}](<https://www.last.fm/user/{view.username}>) foi " + \
+            embeds[-1].description += f"\n### A conta [{view.username}](<https://www.last.fm/user/{view.username}>) foi " + \
                                  "vinculada com sucesso!\n\n`Agora ao ouvir suas músicas no canal de voz elas serão registradas " \
                                 "na sua conta do last.fm`"
         else:
-            embed.description += "\n### Conta desvinculada com sucesso!"
+            embeds[-1].description += "\n### Conta desvinculada com sucesso!"
 
         if view.interaction:
-            await view.interaction.response.edit_message(embed=embed, view=view, content=None)
+            await view.interaction.response.edit_message(embeds=embeds, view=view, content=None)
         elif msg:
-            await msg.edit(embed=embed, view=view, content=None)
+            await msg.edit(embeds=embeds, view=view, content=None)
         else:
-            await inter.edit_original_message(embed=embed, view=view, content=None)
+            await inter.edit_original_message(embeds=embeds, view=view, content=None)
 
     @commands.Cog.listener("on_voice_state_update")
     async def connect_vc_update(self, member: disnake.Member, before: disnake.VoiceState, after: disnake.VoiceState):

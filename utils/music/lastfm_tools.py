@@ -141,3 +141,12 @@ async def lastfm_user_info(session_key: str, api_key: str):
             'sk': session_key,
         }))['user']
 
+
+async def lastfm_user_recent_tracks(user: str, api_key: str, limit: int = 50):
+    return (await request_lastfm(
+        params = {
+            'method': 'user.getRecentTracks',
+            'user': user,
+            'limit': limit,
+            'api_key': api_key,
+        }))['recenttracks']
