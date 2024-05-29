@@ -261,7 +261,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         if not isinstance(inter, CustomContext) and not inter.guild.voice_client:
 
             if only_voiced:
-                inter.bot.dispatch("pool_dispatch", None)
+                inter.bot.dispatch("pool_dispatch", None, None)
                 raise NoPlayer()
 
             inter.music_bot = inter.bot
