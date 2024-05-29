@@ -165,7 +165,10 @@ class LocalDatabase(BaseDB):
 
         id_ = str(id_)
 
-        self.cache.get((db_name, collection, frozenset({"_id": id_}.items())))
+        cached_result = self.cache.get((db_name, collection, frozenset({"_id": id_}.items())))
+
+        if cached_result is not None:
+            return cached_result
 
         data = self._connect[collection][db_name].find_one({"_id": id_})
 
