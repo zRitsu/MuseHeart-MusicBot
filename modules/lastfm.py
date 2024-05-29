@@ -11,7 +11,7 @@ import disnake
 from disnake.ext import commands
 
 from utils.db import DBModel
-from utils.music.lastfm import lastfm_get_session_key, lastfm_get_token, generate_api_sig, LastFmException, post_lastfm, \
+from utils.music.lastfm_tools import lastfm_get_session_key, lastfm_get_token, generate_api_sig, LastFmException, post_lastfm, \
     lastfm_update_nowplaying, lastfm_track_scrobble, lastfm_user_info
 from utils.music.models import LavalinkPlayer, LavalinkTrack
 from utils.others import CustomContext
