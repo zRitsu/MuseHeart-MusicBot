@@ -196,7 +196,7 @@ class LastFmCog(commands.Cog):
             recenttracks = await lastfm_user_recent_tracks(lastfm_user['name'], api_key=self.bot.config["LASTFM_KEY"])
 
             if recenttracks['track']:
-                embeds[0].description += f"### Músicas mais recentes ouvidas por [{lastfm_user['realname']}](<{lastfm_user['url']}>):"
+                embeds[0].description += f"### Músicas recentes ouvidas por [{lastfm_user['realname']}](<{lastfm_user['url']}>):"
 
                 for n, t in enumerate(recenttracks['track'][:3]):
                     artist_url = t['url'].split('/_/')[0]
