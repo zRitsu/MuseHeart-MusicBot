@@ -165,6 +165,8 @@ class LastFmCog(commands.Cog):
             current_session_key = ""
             await self.bot.update_global_data(inter.author.id, data, db_name=DBModel.users)
 
+        embed_color = self.bot.get_color()
+
         if lastfm_user:
             txt = f"👤 **⠂Usuário:** [`{lastfm_user['realname']}`](<{lastfm_user['url']}>)\n\n" \
                   f"⏰ **⠂Conta criada em:** <t:{lastfm_user['registered']['#text']}:f>\n\n" \
@@ -184,8 +186,6 @@ class LastFmCog(commands.Cog):
 
             if albums := lastfm_user['album_count']:
                 txt += f"📀 **⠂Álbuns registrados:** [`{albums}`](<https://www.last.fm/user/{lastfm_user['name']}/library/albums>)\n\n"
-
-            embed_color = self.bot.get_color()
 
             embeds = [disnake.Embed(
                 description=txt, color=self.bot.get_color()
@@ -217,7 +217,7 @@ class LastFmCog(commands.Cog):
                             "todas as músicas que você ouvir por aqui no seu perfil do last.fm para obter sugestões de "
                             "músicas/artistas/álbuns e ter uma estatística geral das músicas que você ouviu alem de ter "
                             "acesso a uma comunidade incrível da plataforma.**",
-                color=self.bot.get_color()
+                color=embed_color
             ).set_thumbnail(url="https://www.last.fm/static/images/lastfm_avatar_twitter.52a5d69a85ac.png")]
 
         view = LastFMView(inter, session_key=current_session_key)
@@ -239,8 +239,9 @@ class LastFmCog(commands.Cog):
             if view.error:
                 raise view.error
 
-            embeds[-1].set_footer(text="O tempo para interagir nessa mensagem expirou! Use o comando novamente caso "
-                                      "queira usar novamente.")
+            embeds.append(
+                disnake.Embed(color=embed_color).set_footer(text="O tempo para interagir nessa mensagem expirou.")
+            )
 
             if msg:
                 await msg.edit(embeds=embeds, view=view)
@@ -258,11 +259,15 @@ class LastFmCog(commands.Cog):
         embeds[0].clear_fields()
 
         if view.session_key:
-            embeds[-1].description += f"\n### A conta [{view.username}](<https://www.last.fm/user/{view.username}>) foi " + \
-                                 "vinculada com sucesso!\n\n`Agora ao ouvir suas músicas no canal de voz elas serão registradas " \
-                                "na sua conta do last.fm`"
+            embeds.append(
+                disnake.Embed(description=f"### A conta [{view.username}](<https://www.last.fm/user/{view.username}>) foi "
+                                 "vinculada com sucesso!\n\n`Agora ao ouvir suas músicas no canal de voz elas serão registradas "
+                                "na sua conta do last.fm`", color=embed_color)
+            )
         else:
-            embeds[-1].description += "\n### Conta desvinculada com sucesso!"
+            embeds.append(
+                disnake.Embed(description="### Conta desvinculada com sucesso!", color=embed_color)
+            )
 
         if view.interaction:
             await view.interaction.response.edit_message(embeds=embeds, view=view, content=None)
