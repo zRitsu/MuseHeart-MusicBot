@@ -37,7 +37,7 @@ from utils.music.interactions import VolumeInteraction, QueueInteraction, Select
 from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, PartialTrack
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, SongRequestPurgeMode, song_request_buttons, \
-    select_bot_pool, get_inter_guild_data, ProgressBar, update_inter
+    select_bot_pool, ProgressBar, update_inter
 
 
 class Music(commands.Cog):
@@ -120,11 +120,7 @@ class Music(commands.Cog):
     async def updatecache(self, ctx: CustomContext, *args):
 
         if "-fav" in args:
-            try:
-                data = ctx.global_user_data
-            except AttributeError:
-                data = await self.bot.get_global_data(ctx.author.id, db_name=DBModel.users)
-                ctx.global_user_data = data
+            data = await self.bot.get_global_data(ctx.author.id, db_name=DBModel.users)
 
             self.bot.pool.playlist_cache.update({url: [] for url in data["fav_links"].values()})
 
@@ -751,7 +747,7 @@ class Music(commands.Cog):
             guild = inter.guild
 
         msg = None
-        inter, guild_data = await get_inter_guild_data(inter, bot)
+        guild_data = await bot.get_data(inter.author.id, db_name=DBModel.guilds)
         ephemeral = None
 
         if not inter.response.is_done():
@@ -945,12 +941,6 @@ class Music(commands.Cog):
 
                 if bot != current_bot:
                     guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
-                    try:
-                        inter.guild_data = guild_data
-                    except AttributeError:
-                        pass
-                else:
-                    inter, guild_data = await get_inter_guild_data(inter, bot)
 
                 bot = current_bot
 
@@ -1007,13 +997,7 @@ class Music(commands.Cog):
             if not node:
                 node = await self.get_best_node(bot)
 
-            guild_data = None
-
-            if inter.bot == bot:
-                inter, guild_data = await get_inter_guild_data(inter, bot)
-
-            if not guild_data:
-                guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
+            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
             if not guild.me.voice:
                 can_connect(voice_channel, guild, guild_data["check_other_bots_in_vc"], bot=bot)
@@ -1052,14 +1036,7 @@ class Music(commands.Cog):
                 except IndexError:
                     pass
 
-        try:
-            user_data = inter.global_user_data
-        except:
-            user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
-            try:
-                inter.global_user_data = user_data
-            except:
-                pass
+        user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
         if not query:
 
@@ -1101,7 +1078,7 @@ class Music(commands.Cog):
                 await inter.response.defer(ephemeral=ephemeral)
 
             if not guild_data:
-                nter, guild_data = await get_inter_guild_data(inter, bot)
+                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
             if guild_data["player_controller"]["fav_links"]:
                 disnake.SelectOption(label="Usar favorito do servidor", value=">> [📌 Favoritos do servidor 📌] <<", emoji="📌"),
@@ -1186,11 +1163,7 @@ class Music(commands.Cog):
         elif query.startswith(">> [📌 Favoritos do servidor 📌] <<"):
 
             if not guild_data:
-
-                if inter.bot == bot:
-                    inter, guild_data = await get_inter_guild_data(inter, bot)
-                else:
-                    guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
+                guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
 
             if not guild_data["player_controller"]["fav_links"]:
                 raise GenericError("**O servidor não possui links fixos/favoritos.**")
@@ -1303,7 +1276,7 @@ class Music(commands.Cog):
             if is_pin is None:
                 is_pin = True
             if not guild_data:
-                inter, guild_data = await get_inter_guild_data(inter, bot)
+                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
             query = guild_data["player_controller"]["fav_links"][query[7:]]['url']
             source = False
 
@@ -1312,14 +1285,8 @@ class Music(commands.Cog):
             source = False
 
         elif query.startswith(("> fav: ", "> itg: ")):
-            try:
-                user_data = inter.global_user_data
-            except AttributeError:
-                user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
-                try:
-                    inter.global_user_data = user_data
-                except:
-                    pass
+
+            user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
             if query.startswith("> fav:"):
                 query = user_data["fav_links"][query[7:]]
@@ -1591,11 +1558,7 @@ class Music(commands.Cog):
                 player = None
 
                 if not guild_data:
-
-                    if inter.bot == bot:
-                        inter, guild_data = await get_inter_guild_data(inter, bot)
-                    else:
-                        guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
+                    guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
 
                 static_player = guild_data['player_controller']
 
@@ -1924,10 +1887,7 @@ class Music(commands.Cog):
             try:
                 guild_data["check_other_bots_in_vc"]
             except KeyError:
-                if inter.bot == bot:
-                    inter, guild_data = await get_inter_guild_data(inter, bot)
-                else:
-                    guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
+                guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
 
             if isinstance(voice_channel, disnake.StageChannel):
                 player.stage_title_event = False
@@ -3038,7 +2998,7 @@ class Music(commands.Cog):
         if not player.current:
             raise GenericError(f"**No momento não estou tocando algo no canal {player.last_channel.mention}**")
 
-        inter, guild_data = await get_inter_guild_data(inter, player.bot)
+        guild_data = await player.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         ephemeral = (player.guild.id != inter.guild_id and not await player.bot.is_owner(inter.author)) or await self.is_request_channel(inter, data=guild_data)
 
@@ -4681,20 +4641,13 @@ class Music(commands.Cog):
 
                 await interaction.response.defer(ephemeral=True)
 
-                inter, guild_data = await get_inter_guild_data(inter, bot)
+                guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
             elif inter.invoked_with in ("integrations", "integrationmanager", "itg", "itgmgr", "itglist", "integrationlist"):
                 mode = ViewMode.integrations_manager
 
         else:
-            try:
-                global_data = inter.global_guild_data
-            except AttributeError:
-                global_data = await bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
-                try:
-                    inter.global_guild_data = global_data
-                except:
-                    pass
+            global_data = await bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
             prefix = global_data['prefix'] or bot.default_prefix
 
         if not interaction:
@@ -4703,14 +4656,7 @@ class Music(commands.Cog):
         if not interaction.response.is_done():
             await interaction.response.defer(ephemeral=True)
 
-        try:
-            user_data = inter.global_user_data
-        except AttributeError:
-            user_data = await bot.get_global_data(inter.author.id, db_name=DBModel.users)
-            try:
-                inter.global_user_data = user_data
-            except:
-                pass
+        user_data = await bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
         view = FavMenuView(bot=bot, ctx=interaction, data=user_data, prefix=prefix, mode=mode, is_owner=await bot.is_owner(inter.author))
         view.guild_data = guild_data
@@ -4822,13 +4768,11 @@ class Music(commands.Cog):
 
         except KeyError:
 
-            if data:
-                guild_data = data
-            else:
-                ctx, guild_data = await get_inter_guild_data(ctx, bot)
+            if not data:
+                data = await bot.get_data(ctx.guild_id, db_name=DBModel.guilds)
 
             try:
-                channel = bot.get_channel(int(guild_data["player_controller"]["channel"]))
+                channel = bot.get_channel(int(data["player_controller"]["channel"]))
             except:
                 channel = None
 
@@ -6131,7 +6075,7 @@ class Music(commands.Cog):
     ):
 
         if not guild_data:
-            inter, guild_data = await get_inter_guild_data(inter, bot)
+            guild_data = await self.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         skin = guild_data["player_controller"]["skin"]
         static_skin = guild_data["player_controller"]["static_skin"]
@@ -6143,14 +6087,7 @@ class Music(commands.Cog):
         if not node:
             node = await self.get_best_node(bot)
 
-        try:
-            global_data = inter.global_guild_data
-        except AttributeError:
-            global_data = await bot.get_global_data(guild.id, db_name=DBModel.guilds)
-            try:
-                inter.global_guild_data = global_data
-            except:
-                pass
+        global_data = await bot.get_global_data(guild.id, db_name=DBModel.guilds)
         
         try:
             vc = inter.author.voice.channel

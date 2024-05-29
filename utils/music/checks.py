@@ -8,10 +8,11 @@ from typing import Union, Optional, TYPE_CHECKING
 import disnake
 from disnake.ext import commands
 
+from utils.db import DBModel
 from utils.music.converters import time_format
 from utils.music.errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, \
     GenericError, MissingVoicePerms, DiffVoiceChannel, PoolException
-from utils.others import CustomContext, get_inter_guild_data
+from utils.others import CustomContext
 
 if TYPE_CHECKING:
     from utils.music.models import LavalinkPlayer
@@ -38,7 +39,8 @@ def can_send_message(
 
 
 async def check_requester_channel(ctx: CustomContext):
-    ctx, guild_data = await get_inter_guild_data(ctx, ctx.bot)
+
+    guild_data = await ctx.bot.get_data(ctx.guild_id, db_name=DBModel.guilds)
 
     if guild_data['player_controller']["channel"] == str(ctx.channel.id):
 
@@ -585,8 +587,7 @@ async def check_player_perm(inter, bot: BotCore, channel, guild_data: dict = Non
 
     user_roles = [r.id for r in inter.author.roles]
 
-    if not guild_data:
-        inter, guild_data = await get_inter_guild_data(inter, bot)
+    guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
     if [r for r in guild_data['djroles'] if int(r) in user_roles]:
         return True

@@ -517,11 +517,7 @@ def string_to_file(txt, filename="result.txt"):
 
 async def fav_list(inter, query: str):
 
-    try:
-        data = inter.global_user_data
-    except:
-        data = await inter.bot.get_global_data(inter.author.id, db_name=DBModel.users)
-        inter.global_user_data = data
+    data = await inter.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
     lst = sorted([f"> itg: {integrationname}" for integrationname in data["integration_links"]
                if not query or query.lower() in integrationname.lower()])
@@ -854,17 +850,3 @@ def sort_dict_recursively(d):
             return d
     else:
         return d
-
-async def get_inter_guild_data(inter, bot):
-    try:
-        guild_data = inter.guild_data
-    except AttributeError:
-        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-        try:
-            inter.guild_data = guild_data
-        except AttributeError:
-            pass
-    if not guild_data:
-        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-
-    return inter, guild_data

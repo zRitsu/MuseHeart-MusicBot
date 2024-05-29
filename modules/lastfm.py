@@ -141,14 +141,7 @@ class LastFmCog(commands.Cog):
         else:
             await inter.response.defer(ephemeral=True)
 
-        try:
-            data = inter.global_user_data
-        except AttributeError:
-            data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
-            try:
-                inter.global_user_data = data
-            except:
-                pass
+        data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
         lastfm_user = None
 

@@ -116,13 +116,13 @@ async def get_prefix(bot: BotCore, message: disnake.Message):
 
 class BaseDB:
 
-    cache = TTLCache(maxsize=1000, ttl=300)
+    def __init__(self, cache_maxsize: int = 1000, cache_ttl=300):
+        self.cache = TTLCache(maxsize=cache_maxsize, ttl=cache_ttl)
 
     def get_default(self, collection: str, db_name: Union[DBModel.guilds, DBModel.users]):
         if collection == "global":
             return deepcopy(global_db_models[db_name])
         return deepcopy(db_models[db_name])
-
 
 
 class DatetimeSerializer(Serializer):
@@ -149,8 +149,8 @@ class CustomTinyMongoClient(TinyMongoClient):
 
 class LocalDatabase(BaseDB):
 
-    def __init__(self, dir_="./local_database"):
-        super().__init__()
+    def __init__(self, dir_="./local_database", cache_maxsize=1000, cache_ttl=300):
+        super().__init__(cache_maxsize=cache_maxsize, cache_ttl=cache_ttl)
 
         if not os.path.isdir(dir_):
             os.makedirs(dir_)
@@ -165,9 +165,7 @@ class LocalDatabase(BaseDB):
 
         id_ = str(id_)
 
-        cached_result = self.cache.get((db_name, collection, frozenset({"_id": id_}.items())))
-
-        if cached_result is not None:
+        if (cached_result := self.cache.get((db_name, collection, frozenset({"_id": id_}.items())))) is not None:
             return cached_result
 
         data = self._connect[collection][db_name].find_one({"_id": id_})
@@ -215,8 +213,8 @@ class LocalDatabase(BaseDB):
 
 class MongoDatabase(BaseDB):
 
-    def __init__(self, token: str, timeout=30):
-        super().__init__()
+    def __init__(self, token: str, timeout=30, cache_maxsize=1000, cache_ttl=300):
+        super().__init__(cache_maxsize=cache_maxsize, cache_ttl=cache_ttl)
 
         fix_ssl = os.environ.get("MONGO_SSL_FIX") or os.environ.get("REPL_SLUG")
 
@@ -278,9 +276,7 @@ class MongoDatabase(BaseDB):
 
         id_ = str(id_)
 
-        cached_result = self.cache.get((db_name, collection, frozenset({"_id": id_}.items())))
-
-        if cached_result is not None:
+        if (cached_result := self.cache.get((db_name, collection, frozenset({"_id": id_}.items())))) is not None:
             return cached_result
 
         data = await self._connect[collection][db_name].find_one({"_id": id_})

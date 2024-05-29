@@ -1584,11 +1584,7 @@ class FavMenuView(disnake.ui.View):
                 self.guild_data = await self.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         else:
-            try:
-                self.data = inter.global_user_data
-            except AttributeError:
-                self.data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
-                inter.global_user_data = self.data
+            self.data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
         if self.mode == ViewMode.fav_manager:
             try:
@@ -1674,12 +1670,7 @@ class FavMenuView(disnake.ui.View):
 
             await inter.response.defer(ephemeral=True)
 
-            try:
-                self.data = inter.global_user_data
-            except AttributeError:
-                self.data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
-                inter.global_user_data = self.data
-
+            self.data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
         if self.mode == ViewMode.fav_manager:
             if not self.data["fav_links"]:

@@ -21,7 +21,7 @@ from utils.music.errors import GenericError, NoVoice
 from utils.music.interactions import SkinEditorMenu
 from utils.music.models import LavalinkPlayer
 from utils.others import send_idle_embed, CustomContext, select_bot_pool, pool_command, CommandArgparse, \
-    SongRequestPurgeMode, update_inter, get_inter_guild_data
+    SongRequestPurgeMode, update_inter
 
 if TYPE_CHECKING:
     from utils.client import BotCore
@@ -366,7 +366,7 @@ class MusicSettings(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        guild_data = await self.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         try:
             func = inter.store_message.edit
@@ -995,13 +995,7 @@ class MusicSettings(commands.Cog):
 
         channel_inter = bot.get_channel(inter.channel.id)
 
-        guild_data = None
-
-        if inter.bot == bot:
-            inter, guild_data = await get_inter_guild_data(inter, bot)
-
-        if not guild_data:
-            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         try:
             channel = bot.get_channel(int(guild_data['player_controller']['channel'])) or \
@@ -1119,13 +1113,7 @@ class MusicSettings(commands.Cog):
             await inter.send("Você não pode adicionar esse cargo.", ephemeral=True)
             return
 
-        guild_data = None
-
-        if inter.bot == bot:
-            inter, guild_data = await get_inter_guild_data(inter, bot)
-
-        if not guild_data:
-            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         if str(role.id) in guild_data['djroles']:
             await inter.send(f"O cargo {role.mention} já está na lista de DJ's", ephemeral=True)
@@ -1159,10 +1147,7 @@ class MusicSettings(commands.Cog):
         if not bot:
             return
 
-        if inter.bot == bot:
-            inter, guild_data = await get_inter_guild_data(inter, bot)
-        else:
-            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         if not guild_data['djroles']:
 
@@ -1213,19 +1198,9 @@ class MusicSettings(commands.Cog):
 
         add_skin_prefix = (lambda d: [f"> custom_skin: {i}" for i in d.keys()])
 
-        guild_data = None
+        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
-        if inter.bot == bot:
-            inter, guild_data = await get_inter_guild_data(inter, bot)
-
-        if not guild_data:
-            guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
-
-        try:
-            global_data = inter.global_guild_data
-        except AttributeError:
-            global_data = await bot.get_global_data(guild.id, db_name=DBModel.guilds)
-            inter.global_guild_data = global_data
+        global_data = await bot.get_global_data(guild.id, db_name=DBModel.guilds)
 
         global_mode = global_data["global_skin"]
 
@@ -1522,14 +1497,7 @@ class MusicSettings(commands.Cog):
         if not channel:
             return await inter.edit_original_message("**Não há bots compatíveis adicionado no servidor do invite informado.**")
 
-        try:
-            global_data = inter.global_guild_data
-        except AttributeError:
-            global_data = await self.bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
-            try:
-                inter.global_guild_data = global_data
-            except:
-                pass
+        global_data = await self.bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
 
         if len(global_data["listen_along_invites"]) > 4:
             return await inter.edit_original_message(
@@ -1855,11 +1823,7 @@ class RPCCog(commands.Cog):
         if button_id == "rpc_gen":
             await inter.response.defer()
 
-            try:
-                data = inter.global_user_data
-            except AttributeError:
-                data = await self.bot.get_global_data(id_=user_id, db_name=DBModel.users)
-                inter.global_user_data = data
+            data = await self.bot.get_global_data(id_=user_id, db_name=DBModel.users)
 
             if data["token"]:
                 await self.close_presence(inter)
@@ -1875,11 +1839,7 @@ class RPCCog(commands.Cog):
 
             try:
 
-                try:
-                    data = inter.global_user_data
-                except AttributeError:
-                    data = await self.bot.get_global_data(id_=user_id, db_name=DBModel.users)
-                    inter.global_user_data = data
+                data = await self.bot.get_global_data(id_=user_id, db_name=DBModel.users)
 
                 if len(data["token"]) == 50:
                     kwargs["value"] = data["token"]
@@ -1914,11 +1874,7 @@ class RPCCog(commands.Cog):
 
             await self.close_presence(inter)
 
-            try:
-                data = inter.global_user_data
-            except AttributeError:
-                data = await self.bot.get_global_data(id_=user_id, db_name=DBModel.users)
-                inter.global_user_data = data
+            data = await self.bot.get_global_data(id_=user_id, db_name=DBModel.users)
 
             data["token"] = ""
             await self.bot.update_global_data(id_=user_id, data=data, db_name=DBModel.users)

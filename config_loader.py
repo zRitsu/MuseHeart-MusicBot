@@ -144,6 +144,8 @@ DEFAULT_CONFIG = {
     "USE_YTDL": True,
     "FORCE_USE_DEEZER_CLIENT": False,
     "SILENT_PUBLICBOT_WARNING": False,
+    "DBCACHE_SIZE": 1000,
+    "DBCACHE_TTL": 300
 }
 
 
@@ -200,6 +202,8 @@ def load_config():
         "LAVALINK_RECONNECT_RETRIES",
         "QUEUE_MAX_ENTRIES",
         "VOICE_CHANNEL_LATENCY_RECONNECT",
+        "DBCACHE_SIZE",
+        "DBCACHE_TTL",
     ]:
         try:
             new_value = int(CONFIG[i])

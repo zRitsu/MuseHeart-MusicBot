@@ -544,11 +544,7 @@ class Owner(commands.Cog):
         if not prefix or len(prefix) > 5:
             raise GenericError("**O prefixo não pode conter espaços ou ter acima de 5 caracteres.**")
 
-        try:
-            guild_data = ctx.global_guild_data
-        except AttributeError:
-            guild_data = await self.bot.get_global_data(ctx.guild.id, db_name=DBModel.guilds)
-            ctx.global_guild_data = guild_data
+        guild_data = await self.bot.get_global_data(ctx.guild.id, db_name=DBModel.guilds)
 
         self.bot.pool.guild_prefix_cache[ctx.guild.id] = prefix
         guild_data["prefix"] = prefix
@@ -571,11 +567,7 @@ class Owner(commands.Cog):
     )
     async def resetprefix(self, ctx: CustomContext):
 
-        try:
-            guild_data = ctx.global_guild_data
-        except AttributeError:
-            guild_data = await self.bot.get_global_data(ctx.guild.id, db_name=DBModel.guilds)
-            ctx.global_guild_data = guild_data
+        guild_data = await self.bot.get_global_data(ctx.guild.id, db_name=DBModel.guilds)
 
         if not guild_data["prefix"]:
             raise GenericError("**Nao há prefixo configurado no servidor.**")
@@ -607,11 +599,7 @@ class Owner(commands.Cog):
         if not prefix or len(prefix) > 5:
             raise GenericError("**O prefixo não pode conter espaços ou ter acima de 5 caracteres.**")
 
-        try:
-            user_data = ctx.global_user_data
-        except AttributeError:
-            user_data = await self.bot.get_global_data(ctx.author.id, db_name=DBModel.users)
-            ctx.global_user_data = user_data
+        user_data = await self.bot.get_global_data(ctx.author.id, db_name=DBModel.users)
 
         user_data["custom_prefix"] = prefix
         self.bot.pool.user_prefix_cache[ctx.author.id] = prefix
@@ -631,11 +619,7 @@ class Owner(commands.Cog):
     @commands.command(description="Remover seu prefixo de usuário")
     async def resetuserprefix(self, ctx: CustomContext):
 
-        try:
-            user_data = ctx.global_user_data
-        except AttributeError:
-            user_data = await self.bot.get_global_data(ctx.author.id, db_name=DBModel.users)
-            ctx.global_user_data = user_data
+        user_data = await self.bot.get_global_data(ctx.author.id, db_name=DBModel.users)
 
         if not user_data["custom_prefix"]:
             raise GenericError("**Você não possui prefixo configurado.**")

@@ -488,12 +488,15 @@ class BotPool:
         mongo_key = self.config.get("MONGO")
 
         if mongo_key:
-            self.mongo_database = MongoDatabase(mongo_key, timeout=self.config["MONGO_TIMEOUT"])
+            self.mongo_database = MongoDatabase(mongo_key, timeout=self.config["MONGO_TIMEOUT"],
+                                                cache_maxsize=self.config["DBCACHE_SIZE"],
+                                                cache_ttl=self.config["DBCACHE_TTL"])
             print("Database em uso: MongoDB")
         else:
             print("Database em uso: TinyMongo | Nota: Os arquivos da database serão salvos localmente na pasta: local_database")
 
-        self.local_database = LocalDatabase()
+        self.local_database = LocalDatabase(cache_maxsize=self.config["DBCACHE_SIZE"],
+                                            cache_ttl=self.config["DBCACHE_TTL"])
 
         os.environ.update(
             {

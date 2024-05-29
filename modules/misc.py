@@ -646,22 +646,14 @@ class Misc(commands.Cog):
 
         if not bot.config["INTERACTION_COMMAND_ONLY"]:
 
-            try:
-                guild_data = inter.global_guild_data
-            except AttributeError:
-                guild_data = await bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
-                inter.global_guild_data = guild_data
+            guild_data = await bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
 
             if guild_data["prefix"]:
                 embed.description += f"> ⌨️ **⠂Prefixo do servidor:** `{disnake.utils.escape_markdown(guild_data['prefix'], as_needed=True)}`\n"
             else:
                 embed.description += f"> ⌨️ **⠂Prefixo padrão:** `{disnake.utils.escape_markdown(bot.default_prefix, as_needed=True)}`\n"
 
-            try:
-                user_data = inter.global_user_data
-            except AttributeError:
-                user_data = await bot.get_global_data(inter.author.id, db_name=DBModel.users)
-                inter.global_user_data = user_data
+            user_data = await bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
             if user_data["custom_prefix"]:
                 embed.description += f"> ⌨️ **⠂Seu prefixo de usuário:** `{disnake.utils.escape_markdown(user_data['custom_prefix'], as_needed=True)}`\n"
