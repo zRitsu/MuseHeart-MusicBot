@@ -491,8 +491,8 @@ class LavalinkPlayer(wavelink.Player):
         disnake.VoiceChannel, disnake.Thread] = kwargs.pop('channel')
         self.message: Optional[disnake.Message] = kwargs.pop('message', None)
         self.static: bool = kwargs.pop('static', False)
-        self.skin: str = kwargs.pop("skin", None) or self.bot.default_skin
-        self.skin_static: str = kwargs.pop("skin_static", None) or self.bot.default_static_skin
+        self.skin: str = kwargs.pop("skin", None) or self.bot.pool.default_skin
+        self.skin_static: str = kwargs.pop("skin_static", None) or self.bot.pool.default_static_skin
         self.custom_skin_data = kwargs.pop("custom_skin_data", {})
         self.custom_skin_static_data = kwargs.pop("custom_skin_static_data", {})
         self.queue: deque = deque()
@@ -1304,15 +1304,15 @@ class LavalinkPlayer(wavelink.Player):
     def check_skins(self):
         if self.skin.startswith("> custom_skin: "):
             if self.skin[15:] not in  self.custom_skin_data:
-                self.skin = self.bot.default_skin
-        elif self.skin not in self.bot.player_skins:
-            self.skin = self.bot.default_skin
+                self.skin = self.bot.pool.default_skin
+        elif self.skin not in self.bot.pool.player_skins:
+            self.skin = self.bot.pool.default_skin
 
         if self.skin_static.startswith("> custom_skin: "):
             if self.skin_static[15:] not in  self.custom_skin_static_data:
-                self.skin_static = self.bot.default_static_skin
-        elif self.skin_static not in self.bot.player_static_skins:
-            self.skin_static = self.bot.default_static_skin
+                self.skin_static = self.bot.pool.default_static_skin
+        elif self.skin_static not in self.bot.pool.player_static_skins:
+            self.skin_static = self.bot.pool.default_static_skin
 
     async def members_timeout(self, check: bool, force: bool = False, idle_timeout = None):
 
@@ -2259,13 +2259,13 @@ class LavalinkPlayer(wavelink.Player):
                 if self.skin_static.startswith("> custom_skin: "):
                     data = skin_converter(self.custom_skin_static_data[self.skin_static[15:]], player=self, guild=self.guild)
                 else:
-                    data = self.bot.player_static_skins[self.skin_static].load(self)
+                    data = self.bot.pool.player_static_skins[self.skin_static].load(self)
 
             else:
                 if self.skin.startswith("> custom_skin: "):
                     data = skin_converter(self.custom_skin_data[self.skin[15:]], player=self, guild=self.guild)
                 else:
-                    data = self.bot.player_skins[self.skin].load(self)
+                    data = self.bot.pool.player_skins[self.skin].load(self)
         except OverflowError:
             await self.process_next()
             return

@@ -89,6 +89,12 @@ class BotPool:
         self.processing_gc: bool = False
         self.lavalink_connect_queue = {}
         self.lastfm_sessions = {}
+        self.player_skins = {}
+        self.player_static_skins = {}
+        self.default_skin = self.config.get("DEFAULT_SKIN", "default")
+        self.default_static_skin = self.config.get("DEFAULT_STATIC_SKIN", "default")
+        self.default_controllerless_skin = self.config.get("DEFAULT_CONTROLLERLESS_SKIN", "default")
+        self.default_idling_skin = self.config.get("DEFAULT_IDLING_SKIN", "default")
 
     def reset_useragent(self):
         self.current_useragent = generate_user_agent()
@@ -385,9 +391,82 @@ class BotPool:
         if not self.config["DEFAULT_PREFIX"]:
             self.config["DEFAULT_PREFIX"] = "!!"
 
+    def load_skins(self):
+
+        for skin in os.listdir("./utils/music/skins/normal_player"):
+            if not skin.endswith(".py"):
+                continue
+
+            skin = skin[:-3]
+
+            if skin in self.config["IGNORE_SKINS"].split() and skin != "default":
+                print(f"Skin {skin}.py ignorada")
+                continue
+
+            try:
+                skin_file = import_module(f"utils.music.skins.normal_player.{skin}")
+                if not hasattr(skin_file, "load"):
+                    print(f"Skin ignorada: {skin}.py | Função load() não configurada/encontrada...")
+                    continue
+                self.player_skins[skin] = skin_file.load()
+            except Exception:
+                print(f"Falha ao carregar skin [normal_player]: {traceback.format_exc()}")
+
+        if self.default_skin not in self.player_skins:
+            self.default_skin = "default"
+
+        for skin in os.listdir("./utils/music/skins/static_player"):
+            if not skin.endswith(".py"):
+                continue
+
+            skin = skin[:-3]
+
+            if skin in self.config["IGNORE_STATIC_SKINS"].split() and skin != "default":
+                print(f"Skin {skin}.py ignorada")
+                continue
+
+            try:
+                skin_file = import_module(f"utils.music.skins.static_player.{skin}")
+                if not hasattr(skin_file, "load"):
+                    print(f"Skin ignorada: {skin}.py | Função load() não configurada/encontrada...")
+                    continue
+                self.player_static_skins[skin] = skin_file.load()
+            except Exception:
+                print(f"Falha ao carregar skin [static_player]: {traceback.format_exc()}")
+        if self.default_static_skin not in self.player_static_skins:
+            self.default_static_skin = "default"
+
+    def check_skin(self, skin: str):
+
+        if skin is None:
+            return self.default_skin
+
+        if skin.startswith("> custom_skin: "):
+            return skin
+
+        if skin not in self.player_skins:
+            return self.default_skin
+
+        return skin
+
+    def check_static_skin(self, skin: str):
+
+        if skin is None:
+            return self.default_static_skin
+
+        if skin.startswith("> custom_skin: "):
+            return skin
+
+        if skin is None or skin not in self.player_static_skins:
+            return self.default_static_skin
+
+        return skin
+
     def setup(self):
 
         self.load_cfg()
+
+        self.load_skins()
 
         if self.config['ENABLE_LOGGER']:
 
@@ -834,13 +913,6 @@ class BotCore(commands.AutoShardedBot):
         self.exclusive_guild_id: Optional[int] = None
         self.bot_ready = False
         self.initializing = False
-        self.player_skins = {}
-        self.player_static_skins = {}
-        self.default_skin = self.config.get("DEFAULT_SKIN", "default")
-        self.default_static_skin = self.config.get("DEFAULT_STATIC_SKIN", "default")
-        self.default_controllerless_skin = self.config.get("DEFAULT_CONTROLLERLESS_SKIN", "default")
-        self.default_idling_skin = self.config.get("DEFAULT_IDLING_SKIN", "default")
-        self.load_skins()
         self.uptime = disnake.utils.utcnow()
         self.env_owner_ids = set()
         self.dm_cooldown = commands.CooldownMapping.from_cooldown(rate=2, per=30, type=commands.BucketType.member)
@@ -868,49 +940,13 @@ class BotCore(commands.AutoShardedBot):
         payload = {'status': status}
         return await self.http.request(r, reason=reason, json=payload)
 
-    def load_skins(self):
+    @property
+    def player_skins(self):
+        return self.pool.player_skins
 
-        for skin in os.listdir("./utils/music/skins/normal_player"):
-            if not skin.endswith(".py"):
-                continue
-
-            skin = skin[:-3]
-
-            if skin in self.config["IGNORE_SKINS"].split() and skin != "default":
-                print(f"{self.user} | Skin {skin}.py ignorada")
-                continue
-
-            try:
-                skin_file = import_module(f"utils.music.skins.normal_player.{skin}")
-                if not hasattr(skin_file, "load"):
-                    print(f"Skin ignorada: {skin}.py | Função load() não configurada/encontrada...")
-                    continue
-                self.player_skins[skin] = skin_file.load()
-            except Exception:
-                print(f"Falha ao carregar skin [normal_player]: {traceback.format_exc()}")
-        if self.default_skin not in self.player_skins:
-            self.default_skin = "default"
-
-        for skin in os.listdir("./utils/music/skins/static_player"):
-            if not skin.endswith(".py"):
-                continue
-
-            skin = skin[:-3]
-
-            if skin in self.config["IGNORE_STATIC_SKINS"].split() and skin != "default":
-                print(f"{self.user} | Skin {skin}.py ignorada")
-                continue
-
-            try:
-                skin_file = import_module(f"utils.music.skins.static_player.{skin}")
-                if not hasattr(skin_file, "load"):
-                    print(f"Skin ignorada: {skin}.py | Função load() não configurada/encontrada...")
-                    continue
-                self.player_static_skins[skin] = skin_file.load()
-            except Exception:
-                print(f"Falha ao carregar skin [static_player]: {traceback.format_exc()}")
-        if self.default_static_skin not in self.player_static_skins:
-            self.default_static_skin = "default"
+    @property
+    def player_static_skins(self):
+        return self.pool.player_static_skins
 
     @property
     def config(self):
@@ -959,32 +995,6 @@ class BotCore(commands.AutoShardedBot):
         return await self.pool.database.update_data(
             id_=id_, data=data, db_name=db_name, collection="global", default_model=global_db_models
         )
-
-    def check_skin(self, skin: str):
-
-        if skin is None:
-            return self.default_skin
-
-        if skin.startswith("> custom_skin: "):
-            return skin
-
-        if skin not in self.player_skins:
-            return self.default_skin
-
-        return skin
-
-    def check_static_skin(self, skin: str):
-
-        if skin is None:
-            return self.default_static_skin
-
-        if skin.startswith("> custom_skin: "):
-            return skin
-
-        if skin is None or skin not in self.player_static_skins:
-            return self.default_static_skin
-
-        return skin
 
     async def is_owner(self, user: Union[disnake.User, disnake.Member]) -> bool:
 

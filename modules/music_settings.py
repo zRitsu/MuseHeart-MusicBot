@@ -78,11 +78,11 @@ class SkinSelector(disnake.ui.View):
             try:
                 self.skin_selected = [s.value for s in global_select_opts if s.default][0]
             except IndexError:
-                self.skin_selected = self.ctx.bot.default_skin
+                self.skin_selected = self.ctx.bot.pool.default_skin
             try:
                 self.static_skin_selected = [s.value for s in global_static_select_opts if s.default][0]
             except IndexError:
-                self.static_skin_selected = self.ctx.bot.default_static_skin
+                self.static_skin_selected = self.ctx.bot.pool.default_static_skin
 
         self.rebuild_selects()
 
@@ -1204,11 +1204,11 @@ class MusicSettings(commands.Cog):
 
         global_mode = global_data["global_skin"]
 
-        selected = guild_data["player_controller"]["skin"] or bot.default_skin
-        static_selected = guild_data["player_controller"]["static_skin"] or bot.default_static_skin
+        selected = guild_data["player_controller"]["skin"] or bot.pool.default_skin
+        static_selected = guild_data["player_controller"]["static_skin"] or bot.pool.default_static_skin
 
-        global_selected = global_data["player_skin"] or bot.default_skin
-        global_static_selected = global_data["player_skin_static"] or bot.default_static_skin
+        global_selected = global_data["player_skin"] or bot.pool.default_skin
+        global_static_selected = global_data["player_skin_static"] or bot.pool.default_static_skin
 
         skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Modo normal: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "skin atual"} if selected == s else {}) for s in skin_list + add_skin_prefix(global_data["custom_skins"])]
         static_skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Song-Request: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "skin atual"} if static_selected == s else {}) for s in static_skin_list + add_skin_prefix(global_data["custom_skins_static"])]
