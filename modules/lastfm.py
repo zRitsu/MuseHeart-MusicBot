@@ -2,60 +2,22 @@ from __future__ import annotations
 
 import asyncio
 import datetime
-import hashlib
-import tempfile
+import pprint
 import time
 import traceback
 from typing import TYPE_CHECKING, Optional
 
 import disnake
-import xmltodict
-from aiohttp import ClientSession
 from disnake.ext import commands
 
 from utils.db import DBModel
+from utils.music.lastfm import lastfm_get_session_key, lastfm_get_token, generate_api_sig, LastFmException, post_lastfm, \
+    lastfm_update_nowplaying, lastfm_track_scrobble, lastfm_user_info
 from utils.music.models import LavalinkPlayer, LavalinkTrack
 from utils.others import CustomContext
 
 if TYPE_CHECKING:
     from utils.client import BotCore
-
-temp_dir = tempfile.gettempdir()
-
-lastfm_header = {"user-agent" : "mediascrobbler/0.1",
-      "Content-type": "application/x-www-form-urlencoded"}
-
-async def request_lastfm(params):
-    async with ClientSession() as session:
-        async with session.get("http://ws.audioscrobbler.com/2.0/", params=params) as response:
-            return await response.json()
-
-
-async def lastfm_get_token(apikey: str):
-    data = await request_lastfm(
-        params={
-            'method': 'auth.getToken',
-            'api_key': apikey,
-            'format': 'json',
-        }
-    )
-    return data['token']
-
-
-async def lastfm_get_session_key(apikey: str, apisecret: str, token: str):
-    params = {
-        'method': 'auth.getSession',
-        'api_key': apikey,
-        'token': token,
-    }
-    sig = ''.join([f"{key}{params[key]}" for key in sorted(params)])
-    sig += apisecret
-    api_sig = hashlib.md5(sig.encode('utf-8')).hexdigest()
-
-    params['api_sig'] = api_sig
-    params['format'] = 'json'
-
-    return await request_lastfm(params=params)
 
 
 class LastFMView(disnake.ui.View):
@@ -78,10 +40,6 @@ class LastFMView(disnake.ui.View):
 
 
         if session_key:
-            btn = disnake.ui.Button(label="Revincular conta do last.fm")
-            btn.callback = self.send_authurl_callback
-            self.add_item(btn)
-
             btn2 = disnake.ui.Button(label="Desvincular conta do last.fm", style=disnake.ButtonStyle.red)
             btn2.callback = self.disconnect_account
             self.add_item(btn2)
@@ -99,8 +57,8 @@ class LastFMView(disnake.ui.View):
             try:
                 await asyncio.sleep(20)
                 data = await lastfm_get_session_key(
-                    apikey=self.ctx.bot.config["LASTFM_KEY"],
-                    apisecret=self.ctx.bot.config["LASTFM_SECRET"],
+                    api_key=self.ctx.bot.config["LASTFM_KEY"],
+                    api_secret=self.ctx.bot.config["LASTFM_SECRET"],
                     token=self.token
                 )
                 if data.get('error'):
@@ -161,20 +119,20 @@ class LastFmCog(commands.Cog):
         if not hasattr(bot.pool, "lastfm_sessions"):
             bot.pool.lastfm_sessions = {}
 
-    lastfm_cd = commands.CooldownMapping.from_cooldown(1, 13, commands.BucketType.member)
+    lastfm_cd = commands.CooldownMapping.from_cooldown(1, 30, commands.BucketType.member)
     lastfm_mc = commands.MaxConcurrency(1, per=commands.BucketType.user, wait=False)
 
     @commands.command(hidden=True, name="lastfm", aliases=["lastfmconnect", "lfm"],
                       description="Conectar sua conta do last.fm.",
                       cooldown=lastfm_cd, max_concurrency=lastfm_mc)
     async def lastfmconnect_legacy(self, ctx: CustomContext):
-        await self.lastfmconnect.callback(self=self, inter=ctx)
+        await self.lastfm.callback(self=self, inter=ctx)
 
 
     @commands.slash_command(hidden=True, name="lastfm",
                       description=f"{desc_prefix}Conectar sua conta do last.fm",
                       cooldown=lastfm_cd, max_concurrency=lastfm_mc)
-    async def lastfmconnect(self, inter: disnake.AppCmdInter):
+    async def lastfm(self, inter: disnake.AppCmdInter):
 
         cog = self.bot.get_cog("Music")
 
@@ -192,18 +150,60 @@ class LastFmCog(commands.Cog):
             except:
                 pass
 
-        embed = disnake.Embed(
-            description="**Vincule (ou crie) uma conta no [last.fm](<https://www.last.fm/home>) para registrar "
-                        "todas as músicas que você ouvir por aqui no seu perfil do last.fm para obter sugestões de "
-                        "músicas/artistas/álbuns e ter uma estatística geral das músicas que você ouviu alem de ter "
-                        "acesso a uma comunidade incrível da plataforma.**",
-            color=self.bot.get_color()
-        ).set_thumbnail(url="https://www.last.fm/static/images/lastfm_avatar_twitter.52a5d69a85ac.png")
+        lastfm_user = None
 
-        if username:=data["lastfm"]["username"]:
-            embed.add_field(name="\u200b", value=f"**Conta vinculada atual:** [**{username}**](<https://www.last.fm/user/{username}>)")
+        if current_session_key:=data["lastfm"]["sessionkey"]:
+            try:
+                lastfm_user = await lastfm_user_info(current_session_key, self.bot.config["LASTFM_KEY"])
+            except LastFmException as e:
+                if e.code == 9:
+                    data["lastfm"]["sessionkey"] = ""
+                    data["lastfm"]["username"] = ""
+                    current_session_key = ""
+                    await self.bot.update_global_data(inter.author.id, data, db_name=DBModel.users)
+                else:
+                    raise e
 
-        current_session_key = data["lastfm"]["sessionkey"]
+        else:
+            data["lastfm"]["sessionkey"] = ""
+            data["lastfm"]["username"] = ""
+            current_session_key = ""
+            await self.bot.update_global_data(inter.author.id, data, db_name=DBModel.users)
+
+        if lastfm_user:
+            txt = f"👤 **⠂Usuário:** [`{lastfm_user['realname']}`](<{lastfm_user['url']}>)\n\n" \
+                  f"⏰ **⠂Conta criada em:** <t:{lastfm_user['registered']['#text']}:f>\n\n" \
+                  f"🌎 **⠂País:** `{lastfm_user['country']}`\n\n"
+
+            if playcount := lastfm_user['playcount']:
+                txt += f"▶️ **⠂Músicas reproduzidas:** [`{playcount}`](<https://www.last.fm/user/{lastfm_user['name']}/library>)\n\n"
+
+            if playlists := lastfm_user['playlists'] != "0":
+                txt += f"📄 **⠂Playlists:** [`{playlists}`](<https://www.last.fm/user/{lastfm_user['name']}/playlists>)\n\n"
+
+            if playcount := lastfm_user['track_count']:
+                txt += f"🎵 **⠂Músicas registradas:** [`{playcount}`](<https://www.last.fm/user/{lastfm_user['name']}/library/tracks>)\n\n"
+
+            if artists := lastfm_user['artist_count']:
+                txt += f"🎧 **⠂Artistas registrados:** [`{artists}`](<https://www.last.fm/user/{lastfm_user['name']}/library/artists>)\n\n"
+
+            if albums := lastfm_user['album_count']:
+                txt += f"📀 **⠂Álbuns registrados:** [`{albums}`](<https://www.last.fm/user/{lastfm_user['name']}/library/albums>)\n\n"
+
+            embed = disnake.Embed(
+                description=txt, color=self.bot.get_color()
+            ).set_thumbnail(url=lastfm_user['image'][-1]["#text"]).set_author(
+                name="Last.FM: Informação de usuário",
+                icon_url="https://www.last.fm/static/images/lastfm_avatar_twitter.52a5d69a85ac.png")
+
+        else:
+            embed = disnake.Embed(
+                description="**Vincule (ou crie) uma conta no [last.fm](<https://www.last.fm/home>) para registrar "
+                            "todas as músicas que você ouvir por aqui no seu perfil do last.fm para obter sugestões de "
+                            "músicas/artistas/álbuns e ter uma estatística geral das músicas que você ouviu alem de ter "
+                            "acesso a uma comunidade incrível da plataforma.**",
+                color=self.bot.get_color()
+            ).set_thumbnail(url="https://www.last.fm/static/images/lastfm_avatar_twitter.52a5d69a85ac.png")
 
         view = LastFMView(inter, session_key=current_session_key)
 
@@ -366,18 +366,19 @@ class LastFmCog(commands.Cog):
                 continue
 
             try:
-                resp_data = await self.request_lastfm(
-                    artist=artist, track=name, album=album, duration=duration, session_key=fminfo["sessionkey"],
-                    method = "track.updateNowPlaying" if update_np else "track.scrobble"
-                )
-            except Exception:
-                traceback.print_exc()
-            else:
-                if resp_data['lfm']['@status'] == 'failed':
-                    status = resp_data['lfm']['error']['#text']
-                    code = resp_data['lfm']['error']['@code']
-                    print(f"last.fm failed! user: {user.id} - code: {code} - message:{status}")
-                    if "Invalid session key" in status:
+                kwargs = {
+                    "artist": artist, "track": name, "album": album, "duration": duration,
+                    "session_key": fminfo["sessionkey"], "api_key": self.bot.config["LASTFM_KEY"],
+                    "api_secret": self.bot.config["LASTFM_SECRET"]
+                }
+                if update_np:
+                    await lastfm_update_nowplaying(**kwargs)
+                else:
+                    await lastfm_track_scrobble(**kwargs)
+            except Exception as e:
+                if isinstance(e, LastFmException):
+                    print(f"last.fm failed! user: {user.id} - code: {e.code} - message: {e.message}")
+                    if e.code == 9:
                         user_data = await self.bot.get_global_data(user.id, db_name=DBModel.users)
                         user_data["lastfm"]["sessionkey"] = ""
                         await self.bot.update_global_data(user.id, user_data, db_name=DBModel.users)
@@ -389,57 +390,15 @@ class LastFmCog(commands.Cog):
                             del player.lastfm_users[user.id]
                         except KeyError:
                             pass
-                    return
+                        continue
+                traceback.print_exc()
+                continue
 
-                player.lastfm_users[user.id] = {
-                    "last_url": track.url,
-                    "last_timestamp": datetime.datetime.utcnow() + datetime.timedelta(seconds=duration)
-                }
-
-    async def request_lastfm(self, artist: str, track: str, album: str, duration: int, session_key: str, method: str):
-
-        if method == "track.scrobble":
-            params = {
-                "artist[0]": artist,
-                "timestamp[0]": str(int(time.time() - 30)),
-                "track[0]": track,
+            player.lastfm_users[user.id] = {
+                "last_url": track.url,
+                "last_timestamp": datetime.datetime.utcnow() + datetime.timedelta(seconds=duration)
             }
 
-        else:
-            params = {
-                "artist": artist,
-                "track": track,
-                "timestamp": str(int(time.time() - 30)),
-            }
-
-        if album:
-            params["album"] = album
-
-        if duration:
-            params["duration"] = str(duration)
-
-        params.update(
-            {
-                "api_key": self.bot.config['LASTFM_KEY'],
-                "sk": session_key,
-                "method": method,
-            }
-        )
-
-        string = ''
-        items = list(params.keys())
-        items.sort()
-        for i in items:
-            string += i
-            string += params[i]
-
-        string += self.bot.config['LASTFM_SECRET']
-
-        params['api_sig'] = hashlib.md5(string.encode('utf8')).hexdigest()
-
-        async with ClientSession() as session:
-            async with session.post("http://ws.audioscrobbler.com/2.0/", params=params, headers=lastfm_header) as r:
-                return xmltodict.parse(await r.text())
 
 def setup(bot):
     if not bot.pool.config["LASTFM_KEY"] or not bot.pool.config["LASTFM_SECRET"]:

@@ -18,5 +18,4 @@ spotipy
 urllib3>=2.1.0
 async-timeout
 deezer-python
-xmltodict
 cachetools
