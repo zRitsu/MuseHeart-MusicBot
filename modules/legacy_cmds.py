@@ -234,7 +234,7 @@ class Owner(commands.Cog):
         data = {}
 
         for bot in (allbots:=set(self.bot.pool.get_all_bots())):
-            bot.load_skins()
+            bot.pool.load_skins()
             data = bot.load_modules(modules)
 
         self.bot.sync_command_cooldowns(force=True)
