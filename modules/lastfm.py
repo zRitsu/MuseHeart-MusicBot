@@ -183,7 +183,9 @@ class LastFmCog(commands.Cog):
 
         if lastfm_user:
 
-            txt = f"`👤` **⠂Usuário:** [`{lastfm_user['realname']}`](<{lastfm_user['url']}>)\n" \
+            name = lastfm_user['realname'] or lastfm_user['name']
+
+            txt = f"`👤` **⠂Usuário:** [`{name}`](<{lastfm_user['url']}>)\n" \
                   f"`⏰` **⠂Conta criada em:** <t:{lastfm_user['registered']['#text']}:f>\n" \
                   f"`🌎` **⠂País:** `{lastfm_user['country']}`\n"
 
@@ -213,7 +215,7 @@ class LastFmCog(commands.Cog):
                 recenttracks = await lastfm_user_recent_tracks(lastfm_user['name'], api_key=self.bot.config["LASTFM_KEY"])
 
                 if recenttracks['track']:
-                    embeds[0].description += f"## Músicas recentes ouvidas por [`{lastfm_user['realname']}`](<{lastfm_user['url']}>):"
+                    embeds[0].description += f"## Músicas recentes ouvidas por [`{name}`](<{lastfm_user['url']}>):"
 
                     for n, t in enumerate(recenttracks['track'][:last_tracks_amount]):
                         try:
