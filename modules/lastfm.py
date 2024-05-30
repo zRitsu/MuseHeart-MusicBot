@@ -216,11 +216,14 @@ class LastFmCog(commands.Cog):
                     embeds[0].description += f"## Músicas recentes ouvidas por [`{lastfm_user['realname']}`](<{lastfm_user['url']}>):"
 
                     for n, t in enumerate(recenttracks['track'][:last_tracks_amount]):
+                        try:
+                            txt = f"` {n+1}. ` [`{t['name']}`]({t['url']}) ( <t:{t['date']['uts']}:R> )\n"
+                        except KeyError:
+                            txt = f"`[▶️] Ouvindo agora:` [`{t['name']}`]({t['url']})\n"
                         artist_url = t['url'].split('/_/')[0]
                         t_embed = disnake.Embed(
                             color=embed_color,
-                            description=f"` {n+1}. ` [`{t['name']}`]({t['url']}) ( <t:{t['date']['uts']}:R> )\n"
-                                        f"`Artista:` [`{t['artist']['#text']}`]({artist_url})"
+                            description=f"{txt}`Artista:` [`{t['artist']['#text']}`]({artist_url})"
                         )
                         if t['album']['#text']:
                             t_embed.description += f" **-** `Álbum:` [`{t['album']['#text']}`]({artist_url}/{quote(t['album']['#text'])})"
