@@ -281,7 +281,7 @@ class LavalinkPlaylist:
         encoded_name = kwargs.pop("encoded_name", "track")
 
         try:
-            if self.data['tracks'][0]['info'].get("sourceName") == "youtube":
+            if self.data['tracks'][0]['info'].get("sourceName") in ("youtube", "youtubemusic"):
                 try:
                     self.url = f"https://www.youtube.com/playlist?list={parse.parse_qs(parse.urlparse(self.url).query)['list'][0]}"
                 except KeyError:
@@ -297,7 +297,7 @@ class LavalinkPlaylist:
         except KeyError:
             playlist = self
         self.tracks = [LavalinkTrack(
-            id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo", {}), thumb=thumb, playlist=playlist, **kwargs) for track in data['tracks']]
+            id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo") or pluginInfo, thumb=thumb, playlist=playlist, **kwargs) for track in data['tracks']]
 
     @property
     def uri(self):
@@ -333,6 +333,11 @@ class LavalinkTrack(wavelink.Track):
         self.unique_id = str(uuid.uuid4().hex)[:10]
         self.temp_id = None
 
+        if source_replace:=kwargs.get("source_replace"):
+            self.info["sourceName"] = source_replace
+            self.uri = self.uri.replace("https://www.youtube.com/", "https://music.youtube.com/")
+            self.info["uri"] = self.uri
+
         try:
             self.info['sourceName']
         except:
@@ -359,7 +364,7 @@ class LavalinkTrack(wavelink.Track):
         self.playlist: Optional[LavalinkPlaylist] = kwargs.pop(
             "playlist", None)
 
-        if self.info["sourceName"] == "youtube":
+        if self.info["sourceName"] in ("youtube", "youtubemusic"):
             self.info["artworkUrl"] = f"https://img.youtube.com/vi/{self.ytid}/mqdefault.jpg"
             if "list=" not in self.uri:
                 try:
@@ -922,7 +927,7 @@ class LavalinkPlayer(wavelink.Player):
 
                     self.native_yt = False
 
-                    if track.info["sourceName"] == "youtube":
+                    if track.info["sourceName"] in ("youtube", "youtubemusic"):
                         txt = f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual " \
                                  "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome " \
                                  "das músicas do youtube que estão na fila (talvez a música tocada seja diferente do esperado " \
@@ -1005,7 +1010,7 @@ class LavalinkPlayer(wavelink.Player):
                     self.current = None
                     self.queue.appendleft(track)
                     self.locked = False
-                    if track.info["sourceName"] == "youtube":
+                    if track.info["sourceName"] in ("youtube", "youtubemusic"):
                         self.set_command_log(
                             text=f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual "
                                  "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome "
@@ -1332,7 +1337,7 @@ class LavalinkPlayer(wavelink.Player):
                     self.set_command_log(emoji="🔋", text="O modo **[economia de recursos]** foi desativado.")
                     await self.resolve_track(self.current)
                     if self.current.id:
-                        if self.current.info["sourceName"] == "youtube" and not self.native_yt:
+                        if self.current.info["sourceName"] in ("youtube", "youtubemusic") and not self.native_yt:
                             stream = self.current.is_stream
                             self.queue.appendleft(self.current)
                             self.current = None
@@ -1551,7 +1556,7 @@ class LavalinkPlayer(wavelink.Player):
                         traceback.print_exc()
 
                 if not tracks:
-                    if track_data.info["sourceName"] == "youtube" and self.native_yt:
+                    if track_data.info["sourceName"] in ("youtube", "youtubemusic") and self.native_yt:
                         queries = [f"https://www.youtube.com/watch?v={track_data.ytid}&list=RD{track_data.ytid}"]
                     elif track_data.info["sourceName"] == "spotify" and "spotfy" in self.node.info["sourceManagers"]:
                         queries = ["sprec:seed_tracks=" + ",".join(list(set(t.identifier for t in tracks_search if t.info["sourceName"] == "spotify"))[:5])]
@@ -1812,7 +1817,7 @@ class LavalinkPlayer(wavelink.Player):
                         await self.process_next()
                         return
 
-            if not self.native_yt and (track.info["sourceName"] == "youtube" or track.info.get("sourceNameOrig") == "youtube"):
+            if not self.native_yt and (track.info["sourceName"] in ("youtube", "youtubemusic") or track.info.get("sourceNameOrig") in ("youtube", "youtubemusic")):
 
                 if track.is_stream or track.duration > 480000:
                     self.failed_tracks.append(track)
@@ -2816,7 +2821,7 @@ class LavalinkPlayer(wavelink.Player):
                 try:
                     tracks = (await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist))
                 except Exception as e:
-                    if track.info["sourceName"] == "youtube" and any(e in str(e) for e in (
+                    if track.info["sourceName"] in ("youtube", "youtubemusic") and any(e in str(e) for e in (
                         "This video is not available",
                         "YouTube WebM streams are currently not supported.",
                         "Video returned by YouTube isn't what was requested",

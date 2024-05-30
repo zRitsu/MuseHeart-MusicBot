@@ -146,6 +146,7 @@ sources = {
     "twitch": "https://cdn3.iconfinder.com/data/icons/popular-services-brands-vol-2/512/twitch-512.png",
     "jiosaavn": "https://i.ibb.co/Bfh8dW2/jiosaavn.png",
     "tidal": "https://i.ibb.co/JkBbrXh/tidal.png",
+    "youtubemusic": "https://i.ibb.co/WtCC2pg/Youtube-music-icon.png",
 }
 
 def music_source_image(sourcename):

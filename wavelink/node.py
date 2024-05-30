@@ -211,6 +211,9 @@ class Node:
         else:
             self.plugin_names = set([p["name"] for p in self.info["plugins"]])
 
+        if "youtube" in self.info["sourceManagers"]:
+            self.info["sourceManagers"].append("youtubemusic")
+
         if not self._websocket:
 
             self._websocket = WebSocket(node=self,
@@ -371,11 +374,29 @@ class Node:
                     except KeyError:
                         pass
                     playlist_cls = kwargs.pop('playlist_cls', TrackPlaylist)
-                    return playlist_cls(data=data, url=query, encoded_name=encoded_name, pluginInfo=data.pop("pluginInfo", {}), **kwargs)
+                    if query.startswith("https://music.youtube.com/"):
+                        query = query.replace("https://www.youtube.com/", "https://music.youtube.com/")
+                        source_replace = "youtubemusic"
+                        try:
+                            if data["playlistInfo"]["name"].startswith("Album - "):
+                                data["playlistInfo"]["name"] = data["playlistInfo"]["name"][8:]
+                                data["pluginInfo"]["type"] = "album"
+                                data["pluginInfo"]["albumName"] = data["playlistInfo"]["name"]
+                                data["pluginInfo"]["albumUrl"] = query
+                        except KeyError:
+                            pass
+                    else:
+                        source_replace = None
+                    return playlist_cls(data=data, url=query, encoded_name=encoded_name, pluginInfo=data.pop("pluginInfo", {}), source_replace=source_replace, **kwargs)
 
                 track_cls = kwargs.pop('track_cls', Track)
 
-                tracks = [track_cls(id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo", {}), **kwargs) for track in tracks]
+                if query.startswith("https://music.youtube.com/"):
+                    source_replace = "youtubemusic"
+                else:
+                    source_replace = None
+
+                tracks = [track_cls(id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo", {}), source_replace=source_replace, **kwargs) for track in tracks]
 
                 return tracks
 

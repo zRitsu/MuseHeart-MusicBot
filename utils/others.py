@@ -393,7 +393,7 @@ async def send_idle_embed(
     for n in bot.music.nodes.values():
         try:
             for p in n.info["sourceManagers"]:
-                if p == "youtube":
+                if p in ("youtube", "youtubemusic"):
                     if "ytsearch" not in n.original_providers and "ytmsearch" not in n.original_providers:
                         continue
                 elif p == "http":
@@ -567,6 +567,7 @@ music_source_emoji_data = {
     "twitch": "<:Twitch:803656463695478804>",
     "jiosaavn": "<:jiosaavn:1235276169473949747>",
     "tidal": "<:tidal:1235352567048048691>",
+    "youtubemusic": "<:Youtubemusicicon:1245606364470841354>"
 }
 
 def music_source_emoji(name: str):

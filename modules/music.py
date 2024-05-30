@@ -1790,7 +1790,7 @@ class Music(commands.Cog):
 
                 pos_txt = f" (Pos. {position + 1})"
 
-            if tracks.tracks[0].info["sourceName"] == "youtube":
+            if tracks.tracks[0].info["sourceName"] in ("youtube", "youtubemusic"):
                 try:
                     async with bot.session.get((oembed_url:=f"https://www.youtube.com/oembed?url={query}")) as r:
                         try:
