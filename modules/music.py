@@ -6858,12 +6858,12 @@ class Music(commands.Cog):
 
         if not tracks:
 
-            if is_yt_source:
+            txt = "\n".join(exceptions)
+
+            if is_yt_source and "Video returned by YouTube isn't what was requested" in txt:
                 raise YoutubeSourceDisabled()
 
-            if exceptions:
-
-                txt = "\n".join(exceptions)
+            if txt:
 
                 if "This track is not readable. Available countries:" in txt:
                     txt = "A música informada não está disponível na minha região atual..."
