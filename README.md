@@ -19,7 +19,11 @@ Mais previews:
 
 - Comandos de barra / Slash commands
 
-[![](https://i.ibb.co/t8yKKr9/image.png)](https://i.ibb.co/t8yKKr9/image.png)
+[![](https://i.ibb.co/nmhYWrK/muse-heart-slashcommands.png)](https://i.ibb.co/nmhYWrK/muse-heart-slashcommands.png)
+
+- Integração com o [last.fm](https://www.last.fm/) para scrobbles (outras funcionalidades em breve).
+
+[![](https://i.ibb.co/K2WVMLH/muse-heart-last-fm.png)](https://i.ibb.co/K2WVMLH/muse-heart-last-fm.png)
 
 - Player controller: modo fixo/estendido com canal e conversa de song requests (skin: default), configurável com o comando: /setup
 
@@ -28,10 +32,6 @@ Mais previews:
 - Player controller: modo fixo/estendido com canal de song-request em forum com suporte a status automático no canal de voz e palco
 
 [![](https://i.ibb.co/9Hm5cyG/playercontrollerforum.png)](https://i.ibb.co/9Hm5cyG/playercontrollerforum.png)
-
-- Integração com o [last.fm](https://www.last.fm/) para scrobbles (outras funcionalidades em breve).
-
-[![](https://i.ibb.co/DGRsqdX/muse-heart-last-fm.png)](https://i.ibb.co/DGRsqdX/muse-heart-last-fm.png)
 
 * Há diversas outras skins, veja todas usando o comando /change_skin (você também pode criar outras, use os modelos padrões que estão na pasta [skins](utils/music/skins/) como referência, crie uma cópia com outro nome e modifique a seu gosto).
 
