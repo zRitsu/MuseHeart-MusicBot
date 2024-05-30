@@ -208,7 +208,10 @@ class LocalDatabase(BaseDB):
         except TypeError:
             return
 
-        del self.cache[(db_name, collection, frozenset({"_id": id_}.items()))]
+        try:
+            self.cache.pop((db_name, collection, frozenset({"_id": id_}.items())))
+        except KeyError:
+            pass
 
 
 class MongoDatabase(BaseDB):
@@ -303,7 +306,10 @@ class MongoDatabase(BaseDB):
         return [d async for d in self._connect[collection][db_name].find(filter or {})]
 
     async def delete_data(self, id_, db_name: str, collection: str):
-        del self.cache[(db_name, collection, frozenset({"_id": id_}.items()))]
+        try:
+            self.cache.pop((db_name, collection, frozenset({"_id": id_}.items())))
+        except KeyError:
+            pass
         return await self._connect[collection][db_name].delete_one({'_id': str(id_)})
 
 
