@@ -1152,11 +1152,15 @@ class LavalinkPlayer(wavelink.Player):
                     4014,
                     4006,  # Session is no longer valid.
             ):
-                #await asyncio.sleep(1)
-                #if self.guild and self.guild.me.voice:
-                #    return
-                #self.set_command_log(f"O player foi desligado por perca de conexão com o canal {self.last_channel.mention}...")
-                #await self.destroy(force=True)
+                await asyncio.sleep(5)
+                try:
+                    self.bot.music.players[self.guild_id]
+                except KeyError:
+                    return
+                if self.guild and self.guild.me.voice:
+                    return
+                self.set_command_log(f"O player foi desligado por perca de conexão com o canal {self.last_channel.mention}...")
+                await self.destroy(force=True)
                 return
 
         if isinstance(event, wavelink.TrackStuck):
