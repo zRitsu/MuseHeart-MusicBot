@@ -122,15 +122,34 @@ async def lastfm_track_unlove(track: str, artist: str, session_key: str, api_key
     await post_lastfm(params)
 
 
-async def lastfm_get_similar_track(track: str, artist: str, session_key: str, api_key: str, mbid: str = None):
+async def lastfm_get_similar_tracks(track: str, api_key: str, artist: str = None, mbid: str = None):
     params = {
         'method': 'track.getSimilar',
         'api_key': api_key,
-        'autocorrect[0|1]': True,
-        'sk': session_key,
+        'autocorrect': 1,
     }
-    params.update({'mbid': mbid}) if mbid else {'track': track, 'artist': artist}
-    return (await request_lastfm(params))['lfm']['similartracks']
+    if mbid:
+        params['mbid'] = mbid
+    else:
+        params['track'] = track
+        if artist:
+            params['artist'] = artist
+
+    return (await request_lastfm(params))['similartracks']['track']
+
+
+async def lastfm_get_similar_artists(artist: str, api_key: str, mbid: str = None):
+    params = {
+        'method': 'artist.getSimilar',
+        'api_key': api_key,
+        'autocorrect': 1,
+    }
+    if mbid:
+        params['mbid'] = mbid
+    else:
+        params['artist'] = artist
+
+    return (await request_lastfm(params))['similarartists']['artist']
 
 
 async def lastfm_user_info(session_key: str, api_key: str):
@@ -149,4 +168,4 @@ async def lastfm_user_recent_tracks(user: str, api_key: str, limit: int = 50):
             'user': user,
             'limit': limit,
             'api_key': api_key,
-        }))['recenttracks']
+        }))['recenttracks']['similarTracks']['track']
