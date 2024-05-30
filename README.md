@@ -1,5 +1,5 @@
 # MuseHeart-MusicBot
-## bot de música programado em python com player interativo, comandos barra/slash e muito mais.
+## bot de música programado em python com player interativo, comandos de barra + slash, integração com o [last.fm](https://www.last.fm/) e muito mais.
 
 ## Página com invites e algumas infos/screenshots da Muse Heart e funcionamento dessa source: [clique aqui](https://gist.github.com/zRitsu/4875008554a00c3c372b2df6dcdf437f#file-muse_heart_invites-md).
 
@@ -29,6 +29,9 @@ Mais previews:
 
 [![](https://i.ibb.co/9Hm5cyG/playercontrollerforum.png)](https://i.ibb.co/9Hm5cyG/playercontrollerforum.png)
 
+- Integração com o [last.fm](https://www.last.fm/) para scrobbles (outras funcionalidades em breve).
+
+[![](https://i.ibb.co/DGRsqdX/muse-heart-last-fm.png)](https://i.ibb.co/DGRsqdX/muse-heart-last-fm.png)
 
 * Há diversas outras skins, veja todas usando o comando /change_skin (você também pode criar outras, use os modelos padrões que estão na pasta [skins](utils/music/skins/) como referência, crie uma cópia com outro nome e modifique a seu gosto).
 
