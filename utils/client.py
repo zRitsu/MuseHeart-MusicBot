@@ -797,14 +797,14 @@ class BotPool:
 
                         bot.load_modules()
 
+                        bot.sync_command_cooldowns()
+
                         if bot.config["AUTO_SYNC_COMMANDS"]:
                             await bot.sync_app_commands(force=True)
 
                         bot.add_view(PanelView(bot))
 
                         self.bot_mentions.update((f"<@!{bot.user.id}>", f"<@{bot.user.id}>"))
-
-                        bot.sync_command_cooldowns()
 
                     except Exception:
                         traceback.print_exc()
@@ -1010,6 +1010,15 @@ class BotCore(commands.AutoShardedBot):
         if not self.command_sync_flags.sync_commands and not force:
             return
 
+        for cmd in self.slash_commands:
+            cmd.body.dm_permission = False
+
+        for cmd in self.user_commands:
+            cmd.body.dm_permission = False
+
+        for cmd in self.message_commands:
+            cmd.body.dm_permission = False
+
         current_cmds = sorted([sort_dict_recursively(cmd.body.to_dict()) for cmd in self.application_commands], key=lambda k: k["name"])
 
         try:
@@ -1060,7 +1069,6 @@ class BotCore(commands.AutoShardedBot):
             for cmd in b.slash_commands:
                 c = self.get_slash_command(cmd.name)
                 if not c: continue
-                c.body.dm_permission = False
                 if self.pool.config["ENABLE_COMMANDS_COOLDOWN"] is False:
                     c._buckets._cooldown = None
                 else:
@@ -1070,7 +1078,6 @@ class BotCore(commands.AutoShardedBot):
             for cmd in b.user_commands:
                 c = self.get_user_command(cmd.name)
                 if not c: continue
-                c.body.dm_permission = False
                 if self.pool.config["ENABLE_COMMANDS_COOLDOWN"] is False:
                     c._buckets._cooldown = None
                 else:
@@ -1080,7 +1087,6 @@ class BotCore(commands.AutoShardedBot):
             for cmd in b.message_commands:
                 c = self.get_message_command(cmd.name)
                 if not c: continue
-                c.body.dm_permission = False
                 if self.pool.config["ENABLE_COMMANDS_COOLDOWN"] is False:
                     c._buckets._cooldown = None
                 else:

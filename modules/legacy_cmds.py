@@ -236,8 +236,7 @@ class Owner(commands.Cog):
         for bot in (allbots:=set(self.bot.pool.get_all_bots())):
             bot.pool.load_skins()
             data = bot.load_modules(modules)
-
-        self.bot.sync_command_cooldowns(force=True)
+            bot.sync_command_cooldowns(force=True)
 
         for bot in allbots:
             await bot.sync_app_commands(force=True)
