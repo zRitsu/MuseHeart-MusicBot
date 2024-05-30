@@ -393,7 +393,7 @@ async def send_idle_embed(
     for n in bot.music.nodes.values():
         try:
             for p in n.info["sourceManagers"]:
-                if p in ("youtube", "youtubemusic"):
+                if p == "youtube":
                     if "ytsearch" not in n.original_providers and "ytmsearch" not in n.original_providers:
                         continue
                 elif p == "http":

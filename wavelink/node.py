@@ -376,7 +376,7 @@ class Node:
                     playlist_cls = kwargs.pop('playlist_cls', TrackPlaylist)
                     if query.startswith("https://music.youtube.com/"):
                         query = query.replace("https://www.youtube.com/", "https://music.youtube.com/")
-                        source_replace = "youtubemusic"
+
                         try:
                             if data["playlistInfo"]["name"].startswith("Album - "):
                                 data["playlistInfo"]["name"] = data["playlistInfo"]["name"][8:]
@@ -385,18 +385,11 @@ class Node:
                                 data["pluginInfo"]["albumUrl"] = query
                         except KeyError:
                             pass
-                    else:
-                        source_replace = None
-                    return playlist_cls(data=data, url=query, encoded_name=encoded_name, pluginInfo=data.pop("pluginInfo", {}), source_replace=source_replace, **kwargs)
+                    return playlist_cls(data=data, url=query, encoded_name=encoded_name, pluginInfo=data.pop("pluginInfo", {}), **kwargs)
 
                 track_cls = kwargs.pop('track_cls', Track)
 
-                if query.startswith("https://music.youtube.com/"):
-                    source_replace = "youtubemusic"
-                else:
-                    source_replace = None
-
-                tracks = [track_cls(id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo", {}), source_replace=source_replace, **kwargs) for track in tracks]
+                tracks = [track_cls(id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo", {}), **kwargs) for track in tracks]
 
                 return tracks
 
