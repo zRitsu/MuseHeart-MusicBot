@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import datetime
-import pprint
-import time
 import traceback
 from typing import TYPE_CHECKING, Optional
 from urllib.parse import quote
@@ -12,11 +10,10 @@ import disnake
 from disnake.ext import commands
 
 from utils.db import DBModel
-from utils.music.lastfm_tools import lastfm_get_session_key, lastfm_get_token, generate_api_sig, LastFmException, \
-    post_lastfm, \
+from utils.music.lastfm_tools import lastfm_get_session_key, lastfm_get_token, LastFmException, \
     lastfm_update_nowplaying, lastfm_track_scrobble, lastfm_user_info, lastfm_user_recent_tracks
 from utils.music.models import LavalinkPlayer, LavalinkTrack
-from utils.others import CustomContext
+from utils.others import CustomContext, CommandArgparse
 
 if TYPE_CHECKING:
     from utils.client import BotCore
@@ -124,17 +121,34 @@ class LastFmCog(commands.Cog):
     lastfm_cd = commands.CooldownMapping.from_cooldown(1, 30, commands.BucketType.member)
     lastfm_mc = commands.MaxConcurrency(1, per=commands.BucketType.user, wait=False)
 
+    lastm_flags = CommandArgparse()
+    lastm_flags.add_argument('-last_tracks', '-lasttracks', '-last', '-recents',
+                             help="Quantidade de músicas recentes a serem exibidas.\nEx: -last 5",
+                             type=int, default=3)
+
     @commands.command(hidden=True, name="lastfm", aliases=["lastfmconnect", "lfm"],
-                      description="Conectar sua conta do last.fm.",
+                      description="Conectar sua conta do last.fm.", extras={"flags": lastm_flags},
                       cooldown=lastfm_cd, max_concurrency=lastfm_mc)
-    async def lastfmconnect_legacy(self, ctx: CustomContext):
-        await self.lastfm.callback(self=self, inter=ctx)
+    async def lastfm_legacy(self, ctx: CustomContext, *flags):
+
+        args, unknown = ctx.command.extras['flags'].parse_known_args(flags)
+
+        if args.last_tracks > 6:
+            args.last_tracks = 6
+
+        await self.lastfm.callback(self=self, inter=ctx, last_tracks_amount=args.last_tracks)
 
 
     @commands.slash_command(hidden=True, name="lastfm",
                       description=f"{desc_prefix}Conectar sua conta do last.fm",
                       cooldown=lastfm_cd, max_concurrency=lastfm_mc)
-    async def lastfm(self, inter: disnake.AppCmdInter):
+    async def lastfm(
+            self, inter: disnake.AppCmdInter,
+            last_tracks_amount: int = commands.Param(
+                name="músicas_recentes", description="Quantidade de músicas recentes a serem exibidas.",
+                default=3, min_value=0, max_value=6
+            ),
+    ):
 
         cog = self.bot.get_cog("Music")
 
@@ -168,24 +182,25 @@ class LastFmCog(commands.Cog):
         embed_color = self.bot.get_color()
 
         if lastfm_user:
-            txt = f"👤 **⠂Usuário:** [`{lastfm_user['realname']}`](<{lastfm_user['url']}>)\n\n" \
-                  f"⏰ **⠂Conta criada em:** <t:{lastfm_user['registered']['#text']}:f>\n\n" \
-                  f"🌎 **⠂País:** `{lastfm_user['country']}`\n\n"
+
+            txt = f"`👤` **⠂Usuário:** [`{lastfm_user['realname']}`](<{lastfm_user['url']}>)\n" \
+                  f"`⏰` **⠂Conta criada em:** <t:{lastfm_user['registered']['#text']}:f>\n" \
+                  f"`🌎` **⠂País:** `{lastfm_user['country']}`\n"
 
             if playcount := lastfm_user['playcount']:
-                txt += f"▶️ **⠂Músicas reproduzidas:** [`{playcount}`](<https://www.last.fm/user/{lastfm_user['name']}/library>)\n\n"
+                txt += f"`🔊` **⠂Total de músicas reproduzidas:** [`{playcount}`](<https://www.last.fm/user/{lastfm_user['name']}/library>)\n"
 
             if playlists := lastfm_user['playlists'] != "0":
-                txt += f"📄 **⠂Playlists:** [`{playlists}`](<https://www.last.fm/user/{lastfm_user['name']}/playlists>)\n\n"
+                txt += f"`📄` **⠂Playlists públicas:** [`{playlists}`](<https://www.last.fm/user/{lastfm_user['name']}/playlists>)\n"
 
             if playcount := lastfm_user['track_count']:
-                txt += f"🎵 **⠂Músicas registradas:** [`{playcount}`](<https://www.last.fm/user/{lastfm_user['name']}/library/tracks>)\n\n"
+                txt += f"`📻` **⠂Total de músicas registradas:** [`{playcount}`](<https://www.last.fm/user/{lastfm_user['name']}/library/tracks>)\n"
 
             if artists := lastfm_user['artist_count']:
-                txt += f"🎧 **⠂Artistas registrados:** [`{artists}`](<https://www.last.fm/user/{lastfm_user['name']}/library/artists>)\n\n"
+                txt += f"`🎧` **⠂Total de artistas registrados:** [`{artists}`](<https://www.last.fm/user/{lastfm_user['name']}/library/artists>)\n"
 
             if albums := lastfm_user['album_count']:
-                txt += f"📀 **⠂Álbuns registrados:** [`{albums}`](<https://www.last.fm/user/{lastfm_user['name']}/library/albums>)\n\n"
+                txt += f"`📀` **⠂Total de álbuns registrados:** [`{albums}`](<https://www.last.fm/user/{lastfm_user['name']}/library/albums>)\n"
 
             embeds = [disnake.Embed(
                 description=txt, color=self.bot.get_color()
@@ -193,23 +208,25 @@ class LastFmCog(commands.Cog):
                 name="Last.FM: Informação de usuário",
                 icon_url="https://www.last.fm/static/images/lastfm_avatar_twitter.52a5d69a85ac.png")]
 
-            recenttracks = await lastfm_user_recent_tracks(lastfm_user['name'], api_key=self.bot.config["LASTFM_KEY"])
+            if last_tracks_amount > 0:
 
-            if recenttracks['track']:
-                embeds[0].description += f"### Músicas recentes ouvidas por [{lastfm_user['realname']}](<{lastfm_user['url']}>):"
+                recenttracks = await lastfm_user_recent_tracks(lastfm_user['name'], api_key=self.bot.config["LASTFM_KEY"])
 
-                for n, t in enumerate(recenttracks['track'][:3]):
-                    artist_url = t['url'].split('/_/')[0]
-                    t_embed = disnake.Embed(
-                        color=embed_color,
-                        description=f"[`{t['name']}`]({t['url']}) - <t:{t['date']['uts']}:R>\n"
-                                    f"Artista: [`{t['artist']['#text']}`]({artist_url})"
-                    )
-                    if t['album']['#text']:
-                        t_embed.description += f" **|** Álbum: [`{t['album']['#text']}`]({artist_url}/{quote(t['album']['#text'])})"
-                    t_embed.set_thumbnail(url=t['image'][0]['#text'] or 'https://i.ibb.co/pQPrKdw/lastfm-unknown-image.webp')
-                    embeds.append(t_embed)
+                if recenttracks['track']:
+                    embeds[0].description += f"## Músicas recentes ouvidas por [`{lastfm_user['realname']}`](<{lastfm_user['url']}>):"
 
+                    for n, t in enumerate(recenttracks['track'][:last_tracks_amount]):
+                        artist_url = t['url'].split('/_/')[0]
+                        t_embed = disnake.Embed(
+                            color=embed_color,
+                            description=f"` {n+1}. ` [`{t['name']}`]({t['url']}) ( <t:{t['date']['uts']}:R> )\n"
+                                        f"`Artista:` [`{t['artist']['#text']}`]({artist_url})"
+                        )
+                        if t['album']['#text']:
+                            t_embed.description += f" **-** `Álbum:` [`{t['album']['#text']}`]({artist_url}/{quote(t['album']['#text'])})"
+                        t_embed.set_thumbnail(url=t['image'][0]['#text'] or 'https://i.ibb.co/pQPrKdw/lastfm-unknown-image.webp')
+                        t_embed.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/1082887587770937455/rainbow_bar2.gif")
+                        embeds.append(t_embed)
 
         else:
             embeds = [disnake.Embed(
