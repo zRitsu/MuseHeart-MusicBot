@@ -133,8 +133,8 @@ class LastFmCog(commands.Cog):
 
         args, unknown = ctx.command.extras['flags'].parse_known_args(flags)
 
-        if args.last_tracks > 6:
-            args.last_tracks = 6
+        if args.last_tracks > 7:
+            args.last_tracks = 7
 
         await self.lastfm.callback(self=self, inter=ctx, last_tracks_amount=args.last_tracks)
 
@@ -146,7 +146,7 @@ class LastFmCog(commands.Cog):
             self, inter: disnake.AppCmdInter,
             last_tracks_amount: int = commands.Param(
                 name="músicas_recentes", description="Quantidade de músicas recentes a serem exibidas.",
-                default=3, min_value=0, max_value=6
+                default=3, min_value=0, max_value=7
             ),
     ):
 
@@ -186,8 +186,10 @@ class LastFmCog(commands.Cog):
             name = lastfm_user['realname'] or lastfm_user['name']
 
             txt = f"`👤` **⠂Usuário:** [`{name}`](<{lastfm_user['url']}>)\n" \
-                  f"`⏰` **⠂Conta criada em:** <t:{lastfm_user['registered']['#text']}:f>\n" \
-                  f"`🌎` **⠂País:** `{lastfm_user['country']}`\n"
+                  f"`⏰` **⠂Conta criada em:** <t:{lastfm_user['registered']['#text']}:f>\n"
+
+            if lastfm_user['country']:
+                txt += f"`🌎` **⠂País:** `{lastfm_user['country']}`\n"
 
             if playcount := lastfm_user['playcount']:
                 txt += f"`🔊` **⠂Total de músicas reproduzidas:** [`{playcount}`](<https://www.last.fm/user/{lastfm_user['name']}/library>)\n"
@@ -204,10 +206,19 @@ class LastFmCog(commands.Cog):
             if albums := lastfm_user['album_count']:
                 txt += f"`📀` **⠂Total de álbuns registrados:** [`{albums}`](<https://www.last.fm/user/{lastfm_user['name']}/library/albums>)\n"
 
+            try:
+                slashcmd = f"</play:" + str(self.bot.get_global_command_named("play",
+                                                                              cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+            except AttributeError:
+                slashcmd = "/play"
+
+            txt += f"\n`Ouça suas músicas em um canal de voz usando o comando` {slashcmd} `para registra-las na sua " \
+                    f"conta do last.fm`\n"
+
             embeds = [disnake.Embed(
                 description=txt, color=self.bot.get_color()
             ).set_thumbnail(url=lastfm_user['image'][-1]["#text"]).set_author(
-                name="Last.FM: Informação de usuário",
+                name="Last.fm: Informação da conta vinculada",
                 icon_url="https://www.last.fm/static/images/lastfm_avatar_twitter.52a5d69a85ac.png")]
 
             if last_tracks_amount > 0:
@@ -261,8 +272,9 @@ class LastFmCog(commands.Cog):
             if view.error:
                 raise view.error
 
-            embeds.append(
-                disnake.Embed(color=embed_color).set_footer(text="O tempo para interagir nessa mensagem expirou.")
+            embeds[-1].set_footer(
+                text="O tempo para interagir nessa mensagem expirou.",
+                icon_url="https://i.ibb.co/gb0cZQw/warning.png",
             )
 
             if msg:
@@ -280,23 +292,35 @@ class LastFmCog(commands.Cog):
 
         embeds[0].clear_fields()
 
-        if view.session_key:
-            embeds.append(
-                disnake.Embed(description=f"### A conta [{view.username}](<https://www.last.fm/user/{view.username}>) foi "
-                                 "vinculada com sucesso!\n\n`Agora ao ouvir suas músicas no canal de voz elas serão registradas "
-                                "na sua conta do last.fm`", color=embed_color)
-            )
-        else:
-            embeds.append(
-                disnake.Embed(description="### Conta desvinculada com sucesso!", color=embed_color)
-            )
-
         if view.interaction:
-            await view.interaction.response.edit_message(embeds=embeds, view=view, content=None)
+            func = view.interaction.response.edit_message
         elif msg:
-            await msg.edit(embeds=embeds, view=view, content=None)
+            func = msg.edit
         else:
-            await inter.edit_original_message(embeds=embeds, view=view, content=None)
+            func = inter.edit_original_message
+
+        if view.session_key:
+            embeds[0].description += f"### A conta [{view.username}](<https://www.last.fm/user/{view.username}>) foi " \
+                                 "vinculada com sucesso!\n\n`Agora ao ouvir suas músicas no canal de voz elas " \
+                                "serão registradas automaticamente na sua conta do last.fm`"
+
+            await func(embeds=embeds, view=view, content=None)
+
+            for b in self.bot.pool.get_all_bots():
+                for p in b.music.players.values():
+                    try:
+                        if inter.guild_id == p.guild_id and inter.author.id in p.last_channel.voice_states:
+                            self.bot.loop.create_task(self.update_np(player=p))
+                            return
+                    except AttributeError:
+                        continue
+
+        else:
+            embeds[-1].set_footer(
+                text="Sua conta foi desvinculada com sucesso!",
+                icon_url="https://i.ibb.co/xLFhCd2/confirm.png",
+            )
+            await func(embeds=embeds, view=view, content=None)
 
     @commands.Cog.listener("on_voice_state_update")
     async def connect_vc_update(self, member: disnake.Member, before: disnake.VoiceState, after: disnake.VoiceState):
