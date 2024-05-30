@@ -1,5 +1,4 @@
 import hashlib
-import pprint
 import time
 
 from aiohttp import ClientSession
@@ -9,163 +8,154 @@ class LastFmException(Exception):
     def __init__(self, data: dict):
         self.code = data["error"]
         self.message = data["message"]
+        
+class LastFM:
+    
+    def __init__(self, api_key: str, api_secret: str):
+        self.api_key = api_key
+        self.api_secret = api_secret
 
-
-def generate_api_sig(params, api_secret):
-    sig = ''.join(f"{key}{params[key]}" for key in sorted(params))
-    sig += api_secret
-    return hashlib.md5(sig.encode('utf-8')).hexdigest()
-
-
-async def request_lastfm(params):
-    params["format"] = "json"
-    async with ClientSession() as session:
-        async with session.get("http://ws.audioscrobbler.com/2.0/", params=params) as response:
-            if (data:=await response.json()).get('error'):
-                raise LastFmException(data)
-            return data
-
-
-async def post_lastfm(params):
-    params["format"] = "json"
-    async with ClientSession() as session:
-        async with session.post("http://ws.audioscrobbler.com/2.0/", params=params) as response:
-            if (data:=await response.json()).get('error'):
-                raise LastFmException(data)
-            return data
-
-
-async def lastfm_get_token(apikey: str):
-    data = await request_lastfm(
-        params={
-            'method': 'auth.getToken',
-            'api_key': apikey,
-            'format': 'json',
+    def generate_api_sig(self, params: dict):
+        sig = ''.join(f"{key}{params[key]}" for key in sorted(params))
+        sig += self.api_secret
+        return hashlib.md5(sig.encode('utf-8')).hexdigest()
+    
+    async def request_lastfm(self, params: dict):
+        params["format"] = "json"
+        async with ClientSession() as session:
+            async with session.get("http://ws.audioscrobbler.com/2.0/", params=params) as response:
+                if (data:=await response.json()).get('error'):
+                    raise LastFmException(data)
+                return data
+    
+    async def post_lastfm(self, params: dict):
+        params["format"] = "json"
+        async with ClientSession() as session:
+            async with session.post("http://ws.audioscrobbler.com/2.0/", params=params) as response:
+                if (data:=await response.json()).get('error'):
+                    raise LastFmException(data)
+                return data
+    
+    async def get_token(self):
+        data = await self.request_lastfm(
+            params={
+                'method': 'auth.getToken',
+                'api_key': self.api_key,
+                'format': 'json',
+            }
+        )
+        return data['token']
+    
+    async def get_session_key(self, token: str):
+        params = {
+            'method': 'auth.getSession',
+            'api_key': self.api_key,
+            'token': token,
         }
-    )
-    return data['token']
-
-
-async def lastfm_get_session_key(api_key: str, api_secret: str, token: str):
-    params = {
-        'method': 'auth.getSession',
-        'api_key': api_key,
-        'token': token,
-    }
-    params['api_sig'] = generate_api_sig(params, api_secret=api_secret)
-    return await request_lastfm(params=params)
-
-
-async def lastfm_track_scrobble(artist: str, track: str, album: str, duration: int, session_key: str, api_key: str,
-                                api_secret: str):
-    params = {
-        "method": "track.scrobble",
-        "artist[0]": artist,
-        "timestamp[0]": str(int(time.time() - 30)),
-        "track[0]": track,
-        "api_key": api_key,
-        "sk": session_key,
-    }
-    if album:
-        params["album"] = album
-    if duration:
-        params["duration"] = str(duration)
-
-    params['api_sig'] = generate_api_sig(params, api_secret)
-
-    return await post_lastfm(params)
-
-
-async def lastfm_update_nowplaying(artist: str, track: str, album: str, duration: int, session_key: str, api_key: str,
-                                   api_secret: str):
-
-    params = {
-        "method": "track.updateNowPlaying",
-        "artist": artist,
-        "track": track,
-        "timestamp": str(int(time.time() - 30)),
-        "api_key": api_key,
-        "sk": session_key,
-    }
-
-    if album:
-        params["album"] = album
-    if duration:
-        params["duration"] = str(duration)
-
-    params['api_sig'] = generate_api_sig(params, api_secret)
-
-    return await post_lastfm(params)
-
-
-async def lastfm_track_love(track: str, artist: str, session_key: str, api_key: str, api_secret: str):
-    params = {
-        'method': 'track.love',
-        'track': track,
-        'artist': artist,
-        'api_key': api_key,
-        'sk': session_key,
-    }
-    params['api_sig'] = generate_api_sig(params, api_secret)
-    await post_lastfm(params)
-
-
-async def lastfm_track_unlove(track: str, artist: str, session_key: str, api_key: str, api_secret: str):
-    params = {
-        'method': 'track.unlove',
-        'track': track,
-        'artist': artist,
-        'api_key': api_key,
-        'sk': session_key,
-    }
-    params['api_sig'] = generate_api_sig(params, api_secret)
-    await post_lastfm(params)
-
-
-async def lastfm_get_similar_tracks(track: str, api_key: str, artist: str = None, mbid: str = None):
-    params = {
-        'method': 'track.getSimilar',
-        'api_key': api_key,
-        'autocorrect': 1,
-    }
-    if mbid:
-        params['mbid'] = mbid
-    else:
-        params['track'] = track
-        if artist:
-            params['artist'] = artist
-
-    return (await request_lastfm(params))['similartracks']['track']
-
-
-async def lastfm_get_similar_artists(artist: str, api_key: str, mbid: str = None):
-    params = {
-        'method': 'artist.getSimilar',
-        'api_key': api_key,
-        'autocorrect': 1,
-    }
-    if mbid:
-        params['mbid'] = mbid
-    else:
-        params['artist'] = artist
-
-    return (await request_lastfm(params))['similarartists']['artist']
-
-
-async def lastfm_user_info(session_key: str, api_key: str):
-    return (await request_lastfm(
+        params['api_sig'] = self.generate_api_sig(params)
+        return await self.request_lastfm(params=params)
+    
+    async def track_scrobble(self, artist: str, track: str, album: str, duration: int, session_key: str):
         params = {
-            'method': 'user.getInfo',
-            'api_key': api_key,
+            "method": "track.scrobble",
+            "artist[0]": artist,
+            "timestamp[0]": str(int(time.time() - 30)),
+            "track[0]": track,
+            "api_key": self.api_key,
+            "sk": session_key,
+        }
+        if album:
+            params["album"] = album
+        if duration:
+            params["duration"] = str(duration)
+    
+        params['api_sig'] = self.generate_api_sig(params)
+    
+        return await self.post_lastfm(params)
+    
+    async def update_nowplaying(self, artist: str, track: str, album: str, duration: int, session_key: str):
+    
+        params = {
+            "method": "track.updateNowPlaying",
+            "artist": artist,
+            "track": track,
+            "timestamp": str(int(time.time() - 30)),
+            "api_key": self.api_key,
+            "sk": session_key,
+        }
+    
+        if album:
+            params["album"] = album
+        if duration:
+            params["duration"] = str(duration)
+    
+        params['api_sig'] = self.generate_api_sig(params)
+    
+        return await self.post_lastfm(params)
+    
+    async def track_love(self, track: str, artist: str, session_key: str):
+        params = {
+            'method': 'track.love',
+            'track': track,
+            'artist': artist,
+            'api_key': self.api_key,
             'sk': session_key,
-        }))['user']
-
-
-async def lastfm_user_recent_tracks(user: str, api_key: str, limit: int = 50):
-    return (await request_lastfm(
+        }
+        params['api_sig'] = self.generate_api_sig(params)
+        await self.post_lastfm(params)
+    
+    async def track_unlove(self, track: str, artist: str, session_key: str):
         params = {
-            'method': 'user.getRecentTracks',
-            'user': user,
-            'limit': limit,
-            'api_key': api_key,
-        }))['recenttracks']['similarTracks']['track']
+            'method': 'track.unlove',
+            'track': track,
+            'artist': artist,
+            'api_key': self.api_key,
+            'sk': session_key,
+        }
+        params['api_sig'] = self.generate_api_sig(params)
+        await self.post_lastfm(params)
+    
+    async def get_similar_tracks(self, track: str, artist: str = None, mbid: str = None):
+        params = {
+            'method': 'track.getSimilar',
+            'api_key': self.api_key,
+            'autocorrect': 1,
+        }
+        if mbid:
+            params['mbid'] = mbid
+        else:
+            params['track'] = track
+            if artist:
+                params['artist'] = artist
+    
+        return (await self.request_lastfm(params))['similartracks']['track']
+    
+    async def get_similar_artists(self, artist: str, mbid: str = None):
+        params = {
+            'method': 'artist.getSimilar',
+            'api_key': self.api_key,
+            'autocorrect': 1,
+        }
+        if mbid:
+            params['mbid'] = mbid
+        else:
+            params['artist'] = artist
+    
+        return (await self.request_lastfm(params))['similarartists']['artist']
+    
+    async def user_info(self, session_key: str):
+        return (await self.request_lastfm(
+            params = {
+                'method': 'user.getInfo',
+                'api_key': self.api_key,
+                'sk': session_key,
+            }))['user']
+    
+    async def user_recent_tracks(self, user: str, limit: int = 50):
+        return (await self.request_lastfm(
+            params = {
+                'method': 'user.getRecentTracks',
+                'user': user,
+                'limit': limit,
+                'api_key': self.api_key,
+            }))['recenttracks']

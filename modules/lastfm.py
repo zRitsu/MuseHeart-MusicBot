@@ -10,8 +10,7 @@ import disnake
 from disnake.ext import commands
 
 from utils.db import DBModel
-from utils.music.lastfm_tools import lastfm_get_session_key, lastfm_get_token, LastFmException, \
-    lastfm_update_nowplaying, lastfm_track_scrobble, lastfm_user_info, lastfm_user_recent_tracks
+from utils.music.lastfm_tools import LastFmException
 from utils.music.models import LavalinkPlayer, LavalinkTrack
 from utils.others import CustomContext, CommandArgparse
 
@@ -55,11 +54,7 @@ class LastFMView(disnake.ui.View):
         while count > 0:
             try:
                 await asyncio.sleep(20)
-                data = await lastfm_get_session_key(
-                    api_key=self.ctx.bot.config["LASTFM_KEY"],
-                    api_secret=self.ctx.bot.config["LASTFM_SECRET"],
-                    token=self.token
-                )
+                data = await self.ctx.bot.get_session_key(token=self.token)
                 if data.get('error'):
                     count -= 1
                     continue
@@ -94,8 +89,8 @@ class LastFMView(disnake.ui.View):
         self.check_loop = self.ctx.bot.loop.create_task(self.check_session_loop())
 
         if not self.auth_url:
-            self.token = await lastfm_get_token(apikey=self.ctx.bot.config["LASTFM_KEY"])
-            self.auth_url = f'http://www.last.fm/api/auth/?api_key={self.ctx.bot.config["LASTFM_KEY"]}&token={self.token}'
+            self.token = await self.ctx.bot.get_token()
+            self.auth_url = f'http://www.last.fm/api/auth/?api_key={self.ctx.bot.last_fm.api_key}&token={self.token}'
             self.last_timestamp = int((disnake.utils.utcnow() + datetime.timedelta(minutes=5)).timestamp())
 
         await interaction.send(f"### [Clique aqui](<{self.auth_url}>) para vincular sua conta do last.fm (na página clique em \"allow\")\n\n"
@@ -114,9 +109,6 @@ class LastFmCog(commands.Cog):
 
     def __init__(self, bot: BotCore):
         self.bot = bot
-
-        if not hasattr(bot.pool, "lastfm_sessions"):
-            bot.pool.lastfm_sessions = {}
 
     lastfm_cd = commands.CooldownMapping.from_cooldown(1, 30, commands.BucketType.member)
     lastfm_mc = commands.MaxConcurrency(1, per=commands.BucketType.user, wait=False)
@@ -163,7 +155,7 @@ class LastFmCog(commands.Cog):
 
         if current_session_key:=data["lastfm"]["sessionkey"]:
             try:
-                lastfm_user = await lastfm_user_info(current_session_key, self.bot.config["LASTFM_KEY"])
+                lastfm_user = await self.bot.last_fm.user_info(current_session_key)
             except LastFmException as e:
                 if e.code == 9:
                     data["lastfm"]["sessionkey"] = ""
@@ -223,7 +215,7 @@ class LastFmCog(commands.Cog):
 
             if last_tracks_amount > 0:
 
-                recenttracks = await lastfm_user_recent_tracks(lastfm_user['name'], api_key=self.bot.config["LASTFM_KEY"])
+                recenttracks = await self.bot.last_fm.user_recent_tracks(lastfm_user['name'])
 
                 if recenttracks['track']:
                     embeds[0].description += f"## Músicas recentes ouvidas por [`{name}`](<{lastfm_user['url']}>):"
@@ -273,7 +265,7 @@ class LastFmCog(commands.Cog):
                 raise view.error
 
             embeds[-1].set_footer(
-                text="O tempo para interagir nessa mensagem expirou.",
+                text="O tempo para interagir nessa mensagem foi esgotado.",
                 icon_url="https://i.ibb.co/gb0cZQw/warning.png",
             )
 
@@ -435,13 +427,12 @@ class LastFmCog(commands.Cog):
             try:
                 kwargs = {
                     "artist": artist, "track": name, "album": album, "duration": duration,
-                    "session_key": fminfo["sessionkey"], "api_key": self.bot.config["LASTFM_KEY"],
-                    "api_secret": self.bot.config["LASTFM_SECRET"]
+                    "session_key": fminfo["sessionkey"],
                 }
                 if update_np:
-                    await lastfm_update_nowplaying(**kwargs)
+                    await self.bot.last_fm.update_nowplaying(**kwargs)
                 else:
-                    await lastfm_track_scrobble(**kwargs)
+                    await self.bot.last_fm.track_scrobble(**kwargs)
             except Exception as e:
                 if isinstance(e, LastFmException):
                     print(f"last.fm failed! user: {user.id} - code: {e.code} - message: {e.message}")

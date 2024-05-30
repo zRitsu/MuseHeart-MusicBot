@@ -34,6 +34,7 @@ from utils.db import MongoDatabase, LocalDatabase, get_prefix, DBModel, global_d
 from utils.music.audio_sources.spotify import spotify_client
 from utils.music.checks import check_pool_bots
 from utils.music.errors import GenericError
+from utils.music.lastfm_tools import LastFM
 from utils.music.local_lavalink import run_lavalink
 from utils.music.models import music_mode, LavalinkPlayer, LavalinkPlaylist, LavalinkTrack, PartialTrack
 from utils.music.remote_lavalink_serverlist import get_lavalink_servers
@@ -88,6 +89,7 @@ class BotPool:
         self.current_useragent = self.reset_useragent()
         self.processing_gc: bool = False
         self.lavalink_connect_queue = {}
+        self.last_fm: Optional[LastFM] = None
         self.lastfm_sessions = {}
         self.player_skins = {}
         self.player_static_skins = {}
@@ -604,6 +606,9 @@ class BotPool:
 
         self.spotify: Optional[spotipy.Spotify] = spotify_client(self.config)
 
+        if self.config["LASTFM_KEY"] and self.config["LASTFM_SECRET"]:
+            self.last_fm = LastFM(api_key=self.config["LASTFM_KEY"], api_secret=self.config["LASTFM_SECRET"])
+
         all_tokens = {}
 
         for k, v in dict(os.environ, **self.config).items():
@@ -951,6 +956,10 @@ class BotCore(commands.AutoShardedBot):
     @property
     def config(self):
         return self.pool.config
+
+    @property
+    def last_fm(self):
+        return self.pool.last_fm
 
     @property
     def emoji_data(self):
