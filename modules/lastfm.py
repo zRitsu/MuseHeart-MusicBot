@@ -218,7 +218,7 @@ class LastFmCog(commands.Cog):
             embeds = [disnake.Embed(
                 description=txt, color=self.bot.get_color()
             ).set_thumbnail(url=lastfm_user['image'][-1]["#text"]).set_author(
-                name="Last.fm: Informação da conta vinculada",
+                name="Last.fm: Informações da conta vinculada",
                 icon_url="https://www.last.fm/static/images/lastfm_avatar_twitter.52a5d69a85ac.png")]
 
             if last_tracks_amount > 0:
