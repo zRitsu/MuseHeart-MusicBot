@@ -201,7 +201,7 @@ class LastFmCog(commands.Cog):
             top_tracks = await self.bot.last_fm.user_top_tracks(data["lastfm"]["username"], limit=3)
 
             if top_tracks:
-                txt += f"\n`📻` **⠂Top 3 músicas mais ouvidas (do total de [`{int(playcount):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library/tracks>)):**\n"
+                txt += f"\n`📻` **⠂Top 3 músicas mais ouvidas (do total de [`{int(lastfm_user['track_count']):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library/tracks>)):**\n"
                 for t in top_tracks[:3]:
                     txt += f"[`{t['name']}`]({t['url']}) `[De:` [`{t['artist']['name']}`]({t['artist']['url']})`] ({t['playcount']} vezes)`\n"
 
