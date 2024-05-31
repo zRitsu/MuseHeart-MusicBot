@@ -177,3 +177,30 @@ class LastFM:
                 'limit': limit,
                 'api_key': self.api_key,
             }))['recenttracks']
+
+    async def user_top_tracks(self, user: str, limit: int = 50):
+        return (await self.request_lastfm(
+            params = {
+                'method': 'user.getTopTracks',
+                'user': user,
+                'limit': limit,
+                'api_key': self.api_key,
+            }))['toptracks']['track']
+
+    async def user_top_artists(self, user: str, limit: int = 50):
+        return (await self.request_lastfm(
+            params = {
+                'method': 'user.getTopArtists',
+                'user': user,
+                'limit': limit,
+                'api_key': self.api_key,
+            }))['topartists']['artist']
+
+    async def user_top_albums(self, user: str, limit: int = 50):
+        return (await self.request_lastfm(
+            params = {
+                'method': 'user.getTopAlbums',
+                'user': user,
+                'limit': limit,
+                'api_key': self.api_key,
+            }))['topalbums']['album']

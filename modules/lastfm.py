@@ -110,7 +110,7 @@ class LastFmCog(commands.Cog):
     def __init__(self, bot: BotCore):
         self.bot = bot
 
-    lastfm_cd = commands.CooldownMapping.from_cooldown(1, 30, commands.BucketType.member)
+    lastfm_cd = commands.CooldownMapping.from_cooldown(1, 45, commands.BucketType.member)
     lastfm_mc = commands.MaxConcurrency(1, per=commands.BucketType.user, wait=False)
 
     lastm_flags = CommandArgparse()
@@ -189,14 +189,35 @@ class LastFmCog(commands.Cog):
             if playlists := lastfm_user['playlists'] != "0":
                 txt += f"`📄` **⠂Playlists públicas:** [`{int(playlists):,}`](<https://www.last.fm/user/{lastfm_user['name']}/playlists>)\n"
 
-            if playcount := lastfm_user['track_count']:
-                txt += f"`📻` **⠂Total de músicas registradas:** [`{int(playcount):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library/tracks>)\n"
+            #if playcount := lastfm_user['track_count']:
+            #    txt += f"`📻` **⠂Total de músicas registradas:** [`{int(playcount):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library/tracks>)\n"
 
-            if artists := lastfm_user['artist_count']:
-                txt += f"`🎧` **⠂Total de artistas registrados:** [`{int(artists):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library/artists>)\n"
+            #if artists := lastfm_user['artist_count']:
+            #    txt += f"`🎧` **⠂Total de artistas registrados:** [`{int(artists):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library/artists>)\n"
 
-            if albums := lastfm_user['album_count']:
-                txt += f"`📀` **⠂Total de álbuns registrados:** [`{int(albums):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library/albums>)\n"
+            #if albums := lastfm_user['album_count']:
+            #    txt += f"`📀` **⠂Total de álbuns registrados:** [`{int(albums):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library/albums>)\n"
+
+            top_tracks = await self.bot.last_fm.user_top_tracks(data["lastfm"]["username"], limit=3)
+
+            if top_tracks:
+                txt += f"\n`📻` **⠂Top 3 músicas mais ouvidas (do total de [`{int(playcount):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library/tracks>)):**\n"
+                for t in top_tracks[:3]:
+                    txt += f"[`{t['name']}`]({t['url']}) `[De:` [`{t['artist']['name']}`]({t['artist']['url']})`] ({t['playcount']} vezes)`\n"
+
+            top_artists = await self.bot.last_fm.user_top_artists(data["lastfm"]["username"], limit=3)
+
+            if top_artists:
+                txt += f"\n`🎧` **⠂Top 3 artistas mais ouvidos (do total de [`{int(lastfm_user['artist_count']):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library/artists>)):**\n"
+                for a in top_artists[:3]:
+                    txt += f"[`{a['name']}`]({a['url']}) `({a['playcount']} vezes)`\n"
+
+            top_albuns = await self.bot.last_fm.user_top_albums(data["lastfm"]["username"], limit=3)
+
+            if top_albuns:
+                txt += f"\n`📀` **⠂Top 3 álbuns mais ouvidos (do total de [`{int(lastfm_user['album_count']):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library/albums>)):**\n"
+                for b in top_albuns[:3]:
+                    txt += f"[`{b['name']}`]({b['url']}) `[De:` [`{b['artist']['name']}`]({b['artist']['url']})`] ({b['playcount']} vezes)`\n"
 
             try:
                 slashcmd = f"</play:" + str(self.bot.get_global_command_named("play",
