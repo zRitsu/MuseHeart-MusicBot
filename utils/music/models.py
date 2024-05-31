@@ -1574,7 +1574,8 @@ class LavalinkPlayer(wavelink.Player):
 
                         try:
                             self.lastfm_artists = [a['name'] for a in
-                                                   await self.bot.last_fm.get_similar_artists(artist)]
+                                                   await self.bot.last_fm.get_similar_artists(artist) if a['name'].lower() not in track_data.author.lower()]
+                            self.lastfm_artists.insert(0, track_data.author)
                         except:
                             traceback.print_exc()
 
