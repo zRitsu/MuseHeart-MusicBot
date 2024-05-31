@@ -214,7 +214,8 @@ class LastFmCog(commands.Cog):
                 embed = disnake.Embed(
                     description="\n".join(f"> ` {n+1}º ` [`{t['name']}`]({t['url']}) `[Por:` [`{t['artist']['name']}`]({t['artist']['url']})`] ({t['playcount']}x)`" for n, t in enumerate(top_tracks[:3])),
                     color=embed_color).set_author(name=f"Top 3 músicas mais ouvidas (de {int(lastfm_user['track_count']):,}):",
-                    icon_url="https://i.ibb.co/Hhcwdf9/muse-heart-disc.jpg")
+                    icon_url="https://i.ibb.co/Hhcwdf9/muse-heart-disc.jpg",
+                    url=f"https://www.last.fm/user/{lastfm_user['name']}/library")
 
                 if thumb:=top_tracks[0]['image'][-1]["#text"]:
 
@@ -248,7 +249,8 @@ class LastFmCog(commands.Cog):
                 embed = disnake.Embed(
                     description="\n".join(f"> ` {n+1}º ` [`{t['name']}`]({t['url']}) `({t['playcount']}x)`" for n, t in enumerate(top_artists[:3])),
                     color=embed_color).set_author(name=f"Top 3 artistas mais ouvidos (de {int(lastfm_user['artist_count']):,}):",
-                    icon_url="https://i.ibb.co/8KQzkyy/muse-heart-artist-icon.jpg")
+                    icon_url="https://i.ibb.co/8KQzkyy/muse-heart-artist-icon.jpg",
+                    url=f"https://www.last.fm/user/{lastfm_user['name']}/library/artists")
 
                 if thumb:=top_artists[0]['image'][-1]["#text"]:
 
@@ -271,8 +273,9 @@ class LastFmCog(commands.Cog):
 
                 embed = disnake.Embed(
                     description="\n".join(f"> ` {n+1}º ` [`{b['name']}`]({b['url']}) `[Por:` [`{b['artist']['name']}`]({b['artist']['url']})`] ({b['playcount']}x)`" for n, b in enumerate(top_albuns[:3])),
-                        color=embed_color).set_author(name=f"Top 3 álbuns mais ouvidos (de {int(lastfm_user['album_count']):,}):",
-                                icon_url="https://i.ibb.co/s6TQK5D/muse-heart-disc-album.jpg")
+                    color=embed_color).set_author(name=f"Top 3 álbuns mais ouvidos (de {int(lastfm_user['album_count']):,}):",
+                    icon_url="https://i.ibb.co/s6TQK5D/muse-heart-disc-album.jpg",
+                    url=f"https://www.last.fm/user/{lastfm_user['name']}/library/albums")
 
                 if thumb:=top_albuns[0]['image'][-1]["#text"]:
 
