@@ -235,7 +235,7 @@ class LastFmCog(commands.Cog):
                         for i in r:
                             if album and i['album']['title'] != album:
                                 continue
-                            thumb = i['album']['cover']
+                            thumb = i['album']['cover_big']
                             break
 
                     embed.set_thumbnail(url=thumb)
@@ -260,7 +260,7 @@ class LastFmCog(commands.Cog):
 
                         for i in r:
                             if i['artist']['name'].lower() == t['name'].lower():
-                                thumb = i['artist']['picture']
+                                thumb = i['artist']['picture_big']
                                 break
 
                     embed.set_thumbnail(url=thumb)
@@ -285,7 +285,7 @@ class LastFmCog(commands.Cog):
 
                         for i in r:
                             if t['album']['#text'].lower() == i['album']['title'].lower():
-                                thumb = i['album']['cover']
+                                thumb = i['album']['cover_big']
                                 break
 
                     embed.set_thumbnail(url=thumb)
