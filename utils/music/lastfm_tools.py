@@ -114,6 +114,24 @@ class LastFM:
         }
         params['api_sig'] = self.generate_api_sig(params)
         await self.post_lastfm(params)
+
+    async def get_track_info(self, track: str, artist: str = None, mbid: str = None, username: str = None):
+        params = {
+            'method': 'track.getInfo',
+            'api_key': self.api_key,
+            'autocorrect': 1,
+        }
+        if mbid:
+            params['mbid'] = mbid
+        else:
+            params['track'] = track
+            if artist:
+                params['artist'] = artist
+
+        if username:
+            params["username"] = username
+
+        return (await self.request_lastfm(params))
     
     async def get_similar_tracks(self, track: str, artist: str = None, mbid: str = None):
         params = {
