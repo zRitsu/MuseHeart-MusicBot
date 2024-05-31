@@ -6845,9 +6845,12 @@ class Music(commands.Cog):
                                     except:
                                         pass
 
-                                node_retry = True
-                                break
-                            print(f"Falha ao processar busca...\n{query}\n{traceback.format_exc()}")
+                                if is_yt_source:
+                                    node_retry = True
+                                    break
+
+                            if not isinstance(e, wavelink.TrackNotFound):
+                                print(f"Falha ao processar busca...\n{query}\n{traceback.format_exc()}")
 
                         if tracks or not source:
                             break
