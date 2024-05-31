@@ -184,19 +184,19 @@ class LastFmCog(commands.Cog):
                 txt += f"`🌎` **⠂País:** `{lastfm_user['country']}`\n"
 
             if playcount := lastfm_user['playcount']:
-                txt += f"`🔊` **⠂Total de músicas reproduzidas:** [`{playcount}`](<https://www.last.fm/user/{lastfm_user['name']}/library>)\n"
+                txt += f"`🔊` **⠂Total de músicas reproduzidas:** [`{int(playcount):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library>)\n"
 
             if playlists := lastfm_user['playlists'] != "0":
-                txt += f"`📄` **⠂Playlists públicas:** [`{playlists}`](<https://www.last.fm/user/{lastfm_user['name']}/playlists>)\n"
+                txt += f"`📄` **⠂Playlists públicas:** [`{int(playlists):,}`](<https://www.last.fm/user/{lastfm_user['name']}/playlists>)\n"
 
             if playcount := lastfm_user['track_count']:
-                txt += f"`📻` **⠂Total de músicas registradas:** [`{playcount}`](<https://www.last.fm/user/{lastfm_user['name']}/library/tracks>)\n"
+                txt += f"`📻` **⠂Total de músicas registradas:** [`{int(playcount):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library/tracks>)\n"
 
             if artists := lastfm_user['artist_count']:
-                txt += f"`🎧` **⠂Total de artistas registrados:** [`{artists}`](<https://www.last.fm/user/{lastfm_user['name']}/library/artists>)\n"
+                txt += f"`🎧` **⠂Total de artistas registrados:** [`{int(artists):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library/artists>)\n"
 
             if albums := lastfm_user['album_count']:
-                txt += f"`📀` **⠂Total de álbuns registrados:** [`{albums}`](<https://www.last.fm/user/{lastfm_user['name']}/library/albums>)\n"
+                txt += f"`📀` **⠂Total de álbuns registrados:** [`{int(albums):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library/albums>)\n"
 
             try:
                 slashcmd = f"</play:" + str(self.bot.get_global_command_named("play",
