@@ -259,7 +259,7 @@ class LastFmCog(commands.Cog):
                         r = await self.deezer_search(**{'artist': t['name']})
 
                         for i in r:
-                            if i['artist']['name'] == t['name']:
+                            if i['artist']['name'].lower() == t['name'].lower():
                                 thumb = i['artist']['picture']
                                 break
 
@@ -284,7 +284,7 @@ class LastFmCog(commands.Cog):
                         r = await self.deezer_search(**{"album": t['album']['#text'], 'artist': t['artist']['name']})
 
                         for i in r:
-                            if t['album']['#text'] == i['album']['title']:
+                            if t['album']['#text'].lower() == i['album']['title'].lower():
                                 thumb = i['album']['cover']
                                 break
 
