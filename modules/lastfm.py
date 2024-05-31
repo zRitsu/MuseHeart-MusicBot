@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Optional
 from urllib.parse import quote
 
 import disnake
+from aiohttp import ClientSession
 from disnake.ext import commands
 
 from utils.db import DBModel
@@ -189,32 +190,13 @@ class LastFmCog(commands.Cog):
             if playlists := lastfm_user['playlists'] != "0":
                 txt += f"> `📄` **⠂Playlists públicas:** [`{int(playlists):,}`](<https://www.last.fm/user/{lastfm_user['name']}/playlists>)\n"
 
-            top_tracks = await self.bot.last_fm.user_top_tracks(data["lastfm"]["username"], limit=3)
-
-            if top_tracks:
-                txt += f"\n> ### `📻` ⠂Top 3 músicas mais ouvidas (de [`{int(lastfm_user['track_count']):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library/tracks>)):\n"
-                for n, t in enumerate(top_tracks[:3]):
-                    txt += f"> ` {n+1}º ` [`{t['name']}`]({t['url']}) `[Por:` [`{t['artist']['name']}`]({t['artist']['url']})`] ({t['playcount']}x)`\n"
-
-            top_artists = await self.bot.last_fm.user_top_artists(data["lastfm"]["username"], limit=3)
-
-            if top_artists:
-                txt += f"\n> ### `🎧` ⠂Top 3 artistas mais ouvidos (de [`{int(lastfm_user['artist_count']):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library/artists>)):\n"
-                for n, a in enumerate(top_artists[:3]):
-                    txt += f"> ` {n+1}º ` [`{a['name']}`]({a['url']}) `({a['playcount']}x)`\n"
-
-            top_albuns = await self.bot.last_fm.user_top_albums(data["lastfm"]["username"], limit=3)
-
-            if top_albuns:
-                txt += f"\n> ### `📀` ⠂Top 3 álbuns mais ouvidos (de [`{int(lastfm_user['album_count']):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library/albums>)):\n"
-                for n, b in enumerate(top_albuns[:3]):
-                    txt += f"> ` {n+1}º ` [`{b['name']}`]({b['url']}) `[Por:` [`{b['artist']['name']}`]({b['artist']['url']})`] ({b['playcount']}x)`\n"
-
             try:
                 slashcmd = f"</play:" + str(self.bot.get_global_command_named("play",
                                                                               cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
             except AttributeError:
                 slashcmd = "/play"
+
+            bar = "https://cdn.discordapp.com/attachments/554468640942981147/1246060048472342549/rainbow_bar3.gif"
 
             txt += f"\n`Ouça suas músicas em um canal de voz usando o comando` {slashcmd} `para registra-las na sua " \
                     f"conta do last.fm`\n"
@@ -224,6 +206,88 @@ class LastFmCog(commands.Cog):
             ).set_thumbnail(url=lastfm_user['image'][-1]["#text"]).set_author(
                 name="Last.fm: Informações da conta vinculada",
                 icon_url="https://www.last.fm/static/images/lastfm_avatar_twitter.52a5d69a85ac.png")]
+
+            top_tracks = await self.bot.last_fm.user_top_tracks(data["lastfm"]["username"], limit=3)
+
+            if top_tracks:
+
+                embed = disnake.Embed(
+                    description="\n".join(f"> ` {n+1}º ` [`{t['name']}`]({t['url']}) `[Por:` [`{t['artist']['name']}`]({t['artist']['url']})`] ({t['playcount']}x)`" for n, t in enumerate(top_tracks[:3])),
+                    color=embed_color).set_author(name=f"Top 3 músicas mais ouvidas (de {int(lastfm_user['track_count']):,}):",
+                    icon_url="https://i.ibb.co/Hhcwdf9/muse-heart-disc.jpg")
+
+                if thumb:=top_tracks[0]['image'][-1]["#text"]:
+
+                    if thumb.endswith("2a96cbd8b46e442fc41c2b86b821562f.png"):
+                        t = top_tracks[0]
+                        kw = {"track": t['name'], 'artist': t['artist']['name']}
+
+                        try:
+                            album = t['album']['#text']
+                        except KeyError:
+                            album = None
+
+                        if album:
+                            kw["album"] = album
+                        r = await self.deezer_search(**kw)
+
+                        for i in r:
+                            if album and i['album']['title'] != album:
+                                continue
+                            thumb = i['album']['cover']
+                            break
+
+                    embed.set_thumbnail(url=thumb)
+
+                embeds.append(embed)
+
+            top_artists = await self.bot.last_fm.user_top_artists(data["lastfm"]["username"], limit=3)
+
+            if top_artists:
+
+                embed = disnake.Embed(
+                    description="\n".join(f"> ` {n+1}º ` [`{t['name']}`]({t['url']}) `({t['playcount']}x)`" for n, t in enumerate(top_artists[:3])),
+                    color=embed_color).set_author(name=f"Top 3 artistas mais ouvidos (de {int(lastfm_user['artist_count']):,}):",
+                    icon_url="https://i.ibb.co/8KQzkyy/muse-heart-artist-icon.jpg")
+
+                if thumb:=top_artists[0]['image'][-1]["#text"]:
+
+                    if thumb.endswith("2a96cbd8b46e442fc41c2b86b821562f.png"):
+                        t = top_artists[0]
+                        r = await self.deezer_search(**{'artist': t['name']})
+
+                        for i in r:
+                            if i['artist']['name'] == t['name']:
+                                thumb = i['artist']['picture']
+                                break
+
+                    embed.set_thumbnail(url=thumb)
+
+                embeds.append(embed)
+
+            top_albuns = await self.bot.last_fm.user_top_albums(data["lastfm"]["username"], limit=3)
+
+            if top_albuns:
+
+                embed = disnake.Embed(
+                    description="\n".join(f"> ` {n+1}º ` [`{b['name']}`]({b['url']}) `[Por:` [`{b['artist']['name']}`]({b['artist']['url']})`] ({b['playcount']}x)`" for n, b in enumerate(top_albuns[:3])),
+                        color=embed_color).set_author(name=f"Top 3 álbuns mais ouvidos (de {int(lastfm_user['album_count']):,}):",
+                                icon_url="https://i.ibb.co/s6TQK5D/muse-heart-disc-album.jpg")
+
+                if thumb:=top_albuns[0]['image'][-1]["#text"]:
+
+                    if thumb.endswith("2a96cbd8b46e442fc41c2b86b821562f.png"):
+                        t = top_albuns[0]
+                        r = await self.deezer_search(**{"album": t['album']['#text'], 'artist': t['artist']['name']})
+
+                        for i in r:
+                            if t['album']['#text'] == i['album']['title']:
+                                thumb = i['album']['cover']
+                                break
+
+                    embed.set_thumbnail(url=thumb)
+
+                embeds.append(embed)
 
             if last_tracks_amount > 0:
 
@@ -245,7 +309,7 @@ class LastFmCog(commands.Cog):
                         if t['album']['#text']:
                             t_embed.description += f" **-** `Álbum:` [`{t['album']['#text']}`]({artist_url}/{quote(t['album']['#text'])})"
                         t_embed.set_thumbnail(url=t['image'][0]['#text'] or 'https://i.ibb.co/pQPrKdw/lastfm-unknown-image.webp')
-                        t_embed.set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/1082887587770937455/rainbow_bar2.gif")
+                        t_embed.set_image(url=bar)
                         embeds.append(t_embed)
 
         else:
@@ -468,6 +532,24 @@ class LastFmCog(commands.Cog):
                 "last_url": track.url,
                 "last_timestamp": datetime.datetime.utcnow() + datetime.timedelta(seconds=duration)
             }
+
+    async def deezer_search(self, **kwargs):
+
+        query = " ".join(f'{k}:"{v}"' for k,v in kwargs.items())
+
+        if not query:
+            return
+
+        base_url = 'https://api.deezer.com/search'
+        params = {'q': query, 'strict': 'on'}
+
+        async with ClientSession() as session:
+            async with session.get(base_url, params=params) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    return data['data']
+                else:
+                    response.raise_for_status()
 
 
 def setup(bot):
