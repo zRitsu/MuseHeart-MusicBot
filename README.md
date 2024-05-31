@@ -23,7 +23,7 @@ Mais previews:
 
 - Integração com o [last.fm](https://www.last.fm/) para scrobbles (outras funcionalidades em breve).
 
-[![](https://i.ibb.co/K2WVMLH/muse-heart-last-fm.png)](https://i.ibb.co/K2WVMLH/muse-heart-last-fm.png)
+[![](https://i.ibb.co/JH0mjms/muse-heart-lasfm.png)](https://i.ibb.co/JH0mjms/muse-heart-lasfm.png)
 
 - Player controller: modo fixo/estendido com canal e conversa de song requests (skin: default), configurável com o comando: /setup
 
