@@ -202,22 +202,22 @@ class LastFmCog(commands.Cog):
 
             if top_tracks:
                 txt += f"\n`📻` **⠂Top 3 músicas mais ouvidas (do total de [`{int(lastfm_user['track_count']):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library/tracks>)):**\n"
-                for t in top_tracks[:3]:
-                    txt += f"[`{t['name']}`]({t['url']}) `[De:` [`{t['artist']['name']}`]({t['artist']['url']})`] ({t['playcount']} vezes)`\n"
+                for n, t in enumerate(top_tracks[:3]):
+                    txt += f"` {n+1}º ` [`{t['name']}`]({t['url']}) `[De:` [`{t['artist']['name']}`]({t['artist']['url']})`] ({t['playcount']} vezes)`\n"
 
             top_artists = await self.bot.last_fm.user_top_artists(data["lastfm"]["username"], limit=3)
 
             if top_artists:
                 txt += f"\n`🎧` **⠂Top 3 artistas mais ouvidos (do total de [`{int(lastfm_user['artist_count']):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library/artists>)):**\n"
-                for a in top_artists[:3]:
-                    txt += f"[`{a['name']}`]({a['url']}) `({a['playcount']} vezes)`\n"
+                for n, a in enumerate(top_artists[:3]):
+                    txt += f"` {n+1}º ` [`{a['name']}`]({a['url']}) `({a['playcount']} vezes)`\n"
 
             top_albuns = await self.bot.last_fm.user_top_albums(data["lastfm"]["username"], limit=3)
 
             if top_albuns:
                 txt += f"\n`📀` **⠂Top 3 álbuns mais ouvidos (do total de [`{int(lastfm_user['album_count']):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library/albums>)):**\n"
-                for b in top_albuns[:3]:
-                    txt += f"[`{b['name']}`]({b['url']}) `[De:` [`{b['artist']['name']}`]({b['artist']['url']})`] ({b['playcount']} vezes)`\n"
+                for n, b in enumerate(top_albuns[:3]):
+                    txt += f"` {n+1}º ` [`{b['name']}`]({b['url']}) `[De:` [`{b['artist']['name']}`]({b['artist']['url']})`] ({b['playcount']} vezes)`\n"
 
             try:
                 slashcmd = f"</play:" + str(self.bot.get_global_command_named("play",
