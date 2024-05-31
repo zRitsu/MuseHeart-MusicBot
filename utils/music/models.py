@@ -559,6 +559,8 @@ class LavalinkPlayer(wavelink.Player):
 
         self.start_time = disnake.utils.utcnow()
 
+        self.lastfm_artists = []
+
         self.initial_hints = [
             f"É possível alterar a skin/aparência do player usando o comando /change_skin ou {self.prefix_info}skin "
             f"(Apenas membros com permissão de gerenciar servidor podem usar esse comando).",
@@ -1436,15 +1438,15 @@ class LavalinkPlayer(wavelink.Player):
 
         tracks_search = []
 
-        if current_track := self.current or self.last_track:
-            tracks_search.append(current_track)
-
         for t in reversed(self.failed_tracks + self.played):
 
             if len(tracks_search) > 4:
                 break
 
-            tracks_search.append(t)
+            tracks_search.insert(0, t)
+
+        if current_track := self.current or self.last_track:
+            tracks_search.insert(0, current_track)
 
         track = None
         tracks = []
@@ -1555,6 +1557,32 @@ class LavalinkPlayer(wavelink.Player):
                         traceback.print_exc()
 
                 if not tracks:
+
+                    if self.bot.last_fm and not self.lastfm_artists:
+
+                        if track_data.ytid:
+                            if track_data.author.endswith(" - topic") and not track_data.author.endswith(
+                                    "Release - topic") and not track_data.title.startswith(track_data.author[:-8]):
+                                artist = track_data.author[:-8]
+                            else:
+                                try:
+                                    artist = track_data.title.split(" - ", maxsplit=1)[0]
+                                except ValueError:
+                                    artist = track_data.author
+                        else:
+                            artist = track_data.author
+
+                        try:
+                            self.lastfm_artists = [a['name'] for a in
+                                                   await self.bot.last_fm.get_similar_artists(artist)]
+                        except:
+                            traceback.print_exc()
+
+                    try:
+                        author = self.lastfm_artists.pop(0)
+                    except:
+                        author = track_data.author
+
                     if track_data.info["sourceName"] == "youtube" and self.native_yt:
                         queries = [f"https://www.youtube.com/watch?v={track_data.ytid}&list=RD{track_data.ytid}"]
                     elif track_data.info["sourceName"] == "spotify" and "spotfy" in self.node.info["sourceManagers"]:
@@ -1565,7 +1593,7 @@ class LavalinkPlayer(wavelink.Player):
                         else:
                             providers = self.node.search_providers
 
-                        queries = [f"{sp}:{track_data.author.split(',')[0]}" for sp in providers]
+                        queries = [f"{sp}:{author.split(',')[0]}" for sp in providers]
 
                     for query in queries:
 
@@ -1678,6 +1706,7 @@ class LavalinkPlayer(wavelink.Player):
 
                 if not isinstance(t, PartialTrack):
                     t.info["extra"].update({"autoplay": True, "requester": self.bot.user.id})
+                    t.playlist = None
 
                 t.info["extra"]["related"] = info
                 tracks_final.append(t)
