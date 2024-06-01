@@ -1262,8 +1262,6 @@ class FavMenuView(disnake.ui.View):
 
             for b in sorted(self.bot.pool.get_guild_bots(self.guild.id), key=lambda b: b.identifier):
                 if b.bot_ready and b.user in self.guild.members:
-                    if not bots_in_guild:
-                        self.bot = b
                     bots_in_guild.append(disnake.SelectOption(emoji="🎶",
                                                               label=f"Bot: {b.user.display_name}"[:25],
                                                               value=f"bot_select_{b.user.id}",
@@ -1637,17 +1635,19 @@ class FavMenuView(disnake.ui.View):
     async def bot_select(self, inter: disnake.MessageInteraction):
 
         value = int(inter.values[0][11:])
+
         for b in self.bot.pool.get_guild_bots(inter.guild_id):
             try:
                 if b.user.id == value:
                     self.bot = b
-                    break
             except AttributeError:
                 continue
 
         self.guild_data = await self.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
-        await inter.response.edit_message(embed=self.build_embed(), view=self)
+        embed = self.build_embed()
+
+        await inter.response.edit_message(embed=embed, view=self)
 
     async def clear_callback(self, inter: disnake.MessageInteraction):
 
