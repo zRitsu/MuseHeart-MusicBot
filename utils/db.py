@@ -37,7 +37,6 @@ db_models = {
             "skin": None,
             "static_skin": None,
             "fav_links": {},
-            "purge_mode": "on_message"
         },
         "autoplay": False,
         "check_other_bots_in_vc": False,

@@ -178,9 +178,9 @@ class PlayerSession(commands.Cog):
             "queue_autoplay": autoqueue,
             "failed_tracks": failed_tracks,
             "prefix_info": player.prefix_info,
-            "purge_mode": player.purge_mode,
             "voice_state": player._voice_state,
             "time": disnake.utils.utcnow(),
+            "lastfm_artists": player.lastfm_artists
         }
 
         try:
@@ -488,12 +488,6 @@ class PlayerSession(commands.Cog):
                         traceback.print_exc()
                     return
 
-                if data["purge_mode"] == SongRequestPurgeMode.on_player_start:
-                    data["purge_mode"] = SongRequestPurgeMode.no_purge
-                    temp_purge_mode = True
-                else:
-                    temp_purge_mode = False
-
                 while True:
 
                     node = self.bot.music.get_best_node()
@@ -528,7 +522,6 @@ class PlayerSession(commands.Cog):
                         stage_title_template=data.get("stage_title_template"),
                         restrict_mode=data["restrict_mode"],
                         prefix=data["prefix_info"],
-                        purge_mode=data["purge_mode"],
                         session_resuming=True,
                     )
                 except Exception:
@@ -547,8 +540,7 @@ class PlayerSession(commands.Cog):
                 except:
                     pass
 
-                if temp_purge_mode:
-                    player.purge_mode = SongRequestPurgeMode.on_player_start
+                player.lastfm_artists = data.get("lastfm_artists")
 
                 player.stage_title_event = data.get("stage_title_event", False)
 

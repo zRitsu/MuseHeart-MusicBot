@@ -549,10 +549,7 @@ class LavalinkPlayer(wavelink.Player):
         self.stage_title_template: str = kwargs.pop("stage_title_template", None) or "Tocando: {track.title} | {track.author}"
         self.last_stage_title = ""
 
-        self.purge_mode = kwargs.pop("purge_mode", SongRequestPurgeMode.on_message)
-
-        if self.static and self.purge_mode in (SongRequestPurgeMode.on_message, SongRequestPurgeMode.on_player_start):
-            self.bot.loop.create_task(self.channel_cleanup())
+        self.channel_purged = False
 
         self.temp_embed: Optional[disnake.Embed] = None
         self.prefix_info = kwargs.pop("prefix", "")
@@ -1196,11 +1193,13 @@ class LavalinkPlayer(wavelink.Player):
                         check=lambda m: m.channel.id != m.id and (not m.pinned or not m.is_system()))
                 except:
                     pass
+                self.channel_purged = True
                 return
 
         try:
             self.last_message_id = int(self.last_message_id)
         except TypeError:
+            self.channel_purged = True
             return
 
         if self.last_message_id != self.text_channel.last_message_id:
@@ -1217,6 +1216,8 @@ class LavalinkPlayer(wavelink.Player):
                 print(f"Falha ao limpar mensagens do canal {self.text_channel} [ID: {self.text_channel.id}]:\n"
                       f"{traceback.format_exc()}")
                 pass
+
+        self.channel_purged = True
 
     async def connect(self, channel_id: int, self_mute: bool = False, self_deaf: bool = False):
         await super().connect(channel_id, self_mute=self_mute, self_deaf=True)
@@ -1765,6 +1766,9 @@ class LavalinkPlayer(wavelink.Player):
                 await self.connect(self.last_channel.id)
             else:
                 return
+
+        if not self.channel_purged and self.static:
+            await self.channel_cleanup()
 
         try:
             self.idle_task.cancel()
@@ -2702,8 +2706,7 @@ class LavalinkPlayer(wavelink.Player):
                     traceback.print_exc()
                     pass
 
-                if self.purge_mode == SongRequestPurgeMode.on_player_stop:
-                    await self.channel_cleanup()
+                #await self.channel_cleanup()
 
             else:
 

@@ -177,46 +177,12 @@ class PlayerSettings(disnake.ui.View):
         self.check_other_bots_in_vc = data['check_other_bots_in_vc']
         self.enable_restrict_mode = data['enable_restrict_mode']
         self.default_player_volume = data['default_player_volume']
-        self.player_purge_mode = data["player_controller"]["purge_mode"]
         self.message: Optional[disnake.Message] = None
         self.load_buttons()
 
     def load_buttons(self):
 
         self.clear_items()
-
-        player_purge_select = disnake.ui.Select(
-            placeholder="Selecione o modo de limpeza (song-request).",
-            options=[
-                disnake.SelectOption(
-                    label="Limpar ao enviar mensagem",
-                    description="Limpar ao enviar mensagem no canal song-request",
-                    value=SongRequestPurgeMode.on_message,
-                    default=SongRequestPurgeMode.on_message == self.player_purge_mode
-                ),
-                disnake.SelectOption(
-                    label="Limpar ao finalizar o player",
-                    description="Limpar mensagens do song-request ao finalizar",
-                    value=SongRequestPurgeMode.on_player_stop,
-                    default=SongRequestPurgeMode.on_player_stop == self.player_purge_mode
-                ),
-                disnake.SelectOption(
-                    label="Limpar ao iniciar o player",
-                    description="Limpar mensagens do song-request ao iniciar",
-                    value=SongRequestPurgeMode.on_player_start,
-                    default=SongRequestPurgeMode.on_player_start == self.player_purge_mode
-                ),
-                disnake.SelectOption(
-                    label="Não limpar mensagens",
-                    description="Manter mensagens enviadas no canal song-request",
-                    value=SongRequestPurgeMode.no_purge,
-                    default=SongRequestPurgeMode.no_purge == self.player_purge_mode
-                ),
-            ]
-        )
-
-        player_purge_select.callback = self.purge_mode_callback
-        self.add_item(player_purge_select)
 
         player_volume_select = disnake.ui.Select(
             placeholder="Selecione um volume padrão.",
@@ -267,11 +233,6 @@ class PlayerSettings(disnake.ui.View):
         self.load_buttons()
         await interaction.response.edit_message(view=self)
 
-    async def purge_mode_callback(self, interaction: disnake.MessageInteraction):
-        self.player_purge_mode = interaction.data.values[0]
-        self.load_buttons()
-        await interaction.response.edit_message(view=self)
-
     async def autoplay_callback(self, interaction: disnake.MessageInteraction):
         self.enable_autoplay = not self.enable_autoplay
         self.load_buttons()
@@ -303,7 +264,6 @@ class PlayerSettings(disnake.ui.View):
         guild_data['check_other_bots_in_vc'] = self.check_other_bots_in_vc
         guild_data['enable_restrict_mode'] = self.enable_restrict_mode
         guild_data['default_player_volume'] = int(self.default_player_volume)
-        guild_data['player_controller']['purge_mode'] = self.player_purge_mode
 
         await self.bot.update_data(self.ctx.guild_id, guild_data, db_name=DBModel.guilds)
 
@@ -312,7 +272,6 @@ class PlayerSettings(disnake.ui.View):
         except KeyError:
             pass
         else:
-            player.purge_mode = self.player_purge_mode
             await player.process_save_queue()
 
     async def on_timeout(self):

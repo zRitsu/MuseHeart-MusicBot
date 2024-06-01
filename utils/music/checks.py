@@ -660,8 +660,9 @@ def can_connect(
             if b == bot:
                 continue
             if b.bot_ready and b.user.id in channel.voice_states:
-                raise GenericError(f"**Já há um bot conectado no canal {channel.mention}\n"
-                                   f"Bot:** {b.user.mention}")
+                raise PoolException()
+                #raise GenericError(f"**Já há um bot conectado no canal {channel.mention}\n"
+                #                   f"Bot:** {b.user.mention}")
 
     if check_other_bots_in_vc and any(m for m in channel.members if m.bot and m.id != guild.me.id):
         raise GenericError(f"**Há outro bot conectado no canal:** <#{channel.id}>")

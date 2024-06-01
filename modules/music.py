@@ -940,7 +940,7 @@ class Music(commands.Cog):
                     current_bot = free_bots.pop(0)
 
                 if bot != current_bot:
-                    guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
+                    guild_data = await current_bot.get_data(guild.id, db_name=DBModel.guilds)
 
                 bot = current_bot
 
@@ -1544,26 +1544,28 @@ class Music(commands.Cog):
             await check_pool_bots(inter, check_player=False, bypass_prefix=True)
 
             try:
-                bot = inter.music_bot
+                new_bot = inter.music_bot
                 guild = inter.music_guild
                 channel = bot.get_channel(inter.channel.id)
             except AttributeError:
-                bot = inter.bot
+                new_bot = inter.bot
                 guild = inter.guild
                 channel = inter.channel
 
             try:
-                player = bot.music.players[guild.id]
+                player = new_bot.music.players[guild.id]
             except KeyError:
                 player = None
 
-                if not guild_data:
-                    guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
+                if new_bot != bot or not guild_data:
+                    guild_data = await new_bot.get_data(guild.id, db_name=DBModel.guilds)
 
                 static_player = guild_data['player_controller']
 
                 if static_player['channel']:
-                    channel, warn_message, message = await self.check_channel(guild_data, inter, channel, guild, bot)
+                    channel, warn_message, message = await self.check_channel(guild_data, inter, channel, guild, new_bot)
+
+            bot = new_bot
 
         if not player:
             player = await self.create_player(
@@ -5776,7 +5778,10 @@ class Music(commands.Cog):
             elif str(message.channel.id) != channel_id:
                 return
 
-            text_channel = self.bot.get_channel(int(channel_id)) or await self.bot.fetch_channel(int(channel_id))
+            try:
+                text_channel = self.bot.get_channel(int(channel_id)) or await self.bot.fetch_channel(int(channel_id))
+            except disnake.NotFound:
+                text_channel = None
 
             if not text_channel:
                 await self.reset_controller_db(message.guild.id, data)
@@ -5817,7 +5822,7 @@ class Music(commands.Cog):
 
                     if data['player_controller']["channel"] != str(message.channel.id):
                         return
-                    await self.delete_message(message, ignore=data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message)
+                    await self.delete_message(message)
 
         except AttributeError:
             pass
@@ -5828,10 +5833,7 @@ class Music(commands.Cog):
 
         try:
             if message.author.bot:
-                if message.is_system() and not isinstance(message.channel, disnake.Thread):
-                    await self.delete_message(message, ignore=data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message)
-                if message.author.id == self.bot.user.id:
-                    await self.delete_message(message, delay=15, ignore=data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message)
+                await self.delete_message(message)
                 return
 
             if not message.content:
@@ -5846,19 +5848,19 @@ class Music(commands.Cog):
                 try:
                     attachment = message.attachments[0]
                 except IndexError:
-                    await message.channel.send(f"{message.author.mention} você deve enviar um link/nome da música.")
+                    await message.channel.send(f"{message.author.mention} você deve enviar um link/nome da música.", delete_after=8)
                     return
 
                 else:
 
                     if attachment.size > 18000000:
                         await message.channel.send(f"{message.author.mention} o arquivo que você enviou deve ter o tamanho "
-                                                   f"inferior a 18mb.")
+                                                   f"inferior a 18mb.", delete_after=8)
                         return
 
                     if attachment.content_type not in self.audio_formats:
                         await message.channel.send(f"{message.author.mention} o arquivo que você enviou deve ter o tamanho "
-                                                   f"inferior a 18mb.")
+                                                   f"inferior a 18mb.", delete_after=8)
                         return
 
                     message.content = attachment.url
@@ -5871,7 +5873,7 @@ class Music(commands.Cog):
                     f"{message.author.mention} você deve aguardar seu pedido de música anterior carregar...",
                 )
 
-                await self.delete_message(message, ignore=data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message)
+                await self.delete_message(message)
                 return
 
             message.content = message.content.strip("<>")
@@ -5933,7 +5935,7 @@ class Music(commands.Cog):
 
         if error:
 
-            await self.delete_message(message, ignore=data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message)
+            await self.delete_message(message)
 
             try:
                 if msg:
@@ -6075,7 +6077,7 @@ class Music(commands.Cog):
     ):
 
         if not guild_data:
-            guild_data = await self.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+            guild_data = bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         skin = guild_data["player_controller"]["skin"]
         static_skin = guild_data["player_controller"]["static_skin"]
@@ -6213,7 +6215,6 @@ class Music(commands.Cog):
             listen_along_invite=invite,
             autoplay=guild_data["autoplay"],
             prefix=global_data["prefix"] or bot.default_prefix,
-            purge_mode=guild_data['player_controller']['purge_mode'],
             stage_title_template=global_data['voice_channel_status'],
         )
 
@@ -6261,7 +6262,7 @@ class Music(commands.Cog):
             channel=message.author.voice.channel,
             guild=message.guild,
             check_other_bots_in_vc=data["check_other_bots_in_vc"],
-            bot=self.bot
+            bot=self.bot,
         )
 
         try:
@@ -6306,10 +6307,10 @@ class Music(commands.Cog):
             components = []
 
         if not isinstance(tracks, list):
+
             player.queue.extend(tracks.tracks)
-            if (isinstance(message.channel, disnake.Thread) and
-                    (not isinstance(message.channel.parent, disnake.ForumChannel) or
-                     data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message)):
+
+            if isinstance(message.channel, disnake.Thread) and not isinstance(message.channel.parent, disnake.ForumChannel):
                 tcount = len(tracks.tracks)
                 embed.description = f"✋ **⠂ Pedido por:** {message.author.mention}\n" \
                                     f"🎼 **⠂ Música{'s'[:tcount^1]}:** `[{tcount}]`"
@@ -6339,28 +6340,14 @@ class Music(commands.Cog):
                 else:
                     await message.reply(embed=embed, fail_if_not_exists=False, mention_author=False)
 
-            elif data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message:
-
-                txt = f"> 🎼 **⠂** [`{fix_characters(tracks.tracks[0].playlist_name, 35)}`](<{message.content}>) `[{(tcount:=len(tracks.tracks))} música{'s'[:tcount^1]}]` {message.author.mention}"
-
-                try:
-                    txt += f" `|` {message.author.voice.channel.mention}"
-                except AttributeError:
-                    pass
-
-                if response:
-                    await response.edit(content=txt, embed=None, components=components)
-                else:
-                    await message.reply(txt, components=components, allowed_mentions=disnake.AllowedMentions(users=False, everyone=False, roles=False), fail_if_not_exists=False, mention_author=False)
-
             else:
                 player.set_command_log(
                     text=f"{message.author.mention} adicionou a playlist [`{fix_characters(tracks.data['playlistInfo']['name'], 20)}`]"
                          f"(<{tracks.tracks[0].playlist_url}>) `({len(tracks.tracks)})`.",
                     emoji="🎶"
                 )
-                if destroy_message:
-                    await self.delete_message(message)
+            if destroy_message:
+                await self.delete_message(message)
 
         else:
             track = tracks[0]
@@ -6377,9 +6364,8 @@ class Music(commands.Cog):
                 track.uri = ""
 
             player.queue.append(track)
-            if (isinstance(message.channel, disnake.Thread) and
-                    (not isinstance(message.channel.parent, disnake.ForumChannel) or
-                     data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message)):
+
+            if isinstance(message.channel, disnake.Thread) and not isinstance(message.channel.parent, disnake.ForumChannel):
                 embed.description = f"💠 **⠂ Uploader:** `{track.author}`\n" \
                                     f"✋ **⠂ Pedido por:** {message.author.mention}\n" \
                                     f"⏰ **⠂ Duração:** `{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}`"
@@ -6410,20 +6396,6 @@ class Music(commands.Cog):
                 else:
                     await message.reply(embed=embed, fail_if_not_exists=False, mention_author=False, components=components)
 
-            elif data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message:
-
-                txt = f"> 🎵 **⠂** [`{fix_characters(track.title, 35)}`](<{track.uri}>) `[{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}]` {message.author.mention}"
-
-                try:
-                    txt += f" `|` {message.author.voice.channel.mention}"
-                except AttributeError:
-                    pass
-
-                if response:
-                    await response.edit(content=txt, embed=None, components=components)
-                else:
-                    await message.reply(txt, components=components, allowed_mentions=disnake.AllowedMentions(users=False, everyone=False, roles=False), fail_if_not_exists=False, mention_author=False)
-
             else:
                 duration = time_format(tracks[0].duration) if not tracks[0].is_stream else '🔴 Livestream'
                 player.set_command_log(
@@ -6431,7 +6403,7 @@ class Music(commands.Cog):
                     emoji="🎵"
                 )
                 if destroy_message:
-                    await self.delete_message(message, ignore=data['player_controller']['purge_mode'] != SongRequestPurgeMode.on_message)
+                    await self.delete_message(message)
 
         if not player.is_connected:
             await self.do_connect(
