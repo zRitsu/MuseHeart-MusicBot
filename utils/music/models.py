@@ -1767,8 +1767,12 @@ class LavalinkPlayer(wavelink.Player):
             else:
                 return
 
-        if not self.channel_purged and self.static:
-            await self.channel_cleanup()
+        if not self.channel_purged and self.static and self.text_channel:
+            data = await self.bot.get_data(self.guild_id, db_name=DBModel.guilds)
+            if data["player_controller"]["channel"] == str(self.text_channel.id):
+                await self.channel_cleanup()
+            else:
+                self.channel_purged = True
 
         try:
             self.idle_task.cancel()
