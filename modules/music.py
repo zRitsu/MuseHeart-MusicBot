@@ -245,7 +245,10 @@ class Music(commands.Cog):
     )
     async def set_voice_status(
             self, inter: disnake.AppCmdInter,
-            template: str = commands.Param(name="modelo", default="")
+            template: str = commands.Param(
+                name="modelo", default="",
+                description="Especifique manualmente um modelo de status (inclua placeholders)."
+            )
     ):
 
         if isinstance(template, commands.ParamInfo):
@@ -296,11 +299,20 @@ class Music(commands.Cog):
 
             player.update = True
 
-            if isinstance(inter, CustomContext):
+            if isinstance(inter, CustomContext) or inter.response.is_done():
                 await inter.send("**O status automático foi definido com sucesso!**")
             else:
                 await inter.edit_original_message("**O status automático foi definido com sucesso!**")
 
+
+    @set_voice_status.autocomplete("modelo")
+    async def default_models(self, inter: disnake.Interaction, query: str):
+        return [
+            "{track.title} - By: {track.author} | {track.timestamp}",
+            "{track.emoji} | {track.title}",
+            "{track.title} ( {track.playlist} )",
+            "{track.title}  Solicitado por: {requester.name}",
+        ]
 
     play_cd = commands.CooldownMapping.from_cooldown(3, 12, commands.BucketType.member)
     play_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
@@ -338,7 +350,7 @@ class Music(commands.Cog):
             inter: disnake.AppCmdInter,
             query: str = commands.Param(name="busca", desc="Nome ou link da música."),
             *,
-            position: int = commands.Param(name="posição", description=f"{desc_prefix}Colocar a música em uma posição específica",
+            position: int = commands.Param(name="posição", description="Colocar a música em uma posição específica",
                                            default=0),
             force_play: str = commands.Param(
                 name="tocar_agora",
