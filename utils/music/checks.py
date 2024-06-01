@@ -587,7 +587,8 @@ async def check_player_perm(inter, bot: BotCore, channel, guild_data: dict = Non
 
     user_roles = [r.id for r in inter.author.roles]
 
-    guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
+    if not guild_data:
+        guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
     if [r for r in guild_data['djroles'] if int(r) in user_roles]:
         return True
@@ -603,7 +604,7 @@ async def check_player_perm(inter, bot: BotCore, channel, guild_data: dict = Non
         player.dj.add(inter.author.id)
         await channel.send(embed=disnake.Embed(
             description=f"{inter.author.mention} foi adicionado à lista de DJ's por não haver um no canal <#{vc.id}>.",
-            color=player.bot.get_color(channel.guild.me)), delete_after=10)
+            color=player.bot.get_color()), delete_after=10)
 
     return True
 
