@@ -212,8 +212,8 @@ class LastFmCog(commands.Cog):
             if top_tracks:
 
                 embed = disnake.Embed(
-                    description="\n".join(f"> ` {n+1}º ` [`{t['name']}`]({t['url']}) `[Por:` [`{t['artist']['name']}`]({t['artist']['url']})`] ({t['playcount']}x)`" for n, t in enumerate(top_tracks[:3])),
-                    color=embed_color).set_author(name=f"Top 3 músicas mais ouvidas (de {int(lastfm_user['track_count']):,}):",
+                    description="\n".join(f"> ` {n+1}º ` [`{t['name']}`]({t['url']}) `De:` [`{t['artist']['name']}`]({t['artist']['url']}) `(x{int(t['playcount']):,})`" for n, t in enumerate(top_tracks)),
+                    color=embed_color).set_author(name=f"Top 3: Músicas que você mais ouviu (do total de {int(lastfm_user['track_count']):,}):",
                     icon_url="https://i.ibb.co/Hhcwdf9/muse-heart-disc.jpg",
                     url=f"https://www.last.fm/user/{lastfm_user['name']}/library")
 
@@ -247,8 +247,8 @@ class LastFmCog(commands.Cog):
             if top_artists:
 
                 embed = disnake.Embed(
-                    description="\n".join(f"> ` {n+1}º ` [`{t['name']}`]({t['url']}) `({t['playcount']}x)`" for n, t in enumerate(top_artists[:3])),
-                    color=embed_color).set_author(name=f"Top 3 artistas mais ouvidos (de {int(lastfm_user['artist_count']):,}):",
+                    description="\n".join(f"> ` {n+1}º ` [`{t['name']}`]({t['url']}) `(x{int(t['playcount']):,})`" for n, t in enumerate(top_artists)),
+                    color=embed_color).set_author(name=f"Top 3: Artistas que você mais ouviu (do total de {int(lastfm_user['artist_count']):,}):",
                     icon_url="https://i.ibb.co/8KQzkyy/muse-heart-artist-icon.jpg",
                     url=f"https://www.last.fm/user/{lastfm_user['name']}/library/artists")
 
@@ -272,8 +272,8 @@ class LastFmCog(commands.Cog):
             if top_albuns:
 
                 embed = disnake.Embed(
-                    description="\n".join(f"> ` {n+1}º ` [`{b['name']}`]({b['url']}) `[Por:` [`{b['artist']['name']}`]({b['artist']['url']})`] ({b['playcount']}x)`" for n, b in enumerate(top_albuns[:3])),
-                    color=embed_color).set_author(name=f"Top 3 álbuns mais ouvidos (de {int(lastfm_user['album_count']):,}):",
+                    description="\n".join(f"> ` {n+1}º ` [`{b['name']}`]({b['url']}) `de:` [`{b['artist']['name']}`]({b['artist']['url']}) `(x{int(b['playcount']):,})`" for n, b in enumerate(top_albuns)),
+                    color=embed_color).set_author(name=f"Top 5: Álbuns que você mais ouviu (do total de {int(lastfm_user['album_count']):,}):",
                     icon_url="https://i.ibb.co/s6TQK5D/muse-heart-disc-album.jpg",
                     url=f"https://www.last.fm/user/{lastfm_user['name']}/library/albums")
 
