@@ -175,13 +175,6 @@ class PlayerControls:
     embed_forceplay = "musicplayer_embed_forceplay"
 
 
-class SongRequestPurgeMode:
-    on_message = "on_message" # mensagens serão apagadas assim que enviadas (ao iniciar player as mensagens serão limpas também).
-    on_player_start = "on_player_start" # as mensagens serão deletadas apenas ao iniciar o player
-    on_player_stop = "on_player_stop" # limpa as mensagens apenas ao desligar o player
-    no_purge = "no_purge" # as mensagens não serão limpas
-
-
 class EmbedPaginator(disnake.ui.View):
 
     def __init__(self, ctx: Union[CustomContext, disnake.MessageInteraction], embeds: list[disnake.Embed], *,timeout=180):

@@ -20,8 +20,7 @@ from utils.music.converters import perms_translations, time_format
 from utils.music.errors import GenericError, NoVoice
 from utils.music.interactions import SkinEditorMenu
 from utils.music.models import LavalinkPlayer
-from utils.others import send_idle_embed, CustomContext, select_bot_pool, pool_command, CommandArgparse, \
-    SongRequestPurgeMode, update_inter
+from utils.others import send_idle_embed, CustomContext, select_bot_pool, pool_command, CommandArgparse, update_inter
 
 if TYPE_CHECKING:
     from utils.client import BotCore

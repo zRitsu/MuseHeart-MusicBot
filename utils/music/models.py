@@ -25,8 +25,7 @@ from utils.music.checks import can_connect
 from utils.music.converters import fix_characters, time_format, get_button_style
 from utils.music.filters import AudioFilter
 from utils.music.skin_utils import skin_converter
-from utils.others import music_source_emoji, send_idle_embed, PlayerControls, SongRequestPurgeMode, \
-    song_request_buttons
+from utils.others import music_source_emoji, send_idle_embed, PlayerControls, song_request_buttons
 from wavelink import TrackStart, TrackEnd
 
 if TYPE_CHECKING:

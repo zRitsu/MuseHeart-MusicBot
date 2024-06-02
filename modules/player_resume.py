@@ -19,7 +19,7 @@ from utils.db import DBModel
 from utils.music.checks import can_connect, can_send_message
 from utils.music.filters import AudioFilter
 from utils.music.models import LavalinkPlayer
-from utils.others import SongRequestPurgeMode, send_idle_embed, CustomContext
+from utils.others import send_idle_embed, CustomContext
 
 
 class PlayerSession(commands.Cog):
