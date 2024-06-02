@@ -17,7 +17,6 @@ from urllib import parse
 from urllib.parse import quote
 
 import disnake
-from aiohttp import ClientSession
 
 import wavelink
 from utils.db import DBModel
@@ -1521,12 +1520,11 @@ class LavalinkPlayer(wavelink.Player):
                 elif track_data.info["sourceName"] == "deezer" and (self.bot.pool.config["FORCE_USE_DEEZER_CLIENT"] or "deezer" not in self.node.info["sourceManagers"]) and (artist_id:=track_data.info["extra"].get("artist_id")):
 
                     try:
-                        async with ClientSession() as session:
-                            async with session.get(f"https://api.deezer.com/artist/{artist_id}/radio") as response:
-                                if response.status == 200:
-                                    result = (await response.json())['data']
-                                else:
-                                    response.raise_for_status()
+                        try:
+                            result = await self.bot.deezer.artist_radio_info(artist_id)
+                        except Exception:
+                            traceback.print_exc()
+                            result = None
 
                         if result:
 

@@ -30,6 +30,7 @@ from user_agent import generate_user_agent
 
 from config_loader import load_config
 from utils.db import MongoDatabase, LocalDatabase, get_prefix, DBModel, global_db_models
+from utils.music.audio_sources.deezer import DeezerClient
 from utils.music.audio_sources.spotify import spotify_client
 from utils.music.checks import check_pool_bots
 from utils.music.errors import GenericError
@@ -73,6 +74,7 @@ class BotPool:
         self.local_database: Optional[LocalDatabase] = None
         self.ws_client: Optional[WSClient] = None
         self.spotify: Optional[spotipy.Spotify] = None
+        self.deezer = DeezerClient()
         self.lavalink_instance: Optional[subprocess.Popen] = None
         self.config = {}
         self.emoji_data = {}
@@ -908,7 +910,6 @@ class BotCore(commands.AutoShardedBot):
         self.session: Optional[aiohttp.ClientError] = None
         self.pool: BotPool = kwargs.pop('pool')
         self.default_prefix = kwargs.pop("default_prefix", "!!")
-        self.spotify: Optional[spotipy.Spotify] = self.pool.spotify
         self.session = aiohttp.ClientSession()
         self.color = kwargs.pop("embed_color", None)
         self.identifier = kwargs.pop("identifier", "")
@@ -958,6 +959,14 @@ class BotCore(commands.AutoShardedBot):
     @property
     def last_fm(self):
         return self.pool.last_fm
+
+    @property
+    def deezer(self):
+        return self.pool.deezer
+
+    @property
+    def spotify(self):
+        return self.pool.spotify
 
     @property
     def emoji_data(self):

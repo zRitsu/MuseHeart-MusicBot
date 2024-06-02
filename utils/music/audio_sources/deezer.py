@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING
 
 from aiohttp import ClientSession
 
@@ -10,192 +9,206 @@ from utils.music.converters import fix_characters
 from utils.music.errors import GenericError
 from utils.music.models import PartialTrack, PartialPlaylist
 
-if TYPE_CHECKING:
-    from utils.client import BotCore
 
 deezer_regex = re.compile(r"(https?://)?(www\.)?deezer\.com/(?P<countrycode>[a-zA-Z]{2}/)?(?P<type>track|album|playlist|artist|profile)/(?P<identifier>[0-9]+)")
 
-async def request_deezer(base_url: str, params: dict = None):
 
-    async with ClientSession() as session:
-        async with session.get(base_url, params=params) as response:
-            if response.status == 200:
-                return await response.json()
-            else:
-                response.raise_for_status()
+class DeezerClient:
 
-async def process_deezer(bot: BotCore, requester: int, query: str):
+    async def request(self, base_url: str, params: dict = None):
 
-    if not bot.pool.config["FORCE_USE_DEEZER_CLIENT"] and [n for n in bot.music.nodes.values() if "deezer" in n.info.get("sourceManagers", [])]:
-        return
+        async with ClientSession() as session:
+            async with session.get(base_url, params=params) as response:
+                if response.status == 200:
+                    return await response.json()
+                else:
+                    response.raise_for_status()
 
-    if query.startswith("https://deezer.page.link/"):
-        async with bot.session.get(query, allow_redirects=False) as r:
-            if 'location' not in r.headers:
-                raise GenericError("**Falha ao obter resultado para o link informado...**")
-            query = str(r.headers["location"])
+    async def track_info(self, track_id):
+        return await self.request(base_url=f"https://api.deezer.com/track/{track_id}")
 
-    if not (matches := deezer_regex.match(query)):
-        return
+    async def album_info(self, album_id):
+        return await self.request(base_url=f"https://api.deezer.com/album/{album_id}")
 
-    url_type, url_id = matches.groups()[-2:]
+    async def artist_info(self, artist_id):
+        return await self.request(base_url=f"https://api.deezer.com/artist/{artist_id}/top?limit=50")
 
-    if url_type == "track":
+    async def playlist_info(self, playlist_id):
+        return await self.request(base_url=f"https://api.deezer.com/playlist/{playlist_id}")
 
-        result = await request_deezer(base_url=f"https://api.deezer.com/track/{url_id}")
+    async def user_playlists(self, user_id: int):
+        return (await self.request(base_url=f'https://api.deezer.com/user/{user_id}/playlists'))['data']
 
-        t = PartialTrack(
-            uri=result['link'],
-            author=result['artist']['name'],
-            title=result['title'],
-            thumb=result['album']['cover_big'],
-            duration=result['duration'] * 1000,
-            source_name="deezer",
-            identifier=result['id'],
-            requester=requester
-        )
+    async def artist_radio_info(self, artist_id):
+        return (await self.request(base_url=f"https://api.deezer.com/artist/{artist_id}/radio"))['data']
 
-        t.info["isrc"] = result.get('isrc')
-        artists = result.get('contributors') or [result['artist']]
+    async def get_tracks(self, requester: int, url: str):
 
-        t.info["extra"]["authors"] = [a['name'] for a in artists]
-        t.info["extra"]["authors_md"] = ", ".join(f"[`{fix_characters(a['name'])}`](https://www.deezer.com/artist/{a['id']})" for a in artists)
-        t.info["extra"]["artist_id"] = result['artist']['id']
+        if not (matches := deezer_regex.match(url)):
+            return
 
-        if result['title'] != result['album']['title']:
-            t.info["extra"]["album"] = {
-                "name": result['album']['title'],
-                "url": result['album']['tracklist']
-            }
+        if url.startswith("https://deezer.page.link/"):
+            async with ClientSession() as session:
+                async with session.get(url, allow_redirects=False) as r:
+                    if 'location' not in r.headers:
+                        raise GenericError("**Falha ao obter resultado para o link informado...**")
+                    url = str(r.headers["location"])
 
-        return [t]
+        url_type, url_id = matches.groups()[-2:]
 
-    data = {
-        'loadType': 'PLAYLIST_LOADED',
-        'playlistInfo': {'name': ''},
-        'sourceName': "deezer",
-        'tracks_data': [],
-        "thumb": ""
-    }
+        if url_type == "track":
 
-    if url_type == "album":
-
-        result = await request_deezer(base_url=f"https://api.deezer.com/album/{url_id}")
-
-        if len(result['tracks']['data']) > 1:
-            data["playlistInfo"].update(
-                {
-                    "name":result['title'],
-                    "url": result['link'],
-                    "is_album": True
-                }
-            )
-            tracks_data = result['tracks']['data']
-
-        else:
-            result_track = result['tracks']['data'][0]
+            result = await self.track_info(url_id)
 
             t = PartialTrack(
-                uri=result_track['link'],
-                author=result_track['artist']['name'],
-                title=result_track['title'],
-                thumb=result_track['album']['cover_big'],
-                duration=result_track['duration'] * 1000,
+                uri=result['link'],
+                author=result['artist']['name'],
+                title=result['title'],
+                thumb=result['album']['cover_big'],
+                duration=result['duration'] * 1000,
                 source_name="deezer",
-                identifier=result_track['id'],
+                identifier=result['id'],
                 requester=requester
             )
 
-            t.info["isrc"] = result_track.get('isrc')
-
-            artists = result_track.get('contributors') or [result_track['artist']]
+            t.info["isrc"] = result.get('isrc')
+            artists = result.get('contributors') or [result['artist']]
 
             t.info["extra"]["authors"] = [a['name'] for a in artists]
             t.info["extra"]["authors_md"] = ", ".join(f"[`{fix_characters(a['name'])}`](https://www.deezer.com/artist/{a['id']})" for a in artists)
             t.info["extra"]["artist_id"] = result['artist']['id']
 
-            if result['title'] != result_track['title']:
-                result_track.info["extra"]["album"] = {
-                    "name": result['title'],
-                    "url": result['tracklist']
+            if result['title'] != result['album']['title']:
+                t.info["extra"]["album"] = {
+                    "name": result['album']['title'],
+                    "url": result['album']['tracklist']
                 }
 
             return [t]
 
-    elif url_type == "artist":
+        data = {
+            'loadType': 'PLAYLIST_LOADED',
+            'playlistInfo': {'name': ''},
+            'sourceName': "deezer",
+            'tracks_data': [],
+            "thumb": ""
+        }
 
-        result = await request_deezer(base_url=f"https://api.deezer.com/artist/{url_id}/top?limit=50")
+        if url_type == "album":
 
-        url_id = int(url_id)
+            result = await self.album_info(url_id)
 
-        for a in result['data']:
+            if len(result['tracks']['data']) > 1:
+                data["playlistInfo"].update(
+                    {
+                        "name":result['title'],
+                        "url": result['link'],
+                        "is_album": True
+                    }
+                )
+                tracks_data = result['tracks']['data']
 
-            if url_id == a['artist']['id']:
-                data["playlistInfo"]["name"] = f"As mais tocadas de: {a['artist']['name']}"
-                break
+            else:
+                result_track = result['tracks']['data'][0]
 
-            artist = None
+                t = PartialTrack(
+                    uri=result_track['link'],
+                    author=result_track['artist']['name'],
+                    title=result_track['title'],
+                    thumb=result_track['album']['cover_big'],
+                    duration=result_track['duration'] * 1000,
+                    source_name="deezer",
+                    identifier=result_track['id'],
+                    requester=requester
+                )
 
-            for c in a['contributors']:
-                if c['id'] == url_id:
-                    artist = f"As mais tocadas de: {c['name']}"
+                t.info["isrc"] = result_track.get('isrc')
+
+                artists = result_track.get('contributors') or [result_track['artist']]
+
+                t.info["extra"]["authors"] = [a['name'] for a in artists]
+                t.info["extra"]["authors_md"] = ", ".join(f"[`{fix_characters(a['name'])}`](https://www.deezer.com/artist/{a['id']})" for a in artists)
+                t.info["extra"]["artist_id"] = result['artist']['id']
+
+                if result['title'] != result_track['title']:
+                    result_track.info["extra"]["album"] = {
+                        "name": result['title'],
+                        "url": result['tracklist']
+                    }
+
+                return [t]
+
+        elif url_type == "artist":
+
+            result = await self.artist_info(url_id)
+
+            url_id = int(url_id)
+
+            for a in result['data']:
+
+                if url_id == a['artist']['id']:
+                    data["playlistInfo"]["name"] = f"As mais tocadas de: {a['artist']['name']}"
                     break
 
-            if artist:
-                data["playlistInfo"]["name"] = artist
-                break
+                artist = None
 
-        tracks_data = result['data']
+                for c in a['contributors']:
+                    if c['id'] == url_id:
+                        artist = f"As mais tocadas de: {c['name']}"
+                        break
 
-    elif url_type == "playlist":
-        result = await request_deezer(base_url=f"https://api.deezer.com/playlist/{url_id}")
-        data["playlistInfo"]["name"] = result["title"]
-        data["playlistInfo"]["thumb"] = result["picture_big"]
-        tracks_data = result["tracks"]["data"]
+                if artist:
+                    data["playlistInfo"]["name"] = artist
+                    break
 
-    else:
-        raise GenericError(f"**Link do deezer não reconhecido/suportado:**\n{query}")
+            tracks_data = result['data']
 
-    if not tracks_data:
-        raise GenericError("**Não houve resultados no link do spotify informado...**")
+        elif url_type == "playlist":
+            result = await self.playlist_info(url_id)
+            data["playlistInfo"]["name"] = result["title"]
+            data["playlistInfo"]["thumb"] = result["picture_big"]
+            tracks_data = result["tracks"]["data"]
 
-    data["playlistInfo"]["selectedTrack"] = -1
-    data["playlistInfo"]["type"] = url_type
+        else:
+            raise GenericError(f"**Link do deezer não reconhecido/suportado:**\n{url}")
 
-    playlist = PartialPlaylist(data, url=query)
+        if not tracks_data:
+            raise GenericError("**Não houve resultados no link do spotify informado...**")
 
-    playlist_info = playlist if url_type != "album" else None
+        data["playlistInfo"]["selectedTrack"] = -1
+        data["playlistInfo"]["type"] = url_type
 
-    for t in tracks_data:
+        playlist = PartialPlaylist(data, url=url)
 
-        track = PartialTrack(
-            uri=t['link'],
-            author=t['artist']['name'],
-            title=t['title'],
-            thumb=t['album']['cover_big'],
-            duration=t['duration'] * 1000,
-            source_name="deezer",
-            identifier=t['id'],
-            playlist=playlist_info,
-            requester=requester
-        )
+        playlist_info = playlist if url_type != "album" else None
 
-        track.info["isrc"] = t.get('isrc')
-        artists = t.get('contributors') or [t['artist']]
+        for t in tracks_data:
 
-        track.info["extra"]["authors"] = [a['name'] for a in artists]
-        track.info["extra"]["authors_md"] = ", ".join(f"[`{fix_characters(a['name'])}`](https://www.deezer.com/artist/{a['id']})" for a in artists)
-        track.info["extra"]["artist_id"] = t['artist']['id']
+            track = PartialTrack(
+                uri=t['link'],
+                author=t['artist']['name'],
+                title=t['title'],
+                thumb=t['album']['cover_big'],
+                duration=t['duration'] * 1000,
+                source_name="deezer",
+                identifier=t['id'],
+                playlist=playlist_info,
+                requester=requester
+            )
 
-        if t['title'] != t['album']['title']:
-            track.info["extra"]["album"] = {
-                "name": t['album']['title'],
-                "url": t['album']['tracklist']
-            }
+            track.info["isrc"] = t.get('isrc')
+            artists = t.get('contributors') or [t['artist']]
 
-        playlist.tracks.append(track)
+            track.info["extra"]["authors"] = [a['name'] for a in artists]
+            track.info["extra"]["authors_md"] = ", ".join(f"[`{fix_characters(a['name'])}`](https://www.deezer.com/artist/{a['id']})" for a in artists)
+            track.info["extra"]["artist_id"] = t['artist']['id']
 
-    return playlist
+            if t['title'] != t['album']['title']:
+                track.info["extra"]["album"] = {
+                    "name": t['album']['title'],
+                    "url": t['album']['tracklist']
+                }
 
-async def deezer_user_playlists(user_id: int):
-    return (await request_deezer(base_url=f'https://api.deezer.com/user/{user_id}/playlists'))['data']
+            playlist.tracks.append(track)
+
+        return playlist

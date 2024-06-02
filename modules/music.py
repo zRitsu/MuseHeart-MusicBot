@@ -23,7 +23,7 @@ from disnake.ext import commands
 import wavelink
 from utils.client import BotCore
 from utils.db import DBModel
-from utils.music.audio_sources.deezer import process_deezer, deezer_regex, deezer_user_playlists
+from utils.music.audio_sources.deezer import deezer_regex
 from utils.music.audio_sources.spotify import process_spotify, spotify_regex_w_user
 from utils.music.checks import check_voice, has_player, has_source, is_requester, is_dj, \
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen, check_pool_bots, \
@@ -1338,7 +1338,7 @@ class Music(commands.Cog):
                     except:
                         pass
 
-                    result = await deezer_user_playlists(user_id)
+                    result = await bot.deezer.user_playlists(user_id)
 
                     info = {"entries": [{"title": t['title'], "url": t['link']} for t in result]}
 
@@ -6753,7 +6753,10 @@ class Music(commands.Cog):
         if not nodes:
             raise GenericError("**Não há servidores de música disponível!**")
 
-        tracks = await process_spotify(self.bot, user.id, query) or await process_deezer(self.bot, user.id, query)
+        tracks = await process_spotify(self.bot, user.id, query)
+
+        if not tracks and (bot.pool.config["FORCE_USE_DEEZER_CLIENT"] or [n for n in bot.music.nodes.values() if "deezer" in n.info.get("sourceManagers", [])]):
+            tracks = await bot.deezer.get_tracks(url=query, requester=user.id)
 
         exceptions = set()
 
