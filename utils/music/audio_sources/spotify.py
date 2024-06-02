@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import base64
+import json
 import re
+import time
 import traceback
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Union
 from urllib.parse import quote
 
-from spotipy import SpotifyClientCredentials, CacheFileHandler, Spotify, SpotifyException
+import aiofiles
+from aiohttp import ClientSession
 
 from utils.music.converters import fix_characters
 from utils.music.errors import MissingSpotifyClient, GenericError
@@ -20,8 +24,86 @@ spotify_link_regex = re.compile(r"(?i)https?:\/\/spotify\.link\/?(?P<id>[a-zA-Z0
 spotify_regex_w_user = re.compile("https://open.spotify.com?.+(album|playlist|artist|track|user)/([a-zA-Z0-9]+)")
 
 
-def query_spotify_track(func, url_id: str):
-    return func(url_id)
+class SpotifyClient:
+
+    def __init__(self, client_id: str, client_secret: str):
+
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.base_url = "https://api.spotify.com/v1"
+
+        self.spotify_cache = {
+            "access_token": "",
+            "expires_at": 0
+        }
+        try:
+            with open(".spotify_cache.json") as f:
+                self.spotify_cache = json.load(f)
+        except FileNotFoundError:
+            pass
+
+    async def request(self, path: str, params: dict = None):
+
+        headers = {'Authorization': f'Bearer {await self.get_valid_access_token()}'}
+
+        async with ClientSession() as session:
+            async with session.get(f"{self.base_url}/{path}", headers=headers, params=params) as response:
+                if response.status == 200:
+                    return await response.json()
+                else:
+                    response.raise_for_status()
+
+    async def get_track_info(self, track_id: str):
+        return await self.request(path=f'tracks/{track_id}')
+
+    async def get_album_info(self, album_id: str):
+        return await self.request(path=f'albums/{album_id}')
+
+    async def get_artist_top(self, artist_id: str):
+        return await self.request(path=f'artists/{artist_id}/top-tracks')
+
+    async def get_playlist_info(self, playlist_id: str):
+        return await self.request(path=f"playlists/{playlist_id}")
+
+    async def get_user_info(self, user_id: str):
+        return await self.request(path=f"users/{user_id}")
+
+    async def get_user_playlists(self, user_id: str):
+        return await self.request(path=f"users/{user_id}/playlists")
+
+    async def get_recommendations(self, seed_tracks: Union[list, str], limit=10):
+        if isinstance(seed_tracks, str):
+            track_ids = seed_tracks
+        else:
+            track_ids = ",".join(seed_tracks)
+
+        return await self.request(path='recommendations', params={
+            'seed_tracks': track_ids, 'limit': limit
+        })
+
+    async def get_access_token(self):
+
+        token_url = 'https://accounts.spotify.com/api/token'
+
+        headers = {
+            'Authorization': 'Basic ' + base64.b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
+        }
+
+        data = {
+            'grant_type': 'client_credentials'
+        }
+
+        async with ClientSession() as session:
+            async with session.post(token_url, headers=headers, data=data) as response:
+                self.spotify_cache = await response.json()
+                self.spotify_cache["expires_at"] = time.time() + self.spotify_cache["expires_in"]
+                async with aiofiles.open(".spotify_cache.json", "w") as f:
+                    await f.write(json.dumps(self.spotify_cache))
+
+    async def get_valid_access_token(self):
+        if time.time() >= self.spotify_cache["expires_at"]:
+            await self.get_access_token()
+        return self.spotify_cache["access_token"]
 
 
 async def process_spotify(bot: BotCore, requester: int, query: str):
@@ -44,7 +126,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
 
     if url_type == "track":
 
-        result = await bot.loop.run_in_executor(None, lambda: bot.spotify.track(url_id))
+        result = await bot.spotify.get_track_info(url_id)
 
         t = PartialTrack(
             uri=result["external_urls"]["spotify"],
@@ -89,7 +171,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
 
     if url_type == "album":
 
-        result = await bot.loop.run_in_executor(None, lambda: bot.spotify.album(url_id))
+        result = await bot.spotify.get_album_info(url_id)
 
         try:
             thumb = result["tracks"][0]["album"]["images"][0]["url"]
@@ -143,7 +225,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
 
     elif url_type == "artist":
 
-        result = await bot.loop.run_in_executor(None, lambda: bot.spotify.artist_top_tracks(url_id))
+        result = await bot.spotify.get_artist_top(url_id)
 
         try:
             data["playlistInfo"]["name"] = "As mais tocadas de: " + \
@@ -153,12 +235,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
         tracks_data = result["tracks"]
 
     elif url_type == "playlist":
-
-        try:
-            result = await bot.loop.run_in_executor(None, lambda: bot.spotify.playlist(url_id))
-        except SpotifyException as e:
-            raise GenericError("**Ocorreu um erro ao processar a playlist:** ```py"
-                               f"{repr(e)}```")
+        result = await bot.spotify.get_playlist_info(url_id)
         data["playlistInfo"]["name"] = result["name"]
         data["playlistInfo"]["thumb"] = result["images"][0]["url"]
         tracks_data = [t["track"] for t in result["tracks"]["items"]]
@@ -223,7 +300,7 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
     return playlist
 
 
-def spotify_client(config: dict) -> Optional[Spotify]:
+def spotify_client(config: dict) -> Optional[SpotifyClient]:
     if not config['SPOTIFY_CLIENT_ID']:
         print(
             f"[IGNORADO] - Spotify Support: SPOTIFY_CLIENT_ID não foi configurado na ENV da host (ou no arquivo .env)."
@@ -237,13 +314,7 @@ def spotify_client(config: dict) -> Optional[Spotify]:
         return
 
     try:
-        return Spotify(
-            auth_manager=SpotifyClientCredentials(
-                client_id=config['SPOTIFY_CLIENT_ID'],
-                client_secret=config['SPOTIFY_CLIENT_SECRET'],
-                cache_handler=CacheFileHandler(cache_path="./.spotipy_cache")
-            )
-        )
+        return SpotifyClient(client_id=config['SPOTIFY_CLIENT_ID'], client_secret=config['SPOTIFY_CLIENT_SECRET'])
 
     except KeyError as e:
         print(

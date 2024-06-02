@@ -1044,7 +1044,7 @@ class FavModalAdd(disnake.ui.Modal):
                     return
 
                 try:
-                    result = await self.view.bot.loop.run_in_executor(None, lambda: self.view.bot.spotify.user(user_id))
+                    result = await self.view.bot.spotify.get_user_info(user_id)
                 except Exception as e:
                     await inter.edit_original_message(
                         embed=disnake.Embed(

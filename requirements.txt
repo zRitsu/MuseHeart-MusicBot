@@ -14,7 +14,6 @@ aiosqlite
 yt-dlp>=2024.05.27
 tornado
 emoji
-spotipy
 urllib3>=2.1.0
 async-timeout
 cachetools

@@ -21,7 +21,6 @@ import aiofiles
 import aiohttp
 import disnake
 import requests
-import spotipy
 from async_timeout import timeout
 from disnake.ext import commands
 from disnake.http import Route
@@ -31,7 +30,7 @@ from user_agent import generate_user_agent
 from config_loader import load_config
 from utils.db import MongoDatabase, LocalDatabase, get_prefix, DBModel, global_db_models
 from utils.music.audio_sources.deezer import DeezerClient
-from utils.music.audio_sources.spotify import spotify_client
+from utils.music.audio_sources.spotify import spotify_client, SpotifyClient
 from utils.music.checks import check_pool_bots
 from utils.music.errors import GenericError
 from utils.music.lastfm_tools import LastFM
@@ -73,7 +72,7 @@ class BotPool:
         self.mongo_database: Optional[MongoDatabase] = None
         self.local_database: Optional[LocalDatabase] = None
         self.ws_client: Optional[WSClient] = None
-        self.spotify: Optional[spotipy.Spotify] = None
+        self.spotify: Optional[SpotifyClient] = None
         self.deezer = DeezerClient()
         self.lavalink_instance: Optional[subprocess.Popen] = None
         self.config = {}
@@ -604,7 +603,7 @@ class BotPool:
 
         self.ws_client = WSClient(self.config["RPC_SERVER"], pool=self)
 
-        self.spotify: Optional[spotipy.Spotify] = spotify_client(self.config)
+        self.spotify: Optional[SpotifyClient] = spotify_client(self.config)
 
         if self.config["LASTFM_KEY"] and self.config["LASTFM_SECRET"]:
             self.last_fm = LastFM(api_key=self.config["LASTFM_KEY"], api_secret=self.config["LASTFM_SECRET"])

@@ -165,7 +165,7 @@ application.yml
 /.gitbak/
 /.tempjar/
 /emojis.json
-/.spotipy_cache
+/.spotify_cache.json
 /.playlist_cache.pkl
 /guild_bots.json
 /modules_dev/
