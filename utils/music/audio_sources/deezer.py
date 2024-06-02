@@ -30,8 +30,8 @@ class DeezerClient:
     async def get_album_info(self, album_id):
         return await self.request(base_url=f"https://api.deezer.com/album/{album_id}")
 
-    async def get_artist_info(self, artist_id):
-        return await self.request(base_url=f"https://api.deezer.com/artist/{artist_id}/top?limit=50")
+    async def get_artist_top(self, artist_id, limit=50):
+        return await self.request(base_url=f"https://api.deezer.com/artist/{artist_id}/top?limit={limit}")
 
     async def get_playlist_info(self, playlist_id):
         return await self.request(base_url=f"https://api.deezer.com/playlist/{playlist_id}")
@@ -140,7 +140,7 @@ class DeezerClient:
 
         elif url_type == "artist":
 
-            result = await self.get_artist_info(url_id)
+            result = await self.get_artist_top(url_id)
 
             url_id = int(url_id)
 
