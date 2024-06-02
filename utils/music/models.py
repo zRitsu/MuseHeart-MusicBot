@@ -1521,7 +1521,7 @@ class LavalinkPlayer(wavelink.Player):
 
                     try:
                         try:
-                            result = await self.bot.deezer.artist_radio_info(artist_id)
+                            result = await self.bot.deezer.get_artist_radio_info(artist_id)
                         except Exception:
                             traceback.print_exc()
                             result = None

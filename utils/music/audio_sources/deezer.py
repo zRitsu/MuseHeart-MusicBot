@@ -24,22 +24,22 @@ class DeezerClient:
                 else:
                     response.raise_for_status()
 
-    async def track_info(self, track_id):
+    async def get_track_info(self, track_id):
         return await self.request(base_url=f"https://api.deezer.com/track/{track_id}")
 
-    async def album_info(self, album_id):
+    async def get_album_info(self, album_id):
         return await self.request(base_url=f"https://api.deezer.com/album/{album_id}")
 
-    async def artist_info(self, artist_id):
+    async def get_artist_info(self, artist_id):
         return await self.request(base_url=f"https://api.deezer.com/artist/{artist_id}/top?limit=50")
 
-    async def playlist_info(self, playlist_id):
+    async def get_playlist_info(self, playlist_id):
         return await self.request(base_url=f"https://api.deezer.com/playlist/{playlist_id}")
 
-    async def user_playlists(self, user_id: int):
+    async def get_user_playlists(self, user_id: int):
         return (await self.request(base_url=f'https://api.deezer.com/user/{user_id}/playlists'))['data']
 
-    async def artist_radio_info(self, artist_id):
+    async def get_artist_radio_info(self, artist_id):
         return (await self.request(base_url=f"https://api.deezer.com/artist/{artist_id}/radio"))['data']
 
     async def get_tracks(self, requester: int, url: str):
@@ -58,7 +58,7 @@ class DeezerClient:
 
         if url_type == "track":
 
-            result = await self.track_info(url_id)
+            result = await self.get_track_info(url_id)
 
             t = PartialTrack(
                 uri=result['link'],
@@ -96,7 +96,7 @@ class DeezerClient:
 
         if url_type == "album":
 
-            result = await self.album_info(url_id)
+            result = await self.get_album_info(url_id)
 
             if len(result['tracks']['data']) > 1:
                 data["playlistInfo"].update(
@@ -140,7 +140,7 @@ class DeezerClient:
 
         elif url_type == "artist":
 
-            result = await self.artist_info(url_id)
+            result = await self.get_artist_info(url_id)
 
             url_id = int(url_id)
 
@@ -164,7 +164,7 @@ class DeezerClient:
             tracks_data = result['data']
 
         elif url_type == "playlist":
-            result = await self.playlist_info(url_id)
+            result = await self.get_playlist_info(url_id)
             data["playlistInfo"]["name"] = result["title"]
             data["playlistInfo"]["thumb"] = result["picture_big"]
             tracks_data = result["tracks"]["data"]
