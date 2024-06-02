@@ -1081,7 +1081,7 @@ class FavModalAdd(disnake.ui.Modal):
                     return
 
                 try:
-                    result = await self.view.bot.loop.run_in_executor(None, lambda: self.view.bot.pool.deezer.get_user(int(url_id)))
+                    result = await self.view.bot.deezer.get_user_info(int(url_id))
                 except Exception as e:
                     await inter.edit_original_message(
                         embed=disnake.Embed(
@@ -1093,7 +1093,7 @@ class FavModalAdd(disnake.ui.Modal):
                     traceback.print_exc()
                     return
 
-                data = {"title": f"[DZ]: {result.name[:90]}", "url": result.link}
+                data = {"title": f"[DZ]: {result['name'][:90]}", "url": result['link']}
 
             else:
 

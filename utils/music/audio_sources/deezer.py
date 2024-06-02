@@ -39,6 +39,9 @@ class DeezerClient:
     async def get_user_playlists(self, user_id: int):
         return (await self.request(base_url=f'https://api.deezer.com/user/{user_id}/playlists'))['data']
 
+    async def get_user_info(self, user_id: int):
+        return await self.request(base_url=f"https://api.deezer.com/user/{user_id}")
+
     async def get_artist_radio_info(self, artist_id):
         return (await self.request(base_url=f"https://api.deezer.com/artist/{artist_id}/radio"))['data']
 
