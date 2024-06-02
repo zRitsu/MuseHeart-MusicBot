@@ -15,35 +15,37 @@ deezer_regex = re.compile(r"(https?://)?(www\.)?deezer\.com/(?P<countrycode>[a-z
 
 class DeezerClient:
 
-    async def request(self, base_url: str, params: dict = None):
+    base_url = "https://api.deezer.com"
+
+    async def request(self, path: str, params: dict = None):
 
         async with ClientSession() as session:
-            async with session.get(base_url, params=params) as response:
+            async with session.get(f"{self.base_url}/{path}", params=params) as response:
                 if response.status == 200:
                     return await response.json()
                 else:
                     response.raise_for_status()
 
     async def get_track_info(self, track_id):
-        return await self.request(base_url=f"https://api.deezer.com/track/{track_id}")
+        return await self.request(path=f"track/{track_id}")
 
     async def get_album_info(self, album_id):
-        return await self.request(base_url=f"https://api.deezer.com/album/{album_id}")
+        return await self.request(path=f"album/{album_id}")
 
     async def get_artist_top(self, artist_id, limit=50):
-        return await self.request(base_url=f"https://api.deezer.com/artist/{artist_id}/top?limit={limit}")
+        return await self.request(path=f"artist/{artist_id}/top?limit={limit}")
 
     async def get_playlist_info(self, playlist_id):
-        return await self.request(base_url=f"https://api.deezer.com/playlist/{playlist_id}")
+        return await self.request(path=f"playlist/{playlist_id}")
 
     async def get_user_playlists(self, user_id: int):
-        return (await self.request(base_url=f'https://api.deezer.com/user/{user_id}/playlists'))['data']
+        return (await self.request(path=f'user/{user_id}/playlists'))['data']
 
     async def get_user_info(self, user_id: int):
-        return await self.request(base_url=f"https://api.deezer.com/user/{user_id}")
+        return await self.request(path=f"user/{user_id}")
 
     async def get_artist_radio_info(self, artist_id):
-        return (await self.request(base_url=f"https://api.deezer.com/artist/{artist_id}/radio"))['data']
+        return (await self.request(path=f"artist/{artist_id}/radio"))['data']
 
     async def get_tracks(self, requester: int, url: str):
 
