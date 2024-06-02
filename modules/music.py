@@ -23,7 +23,7 @@ from disnake.ext import commands
 import wavelink
 from utils.client import BotCore
 from utils.db import DBModel
-from utils.music.audio_sources.deezer import process_deezer, deezer_regex
+from utils.music.audio_sources.deezer import process_deezer, deezer_regex, deezer_user_playlists
 from utils.music.audio_sources.spotify import process_spotify, spotify_regex_w_user
 from utils.music.checks import check_voice, has_player, has_source, is_requester, is_dj, \
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen, check_pool_bots, \
@@ -1338,11 +1338,9 @@ class Music(commands.Cog):
                     except:
                         pass
 
-                    result = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.deezer._get_paginated_list(
-                        path=f"user/{user_id}/playlists",
-                    ))
+                    result = await deezer_user_playlists(user_id)
 
-                    info = {"entries": [{"title": t.title, "url": t.link} for t in result]}
+                    info = {"entries": [{"title": t['title'], "url": t['link']} for t in result]}
 
                 elif not self.bot.config["USE_YTDL"]:
                     raise GenericError("**Não há suporte a esse tipo de requisição no momento...**")

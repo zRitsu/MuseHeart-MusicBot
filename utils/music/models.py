@@ -17,6 +17,7 @@ from urllib import parse
 from urllib.parse import quote
 
 import disnake
+from aiohttp import ClientSession
 
 import wavelink
 from utils.db import DBModel
@@ -1519,38 +1520,44 @@ class LavalinkPlayer(wavelink.Player):
                             tracks.append(partial_track)
 
                 elif track_data.info["sourceName"] == "deezer" and (self.bot.pool.config["FORCE_USE_DEEZER_CLIENT"] or "deezer" not in self.node.info["sourceManagers"]) and (artist_id:=track_data.info["extra"].get("artist_id")):
+
                     try:
-                        result = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.deezer.request(
-                            "GET",
-                            f"artist/{artist_id}/radio",
-                        ))
+                        async with ClientSession() as session:
+                            async with session.get(f"https://api.deezer.com/artist/{artist_id}/radio") as response:
+                                if response.status == 200:
+                                    result = (await response.json())['data']
+                                else:
+                                    response.raise_for_status()
 
                         if result:
 
                             tracks = []
 
-                            for n, t in enumerate(result[:15]):
+                            for n, t in enumerate(result):
 
                                 partial_track = PartialTrack(
-                                    uri=t.link,
-                                    author=t.artist.name,
-                                    title=t.title,
-                                    thumb=f"https://e-cdns-images.dzcdn.net/images/cover/{t.md5_image}/500x500-000000-80-0-0.jpg",
-                                    duration=t.duration * 1000,
+                                    uri=f"https://www.deezer.com/track/{t['id']}",
+                                    author=t['artist']['name'],
+                                    title=t['title'],
+                                    thumb=t['album']['cover_big'],
+                                    duration=t['duration'] * 1000,
                                     source_name="deezer",
-                                    identifier=t.id,
+                                    identifier=t['id'],
                                     requester=self.bot.user.id,
                                     autoplay=True,
                                 )
 
-                                partial_track.info["isrc"] = t.isrc
-                                partial_track.info["extra"]["authors_md"] = f"[`{fix_characters(t.artist.name)}`]({t.artist.link})"
-                                partial_track.info["extra"]["artist_id"] = t.artist.id
+                                partial_track.info["isrc"] = t.get('isrc')
+                                artists = t.get('contributors') or [t['artist']]
 
-                                if t.album.title != t.title:
+                                partial_track.info["extra"]["authors"] = [a['name'] for a in artists]
+                                partial_track.info["extra"]["authors_md"] = ", ".join(f"[`{fix_characters(a['name'])}`](https://www.deezer.com/artist/{a['id']})" for a in artists)
+                                partial_track.info["extra"]["artist_id"] = t['artist']['id']
+
+                                if t['title'] != t['album']['title']:
                                     partial_track.info["extra"]["album"] = {
-                                        "name": t.album.title,
-                                        "url": t.album.link
+                                        "name": t['album']['title'],
+                                        "url": t['album']['tracklist']
                                     }
 
                                 tracks.append(partial_track)
