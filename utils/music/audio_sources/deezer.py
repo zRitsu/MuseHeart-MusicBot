@@ -178,7 +178,7 @@ class DeezerClient:
             raise GenericError(f"**Link do deezer não reconhecido/suportado:**\n{url}")
 
         if not tracks_data:
-            raise GenericError("**Não houve resultados no link do spotify informado...**")
+            raise GenericError("**Não houve resultados no link do deezer informado...**")
 
         data["playlistInfo"]["selectedTrack"] = -1
         data["playlistInfo"]["type"] = url_type
