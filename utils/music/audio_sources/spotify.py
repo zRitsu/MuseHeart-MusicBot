@@ -109,7 +109,7 @@ class SpotifyClient:
                     raise GenericError(f"**Ocorreu um erro ao obter token do spotify** ```py\n"
                                        f"{data}```")
 
-                self.spotify_cache = await response.json()
+                self.spotify_cache = data
 
                 self.spotify_cache["expires_at"] = time.time() + self.spotify_cache["expires_in"]
                 async with aiofiles.open(".spotify_cache.json", "w") as f:
