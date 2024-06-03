@@ -32,15 +32,15 @@ class SpotifyClient:
         self.client_secret = client_secret
         self.base_url = "https://api.spotify.com/v1"
 
-        self.spotify_cache = {
-            "access_token": "",
-            "expires_at": 0
-        }
         try:
             with open(".spotify_cache.json") as f:
                 self.spotify_cache = json.load(f)
         except FileNotFoundError:
-            pass
+            self.spotify_cache = {
+                "access_token": "",
+                "expires_at": 0,
+                "expires_in": 0
+            }
 
     async def request(self, path: str, params: dict = None):
 
