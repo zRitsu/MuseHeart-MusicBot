@@ -31,6 +31,7 @@ class SpotifyClient:
         self.client_id = client_id
         self.client_secret = client_secret
         self.base_url = "https://api.spotify.com/v1"
+        self.disabled = ""
 
         try:
             with open(".spotify_cache.json") as f:
@@ -43,6 +44,9 @@ class SpotifyClient:
             }
 
     async def request(self, path: str, params: dict = None):
+
+        if self.disabled:
+            raise GenericError(f"**O suporte ao spotify foi temporariamente desativado.** ```py\n{self.disabled}```")
 
         headers = {'Authorization': f'Bearer {await self.get_valid_access_token()}'}
 
@@ -83,6 +87,9 @@ class SpotifyClient:
 
     async def get_access_token(self):
 
+        if self.disabled:
+            raise GenericError(f"**O suporte ao spotify foi temporariamente desativado.** ```py{self.disabled}```")
+
         token_url = 'https://accounts.spotify.com/api/token'
 
         headers = {
@@ -95,7 +102,15 @@ class SpotifyClient:
 
         async with ClientSession() as session:
             async with session.post(token_url, headers=headers, data=data) as response:
+                data = await response.json()
+
+                if data.get("error"):
+                    self.disabled = data
+                    raise GenericError(f"**Ocorreu um erro ao obter token do spotify** ```py\n"
+                                       f"{data}```")
+
                 self.spotify_cache = await response.json()
+
                 self.spotify_cache["expires_at"] = time.time() + self.spotify_cache["expires_in"]
                 async with aiofiles.open(".spotify_cache.json", "w") as f:
                     await f.write(json.dumps(self.spotify_cache))
@@ -107,6 +122,10 @@ class SpotifyClient:
 
 
 async def process_spotify(bot: BotCore, requester: int, query: str):
+
+    if bot.spotify.disabled:
+        bot.pool.spotify = None
+        return
 
     if spotify_link_regex.match(query):
         async with bot.session.get(query, allow_redirects=False) as r:
