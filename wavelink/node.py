@@ -211,9 +211,6 @@ class Node:
         else:
             self.plugin_names = set([p["name"] for p in self.info["plugins"]])
 
-        if "youtube" in self.info["sourceManagers"]:
-            self.info["sourceManagers"].append("youtubemusic")
-
         if not self._websocket:
 
             self._websocket = WebSocket(node=self,
