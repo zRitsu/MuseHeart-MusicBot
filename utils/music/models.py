@@ -2908,12 +2908,14 @@ class LavalinkPlayer(wavelink.Player):
 
             selected_track = None
 
+            has_exclude_tags = any(tag for tag in exclude_tags if tag.lower() in track.title.lower())
+
             for t in tracks:
 
                 if t.is_stream:
                     continue
 
-                if any((i in t.title.lower() and i not in track.title.lower()) for i in exclude_tags):
+                if not has_exclude_tags and any(tag for tag in exclude_tags if tag.lower() in t.title.lower()):
                     continue
 
                 if check_duration and ((t.duration - 10000) < track.duration < (t.duration + 10000)):
