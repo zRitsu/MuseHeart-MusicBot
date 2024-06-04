@@ -1012,6 +1012,7 @@ class LavalinkPlayer(wavelink.Player):
                                  "ou até mesmo ignoradas caso não retorne resultados).",
                             emoji="⚠️"
                         )
+                    await asyncio.sleep(5)
                     await self.process_next(start_position=self.position)
                     await send_report()
                     return
@@ -2891,10 +2892,8 @@ class LavalinkPlayer(wavelink.Player):
                     exceptions.append(e)
                     continue
 
-                if not tracks:
-                    continue
-
-                break
+                if tracks:
+                    break
 
             try:
                 tracks = tracks.tracks

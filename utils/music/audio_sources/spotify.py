@@ -32,6 +32,8 @@ class SpotifyClient:
         self.client_secret = client_secret
         self.base_url = "https://api.spotify.com/v1"
         self.spotify_cache = {}
+        self.disabled = False
+        self.type = "api" if client_id and client_secret else "visitor"
 
         try:
             with open(".spotify_cache.json") as f:
@@ -40,6 +42,9 @@ class SpotifyClient:
             pass
 
     async def request(self, path: str, params: dict = None):
+
+        if self.disabled:
+            return
 
         headers = {'Authorization': f'Bearer {await self.get_valid_access_token()}'}
 
@@ -50,6 +55,10 @@ class SpotifyClient:
                 elif response.status == 401:
                     await self.get_access_token()
                     return await self.request(path=path, params=params)
+                elif response.status == 429:
+                    self.disabled = True
+                    print(f"⚠️ - Spotify: Suporte interno desativado devido a ratelimit (429).")
+                    return
                 else:
                     response.raise_for_status()
 
@@ -91,8 +100,10 @@ class SpotifyClient:
                     self.spotify_cache = {
                         "access_token": data["accessToken"],
                         "expires_in": data["accessTokenExpirationTimestampMs"],
-                        "expires_at": time.time() + data["accessTokenExpirationTimestampMs"]
+                        "expires_at": time.time() + data["accessTokenExpirationTimestampMs"],
+                        "type": "visitor",
                     }
+                    self.type = "visitor"
                     print("🎶 - Access token do spotify obtido com sucesso do tipo: visitante.")
 
         else:
@@ -119,6 +130,10 @@ class SpotifyClient:
 
                 self.spotify_cache = data
 
+                self.type = "api"
+
+                self.spotify_cache["tyoe"] = "api"
+
                 self.spotify_cache["expires_at"] = time.time() + self.spotify_cache["expires_in"]
 
                 print("🎶 - Access token do spotify obtido com sucesso via API Oficial.")
@@ -127,7 +142,7 @@ class SpotifyClient:
             await f.write(json.dumps(self.spotify_cache))
 
     async def get_valid_access_token(self):
-        if time.time() >= self.spotify_cache["expires_at"]:
+        if time.time() >= self.spotify_cache["expires_at"] or self.spotify_cache.get("type") != self.type:
             await self.get_access_token()
         return self.spotify_cache["access_token"]
 
@@ -143,9 +158,12 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
     if not (matches := spotify_regex.match(query)):
         return
 
-    if not bot.spotify:
+    if bot.spotify.disabled:
+
         if [n for n in bot.music.nodes.values() if "spotify" in n.info.get("sourceManagers", [])]:
             return
+
+        raise GenericError("**O suporte a links do spotify está temporariamente desativado.**")
 
     url_type, url_id = matches.groups()
 
