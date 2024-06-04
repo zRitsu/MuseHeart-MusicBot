@@ -170,3 +170,4 @@ application.yml
 /guild_bots.json
 /modules_dev/
 /.tmp/
+/.deployed
