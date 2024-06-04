@@ -26,27 +26,20 @@ spotify_regex_w_user = re.compile("https://open.spotify.com?.+(album|playlist|ar
 
 class SpotifyClient:
 
-    def __init__(self, client_id: str, client_secret: str):
+    def __init__(self, client_id: Optional[str] = None, client_secret: Optional[str] = None):
 
         self.client_id = client_id
         self.client_secret = client_secret
         self.base_url = "https://api.spotify.com/v1"
-        self.disabled = ""
+        self.spotify_cache = {}
 
         try:
             with open(".spotify_cache.json") as f:
                 self.spotify_cache = json.load(f)
         except FileNotFoundError:
-            self.spotify_cache = {
-                "access_token": "",
-                "expires_at": 0,
-                "expires_in": 0
-            }
+            pass
 
     async def request(self, path: str, params: dict = None):
-
-        if self.disabled:
-            raise GenericError(f"**O suporte ao spotify foi temporariamente desativado.** ```py\n{self.disabled}```")
 
         headers = {'Authorization': f'Bearer {await self.get_valid_access_token()}'}
 
@@ -87,33 +80,48 @@ class SpotifyClient:
 
     async def get_access_token(self):
 
-        if self.disabled:
-            raise GenericError(f"**O suporte ao spotify foi temporariamente desativado.** ```py{self.disabled}```")
+        if not self.client_id or not self.client_secret:
+            access_token_url = "https://open.spotify.com/get_access_token?reason=transport&productType=embed"
+            async with ClientSession() as session:
+                async with session.get(access_token_url) as response:
+                    data = await response.json()
+                    self.spotify_cache = {
+                        "access_token": data["accessToken"],
+                        "expires_in": data["accessTokenExpirationTimestampMs"],
+                        "expires_at": time.time() + data["accessTokenExpirationTimestampMs"]
+                    }
+                    print("🎶 - Access token do spotify obtido com sucesso do tipo: visitante.")
 
-        token_url = 'https://accounts.spotify.com/api/token'
+        else:
+            token_url = 'https://accounts.spotify.com/api/token'
 
-        headers = {
-            'Authorization': 'Basic ' + base64.b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
-        }
+            headers = {
+                'Authorization': 'Basic ' + base64.b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
+            }
 
-        data = {
-            'grant_type': 'client_credentials'
-        }
+            data = {
+                'grant_type': 'client_credentials'
+            }
 
-        async with ClientSession() as session:
-            async with session.post(token_url, headers=headers, data=data) as response:
-                data = await response.json()
+            async with ClientSession() as session:
+                async with session.post(token_url, headers=headers, data=data) as response:
+                    data = await response.json()
 
                 if data.get("error"):
-                    self.disabled = data
-                    raise GenericError(f"**Ocorreu um erro ao obter token do spotify** ```py\n"
-                                       f"{data}```")
+                    print(f"⚠️ - Spotify: Ocorreu um erro ao obter token: {data['error_description']}")
+                    self.client_id = None
+                    self.client_secret = None
+                    await self.get_access_token()
+                    return
 
                 self.spotify_cache = data
 
                 self.spotify_cache["expires_at"] = time.time() + self.spotify_cache["expires_in"]
-                async with aiofiles.open(".spotify_cache.json", "w") as f:
-                    await f.write(json.dumps(self.spotify_cache))
+
+                print("🎶 - Access token do spotify obtido com sucesso via API Oficial.")
+
+        async with aiofiles.open(".spotify_cache.json", "w") as f:
+            await f.write(json.dumps(self.spotify_cache))
 
     async def get_valid_access_token(self):
         if time.time() >= self.spotify_cache["expires_at"]:
@@ -122,10 +130,6 @@ class SpotifyClient:
 
 
 async def process_spotify(bot: BotCore, requester: int, query: str):
-
-    if bot.spotify.disabled:
-        bot.pool.spotify = None
-        return
 
     if spotify_link_regex.match(query):
         async with bot.session.get(query, allow_redirects=False) as r:
@@ -139,7 +143,6 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
     if not bot.spotify:
         if [n for n in bot.music.nodes.values() if "spotify" in n.info.get("sourceManagers", [])]:
             return
-        raise MissingSpotifyClient()
 
     url_type, url_id = matches.groups()
 
@@ -317,30 +320,3 @@ async def process_spotify(bot: BotCore, requester: int, query: str):
         playlist.tracks.append(track)
 
     return playlist
-
-
-def spotify_client(config: dict) -> Optional[SpotifyClient]:
-    if not config['SPOTIFY_CLIENT_ID']:
-        print(
-            f"[IGNORADO] - Spotify Support: SPOTIFY_CLIENT_ID não foi configurado na ENV da host (ou no arquivo .env)."
-            f"\n{'-' * 30}")
-        return
-
-    if not config['SPOTIFY_CLIENT_SECRET']:
-        print(
-            F"[IGNORADO] - Spotify Support: SPOTIFY_CLIENT_SECRET não foi configurado nas ENV da host "
-            F"(ou no arquivo .env).\n{'-' * 30}")
-        return
-
-    try:
-        return SpotifyClient(client_id=config['SPOTIFY_CLIENT_ID'], client_secret=config['SPOTIFY_CLIENT_SECRET'])
-
-    except KeyError as e:
-        print(
-            f"A APIKEY do spotify não foi configurada devidamente na ENV da host (ou no arquivo .env), "
-            f"verifique e tente novamente caso queira o suporte a músicas do spotify (Erro: {repr(e)}).\n{'-' * 30}")
-        return
-
-    except Exception as e:
-        print(f"Ocorreu um erro na configuração do spotify:\n{traceback.format_exc()}).\n{'-' * 30}")
-        return

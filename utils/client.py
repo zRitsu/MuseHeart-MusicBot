@@ -30,7 +30,7 @@ from user_agent import generate_user_agent
 from config_loader import load_config
 from utils.db import MongoDatabase, LocalDatabase, get_prefix, DBModel, global_db_models
 from utils.music.audio_sources.deezer import DeezerClient
-from utils.music.audio_sources.spotify import spotify_client, SpotifyClient
+from utils.music.audio_sources.spotify import SpotifyClient
 from utils.music.checks import check_pool_bots
 from utils.music.errors import GenericError
 from utils.music.lastfm_tools import LastFM
@@ -603,7 +603,10 @@ class BotPool:
 
         self.ws_client = WSClient(self.config["RPC_SERVER"], pool=self)
 
-        self.spotify: Optional[SpotifyClient] = spotify_client(self.config)
+        self.spotify = SpotifyClient(
+            client_id=self.config['SPOTIFY_CLIENT_ID'],
+            client_secret=self.config['SPOTIFY_CLIENT_SECRET']
+        )
 
         if self.config["LASTFM_KEY"] and self.config["LASTFM_SECRET"]:
             self.last_fm = LastFM(api_key=self.config["LASTFM_KEY"], api_secret=self.config["LASTFM_SECRET"])
@@ -872,6 +875,9 @@ class BotPool:
 
         if start_local:
             loop.create_task(self.start_lavalink(loop=loop))
+
+        if not self.spotify.spotify_cache:
+            loop.create_task(self.spotify.get_access_token())
 
         self.node_check(LAVALINK_SERVERS, loop=loop, start_local=start_local)
 
