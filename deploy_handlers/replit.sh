@@ -1,7 +1,7 @@
 #!/bin/bash
 
 rm -rf poetry.lock pyproject.toml .upm
-pip3 uninstall poetry -y
+pip uninstall poetry -y
 
 if [ ! "$REPL_SLUG-$REPL_OWNER" == "$(cat ./.deployed)" ]; then
   rm -rf venv .spotify_cache .config .cache local_database .logs Lavalink.jar application.yml plugins pyproject.toml poetry.lock
