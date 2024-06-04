@@ -47,6 +47,9 @@ class SpotifyClient:
             async with session.get(f"{self.base_url}/{path}", headers=headers, params=params) as response:
                 if response.status == 200:
                     return await response.json()
+                elif response.status == 401:
+                    await self.get_access_token()
+                    return await self.request(path=path, params=params)
                 else:
                     response.raise_for_status()
 
