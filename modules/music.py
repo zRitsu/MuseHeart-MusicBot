@@ -1577,6 +1577,12 @@ class Music(commands.Cog):
 
             bot = new_bot
 
+        channel = bot.get_channel(inter.channel.id)
+
+        can_send_message(channel, bot.user)
+
+        await check_player_perm(inter=inter, bot=bot, channel=channel, guild_data=guild_data)
+
         if not player:
             player = await self.create_player(
                 inter=inter, bot=bot, guild=guild, guild_data=guild_data, channel=channel,
