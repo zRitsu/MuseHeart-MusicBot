@@ -55,7 +55,7 @@ class LastFMView(disnake.ui.View):
         while count > 0:
             try:
                 await asyncio.sleep(20)
-                data = await self.ctx.bot.get_session_key(token=self.token)
+                data = await self.ctx.bot.last_fm.get_session_key(token=self.token)
                 if data.get('error'):
                     count -= 1
                     continue
@@ -90,7 +90,7 @@ class LastFMView(disnake.ui.View):
         self.check_loop = self.ctx.bot.loop.create_task(self.check_session_loop())
 
         if not self.auth_url:
-            self.token = await self.ctx.bot.get_token()
+            self.token = await self.ctx.bot.last_fm.get_token()
             self.auth_url = f'http://www.last.fm/api/auth/?api_key={self.ctx.bot.last_fm.api_key}&token={self.token}'
             self.last_timestamp = int((disnake.utils.utcnow() + datetime.timedelta(minutes=5)).timestamp())
 
