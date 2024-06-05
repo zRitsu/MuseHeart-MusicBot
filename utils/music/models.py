@@ -510,6 +510,7 @@ class LavalinkPlayer(wavelink.Player):
         self.player_creator: Optional[int] = kwargs.pop('player_creator', None)
         self.filters: dict = {}
         self.idle_task: Optional[asyncio.Task] = None
+        self.hook_event_task: Optional[asyncio.Task] = None
         self.members_timeout_task: Optional[asyncio.Task] = None
         self.reconnect_voice_channel_task: Optional[asyncio.Task] = None
         self.idle_endtime: Optional[datetime.datetime] = None
@@ -777,6 +778,17 @@ class LavalinkPlayer(wavelink.Player):
 
         if self.is_closing:
             return
+
+        try:
+            if not self.hook_event_task.done():
+                return
+            self.hook_event_task.cancel()
+        except:
+            pass
+
+        self.hook_event_task = self.bot.loop.create_task(self.hook_events(event))
+
+    async def hook_events(self, event):
 
         await self.bot.wait_until_ready()
 
@@ -2691,6 +2703,11 @@ class LavalinkPlayer(wavelink.Player):
 
         try:
             self._queue_updater_task.cancel()
+        except:
+            pass
+
+        try:
+            self.hook_event_task.cancel()
         except:
             pass
 
