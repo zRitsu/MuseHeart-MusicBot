@@ -2863,7 +2863,7 @@ class LavalinkPlayer(wavelink.Player):
         if track.id:
             return
 
-        check_duration = False
+        check_duration = True
 
         try:
 
@@ -2923,6 +2923,9 @@ class LavalinkPlayer(wavelink.Player):
                 return
 
             selected_track = None
+
+            if tracks[0].info["sourceName"] == "bandcamp":
+                check_duration = False
 
             has_exclude_tags = any(tag for tag in exclude_tags if tag.lower() in track.title.lower())
 

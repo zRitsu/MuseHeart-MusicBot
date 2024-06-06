@@ -6642,6 +6642,13 @@ class Music(commands.Cog):
                     self.add_provider(node.search_providers, ["amsearch"])
                     self.add_provider(node.partial_providers, ["amsearch:{title} - {author}"])
 
+                if "bandcamp" not in node.info["sourceManagers"]:
+                    self.remove_provider(node.search_providers, ["bcsearch"])
+                    self.remove_provider(node.partial_providers, ["bcsearch:{title} - {author}"])
+                elif "bcsearch" not in node.search_providers:
+                    self.add_provider(node.search_providers, ["bcsearch"])
+                    self.add_provider(node.partial_providers, ["bcsearch:{title} - {author}"])
+
                 if "spotify" not in node.info["sourceManagers"]:
                     self.remove_provider(node.search_providers, ["spsearch"])
                     self.remove_provider(node.partial_providers, ["spsearch:{title} - {author}"])
@@ -6730,6 +6737,8 @@ class Music(commands.Cog):
                 node.partial_providers.append("amsearch:{title} - {author}")
             elif p == "spsearch":
                 node.partial_providers.append("spsearch:{title} - {author}")
+            elif p == "bcsearch":
+                node.partial_providers.append("bcsearch:{title} - {author}")
             elif p == "ytsearch":
                 node.partial_providers.append("ytsearch:\"{isrc}\"")
                 node.partial_providers.append("ytsearch:\"{title} - {author}\"")
