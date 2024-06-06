@@ -3,9 +3,10 @@ from __future__ import annotations
 
 import base64
 import json
+import os.path
 import re
 import time
-import traceback
+from tempfile import gettempdir
 from typing import Optional, TYPE_CHECKING, Union
 from urllib.parse import quote
 
@@ -13,7 +14,7 @@ import aiofiles
 from aiohttp import ClientSession
 
 from utils.music.converters import fix_characters
-from utils.music.errors import MissingSpotifyClient, GenericError
+from utils.music.errors import GenericError
 from utils.music.models import PartialPlaylist, PartialTrack
 
 if TYPE_CHECKING:
@@ -22,6 +23,8 @@ if TYPE_CHECKING:
 spotify_regex = re.compile("https://open.spotify.com?.+(album|playlist|artist|track)/([a-zA-Z0-9]+)")
 spotify_link_regex = re.compile(r"(?i)https?:\/\/spotify\.link\/?(?P<id>[a-zA-Z0-9]+)")
 spotify_regex_w_user = re.compile("https://open.spotify.com?.+(album|playlist|artist|track|user)/([a-zA-Z0-9]+)")
+
+spotify_cache_file = os.path.join(gettempdir(), ".spotify_cache.json")
 
 
 class SpotifyClient:
@@ -36,7 +39,7 @@ class SpotifyClient:
         self.type = "api" if client_id and client_secret else "visitor"
 
         try:
-            with open(".spotify_cache.json") as f:
+            with open(spotify_cache_file) as f:
                 self.spotify_cache = json.load(f)
         except FileNotFoundError:
             pass
@@ -138,7 +141,7 @@ class SpotifyClient:
 
                 print("🎶 - Access token do spotify obtido com sucesso via API Oficial.")
 
-        async with aiofiles.open(".spotify_cache.json", "w") as f:
+        async with aiofiles.open(spotify_cache_file, "w") as f:
             await f.write(json.dumps(self.spotify_cache))
 
     async def get_valid_access_token(self):
