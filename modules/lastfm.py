@@ -371,7 +371,7 @@ class LastFmCog(commands.Cog):
             func = inter.edit_original_message
 
         if view.session_key:
-            embeds[0].description += f"### A conta [{view.username}](<https://www.last.fm/user/{view.username}>) foi " \
+            embeds[0].description += f"\n### A conta [{view.username}](<https://www.last.fm/user/{view.username}>) foi " \
                                  "vinculada com sucesso!\n\n`Agora ao ouvir suas músicas no canal de voz elas " \
                                 "serão registradas automaticamente na sua conta do last.fm`"
 
