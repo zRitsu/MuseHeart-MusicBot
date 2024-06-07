@@ -2052,13 +2052,14 @@ class Music(commands.Cog):
             except IndexError:
                 raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
 
-            if player.current.autoplay:
-                track: LavalinkTrack = player.queue_autoplay[index - len(player.queue)]
-                index += 1
-                player.queue_autoplay.appendleft(player.last_track)
-            else:
+            if player.queue:
                 track: LavalinkTrack = player.queue[index]
                 player.queue.append(player.last_track)
+            else:
+                track: LavalinkTrack = player.queue_autoplay[index]
+                index += 1
+                player.queue_autoplay.appendleft(player.last_track)
+
             player.last_track = None
 
             if player.loop == "current":
@@ -2177,8 +2178,18 @@ class Music(commands.Cog):
         except:
             track = player.queue.pop()
 
-        if player.current and not player.current.autoplay:
-            player.queue.appendleft(player.current)
+        if not track and player.autoplay:
+            try:
+                track = player.queue_autoplay.pop()
+            except:
+                pass
+
+        if player.current:
+            if player.current.autoplay:
+                if player.autoplay:
+                    player.queue_autoplay.appendleft(player.current)
+            else:
+                player.queue.appendleft(player.current)
 
         player.last_track = None
 
