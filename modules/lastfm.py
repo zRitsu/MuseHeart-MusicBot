@@ -512,7 +512,7 @@ class LastFmCog(commands.Cog):
                     await self.bot.last_fm.update_nowplaying(**kwargs)
                 else:
                     if track.requester != user.id:
-                        kwargs["chosen_by_user"] = 0
+                        kwargs["chosen_by_user"] = False
                     await self.bot.last_fm.track_scrobble(**kwargs)
             except Exception as e:
                 if isinstance(e, LastFmException):
