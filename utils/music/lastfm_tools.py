@@ -55,22 +55,26 @@ class LastFM:
         params['api_sig'] = self.generate_api_sig(params)
         return await self.request_lastfm(params=params)
     
-    async def track_scrobble(self, artist: str, track: str, album: str, duration: int, session_key: str):
+    async def track_scrobble(self, artist: str, track: str, album: str, duration: int, session_key: str, chosen_by_user: int = 1):
+
         params = {
             "method": "track.scrobble",
             "artist[0]": artist,
             "timestamp[0]": str(int(time.time() - 30)),
             "track[0]": track,
+            "chosenByUser[0]": str(chosen_by_user),
             "api_key": self.api_key,
             "sk": session_key,
         }
+
         if album:
             params["album"] = album
+            
         if duration:
             params["duration"] = str(duration)
-    
+
         params['api_sig'] = self.generate_api_sig(params)
-    
+
         return await self.post_lastfm(params)
     
     async def update_nowplaying(self, artist: str, track: str, album: str, duration: int, session_key: str):
