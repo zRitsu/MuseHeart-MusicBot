@@ -425,7 +425,7 @@ class LastFmCog(commands.Cog):
 
     @commands.Cog.listener('on_wavelink_track_start')
     async def update_np(self, player: LavalinkPlayer):
-        await self.startscrooble(player, track=player.current, update_np=True)
+        await self.startscrooble(player, track=player.last_track, update_np=True)
 
     @commands.Cog.listener('on_wavelink_track_end')
     async def startscrooble(self, player: LavalinkPlayer, track: LavalinkTrack, reason: str = None, update_np=False, users=None):
