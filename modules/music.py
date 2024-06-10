@@ -287,6 +287,8 @@ class Music(commands.Cog):
             if inter.author.id not in guild.me.voice.channel.voice_states:
                 raise DiffVoiceChannel()
 
+            await inter.response.defer()
+
             player.stage_title_event = True
             player.stage_title_template = template
             player.start_time = disnake.utils.utcnow()
@@ -299,7 +301,7 @@ class Music(commands.Cog):
 
             player.update = True
 
-            if isinstance(inter, CustomContext) or inter.response.is_done():
+            if isinstance(inter, CustomContext):
                 await inter.send("**O status automático foi definido com sucesso!**")
             else:
                 await inter.edit_original_message("**O status automático foi definido com sucesso!**")
