@@ -129,9 +129,9 @@ def run_lavalink(
                     pass
 
                 if platform.architecture()[0] != "64bit":
-                    jdk_url = "https://download.bell-sw.com/java/17.0.9+11/bellsoft-jdk17.0.9+11-windows-i586.zip"
+                    jdk_url = "https://download.bell-sw.com/java/21.0.3+12/bellsoft-jdk21.0.3+12-windows-i586-lite.zip"
                 else:
-                    jdk_url = "https://download.bell-sw.com/java/17.0.9+11/bellsoft-jdk17.0.9+11-windows-amd64.zip"
+                    jdk_url = "https://download.bell-sw.com/java/21.0.3+12/bellsoft-jdk21.0.3+12-windows-amd64-lite.zip"
 
                 jdk_filename = "java.zip"
 
@@ -158,9 +158,9 @@ def run_lavalink(
                 except:
                     pass
 
-                download_file("https://github.com/Jabba-Team/jabba/raw/main/install.sh", "install_jabba.sh")
-                subprocess.call("bash install_jabba.sh", shell=True, env={"JABBA_HOME": "./.jabba", "JAVA_HOME": "./.jabba", "HOME": os.getcwd()})
-                subprocess.call("./.jabba/bin/jabba install zulu@1.17.0-0", shell=True, env={"JABBA_HOME": "./.jabba", "JAVA_HOME": "./.jabba", "HOME": os.getcwd()})
+                download_file("https://raw.githubusercontent.com/shyiko/jabba/master/install.sh", "install_jabba.sh")
+                subprocess.call("bash install_jabba.sh", shell=True)
+                subprocess.call("./.jabba/bin/jabba install zulu@1.17.0-0", shell=True)
                 os.remove("install_jabba.sh")
 
                 java_cmd = os.path.expanduser("./.jabba/jdk/zulu@1.17.0-0/bin/java")
@@ -174,9 +174,9 @@ def run_lavalink(
                         pass
 
                     if platform.architecture()[0] != "64bit":
-                        jdk_url = "https://download.bell-sw.com/java/17.0.9+11/bellsoft-jdk17.0.9+11-linux-i586.tar.gz"
+                        jdk_url = "https://download.bell-sw.com/java/21.0.3+12/bellsoft-jdk21.0.3+12-linux-i586-lite.tar.gz"
                     else:
-                        jdk_url = "https://download.bell-sw.com/java/17.0.9+11/bellsoft-jdk17.0.9+11-linux-amd64.tar.gz"
+                        jdk_url = "https://download.bell-sw.com/java/21.0.3+12/bellsoft-jdk21.0.3+12-linux-amd64-lite.tar.gz"
 
                     java_cmd = os.path.realpath(f"./.java/{jdk_platform}/bin/java")
 
