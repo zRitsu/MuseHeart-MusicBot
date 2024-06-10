@@ -634,7 +634,7 @@ class BotPool:
             elif (token := tokens.pop()) not in all_tokens.values():
                 all_tokens[k] = token
 
-        def load_bot(bot_name: str, token: str, guild_id: str = None):
+        def load_bot(bot_name: str, token: str, guild_id: str = None, load_modules_log: bool = False):
 
             try:
                 token = token.split().pop()
@@ -802,7 +802,7 @@ class BotPool:
                     try:
                         bot.interaction_id = bot.user.id
 
-                        bot.load_modules()
+                        bot.load_modules(load_modules_log=load_modules_log)
 
                         bot.sync_command_cooldowns()
 
@@ -834,8 +834,11 @@ class BotPool:
         if len(all_tokens) > 1:
             self.single_bot = False
 
+        load_modules_log = True
+
         for k, v in all_tokens.items():
-            load_bot(k, v)
+            load_bot(k, v, load_modules_log=load_modules_log)
+            load_modules_log = False
 
         try:
             with open("guild_bots.json") as f:
@@ -847,7 +850,8 @@ class BotPool:
         else:
             for guild_id, guildbotsdata in guild_bots.items():
                 for n, guildbottoken in enumerate(guildbotsdata):
-                    load_bot(f"{guild_id}_{n}", guildbottoken, guild_id)
+                    load_bot(f"{guild_id}_{n}", guildbottoken, guild_id, load_modules_log=load_modules_log)
+                    load_modules_log = False
 
         message = ""
 
@@ -1339,7 +1343,7 @@ class BotCore(commands.AutoShardedBot):
 
         await super().on_application_command(inter)
 
-    def load_modules(self, module_list: list = None):
+    def load_modules(self, module_list: list = None, load_modules_log=False):
 
         modules_dir = ["modules", "modules_dev"]
 
@@ -1365,13 +1369,13 @@ class BotCore(commands.AutoShardedBot):
                     module_filename = os.path.join(module_dir, filename).replace('\\', '.').replace('/', '.')
                     try:
                         self.reload_extension(module_filename)
-                        if not self.bot_ready:
+                        if not self.bot_ready and load_modules_log:
                             print(f"{'=' * 48}\n🟦 - {bot_name} - {filename}.py Recarregado.")
                         load_status["reloaded"].append(f"{filename}.py")
                     except (commands.ExtensionAlreadyLoaded, commands.ExtensionNotLoaded):
                         try:
                             self.load_extension(module_filename)
-                            if not self.bot_ready:
+                            if not self.bot_ready and load_modules_log:
                                 print(f"{'=' * 48}\n🟩 - {bot_name} - {filename}.py Carregado.")
                             load_status["loaded"].append(f"{filename}.py")
                         except Exception as e:
