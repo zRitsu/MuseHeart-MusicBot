@@ -12,7 +12,7 @@ from collections import deque
 from contextlib import suppress
 from itertools import cycle
 from time import time
-from typing import Optional, Union, TYPE_CHECKING, List
+from typing import Optional, Union, TYPE_CHECKING, List, Dict
 from urllib import parse
 from urllib.parse import quote
 
@@ -510,7 +510,7 @@ class LavalinkPlayer(wavelink.Player):
         self.player_creator: Optional[int] = kwargs.pop('player_creator', None)
         self.filters: dict = {}
         self.idle_task: Optional[asyncio.Task] = None
-        self.hook_event_task: Optional[asyncio.Task] = None
+        self.hook_event_task = {}
         self.members_timeout_task: Optional[asyncio.Task] = None
         self.reconnect_voice_channel_task: Optional[asyncio.Task] = None
         self.idle_endtime: Optional[datetime.datetime] = None
@@ -779,14 +779,16 @@ class LavalinkPlayer(wavelink.Player):
         if self.is_closing:
             return
 
+        event_name = str(event)
+
         try:
-            if not self.hook_event_task.done():
+            if not self.hook_event_task[event_name].done():
                 return
-            self.hook_event_task.cancel()
+            self.hook_event_task[event_name].cancel()
         except:
             pass
 
-        self.hook_event_task = self.bot.loop.create_task(self.hook_events(event))
+        self.hook_event_task[event_name] = self.bot.loop.create_task(self.hook_events(event))
 
     async def hook_events(self, event):
 
@@ -794,7 +796,7 @@ class LavalinkPlayer(wavelink.Player):
 
         if isinstance(event, wavelink.TrackEnd):
 
-            if event.node != self.node:
+            if event.node.identifier != self.node.identifier:
                 return
 
             self.bot.dispatch("wavelink_track_end", player=self, track=self.last_track, reason=event.reason)
@@ -830,23 +832,22 @@ class LavalinkPlayer(wavelink.Player):
 
         if isinstance(event, wavelink.TrackStart):
 
-            if event.node != self.node:
+            if event.node.identifier != self.node.identifier:
                 return
 
             self.start_time = disnake.utils.utcnow()
 
             self.bot.dispatch("wavelink_track_start", player=self)
 
-            if not self.text_channel:
-                return
+            if self.text_channel:
 
-            if isinstance(self.text_channel, disnake.Thread):
-                send_message_perm = self.text_channel.parent.permissions_for(self.guild.me).send_messages_in_threads
-            else:
-                send_message_perm = self.text_channel.permissions_for(self.guild.me).send_messages
+                if isinstance(self.text_channel, disnake.Thread):
+                    send_message_perm = self.text_channel.parent.permissions_for(self.guild.me).send_messages_in_threads
+                else:
+                    send_message_perm = self.text_channel.permissions_for(self.guild.me).send_messages
 
-            if not send_message_perm:
-                self.text_channel = None
+                if not send_message_perm:
+                    self.text_channel = None
 
             if not self.guild.me.voice:
                 try:
