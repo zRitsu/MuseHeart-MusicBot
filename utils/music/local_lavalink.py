@@ -73,7 +73,7 @@ def run_lavalink(
         lavalink_ram_limit: int = 100,
         lavalink_additional_sleep: int = 0,
         lavalink_cpu_cores: int = 1,
-        use_jabba: bool = True
+        use_jabba: bool = False
 ):
     arch, osname = platform.architecture()
     jdk_platform = f"{platform.system()}-{arch}-{osname}"

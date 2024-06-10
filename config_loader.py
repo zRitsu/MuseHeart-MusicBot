@@ -89,7 +89,7 @@ DEFAULT_CONFIG = {
     ##################################################
     "RUN_LOCAL_LAVALINK": False,
     "CONNECT_LOCAL_LAVALINK": True,
-    "USE_JABBA": True,
+    "USE_JABBA": False,
     "LAVALINK_ADDITIONAL_SLEEP": 0,
     "LAVALINK_INITIAL_RAM": 30,
     "LAVALINK_RAM_LIMIT": 120,
