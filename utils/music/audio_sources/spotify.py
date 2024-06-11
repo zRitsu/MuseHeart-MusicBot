@@ -58,6 +58,9 @@ class SpotifyClient:
                 elif response.status == 401:
                     await self.get_access_token()
                     return await self.request(path=path, params=params)
+                elif response.status == 404:
+                    raise GenericError("**Não houve resultado para o link informado (confira se o link está correto ou se o conteúdo dele está privado ou se foi deletado).**\n\n"
+                                       f"{str(response.url).replace('api.', 'open.').replace('/v1/', '/').replace('s/', '/')}")
                 elif response.status == 429:
                     self.disabled = True
                     print(f"⚠️ - Spotify: Suporte interno desativado devido a ratelimit (429).")
