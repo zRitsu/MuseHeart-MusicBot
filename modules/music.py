@@ -5951,6 +5951,10 @@ class Music(commands.Cog):
             error = f"{message.author.mention}. {e}"
 
         except Exception as e:
+
+            if isinstance(e, PoolException):
+                return
+
             try:
                 error_msg, full_error_msg, kill_process, components, mention_author = parse_error(ctx, e)
             except:
