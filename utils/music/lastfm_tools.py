@@ -98,6 +98,17 @@ class LastFM:
         params['api_sig'] = self.generate_api_sig(params)
     
         return await self.post_lastfm(params)
+
+    async def search_track(self, track: str, artist: str = None, limit: int = 30):
+        params = {
+            'method': 'track.search',
+            'track': track,
+            'api_key': self.api_key,
+            'limit': limit
+        }
+        if artist:
+            params['artist'] = artist
+        return (await self.request_lastfm(params))['results']['trackmatches']['track']
     
     async def track_love(self, track: str, artist: str, session_key: str):
         params = {
@@ -210,3 +221,11 @@ class LastFM:
                 'limit': limit,
                 'api_key': self.api_key,
             }))['topalbums']['album']
+
+    async def user_top_tags(self, user: str):
+        return (await self.request_lastfm(
+            params = {
+                'method': 'user.getTopTags',
+                'user': user,
+                'api_key': self.api_key,
+            }))['toptags']['tag']

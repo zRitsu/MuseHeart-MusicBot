@@ -96,6 +96,11 @@ class SpotifyClient:
             'seed_tracks': track_ids, 'limit': limit
         })
 
+    async def track_search(self, query: str):
+        return await self.request(path='search', params = {
+        'q': query, 'type': 'track', 'limit': 10
+        })
+
     async def get_access_token(self):
 
         if not self.client_id or not self.client_secret:
