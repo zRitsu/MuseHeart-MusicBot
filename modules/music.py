@@ -2056,11 +2056,11 @@ class Music(commands.Cog):
 
             if player.queue:
                 track: LavalinkTrack = player.queue[index]
-                player.queue.append(player.last_track)
+                player.queue.append(player.last_track or player.current)
             else:
                 track: LavalinkTrack = player.queue_autoplay[index]
                 index += 1
-                player.queue_autoplay.appendleft(player.last_track)
+                player.queue_autoplay.appendleft(player.last_track or player.current)
 
             player.last_track = None
 
