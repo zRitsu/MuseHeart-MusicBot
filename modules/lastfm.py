@@ -134,6 +134,7 @@ class LastFmCog(commands.Cog):
 
     @commands.slash_command(hidden=True, name="lastfm",
                       description=f"{desc_prefix}Conectar sua conta do last.fm",
+                      extras={"allow_private": True},
                       cooldown=lastfm_cd, max_concurrency=lastfm_mc)
     async def lastfm(
             self, inter: disnake.AppCmdInter,
