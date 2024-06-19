@@ -5111,7 +5111,7 @@ class Music(commands.Cog):
                         player = p
                         bot = b
                         channel = player.text_channel
-                        author = channel.guild.get_member(interaction.author.id)
+                        author = p.guild.get_member(interaction.author.id)
                         break
 
                 if not channel:
