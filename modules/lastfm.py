@@ -458,6 +458,9 @@ class LastFmCog(commands.Cog):
 
         if track.info["sourceName"] in ("youtube", "soundcloud"):
 
+            if not track.album_name:
+                return
+
             if track.ytid:
                 if track.author.endswith(" - topic") and not track.author.endswith("Release - topic") and not track.title.startswith(track.author[:-8]):
                     name = track.title
