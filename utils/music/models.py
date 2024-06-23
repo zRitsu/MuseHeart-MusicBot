@@ -948,13 +948,9 @@ class LavalinkPlayer(wavelink.Player):
                     await self.process_next(start_position=self.position)
 
                 else:
-                    try:
-                        self._new_node_task.cancel()
-                    except:
-                        pass
-                    self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node(
-                        f"O servidor de música **{self.node.identifier}** está indisponível no momento "
-                        f"(aguardando um novo servidor ficar disponível)."))
+                    await asyncio.sleep(10)
+                    self.current = track
+                    await self.play(track=track, start=self.position)
                 return
 
             if (youtube_exception := (event.error == "This IP address has been blocked by YouTube (429)" or
