@@ -86,7 +86,7 @@ class DeezerClient:
             if result['title'] != result['album']['title']:
                 t.info["extra"]["album"] = {
                     "name": result['album']['title'],
-                    "url": result['album']['tracklist']
+                    "url": result['album']['tracklist'].replace("https://api.", "https://")
                 }
 
             return [t]
@@ -138,7 +138,7 @@ class DeezerClient:
                 if result['title'] != result_track['title']:
                     result_track.info["extra"]["album"] = {
                         "name": result['title'],
-                        "url": result['tracklist']
+                        "url": result['tracklist'].replace("https://api.", "https://")
                     }
 
                 return [t]
@@ -211,7 +211,7 @@ class DeezerClient:
             if t['title'] != t['album']['title']:
                 track.info["extra"]["album"] = {
                     "name": t['album']['title'],
-                    "url": t['album']['tracklist']
+                    "url": t['album']['tracklist'].replace("https://api.", "https://")
                 }
 
             playlist.tracks.append(track)
