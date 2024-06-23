@@ -6785,7 +6785,7 @@ class Music(commands.Cog):
         if not nodes:
             raise GenericError("**Não há servidores de música disponível!**")
 
-        tracks = await process_spotify(self.bot, user.id, query)
+        tracks = await process_spotify(self.bot, user.id, query) or await self.bot.pool.deezer.get_tracks(user.id, query)
 
         if not tracks and (bot.pool.config["FORCE_USE_DEEZER_CLIENT"] or [n for n in bot.music.nodes.values() if "deezer" in n.info.get("sourceManagers", [])]):
             tracks = await bot.deezer.get_tracks(url=query, requester=user.id)
