@@ -3044,16 +3044,14 @@ class LavalinkPlayer(wavelink.Player):
 
             stats["user"] = u
 
-            try:
-                token = self.bot.pool.rpc_token_cache[u]
-            except KeyError:
-                data = await self.bot.get_global_data(id_=u, db_name=DBModel.users)
-                token = data["token"]
+            data = await self.bot.get_global_data(id_=u, db_name=DBModel.users)
 
-            if self.bot.config["ENABLE_RPC_AUTH"] and not token:
+            if self.bot.config["ENABLE_RPC_AUTH"] and not data["token"]:
                 continue
 
-            stats["token"] = token
+            stats.update(
+                {"token": data["token"], "lastfm_user": data["lastfm"]["username"]}
+            )
 
             try:
                 await self.bot.ws_client.send(stats)

@@ -83,7 +83,6 @@ class BotPool:
         self.message_ids: dict = {}
         self.bot_mentions = set()
         self.single_bot = True
-        self.rpc_token_cache: dict = {}
         self.failed_bots: dict = {}
         self.current_useragent = self.reset_useragent()
         self.processing_gc: bool = False
@@ -1001,21 +1000,9 @@ class BotCore(commands.AutoShardedBot):
             id_=id_, db_name=db_name, collection="global", default_model=global_db_models
         )
 
-        if db_name == DBModel.users:
-            try:
-                self.pool.rpc_token_cache[int(id_)] = data["token"]
-            except KeyError:
-                pass
-
         return data
 
     async def update_global_data(self, id_, data: dict, *, db_name: Union[DBModel.guilds, DBModel.users]):
-
-        if db_name == DBModel.users:
-            try:
-                self.pool.rpc_token_cache[int(id_)] = data["token"]
-            except KeyError:
-                pass
 
         return await self.pool.database.update_data(
             id_=id_, data=data, db_name=db_name, collection="global", default_model=global_db_models
