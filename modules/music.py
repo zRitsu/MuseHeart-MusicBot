@@ -2991,10 +2991,15 @@ class Music(commands.Cog):
         player: Optional[LavalinkPlayer] = None
 
         for bot in self.bot.pool.get_guild_bots(inter.guild_id):
+
             try:
                 p = bot.music.players[inter.guild_id]
             except KeyError:
                 continue
+
+            if not p.last_channel:
+                continue
+
             if inter.author.id in p.last_channel.voice_states:
                 player = p
                 break
