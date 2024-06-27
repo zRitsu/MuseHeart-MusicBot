@@ -3997,10 +3997,10 @@ class Music(commands.Cog):
     async def move(
             self,
             inter: disnake.AppCmdInter,
-            position: int = commands.Param(name="posição", description="Posição de destino na fila (Opcional).",
-                                           min_value=1, max_value=900, default=1),
             song_name: str = commands.Param(name="nome", description="Incluir um nome que tiver na música.",
                                             default=None),
+            position: int = commands.Param(name="posição", description="Posição de destino na fila (Opcional).",
+                                           min_value=1, max_value=900, default=1),
             song_author: str = commands.Param(name="uploader",
                                               description="Incluir um nome que tiver no autor/artista/uploader da música.",
                                               default=None),
