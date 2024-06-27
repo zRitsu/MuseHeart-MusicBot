@@ -6790,119 +6790,117 @@ class Music(commands.Cog):
         if not nodes:
             raise GenericError("**Não há servidores de música disponível!**")
 
-        tracks = []
-
-        if (bot.pool.config["FORCE_USE_DEEZER_CLIENT"] or [n for n in bot.music.nodes.values() if "deezer" in n.info.get("sourceManagers", [])]):
-            tracks = await self.bot.pool.deezer.get_tracks(url=query, requester=user.id)
-
-        if not tracks:
-            tracks = await self.bot.pool.spotify.get_tracks(self.bot, user.id, query)
-
         exceptions = set()
 
         is_yt_source = False
 
+        tracks = []
+
+        if use_cache:
+            try:
+                tracks = self.bot.pool.playlist_cache[query]
+            except KeyError:
+                pass
+            else:
+                playlist = tracks[0].playlist
+                playlist.tracks = tracks
+                tracks = playlist
+
         if not tracks:
 
-            if use_cache:
-                try:
-                    tracks = self.bot.pool.playlist_cache[query]
-                except KeyError:
-                    pass
+            is_yt_source = query.lower().startswith(
+                ("https://youtu.be", "https://www.youtube.com", "https://music.youtube.com")
+            )
+
+            for n in nodes:
+
+                node_retry = False
+
+                if source is False:
+                    providers = [n.search_providers[:1]]
+                    if query.startswith("https://www.youtube.com/live/"):
+                        query = query.split("?")[0].replace("/live/", "/watch?v=")
+
+                    elif query.startswith("https://listen.tidal.com/album/") and "/track/" in query:
+                        query = f"http://www.tidal.com/track/{query.split('/track/')[-1]}"
+
+                    elif query.startswith(("https://youtu.be/", "https://www.youtube.com/")):
+
+                        for p in ("&ab_channel=", "&start_radio="):
+                            if p in query:
+                                try:
+                                    query = f'https://www.youtube.com/watch?v={re.search(r"v=([a-zA-Z0-9_-]+)", query).group(1)}'
+                                except:
+                                    pass
+                                break
+                elif source:
+                    providers = [s for s in n.search_providers if s != source]
+                    providers.insert(0, source)
                 else:
-                    playlist = tracks[0].playlist
-                    playlist.tracks = tracks
-                    tracks = playlist
+                    source = True
+                    providers = n.search_providers
 
-            if not tracks:
+                for search_provider in providers:
 
-                is_yt_source = query.lower().startswith(
-                    ("https://youtu.be", "https://www.youtube.com", "https://music.youtube.com")
-                )
-
-                for n in nodes:
-
-                    node_retry = False
-
-                    if source is False:
-                        providers = [n.search_providers[:1]]
-                        if query.startswith("https://www.youtube.com/live/"):
-                            query = query.split("?")[0].replace("/live/", "/watch?v=")
-
-                        elif query.startswith("https://listen.tidal.com/album/") and "/track/" in query:
-                            query = f"http://www.tidal.com/track/{query.split('/track/')[-1]}"
-
-                        elif query.startswith(("https://youtu.be/", "https://www.youtube.com/")):
-
-                            for p in ("&ab_channel=", "&start_radio="):
-                                if p in query:
-                                    try:
-                                        query = f'https://www.youtube.com/watch?v={re.search(r"v=([a-zA-Z0-9_-]+)", query).group(1)}'
-                                    except:
-                                        pass
-                                    break
-                    elif source:
-                        providers = [s for s in n.search_providers if s != source]
-                        providers.insert(0, source)
-                    else:
-                        source = True
-                        providers = n.search_providers
-
-                    for search_provider in providers:
-
+                    try:
                         search_query = f"{search_provider}:{query}" if source else query
+                        tracks = await n.get_tracks(
+                            search_query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
+                        )
+                    except Exception as e:
+                        exceptions.add(repr(e))
+                        if [e for e in ("Video returned by YouTube isn't what was requested", "The video returned is not what was requested.") if e in str(e)]:
 
-                        try:
-                            tracks = await n.get_tracks(
-                                search_query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
-                            )
-                        except Exception as e:
-                            exceptions.add(repr(e))
-                            if [e for e in ("Video returned by YouTube isn't what was requested", "The video returned is not what was requested.") if e in str(e)]:
+                            if is_yt_source and n.version > 3:
+                                try:
+                                    n.search_providers.remove("ytsearch")
+                                except:
+                                    pass
+                                try:
+                                    n.search_providers.remove("ytmsearch")
+                                except:
+                                    pass
 
-                                if is_yt_source and n.version > 3:
-                                    try:
-                                        n.search_providers.remove("ytsearch")
-                                    except:
-                                        pass
-                                    try:
-                                        n.search_providers.remove("ytmsearch")
-                                    except:
-                                        pass
+                            if is_yt_source:
+                                node_retry = True
+                                break
 
-                                if is_yt_source:
-                                    node_retry = True
-                                    break
+                        if not isinstance(e, wavelink.TrackNotFound):
+                            print(f"Falha ao processar busca...\n{query}\n{traceback.format_exc()}")
 
-                            if not isinstance(e, wavelink.TrackNotFound):
-                                print(f"Falha ao processar busca...\n{query}\n{traceback.format_exc()}")
-
-                        if tracks or not source:
-                            break
-
-                    if not node_retry:
-                        node = n
+                    if tracks or not source:
                         break
 
+                if not node_retry:
+                    node = n
+                    break
+
         if not tracks:
 
-            txt = "\n".join(exceptions)
+            if (bot.pool.config["FORCE_USE_DEEZER_CLIENT"] or [n for n in bot.music.nodes.values() if "deezer" in n.info.get("sourceManagers", [])]):
+                tracks = await self.bot.pool.deezer.get_tracks(url=query, requester=user.id)
 
-            if is_yt_source and "Video returned by YouTube isn't what was requested" in txt:
-                raise YoutubeSourceDisabled()
+            if not tracks:
+                tracks = await self.bot.pool.spotify.get_tracks(self.bot, user.id, query)
 
-            if txt:
+                if not tracks:
 
-                if "This track is not readable. Available countries:" in txt:
-                    txt = "A música informada não está disponível na minha região atual..."
-                raise GenericError(f"**Ocorreu um erro ao processar sua busca:** \n{txt}", error=txt)
-            raise GenericError("**Não houve resultados para sua busca.**")
+                    txt = "\n".join(exceptions)
+
+                    if is_yt_source and "Video returned by YouTube isn't what was requested" in txt:
+                        raise YoutubeSourceDisabled()
+
+                    if txt:
+
+                        if "This track is not readable. Available countries:" in txt:
+                            txt = "A música informada não está disponível na minha região atual..."
+                        raise GenericError(f"**Ocorreu um erro ao processar sua busca:** \n{txt}", error=txt)
+                    raise GenericError("**Não houve resultados para sua busca.**")
 
         if isinstance(tracks, list):
             tracks[0].info["extra"]["track_loops"] = track_loops
 
         else:
-
             if (selected := tracks.data['playlistInfo']['selectedTrack']) > 0:
                 tracks.tracks = tracks.tracks[selected:] + tracks.tracks[:selected]
 
