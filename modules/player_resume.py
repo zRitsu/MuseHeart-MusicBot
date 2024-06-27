@@ -361,7 +361,7 @@ class PlayerSession(commands.Cog):
 
             db_date = data.get("time")
 
-            if not db_date or (not guild and (disnake.utils.utcnow() - db_date)).total_seconds() > 172800:
+            if not db_date or (not guild and ((disnake.utils.utcnow() - db_date)).total_seconds() > 172800):
                 print(f"{self.bot.user} - Limpando informações do player: {data['_id']}")
                 await self.delete_data(data["_id"])
                 return
