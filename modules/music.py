@@ -1605,7 +1605,7 @@ class Music(commands.Cog):
 
         if isinstance(tracks, list):
 
-            if not queue_loaded and (tracks[0].info['sourceName'] == "deezer" or (manual_selection and len(tracks) > 1)):
+            if not queue_loaded and len(tracks) > 1 and (tracks[0].info['sourceName'] == "deezer" or manual_selection):
 
                 embed.description = f"**Selecione a(s) música(s) desejada(s) abaixo:**"
 
