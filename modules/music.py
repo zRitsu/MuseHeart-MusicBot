@@ -24,7 +24,7 @@ import wavelink
 from utils.client import BotCore
 from utils.db import DBModel
 from utils.music.audio_sources.deezer import deezer_regex
-from utils.music.audio_sources.spotify import process_spotify, spotify_regex_w_user
+from utils.music.audio_sources.spotify import spotify_regex_w_user
 from utils.music.checks import check_voice, has_player, has_source, is_requester, is_dj, \
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen, check_pool_bots, \
     check_channel_limit, check_stage_topic, check_queue_loading, check_player_perm
@@ -6790,7 +6790,7 @@ class Music(commands.Cog):
         if not nodes:
             raise GenericError("**Não há servidores de música disponível!**")
 
-        tracks = await process_spotify(self.bot, user.id, query) or await self.bot.pool.deezer.get_tracks(user.id, query)
+        tracks = await self.bot.pool.deezer.get_tracks(user.id, query) or await self.bot.spotify.get_tracks(self.bot, user.id, query)
 
         if not tracks and (bot.pool.config["FORCE_USE_DEEZER_CLIENT"] or [n for n in bot.music.nodes.values() if "deezer" in n.info.get("sourceManagers", [])]):
             tracks = await bot.deezer.get_tracks(url=query, requester=user.id)

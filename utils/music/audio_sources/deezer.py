@@ -5,7 +5,7 @@ import re
 
 from aiohttp import ClientSession
 
-from utils.music.converters import fix_characters
+from utils.music.converters import fix_characters, URL_REG
 from utils.music.errors import GenericError
 from utils.music.models import PartialTrack, PartialPlaylist
 
@@ -47,10 +47,55 @@ class DeezerClient:
     async def get_artist_radio_info(self, artist_id):
         return (await self.request(path=f"artist/{artist_id}/radio"))['data']
 
+    async def track_search(self, query):
+        return await self.request(path="search", params={'q': query})
+
     async def get_tracks(self, requester: int, url: str):
 
         if not (matches := deezer_regex.match(url)):
-            return
+
+            if URL_REG.match(url):
+                return
+
+            r = await self.track_search(query=url)
+
+            try:
+                tracks_result = r['data']
+            except KeyError:
+                return
+            else:
+                tracks = []
+
+                for result in tracks_result:
+                    t = PartialTrack(
+                        uri=result['link'],
+                        author=result['artist']['name'],
+                        title=result['title'],
+                        thumb=result['album']['cover_big'],
+                        duration=result['duration'] * 1000,
+                        source_name="deezer",
+                        identifier=result['id'],
+                        requester=requester
+                    )
+
+                    t.info["isrc"] = result.get('isrc')
+                    artists = result.get('contributors') or [result['artist']]
+
+                    t.info["extra"]["authors"] = [a['name'] for a in artists]
+                    t.info["extra"]["authors_md"] = ", ".join(
+                        f"[`{fix_characters(a['name'])}`](https://www.deezer.com/artist/{a['id']})" for a in
+                        artists)
+                    t.info["extra"]["artist_id"] = result['artist']['id']
+
+                    if result['title'] != result['album']['title']:
+                        t.info["extra"]["album"] = {
+                            "name": result['album']['title'],
+                            "url": result['album']['tracklist'].replace("https://api.", "https://")
+                        }
+
+                    tracks.append(t)
+
+                return tracks
 
         if url.startswith("https://deezer.page.link/"):
             async with ClientSession() as session:
