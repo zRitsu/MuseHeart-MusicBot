@@ -1462,14 +1462,17 @@ class Music(commands.Cog):
                 if not self.bot.config["ENABLE_DISCORD_URLS_PLAYBACK"] and "cdn.discordapp.com/attachments/" in query:
                     raise GenericError("**O suporte a links do discord está desativado.**")
 
-                if query.startswith("https://www.youtube.com/results"):
+                if query.startswith(("https://deezer.page.link/", "https://www.deezer.com/")):
+                    manual_selection = True
+
+                elif query.startswith("https://www.youtube.com/results"):
                     try:
                         query = f"ytsearch:{parse_qs(urlparse(query).query)['search_query'][0]}"
                     except:
                         raise GenericError(f"**Não há suporte para o link informado:** {query}")
                     manual_selection = True
 
-                if "&list=" in query and (link_re := YOUTUBE_VIDEO_REG.match(query)):
+                elif "&list=" in query and (link_re := YOUTUBE_VIDEO_REG.match(query)):
 
                     view = SelectInteraction(
                         user=inter.author,
@@ -6790,10 +6793,13 @@ class Music(commands.Cog):
         if not nodes:
             raise GenericError("**Não há servidores de música disponível!**")
 
-        tracks = await self.bot.pool.deezer.get_tracks(user.id, query) or await self.bot.spotify.get_tracks(self.bot, user.id, query)
+        tracks = []
 
-        if not tracks and (bot.pool.config["FORCE_USE_DEEZER_CLIENT"] or [n for n in bot.music.nodes.values() if "deezer" in n.info.get("sourceManagers", [])]):
-            tracks = await bot.deezer.get_tracks(url=query, requester=user.id)
+        if (bot.pool.config["FORCE_USE_DEEZER_CLIENT"] or [n for n in bot.music.nodes.values() if "deezer" in n.info.get("sourceManagers", [])]):
+            tracks = await self.bot.pool.deezer.get_tracks(url=query, requester=user.id)
+
+        if not tracks:
+            tracks = await self.bot.pool.spotify.get_tracks(self.bot, user.id, query)
 
         exceptions = set()
 
