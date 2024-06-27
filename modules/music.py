@@ -1462,10 +1462,7 @@ class Music(commands.Cog):
                 if not self.bot.config["ENABLE_DISCORD_URLS_PLAYBACK"] and "cdn.discordapp.com/attachments/" in query:
                     raise GenericError("**O suporte a links do discord está desativado.**")
 
-                if query.startswith(("https://deezer.page.link/", "https://www.deezer.com/")):
-                    manual_selection = True
-
-                elif query.startswith("https://www.youtube.com/results"):
+                if query.startswith("https://www.youtube.com/results"):
                     try:
                         query = f"ytsearch:{parse_qs(urlparse(query).query)['search_query'][0]}"
                     except:
@@ -1608,7 +1605,7 @@ class Music(commands.Cog):
 
         if isinstance(tracks, list):
 
-            if manual_selection and not queue_loaded and len(tracks) > 1:
+            if not queue_loaded and (tracks[0].info['sourceName'] == "deezer" or (manual_selection and len(tracks) > 1)):
 
                 embed.description = f"**Selecione a(s) música(s) desejada(s) abaixo:**"
 
