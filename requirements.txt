@@ -17,4 +17,3 @@ emoji
 urllib3>=2.1.0
 async-timeout
 cachetools
-setuptools>=70.0.0
