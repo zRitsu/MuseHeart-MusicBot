@@ -4689,8 +4689,12 @@ class Music(commands.Cog):
         if not interaction:
             interaction = inter
 
-        if not interaction.response.is_done():
-            await interaction.response.defer(ephemeral=True)
+        cog = self.bot.get_cog("Music")
+
+        if cog:
+            await inter.response.defer(ephemeral=await cog.is_request_channel(inter, ignore_thread=True))
+        else:
+            await inter.response.defer(ephemeral=True)
 
         user_data = await bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
