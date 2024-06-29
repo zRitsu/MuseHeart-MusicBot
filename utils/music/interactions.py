@@ -1208,6 +1208,7 @@ class FavMenuView(disnake.ui.View):
         self.prefix = prefix
         self.components_updater_task = bot.loop.create_task(self.auto_update())
         self.is_owner = is_owner
+        self.light_mode = False
 
         if not self.guild:
             for b in self.bot.pool.get_guild_bots(ctx.guild_id):
@@ -1216,32 +1217,37 @@ class FavMenuView(disnake.ui.View):
                     self.guild = guild
                     break
 
+            if not self.guild:
+                self.light_mode = True
+
     def update_components(self):
 
         self.clear_items()
 
-        mode_select = disnake.ui.Select(
-            options=[
-                disnake.SelectOption(label="Gerenciador de Favoritos", value=f"fav_view_mode_{ViewMode.fav_manager}", emoji="⭐",
-                                     default=self.mode == ViewMode.fav_manager)
-            ], min_values=1, max_values=1
-        )
+        if not self.light_mode:
 
-        mode_select.append_option(
-            disnake.SelectOption(label="Gerenciador de Integrações", value=f"fav_view_mode_{ViewMode.integrations_manager}", emoji="💠",
-                                 default=self.mode == ViewMode.integrations_manager)
-        )
+            mode_select = disnake.ui.Select(
+                options=[
+                    disnake.SelectOption(label="Gerenciador de Favoritos", value=f"fav_view_mode_{ViewMode.fav_manager}", emoji="⭐",
+                                         default=self.mode == ViewMode.fav_manager)
+                ], min_values=1, max_values=1
+            )
 
-        if self.guild and (self.ctx.author.guild_permissions.manage_guild or self.is_owner):
-            mode_select.options.insert(1, disnake.SelectOption(label="Gerenciador de Playlists do Servidor",
-                                                               value=f"fav_view_mode_{ViewMode.guild_fav_manager}", emoji="📌",
-                                                               default=self.mode == ViewMode.guild_fav_manager))
+            mode_select.append_option(
+                disnake.SelectOption(label="Gerenciador de Integrações", value=f"fav_view_mode_{ViewMode.integrations_manager}", emoji="💠",
+                                     default=self.mode == ViewMode.integrations_manager)
+            )
 
-        if len(mode_select.options) < 2:
-            mode_select.disabled = True
+            if self.guild and (self.ctx.author.guild_permissions.manage_guild or self.is_owner):
+                mode_select.options.insert(1, disnake.SelectOption(label="Gerenciador de Playlists do Servidor",
+                                                                   value=f"fav_view_mode_{ViewMode.guild_fav_manager}", emoji="📌",
+                                                                   default=self.mode == ViewMode.guild_fav_manager))
 
-        mode_select.callback = self.mode_callback
-        self.add_item(mode_select)
+            if len(mode_select.options) < 2:
+                mode_select.disabled = True
+
+            mode_select.callback = self.mode_callback
+            self.add_item(mode_select)
 
         if self.mode == ViewMode.fav_manager:
 
@@ -1352,7 +1358,7 @@ class FavMenuView(disnake.ui.View):
         self.add_item(import_button)
 
         if self.mode == ViewMode.fav_manager:
-            if self.data["fav_links"]:
+            if self.data["fav_links"] and not self.light_mode:
                 play_button = disnake.ui.Button(label="Tocar o favorito selecionado", emoji="▶", custom_id="favmanager_play_button")
                 play_button.callback = self.play_callback
                 self.add_item(play_button)
@@ -1455,11 +1461,12 @@ class FavMenuView(disnake.ui.View):
                     f"> {format_fav(n+1, d)}" for n, d in enumerate(islice(self.data["fav_links"].items(), 25))
                 )
 
-            embed.add_field(name="**Como usá-los?**", inline=False,
-                            value=f"* Usando o comando {cmd} (selecionando o favorito no preenchimento automático da busca)\n"
-                                  "* Clicando no botão/select de tocar favorito/integração do player.\n"
-                                  f"* Usando o comando {self.prefix}{self.bot.get_cog('Music').play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n"
-                                  "* Usando o botão de tocar favorito abaixo.")
+            if not self.light_mode:
+                embed.add_field(name="**Como usá-los?**", inline=False,
+                                value=f"* Usando o comando {cmd} (selecionando o favorito no preenchimento automático da busca)\n"
+                                      "* Clicando no botão/select de tocar favorito/integração do player.\n"
+                                      f"* Usando o comando {self.prefix}{self.bot.get_cog('Music').play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n"
+                                      "* Usando o botão de tocar favorito abaixo.")
 
         elif self.mode == ViewMode.guild_fav_manager:
             embed = disnake.Embed(
