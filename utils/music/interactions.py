@@ -1521,7 +1521,7 @@ class FavMenuView(disnake.ui.View):
             txt += f"\n**Última interação:**\n{self.log}\n"
 
         if self.mode == ViewMode.integrations_manager:
-            txt += f"**Links de perfis/canais suportados:**\n{', '.join(supported_platforms)}"
+            txt += f"\n**Links de perfis/canais suportados:**\n{', '.join(supported_platforms)}"
 
         return txt
 
