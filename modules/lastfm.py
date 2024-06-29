@@ -11,6 +11,7 @@ from aiohttp import ClientSession
 from disnake.ext import commands
 
 from utils.db import DBModel
+from utils.music.errors import GenericError
 from utils.music.lastfm_tools import LastFmException
 from utils.music.models import LavalinkPlayer, LavalinkTrack
 from utils.others import CustomContext, CommandArgparse
@@ -143,6 +144,12 @@ class LastFmCog(commands.Cog):
                 default=0, min_value=0, max_value=7
             ),
     ):
+
+        try:
+            if not inter.permissions.embed_links:
+                raise GenericError(f"**Você não possui permissão de inserir links/anexos no canal <#{inter.channel_id}>**")
+        except AttributeError:
+            pass
 
         cog = self.bot.get_cog("Music")
 

@@ -1385,9 +1385,9 @@ class FavMenuView(disnake.ui.View):
             self.log = f"{url} foi adicionado nos seus favoritos."
 
             if not isinstance(self.ctx, CustomContext):
-                await self.ctx.edit_original_message(embed=self.build_embed(), view=self)
+                await self.ctx.edit_original_message(content=self.build_txt(), view=self)
             elif self.message:
-                await self.message.edit(embed=self.build_embed(), view=self)
+                await self.message.edit(content=self.build_txt(), view=self)
 
     async def on_timeout(self):
 
@@ -1419,7 +1419,7 @@ class FavMenuView(disnake.ui.View):
 
         self.stop()
 
-    def build_embed(self):
+    def build_txt(self):
 
         supported_platforms = []
 
@@ -1441,96 +1441,89 @@ class FavMenuView(disnake.ui.View):
             cmd = "/play"
 
         if self.mode == ViewMode.fav_manager:
-            embed = disnake.Embed(
-                title="Gerenciador de favoritos.",
-                colour=self.bot.get_color(),
-            )
+
+            txt = "### Gerenciador de favoritos.\n"
 
             if not self.data["fav_links"]:
-                embed.description = "Você não possui favoritos (clique no botão de adicionar abaixo)."
+                txt += "Você não possui favoritos (clique no botão de adicionar abaixo).\n"
 
             else:
                 def format_fav(index, data):
                     name, url = data
                     e = get_source_emoji_cfg(self.bot, url)
                     if e:
-                        return f"` {index:02} ` {e} [`{name}`]({url})"
-                    return f"` {index:02} ` [`{name}`]({url})"
+                        return f"` {index:02} ` {e} [`{name}`](<{url}>)"
+                    return f"` {index:02} ` [`{name}`](<{url}>)"
 
-                embed.description = f"**Seus favoritos atuais:**\n\n" + "\n".join(
+                txt += "\n".join(
                     f"> {format_fav(n+1, d)}" for n, d in enumerate(islice(self.data["fav_links"].items(), 25))
                 )
 
             if not self.light_mode:
-                embed.add_field(name="**Como usá-los?**", inline=False,
-                                value=f"* Usando o comando {cmd} (selecionando o favorito no preenchimento automático da busca)\n"
-                                      "* Clicando no botão/select de tocar favorito/integração do player.\n"
-                                      f"* Usando o comando {self.prefix}{self.bot.get_cog('Music').play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n"
-                                      "* Usando o botão de tocar favorito abaixo.")
+                txt += "\n\n**Como usá-los?**\n" \
+                       f"* Usando o comando {cmd} (selecionando o favorito no preenchimento automático da busca)\n" \
+                        "* Clicando no botão/select de tocar favorito/integração do player.\n" \
+                        f"* Usando o comando {self.prefix}{self.bot.get_cog('Music').play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n" \
+                        "* Usando o botão de tocar favorito abaixo.\n"
 
         elif self.mode == ViewMode.guild_fav_manager:
-            embed = disnake.Embed(
-                title="Gerenciador de favoritos do servidor.",
-                colour=self.bot.get_color(),
-            )
-            embed.set_author(name=f"Bot selecionado: {self.bot.user.display_name}", icon_url=self.bot.user.display_avatar.url)
+
+            txt = "### Gerenciador de favoritos do servidor.\n"
 
             if not self.guild_data["player_controller"]["fav_links"]:
-                embed.description = f"Não há links adicionados no bot {self.bot.user.mention} (clique no botão de adicionar abaixo)."
+                txt += f"Não há links adicionados no bot {self.bot.user.mention} (clique no botão de adicionar abaixo).\n"
 
             else:
                 def format_gfav(index, data):
                     name, data = data
                     e = get_source_emoji_cfg(self.bot, data['url'])
                     if e:
-                        return f"` {index:02} ` {e} [`{name}`]({data['url']})"
-                    return f"` {index:02} ` [`{name}`]({data['url']})"
+                        return f"` {index:02} ` {e} [`{name}`](<{data['url']}>)"
+                    return f"` {index:02} ` [`{name}`](<{data['url']}>)"
 
-                embed.description = f"**Links atuais no bot {self.bot.user.mention}:**\n\n" + "\n".join(
+                txt += f"**Links atuais no bot {self.bot.user.mention}:**\n" + "\n".join(
                     f"> {format_gfav(n+1, d)}" for n, d in enumerate(islice(self.guild_data["player_controller"]["fav_links"].items(), 25))
                 )
 
-            embed.add_field(name="**Como usá-los?**", inline=False,
-                            value=f"* Usando o menu de seleção do player durante o modo de espera.")
+                txt += "\n\n**Como usá-los?**\n" \
+                        f"* Usando o menu de seleção do player durante o modo de espera.\n" \
+                       f"\n`Bot selecionado:` {self.bot.user.mention}"
 
         elif self.mode == ViewMode.integrations_manager:
-            embed = disnake.Embed(
-                title="Gerenciador de integrações de canais/perfis com playlists públicas.",
-                colour=self.bot.get_color(),
-            )
+
+            txt = "### Gerenciador de integrações de canais/perfis com playlists públicas.\n"
 
             if not self.data["integration_links"]:
-                embed.description = "**Você não possui integrações no momento (clique no botão de adicionar abaixo).**"
+                txt += "**Você não possui integrações no momento (clique no botão de adicionar abaixo).**\n"
 
             else:
                 def format_itg(bot, index, data):
                     name, url = data
                     e = get_source_emoji_cfg(bot, url)
                     if e:
-                        return f"` {index:02} ` {e} [`{name[5:]}`]({url})"
-                    return f"` {index:02} ` [`{name}`]({url})"
+                        return f"` {index:02} ` {e} [`{name[5:]}`](<{url}>)"
+                    return f"` {index:02} ` [`{name}`](<{url}>)"
 
-                embed.description = f"**Suas integrações atuais:**\n\n" + "\n".join(
+                txt += f"### Suas integrações atuais:\n" + "\n".join(
                     f"> {format_itg(self.bot, n+1, d)}" for n, d in enumerate(islice(self.data["integration_links"].items(), 25)))
 
-                embed.add_field(name="**Como tocar a playlist de uma integração?**", inline=False,
-                                value=f"* Usando o comando {cmd} (selecionando a integração no preenchimento automático da busca)\n"
-                                      "* Clicando no botão/select de tocar favorito/integração do player.\n"
-                                      f"* Usando o comando {self.prefix}{self.bot.get_cog('Music').play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n"
-                                      "* Usando o botão de tocar integração abaixo.")
+                if not self.light_mode:
+                    txt += "\n\n**Como usá-los?**\n" \
+                           f"* Usando o comando {cmd} (selecionando o favorito no preenchimento automático da busca)\n" \
+                           "* Clicando no botão/select de tocar favorito/integração do player.\n" \
+                           f"* Usando o comando {self.prefix}{self.bot.get_cog('Music').play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n" \
+                           "* Usando o botão de tocar favorito abaixo.\n"
 
         else:
             raise GenericError(f"**Modo não implementado:** {self.mode} | {type(self.mode)}")
 
         if self.log:
-            embed.add_field(name="Última interação:", value=self.log)
+            txt += f"\n**Última interação:**\n{self.log}\n"
 
         if self.mode == ViewMode.integrations_manager:
-            embed.add_field(
-                name="Links de perfis/canais suportados:", inline=False,
-                value=', '.join(supported_platforms)
-            )
-        return embed
+            txt += f"**Links de perfis/canais suportados:**\n{', '.join(supported_platforms)}"
+
+        return txt
 
     async def add_callback(self, inter: disnake.MessageInteraction):
         await inter.response.send_modal(FavModalAdd(name=None, url=None, view=self))
@@ -1637,7 +1630,7 @@ class FavMenuView(disnake.ui.View):
 
             self.log = f"Integração {url} foi removida com sucesso!"
 
-        await inter.edit_original_message(embed=self.build_embed(), view=self)
+        await inter.edit_original_message(content=self.build_txt(), view=self)
 
     async def bot_select(self, inter: disnake.MessageInteraction):
 
@@ -1652,9 +1645,7 @@ class FavMenuView(disnake.ui.View):
 
         self.guild_data = await self.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
-        embed = self.build_embed()
-
-        await inter.response.edit_message(embed=embed, view=self)
+        await inter.response.edit_message(content=self.build_txt(), view=self)
 
     async def clear_callback(self, inter: disnake.MessageInteraction):
 
@@ -1743,9 +1734,9 @@ class FavMenuView(disnake.ui.View):
         self.current = None
 
         if not isinstance(self.ctx, CustomContext):
-            await self.ctx.edit_original_message(embed=self.build_embed(), view=self)
+            await self.ctx.edit_original_message(content=self.build_txt(), view=self)
         elif self.message:
-            await self.message.edit(embed=self.build_embed(), view=self)
+            await self.message.edit(content=self.build_txt(), view=self)
 
     async def import_callback(self, inter: disnake.MessageInteraction):
         await inter.response.send_modal(FavModalImport(view=self))
@@ -1846,9 +1837,9 @@ class FavMenuView(disnake.ui.View):
                 self.guild_data = await self.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         if inter.response.is_done():
-            await inter.edit_original_message(embed=self.build_embed(), view=self)
+            await inter.edit_original_message(content=self.build_txt(), view=self)
         else:
-            await inter.response.edit_message(embed=self.build_embed(), view=self)
+            await inter.response.edit_message(content=self.build_txt(), view=self)
 
     async def select_callback(self, inter: disnake.MessageInteraction):
         self.current = inter.values[0]
