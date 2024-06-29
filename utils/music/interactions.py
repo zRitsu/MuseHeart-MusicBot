@@ -1452,8 +1452,8 @@ class FavMenuView(disnake.ui.View):
                     name, url = data
                     e = get_source_emoji_cfg(self.bot, url)
                     if e:
-                        return f"` {index} ` {e} [`{name}`]({url})"
-                    return f"` {index} ` [`{name}`]({url})"
+                        return f"` {index:02} ` {e} [`{name}`]({url})"
+                    return f"` {index:02} ` [`{name}`]({url})"
 
                 embed.description = f"**Seus favoritos atuais:**\n\n" + "\n".join(
                     f"> {format_fav(n+1, d)}" for n, d in enumerate(islice(self.data["fav_links"].items(), 25))
@@ -1481,8 +1481,8 @@ class FavMenuView(disnake.ui.View):
                     name, data = data
                     e = get_source_emoji_cfg(self.bot, data['url'])
                     if e:
-                        return f"` {index} ` {e} [`{name}`]({data['url']})"
-                    return f"` {index} ` [`{name}`]({data['url']})"
+                        return f"` {index:02} ` {e} [`{name}`]({data['url']})"
+                    return f"` {index:02} ` [`{name}`]({data['url']})"
 
                 embed.description = f"**Links atuais no bot {self.bot.user.mention}:**\n\n" + "\n".join(
                     f"> {format_gfav(n+1, d)}" for n, d in enumerate(islice(self.guild_data["player_controller"]["fav_links"].items(), 25))
@@ -1505,8 +1505,8 @@ class FavMenuView(disnake.ui.View):
                     name, url = data
                     e = get_source_emoji_cfg(bot, url)
                     if e:
-                        return f"` {index} ` {e} [`{name[5:]}`]({url})"
-                    return f"` {index} ` [`{name}`]({url})"
+                        return f"` {index:02} ` {e} [`{name[5:]}`]({url})"
+                    return f"` {index:02} ` [`{name}`]({url})"
 
                 embed.description = f"**Suas integrações atuais:**\n\n" + "\n".join(
                     f"> {format_itg(self.bot, n+1, d)}" for n, d in enumerate(islice(self.data["integration_links"].items(), 25)))
