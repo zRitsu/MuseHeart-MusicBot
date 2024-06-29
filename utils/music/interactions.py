@@ -1215,8 +1215,10 @@ class FavMenuView(disnake.ui.View):
                 guild = b.get_guild(ctx.guild_id)
                 if guild:
                     self.guild = guild
-                    self.light_mode = True
                     break
+
+            if not self.guild:
+                self.light_mode = True
 
     def update_components(self):
 
