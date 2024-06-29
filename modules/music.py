@@ -4689,6 +4689,14 @@ class Music(commands.Cog):
         if not interaction:
             interaction = inter
 
+        cog = self.bot.get_cog("Music")
+
+        if cog:
+            ephemeral = await cog.is_request_channel(inter, ignore_thread=True)
+            await inter.response.defer(ephemeral=ephemeral)
+        else:
+            ephemeral = True
+
         user_data = await bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
         view = FavMenuView(bot=bot, ctx=interaction, data=user_data, prefix=prefix, mode=mode, is_owner=await bot.is_owner(inter.author))
@@ -4699,14 +4707,6 @@ class Music(commands.Cog):
         if not txt:
             raise GenericError("**Não há suporte a esse recurso no momento...**\n\n"
                              "`Suporte ao spotify e YTDL não estão ativados.`")
-
-        cog = self.bot.get_cog("Music")
-
-        if cog:
-            ephemeral = await cog.is_request_channel(inter, ignore_thread=True)
-            await inter.response.defer(ephemeral=)
-        else:
-            ephemeral = True
 
         view.message = await inter.send(txt, view=view, ephemeral=ephemeral)
 
