@@ -1821,6 +1821,7 @@ class LavalinkPlayer(wavelink.Player):
                     self.idle_endtime = disnake.utils.utcnow() + datetime.timedelta(seconds=self.bot.config["IDLE_TIMEOUT"])
                     self.last_track = None
                     self.idle_task = self.bot.loop.create_task(self.idling_mode())
+                    self.bot.dispatch("player_queue_end", player=self)
                     return
 
             except Exception:
