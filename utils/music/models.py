@@ -911,7 +911,8 @@ class LavalinkPlayer(wavelink.Player):
 
             if event.cause.startswith((
                     "java.net.SocketTimeoutException: Read timed out",
-                    "java.net.SocketException: Network is unreachable"
+                    "java.net.SocketException: Network is unreachable",
+                    "java.lang.IllegalStateException: Connection pool shut down",
             )) \
                 or (video_not_available:=event.cause.startswith((
                 "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: This video is not available",
