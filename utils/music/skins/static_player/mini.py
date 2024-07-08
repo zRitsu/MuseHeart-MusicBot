@@ -35,7 +35,7 @@ class MiniStaticSkin:
 
         embed = disnake.Embed(
             color=embed_color,
-            description=f"[`{player.current.single_title}`]({player.current.uri or player.current.search_uri})"
+            description=f"-# [`{player.current.single_title}`]({player.current.uri or player.current.search_uri})"
         )
         embed_queue = None
         queue_size = len(player.queue)
@@ -115,8 +115,8 @@ class MiniStaticSkin:
                 else:
                     duration = f"<t:{int((current_time + datetime.timedelta(milliseconds=queue_duration)).timestamp())}:R>"
 
-                    queue_txt += f"`┌ {n + 1})` [`{fix_characters(t.title, limit=34)}`]({t.uri})\n" \
-                                 f"`└ ⏲️` {duration}" + (f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
+                    queue_txt += f"-# `┌ {n + 1})` [`{fix_characters(t.title, limit=34)}`]({t.uri})\n" \
+                                 f"-# `└ ⏲️` {duration}" + (f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
                                  f" **|** `✋` <@{t.requester}>\n"
 
             embed_queue = disnake.Embed(title=f"Músicas na fila: {queue_size}",
@@ -124,7 +124,7 @@ class MiniStaticSkin:
                                         description=f"\n{queue_txt}")
 
             if not has_stream and not player.loop and not player.keep_connected and not player.paused and not player.current.is_stream:
-                embed_queue.description += f"\n`[ ⌛ As músicas acabam` <t:{int((current_time + datetime.timedelta(milliseconds=queue_duration + player.current.duration)).timestamp())}:R> `⌛ ]`"
+                embed_queue.description += f"\n-# `[ ⌛ As músicas acabam` <t:{int((current_time + datetime.timedelta(milliseconds=queue_duration + player.current.duration)).timestamp())}:R> `⌛ ]`"
 
         elif player.queue_autoplay:
 
@@ -159,8 +159,8 @@ class MiniStaticSkin:
                 else:
                     duration = f"<t:{int((current_time + datetime.timedelta(milliseconds=queue_duration)).timestamp())}:R>"
 
-                    queue_txt += f"`┌ {n + 1})` [`{fix_characters(t.title, limit=34)}`]({t.uri})\n" \
-                                 f"`└ ⏲️` {duration}" + (f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
+                    queue_txt += f"-# `┌ {n + 1})` [`{fix_characters(t.title, limit=34)}`]({t.uri})\n" \
+                                 f"-# `└ ⏲️` {duration}" + (f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
                                  f" **|** `👍⠂Recomendada`\n"
 
             embed_queue = disnake.Embed(title="Próximas músicas recomendadas:",

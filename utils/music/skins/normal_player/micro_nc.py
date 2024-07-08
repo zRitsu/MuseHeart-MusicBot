@@ -31,7 +31,7 @@ class MicroNC:
 
         embed = disnake.Embed(
             color=player.bot.get_color(player.guild.me),
-            description=f"🎶 **⠂[{fix_characters(player.current.title, 30)}]({player.current.uri or player.current.search_uri})** `[{fix_characters(player.current.author, 12)}]`"
+            description=f"-# 🎶 **⠂[{fix_characters(player.current.title, 30)}]({player.current.uri or player.current.search_uri})** `[{fix_characters(player.current.author, 12)}]`"
         )
 
         data["embeds"].append(embed)

@@ -69,20 +69,20 @@ class DefaultProgressbarSkin:
 
         vc_txt = ""
 
-        txt = f"[`{player.current.single_title}`]({player.current.uri or player.current.search_uri})\n\n" \
-              f"> 👤 **⠂** {player.current.authors_md}"
+        txt = f"-# [`{player.current.single_title}`]({player.current.uri or player.current.search_uri})\n\n" \
+              f"> -# 👤 **⠂** {player.current.authors_md}"
 
         if not player.current.autoplay:
-            txt += f"\n> ✋ **⠂** <@{player.current.requester}>"
+            txt += f"\n> -# ✋ **⠂** <@{player.current.requester}>"
         else:
             try:
                 mode = f" [`Recomendada`]({player.current.info['extra']['related']['uri']})"
             except:
                 mode = "`Recomendada`"
-            txt += f"\n> 👍 **⠂** {mode}"
+            txt += f"\n> -# 👍 **⠂** {mode}"
 
         if player.current.track_loops:
-            txt += f"\n> 🔂 **⠂** `Repetições restantes: {player.current.track_loops}`"
+            txt += f"\n> -# 🔂 **⠂** `Repetições restantes: {player.current.track_loops}`"
 
         if player.loop:
             if player.loop == 'current':
@@ -91,24 +91,24 @@ class DefaultProgressbarSkin:
             else:
                 e = '🔁'
                 m = 'Fila'
-            txt += f"\n> {e} **⠂** `Repetição: {m}`"
+            txt += f"\n> -# {e} **⠂** `Repetição: {m}`"
 
         if player.current.album_name:
-            txt += f"\n> 💽 **⠂** [`{fix_characters(player.current.album_name, limit=36)}`]({player.current.album_url})"
+            txt += f"\n> -# 💽 **⠂** [`{fix_characters(player.current.album_name, limit=36)}`]({player.current.album_url})"
 
         if player.current.playlist_name:
-            txt += f"\n> 📑 **⠂** [`{fix_characters(player.current.playlist_name, limit=36)}`]({player.current.playlist_url})"
+            txt += f"\n> -# 📑 **⠂** [`{fix_characters(player.current.playlist_name, limit=36)}`]({player.current.playlist_url})"
 
         if (qlenght:=len(player.queue)) and not player.mini_queue_enabled:
-            txt += f"\n> 🎶 **⠂** `{qlenght} música{'s'[:qlenght^1]} na fila`"
+            txt += f"\n> -# 🎶 **⠂** `{qlenght} música{'s'[:qlenght^1]} na fila`"
 
         if player.keep_connected:
-            txt += "\n> ♾️ **⠂** `Modo 24/7 ativado`"
+            txt += "\n> -# ♾️ **⠂** `Modo 24/7 ativado`"
 
         txt += f"{vc_txt}\n"
 
         if player.command_log:
-            txt += f"> {player.command_log_emoji} **⠂Última Interação:** {player.command_log}\n"
+            txt += f"> -# {player.command_log_emoji} **⠂Última Interação:** {player.command_log}\n"
 
         txt += duration
 

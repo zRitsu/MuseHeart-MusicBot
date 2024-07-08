@@ -34,7 +34,7 @@ class MicroController:
 
         embed = disnake.Embed(
             color=embed_color,
-            description=f"[`{fix_characters(player.current.single_title, 32)}`]({player.current.uri or player.current.search_uri}) "
+            description=f"-# [`{fix_characters(player.current.single_title, 32)}`]({player.current.uri or player.current.search_uri}) "
                         f"[`{fix_characters(player.current.author, 12)}`] "
         )
 
@@ -42,9 +42,9 @@ class MicroController:
             embed.description += f"<@{player.current.requester}>"
         else:
             try:
-                embed.description = f"[`[Recomendada]`]({player.current.info['extra']['related']['uri']})"
+                embed.description += f"[`[Recomendada]`]({player.current.info['extra']['related']['uri']})"
             except:
-                embed.description = "`[Recomendada]`"
+                embed.description += "`[Recomendada]`"
 
         embed.set_author(
             name="Tocando Agora:",

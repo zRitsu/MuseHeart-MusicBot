@@ -35,20 +35,20 @@ class EmbedLinkSkin:
         txt = ""
 
         if player.current_hint:
-            txt += f"> `💡` **⠂Dica:** `{player.current_hint}`"
+            txt += f"> -# `💡` **⠂Dica:** `{player.current_hint}`"
 
         if player.current.is_stream:
-            duration_txt = f"\n> `🔴` **⠂Duração:** `Livestream`"
+            duration_txt = f"\n> -# `🔴` **⠂Duração:** `Livestream`"
         else:
-            duration_txt = f"\n> `⏰` **⠂Duração:** `{time_format(player.current.duration)}`"
+            duration_txt = f"\n> -# `⏰` **⠂Duração:** `{time_format(player.current.duration)}`"
 
         title = f"`{fix_characters(player.current.title)}`" if not player.current.uri else f"[`{fix_characters(player.current.title, 40)}`]({player.current.uri})"
 
         if player.paused:
-            txt += f"\n> ⏸️ **⠂Em Pausa:** {title}{duration_txt}"
+            txt += f"\n> -# ⏸️ **⠂Em Pausa:** {title}{duration_txt}"
 
         else:
-            txt += f"\n> ▶️ **⠂Tocando Agora:** {title}{duration_txt}"
+            txt += f"\n> -# ▶️ **⠂Tocando Agora:** {title}{duration_txt}"
             if not player.current.is_stream:
                 txt += f" `[`<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`" \
                 if not player.paused else ''
@@ -68,7 +68,7 @@ class EmbedLinkSkin:
 
             log = re.sub(r"\[(.+)]\(.+\)", r"\1", player.command_log.replace("`", "")) # remover links do command_log p/ evitar gerar mais de uma preview.
 
-            txt += f"> {player.command_log_emoji} **⠂Última Interação:** {log}\n"
+            txt += f"> -# {player.command_log_emoji} **⠂Última Interação:** {log}\n"
 
         data["content"] = txt
 

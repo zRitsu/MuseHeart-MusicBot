@@ -60,45 +60,45 @@ class DefaultSkin:
 
         player.mini_queue_feature = True
 
-        duration = "> 🔴 **⠂** `Livestream`\n" if player.current.is_stream else \
-            (f"> ⏰ **⠂** `{time_format(player.current.duration)} [`" +
+        duration = "> -# 🔴 **⠂** `Livestream`\n" if player.current.is_stream else \
+            (f"> -# ⏰ **⠂** `{time_format(player.current.duration)} [`" +
             f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`\n"
             if not player.paused else '')
 
-        txt = f"[`{player.current.single_title}`]({player.current.uri or player.current.search_uri})\n\n" \
+        txt = f"-# [`{player.current.single_title}`]({player.current.uri or player.current.search_uri})\n\n" \
               f"{duration}" \
-              f"> 👤 **⠂** {player.current.authors_md}"
+              f"> -# 👤 **⠂** {player.current.authors_md}"
 
         if not player.current.autoplay:
-            txt += f"\n> ✋ **⠂** <@{player.current.requester}>"
+            txt += f"\n> -# ✋ **⠂** <@{player.current.requester}>"
         else:
             try:
                 mode = f" [`Recomendada`]({player.current.info['extra']['related']['uri']})"
             except:
                 mode = "`Recomendada`"
-            txt += f"\n> 👍 **⠂** {mode}"
+            txt += f"\n> -# 👍 **⠂** {mode}"
 
         if player.current.track_loops:
-            txt += f"\n> 🔂 **⠂** `Repetições restantes: {player.current.track_loops}`"
+            txt += f"\n> -# 🔂 **⠂** `Repetições restantes: {player.current.track_loops}`"
 
         if player.loop:
             if player.loop == 'current':
                 e = '🔂'; m = 'Música atual'
             else:
                 e = '🔁'; m = 'Fila'
-            txt += f"\n> {e} **⠂** `Repetição: {m}`"
+            txt += f"\n> -# {e} **⠂** `Repetição: {m}`"
 
         if player.current.album_name:
-            txt += f"\n> 💽 **⠂** [`{fix_characters(player.current.album_name, limit=36)}`]({player.current.album_url})"
+            txt += f"\n> -# 💽 **⠂** [`{fix_characters(player.current.album_name, limit=36)}`]({player.current.album_url})"
 
         if player.current.playlist_name:
-            txt += f"\n> 📑 **⠂** [`{fix_characters(player.current.playlist_name, limit=36)}`]({player.current.playlist_url})"
+            txt += f"\n> -# 📑 **⠂** [`{fix_characters(player.current.playlist_name, limit=36)}`]({player.current.playlist_url})"
 
         if (qlenght:=len(player.queue)) and not player.mini_queue_enabled:
-            txt += f"\n> 🎶 **⠂** `{qlenght} música{'s'[:qlenght^1]} na fila`"
+            txt += f"\n> -# 🎶 **⠂** `{qlenght} música{'s'[:qlenght^1]} na fila`"
 
         if player.keep_connected:
-            txt += "\n> ♾️ **⠂** `Modo 24/7 ativado`"
+            txt += "\n> -# ♾️ **⠂** `Modo 24/7 ativado`"
 
         txt += f"{vc_txt}\n"
 
@@ -112,7 +112,7 @@ class DefaultSkin:
             if len(player.queue):
 
                 queue_txt = "\n".join(
-                    f"`{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 21)}`]({t.uri})"
+                    f"-# `{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 21)}`]({t.uri})"
                     for n, t in (enumerate(itertools.islice(player.queue, 3)))
                 )
 
@@ -127,13 +127,13 @@ class DefaultSkin:
                         if not t.is_stream:
                             queue_duration += t.duration
 
-                    embed_queue.description += f"\n`[⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + (player.current.duration if not player.current.is_stream else 0)) - player.position)).timestamp())}:R> `⌛]`"
+                    embed_queue.description += f"\n-# `[⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + (player.current.duration if not player.current.is_stream else 0)) - player.position)).timestamp())}:R> `⌛]`"
 
                 embed_queue.set_image(url=bar)
 
             elif len(player.queue_autoplay):
                 queue_txt = "\n".join(
-                    f"`👍⠂{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 20)}`]({t.uri})"
+                    f"-# `👍⠂{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 20)}`]({t.uri})"
                     for n, t in (enumerate(itertools.islice(player.queue_autoplay, 3)))
                 )
                 embed_queue = disnake.Embed(title="Próximas músicas recomendadas:", color=color,

@@ -34,20 +34,20 @@ class MiniPlayer:
 
         embed = disnake.Embed(
             color=embed_color,
-            description=f"[{fix_characters(player.current.single_title, 48)}]({player.current.uri or player.current.search_uri})\n"
-                        f"**Uploader:** `{fix_characters(player.current.author, 17)}`\n"
+            description=f"-# [{fix_characters(player.current.single_title, 48)}]({player.current.uri or player.current.search_uri})\n"
+                        f"-# **Uploader:** `{fix_characters(player.current.author, 17)}`\n"
         )
 
         if player.current.thumb:
             embed.set_thumbnail(url=player.current.thumb)
 
         if not player.current.autoplay:
-            embed.description += f"**Pedido por:** <@{player.current.requester}>\n"
+            embed.description += f"-# **Pedido por:** <@{player.current.requester}>\n"
         else:
             try:
-                embed.description = f"**Adicionado via:** [`[Recomendação]`]({player.current.info['extra']['related']['uri']})"
+                embed.description += f"-# **Adicionado via:** [`[Recomendação]`]({player.current.info['extra']['related']['uri']})\n"
             except:
-                embed.description = "**Adicionado via:** `[Recomendação]`"
+                embed.description += "-# **Adicionado via:** `[Recomendação]`\n"
 
         embed.set_author(
             name="Tocando Agora:",
@@ -55,7 +55,7 @@ class MiniPlayer:
         )
 
         if player.command_log:
-            embed.description += f"\n{player.command_log_emoji} ⠂**Última Interação:** {player.command_log}"
+            embed.description += f"-# {player.command_log_emoji} ⠂**Última Interação:** {player.command_log}"
 
         if player.current_hint:
             embed_hint = disnake.Embed(colour=embed_color)
