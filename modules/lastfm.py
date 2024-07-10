@@ -116,7 +116,7 @@ class LastFmCog(commands.Cog):
     lastfm_mc = commands.MaxConcurrency(1, per=commands.BucketType.user, wait=False)
 
     @commands.command(hidden=True, name="lastfm", aliases=["lastfmconnect", "lfm"],
-                      description="Vincular sua conta do last.fm para registrar suas músicas ouvidas no servidor.",
+                      description="Vincular sua conta do last.fm para registrar as músicas via scrobble.",
                       cooldown=lastfm_cd, max_concurrency=lastfm_mc)
     async def lastfm_legacy(self, ctx: CustomContext):
 
@@ -124,7 +124,7 @@ class LastFmCog(commands.Cog):
 
 
     @commands.slash_command(hidden=True, name="lastfm",
-                      description=f"{desc_prefix}Vincular sua conta do last.fm para registrar suas músicas ouvidas no servidor.",
+                      description=f"{desc_prefix}Vincular sua conta do last.fm para registrar as músicas via scrobble.",
                       extras={"allow_private": True},
                       cooldown=lastfm_cd, max_concurrency=lastfm_mc)
     async def lastfm(self, inter: disnake.AppCmdInter):
