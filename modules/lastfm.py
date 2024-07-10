@@ -504,12 +504,6 @@ class LastFmCog(commands.Cog):
                 continue
 
             try:
-                if user.voice.self_deaf or user.voice.deaf:
-                    continue
-            except AttributeError:
-                continue
-
-            try:
                 fminfo = self.bot.pool.lastfm_sessions[user.id]
             except KeyError:
                 user_data = await self.bot.get_global_data(user.id, db_name=DBModel.users)
