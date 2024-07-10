@@ -115,35 +115,19 @@ class LastFmCog(commands.Cog):
     lastfm_cd = commands.CooldownMapping.from_cooldown(1, 45, commands.BucketType.member)
     lastfm_mc = commands.MaxConcurrency(1, per=commands.BucketType.user, wait=False)
 
-    lastm_flags = CommandArgparse()
-    lastm_flags.add_argument('-last_tracks', '-lasttracks', '-last', '-recents',
-                             help="Quantidade de músicas recentes a serem exibidas.\nEx: -last 5",
-                             type=int, default=0)
-
     @commands.command(hidden=True, name="lastfm", aliases=["lastfmconnect", "lfm"],
-                      description="Conectar sua conta do last.fm.", extras={"flags": lastm_flags},
+                      description="Vincular sua conta do last.fm para registrar suas músicas via scrobble no last.fm",
                       cooldown=lastfm_cd, max_concurrency=lastfm_mc)
-    async def lastfm_legacy(self, ctx: CustomContext, *flags):
+    async def lastfm_legacy(self, ctx: CustomContext):
 
-        args, unknown = ctx.command.extras['flags'].parse_known_args(flags)
-
-        if args.last_tracks > 7:
-            args.last_tracks = 7
-
-        await self.lastfm.callback(self=self, inter=ctx, last_tracks_amount=args.last_tracks)
+        await self.lastfm.callback(self=self, inter=ctx)
 
 
     @commands.slash_command(hidden=True, name="lastfm",
-                      description=f"{desc_prefix}Conectar sua conta do last.fm",
+                      description=f"{desc_prefix}Vincular sua conta do last.fm para registrar suas músicas via scrobble no last.fm",
                       extras={"allow_private": True},
                       cooldown=lastfm_cd, max_concurrency=lastfm_mc)
-    async def lastfm(
-            self, inter: disnake.AppCmdInter,
-            last_tracks_amount: int = commands.Param(
-                name="músicas_recentes", description="Quantidade de músicas recentes a serem exibidas.",
-                default=0, min_value=0, max_value=7
-            ),
-    ):
+    async def lastfm(self, inter: disnake.AppCmdInter):
 
         try:
             if not inter.permissions.embed_links:
@@ -297,34 +281,6 @@ class LastFmCog(commands.Cog):
                     embed.set_thumbnail(url=thumb)
 
                 embeds.append(embed)
-
-            if last_tracks_amount > 0:
-
-                recenttracks = await self.bot.last_fm.user_recent_tracks(lastfm_user['name'])
-
-                if recenttracks['track']:
-
-                    for n, t in enumerate(recenttracks['track'][:last_tracks_amount]):
-                        try:
-                            txt = f"` {n+1}. ` [`{t['name']}`]({t['url']}) ( <t:{t['date']['uts']}:R> )\n"
-                        except KeyError:
-                            txt = f"`[▶️] Ouvindo agora:` [`{t['name']}`]({t['url']})\n"
-                        artist_url = t['url'].split('/_/')[0]
-                        t_embed = disnake.Embed(
-                            color=embed_color,
-                            description=f"{txt}`Artista:` [`{t['artist']['#text']}`]({artist_url})"
-                        )
-
-                        if n == 0:
-                            t_embed.set_author(
-                                icon_url="https://i.ibb.co/Qb3zjQ5/muse-heart-recently-played.jpg",
-                                name=f"Música{(s:='s'[:last_tracks_amount^1])} recente{s} que você ouviu:"
-                            )
-
-                        if t['album']['#text']:
-                            t_embed.description += f" **-** `Álbum:` [`{t['album']['#text']}`]({artist_url}/{quote(t['album']['#text'])})"
-                        t_embed.set_thumbnail(url=t['image'][0]['#text'] or 'https://i.ibb.co/pQPrKdw/lastfm-unknown-image.webp')
-                        embeds.append(t_embed)
 
         else:
             embeds = [disnake.Embed(
