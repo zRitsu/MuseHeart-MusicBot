@@ -467,8 +467,8 @@ class LastFmCog(commands.Cog):
                 else:
                     if fmdata := self.bot.last_fm.cache.get(f"{track.title} - {track.author}") is None:
 
-                        result = await player.bot.spotify.get_tracks(f"{track.author} - {track.title}",
-                                                                     requester=self.bot.user.id)
+                        result = await player.bot.spotify.get_tracks(query=f"{track.author} - {track.title}",
+                                                                     requester=self.bot.user.id, bot=self.bot)
 
                         if not [t for t in exclude_tags if t.lower() in track.title]:
                             result = [t for t in result if check_track_title(t.title)]
