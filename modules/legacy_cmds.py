@@ -108,7 +108,7 @@ class Owner(commands.Cog):
     @commands.is_owner()
     @commands.command(
         hidden=True, aliases=["gls", "lavalink", "lllist", "lavalinkservers"],
-        description="Baixar um arquivo com lista de servidores lavalink para usá-los no sistema de música."
+        description="Müzik sisteminde kullanmak için lavalink sunucularının listesini içeren bir dosya indirin."
     )
     async def getlavaservers(self, ctx: CustomContext):
 
@@ -118,17 +118,17 @@ class Owner(commands.Cog):
 
         await ctx.send(
             embed=disnake.Embed(
-                description="**O arquivo lavalink.ini foi baixado com sucesso!\n"
-                            "Será necessário me reiniciar para usar os servidores deste arquivo.**"
+                description="**lavalink.ini dosyası başarıyla indirildi!\n"
+                            "Bu dosyadaki sunucuları kullanabilmem için kendimi yeniden başlatmam gerekecek.**"
             )
         )
 
     updatelavalink_flags = CommandArgparse()
     updatelavalink_flags.add_argument('-yml', '--yml', action='store_true',
-                                      help="Fazer download do arquivo application.yml.")
+                                      help="application.yml dosyasını indirin.")
     updatelavalink_flags.add_argument("-resetids", "-reset", "--resetids", "--reset",
-                                      help="Resetar info de ids das músicas (útil pra evitar problemas com certas "
-                                           "mudanças do lavaplayer/lavalink).", action="store_true")
+                                      help="Şarkı kimliği bilgisini sıfırlayın (belirli şarkılarda sorunları önlemek için "
+                                           "lavaplayer/lavalink değişiklikleri kullanılmıştır).", action="store_true")
 
     @commands.is_owner()
     @commands.max_concurrency(1, commands.BucketType.default)
@@ -136,13 +136,13 @@ class Owner(commands.Cog):
     async def restartlavalink(self, ctx: CustomContext):
 
         if not self.bot.pool.lavalink_instance:
-            raise GenericError("**O servidor LOCAL não está sendo usado!**")
+            raise GenericError("**YEREL sunucu kullanılmıyor!**")
 
         await self.bot.pool.start_lavalink()
 
         await ctx.send(
             embed=disnake.Embed(
-                description="**Reiniciando o servidor lavalink LOCAL.**",
+                description="**Lavalink LOCAL sunucusunu yeniden başlatma.**",
                 color=self.bot.get_color(ctx.guild.me)
             )
         )
@@ -153,7 +153,7 @@ class Owner(commands.Cog):
     async def updatelavalink(self, ctx: CustomContext, flags: str = ""):
 
         if not self.bot.pool.lavalink_instance:
-            raise GenericError("**O servidor LOCAL não está sendo usado!**")
+            raise GenericError("**YEREL sunucu kullanılmıyor!**")
 
         args, unknown = ctx.command.extras['flags'].parse_known_args(flags.split())
 
@@ -195,20 +195,20 @@ class Owner(commands.Cog):
 
         await ctx.send(
             embed=disnake.Embed(
-                description="**O arquivo Lavalink.jar será atualizado "
-                            "e o servidor lavalink LOCAL será reiniciado.**",
+                description="**Lavalink.jar dosyası güncellenecek "
+                            "e lavalink LOCAL sunucusu yeniden başlatılacak.**",
                 color=self.bot.get_color(ctx.guild.me)
             )
         )
 
     @commands.is_owner()
-    @panel_command(aliases=["rcfg"], description="Recarregar as configs do bot.", emoji="⚙",
-                   alt_name="Recarregar as configs do bot.")
+    @panel_command(aliases=["rcfg"], description="Yapılandırmaların bot olarak yeniden düzenlenmesi.", emoji="⚙",
+                   alt_name="Yapılandırmaların bot olarak yeniden düzenlenmesi.")
     async def reloadconfig(self, ctx: Union[CustomContext, disnake.MessageInteraction]):
 
         self.bot.pool.load_cfg()
 
-        txt = "**AS Configurações do bot foram recarregadas com sucesso!**"
+        txt = "**Bot Ayarları başarıyla yeniden yüklendi!**"
 
         if isinstance(ctx, CustomContext):
             embed = disnake.Embed(colour=self.bot.get_color(ctx.me), description=txt)
@@ -217,8 +217,8 @@ class Owner(commands.Cog):
             return txt
 
     @commands.is_owner()
-    @panel_command(aliases=["rd", "recarregar"], description="Recarregar os módulos.", emoji="🔄",
-                   alt_name="Carregar/Recarregar módulos.")
+    @panel_command(aliases=["rd", "recarregar"], description="Modülleri yeniden yükleyin.", emoji="🔄",
+                   alt_name="Modülleri yükleyin/yeniden yükleyin.")
     async def reload(self, ctx: Union[CustomContext, disnake.MessageInteraction], *modules):
 
         for m in list(sys.modules):
@@ -245,16 +245,16 @@ class Owner(commands.Cog):
         txt = ""
 
         if data["loaded"]:
-            txt += f'**Módulos carregados:** ```ansi\n[0;34m{" [0;37m| [0;34m".join(data["loaded"])}```\n'
+            txt += f'**Yüklü modüller:** ```ansi\n[0;34m{" [0;37m| [0;34m".join(data["loaded"])}```\n'
 
         if data["reloaded"]:
-            txt += f'**Módulos recarregados:** ```ansi\n[0;32m{" [0;37m| [0;32m".join(data["reloaded"])}```\n'
+            txt += f'**Yeniden yüklenen modüller:** ```ansi\n[0;32m{" [0;37m| [0;32m".join(data["reloaded"])}```\n'
 
         if data["failed"]:
-            txt += f'**Módulos que falharam:** ```ansi\n[0;31m{" [0;37m| [0;31m".join(data["failed"])}```\n'
+            txt += f'**Başarısız olan modüller:** ```ansi\n[0;31m{" [0;37m| [0;31m".join(data["failed"])}```\n'
 
         if not txt:
-            txt = "**Nenhum módulo encontrado...**"
+            txt = "**Hiçbir modül bulunamadı...**"
 
         self.bot.pool.config = load_config()
 
@@ -266,14 +266,14 @@ class Owner(commands.Cog):
 
     update_flags = CommandArgparse()
     update_flags.add_argument("-force", "--force", action="store_true",
-                              help="Forçar update ignorando o estado do repositório local).")
+                              help="Yerel depo durumunu yok sayarak güncellemeyi zorla).")
     update_flags.add_argument("-pip", "--pip", action="store_true",
-                              help="Instalar/atualizar dependências após a atualização.")
+                              help="Yükseltme sonrasında bağımlılıkları yükleyin/güncelleyin.")
 
     @commands.is_owner()
     @commands.max_concurrency(1, commands.BucketType.default)
-    @panel_command(aliases=["up", "atualizar"], description="Atualizar meu code usando o git.",
-                   emoji="<:git:944873798166020116>", alt_name="Atualizar Bot", extras={"flags": update_flags})
+    @panel_command(aliases=["up", "atualizar"], description="Git'i kullanarak kodumu güncelle.",
+                   emoji="<:git:944873798166020116>", alt_name="Botu Güncelle", extras={"flags": update_flags})
     async def update(self, ctx: Union[CustomContext, disnake.MessageInteraction], *,
                      opts: str = ""):  # TODO: Rever se há alguma forma de usar commands.Flag sem um argumento obrigatório, ex: --pip.
 
@@ -313,7 +313,7 @@ class Owner(commands.Cog):
         try:
             pull_log = await run_command("git --work-tree=. pull --allow-unrelated-histories -X theirs")
             if "Already up to date" in pull_log:
-                raise GenericError("**Já estou com os ultimos updates instalados...**")
+                raise GenericError("**Zaten son güncellemeleri yükledim...**")
             out_git += pull_log
 
         except GenericError as e:
@@ -322,7 +322,7 @@ class Owner(commands.Cog):
         except Exception as e:
 
             if "Already up to date" in str(e):
-                raise GenericError("Já estou com os ultimos updates instalados...")
+                raise GenericError("Zaten son güncellemeleri yükledim...")
 
             elif not "Fast-forward" in str(e):
                 out_git += await self.cleanup_git(force=True)
@@ -343,9 +343,9 @@ class Owner(commands.Cog):
 
         self.bot.pool.commit = commit.split("...")[-1]
 
-        text = "`Será necessário me reiniciar após as alterações.`"
+        text = "`Değişikliklerden sonra kendimi yeniden başlatmam gerekecek.`"
 
-        txt = f"`✅` **[Atualização realizada com sucesso!]({self.bot.pool.remote_git_url}/commits/main)**"
+        txt = f"`✅` **[Güncelleme başarıyla tamamlandı!]({self.bot.pool.remote_git_url}/commits/main)**"
 
         if git_log:
             txt += f"\n\n{self.format_log(git_log[:10])}"
@@ -377,7 +377,7 @@ class Owner(commands.Cog):
         if args.pip:
 
             embed = disnake.Embed(
-                description="**Instalando as dependências.\nPor favor aguarde...**",
+                description="**Bağımlılıklar yükleniyor.\nLütfen bekleyin...**",
                 color=self.bot.get_color(ctx.guild.me)
             )
 
@@ -385,7 +385,7 @@ class Owner(commands.Cog):
 
             await run_command(cmd)
 
-            embed.description = "**As dependências foram instaladas com sucesso!**"
+            embed.description = "**Bağımlılıklar başarıyla kuruldu!**"
 
             await msg.edit(embed=embed)
 
@@ -411,20 +411,20 @@ class Owner(commands.Cog):
 
                 await ctx.send(
                     embed=disnake.Embed(
-                        description="**Será necessário atualizar as dependências usando o comando "
-                                    "abaixo no terminal/shell:**\n"
-                                    f"```sh\n{txt}{cmd}```\nou usar usar o comando: "
+                        description="**Komutu kullanarak bağımlılıkları güncellemeniz gerekecek "
+                                    "aşağıda terminal/konsolda:**\n"
+                                    f"```sh\n{txt}{cmd}```\nveya şu komutu kullanın: "
                                     f"```ansi\n[34;1m{prefix}update --force --pip[0m``` \n"
-                                    f"**Nota:** Dependendo da hospedagem (ou que não tenha 150mb de RAM livre "
-                                    f"e 0.5vCPU) você deve enviar o arquivo requirements.txt ao invés de "
-                                    f"usar uma das opções acima ou os botões de instalar dependências abaixo...",
+                                    f"**Not:**Hosting'e bağlı olarak (veya 150mb boş RAM'iniz yoksa "
+                                    f"e 0.5vCPU) yerine gereksinimleri.txt dosyasını göndermelisiniz "
+                                    f"Yukarıdaki seçeneklerden birini veya aşağıdaki bağımlılıkları yükle düğmelerini kullanın...",
                         color=self.bot.get_color(ctx.guild.me)
                     ),
                     components=[
                         disnake.ui.Button(label="Download requirements.txt", custom_id="updatecmd_requirements"),
-                        disnake.ui.Button(label="Atualizar dependências",
+                        disnake.ui.Button(label="Bağımlılıkları güncelle",
                                           custom_id="updatecmd_installdeps_" + ("poetry" if use_poetry else "pip")),
-                        disnake.ui.Button(label="Atualizar dependências (force)",
+                        disnake.ui.Button(label="Bağımlılıkları güncelle (zorla)",
                                           custom_id="updatecmd_installdeps_force_" + ("poetry" if use_poetry else "pip")),
                     ]
                 )
@@ -447,7 +447,7 @@ class Owner(commands.Cog):
 
             await inter.send(
                 embed=disnake.Embed(
-                    description="**Baixe o arquivo anexado e envie para sua hospedagem via commit etc.**",
+                    description="**Ekli dosyayı indirin ve taahhüt vb. yoluyla hostinginize gönderin.**",
                     color=self.bot.get_color(inter.guild.me)
                 ),
                 file=disnake.File("update_reqs.zip")
@@ -490,12 +490,12 @@ class Owner(commands.Cog):
 
     @commands.max_concurrency(1, commands.BucketType.guild)
     @commands.cooldown(1, 10, commands.BucketType.user)
-    @panel_command(aliases=["latest", "lastupdate"], description="Ver minhas atualizações mais recentes.", emoji="📈",
+    @panel_command(aliases=["latest", "lastupdate"], description="En son güncellemelerime bakın.", emoji="📈",
                    alt_name="Ultimas atualizações", hidden=False)
     async def updatelog(self, ctx: Union[CustomContext, disnake.MessageInteraction], amount: int = 10):
 
         if not os.path.isdir(os.environ["GIT_DIR"]):
-            raise GenericError("Não há repositorio iniciado no diretório do bot...\nNota: Use o comando update.")
+            raise GenericError("Bot dizininde başlatılan bir depo yok...\nNot: Güncelleme komutunu kullanın.")
 
         if not self.bot.pool.remote_git_url:
             self.bot.pool.remote_git_url = self.bot.config["SOURCE_REPO"][:-4]
@@ -506,7 +506,7 @@ class Owner(commands.Cog):
 
         git_log += format_git_log(data)
 
-        txt = f"🔰 ** | [Atualizações recentes:]({self.bot.pool.remote_git_url}/commits/main)**\n\n" + self.format_log(
+        txt = f"🔰 ** | [Son Güncellemeler:]({self.bot.pool.remote_git_url}/commits/main)**\n\n" + self.format_log(
             git_log)
 
         if isinstance(ctx, CustomContext):
@@ -529,14 +529,14 @@ class Owner(commands.Cog):
             title="PAINEL DE CONTROLE.",
             color=self.bot.get_color(ctx.guild.me)
         )
-        embed.set_footer(text="Clique em uma tarefa que deseja executar.")
+        embed.set_footer(text="Gerçekleştirmek istediğiniz göreve tıklayın.")
         await ctx.send(embed=embed, view=PanelView(self.bot))
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.cooldown(1, 10, commands.BucketType.guild)
     @commands.command(
         aliases=["mudarprefixo", "prefix", "changeprefix"],
-        description="Alterar o prefixo do servidor",
+        description="Sunucu önekini değiştirin",
         usage="{prefix}{cmd} [prefixo]\nEx: {prefix}{cmd} >>"
     )
     async def setprefix(self, ctx: CustomContext, prefix: str):
@@ -544,7 +544,7 @@ class Owner(commands.Cog):
         prefix = prefix.strip()
 
         if not prefix or len(prefix) > 5:
-            raise GenericError("**O prefixo não pode conter espaços ou ter acima de 5 caracteres.**")
+            raise GenericError("**Önek boşluk içeremez veya 5 karakterden uzun olamaz.**")
 
         guild_data = await self.bot.get_global_data(ctx.guild.id, db_name=DBModel.guilds)
 
@@ -555,8 +555,8 @@ class Owner(commands.Cog):
         prefix = disnake.utils.escape_markdown(prefix)
 
         embed = disnake.Embed(
-            description=f"**O meu prefixo no servidor agora é:** `{prefix}`\n"
-                        f"**Caso queira restaurar o prefixo padrão use o comando:** `{prefix}{self.resetprefix.name}`",
+            description=f"**Sunucudaki önekim şu anda:** `{prefix}`\n"
+                        f"**Varsayılan öneki geri yüklemek istiyorsanız şu komutu kullanın:** `{prefix}{self.resetprefix.name}`",
             color=self.bot.get_color(ctx.guild.me)
         )
 
@@ -565,14 +565,14 @@ class Owner(commands.Cog):
     @commands.has_guild_permissions(manage_guild=True)
     @commands.cooldown(1, 10, commands.BucketType.guild)
     @commands.command(
-        description="Resetar o prefixo do servidor (Usar o prefixo padrão do bot)"
+        description="Sunucu önekini sıfırlayın (Botun varsayılan önekini kullanın)"
     )
     async def resetprefix(self, ctx: CustomContext):
 
         guild_data = await self.bot.get_global_data(ctx.guild.id, db_name=DBModel.guilds)
 
         if not guild_data["prefix"]:
-            raise GenericError("**Nao há prefixo configurado no servidor.**")
+            raise GenericError("**Sunucuda yapılandırılmış bir önek yok.**")
 
         guild_data["prefix"] = ""
         self.bot.pool.guild_prefix_cache[ctx.guild.id] = ""
@@ -580,8 +580,8 @@ class Owner(commands.Cog):
         await self.bot.update_global_data(ctx.guild.id, guild_data, db_name=DBModel.guilds)
 
         embed = disnake.Embed(
-            description=f"**O prefixo do servidor foi resetado com sucesso.\n"
-                        f"O prefixo padrão agora é:** `{disnake.utils.escape_markdown(self.bot.default_prefix)}`",
+            description=f"**Sunucu öneki başarıyla sıfırlandı.\n"
+                        f"Varsayılan önek artık:** `{disnake.utils.escape_markdown(self.bot.default_prefix)}`",
             color=self.bot.get_color(ctx.guild.me)
         )
 
@@ -590,8 +590,8 @@ class Owner(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.guild)
     @commands.command(
         aliases=["uprefix", "spu", "setmyprefix", "spm", "setcustomprefix", "scp", "customprefix", "myprefix"],
-        description="Alterar seu prefixo de usuário (prefixo que irei responder a você independente "
-                    "do prefixo configurado no servidor).",
+        description="Kullanıcı önekinizi değiştirin (ne olursa olsun size yanıt vereceğim önek, "
+                    "sunucuda yapılandırılmış önek).",
         usage="{prefix}{cmd} [prefixo]\nEx: {prefix}{cmd} >>"
     )
     async def setuserprefix(self, ctx: CustomContext, prefix: str):
@@ -599,7 +599,7 @@ class Owner(commands.Cog):
         prefix = prefix.strip()
 
         if not prefix or len(prefix) > 5:
-            raise GenericError("**O prefixo não pode conter espaços ou ter acima de 5 caracteres.**")
+            raise GenericError("**Önek boşluk içeremez veya 5 karakterden uzun olamaz.**")
 
         user_data = await self.bot.get_global_data(ctx.author.id, db_name=DBModel.users)
 
@@ -610,28 +610,28 @@ class Owner(commands.Cog):
         prefix = disnake.utils.escape_markdown(prefix)
 
         embed = disnake.Embed(
-            description=f"**O seu prefixo de usuário agora é:** `{prefix}`\n"
-                        f"**Caso queira remover seu prefixo de usuário use o comando:** `{prefix}{self.resetuserprefix.name}`",
+            description=f"**Kullanıcı önekiniz artık:** `{prefix}`\n"
+                        f"**Kullanıcı önekinizi kaldırmak istiyorsanız şu komutu kullanın:** `{prefix}{self.resetuserprefix.name}`",
             color=self.bot.get_color(ctx.guild.me)
         )
 
         await ctx.send(embed=embed)
 
     @commands.cooldown(1, 10, commands.BucketType.guild)
-    @commands.command(description="Remover seu prefixo de usuário")
+    @commands.command(description="Kullanıcı önekinizi kaldırın")
     async def resetuserprefix(self, ctx: CustomContext):
 
         user_data = await self.bot.get_global_data(ctx.author.id, db_name=DBModel.users)
 
         if not user_data["custom_prefix"]:
-            raise GenericError("**Você não possui prefixo configurado.**")
+            raise GenericError("**Yapılandırılmış bir önekiniz yok.**")
 
         user_data["custom_prefix"] = ""
         self.bot.pool.user_prefix_cache[ctx.author.id] = ""
         await self.bot.update_global_data(ctx.author.id, user_data, db_name=DBModel.users)
 
         embed = disnake.Embed(
-            description=f"**O seu prefixo de usuário foi removido com sucesso.**",
+            description=f"**Kullanıcı önekiniz başarıyla kaldırıldı.**",
             color=self.bot.get_color(ctx.guild.me)
         )
 
@@ -640,13 +640,13 @@ class Owner(commands.Cog):
     @commands.is_owner()
     @commands.command(
         aliases=["guildprefix", "sgp", "gp"], hidden=True,
-        description="Setar um prefixo manualmente pra um server com o id informado (útil para botlists)",
-        usage="{prefix}{cmd} [server id] <prefixo>\nEx: {prefix}{cmd} 1155223334455667788 >>\nNota: Use o comando sem especificar um prefix para removê-lo."
+        description="Verilen kimliğe sahip bir sunucu için manuel olarak bir önek ayarlayın (bot listeleri için kullanışlıdır)",
+        usage="{prefix}{cmd} [server id] <prefixo>\nEx: {prefix}{cmd} 1155223334455667788 >>\nNot: Kaldırmak için komutu bir önek belirtmeden kullanın."
     )
     async def setguildprefix(self, ctx: CustomContext, server_id: int, prefix: str = None):
 
         if not 17 < len(str(server_id)) < 24:
-            raise GenericError("**A quantidade de caracteres do id do servidor tem que estar entre 18 a 23.**")
+            raise GenericError("**Sunucu kimliğindeki karakter sayısı 18 ile 23 arasında olmalıdır.**")
 
         guild_data = await self.bot.get_global_data(server_id, db_name=DBModel.guilds)
 
@@ -657,12 +657,12 @@ class Owner(commands.Cog):
         if not prefix:
             guild_data["prefix"] = ""
             await ctx.bot.update_global_data(server_id, guild_data, db_name=DBModel.guilds)
-            embed.description = "**O prefixo antecipado do servidor com o id informado foi resetado com sucesso.**"
+            embed.description = "**Belirtilen kimliğe sahip sunucunun yönlendirme öneki başarıyla sıfırlandı.**"
 
         else:
             guild_data["prefix"] = prefix
             await self.bot.update_global_data(server_id, guild_data, db_name=DBModel.guilds)
-            embed.description = f"**O prefixo para o servidor com o id informado agora é:** {disnake.utils.escape_markdown(prefix)}"
+            embed.description = f"**Belirtilen kimliğe sahip sunucunun öneki artık şöyledir:** {disnake.utils.escape_markdown(prefix)}"
 
         self.bot.pool.guild_prefix_cache[ctx.guild.id] = prefix
 
@@ -670,8 +670,8 @@ class Owner(commands.Cog):
 
     @commands.is_owner()
     @panel_command(aliases=["expsource", "export", "exs"],
-                   description="Exportar minha source para um arquivo zip.", emoji="💾",
-                   alt_name="Exportar source/código-fonte.")
+                   description="Kaynağımı bir zip dosyasına aktar.", emoji="💾",
+                   alt_name="Kaynağı/kaynak kodunu dışa aktar.")
     async def exportsource(self, ctx:Union[CustomContext, disnake.MessageInteraction], *, flags: str = ""):
 
         if not os.path.isdir(os.environ['GIT_DIR']):
@@ -759,15 +759,15 @@ class Owner(commands.Cog):
                 os.remove("./source.zip")
             except:
                 pass
-            raise GenericError(f"**O tamanho do arquivo ultrapassou do limite de 25MB (tamanho atual: {humanize.naturalsize(filesize)})**")
+            raise GenericError(f"**Dosya boyutu 25 MB sınırını aşıyor (geçerli boyut: {humanize.naturalsize(filesize)})**")
 
         try:
             embed = disnake.Embed(
-                description="**Não envie o arquivo source.zip ou o arquivo .env pra ninguém e muito cuidado ao postar "
-                            "print's do conteudo do arquivo .env e não adicione esse arquivo em locais públicos como "
-                            "github, repl.it, glitch.com, etc.**",
+                description="**Source.zip dosyasını veya .env dosyasını kimseye göndermeyin ve gönderirken çok dikkatli olun "
+                            ".env dosyasının içeriğini yazdırın ve bu dosyayı halka açık yerlere eklemeyin. "
+                            "github, repl.it, glitch.com vb..**",
                 color=self.bot.get_color(ctx.guild.me))
-            embed.set_footer(text="Por medida de segurança, esta mensagem será deletada em 2 minutos.")
+            embed.set_footer(text="Güvenlik nedeniyle bu mesaj 2 dakika içinde silinecektir.")
 
             msg = await ctx.author.send(
                 embed=embed,
@@ -779,17 +779,17 @@ class Owner(commands.Cog):
 
         except disnake.Forbidden:
             os.remove("./source.zip")
-            raise GenericError("Seu DM está desativado!")
+            raise GenericError("DM'niz devre dışı bırakıldı!")
 
         if isinstance(ctx, CustomContext):
             await ctx.send(
                 embed=disnake.Embed(
-                    description=f"**O arquivo [source.zip]({msg.jump_url}) foi enviado no seu privado.**",
+                    description=f"**Dosya [source.zip]({msg.jump_url}) Özel olarak gönderildi.**",
                     color=self.bot.get_color(ctx.guild.me)
                 )
             )
         else:
-            return f"Arquivo [source.zip]({msg.jump_url}) foi enviado com sucesso no seu DM."
+            return f"Dosya [source.zip]({msg.jump_url}) DM'nize başarıyla gönderildi."
 
     def zip_dir(self, filelist: list):
 
@@ -826,12 +826,12 @@ class Owner(commands.Cog):
                     counter += 1
 
         if not counter:
-            raise GenericError(f"**Nenhuma mensagem foi deletada de {amount} verificada{'s'[:amount^1]}...**")
+            raise GenericError(f"**Hiçbir mesaj silinmedi {amount} doğrulandı{'s'[:amount^1]}...**")
 
         if counter == 1:
-            txt = "**Uma mensagem foi deletada do seu DM.**"
+            txt = "**DM'nizden bir mesaj silindi.**"
         else:
-            txt = f"**{counter} mensagens foram deletadas do seu DM.**"
+            txt = f"**{counter} DM'nizdeki mesajlar silindi.**"
 
         await ctx.send(embed=disnake.Embed(description=txt, colour=self.bot.get_color(ctx.guild.me)))
 
@@ -842,10 +842,10 @@ class Owner(commands.Cog):
             return
 
         if not await self.bot.is_owner(inter.author):
-            return await inter.send("**Apenas meu dono pode usar este botão!**", ephemeral=True)
+            return await inter.send("**Bu düğmeyi yalnızca sahibim kullanabilir!**", ephemeral=True)
 
         await inter.response.edit_message(
-            content="```ini\n🔒 - [Shell Fechado!] - 🔒```",
+            content="```ini\n🔒 - [Konsol Kapalı!] - 🔒```",
             attachments=None,
             view=None,
             embed=None
@@ -880,8 +880,8 @@ class Owner(commands.Cog):
             except disnake.Forbidden:
                 traceback.print_exc()
                 raise GenericError(
-                    "**Ocorreu um erro (verifique os logs/terminal ou libere seu DM para o próximo "
-                    "resultado ser enviado diretamente no seu DM).**"
+                    "**Bir hata oluştu (günlükleri/terminali kontrol edin veya bir sonraki adım için DM'nizi açın "
+                    "sonuç doğrudan DM'nize gönderilecektir).**"
                 )
 
         else:
@@ -902,12 +902,12 @@ class Owner(commands.Cog):
 
     @check_voice()
     @commands.cooldown(1, 15, commands.BucketType.guild)
-    @commands.command(description='inicializar um player no servidor.', aliases=["spawn", "sp", "spw", "smn"])
+    @commands.command(description='sunucudaki bir oynatıcıyı başlatın.', aliases=["spawn", "sp", "spw", "smn"])
     async def summon(self, ctx: CustomContext):
 
         try:
             ctx.bot.music.players[ctx.guild.id]  # type ignore
-            raise GenericError("**Já há um player iniciado no servidor.**")
+            raise GenericError("**Sunucuda zaten başlatılmış bir oyuncu var.**")
         except KeyError:
             pass
 
@@ -943,7 +943,7 @@ class Owner(commands.Cog):
 
                 msg = await ctx.send(
                     embed=disnake.Embed(
-                        description=f"**Escolha qual bot você deseja usar no canal {ctx.author.voice.channel.mention}**",
+                        description=f"**Kanalda hangi botu kullanmak istediğinizi seçin {ctx.author.voice.channel.mention}**",
                         color=self.bot.get_color(guild.me)), view=v
                 )
 
@@ -952,16 +952,16 @@ class Owner(commands.Cog):
                 await v.wait()
 
                 if v.status is None:
-                    await msg.edit(embed=disnake.Embed(description="### Tempo esgotado...", color=self.bot.get_color(guild.me)), view=None)
+                    await msg.edit(embed=disnake.Embed(description="### Zaman bitti...", color=self.bot.get_color(guild.me)), view=None)
                     return
 
                 if v.status is False:
-                    await msg.edit(embed=disnake.Embed(description="### Operação cancelada.",
+                    await msg.edit(embed=disnake.Embed(description="### İşlem iptal edildi.",
                                                    color=self.bot.get_color(guild.me)), view=None)
                     return
 
                 if not v.inter.author.voice:
-                    await msg.edit(embed=disnake.Embed(description="### Você não está conectado em um canal de voz...",
+                    await msg.edit(embed=disnake.Embed(description="### Bir ses kanalına bağlı değilsiniz...",
                                                    color=self.bot.get_color(guild.me)), view=None)
                     return
 
@@ -978,7 +978,7 @@ class Owner(commands.Cog):
         node: wavelink.Node = bot.music.get_best_node()
 
         if not node:
-            raise GenericError("**Não há servidores de música disponível!**")
+            raise GenericError("**Kullanılabilir müzik sunucusu yok!**")
 
         player: LavalinkPlayer = await bot.get_cog("Music").create_player(
             inter=ctx, bot=bot, guild=guild, channel=channel
@@ -988,7 +988,7 @@ class Owner(commands.Cog):
 
         if msg:
             await msg.edit(
-                f"Sessão de música iniciada no canal {ctx.author.voice.channel.mention}\nVia: {bot.user.mention}{player.controller_link}",
+                f"Kanalda müzik seansı başladı {ctx.author.voice.channel.mention}\nAracılığıyla: {bot.user.mention}{player.controller_link}",
                 components=None, embed=None
             )
         else:
@@ -1008,12 +1008,12 @@ class Owner(commands.Cog):
         await player.process_next()
 
     @commands.is_owner()
-    @commands.command(hidden=True, aliases=["setbotbanner"], description="Alterar o banner do bot usando anexo ou link direto de uma imagem jpg ou gif.")
+    @commands.command(hidden=True, aliases=["setbotbanner"], description="Bir eki veya bir jpg veya gif görüntüsüne doğrudan bağlantıyı kullanarak bot başlığını değiştirin.")
     async def setbanner(self, ctx: CustomContext, url: str = ""):
         await self.setavatar.callback(self=self, ctx=ctx, url=url, mode="banner")
 
     @commands.is_owner()
-    @commands.command(hidden=True, aliases=["setbotavatar"], description="Alterar o avatar do bot usando anexo ou link direto de uma imagem jpg ou gif.")
+    @commands.command(hidden=True, aliases=["setbotavatar"], description="Bir jpg veya gif görüntüsündeki eki veya doğrudan bağlantıyı kullanarak bot avatarını değiştirin.")
     async def setavatar(self, ctx: CustomContext, url: str = "", mode="avatar"):
 
         use_hyperlink = False
@@ -1025,15 +1025,15 @@ class Owner(commands.Cog):
         if not url:
 
             if not ctx.message.attachments:
-                raise GenericError("Você deve informar o link de uma imagem ou gif (ou anexar uma) no comando.")
+                raise GenericError("Komutta bir görsele veya gif'e bağlantı sağlamanız (veya bir tane eklemeniz) gerekir.")
 
             url = ctx.message.attachments[0].url
 
             if not url.split("?ex=")[0].endswith((".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp")):
-                raise GenericError("Você deve anexar um arquivo válido: png, jpg, jpeg, webp, gif, bmp.")
+                raise GenericError("Geçerli bir dosya eklemelisiniz: png, jpg, jpeg, webp, gif, bmp.")
 
         elif not URL_REG.match(url):
-            raise GenericError("Você informou um link inválido.")
+            raise GenericError("Geçersiz bir bağlantı sağladınız.")
 
         inter, bot = await select_bot_pool(ctx, return_new=True)
 
@@ -1049,11 +1049,11 @@ class Owner(commands.Cog):
             await inter.response.defer(ephemeral=True)
             func = inter.edit_original_message
 
-        await func(f"O novo {mode} do bot {bot.user.mention} está sendo processado. Por favor aguarde...", embed=None, view=None)
+        await func(f"Yeni {mode} bot yapılandırması {bot.user.mention} işleniyor. Lütfen bekleyin...", embed=None, view=None)
 
         async with ctx.bot.session.get(url) as r:
             if r.status != 200:
-                raise GenericError(f"Erro {r.status}: {await r.text()}")
+                raise GenericError(f"Hata {r.status}: {await r.text()}")
             image_bytes = await r.read()
 
         payload = {mode: await disnake.utils._assetbytes_to_base64_data(image_bytes)}
@@ -1077,7 +1077,7 @@ class Owner(commands.Cog):
 
         avatar_txt = mode if not use_hyperlink else f"[{mode}]({url})"
 
-        await func(f"O {avatar_txt} do bot {bot.user.mention} foi alterado com sucesso.", view=None, embed=None)
+        await func(f"O {avatar_txt} bot yapılandırması {bot.user.mention} başarıyla değiştirildi.", view=None, embed=None)
 
     async def cog_check(self, ctx: CustomContext) -> bool:
         return await check_requester_channel(ctx)
