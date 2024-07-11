@@ -1,8 +1,13 @@
 import hashlib
+import os
+import pickle
 import time
+from typing import Optional
 
 from aiohttp import ClientSession
+from cachetools import TTLCache
 
+cache_file = "./.lastfm_cache"
 
 class LastFmException(Exception):
     def __init__(self, data: dict):
@@ -14,6 +19,20 @@ class LastFM:
     def __init__(self, api_key: str, api_secret: str):
         self.api_key = api_key
         self.api_secret = api_secret
+        self.cache: Optional[TTLCache] = None
+        self.scrobble_load_cache()
+
+    def scrobble_load_cache(self):
+
+        if os.path.exists(cache_file):
+            with open(cache_file, 'rb') as f:
+                return pickle.load(f)
+
+        self.cache = TTLCache(maxsize=10000, ttl=600)
+
+    def scrobble_save_cache(self):
+        with open(cache_file, 'wb') as f:
+            pickle.dump(self.cache, f)
 
     def generate_api_sig(self, params: dict):
         sig = ''.join(f"{key}{params[key]}" for key in sorted(params))
