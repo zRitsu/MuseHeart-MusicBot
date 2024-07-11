@@ -171,3 +171,4 @@ application.yml
 /modules_dev/
 /.tmp/
 /.deployed
+/.lastfm_cache
