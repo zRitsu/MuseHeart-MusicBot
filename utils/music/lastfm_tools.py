@@ -19,8 +19,7 @@ class LastFM:
     def __init__(self, api_key: str, api_secret: str):
         self.api_key = api_key
         self.api_secret = api_secret
-        self.cache: Optional[TTLCache] = None
-        self.scrobble_load_cache()
+        self.cache: TTLCache = self.scrobble_load_cache()
 
     def scrobble_load_cache(self):
 
@@ -28,7 +27,7 @@ class LastFM:
             with open(cache_file, 'rb') as f:
                 return pickle.load(f)
 
-        self.cache = TTLCache(maxsize=10000, ttl=600)
+        return TTLCache(maxsize=10000, ttl=600)
 
     def scrobble_save_cache(self):
         with open(cache_file, 'wb') as f:

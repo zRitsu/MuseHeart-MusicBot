@@ -395,11 +395,11 @@ class LastFmCog(commands.Cog):
             if fm_user["last_url"] == player.current.uri and fm_user["last_timestamp"] and datetime.datetime.utcnow() < fm_user["last_timestamp"]:
                 return
 
-        await self.startscrooble(player=player, track=player.last_track, users=[member])
+        await self.startscrooble(player=player, track=player.current or player.last_track, users=[member])
 
     @commands.Cog.listener('on_wavelink_track_start')
     async def update_np(self, player: LavalinkPlayer):
-        await self.startscrooble(player, track=player.last_track, update_np=True)
+        await self.startscrooble(player, track=player.current or player.last_track, update_np=True)
 
     @commands.Cog.listener('on_wavelink_track_end')
     async def startscrooble(self, player: LavalinkPlayer, track: LavalinkTrack, reason: str = None, update_np=False, users=None):
@@ -465,7 +465,10 @@ class LastFmCog(commands.Cog):
                     artist = track.author[:-8]
 
                 else:
-                    if fmdata := self.bot.last_fm.cache.get(f"{track.title} - {track.author}") is None:
+
+                    track_query = f"{track.title} - {track.author}"
+
+                    if (fmdata := self.bot.last_fm.cache.get(track_query)) is None:
 
                         result = await player.bot.spotify.get_tracks(query=f"{track.author} - {track.title}",
                                                                      requester=self.bot.user.id, bot=self.bot)
@@ -474,8 +477,8 @@ class LastFmCog(commands.Cog):
                             result = [t for t in result if check_track_title(t.title)]
 
                         if not result:
-                            print(f"⚠️ - Last.FM Scrobble - Sem resultados para a música: {track.author} - {track.title}")
-                            self.bot.last_fm.cache[f"{track.title} - {track.author}"] = {}
+                            print(f"⚠️ - Last.FM Scrobble - Sem resultados para a música: {track_query}")
+                            self.bot.last_fm.cache[track_query] = {}
                             self.bot.last_fm.scrobble_save_cache()
                             return
 
@@ -485,11 +488,11 @@ class LastFmCog(commands.Cog):
                             "album": result[0].album_name,
                         }
 
-                        self.bot.last_fm.cache[f"{track.title} - {track.author}"] = fmdata
+                        self.bot.last_fm.cache[track_query] = fmdata
                         self.bot.last_fm.scrobble_save_cache()
 
                     if not fmdata:
-                        print(f"⚠️ - Last.FM Scrobble - Ignorado: {track.author} - {track.title}")
+                        print(f"⚠️ - Last.FM Scrobble - Ignorado: {track_query}")
                         return
 
                     name = fmdata["name"]
