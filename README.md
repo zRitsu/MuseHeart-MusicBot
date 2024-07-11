@@ -1,43 +1,45 @@
-# MuseHeart-MusicBot
-## bot de música programado em python com player interativo, comandos de barra + slash, integração com o [last.fm](https://www.last.fm/) e muito mais.
+# MuseHeart-MusicBot-TURKISH
+## Bu repo, Museheart botunun Portekizce'den Türkçe'ye çevrilmiş versiyonudur. (DİKKAT! Botun mevcut sürümü ile birebir aynı olmayabilir ve çeviride tutarsızlıklar bulunabilir.)
+## etkileşimli oynatıcı, slash komutları, [last.fm](https://www.last.fm/) ile entegrasyon ve çok daha fazlası ile python'ile programlanmış müzik botu.
 
-## Página com invites e algumas infos/screenshots da Muse Heart e funcionamento dessa source: [clique aqui](https://gist.github.com/zRitsu/4875008554a00c3c372b2df6dcdf437f#file-muse_heart_invites-md).
+## Davetler ve Muse Heart'tan bazı bilgileri/ekran görüntülerini ve bu kaynağın nasıl çalıştığını içeren sayfa: [buraya tıklayın](https://gist.github.com/zRitsu/4875008554a00c3c372b2df6dcdf437f#file-muse_heart_invites-md).
 
 [![](https://discordapp.com/api/guilds/911370624507707483/embed.png?style=banner2)](https://discord.gg/KM3NS7D6Zj)
 
-### Algumas Previews:
+### Bazı Önizlemeler:
 
-- Player controller: modo normal/mini-player (skin: default) e suporte a [RPC (Rich Presence)](https://github.com/zRitsu/MuseHeart-MusicBot-RPC-app)
+- Oynatıcı kontrolörü: Mod normal/mini-player (dış görünüm: varsayılan) 
+- [RPC (Rich Presence)](https://github.com/zRitsu/MuseHeart-MusicBot-RPC-app)
 
 [![](https://i.ibb.co/6tVbfFH/image.png)](https://i.ibb.co/6tVbfFH/image.png)
 
 <details>
 <summary>
-Mais previews:
+Daha fazla önizleme:
 </summary>
 <br>
 
-- Comandos de barra / Slash commands
+- Slash Komutları
 
 [![](https://i.ibb.co/nmhYWrK/muse-heart-slashcommands.png)](https://i.ibb.co/nmhYWrK/muse-heart-slashcommands.png)
 
-- Integração com o [last.fm](https://www.last.fm/) para scrobbles (outras funcionalidades em breve).
+- [last.fm](https://www.last.fm/) ile entegre çalışmaktadır.
 
 [![](https://i.ibb.co/SXm608z/muse-heart-lastfm.png)](https://i.ibb.co/SXm608z/muse-heart-lastfm.png)
 
-- Player controller: modo fixo/estendido com canal e conversa de song requests (skin: default), configurável com o comando: /setup
+- Oynatıcı kontrolörü: kanal ve şarkı isteği sohbeti ile sabit/genişletilmiş mod (dış görünüm: varsayılan), /setup komutuyla yapılandırılabilir
 
 [![](https://i.ibb.co/5cZ7JGs/image.png)](https://i.ibb.co/5cZ7JGs/image.png)
 
-- Player controller: modo fixo/estendido com canal de song-request em forum com suporte a status automático no canal de voz e palco
+- Oynatıcı kontrolörü: ses kanalı ve sahnede otomatik durum desteği ile forumda şarkı istek kanalı ile sabit / genişletilmiş mod
 
 [![](https://i.ibb.co/9Hm5cyG/playercontrollerforum.png)](https://i.ibb.co/9Hm5cyG/playercontrollerforum.png)
 
-* Há diversas outras skins, veja todas usando o comando /change_skin (você também pode criar outras, use os modelos padrões que estão na pasta [skins](utils/music/skins/) como referência, crie uma cópia com outro nome e modifique a seu gosto).
+* Başka birçok görünüm vardır, /change_skin komutunu kullanarak hepsini kontrol edin (yenilerini de oluşturabilirsiniz, [skins](utils/music/skins/) klasöründeki varsayılan şablonları referans olarak kullanın, başka bir ad altında bir kopya oluşturun ve istediğiniz gibi değiştirin).
 
 </details>
 
-## Teste agora mesmo criando/reusando um bot próprio com essa source fazendo deploy em um dos serviços abaixo:
+## Bu kaynakla kendi botunuzu oluşturarak/yeniden kullanarak ve aşağıdaki hizmetlerden birine dağıtarak şimdi test edin:
 
 ---
 
@@ -46,7 +48,7 @@ Mais previews:
 Repl.it
 </summary>
 
-Link do guia com imagens: https://gist.github.com/zRitsu/70737984cbe163f890dae05a80a3ddbe
+Resimlerle birlikte kılavuza bağlantı: https://gist.github.com/zRitsu/70737984cbe163f890dae05a80a3ddbe
 </details>
 
 ---
@@ -59,19 +61,19 @@ Render.com
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/zRitsu/MuseHeart-MusicBot/tree/main)
 
-* **[ 1 ]** - No campo **TOKEN_BOT_1** coloque o token do bot **( [tutorial de como obter](https://www.youtube.com/watch?v=lfdmZQySTXE) )**. `Nota: Caso queira, no campo TOKEN você pode incluir token de mais bots para ter bots extras pra ativar o suporte a multi-voice incluindo mais tokens no value (separando com espaços).`
+* **[ 1 ]** - **TOKEN_BOT_1** kısmına tokeni giriniz **( [Nasıl Bulunacağına Dair](https://www.youtube.com/watch?v=lfdmZQySTXE) )**. `Not: Dilerseniz, TOKEN alanına daha fazla bottan gelen tokenları dahil edebilir, böylece değere daha fazla token ekleyerek (boşluklarla ayırarak) çoklu ses desteğini etkinleştirmek için ekstra botlara sahip olabilirsiniz.`
 
 
-* **[ 2 ]** - No campo **DEFAULT_PREFIX** coloque um prefixo para o bot.
+* **[ 2 ]** - **DEFAULT_PREFIX** alanına bot için bir önek girin.
 
 
-* **[ 3 ]** - Nos campos **SPOTIFY_CLIENT_ID** e **SPOTIFY_CLIENT_SECRET** coloque as suas keys do spotify **( [tutorial de como obter](https://www.youtube.com/watch?v=ceKQjWiCyWE) )**.
+* **[ 3 ]** - **SPOTIFY_CLIENT_ID** ve **SPOTIFY_CLIENT_SECRET** alanlarına spotif anahtarlarınızı girin **( [Nasıl Bulunacağına Dair](https://www.youtube.com/watch?v=ceKQjWiCyWE) )**.
 
 
-* **[ 4 ]** - No campo **MONGO** coloque o link da sua database do MongoDB **( [tutorial de como obter](https://www.youtube.com/watch?v=x1Gq5beRx9k) )**.
+* **[ 4 ]** - MongoDB veritabanınızın bağlantısını **MONGO** alanına girin **( [Nasıl Bulunacağına Dair](https://www.youtube.com/watch?v=x1Gq5beRx9k) )**.
 
 
-* **[ 5 ]** - Clique em Apply e aguarde o processo de build até o bot iniciar (isso pode demorar bastante, no mínimo uns 13 minutos ou mais para o deploy ser finalizado + bot iniciar + servidor lavalink iniciar).
+* **[ 5 ]** - Uygula'ya tıklayın ve bot başlayana kadar derleme işlemini bekleyin (bu uzun sürebilir, dağıtımın tamamlanması + botun başlaması + lavalink sunucusunun başlaması için en az 13 dakika veya daha fazla sürebilir).
 </details>
 
 ---
@@ -84,92 +86,92 @@ Gitpod
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/zRitsu/MuseHeart-MusicBot)
 
-* **[ 1 ]** - Abra o arquivo .env e coloque o token do bot no campo apropriado (caso não tenha, veja como obter com este tutorial [tutorial](https://www.youtube.com/watch?v=lfdmZQySTXE) de como obter). Também altamente recomendo usar mongodb, procure onde tem MONGO= no arquivo .env e nele coloque o link da sua db do mongodb (caso não tenha, veja como obter por este [tutorial](https://www.youtube.com/watch?v=x1Gq5beRx9k)).
+* **[ 1 ]** - .env dosyasını açın ve bot token'ını uygun alana yerleştirin (eğer sahip değilseniz, bu öğretici ile nasıl elde edeceğinize bakın [tutorial](https://www.youtube.com/watch?v=lfdmZQySTXE) nasıl bulunur). Ayrıca mongodb kullanmanızı şiddetle tavsiye ederim, .env dosyasında MONGO='yu arayın ve mongodb db'nizin bağlantısını girin (eğer sahip değilseniz, nasıl edineceğinizi buradan öğrenebilirsiniz). [tutorial](https://www.youtube.com/watch?v=x1Gq5beRx9k)).
 
 
-* **[ 2 ]** - Clique com botão direito em cima do arquivo main.py e depois clique em: Run Python File in Terminal.
+* **[ 2 ]** - main.py dosyasına sağ tıklayın ve ardından tıklayın: Python Dosyasını Terminal'de Çalıştır.
 
 
-* **Nota 1:** Requer verificação da conta por número de celular/mobile.
-* **Nota 2:** Não esqueça de ir na lista de [workspaces](https://gitpod.io/workspaces) e clicar nos 3 pontinhos do projeto e depois clicar em **pin**. `(isso evitará o worskpace ser deletado após 14 dias inativo)`
-* **Nota 3:** Não use o gitpod para hospedar / manter o bot online, pois a mesma tem bastante limitações no plano gratuito (mais informações [nesse link](https://www.gitpod.io/pricing)).
+* **Nota 1:** Cep telefonu/cep numarası ile hesap doğrulaması gerektirir.
+* **Nota 2:** Kontrol etmeyi unutmayın [workspaces](https://gitpod.io/workspaces) ve projenin 3 noktasına tıklayın ve ardından **pin** öğesine tıklayın.. `(isso evitará o worskpace ser deletado após 14 dias inativo)`
+* **Nota 3:** Botu çevrimiçi barındırmak/bakımını yapmak için gitpod kullanmayın, çünkü ücretsiz planda birçok sınırlaması vardır (daha fazla bilgi [Gitpod Linki](https://www.gitpod.io/pricing)).
 </details>
 
 ---
 
 <details>
 <summary>
-Hospedando no seu próprio PC/VPS (windows/linux)
+Kendi bilgisayarınızda/VPS'nizde barındırma (windows/linux)
 </summary>
 <br>
 
 ### Requisitos:
 
 * Python 3.9, 3.10 ou 3.11<br/>
-[Download pela Microsoft Store](https://apps.microsoft.com/store/detail/9PJPW5LDXLZ5?hl=pt-br&gl=BR) (Recomendável para usuários do windows 10/11).<br/>
-[Download direto do site oficial](https://www.python.org/downloads/release/python-3117/) (Marque esta opção ao instalar: **Add python to the PATH**)
-* [Git](https://git-scm.com/downloads) (Não escolha a versão portable)</br>
+[Download pela Microsoft Store](https://apps.microsoft.com/store/detail/9PJPW5LDXLZ5?hl=pt-br&gl=BR) (Windows 10/11 kullanıcıları için önerilir).<br/>
+[Download direto do site oficial](https://www.python.org/downloads/release/python-3117/) (Kurulum sırasında bu seçeneği işaretleyin: **Add python to the PATH**)
+* [Git](https://git-scm.com/downloads) (Taşınabilir sürümü seçmeyin)</br>
 
-* [JDK 17](https://www.azul.com/downloads) ou superior (Windows e Linux não é necessário instalar, ele é baixado automaticamente)</br>
+* [JDK 17](https://www.azul.com/downloads) veya üstü (Windows'ta ve Linux'ta yüklenmesi gerekmez, otomatik olarak indirilir)</br>
 
-`Nota: esta source requer no mínimo 512mb de RAM E 1Ghz de CPU para rodar normalmente (caso rode o Lavalink na mesma instância do bot considerando que o bot seja privado).`
+`Not: Bu kaynağın normal çalışması için en az 512mb RAM VE 1Ghz CPU gerekir (Lavalink'i botla aynı örnekte çalıştırırsanız, botun özel olduğunu varsayarak).`
 
-### Iniciar bot (guia rápido):
+### Botu başlatın (hızlı kılavuz):
 
-* Baixe esta source como [zip](https://github.com/zRitsu/MuseHeart-MusicBot/archive/refs/heads/main.zip) e extraia em seguida (Ou use o comando abaixo no terminal/cmd e abra a pasta em seguida):
+* Repoyu burdan indirin [zip](https://github.com/zRitsu/MuseHeart-MusicBot/archive/refs/heads/main.zip) ve ardından ayıklayın (Veya aşağıdaki komutu terminal/cmd'de kullanın ve ardından klasörü açın):
 ```shell
 git clone https://github.com/zRitsu/MuseHeart-MusicBot.git
 ```
-* dê clique-duplo no arquivo source_setup.sh (ou apenas setup caso o seu windows não esteja exibindo extensões de arquivo) e aguarde.</br>
-`Caso esteja usando linux use o comando no terminal:` 
+* source_setup.sh dosyasına çift tıklayın (veya pencereleriniz dosya uzantılarını görüntülemiyorsa sadece setup tıklayın) ve bekleyin.</br>
+`Eğer linux kullanıyorsanız, terminaldeki komutu kullanın:` 
 ```shell
 bash source_setup.sh
 ```
-* Vai aparecer um arquivo com nome **.env**, edite ele e coloque o token do bot no campo apropriado (você também pode editar outras coisas deste mesmo arquivo caso queira fazer ajustes específicos no bot).</br>
-`Nota: Caso não tenha criado uma conta de bot,` [veja este tutorial](https://www.youtube.com/watch?v=lfdmZQySTXE) `para criar seu bot e obter o token necessário.`</br>`Também altamente recomendo usar mongodb, procure onde tem MONGO= no arquivo .env e nele coloque o link da sua db do mongodb (caso não tenha, veja como obter por este` [tutorial](https://www.youtube.com/watch?v=x1Gq5beRx9k)`). ` 
-* Agora basta apenas abrir o arquivo source_start_win.bat para iniciar o bot se o seu sistema for windows, caso seja linux dê clique duplo no start.sh (ou se preferir execute o bot usando o comando abaixo):
+* **.env** adında bir dosya görünecektir, bu dosyayı düzenleyin ve bot belirtecini uygun alana yerleştirin (botta belirli ayarlamalar yapmak istiyorsanız aynı dosyadaki diğer şeyleri de düzenleyebilirsiniz).</br>
+`Not: Eğer bir bot hesabı oluşturmadıysanız,` [veja este tutorial](https://www.youtube.com/watch?v=lfdmZQySTXE) `botunuzu oluşturmak ve gerekli jetonu almak için.`</br>` MONGO= .env dosyasını açın ve içine mongodb db'nizin bağlantısını koyun (eğer sahip değilseniz, nasıl edineceğiniz aşağıda açıklanmıştır` [tutorial](https://www.youtube.com/watch?v=x1Gq5beRx9k)`). ` 
+* Şimdi, sisteminiz windows ise botu başlatmak için source_start_win.bat dosyasını açın, linux ise start.sh dosyasına çift tıklayın (veya botu aşağıdaki komutu kullanarak çalıştırmayı tercih ederseniz).:
 ```shell
 bash source_start.sh
 ```
 
 ### Notas:
 
-* Para atualizar seu bot dê um clique duplo no update.sh (windows), p/ Linux use o comando no shell/terminal:
+* Botunuzu güncellemek için update.sh (windows) dosyasına çift tıklayın, Linux için kabuk/terminaldeki komutu kullanın:
 ```shell
 bash source_update.sh
 ```
-`Ao atualizar, há chance de qualquer alteração manual feita ser perdida (caso não seja um fork desta source)...`<br/>
+`Güncelleme sırasında, yapılan tüm manuel değişikliklerin kaybolma ihtimali vardır (eğer bu kaynağın bir çatalı değilse)...`<br/>
 
-`Obs: Caso esteja rodando a source diretamente de uma máquina com windows (e que tenha git instalado) apenas dê um duplo-click no arquivo source_update.sh`
+`Not: Kaynağı doğrudan bir Windows makinesinden çalıştırıyorsanız (ve git yüklüyse) source_update.sh dosyasına çift tıklamanız yeterlidir.`
 </details>
 
 ---
 
-Nota: há mais alguns guias na [wiki](https://github.com/zRitsu/MuseHeart-MusicBot/wiki).
+Not: Bu bölümde birkaç rehber daha var [wiki](https://github.com/zRitsu/MuseHeart-MusicBot/wiki).
 
-### Observaçoes importantes:
+### Önemli gözlemler:
 
-* Você pode usar essa source como alternativa de self-hosting do meu bot principal (Muse Heart) pra hospedar/rodar seu próprio bot de música para uso privado ou em servidores públicos no qual você gerencia (que você tenha permissão de adicionar seu próprio bot no servidor). Entretanto não recomendo distribuir o bot usando essa source publicamente por não estar otimizado o suficiente pra lidar com alta demanda de servidores, mas se mesmo assim decidir fazer isso o bot terá que estar sob a [licença](/LICENSE) da source original e dependendo de onde o bot estiver sendo divulgado (ex: botlists) há possibilidade de seu bot ser apontado pelo uso dessa source.
-
-
-* Recomendo usar a source atual sem alterações no code. Caso queira fazer modificações (e principalmente adicionar novas funcionalidades) é altamente recomendável que tenha conhecimento em python, disnake, lavalink e etc. E caso queira manter sua source modificada com updates em dias usando a source base também recomendo ter conhecimento em git (pelo menos o necessário pra fazer um merge sem erros).
+* Bu kaynağı, özel kullanım için kendi müzik botunuzu barındırmak / çalıştırmak için ana botuma (Muse Heart) alternatif olarak veya yönettiğiniz genel sunucularda (sunucuya kendi botunuzu eklemek için izniniz varsa) kullanabilirsiniz. Bununla birlikte, botu bu kaynağı kullanarak herkese açık olarak dağıtmanızı önermiyorum çünkü yüksek sunucu talebiyle başa çıkacak kadar optimize edilmemiştir, ancak yine de bunu yapmaya karar verirseniz, botun orijinal kaynağın [lisans](/LICENSE) altında olması gerekecektir ve botun nerede tanıtıldığına bağlı olarak (örneğin bot listeleri) botunuzun bu kaynağı kullandığına dikkat çekilme olasılığı vardır.
 
 
-* Não será fornecido suporte caso modifique a source atual (exceto para custom skins), pois atualizo ela com frequência e versões modificadas tendem a ficarem desatualizadas dificultando dar suporte por esse motivo (além de que dependendo da modificação ou implementação poder gerar erros desconhecidos que dificulta ao tentar resolver o problema e de eu exigir usar métodos pra atualizar o code que geralmente desfaz essas alterações).
+* Kodda hiçbir değişiklik yapmadan mevcut kaynağı kullanmanızı öneririm. Eğer değişiklik yapmak (ve özellikle yeni özellikler eklemek) istiyorsanız, python, disnake, lavalink ve benzeri konularda bilgi sahibi olmanız şiddetle tavsiye edilir. Ve eğer değiştirdiğiniz kaynağı temel kaynağı kullanarak günlük olarak güncel tutmak istiyorsanız, git bilgisine sahip olmanızı da tavsiye ederim (en azından hatasız bir şekilde birleştirmek için ihtiyacınız olan şey).
 
 
-* Caso queira postar algum vídeo/tutorial usando essa source, você está totalmente livre para usá-la pra essa finalidade desde que esteja de acordo com os termos citados nos parágrafos acima.
+* Mevcut kaynağı değiştirirseniz (özel görünümler hariç) destek sağlanmayacaktır, çünkü sık sık güncelliyorum ve değiştirilmiş sürümler güncelliğini kaybetme eğiliminde olduğundan, bu nedenle destek sağlamayı zorlaştırıyor (değişikliğe veya uygulamaya bağlı olarak, sorunu çözmeye çalışmayı zorlaştıran bilinmeyen hatalar oluşturabileceği ve genellikle bu değişiklikleri geri alan kodu güncellemek için yöntemler kullanmam gerektiği gerçeğine ek olarak).
+
+
+* Bu kaynağı kullanarak bir video / öğretici yayınlamak istiyorsanız, yukarıdaki paragraflarda belirtilen şartları kabul ettiğiniz sürece bu amaçla kullanmakta tamamen özgürsünüz.
 
 ---
 
-### Caso tenha algum problema, poste uma [issue](https://github.com/zRitsu/MuseHeart-MusicBot/issues) detalhando o problema.
+### Eğer bir probleminiz varsa, problemi detaylandıran bir [issue](https://github.com/zRitsu/MuseHeart-MusicBot/issues) gönderin.
 
 
-## Agradecimentos especiais e créditos:
+## Özel teşekkürler ve krediler:
 
-* [DisnakeDev](https://github.com/DisnakeDev) (disnake) e ao Rapptz pelo [discord.py](https://github.com/Rapptz/discord.py) original
+* [DisnakeDev](https://github.com/DisnakeDev) (disnake) ve Rapptz'e [discord.py](https://github.com/Rapptz/discord.py) original
 * [Pythonista Guild](https://github.com/PythonistaGuild) (wavelink)
 * [Lavalink-Devs](https://github.com/lavalink-devs) (lavalink e lavaplayer)
-* [DarrenOfficial](https://lavalink-list.darrennathanael.com/) Lavalink serverlist (Usuários que publicaram seus servidores lavalink estão listados no comando about junto com website/link).
-* E a todos os membros que me me ajudaram bastante com reports de erros (sendo nas [issues](https://github.com/zRitsu/MuseHeart-MusicBot/issues) e no servidor do discord)
-* Demais atribuições podem ser conferidas no [dependency graph](https://github.com/zRitsu/MuseHeart-MusicBot/network/dependencies)
+* [DarrenOfficial](https://lavalink-list.darrennathanael.com/) Lavalink sunucu listesi (lavalink sunucularını yayınlayan kullanıcılar, web sitesi / bağlantı ile birlikte hakkında komutunda listelenir).
+* Ve hata bildirimlerinde bana çok yardımcı olan tüm üyelere ([issues](https://github.com/zRitsu/MuseHeart-MusicBot/issues) ve discord sunucusunda).
+* Diğer görevler şu adreste bulunabilir [dependency graph](https://github.com/zRitsu/MuseHeart-MusicBot/network/dependencies)
