@@ -480,7 +480,7 @@ class LastFmCog(commands.Cog):
                             return
 
                         fmdata = {
-                            "name": result[0].title,
+                            "name": result[0].single_title,
                             "artist": result[0].author,
                             "album": result[0].album_name,
                         }
