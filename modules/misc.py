@@ -48,7 +48,7 @@ def remove_blank_spaces(d):
 class Misc(commands.Cog):
 
     emoji = "🔰"
-    name = "Diversos"
+    name = "Birçok"
     desc_prefix = f"[{emoji} {name}] | "
 
     def __init__(self, bot: BotCore):
@@ -242,16 +242,16 @@ class Misc(commands.Cog):
             else:
                 bots_outside_guild.append(bot)
 
-        components = [disnake.ui.Button(custom_id="bot_invite", label="Precisa de mais bots de música? Clique aqui.")] if [b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public] else []
+        components = [disnake.ui.Button(custom_id="bot_invite", label="Daha fazla müzik botuna mı ihtiyacınız var? buraya tıklayın.")] if [b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public] else []
 
         if cmd:=self.bot.get_command("setup"):
-            cmd_text = f"Se desejar, use o comando **/{cmd.name}** para criar um canal dedicado pra pedir " \
-                        "músicas sem comandos e deixar o music player fixo em um canal dedicado.\n\n"
+            cmd_text = f"İstenirse, isteğe özel bir kanal oluşturmak için **/{cmd.name}**komutunu kullanın " \
+                        "şarkıları komut olmadan çalın ve müzik çaları özel bir kanala sabit bırakın.\n\n"
         else:
             cmd_text = ""
 
         if self.bot.config["SUPPORT_SERVER"]:
-            support_server = f"Caso tenha alguma dúvida ou queira acompanhar as últimas novidades, você pode entrar no meu [`servidor de suporte`]({self.bot.config['SUPPORT_SERVER']})"
+            support_server = f"Sorularınız varsa veya en son haberlerden haberdar olmak istiyorsanız, hesabıma giriş yapabilirsiniz. [`destek sunucusu`]({self.bot.config['SUPPORT_SERVER']})"
         else:
             support_server = ""
 
@@ -285,42 +285,42 @@ class Misc(commands.Cog):
                         embeds.append(
                             disnake.Embed(
                                 color=color,
-                                description=f"Olá! Agradeço muito por ter me adicionado no servidor: **{guild.name}** :)"
+                                description=f"Merhaba! Beni sunucuya eklediğiniz için çok teşekkür ederim: **{guild.name}** :)"
                             ).set_image(url=image)
                         )
 
                         embeds.append(
                             disnake.Embed(
                                 color=color,
-                                description=f"Para ver todos os meus comandos use barra (**/**) no servidor " \
+                                description=f"Tüm komutlarımı görmek için sunucuda eğik çizgi (**/**) kullanın " \
                                              f"**{guild.name}**"
                             ).set_image(url=image)
                         )
 
                         if prefix:
-                            prefix_msg = f"Meu prefixo no servidor **{guild.name}** é: **{prefix}**"
+                            prefix_msg = f"Sunucudaki önekim **{guild.name}** é: **{prefix}**"
                         else:
                             prefix = self.bot.default_prefix
-                            prefix_msg = f"Meu prefixo padrão é **{prefix}**"
+                            prefix_msg = f"Varsayılan önekim **{prefix}**"
 
                         embeds.append(
                             disnake.Embed(
                                 color=color,
-                                description=f"Também tenho comandos de texto por prefixo. {prefix_msg} (minha menção "
-                                            f"também funciona como prefixo). Pra ver todos os meus comandos de texto "
-                                            f"use **{prefix}help** em um canal do servidor **{guild.name}**. "
-                                            f"Caso queira alterar meu prefixo use o comando **{prefix}setprefix** "
-                                            f"(você pode ter um prefixo pessoal usando o comando "
+                                description=f"Ayrıca önek ile metin komutlarım var. {prefix_msg} (benim sözüm "
+                                            f"aynı zamanda önek olarak da çalışır). Tüm metin komutlarımı görmek için "
+                                            f"kullan **{prefix}help** bir sunucu kanalında **{guild.name}**. "
+                                            f"Ön ekimi değiştirmek istiyorsanız şu komutu kullanın: **{prefix}setprefix** "
+                                            f"(komutu kullanarak kişisel bir önekiniz olabilir "
                                             f"**{prefix}setmyprefix**)."
                             ).set_image(url=image)
                         )
 
                         if bots_in_guild:
 
-                            msg = f"Notei que há outros bots no servidor **{guild.name}** no qual sou compatível com " \
-                                   f"o sistema de multi-voice: {', '.join(b.user.mention for b in bots_in_guild)}\n\n" \
-                                   f"Ao usar usar os comandos de música (ex: play) sem um dos bots conectado no canal, " \
-                                    "será usado um dos bots que estiver livre no servidor."
+                            msg = f"Sunucuda başka botların da olduğunu fark ettim **{guild.name}** hangisiyle uyumluyum " \
+                                   f"çok sesli sistem: {', '.join(b.user.mention for b in bots_in_guild)}\n\n" \
+                                   f"Kanala bağlı botlardan biri olmadan müzik komutlarını (örn. oynat) kullanırken, " \
+                                    "Sunucuda ücretsiz olan botlardan biri kullanılacaktır."
 
                             if not self.bot.pool.config.get("MULTIVOICE_VIDEO_DEMO_URL"):
                                 embeds.append(
@@ -334,10 +334,10 @@ class Misc(commands.Cog):
                                 send_video = msg
 
                         elif bots_outside_guild and self.bot.config.get('MULTIVOICE_VIDEO_DEMO_URL'):
-                            send_video = "**Caso tenha demanda no seu servidor você também pode adicionar mais bots de músicas extras.\n" \
-                                         "Todos os bots compartilham o mesmo prefixo e comando de barra o que descarta a necessidade " \
-                                         f"de ficar decorando prefixos e comandos de barra de cada bot individualmente.\n\n" \
-                                         f"Confira o [vídeo]({self.bot.config['MULTIVOICE_VIDEO_DEMO_URL']}) demonstrando o uso de multi-bot na prática.**"
+                            send_video = "**Sunucunuzda talep varsa daha fazla ekstra müzik botu da ekleyebilirsiniz..\n" \
+                                         "Tüm botlar aynı önek ve eğik çizgi komutunu paylaşır, bu da ihtiyacı ortadan kaldırır " \
+                                         f"her bot için önekleri ve eğik çizgi komutlarını ayrı ayrı ezberlemek zorunda kalmak.\n\n" \
+                                         f"Kontrol et [vídeo]({self.bot.config['MULTIVOICE_VIDEO_DEMO_URL']}) çoklu botun pratikte kullanımını gösteren.**"
 
                         if support_server:
                             embeds.append(disnake.Embed(color=color, description=support_server).set_image(url=image))
@@ -346,7 +346,7 @@ class Misc(commands.Cog):
                             await entry.user.send(embeds=embeds, components=components)
                             if send_video:
                                 await asyncio.sleep(1)
-                                await entry.user.send(f"{send_video}\n\nConfira o [**vídeo**]({self.bot.config['MULTIVOICE_VIDEO_DEMO_URL']}) demonstrando essa funcionalidade.")
+                                await entry.user.send(f"{send_video}\n\nÇıkış yapmako [**vídeo**]({self.bot.config['MULTIVOICE_VIDEO_DEMO_URL']}) bu işlevselliği gösteriyor.")
                             return
                         except disnake.Forbidden:
                             pass
@@ -367,35 +367,35 @@ class Misc(commands.Cog):
 
         embeds = [
             disnake.Embed(
-                color=color, description="Olá! Para ver todos os meus comandos use barra (**/**)\n"
-                                         "`Nota: Caso os comandos estejam aparecendo no seu servidor,"
-                                         "talvez o mesmo tenha atingido o limite de bots com comandos de barra "
-                                         "registrados (caso tenha mais de 50 integrações/apps no seu servidor).`"
+                color=color, description="Merhaba! Tüm komutlarımı görmek için eğik çizgiyi kullanın (**/**)\n"
+                                         "`Not: Komutlar sunucunuzda görünüyorsa,"
+                                         "belki de eğik çizgi komutlarını kullanan botların sınırına ulaşılmıştır "
+                                         "kayıtlı (sunucunuzda 50'den fazla entegrasyon/uygulama varsa).`"
             ).set_image(url=image)
         ]
 
         if prefix:
-            prefix_msg = f"Meu prefixo no servidor é: **{prefix}**"
+            prefix_msg = f"Sunucu önekim: **{prefix}**"
         else:
             prefix = self.bot.default_prefix
-            prefix_msg = f"Meu prefixo padrão é **{prefix}**"
+            prefix_msg = f"Varsayılan önekim **{prefix}**"
 
         embeds.append(
             disnake.Embed(
                 color=color,
-                description=f"Também tenho comandos de texto por prefixo. {prefix_msg} (minha menção "
-                            f"também funciona como prefixo). Pra ver todos os meus comandos de texto use "
-                            f"**{prefix}help**. Caso queira alterar meu prefixo use o comando **{prefix}setprefix** "
-                            f"(você pode ter um prefixo pessoal usando o comando **{prefix}setmyprefix**)."
+                description=f"Ayrıca önek ile metin komutlarım var. {prefix_msg} (bahsettiğim "
+                            f"aynı zamanda önek olarak da çalışır). Tüm metin komutlarımı görmek için şunu kullanın: "
+                            f"**{prefix}help**. Ön ekimi değiştirmek istiyorsanız şu komutu kullanın: **{prefix}setprefix** "
+                            f"(komutu kullanarak kişisel bir önekiniz olabilir **{prefix}setmyprefix**)."
             ).set_image(url=image)
         )
 
         if bots_in_guild:
 
-            msg = f"Notei que há outros bots no servidor **{guild.name}** no qual sou compatível com " \
-                  f"o sistema de multi-voice: {', '.join(b.user.mention for b in bots_in_guild)}\n\n" \
-                  f"Ao usar usar os comandos de música (ex: play) sem um dos bots conectado no canal, será usado um " \
-                   f"dos bots que estiver livre no servidor."
+            msg = f"Sunucuda başka botların da olduğunu fark ettim **{guild.name}** hangisiyle uyumluyum " \
+                  f"çok sesli sistem: {', '.join(b.user.mention for b in bots_in_guild)}\n\n" \
+                  f"Kanala bağlı botlardan biri olmadan müzik komutlarını (örn. oynat) kullanırken, " \
+                   f"sunucuda ücretsiz olan botların sayısı."
 
             if not self.bot.config.get('MULTIVOICE_VIDEO_DEMO_URL'):
                 embeds.append(
@@ -408,10 +408,10 @@ class Misc(commands.Cog):
                 send_video = msg
 
         elif bots_outside_guild and self.bot.config.get('MULTIVOICE_VIDEO_DEMO_URL'):
-            send_video = "**Caso tenha demanda no seu servidor você também pode adicionar mais bots de músicas extras.\n" \
-                          "Todos os bots compartilham o mesmo prefixo e comando de barra o que descarta a necessidade " \
-                          f"de ficar decorando prefixos e comandos de barra de cada bot individualmente.\n\n" \
-                        f"Confira o [vídeo]({self.bot.config['MULTIVOICE_VIDEO_DEMO_URL']}) demonstrando o uso de multi-bot na prática.**"
+            send_video = "**Sunucunuzda talep varsa daha fazla ekstra müzik botu da ekleyebilirsiniz..\n" \
+                          "Tüm botlar aynı önek ve eğik çizgi komutunu paylaşır, bu da ihtiyacı ortadan kaldırır " \
+                          f"her bot için önekleri ve eğik çizgi komutlarını ayrı ayrı ezberleme.\n\n" \
+                        f"Kontrol et [vídeo]({self.bot.config['MULTIVOICE_VIDEO_DEMO_URL']}) çoklu botun pratikte kullanımını gösteriyor.**"
 
         embeds.append(disnake.Embed(color=color, description=cmd_text).set_image(url=image))
 
@@ -422,7 +422,7 @@ class Misc(commands.Cog):
 
         timestamp = int((disnake.utils.utcnow() + datetime.timedelta(seconds=kwargs["delete_after"])).timestamp())
 
-        embeds[-1].description += f"\nEssa mensagem será deletada automaticamente <t:{timestamp}:R>"
+        embeds[-1].description += f"\nBu mesaj otomatik olarak silinecek <t:{timestamp}:R>"
 
         try:
             await channel.send(embeds=embeds, components=components, **kwargs)
@@ -430,24 +430,24 @@ class Misc(commands.Cog):
                 if "delete_after" in kwargs:
                     kwargs["delete_after"] = 600
                 await asyncio.sleep(1)
-                await channel.send(f"{send_video}\n\nConfira o [**vídeo**]({self.bot.config['MULTIVOICE_VIDEO_DEMO_URL']}) demonstrando essa funcionalidade.", **kwargs)
+                await channel.send(f"{send_video}\n\nKontrol et [**vídeo**]({self.bot.config['MULTIVOICE_VIDEO_DEMO_URL']}) bu işlevselliği gösteriyor.", **kwargs)
         except:
-            print(f"Falha ao enviar mensagem de novo servidor no canal: {channel}\n"
-                  f"ID do canal: {channel.id}\n"
-                  f"Tipo de canal: {type(channel)}\n"
+            print(f"Kanaldaki yeni sunucudan mesaj gönderilemedi: {channel}\n"
+                  f"Kimlik kanalı: {channel.id}\n"
+                  f"Kanal türü: {type(channel)}\n"
                   f"{traceback.format_exc()}")
 
 
     about_cd = commands.CooldownMapping.from_cooldown(1, 5, commands.BucketType.member)
 
-    @commands.command(name="about", aliases=["sobre", "info", "botinfo"], description="Exibir informações sobre mim.",
+    @commands.command(name="about", aliases=["sobre", "info", "botinfo"], description="Hakkımdaki bilgileri görüntüleyin.",
                       cooldown=about_cd)
     async def about_legacy(self, ctx: CustomContext):
         await self.about.callback(self=self, interaction=ctx)
 
 
     @commands.slash_command(
-        description=f"{desc_prefix}Exibir informações sobre mim.", cooldown=about_cd, dm_permission=False,
+        description=f"{desc_prefix}Hakkımdaki bilgileri görüntüleyin.", cooldown=about_cd, dm_permission=False,
         extras={"allow_private": True}
     )
     async def about(
@@ -469,11 +469,11 @@ class Misc(commands.Cog):
 
         python_ram = psutil.Process(getpid()).memory_info().rss
 
-        ram_msg = f"> 🖥️ **⠂Uso de RAM (Python):** `{humanize.naturalsize(python_ram)}`\n"
+        ram_msg = f"> 🖥️ **⠂RAM Kullanımı (Python):** `{humanize.naturalsize(python_ram)}`\n"
 
         if lavalink_ram:
-            ram_msg += f"> 🌋 **⠂Uso de RAM (Lavalink):** `{humanize.naturalsize(lavalink_ram)}`\n" \
-                        f"> 🖥️ **⠂Uso de RAM (Total):** `{humanize.naturalsize(python_ram + lavalink_ram)}`\n"
+            ram_msg += f"> 🌋 **⠂RAM Kullanımı (Lavalink):** `{humanize.naturalsize(lavalink_ram)}`\n" \
+                        f"> 🖥️ **⠂RAM Kullanımı (Toplam):** `{humanize.naturalsize(python_ram + lavalink_ram)}`\n"
 
         guild = bot.get_guild(inter.guild_id) or inter.guild
 
@@ -596,67 +596,67 @@ class Misc(commands.Cog):
 
         if len(allbots) < 2:
 
-            embed.description += "### Estatíticas (bot atual):\n" \
-                                 f"> 🏙️ **⠂Servidor{'es'[:(svcount:=len(bot.guilds))^1]}:** `{svcount:,}`\n" \
-                                 f"> 👥 **⠂Usuário{'s'[:user_count^1]}:** `{user_count:,}`\n"
+            embed.description += "### İstatistikler \n" \
+                                 f"> 🏙️ **⠂Sunucu{'es'[:(svcount:=len(bot.guilds))^1]}:** `{svcount:,}`\n" \
+                                 f"> 👥 **⠂Kullanıcı{'s'[:user_count^1]}:** `{user_count:,}`\n"
 
             if bot_count:
                 embed.description += f"> 🤖 **⠂Bot{'s'[:bot_count^1]}:** `{bot_count:,}`\n"
 
         else:
 
-            embed.description += "### Estatísticas (totais em todos os bots):\n"
+            embed.description += "### İstatistikler (tüm botlardaki toplamlar):\n"
 
             if public_bot_count:
-                embed.description += f"> 🤖 **⠂Bot{(s:='s'[:public_bot_count^1])} público{s}:** `{public_bot_count:,}`\n"
+                embed.description += f"> 🤖 **⠂Bot{(s:='s'[:public_bot_count^1])} halk{s}:** `{public_bot_count:,}`\n"
 
             if private_bot_count:
-                embed.description += f"> 🤖 **⠂Bot{(s:='s'[:private_bot_count^1])} privado{s}:** `{private_bot_count:,}`\n"
+                embed.description += f"> 🤖 **⠂Bot{(s:='s'[:private_bot_count^1])} özel{s}:** `{private_bot_count:,}`\n"
 
-            embed.description += f"> 🏙️ **⠂Servidor{'es'[:guilds_size^1]}:** `{guilds_size:,}`\n"
+            embed.description += f"> 🏙️ **⠂Sunucu{'lar'[:guilds_size^1]}:** `{guilds_size:,}`\n"
 
             if users_amount := len(users):
-                embed.description += f"> 👥 **⠂Usuário{'s'[:users_amount^1]}:** `{users_amount:,}`\n"
+                embed.description += f"> 👥 **⠂Kullanıcı{'lar'[:users_amount^1]}:** `{users_amount:,}`\n"
 
             if bots_amount := len(bots):
-                embed.description += f"> 🤖 **⠂Bot{'s'[:bots_amount^1]}:** `{bots_amount:,}`\n"
+                embed.description += f"> 🤖 **⠂Bot{'lar'[:bots_amount^1]}:** `{bots_amount:,}`\n"
 
-        embed.description += "### Outras informações:\n"
+        embed.description += "### Diğer bilgiler:\n"
 
         if active_players_other_bots:
-            embed.description += f"> ▶️ **⠂Player{(s:='s'[:active_players_other_bots^1])} ativo{s}:** `{active_players_other_bots:,}`\n"
+            embed.description += f"> ▶️ **⠂Player{(s:='s'[:active_players_other_bots^1])} aktif{s}:** `{active_players_other_bots:,}`\n"
 
         if paused_players_other_bots:
-            embed.description += f"> ⏸️ **⠂Player{'s'[:paused_players_other_bots^1]} em pausa:** `{paused_players_other_bots:,}`\n"
+            embed.description += f"> ⏸️ **⠂Player{'s'[:paused_players_other_bots^1]} duraklamada:** `{paused_players_other_bots:,}`\n"
 
         if inactive_players_other_bots:
-            embed.description += f"> 💤 **⠂Player{(s:='s'[:inactive_players_other_bots^1])} inativo{s}:** `{inactive_players_other_bots:,}`\n"
+            embed.description += f"> 💤 **⠂Player{(s:='s'[:inactive_players_other_bots^1])} aktif değil{s}:** `{inactive_players_other_bots:,}`\n"
 
         if listeners:
-            embed.description += f"> 🎧 **⠂Ouvinte{'s'[:(lcount:=len(listeners))^1]} atua{'is'[:lcount^1] or 'l'}:** `{lcount:,}`\n"
+            embed.description += f"> 🎧 **⠂Dinleyici{'ler'[:(lcount:=len(listeners))^1]} a{'a'[:lcount^1] or 'l'}:** `{lcount:,}`\n"
 
         if bot.pool.commit:
-            embed.description += f"> 📥 **⠂Commit atual:** [`{bot.pool.commit[:7]}`]({bot.pool.remote_git_url}/commit/{bot.pool.commit})\n"
+            embed.description += f"> 📥 **⠂Gerçek işlemi gerçekleştir:** [`{bot.pool.commit[:7]}`]({bot.pool.remote_git_url}/commit/{bot.pool.commit})\n"
 
-        embed.description += f"> 🐍 **⠂Versão do Python:** `{platform.python_version()}`\n" \
-                             f"> 📦 **⠂Versão do Disnake:** `{disnake.__version__}`\n" \
-                             f"> 📶 **⠂Latencia:** `{round(bot.latency * 1000)}ms`\n" \
+        embed.description += f"> 🐍 **⠂Python sürümü:** `{platform.python_version()}`\n" \
+                             f"> 📦 **⠂Disney versiyonu:** `{disnake.__version__}`\n" \
+                             f"> 📶 **⠂Gecikme:** `{round(bot.latency * 1000)}ms`\n" \
                              f"{ram_msg}" \
-                             f"> ⏰ **⠂Uptime:** <t:{int(bot.uptime.timestamp())}:R>\n"
+                             f"> ⏰ **⠂Çalışma süresi:** <t:{int(bot.uptime.timestamp())}:R>\n"
 
         if not bot.config["INTERACTION_COMMAND_ONLY"]:
 
             guild_data = await bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
 
             if guild_data["prefix"]:
-                embed.description += f"> ⌨️ **⠂Prefixo do servidor:** `{disnake.utils.escape_markdown(guild_data['prefix'], as_needed=True)}`\n"
+                embed.description += f"> ⌨️ **⠂Sunucu öneki:** `{disnake.utils.escape_markdown(guild_data['prefix'], as_needed=True)}`\n"
             else:
-                embed.description += f"> ⌨️ **⠂Prefixo padrão:** `{disnake.utils.escape_markdown(bot.default_prefix, as_needed=True)}`\n"
+                embed.description += f"> ⌨️ **⠂Varsayılan önek:** `{disnake.utils.escape_markdown(bot.default_prefix, as_needed=True)}`\n"
 
             user_data = await bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
             if user_data["custom_prefix"]:
-                embed.description += f"> ⌨️ **⠂Seu prefixo de usuário:** `{disnake.utils.escape_markdown(user_data['custom_prefix'], as_needed=True)}`\n"
+                embed.description += f"> ⌨️ **⠂Kullanıcı önekiniz:** `{disnake.utils.escape_markdown(user_data['custom_prefix'], as_needed=True)}`\n"
 
         links = "[`[Source]`](https://github.com/zRitsu/MuseHeart-MusicBot)"
 
@@ -672,7 +672,7 @@ class Misc(commands.Cog):
 
         if node_txt_final:
 
-            embed.description += f"### Servidores de música (Lavalink Servers):\n{node_txt_final}"
+            embed.description += f"### Müzik Sunucuları (Lavalink Sunucuları):\n{node_txt_final}"
 
         try:
             avatar = owner.avatar.with_static_format("png").url
@@ -684,7 +684,7 @@ class Misc(commands.Cog):
             text=f"Dono(a): {owner} [{owner.id}]"
         )
 
-        components = [disnake.ui.Button(custom_id="bot_invite", label="Me adicione no seu servidor")] if [b for b in self.bot.pool.bots if b.appinfo and (b.appinfo.bot_public or await b.is_owner(inter.author))] else None
+        components = [disnake.ui.Button(custom_id="bot_invite", label="Beni sunucuna ekle")] if [b for b in self.bot.pool.bots if b.appinfo and (b.appinfo.bot_public or await b.is_owner(inter.author))] else None
 
         try:
             await inter.edit_original_message(embed=embed, components=components)
@@ -738,13 +738,13 @@ class Misc(commands.Cog):
         txt = ""
 
         if bots_invites:
-            txt += "## Bots de música disponíveis:\n"
+            txt += "## Mevcut müzik botları:\n"
             for i in disnake.utils.as_chunks(bots_invites, 2):
                 txt += " | ".join(i) + "\n"
             txt += "\n"
 
         if bots_in_guild:
-            txt += "## Bots de música que já estão no servidor atual:\n"
+            txt += "## Halihazırda mevcut sunucuda bulunan müzik botları:\n"
             for i in disnake.utils.as_chunks(bots_in_guild, 2):
                 txt += " | ".join(i) + "\n"
 
@@ -754,7 +754,7 @@ class Misc(commands.Cog):
                     colour=self.bot.get_color(
                         inter.guild.me if inter.guild else guild.me if guild else None
                     ),
-                    description="## Não há bots públicos disponível...",
+                    description="## Herkese açık bot yok...",
                 ), ephemeral=True
             )
             return
@@ -771,13 +771,13 @@ class Misc(commands.Cog):
         await inter.send(embeds=embeds, ephemeral=True)
 
 
-    @commands.command(name="invite", aliases=["convidar"], description="Exibir meu link de convite para você me adicionar no seu servidor.")
+    @commands.command(name="invite", aliases=["convidar"], description="Beni sunucunuza ekleyebilmeniz için davet bağlantımı görüntüleyin.")
     async def invite_legacy(self, ctx):
         await self.invite.callback(self=self, inter=ctx)
 
 
     @commands.slash_command(
-        description=f"{desc_prefix}Exibir meu link de convite para você me adicionar no seu servidor.",
+        description=f"{desc_prefix}Beni sunucunuza ekleyebilmeniz için davet bağlantımı görüntüleyin.",
         dm_permission=False, extras={"allow_private": True}
     )
     async def invite(self, inter: disnake.AppCmdInter):
@@ -817,8 +817,8 @@ class Misc(commands.Cog):
 
     @commands.is_owner()
     @commands.max_concurrency(1, commands.BucketType.default)
-    @commands.command(hidden=True, description="Comando temporário para corrigir favoritos com espaços em branco "
-                                               "que ocasionam erros em algumas situações.")
+    @commands.command(hidden=True, description="Yer imlerini boşlukla düzeltmeye yönelik geçici komut "
+                                               "bazı durumlarda hatalara neden olur.")
     async def fixfavs(self, ctx: CustomContext):
 
         if not os.path.isdir("./local_database/fixfavs_backup"):
@@ -849,7 +849,7 @@ class Misc(commands.Cog):
                 remove_blank_spaces(data["fav_links"])
                 await self.bot.update_global_data(id_=data["_id"], data=data, db_name=DBModel.users)
 
-            await ctx.send("os favoritos foram corrigidos com sucesso!")
+            await ctx.send("Favoriler başarıyla düzeltildi!")
 
     async def cog_check(self, ctx):
         return await check_requester_channel(ctx)
@@ -873,12 +873,12 @@ class GuildLog(commands.Cog):
             if URL_REG.match(bot.config["BOT_ADD_REMOVE_LOG"]):
                 self.hook_url = bot.config["BOT_ADD_REMOVE_LOG"]
             else:
-                print("URL do webhook inválido (para envio de logs ao adicionar/remover bot).")
+                print("Geçersiz webhook URL'si (bot eklerken/kaldırırken günlükleri göndermek için).")
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: disnake.Guild):
 
-        print(f"Removido do servidor: {guild.name} - [{guild.id}]")
+        print(f"Sunucudan kaldırıldı: {guild.name} - [{guild.id}]")
 
         try:
             await self.bot.music.players[guild.id].destroy()
@@ -891,7 +891,7 @@ class GuildLog(commands.Cog):
             return
 
         try:
-            await self.send_hook(guild, title="Me removeram do servidor", color=disnake.Color.red())
+            await self.send_hook(guild, title="Beni sunucudan çıkardılar", color=disnake.Color.red())
         except:
             traceback.print_exc()
 
@@ -900,7 +900,7 @@ class GuildLog(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_join(self, guild: disnake.Guild):
 
-        print(f"{self.bot.user.name} - Adicionado(a) no servidor: {guild.name} - [{guild.id}]")
+        print(f"{self.bot.user.name} - Sunucuya eklendi: {guild.name} - [{guild.id}]")
 
         try:
             guild_data = await self.bot.get_data(guild.id, db_name=DBModel.guilds)
@@ -913,7 +913,7 @@ class GuildLog(commands.Cog):
             return
 
         try:
-            await self.send_hook(guild, title="Me adicionaram em um novo servidor", color=disnake.Color.green())
+            await self.send_hook(guild, title="Beni yeni bir sunucuya eklediler", color=disnake.Color.green())
         except:
             traceback.print_exc()
 
@@ -927,11 +927,11 @@ class GuildLog(commands.Cog):
             description=f"__**{title}:**__\n"
                         f"```{guild.name}```\n"
                         f"**ID:** `{guild.id}`\n"
-                        f"**Dono:** `{guild.owner} [{guild.owner.id}]`\n"
-                        f"**Criado em:** <t:{created_at}:f> - <t:{created_at}:R>\n"
-                        f"**Nível de verificação:** `{guild.verification_level or 'nenhuma'}`\n"
-                        f"**Membros:** `{len([m for m in guild.members if not m.bot])}`\n"
-                        f"**Bots:** `{len([m for m in guild.members if m.bot])}`\n",
+                        f"**Sunucu Sahibi:** `{guild.owner} [{guild.owner.id}]`\n"
+                        f"**Oluşturulma tarihi:** <t:{created_at}:f> - <t:{created_at}:R>\n"
+                        f"**Doğrulama düzeyi:** `{guild.verification_level or 'hiçbiri'}`\n"
+                        f"**Üyeler:** `{len([m for m in guild.members if not m.bot])}`\n"
+                        f"**Botlar:** `{len([m for m in guild.members if m.bot])}`\n",
             color=color
         )
 
