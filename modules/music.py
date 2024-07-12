@@ -1201,7 +1201,7 @@ class Music(commands.Cog):
 
                 try:
                     if bot.user.id != self.bot.user.id:
-                        embed.set_footer(text=f"Bot selecionado: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
+                        embed.set_footer(text=f"Bot seçildi: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
                 except AttributeError:
                     pass
 
@@ -1247,7 +1247,7 @@ class Music(commands.Cog):
 
                 if not select_interaction or view.selected is False:
 
-                    embed = disnake.Embed(description="### Tempo de seleção esgotado!" if view.selected is not False else "### Cancelado pelo usuário.", color=self.bot.get_color(guild.me))
+                    embed = disnake.Embed(description="### Seçim zamanı bitti!" if view.selected is not False else "### Kullanıcı tarafından iptal edildi.", color=self.bot.get_color(guild.me))
 
                     try:
                         await msg.edit(embed=embed, components=song_request_buttons)
@@ -1261,7 +1261,7 @@ class Music(commands.Cog):
                 if select_interaction.data.values[0] == "cancel":
                     await msg.edit(
                         embed=disnake.Embed(
-                            description="**Seleção cancelada!**",
+                            description="**Seçim iptal edildi!**",
                             color=self.bot.get_color(guild.me)
                         ),
                         components=None
@@ -1312,12 +1312,12 @@ class Music(commands.Cog):
                 if (matches := spotify_regex_w_user.match(query)):
 
                     if not self.bot.spotify:
-                        raise GenericError("**O suporte ao spotify não está disponível no momento...**")
+                        raise GenericError("**Spotify desteği şu anda mevcut değil...**")
 
                     url_type, user_id = matches.groups()
 
                     if url_type != "user":
-                        raise GenericError("**Link não suportado usando este método...**")
+                        raise GenericError("**Bağlantı bu yöntem kullanılarak desteklenmiyor...**")
 
                     try:
                         await inter.response.defer(ephemeral=True)
@@ -1333,7 +1333,7 @@ class Music(commands.Cog):
                     url_type, user_id = matches.groups()[-2:]
 
                     if url_type != "profile":
-                        raise GenericError("**Link não suportado usando este método...**")
+                        raise GenericError("**Bağlantı bu yöntem kullanılarak desteklenmiyor...**")
 
                     try:
                         await inter.response.defer(ephemeral=True)
@@ -1345,7 +1345,7 @@ class Music(commands.Cog):
                     info = {"entries": [{"title": t['title'], "url": t['link']} for t in result]}
 
                 elif not self.bot.config["USE_YTDL"]:
-                    raise GenericError("**Não há suporte a esse tipo de requisição no momento...**")
+                    raise GenericError("**Bu tür bir talep şu anda desteklenmiyor...**")
 
                 else:
 
@@ -1360,9 +1360,9 @@ class Music(commands.Cog):
 
                     try:
                         if not info["entries"]:
-                            raise GenericError(f"**Conteúdo indisponível (ou privado):**\n{query}")
+                            raise GenericError(f"**Kullanılamayan (veya özel) içerik:**\n{query}")
                     except KeyError:
-                        raise GenericError("**Ocorreu um erro ao tentar obter resultados para a opção selecionada...**")
+                        raise GenericError("**Seçilen seçenek için sonuç alınmaya çalışılırken bir hata oluştu...**")
 
                 if len(info["entries"]) == 1:
                     query = info["entries"][0]['url']
@@ -1379,8 +1379,8 @@ class Music(commands.Cog):
                         ], timeout=30)
 
                     embed = disnake.Embed(
-                        description="**Escolha uma playlist abaixo:**\n"
-                                    f'Selecione uma opção em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para prosseguir.',
+                        description="**Aşağıdan bir çalma listesi seçin:**\n"
+                                    f'Devam etmek için aşağıdakiler arasından bir seçenek seçin <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> ',
                         color=self.bot.get_color(guild.me)
                     )
 
@@ -1411,7 +1411,7 @@ class Music(commands.Cog):
 
                         try:
                             await func(embed=disnake.Embed(color=self.bot.get_color(guild.me),
-                                description="**Tempo esgotado!**" if not view.selected is False else "### Cancelado pelo usuário."),
+                                description="**Zaman doldu!**" if not view.selected is False else "### Kullanıcı tarafından iptal edildi."),
                                 components=song_request_buttons
                             )
                         except:
@@ -1429,7 +1429,7 @@ class Music(commands.Cog):
 
             source = False
 
-        elif query.startswith(">> [💾 Fila Salva 💾] <<"):
+        elif query.startswith(">> [💾 Kaydedilen liste 💾] <<"):
 
             try:
                 async with aiofiles.open(f"./local_database/saved_queues_v1/users/{inter.author.id}.pkl", 'rb') as f:
@@ -1440,7 +1440,7 @@ class Music(commands.Cog):
                         pass
                     data = pickle.loads(f_content)
             except FileNotFoundError:
-                raise GenericError("**A sua fila salva já foi excluída...**")
+                raise GenericError("**Kayıtlı kuyruğunuz zaten silinmiş...**")
 
             tracks = await self.check_player_queue(inter.author, bot, guild.id, self.bot.pool.process_track_cls(data["tracks"])[0])
             node = await self.get_best_node(bot)
@@ -1460,13 +1460,13 @@ class Music(commands.Cog):
                 source = False
 
                 if not self.bot.config["ENABLE_DISCORD_URLS_PLAYBACK"] and "cdn.discordapp.com/attachments/" in query:
-                    raise GenericError("**O suporte a links do discord está desativado.**")
+                    raise GenericError("**Discord bağlantı desteği devre dışı bırakıldı.**")
 
                 if query.startswith("https://www.youtube.com/results"):
                     try:
                         query = f"ytsearch:{parse_qs(urlparse(query).query)['search_query'][0]}"
                     except:
-                        raise GenericError(f"**Não há suporte para o link informado:** {query}")
+                        raise GenericError(f"**Sağlanan bağlantı için herhangi bir destek bulunmamaktadır:** {query}")
                     manual_selection = True
 
                 elif "&list=" in query and (link_re := YOUTUBE_VIDEO_REG.match(query)):
@@ -1474,21 +1474,21 @@ class Music(commands.Cog):
                     view = SelectInteraction(
                         user=inter.author,
                         opts=[
-                            disnake.SelectOption(label="Música", emoji="🎵",
-                                                 description="Carregar apenas a música do link.", value="music"),
-                            disnake.SelectOption(label="Playlist", emoji="🎶",
-                                                 description="Carregar playlist com a música atual.", value="playlist"),
+                            disnake.SelectOption(label="Müzik", emoji="🎵",
+                                                 description="Yalnızca bağlantıdaki müziği yükleyin.", value="music"),
+                            disnake.SelectOption(label="Çalma listesi", emoji="🎶",
+                                                 description="Çalma listesini geçerli şarkı ile yükleyin.", value="playlist"),
                         ], timeout=30)
 
                     embed = disnake.Embed(
-                        description='**O link contém vídeo com playlist.**\n'
-                                    f'Selecione uma opção em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para prosseguir.',
+                        description='**Bağlantı, oynatma listesi içeren bir video içermektedir.**\n'
+                                    f'Devam etmek için aşağıdakiler arasından bir seçenek seçin <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R>',
                         color=self.bot.get_color(guild.me)
                     )
 
                     try:
                         if bot.user.id != self.bot.user.id:
-                            embed.set_footer(text=f"Bot selecionado: {bot.user.display_name}",
+                            embed.set_footer(text=f"Bot seçildi: {bot.user.display_name}",
                                              icon_url=bot.user.display_avatar.url)
                     except AttributeError:
                         pass
@@ -1521,7 +1521,7 @@ class Music(commands.Cog):
 
                         try:
                             await func(
-                                content=f"{mention}{'operação cancelada' if view.selected is not False else 'tempo esgotado'}" if view.selected is not False else "Cancelado pelo usuário.",
+                                content=f"{mention}{'operasyon i̇ptal edi̇ldi̇' if view.selected is not False else 'zaman tükeniyor'}" if view.selected is not False else "Kullanıcı tarafından iptal edildi.",
                                 embed=None, components=song_request_buttons
                             )
                         except:
@@ -1607,7 +1607,7 @@ class Music(commands.Cog):
 
             if not queue_loaded and len(tracks) > 1 and (tracks[0].info['sourceName'] == "deezer" or manual_selection):
 
-                embed.description = f"**Selecione a(s) música(s) desejada(s) abaixo:**"
+                embed.description = f"**Aşağıdan istediğiniz şarkıyı/şarkıları seçin:**"
 
                 try:
                     func = inter.edit_original_message
@@ -1625,7 +1625,7 @@ class Music(commands.Cog):
                     embed=embed,
                     components=[
                         disnake.ui.Select(
-                            placeholder='Resultados:',
+                            placeholder='Sonuçlar:',
                             custom_id=f"track_selection{add_id}",
                             min_values=1,
                             max_values=len(tracks),
@@ -1654,7 +1654,7 @@ class Music(commands.Cog):
                         check=check_song_selection
                     )
                 except asyncio.TimeoutError:
-                    raise GenericError("Tempo esgotado!")
+                    raise GenericError("Zaman doldu!")
 
                 if len(select_interaction.data.values) > 1:
 
@@ -1716,14 +1716,13 @@ class Music(commands.Cog):
                     player.queue.append(tracks)
                 else:
                     player.queue.insert(position, tracks)
-                    pos_txt = f" na posição {position + 1} da fila"
-
+                    pos_txt = f" kuyruğun {position + 1}. pozisyonunda"
                 duration = time_format(tracks.duration) if not tracks.is_stream else '🔴 Livestream'
 
                 if not track_url:
                     track_url = tracks.uri or tracks.search_uri
 
-                log_text = f"{inter.author.mention} adicionou [`{fix_characters(tracks.title, 20)}`](<{track_url}>){pos_txt} `({duration})`."
+                log_text = f"{inter.author.mention} eklendi [`{fix_characters(tracks.title, 20)}`](<{track_url}>){pos_txt} `({duration})`."
 
                 loadtype = "track"
 
@@ -1758,8 +1757,8 @@ class Music(commands.Cog):
                     pos_txt = f" (Pos. {position + 1})"
 
                 if queue_loaded:
-                    log_text = f"{inter.author.mention} adicionou `{len(tracks)} músicas` via: {query[7:]}."
-                    title = f"Usando músicas salvas de {inter.author.display_name}"
+                    log_text = f"{inter.author.mention} eklendi `{len(tracks)} şarkılar aracılığıyla: {query[7:]}."
+                    title = f"Müzik kayıtlarını kullanma {inter.author.display_name}"
                     icon_url = "https://i.ibb.co/51yMNPw/floppydisk.png"
 
                     tracks_playlists = {}
@@ -1772,13 +1771,13 @@ class Music(commands.Cog):
                                 tracks_playlists[t.playlist_url] = {"name": t.playlist_name, "count": 1}
 
                     if tracks_playlists:
-                        embed_description += "\n### Playlists carregadas:\n" + "\n".join(f"[`{info['name']}`]({url}) `- {info['count']} música{'s'[:info['count']^1]}` " for url, info in tracks_playlists.items()) + "\n"
+                        embed_description += "\n### Yüklenmiş çalma listeleri:\n" + "\n".join(f"[`{info['name']}`]({url}) `- {info['count']} müzik{'s'[:info['count']^1]}` " for url, info in tracks_playlists.items()) + "\n"
 
                 else:
                     query = fix_characters(query.replace(f"{source}:", '', 1), 25)
                     title = f"Busca: {query}"
                     icon_url = music_source_image(tracks[0].info['sourceName'])
-                    log_text = f"{inter.author.mention} adicionou `{len(tracks)} músicas` via busca: `{query}`{pos_txt}."
+                    log_text = f"{inter.author.mention} eklendi `{len(tracks)} müzik arama yoluyla: `{query}`{pos_txt}."
 
                 total_duration = 0
 
@@ -1788,7 +1787,7 @@ class Music(commands.Cog):
 
                 embed.set_author(name="⠂" + title, icon_url=icon_url)
                 embed.set_thumbnail(url=tracks[0].thumb)
-                embed.description = f"`{(tcount:=len(tracks))} música{'s'[:tcount^1]}`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
+                embed.description = f"`{(tcount:=len(tracks))} müzik{'s'[:tcount^1]}`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
                 emoji = "🎶"
 
         else:
@@ -1819,7 +1818,7 @@ class Music(commands.Cog):
                             raise Exception(f"{r.status} | {await r.text()}")
                     tracks.data["playlistInfo"]["thumb"] = playlist_data["thumbnail_url"]
                 except Exception as e:
-                    print(f"Falha ao obter artwork da playlist: {oembed_url} | {repr(e)}")
+                    print(f"Çalma listesinden şarkı alınamadı: {oembed_url} | {repr(e)}")
 
             loadtype = "playlist"
 
