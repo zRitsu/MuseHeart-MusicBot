@@ -1083,7 +1083,7 @@ class Music(commands.Cog):
             ]
             
             if os.path.isfile(f"./local_database/saved_queues_v1/users/{inter.author.id}.pkl"):
-                opts.append(disnake.SelectOption(label="Kaydedilen listeyi kullanın", value=">> [💾 Kaydedilen liste 💾] <<", emoji="💾"))
+                opts.append(disnake.SelectOption(label="Kaydedilen listeyi kullanın", value=">> [💾 Kaydedilen kuyruk 💾] <<", emoji="💾"))
 
             if user_data["last_tracks"]:
                 opts.append(disnake.SelectOption(label="Yeni müzikler ekleyin", value=">> [📑 Son şarkılar 📑] <<", emoji="📑"))
@@ -1429,7 +1429,7 @@ class Music(commands.Cog):
 
             source = False
 
-        elif query.startswith(">> [💾 Kaydedilen liste 💾] <<"):
+        elif query.startswith(">> [💾 Kaydedilen kuyruk 💾] <<"):
 
             try:
                 async with aiofiles.open(f"./local_database/saved_queues_v1/users/{inter.author.id}.pkl", 'rb') as f:
@@ -1929,7 +1929,7 @@ class Music(commands.Cog):
         favs = [">> [⭐ Favoriler ⭐] <<", ">> [💠 Entegrasyonlar 💠] <<", ">> [📌 Sunucu favorileri 📌] <<"]
 
         if os.path.isfile(f"./local_database/saved_queues_v1/users/{inter.author.id}.pkl"):
-            favs.append(">> [💾 Kaydedilen liste 💾] <<")
+            favs.append(">> [💾 Kaydedilen kuyruk 💾] <<")
 
         if not inter.guild_id:
             try:
@@ -2409,7 +2409,7 @@ class Music(commands.Cog):
     @check_queue_loading()
     @has_source()
     @check_voice()
-    @pool_command(name="seek", aliases=["sk"], description="Avançar/Retomar a música para um tempo específico.",
+    @pool_command(name="seek", aliases=["sk"], description="Müziği belirli bir zamana atlatmak/devam ettirmek.",
                   only_voiced=True, cooldown=seek_cd, max_concurrency=seek_mc,
                   usage="{prefix}{cmd} [tempo]\n"
                         "Ex 1: {prefix}{cmd} 10 (tempo 0:10)\n"
@@ -2423,13 +2423,13 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.slash_command(
-        description=f"{desc_prefix}Avançar/Retomar a música para um tempo específico.",
+        description=f"{desc_prefix}Müziği belirli bir zamana atlatmak/devam ettirmek.",
         extras={"only_voiced": True}, cooldown=seek_cd, max_concurrency=seek_mc, dm_permission=False
     )
     async def seek(
             self,
             inter: disnake.AppCmdInter,
-            position: str = commands.Param(name="tempo", description="Tempo para avançar/voltar (ex: 1:45 / 40 / 0:30)")
+            position: str = commands.Param(name="tempo", description="İleri/geri sar (örn. 1:45 / 40 / 0:30)")
     ):
 
         try:
@@ -2440,7 +2440,7 @@ class Music(commands.Cog):
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         if player.current.is_stream:
-            raise GenericError("**Você não pode usar esse comando em uma livestream.**")
+            raise GenericError("**Bu komutu bir canlı yayında kullanamazsınız.**")
 
         position = position.split(" | ")[0].replace(" ", ":")
 
@@ -2448,7 +2448,7 @@ class Music(commands.Cog):
 
         if seconds is None:
             raise GenericError(
-                "**Você usou um tempo inválido! Use segundos (1 ou 2 digitos) ou no formato (minutos):(segundos)**")
+                "**Geçersiz bir saat kullandınız! Saniye (1 veya 2 basamaklı) veya (dakika):(saniye) biçiminde kullanın**")
 
         milliseconds = seconds * 1000
 
@@ -2460,8 +2460,8 @@ class Music(commands.Cog):
             emoji = "⏩"
 
             txt = [
-                f"avançou o tempo da música para: `{time_format(milliseconds)}`",
-                f"{emoji} **⠂{inter.author.mention} avançou o tempo da música para:** `{time_format(milliseconds)}`"
+                f"şarkının süresini şu şekilde ilerletir: `{time_format(milliseconds)}`",
+                f"{emoji} **⠂{inter.author.mention} şarkının süresini şu şekilde ilerletir:** `{time_format(milliseconds)}`"
             ]
 
         else:
@@ -2469,8 +2469,8 @@ class Music(commands.Cog):
             emoji = "⏪"
 
             txt = [
-                f"voltou o tempo da música para: `{time_format(milliseconds)}`",
-                f"{emoji} **⠂{inter.author.mention} voltou o tempo da música para:** `{time_format(milliseconds)}`"
+                f"Müziğin süresini geri aldı: `{time_format(milliseconds)}`",
+                f"{emoji} **⠂{inter.author.mention} Müziğin süresini geri aldı:** `{time_format(milliseconds)}`"
             ]
 
         await player.seek(milliseconds)
@@ -2533,7 +2533,7 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @pool_command(
-        description=f"Selecionar modo de repetição entre: música atual / fila / desativar / quantidade (usando números).",
+        description=f"Tekrarlama modunu şunlar arasından seçin: geçerli şarkı / sıra / kapalı / miktar (rakamları kullanarak).",
         only_voiced=True, cooldown=loop_cd, max_concurrency=loop_mc,
         usage="{prefix}{cmd} <quantidade|modo>\nEx 1: {prefix}{cmd} 1\nEx 2: {prefix}{cmd} queue")
     async def loop(self, ctx: CustomContext, mode: str = None):
@@ -2541,7 +2541,7 @@ class Music(commands.Cog):
         if not mode:
 
             embed = disnake.Embed(
-                description="**Selecione um modo de repetição:**",
+                description="**Bir tekrar modu seçin:**",
                 color=self.bot.get_color(ctx.guild.me)
             )
 
@@ -2550,7 +2550,7 @@ class Music(commands.Cog):
                 embed=embed,
                 components=[
                     disnake.ui.Select(
-                        placeholder="Selecione uma opção:",
+                        placeholder="Bir seçenek belirleyin:",
                         custom_id="loop_mode_legacy",
                         options=[
                             disnake.SelectOption(label="Música Atual", value="current"),
@@ -2567,7 +2567,7 @@ class Music(commands.Cog):
                     check=lambda i: i.message.id == msg.id and i.author == ctx.author
                 )
             except asyncio.TimeoutError:
-                embed.description = "Tempo de seleção esgotado!"
+                embed.description = "Seçim süresi doldu!"
                 try:
                     await msg.edit(embed=embed, view=None)
                 except:
@@ -2580,14 +2580,14 @@ class Music(commands.Cog):
         if mode.isdigit():
 
             if len(mode) > 2 or int(mode) > 10:
-                raise GenericError(f"**Quantidade inválida: {mode}**\n"
-                                   "`Quantidade máxima permitida: 10`")
+                raise GenericError(f"**Geçersiz miktar: {mode}**\n"
+                                   "`İzin verilen maksimum miktar: 10`")
 
             await self.loop_amount.callback(self=self, inter=ctx, value=int(mode))
             return
 
         if mode not in ('current', 'queue', 'off'):
-            raise GenericError("Modo inválido! escolha entre: current/queue/off")
+            raise GenericError("Geçersiz mod! Seçenekler: current/queue/off")
 
         await self.loop_mode.callback(self=self, inter=ctx, mode=mode)
 
@@ -2595,7 +2595,7 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.slash_command(
-        description=f"{desc_prefix}Selecionar modo de repetição entre: atual / fila ou desativar.",
+        description=f"{desc_prefix}Tekrarlama modunu şunlar arasından seçin: mevcut / kuyruk veya devre dışı bırak.",
         extras={"only_voiced": True}, cooldown=loop_cd, max_concurrency=loop_mc, dm_permission=False
     )
     async def loop_mode(
@@ -2625,23 +2625,23 @@ class Music(commands.Cog):
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         if mode == player.loop:
-            raise GenericError("**O modo de repetição selecionado já está ativo...**")
+            raise GenericError("**Seçilen tekrar modu zaten aktif...**")
 
         if mode == 'off':
             mode = False
             player.current.info["extra"]["track_loops"] = 0
             emoji = "⭕"
-            txt = ['desativou a repetição.', f"{emoji} **⠂{inter.author.mention}desativou a repetição.**"]
+            txt = ['tekrar oynatmayı devre dışı bıraktı.', f"{emoji} **⠂{inter.author.mention}tekrar oynatmayı devre dışı bıraktı.**"]
 
         elif mode == "current":
             player.current.info["extra"]["track_loops"] = 0
             emoji = "🔂"
-            txt = ["ativou a repetição da música atual.",
-                   f"{emoji} **⠂{inter.author.mention} ativou a repetição da música atual.**"]
+            txt = ["geçerli şarkının tekrarını etkinleştirir.",
+                   f"{emoji} **⠂{inter.author.mention} geçerli şarkının tekrarını etkinleştirir.**"]
 
         else:  # queue
             emoji = "🔁"
-            txt = ["ativou a repetição da fila.", f"{emoji} **⠂{inter.author.mention} ativou a repetição da fila.**"]
+            txt = ["kuyruk tekrarını etkinleştirdi.", f"{emoji} **⠂{inter.author.mention} kuyruk tekrarını etkinleştirdi.**"]
 
         player.loop = mode
 
@@ -2653,13 +2653,13 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.slash_command(
-        description=f"{desc_prefix}Definir quantidade de repetições da música atual.",
+        description=f"{desc_prefix}Geçerli şarkının tekrar sayısını ayarlayın.",
         extras={"only_voiced": True}, cooldown=loop_cd, max_concurrency=loop_mc, dm_permission=False
     )
     async def loop_amount(
             self,
             inter: disnake.AppCmdInter,
-            value: int = commands.Param(name="valor", description="número de repetições.")
+            value: int = commands.Param(name="valor", description="tekrar sayısı.")
     ):
 
         try:
@@ -2672,9 +2672,9 @@ class Music(commands.Cog):
         player.current.info["extra"]["track_loops"] = value
 
         txt = [
-            f"definiu a quantidade de repetições da música "
+            f"şarkının tekrar sayısını ayarlayın "
             f"[`{(fix_characters(player.current.title, 25))}`](<{player.current.uri or player.current.search_uri}>) para **{value}**.",
-            f"🔄 **⠂{inter.author.mention} definiu a quantidade de repetições da música para [{value}]:**\n"
+            f"🔄 **⠂{inter.author.mention} şarkının tekrar sayısını şu şekilde ayarlayın [{value}]:**\n"
             f"╰[`{player.current.title}`](<{player.current.uri or player.current.search_uri}>)"
         ]
 
@@ -2685,7 +2685,7 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @pool_command(name="remove", aliases=["r", "del"], description="Remover uma música específica da fila.",
+    @pool_command(name="remove", aliases=["r", "del"], description="Kuyruktan belirli bir şarkıyı kaldırın.",
                   only_voiced=True, max_concurrency=remove_mc, extras={"flags": case_sensitive_args},
                   usage="{prefix}{cmd} [nome]\nEx: {prefix}{cmd} sekai")
     async def remove_legacy(self, ctx: CustomContext, *, flags: str = ""):
@@ -2693,7 +2693,7 @@ class Music(commands.Cog):
         args, unknown = ctx.command.extras['flags'].parse_known_args(flags.split())
 
         if not unknown:
-            raise GenericError("**Você não adicionou o nome da música.**")
+            raise GenericError("**Şarkının adını eklenmemiş.**")
 
         await self.remove.callback(self=self, inter=ctx, query=" ".join(unknown), case_sensitive=args.casesensitive)
 
@@ -2701,16 +2701,16 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.slash_command(
-        description=f"{desc_prefix}Remover uma música específica da fila.",
+        description=f"{desc_prefix}Kuyruktan belirli bir şarkıyı kaldırın.",
         extras={"only_voiced": True}, max_concurrency=remove_mc, dm_permission=False
     )
     async def remove(
             self,
             inter: disnake.AppCmdInter,
-            query: str = commands.Param(name="nome", description="Nome da música completo."),
+            query: str = commands.Param(name="nome", description="Şarkının tam adı."),
             case_sensitive: bool = commands.Param(
                 name="nome_exato", default=False,
-                description="Buscar por músicas com a frase exata no nome da música ao invés de buscar palavra por palavra.",
+                description="Kelime kelime aramak yerine şarkının adındaki tam ifadeyle şarkıları arayın.",
 
             )
     ):
@@ -2723,7 +2723,7 @@ class Music(commands.Cog):
         try:
             index = queue_track_index(inter, bot, query, case_sensitive=case_sensitive)[0][0]
         except IndexError:
-            raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
+            raise GenericError(f"**Kuyrukta bu isimde bir şarkı yok: {query}**")
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
@@ -2732,8 +2732,8 @@ class Music(commands.Cog):
         player.queue.remove(track)
 
         txt = [
-            f"removeu a música [`{(fix_characters(track.title, 25))}`](<{track.uri or track.search_uri}>) da fila.",
-            f"♻️ **⠂{inter.author.mention} removeu a música da fila:**\n╰[`{track.title}`](<{track.uri or track.search_uri}>)"
+            f"şarkıyı kuyruktan kaldırdı: [`{(fix_characters(track.title, 25))}`](<{track.uri or track.search_uri}>) ",
+            f"♻️ **⠂{inter.author.mention} şarkıyı kuyruktan kaldırdı:**\n╰[`{track.title}`](<{track.uri or track.search_uri}>)"
         ]
 
         await self.interaction_message(inter, txt, emoji="♻️")
@@ -2746,7 +2746,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @pool_command(name="readd", aliases=["readicionar", "rdd"], only_voiced=True, cooldown=queue_manipulation_cd,
-                  max_concurrency=remove_mc, description="Readicionar as músicas tocadas na fila.")
+                  max_concurrency=remove_mc, description="Kuyrukta çalınan şarkıları yeniden ekleyin.")
     async def readd_legacy(self, ctx: CustomContext):
         await self.readd_songs.callback(self=self, inter=ctx)
 
@@ -2754,7 +2754,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.slash_command(
-        description=f"{desc_prefix}Readicionar as músicas tocadas na fila.", dm_permission=False,
+        description=f"{desc_prefix}Kuyrukta çalınan şarkıları yeniden ekleyin.", dm_permission=False,
         extras={"only_voiced": True}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc
     )
     async def readd_songs(self, inter: disnake.AppCmdInter):
@@ -2767,7 +2767,7 @@ class Music(commands.Cog):
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         if not player.played and not player.failed_tracks:
-            raise GenericError("**Não há músicas tocadas.**")
+            raise GenericError("**Hiç şarkı çalmıyor.**")
 
         qsize = len(player.played) + len(player.failed_tracks)
 
@@ -2779,7 +2779,7 @@ class Music(commands.Cog):
         player.failed_tracks.clear()
 
         txt = [
-            f"readicionou [{qsize}] música{(s:='s'[:qsize^1])} tocada{s} na fila.",
+            f"tekrar ekledi [{qsize}] çalınan müzik{(s:='ler'[:qsize^1])} sıraya.",
             f"🎶 **⠂{inter.author.mention} readicionou {qsize} música{s} na fila.**"
         ]
 
