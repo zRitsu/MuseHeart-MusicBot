@@ -1,5 +1,5 @@
 # MuseHeart-MusicBot-TURKISH
-## Bu repo, Museheart botunun Portekizce'den Türkçe'ye çevrilmiş versiyonudur. (DİKKAT! Botun mevcut sürümü ile birebir aynı olmayabilir ve çeviride tutarsızlıklar bulunabilir.)
+## Bu repo, Museheart botunun Ekibimiz [Mahirsn](https://github.com/mahirsn), [Tospeek](https://github.com/Tospeek) Ve [Sepultrex](https://github.com/Sepultrex) Tarafından Portekizce'den Türkçe'ye çevrilmiş versiyonudur. (DİKKAT! Botun mevcut sürümü ile birebir aynı olmayabilir ve çeviride tutarsızlıklar bulunabilir.)
 ## etkileşimli oynatıcı, slash komutları, [last.fm](https://www.last.fm/) ile entegrasyon ve çok daha fazlası ile python'ile programlanmış müzik botu.
 
 ## Davetler ve Muse Heart'tan bazı bilgileri/ekran görüntülerini ve bu kaynağın nasıl çalıştığını içeren sayfa: [buraya tıklayın](https://gist.github.com/zRitsu/4875008554a00c3c372b2df6dcdf437f#file-muse_heart_invites-md).
