@@ -1,10 +1,17 @@
 # MuseHeart-MusicBot-TURKISH / b15162b
-## Bu repo, Museheart botunun Ekibimiz [Mahirsn](https://github.com/mahirsn), [Tospeek](https://github.com/Tospeek) Ve [Sepultrex](https://github.com/Sepultrex) Tarafından Portekizce'den Türkçe'ye çevrilmiş versiyonudur. (DİKKAT! Botun mevcut sürümü ile birebir aynı olmayabilir ve çeviride tutarsızlıklar bulunabilir.)
-## etkileşimli oynatıcı, slash komutları, [last.fm](https://www.last.fm/) ile entegrasyon ve çok daha fazlası ile python'ile programlanmış müzik botu.
+> [!WARNING]
+> Bu repo, Museheart botunun Ekibimiz [Mahirsn](https://github.com/mahirsn), [Tospeek](https://github.com/Tospeek) Ve [Sepultrex](https://github.com/Sepultrex) Tarafından Portekizce'den Türkçe'ye çevrilmiş versiyonudur. (DİKKAT! Botun mevcut sürümü ile birebir aynı olmayabilir ve çeviride tutarsızlıklar bulunabilir.)
 
-## Davetler ve Muse Heart'tan bazı bilgileri/ekran görüntülerini ve bu kaynağın nasıl çalıştığını içeren sayfa: [buraya tıklayın](https://gist.github.com/zRitsu/4875008554a00c3c372b2df6dcdf437f#file-muse_heart_invites-md).
+> [!NOTE]
+> Etkileşimli Oynatıcı, Slash komutları (/), [last.fm](https://www.last.fm/) entegrasyonu ve çok daha fazlası... <br> Python'ile programlanmış müzik botu.
 
-[![](https://discordapp.com/api/guilds/911370624507707483/embed.png?style=banner2)](https://discord.gg/KM3NS7D6Zj)
+### Davetler ve Muse Heart'tan bazı bilgileri/ekran görüntülerini içeren ve bu kaynağın nasıl çalıştığını gösteren sayfa: [buraya tıklayın](https://gist.github.com/zRitsu/4875008554a00c3c372b2df6dcdf437f#file-muse_heart_invites-md).
+
+[![](https://discordapp.com/api/guilds/911370624507707483/embed.png?style=banner2)](https://discord.gg/KM3NS7D6Zj) 
+[![](https://discordapp.com/api/guilds/1116772733737500674/embed.png?style=banner2)](https://discord.gg/N3VjykDDen)
+
+
+</object>
 
 ### Bazı Önizlemeler:
 
