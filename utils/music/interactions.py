@@ -2282,12 +2282,12 @@ class SkinEditorMenu(disnake.ui.View):
                 has_skins = True
 
             if not has_skins:
-                self.message_data = {"embeds": [{"description": "**Não há skins salvas...\nClique no botão abaixo para criar uma nova skin/template.**", "color": self.guild.me.color.value}]}
+                self.message_data = {"embeds": [{"description": "**Kaydedilmiş dış görünüm yok...\noYeni bir dış görünüm/şablon oluşturmak için aşağıdaki düğmeyi tıklayın.**", "color": self.guild.me.color.value}]}
                 new_skin_btn = disnake.ui.Button(label="Adicionar nova skin", custom_id="skin_editor_new_skin", disabled=len(static_skins_opts) > 2 and len(skins_opts) > 2)
                 new_skin_btn.callback = self.new_skin
                 self.add_item(new_skin_btn)
             else:
-                self.message_data = {"embeds": [{"description": "**Selecione uma skin abaixo para editá-la ou crie uma nova usando um modelo base clicando no botão de adicionar abaixo.**", "color": self.guild.me.color.value}]}
+                self.message_data = {"embeds": [{"description": "**Düzenlemek için aşağıdan bir görünüm seçin veya aşağıdaki ekle düğmesini tıklayarak temel şablon kullanarak yeni bir görünüm oluşturun.**", "color": self.guild.me.color.value}]}
                 new_skin_btn = disnake.ui.Button(label="Adicionar nova skin", custom_id="skin_editor_new_skin", disabled=len(static_skins_opts) > 2 and len(skins_opts) > 2)
                 new_skin_btn.callback = self.new_skin
                 self.add_item(new_skin_btn)
@@ -2315,71 +2315,71 @@ class SkinEditorMenu(disnake.ui.View):
                     self.add_item(select_embed_field)
 
                 if len(fields) < 25:
-                    add_field_btn = disnake.ui.Button(label="Adicionar Field", emoji="🔖")
+                    add_field_btn = disnake.ui.Button(label="Alan ekle", emoji="🔖")
                     add_field_btn.callback = self.add_field
                     self.add_item(add_field_btn)
 
                 if fields:
-                    edit_field_btn = disnake.ui.Button(label="Editar Field", emoji="🔖")
+                    edit_field_btn = disnake.ui.Button(label="Alanı Düzenle", emoji="🔖")
                     edit_field_btn.callback = self.edit_embed_field_button
                     self.add_item(edit_field_btn)
 
-                    delete_field_btn = disnake.ui.Button(label="Remover Field", emoji="🔖")
+                    delete_field_btn = disnake.ui.Button(label="Alan Kaldır", emoji="🔖")
                     delete_field_btn.callback = self.delete_embed_field_button
                     self.add_item(delete_field_btn)
 
-                edit_embed_btn = disnake.ui.Button(label="Editar Embed", emoji="📋")
+                edit_embed_btn = disnake.ui.Button(label="Embed Düzenle", emoji="📋")
                 edit_embed_btn.callback = self.edit_embed_button
                 self.add_item(edit_embed_btn)
 
-                remove_embed_btn = disnake.ui.Button(label="Remover Embed", emoji="📋")
+                remove_embed_btn = disnake.ui.Button(label="Embed Kaldır", emoji="📋")
                 remove_embed_btn.callback = self.remove_embed
                 self.add_item(remove_embed_btn)
 
-                set_author_footer_btn = disnake.ui.Button(label="Embed Author + Footer", emoji="👤")
+                set_author_footer_btn = disnake.ui.Button(label="Yazar + Alt Bilgiyi Yerleştir", emoji="👤")
                 set_author_footer_btn.callback = self.set_author_footer
                 self.add_item(set_author_footer_btn)
 
-            edit_content_btn = disnake.ui.Button(label=("Adicionar" if not self.message_data.get("content") else "Editar") + " Mensagem", emoji="💬")
+            edit_content_btn = disnake.ui.Button(label=("Eklemek" if not self.message_data.get("content") else "Editar") + " Mensagem", emoji="💬")
             edit_content_btn.callback = self.edit_content
             self.add_item(edit_content_btn)
 
-            add_embed_btn = disnake.ui.Button(label="Adicionar Embed", disabled=len(embeds)>=8, emoji="📋")
+            add_embed_btn = disnake.ui.Button(label="Embed Ekle", disabled=len(embeds)>=8, emoji="📋")
             add_embed_btn.callback = self.add_embed
             self.add_item(add_embed_btn)
 
-            setup_queue_btn = disnake.ui.Button(label="Configurar placeholder da fila", emoji="<:music_queue:703761160679194734>")
+            setup_queue_btn = disnake.ui.Button(label="Yer tutucuyu yapılandır kuyruktan", emoji="<:music_queue:703761160679194734>")
             setup_queue_btn.callback = self.setup_queue
             self.add_item(setup_queue_btn)
 
             save_disabled = not embeds and len(self.message_data.get("content", "")) < 15
 
-            export_btn = disnake.ui.Button(label="Exportar Skin", emoji="📤", disabled=save_disabled)
+            export_btn = disnake.ui.Button(label="Görünümü Dışa Aktar", emoji="📤", disabled=save_disabled)
             export_btn.callback = self.export
             self.add_item(export_btn)
 
-            import_btn = disnake.ui.Button(label="Importar Skin", emoji="📥")
+            import_btn = disnake.ui.Button(label="Görünümü İçe Aktar", emoji="📥")
             import_btn.callback = self.import_
             self.add_item(import_btn)
 
             if self.skin_selected:
-                delete_skin_btn = disnake.ui.Button(label="Excluir Skin", emoji="🚮")
+                delete_skin_btn = disnake.ui.Button(label="Dış Görünüm", emoji="🚮")
                 delete_skin_btn.callback = self.delete_skin
                 self.add_item(delete_skin_btn)
 
-            back_btn = disnake.ui.Button(label="Voltar ao menu anterior", emoji="⬅️")
+            back_btn = disnake.ui.Button(label="Önceki menüye dön", emoji="⬅️")
             back_btn.callback = self.back
             self.add_item(back_btn)
 
-            self.add_item(disnake.ui.Button(label="Lista de placeholders", emoji="<:help:947781412017279016>", custom_id="skin_editor_placeholders"))
+            self.add_item(disnake.ui.Button(label="Yer tutucu listesi", emoji="<:help:947781412017279016>", custom_id="skin_editor_placeholders"))
 
-            save_btn = disnake.ui.Button(label="Salvar Skin", emoji="💾", disabled=save_disabled)
+            save_btn = disnake.ui.Button(label="Görünümü Kaydet", emoji="💾", disabled=save_disabled)
             save_btn.callback = self.save
             self.add_item(save_btn)
 
     async def interaction_check(self, inter: disnake.MessageInteraction) -> bool:
         if inter.author.id != self.ctx.author.id:
-            await inter.send(f"Apenas o membro {self.ctx.author.mention} pode interagir nessa mensagem.",
+            await inter.send(f"Bu mesajla yalnızca {self.ctx.author.mention} üyesi etkileşim kurabilir.",
                              ephemeral=True)
             return False
         return True
@@ -2426,7 +2426,7 @@ class SkinEditorMenu(disnake.ui.View):
         self.ctx = inter
         await inter.response.send_modal(
             ViewModal(
-                view=self, title="Editar/Adicionar conteúdo da mensagem", custom_id="skin_editor_message_content",
+                view=self, title="Mesaj içeriğini düzenleyin/ekleyin", custom_id="skin_editor_message_content",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
@@ -2445,40 +2445,40 @@ class SkinEditorMenu(disnake.ui.View):
 
         await inter.response.send_modal(
             ViewModal(
-                view=self, title="Adicionar Embed", custom_id="skin_editor_add_embed",
+                view=self, title="Embed Ekle", custom_id="skin_editor_add_embed",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Título da embed:",
+                        label="Embed İsmi:",
                         custom_id="skin_embed_title",
                         max_length=170,
                         required=False
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
-                        label="Descrição da embed:",
+                        label="Embed Açıklaması:",
                         custom_id="skin_embed_description",
                         max_length=1700,
                         required=True
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Cor da embed:",
-                        placeholder="Exemplo: #000fff ou {guild.color}",
+                        label="Embed Rengi:",
+                        placeholder="Örnek: #000fff ou {guild.color}",
                         custom_id="skin_embed_color",
                         max_length=15,
                         required=False
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Link/Placeholder da imagem:",
+                        label="Resim bağlantısı Embed:",
                         custom_id="image_url",
                         max_length=400,
                         required=False
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Link/Placeholder da miniatura:",
+                        label="Embed Thumbnail:",
                         custom_id="thumbnail_url",
                         max_length=400,
                         required=False
@@ -2505,11 +2505,11 @@ class SkinEditorMenu(disnake.ui.View):
 
         await inter.response.send_modal(
             ViewModal(
-                view=self, title="Edite os campos principais da embed", custom_id="skin_editor_edit_embed",
+                view=self, title="Ana yerleştirme alanlarını düzenleyin", custom_id="skin_editor_edit_embed",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Título da embed:",
+                        label="Embed Title:",
                         custom_id="skin_embed_title",
                         value=embed.get("title", ""),
                         max_length=170,
@@ -2517,7 +2517,7 @@ class SkinEditorMenu(disnake.ui.View):
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
-                        label="Descrição da embed:",
+                        label="Embed Açıklaması:",
                         custom_id="skin_embed_description",
                         value=embed.get("description", ""),
                         max_length=1700,
@@ -2525,8 +2525,8 @@ class SkinEditorMenu(disnake.ui.View):
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Cor da embed:",
-                        placeholder="Exemplo: #000fff ou {guild.color}",
+                        label="Embed Color:",
+                        placeholder="Örnek: #000fff ou {guild.color}",
                         custom_id="skin_embed_color",
                         value=str(embed.get("color", "")),
                         max_length=14,
@@ -2534,7 +2534,7 @@ class SkinEditorMenu(disnake.ui.View):
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Link/Placeholder da imagem:",
+                        label="Embed Resmi:",
                         custom_id="image_url",
                         value=image_url,
                         max_length=400,
@@ -2542,7 +2542,7 @@ class SkinEditorMenu(disnake.ui.View):
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Link/Placeholder da miniatura:",
+                        label="Embed Thumbnail:",
                         custom_id="thumbnail_url",
                         value=thumb_url,
                         max_length=400,
@@ -2563,18 +2563,18 @@ class SkinEditorMenu(disnake.ui.View):
         self.ctx = inter
         await inter.response.send_modal(
             ViewModal(
-                view=self, title="Adicionar field na embed", custom_id="skin_editor_add_field",
+                view=self, title="Yerleştirilecek alanı ekleyin", custom_id="skin_editor_add_field",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Nome:",
+                        label="İsim:",
                         custom_id="add_field_name",
                         max_length=170,
                         required=True
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
-                        label="Valor/Texto:",
+                        label="Değer/Metin:",
                         custom_id="add_field_value",
                         max_length=1700,
                         required=True
@@ -2591,11 +2591,11 @@ class SkinEditorMenu(disnake.ui.View):
 
         await inter.response.send_modal(
             ViewModal(
-                view=self, title="Edição dos campos principais da embed", custom_id="skin_editor_edit_field",
+                view=self, title="Ana yerleştirme alanlarını düzenleme", custom_id="skin_editor_edit_field",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Nome do campo:",
+                        label="Alan adı:",
                         custom_id="edit_field_name",
                         value=field["name"],
                         max_length=170,
@@ -2603,7 +2603,7 @@ class SkinEditorMenu(disnake.ui.View):
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
-                        label="Valor/Texto do campo:",
+                        label="Alan Değeri/Metin:",
                         custom_id="edit_field_value",
                         value=field["value"],
                         max_length=1700,
@@ -2655,7 +2655,7 @@ class SkinEditorMenu(disnake.ui.View):
                 components = [
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Nome do author:",
+                        label="Yazarın ismi:",
                         custom_id="set_author_name",
                         value=author_name,
                         max_length=170,
@@ -2663,7 +2663,7 @@ class SkinEditorMenu(disnake.ui.View):
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Link/Url do author:",
+                        label="Yazarın bağlantısı/URL'si:",
                         custom_id="set_author_url",
                         value=author_url,
                         max_length=400,
@@ -2671,7 +2671,7 @@ class SkinEditorMenu(disnake.ui.View):
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Link/Url da imagem do author:",
+                        label="Yazar resmi bağlantısı/url'si:",
                         custom_id="set_author_icon",
                         value=author_icon_url,
                         max_length=400,
@@ -2679,7 +2679,7 @@ class SkinEditorMenu(disnake.ui.View):
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
-                        label="Texto do footer:",
+                        label="Altbilgi metni:",
                         custom_id="footer_text",
                         value=footer_text,
                         max_length=1700,
@@ -2687,7 +2687,7 @@ class SkinEditorMenu(disnake.ui.View):
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="URL/Link da imagem do footer:",
+                        label="Altbilgi resminin URL'si/Bağlantısı:",
                         custom_id="footer_icon_url",
                         value=footer_icon_url,
                         max_length=400,
@@ -2703,11 +2703,11 @@ class SkinEditorMenu(disnake.ui.View):
 
         await inter.response.send_modal(
             ViewModal(
-                view=self, title="Placeholder da lista de músicas da fila", custom_id="skin_editor_setup_queue",
+                view=self, title="Sıra oynatma listesi yer tutucusu", custom_id="skin_editor_setup_queue",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Formatação de texto no nome das músicas:",
+                        label="Şarkı adlarındaki metin biçimlendirmesi:",
                         custom_id="queue_format",
                         value=self.message_data["queue_format"],
                         max_length=120,
@@ -2715,7 +2715,7 @@ class SkinEditorMenu(disnake.ui.View):
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Quantidade de músicas exibidas na lista:",
+                        label="Listede görüntülenen şarkı sayısı:",
                         custom_id="queue_max_entries",
                         value=str(self.message_data["queue_max_entries"]),
                         max_length=2,
@@ -2734,11 +2734,11 @@ class SkinEditorMenu(disnake.ui.View):
         self.ctx = inter
         await inter.response.send_modal(
             ViewModal(
-                view=self, title="Importar skin", custom_id="skin_editor_import_skin",
+                view=self, title="Görünümü içe aktar", custom_id="skin_editor_import_skin",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
-                        label="Código da skin (json):",
+                        label="Dış görünüm kodu (json):",
                         custom_id="skin",
                         max_length=2000,
                         required=True
@@ -2751,11 +2751,11 @@ class SkinEditorMenu(disnake.ui.View):
         self.ctx = inter
         await inter.response.send_modal(
             ViewModal(
-                view=self, title="Informe o nome da skin", custom_id="skin_editor_save",
+                view=self, title="Bilgisiz veya deriden isim", custom_id="skin_editor_save",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Nome:",
+                        label="İsim:",
                         custom_id="skin_name",
                         value=self.skin_selected.replace("> css: ", "", 1).replace("> cs: ", "", 1),
                         max_length=15,
@@ -2777,14 +2777,14 @@ class SkinEditorMenu(disnake.ui.View):
             try:
                 del self.global_data["custom_skins"][self.skin_selected[6:]]
             except KeyError:
-                await inter.send(f'**A skin {self.skin_selected[6:]} não existe mais na database...**', ephemeral=True)
+                await inter.send(f'**{self.skin_selected[6:]} dış görünümü artık veritabanında mevcut değil..**', ephemeral=True)
                 return
 
         elif self.skin_selected.startswith("> css:"):
             try:
                 del self.global_data["custom_skins_static"][self.skin_selected[7:]]
             except KeyError:
-                await inter.send(f'**A skin {self.skin_selected[7:]} não existe mais na database...**', ephemeral=True)
+                await inter.send(f'**{self.skin_selected[7:]} dış görünümü artık veritabanında mevcut değil...**', ephemeral=True)
                 return
 
         await self.bot.update_global_data(id_=inter.guild_id, data=self.global_data, db_name=DBModel.guilds)
@@ -2814,7 +2814,7 @@ class SkinEditorMenu(disnake.ui.View):
                 await inter.edit_original_message(view=self, **self.build_embeds())
         except Exception as e:
             traceback.print_exc()
-            await inter.send(f"**Ocorreu um erro ao processar a mensagem:** ```py\n{repr(e)}```", ephemeral=True)
+            await inter.send(f"**Mesaj işlenirken bir hata oluştu:** ```py\n{repr(e)}```", ephemeral=True)
 
     async def modal_handler(self, inter: disnake.ModalInteraction):
 
@@ -2918,7 +2918,7 @@ class SkinEditorMenu(disnake.ui.View):
             try:
                 info = json.loads(inter.text_values["skin"])
             except Exception as e:
-                await inter.send(f"**Ocorreu um erro ao processar sua skin:** ```py\n{repr(e)}```", ephemeral=True)
+                await inter.send(f"**Cildiniz işlenirken bir hata oluştu:** ```py\n{repr(e)}```", ephemeral=True)
                 return
 
             try:
@@ -2957,7 +2957,7 @@ class SkinEditorMenu(disnake.ui.View):
 
             view = SkinSettingsButton(self.ctx.author, timeout=30)
             view.controller_enabled = self.message_data.get("controller_enabled", True)
-            await inter.send("**Selecione o modo de player que será aplicado na skin.**", view=view, ephemeral=True)
+            await inter.send("**Dış görünüme uygulanacak oynatıcı modunu seçin.**", view=view, ephemeral=True)
             await view.wait()
 
             if view.mode is None:
@@ -3025,8 +3025,8 @@ class SkinEditorMenu(disnake.ui.View):
             if not view.inter:
                 view.inter = inter
 
-            await view.inter.edit_original_message("**A skin foi salva/editada com sucesso!**\n"
-                                                   f"Você pode aplicá-la usando o comando {cmd} ou {guild_prefix}skin",
+            await view.inter.edit_original_message("**Görünüm başarıyla kaydedildi/düzenlendi!**\n"
+                                                   f"{cmd} veya {guild_prefix}skin komutunu kullanarak uygulayabilirsiniz",
                                                    view=None)
 
             self.skin_selected = ("> cs: " if view.mode == "custom_skins" else "> css: ") + modal_skin_name
@@ -3094,11 +3094,11 @@ class SelectBotVoice(disnake.ui.View):
         bot_select.callback = self.bot_select_callback
         self.add_item(bot_select)
 
-        refresh_btn = disnake.ui.Button(label="Atualizar lista", emoji="🔄", style=disnake.ButtonStyle.blurple)
+        refresh_btn = disnake.ui.Button(label="Güncelleme listesi", emoji="🔄", style=disnake.ButtonStyle.blurple)
         refresh_btn.callback = self.reload_callback
         self.add_item(refresh_btn)
 
-        cancel_btn = disnake.ui.Button(label="Cancelar", emoji="❌")
+        cancel_btn = disnake.ui.Button(label="İptal", emoji="❌")
         cancel_btn.callback = self.cancel_callback
         self.add_item(cancel_btn)
 
@@ -3125,14 +3125,14 @@ class SelectBotVoice(disnake.ui.View):
         try:
             bot = [b for b in self.inter.bot.pool.get_guild_bots(inter.guild_id) if b.bot_ready and b.user.id == bot_id][0]
         except IndexError:
-            await inter.send(f"<@{bot_id}> não está mais presente no servidor...", ephemeral=True)
+            await inter.send(f"<@{bot_id}> artık sunucuda mevcut değil...", ephemeral=True)
             await self.update_message()
             return
 
         guild = bot.get_guild(inter.guild_id)
 
         if not guild:
-            await inter.send(f"{bot.user.mention} não está mais no servidor...", ephemeral=True)
+            await inter.send(f"{bot.user.mention} Artık sunucuda değil...", ephemeral=True)
             await self.update_message()
             return
 
@@ -3147,13 +3147,13 @@ class SelectBotVoice(disnake.ui.View):
 
             if not vc:
                 await inter.send(
-                    f"{bot.user.mention} está com player ativo mas não está conectado em um canal de voz...",
+                    f"{bot.user.mention} oynatıcı aktif ancak bir ses kanalına bağlı değil...",
                     ephemeral=True)
                 await self.update_message()
                 return
 
             if inter.author.id not in vc.voice_states:
-                await inter.send(f"{bot.user.mention} já está em uso no canal {vc.mention}", ephemeral=True)
+                await inter.send(f"{bot.user.mention} zaten {vc.mention} kanalında kullanılıyor", ephemeral=True)
                 await self.update_message()
                 return
 
