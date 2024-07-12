@@ -2780,8 +2780,7 @@ class Music(commands.Cog):
 
         txt = [
             f"tekrar ekledi [{qsize}] çalınan müzik{(s:='ler'[:qsize^1])} sıraya.",
-            f"🎶 **⠂{inter.author.mention} {qsize} müzik{s} sıraya tekrar ekledi.**
-"
+            f"🎶 **⠂{inter.author.mention} {qsize} müzik{s} sıraya tekrar ekledi.**"
         ]
 
         await self.interaction_message(inter, txt, emoji="🎶")
