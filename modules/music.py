@@ -152,7 +152,7 @@ class Music(commands.Cog):
                     pass
 
             if not tracks:
-                txt += f"[`❌ Falha`]({url})\n"
+                txt += f"[`❌ Başarısız`]({url})\n"
 
             else:
 
