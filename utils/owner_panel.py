@@ -41,7 +41,7 @@ class PanelView(disnake.ui.View):
                                              emoji=cmd.emoji))
 
         select = disnake.ui.Select(
-            placeholder="Selecione uma tarefa:",
+            placeholder="Bir görev seçin:",
             options=opts,
             custom_id="onwer_panel_dropdown"
         )
@@ -58,20 +58,20 @@ class PanelView(disnake.ui.View):
             edit = (await interaction.original_message()).edit
         else:
             edit = interaction.response.edit_message
-        interaction.message.embeds[0].description = txt or "Comando executado com sucesso!"
+        interaction.message.embeds[0].description = txt or "Komut başarıyla yürütüldü!"
         await edit(embed=interaction.message.embeds[0], view=self)
 
     async def interaction_check(self, interaction: disnake.MessageInteraction):
 
         if not (await self.bot.is_owner(interaction.user)):
-            await interaction.send("Apenas meu(s) desenvolvedor(es) pode(m) usar essas opções.", ephemeral=True)
+            await interaction.send("Bu seçenekleri yalnızca geliştirici(ler)im kullanabilir.", ephemeral=True)
             return
 
         return True
 
 
     async def on_error(self, error: Exception, item: disnake.ui.Item, interaction: disnake.MessageInteraction):
-        interaction.message.embeds[0].description = parse_error(interaction, error)[0] or "**Ocorreu um erro:**\n" \
+        interaction.message.embeds[0].description = parse_error(interaction, error)[0] or "**Bir hata oluştu:**\n" \
                                      f"```py\n{repr(error)[:2020].replace(self.bot.http.token, 'mytoken')}```"
 
         if not interaction.response.is_done():
