@@ -1594,7 +1594,7 @@ class FavMenuView(disnake.ui.View):
 
             await self.bot.update_global_data(inter.author.id, self.data, db_name=DBModel.users)
 
-            self.log = f"Favorito {url} foi removido com sucesso!"
+            self.log = f"Favori {url} başarıyla kaldırıldı!"
 
         elif self.mode == ViewMode.guild_fav_manager:
             try:
@@ -1608,7 +1608,7 @@ class FavMenuView(disnake.ui.View):
 
                 await inter.edit_original_message(
                     embed=disnake.Embed(
-                        description=f"**Não há links da lista com o nome:** {self.current}",
+                        description=f"**Şu adda liste bağlantısı yok:** {self.current}",
                         color=self.bot.get_color(guild.me)),
                     view=None
                 )
@@ -1616,19 +1616,19 @@ class FavMenuView(disnake.ui.View):
 
             await self.bot.update_data(inter.guild_id, self.guild_data, db_name=DBModel.guilds)
 
-            self.log = f"Link {url} foi removido com sucesso da lista de favoritos do servidor!"
+            self.log = f"Bağlantı {url}, sunucu favorileri listesinden başarıyla kaldırıldı!"
 
         elif self.mode == ViewMode.integrations_manager:
             try:
                 url = f'[`{self.current}`]({self.data["integration_links"][self.current]})'
                 del self.data["integration_links"][self.current]
             except:
-                await inter.send(f"**Não há integração na lista com o nome:** {self.current}", ephemeral=True)
+                await inter.send(f"**Listede isimle entegrasyon yok:** {self.current}", ephemeral=True)
                 return
 
             await self.bot.update_global_data(inter.author.id, self.data, db_name=DBModel.users)
 
-            self.log = f"Integração {url} foi removida com sucesso!"
+            self.log = f"Entegrasyon {url} başarıyla kaldırıldı!"
 
         await inter.edit_original_message(content=self.build_txt(), view=self)
 
@@ -1656,7 +1656,7 @@ class FavMenuView(disnake.ui.View):
             guild = self.bot.get_guild(inter.guild_id) or inter.guild
 
             if not guild:
-                await inter.send("Você não pode executar essa ação fora de um servidor.", ephemeral=True)
+                await inter.send("Bu eylemi sunucunun dışında gerçekleştiremezsiniz.", ephemeral=True)
                 return
 
             await inter.response.defer(ephemeral=True)
@@ -1672,7 +1672,7 @@ class FavMenuView(disnake.ui.View):
 
         if self.mode == ViewMode.fav_manager:
             if not self.data["fav_links"]:
-                await inter.send("**Você não possui links favoritos!**", ephemeral=True)
+                await inter.send("**Favori bağlantınız yok!**", ephemeral=True)
                 return
 
             fp = BytesIO(bytes(json.dumps(self.data["fav_links"], indent=4), 'utf-8'))
@@ -1681,17 +1681,17 @@ class FavMenuView(disnake.ui.View):
 
             await self.bot.update_global_data(inter.author.id, self.data, db_name=DBModel.users)
 
-            self.log = "Sua lista de favoritos foi limpa com sucesso!"
+            self.log = "Favori listeniz başarıyla temizlendi!"
 
-            await inter.send("### Seus favoritos foram excluídos com sucesso!\n"
-                             "`Um arquivo de backup foi gerado e caso queira reverter essa exclusão, copie o "
-                             "conteúdo do arquivo e clique no botão \"importar\" e cole o conteudo no campo indicado.`",
+            await inter.send("### Yer işaretleriniz başarıyla silindi!\n"
+                             "`Bir yedekleme dosyası oluşturuldu ve bu silme işlemini geri almak istiyorsanız, yedekleme dosyasını kopyalayın. "
+                             "dosya içeriğini seçin ve \"içe aktar\" düğmesine tıklayın ve içeriği belirtilen alana yapıştırın.`",
                              ephemeral=True, file=disnake.File(fp, filename="favs.json"))
 
         elif self.mode == ViewMode.guild_fav_manager:
 
             if not self.guild_data["player_controller"]["fav_links"]:
-                await inter.send("**Não há links favoritos no servidor.**", ephemeral=True)
+                await inter.send("**Sunucuda favori bağlantı yok.**", ephemeral=True)
                 return
 
             fp = BytesIO(bytes(json.dumps(self.guild_data["player_controller"]["fav_links"], indent=4), 'utf-8'))
@@ -1705,17 +1705,17 @@ class FavMenuView(disnake.ui.View):
             except:
                 traceback.print_exc()
 
-            self.log = "Lista de favoritos do server foi limpa com sucesso!"
+            self.log = "Sunucu favorileri listesi başarıyla temizlendi!"
 
-            await inter.send("### Os links de favoritos do server foram excluídos com sucesso!\n"
-                             "`um arquivo de backup foi gerado e caso queira reverter essa exclusão, copie o "
-                             "conteúdo do arquivo e clique no botão \"importar\" e cole o conteudo no campo indicado.`",
+            await inter.send("### Sunucu yer işareti bağlantıları başarıyla silindi!\n"
+                             "`bir yedekleme dosyası oluşturuldu ve bu silme işlemini geri almak istiyorsanız, yedekleme dosyasını kopyalayın. "
+                             "dosya içeriğini seçin ve \"içe aktar\" düğmesine tıklayın ve içeriği belirtilen alana yapıştırın.`",
                              ephemeral=True, file=disnake.File(fp, filename="guild_favs.json"))
 
         elif self.mode == ViewMode.integrations_manager:
 
             if not self.data["integration_links"]:
-                await inter.response.edit_message(content="**Você não possui integrações salvas!**", view=None)
+                await inter.response.edit_message(content="**Kaydedilmiş entegrasyonunuz yok!**", view=None)
                 return
 
             fp = BytesIO(bytes(json.dumps(self.data["integration_links"], indent=4), 'utf-8'))
@@ -1724,11 +1724,11 @@ class FavMenuView(disnake.ui.View):
 
             await self.bot.update_global_data(inter.author.id, self.data, db_name=DBModel.users)
 
-            self.log = "Sua lista de integrações foi limpa com sucesso!"
+            self.log = "Entegrasyon listeniz başarıyla temizlendi!"
 
-            await inter.send("### Suas integrações foram excluídas com sucesso!\n"
-                             "`um arquivo de backup foi gerado e caso queira reverter essa exclusão, copie o "
-                             "conteúdo do arquivo e clique no botão \"importar\" e cole o conteudo no campo indicado.`",
+            await inter.send("### Entegrasyonlarınız başarıyla silindi!\n"
+                             "`bir yedekleme dosyası oluşturuldu ve bu silme işlemini geri almak istiyorsanız, yedekleme dosyasını kopyalayın. "
+                             "dosya içeriğini seçin ve \"içe aktar\" düğmesine tıklayın ve içeriği belirtilen alana yapıştırın.`",
                              ephemeral=True, file=disnake.File(fp, filename="integrations.json"))
 
         self.current = None
@@ -1751,7 +1751,7 @@ class FavMenuView(disnake.ui.View):
         if retry_after := cog.fav_import_export_cd.get_bucket(inter).update_rate_limit():
             if retry_after < 1:
                 retry_after = 1
-            await inter.send("**Você deve aguardar {} para exportar.**".format(
+            await inter.send("**Dışa aktarma için {}'ı beklemeniz gerekir.**".format(
                 time_format(int(retry_after) * 1000, use_names=True)), ephemeral=True)
             return
 
@@ -1766,28 +1766,28 @@ class FavMenuView(disnake.ui.View):
 
         if self.mode == ViewMode.fav_manager:
             if not self.data["fav_links"]:
-                await inter.send(f"**Você não possui links favoritos..\n"
-                                 f"Você pode adicionar usando o comando: {cmd}**", ephemeral=True)
+                await inter.send(f"**Favori bağlantılarınız yok..\n"
+                                 f"Komutu kullanarak ekleyebilirsiniz: {cmd}**", ephemeral=True)
                 return
 
             fp = BytesIO(bytes(json.dumps(self.data["fav_links"], indent=4), 'utf-8'))
 
             await inter.send(embed=disnake.Embed(
-                description=f"Seus favoritos estão aqui.\nVocê pode importar usando o comando: {cmd}",
+                description=f"Favorileriniz burada.\Komutu kullanarak içe aktarabilirsiniz: {cmd}",
                 color=self.bot.get_color()), file=disnake.File(fp=fp, filename="favoritos.json"), ephemeral=True)
 
         elif self.mode == ViewMode.guild_fav_manager:
             if not self.guild_data["player_controller"]["fav_links"]:
-                await inter.edit_original_message(content=f"**Não há músicas/playlists fixadas no servidor..\n"
-                                                          f"Você pode adicionar usando o comando: {cmd}**")
+                await inter.edit_original_message(content=f"**Sunucuya sabitlenmiş şarkı/çalma listesi yok.\n"
+                                                          f"Komutu kullanarak ekleyebilirsiniz: {cmd}**")
 
             fp = BytesIO(bytes(json.dumps(self.guild_data["player_controller"]["fav_links"], indent=4), 'utf-8'))
 
             guild = self.bot.get_guild(inter.guild_id) or inter.guild
 
             embed = disnake.Embed(
-                description=f"**Os dados dos links de músicas/playlists fixas do servidor estão aqui.\n"
-                            f"Você pode importar usando o comando:** {cmd}",
+                description=f"**Sunucunun sabit şarkı/çalma listesi bağlantı verileri buradadır.\n"
+                            f"Şu komutu kullanarak içe aktarabilirsiniz:** {cmd}",
                 color=self.bot.get_color(guild.me))
 
             await inter.send(embed=embed, file=disnake.File(fp=fp, filename="guild_favs.json"), ephemeral=True)
@@ -1795,14 +1795,14 @@ class FavMenuView(disnake.ui.View):
         elif self.mode == ViewMode.integrations_manager:
 
             if not self.data["integration_links"]:
-                await inter.edit_original_message(f"**Você não possui integrações adicionadas...\n"
-                                                  f"Você pode adicionar usando o comando: {cmd}**")
+                await inter.edit_original_message(f"**Eklenen entegrasyonunuz yok...\n"
+                                                  f"Komutu kullanarak ekleyebilirsiniz: {cmd}**")
                 return
 
             fp = BytesIO(bytes(json.dumps(self.data["integration_links"], indent=4), 'utf-8'))
 
             await inter.send(embed=disnake.Embed(
-                description=f"Suas integrações estão aqui.\nVocê pode importar usando o comando: {cmd}",
+                description=f"Entegrasyonlarınız burada.\nKomutu kullanarak içe aktarabilirsiniz: {cmd}",
                 color=self.bot.get_color()), file=disnake.File(fp=fp, filename="integrations.json"), ephemeral=True)
 
     async def cancel_callback(self, inter: disnake.MessageInteraction):
@@ -1814,7 +1814,7 @@ class FavMenuView(disnake.ui.View):
 
         await inter.response.edit_message(
             embed=disnake.Embed(
-                description="**Gerenciador fechado.**",
+                description="**Kapalı yönetici.**",
                 color=self.bot.get_color(),
             ), view=None
         )
@@ -1850,7 +1850,7 @@ class FavMenuView(disnake.ui.View):
         if inter.author.id == self.ctx.author.id:
             return True
 
-        await inter.send(f"Apenas o membro {self.ctx.author.mention} pode interagir nessa mensagem.", ephemeral=True)
+        await inter.send(f"Bu mesajla yalnızca {self.ctx.author.mention} üyesi etkileşim kurabilir.", ephemeral=True)
 
 
 
@@ -1859,18 +1859,18 @@ base_skin = {
     "queue_format": "`{track.number}) [{track.duration}]` [`{track.title_42}`]({track.url})",
     "embeds": [
         {
-            "title": "Próximas músicas:",
+            "title": "Sonraki şarkılar:",
             "description": "{queue_format}",
             "color": "{guild.color}"
         },
         {
-            "description": "**Tocando agora:\n[{track.title}]({track.url})**\n\n**Duração:** `{track.duration}`\n**Pedido por:** {requester.mention}\n**Uploader**: `{track.author}`\n**Playlist de origem:** [`{playlist.name}`]({playlist.url})\n\n{player.log.emoji} **Última ação:** {player.log.text}",
+            "description": "**Şimdi çalıyor:\n[{track.title}]({track.url})**\n\n**Süre:** `{track.duration}`\n**Talep eden:** {requester.mention}\n**Yükleyici**: `{track.author}`\n**Kaynak oynatma listesi:** [`{playlist.name}`]({playlist.url})\n\n{player.log.emoji} **Son eylem:** {player.log.text}",
             "image": {
               "url": "{track.thumb}"
             },
             "color": "{guild.color}",
             "footer": {
-               "text": "Músicas na lista: {player.queue.size}"
+               "text": "Listedeki şarkılar: {player.queue.size}"
             }
         }
     ]
@@ -1893,9 +1893,9 @@ class SkinSettingsButton(disnake.ui.View):
 
         select_mode = disnake.ui.Select(
             min_values=1, max_values=1, options=[
-                disnake.SelectOption(label="Modo Normal", description="Aplicar skin ao modo normal do player",
+                disnake.SelectOption(label="Modo Normal", description="Görünümü normal oynatıcı moduna uygula",
                                      value="custom_skins", default=self.mode == "custom_skins"),
-                disnake.SelectOption(label="Song-Request", description="Aplicar skin no modo song-request do player",
+                disnake.SelectOption(label="Song-Request", description="Uygulama dış görünümü modo şarkı isteği yok oyuncuya",
                                      value="custom_skins_static", default=self.mode == "custom_skins_static"),
             ]
         )
@@ -1904,12 +1904,12 @@ class SkinSettingsButton(disnake.ui.View):
 
         if self.mode == "custom_skins":
             controller_btn = disnake.ui.Button(emoji="💠",
-                label="Ativar Player-Controller" if not self.controller_enabled else "Desativar Player-Controller"
+                label="Oyuncu Kontrol Cihazını Etkinleştir" if not self.controller_enabled else "Oynatıcı Denetleyicisini Devre Dışı Bırak"
             )
             controller_btn.callback = self.controller_buttons
             self.add_item(controller_btn)
 
-        save_btn = disnake.ui.Button(label="Salvar", emoji="💾")
+        save_btn = disnake.ui.Button(label="Kaydet", emoji="💾")
         save_btn.callback = self.save
         self.add_item(save_btn)
 
@@ -1930,7 +1930,7 @@ class SkinSettingsButton(disnake.ui.View):
     async def interaction_check(self, inter: disnake.MessageInteraction) -> bool:
 
         if inter.user.id != self.user.id:
-            await inter.send(f"Apenas o membro {self.user.mention} pode usar es botões da mensagem.", ephemeral=True)
+            await inter.send(f"Bu mesaj butonlarını yalnızca {self.user.mention} üyesi kullanabilir.", ephemeral=True)
             return False
 
         return True
@@ -1952,17 +1952,17 @@ class SetStageTitle(disnake.ui.View):
         '{requester.name}', '{requester.id}'
     )
 
-    placeholder_text = "```ansi\n[34;1m{track.title}[0m -> Nome da música\n" \
-               "[34;1m{track.author}[0m -> Nome do Artista/Uploader/Autor da música.\n" \
-               "[34;1m{track.duration}[0m -> Duração da música.\n" \
-               "[34;1m{track.timestamp}[0m -> Duração da música em contagem regressiva (apenas em canal de voz).\n" \
-               "[34;1m{track.source}[0m -> Origem/Fonte da música (Youtube/Spotify/Soundcloud etc)\n" \
-               "[34;1m{track.emoji}[0m -> Emoji da fonte de música (apenas em canal de voz).\n" \
-               "[34;1m{track.playlist}[0m -> Nome da playlist de origem da música (caso tenha)\n" \
-               "[34;1m{requester.name}[0m -> Nome/Nick do membro que pediu a música\n" \
-               "[34;1m{requester.id}[0m -> ID do membro que pediu a música```\n" \
-               "Exemplo: Tocando {track.title} | Por: {track.author}\n\n" \
-               "`Nota: No canal de voz você pode usar custom emojis na mensagem do status (incluindo emoji de servers que eu não estou e de servers que você não está).`"
+    placeholder_text = "```ansi\n[34;1m{track.title}[0m -> Şarkının adı\n" \
+               "[34;1m{track.author}[0m -> Şarkının Sanatçısının/Yükleyicisinin/Yazarının adı.\n" \
+               "[34;1m{track.duration}[0m -> Şarkı süresi.\n" \
+               "[34;1m{track.timestamp}[0m -> Geri sayımda şarkı süresi (yalnızca ses kanalı).\n" \
+               "[34;1m{track.source}[0m -> Müziğin kökeni/kaynağı (Youtube/Spotify/Soundcloud vb.)\n" \
+               "[34;1m{track.emoji}[0m -> Müzik Kaynağı Emoji (Yalnızca Ses Kanalı).\n" \
+               "[34;1m{track.playlist}[0m -> Şarkının kaynak çalma listesinin adı (varsa)\n" \
+               "[34;1m{requester.name}[0m -> Şarkıyı talep eden üyenin adı/takma adıa\n" \
+               "[34;1m{requester.id}[0m -> Şarkıyı isteyen üyenin kimliği```\n" \
+               "Örnek: Oynamak {track.title} - {track.author}\n\n" \
+               "`Not: Ses kanalında durum mesajında ​​özel emojiler kullanabilirsiniz (bulunmadığım sunuculardaki ve bulunmadığınız sunuculardaki emojiler dahil).`"
 
     def __init__(self, ctx: Union[CustomContext, disnake.Interaction], bot: BotCore, guild: disnake.Guild, data: dict):
         super().__init__(timeout=180)
@@ -1973,18 +1973,18 @@ class SetStageTitle(disnake.ui.View):
         self.message = None
 
         if self.data['voice_channel_status']:
-            setstatus_btn = disnake.ui.Button(label="Usar modelo atual", emoji="🎶",
+            setstatus_btn = disnake.ui.Button(label="Mevcut şablonu kullan", emoji="🎶",
                                               style=disnake.ButtonStyle.grey,
                                               custom_id="status_voice_channel_temp_current")
             setstatus_btn.callback = self.setstatus_callback
             self.add_item(setstatus_btn)
 
-        setstatus_modal_btn = disnake.ui.Button(label="Ativar/Desativar status",
+        setstatus_modal_btn = disnake.ui.Button(label="Durumu Etkinleştir/Devre Dışı Bırak",
                                                 emoji='🔊', style=disnake.ButtonStyle.grey)
         setstatus_modal_btn.callback = self.set_status_modal
         self.add_item(setstatus_modal_btn)
 
-        setstatus_perm_btn = disnake.ui.Button(label="Ativar/Desativar status (permanente)",
+        setstatus_perm_btn = disnake.ui.Button(label="Etkinleştirme/Devre Dışı Bırakma durumu (kalıcı)",
                                                emoji='💾', style=disnake.ButtonStyle.grey)
         setstatus_perm_btn.callback = self.set_status_perm
         self.add_item(setstatus_perm_btn)
@@ -2003,13 +2003,13 @@ class SetStageTitle(disnake.ui.View):
                         style=disnake.TextInputStyle.long,
                         label="status",
                         custom_id="status_voice_value",
-                        placeholder="Pra desativar deixe vazio",
+                        placeholder="Devre dışı bırakmak için boş bırakın",
                         max_length=496,
                         required=False
                     ),
                 ],
                 view=self,
-                title="Definir status do canal",
+                title="Kanal durumunu ayarla",
                 custom_id="status_voice_channel_temp",
             )
         )
@@ -2022,7 +2022,7 @@ class SetStageTitle(disnake.ui.View):
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
-                        label="status permanente",
+                        label="kalıcı durum",
                         custom_id="status_voice_value",
                         placeholder="Pra desativar deixe vazio",
                         max_length=496,
@@ -2030,7 +2030,7 @@ class SetStageTitle(disnake.ui.View):
                     ),
                 ],
                 view=self,
-                title="Definir status do canal",
+                title="Kanal durumunu ayarla",
                 custom_id="status_voice_channel_perm",
             )
         )
@@ -2043,15 +2043,15 @@ class SetStageTitle(disnake.ui.View):
 
         embeds.append(
             disnake.Embed(
-                description="### Definir status automático no canal de voz ou palco\n"
-                            "**Placeholders:** `(Pelo menos um placeholder deve ser incluso na mensagem de status)`\n"
+                description="### Ses kanalında veya sahnede otomatik durumu ayarlayın\n"
+                            "**Yer tutucular:**`(Durum mesajına en az bir yer tutucu eklenmelidir)`\n"
                             f"{self.placeholder_text}",
                 color=color)
         )
 
         if self.data['voice_channel_status']:
             embeds.append(
-                disnake.Embed(title="**Modelo permanente atual:**", description=self.data['voice_channel_status'], color=self.bot.get_color(self.guild.me))
+                disnake.Embed(title="**Mevcut kalıcı model:**", description=self.data['voice_channel_status'], color=self.bot.get_color(self.guild.me))
             )
 
         return embeds
@@ -2067,13 +2067,13 @@ class SetStageTitle(disnake.ui.View):
 
         if values["status_voice_value"] and not any(
                 p in values["status_voice_value"] for p in self.placeholders):
-            await inter.send("**Você deve usar pelo menos um placeholder válido...**", ephemeral=True)
+            await inter.send("**En az bir geçerli yer tutucu kullanmalısınız...**", ephemeral=True)
             return
 
         if inter.data.custom_id == "status_voice_channel_perm":
 
             if self.data["voice_channel_status"] == values["status_voice_value"]:
-                await inter.send("**O status permanente atual é o mesmo do informado...**", ephemeral=True)
+                await inter.send("**Şu anki kalıcı durumu bildirilenle aynı...**", ephemeral=True)
                 return
 
             guild: Optional[disnake.Guild] = None
@@ -2083,14 +2083,14 @@ class SetStageTitle(disnake.ui.View):
                     break
 
             if not guild:
-                await inter.send("**Não há bots disponíveis no servidor, Adicione pelo menos um clicando no botão abaixo.**",
+                await inter.send("**Sunucuda kullanılabilir bot bulunmamaktadır, Aşağıdaki butona tıklayarak en az bir tane ekleyin.**",
                                 components=[disnake.ui.Button(custom_id="bot_invite", label="Adicionar bots")], ephemeral=True)
                 return
 
             inter.author = guild.get_member(inter.author.id)
 
             if not inter.author.guild_permissions.manage_guild:
-                await inter.send("**Você não possui a permissão de gerenciar servidor para alterar o status do canal de voz**", ephemeral=True)
+                await inter.send("**Ses kanalı durumunu değiştirmek için Sunucuyu Yönetme izniniz yok**", ephemeral=True)
                 return
 
             self.data["voice_channel_status"] = values["status_voice_value"]
@@ -2108,7 +2108,7 @@ class SetStageTitle(disnake.ui.View):
                 p.stage_title_template = values["status_voice_value"]
                 p.start_time = disnake.utils.utcnow()
                 p.set_command_log(
-                    text=f"{inter.author.mention} " + ("ativou" if values["status_voice_value"] else "desativou") + " o status automático",
+                    text=f"{inter.author.mention} " + ("Aktif" if values["status_voice_value"] else "engelli") + " otomatik durum",
                     emoji="📢",
                 )
                 p.update = True
@@ -2121,7 +2121,7 @@ class SetStageTitle(disnake.ui.View):
                 await p.process_save_queue()
                 await asyncio.sleep(3)
 
-            await inter.edit_original_message("**Status permanente foi " + ("salvo" if values["status_voice_value"] else "desativado") + " com sucesso!**" )
+            await inter.edit_original_message("**Kalıcı statü (önceki değeri) " + ("kaydedildi" if values["status_voice_value"] else "engelli") + " başarıyla!**" )
 
         elif inter.data.custom_id.startswith("status_voice_channel_temp"):
 
@@ -2139,13 +2139,13 @@ class SetStageTitle(disnake.ui.View):
                 break
 
             if not player:
-                await inter.send("**Não estou tocando música em um canal de voz/palco...**", ephemeral=True)
+                await inter.send("**Bir ses/sahne kanalında müzik çalmıyorum...**", ephemeral=True)
                 return
 
             inter.author = player.guild.get_member(inter.author.id)
 
             if not inter.author.guild_permissions.manage_guild:
-                await inter.send("Você não possui a permissão de gerenciar servidor para alterar o status do canal de voz", ephemeral=True)
+                await inter.send("Ses kanalı durumunu değiştirmek için Sunucuyu Yönetme izniniz yok", ephemeral=True)
                 return
 
             player.stage_title_event = bool(values["status_voice_value"])
@@ -2162,16 +2162,16 @@ class SetStageTitle(disnake.ui.View):
             await player.process_save_queue()
 
             player.set_command_log(
-                text=f"{inter.author.mention} " + ("ativou" if values["status_voice_value"] else "desativou") + " o status automático",
+                text=f"{inter.author.mention} " + ("Aktif" if values["status_voice_value"] else "engelli") + " otomatik durum",
                 emoji="📢",
             )
 
             player.update = True
 
-            await inter.edit_original_message("**Status definido com sucesso!**" if values["status_voice_value"] else "**Status desativado com sucesso!**")
+            await inter.edit_original_message("**Durum başarıyla ayarlandı!**" if values["status_voice_value"] else "**Başarıyla devre dışı bırakma durumu!**")
 
         else:
-            await inter.send(f"Não implementado: {inter.data.custom_id}", ephemeral=True)
+            await inter.send(f"Uygulanmadı: {inter.data.custom_id}", ephemeral=True)
             return
 
         await self.close()
@@ -2198,7 +2198,7 @@ class SetStageTitle(disnake.ui.View):
 
     async def interaction_check(self, inter: disnake.MessageInteraction) -> bool:
         if inter.author.id != self.ctx.author.id:
-            await inter.send(f"Apenas o membro {self.ctx.author.mention} pode interagir nessa mensagem.",
+            await inter.send(f"Sadece üyeler {self.ctx.author.mention} bu mesajla etkileşime girebilir.",
                              ephemeral=True)
             return False
         return True
@@ -2269,14 +2269,14 @@ class SkinEditorMenu(disnake.ui.View):
 
             if skins_opts:
                 skin_select = disnake.ui.Select(min_values=1, max_values=1, options=skins_opts,
-                                                placeholder="Skins do modo normal do player")
+                                                placeholder="Görünümler normal oyuncu modunu yapar")
                 skin_select.callback = self.load_skin
                 self.add_item(skin_select)
                 has_skins = True
 
             if static_skins_opts:
                 static_skin_select = disnake.ui.Select(min_values=1, max_values=1, options=static_skins_opts,
-                                                       placeholder="Skins do modo song-request do player")
+                                                       placeholder="Görünümler oynatıcının şarkı isteğini modo yapar")
                 static_skin_select.callback = self.load_skin
                 self.add_item(static_skin_select)
                 has_skins = True
