@@ -175,7 +175,7 @@ class BotPool:
                         return
 
                     self.killing_state = "ratelimit"
-                    print("Aplicação com ratelimit do discord!")
+                    print("Discord rate limitine takıldı!")
                     await asyncio.sleep(10)
                     raise e
 
@@ -183,8 +183,8 @@ class BotPool:
                     return
 
                 print(
-                    "Aplicação com ratelimit do discord!\n"
-                    "Finalizando/Reiniciando o processo em 5 segundos..."
+                    "Discord rate limitine takıldı!\n"
+                    "İşlemi 5 saniyede sonlandırma/yeniden başlatma..."
                 )
 
                 self.killing_state = True
@@ -203,24 +203,24 @@ class BotPool:
         if e:
 
             if isinstance(e, disnake.PrivilegedIntentsRequired):
-                e = "Você não ativou as Privileged Intents na sua aplicação<br>" \
-                    "Acesse o discord developer portal:<br>" \
+                e = "Uygulamanızda Ayrıcalıklı Amaçları etkinleştirmediniz<br>" \
+                    "Discord geliştirici portalına erişin:<br>" \
                     "https://discord.com/developers/applications/<br>" \
-                    "e clique na sua aplicação e depois clique no menu \"bot\"<br>" \
-                    "e em seguida ative todas as intents.<br>" \
-                    "Print de exemplo: https://i.imgur.com/a9c1DHT.png<br>" \
-                    "Após corrigir, reinicie a aplicação."
+                    "ve uygulamanıza tıklayın ve ardından menüye tıklayın \"bot\"<br>" \
+                    "ve ardından tüm niyetleri etkinleştirin.<br>" \
+                    "Örnek çıktı: https://i.imgur.com/a9c1DHT.png<br>" \
+                    "Düzelttikten sonra uygulamayı yeniden başlatın."
 
                 print(("=" * 30) + f"\nFalha ao iniciar o bot configurado no: {bot.identifier}\n" + e.replace('<br>', '\n') + "\n" + ("=" * 30))
 
             elif isinstance(e, disnake.LoginFailure) and "Improper token" in str(e):
-                e = "Foi utilizado um token inválido.<br>" \
-                    "Revise se o token informado está correto<br>" \
-                    "ou se o token foi resetado<br>" \
-                    "ou copiado do local correto ( ex: https://i.imgur.com/k894c1q.png )<br>" \
-                    "Após corrigir, reinicie a aplicação."
+                e = "Geçersiz bir Token kullanıldı.<br>" \
+                    "Girilen Tokenin doğru olup olmadığını kontrol edin<br>" \
+                    "veya token sıfırlanmış olabilir<br>" \
+                    "veya doğru yerden kopyayın ( ex: https://i.imgur.com/k894c1q.png )<br>" \
+                    "Düzelttikten sonra uygulamayı yeniden başlatın."
 
-                print(("=" * 30) + f"\nFalha ao iniciar o bot configurado no: {bot.identifier}\n" + e.replace('<br>', '\n') + "\n" + ( "=" * 30))
+                print(("=" * 30) + f"\nYapılandırılmış bot başlatılamadı: {bot.identifier}\n" + e.replace('<br>', '\n') + "\n" + ( "=" * 30))
 
             else:
                 traceback.print_tb(e.__traceback__)
@@ -262,12 +262,12 @@ class BotPool:
         retries = 0
         exception = None
 
-        print(f"📶 - Verificando se o servidor de música [{data['identifier']}] está disponível.")
+        print(f"📶 - Müzik sunucusunun olup olmadığı kontrol ediliyor [{data['identifier']}] gecerli.")
 
         while True:
             if retries >= max_retries:
                 print(
-                    f"❌ - Todas as tentativas de verificar o servidor [{data['identifier']}] falharam. Causa: {repr(exception)}")
+                    f"❌ - Sunucuyu doğrulamaya yönelik tüm girişimler [{data['identifier']}] arızalı. Neden: {repr(exception)}")
                 return
             else:
                 await asyncio.sleep(backoff)
@@ -289,8 +289,8 @@ class BotPool:
                 except Exception as e:
                     exception = e
                     if data["identifier"] != "LOCAL":
-                        print(f'⚠️ - Falha ao verificar o servidor [{data["identifier"]}], '
-                              f'nova tentativa [{retries}/{max_retries}] em {backoff} segundos.')
+                        print(f'⚠️ - Sunucu doğrulanamadı [{data["identifier"]}], '
+                              f'yeni deneme [{retries}/{max_retries}] saniye {backoff} içinde.')
                     backoff += 2
                     retries += 1
 
@@ -400,17 +400,17 @@ class BotPool:
             skin = skin[:-3]
 
             if skin in self.config["IGNORE_SKINS"].split() and skin != "default":
-                print(f"Skin {skin}.py ignorada")
+                print(f"Skin {skin}.py görmezden gelindi")
                 continue
 
             try:
                 skin_file = import_module(f"utils.music.skins.normal_player.{skin}")
                 if not hasattr(skin_file, "load"):
-                    print(f"Skin ignorada: {skin}.py | Função load() não configurada/encontrada...")
+                    print(f"Göz ardı edilen skin: {skin}.py | Load() işlevi yapılandırılmadı/bulunamadı...")
                     continue
                 self.player_skins[skin] = skin_file.load()
             except Exception:
-                print(f"Falha ao carregar skin [normal_player]: {traceback.format_exc()}")
+                print(f"Görünüm yüklenemedi [normal_player]: {traceback.format_exc()}")
 
         if self.default_skin not in self.player_skins:
             self.default_skin = "default"
@@ -422,17 +422,17 @@ class BotPool:
             skin = skin[:-3]
 
             if skin in self.config["IGNORE_STATIC_SKINS"].split() and skin != "default":
-                print(f"Skin {skin}.py ignorada")
+                print(f"Skin {skin}.py görmezden gelindi")
                 continue
 
             try:
                 skin_file = import_module(f"utils.music.skins.static_player.{skin}")
                 if not hasattr(skin_file, "load"):
-                    print(f"Skin ignorada: {skin}.py | Função load() não configurada/encontrada...")
+                    print(f"Göz ardı edilen skin: {skin}.py | Load() işlevi yapılandırılmadı/bulunamadı...")
                     continue
                 self.player_static_skins[skin] = skin_file.load()
             except Exception:
-                print(f"Falha ao carregar skin [static_player]: {traceback.format_exc()}")
+                print(f"Skin yüklenemedi [static_player]: {traceback.format_exc()}")
         if self.default_static_skin not in self.player_static_skins:
             self.default_static_skin = "default"
 
@@ -489,7 +489,7 @@ class BotPool:
             except Exception:
                 traceback.print_exc()
                 ini_file = "auto_lavalink.ini"
-                print(f"Baixando lista de servidores lavalink (arquivo: {ini_file})")
+                print(f"Lavalink sunucularının listesi indiriliyor (dosya: {ini_file})")
                 try:
                     r = requests.get(self.config["LAVALINK_SERVER_LIST"], allow_redirects=False)
                     with open("auto_lavalink.ini", 'wb') as f:
@@ -506,7 +506,7 @@ class BotPool:
                 try:
                     LAVALINK_SERVERS[key] = json.loads(value)
                 except Exception as e:
-                    print(f"Falha ao adicionar node: {key}, erro: {repr(e)}")
+                    print(f"Düğüm eklenemedi: {key}, erro: {repr(e)}")
 
         if ini_file:
             config = ConfigParser()
@@ -545,12 +545,12 @@ class BotPool:
                         self.config['USE_JABBA'] = False
                         if not square_cfg.get("SUBDOMAIN"):
                             self.config["RUN_RPC_SERVER"] = False
-                        print("Usando a configuração automática na squarecloud\n"
-                              f"Lavalink local: {start_local}\n"
+                        print("Squarecloud'da otomatik yapılandırmayı kullanma\n"
+                              f"Lavalink yerel: {start_local}\n"
                               f"YTDL: {self.config['USE_YTDL']}\n"
-                              f"Memória: {square_cfg['MEMORY']}\n"
-                              f"Run RPC Server: {self.config['RUN_RPC_SERVER']}\n"
-                              f"Usando JABBA: {self.config['USE_JABBA']}")
+                              f"Hafıza: {square_cfg['MEMORY']}\n"
+                              f"RPC Sunucusunu Çalıştır: {self.config['RUN_RPC_SERVER']}\n"
+                              f"JABBA'yı kullanma: {self.config['USE_JABBA']}")
                     break
 
         if start_local is None:
@@ -570,9 +570,9 @@ class BotPool:
             self.mongo_database = MongoDatabase(mongo_key, timeout=self.config["MONGO_TIMEOUT"],
                                                 cache_maxsize=self.config["DBCACHE_SIZE"],
                                                 cache_ttl=self.config["DBCACHE_TTL"])
-            print("Database em uso: MongoDB")
+            print("Kullanılan veritabanı: MongoDB")
         else:
-            print("Database em uso: TinyMongo | Nota: Os arquivos da database serão salvos localmente na pasta: local_database")
+            print("Kullanılan veritabanı: TinyMongo | Not: Veritabanı dosyaları yerel olarak şu klasöre kaydedilecektir: local_database")
 
         self.local_database = LocalDatabase(cache_maxsize=self.config["DBCACHE_SIZE"],
                                             cache_ttl=self.config["DBCACHE_TTL"])
@@ -641,7 +641,7 @@ class BotPool:
                 pass
 
             if not token:
-                print(f"{bot_name} Ignorado (token não informado)...")
+                print(f"{bot_name} Yoksayıldı (prefix sağlanmadı)...")
                 return
 
             try:
@@ -672,8 +672,8 @@ class BotPool:
                 async def check_commands(ctx: CustomContext):
 
                     if not (await bot.is_owner(ctx.author)):
-                        raise GenericError("**Os comandos de texto estão desativados!\n"
-                                           "Use os comandos de barra /**", self_delete=True, delete_original=15)
+                        raise GenericError("**Metin komutları devre dışı!\n"
+                                           "Komut çubuğunu kullanma /**", self_delete=True, delete_original=15)
 
                     return True
 
@@ -733,7 +733,7 @@ class BotPool:
                     allow_private = False
 
                 if inter.bot.exclusive_guild_id and inter.guild_id != inter.bot.exclusive_guild_id:
-                    raise GenericError("Esse servidor não está autorizado para usar meus comandos...")
+                    raise GenericError("Bu sunucunun komutlarımı kullanma yetkisi yok...")
 
                 if self.config["COMMAND_LOG"] and inter.guild and not (await inter.bot.is_owner(inter.author)):
                     try:
@@ -749,8 +749,8 @@ class BotPool:
                     if allow_private:
                         return True
 
-                    raise GenericError("Esse comando não pode ser executado em mensagens privadas.\n"
-                                     "Use em algum servidor onde há bot compatível adicionado.")
+                    raise GenericError("Bu komut özel mesajlarda çalıştırılamaz.\n"
+                                     "Uyumlu botun eklendiği herhangi bir sunucuda kullanın.")
 
                 if not allow_private and not isinstance(inter.guild, disnake.Guild):
 
@@ -765,8 +765,8 @@ class BotPool:
 
                     if not available_bot:
                         raise GenericError(
-                            "**Não há bots disponíveis no servidor, Adicione pelo menos um clicando no botão abaixo.**",
-                            components=[disnake.ui.Button(custom_id="bot_invite", label="Adicionar bots")])
+                            "**Sunucuda kullanılabilir bot yok, Aşağıdaki butona tıklayarak en az bir tane ekleyin.**",
+                            components=[disnake.ui.Button(custom_id="bot_invite", label="Bot ekle")])
 
                 if not kwargs:
                     kwargs["return_first"] = True
@@ -858,17 +858,17 @@ class BotPool:
 
             os.system('cls' if os.name == 'nt' else 'clear')
 
-            message = "O token do bot não foi configurado devidamente!\n\n"
+            message = "Bot tokeni düzgün yapılandırılmamış!\n\n"
 
             if os.environ.get("REPL_SLUG"):
-                message += f"Confira se o token foi adicionado nas secrets da replit"
+                message += f"Belirtecin tekrarlanan gizli dizilere eklenip eklenmediğini kontrol edin"
 
-                print(message + ": Guia de como configurar: https://gist.github.com/zRitsu/70737984cbe163f890dae05a80a3ddbe#2---com-o-projeto-j%C3%A1-criado-prossiga-as-etapas-abaixo")
+                print(message + ": Nasıl yapılandırılacağına ilişkin kılavuz: https://gist.github.com/zRitsu/70737984cbe163f890dae05a80a3ddbe#2---com-o-projeto-j%C3%A1-criado-prossiga-as-etapas-abaixo")
 
                 message += f'. <a href="https://gist.github.com/zRitsu/70737984cbe163f890dae05a80a3ddbe#2---com-o-projeto-j%C3%A1-criado-prossiga-as-etapas-abaixo" target="_blank">Clique aqui</a> para ver o guia de como configurar.'
 
             else:
-                message += "Confira se o token foi configurado na ENV/ENVIRONMENT ou no arquivo .env"
+                message += "Belirtecin ENV/ENVIRONMENT'ta mı yoksa .env dosyasında mı yapılandırıldığını kontrol edin"
 
                 print(message)
 
@@ -1041,7 +1041,7 @@ class BotCore(commands.AutoShardedBot):
 
         if current_cmds == synced_cmds:
             if current_cmds:
-                print(f"⚠️ - {self.user} - Os comandos já estão sincronizados.")
+                print(f"⚠️ - {self.user} - Komutlar zaten senkronize edildi.")
             return
 
         self._command_sync_flags = self.pool.command_sync_config
@@ -1160,15 +1160,15 @@ class BotCore(commands.AutoShardedBot):
             embed.description = f"**Olá {message.author.mention}.**"
 
             if not self.config["INTERACTION_COMMAND_ONLY"]:
-                embed.description += f"\n\nMeu prefixo no servidor é: **{prefix}** `(minha menção também funciona como prefixo).`\n"\
-                                    f"Pra ver todos os meus comandos use **{prefix}help**"
+                embed.description += f"\n\nSunucudaki prefixim: **{prefix}** `(beni etiketleyerekte çalıştırabilirsinizr).`\n"\
+                                    f"Tüm komutlarımın kullanımını görmek için **{prefix}help**"
 
-            embed.description += "\n\n**Pra ver todos os meus comandos use: /**"
+            embed.description += "\n\n**Tüm komutlarımın kullanımını görmek için: /**"
 
             kwargs = {
                 "components": [
                     disnake.ui.Button(
-                        label="Me adicione no seu servidor.",
+                        label="Beni sunucuna ekle.",
                         url=disnake.utils.oauth_url(self.user.id, permissions=disnake.Permissions(self.config['INVITE_PERMISSIONS']), scopes=('bot',))
                     )
                 ]
@@ -1247,8 +1247,8 @@ class BotCore(commands.AutoShardedBot):
                     if raise_error is False:
                         return False
 
-                    raise GenericError("**Você não pode usar comandos prefixed na postagem atual...**\n"
-                                       "`Use comando de barra (/) aqui.`", self_delete=True)
+                    raise GenericError("**Mevcut gönderide ön ekli komutları kullanamazsınız...**\n"
+                                       "`Burada eğik çizgi (/) komutunu kullanın.`", self_delete=True)
         except AttributeError:
             pass
 
@@ -1291,21 +1291,21 @@ class BotCore(commands.AutoShardedBot):
                 if not [dev for dev in owners if check_member(dev, guild)]:
                     guilds.add(guild)
 
-            warn_msg = f"Atenção: O bot [{self.user}] (ID: {self.user.id}) foi configurado no portal do desenvolvedor " \
-                  "como bot público\n" \
-                  "lembrando que se caso o bot seja divulgado pra ser adicionado publicamente o mesmo terá que " \
-                  "estar sob as condições da licença GPL-2: " \
+            warn_msg = f"Dikkat: Bot [{self.user}] (ID: {self.user.id}) geliştirici portalında yapılandırılmıştır " \
+                  "herkese açık bot olarak\n" \
+                  "Botun herkese açık olarak eklenmek üzere serbest bırakılması durumunda, " \
+                  "GPL-2 lisansının koşulları altında olmak: " \
                   "https://github.com/zRitsu/MuseHeart-MusicBot/blob/main/LICENSE\n" \
-                  "Caso não queira seguir as condições da licença no seu bot, você pode deixar o bot privado desmarcando a " \
-                  f"opção public bot acessando o link: https://discord.com/developers/applications/{self.user.id}/bot"
+                  "Botunuzdaki lisans koşullarına uymak istemiyorsanız kutunun işaretini kaldırarak botu özel hale getirebilirsiniz. " \
+                  f"bağlantıya erişerek herkese açık bot seçeneği: https://discord.com/developers/applications/{self.user.id}/bot"
 
             if guilds:
-                warn_msg += "\n\nAtualmente o bot se encontra em servidores no qual o dono do bot (ou membro da equipe) não "\
-                            f"estão ou que não possuem permissão de gerenciar servidor pra adicionar o próprio bot " \
-                             f"[{self.user}] nos servidores abaixo:\n\n" + "\n".join(f"{g.name} [ID: {g.id}]" for g in list(guilds)[:10])
+                warn_msg += "\n\nŞu anda bot, bot sahibinin (veya ekip üyesinin) bulunmadığı sunucularda bulunmaktadır. "\
+                            f"Kendi botlarını eklemek için sunucuyu yönetme izniniz var veya yok " \
+                             f"[{self.user}] aşağıdaki sunucularda:\n\n" + "\n".join(f"{g.name} [ID: {g.id}]" for g in list(guilds)[:10])
 
                 if (gcount:=len(guilds)) > 10:
-                    warn_msg += F"\ne em mais {gcount-10} servidor(es)."
+                    warn_msg += F"\nve daha fazlası {gcount-10} sunucu(lar)."
 
             print(("="*50) + f"\n{warn_msg}\n" + ("="*50))
 
@@ -1325,7 +1325,7 @@ class BotCore(commands.AutoShardedBot):
     async def on_application_command(self, inter: disnake.ApplicationCommandInteraction):
 
         if not self.bot_ready or self.is_closed():
-            await inter.send("Ainda estou inicializando...\nPor favor aguarde mais um pouco...", ephemeral=True)
+            await inter.send("Hala başlatıyorum...\Lütfen biraz daha bekleyin....", ephemeral=True)
             return
 
         await super().on_application_command(inter)
@@ -1357,22 +1357,22 @@ class BotCore(commands.AutoShardedBot):
                     try:
                         self.reload_extension(module_filename)
                         if not self.bot_ready and load_modules_log:
-                            print(f"{'=' * 48}\n🟦 - {bot_name} - {filename}.py Recarregado.")
+                            print(f"{'=' * 48}\n🟦 - {bot_name} - {filename}.py Yeniden dolduruldu.")
                         load_status["reloaded"].append(f"{filename}.py")
                     except (commands.ExtensionAlreadyLoaded, commands.ExtensionNotLoaded):
                         try:
                             self.load_extension(module_filename)
                             if not self.bot_ready and load_modules_log:
-                                print(f"{'=' * 48}\n🟩 - {bot_name} - {filename}.py Carregado.")
+                                print(f"{'=' * 48}\n🟩 - {bot_name} - {filename}.py Yüklendi.")
                             load_status["loaded"].append(f"{filename}.py")
                         except Exception as e:
-                            print(f"{'=' * 48}\n❌- {bot_name} - Falha ao carregar/recarregar o módulo: {filename}\n")
+                            print(f"{'=' * 48}\n❌- {bot_name} - Modül yüklenemedi/yeniden yüklenemedi: {filename}\n")
                             if not self.bot_ready:
                                 raise e
                             load_status["failed"].append(f"{filename}.py")
                             traceback.print_exc()
                     except Exception as e:
-                        print(f"{'=' * 48}\n\❌ - {bot_name} - Falha ao carregar/recarregar o módulo: {filename}")
+                        print(f"{'=' * 48}\n\❌ - {bot_name} - Modül yüklenemedi/yeniden yüklenemedi: {filename}")
                         if not self.bot_ready:
                             raise e
                         load_status["failed"].append(f"{filename}.py")
@@ -1387,7 +1387,7 @@ class BotCore(commands.AutoShardedBot):
 
         for c in self.slash_commands:
             if (desc:=len(c.description)) > 100:
-                raise Exception(f"A descrição do comando {c.name} excedeu a quantidade de caracteres permitido "
-                                f"no discord (100), quantidade atual: {desc}")
+                raise Exception(f"{c.name} komut açıklaması izin verilen karakter sayısını aştı "
+                                f"anlaşmazlıkta (100), mevcut miktar: {desc}")
 
         return load_status
