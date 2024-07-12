@@ -88,21 +88,21 @@ def parse_error(
     error = getattr(error, 'original', error)
 
     if isinstance(error, NotDJorStaff):
-        error_txt = "**Você deve estar na lista de DJ ou ter a permissão de **Mover Membros** " \
-                    "para usar este comando.**"
+        error_txt = "**DJ listesinde olmanız veya **Üyeleri Taşıma**iznine sahip olmanız gerekir " \
+                    "bu komutu kullanmak için.**"
 
     elif isinstance(error, MissingVoicePerms):
-        error_txt = f"**Não tenho permissão para conectar/falar no canal:** {error.voice_channel.mention}"
+        error_txt = f"**Kanala bağlanma/konuşma iznim yok:** {error.voice_channel.mention}"
 
     elif isinstance(error, commands.NotOwner):
-        error_txt = "**Apenas meu(s) desenvolvedor(es) pode(m) usar esse comando.**"
+        error_txt = "**Bu komutu yalnızca geliştiricilerim kullanabilir.**"
 
     elif isinstance(error, commands.BotMissingPermissions):
-        error_txt = "Não tenho as seguintes permissões para executar esse comando: ```\n{}```" \
+        error_txt = "Bu komutu çalıştırmak için aşağıdaki izinlere sahip değilim: ```\n{}```" \
             .format(", ".join(perms_translations.get(perm, perm) for perm in error.missing_permissions))
 
     elif isinstance(error, commands.MissingPermissions):
-        error_txt = "Você não possui as seguintes permissões para executar esse comando: ```\n{}```" \
+        error_txt = "Bu komutu çalıştırmak için aşağıdaki izinlere sahip değilsiniz: ```\n{}```" \
             .format(", ".join(perms_translations.get(perm, perm) for perm in error.missing_permissions))
 
     elif isinstance(error, GenericError):
@@ -112,113 +112,113 @@ def parse_error(
             send_error = True
 
     elif isinstance(error, NotRequester):
-        error_txt = "**Você deve ter pedido a música atual ou estar na lista de DJ ou ter a permissão de " \
-                    "**Gerenciar canais** para pular músicas.**"
+        error_txt = "**Geçerli şarkıyı talep etmiş olmanız veya DJ listesinde olmanız veya izin sahibi olmanız gerekir. " \
+                    "**Şarkıları atlamak için kanalları yönetin**.**"
 
     elif isinstance(error, DiffVoiceChannel):
-        error_txt = "**Você deve estar no meu canal de voz atual para usar esse comando.**"
+        error_txt = "**Bu komutu kullanabilmek için mevcut ses kanalımda olmanız gerekir.**"
 
     elif isinstance(error, NoSource):
-        error_txt = "**Não há músicas no player atualmente.**"
+        error_txt = "**Şu anda oynatıcıda şarkı yok.**"
 
     elif isinstance(error, NoVoice):
-        error_txt = "**Você deve entrar em um canal de voz para usar esse comando.**"
+        error_txt = "**Bu komutu kullanmak için bir ses kanalına katılmalısınız.**"
 
     elif isinstance(error, NoPlayer):
         try:
-            error_txt = f"**Não há player ativo no canal {ctx.author.voice.channel.mention}.**"
+            error_txt = f"**Kanalda aktif oyuncu yok {ctx.author.voice.channel.mention}.**"
         except AttributeError:
-            error_txt = "**Não há player inicializado no servidor.**"
+            error_txt = "**Sunucuda başlatılan oyuncu yok.**"
 
     elif isinstance(error, (commands.UserInputError, commands.MissingRequiredArgument)) and ctx.command.usage:
 
-        error_txt = "### Você usou o comando de forma incorreta.\n"
+        error_txt = "### Komutu yanlış kullandınız.\n"
 
         if ctx.command.usage:
 
             prefix = ctx.prefix if str(ctx.me.id) not in ctx.prefix else f"@{ctx.me.display_name} "
 
-            error_txt += f'📘 **⠂Como Usar:** ```\n{ctx.command.usage.replace("{prefix}", prefix).replace("{cmd}", ctx.command.name).replace("{parent}", ctx.command.full_parent_name)}```\n' \
-                        f"⚠️ **⠂Notas sobre o uso dos argumentos no comando:** ```\n" \
-                        f"[] = Obrigatório | <> = Opcional```\n"
+            error_txt += f'📘 **⠂Nasıl kullanılır:** ```\n{ctx.command.usage.replace("{prefix}", prefix).replace("{cmd}", ctx.command.name).replace("{parent}", ctx.command.full_parent_name)}```\n' \
+                        f"⚠️ **⠂Komutta bağımsız değişkenlerin kullanımına ilişkin notlar:** ```\n" \
+                        f"[] = Zorunlu | <> = İsteğe bağlı```\n"
 
     elif isinstance(error, MissingSpotifyClient):
-        error_txt = "**Não há suporte a links do spotify no momento.**"
+        error_txt = "**Spotify bağlantıları şu anda desteklenmiyor.**"
 
     elif isinstance(error, commands.NoPrivateMessage):
-        error_txt = "Esse comando não pode ser executado em mensagens privadas."
+        error_txt = "Bu komut özel mesajlarda çalıştırılamaz."
 
     elif isinstance(error, MissingSessionID):
-        error_txt = f"**O servidor de música {error.node.identifier} está desconectado, por favor aguarde alguns segundos e tente novamente.**"
+        error_txt = f"**{error.node.identifier} müzik sunucusunun bağlantısı kesildi, lütfen birkaç saniye bekleyip tekrar deneyin.**"
 
     elif isinstance(error, commands.CommandOnCooldown):
         remaing = int(error.retry_after)
         if remaing < 1:
             remaing = 1
-        error_txt = "**Você deve aguardar {} para usar esse comando.**".format(time_format(int(remaing) * 1000, use_names=True))
+        error_txt = "**Bu komutu kullanmak için {} süresini beklemelisiniz.**".format(time_format(int(remaing) * 1000, use_names=True))
 
     elif isinstance(error, EmptyFavIntegration):
 
         if isinstance(ctx, disnake.MessageInteraction):
-            error_txt = "**Você não possui favorito/integração**\n\n" \
-                        "`Caso queira, você pode adicionar um favorito ou integração para usar esse " \
-                        "esse botão da próxima vez. Pra isso você pode clicar em um dos botões abaixo.`"
+            error_txt = "**Favoriniz/entegrasyonunuz yok**\n\n" \
+                        "`İsterseniz bunu kullanmak için favori veya entegrasyon ekleyebilirsiniz. " \
+                        "bir dahaki sefere bu düğmeyi kullanın. Bunu yapmak için aşağıdaki düğmelerden birine tıklayabilirsiniz..`"
         else:
-            error_txt = "**Você usou o comando sem incluir um nome ou link de uma músisca ou vídeo e você não possui " \
-                        "favoritos ou integrações para usar esse comando dessa forma diretamente...**\n\n" \
-                        "`Caso queira, você pode adicionar um favorito ou integração para usar esse " \
-                        "comando sem incluir um nome ou link. Pra isso você pode clicar em um dos botões abaixo.`"
+            error_txt = "**Komutu bir şarkının veya videonun adını veya bağlantısını eklemeden kullandınız ve " \
+                        "Bu komutu doğrudan bu şekilde kullanmak için favoriler veya entegrasyonlar ...**\n\n" \
+                        "`İsterseniz bunu kullanmak için favori veya entegrasyon ekleyebilirsiniz. " \
+                        "bir ad veya bağlantı eklemeden komut. Bunu yapmak için aşağıdaki düğmelerden birine tıklayabilirsiniz..`"
 
         mention_author = True
 
         components = [
-            disnake.ui.Button(label="Abrir o gerenciador de favoritos",
+            disnake.ui.Button(label="Yer imi yöneticisini açın",
                               custom_id="musicplayer_fav_manager", emoji="⭐"),
-            disnake.ui.Button(label="Abrir o gerenciador de integrações",
+            disnake.ui.Button(label="Entegrasyon yöneticisini açın",
                               custom_id="musicplayer_integration_manager", emoji="💠")
         ]
 
     elif isinstance(error, commands.MaxConcurrencyReached):
         txt = f"{error.number} vezes " if error.number > 1 else ''
         txt = {
-            commands.BucketType.member: f"você já usou esse comando {txt}no servidor",
-            commands.BucketType.guild: f"esse comando já foi usado {txt}no servidor",
-            commands.BucketType.user: f"você já usou esse comando {txt}",
-            commands.BucketType.channel: f"esse comando já foi usado {txt}no canal atual",
-            commands.BucketType.category: f"esse comando já foi usado {txt}na categoria do canal atual",
-            commands.BucketType.role: f"esse comando já foi usado {txt}por um membro que possui o cargo permitido",
-            commands.BucketType.default: f"esse comando já foi usado {txt}por alguém"
+            commands.BucketType.member: f"Sunucuda bu {txt} komutunu hiç kullandınız mı?",
+            commands.BucketType.guild: f"bu komut sunucuda zaten {txt} kullanıldı",
+            commands.BucketType.user: f"Bu komutu hiç kullandınız mı? {txt}",
+            commands.BucketType.channel: f"bu komut mevcut kanalda {txt} zaten kullanıldı",
+            commands.BucketType.category: f"bu komut mevcut kanal kategorisinde zaten {txt} kullanıldı",
+            commands.BucketType.role: f"bu komut, izin verilen konuma sahip bir üye tarafından zaten {txt} kullanıldı",
+            commands.BucketType.default: f"bu komut zaten birisi tarafından {txt} kullanıldı"
         }
 
-        error_txt = f"{ctx.author.mention} **{txt[error.per]} e ainda não teve seu{'s' if error.number > 1 else ''} " \
-                    f"uso{'s' if error.number > 1 else ''} finalizado{'s' if error.number > 1 else ''}!**"
+        error_txt = f"{ctx.author.mention} **{txt[error.per]} ve henüz seninkine sahip olmadın{'ız' if error.number > 1 else ''} " \
+                    f"kullanılan{'lar' if error.number > 1 else ''} biten{'ler' if error.number > 1 else ''}!**"
 
     elif isinstance(error, TrackNotFound):
-        error_txt = "**Não houve resultados para sua busca...**"
+        error_txt = "**Aramanıza ilişkin hiç sonuç bulunamadı...**"
 
     elif isinstance(error, YoutubeSourceDisabled):
-        error_txt = "O suporte a links/buscas do youtube está desativado devido a medidas reforçadas do próprio youtube " \
-                     "que impede o funcionamento nativo de links do yt. Caso queira conferir a postagem do youtube sobre isso você pode [clicar aqui](<https://support.google.com/youtube/thread/269521462/enforcement-on-third-party-apps?hl=en>)."
+        error_txt = "YouTube'un kendisinin aldığı güçlendirilmiş önlemler nedeniyle YouTube bağlantıları/arama desteği devre dışı bırakıldı " \
+                     "bu, YouTube bağlantılarının yerel olarak çalışmasını engeller. Bununla ilgili YouTube yayınına göz atmak isterseniz şunları yapabilirsiniz: [buraya tıklayın](<https://support.google.com/youtube/thread/269521462/enforcement-on-third-party-apps?hl=en>)."
 
     if isinstance(error, ServerSelectionTimeoutError) and os.environ.get("REPL_SLUG"):
-        error_txt = "Foi detectado um erro de dns na repl.it que me impede de conectar com minha database " \
-                    "do mongo/atlas. irei reiniciar e em breve estarei disponível novamente..."
+        error_txt = "Repl.it'te veritabanıma bağlanmamı engelleyen bir DNS hatası algılandı " \
+                    "mongo/atlas'tan. Yeniden başlayacağım ve yakında tekrar müsait olacağım..."
         kill_process = True
 
     elif isinstance(error, WavelinkException):
         if "Unknown file format" in (wave_error := str(error)):
-            error_txt = "**Não há suporte para o link especificado...**"
+            error_txt = "**Belirtilen bağlantı desteklenmiyor...**"
         elif "No supported audio format" in wave_error:
-            error_txt = "**Não há suporte para o link informado.**"
+            error_txt = "**Sağlanan bağlantı desteklenmiyor.**"
         elif "This video is not available" in wave_error:
-            error_txt = "**Este vídeo está indisponível ou privado...**"
+            error_txt = "**Bu video kullanılamıyor veya özel...**"
         elif "This playlist type is unviewable" in wave_error:
-            error_txt = "**Oo link da playlist contém um parâmetro/id não suportado...**"
+            error_txt = "**Çalma listesi bağlantısı desteklenmeyen bir parametre/kimlik içeriyor...**"
         elif "The playlist does not exist" in wave_error:
-            error_txt = "**A playlist não existe (ou está privada).**"
-        elif "not made this video available in your country" in wave_error.lower() or \
-                "who has blocked it in your country on copyright grounds" in wave_error.lower():
-            error_txt = "**O conteúdo deste link não está disponível na região no qual estou funcionando...**"
+            error_txt = "**Çalma listesi mevcut değil (veya gizli).**"
+        elif "bu video ülkenizde kullanıma sunulmadı" in wave_error.lower() or \
+                "ülkenizde telif hakkı gerekçesiyle kim engelledi" in wave_error.lower():
+            error_txt = "**Bu bağlantının içeriği çalıştığım bölgede mevcut değil...**"
 
     full_error_txt = ""
 
