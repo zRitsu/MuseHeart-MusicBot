@@ -912,11 +912,11 @@ class LavalinkPlayer(wavelink.Player):
             if event.cause.startswith((
                     "java.net.SocketTimeoutException: Read timed out",
                     "java.net.SocketException: Network is unreachable",
-                    "java.lang.IllegalStateException: Connection pool shut down",
             )) \
                 or (video_not_available:=event.cause.startswith((
                 "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: This video is not available",
                 "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: YouTube WebM streams are currently not supported.",
+                "java.lang.IllegalStateException: Connection pool shut down",
             )) or event.message in ("Video returned by YouTube isn't what was requested", "The video returned is not what was requested.")):
                 await send_report()
 
