@@ -189,7 +189,7 @@ class EmbedPaginator(disnake.ui.View):
 
         if interaction.author != self.ctx.author:
             await interaction.send(
-                f"Apenas o membro {self.ctx.author.mention} pode usar os botões dessa mensagem...",
+                f"Sadece üye {self.ctx.author.mention} bu mesajdaki düğmeleri kullanabilirsiniz...",
                 ephemeral=True
             )
             return False
@@ -231,8 +231,8 @@ class EmbedPaginator(disnake.ui.View):
 
 
 song_request_buttons = [
-    disnake.ui.Button(label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song),
-    disnake.ui.Button(label="Tocar favorito/integração", emoji="⭐", custom_id=PlayerControls.enqueue_fav)
+    disnake.ui.Button(label="Şarkı isteğinde bulunun", emoji="🎶", custom_id=PlayerControls.add_song),
+    disnake.ui.Button(label="Favori/entegrasyon oynayın", emoji="⭐", custom_id=PlayerControls.enqueue_fav)
 ]
 
 
@@ -395,16 +395,16 @@ async def send_idle_embed(
         except:
             continue
 
-    embed = disnake.Embed(description="**Entre em um canal de voz e peça uma música aqui " +
-                                      ("no post" if is_forum else "no canal ou na conversa abaixo") +
-                                      f" (ou clique no botão abaixo ou use o comando {cmd} aqui ou em algum outro canal)**\n\n"
-                                      "**Você pode usar um nome ou um link de site compatível:**\n"
+    embed = disnake.Embed(description="**Bir ses kanalı girin ve buradan bir şarkı isteyin " +
+                                      ("postada" if is_forum else "kanalda veya aşağıdaki sohbette") +
+                                      f" (veya aşağıdaki düğmeye tıklayın ya da şu komutu kullanın {cmd} burada veya başka bir kanalda)**\n\n"
+                                      "**Uyumlu bir web sitesi adı veya bağlantısı kullanabilirsiniz:**\n"
                                       "[`Youtube`](<https://www.youtube.com/>), [`Soundcloud`](<https://soundcloud.com/>), " \
                                       "[`Spotify`](<https://open.spotify.com/>), [`Twitch`](<https://www.twitch.tv/>)",
                           color=bot.get_color(target.guild.me))
 
     if text:
-        embed.description += f"\n\n**ÚLTIMA AÇÃO:** {text.replace('**', '')}\n"
+        embed.description += f"\n\n**SON EYLEM:** {text.replace('**', '')}\n"
 
     embed.set_thumbnail(target.guild.me.display_avatar.replace(size=256).url)
 
@@ -415,7 +415,7 @@ async def send_idle_embed(
     if opts:
         components.append(
             disnake.ui.Select(
-                placeholder="Músicas/Playlists do servidor.",
+                placeholder="Sunucu müziği/çalma listeleri.",
                 options=opts, custom_id="player_guild_pin",
                 min_values=0, max_values=1
             )
@@ -424,7 +424,7 @@ async def send_idle_embed(
     components.extend(song_request_buttons)
 
     if is_forum:
-        content = "🎶 Entre em um canal de voz e peça sua música aqui."
+        content = "🎶 Bir ses kanalına katılın ve müziğinizi buradan talep edin."
     else:
         content = None
 
@@ -660,18 +660,18 @@ async def select_bot_pool(inter: Union[CustomContext, disnake.MessageInteraction
 
         if (bcount:=len([b for b in inter.bot.pool.get_guild_bots(inter.guild_id) if b.appinfo and b.appinfo.bot_public])):
             raise GenericError(
-                f"**Será necessário adicionar no servidor pelo menos um bot compatível clicando no botão abaixo:**",
+                f"**Aşağıdaki düğmeye tıklayarak sunucuya en az bir uyumlu bot eklemeniz gerekir:**",
                 components=[disnake.ui.Button(custom_id="bot_invite", label=f"Adicionar bot{'s'[:bcount^1]}")]
             )
         else:
-            raise GenericError("**Não há bots compatíveis com meus comandos no servidor...**")
+            raise GenericError("**Sunucuda benim komutlarımla uyumlu hiçbir bot yok...**")
 
     if len(bots) == 1 or first:
         return inter, list(bots.values())[0]
     else:
         opts = [disnake.SelectOption(label=f"{b.user}", value=f"{b.user.id}", emoji="🎶") for b in bots.values()]
 
-        opts.append(disnake.SelectOption(label="Cancelar", value="cancel", emoji="❌"))
+        opts.append(disnake.SelectOption(label="İptal", value="cancel", emoji="❌"))
 
         try:
             add_id = f"_{inter.id}"
@@ -680,8 +680,8 @@ async def select_bot_pool(inter: Union[CustomContext, disnake.MessageInteraction
 
         embed = disnake.Embed(
             color=inter.bot.get_color(),
-            description="**Selecione um bot abaixo:**\n"
-                        f'Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para escolher!'
+            description="**Aşağıdan bir bot seçin:**\n"
+                        f'Not: sadece <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> seçim yapmak için!'
         )
 
         components = [
@@ -709,7 +709,7 @@ async def select_bot_pool(inter: Union[CustomContext, disnake.MessageInteraction
             )
         except asyncio.TimeoutError:
             try:
-                await msg.edit(conent="Tempo de seleção esgotado!", embed=None, view=None)
+                await msg.edit(conent="Seçim zamanı bitti!", embed=None, view=None)
             except:
                 pass
             return None, None
@@ -724,7 +724,7 @@ async def select_bot_pool(inter: Union[CustomContext, disnake.MessageInteraction
         if new_inter.data.values[0] == "cancel":
             await func(
                 embed=disnake.Embed(
-                    description="**Seleção cancelada!**",
+                    description="**Seçim iptal edildi!**",
                     color=inter.bot.get_color()
                 ),
                 components=None
@@ -740,7 +740,7 @@ async def select_bot_pool(inter: Union[CustomContext, disnake.MessageInteraction
         try:
             return inter, bots[int(new_inter.data.values[0])]
         except KeyError:
-            raise GenericError("**O bot selecionado foi removido do servidor antes de sua seleção...**")
+            raise GenericError("**Seçilen bot, seçilmeden önce sunucudan kaldırılmıştır...**")
 
 def queue_track_index(inter: disnake.AppCmdInter, bot: BotCore, query: str, match_count: int = 1,
                       case_sensitive: bool = False):
