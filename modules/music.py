@@ -152,7 +152,7 @@ class Music(commands.Cog):
                     pass
 
             if not tracks:
-                txt += f"[`❌ Başarısız`]({url})\n"
+                txt += f"[`❌ Falha`]({url})\n"
 
             else:
 
@@ -307,7 +307,7 @@ class Music(commands.Cog):
                 await inter.edit_original_message("**Otomatik durum başarıyla ayarlandı!**")
 
 
-    @set_voice_status.autocomplete("model")
+    @set_voice_status.autocomplete("modelo")
     async def default_models(self, inter: disnake.Interaction, query: str):
         return [
             "{track.title} - By: {track.author} | {track.timestamp}",
@@ -326,7 +326,7 @@ class Music(commands.Cog):
     async def message_play(self, inter: disnake.MessageCommandInteraction):
 
         if not inter.target.content:
-            emb = disnake.Embed(description=f"Seçilen [mesaj] ({inter.target.jump_url}) içinde metin yok...",
+            emb = disnake.Embed(description=f"Seçilen [mensagem] ({inter.target.jump_url}) içinde metin yok...",
                                 color=disnake.Colour.red())
             await inter.send(embed=emb, ephemeral=True)
             return
@@ -350,9 +350,9 @@ class Music(commands.Cog):
     async def search(
             self,
             inter: disnake.AppCmdInter,
-            query: str = commands.Param(name="arıyor", desc="Şarkının adı veya bağlantısı."),
+            query: str = commands.Param(name="busca", desc="Şarkının adı veya bağlantısı."),
             *,
-            position: int = commands.Param(name="pozisyon", description="Müziği belirli bir konuma yerleştirin",
+            position: int = commands.Param(name="posição", description="Müziği belirli bir konuma yerleştirin",
                                            default=0),
             force_play: str = commands.Param(
                 name="tocar_agora",
@@ -362,11 +362,11 @@ class Music(commands.Cog):
                     disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
                 ]
             ),
-            options: str = commands.Param(name="seçenekler", description="Çalma listelerini düzenleme seçenekleri",
+            options: str = commands.Param(name="opções", description="Çalma listelerini düzenleme seçenekleri",
                                           choices=playlist_opts, default=False),
-            repeat_amount: int = commands.Param(name="tekrarlar", description="tekrar sayısını ayarlayın.",
+            repeat_amount: int = commands.Param(name="repetições", description="tekrar sayısını ayarlayın.",
                                                 default=0),
-            server: str = commands.Param(name="sunucu", desc="Aramada belirli bir müzik sunucusu kullanın.",
+            server: str = commands.Param(name="server", desc="Aramada belirli bir müzik sunucusu kullanın.",
                                          default=None),
             manual_bot_choice: str = commands.Param(
                 name="selecionar_bot",
@@ -391,7 +391,7 @@ class Music(commands.Cog):
             manual_bot_choice=manual_bot_choice
         )
 
-    @search.autocomplete("arıyor")
+    @search.autocomplete("busca")
     async def search_autocomplete(self, inter: disnake.Interaction, current: str):
 
         if not current:
@@ -7261,3 +7261,4 @@ def setup(bot: BotCore):
         )
 
     bot.add_cog(Music(bot))
+    
