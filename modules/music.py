@@ -2936,7 +2936,8 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @pool_command(name="nightcore", aliases=["nc"], only_voiced=True, cooldown=nightcore_cd, max_concurrency=nightcore_mc,
-                  description="Nightcore efektini etkinleştirin/devre dışı bırakın (daha yüksek perdeli hızlandırılmış müzik).")
+                  description="Nightcore efektini etkinleştirin/devre dışı bırakın "
+                  " (daha yüksek perdeli hızlandırılmış müzik).")
     async def nightcore_legacy(self, ctx: CustomContext):
 
         await self.nightcore.callback(self=self, inter=ctx)
@@ -2945,7 +2946,7 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.slash_command(
-        description=f"{desc_prefix}Nightcore efektini etkinleştirin/devre dışı bırakın (daha yüksek perdeli hızlandırılmış müzik).",
+        description=f"{desc_prefix}Nightcore efektini etkinleştirin/devre dışı bırakın.",
         extras={"only_voiced": True}, cooldown=nightcore_cd, max_concurrency=nightcore_mc, dm_permission=False,
     )
     async def nightcore(self, inter: disnake.AppCmdInter):
