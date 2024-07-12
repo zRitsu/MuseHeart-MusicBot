@@ -45,17 +45,17 @@ class VolumeInteraction(disnake.ui.View):
         for l in [5, 20, 40, 60, 80, 100, 120, 150]:
 
             if l > 100:
-                description = "Acima de 100% o audio pode ficar bem ruim."
+                description = "%100'ün üzerinde ses çok kötü olabilir."
             else:
                 description = None
             opts.append(disnake.SelectOption(label=f"{l}%", value=f"vol_{l}", description=description))
 
-        select = disnake.ui.Select(placeholder='Nível:', options=opts)
+        select = disnake.ui.Select(placeholder='Seviye:', options=opts)
         select.callback = self.callback
         self.add_item(select)
 
     async def callback(self, interaction: disnake.MessageInteraction):
-        await interaction.response.edit_message(content=f"Volume alterado!",embed=None, view=None)
+        await interaction.response.edit_message(content=f"Ses seviyesi değişti!",embed=None, view=None)
         self.volume = int(interaction.data.values[0][4:])
         self.stop()
 
@@ -96,7 +96,7 @@ class QueueInteraction(disnake.ui.View):
         if not self.message:
             return
 
-        self.embed.set_footer(text="Tempo para interagir esgotado!")
+        self.embed.set_footer(text="Etkileşim zamanı bitti!")
 
         for c in self.children:
             c.disabled = True
@@ -112,7 +112,7 @@ class QueueInteraction(disnake.ui.View):
         self.clear_items()
 
         track_select = disnake.ui.Select(
-            placeholder="Tocar uma música específica da página:",
+            placeholder="Sayfadan belirli bir şarkıyı çal:",
             options=self.select_options,
             custom_id="queue_track_selection",
             max_values=1
@@ -142,30 +142,30 @@ class QueueInteraction(disnake.ui.View):
         stop_interaction.callback = self.stop_interaction
         self.add_item(stop_interaction)
 
-        play = disnake.ui.Button(emoji='▶️', label="Tocar", style=disnake.ButtonStyle.grey, custom_id="queue_skip")
+        play = disnake.ui.Button(emoji='▶️', label="Başlat", style=disnake.ButtonStyle.grey, custom_id="queue_skip")
         play.callback = self.invoke_command
         self.add_item(play)
 
-        move = disnake.ui.Button(emoji="↪️", label="Mover", style=disnake.ButtonStyle.grey, custom_id="queue_move")
+        move = disnake.ui.Button(emoji="↪️", label="Taşıyıcı", style=disnake.ButtonStyle.grey, custom_id="queue_move")
         move.callback = self.move_callback
         self.add_item(move)
 
-        rotate_q = disnake.ui.Button(emoji='🔃', label="Rotacionar Fila", style=disnake.ButtonStyle.grey, custom_id="queue_rotate")
+        rotate_q = disnake.ui.Button(emoji='🔃', label="Sırayı Döndür", style=disnake.ButtonStyle.grey, custom_id="queue_rotate")
         rotate_q.callback = self.invoke_command
         self.add_item(rotate_q)
 
-        update_q = disnake.ui.Button(emoji='🔄', label="Recarregar", style=disnake.ButtonStyle.grey)
+        update_q = disnake.ui.Button(emoji='🔄', label="Yeniden Ekle", style=disnake.ButtonStyle.grey)
         update_q.callback = self.update_q
         self.add_item(update_q)
 
     async def move_callback(self, inter: disnake.MessageInteraction):
         await inter.response.send_modal(
             ViewModal(
-                view=self, title="Mover música selecionada", custom_id="queue_move_modal",
+                view=self, title="Seçilen şarkıyı taşı", custom_id="queue_move_modal",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Posição da fila:",
+                        label="Kuyruk konumu:",
                         custom_id="queue_move_position",
                         max_length=4,
                         required=True
@@ -180,7 +180,7 @@ class QueueInteraction(disnake.ui.View):
             if inter.data.custom_id == "queue_move_modal":
 
                 if not inter.text_values["queue_move_position"].isdigit():
-                    await inter.send("Você deve usar um número válido...", ephemeral=True)
+                    await inter.send("Geçerli bir numara kullanmalısınız...", ephemeral=True)
                     return
 
                 await check_cmd(self.bot.get_slash_command("move"), inter)
@@ -216,7 +216,7 @@ class QueueInteraction(disnake.ui.View):
                     await inter.edit_original_message(embed=self.embed, view=self)
 
             else:
-                await inter.send(f"Método ainda não implementado: {inter.data.custom_id}", ephemeral=True)
+                await inter.send(f"Henüz uygulanmayan yöntem: {inter.data.custom_id}", ephemeral=True)
 
         except Exception as e:
             self.bot.dispatch('interaction_player_error', inter, e)
@@ -224,7 +224,7 @@ class QueueInteraction(disnake.ui.View):
 
     def update_embed(self):
 
-        self.embed.title = f"**Músicas da fila [Página: {self.current_page+1} / {self.max_page+1}]**"
+        self.embed.title = f"**Sıradaki şarkılar [Sayfa: {self.current_page+1} / {self.max_page+1}]**"
 
         opts = []
 
@@ -232,18 +232,18 @@ class QueueInteraction(disnake.ui.View):
 
         for n, t in enumerate(self.track_pages[self.current_page]):
 
-            duration = time_format(t.duration) if not t.is_stream else '🔴 Livestream'
+            duration = time_format(t.duration) if not t.is_stream else '🔴 Canlı yayın'
 
             index = (self.max_items*self.current_page) + n + 1
 
             if self.current_track == t:
                 txt += f"`╔{'='*50}`\n`║` **{index}º) [{fix_characters(t.title, limit=37)}]({t.uri})**\n" \
-                       f"`║ ⏲️`  **{duration}**" + (f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
-                       " **|** " + (f"`✋` <@{t.requester}>" if not t.autoplay else f"`👍⠂Recomendada`") + f"\n`╚{'='*50}`\n"
+                       f"`║ ⏲️`  **{duration}**" + (f" - `Temsilciler: {t.track_loops}`" if t.track_loops else "") + \
+                       " **|** " + (f"`✋` <@{t.requester}>" if not t.autoplay else f"`👍⠂Tavsiye edilen`") + f"\n`╚{'='*50}`\n"
             else:
                 txt += f"`┌ {index})` [`{fix_characters(t.title, limit=45)}`]({t.uri})\n" \
-                       f"`└ ⏲️ {duration}`" + (f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
-                       f" **|** " + (f"`✋` <@{t.requester}>" if not t.autoplay else f"`👍⠂Recomendada`") + "\n"
+                       f"`└ ⏲️ {duration}`" + (f" - `Temsilciler: {t.track_loops}`" if t.track_loops else "") + \
+                       f" **|** " + (f"`✋` <@{t.requester}>" if not t.autoplay else f"`👍⠂Tavsiye edilen`") + "\n"
 
             opts.append(
                 disnake.SelectOption(
@@ -275,7 +275,7 @@ class QueueInteraction(disnake.ui.View):
                 break
 
         if not track:
-            await interaction.send(f"Música com id \"{track_id}\" não encontrada na fila do player...", ephemeral=True)
+            await interaction.send(f"\"{track_id}\" kimliğine sahip şarkı oynatıcı kuyruğunda bulunamadı..", ephemeral=True)
             return
 
         self.current_track = track
@@ -291,7 +291,7 @@ class QueueInteraction(disnake.ui.View):
         try:
             player = self.bot.music.players[self.user.guild.id]
         except KeyError:
-            await interaction.send("O player já foi finalizado...", ephemeral=True)
+            await interaction.send("Oyuncu zaten kesinleşti...", ephemeral=True)
             self.stop()
             return
 
@@ -299,14 +299,14 @@ class QueueInteraction(disnake.ui.View):
 
         try:
             if self.current_track is None:
-                await interaction.send("Nenhuma música selecionada...", ephemeral=True)
+                await interaction.send("Hiçbir şarkı seçilmedi...", ephemeral=True)
                 return
 
             if interaction.data.custom_id == "queue_skip":
                 if player.current and player.current.unique_id == self.current_track.unique_id:
                     await check_cmd(self.bot.get_slash_command("seek"), interaction)
                     await player.seek(0)
-                    player.set_command_log(emoji="⏪", text=f"{interaction.author.mention} retrocedeu da música para: `0:00`")
+                    player.set_command_log(emoji="⏪", text=f"{interaction.author.mention} şarkıdan geriye doğru taşındı: `0:00`")
                     player.update = True
                     await interaction.response.defer()
                     return
@@ -320,7 +320,7 @@ class QueueInteraction(disnake.ui.View):
                 update_inter = True
 
             else:
-                await interaction.send(f"Comando não implementado: {interaction.data.custom_id}", ephemeral=True)
+                await interaction.send(f"Komut uygulanmadı: {interaction.data.custom_id}", ephemeral=True)
                 return
 
             interaction.music_bot = self.bot
@@ -377,7 +377,7 @@ class QueueInteraction(disnake.ui.View):
 
     async def stop_interaction(self, interaction: disnake.MessageInteraction):
 
-        await interaction.response.edit_message(content="Queue fechada", embed=None, view=None)
+        await interaction.response.edit_message(content="Kapalı kuyruk", embed=None, view=None)
         self.stop()
 
     async def update_q(self, interaction: disnake.MessageInteraction):
@@ -391,13 +391,13 @@ class QueueInteraction(disnake.ui.View):
     async def interaction_check(self, interaction: disnake.MessageInteraction):
 
         if interaction.author != self.user:
-            await interaction.send(f"Apenas o membro {self.user.mention} pode interagir aqui.", ephemeral=True)
+            await interaction.send(f"Burada yalnızca {self.user.mention} üyesi etkileşim kurabilir.", ephemeral=True)
             return
 
         try:
             self.bot.music.players[self.user.guild.id]
         except KeyError:
-            await interaction.response.edit_message(content="O player foi finalizado...", embed=None, view=None)
+            await interaction.response.edit_message(content="Oynatıcının işi bitti...", embed=None, view=None)
             self.stop()
             return
 
@@ -420,7 +420,7 @@ class SelectInteraction(disnake.ui.View):
 
         self.clear_items()
 
-        select_menu = disnake.ui.Select(placeholder='Selecione uma opção:', options=self.item_pages[self.current_page])
+        select_menu = disnake.ui.Select(placeholder='Bir seçenek seçin:', options=self.item_pages[self.current_page])
         select_menu.callback = self.callback
         self.add_item(select_menu)
         self.selected = self.item_pages[self.current_page][0].value
@@ -435,7 +435,7 @@ class SelectInteraction(disnake.ui.View):
             next_button.callback = self.next_callback
             self.add_item(next_button)
 
-        button = disnake.ui.Button(label="Cancelar", emoji="❌")
+        button = disnake.ui.Button(label="İptal etmek", emoji="❌")
         button.callback = self.cancel_callback
         self.add_item(button)
 
@@ -444,7 +444,7 @@ class SelectInteraction(disnake.ui.View):
         if interaction.user.id == self.user.id:
             return True
 
-        await interaction.send(f"Apenas {self.user.mention} pode interagir aqui.", ephemeral = True)
+        await interaction.send(f"Burada yalnızca {self.user.mention} etkileşim kurabilir.", ephemeral = True)
 
     async def back_callback(self, interaction: disnake.MessageInteraction):
         if self.current_page == 0:
@@ -484,18 +484,18 @@ class AskView(disnake.ui.View):
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
 
         if interaction.user != self.ctx.author:
-            await interaction.send("Você não pode usar este botão!", ephemeral=True)
+            await interaction.send("Bu düğmeyi kullanamazsınız!", ephemeral=True)
             return False
 
         return True
 
-    @disnake.ui.button(label="Sim", emoji="✅")
+    @disnake.ui.button(label="Evet", emoji="✅")
     async def allow(self, button, interaction: disnake.MessageInteraction):
         self.selected = True
         self.interaction_resp = interaction
         self.stop()
 
-    @disnake.ui.button(label="Não", emoji="❌")
+    @disnake.ui.button(label="HAYIR", emoji="❌")
     async def deny(self, button, interaction: disnake.MessageInteraction):
         self.selected = False
         self.interaction_resp = interaction
@@ -537,11 +537,11 @@ class FavModalImport(disnake.ui.Modal):
 
         if self.view.mode == ViewMode.fav_manager:
             super().__init__(
-                title="Importar Favoritos",
+                title="Favorileri İçe Aktar",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
-                        label="Inserir dados (em formato json)",
+                        label="Veri ekleyin (json formatında)",
                         custom_id="json_data",
                         min_length=20,
                         required=True
@@ -552,11 +552,11 @@ class FavModalImport(disnake.ui.Modal):
 
         if self.view.mode == ViewMode.guild_fav_manager:
             super().__init__(
-                title="Importar Playlists para o Servidor",
+                title="Çalma Listelerini Sunucuya Aktar",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
-                        label="Inserir dados (em formato json)",
+                        label="Veri ekleyin (json formatında)",
                         custom_id="json_data",
                         min_length=20,
                         required=True
@@ -567,11 +567,11 @@ class FavModalImport(disnake.ui.Modal):
 
         if self.view.mode == ViewMode.integrations_manager:
             super().__init__(
-                title="Importar integração",
+                title="İçe aktarma entegrasyonu",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
-                        label="Inserir dados (em formato json)",
+                        label="Veri ekleyin (json formatında)",
                         custom_id="json_data",
                         min_length=20,
                         required=True
@@ -580,15 +580,15 @@ class FavModalImport(disnake.ui.Modal):
             )
             return
 
-        raise GenericError(f"Modo atual ainda não implementado: {self.view.mode} | {type(self.view.mode)}")
+        raise GenericError(f"Mevcut mod henüz uygulanmadı: {self.view.mode} | {type(self.view.mode)}")
 
     async def callback(self, inter: disnake.ModalInteraction, /) -> None:
 
         try:
             json_data = json.loads(inter.text_values["json_data"])
         except Exception as e:
-            await inter.send("**Ocorreu um erro ao analisar os dados ou foi enviado dados inválidos/não-formatado "
-                               f"em formato json.**\n\n`{repr(e)}`", ephemeral=True)
+            await inter.send("**Veriler ayrıştırılırken bir hata oluştu veya geçersiz/biçimlendirilmemiş veriler gönderildi "
+                               f"json formatında.**\n\n`{repr(e)}`", ephemeral=True)
             return
 
         if self.view.mode == ViewMode.fav_manager:
@@ -596,7 +596,7 @@ class FavModalImport(disnake.ui.Modal):
             if retry_after := self.view.bot.get_cog("Music").fav_import_export_cd.get_bucket(inter).update_rate_limit():
                 if retry_after < 1:
                     retry_after = 1
-                await inter.send("**Você deve aguardar {} para importar.**".format(
+                await inter.send("**{}'ın içe aktarılmasını beklemelisiniz.**".format(
                     time_format(int(retry_after) * 1000, use_names=True)), ephemeral=True)
                 return
 
@@ -607,12 +607,12 @@ class FavModalImport(disnake.ui.Modal):
 
                 if len(url) > (max_url_chars := self.view.bot.config["USER_FAV_MAX_URL_LENGTH"]):
                     await inter.send(
-                        f"**Um item de seu arquivo {url} ultrapassa a quantidade de caracteres permitido:{max_url_chars}**",
+                        f"**{url} dosyanızdaki bir öğe izin verilen karakter sayısını aşıyor:{max_url_chars}**",
                         ephemeral=True)
                     return
 
                 if not isinstance(url, str) or not URL_REG.match(url):
-                    await inter.send(f"O seu arquivo contém link inválido: ```ldif\n{url}```", ephemeral=True)
+                    await inter.send(f"Dosyanız geçersiz bir bağlantı içeriyor: ```ldif\n{url}```", ephemeral=True)
                     return
 
             await inter.response.defer(ephemeral=True)
@@ -622,7 +622,7 @@ class FavModalImport(disnake.ui.Modal):
             for name in json_data.keys():
                 if len(name) > (max_name_chars := self.view.bot.config["USER_FAV_MAX_NAME_LENGTH"]):
                     await inter.edit_original_message(
-                        f"**Um item de seu arquivo ({name}) ultrapassa a quantidade de caracteres permitido:{max_name_chars}**")
+                        f"**Dosyanızdaki ({name}) bir öğe izin verilen karakter sayısını aşıyor:{max_name_chars}**")
                     return
                 try:
                     del self.view.data["fav_links"][name.lower()]
@@ -632,30 +632,30 @@ class FavModalImport(disnake.ui.Modal):
             if self.view.bot.config["MAX_USER_FAVS"] > 0 and not (await self.view.bot.is_owner(inter.author)):
 
                 if (json_size := len(json_data)) > self.view.bot.config["MAX_USER_FAVS"]:
-                    await inter.edit_original_message(f"A quantidade de itens no seu arquivo de favorito excede "
-                                                      f"a quantidade máxima permitida ({self.view.bot.config['MAX_USER_FAVS']}).")
+                    await inter.edit_original_message(f"Favori dosyanızdaki öğe sayısı şunu aşıyor: "
+                                                      f"izin verilen maksimum miktar({self.view.bot.config['MAX_USER_FAVS']}).")
                     return
 
                 if (json_size + (user_favs := len(self.view.data["fav_links"]))) > self.view.bot.config[
                     "MAX_USER_FAVS"]:
                     await inter.edit_original_message(
-                        "Você não possui espaço suficiente para adicionar todos os favoritos de seu arquivo...\n"
-                        f"Limite atual: {self.view.bot.config['MAX_USER_FAVS']}\n"
-                        f"Quantidade de favoritos salvos: {user_favs}\n"
-                        f"Você precisa de: {(json_size + user_favs) - self.view.bot.config['MAX_USER_FAVS']}")
+                        "Dosyanızdaki tüm yer işaretlerini eklemek için yeterli alanınız yok...\n"
+                        f"Akım sınırı: {self.view.bot.config['MAX_USER_FAVS']}\n"
+                        f"Kaydedilen favorilerin sayısı: {user_favs}\n"
+                        f"Gerekenler: {(json_size + user_favs) - self.view.bot.config['MAX_USER_FAVS']}")
                     return
 
             self.view.data["fav_links"].update(json_data)
 
             await self.view.bot.update_global_data(inter.author.id, self.view.data, db_name=DBModel.users)
 
-            await inter.edit_original_message(content="**Favoritos importados com sucesso!**")
+            await inter.edit_original_message(content="**Favoriler başarıyla içe aktarıldı!**")
 
             if (s := len(json_data)) > 1:
-                self.view.log = f"{s} favoritos foram importados com sucesso."
+                self.view.log = f"{s} Favoriler başarıyla içe aktarıldı."
             else:
                 name = next(iter(json_data))
-                self.view.log = f"O favorito [`{name}`]({json_data[name]}) foi importado com sucesso."
+                self.view.log = f"[`{name}`]({json_data[name]}) yer işareti başarıyla içe aktarıldı."
 
 
         elif self.view.mode == ViewMode.guild_fav_manager:
@@ -663,7 +663,7 @@ class FavModalImport(disnake.ui.Modal):
             if retry_after := self.view.bot.get_cog("Music").fav_import_export_cd.get_bucket(inter).update_rate_limit():
                 if retry_after < 1:
                     retry_after = 1
-                await inter.send("**Você deve aguardar {} para importar.**".format(
+                await inter.send("**İçe aktarmak için {} süre beklemelisiniz.**".format(
                     time_format(int(retry_after) * 1000, use_names=True)), ephemeral=True)
                 return
 
@@ -674,18 +674,18 @@ class FavModalImport(disnake.ui.Modal):
 
                 if len(data['url']) > (max_url_chars := self.view.bot.config["USER_FAV_MAX_URL_LENGTH"]):
                     await inter.send(
-                        f"**Um item de seu arquivo ultrapassa a quantidade de caracteres permitido:{max_url_chars}\nURL:** {data['url']}",
+                        f"**Dosyanızdaki bir öğe izin verilen karakter sayısını aşıyor:{max_url_chars}\nURL:** {data['url']}",
                         ephemeral=True)
                     return
 
                 if len(data['description']) > 50:
                     await inter.send(
-                        f"**Um item de seu arquivo ultrapassa a quantidade de caracteres permitido:{max_url_chars}\nDescrição:** {data['description']}",
+                        f"**Dosyanızdaki bir öğe izin verilen karakter sayısını aşıyor:{max_url_chars}\nAçıklama:** {data['description']}",
                         ephemeral=True)
                     return
 
                 if not isinstance(data['url'], str) or not URL_REG.match(data['url']):
-                    await inter.send(f"O seu arquivo contém link inválido: ```ldif\n{data['url']}```", ephemeral=True)
+                    await inter.send(f"Dosyanız geçersiz bir bağlantı içeriyor: ```ldif\n{data['url']}```", ephemeral=True)
                     return
 
             await inter.response.defer(ephemeral=True)
@@ -694,7 +694,7 @@ class FavModalImport(disnake.ui.Modal):
 
             if not self.view.guild_data["player_controller"]["channel"] or not self.view.bot.get_channel(
                     int(self.view.guild_data["player_controller"]["channel"])):
-                await inter.edit_original_message("**Não há player configurado no servidor! Use o comando /setup**")
+                await inter.edit_original_message("**Sunucuda yapılandırılmış oyuncu yok! /setup komutunu kullanın**")
                 return
 
             for name in json_data.keys():
