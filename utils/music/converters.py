@@ -82,10 +82,10 @@ def time_format(milliseconds: Union[int, float], use_names: bool = False) -> str
         times = []
 
         for time_, name in (
-                (days, "dia"),
-                (hours, "hora"),
-                (minutes, "minuto"),
-                (seconds, "segundo")
+                (days, "Gün"),
+                (hours, "Saat"),
+                (minutes, "Dakika"),
+                (seconds, "Saniye")
         ):
             if not time_:
                 continue
@@ -96,7 +96,7 @@ def time_format(milliseconds: Union[int, float], use_names: bool = False) -> str
             last_time = times.pop()
         except IndexError:
             last_time = None
-            times = ["1 segundo"]
+            times = ["1 Saniye"]
 
         strings = ", ".join(t for t in times)
 
@@ -111,12 +111,12 @@ def time_format(milliseconds: Union[int, float], use_names: bool = False) -> str
             strings = f"{hours}:{strings}"
 
         if days:
-            strings = (f"{days} dias" if days > 1 else f"{days} dia") + (f", {strings}" if strings != "00:00" else "")
+            strings = (f"{days} Günler" if days > 1 else f"{days} Gün") + (f", {strings}" if strings != "00:00" else "")
 
     return strings
 
 
-time_names = ["seconds", "minutes", "hours"]
+time_names = ["Saniye", "Dakika, "Saat"]
 
 
 def string_to_seconds(time):
@@ -157,46 +157,46 @@ def music_source_image(sourcename):
 
 
 perms_translations = {
-    "add_reactions": "Adicionar Reações",
-    "administrator": "Administrador",
-    "attach_files": "Anexar Arquivos",
-    "ban_members": "Banir Membros",
-    "change_nickname": "Alterar apelido",
-    "connect": "Conectar em canal de voz",
-    "create_instant_invite": "Criar convite instantâneo",
-    "create_private_threads": "Criar Tópicos Privado",
-    "create_public_threads": "Criar Tópicos Públicos",
-    "deafen_members": "Ensurdecer membros",
-    "embed_links": "Inserir links",
-    "kick_members": "Expulsar Membros",
-    "manage_channels": "Gerenciar Canais",
-    "manage_emojis_and_stickers": "Gerenciar Emojis e Figurinhas",
-    "manage_events": "Gerenciar Eventos",
-    "manage_guild": "Gerenciar Servidor",
-    "manage_messages": "Gerenciar Mensagens",
-    "manage_nicknames": "Gerenciar Apelidos",
-    "manage_roles": "Gerenciar Cargos",
-    "manage_threads": "Gerenciar Tópicos",
-    "manage_webhooks": "Gerenciar Webhooks",
-    "mention_everyone": "Marcar @everyone e @here",
-    "moderate_members": "Moderar membros",
-    "move_members": "Mover membros",
-    "mute_members": "Silenciar membros",
-    "priority_speaker": "Prioridade para falar",
-    "read_message_history": "Mostrar histórico de mensagens",
-    "read_messages": "Ler mensagens",
-    "request_to_speak": "Pedir para falar",
-    "send_messages": "Enviar mensagem",
-    "send_messages_in_threads": "Enviar mensagem em tópicos",
-    "send_tts_messages": "Enviar mensagens de texto-a-voz",
-    "speak": "Falar em canal de voz",
-    "stream": "Transmitir",
-    "use_application_commands": "Usar comandos de aplicações/bots",
-    "use_embedded_activities": "Usar atividades ",
-    "use_external_emojis": "Usar Emojis Externos",
-    "use_external_stickers": "Usar Figurinhas Externas",
-    "use_voice_activation": "Usar detecção de voz automática",
-    "view_audit_log": "Visualizar registro de auditória",
-    "view_channel": "Ver canal",
-    "view_guild_insights": "Ver análises do servidor"
+    "add_reactions": "Tepkiler ekleyin",
+    "administrator": "Yönetici",
+    "attach_files": "Dosya ekleme",
+    "ban_members": "Yasaklı Üyeler",
+    "change_nickname": "Soyadınızı değiştirin",
+    "connect": "Bir ses kanalına bağlanın",
+    "create_instant_invite": "Anında davetiye oluşturun",
+    "create_private_threads": "Özel Konular Oluşturun",
+    "create_public_threads": "Genel Konular Oluşturun",
+    "deafen_members": "Sağır edici uzuvlar",
+    "embed_links": "Bağlantıları ekle",
+    "kick_members": "Üyelerin İhraç Edilmesi",
+    "manage_channels": "Kanalları Yönet",
+    "manage_emojis_and_stickers": "Emojileri ve Çıkartmaları Yönetme",
+    "manage_events": "Etkinlikleri Yönet",
+    "manage_guild": "Sunucu Yönetme",
+    "manage_messages": "Mesajları Yönet",
+    "manage_nicknames": "Takma adları yönetme",
+    "manage_roles": "İşlerin yönetilmesi",
+    "manage_threads": "Konuları Yönet",
+    "manage_webhooks": "Web Kancalarını Yönetme",
+    "mention_everyone": "@everyone ve @here işaretle",
+    "moderate_members": "Ilımlı üyeler",
+    "move_members": "Üyeleri taşıyın",
+    "mute_members": "Üyelerin susturulması",
+    "priority_speaker": "Konuşmaya öncelik verme",
+    "read_message_history": "Mesaj geçmişini göster",
+    "read_messages": "Mesajları okuyun",
+    "request_to_speak": "Konuşmak isteyin",
+    "send_messages": "Bir mesaj gönderin",
+    "send_messages_in_threads": "Konu başlıklarında mesaj gönderme",
+    "send_tts_messages": "Metinden sese mesaj gönderme",
+    "speak": "Bir ses kanalında konuşma",
+    "stream": "İletim",
+    "use_application_commands": "Uygulama/bot komutlarını kullanma",
+    "use_embedded_activities": "Faaliyetleri kullanın ",
+    "use_external_emojis": "Harici Emojileri Kullanın",
+    "use_external_stickers": "Harici çıkartmalar kullanın",
+    "use_voice_activation": "Otomatik ses algılamayı kullanın",
+    "view_audit_log": "Denetim günlüğünü görüntüle",
+    "view_channel": "Kanalı izle",
+    "view_guild_insights": "Sunucu analizlerini görüntüleyin"
 }
