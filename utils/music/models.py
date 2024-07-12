@@ -559,16 +559,16 @@ class LavalinkPlayer(wavelink.Player):
         self.lastfm_artists = []
 
         self.initial_hints = [
-            f"É possível alterar a skin/aparência do player usando o comando /change_skin ou {self.prefix_info}skin "
-            f"(Apenas membros com permissão de gerenciar servidor podem usar esse comando).",
+            f"Oyuncunun dış görünümünü /change_skin veya {self.prefix_info}skin komutunu kullanarak değiştirebilirsiniz. "
+            f"(Bu komutu yalnızca sunucuyu yönetme iznine sahip üyeler kullanabilir).",
 
-            "Dê uma nova cara para o player de música no servidor criando skins personalizadas. Experimente usando "
-            f"o comando /custom_skin ou {self.prefix_info}customskin (Apenas membros com permissão de administrador "
-            "podem usar esse comando).",
+            "Kişiselleştirilmiş görünümler oluşturarak sunucunuzdaki müzik çalara yeni bir görünüm kazandırın. Kullanmayı deneyin "
+            f"/custom_skin veya {self.prefix_info}customskin komutu (Yalnızca yönetici iznine sahip üyeler "
+            "bu komutu kullanabilir).",
 
-            "É possível definir o status automático no canal de voz com informações sobre "
-            "a música que está sendo tocada no momento. Experimente usando o comando /set_voice_status ou "
-            f"{self.prefix_info}stageannounce (Apenas membros com permissão de gerenciar servidor podem usar esse recurso)."
+            "Ses kanalında aşağıdakiler hakkında bilgi içeren otomatik durum ayarlayabilirsiniz "
+            "o anda çalmakta olan şarkı. /set_voice_status komutunu kullanmayı deneyin veya "
+            f"{self.prefix_info}stageannounce (Bu özelliği yalnızca sunucuyu yönetme izni olan üyeler kullanabilir)."
         ]
 
         self.retry_setup_hints = False
@@ -583,17 +583,17 @@ class LavalinkPlayer(wavelink.Player):
 
         if self.bot.config["LASTFM_KEY"] and self.bot.config["LASTFM_SECRET"]:
             self.initial_hints.append(
-                f"Você pode vincular uma conta do last.fm para registrar as músicas que você ouvir por aqui na sua "
-                f"lista de músicas tocadas. Experimente usando o comando /lastfm ou {self.prefix_info}lastfm "
-                "(Nota: Sistema incompatível com músicas do youtube e soundcloud)"
+                f"Burada dinlediğiniz şarkıları mobil cihazınıza kaydetmek için bir last.fm hesabına bağlanabilirsiniz. "
+                f"çalınan şarkıların listesi. lastfm komutunu veya {self.prefix_info}lastfm komutunu kullanmayı deneyin "
+                "(Not: Sistem youtube ve soundcloud'dan müzik ile uyumlu değildir)"
             )
 
         if hint_platforms:
             self.initial_hints.append(
-                "Você pode adicionar/integrar link de perfis/canais do " + " e ".join(hint_platforms) + " para tocar "
-                f"playlists pública que tem no canal/perfil via comando {self.prefix_info}play (sem incluir "
-                "nome/link) ou no comando /play (via preenchimento automático da busca). Experimente usando o "
-                f"comando /fav_manager ou {self.prefix_info}favmanager selecionando a opção \"integrações\"."
+                "Oynamak için " + " ve ".join(hint_platforms) + " adreslerinden bağlantı profilleri/kanalları ekleyebilir/birleştirebilirsiniz "
+                f"kanalınızda/profilinizde {self.prefix_info}play komutu aracılığıyla sahip olduğunuz genel çalma listeleri (dahil değil "
+                "name/link) veya /play komutunda (arama otomatik tamamlama yoluyla). Kullanmayı deneyin "
+                f"komutunu /fav_manager veya {self.prefix_info}favmanager seçeneğini seçerek \"entegrasyonlar\"."
             )
 
         try:
@@ -613,7 +613,7 @@ class LavalinkPlayer(wavelink.Player):
         self.bot.dispatch("player_create", player=self)
 
     def __str__(self) -> str:
-        return f"Servidor de música atual: {self.node.identifier} (v{self.node.version})"
+        return f"Güncel müzik sunucusu: {self.node.identifier} (v{self.node.version})"
 
     def __repr__(self):
         return f"<volume={self.volume} " \
@@ -679,11 +679,11 @@ class LavalinkPlayer(wavelink.Player):
 
         if cog and cog.error_report_queue:
 
-            embed.description += f"\n**Fonte:** `{track.info['sourceName']}`" \
-                                 f"\n**Servidor:** `{disnake.utils.escape_markdown(self.guild.name)} [{self.guild.id}]`"
+            embed.description += f"\n**Kaynak:** `{track.info['sourceName']}`" \
+                                 f"\n**Sunucu:** `{disnake.utils.escape_markdown(self.guild.name)} [{self.guild.id}]`"
 
             try:
-                embed.description += f"\n**Canal:** `{disnake.utils.escape_markdown(self.guild.me.voice.channel.name)} [{self.guild.me.voice.channel.id}]`\n"
+                embed.description += f"\n**Kanal:** `{disnake.utils.escape_markdown(self.guild.me.voice.channel.name)} [{self.guild.me.voice.channel.id}]`\n"
             except:
                 pass
 
@@ -703,7 +703,7 @@ class LavalinkPlayer(wavelink.Player):
 
         if not vc:
 
-            msg = "O canal de voz foi excluido..."
+            msg = "Ses kanalı silindi..."
 
             if self.static:
                 self.set_command_log(msg)
@@ -745,27 +745,27 @@ class LavalinkPlayer(wavelink.Player):
                 try:
                     can_connect(vc, self.guild, bot=self.bot)
                 except Exception as e:
-                    self.set_command_log(f"O player foi finalizado devido ao erro: {e}")
+                    self.set_command_log(f"Hata nedeniyle oyuncu sonlandırılmıştır: {e}")
                     await self.destroy()
                     return
 
 
                 if (ping:=round(self.bot.latency * 1000)) > self.bot.pool.config["VOICE_CHANNEL_LATENCY_RECONNECT"]:
-                    voice_msg = f"Reconectei no canal de voz devido a um possível problema de instabilidade ne conexão (ping: {ping}ms)."
+                    voice_msg = f"Olası bir bağlantı kararsızlığı sorunu nedeniyle ses kanalına yeniden bağlandım (ping: {ping}ms)."
                 elif self.keep_connected:
-                    voice_msg = f"Notei uma tentativa de me desconectarem do canal <#{vc.id}>."
+                    voice_msg = f"Kanalla bağlantımı kesmek için bir girişimde bulunulduğunu fark ettim <#{vc.id}>."
                 else:
                     voice_msg = None
 
                 if not voice_msg:
-                    self.set_command_log(text=f"O player foi finalizado por perca de conexão no canal <#{vc.id}>.",
+                    self.set_command_log(text=f"Oyuncu, kanalla bağlantı kaybı nedeniyle sonlandırıldı <#{vc.id}>.",
                                            emoji="⚠️")
                     await self.destroy()
                     return
 
                 try:
                     await self.connect(vc.id)
-                    self.set_command_log(text=f"{voice_msg}\nCaso realmente queira me desconectar, use o comando/botão: **stop**.",
+                    self.set_command_log(text=f"{voice_msg}\nEğer bağlantımı gerçekten kesmek istiyorsanız, komutu/düğmeyi kullanın: **durdur**.",
                                            emoji="⚠️")
                     self.update = True
                     await asyncio.sleep(5)
@@ -873,17 +873,17 @@ class LavalinkPlayer(wavelink.Player):
             track = self.current or self.last_track
             node_info = f"`{event.node.identifier}`" if event.node.identifier == self.node.identifier else f"`{self.node.identifier} | {event.node.identifier}`"
             embed = disnake.Embed(
-                description=f"**Falha ao reproduzir música:\n[{track.title}]({track.uri or track.search_uri})** ```java\n{event.message}```\n"
-                            f"**Causa:** ```java\n{event.cause[:200]}```\n"
-                            f"**Nível:** `{event.severity}`\n"
-                            f"**Servidor de música:** {node_info}",
+                description=f"**Müzik çalma başarısız:\n[{track.title}]({track.uri or track.search_uri})** ```java\n{event.message}```\n"
+                            f"**Sebep:** ```java\n{event.cause[:200]}```\n"
+                            f"**Seviye:** `{event.severity}`\n"
+                            f"**Müzik sunucusu:** {node_info}",
                 color=disnake.Colour.red())
 
             error_format = pprint.pformat(event.data)
 
             async def send_report():
 
-                print(("-" * 50) + f"\nErro ao reproduzir a música: {track.uri or track.search_uri}\n"
+                print(("-" * 50) + f"\nŞarkı çalınırken hata oluştu: {track.uri or track.search_uri}\n"
                                    f"Servidor: {self.node.identifier}\n"
                                    f"{error_format}\n" + ("-" * 50))
 
@@ -895,7 +895,7 @@ class LavalinkPlayer(wavelink.Player):
 
             if self.locked:
                 self.set_command_log(
-                    text=f"A reprodução da música falhou (tentando tocar novamente): [`{fix_characters(track.title, 15)}`](<{track.uri or track.search_uri}>). **Causa:** `{event.cause[:50]}`")
+                    text=f"Müzik oynatma başarısız oldu (tekrar oynatmaya çalışıyorum): [`{fix_characters(track.title, 15)}`](<{track.uri or track.search_uri}>). **Sebep:** `{event.cause[:50]}`")
                 self.update = True
                 await send_report()
                 return
@@ -936,10 +936,10 @@ class LavalinkPlayer(wavelink.Player):
                     self.native_yt = False
 
                     if track.info["sourceName"] == "youtube":
-                        txt = f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual " \
-                                 "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome " \
-                                 "das músicas do youtube que estão na fila (talvez a música tocada seja diferente do esperado " \
-                                 "ou até mesmo ignoradas caso não retorne resultados)."
+                        txt = f"Sunucudaki youtube kısıtlamaları nedeniyle `{self.node.identifier}`. Mevcut oturum sırasında " \
+                                 "adı kullanılarak aynı şarkının diğer müzik platformlarında yer alması için girişimde bulunulacaktır. " \
+                                 "Kuyruktaki youtube şarkılarının (belki de çalınan müzik beklediğinizden farklıdır. " \
+                                 "ya da sonuç döndürmezse yok sayılır)."
 
                         try:
                             await self.text_channel.send(embed=disnake.Embed(description=txt, color=self.bot.get_color(self.guild.me)), delete_after=60)
@@ -988,7 +988,7 @@ class LavalinkPlayer(wavelink.Player):
 
                         self.locked = False
                         self.set_command_log(
-                            text=f'Ocorreu o erro 403 do youtube na reprodução da música atual. Tentativa {self.retries_403["counter"]}/5...')
+                            text=f'Geçerli şarkı oynatılırken Youtube hatası 403. Girişim {self.retries_403["counter"]}/5...')
                         if not self.auto_pause:
                             self.update = True
                         else:
@@ -1017,10 +1017,10 @@ class LavalinkPlayer(wavelink.Player):
                     self.locked = False
                     if track.info["sourceName"] == "youtube":
                         self.set_command_log(
-                            text=f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual "
-                                 "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome "
-                                 "das músicas do youtube que estão na fila (talvez a música tocada seja diferente do esperado "
-                                 "ou até mesmo ignoradas caso não retorne resultados).",
+                            text=f"Sunucudaki youtube kısıtlamaları nedeniyle `{self.node.identifier}`. Mevcut oturum sırasında "
+                                 "adı kullanılarak aynı şarkının diğer müzik platformlarında yer alması için girişimde bulunulacaktır. "
+                                 "Kuyruktaki youtube şarkılarının (belki de çalınan müzik beklediğinizden farklıdır. "
+                                 "veya hiçbir sonuç döndürülmezse yok sayılır).",
                             emoji="⚠️"
                         )
                     await asyncio.sleep(5)
@@ -1165,7 +1165,7 @@ class LavalinkPlayer(wavelink.Player):
                     return
                 if self.guild and self.guild.me.voice:
                     return
-                self.set_command_log(f"O player foi desligado por perca de conexão com o canal {self.last_channel.mention}...")
+                self.set_command_log(f"Kanal ile bağlantı kaybı nedeniyle oynatıcının bağlantısı kesildi {self.last_channel.mention}...")
                 await self.destroy(force=True)
                 return
 
@@ -1225,7 +1225,7 @@ class LavalinkPlayer(wavelink.Player):
             try:
                 await self.text_channel.purge(check=check)
             except:
-                print(f"Falha ao limpar mensagens do canal {self.text_channel} [ID: {self.text_channel.id}]:\n"
+                print(f"Kanal mesajları temizlenemedi {self.text_channel} [ID: {self.text_channel.id}]:\n"
                       f"{traceback.format_exc()}")
                 pass
 
@@ -1265,14 +1265,14 @@ class LavalinkPlayer(wavelink.Player):
         hints = list(self.initial_hints)
 
         if self.static:
-            hints.append("É possível fixar músicas/playlists na mensagem do player quando tiver no modo de "
-                         "espera/oscioso para permitir os membros ouvi-las de forma pública. Pra isso use o "
-                         f"comando /fav_manager ou {self.prefix_info}favmanager (apenas membros com permissão "
-                         "de gerenciar servidor podem usar esse recurso).")
+            hints.append("Oynatma modundayken şarkıları/çalma listelerini oynatıcı mesajına sabitleyebilirsiniz. "
+                         "üyelerin bunları herkese açık olarak dinlemesine izin vermek için. Bunu yapmak için şunu kullanın "
+                         f"komutu /fav_manager veya {self.prefix_info}favmanager (yalnızca izni olan üyeler "
+                         "bu özelliği kullanabilir).")
 
         elif self.bot.intents.message_content and self.controller_mode:
-            hints.append("Ao criar uma conversa/thread na mensagem do player, será ativado o modo de song-request "
-                         "nela (possibilitando pedir música apenas enviando o nome/link da música na conversa).")
+            hints.append("Oyuncunun mesajında bir konuşma / konu oluştururken, şarkı isteği modu etkinleştirilecektir "
+                         "içinde (sadece konuşmadaki şarkının adını/bağlantısını göndererek müzik istemeyi mümkün kılar).")
 
         if len(self.bot.pool.get_guild_bots(self.guild.id)) > 1:
 
@@ -1297,24 +1297,24 @@ class LavalinkPlayer(wavelink.Player):
 
             if bots_in_guild:
                 hints.append(
-                    "Caso algum membro queira me usar em outro canal de voz sem precisar aguardar me "
-                    f"desconectarem ou me interromperem do canal atual, há mais {bots_in_guild} bot{'s'[:bots_in_guild^1]} no servidor que "
-                    "funciona(m) com o meu mesmo sistema/comandos (usando o mesmo prefixo/comandos de barra). "
-                    f"Experimente entrar em um canal de voz diferente do meu atual e use o comando "
-                    f"{self.prefix_info}play ou /play."
+                    "Eğer herhangi bir üye beni beklemek zorunda kalmadan başka bir ses kanalında kullanmak isterse, lütfen benimle iletişime geçin. "
+                    f"bağlantıyı kesmek veya mevcut kanaldan beni kesmek, daha fazlası var {bots_in_guild} bot{'s'[:bots_in_guild^1]} sunucu üzerinde "
+                    "aynı sistemimle/komutlarımla çalışır(lar) (aynı önek/slash komutlarını kullanarak). "
+                    f"Mevcut kanalımdan başka bir ses kanalına girmeyi deneyin ve şu komutu kullanın "
+                    f"{self.prefix_info}play veya /play."
                 )
 
             elif bots_outside_guild:
                 hints.append(
-                    "Caso algum membro queira me usar em outro canal de voz sem precisar aguardar me "
-                    f"desconectarem ou me interromperem do canal atual. Dá para adicionar mais {bots_outside_guild} bot{'s'[:bots_outside_guild^1]} "
-                    f"extras no servidor atual que funciona(m) com o meu mesmo sistema/comandos (usando o mesmo "
-                    f"prefixo/comandos de barra). Use o comando {self.prefix_info}invite ou /invite para adicioná-los."
+                    "Eğer herhangi bir üye beni beklemek zorunda kalmadan başka bir ses kanalında kullanmak isterse, lütfen benimle iletişime geçin. "
+                    f"mevcut kanalla bağlantımı keser veya araya girer. Daha fazla ekleyebilirsiniz {bots_outside_guild} bot{'s'[:bots_outside_guild^1]} "
+                    f"mevcut sunucuda aynı sistemimle/komutlarımla çalışan(lar) (aynı "
+                    f"önek/slash komutları). Kullanın {self.prefix_info}invite veya /invite ile ekleyebilirsiniz."
                 )
 
         if self.controller_mode:
             hints.append(
-                "Ao clicar nesse emoji 🎛️ das mensagens de alguns comandos você será redirecionado para o player-controller."
+                "Bazı komutların mesajlarında bu emojiye 🎛️ tıkladığınızda oyuncu kontrolcüsüne yönlendirileceksiniz."
             )
 
         random.shuffle(hints)
@@ -1348,7 +1348,7 @@ class LavalinkPlayer(wavelink.Player):
                 self.auto_pause = False
 
                 try:
-                    self.set_command_log(emoji="🔋", text="O modo **[economia de recursos]** foi desativado.")
+                    self.set_command_log(emoji="🔋", text="**[Kaynak tasarrufu]** modu devre dışı bırakıldı.")
                     await self.resolve_track(self.current)
                     if self.current.id:
                         if self.current.info["sourceName"] == "youtube" and not self.native_yt:
@@ -1414,8 +1414,8 @@ class LavalinkPlayer(wavelink.Player):
                 pass
             self.set_command_log(
                 emoji="🪫",
-                text="O player está no modo **[economia de recursos]** (esse modo será desativado automaticamente quando "
-                     f"um membro entrar no canal <#{self.channel_id}>)."
+                text="Oyuncu **[kaynak tasarrufu]** modundadır (bu mod aşağıdaki durumlarda otomatik olarak devre dışı bırakılacaktır "
+                     f"bir üye kanala katılır <#{self.channel_id}>)."
             )
             self.update = True
             self.start_auto_skip()
@@ -1426,7 +1426,7 @@ class LavalinkPlayer(wavelink.Player):
             if self.is_closing:
                 return
 
-            msg = "**O player foi desligado por falta de membros no canal" + (f" <#{self.guild.me.voice.channel.id}>"
+            msg = "**Oyuncu, kanaldaki üye eksikliği nedeniyle kapatıldı" + (f" <#{self.guild.me.voice.channel.id}>"
                                                                                if self.guild.me.voice else '') + "...**"
             self.command_log = msg
             if not self.static and not self.has_thread:
@@ -1483,7 +1483,7 @@ class LavalinkPlayer(wavelink.Player):
                             result = await self.bot.spotify.get_recommendations(track_ids)
                             break
                         except Exception as e:
-                            self.set_command_log(emoji="⚠️", text=f"Falha ao obter músicas recomendadas do spotify, tentativa {i+1} de 3.")
+                            self.set_command_log(emoji="⚠️", text=f"Spotify'dan önerilen şarkılar alınamadı, 3'ten {i+1} denemesi.")
                             self.update = True
                             traceback.print_exc()
                             exception = e
@@ -1689,11 +1689,11 @@ class LavalinkPlayer(wavelink.Player):
                     else:
                         error_msg = f"**Detalhes:** ```py\n{repr(exception)}```"
                 else:
-                    error_msg = "Não houve resultados relacionados as músicas tocadas..."
+                    error_msg = "Çalınan şarkılarla ilgili herhangi bir sonuç bulunamamıştır..."
 
                 try:
                     embed = disnake.Embed(
-                        description=f"**Falha ao obter dados do autoplay:**\n"
+                        description=f"**Otomatik oynatma verileri alınamadı:**\n"
                                     f"{error_msg}",
                         color=disnake.Colour.red())
                     await self.text_channel.send(embed=embed, delete_after=10)
@@ -1849,7 +1849,7 @@ class LavalinkPlayer(wavelink.Player):
                         try:
                             await self.text_channel.send(
                                 embed=disnake.Embed(
-                                    description=f"Houve um problema ao tentar processar a música [{track.title}]({track.uri})... "
+                                    description=f"Müziği işlemeye çalışırken bir sorun oluştu [{track.title}]({track.uri})... "
                                                 f"```py\n{repr(e)}```",
                                     color=self.bot.get_color()
                                 )
@@ -1866,8 +1866,8 @@ class LavalinkPlayer(wavelink.Player):
                         try:
                             await self.text_channel.send(
                                 embed=disnake.Embed(
-                                    description=f"A música [{track.title}]({track.uri}) não está disponível...\n"
-                                                f"Pulando para a próxima música...",
+                                    description=f"Müzik [{track.title}]({track.uri}) mevcut değil...\n"
+                                                f"Bir sonraki şarkıya atlama...",
                                     color=self.bot.get_color()
                                 ), delete_after=10
                             )
@@ -1939,8 +1939,8 @@ class LavalinkPlayer(wavelink.Player):
                         if exceptions:
                             print(exceptions)
                         self.failed_tracks.append(track)
-                        self.set_command_log(emoji="⚠️", text=f"A música [`{track.title[:15]}`](<{track.uri}>) será pulada devido a falta de resultado "
-                                                              "em outras plataformas de música.")
+                        self.set_command_log(emoji="⚠️", text=f"Müzik [`{track.title[:15]}`](<{track.uri}>) sonuç eksikliği nedeniyle atlanacaktır "
+                                                              "diğer müzik platformlarında.")
                         await self.invoke_np()
                         await asyncio.sleep(13)
                         self.locked = False
@@ -1951,7 +1951,7 @@ class LavalinkPlayer(wavelink.Player):
                     track.temp_id = alt_track.id
                     self.set_command_log(
                         emoji="▶️",
-                        text=f"Tocando música obtida via metadados: [`{fix_characters(alt_track.title, 20)}`](<{alt_track.uri}>) `| Por: {fix_characters(alt_track.author, 15)}`"
+                        text=f"Meta veriler aracılığıyla elde edilen müziği çalma: [`{fix_characters(alt_track.title, 20)}`](<{alt_track.uri}>) `| Por: {fix_characters(alt_track.author, 15)}`"
                     )
 
             elif not track.id:
@@ -1962,8 +1962,8 @@ class LavalinkPlayer(wavelink.Player):
                     try:
                         await self.text_channel.send(
                             embed=disnake.Embed(
-                                description=f"A música [{track.title}]({track.uri}) não está disponível...\n"
-                                            "Pulando para a próxima música...",
+                                description=f"Müzik [{track.title}]({track.uri}) mevcut değil...\n"
+                                            "Bir sonraki şarkıya geçiyoruz...",
                                 color=self.bot.get_color()
                             ), delete_after=10
                         )
@@ -2001,8 +2001,8 @@ class LavalinkPlayer(wavelink.Player):
             self.bot.loop.create_task(self.node.on_event(TrackStart({"track": track, "player": self,"node": self.node})))
             self.set_command_log(
                 emoji="🪫",
-                text="O player está no modo **[economia de recursos]** (esse modo será desativado automaticamente quando "
-                     f"um membro entrar no canal <#{self.channel_id}>)."
+                text="Oyuncu **[kaynak tasarrufu]** modundadır (bu mod aşağıdaki durumlarda otomatik olarak devre dışı bırakılacaktır "
+                     f"bir üye kanala katılır <#{self.channel_id}>)."
             )
         else:
             await self.play(track, start=start_position, temp_id=track.temp_id)
@@ -2023,12 +2023,12 @@ class LavalinkPlayer(wavelink.Player):
 
         controller_opts = [
             disnake.SelectOption(
-                emoji="<:add_music:588172015760965654>", value=PlayerControls.add_song, label="Adicionar música",
-                description=f"Tocar nova música/playlist."
+                emoji="<:add_music:588172015760965654>", value=PlayerControls.add_song, label="Müzik ekleyin",
+                description=f"Yeni şarkı/çalma listesi çal."
             ),
             disnake.SelectOption(
-                emoji="⭐", value=PlayerControls.enqueue_fav, label="Adicionar favorito",
-                description=f"Adicionar favorito na fila."
+                emoji="⭐", value=PlayerControls.enqueue_fav, label="Favori ekle",
+                description=f"Kuyruğa bir favori ekleyin."
             ),
         ]
 
@@ -2042,13 +2042,13 @@ class LavalinkPlayer(wavelink.Player):
             controller_opts.extend(
                 [
                     disnake.SelectOption(
-                        emoji="⏮️", value=PlayerControls.back, label="Voltar",
-                        description=f"Ouvir novamente: {play_txt[:31]}"
+                        emoji="⏮️", value=PlayerControls.back, label="Geri",
+                        description=f"Tekrar dinleyin: {play_txt[:31]}"
                     ),
                     disnake.SelectOption(
-                        label="Ativar a reprodução automática", emoji="🔄",
+                        label="Otomatik oynatmayı etkinleştirme", emoji="🔄",
                         value=PlayerControls.autoplay,
-                        description=f"Tocar música relacionadas a: {play_txt[:19]}"
+                        description=f"İlgili müzikleri çalın: {play_txt[:19]}"
                     ),
                 ]
             )
@@ -2056,21 +2056,21 @@ class LavalinkPlayer(wavelink.Player):
         if played > 1:
             controller_opts.append(
                 disnake.SelectOption(
-                    emoji="↪️", value=PlayerControls.readd, label="Tocar novamente",
-                    description=f"Tocar todas as músicas novamente ({played})"
+                    emoji="↪️", value=PlayerControls.readd, label="Tekrar oynat",
+                    description=f"Tüm şarkıları tekrar çalın ({played})"
                 )
             )
 
         controller_opts.append(
             disnake.SelectOption(
-                emoji="🛑", value=PlayerControls.stop, label="Finalizar",
-                description=f"Finalizar o player e me desconectar do canal."
+                emoji="🛑", value=PlayerControls.stop, label="Sonuçlandırın",
+                description=f"Oynatıcıyı sonlandırın ve kanal bağlantısını kesin."
             ),
         )
 
         components = [
             disnake.ui.Select(
-                placeholder="Executar uma ação:", options=controller_opts,
+                placeholder="Bir eylem gerçekleştirin:", options=controller_opts,
                 custom_id="musicplayer_dropdown_idle", min_values=0, max_values=1
             )
         ]
@@ -2083,22 +2083,22 @@ class LavalinkPlayer(wavelink.Player):
         if opts:
             components.append(
                 disnake.ui.Select(
-                    placeholder="Tocar música/playlist do servidor.",
+                    placeholder="Sunucudan müzik/çalma listesi çalın.",
                     options=opts, custom_id="player_guild_pin"
                 )
             )
 
         embed = disnake.Embed(
-            description="**Não há músicas na fila... Adicione uma música ou use uma das opções abaixo.**",
+            description="**Kuyrukta hiç şarkı yok... Bir şarkı ekleyin veya aşağıdaki seçeneklerden birini kullanın.**",
             color=self.bot.get_color(self.guild.me)
         )
 
         embed.set_thumbnail(url=self.bot.user.display_avatar.replace(size=512, static_format="png").url)
 
         if not self.keep_connected:
-            embed.description += "\n\n**Nota:** `O Player será desligado automaticamente` " \
+            embed.description += "\n\n**Not:** `Oynatıcı otomatik olarak kapanacaktır` " \
                         f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=self.bot.config['IDLE_TIMEOUT'])).timestamp())}:R> " \
-                        f"`caso nenhuma ação seja executada...`"
+                        f"`herhangi bir işlem yapılmazsa...`"
 
         kwargs = {
             "embed": embed,
@@ -2109,7 +2109,7 @@ class LavalinkPlayer(wavelink.Player):
 
         try:
             if isinstance(self.text_channel.parent, disnake.ForumChannel) and self.static:
-                kwargs["content"] = "💤 Aguardando por novas músicas..."
+                kwargs["content"] = "💤 Yeni şarkıları bekliyorum..."
         except:
             pass
 
@@ -2161,7 +2161,7 @@ class LavalinkPlayer(wavelink.Player):
 
         await asyncio.sleep(self.bot.config["IDLE_TIMEOUT"])
 
-        msg = "💤 **⠂O player foi desligado por inatividade...**"
+        msg = "💤 **⠂Oynatıcı hareketsizlik nedeniyle kapatıldı...**"
 
         try:
             if self.static or self.has_thread:
@@ -2205,7 +2205,7 @@ class LavalinkPlayer(wavelink.Player):
             if requester:
                 requester_name = str(requester.display_name)
             else:
-                requester_name = "Membro desconhecido"
+                requester_name = "Bilinmeyen üye"
 
             if not self.current.is_stream and (not self.auto_pause or not self.paused):
                 if isinstance(self.guild.me.voice.channel, disnake.StageChannel):
@@ -2238,7 +2238,7 @@ class LavalinkPlayer(wavelink.Player):
                     msg = msg[:107] + "..."
 
             if not msg:
-                msg = "Status: Aguardando por novas músicas."
+                msg = "Durum: Yeni şarkıları bekliyorum."
             else:
                 emojis = emoji_pattern.findall(msg)
                 for emoji in emojis:
@@ -2270,7 +2270,7 @@ class LavalinkPlayer(wavelink.Player):
             except Exception as e:
                 if isinstance(e, disnake.Forbidden):
                     self.stage_title_event = False
-                    self.set_command_log(emoji="❌", text="O status automático foi desativado devido a falta de permissão pra alterar status.")
+                    self.set_command_log(emoji="❌", text="Statü değiştirme izni olmadığı için otomatik statü devre dışı bırakıldı.")
                     self.update = True
                 print(traceback.format_exc())
 
@@ -2416,61 +2416,61 @@ class LavalinkPlayer(wavelink.Player):
                         min_values=0, max_values=1,
                         options=[
                             disnake.SelectOption(
-                                label="Adicionar música", emoji="<:add_music:588172015760965654>",
+                                label="Müzik ekleyin", emoji="<:add_music:588172015760965654>",
                                 value=PlayerControls.add_song,
-                                description="Adicionar uma música/playlist na fila."
+                                description="Kuyruğa bir şarkı/çalma listesi ekleyin."
                             ),
                             disnake.SelectOption(
-                                label="Adicionar favorito na fila", emoji="⭐",
+                                label="Kuyruğa bir favori ekleyin", emoji="⭐",
                                 value=PlayerControls.enqueue_fav,
-                                description="Adicionar um de seus favoritos na fila."
+                                description="Favorilerinizden birini kuyruğa ekleyin."
                             ),
                             disnake.SelectOption(
-                                label="Adicionar nos seus favoritos", emoji="💗",
+                                label="Favorilerinize ekleyin", emoji="💗",
                                 value=PlayerControls.add_favorite,
-                                description="Adicionar a música atual nos seus favoritos."
+                                description="Geçerli şarkıyı favorilerinize ekleyin."
                             ),
                             disnake.SelectOption(
-                                label="Tocar do inicio", emoji="⏪",
+                                label="En baştan oynayın", emoji="⏪",
                                 value=PlayerControls.seek_to_start,
-                                description="Voltar o tempo da música atual para o inicio."
+                                description="Geçerli şarkının temposunu başlangıca döndürür."
                             ),
                             disnake.SelectOption(
-                                label=f"Volume: {self.volume}%", emoji="🔊",
+                                label=f"Cilt: {self.volume}%", emoji="🔊",
                                 value=PlayerControls.volume,
-                                description="Ajustar volume."
+                                description="Ses seviyesini ayarlayın."
                             ),
                             disnake.SelectOption(
-                                label="Misturar", emoji="🔀",
+                                label="Karıştırma", emoji="🔀",
                                 value=PlayerControls.shuffle,
-                                description="Misturar as músicas da fila."
+                                description="Kuyruktaki şarkıları karıştırın."
                             ),
                             disnake.SelectOption(
-                                label="Readicionar", emoji="🎶",
+                                label="Yeniden ekle", emoji="🎶",
                                 value=PlayerControls.readd,
-                                description="Readicionar as músicas tocadas de volta na fila."
+                                description="Çalınan şarkıları sıraya geri koyun."
                             ),
                             disnake.SelectOption(
-                                label="Repetição", emoji="🔁",
+                                label="Tekrarlama", emoji="🔁",
                                 value=PlayerControls.loop_mode,
-                                description="Ativar/Desativar repetição da música/fila."
+                                description="Şarkı/sıra tekrarını etkinleştirin/devre dışı bırakın."
                             ),
                             disnake.SelectOption(
-                                label=("Desativar" if self.nightcore else "Ativar") + " o efeito nightcore", emoji="🇳",
+                                label=("Devre dışı bırak" if self.nightcore else "Etkinleştir") + " gece çekirdeği etkisi", emoji="🇳",
                                 value=PlayerControls.nightcore,
-                                description="Efeito que aumenta velocidade e tom da música."
+                                description="Müziğin hızını ve perdesini artıran efekt."
                             ),
                             disnake.SelectOption(
-                                label=("Desativar" if self.autoplay else "Ativar") + " a reprodução automática",
+                                label=("Devre dışı bırak" if self.autoplay else "Etkinleştir") + " otomatik oynatma",
                                 emoji="🔄",
                                 value=PlayerControls.autoplay,
-                                description="Sistema de reprodução de música automática quando a fila tiver vazia."
+                                description="Kuyruk boş olduğunda otomatik müzik çalma sistemi."
                             ),
                             disnake.SelectOption(
-                                label=("Desativar" if self.restrict_mode else "Ativar") + " o modo restrito",
+                                label=("Devre dışı bırak" if self.restrict_mode else "Etkinleştir") + " kısıtlı mod",
                                 emoji="🔐",
                                 value=PlayerControls.restrict_mode,
-                                description="Apenas DJ's/Staff's podem usar comandos restritos."
+                                description="Sadece DJ'ler/Personel kısıtlı komutları kullanabilir."
                             ),
                         ]
                     ),
@@ -2479,36 +2479,36 @@ class LavalinkPlayer(wavelink.Player):
                 if self.current.ytid and self.node.lyric_support:
                     data["components"][5].options.append(
                         disnake.SelectOption(
-                            label="Visualizar letras", emoji="📃",
+                            label="Harfleri görselleştirin", emoji="📃",
                             value=PlayerControls.lyrics,
-                            description="Obter letra da música atual."
+                            description="Geçerli şarkının sözlerini al."
                         )
                     )
 
                 if self.mini_queue_feature:
                     data["components"][5].options.append(
                         disnake.SelectOption(
-                            label="Mini-fila do player", emoji="<:music_queue:703761160679194734>",
+                            label="Oyuncu mini filmi", emoji="<:music_queue:703761160679194734>",
                             value=PlayerControls.miniqueue,
-                            description="Ativar/Desativar a mini-fila do player."
+                            description="Oyuncunun mini dosyasını etkinleştirin/devre dışı bırakın."
                         )
                     )
 
                 if isinstance(self.last_channel, disnake.VoiceChannel):
                     data["components"][5].options.append(
                         disnake.SelectOption(
-                            label="Status automático", emoji="📢",
+                            label="Otomatik durum", emoji="📢",
                             value=PlayerControls.set_voice_status,
-                            description="Configurar o status automático do canal de voz."
+                            description="Ses kanalının otomatik durumunu yapılandırın."
                         )
                     )
 
                 if not self.static and not self.has_thread:
                     data["components"][5].options.append(
                         disnake.SelectOption(
-                            label="Song-Request Thread", emoji="💬",
+                            label="Şarkı İstek İpliği", emoji="💬",
                             value=PlayerControls.song_request_thread,
-                            description="Criar uma thread/conversa temporária para pedir músicas usando apenas o nome/link."
+                            description="Sadece isim/bağlantı kullanarak şarkı istemek için geçici bir konu/konuşma oluşturun."
                         )
                     )
 
@@ -2572,7 +2572,7 @@ class LavalinkPlayer(wavelink.Player):
                                     if self.text_channel.owner_id == self.bot.user.id:
                                         await self.text_channel.edit(archived=False)
                                     else:
-                                        await self.text_channel.send("Desarquivando o tópico.", delete_after=2)
+                                        await self.text_channel.send("Konuyu arşivden çıkarıyorum.", delete_after=2)
 
                                 #elif ((
                                 #              self.text_channel.archive_timestamp - disnake.utils.utcnow()).total_seconds() / 60) < (
@@ -2592,7 +2592,7 @@ class LavalinkPlayer(wavelink.Player):
                         traceback.print_exc()
                         if self.static or self.has_thread:
                             self.set_command_log(
-                                f"{(interaction.author.mention + ' ') if interaction else ''}houve um erro na interação: {repr(e)}",
+                                f"{(interaction.author.mention + ' ') if interaction else ''}etkileşimde bir hata vardı: {repr(e)}",
                                 "⚠️")
                             self.update = True
                             return
@@ -2767,7 +2767,7 @@ class LavalinkPlayer(wavelink.Player):
                                         await channel.send(
                                             embed=disnake.Embed(
                                                 color=self.bot.get_color(self.guild.me),
-                                                description="**A sessão de pedido de música da conversa atual foi encerrada.**",
+                                                description="**Geçerli görüşmenin şarkı isteği oturumu kapatıldı.**",
                                             )
                                         )
                                     except:
@@ -2782,7 +2782,7 @@ class LavalinkPlayer(wavelink.Player):
                                 await channel.edit(**kwargs)
                             except Exception:
                                 print(
-                                    f"Falha ao arquivar thread do servidor: {self.guild.name}\n{traceback.format_exc()}")
+                                    f"Sunucu iş parçacığı arşivleme başarısız oldu: {self.guild.name}\n{traceback.format_exc()}")
 
                     elif inter:
 
@@ -2919,7 +2919,7 @@ class LavalinkPlayer(wavelink.Player):
 
             if not tracks:
                 if exceptions:
-                    print("Falha ao resolver PartialTrack:\n" + "\n".join(repr(e) for e in exceptions))
+                    print("PartialTrack çözümlenemedi:\n" + "\n".join(repr(e) for e in exceptions))
                 return
 
             selected_track = None
@@ -2951,8 +2951,8 @@ class LavalinkPlayer(wavelink.Player):
         except Exception as e:
             traceback.print_exc()
             embed = disnake.Embed(
-                description=f"**Falha ao obter informação de PartialTrack:\n[{track.title}]({track.uri or track.search_uri})** ```py\n{repr(e)}```\n"
-                            f"**Servidor de música:** `{self.node.identifier}`",
+                description=f"**PartialTrack bilgisi alınamadı:\n[{track.title}]({track.uri or track.search_uri})** ```py\n{repr(e)}```\n"
+                            f"**Müzik sunucusu:** `{self.node.identifier}`",
                 color=disnake.Colour.red())
             await self.report_error(embed, track)
             return
@@ -2976,7 +2976,7 @@ class LavalinkPlayer(wavelink.Player):
             original_identifier = str(self.node.identifier)
 
             self.set_command_log(
-                txt or "Não há servidores de música disponível. Irei fazer algumas tentativas de conectar em um novo servidor de música.",
+                txt or "Kullanılabilir müzik sunucusu yok. Yeni bir müzik sunucusuna bağlanmak için birkaç deneme yapacağım.",
                 emoji="⏰"
             )
             self.update = True
@@ -3010,7 +3010,7 @@ class LavalinkPlayer(wavelink.Player):
                         can_connect(self.last_channel, self.guild, bot=self.bot)
                     except Exception as e:
                         print(traceback.format_exc())
-                        self.set_command_log(f"O player foi finalizado devido ao erro: {e}")
+                        self.set_command_log(f"Hata nedeniyle oyuncu sonlandırılmıştır: {e}")
                         await self.destroy()
                         return
                     await self.connect(self.last_channel.id)
@@ -3029,9 +3029,9 @@ class LavalinkPlayer(wavelink.Player):
                 try:
                     if not self.auto_pause:
                         if original_identifier != node.identifier:
-                            txt = f"O player foi movido para o servidor de música **{node.identifier}**."
+                            txt = f"Oynatıcı müzik sunucusuna taşındı **{node.identifier}**."
                         else:
-                            txt = f"O player foi reconectado no servidor de músca **{self.node.identifier}**"
+                            txt = f"Oynatıcı müzik sunucusuna yeniden bağlandı **{self.node.identifier}**"
                         self.set_command_log(emoji="📶", text=txt)
                         self.update = True
                 except:
