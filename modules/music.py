@@ -2780,7 +2780,8 @@ class Music(commands.Cog):
 
         txt = [
             f"tekrar ekledi [{qsize}] çalınan müzik{(s:='ler'[:qsize^1])} sıraya.",
-            f"🎶 **⠂{inter.author.mention} readicionou {qsize} música{s} na fila.**"
+            f"🎶 **⠂{inter.author.mention} {qsize} müzik{s} sıraya tekrar ekledi.**
+"
         ]
 
         await self.interaction_message(inter, txt, emoji="🎶")
@@ -2796,7 +2797,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @pool_command(name="rotate", aliases=["rt", "rotacionar"], only_voiced=True,
-                  description="Rotacionar a fila para a música especificada.",
+                  description="Kuyruğu belirtilen müziğe döndürün.",
                   cooldown=queue_manipulation_cd, max_concurrency=remove_mc, extras={"flags": case_sensitive_args},
                   usage="{prefix}{cmd} [nome]\nEx: {prefix}{cmd} sekai")
     async def rotate_legacy(self, ctx: CustomContext, *, flags: str = ""):
@@ -2804,7 +2805,7 @@ class Music(commands.Cog):
         args, unknown = ctx.command.extras['flags'].parse_known_args(flags.split())
 
         if not unknown:
-            raise GenericError("**Você não adicionou o nome da música.**")
+            raise GenericError("**Şarkının adın eklenmemiş.**")
 
         await self.rotate.callback(self=self, inter=ctx, query=" ".join(unknown), case_sensitive=args.casesensitive)
 
@@ -2813,16 +2814,16 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.slash_command(
-        description=f"{desc_prefix}Rotacionar a fila para a música especificada.", dm_permission=False,
+        description=f"{desc_prefix}Kuyruğu belirtilen müziğe döndürün.", dm_permission=False,
         extras={"only_voiced": True}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc
     )
     async def rotate(
             self,
             inter: disnake.AppCmdInter,
-            query: str = commands.Param(name="nome", description="Nome da música completo."),
+            query: str = commands.Param(name="nome", description="Şarkının tam adı."),
             case_sensitive: bool = commands.Param(
                 name="nome_exato", default=False,
-                description="Buscar por músicas com a frase exata no nome da música ao invés de buscar palavra por palavra.",
+                description="Kelime kelime aramak yerine şarkının adındaki tam ifadeyle şarkıları arayın.",
             )
     ):
 
@@ -2834,7 +2835,7 @@ class Music(commands.Cog):
         index = queue_track_index(inter, bot, query, case_sensitive=case_sensitive)
 
         if not index:
-            raise GenericError(f"**Não há músicas na fila com o nome: {query}**")
+            raise GenericError(f"**Kuyrukta bu isimde bir şarkı yok: {query}**")
 
         index = index[0][0]
 
@@ -2843,7 +2844,7 @@ class Music(commands.Cog):
         track = (player.queue + player.queue_autoplay)[index]
 
         if index <= 0:
-            raise GenericError(f"**A música **[`{track.title}`](<{track.uri or track.search_uri}>) já é a próxima da fila.")
+            raise GenericError(f"**Müzik **[`{track.title}`](<{track.uri or track.search_uri}>) zaten sıradaki bir sonraki parça.")
 
         if track.autoplay:
             player.queue_autoplay.rotate(0 - (index - len(player.queue)))
@@ -2851,15 +2852,15 @@ class Music(commands.Cog):
             player.queue.rotate(0 - (index))
 
         txt = [
-            f"rotacionou a fila para a música [`{(fix_characters(track.title, limit=25))}`](<{track.uri or track.search_uri}>).",
-            f"🔃 **⠂{inter.author.mention} rotacionou a fila para a música:**\n╰[`{track.title}`](<{track.uri or track.search_uri}>)."
+    f"sırayı [`{(fix_characters(track.title, limit=25))}`](<{track.uri or track.search_uri}>) müziğine çevirdi.",
+    f"🔃 **⠂{inter.author.mention} sırayı şu müziğe çevirdi:**\n╰[`{track.title}`](<{track.uri or track.search_uri}>)."
         ]
 
         if isinstance(inter, disnake.MessageInteraction):
             player.set_command_log(text=f"{inter.author.mention} " + txt[0], emoji="🔃")
         else:
             await self.interaction_message(inter, txt, emoji="🔃", components=[
-                disnake.ui.Button(emoji="▶️", label="Tocar agora", custom_id=PlayerControls.embed_forceplay),
+                disnake.ui.Button(emoji="▶️", label="Şimdi çal", custom_id=PlayerControls.embed_forceplay),
             ])
 
         await player.update_message()
@@ -2870,7 +2871,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.bot_has_guild_permissions(manage_threads=True)
-    @pool_command(name="songrequestthread", aliases=["songrequest", "srt"], only_voiced=True,
+    @pool_command(name="songrequestthread", aliases=["songrequest", "srt","istek","şarkı isteği"], only_voiced=True,
                   description="Criar uma thread/conversa temporária para song-request (pedido de música)")
     async def song_request_thread_legacy(self, ctx: CustomContext):
 
