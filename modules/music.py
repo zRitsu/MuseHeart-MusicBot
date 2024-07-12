@@ -605,7 +605,7 @@ class Music(commands.Cog):
     @commands.bot_has_guild_permissions(send_messages=True)
     @check_voice()
     @commands.max_concurrency(1, commands.BucketType.member)
-    @pool_command(name="play", description="Tocar música em um canal de voz.", aliases=["p"], check_player=False,
+    @pool_command(name="play", description="Bir ses kanalında müzik çalmak.", aliases=["p"], check_player=False,
                   cooldown=play_cd, max_concurrency=play_mc, extras={"flags": stage_flags},
                   usage="{prefix}{cmd} [nome|link]\nEx: {prefix}{cmd} sekai - burn me down")
     async def play_legacy(self, ctx: CustomContext, *, flags: str = ""):
@@ -628,7 +628,7 @@ class Music(commands.Cog):
     @can_send_message_check()
     @commands.bot_has_guild_permissions(send_messages=True)
     @check_voice()
-    @pool_command(name="search", description="Pesquisar por músicas e escolher uma entre os resultados para tocar.",
+    @pool_command(name="search", description="Müzikleri aramak ve sonuçlar arasından birini seçip çalmak.",
                   aliases=["sc"], check_player=False, cooldown=play_cd, max_concurrency=play_mc,
                   usage="{prefix}{cmd} [nome]\nEx: {prefix}{cmd} sekai - burn me down")
     async def search_legacy(self, ctx: CustomContext, *, query):
@@ -640,32 +640,32 @@ class Music(commands.Cog):
     @check_voice()
     @commands.slash_command(
         name="play_music_file", dm_permission=False,
-        description=f"{desc_prefix}Tocar arquivo de música em um canal de voz.",
+        description=f"{desc_prefix}Bir ses kanalında müzik dosyası çalmak.",
         extras={"check_player": False}, cooldown=play_cd, max_concurrency=play_mc
     )
     async def play_file(
             self,
             inter: Union[disnake.AppCmdInter, CustomContext],
             file: disnake.Attachment = commands.Param(
-                name="arquivo", description="arquivo de audio para tocar ou adicionar na fila"
+                name="arquivo", description="Çalmak veya sıraya eklemek için ses dosyası."
             ),
-            position: int = commands.Param(name="posição", description="Colocar a música em uma posição específica",
+            position: int = commands.Param(name="posição", description="Müziği belirli bir konuma yerleştirin",
                                            default=0),
             force_play: str = commands.Param(
                 name="tocar_agora",
-                description="Tocar a música imediatamente (ao invés de adicionar na fila).",
+                description="Müziği hemen çalmak (sıraya eklemek yerine).",
                 default="no",
                 choices=[
                     disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
                 ]
             ),
-            repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.",
+            repeat_amount: int = commands.Param(name="repetições", description="tekrar sayısını ayarlayın.",
                                                 default=0),
-            server: str = commands.Param(name="server", desc="Usar um servidor de música específico na busca.",
+            server: str = commands.Param(name="server", desc="Aramada belirli bir müzik sunucusu kullanın.",
                                          default=None),
             manual_bot_choice: str = commands.Param(
                 name="selecionar_bot",
-                description="Selecionar um bot disponível manualmente.",
+                description="Kullanılabilir bir botu manuel olarak seçin.",
                 default="no",
                 choices=[
                     disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
@@ -701,7 +701,7 @@ class Music(commands.Cog):
             if count < 1:
                 return tracks
             if len(player.queue) >= count and not (await bot.is_owner(user)):
-                raise GenericError(f"**A fila está cheia ({self.bot.config['QUEUE_MAX_ENTRIES']} músicas).**")
+                raise GenericError(f"**Kuyruk dolu ({self.bot.config['QUEUE_MAX_ENTRIES']} müzik).**")
 
         if tracks:
 
@@ -717,35 +717,35 @@ class Music(commands.Cog):
     @can_send_message_check()
     @check_voice()
     @commands.slash_command(
-        description=f"{desc_prefix}Tocar música em um canal de voz.", dm_permission=False,
+        description=f"{desc_prefix}Bir ses kanalında müzik çalın.", dm_permission=False,
         extras={"check_player": False}, cooldown=play_cd, max_concurrency=play_mc
     )
     async def play(
             self,
             inter: Union[disnake.AppCmdInter, CustomContext],
-            query: str = commands.Param(name="busca", desc="Nome ou link da música."), *,
-            position: int = commands.Param(name="posição", description="Colocar a música em uma posição específica",
+            query: str = commands.Param(name="busca", desc="Şarkının adı veya bağlantısı."), *,
+            position: int = commands.Param(name="posição", description="Müziği belirli bir konuma yerleştirin",
                                            default=0),
             force_play: str = commands.Param(
                 name="tocar_agora",
-                description="Tocar a música imediatamente (ao invés de adicionar na fila).",
+                description="Şarkıyı hemen çalın (kuyruğa eklemek yerine).",
                 default="no",
                 choices=[
                     disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
                 ]
             ),
             manual_selection: bool = commands.Param(name="selecionar_manualmente",
-                                                    description="Escolher uma música manualmente entre os resultados encontrados",
+                                                    description="Bulunan sonuçlardan manuel olarak bir şarkı seçin",
                                                     default=False),
-            options: str = commands.Param(name="opções", description="Opções para processar playlist",
+            options: str = commands.Param(name="opções", description="Çalma listelerini düzenleme seçenekleri",
                                           choices=playlist_opts, default=False),
-            repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.",
+            repeat_amount: int = commands.Param(name="repetições", description="tekrar sayısını ayarlayın.",
                                                 default=0),
-            server: str = commands.Param(name="server", desc="Usar um servidor de música específico na busca.",
+            server: str = commands.Param(name="server", desc="Aramada belirli bir müzik sunucusu kullanın.",
                                          default=None),
             manual_bot_choice: str = commands.Param(
                 name="selecionar_bot",
-                description="Selecionar um bot disponível manualmente.",
+                description="Kullanılabilir bir botu manuel olarak seçin.",
                 default="no",
                 choices=[
                     disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
@@ -875,17 +875,17 @@ class Music(commands.Cog):
                 if not free_bots:
 
                     if bot_count:
-                        txt = "**Todos os bots estão em uso no nomento...**"
+                        txt = "**Tüm botlar şu anda kullanımda...**"
                         if voice_channels:
-                            txt += "\n\n**Você pode conectar em um dos canais abaixo onde há sessões ativas:**\n" + ", ".join(voice_channels)
+                            txt += "\n\n**Aktif oturumların olduğu aşağıdaki kanallardan birine bağlanabilirsiniz:**\n" + ", ".join(voice_channels)
                             if inter.author.guild_permissions.manage_guild:
-                                txt += "\n\n**Ou se preferir: Adicione mais bots de música no servidor atual clicando no botão abaixo:**"
+                                txt += "\n\n**Ya da tercih ederseniz: Aşağıdaki düğmeye tıklayarak mevcut sunucuya daha fazla müzik botu ekleyin:**"
                             else:
-                                txt += "\n\n**Ou se preferir: Solicite a um administrador/manager do servidor para clicar no botão abaixo " \
-                                       "para adicionar mais bots de música no servidor atual.**"
+                                txt += "\n\n**Ya da tercih ederseniz: Bir sunucu yöneticisinden/moderatöründen mevcut sunucuya daha fazla müzik " \
+                                       " botu eklemek için aşağıdaki düğmeye tıklamasını isteyin.**"
                     else:
-                        txt = "**Não há bots de música compatíveis no servidor...**" \
-                               "\n\nSerá necessário adicionar pelo menos um bot compatível clicando no botão abaixo:"
+                        txt = "**Sunucuda uyumlu müzik botları yok...**" \
+                               "\n\nAşağıdaki düğmeye tıklayarak en az bir uyumlu bot eklemeniz gerekir:"
 
                     await inter.send(
                         txt, ephemeral=True, components=[disnake.ui.Button(custom_id="bot_invite", label="Adicionar bots")])
@@ -905,7 +905,7 @@ class Music(commands.Cog):
 
                     newmsg = await func(
                         embed=disnake.Embed(
-                            description=f"**Escolha qual bot você deseja usar no canal {inter.author.voice.channel.mention}**",
+                            description=f"**Kanalda hangi botu kullanmak istediğinizi seçin{inter.author.voice.channel.mention}**",
                             color=self.bot.get_color(guild.me)), view=v
                     )
                     await v.wait()
@@ -919,7 +919,7 @@ class Music(commands.Cog):
                         except AttributeError:
                             func = inter.edit_original_message
                         try:
-                            await func(embed=disnake.Embed(description="### Tempo esgotado...", color=self.bot.get_color(guild.me)), view=None)
+                            await func(embed=disnake.Embed(description="### Zaman doldu...", color=self.bot.get_color(guild.me)), view=None)
                         except:
                             traceback.print_exc()
                         return
@@ -929,7 +929,7 @@ class Music(commands.Cog):
                             func = msg.edit
                         except AttributeError:
                             func = inter.edit_original_message
-                        await func(embed=disnake.Embed(description="### Operação cancelada.",
+                        await func(embed=disnake.Embed(description="### Operasyon iptal edildi.",
                                                        color=self.bot.get_color(guild.me)), view=None)
                         return
 
@@ -938,7 +938,7 @@ class Music(commands.Cog):
                             func = msg.edit
                         except AttributeError:
                             func = inter.edit_original_message
-                        await func(embed=disnake.Embed(description="### Você não está conectado em um canal de voz...",
+                        await func(embed=disnake.Embed(description="### Bir ses kanalına bağlı değilsiniz...",
                                                        color=self.bot.get_color(guild.me)), view=None)
                         return
 
@@ -965,7 +965,7 @@ class Music(commands.Cog):
         await check_player_perm(inter=inter, bot=bot, channel=channel, guild_data=guild_data)
 
         if not guild.voice_client and not check_channel_limit(guild.me, inter.author.voice.channel):
-            raise GenericError(f"**O canal {inter.author.voice.channel.mention} está lotado!**")
+            raise GenericError(f"** {inter.author.voice.channel.mention} Kanal Dolu!**")
 
         await self.check_player_queue(inter.author, bot, guild.id)
 
@@ -1040,10 +1040,10 @@ class Music(commands.Cog):
                     attachment = inter.message.attachments[0]
 
                     if attachment.size > 18000000:
-                        raise GenericError("**O arquivo que você enviou deve ter o tamanho igual ou inferior a 18mb.**")
+                        raise GenericError("**Gönderdiğiniz dosyanın boyutu 18mb veya daha az olmalıdır.**")
 
                     if attachment.content_type not in self.audio_formats:
-                        raise GenericError("**O arquivo que você enviou não é um arquivo de música válido...**")
+                        raise GenericError("**Gönderdiğiniz dosya geçerli bir müzik dosyası değil...**")
 
                     query = attachment.url
 
@@ -1056,13 +1056,13 @@ class Music(commands.Cog):
 
             embed = disnake.Embed(
                 color=self.bot.get_color(guild.me),
-                description="**Selecione um item abaixo:**\n"
-                            f'Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para escolher!'
+                description="**Aşağıdan bir ürün seçin:**\n"
+                            f'Not: sadece <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> seçim yapmak için!'
             )
 
             try:
                 if bot.user.id != self.bot.user.id:
-                    embed.set_footer(text=f"Bot selecionado: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
+                    embed.set_footer(text=f"Bot seçildi: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
             except AttributeError:
                 pass
 
@@ -1078,15 +1078,15 @@ class Music(commands.Cog):
                 pass
 
             opts = [
-                disnake.SelectOption(label="Usar favorito", value=">> [⭐ Favoritos ⭐] <<", emoji="⭐"),
-                disnake.SelectOption(label="Usar integração", value=">> [💠 Integrações 💠] <<", emoji="💠"),
+                disnake.SelectOption(label="Favoriy kullan", value=">> [⭐ Favoriler ⭐] <<", emoji="⭐"),
+                disnake.SelectOption(label="Entegrasyonu kullan", value=">> [💠 Entegrasyonlar 💠] <<", emoji="💠"),
             ]
             
             if os.path.isfile(f"./local_database/saved_queues_v1/users/{inter.author.id}.pkl"):
-                opts.append(disnake.SelectOption(label="Usar fila salva", value=">> [💾 Fila Salva 💾] <<", emoji="💾"))
+                opts.append(disnake.SelectOption(label="Kaydedilen listeyi kullanın", value=">> [💾 Kaydedilen liste 💾] <<", emoji="💾"))
 
             if user_data["last_tracks"]:
-                opts.append(disnake.SelectOption(label="Adicionar música recente", value=">> [📑 Músicas recentes 📑] <<", emoji="📑"))
+                opts.append(disnake.SelectOption(label="Yeni müzikler ekleyin", value=">> [📑 Son şarkılar 📑] <<", emoji="📑"))
                 
             if isinstance(inter, disnake.MessageInteraction) and not inter.response.is_done():
                 await inter.response.defer(ephemeral=ephemeral)
@@ -1095,7 +1095,7 @@ class Music(commands.Cog):
                 guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
             if guild_data["player_controller"]["fav_links"]:
-                disnake.SelectOption(label="Usar favorito do servidor", value=">> [📌 Favoritos do servidor 📌] <<", emoji="📌"),
+                disnake.SelectOption(label="Sunucu favorilerini kullanın", value=">> [📌 Sunucu favorileri 📌] <<", emoji="📌"),
 
             view = SelectInteraction(user=inter.author, timeout=45, opts=opts)
 
@@ -1118,7 +1118,7 @@ class Music(commands.Cog):
 
             if not select_interaction or view.selected is False:
 
-                text = "### Tempo de seleção esgotado!" if view.selected is not False else "### Cancelado pelo usuário."
+                text = "### Seçim zamanı bitti!" if view.selected is not False else "### Kullanıcı tarafından iptal edildi."
 
                 try:
                     await func(embed=disnake.Embed(description=text, color=self.bot.get_color(guild.me)),
@@ -1131,7 +1131,7 @@ class Music(commands.Cog):
             if select_interaction.data.values[0] == "cancel":
                 await func(
                     embed=disnake.Embed(
-                        description="**Seleção cancelada!**",
+                        description="**Seçim iptal edildi!**",
                         color=self.bot.get_color(guild.me)
                     ),
                     components=None
@@ -1151,39 +1151,39 @@ class Music(commands.Cog):
 
         fav_opts = []
 
-        if query.startswith(">> [💠 Integrações 💠] <<"):
+        if query.startswith(">> [💠 Entegrasyonlar 💠] <<"):
             query = ""
             for k, v in user_data["integration_links"].items():
                 emoji, platform = music_source_emoji_url(v)
-                fav_opts.append(disnake.SelectOption(label=k[5:], value=f"> itg: {k}", description=f"[💠 Integração 💠] -> {platform}", emoji=emoji))
+                fav_opts.append(disnake.SelectOption(label=k[5:], value=f"> itg: {k}", description=f"[💠 Entegrasyon 💠] -> {platform}", emoji=emoji))
 
-        elif query.startswith(">> [⭐ Favoritos ⭐] <<"):
+        elif query.startswith(">> [⭐ Favoriler ⭐] <<"):
             query = ""
             for k, v in user_data["fav_links"].items():
                 emoji, platform = music_source_emoji_url(v)
-                fav_opts.append(disnake.SelectOption(label=k, value=f"> fav: {k}", description=f"[⭐ Favorito ⭐] -> {platform}", emoji=emoji))
+                fav_opts.append(disnake.SelectOption(label=k, value=f"> fav: {k}", description=f"[⭐ Favori ⭐] -> {platform}", emoji=emoji))
 
-        elif query.startswith(">> [📑 Músicas recentes 📑] <<"):
+        elif query.startswith(">> [📑 Son şarkılar 📑] <<"):
 
             if not user_data["last_tracks"]:
-                raise GenericError("**Você não possui músicas registradas no seu histórico...**\n"
-                                   "Elas vão aparecer a medida que for adicionando músicas via busca ou link.")
+                raise GenericError("**Geçmişinizde kayıtlı hiç şarkı yok...**\n"
+                                   "Arama veya bağlantı yoluyla şarkı eklediğinizde bunlar görünecektir.")
 
             query = ""
             for i, d in enumerate(user_data["last_tracks"]):
-                fav_opts.append(disnake.SelectOption(label=d["name"], value=f"> lst: {i}", description="[📑 Músicas recentes 📑]",
+                fav_opts.append(disnake.SelectOption(label=d["name"], value=f"> lst: {i}", description="[📑 Son şarkılar 📑]",
                                                      emoji=music_source_emoji_url(d["url"])[0]))
 
-        elif query.startswith(">> [📌 Favoritos do servidor 📌] <<"):
+        elif query.startswith(">> [📌 Sunucu favorileri 📌] <<"):
 
             if not guild_data:
                 guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
 
             if not guild_data["player_controller"]["fav_links"]:
-                raise GenericError("**O servidor não possui links fixos/favoritos.**")
+                raise GenericError("**Sunucuda sabit/favori bağlantılar yok.**")
             
             for name, v in guild_data["player_controller"]["fav_links"].items():
-                fav_opts.append(disnake.SelectOption(label=name, value=f"> pin: {name}", description="[📌 Favorito do servidor 📌]", emoji=music_source_emoji_url(v['url'])[0]))
+                fav_opts.append(disnake.SelectOption(label=name, value=f"> pin: {name}", description="[📌 Sunucu favorisi 📌]", emoji=music_source_emoji_url(v['url'])[0]))
 
             is_pin = False
 
@@ -1195,8 +1195,8 @@ class Music(commands.Cog):
             else:
                 embed = disnake.Embed(
                     color=self.bot.get_color(guild.me),
-                    description="**Selecione um item abaixo:**\n"
-                                f'Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para escolher!'
+                    description="**Aşağıdan bir ürün seçin:**\n"
+                                f'Not: sadece <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> seçim yapmak için!'
                 )
 
                 try:
