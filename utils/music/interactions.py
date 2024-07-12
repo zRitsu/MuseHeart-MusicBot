@@ -1026,7 +1026,7 @@ class FavModalAdd(disnake.ui.Modal):
                 if not self.view.bot.spotify:
                     await inter.edit_original_message(
                         embed=disnake.Embed(
-                            description="**O suporte ao spotify não está disponível no momento...**",
+                            description="**Spotify desteği şu anda kullanılamıyor...**",
                             color=disnake.Color.red()
                         )
                     )
@@ -1037,7 +1037,7 @@ class FavModalAdd(disnake.ui.Modal):
                 if url_type != "user":
                     await inter.edit_original_message(
                         embed=disnake.Embed(
-                            description=f"**Você deve usar link de um perfil de usuário do spotify.** {url}",
+                            description=f"**Bir Spotify kullanıcı profili bağlantısı kullanmalısınız.** {url}",
                             color=disnake.Color.red()
                         )
                     )
@@ -1048,7 +1048,7 @@ class FavModalAdd(disnake.ui.Modal):
                 except Exception as e:
                     await inter.edit_original_message(
                         embed=disnake.Embed(
-                            description="**Ocorreu um erro ao obter informações do spotify:** ```py\n"
+                            description="**Spotify'dan bilgi alınırken bir hata oluştu:** ```py\n"
                                         f"{repr(e)}```",
                             color=self.view.bot.get_color()
                         )
@@ -1059,7 +1059,7 @@ class FavModalAdd(disnake.ui.Modal):
                 if not result:
                     await inter.edit_original_message(
                         embed=disnake.Embed(
-                            description="**O usuário do link informado não possui playlists públicas...**",
+                            description="**Sağlanan bağlantının kullanıcısının herkese açık oynatma listeleri yok...**",
                             color=self.view.bot.get_color()
                         )
                     )
@@ -1074,7 +1074,7 @@ class FavModalAdd(disnake.ui.Modal):
                 if url_type != "profile":
                     await inter.edit_original_message(
                         embed=disnake.Embed(
-                            description=f"**Você deve usar link de um perfil de usuário do deezer.** {url}",
+                            description=f"**Deezer kullanıcı profilindeki bir bağlantıyı kullanmalısınız.** {url}",
                             color=disnake.Color.red()
                         )
                     )
@@ -1085,7 +1085,7 @@ class FavModalAdd(disnake.ui.Modal):
                 except Exception as e:
                     await inter.edit_original_message(
                         embed=disnake.Embed(
-                            description="**Ocorreu um erro ao obter informações do spotify:** ```py\n"
+                            description="**Spotify'dan bilgi alınırken bir hata oluştu:** ```py\n"
                                         f"{repr(e)}```",
                             color=self.view.bot.get_color()
                         )
@@ -1100,7 +1100,7 @@ class FavModalAdd(disnake.ui.Modal):
                 if not self.view.bot.config["USE_YTDL"]:
                     await inter.edit_original_message(
                         embed=disnake.Embed(
-                            description="**Não há suporte a esse tipo de link no momento...**",
+                            description="**Bu tür bağlantı şu anda desteklenmiyor...**",
                             color=self.view.bot.get_color()
                         )
                     )
@@ -1119,7 +1119,7 @@ class FavModalAdd(disnake.ui.Modal):
                     else:
                         await inter.edit_original_message(
                             embed=disnake.Embed(
-                                description=f"**Link informado não é suportado:** {url}",
+                                description=f"**Sağlanan bağlantı desteklenmiyor:** {url}",
                                 color=disnake.Color.red()
                             )
                         )
@@ -1133,15 +1133,15 @@ class FavModalAdd(disnake.ui.Modal):
                     info = await loop.run_in_executor(None, lambda: self.view.bot.pool.ytdl.extract_info(base_url, download=False))
                 except Exception as e:
                     traceback.print_exc()
-                    await inter.edit_original_message(f"**Ocorreu um erro ao obter informação da url:** ```py\n{repr(e)}```")
+                    await inter.edit_original_message(f"**URL'den bilgi alınırken bir hata oluştu:** ```py\n{repr(e)}```")
                     return
 
                 if not info:
 
-                    msg = f"**O usuário/canal do link informado não existe:**\n{url}"
+                    msg = f"**Sağlanan bağlantının kullanıcısı/kanalı mevcut değil:**\n{url}"
 
                     if source == "[YT]:":
-                        msg += f"\n\n`Nota: Confira se no link contém usuário com @, ex: @ytchannel`"
+                        msg += f"\n\n`Not: Bağlantının @ karakterine sahip bir kullanıcı içerip içermediğini kontrol edin; ör. @ytchannel.`"
 
                     await inter.edit_original_message(
                         embed=disnake.Embed(
@@ -1154,7 +1154,7 @@ class FavModalAdd(disnake.ui.Modal):
                 if not info['entries']:
                     await inter.edit_original_message(
                         embed=disnake.Embed(
-                            description=f"**O usuário/canal do link informado não possui playlists públicas...**",
+                            description=f"**Sağlanan bağlantıdaki kullanıcı/kanalın herkese açık oynatma listeleri yok...**",
                             color=disnake.Color.red()
                         )
                     )
@@ -1175,16 +1175,16 @@ class FavModalAdd(disnake.ui.Modal):
 
             await inter.edit_original_message(
                 embed=disnake.Embed(
-                    description=f"**Integração adicionada/editada com sucesso:** [`{title}`]({data['url']})\n"
-                                "**Ela vai aparecer nas seguintes ocasições:** ```\n"
-                                "- Ao usar o comando /play (selecionando a integração no preenchimento automático da busca)\n"
-                                "- Ao clicar no botão de tocar favorito do player.\n"
-                                "- Ao usar o comando play (prefixed) sem nome ou link.```",
+                    description=f"**Entegrasyon başarıyla eklendi/düzenlendi:** [`{title}`]({data['url']})\n"
+                                "**Aşağıdaki durumlarda ortaya çıkacak:** ```\n"
+                                "- /play komutunu kullanırken (arama otomatik tamamlamada entegrasyonu seçme))\n"
+                                "- Oyuncunun favori oynat düğmesine tıklayarak.\n"
+                                "- Oynat (önekli) komutunu isim veya bağlantı olmadan kullanırken.```",
                     color=self.view.bot.get_color(me)
                 ), view=None
             )
 
-            self.view.log = f"[`{data['title']}`]({data['url']}) foi adicionado nas suas integrações."
+            self.view.log = f"[`{data['title']}`]({data['url']}) entegrasyonlarınıza eklendi."
 
         if not isinstance(self.view.ctx, CustomContext):
             await self.view.ctx.edit_original_message(embed=self.view.build_embed(), view=self.view)
@@ -1228,18 +1228,18 @@ class FavMenuView(disnake.ui.View):
 
             mode_select = disnake.ui.Select(
                 options=[
-                    disnake.SelectOption(label="Gerenciador de Favoritos", value=f"fav_view_mode_{ViewMode.fav_manager}", emoji="⭐",
+                    disnake.SelectOption(label="Favoriler Yöneticisi", value=f"fav_view_mode_{ViewMode.fav_manager}", emoji="⭐",
                                          default=self.mode == ViewMode.fav_manager)
                 ], min_values=1, max_values=1
             )
 
             mode_select.append_option(
-                disnake.SelectOption(label="Gerenciador de Integrações", value=f"fav_view_mode_{ViewMode.integrations_manager}", emoji="💠",
+                disnake.SelectOption(label="Entegrasyon Yöneticisi", value=f"fav_view_mode_{ViewMode.integrations_manager}", emoji="💠",
                                      default=self.mode == ViewMode.integrations_manager)
             )
 
             if self.guild and (self.ctx.author.guild_permissions.manage_guild or self.is_owner):
-                mode_select.options.insert(1, disnake.SelectOption(label="Gerenciador de Playlists do Servidor",
+                mode_select.options.insert(1, disnake.SelectOption(label="Sunucu Oynatma Listesi Yöneticisi",
                                                                    value=f"fav_view_mode_{ViewMode.guild_fav_manager}", emoji="📌",
                                                                    default=self.mode == ViewMode.guild_fav_manager))
 
@@ -1302,70 +1302,70 @@ class FavMenuView(disnake.ui.View):
                 integration_select.callback = self.select_callback
                 self.add_item(integration_select)
 
-        add_button = disnake.ui.Button(label="Adicionar", emoji="<:add_music:588172015760965654>")
+        add_button = disnake.ui.Button(label="Eklemek", emoji="<:add_music:588172015760965654>")
         add_button.callback = self.add_callback
         self.add_item(add_button)
 
         if self.mode == ViewMode.fav_manager:
-            edit_button = disnake.ui.Button(label="Editar", emoji="✍️", disabled=not self.data["fav_links"])
+            edit_button = disnake.ui.Button(label="Düzenlemek için", emoji="✍️", disabled=not self.data["fav_links"])
             edit_button.callback = self.edit_callback
             self.add_item(edit_button)
 
-            remove_button = disnake.ui.Button(label="Remover", emoji="♻️", disabled=not self.data["fav_links"])
+            remove_button = disnake.ui.Button(label="Kaldır", emoji="♻️", disabled=not self.data["fav_links"])
             remove_button.callback = self.remove_callback
             self.add_item(remove_button)
 
-            clear_button = disnake.ui.Button(label="Limpar favoritos", emoji="🚮", disabled=not self.data["fav_links"])
+            clear_button = disnake.ui.Button(label="Favorileri temizle", emoji="🚮", disabled=not self.data["fav_links"])
             clear_button.callback = self.clear_callback
             self.add_item(clear_button)
 
-            export_button = disnake.ui.Button(label="Exportar", emoji="📤", disabled=not self.data["fav_links"])
+            export_button = disnake.ui.Button(label="Dışa Aktar", emoji="📤", disabled=not self.data["fav_links"])
             export_button.callback = self.export_callback
             self.add_item(export_button)
 
         elif self.mode == ViewMode.guild_fav_manager:
-            edit_button = disnake.ui.Button(label="Editar", emoji="✍️", disabled=not self.guild_data["player_controller"]["fav_links"])
+            edit_button = disnake.ui.Button(label="Düzenlemek için", emoji="✍️", disabled=not self.guild_data["player_controller"]["fav_links"])
             edit_button.callback = self.edit_callback
             self.add_item(edit_button)
 
-            remove_button = disnake.ui.Button(label="Remover", emoji="♻️", disabled=not self.guild_data["player_controller"]["fav_links"])
+            remove_button = disnake.ui.Button(label="Kaldır", emoji="♻️", disabled=not self.guild_data["player_controller"]["fav_links"])
             remove_button.callback = self.remove_callback
             self.add_item(remove_button)
 
-            clear_button = disnake.ui.Button(label="Limpar favoritos", emoji="🚮", disabled=not self.guild_data["player_controller"]["fav_links"])
+            clear_button = disnake.ui.Button(label="Favorileri temizle", emoji="🚮", disabled=not self.guild_data["player_controller"]["fav_links"])
             clear_button.callback = self.clear_callback
             self.add_item(clear_button)
 
-            export_button = disnake.ui.Button(label="Exportar", emoji="📤", disabled=not self.guild_data["player_controller"]["fav_links"])
+            export_button = disnake.ui.Button(label="Dışa Aktar", emoji="📤", disabled=not self.guild_data["player_controller"]["fav_links"])
             export_button.callback = self.export_callback
             self.add_item(export_button)
 
         elif self.mode == ViewMode.integrations_manager:
-            remove_button = disnake.ui.Button(label="Remover", emoji="♻️", disabled=not self.data["integration_links"])
+            remove_button = disnake.ui.Button(label="Kaldır", emoji="♻️", disabled=not self.data["integration_links"])
             remove_button.callback = self.remove_callback
             self.add_item(remove_button)
 
-            clear_button = disnake.ui.Button(label="Limpar Integrações", emoji="🚮", disabled=not self.data["integration_links"])
+            clear_button = disnake.ui.Button(label="Entegrasyonları Temizle", emoji="🚮", disabled=not self.data["integration_links"])
             clear_button.callback = self.clear_callback
             self.add_item(clear_button)
 
-            export_button = disnake.ui.Button(label="Exportar", emoji="📤", disabled=not self.data["integration_links"])
+            export_button = disnake.ui.Button(label="Dışa Aktar", emoji="📤", disabled=not self.data["integration_links"])
             export_button.callback = self.export_callback
             self.add_item(export_button)
 
-        import_button = disnake.ui.Button(label="Importar", emoji="📥")
+        import_button = disnake.ui.Button(label="İçe Aktar", emoji="📥")
         import_button.callback = self.import_callback
         self.add_item(import_button)
 
         if self.mode == ViewMode.fav_manager:
             if self.data["fav_links"] and not self.light_mode:
-                play_button = disnake.ui.Button(label="Tocar o favorito selecionado", emoji="▶", custom_id="favmanager_play_button")
+                play_button = disnake.ui.Button(label="Seçilen favoriyi çal", emoji="▶", custom_id="favmanager_play_button")
                 play_button.callback = self.play_callback
                 self.add_item(play_button)
 
         elif self.mode == ViewMode.integrations_manager:
             if self.data["integration_links"]:
-                play_button = disnake.ui.Button(label="Tocar uma playlist da integração selecionada", emoji="▶", custom_id="favmanager_play_button")
+                play_button = disnake.ui.Button(label="Seçilen entegrasyondan bir oynatma listesi oynatın", emoji="▶", custom_id="favmanager_play_button")
                 play_button.callback = self.play_callback
                 self.add_item(play_button)
 
@@ -1382,7 +1382,7 @@ class FavMenuView(disnake.ui.View):
 
             user, data, url = await self.bot.wait_for("fav_add", check=lambda user, data, url: user.id == self.ctx.author.id)
 
-            self.log = f"{url} foi adicionado nos seus favoritos."
+            self.log = f"{url} Favorilerinize eklendi."
 
             if not isinstance(self.ctx, CustomContext):
                 await self.ctx.edit_original_message(content=self.build_txt(), view=self)
@@ -1442,10 +1442,10 @@ class FavMenuView(disnake.ui.View):
 
         if self.mode == ViewMode.fav_manager:
 
-            txt = "### Gerenciador de favoritos.\n"
+            txt = "### Favoriler yöneticisi.\n"
 
             if not self.data["fav_links"]:
-                txt += "Você não possui favoritos (clique no botão de adicionar abaixo).\n"
+                txt += "Favorileriniz yok (aşağıdaki ekle düğmesini tıklayın).\n"
 
             else:
                 def format_fav(index, data):
@@ -1460,18 +1460,18 @@ class FavMenuView(disnake.ui.View):
                 )
 
             if not self.light_mode:
-                txt += "\n\n**Como usá-los?**\n" \
-                       f"* Usando o comando {cmd} (selecionando o favorito no preenchimento automático da busca)\n" \
-                        "* Clicando no botão/select de tocar favorito/integração do player.\n" \
-                        f"* Usando o comando {self.prefix}{self.bot.get_cog('Music').play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n" \
-                        "* Usando o botão de tocar favorito abaixo.\n"
+                txt += "\n\n**Bunları nasıl kullanıyorsunuz?**\n" \
+                       f"* {cmd} komutunu kullanma (arama otomatik tamamlamasında favoriyi seçme)\n" \
+                        "* Favori oynat düğmesine tıklamak/seçmek/oyuncu entegrasyonu.\n" \
+                        f"* Komutu kullanma {self.prefix}{self.bot.get_cog('Music').play_legacy.name} bir şarkının/videonun adını veya bağlantısını eklemeden.\n" \
+                        "* Aşağıdaki favori oynat düğmesini kullanma.\n"
 
         elif self.mode == ViewMode.guild_fav_manager:
 
-            txt = "### Gerenciador de favoritos do servidor.\n"
+            txt = "### Sunucu Sık Kullanılanları Yöneticisi.\n"
 
             if not self.guild_data["player_controller"]["fav_links"]:
-                txt += f"Não há links adicionados no bot {self.bot.user.mention} (clique no botão de adicionar abaixo).\n"
+                txt += f"Botta eklenmiş bağlantı yok {self.bot.user.mention} (Aşağıdaki ekle butonuna tıklayın).\n"
 
             else:
                 def format_gfav(index, data):
@@ -1481,20 +1481,20 @@ class FavMenuView(disnake.ui.View):
                         return f"` {index:02} ` {e} [`{name}`](<{data['url']}>)"
                     return f"` {index:02} ` [`{name}`](<{data['url']}>)"
 
-                txt += f"**Links atuais no bot {self.bot.user.mention}:**\n" + "\n".join(
+                txt += f"**Bottaki mevcut bağlantılar {self.bot.user.mention}:**\n" + "\n".join(
                     f"> {format_gfav(n+1, d)}" for n, d in enumerate(islice(self.guild_data["player_controller"]["fav_links"].items(), 25))
                 )
 
-                txt += "\n\n**Como usá-los?**\n" \
-                        f"* Usando o menu de seleção do player durante o modo de espera.\n" \
-                       f"\n`Bot selecionado:` {self.bot.user.mention}"
+                txt += "\n\n**Bunları nasıl kullanıyorsunuz?**\n" \
+                        f"* Bekleme modunda oynatıcı seçim menüsünün kullanılması.\n" \
+                       f"\n`Bot seçildi:` {self.bot.user.mention}"
 
         elif self.mode == ViewMode.integrations_manager:
 
-            txt = "### Gerenciador de integrações de canais/perfis com playlists públicas.\n"
+            txt = "### Herkese açık oynatma listelerine sahip kanal/profil entegrasyon yöneticisi.\n"
 
             if not self.data["integration_links"]:
-                txt += "**Você não possui integrações no momento (clique no botão de adicionar abaixo).**\n"
+                txt += "**Şu anda entegrasyonunuz yok (aşağıdaki ekle düğmesini tıklayın).**\n"
 
             else:
                 def format_itg(bot, index, data):
@@ -1508,20 +1508,20 @@ class FavMenuView(disnake.ui.View):
                     f"> {format_itg(self.bot, n+1, d)}" for n, d in enumerate(islice(self.data["integration_links"].items(), 25)))
 
                 if not self.light_mode:
-                    txt += "\n\n**Como usá-los?**\n" \
-                           f"* Usando o comando {cmd} (selecionando o favorito no preenchimento automático da busca)\n" \
-                           "* Clicando no botão/select de tocar favorito/integração do player.\n" \
-                           f"* Usando o comando {self.prefix}{self.bot.get_cog('Music').play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n" \
-                           "* Usando o botão de tocar favorito abaixo.\n"
+                    txt += "\n\n**Bunları nasıl kullanıyorsunuz?**\n" \
+                           f"* {cmd} komutunu kullanma (arama otomatik tamamlamasında favoriyi seçme)\n" \
+                           "* Favori oynat düğmesine tıklamak/seçmek/oyuncu entegrasyonu.\n" \
+                           f"* Komutu kullanma {self.prefix}{self.bot.get_cog('Music').play_legacy.name} bir şarkının/videonun adını veya bağlantısını eklemeden.\n" \
+                           "* Aşağıdaki favori oynat düğmesini kullanma.\n"
 
         else:
             raise GenericError(f"**Modo não implementado:** {self.mode} | {type(self.mode)}")
 
         if self.log:
-            txt += f"\n**Última interação:**\n{self.log}\n"
+            txt += f"\n**Son etkileşim:**\n{self.log}\n"
 
         if self.mode == ViewMode.integrations_manager:
-            txt += f"\n**Links de perfis/canais suportados:**\n{', '.join(supported_platforms)}"
+            txt += f"\n**Desteklenen profil/kanal bağlantıları:**\n{', '.join(supported_platforms)}"
 
         return txt
 
@@ -1531,7 +1531,7 @@ class FavMenuView(disnake.ui.View):
     async def edit_callback(self, inter: disnake.MessageInteraction):
 
         if not self.current:
-            await inter.send("Você deve selecionar um item!", ephemeral=True)
+            await inter.send("Bir öğe seçmelisiniz!", ephemeral=True)
             return
 
         if self.mode == ViewMode.fav_manager:
@@ -1540,13 +1540,13 @@ class FavMenuView(disnake.ui.View):
                     FavModalAdd(name=self.current, url=self.data["fav_links"][self.current], view=self)
                 )
             except KeyError:
-                await inter.send(f"**Não há favorito com o nome:** {self.current}", ephemeral=True)
+                await inter.send(f"**Bu isimde favori yok:** {self.current}", ephemeral=True)
 
         elif self.mode == ViewMode.guild_fav_manager:
             guild = self.bot.get_guild(inter.guild_id) or inter.guild
 
             if not guild:
-                await inter.send("Você não pode executar essa ação fora de um servidor.", ephemeral=True)
+                await inter.send("Bu eylemi sunucunun dışında gerçekleştiremezsiniz.", ephemeral=True)
                 return
             try:
                 await inter.response.send_modal(
@@ -1558,12 +1558,12 @@ class FavMenuView(disnake.ui.View):
                     )
                 )
             except KeyError:
-                await inter.send(f"**Não há favorito com nome:** {self.current}", ephemeral=True)
+                await inter.send(f"**İsmi olan bir favori yok:** {self.current}", ephemeral=True)
 
     async def remove_callback(self, inter: disnake.MessageInteraction):
 
         if not self.current:
-            await inter.send("Você deve selecionar um item!", ephemeral=True)
+            await inter.send("Bir öğe seçmelisiniz!", ephemeral=True)
             return
 
         await inter.response.defer(ephemeral=True)
@@ -1575,7 +1575,7 @@ class FavMenuView(disnake.ui.View):
             guild = self.bot.get_guild(inter.guild_id)
 
             if not guild:
-                await inter.send("Você não pode executar essa ação fora de um servidor.", ephemeral=True)
+                await inter.send("Bu eylemi sunucunun dışında gerçekleştiremezsiniz.", ephemeral=True)
                 return
 
             if not self.guild_data:
@@ -1589,7 +1589,7 @@ class FavMenuView(disnake.ui.View):
                 url = f'[`{self.current}`]({self.data["fav_links"][self.current]})'
                 del self.data["fav_links"][self.current]
             except:
-                await inter.edit_original_message(f"**Não há favorito na lista com o nome:** {self.current}")
+                await inter.edit_original_message(f"**Listede şu isimde favori yok:** {self.current}")
                 return
 
             await self.bot.update_global_data(inter.author.id, self.data, db_name=DBModel.users)
