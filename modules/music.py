@@ -43,12 +43,12 @@ from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerContro
 class Music(commands.Cog):
 
     emoji = "🎶"
-    name = "Música"
+    name = "Müzik"
     desc_prefix = f"[{emoji} {name}] | "
 
     playlist_opts = [
-        disnake.OptionChoice("Misturar Playlist", "shuffle"),
-        disnake.OptionChoice("Inverter Playlist", "reversed"),
+        disnake.OptionChoice("Karışık Çalma Listesi", "shuffle"),
+        disnake.OptionChoice("Ters Çalma Listesi", "reversed"),
     ]
 
     audio_formats = ("audio/mpeg", "audio/ogg", "audio/mp4", "audio/aac")
@@ -112,7 +112,7 @@ class Music(commands.Cog):
 
         await self.update_cache()
 
-        await ctx.send("As músicas do link foram adicionadas com sucesso em cache.", delete_after=30)
+        await ctx.send("Linkteki müzikler başarıyla önbelleğe eklendi.", delete_after=30)
 
     @commands.is_owner()
     @commands.cooldown(1, 300, commands.BucketType.default)
@@ -126,9 +126,9 @@ class Music(commands.Cog):
 
         try:
             if not self.bot.pool.playlist_cache:
-                raise GenericError("**Seu cache de playlist está vazio...**")
+                raise GenericError("**Çalma listesi önbelleğiniz boş...**")
         except KeyError:
-            raise GenericError(f"**Você ainda não usou o comando: {ctx.prefix}{self.addcache.name}**")
+            raise GenericError(f"**Sen kullanmadın: {ctx.prefix}{self.addcache.name}**")
 
         msg = None
 
@@ -152,7 +152,7 @@ class Music(commands.Cog):
                     pass
 
             if not tracks:
-                txt += f"[`❌ Falha`]({url})\n"
+                txt += f"[`❌ Başarısız`]({url})\n"
 
             else:
 
@@ -169,7 +169,7 @@ class Music(commands.Cog):
 
             embed = disnake.Embed(
                 description=txt, color=self.bot.get_color(ctx.guild.me),
-                title=f"Playlist verificadas: {counter}/{amount}"
+                title=f"Oynatma listesi doğrulandı: {counter}/{amount}"
             )
 
             if not msg:
@@ -186,11 +186,11 @@ class Music(commands.Cog):
         try:
             del self.bot.pool.playlist_cache[url]
         except KeyError:
-            raise GenericError("**Não há itens salvo em cache com a url informada...**")
+            raise GenericError("**Girdiğiniz url ile önbelleğe alınmış öğe yok...**")
 
         await self.update_cache()
 
-        await ctx.send("As músicas do link foram removidas com sucesso do cache.", delete_after=30)
+        await ctx.send("Bağlantıdaki şarkılar önbellekten başarıyla kaldırıldı.", delete_after=30)
 
     @commands.is_owner()
     @commands.command(hidden=True, aliases=["cc"])
@@ -199,11 +199,11 @@ class Music(commands.Cog):
         try:
             self.bot.pool.playlist_cache.clear()
         except KeyError:
-            raise GenericError("**Você não possui links de playlists salva em cache...**")
+            raise GenericError("**Önbelleğe alınmış oynatma listesi bağlantınız yok..**")
 
         await self.update_cache()
 
-        await ctx.send("O cache de playlist foi limpo com sucesso.", delete_after=30)
+        await ctx.send("Oynatma listesi önbelleği başarıyla temizlendi.", delete_after=30)
 
     @commands.is_owner()
     @commands.command(hidden=True, aliases=["ec"])
@@ -222,7 +222,7 @@ class Music(commands.Cog):
 
         await self.update_cache()
 
-        await ctx.send("O arquivo de cache foi importado com sucesso!", delete_after=30)
+        await ctx.send("Önbellek dosyası başarıyla içe aktarıldı!", delete_after=30)
 
     stage_cd = commands.CooldownMapping.from_cooldown(2, 45, commands.BucketType.guild)
     stage_mc = commands.MaxConcurrency(1, per=commands.BucketType.guild, wait=False)
@@ -231,7 +231,7 @@ class Music(commands.Cog):
     @pool_command(
         only_voiced=True, name="setvoicestatus", aliases=["stagevc", "togglestageannounce", "announce", "vcannounce", "setstatus",
                                                          "voicestatus", "setvcstatus", "statusvc", "vcstatus", "stageannounce"],
-        description="Ativar o sistema de anuncio/status automático do canal com o nome da música.",
+        description="Kanalın otomatik anons/durum sistemini şarkının adıyla etkinleştirin.",
         cooldown=stage_cd, max_concurrency=stage_mc, extras={"exclusive_cooldown": True},
         usage="{prefix}{cmd} <placeholders>\nEx: {track.author} - {track.title}"
     )
@@ -239,7 +239,7 @@ class Music(commands.Cog):
         await self.set_voice_status.callback(self=self, inter=ctx, template=template)
 
     @commands.slash_command(
-        description=f"{desc_prefix}Ativar/editar o sistema de anúncio/status automático do canal com o nome da música.",
+        description=f"{desc_prefix}Kanalın otomatik anons/durum sistemini şarkının adıyla etkinleştirin/düzenleyin.",
         extras={"only_voiced": True, "exclusive_cooldown": True}, cooldown=stage_cd, max_concurrency=stage_mc,
         default_member_permissions=disnake.Permissions(manage_guild=True), dm_permission=False
     )
@@ -247,7 +247,7 @@ class Music(commands.Cog):
             self, inter: disnake.AppCmdInter,
             template: str = commands.Param(
                 name="modelo", default="",
-                description="Especifique manualmente um modelo de status (inclua placeholders)."
+                description="Bir durum şablonunu manuel olarak belirleyin (yer tutucuları dahil edin)."
             )
     ):
 
@@ -264,7 +264,7 @@ class Music(commands.Cog):
             author = inter.author
 
         if not author.guild_permissions.manage_guild and not (await bot.is_owner(author)):
-            raise GenericError("**Você não possui permissão de gerenciar servidor para ativar/desativar esse sistema.**")
+            raise GenericError("**Bu sistemi etkinleştirmek/devre dışı bırakmak için sunucu yönetimi izniniz yoktur.**")
 
         if not template:
             await inter.response.defer(ephemeral=True, with_message=True)
@@ -274,7 +274,7 @@ class Music(commands.Cog):
             await view.wait()
         else:
             if not any(p in template for p in SetStageTitle.placeholders):
-                raise GenericError(f"**Você deve usar pelo menos um placeholder válido:** {SetStageTitle.placeholder_text}")
+                raise GenericError(f"**En az bir geçerli yer tutucu kullanmalısınız:** {SetStageTitle.placeholder_text}")
 
             try:
                 player = bot.music.players[inter.guild_id]
@@ -297,17 +297,17 @@ class Music(commands.Cog):
 
             await player.process_save_queue()
 
-            player.set_command_log(text="ativou o status automático", emoji="📢")
+            player.set_command_log(text="etkinleştirilen otomatik durum", emoji="📢")
 
             player.update = True
 
             if isinstance(inter, CustomContext):
-                await inter.send("**O status automático foi definido com sucesso!**")
+                await inter.send("**Otomatik durum başarıyla ayarlandı!**")
             else:
-                await inter.edit_original_message("**O status automático foi definido com sucesso!**")
+                await inter.edit_original_message("**Otomatik durum başarıyla ayarlandı!**")
 
 
-    @set_voice_status.autocomplete("modelo")
+    @set_voice_status.autocomplete("model")
     async def default_models(self, inter: disnake.Interaction, query: str):
         return [
             "{track.title} - By: {track.author} | {track.timestamp}",
@@ -326,7 +326,7 @@ class Music(commands.Cog):
     async def message_play(self, inter: disnake.MessageCommandInteraction):
 
         if not inter.target.content:
-            emb = disnake.Embed(description=f"Não há texto na [mensagem]({inter.target.jump_url}) selecionada...",
+            emb = disnake.Embed(description=f"Seçilen [mesaj] ({inter.target.jump_url}) içinde metin yok...",
                                 color=disnake.Colour.red())
             await inter.send(embed=emb, ephemeral=True)
             return
@@ -345,32 +345,32 @@ class Music(commands.Cog):
     @check_voice()
     @can_send_message_check()
     @commands.slash_command(name="search", extras={"check_player": False}, cooldown=play_cd, max_concurrency=play_mc,
-                            description=f"{desc_prefix}Buscar música e escolher uma entre os resultados para tocar.",
+                            description=f"{desc_prefix}Arama müziği ve çalmak için sonuçlardan birini seçin.",
                             dm_permission=False)
     async def search(
             self,
             inter: disnake.AppCmdInter,
-            query: str = commands.Param(name="busca", desc="Nome ou link da música."),
+            query: str = commands.Param(name="arıyor", desc="Şarkının adı veya bağlantısı."),
             *,
-            position: int = commands.Param(name="posição", description="Colocar a música em uma posição específica",
+            position: int = commands.Param(name="pozisyon", description="Müziği belirli bir konuma yerleştirin",
                                            default=0),
             force_play: str = commands.Param(
                 name="tocar_agora",
-                description="Tocar a música imediatamente (ao invés de adicionar na fila).",
+                description="Şarkıyı hemen çalın (kuyruğa eklemek yerine).",
                 default="no",
                 choices=[
                     disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
                 ]
             ),
-            options: str = commands.Param(name="opções", description="Opções para processar playlist",
+            options: str = commands.Param(name="seçenekler", description="Çalma listelerini düzenleme seçenekleri",
                                           choices=playlist_opts, default=False),
-            repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.",
+            repeat_amount: int = commands.Param(name="tekrarlar", description="tekrar sayısını ayarlayın.",
                                                 default=0),
-            server: str = commands.Param(name="server", desc="Usar um servidor de música específico na busca.",
+            server: str = commands.Param(name="sunucu", desc="Aramada belirli bir müzik sunucusu kullanın.",
                                          default=None),
             manual_bot_choice: str = commands.Param(
                 name="selecionar_bot",
-                description="Selecionar um bot disponível manualmente.",
+                description="Kullanılabilir bir botu manuel olarak seçin.",
                 default="no",
                 choices=[
                     disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
@@ -391,7 +391,7 @@ class Music(commands.Cog):
             manual_bot_choice=manual_bot_choice
         )
 
-    @search.autocomplete("busca")
+    @search.autocomplete("arıyor")
     async def search_autocomplete(self, inter: disnake.Interaction, current: str):
 
         if not current:
@@ -422,14 +422,14 @@ class Music(commands.Cog):
     @commands.max_concurrency(1, commands.BucketType.guild)
     @commands.slash_command(
         extras={"only_voiced": True}, dm_permission=False,
-        description=f"{desc_prefix}Me conectar em um canal de voz (ou me mover para um)."
+        description=f"{desc_prefix}Beni bir ses kanalına bağlayın (veya beni bir kanala taşıyın)."
     )
     async def connect(
             self,
             inter: disnake.AppCmdInter,
             channel: Union[disnake.VoiceChannel, disnake.StageChannel] = commands.Param(
-                name="canal",
-                description="Canal para me conectar"
+                name="kanal",
+                description="bağlanılacak kanal"
             )
     ):
         try:
@@ -484,8 +484,8 @@ class Music(commands.Cog):
         except KeyError:
             print(f"Player debug test 20: {bot.user} | {self.bot.user}")
             raise GenericError(
-                f"**O player do bot {bot.user.mention} foi finalizado antes de conectar no canal de voz "
-                f"(ou o player não foi inicializado)...\nPor via das dúvidas tente novamente.**"
+                f"**Botun oynatıcısı  {bot.user.mention}  ses kanalına bağlanmadan önce son haline getirildi "
+                f"(veya oynatıcı başlatılmadı)...\nHer ihtimale karşı, tekrar deneyin.**"
             )
 
         can_connect(channel, me.guild, check_other_bots_in_vc=check_other_bots_in_vc, bot=bot)
@@ -503,8 +503,8 @@ class Music(commands.Cog):
 
             if channel != me.voice and me.voice.channel:
                 txt = [
-                    f"me moveu para o canal <#{channel.id}>",
-                    f"**Movido com sucesso para o canal** <#{channel.id}>"
+                    f"Beni <#{channel.id}> kanalına taşıdı",
+                    f"** başarıyla <#{channel.id}> kanalına taşındı**"
                 ]
 
                 deafen_check = False
@@ -512,8 +512,8 @@ class Music(commands.Cog):
 
             else:
                 txt = [
-                    f"me conectou no canal <#{channel.id}>",
-                    f"**Conectei no canal** <#{channel.id}>"
+                    f"Beni <#{channel.id}> kanalına bağladı.",
+                    f"**<#{channel.id}> kanalına bağlandım.**"
                 ]
 
             await self.interaction_message(ctx, txt, emoji="🔈", rpc_update=True)
@@ -541,11 +541,11 @@ class Music(commands.Cog):
             if not await check_deafen(me):
                 await text_channel.send(
                     embed=disnake.Embed(
-                        title="Aviso:",
-                        description="Para manter sua privacidade e me ajudar a economizar "
-                                    "recursos, recomendo desativar meu áudio do canal clicando "
-                                    "com botão direito sobre mim e em seguida marcar: desativar "
-                                    "áudio no servidor.",
+                        title="Uyarı:",
+                        description="Mahremiyetinizi korumak ve kaynakları tasarruf etmenize "
+                                    "yardımcı olmak için sesimi devre dışı bırakmanızı öneriyorum. "
+                                    "Bunun için üzerime sağ tıklayın ve ardından 'Sunucuda sesi devre dışı bırak' "
+                                    "seçeneğini işaretleyin.",
                         color=self.bot.get_color(me),
                     ).set_image(
                         url="https://cdn.discordapp.com/attachments/554468640942981147/1012533546386210956/unknown.png"
@@ -564,12 +564,12 @@ class Music(commands.Cog):
             else:
                 embed = disnake.Embed(color=self.bot.get_color(me))
 
-                embed.description = f"**Preciso que algum staff me convide para falar no palco: " \
+                embed.description = f"**Sahneye konuşmacı olarak katılabilmem için bir moderatörün beni davet etmesi gerekiyor. " \
                                     f"[{channel.name}]({channel.jump_url}).**"
 
                 embed.set_footer(
-                    text="💡 Dica: para me permitir falar no palco automaticamente será necessário me conceder "
-                         "permissão de silenciar membros (no servidor ou apenas no canal de palco escolhido).")
+                    text="💡 İpucu: Sahneye otomatik olarak konuşmamı sağlamak için bana yetki vermeniz gerekecek. "
+                         "(İpucu: Sahneye otomatik olarak konuşmamı sağlamak için bana üyeleri susturma izni vermeniz gerekecek (sunucuda veya sadece seçilen sahne kanalında).")
 
                 await text_channel.send(ctx.author.mention, embed=embed, delete_after=45)
 
@@ -577,29 +577,29 @@ class Music(commands.Cog):
     @check_voice()
     @commands.bot_has_guild_permissions(send_messages=True)
     @commands.max_concurrency(1, commands.BucketType.member)
-    @pool_command(name="addposition", description="Adicionar música em uma posição especifica da fila.",
+    @pool_command(name="addposition", description="Kuyruğa belirli bir konumda müzik ekle.",
                   aliases=["adp", "addpos"], check_player=False, cooldown=play_cd, max_concurrency=play_mc,
                   usage="{prefix}{cmd} [posição(Nº)] [nome|link]\nEx: {prefix}{cmd} 2 sekai - burn me down")
     async def addpos_legacy(self, ctx: CustomContext, position: int, *, query: str):
 
         if position < 1:
-            raise GenericError("**Número da posição da fila tem que ser 1 ou superior.**")
+            raise GenericError("**Kuyruk pozisyonu numarası 1 veya daha yüksek olmalıdır.**")
 
         await self.play.callback(self=self, inter=ctx, query=query, position=position, options=False,
                                  force_play="no", manual_selection=False,
                                  repeat_amount=0, server=None)
 
     stage_flags = CommandArgparse()
-    stage_flags.add_argument('query', nargs='*', help="nome ou link da música")
-    stage_flags.add_argument('-position', '-pos', '-p', type=int, default=0, help='Colocar a música em uma posição específica da fila (será ignorado caso use -next etc).\nEx: -p 10')
-    stage_flags.add_argument('-next', '-proximo', action='store_true', help='Adicionar a música/playlist no topo da fila (equivalente ao: -pos 1)')
-    stage_flags.add_argument('-reverse', '-r', action='store_true', help='Inverter a ordem das músicas adicionadas (efetivo apenas ao adicionar playlist).')
-    stage_flags.add_argument('-shuffle', '-sl', action='store_true', help='Misturar as músicas adicionadas (efetivo apenas ao adicionar playlist).')
-    stage_flags.add_argument('-select', '-s', action='store_true', help='Escolher a música entre os resultados encontrados.')
-    stage_flags.add_argument('-force', '-now', '-n', '-f', action='store_true', help='Tocar a música adicionada imediatamente (efetivo apenas se houver uma música tocando atualmente.)')
-    stage_flags.add_argument('-loop', '-lp', type=int, default=0, help="Definir a quantidade de repetições da música escolhida.\nEx: -loop 5")
-    stage_flags.add_argument('-server', '-sv', type=str, default=None, help='Usar um servidor de música específico.')
-    stage_flags.add_argument('-selectbot', '-sb', action="store_true", help="Selecionar um bot disponível manualmente.")
+    stage_flags.add_argument('query', nargs='*', help="Şarkının adı veya bağlantısı")
+    stage_flags.add_argument('-position', '-pos', '-p', type=int, default=0, help='Şarkıyı sıranın belirli bir konumuna yerleştir (eğer next gibi komutlar kullanırsanız bu yok sayılacaktır.)\n Örnek: -p 10')
+    stage_flags.add_argument('-next', '-proximo', action='store_true', help='Şarkıyı/çalma listesini sıranın en üstüne ekle (eşittir: -pos 1)')
+    stage_flags.add_argument('-reverse', '-r', action='store_true', help='Müziklerin eklenme sırasını tersine çevir (yalnızca çalma listesi eklenirken geçerlidir).')
+    stage_flags.add_argument('-shuffle', '-sl', action='store_true', help='Eklenen müzikleri karıştır (yalnızca çalma listesi eklenirken geçerli).')
+    stage_flags.add_argument('-select', '-s', action='store_true', help='Sonuçlar arasından müziği seç.')
+    stage_flags.add_argument('-force', '-now', '-n', '-f', action='store_true', help='Eklenen müziği hemen çalmaya başlat (yalnızca şu anda bir müzik çalınıyorsa geçerli).')
+    stage_flags.add_argument('-loop', '-lp', type=int, default=0, help="Seçilen müziğin tekrar sayısını belirle.\nÖrnek: -loop 5")
+    stage_flags.add_argument('-server', '-sv', type=str, default=None, help='Belirli bir müzik sunucusunu kullanmak.')
+    stage_flags.add_argument('-selectbot', '-sb', action="store_true", help="El ile kullanılabilir bir bot seçin.")
 
     @can_send_message_check()
     @commands.bot_has_guild_permissions(send_messages=True)
