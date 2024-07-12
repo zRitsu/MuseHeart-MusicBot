@@ -1015,7 +1015,7 @@ class FavModalAdd(disnake.ui.Modal):
             except IndexError:
                 await inter.edit_original_message(
                     embed=disnake.Embed(
-                        description=f"**Nenhum link válido encontrado:** {url}",
+                        description=f"**Geçerli bağlantı bulunamadı:** {url}",
                         color=disnake.Color.red()
                     )
                 )
