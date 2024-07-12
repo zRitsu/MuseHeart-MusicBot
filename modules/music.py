@@ -2871,7 +2871,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.bot_has_guild_permissions(manage_threads=True)
     @pool_command(name="songrequestthread", aliases=["songrequest", "srt","istek","şarkı isteği"], only_voiced=True,
-                  description="Criar uma thread/conversa temporária para song-request (pedido de música)")
+                  description="Song-request (müzik isteği) için geçici bir konuşma/sohbet oluştur.")
     async def song_request_thread_legacy(self, ctx: CustomContext):
 
         await self.song_request_thread.callback(self=self, inter=ctx)
@@ -2880,7 +2880,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.slash_command(extras={"only_voiced": True}, cooldown=song_request_thread_cd, dm_permission=False,
-                            description=f"{desc_prefix}Criar uma thread/conversa temporária para song-request (pedido de música)")
+                            description=f"{desc_prefix}Song-request (müzik isteği) için geçici bir konuşma/sohbet oluştur.")
     async def song_request_thread(self, inter: disnake.AppCmdInter):
 
         try:
@@ -2891,44 +2891,40 @@ class Music(commands.Cog):
             guild = inter.guild
 
         if not self.bot.intents.message_content:
-            raise GenericError("**Atualmente não tenho a intent de message-content para conferir "
-                               "o conteúdo de mensagens**")
+            raise GenericError("**Şu anda mesaj içeriğini kontrol edemem**")
 
         player: LavalinkPlayer = bot.music.players[guild.id]
 
         if player.static:
-            raise GenericError("**Você não pode usar esse comando com um canal de song-request configurado.**")
+            raise GenericError("**Bu komutu yapılandırılmış bir şarkı-istek kanalı ile kullanamazsınız.**")
 
         if player.has_thread:
-            raise GenericError("**Já há uma thread/conversa ativa no player.**")
+            raise GenericError("**Oynatıcı'da zaten aktif bir konuşma/sohbet var**")
 
         if not isinstance(player.text_channel, disnake.TextChannel):
-            raise GenericError("**O player-controller está ativo em um canal incompatível com "
-                               "criação de thread/conversa.**")
+            raise GenericError("**Oynatıcı denetleyicisi, bir konuşma/sohbet oluşturma için uyumsuz bir kanalda aktif.**")
 
         if not player.controller_mode:
-            raise GenericError("**A skin/aparência atual não é compatível com o sistem de song-request "
-                               "via thread/conversa\n\n"
-                               "Nota:** `Esse sistema requer uma skin que use botões.`")
+            raise GenericError("**Mevcut görüntü/görünüm şarkı talep sistemi ile uyumlu değil "
+                               "Not:** `Bu sistem, düğmeler kullanan bir dış görünüm gerektirir.`")
 
         if not player.text_channel.permissions_for(guild.me).send_messages:
-            raise GenericError(f"**{bot.user.mention} não possui permissão enviar mensagens no canal {player.text_channel.mention}.**")
+            raise GenericError(f"**{bot.user.mention} adlı kişinin kanalda mesaj göndermesine izin verilmiyor {player.text_channel.mention}.**")
 
         if not player.text_channel.permissions_for(guild.me).create_public_threads:
-            raise GenericError(f"**{bot.user.mention} não possui permissão de criar tópicos públicos.**")
+            raise GenericError(f"**{bot.user.mention} adlı kişinin herkese açık konular oluşturmasına izin verilmiyor.**")
 
         if not [m for m in player.guild.me.voice.channel.members if not m.bot and
                 player.text_channel.permissions_for(m).send_messages_in_threads]:
-            raise GenericError(f"**Não há membros no canal <#{player.channel_id}> com permissão de enviar mensagens "
-                               f"em tópicos no canal {player.text_channel.mention}")
+            raise GenericError(f"**<#{player.channel_id}> kanalında mesaj gönderme izni olan üye yok")
 
         await inter.response.defer(ephemeral=True)
 
         thread = await player.message.create_thread(name=f"{bot.user.name} temp. song-request", auto_archive_duration=10080)
 
         txt = [
-            "Ativou o sistema de thread/conversa temporária para pedido de música.",
-            f"💬 **⠂{inter.author.mention} criou uma [thread/conversa]({thread.jump_url}) temporária para pedido de música.**"
+            "Müzik istekleri için geçici iş parçacığı/konuşma sistemi etkinleştirildi.",
+            f"💬 **⠂{inter.author.mention} müzik isteği için geçici bir [konuşma]({thread.jump_url}) oluşturdu.**"
         ]
 
         await self.interaction_message(inter, txt, emoji="💬", defered=True, force=True)
@@ -2940,7 +2936,7 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @pool_command(name="nightcore", aliases=["nc"], only_voiced=True, cooldown=nightcore_cd, max_concurrency=nightcore_mc,
-                  description="Ativar/Desativar o efeito nightcore (Música acelerada com tom mais agudo).")
+                  description="Nightcore efektini etkinleştirin/devre dışı bırakın (daha yüksek perdeli hızlandırılmış müzik).")
     async def nightcore_legacy(self, ctx: CustomContext):
 
         await self.nightcore.callback(self=self, inter=ctx)
@@ -2949,7 +2945,7 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @commands.slash_command(
-        description=f"{desc_prefix}Ativar/Desativar o efeito nightcore (Música acelerada com tom mais agudo).",
+        description=f"{desc_prefix}Nightcore efektini etkinleştirin/devre dışı bırakın (daha yüksek perdeli hızlandırılmış müzik).",
         extras={"only_voiced": True}, cooldown=nightcore_cd, max_concurrency=nightcore_mc, dm_permission=False,
     )
     async def nightcore(self, inter: disnake.AppCmdInter):
@@ -2965,13 +2961,14 @@ class Music(commands.Cog):
 
         if player.nightcore:
             await player.set_timescale(pitch=1.2, speed=1.1)
-            txt = "ativou"
+            txt = "akti̇f hale geti̇ri̇ldi̇"
         else:
             await player.set_timescale(enabled=False)
             await player.update_filters()
-            txt = "desativou"
+            txt = "deakti̇f hale geti̇ri̇ldi̇"
 
-        txt = [f"{txt} o efeito nightcore.", f"🇳 **⠂{inter.author.mention} {txt} o efeito nightcore.**"]
+        txt = [f"{txt} nightcore efektini aktifleştirdi.", f"🇳 **⠂{inter.author.mention} {txt} nightcore efektini aktifleştirdi.**"]
+
 
         await self.interaction_message(inter, txt, emoji="🇳")
 
@@ -2979,11 +2976,11 @@ class Music(commands.Cog):
     np_cd = commands.CooldownMapping.from_cooldown(1, 7, commands.BucketType.member)
 
     @commands.command(name="nowplaying", aliases=["np", "npl", "current", "tocando", "playing"],
-                 description="Exibir informações da música que você está ouvindo no momento.", cooldown=np_cd)
+                 description="şu anda dinlemekte olduğunuz müzikle ilgili bilgileri görüntüleyin.", cooldown=np_cd)
     async def now_playing_legacy(self, ctx: CustomContext):
         await self.now_playing.callback(self=self, inter=ctx)
 
-    @commands.slash_command(description=f"{desc_prefix}Exibir info da música que que você está ouvindo (em qualquer servidor).",
+    @commands.slash_command(description=f"{desc_prefix}Dinlediğiniz müzikle ilgili bilgileri görüntüleyin (herhangi bir sunucuda).",
                             dm_permission=False, cooldown=np_cd, extras={"allow_private": True})
     async def now_playing(self, inter: disnake.AppCmdInter):
 
