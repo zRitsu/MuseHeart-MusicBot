@@ -700,7 +700,7 @@ class FavModalImport(disnake.ui.Modal):
             for name in json_data.keys():
                 if len(name) > (max_name_chars := 25):
                     await inter.edit_original_message(
-                        f"**Um item de seu arquivo ({name}) ultrapassa a quantidade de caracteres permitido:{max_name_chars}**")
+                        f"**Dosyanızdaki ({name}) bir öğe izin verilen karakter sayısını aşıyor:{max_name_chars}**")
                     return
                 try:
                     del self.view.guild_data["player_controller"]["fav_links"][name]
@@ -709,15 +709,15 @@ class FavModalImport(disnake.ui.Modal):
 
             if (json_size := len(json_data)) > 25:
                 await inter.edit_original_message(
-                    f"A quantidade de itens no arquivo excede a quantidade máxima permitida (25).")
+                    f"Arşivdeki öğe sayısı izin verilen maksimum miktarı (25) aşıyor.")
                 return
 
             if (json_size + (user_favs := len(self.view.guild_data["player_controller"]["fav_links"]))) > 25:
                 await inter.edit_original_message(
-                    "A lista de músicas/playlist do servidor não possui espaço suficiente para adicionar todos os itens de seu arquivo...\n"
-                    f"Limite atual: 25\n"
-                    f"Quantidade de links salvos: {user_favs}\n"
-                    f"Você precisa de: {(json_size + user_favs) - 25}")
+                    "Sunucunun müzik listesi/çalma listesi, dosyanızdaki tüm öğeleri eklemek için yeterli alana sahip değil..\n"
+                    f"Akım sınırı: 25\n"
+                    f"Kaydedilen bağlantıların sayısı: {user_favs}\n"
+                    f"Gerek: {(json_size + user_favs) - 25}")
                 return
 
             self.view.guild_data["player_controller"]["fav_links"].update(json_data)
@@ -726,13 +726,13 @@ class FavModalImport(disnake.ui.Modal):
 
             guild = self.view.bot.get_guild(inter.guild_id)
 
-            await inter.edit_original_message(content="**Links fixos do servidor foram importados com sucesso!**")
+            await inter.edit_original_message(content="**Sabit sunucu bağlantıları başarıyla içe aktarıldı!**")
 
             if (s := len(json_data)) > 1:
-                self.view.log = f"{s} links foram importados com sucesso para a lista de favoritos do servidor."
+                self.view.log = f"{s} Bağlantılar başarıyla sunucunun favoriler listesine aktarıldı."
             else:
                 name = next(iter(json_data))
-                self.view.log = f"O link [`{name}`]({json_data[name]}) foi importado com sucesso para a lista de links do servidor.."
+                self.view.log = f"[`{name}`]({json_data[name]}) bağlantısı başarıyla sunucunun bağlantı listesine aktarıldı."
 
             await process_idle_embed(self.view.bot, guild, guild_data=self.view.guild_data)
 
@@ -741,7 +741,7 @@ class FavModalImport(disnake.ui.Modal):
             if retry_after := self.view.bot.get_cog("Music").fav_import_export_cd.get_bucket(inter).update_rate_limit():
                 if retry_after < 1:
                     retry_after = 1
-                await inter.send("**Você deve aguardar {} para importar.**".format(
+                await inter.send("**{}'ın içe aktarılmasını beklemelisiniz.**".format(
                     time_format(int(retry_after) * 1000, use_names=True)), ephemeral=True)
                 return
 
@@ -752,11 +752,11 @@ class FavModalImport(disnake.ui.Modal):
 
                 if len(url) > (max_url_chars := 150):
                     await inter.edit_original_message(
-                        f"**Um item de seu arquivo {url} ultrapassa a quantidade de caracteres permitido:{max_url_chars}**")
+                        f"**{url} dosyanızdaki bir öğe izin verilen karakter sayısını aşıyor:{max_url_chars}**")
                     return
 
                 if not isinstance(url, str) or not URL_REG.match(url):
-                    await inter.edit_original_message(f"O seu arquivo contém link inválido: ```ldif\n{url}```")
+                    await inter.edit_original_message(f"Dosyanız geçersiz bir bağlantı içeriyor: ```ldif\n{url}```")
                     return
 
             await inter.response.defer(ephemeral=True)
@@ -772,17 +772,17 @@ class FavModalImport(disnake.ui.Modal):
             if self.view.bot.config["MAX_USER_INTEGRATIONS"] > 0 and not (await self.view.bot.is_owner(inter.author)):
 
                 if (json_size := len(json_data)) > self.view.bot.config["MAX_USER_INTEGRATIONS"]:
-                    await inter.edit_original_message(f"A quantidade de itens no seu arquivo de integrações excede "
-                                       f"a quantidade máxima permitida ({self.view.bot.config['MAX_USER_INTEGRATIONS']}).")
+                    await inter.edit_original_message(f"Entegrasyon dosyanızdaki öğe sayısı şunu aşıyor: "
+                                       f"izin verilen maksimum miktar ({self.view.bot.config['MAX_USER_INTEGRATIONS']}).")
                     return
 
                 if (json_size + (user_integrations := len(self.view.data["integration_links"]))) > self.view.bot.config[
                     "MAX_USER_INTEGRATIONS"]:
                     await inter.edit_original_message(
-                        "Você não possui espaço suficiente para adicionar todos as integrações de seu arquivo...\n"
-                        f"Limite atual: {self.view.bot.config['MAX_USER_INTEGRATIONS']}\n"
-                        f"Quantidade de integrações salvas: {user_integrations}\n"
-                        f"Você precisa de: {(json_size + user_integrations) - self.view.bot.config['MAX_USER_INTEGRATIONS']}")
+                        "Dosyanızdaki tüm entegrasyonları eklemek için yeterli alanınız yok...\n"
+                        f"Akım sınırı: {self.view.bot.config['MAX_USER_INTEGRATIONS']}\n"
+                        f"Kaydedilen entegrasyonların sayısı: {user_integrations}\n"
+                        f"Gerek: {(json_size + user_integrations) - self.view.bot.config['MAX_USER_INTEGRATIONS']}")
                     return
 
             self.view.data["integration_links"].update(json_data)
@@ -790,14 +790,14 @@ class FavModalImport(disnake.ui.Modal):
             await self.view.bot.update_global_data(inter.author.id, self.view.data, db_name=DBModel.users)
 
             await inter.edit_original_message(
-                content="**Integrações importadas com sucesso!**"
+                content="**Entegrasyonlar başarıyla içe aktarıldı!**"
             )
 
             if (s := len(json_data)) > 1:
-                self.view.log = f"{s} integrações foram importadas com sucesso."
+                self.view.log = f"{s} entegrasyonlar başarıyla içe aktarıldı."
             else:
                 name = next(iter(json_data))
-                self.view.log = f"A integração [`{name}`]({json_data[name]}) foi importada com sucesso."
+                self.view.log = f"[`{name}`]({json_data[name]}) entegrasyonu başarıyla içe aktarıldı."
 
         else:
             raise GenericError(f"**Modo ainda não implementado: {self.view.mode} | {type(self.view.mode)}**")
@@ -816,12 +816,12 @@ class FavModalAdd(disnake.ui.Modal):
 
         if self.view.mode == ViewMode.fav_manager:
             super().__init__(
-                title="Adicionar/Editar playlist/favorito",
+                title="Çalma listesi/favori Ekle/Düzenle",
                 custom_id="user_fav_edit",
                 timeout=180,
                 components=[
                     disnake.ui.TextInput(
-                        label="Nome da playlist/favorito:",
+                        label="Playlist Favori/Favorileri:",
                         custom_id="user_fav_name",
                         min_length=2,
                         max_length=25,
@@ -840,19 +840,19 @@ class FavModalAdd(disnake.ui.Modal):
 
         if self.view.mode == ViewMode.guild_fav_manager:
             super().__init__(
-                title="Adicionar/Editar playlist/favorito",
+                title="Çalma listesi/favori Ekle/Düzenle",
                 custom_id="guild_fav_edit",
                 timeout=180,
                 components=[
                     disnake.ui.TextInput(
-                        label="Nome do favorito/playlist:",
+                        label="Favori/çalma listesi adı:",
                         custom_id="guild_fav_name",
                         min_length=2,
                         max_length=25,
                         value=name or None
                     ),
                     disnake.ui.TextInput(
-                        label="Descrição:",
+                        label="Açıklama:",
                         custom_id="guild_fav_description",
                         min_length=3,
                         max_length=50,
@@ -872,7 +872,7 @@ class FavModalAdd(disnake.ui.Modal):
 
         if self.view.mode == ViewMode.integrations_manager:
             super().__init__(
-                title="Adicionar integração",
+                title="Entegrasyon ekle",
                 custom_id="user_integration_add",
                 timeout=180,
                 components=[
@@ -887,7 +887,7 @@ class FavModalAdd(disnake.ui.Modal):
             )
             return
 
-        raise GenericError(f"**Modo ainda não implementado: {self.view.mode} | {type(self.view.mode)}**")
+        raise GenericError(f"**Henüz uygulanmayan mod: {self.view.mode} | {type(self.view.mode)}**")
 
 
     async def callback(self, inter: disnake.ModalInteraction):
@@ -901,7 +901,7 @@ class FavModalAdd(disnake.ui.Modal):
             except IndexError:
                 await inter.send(
                     embed=disnake.Embed(
-                        description=f"**Nenhum link válido encontrado:** {url}",
+                        description=f"**Geçerli bağlantı bulunamadı:** {url}",
                         color=disnake.Color.red()
                     ), ephemeral=True
                 )
@@ -919,7 +919,7 @@ class FavModalAdd(disnake.ui.Modal):
             except KeyError:
                 if len(self.view.data["fav_links"]) >= self.view.bot.config["MAX_USER_FAVS"]:
                     await inter.edit_original_message(
-                        "**Não há espaço disponível para adicionar novos favorito (remova algum e tente novamente).**")
+                        "**Yeni favoriler eklemek için kullanılabilir alan yok (bazılarını kaldırıp tekrar deneyin).**")
                     return
 
             self.view.data["fav_links"][name] = valid_url
@@ -933,11 +933,11 @@ class FavModalAdd(disnake.ui.Modal):
 
             await inter.edit_original_message(
                 embed=disnake.Embed(
-                    description="**Link salvo/atualizado com sucesso nos seus favoritos!\n"
-                                "Ele vai aparecer nas seguintes ocasições:** ```\n"
-                                "- Ao usar o comando /play (selecionando no preenchimento automático da busca)\n"
-                                "- Ao clicar no botão de tocar favorito do player.\n"
-                                "- Ao usar o comando play (prefixed) sem nome ou link.```",
+                    description="**Bağlantı favorilerinize başarıyla kaydedildi/güncellendi!\n"
+                                "Aşağıdaki durumlarda görünecektir:** ```\n"
+                                "- /play komutunu kullanırken (arama otomatik tamamlamada seçim)\n"
+                                "- Oyuncunun favori oynat düğmesine tıklayarak.\n"
+                                "- Oynat (önekli) komutunu isim veya bağlantı olmadan kullanırken.```",
                     color=self.view.bot.get_color(me)
                 )
             )
@@ -950,7 +950,7 @@ class FavModalAdd(disnake.ui.Modal):
             except IndexError:
                 await inter.send(
                     embed=disnake.Embed(
-                        description=f"**Nenhum link válido encontrado:** {url}",
+                        description=f"**Geçerli bağlantı bulunamadı:** {url}",
                         color=disnake.Color.red()
                     ), ephemeral=True
                 )
@@ -962,7 +962,7 @@ class FavModalAdd(disnake.ui.Modal):
 
             if not self.view.guild_data["player_controller"]["channel"] or not self.view.bot.get_channel(
                     int(self.view.guild_data["player_controller"]["channel"])):
-                await inter.edit_original_message("**Não há player configurado no servidor! Use o comando /setup**")
+                await inter.edit_original_message("**Sunucuda yapılandırılmış oyuncu yok! /setup komutunu kullanın**")
                 return
 
             name = inter.text_values["guild_fav_name"].strip()
@@ -970,7 +970,7 @@ class FavModalAdd(disnake.ui.Modal):
 
             if not self.view.guild_data["player_controller"]["channel"] or not self.view.bot.get_channel(
                     int(self.view.guild_data["player_controller"]["channel"])):
-                await inter.edit_original_message("**Não há player configurado no servidor! Use o comando /setup**")
+                await inter.edit_original_message("**Sunucuda yapılandırılmış oyuncu yok! /setup komutunu kullanın**")
                 return
 
             try:
@@ -978,7 +978,7 @@ class FavModalAdd(disnake.ui.Modal):
                     del self.view.guild_data["player_controller"]["fav_links"][self.name]
             except KeyError:
                 if len(self.view.guild_data["player_controller"]["fav_links"]) > 24:
-                    await inter.edit_original_message("**Não há espaço disponível para adicionar novos favorito (remova algum e tente novamente).**")
+                    await inter.edit_original_message("**Yeni favoriler eklemek için kullanılabilir alan yok (bazılarını kaldırıp tekrar deneyin).**")
                     return
 
             self.view.guild_data["player_controller"]["fav_links"][name] = {'url': valid_url, "description": description}
@@ -988,8 +988,8 @@ class FavModalAdd(disnake.ui.Modal):
             guild = inter.guild or self.view.bot.get_guild(inter.guild_id)
 
             await inter.edit_original_message(
-                embed=disnake.Embed(description="**Link adicionado/atualizado com sucesso nos fixos do player!\n"
-                                                "Membros podem usá-lo diretamente no player-controller quando não estiver em uso.**",
+                embed=disnake.Embed(description="**Bağlantı oyuncunun sabit hatlarına başarıyla eklendi/güncellendi!\n"
+                                                "Üyeler, kullanılmadığında doğrudan oynatıcı-kontrol cihazında kullanabilir.**",
                                     color=self.view.bot.get_color(guild.me)), view=None)
 
             await process_idle_embed(self.view.bot, guild, guild_data=self.view.guild_data)
@@ -1005,7 +1005,7 @@ class FavModalAdd(disnake.ui.Modal):
 
             if len(self.view.data["integration_links"]) >= self.view.bot.config["MAX_USER_FAVS"]:
                 await inter.edit_original_message(
-                    "**Não há espaço disponível para adicionar novas integrações (remova alguma e tente novamente).**")
+                    "**Yeni entegrasyonlar eklemek için kullanılabilir alan yok (herhangi birini kaldırıp tekrar deneyin).**")
                 return
 
             url = inter.text_values["user_integration_url"].strip()
