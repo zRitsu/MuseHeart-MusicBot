@@ -4535,12 +4535,12 @@ class Music(commands.Cog):
     @is_dj()
     @commands.cooldown(1, 10, commands.BucketType.guild)
     @commands.slash_command(
-        description=f"{desc_prefix}Migrar o player para outro servidor de música.", dm_permission=False
+        description=f"{desc_prefix}Oynatıcı'yı başka bir müzik sunucusuna taşı.", dm_permission=False
     )
     async def change_node(
             self,
             inter: disnake.AppCmdInter,
-            node: str = commands.Param(name="servidor", description="Servidor de música")
+            node: str = commands.Param(name="servidor", description="Müzik sunucusu")
     ):
 
         try:
