@@ -4549,12 +4549,12 @@ class Music(commands.Cog):
             bot = inter.bot
 
         if node not in bot.music.nodes:
-            raise GenericError(f"O servidor de música **{node}** não foi encontrado.")
+            raise GenericError(f"Müzik sunucusu **{node}** bulunamadı.")
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         if node == player.node.identifier:
-            raise GenericError(f"O player já está no servidor de música **{node}**.")
+            raise GenericError(f"Oynatıcı zaten **{node}** müzik sunucusunda.")
 
         await inter.response.defer(ephemeral=True)
 
@@ -4562,17 +4562,17 @@ class Music(commands.Cog):
 
         player.native_yt = True
 
-        embed = disnake.Embed(description=f"**O player foi migrado para o servidor de música:** `{node}`",
+        embed = disnake.Embed(description=f"**Oynatıcı müzik sunucusuna taşındı:** `{node}`",
                               color=self.bot.get_color(player.guild.me))
 
         try:
             if bot.user.id != self.bot.user.id:
-                embed.set_footer(text=f"Bot selecionado: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
+                embed.set_footer(text=f"Bot seçildi: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
         except AttributeError:
             pass
 
         player.set_command_log(
-            text=f"{inter.author.mention} migrou o player para o servidor de música **{node}**",
+            text=f"{inter.author.mention} oynatıcıyı müzik sunucusuna taşıdı **{node}**",
             emoji="🌎"
         )
 
@@ -4608,7 +4608,7 @@ class Music(commands.Cog):
         return [n.identifier for n in bot.music.nodes.values() if n != node
                 and query.lower() in n.identifier.lower() and n.available and n.is_available]
 
-    @commands.command(aliases=["puptime"], description="Ver informações de tempo que o player está ativo no servidor.")
+    @commands.command(aliases=["puptime"], description="Oynatıcının sunucuda aktif olduğu süre bilgilerini görüntüleyin.")
     @commands.cooldown(1, 5, commands.BucketType.guild)
     async def playeruptime(self, ctx: CustomContext):
 
@@ -4623,7 +4623,7 @@ class Music(commands.Cog):
                 continue
 
         if not uptime_info:
-            raise GenericError("**Não há players ativos no servidor.**")
+            raise GenericError("**Sunucuda aktif oynatıcı yok.**")
 
         await ctx.reply(
             embed=disnake.Embed(
@@ -4639,13 +4639,13 @@ class Music(commands.Cog):
     @commands.command(name="favmanager", aliases=["favs", "favoritos", "fvmgr", "favlist",
                                                   "integrations", "integrationmanager", "itg", "itgmgr", "itglist", "integrationlist",
                                                   "serverplaylist", "spl", "svp", "svpl"],
-                      description="Gerenciar seus favoritos/integrações e links do server.", cooldown=fav_cd)
+                      description="Favorilerinizi/entegrasyonlarınızı ve sunucu bağlantılarını yönetin.", cooldown=fav_cd)
     async def fav_manager_legacy(self, ctx: CustomContext):
         await self.fav_manager.callback(self=self, inter=ctx)
 
     @commands.max_concurrency(1, commands.BucketType.member, wait=False)
     @commands.slash_command(
-        description=f"{desc_prefix}Gerenciar seus favoritos/integrações e links do server.",
+        description=f"{desc_prefix}Favorilerinizi/entegrasyonlarınızı ve sunucu bağlantılarını yönetin.",
         cooldown=fav_cd, dm_permission=False, extras={"allow_private": True})
     async def fav_manager(self, inter: disnake.AppCmdInter):
 
@@ -4698,8 +4698,8 @@ class Music(commands.Cog):
         txt = view.build_txt()
 
         if not txt:
-            raise GenericError("**Não há suporte a esse recurso no momento...**\n\n"
-                             "`Suporte ao spotify e YTDL não estão ativados.`")
+            raise GenericError("**Şu anda bu özellik desteklenmiyor...**\n\n"
+                               "`Spotify ve YTDL desteği etkin değil.`")
 
         view.message = await inter.send(txt, view=view, ephemeral=ephemeral)
 
@@ -4755,7 +4755,7 @@ class Music(commands.Cog):
 
                 if not vc:
                     print(
-                        f"{self.bot.user} - {player.guild.name} [{guild_id}] - Player finalizado por falta de canal de voz")
+                        f"{self.bot.user} - {player.guild.name} [{guild_id}] - Ses kanalı eksik olduğu için oynatıcı sonlandırıldı")
                     try:
                         await player.destroy()
                     except:
@@ -4766,7 +4766,7 @@ class Music(commands.Cog):
 
                 if not player.is_paused and not player.is_playing:
                     await player.process_next()
-                print(f"{self.bot.user} - {player.guild.name} [{guild_id}] - Player Reconectado no canal de voz")
+                print(f"{self.bot.user} - {player.guild.name} [{guild_id}] - Ses kanalında oynatıcı yeniden bağlandı")
             except:
                 traceback.print_exc()
 
