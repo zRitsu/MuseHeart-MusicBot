@@ -1168,11 +1168,11 @@ class MusicSettings(commands.Cog):
         global_selected = global_data["player_skin"] or bot.pool.default_skin
         global_static_selected = global_data["player_skin_static"] or bot.pool.default_static_skin
 
-        skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Normal Mod: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "Gerçek Skin"} if selected == s else {}) for s in skin_list + add_skin_prefix(global_data["custom_skins"])]
-        static_skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Şarkı İsteği: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "Gerçek Skin"} if static_selected == s else {}) for s in static_skin_list + add_skin_prefix(global_data["custom_skins_static"])]
+        skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Normal Mod: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "Aktif Skin"} if selected == s else {}) for s in skin_list + add_skin_prefix(global_data["custom_skins"])]
+        static_skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Şarkı İsteği: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "Aktif Skin"} if static_selected == s else {}) for s in static_skin_list + add_skin_prefix(global_data["custom_skins_static"])]
 
-        global_skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Normal Mod: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "Gerçek Skin"} if global_selected == s else {}) for s in skin_list + add_skin_prefix(global_data["custom_skins"])]
-        global_static_skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Şarkı İsteği: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "Gerçek Skin"} if global_static_selected == s else {}) for s in static_skin_list + add_skin_prefix(global_data["custom_skins_static"])]
+        global_skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Normal Mod: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "Aktif Skin"} if global_selected == s else {}) for s in skin_list + add_skin_prefix(global_data["custom_skins"])]
+        global_static_skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Şarkı İsteği: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "Aktif Skin"} if global_static_selected == s else {}) for s in static_skin_list + add_skin_prefix(global_data["custom_skins_static"])]
 
         embed = disnake.Embed(
             description="```ansi\n[31;1mNormal Mod:[0m``` " + ", ".join(f"[`[{s}]`]({bot.player_skins[s].preview})" for s in skin_list) + "\n\n" 
