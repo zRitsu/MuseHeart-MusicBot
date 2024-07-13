@@ -1168,16 +1168,16 @@ class MusicSettings(commands.Cog):
         global_selected = global_data["player_skin"] or bot.pool.default_skin
         global_static_selected = global_data["player_skin_static"] or bot.pool.default_static_skin
 
-        skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Modo normal: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "skin atual"} if selected == s else {}) for s in skin_list + add_skin_prefix(global_data["custom_skins"])]
-        static_skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Song-Request: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "skin atual"} if static_selected == s else {}) for s in static_skin_list + add_skin_prefix(global_data["custom_skins_static"])]
+        skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Normal Mod: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "Gerçek Skin"} if selected == s else {}) for s in skin_list + add_skin_prefix(global_data["custom_skins"])]
+        static_skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Song-Request: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "Gerçek Skin"} if static_selected == s else {}) for s in static_skin_list + add_skin_prefix(global_data["custom_skins_static"])]
 
-        global_skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Modo Normal: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "skin atual"} if global_selected == s else {}) for s in skin_list + add_skin_prefix(global_data["custom_skins"])]
-        global_static_skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Song-Request: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "skin atual"} if global_static_selected == s else {}) for s in static_skin_list + add_skin_prefix(global_data["custom_skins_static"])]
+        global_skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Normal Mod: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "Gerçek Skin"} if global_selected == s else {}) for s in skin_list + add_skin_prefix(global_data["custom_skins"])]
+        global_static_skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Song-Request: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "Gerçek Skin"} if global_static_selected == s else {}) for s in static_skin_list + add_skin_prefix(global_data["custom_skins_static"])]
 
         embed = disnake.Embed(
-            description="```ansi\n[31;1mModo Normal:[0m``` " + ", ".join(f"[`[{s}]`]({bot.player_skins[s].preview})" for s in skin_list) + "\n\n" 
-                        "```ansi\n[33;1mModo Fixo (Song-Request):[0m``` " + ", ".join(f"[`[{s}]`]({bot.player_static_skins[s].preview})" for s in static_skin_list) +
-                        "\n\n`Nota: No modo global a skin será aplicada globalmente em todos os bots.`",
+            description="```ansi\n[31;1mNormal Mod:[0m``` " + ", ".join(f"[`[{s}]`]({bot.player_skins[s].preview})" for s in skin_list) + "\n\n" 
+                        "```ansi\n[33;1mSabit Mod (Song-Request):[0m``` " + ", ".join(f"[`[{s}]`]({bot.player_static_skins[s].preview})" for s in static_skin_list) +
+                        "\n\n`Not: Genel(Global) modda dış görünüm tüm botlara genel olarak uygulanacaktır.`",
             colour=bot.get_color(guild.me)
         ).set_image("https://cdn.discordapp.com/attachments/554468640942981147/1082887587770937455/rainbow_bar2.gif")
 
@@ -1249,15 +1249,15 @@ class MusicSettings(commands.Cog):
 
             if global_selected != select_view.skin_selected:
                 try:
-                    changed_skins_txt += f"Global - Modo Normal: [`{select_view.skin_selected}`]({self.bot.player_skins[select_view.skin_selected].preview})\n"
+                    changed_skins_txt += f"Global - Normal Mod: [`{select_view.skin_selected}`]({self.bot.player_skins[select_view.skin_selected].preview})\n"
                 except:
-                    changed_skins_txt += f"Global - Modo Normal: `{select_view.skin_selected.replace('> custom_skin: ', '[custom skin]: ')}`\n"
+                    changed_skins_txt += f"Global - Normal Mod: `{select_view.skin_selected.replace('> custom_skin: ', '[custom skin]: ')}`\n"
 
             if global_static_selected != select_view.static_skin_selected:
                 try:
-                    changed_skins_txt += f"Global - Song Request: [`{select_view.static_skin_selected}`]({self.bot.player_static_skins[select_view.static_skin_selected].preview})\n"
+                    changed_skins_txt += f"Global - Şarkı İsteği: [`{select_view.static_skin_selected}`]({self.bot.player_static_skins[select_view.static_skin_selected].preview})\n"
                 except:
-                    changed_skins_txt += f"Global - Song Request: `{select_view.static_skin_selected.replace('> custom_skin: ', '[custom skin]: ')}`\n"
+                    changed_skins_txt += f"Global - Şarkı İsteği: `{select_view.static_skin_selected.replace('> custom_skin: ', '[custom skin]: ')}`\n"
 
         else:
             guild_data["player_controller"]["skin"] = select_view.skin_selected
@@ -1266,18 +1266,18 @@ class MusicSettings(commands.Cog):
 
             if selected != select_view.skin_selected:
                 try:
-                    changed_skins_txt += f"Modo Normal: [`{select_view.skin_selected}`]({self.bot.player_skins[select_view.skin_selected].preview})\n"
+                    changed_skins_txt += f"Normal Mod: [`{select_view.skin_selected}`]({self.bot.player_skins[select_view.skin_selected].preview})\n"
                 except:
-                    changed_skins_txt += f"Modo Normal: `{select_view.skin_selected.replace('> custom_skin: ', '[custom skin]: ')}`\n"
+                    changed_skins_txt += f"Normal Mod: `{select_view.skin_selected.replace('> custom_skin: ', '[custom skin]: ')}`\n"
 
             if static_selected != select_view.static_skin_selected:
                 try:
-                    changed_skins_txt += f"Song Request: [`{select_view.static_skin_selected}`]({self.bot.player_static_skins[select_view.static_skin_selected].preview})\n"
+                    changed_skins_txt += f"Şarkı İsteği: [`{select_view.static_skin_selected}`]({self.bot.player_static_skins[select_view.static_skin_selected].preview})\n"
                 except:
-                    changed_skins_txt += f"Song Request: `{select_view.static_skin_selected.replace('> custom_skin: ', '[custom skin]: ')}`\n"
+                    changed_skins_txt += f"Şarkı İsteği: `{select_view.static_skin_selected.replace('> custom_skin: ', '[custom skin]: ')}`\n"
 
         if global_mode != select_view.global_mode:
-            changed_skins_txt += "Skin Global: `" + ("Ativado" if select_view.global_mode else "Desativado") + "`\n"
+            changed_skins_txt += "Global Skin: `" + ("Aktif" if select_view.global_mode else "Kapalı") + "`\n"
 
         if not changed_skins_txt:
             txt = "**Cilt ayarlarında herhangi bir değişiklik yapılmadı...**"
