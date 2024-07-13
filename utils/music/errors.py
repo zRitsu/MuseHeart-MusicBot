@@ -181,17 +181,17 @@ def parse_error(
     elif isinstance(error, commands.MaxConcurrencyReached):
         txt = f"{error.number} vezes " if error.number > 1 else ''
         txt = {
-            commands.BucketType.member: f"Sunucuda bu {txt} komutunu hiç kullandınız mı?",
-            commands.BucketType.guild: f"bu komut sunucuda zaten {txt} kullanıldı",
-            commands.BucketType.user: f"Bu komutu hiç kullandınız mı? {txt}",
-            commands.BucketType.channel: f"bu komut mevcut kanalda {txt} zaten kullanıldı",
-            commands.BucketType.category: f"bu komut mevcut kanal kategorisinde zaten {txt} kullanıldı",
-            commands.BucketType.role: f"bu komut, izin verilen konuma sahip bir üye tarafından zaten {txt} kullanıldı",
-            commands.BucketType.default: f"bu komut zaten birisi tarafından {txt} kullanıldı"
+            commands.BucketType.member: f"bu komutu {txt} sunucuda zaten kullandınız",
+            commands.BucketType.guild: f"bu komut {txt} sunucuda zaten kullanıldı",
+            commands.BucketType.user: f"bu komutu {txt} zaten kullandınız",
+            commands.BucketType.channel: f"bu komut {txt} mevcut kanalda zaten kullanıldı",
+            commands.BucketType.category: f"bu komut {txt} mevcut kanalın kategorisinde zaten kullanıldı",
+            commands.BucketType.role: f"bu komut {txt} izin verilen role sahip bir üye tarafından zaten kullanıldı",
+            commands.BucketType.default: f"bu komut {txt} birisi tarafından zaten kullanıldı"
         }
 
-        error_txt = f"{ctx.author.mention} **{txt[error.per]} ve henüz seninkine sahip olmadın{'ız' if error.number > 1 else ''} " \
-                    f"kullanılan{'lar' if error.number > 1 else ''} biten{'ler' if error.number > 1 else ''}!**"
+        error_txt = f"{ctx.author.mention} **{txt[error.per]} ve hala kullanımınız bitmemiş {' ' if error.number > 1 else ''} " \
+                    f" {' ' if error.number > 1 else ''}  {' ' if error.number > 1 else ''}!**"
 
     elif isinstance(error, TrackNotFound):
         error_txt = "**Aramanıza ilişkin hiç sonuç bulunamadı...**"
