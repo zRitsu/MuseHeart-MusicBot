@@ -260,7 +260,7 @@ class HelpCog(commands.Cog, name="Ajuda"):
 
             elif not cmd.cog or not hasattr(cmd.cog, 'name') or len(cmd.cog.get_commands()) < 2:
                 if not "🔰" in cmdlst:
-                    cmdlst["🔰"] = ("Birçok", [])
+                    cmdlst["🔰"] = ("Bot", [])
                 cmdlst["🔰"][1].append(cmd)
 
             else:

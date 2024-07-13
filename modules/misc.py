@@ -48,7 +48,7 @@ def remove_blank_spaces(d):
 class Misc(commands.Cog):
 
     emoji = "🔰"
-    name = "Birçok"
+    name = "Bot"
     desc_prefix = f"[{emoji} {name}] | "
 
     def __init__(self, bot: BotCore):

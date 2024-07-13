@@ -90,7 +90,7 @@ class SkinSelector(disnake.ui.View):
         self.clear_items()
 
         if not self.global_mode:
-            self.embed.title = "Seletor de skin (Seçilen bota uygula)"
+            self.embed.title = "Görünüm seçici (Seçilen bota uygula)"
 
             for s in self.select_opts:
                 s.default = self.skin_selected == s.value
@@ -102,7 +102,7 @@ class SkinSelector(disnake.ui.View):
             static_select_opts = self.static_select_opts
 
         else:
-            self.embed.title = "Seletor de skin (Sunucudaki tüm botlara uygulayın)"
+            self.embed.title = "Görünüm seçici (Sunucudaki tüm botlara uygulayın)"
 
             for s in self.global_select_opts:
                 s.default = self.skin_selected == s.value
@@ -121,15 +121,15 @@ class SkinSelector(disnake.ui.View):
         static_select_opts.callback = self.static_skin_callback
         self.add_item(static_select_opts)
 
-        global_mode = disnake.ui.Button(label=("Desativar" if self.global_mode else "Ativar") + " modo Global ", emoji="🌐")
+        global_mode = disnake.ui.Button(label=("Devredışı Bırak" if self.global_mode else "Etkinleştir") + " Global Mod ", emoji="🌐")
         global_mode.callback = self.mode_callback
         self.add_item(global_mode)
 
-        confirm_button = disnake.ui.Button(label="Salvar", emoji="💾")
+        confirm_button = disnake.ui.Button(label="Kaydet", emoji="💾")
         confirm_button.callback = self.confirm_callback
         self.add_item(confirm_button)
 
-        cancel_button = disnake.ui.Button(label="Cancelar", emoji="❌")
+        cancel_button = disnake.ui.Button(label="İptal", emoji="❌")
         cancel_button.callback = self.stop_callback
         self.add_item(cancel_button)
 
@@ -138,7 +138,7 @@ class SkinSelector(disnake.ui.View):
         if inter.author.id == self.ctx.author.id:
             return True
 
-        await inter.send(f"Apenas {self.ctx.author.mention} buradan etkileşime geçebilirsiniz!", ephemeral=True)
+        await inter.send(f"Sadece {self.ctx.author.mention} buradan etkileşime geçebilir!", ephemeral=True)
         return False
 
     async def skin_callback(self, inter: disnake.MessageInteraction):
@@ -186,10 +186,10 @@ class PlayerSettings(disnake.ui.View):
         player_volume_select = disnake.ui.Select(
             placeholder="Standart bir birim seçin.",
             options=[
-                        disnake.SelectOption(label=f"Standart hacim: {i}", default=i == self.default_player_volume,
+                        disnake.SelectOption(label=f"Standart Ses: {i}", default=i == self.default_player_volume,
                                              value=str(i)) for i in range(5, 101, 5)
                     ] + [
-                disnake.SelectOption(label=f"Standart hacim: {i}", default=i == self.default_player_volume,
+                disnake.SelectOption(label=f"Standart Ses: {i}", default=i == self.default_player_volume,
                                      description="Not: Yüzde 100'ün üzerinde ses kötü olabilir.",
                                      value=str(i)) for i in range(110, 151, 10)
             ]
@@ -292,7 +292,7 @@ class PlayerSettings(disnake.ui.View):
 class MusicSettings(commands.Cog):
 
     emoji = "🔧"
-    name = "Configurações"
+    name = "Ayarlar"
     desc_prefix = f"[{emoji} {name}] | "
 
     def __init__(self, bot: BotCore):
@@ -547,13 +547,13 @@ class MusicSettings(commands.Cog):
                         kwargs_msg = {"ephemeral": True}
 
             buttons = [
-                disnake.ui.Button(label="Criar canal de texto", custom_id=f"text_channel_{id_}", emoji="💬", disabled=not guild.me.guild_permissions.manage_channels),
-                disnake.ui.Button(label="Criar canal de voz", custom_id=f"voice_channel_{id_}", emoji="🔊", disabled=not guild.me.guild_permissions.manage_channels),
-                disnake.ui.Button(label="Cancelar", custom_id=f"voice_channel_cancel_{id_}", emoji="❌")
+                disnake.ui.Button(label="Metin kanalı oluştur", custom_id=f"text_channel_{id_}", emoji="💬", disabled=not guild.me.guild_permissions.manage_channels),
+                disnake.ui.Button(label="Ses kanalı oluştur", custom_id=f"voice_channel_{id_}", emoji="🔊", disabled=not guild.me.guild_permissions.manage_channels),
+                disnake.ui.Button(label="İptal", custom_id=f"voice_channel_cancel_{id_}", emoji="❌")
             ]
 
             if "COMMUNITY" in guild.features:
-                buttons.insert(2, disnake.ui.Button(label="Criar canal de palco", custom_id=f"stage_channel_{id_}",
+                buttons.insert(2, disnake.ui.Button(label="Sahne kanalı oluştur", custom_id=f"stage_channel_{id_}",
                                   emoji="<:stagechannel:1077351815533826209>", disabled=not guild.me.guild_permissions.manage_channels))
 
             color = self.bot.get_color(guild.me)
@@ -672,7 +672,7 @@ class MusicSettings(commands.Cog):
             else:
 
                 if not guild.me.guild_permissions.manage_channels:
-                    raise GenericError(f"**O bot {bot.user.mention} yeni bir kanal oluşturmak için kanalları yönetme iznine sahip değildir.**")
+                    raise GenericError(f"**Bot {bot.user.mention} yeni bir kanal oluşturmak için kanalları yönetme iznine sahip değildir.**")
 
                 await inter_message.response.defer()
                 if inter_message.data.custom_id.startswith("voice_channel_"):
@@ -1738,11 +1738,11 @@ class RPCCog(commands.Cog):
 
             components.extend(
                 [
-                    disnake.ui.Button(label="Criar/Resetar token", custom_id=f"rpc_gen.{inter.author.id}", emoji="🔑",
+                    disnake.ui.Button(label="Tokeni oluştur/sıfırla", custom_id=f"rpc_gen.{inter.author.id}", emoji="🔑",
                                       row=0),
-                    disnake.ui.Button(label="Importar/Editar/Ver token", custom_id=f"rpc_create.{inter.author.id}",
+                    disnake.ui.Button(label="Tokeni içe aktar/düzenle/görüntüle", custom_id=f"rpc_create.{inter.author.id}",
                                       emoji="✍️", row=0),
-                    disnake.ui.Button(label="Remover token (Desativar)", custom_id=f"rpc_remove.{inter.author.id}",
+                    disnake.ui.Button(label="Tokeni Kaldır (Devre Dışı Bırak)", custom_id=f"rpc_remove.{inter.author.id}",
                                       emoji="♻️", row=1),
                 ]
             )
@@ -1805,7 +1805,7 @@ class RPCCog(commands.Cog):
                 pass
 
             await inter.response.send_modal(
-                title="Importar token",
+                title="Tokeni içe aktar",
                 custom_id="rpc_token_create",
                 components=[
                     disnake.ui.TextInput(
