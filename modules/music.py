@@ -4204,68 +4204,68 @@ class Music(commands.Cog):
             duplicated_titles.clear()
 
         if not tracklist:
-            raise GenericError("Nenhuma música encontrada com os filtros selecionados!")
+            raise GenericError("Seçilen filtrelerle hiçbir müzik bulunamadı!")
 
         for t in reversed(tracklist):
             insert_func(position-1, t)
 
         try:
             final_filters.remove("song_name")
-            txt.append(f"**Inclui nome:** `{fix_characters(song_name)}`")
+            txt.append(f"**İsim ekleyin:** `{fix_characters(song_name)}`")
         except:
             pass
 
         try:
             final_filters.remove("song_author")
-            txt.append(f"**Inclui nome no uploader/artista:** `{fix_characters(song_author)}`")
+            txt.append(f"**Yükleyicinin/sanatçının adını ekleyin:** `{fix_characters(song_author)}`")
         except:
             pass
 
         try:
             final_filters.remove("user")
-            txt.append(f"**Pedido pelo membro:** {user.mention}")
+            txt.append(f"**Üye talebi:** {user.mention}")
         except:
             pass
 
         try:
             final_filters.remove("playlist")
-            txt.append(f"**Playlist:** {' | '.join(playlist_hyperlink)}")
+            txt.append(f"**Oynatma listesi:** {' | '.join(playlist_hyperlink)}")
         except:
             pass
 
         try:
             final_filters.remove("time_below")
-            txt.append(f"**Com duração inicial/igual:** `{time_format(min_duration)}`")
+            txt.append(f"**Başlangıç/eşit süre:** `{time_format(min_duration)}`")
         except:
             pass
 
         try:
             final_filters.remove("time_above")
-            txt.append(f"**Com duração máxima:** `{time_format(max_duration)}`")
+            txt.append(f"**Maksimum süre:** `{time_format(max_duration)}`")
         except:
             pass
 
         try:
             final_filters.remove("duplicates")
-            txt.append(f"**Músicas duplicadas**")
+            txt.append(f"**Yinelenen müzikler**")
         except:
             pass
 
         try:
             final_filters.remove("absent_members")
-            txt.append("`Músicas pedidas por membros que saíram do canal.`")
+            txt.append("`Kanaldan çıkan üyeler tarafından talep edilen şarkılar.`")
         except:
             pass
 
         components = [
-                disnake.ui.Button(emoji="▶️", label="Tocar agora", custom_id=PlayerControls.embed_forceplay),
+                disnake.ui.Button(emoji="▶️", label="Şimdi oynat", custom_id=PlayerControls.embed_forceplay),
             ]
 
         if indexes:
             track = tracklist[0]
             txt = [
-                f"moveu a música [`{fix_characters(track.title, limit=25)}`](<{track.uri or track.search_uri}>) para a posição **[{position}]** da fila.",
-                f"↪️ **⠂{inter.author.mention} moveu uma música para a posição [{position}]:**\n"
+                f"müziği [`{fix_characters(track.title, limit=25)}`](<{track.uri or track.search_uri}>) pozisyonuna **[{position}]** taşıdı.",
+                f"↪️ **⠂{inter.author.mention} bir müziği [{position}] pozisyonuna taşıdı:**\n"
                 f"╰[`{fix_characters(track.title, limit=43)}`](<{track.uri or track.search_uri}>)"
             ]
 
@@ -4277,14 +4277,14 @@ class Music(commands.Cog):
 
             moved_tracks_txt = moved_tracks if moved_tracks == 1 else f"[{position}-{position+moved_tracks-1}]"
 
-            msg_txt = f"### ↪️ ⠂{inter.author.mention} moveu {moved_tracks} música{'s'[:moved_tracks^1]} para a posição {moved_tracks_txt} da fila:\n" + "\n".join(f"`{position+n}.` [`{fix_characters(t.title, 45)}`](<{t.uri}>)" for n, t in enumerate(tracklist[:7]))
+            msg_txt = f"### ↪️ ⠂{inter.author.mention} {moved_tracks} müziği {moved_tracks_txt} pozisyonuna taşıdı:\n" + "\n".join(f"`{position+n}.` [`{fix_characters(t.title, 45)}`](<{t.uri}>)" for n, t in enumerate(tracklist[:7]))
 
             if (track_extra:=(moved_tracks - 7)) > 0:
-                msg_txt += f"\n`e mais {track_extra} música{'s'[:track_extra^1]}.`"
+                msg_txt += f"\n`ve {track_extra} müzik daha.`"
 
-            msg_txt += f"\n### ✅ ⠂Filtro{(t:='s'[:len(txt)^1])} usado{t}:\n" + '\n'.join(txt)
+            msg_txt += f"\n### ✅ ⠂Kullanılan filtre{(t:='ler'[:len(txt)^1])}:\n" + '\n'.join(txt)
 
-            txt = [f"moveu {moved_tracks} música{'s'[:moved_tracks^1]} para a posição **[{position}]** da fila.", msg_txt]
+            txt = [f"{moved_tracks} şarkıyı **[{position}]** konumuna taşıdı.", msg_txt]
 
             await self.interaction_message(inter, txt, emoji="↪️", force=True, thumb=tracklist[0].thumb, components=components)
 
@@ -4407,7 +4407,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @pool_command(name="restrictmode", aliases=["rstc", "restrict", "restrito", "modorestrito"], only_voiced=True, cooldown=restrict_cd, max_concurrency=restrict_mc,
-                  description="Ativar/Desativar o modo restrito de comandos que requer DJ/Staff.")
+                  description="DJ/Personel gerektiren komutların kısıtlı modunu etkinleştirin/devre dışı bırakın.")
     async def restrict_mode_legacy(self, ctx: CustomContext):
 
         await self.restrict_mode.callback(self=self, inter=ctx)
@@ -4416,7 +4416,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.slash_command(
-        description=f"{desc_prefix}Ativar/Desativar o modo restrito de comandos que requer DJ/Staff.",
+        description=f"{desc_prefix}DJ/Personel gerektiren komutların kısıtlı modunu etkinleştirin/devre dışı bırakın.",
         extras={"only_voiced": True}, cooldown=restrict_cd, max_concurrency=restrict_mc, dm_permission=False)
     async def restrict_mode(self, inter: disnake.AppCmdInter):
 
@@ -4429,11 +4429,11 @@ class Music(commands.Cog):
 
         player.restrict_mode = not player.restrict_mode
 
-        msg = ["ativou", "🔐"] if player.restrict_mode else ["desativou", "🔓"]
+        msg = ["akti̇f edildi", "🔐"] if player.restrict_mode else ["deakti̇f edildi", "🔓"]
 
         text = [
-            f"{msg[0]} o modo restrito de comandos do player (que requer DJ/Staff).",
-            f"{msg[1]} **⠂{inter.author.mention} {msg[0]} o modo restrito de comandos do player (que requer DJ/Staff).**"
+            f"{msg[0]} oynatıcının DJ/Personel gerektiren komutlar için kısıtlı modu.",
+            f"{msg[1]} **⠂{inter.author.mention} oynatıcının DJ/Personel gerektiren komutlar için kısıtlı modunu {msg[0]}.**"
         ]
 
         await self.interaction_message(inter, text, emoji=msg[1])
@@ -4445,7 +4445,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.has_guild_permissions(manage_guild=True)
     @pool_command(name="247", aliases=["nonstop"], only_voiced=True, cooldown=nonstop_cd, max_concurrency=nonstop_mc,
-                  description="Ativar/Desativar o modo 24/7 do player (Em testes).")
+                  description="Oynatıcının 24/7 modunu Etkinleştir/Devre Dışı Bırak (Test aşamasında).")
     async def nonstop_legacy(self, ctx: CustomContext):
         await self.nonstop.callback(self=self, inter=ctx)
 
@@ -4453,7 +4453,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.slash_command(
         name="247",
-        description=f"{desc_prefix}Ativar/Desativar o modo 24/7 do player (Em testes).",
+        description=f"{desc_prefix}Oynatıcının 24/7 modunu Etkinleştir/Devre Dışı Bırak (Test aşamasında).",
         default_member_permissions=disnake.Permissions(manage_guild=True), dm_permission=False,
         extras={"only_voiced": True}, cooldown=nonstop_cd, max_concurrency=nonstop_mc
     )
@@ -4468,11 +4468,11 @@ class Music(commands.Cog):
 
         player.keep_connected = not player.keep_connected
 
-        msg = ["ativou", "♾️"] if player.keep_connected else ["desativou", "❌"]
+        msg = ["akti̇f edildi", "♾️"] if player.keep_connected else ["deakti̇f edildi", "❌"]
 
         text = [
-            f"{msg[0]} o modo 24/7 (interrupto) do player.",
-            f"{msg[1]} **⠂{inter.author.mention} {msg[0]} o modo 24/7 (interrupto) do player.**"
+            f"{msg[0]} oynatıcının 24/7 (kesintisiz) modunu.",
+            f"{msg[1]} **⠂{inter.author.mention} {msg[0]} oynatıcının 24/7 (kesintisiz) modunu.**"
         ]
 
         if not len(player.queue):
@@ -4495,7 +4495,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @pool_command(name="autoplay", aliases=["ap", "aplay"], only_voiced=True, cooldown=autoplay_cd, max_concurrency=autoplay_mc,
-                  description="Ativar/Desativar a reprodução automática ao acabar as músicas da fila.")
+                  description="Müzik sırası bittiğinde otomatik oynatmayı aç/kapat.")
     async def autoplay_legacy(self, ctx: CustomContext):
         await self.autoplay.callback(self=self, inter=ctx)
 
