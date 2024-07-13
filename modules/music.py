@@ -3570,7 +3570,7 @@ class Music(commands.Cog):
         await self.interaction_message(
             inter,
             txt=["Kuyruktaki şarkıların sırasını tersine çevirdi.",
-                f"🔄 **⠂{inter.author.mention} kuyruktaki şarkıların sırasını tersine çevirdi.**"]
+                f"🔄 **⠂{inter.author.mention} kuyruktaki şarkıların sırasını tersine çevirdi.**"],
             emoji="🔄"
         )
 
