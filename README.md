@@ -127,7 +127,7 @@ Kendi bilgisayarınızda/VPS'nizde barındırma (windows/linux)
 
 * Repoyu burdan indirin [zip](https://github.com/zRitsu/MuseHeart-MusicBot/archive/refs/heads/main.zip) ve ardından ayıklayın (Veya aşağıdaki komutu terminal/cmd'de kullanın ve ardından klasörü açın):
 ```shell
-git clone https://github.com/zRitsu/MuseHeart-MusicBot.git
+git clone https://github.com/Sepultrex/MuseHeart-MusicBot-TURKISH
 ```
 * source_setup.sh dosyasına çift tıklayın (veya pencereleriniz dosya uzantılarını görüntülemiyorsa sadece setup tıklayın) ve bekleyin.</br>
 `Eğer linux kullanıyorsanız, terminaldeki komutu kullanın:` 
