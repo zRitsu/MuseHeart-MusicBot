@@ -4432,7 +4432,7 @@ class Music(commands.Cog):
         msg = ["akti̇f edildi", "🔐"] if player.restrict_mode else ["deakti̇f edildi", "🔓"]
 
         text = [
-            f"{msg[0]} oynatıcının DJ/Personel gerektiren komutlar için kısıtlı modu.",
+            f"oynatıcının DJ/Personel gerektiren komutlar için kısıtlı modu {msg[0]}.",
             f"{msg[1]} **⠂{inter.author.mention} oynatıcının DJ/Personel gerektiren komutlar için kısıtlı modunu {msg[0]}.**"
         ]
 
