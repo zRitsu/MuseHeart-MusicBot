@@ -4471,8 +4471,8 @@ class Music(commands.Cog):
         msg = ["akti̇f edildi", "♾️"] if player.keep_connected else ["deakti̇f edildi", "❌"]
 
         text = [
-            f"{msg[0]} oynatıcının 24/7 (kesintisiz) modunu.",
-            f"{msg[1]} **⠂{inter.author.mention} {msg[0]} oynatıcının 24/7 (kesintisiz) modunu.**"
+            f"{msg[0]} 24/7 (kesintisiz) modu.",
+            f"{msg[1]} **⠂{inter.author.mention} {msg[0]} 24/7 (kesintisiz) modu.**"
         ]
 
         if not len(player.queue):
@@ -4519,8 +4519,8 @@ class Music(commands.Cog):
 
         msg = ["akti̇f edildi", "🔄"] if player.autoplay else ["deakti̇f edildi", "❌"]
 
-        text = [f"{msg[0]} otomatik oynatmayı.",
-        f"{msg[1]} **⠂{inter.author.mention} {msg[0]} otomatik oynatmayı.**"]
+        text = [f"{msg[0]} (otomatik oynatma).",
+        f"{msg[1]} **⠂{inter.author.mention} {msg[0]} (otomatik oynatma)**"]
 
         if player.current:
             await self.interaction_message(inter, txt=text, emoji=msg[1])
