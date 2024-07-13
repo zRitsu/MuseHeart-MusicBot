@@ -3659,7 +3659,7 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @pool_command(name="clear", aliases=["limpar", "clearqueue"], description="Limpar a fila de música.",
+    @pool_command(name="clear", aliases=["limpar", "clearqueue"], description="Müzik kuyruğunu temizle.",
                   only_voiced=True,
                   extras={"flags": clear_flags}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
     async def clear_legacy(self, ctx: CustomContext, *, flags: str = ""):
@@ -3687,45 +3687,39 @@ class Music(commands.Cog):
     @check_voice()
     @q.sub_command(
         name="clear",
-        description=f"{desc_prefix}Limpar a fila de música.",
+        description=f"{desc_prefix}Müzik kuyruğunu temizle.",
         extras={"only_voiced": True}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc
     )
     async def clear(
             self,
             inter: disnake.AppCmdInter,
-            song_name: str = commands.Param(name="nome", description="Incluir um nome que tiver na música.",
-                                            default=None),
-            song_author: str = commands.Param(name="uploader",
-                                              description="Incluir um nome que tiver no autor/artista/uploader da música.",
-                                              default=None),
-            user: disnake.Member = commands.Param(name='membro',
-                                                  description="Incluir músicas pedidas pelo membro selecionado.",
-                                                  default=None),
-            duplicates: bool = commands.Param(name="duplicados", description="Incluir músicas duplicadas",
-                                              default=False),
-            playlist: str = commands.Param(description="Incluir nome que tiver na playlist.", default=None),
-            min_duration: str = commands.Param(name="duração_inicial",
-                                               description="incluir músicas com duração acima/igual (ex. 1:23).",
-                                               default=None),
-            max_duration: str = commands.Param(name="duração_máxima",
-                                               description="Incluir músicas com duração máxima especificada (ex. 1:45).",
-                                               default=None),
-            amount: int = commands.Param(name="quantidade", description="Quantidade de músicas para mover.",
-                                         min_value=0, max_value=99, default=None),
-            range_start: int = commands.Param(name="posição_inicial",
-                                              description="incluir músicas da fila a partir da posição específicada.",
-                                              min_value=1.0, max_value=500.0, default=0),
-            range_end: int = commands.Param(name="posição_final",
-                                            description="incluir músicas da fila até a posição especificada.",
-                                            min_value=1.0, max_value=500.0, default=0),
-            absent_members: bool = commands.Param(name="membros_ausentes",
-                                                  description="Incluir músicas adicionads por membros que saíram do canal.",
-                                                  default=False)
+            song_name: str = commands.Param(name="nome", description="Müzikte bulunan bir adı dahil et.",
+                                             default=None),
+            song_author: str = commands.Param(name="uploader", description="Müziğin yükleyicisi/oluşturucusunun adını dahil et.",
+             default=None),
+            user: disnake.Member = commands.Param(name='membro', description="Belirli bir üye tarafından istenilen müzikleri dahil et.",
+             default=None),
+            duplicates: bool = commands.Param(name="duplicados", description="Yinelenen müzikleri dahil et.",
+             default=False),
+            playlist: str = commands.Param(description="Oynatma listesinde bulunan bir adı dahil et.",
+             default=None),
+            min_duration: str = commands.Param(name="duração_inicial", description="Belirtilen süreden uzun veya aynı sürede müzikleri dahil et (ör. 1:23).",
+             default=None),
+            max_duration: str = commands.Param(name="duração_máxima", description="Belirtilen maksimum süredeki müzikleri dahil et (ör. 1:45).",
+             default=None),
+            amount: int = commands.Param(name="quantidade", description="Taşınacak müzik miktarı.",
+             min_value=0, max_value=99, default=None),
+            range_start: int = commands.Param(name="posição_inicial", description="Belirtilen pozisyondan itibaren kuyruktaki müzikleri dahil et.",
+             min_value=1.0, max_value=500.0, default=0),
+            range_end: int = commands.Param(name="posição_final", description="Belirtilen pozisyona kadar kuyruktaki müzikleri dahil et.",
+             min_value=1.0, max_value=500.0, default=0),
+            absent_members: bool = commands.Param(name="membros_ausentes", description="Kanaldan ayrılan üyeler tarafından eklenen müzikleri dahil et.",
+             default=False)
     ):
 
         if min_duration and max_duration:
             raise GenericError(
-                "Você deve escolher apenas uma das opções: **duração_abaixo_de** ou **duração_acima_de**.")
+                "Yalnızca duração_abaixo_de veya duração_acima_de seçeneklerinden birini seçmelisiniz.")
 
         try:
             bot = inter.music_bot
@@ -3735,7 +3729,7 @@ class Music(commands.Cog):
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         if not player.queue:
-            raise GenericError("**Não há musicas na fila.**")
+            raise GenericError("**Kuyrukta müzik yok.**")
 
         if amount is None:
             amount = 0
@@ -3772,25 +3766,25 @@ class Music(commands.Cog):
 
         if not filters and not range_start and not range_end:
             player.queue.clear()
-            txt = ['limpou a fila de música.', f'♻️ **⠂{inter.author.mention} limpou a fila de música.**']
+            txt = ['Müzik kuyruğunu temizledi.', f'♻️ **⠂{inter.author.mention} müzik kuyruğunu temizledi.**']
 
         else:
 
             if range_start > 0 and range_end > 0:
 
                 if range_start >= range_end:
-                    raise GenericError("**A posição final deve ser maior que a posição inicial!**")
+                    raise GenericError("**Bitiş pozisyonu, başlangıç pozisyonundan büyük olmalıdır!**")
 
                 song_list = list(player.queue)[range_start - 1: -(range_end - 1)]
-                txt.append(f"**Posição inicial da fila:** `{range_start}`\n"
-                           f"**Posição final da fila:** `{range_end}`")
+                txt.append(f"**Kuyruğun başlangıç pozisyonu:** `{range_start}`\n"
+                           f"**Kuyruğun bitiş pozisyonu:** `{range_end}`")
 
             elif range_start > 0:
                 song_list = list(player.queue)[range_start - 1:]
-                txt.append(f"**Posição inicial da fila:** `{range_start}`")
+                txt.append(f"**Kuyruğun başlangıç pozisyonu:** `{range_start}`")
             elif range_end > 0:
                 song_list = list(player.queue)[:-(range_end - 1)]
-                txt.append(f"**Posição final da fila:** `{range_end}`")
+                txt.append(f"**Kuyruğun bitiş pozisyonu:** `{range_end}`")
             else:
                 song_list = list(player.queue)
 
@@ -3874,65 +3868,65 @@ class Music(commands.Cog):
             duplicated_titles.clear()
 
             if not deleted_tracks:
-                await inter.send("Nenhuma música encontrada!", ephemeral=True)
+                await inter.send("Müzik bulunamadı!", ephemeral=True)
                 return
 
             try:
                 final_filters.remove("song_name")
-                txt.append(f"**Inclui nome:** `{fix_characters(song_name)}`")
+                txt.append(f"**İsim içeren:** `{fix_characters(song_name)}`")
             except:
                 pass
 
             try:
                 final_filters.remove("song_author")
-                txt.append(f"**Inclui nome no uploader/artista:** `{fix_characters(song_author)}`")
+                txt.append(f"**Yükleyici/sanatçı içeren isim:** `{fix_characters(song_author)}`")
             except:
                 pass
 
             try:
                 final_filters.remove("user")
-                txt.append(f"**Pedido pelo membro:** {user.mention}")
+                txt.append(f"**Üye tarafından talep edilen:** {user.mention}")
             except:
                 pass
 
             try:
                 final_filters.remove("playlist")
-                txt.append(f"**Playlist:** {' | '.join(playlist_hyperlink)}")
+                txt.append(f"**Oynatma listesi:** {' | '.join(playlist_hyperlink)}")
             except:
                 pass
 
             try:
                 final_filters.remove("time_below")
-                txt.append(f"**Com duração inicial/igual:** `{time_format(min_duration)}`")
+                txt.append(f"**Başlangıç/eşit süreyle:** `{time_format(min_duration)}`")
             except:
                 pass
 
             try:
                 final_filters.remove("time_above")
-                txt.append(f"**Com duração máxima:** `{time_format(max_duration)}`")
+                txt.append(f"**Maksimum süreyle:** `{time_format(max_duration)}`")
             except:
                 pass
 
             try:
                 final_filters.remove("duplicates")
-                txt.append(f"**Músicas duplicadas**")
+                txt.append(f"**Yinelenen müzikler**")
             except:
                 pass
 
             try:
                 final_filters.remove("absent_members")
-                txt.append("`Músicas pedidas por membros que saíram do canal.`")
+                txt.append("`Kanaldan çıkan üyeler tarafından istenen müzikler.`")
             except:
                 pass
 
-            msg_txt = f"### ♻️ ⠂{inter.author.mention} removeu {deleted_tracks} música{'s'[:deleted_tracks^1]} da fila:\n" + "\n".join(f"[`{fix_characters(t.title, 45)}`](<{t.uri}>)" for t in tracklist[:7])
+            msg_txt = f"### ♻️ ⠂{inter.author.mention} {deleted_tracks} müzik{'ler' if deleted_tracks > 1 else ''} kuyruktan kaldırdı:\n" + "\n".join(f"[`{fix_characters(t.title, 45)}`](<{t.uri}>)" for t in tracklist[:7])
 
             if (trackcount:=(len(tracklist) - 7)) > 0:
-                msg_txt += f"\n`e mais {trackcount} música{'s'[:trackcount^1]}.`"
+                msg_txt += f"\n`ve {trackcount} daha fazla müzik{'ler' if trackcount > 1 else ''}.`"
 
-            msg_txt += f"\n### ✅ ⠂Filtro{(t:='s'[:len(txt)^1])} usado{t}:\n" + '\n'.join(txt)
+            msg_txt += f"\n### ✅ ⠂Kullanılan Filtre{'ler'[:len(txt)^1]}:\n" + '\n'.join(txt)
 
-            txt = [f"removeu {deleted_tracks} música{'s'[:deleted_tracks^1]} da fila via clear.", msg_txt]
+            txt = [f"Kuyruktan {deleted_tracks} müzik{'ler' if deleted_tracks > 1 else ''} temizlendi.", msg_txt]
 
         try:
             kwargs = {"thumb": tracklist[0].thumb}
@@ -3944,17 +3938,17 @@ class Music(commands.Cog):
 
     move_queue_flags = CommandArgparse(parents=[adv_queue_flags])
     move_queue_flags.add_argument('-position', '-pos',
-                           help="Especificar uma posição de destino (opcional).\nEx: -pos 1",
+                           help="Hedef bir konum belirtmek (isteğe bağlı).\nÖrnek: -pos 1",
                            type=int, default=None)
     move_queue_flags.add_argument('-casesensitive', '-cs',  action='store_true',
-                           help="Buscar por músicas com a frase exata no nome da música ao invés de buscar palavra por palavra.")
+                           help="Müzik adında tam bir ifade aramak (kelime kelime değil).")
 
     @check_queue_loading()
     @is_dj()
     @has_player()
     @check_voice()
     @pool_command(name="move", aliases=["movequeue", "moveadv", "moveadvanced", "moveq", "mq", "mv", "mover"],
-                  description="Mover músicas da fila.", only_voiced=True,
+                  description="Müzikleri kuyruktan taşımak.", only_voiced=True,
                   extras={"flags": move_queue_flags}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
     async def move_legacy(self, ctx: CustomContext, position: Optional[int] = None, *, flags: str = ""):
 
@@ -3990,41 +3984,41 @@ class Music(commands.Cog):
     @check_voice()
     @commands.slash_command(
         name="move",
-        description=f"{desc_prefix}Mover músicas da fila.",
+        description=f"{desc_prefix}Müzikleri kuyruktan taşımak.",
         extras={"only_voiced": True}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc
     )
     async def move(
             self,
             inter: disnake.AppCmdInter,
-            song_name: str = commands.Param(name="nome", description="Incluir um nome que tiver na música.",
+            song_name: str = commands.Param(name="nome",description="Müzikte bulunan bir adı eklemek.",
                                             default=None),
-            position: int = commands.Param(name="posição", description="Posição de destino na fila (Opcional).",
+            position: int = commands.Param(name="posição", description="Kuyruktaki hedef konumu (isteğe bağlı).",
                                            min_value=1, max_value=900, default=1),
             song_author: str = commands.Param(name="uploader",
-                                              description="Incluir um nome que tiver no autor/artista/uploader da música.",
+                                              description="Müzikte bulunan bir ismi eklemek (yazar/sanatçı/yükleyici).",
                                               default=None),
             user: disnake.Member = commands.Param(name='membro',
-                                                  description="Incluir músicas pedidas pelo membro selecionado.",
+                                                  description="Seçilen üye tarafından istenen müzikleri eklemek.",
                                                   default=None),
-            duplicates: bool = commands.Param(name="duplicados", description="Incluir músicas duplicadas",
+            duplicates: bool = commands.Param(name="duplicados", description="Yinelenen müzikleri eklemek",
                                               default=False),
-            playlist: str = commands.Param(description="Incluir nome que tiver na playlist.", default=None),
+            playlist: str = commands.Param(description="Çalma listesinde bulunan bir ismi eklemek.", default=None),
             min_duration: str = commands.Param(name="duração_inicial",
-                                               description="incluir músicas com duração acima/igual (ex. 1:23).",
+                                               description="Belirtilen sürede veya daha uzun süreli müzikleri eklemek (ör. 1:23).",
                                                default=None),
             max_duration: str = commands.Param(name="duração_máxima",
-                                               description="Incluir músicas com duração máxima especificada (ex. 1:45).",
+                                               description="Belirtilen maksimum süredeki müzikleri eklemek (ör. 1:45).",
                                                default=None),
-            amount: int = commands.Param(name="quantidade", description="Quantidade de músicas para mover.",
+            amount: int = commands.Param(name="quantidade", description="Taşınacak müzik miktarı.",
                                          min_value=0, max_value=99, default=None),
             range_start: int = commands.Param(name="posição_inicial",
-                                              description="incluir músicas da fila a partir da posição específicada.",
+                                              description="Belirtilen başlangıç konumundan itibaren müzikleri eklemek.",
                                               min_value=1.0, max_value=500.0, default=0),
             range_end: int = commands.Param(name="posição_final",
-                                            description="incluir músicas da fila até a posição especificada.",
+                                            description="Belirtilen son konuma kadar müzikleri eklemek.",
                                             min_value=1.0, max_value=500.0, default=0),
             absent_members: bool = commands.Param(name="membros_ausentes",
-                                                  description="Incluir músicas adicionads por membros que saíram do canal.",
+                                                  description="Kanaldan çıkan üyeler tarafından eklenen müzikleri dahil etmek.",
                                                   default=False),
     ):
 
@@ -4043,7 +4037,7 @@ class Music(commands.Cog):
 
         if min_duration and max_duration:
             raise GenericError(
-                "Você deve escolher apenas uma das opções: **duração_abaixo_de** ou **duração_acima_de**.")
+                "**Sadece bir seçenek seçmelisiniz: duração_abaixo_de veya duração_acima_de.")
 
         try:
             bot = inter.music_bot
@@ -4053,7 +4047,7 @@ class Music(commands.Cog):
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         if not player.queue and not player.queue_autoplay:
-            raise GenericError("**Não há musicas na fila.**")
+            raise GenericError("**Kuyrukta hiç şarkı yok.**")
 
         filters = []
         final_filters = set()
@@ -4086,7 +4080,7 @@ class Music(commands.Cog):
             filters.append('duplicates')
 
         if not filters and not range_start and not range_end:
-            raise GenericError("**Você deve usar pelo menos uma opção pra mover**")
+            raise GenericError("**Taşımak için en az bir seçenek kullanmalısınız**")
 
         indexes = None
 
@@ -4100,18 +4094,18 @@ class Music(commands.Cog):
         if range_start > 0 and range_end > 0:
 
             if range_start >= range_end:
-                raise GenericError("**A posição final deve ser maior que a posição inicial!**")
+                raise GenericError("**Son pozisyon başlangıç pozisyonundan daha yüksek olmalıdır!**")
 
             song_list = list(player.queue)[range_start - 1: -(range_end - 1)]
-            txt.append(f"**Posição inicial da fila:** `{range_start}`\n"
-                       f"**Posição final da fila:** `{range_end}`")
+            txt.append(f"**Kuyruk başlangıç konumu:** `{range_start}`\n"
+                       f"**Kuyruk bitiş konumu:** `{range_end}`")
 
         elif range_start > 0:
             song_list = list(player.queue)[range_start - 1:]
-            txt.append(f"**Posição inicial da fila:** `{range_start}`")
+            txt.append(f"**Kuyruğun başlangıç konumu:** `{range_start}`")
         elif range_end > 0:
             song_list = list(player.queue)[:-(range_end - 1)]
-            txt.append(f"**Posição final da fila:** `{range_end}`")
+            txt.append(f"**Kuyruğun bitiş konumu:** `{range_end}`")
         elif song_name and has_id and filters == ["song_name"] and amount is None:
             indexes = queue_track_index(inter, bot, song_name, match_count=1, case_sensitive=case_sensitive)
             for index, track in reversed(indexes):
