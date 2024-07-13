@@ -40,7 +40,7 @@ from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerContro
     select_bot_pool, ProgressBar, update_inter
 
 
-class Music(codsfdsfdsfdsfsdfsdmmands.Cog):
+class Music(commands.Cog):
 
     emoji = "🎶"
     name = "Müzik"
