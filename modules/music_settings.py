@@ -1049,7 +1049,7 @@ class MusicSettings(commands.Cog):
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.command(name="adddjrole",description="Sunucunun DJ listesine bir iş ekleyin.",
-                      usage="{prefix}{cmd} [id|nome|@cargo]\nEx: {prefix}{cmd} @cargo", cooldown=djrole_cd, max_concurrency=djrole_mc)
+                      usage="{prefix}{cmd} [id|isim|@rol]\nEx: {prefix}{cmd} @djrol", cooldown=djrole_cd, max_concurrency=djrole_mc)
     async def add_dj_role_legacy(self, ctx: CustomContext, *, role: disnake.Role):
         await self.add_dj_role.callback(self=self, interaction=ctx, role=role)
 
@@ -1085,7 +1085,7 @@ class MusicSettings(commands.Cog):
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.command(name="removedjrole", description="Sunucunun DJ listesinden bir işi kaldırın.",
-                      usage="{prefix}{cmd} [id|nome|@cargo]\nEx: {prefix}{cmd} @cargo",
+                      usage="{prefix}{cmd} [id|isim|@rol]\nEx: {prefix}{cmd} @djrol",
                       cooldown=djrole_cd, max_concurrency=djrole_mc)
     async def remove_dj_role_legacy(self, ctx: CustomContext, *, role: disnake.Role):
         await self.remove_dj_role.callback(self=self, interaction=ctx, role=role)
