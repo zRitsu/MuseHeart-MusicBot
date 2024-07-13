@@ -4503,7 +4503,7 @@ class Music(commands.Cog):
     @check_voice()
     @commands.slash_command(
         name="autoplay",
-        description=f"{desc_prefix}Ativar/Desativar a reprodução automática ao acabar as músicas da fila.",
+        description=f"{desc_prefix}Müzik sırası bittiğinde otomatik oynatmayı aç/kapat.",
         extras={"only_voiced": True}, cooldown=autoplay_cd, max_concurrency=autoplay_mc, dm_permission=False
     )
     async def autoplay(self, inter: disnake.AppCmdInter):
@@ -4517,10 +4517,10 @@ class Music(commands.Cog):
 
         player.autoplay = not player.autoplay
 
-        msg = ["ativou", "🔄"] if player.autoplay else ["desativou", "❌"]
+        msg = ["akti̇f edildi", "🔄"] if player.autoplay else ["deakti̇f edildi", "❌"]
 
-        text = [f"{msg[0]} a reprodução automática.",
-                f"{msg[1]} **⠂{inter.author.mention} {msg[0]} a reprodução automática.**"]
+        text = [f"{msg[0]} otomatik oynatmayı.",
+        f"{msg[1]} **⠂{inter.author.mention} {msg[0]} otomatik oynatmayı.**"]
 
         if player.current:
             await self.interaction_message(inter, txt=text, emoji=msg[1])
