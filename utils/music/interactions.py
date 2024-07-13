@@ -2282,13 +2282,13 @@ class SkinEditorMenu(disnake.ui.View):
                 has_skins = True
 
             if not has_skins:
-                self.message_data = {"embeds": [{"description": "**Kaydedilmiş dış görünüm yok...\noYeni bir dış görünüm/şablon oluşturmak için aşağıdaki düğmeyi tıklayın.**", "color": self.guild.me.color.value}]}
-                new_skin_btn = disnake.ui.Button(label="Adicionar nova skin", custom_id="skin_editor_new_skin", disabled=len(static_skins_opts) > 2 and len(skins_opts) > 2)
+                self.message_data = {"embeds": [{"description": "**Kaydedilmiş dış görünüm yok...\nYeni bir dış görünüm/şablon oluşturmak için aşağıdaki düğmeyi tıklayın.**", "color": self.guild.me.color.value}]}
+                new_skin_btn = disnake.ui.Button(label="Yeni görünüm ekle", custom_id="skin_editor_new_skin", disabled=len(static_skins_opts) > 2 and len(skins_opts) > 2)
                 new_skin_btn.callback = self.new_skin
                 self.add_item(new_skin_btn)
             else:
                 self.message_data = {"embeds": [{"description": "**Düzenlemek için aşağıdan bir görünüm seçin veya aşağıdaki ekle düğmesini tıklayarak temel şablon kullanarak yeni bir görünüm oluşturun.**", "color": self.guild.me.color.value}]}
-                new_skin_btn = disnake.ui.Button(label="Adicionar nova skin", custom_id="skin_editor_new_skin", disabled=len(static_skins_opts) > 2 and len(skins_opts) > 2)
+                new_skin_btn = disnake.ui.Button(label="Yeni görünüm ekle", custom_id="skin_editor_new_skin", disabled=len(static_skins_opts) > 2 and len(skins_opts) > 2)
                 new_skin_btn.callback = self.new_skin
                 self.add_item(new_skin_btn)
 
