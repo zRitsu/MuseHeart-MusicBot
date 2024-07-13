@@ -4,7 +4,7 @@ export PYTHONIOENCODING=utf8
 
 trap 'kill $(jobs -pr)' SIGINT SIGTERM EXIT
 
-echo "Criando VENV (por favor aguarde...)"
+echo "VENV oluşturuluyor (lütfen bekleyin...)"
 
 rm -rf venv
 
@@ -15,7 +15,7 @@ else
 fi
 
 if [ ! -d "venv" ]; then
-  echo "Pasta venv não foi criada! Verifique se instalou o python corretamente (e que esteja configurado no PATH/env)"
+  echo "Venv klasörü oluşturulmadı! Python'u doğru yüklediğinizden (ve PATH/env'de yapılandırıldığından) emin olun."
   sleep 45
   exit 1
 fi
@@ -40,7 +40,7 @@ pip install setuptools>=70.0.0
 
 if [ ! -f ".env" ] && [ ! -f "config.json" ]; then
   cp .example.env .env
-  echo 'Não esqueça de adicionar os tokens necessários no arquivo .env'
+  echo '.env dosyasına gerekli jetonları eklemeyi unutmayın'
 fi
 
 sleep 60s

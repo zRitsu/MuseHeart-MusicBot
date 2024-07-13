@@ -18,7 +18,7 @@ if [ ! -d "venv" ]; then
   fi
 
   if [ ! -d "venv" ]; then
-    echo "Pasta venv não foi criada! Verifique se instalou o python corretamente (e que esteja configurado no PATH/env)"
+    echo "Venv klasörü oluşturulmadı! Python'u doğru yüklediğinizden (ve PATH/env'de yapılandırıldığından) emin olun."
     sleep 45
     exit 1
   fi
@@ -29,7 +29,7 @@ else
   source $VENV_PATH
 fi
 
-echo "Iniciando bot (Verifique se o mesmo está online)..."
+echo "Bot başlatılıyor (Çevrimiçi olup olmadığını kontrol edin)..."
 
 #mkdir -p ./.logs
 
