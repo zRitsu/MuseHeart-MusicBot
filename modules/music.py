@@ -3011,8 +3011,8 @@ class Music(commands.Cog):
                 except AttributeError:
                     slashcmd = "/now_playing"
 
-                raise GenericError("**Você deve estar conectado em um canal de voz do servidor atual onde há player ativo...**\n"
-                                   f"`Nota: Caso esteja ouvindo em outro servidor você pode usar o comando` {slashcmd}")
+                raise GenericError("**Mevcut sunucuda aktif bir kullanıcının bulunduğu bir ses kanalına bağlı olmalısınız...**\n"
+                                   f"`Not: Başka bir sunucuda dinliyorsanız, şu komutu kullanabilirsiniz` {slashcmd}")
 
             for bot in self.bot.pool.get_guild_bots(inter.guild_id):
 
@@ -3026,10 +3026,10 @@ class Music(commands.Cog):
                         break
 
         if not player:
-            raise GenericError("**Você deve estar conectado em um canal de voz com player ativo...**")
+            raise GenericError("**Aktif bir kullanıcının olduğu bir ses kanalına bağlı olmalısınız...**")
 
         if not player.current:
-            raise GenericError(f"**No momento não estou tocando algo no canal {player.last_channel.mention}**")
+            raise GenericError(f"**Şu anda {player.last_channel.mention} kanalında hiçbir şey çalmıyorum **")
 
         guild_data = await player.bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
@@ -3040,7 +3040,7 @@ class Music(commands.Cog):
         footer_kw = {}
 
         if player.current.is_stream:
-            txt += "> 🔴 **⠂Transmissão ao vivo**\n"
+            txt += "> 🔴 **⠂Canlı yayın**\n"
         else:
             progress = ProgressBar(
                 player.position,
@@ -3051,45 +3051,45 @@ class Music(commands.Cog):
             txt += f"```ansi\n[34;1m[{time_format(player.position)}] {('=' * progress.start)}[0m🔴️[36;1m{'-' * progress.end} " \
                    f"[{time_format(player.current.duration)}][0m```\n"
 
-        txt += f"> 👤 **⠂Uploader:** {player.current.authors_md}\n"
+        txt += f"> 👤 **Sanatçı:** {player.current.authors_md}\n"
 
         if player.current.album_name:
-            txt += f"> 💽 **⠂Álbum:** [`{fix_characters(player.current.album_name, limit=20)}`]({player.current.album_url})\n"
+            txt += f"> 💽 **⠂Albüm:** [`{fix_characters(player.current.album_name, limit=20)}`]({player.current.album_url})\n"
 
         if not player.current.autoplay:
-            txt += f"> ✋ **⠂Solicitado por:** <@{player.current.requester}>\n"
+            txt += f"> ✋ **⠂Tarafından talep edildi:** <@{player.current.requester}>\n"
         else:
             try:
-                mode = f" [`Recomendação`]({player.current.info['extra']['related']['uri']})"
+                mode = f" [`Tavsiye`]({player.current.info['extra']['related']['uri']})"
             except:
                 mode = "`Recomendação`"
-            txt += f"> 👍 **⠂Adicionado via:** {mode}\n"
+            txt += f"> 👍 **⠂aracılığıyla eklendi** {mode}\n"
 
         if player.current.playlist_name:
-            txt += f"> 📑 **⠂Playlist:** [`{fix_characters(player.current.playlist_name, limit=20)}`]({player.current.playlist_url})\n"
+            txt += f"> 📑 **⠂Çalma listesi:** [`{fix_characters(player.current.playlist_name, limit=20)}`]({player.current.playlist_url})\n"
 
         try:
-            txt += f"> *️⃣ **⠂Canal de voz:** {player.guild.me.voice.channel.jump_url}\n"
+            txt += f"> *️⃣ **⠂Ses kanalı:** {player.guild.me.voice.channel.jump_url}\n"
         except AttributeError:
             pass
 
-        txt += f"> 🔊 **⠂Volume:** `{player.volume}%`\n"
+        txt += f"> 🔊 **⠂Ses düzeyi:** `{player.volume}%`\n"
 
-        components = [disnake.ui.Button(custom_id=f"np_{inter.author.id}", label="Atualizar", emoji="🔄")]
+        components = [disnake.ui.Button(custom_id=f"np_{inter.author.id}", label="Güncelleme", emoji="🔄")]
 
         if player.guild_id != inter.guild_id:
 
             if player.current and not player.paused and (listeners:=len([m for m in player.last_channel.members if not m.bot and (not m.voice.self_deaf or not m.voice.deaf)])) > 1:
-                txt += f"> 🎧 **⠂Ouvintes atuais:** `{listeners}`\n"
+                txt += f"> 🎧 **⠂Şu anki dinleyiciler:** `{listeners}`\n"
 
-            txt += f"> ⏱️ **⠂Player ativo:** <t:{player.uptime}:R>\n"
+            txt += f"> ⏱️ **⠂Aktif kullanıcı:** <t:{player.uptime}:R>\n"
 
             try:
                 footer_kw = {"icon_url": player.guild.icon.with_static_format("png").url}
             except AttributeError:
                 pass
 
-            footer_kw["text"] = f"No servidor: {player.guild.name} [ ID: {player.guild.id} ]"
+            footer_kw["text"] = f"Sunucuda: {player.guild.name} [ ID: {player.guild.id} ]"
 
         else:
             try:
@@ -3100,40 +3100,40 @@ class Music(commands.Cog):
                 pass
 
         if player.keep_connected:
-            txt += "> ♾️ **⠂Modo 24/7:** `Ativado`\n"
+            txt += "> ♾️ **⠂7/24 modu:** `Aktif`\n"
 
         if player.queue or player.queue_autoplay:
 
             if player.guild_id == inter.guild_id:
 
-                txt += f"### 🎶 ⠂Próximas músicas ({(qsize := len(player.queue + player.queue_autoplay))}):\n" + (
+                txt += f"### 🎶 ⠂Yaklaşan müzik ({(qsize := len(player.queue + player.queue_autoplay))}):\n" + (
                             "\n").join(
                     f"> `{n + 1})` [`{fix_characters(t.title, limit=28)}`](<{t.uri}>)\n" \
-                    f"> `⏲️ {time_format(t.duration) if not t.is_stream else '🔴 Ao vivo'}`" + (
-                        f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
-                    f" **|** " + (f"`✋` <@{t.requester}>" if not t.autoplay else f"`👍⠂Recomendada`") for n, t in
+                    f"> `⏲️ {time_format(t.duration) if not t.is_stream else '🔴 Canlı'}`" + (
+                        f" - `Tekrarlar: {t.track_loops}`" if t.track_loops else "") + \
+                    f" **|** " + (f"`✋` <@{t.requester}>" if not t.autoplay else f"`👍⠂Önerilen`") for n, t in
                     enumerate(itertools.islice(player.queue + player.queue_autoplay, 3))
                 )
 
                 if qsize > 3:
                     components.append(
-                        disnake.ui.Button(custom_id=PlayerControls.queue, label="Ver lista completa",
+                        disnake.ui.Button(custom_id=PlayerControls.queue, label="Tam listeyi göster",
                                           emoji="<:music_queue:703761160679194734>"))
 
             elif player.queue:
-                txt += f"> 🎶 **⠂Músicas na fila:** `{len(player.queue)}`\n"
+                txt += f"> 🎶 **⠂Sıradaki şarkılar:** `{len(player.queue)}`\n"
 
         if player.static and player.guild_id == inter.guild_id:
             if player.message:
                 components.append(
-                    disnake.ui.Button(url=player.message.jump_url, label="Ir p/ player-controller",
+                    disnake.ui.Button(url=player.message.jump_url, label="player-controller'a git",
                                       emoji="🔳"))
             elif player.text_channel:
-                txt += f"\n\n`Acesse o player-controller no canal:` {player.text_channel.mention}"
+                txt += f"\n\n`Kanalda player-controller'a erişin:` {player.text_channel.mention}"
 
         embed = disnake.Embed(description=txt, color=self.bot.get_color(player.guild.me))
 
-        embed.set_author(name=("⠂Tocando agora:" if inter.guild_id == player.guild_id else "Você está ouvindo agora:") if not player.paused else "⠂Música atual:",
+        embed.set_author(name=("⠂Şu anda çalınıyor:" if inter.guild_id == player.guild_id else "Şu anda dinliyorsunuz:") if not player.paused else "⠂Mevcut müzik:",
                          icon_url=music_source_image(player.current.info["sourceName"]))
 
         embed.set_thumbnail(url=player.current.thumb)
@@ -3153,7 +3153,7 @@ class Music(commands.Cog):
             return
 
         if inter.data.custom_id != f"np_{inter.author.id}":
-            await inter.send("Você não pode clicar nesse botão...", ephemeral=True)
+            await inter.send("Bu düğmeye tıklayamazsın...", ephemeral=True)
             return
 
         try:
@@ -3169,13 +3169,13 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @pool_command(name="controller", aliases=["ctl"], only_voiced=True, cooldown=controller_cd,
-                  max_concurrency=controller_mc, description="Enviar player controller para um canal específico/atual.")
+                  max_concurrency=controller_mc, description="Oynatıcı kontrolcüsünü belirli/şu anki bir kanala gönder.")
     async def controller_legacy(self, ctx: CustomContext):
         await self.controller.callback(self=self, inter=ctx)
 
     @has_source()
     @check_voice()
-    @commands.slash_command(description=f"{desc_prefix}Enviar player controller para um canal específico/atual.",
+    @commands.slash_command(description=f"{desc_prefix}Oynatıcı kontrolcüsünü belirli/şu anki bir kanala gönder.",
                             extras={"only_voiced": True}, cooldown=controller_cd, max_concurrency=controller_mc,
                             dm_permission=False)
     async def controller(self, inter: disnake.AppCmdInter):
@@ -3192,11 +3192,11 @@ class Music(commands.Cog):
         player: LavalinkPlayer = bot.music.players[guild.id]
 
         if player.static:
-            raise GenericError("Esse comando não pode ser usado no modo fixo do player.")
+            raise GenericError("Bu komut, Oynatıcı'nın sabit modunda kullanılamaz.")
 
         if player.has_thread:
-            raise GenericError("**Esse comando não pode ser usado com uma conversa ativa na "
-                               f"[mensagem]({player.message.jump_url}) do player.**")
+            raise GenericError("**Bu komut, aktif bir konuşma ile kullanılamaz "
+                               f"Kullanıcı [mesajı]({player.message.jump_url}) **")
 
         if not inter.response.is_done():
             await inter.response.defer(ephemeral=True)
@@ -3208,18 +3208,18 @@ class Music(commands.Cog):
             try:
 
                 player.set_command_log(
-                    text=f"{inter.author.mention} moveu o player-controller para o canal {inter.channel.mention}.",
+                    text=f"{inter.author.mention} oynatıcı denetleyicisini kanala taşıdı {inter.channel.mention}.",
                     emoji="💠"
                 )
 
                 embed = disnake.Embed(
-                    description=f"💠 **⠂{inter.author.mention} moveu o player-controller para o canal:** {channel.mention}",
+                    description=f"💠 **⠂{inter.author.mention} oynatıcı denetleyicisini kanala taşıdı:** {channel.mention}",
                     color=self.bot.get_color(guild.me)
                 )
 
                 try:
                     if bot.user.id != self.bot.user.id:
-                        embed.set_footer(text=f"Bot selecionado: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
+                        embed.set_footer(text=f"Bot seçildi: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
                 except AttributeError:
                     pass
 
@@ -3235,12 +3235,12 @@ class Music(commands.Cog):
         await player.invoke_np()
 
         if not isinstance(inter, CustomContext):
-            await inter.edit_original_message("**Player reenviado com sucesso!**")
+            await inter.edit_original_message("**Oynatıcı başarıyla yeniden gönderildi!**")
 
     @is_dj()
     @has_player()
     @check_voice()
-    @commands.user_command(name=disnake.Localized("Add DJ", data={disnake.Locale.pt_BR: "Adicionar DJ"}),
+    @commands.user_command(name=disnake.Localized("Add DJ", data={disnake.Locale.pt_BR: "DJ Ekle"}),
                            extras={"only_voiced": True}, dm_permission=False)
     async def adddj_u(self, inter: disnake.UserCommandInteraction):
         await self.add_dj(interaction=inter, user=inter.target)
@@ -3249,7 +3249,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @pool_command(name="adddj", aliases=["adj"], only_voiced=True,
-                  description="Adicionar um membro à lista de DJ's na sessão atual do player.",
+                  description="Geçerli oynatıcı oturumundaki DJ listesine bir üye ekleyin.",
                   usage="{prefix}{cmd} [id|nome|@user]\nEx: {prefix}{cmd} @membro")
     async def add_dj_legacy(self, ctx: CustomContext, user: disnake.Member):
         await self.add_dj.callback(self=self, inter=ctx, user=user)
@@ -3258,7 +3258,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.slash_command(
-        description=f"{desc_prefix}Adicionar um membro à lista de DJ's na sessão atual do player.",
+        description=f"{desc_prefix}Geçerli oynatıcı oturumundaki DJ listesine bir üye ekleyin.",
         extras={"only_voiced": True}, dm_permission=False
     )
     async def add_dj(
@@ -3283,27 +3283,27 @@ class Music(commands.Cog):
         user = guild.get_member(user.id)
 
         if user.bot:
-            error_text = "**Você não pode adicionar um bot na lista de DJ's.**"
+            error_text = "**DJ listesine bir bot ekleyemezsiniz.**"
         elif user == inter.author:
-            error_text = "**Você não pode adicionar a si mesmo na lista de DJ's.**"
+            error_text = "**Kendinizi DJ listesine ekleyemezsiniz.**"
         elif user.guild_permissions.manage_channels:
-            error_text = f"você não pode adicionar o membro {user.mention} na lista de DJ's (ele(a) possui permissão de **gerenciar canais**)."
+            error_text = f"{user.mention} üyesini DJ listesine ekleyemezsiniz (kendisinin **kanalları yönetme** izni var))."
         elif user.id == player.player_creator:
-            error_text = f"**O membro {user.mention} é o criador do player...**"
+            error_text = f"**{user.mention} üyesi, player'ın yaratıcısıdır...**"
         elif user.id in player.dj:
-            error_text = f"**O membro {user.mention} já está na lista de DJ's**"
+            error_text = f"**{user.mention} üyesi zaten DJ listesinde bulunuyor**"
 
         if error_text:
             raise GenericError(error_text)
 
         player.dj.add(user.id)
 
-        text = [f"adicionou {user.mention} à lista de DJ's.",
-                f"🎧 **⠂{inter.author.mention} adicionou {user.mention} na lista de DJ's.**"]
+        text = [f"{user.mention} DJ listesine eklendi.",
+                f"🎧 **⠂{inter.author.mention} {user.mention} DJ listesine eklendi.**"]
 
         if (player.static and channel == player.text_channel) or isinstance(inter.application_command,
                                                                             commands.InvokableApplicationCommand):
-            await inter.send(f"{user.mention} adicionado à lista de DJ's!{player.controller_link}")
+            await inter.send(f"{user.mention} DJ listesine eklendi! {player.controller_link}")
 
         await self.interaction_message(inter, txt=text, emoji="🎧")
 
@@ -3311,13 +3311,13 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.slash_command(
-        description=f"{desc_prefix}Remover um membro da lista de DJ's na sessão atual do player.",
+        description=f"{desc_prefix}Geçerli oynatıcı oturumundaki DJ listesinden bir üyeyi kaldırın.",
         extras={"only_voiced": True}, dm_permission=False
     )
     async def remove_dj(
             self,
             inter: disnake.AppCmdInter, *,
-            user: disnake.User = commands.Param(name="membro", description="Membro a ser adicionado.")
+            user: disnake.User = commands.Param(name="membro", description="Eklenecek üye.")
     ):
 
         try:
@@ -3337,20 +3337,20 @@ class Music(commands.Cog):
             if inter.author.guild_permissions.manage_guild:
                 player.player_creator = None
             else:
-                raise GenericError(f"**O membro {user.mention} é o criador do player.**")
+                raise GenericError(f"**{user.mention} üyesi, player'ın yaratıcısıdır.**")
 
         elif user.id not in player.dj:
-            GenericError(f"O membro {user.mention} não está na lista de DJ's")
+            GenericError(f"{user.mention} üyesi DJ listesinde değil")
 
         else:
             player.dj.remove(user.id)
 
-        text = [f"removeu {user.mention} da lista de DJ's.",
-                f"🎧 **⠂{inter.author.mention} removeu {user.mention} da lista de DJ's.**"]
+        text = [f"{user.mention} DJ listesinden kaldırıldı.",
+                f"🎧 **⠂{inter.author.mention} {user.mention} DJ listesinden kaldırıldı.**"]
 
         if (player.static and channel == player.text_channel) or isinstance(inter.application_command,
                                                                             commands.InvokableApplicationCommand):
-            await inter.send(f"{user.mention} adicionado à lista de DJ's!{player.controller_link}")
+            await inter.send(f"{user.mention} DJ listesine eklendi! {player.controller_link}")
 
         await self.interaction_message(inter, txt=text, emoji="🎧")
 
@@ -3358,7 +3358,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @pool_command(name="stop", aliases=["leave", "parar"], only_voiced=True,
-                  description="Parar o player e me desconectar do canal de voz.")
+                  description="Oynatıcı'yı durdur ve ses kanalından bağlantımı kes.")
     async def stop_legacy(self, ctx: CustomContext):
         await self.stop.callback(self=self, inter=ctx)
 
@@ -3366,7 +3366,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.slash_command(
-        description=f"{desc_prefix}Parar o player e me desconectar do canal de voz.",
+        description=f"{desc_prefix}Oynatıcı'yı durdur ve ses kanalından bağlantımı kes.",
         extras={"only_voiced": True}, dm_permission=False
     )
     async def stop(self, inter: disnake.AppCmdInter):
@@ -3381,7 +3381,7 @@ class Music(commands.Cog):
             inter_destroy = inter
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
-        player.command_log = f"{inter.author.mention} **parou o player!**"
+        player.command_log = f"{inter.author.mention} **oynatıcı durdu!**"
 
         if isinstance(inter, disnake.MessageInteraction):
             await player.destroy(inter=inter_destroy)
@@ -3389,12 +3389,12 @@ class Music(commands.Cog):
 
             embed = disnake.Embed(
                 color=self.bot.get_color(guild.me),
-                description=f"🛑 **⠂{inter.author.mention} parou o player.**"
+                description=f"🛑 **⠂{inter.author.mention} oynatıcı durdu!**"
             )
 
             try:
                 if bot.user.id != self.bot.user.id:
-                    embed.set_footer(text=f"Bot selecionado: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
+                    embed.set_footer(text=f"Bot seçildi: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
             except AttributeError:
                 pass
 
@@ -3416,7 +3416,7 @@ class Music(commands.Cog):
     @pool_command(
         name="savequeue", aliases=["sq", "svq"],
         only_voiced=True, cooldown=queue_manipulation_cd, max_concurrency=remove_mc,
-        description="Experimental: Salvar a música e fila atual pra reusá-los a qualquer momento."
+        description="Deneysel: Mevcut şarkıyı ve sırayı herhangi bir zamanda yeniden kullanmak için kaydet."
     )
     async def savequeue_legacy(self, ctx: CustomContext):
         await self.save_queue.callback(self=self, inter=ctx)
@@ -3425,7 +3425,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.slash_command(
-        description=f"{desc_prefix}Experimental: Salvar a música e fila atual pra reusá-los a qualquer momento.",
+        description=f"{desc_prefix}Deneysel: Mevcut şarkıyı ve sırayı herhangi bir zamanda yeniden kullanmak için kaydet.",
         extras={"only_voiced": True}, dm_permission=False, cooldown=queue_manipulation_cd, max_concurrency=remove_mc
     )
     async def save_queue(self, inter: disnake.AppCmdInter):
@@ -3454,7 +3454,7 @@ class Music(commands.Cog):
             tracks.append(t.info)
 
         if len(tracks) < 3:
-            raise GenericError(f"**É necessário ter no mínimo 3 músicas pra salvar (atual e/ou na fila)**")
+            raise GenericError(f"**En az 3 şarkıyı kaydetmek için (şu anda çalınanlar ve/veya sırada olanlar)** gereklidir")
 
         if not os.path.isdir(f"./local_database/saved_queues_v1/users"):
             os.makedirs(f"./local_database/saved_queues_v1/users")
@@ -3481,17 +3481,18 @@ class Music(commands.Cog):
 
         embed = disnake.Embed(
             color=bot.get_color(guild.me),
-            description=f"### {inter.author.mention}: A fila foi salva com sucesso!!\n"
-                        f"**Músicas salvas:** `{len(tracks)}`\n"
-                        "### Como usar?\n"
-                        f"* Usando o comando {slashcmd} (selecionando no preenchimento automático da busca)\n"
-                        "* Clicando no botão/select de tocar favorito/integração do player.\n"
-                        f"* Usando o comando {global_data['prefix'] or self.bot.default_prefix}{self.play_legacy.name} "
-                        "sem incluir um nome ou link de uma música/vídeo."
+            description=f"### {inter.author.mention}: Kuyruk başarıyla kaydedildi!!\n"
+                        f"**Kaydedilen şarkılar:** `{len(tracks)}`\n"
+                          "### Nasıl kullanılır?\n"
+                         f"* {slashcmd} komutunu kullanarak (arama otomatik tamamlama ile seçerek)\n"
+                            "* Oynatma düğmesine / seçimine tıklayarak favori / player entegrasyonunu kullanarak.\n"
+                         f"* Bir müzik / video adı veya bağlantı eklemeyerek {global_data['prefix'] or self.bot.default_prefix}{self.play_legacy.name} komutunu kullanarak."
+
         )
 
-        embed.set_footer(text="Nota: Esse é um recurso muito experimental, a fila salva pode sofrer alterações ou ser "
-                              "removida em futuros updates")
+        embed.set_footer(text="Not: Bu çok deneysel bir özelliktir, kaydedilen kuyruk gelecekteki güncellemelerde" 
+                              "değişikliklere uğrayabilir veya kaldırılabilir")
+
 
         if isinstance(inter, CustomContext):
             await inter.reply(embed=embed)
@@ -3509,14 +3510,14 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @pool_command(name="shuffle", aliases=["sf", "shf", "sff", "misturar"], only_voiced=True,
-                  description="Misturar as músicas da fila", cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
+                  description="Kuyruktaki şarkıları karıştır", cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
     async def shuffle_legacy(self, ctx: CustomContext):
         await self.shuffle_.callback(self, inter=ctx)
 
     @is_dj()
     @q.sub_command(
         name="shuffle",
-        description=f"{desc_prefix}Misturar as músicas da fila",
+        description=f"{desc_prefix}Kuyruktaki şarkıları karıştır",
         extras={"only_voiced": True}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
     async def shuffle_(self, inter: disnake.AppCmdInter):
 
@@ -3528,14 +3529,14 @@ class Music(commands.Cog):
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         if len(player.queue) < 3:
-            raise GenericError("**A fila tem que ter no mínimo 3 músicas para ser misturada.**")
+            raise GenericError("**Kuyruk karıştırılmak için en az 3 şarkıya sahip olmalıdır.**")
 
         shuffle(player.queue)
 
         await self.interaction_message(
             inter,
-            ["misturou as músicas da fila.",
-             f"🔀 **⠂{inter.author.mention} misturou as músicas da fila.**"],
+            ["Kuyruktaki şarkıları karıştırdı.",
+                f"🔀 **⠂{inter.author.mention} kuyruktaki şarkıları karıştırdı.**"],
             emoji="🔀"
         )
 
@@ -3543,13 +3544,13 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @pool_command(name="reverse", aliases=["invert", "inverter", "rv"], only_voiced=True,
-                  description="Inverter a ordem das músicas na fila", cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
+                  description="Kuyruktaki şarkıların sırasını tersine çevir", cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
     async def reverse_legacy(self, ctx: CustomContext):
         await self.reverse.callback(self=self, inter=ctx)
 
     @is_dj()
     @q.sub_command(
-        description=f"{desc_prefix}Inverter a ordem das músicas na fila",
+        description=f"{desc_prefix}Kuyruktaki şarkıların sırasını tersine çevir",
         extras={"only_voiced": True}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc
     )
     async def reverse(self, inter: disnake.AppCmdInter):
@@ -3562,13 +3563,14 @@ class Music(commands.Cog):
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         if len(player.queue) < 2:
-            raise GenericError("**A fila tem que ter no mínimo 2 músicas para inverter a ordem.**")
+            raise GenericError("**Kuyruktaki şarkıların sırasını tersine çevirmek" 
+                                "**için en az 2 şarkıya sahip olmalıdır.**")
 
         player.queue.reverse()
         await self.interaction_message(
             inter,
-            txt=["inverteu a ordem das músicas na fila.",
-                 f"🔄 **⠂{inter.author.mention} inverteu a ordem das músicas na fila.**"],
+            txt=["Kuyruktaki şarkıların sırasını tersine çevirdi.",
+                f"🔄 **⠂{inter.author.mention} kuyruktaki şarkıların sırasını tersine çevirdi.**"]
             emoji="🔄"
         )
 
@@ -3576,14 +3578,14 @@ class Music(commands.Cog):
 
     @has_player()
     @check_voice()
-    @pool_command(name="queue", aliases=["q", "fila"], description="Exibir as músicas que estão na fila.",
+    @pool_command(name="queue", aliases=["q", "fila"], description="Kuyruktaki şarkıları göster.",
                   only_voiced=True, max_concurrency=queue_show_mc)
     async def queue_show_legacy(self, ctx: CustomContext):
         await self.display.callback(self=self, inter=ctx)
 
     @commands.max_concurrency(1, commands.BucketType.member)
     @q.sub_command(
-        description=f"{desc_prefix}Exibir as músicas que estão na fila.", max_concurrency=queue_show_mc
+        description=f"{desc_prefix}Kuyruktaki şarkıları göster.", max_concurrency=queue_show_mc
     )
     async def display(self, inter: disnake.AppCmdInter):
 
@@ -3595,14 +3597,14 @@ class Music(commands.Cog):
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
 
         if not player.queue and not player.queue_autoplay:
-            raise GenericError("**Não há músicas na fila.**")
+            raise GenericError("**Kuyrukta şarkı yok.**")
 
         view = QueueInteraction(bot, inter.author)
         embed = view.embed
 
         try:
             if bot.user.id != self.bot.user.id:
-                embed.set_footer(text=f"Bot selecionado: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
+                embed.set_footer(text=f"Bot seçildi: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
         except AttributeError:
             pass
 
