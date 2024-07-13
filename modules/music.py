@@ -4517,10 +4517,10 @@ class Music(commands.Cog):
 
         player.autoplay = not player.autoplay
 
-        msg = ["akti̇f edildi", "🔄"] if player.autoplay else ["deakti̇f edildi", "❌"]
-
         text = [f"{msg[0]} (otomatik oynatma).",
         f"{msg[1]} **⠂{inter.author.mention} {msg[0]} (otomatik oynatma)**"]
+
+        msg = ["akti̇f edildi", "🔄"] if player.autoplay else ["deakti̇f edildi", "❌"]
 
         if player.current:
             await self.interaction_message(inter, txt=text, emoji=msg[1])
