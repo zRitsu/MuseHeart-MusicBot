@@ -66,7 +66,7 @@ class ViewHelp(disnake.ui.View):
                 right_button.callback = self.callback_right
                 self.add_item(right_button)
 
-            back_button = disnake.ui.Button(style=disnake.ButtonStyle.grey, emoji='<:leftwards_arrow_with_hook:868761137703964692>', custom_id="back_page", label="Voltar")
+            back_button = disnake.ui.Button(style=disnake.ButtonStyle.grey, emoji='<:leftwards_arrow_with_hook:868761137703964692>', custom_id="back_page", label="Geri")
             back_button.callback = self.callback_back
             self.add_item(back_button)
 
