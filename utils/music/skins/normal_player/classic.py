@@ -51,17 +51,17 @@ class ClassicSkin:
 
         if not player.paused:
             (embed_top or embed).set_author(
-                name="Tocando Agora:",
+                name="Şimdi çalıyor:",
                 icon_url=music_source_image(player.current.info["sourceName"])
             )
         else:
             (embed_top or embed).set_author(
-                name="Em Pausa:",
+                name="Duraklatıldı:",
                 icon_url="https://cdn.discordapp.com/attachments/480195401543188483/896013933197013002/pause.png"
             )
 
         if player.current.is_stream:
-            duration = "🔴 **⠂ `Livestream`"
+            duration = "🔴 **⠂ `Canlı yayın`"
         else:
             duration = f"⏰ **⠂** `{time_format(player.current.duration)}`"
 
@@ -83,35 +83,35 @@ class ClassicSkin:
         if qsize := len(player.queue):
 
             if not player.mini_queue_enabled:
-                txt += f"🎶 **⠂** `{qsize} música{'s'[:qsize^1]} na fila`\n"
+                txt += f"🎶 **⠂** `{qsize} müzik{'ler'[:qsize^1]} ve sıra`\n"
             else:
-                queue_txt += "```ansi\n[0;33mPróximas Músicas:[0m```" + "\n".join(
-                    f"`{(n + 1):02}) [{time_format(t.duration) if t.duration else '🔴 Livestream'}]` "
+                queue_txt += "```ansi\n[0;33mGelecek Şarkılar:[0m```" + "\n".join(
+                    f"`{(n + 1):02}) [{time_format(t.duration) if t.duration else '🔴 Canlı yayın'}]` "
                     f"[`{fix_characters(t.title, 29)}`]({t.uri})" for n, t in
                     enumerate(itertools.islice(player.queue, 3))
                 )
 
                 if qsize > 3:
-                    queue_txt += f"\n`╚══════ E mais {(t:=qsize - 3)} música{'s'[:t^1]} ══════╝`"
+                    queue_txt += f"\n`╚══════ Sıradaki {(t:=qsize - 3)} müzik{'ler'[:t^1]} ══════╝`"
 
         elif len(player.queue_autoplay):
-            queue_txt += "```ansi\n[0;33mPróximas Músicas:[0m```" + "\n".join(
-                f"`👍⠂{(n + 1):02}) [{time_format(t.duration) if t.duration else '🔴 Livestream'}]` "
+            queue_txt += "```ansi\n[0;33mGelecek Şarkılar:[0m```" + "\n".join(
+                f"`👍⠂{(n + 1):02}) [{time_format(t.duration) if t.duration else '🔴 Canlı yayın'}]` "
                 f"[`{fix_characters(t.title, 29)}`]({t.uri})" for n, t in
                 enumerate(itertools.islice(player.queue_autoplay, 3))
             )
 
         if player.command_log:
-            txt += f"{player.command_log_emoji} **⠂Última Interação:** {player.command_log}\n"
+            txt += f"{player.command_log_emoji} **⠂Son Etkileşim:** {player.command_log}\n"
 
         embed.description += txt + queue_txt
 
         if player.current_hint:
-            embed.set_footer(text=f"💡 Dica: {player.current_hint}")
+            embed.set_footer(text=f"💡 Not: {player.current_hint}")
         else:
             embed.set_footer(
                 text=str(player),
-                icon_url="https://i.ibb.co/QXtk5VB/neon-circle.gif"
+                icon_url="https://i.ibb.co/LxXWyjG/3dgifmaker97684.gif"
             )
 
         data["embeds"] = [embed_top, embed] if embed_top else [embed]
@@ -128,59 +128,59 @@ class ClassicSkin:
                 min_values=0, max_values=1,
                 options=[
                     disnake.SelectOption(
-                        label="Adicionar música", emoji="<:add_music:588172015760965654>",
+                        label="Müzik ekle", emoji="<:add_music:588172015760965654>",
                         value=PlayerControls.add_song,
-                        description="Adicionar uma música/playlist na fila."
+                        description="Sıraya bir şarkı/çalma listesi ekleyin."
                     ),
                     disnake.SelectOption(
-                        label="Adicionar favorito na fila", emoji="⭐",
+                        label="Sıraya favori ekle", emoji="⭐",
                         value=PlayerControls.enqueue_fav,
-                        description="Adicionar um de seus favoritos na fila."
+                        description="Favorilerinizden birini sıraya ekleyin."
                     ),
                     disnake.SelectOption(
-                        label="Adicionar nos seus favoritos", emoji="💗",
+                        label="Favorilerinize ekleyin", emoji="💗",
                         value=PlayerControls.add_favorite,
-                        description="Adicionar a música atual nos seus favoritos."
+                        description="Mevcut şarkıyı favorilerinize ekleyin."
                     ),
                     disnake.SelectOption(
-                        label="Tocar do inicio", emoji="⏪",
+                        label="Baştan itibaren oyna", emoji="⏪",
                         value=PlayerControls.seek_to_start,
-                        description="Voltar o tempo da música atual para o inicio."
+                        description="Geçerli şarkının temposunu başlangıca döndürür."
                     ),
                     disnake.SelectOption(
-                        label=f"Volume: {player.volume}%", emoji="🔊",
+                        label=f"Ses: {player.volume}%", emoji="🔊",
                         value=PlayerControls.volume,
-                        description="Ajustar volume."
+                        description="Ses seviyesini ayarlayın."
                     ),
                     disnake.SelectOption(
-                        label="Misturar", emoji="🔀",
+                        label="Karıştır", emoji="🔀",
                         value=PlayerControls.shuffle,
-                        description="Misturar as músicas da fila."
+                        description="Sıradaki şarkıları karıştırın."
                     ),
                     disnake.SelectOption(
-                        label="Readicionar", emoji="🎶",
+                        label="Yeniden Ekle", emoji="🎶",
                         value=PlayerControls.readd,
-                        description="Readicionar as músicas tocadas de volta na fila."
+                        description="Çalınan şarkıları tekrar sıraya ekleyin."
                     ),
                     disnake.SelectOption(
-                        label="Repetição", emoji="🔁",
+                        label="Tekrar", emoji="🔁",
                         value=PlayerControls.loop_mode,
-                        description="Ativar/Desativar repetição da música/fila."
+                        description="Şarkı/sıra tekrarını etkinleştirme/devre dışı bırakma."
                     ),
                     disnake.SelectOption(
-                        label=("Desativar" if player.nightcore else "Ativar") + " o efeito nightcore", emoji="🇳",
+                        label=("Devre dışı bırakmak" if player.nightcore else "Etkinleştir") + " nightcore efekti", emoji="🇳",
                         value=PlayerControls.nightcore,
-                        description="Efeito que aumenta velocidade e tom da música."
+                        description="Müziğin hızını ve tonunu artıran efekt."
                     ),
                     disnake.SelectOption(
-                        label=("Desativar" if player.autoplay else "Ativar") + " a reprodução automática", emoji="🔄",
+                        label=("Devre dışı bırakmak" if player.autoplay else "Etkinleştir") + " otomatik oynatma", emoji="🔄",
                         value=PlayerControls.autoplay,
-                        description="Sistema de adição de música automática quando a fila estiver vazia."
+                        description="Sıra boşaldığında otomatik müzik ekleme sistemi."
                     ),
                     disnake.SelectOption(
-                        label= ("Desativar" if player.restrict_mode else "Ativar") + " o modo restrito", emoji="🔐",
+                        label= ("Devre dışı bırakmak" if player.restrict_mode else "Etkinleştir") + " kısıtlı mod", emoji="🔐",
                         value=PlayerControls.restrict_mode,
-                        description="Apenas DJ's/Staff's podem usar comandos restritos."
+                        description="Yalnızca DJ'ler/Personel kısıtlı komutları kullanabilir."
                     ),
                 ]
             ),
@@ -189,9 +189,9 @@ class ClassicSkin:
         if player.current.ytid and player.node.lyric_support:
             data["components"][5].options.append(
                 disnake.SelectOption(
-                    label= "Visualizar letras", emoji="📃",
+                    label= "Şarkı sözlerini görüntüle", emoji="📃",
                     value=PlayerControls.lyrics,
-                    description="Obter letra da música atual."
+                    description="Mevcut şarkının sözlerini al."
                 )
             )
 
@@ -199,27 +199,27 @@ class ClassicSkin:
         if player.mini_queue_feature:
             data["components"][5].options.append(
                 disnake.SelectOption(
-                    label="Mini-fila do player", emoji="<:music_queue:703761160679194734>",
+                    label="Mini fila oynatıcısı", emoji="<:music_queue:703761160679194734>",
                     value=PlayerControls.miniqueue,
-                    description="Ativar/Desativar a mini-fila do player."
+                    description="Oynatıcı mini kuyruğunu etkinleştirin/devre dışı bırakın."
                 )
             )
 
         if isinstance(player.last_channel, disnake.VoiceChannel):
             data["components"][5].options.append(
                 disnake.SelectOption(
-                    label="Status automático", emoji="📢",
+                    label="Otomatik durum", emoji="📢",
                     value=PlayerControls.set_voice_status,
-                    description="Configurar o status automático do canal de voz."
+                    description="Otomatik ses kanalı durumunu yapılandırın."
                 )
             )
 
         if not player.static and not player.has_thread:
             data["components"][5].options.append(
                 disnake.SelectOption(
-                    label="Song-Request Thread", emoji="💬",
+                    label="Şarkı İsteği Konusu", emoji="💬",
                     value=PlayerControls.song_request_thread,
-                    description="Criar uma thread/conversa temporária para pedir músicas usando apenas o nome/link."
+                    description="Yalnızca adı/bağlantıyı kullanarak şarkı istemek için geçici bir konu/konuşma oluşturun."
                 )
             )
 
