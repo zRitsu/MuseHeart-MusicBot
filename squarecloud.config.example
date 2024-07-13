@@ -1,14 +1,14 @@
-######################################################################
-### Aviso: Caso use este arquivo, renomeie para squarecloud.config ###
-######################################################################
+#########################################################################################
+### Uyarı: Bu dosyayı kullanırsanız, onu squarecloud.config olarak yeniden adlandırın ###
+#########################################################################################
 
-##############################################################################################################
-### Atenção: A RAM você pode alterar de acordo com o plano contratado (ou quantidade desejada).            ###
-### Recomendo que use um plano pago que forneça no mínimo 512MB de RAM + 0.5vcpu e edite o arquivo .env    ###
-### e no campo AUTO_DOWNLOAD_LAVALINK_SERVERLIST mude o valor true para false                              ###
-###                                                                                                        ###
-### Caso queira, você pode alterar o DISPLAY_NAME, DESCRIPTION e link do AVATAR.                           ###
-##############################################################################################################
+####################################################################################################################
+### Dikkat: RAM'i sözleşmeye göre (veya istenilen miktara) değiştirebilirsiniz..                                 ###
+### En az 512MB RAM + 0.5vcpu sağlayan ücretli bir plan kullanmanızı ve .env dosyasını düzenlemenizi öneririm    ###
+### ve AUTO_DOWNLOAD_LAVALINK_SERVERLIST alanında true değerini false olarak değiştirin                          ###
+###                                                                                                              ###
+### İsterseniz DISPLAY_NAME, DESCRIPTION ve AVATAR bağlantısını değiştirebilirsiniz.                             ###
+####################################################################################################################
 
 DISPLAY_NAME=Muse Heart Music Source
 DESCRIPTION=Source de música criada por: xritsu [DC ID: 184889853102653440] source link: https://github.com/zRitsu/MuseHeart-MusicBot
