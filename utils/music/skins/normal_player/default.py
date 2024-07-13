@@ -46,7 +46,7 @@ class DefaultSkin:
 
         else:
             embed.set_author(
-                name="Duraklatıldığında:",
+                name="Duraklatıldı:",
                 icon_url="https://cdn.discordapp.com/attachments/480195401543188483/896013933197013002/pause.png"
             )
 
