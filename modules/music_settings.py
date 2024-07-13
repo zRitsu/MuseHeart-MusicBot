@@ -1280,7 +1280,7 @@ class MusicSettings(commands.Cog):
             changed_skins_txt += "Global Skin: `" + ("Aktif" if select_view.global_mode else "Kapalı") + "`\n"
 
         if not changed_skins_txt:
-            txt = "**Cilt ayarlarında herhangi bir değişiklik yapılmadı...**"
+            txt = "**Skin ayarlarında herhangi bir değişiklik yapılmadı...**"
         else:
             txt = f"**Sunucunun oyuncu görünümü başarıyla değiştirildi.**\n{changed_skins_txt}"
 
