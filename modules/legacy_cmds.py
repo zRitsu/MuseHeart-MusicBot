@@ -491,7 +491,7 @@ class Owner(commands.Cog):
     @commands.max_concurrency(1, commands.BucketType.guild)
     @commands.cooldown(1, 10, commands.BucketType.user)
     @panel_command(aliases=["latest", "lastupdate"], description="En son güncellemelerime bakın.", emoji="📈",
-                   alt_name="Ultimas atualizações", hidden=False)
+                   alt_name="Son güncellemeler", hidden=False)
     async def updatelog(self, ctx: Union[CustomContext, disnake.MessageInteraction], amount: int = 10):
 
         if not os.path.isdir(os.environ["GIT_DIR"]):
