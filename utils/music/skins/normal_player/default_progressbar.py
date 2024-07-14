@@ -112,7 +112,7 @@ class DefaultProgressbarSkin:
 
         txt += duration
 
-        rainbow_bar = "https://i.ibb.co/VCKrSqz/output-onlinegiftools-1.gif"
+        rainbow_bar = "https://i.ibb.co/9nF5w29/output-onlinegiftools-2.gif"
 
         if player.mini_queue_enabled:
 
