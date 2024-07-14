@@ -6580,7 +6580,7 @@ class Music(commands.Cog):
                 player._new_node_task = player.bot.loop.create_task(player._wait_for_new_node())
 
             if self.bot.config["LAVALINK_RECONNECT_RETRIES"] and retries == self.bot.config["LAVALINK_RECONNECT_RETRIES"]:
-                print(f"❌ - {self.bot.user} - [{node.identifier}] Todas as tentativas de reconectar falharam...")
+                print(f"❌ - {self.bot.user} - [{node.identifier}] Tüm yeniden bağlanma girişimleri başarısız oldu...")
                 return
 
             await self.bot.wait_until_ready()
@@ -6604,8 +6604,7 @@ class Music(commands.Cog):
             backoff *= 1.5
             if node.identifier != "LOCAL":
                 print(
-                    f'⚠️ - {self.bot.user} - Falha ao reconectar no servidor [{node.identifier}] nova tentativa em {int(backoff)}'
-                    f' segundos. Erro: {error}'[:300])
+                      f'⚠️ - {self.bot.user} - [{node.identifier}] Sunucuya yeniden bağlanma başarısız oldu. Yeniden deneme {int(backoff)} saniye sonra. Hata: {error}'[:300])
             await asyncio.sleep(backoff)
             retries += 1
 
