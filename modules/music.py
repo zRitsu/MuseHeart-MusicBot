@@ -3196,8 +3196,8 @@ class Music(commands.Cog):
             raise GenericError("Bu komut, Oynatıcı'nın sabit modunda kullanılamaz.")
 
         if player.has_thread:
-            raise GenericError("**Bu komut, aktif bir oynatıcı mevcutken kullanılamaz "
-                               f"Kullanıcı [mesajı]({player.message.jump_url}) **")
+            raise GenericError("**Bu komut, aktif bir oynatıcı mevcutken kullanılamaz\n"
+                               f"Aktif [Oynatıcı]({player.message.jump_url}) **")
 
         if not inter.response.is_done():
             await inter.response.defer(ephemeral=True)
