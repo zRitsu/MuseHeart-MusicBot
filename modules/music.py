@@ -1057,7 +1057,7 @@ class Music(commands.Cog):
             embed = disnake.Embed(
                 color=self.bot.get_color(guild.me),
                 description="**Aşağıdan bir seçenek seçin:**\n"
-                            f'Not: Seçim yapmak için <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R>niz kaldı!'
+                            f'Seçim yapmak için <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R>niz kaldı!'
             )
 
             try:
@@ -1118,7 +1118,7 @@ class Music(commands.Cog):
 
             if not select_interaction or view.selected is False:
 
-                text = "### Seçim zamanı bitti!" if view.selected is not False else "### Kullanıcı tarafından iptal edildi."
+                text = "### Seçim zamanınız bitti!" if view.selected is not False else "### Kullanıcı tarafından iptal edildi."
 
                 try:
                     await func(embed=disnake.Embed(description=text, color=self.bot.get_color(guild.me)),
@@ -1247,7 +1247,7 @@ class Music(commands.Cog):
 
                 if not select_interaction or view.selected is False:
 
-                    embed = disnake.Embed(description="### Seçim zamanı bitti!" if view.selected is not False else "### Kullanıcı tarafından iptal edildi.", color=self.bot.get_color(guild.me))
+                    embed = disnake.Embed(description="### Seçim zamanınız bitti!" if view.selected is not False else "### Kullanıcı tarafından iptal edildi.", color=self.bot.get_color(guild.me))
 
                     try:
                         await msg.edit(embed=embed, components=song_request_buttons)

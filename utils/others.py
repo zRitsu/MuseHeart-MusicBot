@@ -709,7 +709,7 @@ async def select_bot_pool(inter: Union[CustomContext, disnake.MessageInteraction
             )
         except asyncio.TimeoutError:
             try:
-                await msg.edit(conent="Seçim zamanı bitti!", embed=None, view=None)
+                await msg.edit(conent="Seçim zamannız bitti!", embed=None, view=None)
             except:
                 pass
             return None, None
