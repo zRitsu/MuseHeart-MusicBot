@@ -1597,7 +1597,7 @@ class MusicSettings(commands.Cog):
         if failed_nodes:
             embeds.append(
                 disnake.Embed(
-                    title="**Sbaşarısız sunucular** `❌`",
+                    title="**Başarısız sunucular** `❌`",
                     description=f"```ansi\n[31;1m" + "\n".join(failed_nodes) + "[0m\n```",
                     color=bot.get_color(guild.me)
                 )

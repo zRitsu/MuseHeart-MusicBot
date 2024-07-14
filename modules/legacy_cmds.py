@@ -142,7 +142,7 @@ class Owner(commands.Cog):
 
         await ctx.send(
             embed=disnake.Embed(
-                description="**Lavalink LOCAL sunucusunu yeniden başlatma.**",
+                description="**Lavalink LOCAL sunucusunu yeniden başlatıyorum...**",
                 color=self.bot.get_color(ctx.guild.me)
             )
         )
