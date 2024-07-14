@@ -355,21 +355,21 @@ class Music(commands.Cog):
             position: int = commands.Param(name="sıra", description="Müziği belirli bir konuma yerleştirin",
                                            default=0),
             force_play: str = commands.Param(
-                name="tocar_agora",
+                name="hemen_çal",
                 description="Şarkıyı hemen çalın (kuyruğa eklemek yerine).",
                 default="no",
                 choices=[
                     disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
                 ]
             ),
-            options: str = commands.Param(name="opções", description="Çalma listelerini düzenleme seçenekleri",
+            options: str = commands.Param(name="çalmalistesi_düzenle", description="Çalma listelerini düzenleme seçenekleri",
                                           choices=playlist_opts, default=False),
             repeat_amount: int = commands.Param(name="repetições", description="tekrar sayısını ayarlayın.",
                                                 default=0),
             server: str = commands.Param(name="server", desc="Aramada belirli bir müzik sunucusu kullanın.",
                                          default=None),
             manual_bot_choice: str = commands.Param(
-                name="selecionar_bot",
+                name="bot_seç",
                 description="Kullanılabilir bir botu manuel olarak seçin.",
                 default="no",
                 choices=[
@@ -647,12 +647,12 @@ class Music(commands.Cog):
             self,
             inter: Union[disnake.AppCmdInter, CustomContext],
             file: disnake.Attachment = commands.Param(
-                name="arquivo", description="Çalmak veya sıraya eklemek için ses dosyası."
+                name="dosya_seç", description="Çalmak veya sıraya eklemek için ses dosyası."
             ),
             position: int = commands.Param(name="sıra", description="Müziği belirli bir konuma yerleştirin",
                                            default=0),
             force_play: str = commands.Param(
-                name="tocar_agora",
+                name="hemen_çal",
                 description="Müziği hemen çalmak (sıraya eklemek yerine).",
                 default="no",
                 choices=[
@@ -664,7 +664,7 @@ class Music(commands.Cog):
             server: str = commands.Param(name="server", desc="Aramada belirli bir müzik sunucusu kullanın.",
                                          default=None),
             manual_bot_choice: str = commands.Param(
-                name="selecionar_bot",
+                name="bot_seç",
                 description="Kullanılabilir bir botu manuel olarak seçin.",
                 default="no",
                 choices=[
@@ -727,24 +727,24 @@ class Music(commands.Cog):
             position: int = commands.Param(name="sıra", description="Müziği belirli bir konuma yerleştirin",
                                            default=0),
             force_play: str = commands.Param(
-                name="tocar_agora",
+                name="hemen_çal",
                 description="Şarkıyı hemen çalın (kuyruğa eklemek yerine).",
                 default="no",
                 choices=[
                     disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
                 ]
             ),
-            manual_selection: bool = commands.Param(name="selecionar_manualmente",
+            manual_selection: bool = commands.Param(name="manuel_seç",
                                                     description="Bulunan sonuçlardan manuel olarak bir şarkı seçin",
                                                     default=False),
-            options: str = commands.Param(name="opções", description="Çalma listelerini düzenleme seçenekleri",
+            options: str = commands.Param(name="çalmalistesi_düzenle", description="Çalma listelerini düzenleme seçenekleri",
                                           choices=playlist_opts, default=False),
-            repeat_amount: int = commands.Param(name="repetições", description="tekrar sayısını ayarlayın.",
+            repeat_amount: int = commands.Param(name="tekrar_sayısı", description="tekrar sayısını ayarlayın.",
                                                 default=0),
             server: str = commands.Param(name="server", desc="Aramada belirli bir müzik sunucusu kullanın.",
                                          default=None),
             manual_bot_choice: str = commands.Param(
-                name="selecionar_bot",
+                name="bot_seç",
                 description="Kullanılabilir bir botu manuel olarak seçin.",
                 default="no",
                 choices=[
@@ -1991,7 +1991,7 @@ class Music(commands.Cog):
                 description="Şarkının adı (tamamı veya bir kısmı)."
             ),
             case_sensitive: bool = commands.Param(
-                name="nome_exato", default=False,
+                name="tam_isim_ara", default=False,
                 description="Kelime kelime aramak yerine şarkının adındaki tam ifadeyle şarkıları arayın.",
 
             )
@@ -2027,7 +2027,7 @@ class Music(commands.Cog):
                 default="no"
             ),
             case_sensitive: bool = commands.Param(
-                name="nome_exato", default=False,
+                name="tam_isim_ara", default=False,
                 description="Kelime kelime aramak yerine şarkının adındaki tam ifadeyle şarkıları arayın.",
 
             )
@@ -2710,7 +2710,7 @@ class Music(commands.Cog):
             inter: disnake.AppCmdInter,
             query: str = commands.Param(name="isim", description="Şarkının tam adı."),
             case_sensitive: bool = commands.Param(
-                name="nome_exato", default=False,
+                name="tam_isim_ara", default=False,
                 description="Kelime kelime aramak yerine şarkının adındaki tam ifadeyle şarkıları arayın.",
 
             )
@@ -2822,7 +2822,7 @@ class Music(commands.Cog):
             inter: disnake.AppCmdInter,
             query: str = commands.Param(name="isim", description="Şarkının tam adı."),
             case_sensitive: bool = commands.Param(
-                name="nome_exato", default=False,
+                name="tam_isim_ara", default=False,
                 description="Kelime kelime aramak yerine şarkının adındaki tam ifadeyle şarkıları arayın.",
             )
     ):

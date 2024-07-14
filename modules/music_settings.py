@@ -934,8 +934,8 @@ class MusicSettings(commands.Cog):
             self,
             interaction: disnake.AppCmdInter,
             delete_channel: str = commands.Param(
-                name="deletar_canal",
-                description="doyuncu kumanda kanalını seçme", default=None, choices=["Evet", "Hayır"]
+                name="altbaşlık_sil",
+                description="Altbaşlığı siler", default=None, choices=["Evet", "Hayır"]
             )
     ):
 
