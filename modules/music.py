@@ -2962,13 +2962,13 @@ class Music(commands.Cog):
 
         if player.nightcore:
             await player.set_timescale(pitch=1.2, speed=1.1)
-            txt = "akti̇f hale geti̇ri̇ldi̇"
+            txt = "Akti̇f hale geti̇ri̇ldi̇"
         else:
             await player.set_timescale(enabled=False)
             await player.update_filters()
-            txt = "deakti̇f hale geti̇ri̇ldi̇"
+            txt = "Deakti̇f hale geti̇ri̇ldi̇"
 
-        txt = [f"{txt} nightcore efektini aktifleştirdi.", f"🇳 **⠂{inter.author.mention} {txt} nightcore efektini aktifleştirdi.**"]
+        txt = [f"nightcore efektini {txt}.", f"🇳 **⠂{inter.author.mention} nightcore efektini {txt}.**"]
 
 
         await self.interaction_message(inter, txt, emoji="🇳")
