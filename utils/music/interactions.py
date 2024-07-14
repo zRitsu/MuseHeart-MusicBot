@@ -435,7 +435,7 @@ class SelectInteraction(disnake.ui.View):
             next_button.callback = self.next_callback
             self.add_item(next_button)
 
-        button = disnake.ui.Button(label="İptal etmek", emoji="❌")
+        button = disnake.ui.Button(label="İptal", emoji="❌")
         button.callback = self.cancel_callback
         self.add_item(button)
 
