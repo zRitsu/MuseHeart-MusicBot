@@ -1074,14 +1074,14 @@ class MusicSettings(commands.Cog):
         guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         if str(role.id) in guild_data['djroles']:
-            await inter.send(f"Pozisyon {role.mention} zaten DJ listesinde", ephemeral=True)
+            await inter.send(f"{role.mention} Rolü zaten DJ listesinde", ephemeral=True)
             return
 
         guild_data['djroles'].append(str(role.id))
 
         await bot.update_data(guild.id, guild_data, db_name=DBModel.guilds)
 
-        await inter.send(f"Pozisyon {role.mention} DJ listesine eklenmiştir.", ephemeral=True)
+        await inter.send(f"{role.mention} Rolü DJ listesine eklenmiştir.", ephemeral=True)
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.command(name="removedjrole", description="Sunucunun DJ listesinden bir işi kaldırın.",
@@ -1109,14 +1109,14 @@ class MusicSettings(commands.Cog):
 
         if not guild_data['djroles']:
 
-            await inter.send("DJ listesinde herhangi bir pozisyon bulunmamaktadır.", ephemeral=True)
+            await inter.send("DJ listesinde herhangi bir Rol bulunmamaktadır.", ephemeral=True)
             return
 
         guild = bot.get_guild(inter.guild_id) or inter.guild
         role = guild.get_role(role.id)
 
         if str(role.id) not in guild_data['djroles']:
-            await inter.send(f"Pozisyon {role.mention} DJ listesinde değil\n\n" + "Pozisyon:\n" +
+            await inter.send(f"{role.mention} Rolü DJ listesinde değil\n\n" + "Pozisyon:\n" +
                                               " ".join(f"<#{r}>" for r in guild_data['djroles']), ephemeral=True)
             return
 
@@ -1124,7 +1124,7 @@ class MusicSettings(commands.Cog):
 
         await bot.update_data(guild.id, guild_data, db_name=DBModel.guilds)
 
-        await inter.send(f"Pozisyon {role.mention} DJ listesinden çıkarıldı.", ephemeral=True)
+        await inter.send(f"{role.mention} Rolü DJ listesinden çıkarıldı.", ephemeral=True)
 
     skin_cd = commands.CooldownMapping.from_cooldown(1, 20, commands.BucketType.guild)
     skin_mc =commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
