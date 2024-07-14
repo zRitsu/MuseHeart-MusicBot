@@ -1060,7 +1060,7 @@ class MusicSettings(commands.Cog):
     async def add_dj_role(
             self,
             interaction: disnake.ApplicationCommandInteraction,
-            role: disnake.Role = commands.Param(name="cargo", description="Cargo")
+            role: disnake.Role = commands.Param(name="rol", description="rol")
     ):
 
         inter, bot = await select_bot_pool(interaction)
