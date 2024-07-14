@@ -102,7 +102,7 @@ class DefaultSkin:
 
         txt += f"{vc_txt}\n"
 
-        bar = "https://i.ibb.co/fVgyxLZ/output-onlinegiftools.gif"
+        bar = "https://i.ibb.co/VCKrSqz/output-onlinegiftools-1.gif"
 
         if player.command_log:
             txt += f"```ansi\n [34;1mSon Etkileşim:[0m```**┕ {player.command_log_emoji} ⠂**{player.command_log}\n"

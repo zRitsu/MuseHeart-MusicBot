@@ -37,7 +37,7 @@ class ClassicSkin:
 
         queue_txt = ""
 
-        bar = "https://i.ibb.co/fVgyxLZ/output-onlinegiftools.gif"
+        bar = "https://i.ibb.co/VCKrSqz/output-onlinegiftools-1.gif"
 
         embed_top = disnake.Embed(
             color=color,
