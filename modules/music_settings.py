@@ -1371,15 +1371,15 @@ class MusicSettings(commands.Cog):
         await ctx.reply(
             embed=disnake.Embed(
                 description=f"**Bir kanal daveti oluşturun {ctx.author.voice.channel.mention}"
-                            f"\"Misafir olarak kayıt\" işaretleyin ve ardından aşağıdaki düğmeye tıklayarak bağlantıyı"
+                            f"\"Misafir olarak davet et\" işaretleyin ve ardından aşağıdaki düğmeye tıklayarak bağlantıyı "
                             f"açılan kısma girin.**\n\n"
                             f"Dikkat edin! Bu seçeneğe sahip değilseniz, bu özellik discordunuzda mevcut değil demektir. "
                             f"Bota kalıcı erişim vermekten kaçınmak veya izin sorunlarından kaçınmak için "
                             f"devam etmenizi önermiyorum."
-            ).set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/1108943648508366868/image.png").
+            ).set_image(url="https://cdn.discordapp.com/attachments/1261835711783370802/1261835733547749486/gSuyP8D.jpg").
             set_footer(text="Not: son kullanma tarihi, kullanım sayısı veya kullanım süresi gibi sınırlamalar olmaksızın bir davetiye oluşturun. "
                             "invite linkini bir kişilik oluşturmanızı öneririm."),
-            components=[disnake.ui.Button(label="Enviar convite", custom_id=f"listen_along_{ctx.author.id}")],
+            components=[disnake.ui.Button(label="Davetiye gönder", custom_id=f"listen_along_{ctx.author.id}")],
             fail_if_not_exists=False
         )
 
