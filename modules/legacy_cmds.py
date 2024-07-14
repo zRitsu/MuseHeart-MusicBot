@@ -537,7 +537,7 @@ class Owner(commands.Cog):
     @commands.command(
         aliases=["mudarprefixo", "prefix", "changeprefix"],
         description="Sunucu önekini değiştirin",
-        usage="{prefix}{cmd} [prefix]\Örn: {prefix}{cmd} >>"
+        usage="{prefix}{cmd} [prefix]\nÖrn: {prefix}{cmd} >>"
     )
     async def setprefix(self, ctx: CustomContext, prefix: str):
 
