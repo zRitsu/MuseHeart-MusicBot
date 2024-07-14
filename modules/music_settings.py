@@ -874,7 +874,7 @@ class MusicSettings(commands.Cog):
         if isinstance(channel, disnake.TextChannel):
             if not message.thread:
                 if channel.permissions_for(guild.me).create_public_threads:
-                    await message.create_thread(name="Song-Requests", auto_archive_duration=10080)
+                    await message.create_thread(name="sarki-istekleri", auto_archive_duration=10080)
             else:
                 thread_kw = {}
                 if message.thread.locked and message.thread.permissions_for(guild.me).manage_threads:

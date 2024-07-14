@@ -398,7 +398,7 @@ async def send_idle_embed(
     embed = disnake.Embed(description="**Bir ses kanalı girin ve buradan bir şarkı isteyin " +
                                       ("postada" if is_forum else "kanalda veya aşağıdaki sohbette") +
                                       f" (veya aşağıdaki düğmeye tıklayın ya da şu komutu kullanın {cmd} burada veya başka bir kanalda)**\n\n"
-                                      "**Uyumlu bir web sitesi adı veya bağlantısı kullanabilirsiniz:**\n"
+                                      "**Aşşağıdaki siteleri ve birçoğunu kullanabilirsiniz...:**\n"
                                       "[`Youtube`](<https://www.youtube.com/>), [`Soundcloud`](<https://soundcloud.com/>), " \
                                       "[`Spotify`](<https://open.spotify.com/>), [`Twitch`](<https://www.twitch.tv/>)",
                           color=bot.get_color(target.guild.me))
