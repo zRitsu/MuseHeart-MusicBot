@@ -881,7 +881,7 @@ class LavalinkPlayer(wavelink.Player):
             async def send_report():
 
                 print(("-" * 50) + f"\nŞarkı çalınırken hata oluştu: {track.uri or track.search_uri}\n"
-                                   f"Servidor: {self.node.identifier}\n"
+                                   f"Sunucu: {self.node.identifier}\n"
                                    f"{error_format}\n" + ("-" * 50))
 
                 await self.report_error(embed, track)

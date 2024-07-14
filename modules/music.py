@@ -4541,7 +4541,7 @@ class Music(commands.Cog):
     async def change_node(
             self,
             inter: disnake.AppCmdInter,
-            node: str = commands.Param(name="servidor", description="Müzik sunucusu")
+            node: str = commands.Param(name="sunucu", description="Müzik sunucusu")
     ):
 
         try:
@@ -4583,7 +4583,7 @@ class Music(commands.Cog):
 
     @search.autocomplete("server")
     @play.autocomplete("server")
-    @change_node.autocomplete("servidor")
+    @change_node.autocomplete("sunucu")
     async def node_suggestions(self, inter: disnake.Interaction, query: str):
 
         if not self.bot.bot_ready or not self.bot.is_ready():
