@@ -777,7 +777,7 @@ class LavalinkPlayer(wavelink.Player):
 
     async def hook(self, event) -> None:
 
-        if self.is_closing:
+        """if self.is_closing:
             return
 
         event_name = str(event)
@@ -785,9 +785,8 @@ class LavalinkPlayer(wavelink.Player):
         if self.hook_event_task.get(event_name):
             return
 
-        self.hook_event_task[event_name] = self.bot.loop.create_task(self.hook_events(event))
-
-    async def hook_events(self, event):
+        self.hook_event_task[event_name] = self.bot.loop.create_task(self.hook_events(event))"""
+        await self.hook_events(event)
 
         await self.bot.wait_until_ready()
 
