@@ -3251,7 +3251,7 @@ class Music(commands.Cog):
     @check_voice()
     @pool_command(name="adddj", aliases=["adj"], only_voiced=True,
                   description="Geçerli oynatıcı oturumundaki DJ listesine bir üye ekleyin.",
-                  usage="{prefix}{cmd} [id|nome|@user]\nEx: {prefix}{cmd} @membro")
+                  usage="{prefix}{cmd} [id|nome|@user]\nEx: {prefix}{cmd} @uye")
     async def add_dj_legacy(self, ctx: CustomContext, user: disnake.Member):
         await self.add_dj.callback(self=self, inter=ctx, user=user)
 
@@ -3265,7 +3265,7 @@ class Music(commands.Cog):
     async def add_dj(
             self,
             inter: disnake.AppCmdInter, *,
-            user: disnake.User = commands.Param(name="membro", description="Membro a ser adicionado.")
+            user: disnake.User = commands.Param(name="uye", description="Eklenecek üye.")
     ):
 
         error_text = None
@@ -3318,7 +3318,7 @@ class Music(commands.Cog):
     async def remove_dj(
             self,
             inter: disnake.AppCmdInter, *,
-            user: disnake.User = commands.Param(name="membro", description="Eklenecek üye.")
+            user: disnake.User = commands.Param(name="uye", description="Kaldırılcak üye.")
     ):
 
         try:
@@ -3653,7 +3653,7 @@ class Music(commands.Cog):
     adv_queue_flags.add_argument('-endposition', '-endpos', '-end', type=int, default=0,
                                  help="Remover músicas da fila até uma posição específica na fila.\nEx: -end 15")
     adv_queue_flags.add_argument('-absentmembers', '-absent', '-abs', action='store_true',
-                                 help="Remover músicas adicionads por membros que saíram do canal")
+                                 help="Remover músicas adicionads por aras que saíram do canal")
 
     clear_flags = CommandArgparse(parents=[adv_queue_flags])
 
@@ -3698,7 +3698,7 @@ class Music(commands.Cog):
                                              default=None),
             song_author: str = commands.Param(name="uploader", description="Müziğin yükleyicisi/oluşturucusunun adını dahil et.",
              default=None),
-            user: disnake.Member = commands.Param(name='membro', description="Belirli bir üye tarafından istenilen müzikleri dahil et.",
+            user: disnake.Member = commands.Param(name='uye', description="Belirli bir üye tarafından istenilen müzikleri dahil et.",
              default=None),
             duplicates: bool = commands.Param(name="duplicados", description="Yinelenen müzikleri dahil et.",
              default=False),
@@ -3714,7 +3714,7 @@ class Music(commands.Cog):
              min_value=1.0, max_value=500.0, default=0),
             range_end: int = commands.Param(name="posição_final", description="Belirtilen pozisyona kadar kuyruktaki müzikleri dahil et.",
              min_value=1.0, max_value=500.0, default=0),
-            absent_members: bool = commands.Param(name="membros_ausentes", description="Kanaldan ayrılan üyeler tarafından eklenen müzikleri dahil et.",
+            absent_members: bool = commands.Param(name="aras_ausentes", description="Kanaldan ayrılan üyeler tarafından eklenen müzikleri dahil et.",
              default=False)
     ):
 
@@ -3998,7 +3998,7 @@ class Music(commands.Cog):
             song_author: str = commands.Param(name="uploader",
                                               description="Müzikte bulunan bir ismi eklemek (yazar/sanatçı/yükleyici).",
                                               default=None),
-            user: disnake.Member = commands.Param(name='membro',
+            user: disnake.Member = commands.Param(name='ara',
                                                   description="Seçilen üye tarafından istenen müzikleri eklemek.",
                                                   default=None),
             duplicates: bool = commands.Param(name="duplicados", description="Yinelenen müzikleri eklemek",
@@ -4018,7 +4018,7 @@ class Music(commands.Cog):
             range_end: int = commands.Param(name="posição_final",
                                             description="Belirtilen son konuma kadar müzikleri eklemek.",
                                             min_value=1.0, max_value=500.0, default=0),
-            absent_members: bool = commands.Param(name="membros_ausentes",
+            absent_members: bool = commands.Param(name="aras_ausentes",
                                                   description="Kanaldan çıkan üyeler tarafından eklenen müzikleri dahil etmek.",
                                                   default=False),
     ):
