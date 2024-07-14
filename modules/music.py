@@ -3710,11 +3710,11 @@ class Music(commands.Cog):
              default=None),
             amount: int = commands.Param(name="miktar", description="Taşınacak müzik miktarı.",
              min_value=0, max_value=99, default=None),
-            range_start: int = commands.Param(name="posição_inicial", description="Belirtilen pozisyondan itibaren kuyruktaki müzikleri dahil et.",
+            range_start: int = commands.Param(name="belirtilen_sıra", description="Belirtilen pozisyondan itibaren kuyruktaki müzikleri dahil et.",
              min_value=1.0, max_value=500.0, default=0),
-            range_end: int = commands.Param(name="posição_final", description="Belirtilen pozisyona kadar kuyruktaki müzikleri dahil et.",
+            range_end: int = commands.Param(name="sondan_ekle", description="Belirtilen pozisyona kadar kuyruktaki müzikleri dahil et.",
              min_value=1.0, max_value=500.0, default=0),
-            absent_members: bool = commands.Param(name="aras_ausentes", description="Kanaldan ayrılan üyeler tarafından eklenen müzikleri dahil et.",
+            absent_members: bool = commands.Param(name="ayrılan_üye", description="Kanaldan ayrılan üyeler tarafından eklenen müzikleri dahil et.",
              default=False)
     ):
 
@@ -4012,13 +4012,13 @@ class Music(commands.Cog):
                                                default=None),
             amount: int = commands.Param(name="miktar", description="Taşınacak müzik miktarı.",
                                          min_value=0, max_value=99, default=None),
-            range_start: int = commands.Param(name="posição_inicial",
+            range_start: int = commands.Param(name="belirtilen_sıra",
                                               description="Belirtilen başlangıç konumundan itibaren müzikleri eklemek.",
                                               min_value=1.0, max_value=500.0, default=0),
-            range_end: int = commands.Param(name="posição_final",
+            range_end: int = commands.Param(name="sondan_ekle",
                                             description="Belirtilen son konuma kadar müzikleri eklemek.",
                                             min_value=1.0, max_value=500.0, default=0),
-            absent_members: bool = commands.Param(name="aras_ausentes",
+            absent_members: bool = commands.Param(name="ayrılan_üye",
                                                   description="Kanaldan çıkan üyeler tarafından eklenen müzikleri dahil etmek.",
                                                   default=False),
     ):
