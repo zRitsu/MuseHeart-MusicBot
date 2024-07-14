@@ -230,7 +230,7 @@ class Music(commands.Cog):
     @commands.has_guild_permissions(manage_guild=True)
     @pool_command(
         only_voiced=True, name="setvoicestatus", aliases=["stagevc", "togglestageannounce", "announce", "vcannounce", "setstatus",
-                                                         "voicestatus", "setvcstatus", "statusvc", "vcstatus", "stageannounce", "kanaldurumu"],
+                                                         "voicestatus", "setvcstatus", "statusvc", "vcstatus", "stageannounce"],
         description="Kanalın otomatik anons/durum sistemini şarkının adıyla etkinleştirin.",
         cooldown=stage_cd, max_concurrency=stage_mc, extras={"exclusive_cooldown": True},
         usage="{prefix}{cmd} <placeholders>\nEx: {track.author} - {track.title}"
@@ -578,7 +578,7 @@ class Music(commands.Cog):
     @commands.bot_has_guild_permissions(send_messages=True)
     @commands.max_concurrency(1, commands.BucketType.member)
     @pool_command(name="addposition", description="Kuyruğa belirli bir konumda müzik ekle.",
-                  aliases=["adp", "addpos","konumaekle"], check_player=False, cooldown=play_cd, max_concurrency=play_mc,
+                  aliases=["adp", "addpos"], check_player=False, cooldown=play_cd, max_concurrency=play_mc,
                   usage="{prefix}{cmd} [posição(Nº)] [nome|link]\nEx: {prefix}{cmd} 2 sekai - burn me down")
     async def addpos_legacy(self, ctx: CustomContext, position: int, *, query: str):
 
@@ -605,7 +605,7 @@ class Music(commands.Cog):
     @commands.bot_has_guild_permissions(send_messages=True)
     @check_voice()
     @commands.max_concurrency(1, commands.BucketType.member)
-    @pool_command(name="play", description="Bir ses kanalında müzik çalmak.", aliases=["p","çal"], check_player=False,
+    @pool_command(name="play", description="Bir ses kanalında müzik çalmak.", aliases=["p"], check_player=False,
                   cooldown=play_cd, max_concurrency=play_mc, extras={"flags": stage_flags},
                   usage="{prefix}{cmd} [nome|link]\nEx: {prefix}{cmd} sekai - burn me down")
     async def play_legacy(self, ctx: CustomContext, *, flags: str = ""):
@@ -629,7 +629,7 @@ class Music(commands.Cog):
     @commands.bot_has_guild_permissions(send_messages=True)
     @check_voice()
     @pool_command(name="search", description="Müzikleri aramak ve sonuçlar arasından birini seçip çalmak.",
-                  aliases=["sc","ara"], check_player=False, cooldown=play_cd, max_concurrency=play_mc,
+                  aliases=["sc"], check_player=False, cooldown=play_cd, max_concurrency=play_mc,
                   usage="{prefix}{cmd} [nome]\nEx: {prefix}{cmd} sekai - burn me down")
     async def search_legacy(self, ctx: CustomContext, *, query):
 
@@ -2145,7 +2145,7 @@ class Music(commands.Cog):
     @check_queue_loading()
     @has_player()
     @check_voice()
-    @pool_command(name="back", aliases=["b", "voltar","geri"], description="Önceki şarkıya geri dönün.", only_voiced=True,
+    @pool_command(name="back", aliases=["b", "voltar"], description="Önceki şarkıya geri dönün.", only_voiced=True,
                   cooldown=skip_back_cd, max_concurrency=skip_back_mc)
     async def back_legacy(self, ctx: CustomContext):
         await self.back.callback(self=self, inter=ctx)
@@ -2272,7 +2272,7 @@ class Music(commands.Cog):
     @is_dj()
     @has_source()
     @check_voice()
-    @pool_command(name="volume", description="Müzik sesini ayarlayın.", aliases=["vol", "v","ses"], only_voiced=True,
+    @pool_command(name="volume", description="Müzik sesini ayarlayın.", aliases=["vol", "v"], only_voiced=True,
                   cooldown=volume_cd, max_concurrency=volume_mc, usage="{prefix}{cmd} [seviye]\nÖrneğin: {prefix}{cmd} 57")
     async def volume_legacy(self, ctx: CustomContext, level: int):
 
@@ -2337,7 +2337,7 @@ class Music(commands.Cog):
     @is_dj()
     @has_source()
     @check_voice()
-    @pool_command(name="pause", aliases=["duraklatma","pause"], description="Müziği durdur.", only_voiced=True,
+    @pool_command(name="pause", aliases=["duraklatma"], description="Müziği durdur.", only_voiced=True,
                   cooldown=pause_resume_cd, max_concurrency=pause_resume_mc)
     async def pause_legacy(self, ctx: CustomContext):
         await self.pause.callback(self=self, inter=ctx)
@@ -2371,7 +2371,7 @@ class Music(commands.Cog):
     @is_dj()
     @has_source()
     @check_voice()
-    @pool_command(name="resume", aliases=["devam ettir","resume"], description="Müziği devam ettir/duraklat.", only_voiced=True,
+    @pool_command(name="resume", aliases=["devam ettir"], description="Müziği devam ettir/duraklat.", only_voiced=True,
                   cooldown=pause_resume_cd, max_concurrency=pause_resume_mc)
     async def resume_legacy(self, ctx: CustomContext):
         await self.resume.callback(self=self, inter=ctx)
@@ -2409,7 +2409,7 @@ class Music(commands.Cog):
     @check_queue_loading()
     @has_source()
     @check_voice()
-    @pool_command(name="seek", aliases=["sk","saniyeatla"], description="Müziği belirli bir zamana atlatmak/devam ettirmek.",
+    @pool_command(name="seek", aliases=["sk"], description="Müziği belirli bir zamana atlatmak/devam ettirmek.",
                   only_voiced=True, cooldown=seek_cd, max_concurrency=seek_mc,
                   usage="{prefix}{cmd} [sn]\n"
                         "Örnek 1: {prefix}{cmd} 10 (sn 0:10)\n"
@@ -2686,7 +2686,7 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @pool_command(name="remove", aliases=["r", "del","sil"], description="Kuyruktan belirli bir şarkıyı kaldırın.",
+    @pool_command(name="remove", aliases=["r", "del"], description="Kuyruktan belirli bir şarkıyı kaldırın.",
                   only_voiced=True, max_concurrency=remove_mc, extras={"flags": case_sensitive_args},
                   usage="{prefix}{cmd} [nome]\nEx: {prefix}{cmd} sekai")
     async def remove_legacy(self, ctx: CustomContext, *, flags: str = ""):
@@ -2746,7 +2746,7 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @pool_command(name="readd", aliases=["readicionar", "rdd","ye"], only_voiced=True, cooldown=queue_manipulation_cd,
+    @pool_command(name="readd", aliases=["readicionar", "rdd"], only_voiced=True, cooldown=queue_manipulation_cd,
                   max_concurrency=remove_mc, description="Kuyrukta çalınan şarkıları yeniden ekleyin.")
     async def readd_legacy(self, ctx: CustomContext):
         await self.readd_songs.callback(self=self, inter=ctx)
@@ -2796,7 +2796,7 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @pool_command(name="rotate", aliases=["rt", "rotacionar","döndür"], only_voiced=True,
+    @pool_command(name="rotate", aliases=["rt", "rotacionar"], only_voiced=True,
                   description="Kuyruğu belirtilen müziğe döndürün.",
                   cooldown=queue_manipulation_cd, max_concurrency=remove_mc, extras={"flags": case_sensitive_args},
                   usage="{prefix}{cmd} [nome]\nEx: {prefix}{cmd} sekai")
@@ -2977,7 +2977,7 @@ class Music(commands.Cog):
 
     np_cd = commands.CooldownMapping.from_cooldown(1, 7, commands.BucketType.member)
 
-    @commands.command(name="nowplaying", aliases=["np", "npl", "current", "tocando", "playing","şimdiki"],
+    @commands.command(name="nowplaying", aliases=["np", "npl", "current", "tocando", "playing"],
                  description="şu anda dinlemekte olduğunuz müzikle ilgili bilgileri görüntüleyin.", cooldown=np_cd)
     async def now_playing_legacy(self, ctx: CustomContext):
         await self.now_playing.callback(self=self, inter=ctx)
@@ -3169,7 +3169,7 @@ class Music(commands.Cog):
 
     @has_source()
     @check_voice()
-    @pool_command(name="controller", aliases=["ctl","kontrol"], only_voiced=True, cooldown=controller_cd,
+    @pool_command(name="controller", aliases=["ctl"], only_voiced=True, cooldown=controller_cd,
                   max_concurrency=controller_mc, description="Oynatıcı kontrolcüsünü belirli/şu anki bir kanala gönder.")
     async def controller_legacy(self, ctx: CustomContext):
         await self.controller.callback(self=self, inter=ctx)
@@ -3358,7 +3358,7 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @pool_command(name="stop", aliases=["leave", "parar","at"], only_voiced=True,
+    @pool_command(name="stop", aliases=["leave", "parar"], only_voiced=True,
                   description="Oynatıcı'yı durdur ve ses kanalından bağlantımı kes.")
     async def stop_legacy(self, ctx: CustomContext):
         await self.stop.callback(self=self, inter=ctx)
@@ -3415,7 +3415,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @pool_command(
-        name="savequeue", aliases=["sq", "svq","kk"],
+        name="savequeue", aliases=["sq", "svq"],
         only_voiced=True, cooldown=queue_manipulation_cd, max_concurrency=remove_mc,
         description="Deneysel: Mevcut şarkıyı ve sırayı herhangi bir zamanda yeniden kullanmak için kaydet."
     )
@@ -3510,7 +3510,7 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @pool_command(name="shuffle", aliases=["sf", "shf", "sff", "misturar","karıştır"], only_voiced=True,
+    @pool_command(name="shuffle", aliases=["sf", "shf", "sff", "misturar"], only_voiced=True,
                   description="Kuyruktaki şarkıları karıştır", cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
     async def shuffle_legacy(self, ctx: CustomContext):
         await self.shuffle_.callback(self, inter=ctx)
@@ -3544,7 +3544,7 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @pool_command(name="reverse", aliases=["invert", "inverter", "rv","ters"], only_voiced=True,
+    @pool_command(name="reverse", aliases=["invert", "inverter", "rv"], only_voiced=True,
                   description="Kuyruktaki şarkıların sırasını tersine çevir", cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
     async def reverse_legacy(self, ctx: CustomContext):
         await self.reverse.callback(self=self, inter=ctx)
@@ -3579,7 +3579,7 @@ class Music(commands.Cog):
 
     @has_player()
     @check_voice()
-    @pool_command(name="queue", aliases=["q", "fila","kuyruk"], description="Kuyruktaki şarkıları göster.",
+    @pool_command(name="queue", aliases=["q", "fila"], description="Kuyruktaki şarkıları göster.",
                   only_voiced=True, max_concurrency=queue_show_mc)
     async def queue_show_legacy(self, ctx: CustomContext):
         await self.display.callback(self=self, inter=ctx)
@@ -3660,7 +3660,7 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @pool_command(name="clear", aliases=["limpar", "clearqueue","temizle"], description="Müzik kuyruğunu temizle.",
+    @pool_command(name="clear", aliases=["limpar", "clearqueue"], description="Müzik kuyruğunu temizle.",
                   only_voiced=True,
                   extras={"flags": clear_flags}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
     async def clear_legacy(self, ctx: CustomContext, *, flags: str = ""):
@@ -3948,7 +3948,7 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @pool_command(name="move", aliases=["movequeue", "moveadv", "moveadvanced", "moveq", "mq", "mv", "mover","taşı"],
+    @pool_command(name="move", aliases=["movequeue", "moveadv", "moveadvanced", "moveq", "mq", "mv", "mover"],
                   description="Müzikleri kuyruktan taşımak.", only_voiced=True,
                   extras={"flags": move_queue_flags}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
     async def move_legacy(self, ctx: CustomContext, position: Optional[int] = None, *, flags: str = ""):
@@ -4407,7 +4407,7 @@ class Music(commands.Cog):
     @is_dj()
     @has_player()
     @check_voice()
-    @pool_command(name="restrictmode", aliases=["rstc", "restrict", "restrito", "modorestrito","kısıtlımod"], only_voiced=True, cooldown=restrict_cd, max_concurrency=restrict_mc,
+    @pool_command(name="restrictmode", aliases=["rstc", "restrict", "restrito", "modorestrito"], only_voiced=True, cooldown=restrict_cd, max_concurrency=restrict_mc,
                   description="DJ/Personel gerektiren komutların kısıtlı modunu etkinleştirin/devre dışı bırakın.")
     async def restrict_mode_legacy(self, ctx: CustomContext):
 
@@ -4445,7 +4445,7 @@ class Music(commands.Cog):
     @has_player()
     @check_voice()
     @commands.has_guild_permissions(manage_guild=True)
-    @pool_command(name="247", aliases=["nonstop","7/24"], only_voiced=True, cooldown=nonstop_cd, max_concurrency=nonstop_mc,
+    @pool_command(name="247", aliases=["nonstop"], only_voiced=True, cooldown=nonstop_cd, max_concurrency=nonstop_mc,
                   description="Oynatıcının 24/7 modunu Etkinleştir/Devre Dışı Bırak (Test aşamasında).")
     async def nonstop_legacy(self, ctx: CustomContext):
         await self.nonstop.callback(self=self, inter=ctx)
@@ -4495,7 +4495,7 @@ class Music(commands.Cog):
 
     @has_player()
     @check_voice()
-    @pool_command(name="autoplay", aliases=["ap", "aplay","otooynat"], only_voiced=True, cooldown=autoplay_cd, max_concurrency=autoplay_mc,
+    @pool_command(name="autoplay", aliases=["ap", "aplay"], only_voiced=True, cooldown=autoplay_cd, max_concurrency=autoplay_mc,
                   description="Müzik sırası bittiğinde otomatik oynatmayı aç/kapat.")
     async def autoplay_legacy(self, ctx: CustomContext):
         await self.autoplay.callback(self=self, inter=ctx)
@@ -4639,7 +4639,7 @@ class Music(commands.Cog):
 
     @commands.command(name="favmanager", aliases=["favs", "favoritos", "fvmgr", "favlist",
                                                   "integrations", "integrationmanager", "itg", "itgmgr", "itglist", "integrationlist",
-                                                  "serverplaylist", "spl", "svp", "svpl","favori"],
+                                                  "serverplaylist", "spl", "svp", "svpl"],
                       description="Favorilerinizi/entegrasyonlarınızı ve sunucu bağlantılarını yönetin.", cooldown=fav_cd)
     async def fav_manager_legacy(self, ctx: CustomContext):
         await self.fav_manager.callback(self=self, inter=ctx)
