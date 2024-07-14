@@ -1025,7 +1025,7 @@ class Owner(commands.Cog):
         if not url:
 
             if not ctx.message.attachments:
-                raise GenericError("Komutta bir görsele veya gif'e bağlantı sağlamanız (veya bir tane eklemeniz) gerekir.")
+                raise GenericError("Komutta bir görsele veya gif'e bağlantısı eklemeniz gerekir.")
 
             url = ctx.message.attachments[0].url
 
