@@ -1722,13 +1722,13 @@ class RPCCog(commands.Cog):
             description="**RPC aracılığıyla dinlediğiniz müziği görüntülemek için uygulamayı kullanmaya yönelik mini kılavuz:\n\n"
                         "Uygulamayı indirin (musicbot_rpc.zip) "
                         "[aqui](https://github.com/zRitsu/Discord-MusicBot-RPC/releases).\n\n"
-                        "musicbot_rpc.zip dosyasını çıkarın ve klasördeki musicbot_rpc dosyasını açın." \
+                        "musicbot_rpc.zip dosyasını çıkarın ve klasördeki musicbot_rpc dosyasını açın ve " \
                         "Aşağıdaki websocket bağlantısını uygulamaya ekleyin (sekme: Soket Ayarları):** ```ansi\n" \
                         f"{(self.bot.config['RPC_PUBLIC_URL'] or self.bot.config['RPC_SERVER']).replace('$PORT', os.environ.get('PORT', '80'))}```"
         )
 
-        embed.set_footer(text="Not: Şu anda sadece discord masaüstü ile windows üzerinde çalışıyor, mobil cihazlarda çalışmıyor "
-                              "veya discord web.")
+        embed.set_footer(text="Not: Şu anda sadece discord masaüstü ile windows üzerinde çalışıyor, mobil cihazlarda ve discord web'de "
+                              "çalışmıyor.\n\n Dikkat: Bu özelliği botun sahibi aktif etmemiş olabilir!")
 
         if self.bot.config["ENABLE_RPC_AUTH"]:
 
@@ -1747,8 +1747,8 @@ class RPCCog(commands.Cog):
                 ]
             )
 
-        embed.description += "\n\n**Şimdi tek yapmanız gereken \"Presence\'ı Başlat\" düğmesine tıklamak ve müzik dinlemek " \
-                             "bazı uyumlu botlar.**"
+        embed.description += "\n\n**Şimdi tek yapmanız gereken \"Presence\'ı Başlat\" düğmesine tıklamak" \
+                             "ve uyumlu botlarla müzik dinlemek.**"
 
         embed.set_author(
             name=f"{inter.author.display_name}#{inter.author.discriminator} - [ {inter.author.id} ]",
@@ -1757,7 +1757,7 @@ class RPCCog(commands.Cog):
 
         if isinstance(inter, CustomContext):
             components.append(
-                disnake.ui.Button(label="Fechar", custom_id=f"rpc_close.{inter.author.id}", emoji="❌", row=1),
+                disnake.ui.Button(label="Kapat", custom_id=f"rpc_close.{inter.author.id}", emoji="❌", row=1),
             )
 
         await inter.send(
