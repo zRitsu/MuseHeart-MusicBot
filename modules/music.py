@@ -5964,7 +5964,7 @@ class Music(commands.Cog):
             else:
                 if not error_msg:
                     has_exception = e
-                    error = f"{message.author.mention} **arama sonuçlarını alırken bir hata oluştu:** ```py\n{error_msg}```""
+                    error = f"{message.author.mention} **arama sonuçlarını alırken bir hata oluştu:** ```py\n{error_msg}```"
                 else:
                     error = f"{message.author.mention}. {error_msg}"
 
