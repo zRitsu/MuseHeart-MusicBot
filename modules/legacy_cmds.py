@@ -537,7 +537,7 @@ class Owner(commands.Cog):
     @commands.command(
         aliases=["mudarprefixo", "prefix", "changeprefix"],
         description="Sunucu önekini değiştirin",
-        usage="{prefix}{cmd} [prefixo]\nEx: {prefix}{cmd} >>"
+        usage="{prefix}{cmd} [prefix]\Örn: {prefix}{cmd} >>"
     )
     async def setprefix(self, ctx: CustomContext, prefix: str):
 
@@ -592,7 +592,7 @@ class Owner(commands.Cog):
         aliases=["uprefix", "spu", "setmyprefix", "spm", "setcustomprefix", "scp", "customprefix", "myprefix"],
         description="Kullanıcı önekinizi değiştirin (ne olursa olsun size yanıt vereceğim önek, "
                     "sunucuda yapılandırılmış önek).",
-        usage="{prefix}{cmd} [prefixo]\nEx: {prefix}{cmd} >>"
+        usage="{prefix}{cmd} [prefix]\nÖrn: {prefix}{cmd} >>"
     )
     async def setuserprefix(self, ctx: CustomContext, prefix: str):
 
@@ -641,7 +641,7 @@ class Owner(commands.Cog):
     @commands.command(
         aliases=["guildprefix", "sgp", "gp"], hidden=True,
         description="Verilen prefix ile bir sunucu için manuel olarak bir prefix ayarlayın (bot listeleri için kullanışlıdır)",
-        usage="{prefix}{cmd} [server id] <prefix>\n\nÖrn: {prefix}{cmd} 1155223334455667788 >>\n\nNot: Kaldırmak için komutu bir önek belirtmeden kullanın."
+        usage="{prefix}{cmd} [server id] <prefix>\n\nÖrn: {prefix}{cmd} 1155223334455667788 >>\n\nNot: Kaldırmak için komutu bir prefix belirtmeden kullanın."
     )
     async def setguildprefix(self, ctx: CustomContext, server_id: int, prefix: str = None):
 
