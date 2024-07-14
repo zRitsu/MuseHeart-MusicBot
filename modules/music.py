@@ -2603,16 +2603,16 @@ class Music(commands.Cog):
             self,
             inter: disnake.AppCmdInter,
             mode: str = commands.Param(
-                name="modo",
+                name="mod",
                 choices=[
                     disnake.OptionChoice(
-                        disnake.Localized("Current", data={disnake.Locale.pt_BR: "Música Atual"}), "current"
+                        disnake.Localized("Current", data={disnake.Locale.pt_BR: "Güncel Müzik"}), "current"
                     ),
                     disnake.OptionChoice(
-                        disnake.Localized("Queue", data={disnake.Locale.pt_BR: "Fila"}), "queue"
+                        disnake.Localized("Queue", data={disnake.Locale.pt_BR: "Güncel Dosya"}), "queue"
                     ),
                     disnake.OptionChoice(
-                        disnake.Localized("Off", data={disnake.Locale.pt_BR: "Desativar"}), "off"
+                        disnake.Localized("Off", data={disnake.Locale.pt_BR: "Devre dışı bırak"}), "off"
                     ),
                 ]
             )
