@@ -2660,7 +2660,7 @@ class Music(commands.Cog):
     async def loop_amount(
             self,
             inter: disnake.AppCmdInter,
-            value: int = commands.Param(name="valor", description="tekrar sayısı.")
+            value: int = commands.Param(name="sayı", description="tekrar sayısı.")
     ):
 
         try:
