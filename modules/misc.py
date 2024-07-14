@@ -658,10 +658,10 @@ class Misc(commands.Cog):
             if user_data["custom_prefix"]:
                 embed.description += f"> ⌨️ **⠂Kullanıcı önekiniz:** `{disnake.utils.escape_markdown(user_data['custom_prefix'], as_needed=True)}`\n"
 
-        links = "[`[Source]`](https://github.com/Sepultrex/MuseHeart-MusicBot-TURKISH)"
+        links = "[`[Kaynak Kodları]`](https://github.com/Sepultrex/MuseHeart-MusicBot-TURKISH)"
 
         if bot.config["SUPPORT_SERVER"]:
-            links = f"[`[Suporte]`]({bot.config['SUPPORT_SERVER']})  **|** {links}"
+            links = f"[`[Destek Sunucusu]`]({bot.config['SUPPORT_SERVER']})  **|** {links}"
 
         embed.description += f"> 🌐 **⠂**{links}\n"
 
