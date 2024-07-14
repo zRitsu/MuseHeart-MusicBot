@@ -5602,7 +5602,7 @@ class Music(commands.Cog):
                             await self.player_interaction_concurrency.release(interaction)
                         except:
                             pass
-                        await interaction.send("**Não estou tocando algo no momento...**", ephemeral=True)
+                        await interaction.send("**Şu anda bir şey çalmıyorum...**", ephemeral=True)
                         return
 
                     if not player.current.ytid:
@@ -5610,10 +5610,10 @@ class Music(commands.Cog):
                             await self.player_interaction_concurrency.release(interaction)
                         except:
                             pass
-                        await interaction.send("No momento apenas músicas do youtube são suportadas.", ephemeral=True)
+                        await interaction.send("Şu anda sadece YouTube müzikleri desteklenmektedir.", ephemeral=True)
                         return
 
-                    not_found_msg = "Não há letras disponíveis para a música atual..."
+                    not_found_msg = "Mevcut müzik için şarkı sözü bulunmamaktadır..."
 
                     await interaction.response.defer(ephemeral=True, with_message=True)
 
