@@ -83,7 +83,7 @@ class ClassicSkin:
         if qsize := len(player.queue):
 
             if not player.mini_queue_enabled:
-                txt += f"🎶 **⠂** `{qsize} müzik{'ler'[:qsize^1]} ve sıra`\n"
+                txt += f"🎶 **⠂** `sıradaki müzik{'ler'[:qsize^1]}: {qsize}`\n"
             else:
                 queue_txt += "```ansi\n[0;33mGelecek Şarkılar:[0m```" + "\n".join(
                     f"`{(n + 1):02}) [{time_format(t.duration) if t.duration else '🔴 Canlı yayın'}]` "
