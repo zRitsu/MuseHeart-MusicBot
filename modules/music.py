@@ -246,8 +246,8 @@ class Music(commands.Cog):
     async def set_voice_status(
             self, inter: disnake.AppCmdInter,
             template: str = commands.Param(
-                name="modelo", default="",
-                description="Bir durum şablonunu manuel olarak belirleyin (yer tutucuları dahil edin)."
+                name="durum", default="",
+                description="Bir kanalın durumunu manuel olarak belirleyin."
             )
     ):
 
@@ -307,7 +307,7 @@ class Music(commands.Cog):
                 await inter.edit_original_message("**Otomatik durum başarıyla ayarlandı!**")
 
 
-    @set_voice_status.autocomplete("modelo")
+    @set_voice_status.autocomplete("durum")
     async def default_models(self, inter: disnake.Interaction, query: str):
         return [
             "{track.title} - By: {track.author} | {track.timestamp}",
@@ -364,7 +364,7 @@ class Music(commands.Cog):
             ),
             options: str = commands.Param(name="çalmalistesi_düzenle", description="Çalma listelerini düzenleme seçenekleri",
                                           choices=playlist_opts, default=False),
-            repeat_amount: int = commands.Param(name="repetições", description="tekrar sayısını ayarlayın.",
+            repeat_amount: int = commands.Param(name="tekrar_sayısı", description="tekrar sayısını ayarlayın.",
                                                 default=0),
             server: str = commands.Param(name="server", desc="Aramada belirli bir müzik sunucusu kullanın.",
                                          default=None),
@@ -659,7 +659,7 @@ class Music(commands.Cog):
                     disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
                 ]
             ),
-            repeat_amount: int = commands.Param(name="repetições", description="tekrar sayısını ayarlayın.",
+            repeat_amount: int = commands.Param(name="tekrar_sayısı", description="tekrar sayısını ayarlayın.",
                                                 default=0),
             server: str = commands.Param(name="server", desc="Aramada belirli bir müzik sunucusu kullanın.",
                                          default=None),
@@ -2289,7 +2289,7 @@ class Music(commands.Cog):
     async def volume(
             self,
             inter: disnake.AppCmdInter, *,
-            value: int = commands.Param(name="nível", description="seviye 5 ile 150 arasında", min_value=5.0, max_value=150.0)
+            value: int = commands.Param(name="seviye", description="seviye 5 ile 150 arasında olmalıdır", min_value=5.0, max_value=150.0)
     ):
 
         try:
@@ -2430,7 +2430,7 @@ class Music(commands.Cog):
     async def seek(
             self,
             inter: disnake.AppCmdInter,
-            position: str = commands.Param(name="tempo", description="İleri/geri sar (örn. 1:45 / 40 / 0:30)")
+            position: str = commands.Param(name="süre", description="İleri/geri sar (örn. 1:45 / 40 / 0:30)")
     ):
 
         try:
@@ -2485,7 +2485,7 @@ class Music(commands.Cog):
         await player.update_stage_topic()
         await player.process_rpc()
 
-    @seek.autocomplete("tempo")
+    @seek.autocomplete("süre")
     async def seek_suggestions(self, inter: disnake.Interaction, query: str):
 
         try:
@@ -4619,7 +4619,7 @@ class Music(commands.Cog):
                 player = bot.music.players[ctx.guild.id]
                 uptime_info.append(f"**Bot:** {bot.user.mention}\n"
                             f"**Uptime:** <t:{player.uptime}:R>\n"
-                            f"**Canal:** {player.guild.me.voice.channel.mention}")
+                            f"**kanal:** {player.guild.me.voice.channel.mention}")
             except KeyError:
                 continue
 

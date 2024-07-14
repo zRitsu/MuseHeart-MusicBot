@@ -1686,7 +1686,7 @@ class LavalinkPlayer(wavelink.Player):
                     if isinstance(exception, wavelink.TrackLoadError):
                         error_msg = f"**Causa:** ```java\n{exception.cause}```\n" \
                                     f"**Mensagem:** `\n{exception.message}`\n" \
-                                    f"**Nível:** `{exception.severity}`\n" \
+                                    f"**seviye:** `{exception.severity}`\n" \
                                     f"**Servidor de música:** `{self.node.identifier}`"
                     else:
                         error_msg = f"**Detalhes:** ```py\n{repr(exception)}```"

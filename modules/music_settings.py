@@ -378,10 +378,10 @@ class MusicSettings(commands.Cog):
             self,
             interaction: disnake.AppCmdInter,
             target: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.ForumChannel, disnake.StageChannel] = commands.Param(
-                name="canal", default=None, description="Mevcut bir kanalı seçin"
+                name="kanal", default=None, description="Mevcut bir kanalı seçin"
             ),
             purge_messages: str = commands.Param(
-                name="limpar_mensagens", default="no",
+                name="mesaj_temizle", default="no",
                 description="Seçilen kanaldaki mesajları temizleyin (100 mesaja kadar, forumlarda etkili değildir).",
                 choices=[
                     disnake.OptionChoice(
@@ -935,7 +935,7 @@ class MusicSettings(commands.Cog):
             interaction: disnake.AppCmdInter,
             delete_channel: str = commands.Param(
                 name="altbaşlık_sil",
-                description="Altbaşlığı siler", default=None, choices=["Evet", "Hayır"]
+                description="Mevcut Altbaşlığı siler", default=None, choices=["Evet", "Hayır"]
             )
     ):
 
