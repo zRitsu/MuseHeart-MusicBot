@@ -526,7 +526,7 @@ class Owner(commands.Cog):
     async def panel(self, ctx: CustomContext):
 
         embed =disnake.Embed(
-            title="PAINEL DE CONTROLE.",
+            title="KONTROL PANELİ",
             color=self.bot.get_color(ctx.guild.me)
         )
         embed.set_footer(text="Gerçekleştirmek istediğiniz göreve tıklayın.")
