@@ -1369,7 +1369,7 @@ class FavMenuView(disnake.ui.View):
                 play_button.callback = self.play_callback
                 self.add_item(play_button)
 
-        cancel_button = disnake.ui.Button(label="Fechar", emoji="❌")
+        cancel_button = disnake.ui.Button(label="Kapat", emoji="❌")
         cancel_button.callback = self.cancel_callback
         self.add_item(cancel_button)
 

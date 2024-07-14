@@ -214,7 +214,7 @@ class EmbedPaginator(disnake.ui.View):
             self.current += 1
         await interaction.response.edit_message(embed=self.embeds[self.current])
 
-    @disnake.ui.button(emoji='⏹️', style=disnake.ButtonStyle.red, label="Fechar")
+    @disnake.ui.button(emoji='⏹️', style=disnake.ButtonStyle.red, label="Kapat")
     async def close(self, button, interaction: disnake.MessageInteraction):
 
         await interaction.message.delete()
