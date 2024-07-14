@@ -3,7 +3,7 @@ services:
     name: museheart_music
     env: python
     plan: free
-    repo: https://github.com/zRitsu/MuseHeart-MusicBot.git
+    repo: https://github.com/Sepultrex/MuseHeart-MusicBot-TURKISH
     buildCommand: pip3 install -r requirements.txt --no-cache-dir
     startCommand: python3 main.py
     envVars:
