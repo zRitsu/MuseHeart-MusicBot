@@ -636,7 +636,7 @@ class Misc(commands.Cog):
             embed.description += f"> 🎧 **⠂Dinleyici{'ler'[:(lcount:=len(listeners))^1]} a{'a'[:lcount^1] or 'l'}:** `{lcount:,}`\n"
 
         if bot.pool.commit:
-            embed.description += f"> 📥 **⠂Gerçek işlemi gerçekleştir:** [`{bot.pool.commit[:7]}`]({bot.pool.remote_git_url}/commit/{bot.pool.commit})\n"
+            embed.description += f"> 📥 **⠂Github Commit:** [`{bot.pool.commit[:7]}`]({bot.pool.remote_git_url}/commit/{bot.pool.commit})\n"
 
         embed.description += f"> 🐍 **⠂Python sürümü:** `{platform.python_version()}`\n" \
                              f"> 📦 **⠂Disney versiyonu:** `{disnake.__version__}`\n" \
