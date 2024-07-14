@@ -99,7 +99,7 @@ class ServerManagerView(disnake.ui.View):
             embed.set_thumbnail(url=self.current_guild.icon.with_static_format("png").url)
 
         if interaction.guild.id == self.current_guild.id and interaction.bot.user.id == self.bot.user.id:
-            embed.description += f"\n```ansi\n[32;1mGeçerli sunucudayım!```"
+            embed.description += f"\n```ansi\n[32;1mŞuanda bu sunucudayım!```"
 
         embed.set_footer(text=f"{self.bot.user} [ID: {self.bot.user.id}]", icon_url=self.bot.user.display_avatar.url)
 
@@ -124,7 +124,7 @@ class ServerManagerView(disnake.ui.View):
             next.callback = self.next_page
             self.add_item(next)
 
-        leave = disnake.ui.Button(label="Kaldırmak", emoji="♻️", style=disnake.ButtonStyle.red)
+        leave = disnake.ui.Button(label="Botu bu sunucudan çıkar", emoji="♻️", style=disnake.ButtonStyle.red)
         leave.callback = self.leave_guild
         self.add_item(leave)
 
