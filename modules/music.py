@@ -2411,9 +2411,10 @@ class Music(commands.Cog):
     @check_voice()
     @pool_command(name="seek", aliases=["sk"], description="Müziği belirli bir zamana atlatmak/devam ettirmek.",
                   only_voiced=True, cooldown=seek_cd, max_concurrency=seek_mc,
-                  usage="{prefix}{cmd} [tempo]\n"
-                        "Ex 1: {prefix}{cmd} 10 (tempo 0:10)\n"
-                        "Ex 2: {prefix}{cmd} 1:45 (tempo 1:45)")
+                  usage="{prefix}{cmd} [sn]\n"
+                        "Örnek 1: {prefix}{cmd} 10 (sn 0:10)\n"
+                        "Örnek 2: {prefix}{cmd} 1:45 (dakika 1:45)\n\n"
+                        "İleri Sarmak istediğiniz süreyi girmeniz yeterli.")
     async def seek_legacy(self, ctx: CustomContext, *, position: str):
         await self.seek.callback(self=self, inter=ctx, position=position)
 
