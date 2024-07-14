@@ -744,7 +744,7 @@ class Misc(commands.Cog):
             txt += "\n"
 
         if bots_in_guild:
-            txt += "## Halihazırda mevcut sunucuda bulunan müzik botları:\n"
+            txt += "## Mevcut Müzik Botları:\n"
             for i in disnake.utils.as_chunks(bots_in_guild, 2):
                 txt += " | ".join(i) + "\n"
 
