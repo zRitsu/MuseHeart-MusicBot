@@ -2553,9 +2553,9 @@ class Music(commands.Cog):
                         placeholder="Bir seçenek belirleyin:",
                         custom_id="loop_mode_legacy",
                         options=[
-                            disnake.SelectOption(label="Música Atual", value="current"),
-                            disnake.SelectOption(label="Fila do player", value="queue"),
-                            disnake.SelectOption(label="Desativar repetição", value="off")
+                            disnake.SelectOption(label="Güncel Müzik", value="current"),
+                            disnake.SelectOption(label="Güncel Sıra", value="queue"),
+                            disnake.SelectOption(label="Tekrarlamayı devre dışı bırak", value="off")
                         ]
                     )
                 ]
