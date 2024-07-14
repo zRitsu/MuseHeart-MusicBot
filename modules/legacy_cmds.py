@@ -640,8 +640,8 @@ class Owner(commands.Cog):
     @commands.is_owner()
     @commands.command(
         aliases=["guildprefix", "sgp", "gp"], hidden=True,
-        description="Verilen kimliğe sahip bir sunucu için manuel olarak bir önek ayarlayın (bot listeleri için kullanışlıdır)",
-        usage="{prefix}{cmd} [server id] <prefixo>\nEx: {prefix}{cmd} 1155223334455667788 >>\nNot: Kaldırmak için komutu bir önek belirtmeden kullanın."
+        description="Verilen prefix ile bir sunucu için manuel olarak bir prefix ayarlayın (bot listeleri için kullanışlıdır)",
+        usage="{prefix}{cmd} [server id] <prefix>\n\nÖrn: {prefix}{cmd} 1155223334455667788 >>\n\nNot: Kaldırmak için komutu bir önek belirtmeden kullanın."
     )
     async def setguildprefix(self, ctx: CustomContext, server_id: int, prefix: str = None):
 
@@ -657,12 +657,12 @@ class Owner(commands.Cog):
         if not prefix:
             guild_data["prefix"] = ""
             await ctx.bot.update_global_data(server_id, guild_data, db_name=DBModel.guilds)
-            embed.description = "**Belirtilen kimliğe sahip sunucunun yönlendirme öneki başarıyla sıfırlandı.**"
+            embed.description = "**Belirtilen prefixe sahip sunucunun yönlendirme prefixi başarıyla sıfırlandı.**"
 
         else:
             guild_data["prefix"] = prefix
             await self.bot.update_global_data(server_id, guild_data, db_name=DBModel.guilds)
-            embed.description = f"**Belirtilen kimliğe sahip sunucunun öneki artık şöyledir:** {disnake.utils.escape_markdown(prefix)}"
+            embed.description = f"**Belirtilen prefixe sahip sunucunun öneki artık şöyledir:** {disnake.utils.escape_markdown(prefix)}"
 
         self.bot.pool.guild_prefix_cache[ctx.guild.id] = prefix
 
