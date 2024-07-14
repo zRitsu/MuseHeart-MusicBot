@@ -2536,7 +2536,7 @@ class Music(commands.Cog):
     @pool_command(
         description=f"Tekrarlama modunu şunlar arasından seçin: geçerli şarkı / sıra / kapalı / miktar (rakamları kullanarak).",
         only_voiced=True, cooldown=loop_cd, max_concurrency=loop_mc,
-        usage="{prefix}{cmd} <quantidade|modo>\nEx 1: {prefix}{cmd} 1\nEx 2: {prefix}{cmd} queue")
+        usage="{prefix}{cmd} <miktar|modo>\nEx 1: {prefix}{cmd} 1\nEx 2: {prefix}{cmd} queue")
     async def loop(self, ctx: CustomContext, mode: str = None):
 
         if not mode:
@@ -3696,19 +3696,19 @@ class Music(commands.Cog):
             inter: disnake.AppCmdInter,
             song_name: str = commands.Param(name="isim", description="Müzikte bulunan bir adı dahil et.",
                                              default=None),
-            song_author: str = commands.Param(name="uploader", description="Müziğin yükleyicisi/oluşturucusunun adını dahil et.",
+            song_author: str = commands.Param(name="sanatçı", description="Müziğin yükleyicisi/oluşturucusunun adını dahil et.",
              default=None),
             user: disnake.Member = commands.Param(name='uye', description="Belirli bir üye tarafından istenilen müzikleri dahil et.",
              default=None),
-            duplicates: bool = commands.Param(name="duplicados", description="Yinelenen müzikleri dahil et.",
+            duplicates: bool = commands.Param(name="kopyalar", description="Yinelenen müzikleri dahil et.",
              default=False),
             playlist: str = commands.Param(description="Oynatma listesinde bulunan bir adı dahil et.",
              default=None),
-            min_duration: str = commands.Param(name="duração_inicial", description="Belirtilen süreden uzun veya aynı sürede müzikleri dahil et (ör. 1:23).",
+            min_duration: str = commands.Param(name="azami_süre", description="Belirtilen süreden uzun veya aynı sürede müzikleri dahil et (ör. 1:23).",
              default=None),
-            max_duration: str = commands.Param(name="duração_máxima", description="Belirtilen maksimum süredeki müzikleri dahil et (ör. 1:45).",
+            max_duration: str = commands.Param(name="maximum_süre", description="Belirtilen maksimum süredeki müzikleri dahil et (ör. 1:45).",
              default=None),
-            amount: int = commands.Param(name="quantidade", description="Taşınacak müzik miktarı.",
+            amount: int = commands.Param(name="miktar", description="Taşınacak müzik miktarı.",
              min_value=0, max_value=99, default=None),
             range_start: int = commands.Param(name="posição_inicial", description="Belirtilen pozisyondan itibaren kuyruktaki müzikleri dahil et.",
              min_value=1.0, max_value=500.0, default=0),
@@ -3995,22 +3995,22 @@ class Music(commands.Cog):
                                             default=None),
             position: int = commands.Param(name="sıra", description="Kuyruktaki hedef konumu (isteğe bağlı).",
                                            min_value=1, max_value=900, default=1),
-            song_author: str = commands.Param(name="uploader",
+            song_author: str = commands.Param(name="sanatçı",
                                               description="Müzikte bulunan bir ismi eklemek (yazar/sanatçı/yükleyici).",
                                               default=None),
             user: disnake.Member = commands.Param(name='ara',
                                                   description="Seçilen üye tarafından istenen müzikleri eklemek.",
                                                   default=None),
-            duplicates: bool = commands.Param(name="duplicados", description="Yinelenen müzikleri eklemek",
+            duplicates: bool = commands.Param(name="kopyalar", description="Yinelenen müzikleri eklemek",
                                               default=False),
             playlist: str = commands.Param(description="Çalma listesinde bulunan bir ismi eklemek.", default=None),
-            min_duration: str = commands.Param(name="duração_inicial",
+            min_duration: str = commands.Param(name="azami_süre",
                                                description="Belirtilen sürede veya daha uzun süreli müzikleri eklemek (ör. 1:23).",
                                                default=None),
-            max_duration: str = commands.Param(name="duração_máxima",
+            max_duration: str = commands.Param(name="maximum_süre",
                                                description="Belirtilen maksimum süredeki müzikleri eklemek (ör. 1:45).",
                                                default=None),
-            amount: int = commands.Param(name="quantidade", description="Taşınacak müzik miktarı.",
+            amount: int = commands.Param(name="miktar", description="Taşınacak müzik miktarı.",
                                          min_value=0, max_value=99, default=None),
             range_start: int = commands.Param(name="posição_inicial",
                                               description="Belirtilen başlangıç konumundan itibaren müzikleri eklemek.",
@@ -4375,8 +4375,8 @@ class Music(commands.Cog):
         return results or [f"{track.title[:81]} || ID > {track.unique_id}" for n, track in enumerate(player.queue + player.queue_autoplay)
                            if query.lower() in track.title.lower()][:20]
 
-    @move.autocomplete("uploader")
-    @clear.autocomplete("uploader")
+    @move.autocomplete("sanatçı")
+    @clear.autocomplete("sanatçı")
     async def queue_author(self, inter: disnake.Interaction, query: str):
 
         if not self.bot.bot_ready or not self.bot.is_ready():
