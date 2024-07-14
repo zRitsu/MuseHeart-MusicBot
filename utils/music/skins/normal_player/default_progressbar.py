@@ -37,7 +37,7 @@ class DefaultProgressbarSkin:
 
         if not player.paused:
             embed.set_author(
-                name="Tocando Agora:",
+                name="Şimdi çalıyor:",
                 icon_url=music_source_image(player.current.info["sourceName"])
             )
         else:
