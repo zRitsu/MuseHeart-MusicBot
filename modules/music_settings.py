@@ -1068,7 +1068,7 @@ class MusicSettings(commands.Cog):
         role = guild.get_role(role.id)
 
         if role == guild.default_role:
-            await inter.send("Bu pozisyonu ekleyemezsiniz.", ephemeral=True)
+            await inter.send("Bu rolu ekleyemezsiniz.", ephemeral=True)
             return
 
         guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
@@ -1097,7 +1097,7 @@ class MusicSettings(commands.Cog):
     async def remove_dj_role(
             self,
             interaction: disnake.ApplicationCommandInteraction,
-            role: disnake.Role = commands.Param(name="pozisyon", description="Pozisyon")
+            role: disnake.Role = commands.Param(name="rol", description="rol")
     ):
 
         inter, bot = await select_bot_pool(interaction)
@@ -1116,7 +1116,7 @@ class MusicSettings(commands.Cog):
         role = guild.get_role(role.id)
 
         if str(role.id) not in guild_data['djroles']:
-            await inter.send(f"{role.mention} Rolü DJ listesinde değil\n\n" + "Pozisyon:\n" +
+            await inter.send(f"{role.mention} Rolü DJ listesinde değil\n\n" + "rol:\n" +
                                               " ".join(f"<#{r}>" for r in guild_data['djroles']), ephemeral=True)
             return
 
