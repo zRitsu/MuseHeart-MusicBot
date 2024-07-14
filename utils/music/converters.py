@@ -116,7 +116,7 @@ def time_format(milliseconds: Union[int, float], use_names: bool = False) -> str
     return strings
 
 
-time_names = ["Saniye", "Dakika", "Saat"]
+time_names = ["seconds", "minutes", "hours"]
 
 
 def string_to_seconds(time):
