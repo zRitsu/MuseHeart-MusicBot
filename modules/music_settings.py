@@ -1557,7 +1557,7 @@ class MusicSettings(commands.Cog):
                 failed_nodes.add(node.identifier)
                 continue
 
-            txt = f"Região: `{node.region.title()}`\n"
+            txt = f"Bölge: `{node.region.title()}`\n"
 
             used = humanize.naturalsize(node.stats.memory_used)
             total = humanize.naturalsize(node.stats.memory_allocated)
@@ -1567,14 +1567,14 @@ class MusicSettings(commands.Cog):
             started = node.stats.players
 
             txt += f'RAM: `{used}/{free}`\n' \
-                   f'RAM Total: `{total}`\n' \
-                   f'CPU Cores: `{cpu_cores}`\n' \
-                   f'Uso de CPU: `{cpu_usage}%`\n' \
-                   f'Versão do Lavalink: `v{node.version}`\n' \
-                   f'Uptime: <t:{int((disnake.utils.utcnow() - datetime.timedelta(milliseconds=node.stats.uptime)).timestamp())}:R>\n'
+                   f'RAM Toplam: `{total}`\n' \
+                   f'CPU Çekirdekleri: `{cpu_cores}`\n' \
+                   f'CPU kullanımı: `{cpu_usage}%`\n' \
+                   f'Lavalink sürümü: `v{node.version}`\n' \
+                   f'Çalışma süresi: <t:{int((disnake.utils.utcnow() - datetime.timedelta(milliseconds=node.stats.uptime)).timestamp())}:R>\n'
 
             if started:
-                txt += "Players: "
+                txt += "Oynatıcılar: "
                 players = node.stats.playing_players
                 idle = started - players
                 if players:
