@@ -5651,7 +5651,7 @@ class Music(commands.Cog):
 
                     await interaction.edit_original_message(
                         embed=disnake.Embed(
-                            description=f"### Letras da música: [{player.current.title}](<{player.current.uri}>)\n{lyrics_string}",
+                            description=f"### Şarkı sözleri: [{player.current.title}](<{player.current.uri}>)\n{lyrics_string}",
                             color=self.bot.get_color(player.guild.me)
                         )
                     )
@@ -5718,11 +5718,11 @@ class Music(commands.Cog):
 
                 if position:
                     if not position.isdigit():
-                        raise GenericError("**A posição da fila tem que ser um número.**")
+                        raise GenericError("**Kuyruğun pozisyonu bir sayı olmalıdır.**")
                     position = int(position)
 
                     if position < 1:
-                        raise GenericError("**Número da posição da fila tem que ser 1 ou superior.**")
+                        raise GenericError("**Kuyruk pozisyonu numarası 1 veya daha büyük olmalıdır.**")
 
                 kwargs = {
                     "query": query,
@@ -5834,8 +5834,8 @@ class Music(commands.Cog):
                 await message.channel.send(
                     message.author.mention,
                     embed=disnake.Embed(
-                        description="Infelizmente não posso conferir o conteúdo de sua mensagem...\n"
-                                    "Tente adicionar música usando **/play** ou clique em um dos botões abaixo:",
+                        description="Maalesef mesajınızın içeriğini kontrol edemem...\n"
+                                    "Müzik eklemek için **/play** komutunu kullanmayı veya aşağıdaki düğmelere tıklamayı deneyin:",
                         color=self.bot.get_color(message.guild.me)
                     ),
                     components=song_request_buttons, delete_after=20
@@ -5879,19 +5879,19 @@ class Music(commands.Cog):
                 try:
                     attachment = message.attachments[0]
                 except IndexError:
-                    await message.channel.send(f"{message.author.mention} você deve enviar um link/nome da música.", delete_after=8)
+                    await message.channel.send(f"{message.author.mention} bir bağlantı/müzik adı göndermelisiniz.", delete_after=8)
                     return
 
                 else:
 
                     if attachment.size > 18000000:
-                        await message.channel.send(f"{message.author.mention} o arquivo que você enviou deve ter o tamanho "
-                                                   f"inferior a 18mb.", delete_after=8)
+                        await message.channel.send(f"{message.author.mention} gönderdiğiniz dosyanın boyutu "
+                                                            f"18 MB'den küçük olmalıdır.", delete_after=8)
                         return
 
                     if attachment.content_type not in self.audio_formats:
-                        await message.channel.send(f"{message.author.mention} o arquivo que você enviou deve ter o tamanho "
-                                                   f"inferior a 18mb.", delete_after=8)
+                        await message.channel.send(f"{message.author.mention} gönderdiğiniz dosyanın boyutu "
+                                       f"18 MB'den küçük olmalıdır.", delete_after=8)
                         return
 
                     message.content = attachment.url
@@ -5901,7 +5901,7 @@ class Music(commands.Cog):
             except:
 
                 await message.channel.send(
-                    f"{message.author.mention} você deve aguardar seu pedido de música anterior carregar...",
+                    f"{message.author.mention} önceki müzik isteğinizin yüklenmesini beklemelisiniz...",
                 )
 
                 await self.delete_message(message)
@@ -5923,15 +5923,15 @@ class Music(commands.Cog):
                     view = SelectInteraction(
                         user=message.author,
                         opts=[
-                            disnake.SelectOption(label="Música", emoji="🎵",
-                                                 description="Carregar apenas a música do link.", value="music"),
-                            disnake.SelectOption(label="Playlist", emoji="🎶",
-                                                 description="Carregar playlist com a música atual.", value="playlist"),
+                            disnake.SelectOption(label="Müzik", emoji="🎵",
+                                                 description="Sadece bağlantıdaki müziği yükleyin.", value="music"),
+                            disnake.SelectOption(label="Oynatma Listesi", emoji="🎶",
+                                                 description="Mevcut müzikle birlikte oynatma listesini yükleyin.", value="playlist"),
                         ], timeout=30)
 
                     embed = disnake.Embed(
-                        description="**O link contém vídeo com playlist.**\n"
-                                    f'Selecione uma opção em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para prosseguir.',
+                        description="**Link bir video oynatma listesi içeriyor.**\n" \
+                                     f"Devam etmek için <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> içinde bir seçenek seçin.",
                         color=self.bot.get_color(message.guild.me)
                     )
 
@@ -5964,7 +5964,7 @@ class Music(commands.Cog):
             else:
                 if not error_msg:
                     has_exception = e
-                    error = f"{message.author.mention} **ocorreu um erro ao tentar obter resultados para sua busca:** ```py\n{error_msg}```"
+                    error = f"{message.author.mention} **arama sonuçlarını alırken bir hata oluştu:** ```py\n{error_msg}```""
                 else:
                     error = f"{message.author.mention}. {error_msg}"
 
@@ -6000,7 +6000,7 @@ class Music(commands.Cog):
                     full_error_msg = has_exception
 
                 embed = disnake.Embed(
-                    title="Ocorreu um erro em um servidor (song-request):",
+                    title="Bir sunucuda hata oluştu (şarkı isteği):",
                     timestamp=disnake.utils.utcnow(),
                     description=f"```py\n{repr(has_exception)[:2030].replace(self.bot.http.token, 'mytoken')}```"
                 )
@@ -6011,23 +6011,23 @@ class Music(commands.Cog):
                 )
 
                 embed.add_field(
-                    name="Servidor:", inline=False,
+                    name="Sunucu:", inline=False,
                     value=f"```\n{disnake.utils.escape_markdown(ctx.guild.name)}\nID: {ctx.guild.id}```"
                 )
 
                 embed.add_field(
-                    name="Conteúdo do pedido de música:", inline=False,
+                    name="Şarkı isteği içeriği:", inline=False,
                     value=f"```\n{message.content}```"
                 )
 
                 embed.add_field(
-                    name="Canal de texto:", inline=False,
+                    name="Metin kanalı:", inline=False,
                     value=f"```\n{disnake.utils.escape_markdown(ctx.channel.name)}\nID: {ctx.channel.id}```"
                 )
 
                 if vc := ctx.author.voice:
                     embed.add_field(
-                        name="Canal de voz (user):", inline=False,
+                        name="Ses kanalı (kullanıcı):", inline=False,
                         value=f"```\n{disnake.utils.escape_markdown(vc.channel.name)}" +
                               (f" ({len(vc.channel.voice_states)}/{vc.channel.user_limit})"
                                if vc.channel.user_limit else "") + f"\nID: {vc.channel.id}```"
@@ -6036,7 +6036,7 @@ class Music(commands.Cog):
                 if vcbot := ctx.guild.me.voice:
                     if vcbot.channel != vc.channel:
                         embed.add_field(
-                            name="Canal de voz (bot):", inline=False,
+                            name="Ses kanalı (bot):", inline=False,
                             value=f"{vc.channel.name}" +
                                   (f" ({len(vc.channel.voice_states)}/{vc.channel.user_limit})"
                                    if vc.channel.user_limit else "") + f"\nID: {vc.channel.id}```"
