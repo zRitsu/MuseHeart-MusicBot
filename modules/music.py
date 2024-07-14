@@ -4930,16 +4930,14 @@ class Music(commands.Cog):
 
                     if not send_message_perm:
                         raise GenericError(
-                            f"**{bot.user.mention} não possui permissão para enviar mensagens no canal <#{static_player['channel']}>**\n"
-                            "Caso queira resetar a configuração do canal de pedir música, use o comando /reset ou /setup "
-                            "novamente..."
+                            f"**{bot.user.mention} {static_player['channel']} kanalında mesaj gönderme iznine sahip değil.**\n"
+                             "Müzik talep kanalının yapılandırmasını sıfırlamak istiyorsanız, /reset veya /setup komutunu tekrar kullanın..."
                         )
 
                     if not channel_db_perms.embed_links:
                         raise GenericError(
-                            f"**{bot.user.mention} não possui permissão para anexar links/embeds no canal <#{static_player['channel']}>**\n"
-                            "Caso queira resetar a configuração do canal de pedir música, use o comando /reset ou /setup "
-                            "novamente..."
+                            f"**{bot.user.mention} {static_player['channel']} kanalında mesaj gönderme iznine sahip değil.**\n"
+                             "Müzik talep kanalının yapılandırmasını sıfırlamak istiyorsanız, /reset veya /setup komutunu tekrar kullanın..."
                         )
 
         return channel_db, warn_message, message
@@ -4952,7 +4950,7 @@ class Music(commands.Cog):
     ):
 
         if not command:
-            raise GenericError("comando não encontrado/implementado.")
+            raise GenericError("Komut bulunamadı veya uygulanmadı.")
 
         try:
             interaction.application_command = command
@@ -4981,7 +4979,7 @@ class Music(commands.Cog):
     async def guild_pin(self, interaction: disnake.MessageInteraction):
 
         if not self.bot.bot_ready:
-            await interaction.send("Ainda estou inicializando...\nPor favor aguarde mais um pouco...", ephemeral=True)
+            await interaction.send("Henüz başlatılıyorum...\nLütfen biraz daha bekleyin...", ephemeral=True)
             return
 
         if interaction.data.custom_id != "player_guild_pin":
@@ -4992,7 +4990,7 @@ class Music(commands.Cog):
             return
 
         if not interaction.user.voice:
-            await interaction.send("Você deve entrar em um canal de voz para usar isto.", ephemeral=True)
+            await interaction.send("Bu işlemi kullanabilmek için bir ses kanalına girmelisiniz.", ephemeral=True)
             return
 
         await interaction.response.defer(ephemeral=True)
@@ -5002,7 +5000,7 @@ class Music(commands.Cog):
         try:
             query = interaction.data.values[0]
         except KeyError:
-            await interaction.send("**O item selecionado não foi encontrado na base de dados...**", ephemeral=True)
+            await interaction.send("**Seçili öğe veritabanında bulunamadı...**", ephemeral=True)
             await send_idle_embed(interaction.message, bot=self.bot, guild_data=guild_data, force=True)
             return
 
@@ -5047,14 +5045,14 @@ class Music(commands.Cog):
 
         if player.stage_title_event and (time_:=int((disnake.utils.utcnow() - player.start_time).total_seconds())) < time_limit and not (await bot.is_owner(inter.author)):
             raise GenericError(
-                f"**Você terá que aguardar {time_format((time_limit - time_) * 1000, use_names=True)} para usar essa função "
-                f"com o anúncio automático do palco ativo...**"
+                f"**Aktif sahne otomatik duyurusuyla bu işlevi kullanmak için" 
+                f"{time_format((time_limit - time_) * 1000, use_names=True)} beklemelisiniz...**"
             )
 
     async def player_controller(self, interaction: disnake.MessageInteraction, control: str, **kwargs):
 
         if not self.bot.bot_ready or not self.bot.is_ready():
-            await interaction.send("Ainda estou inicializando...", ephemeral=True)
+            await interaction.send("Henüz başlatılmıyorum...", ephemeral=True)
             return
 
         if not interaction.guild_id:
@@ -5083,7 +5081,7 @@ class Music(commands.Cog):
                 try:
                     await self.player_interaction_concurrency.acquire(interaction)
                 except:
-                    raise GenericError("Há uma música sendo processada no momento...")
+                    raise GenericError("Şu anda işlenen bir müzik var...")
 
                 bot: Optional[BotCore] = None
                 player: Optional[LavalinkPlayer] = None
@@ -5105,8 +5103,8 @@ class Music(commands.Cog):
 
                         if p.locked:
                             raise GenericError(
-                                "**Não é possível executar essa ação com o processamento da música em andamento "
-                                "(por favor aguarde mais alguns segundos e tente novamente).**")
+                                 "**Müzik işleme devam ederken bu eylemi gerçekleştiremezsiniz "
+                                 "(lütfen birkaç saniye bekleyin ve tekrar deneyin).**")
 
                         player = p
                         bot = b
@@ -5115,10 +5113,10 @@ class Music(commands.Cog):
                         break
 
                 if not channel:
-                    raise GenericError("Não há bots disponíveis no momento.")
+                    raise GenericError("Şu anda uygun bot bulunmamaktadır.")
 
                 if not author.voice:
-                    raise GenericError("Você deve entrar em um canal de voz pra usar esse botão....")
+                    raise GenericError("Bu düğmeyi kullanmak için bir ses kanalına girmelisiniz.")
 
                 try:
                     node = player.node
@@ -5142,7 +5140,8 @@ class Music(commands.Cog):
 
                     if (retry_after := self.bot.pool.enqueue_playlist_embed_cooldown.get_bucket(interaction).update_rate_limit()):
                         raise GenericError(
-                            f"**Você terá que aguardar {(rta:=int(retry_after))} segundo{'s'[:rta^1]} pra adicionar uma playlist no player atual.**")
+                            f"**Mevcut çalara bir çalma listesi eklemek için {int(retry_after)} saniye beklemelisiniz.**"
+                        )
 
                     if not player:
                         player = await self.create_player(inter=interaction, bot=bot, guild=channel.guild,
@@ -5152,7 +5151,7 @@ class Music(commands.Cog):
                     result, node = await self.get_tracks(url, author, source=False, node=player.node, bot=bot)
                     result = await self.check_player_queue(interaction.author, bot, interaction.guild_id, tracks=result)
                     player.queue.extend(result.tracks)
-                    await interaction.send(f"{interaction.author.mention}, a playlist [`{result.name}`](<{url}>) foi adicionada com sucesso!{player.controller_link}", ephemeral=True)
+                    await interaction.send(f"{interaction.author.mention}, başarıyla [`{result.name}`](<{url}>) çalma listesi eklendi! {player.controller_link}", ephemeral=True)
                     if not player.is_connected:
                         await player.connect(vc_id)
                     if not player.current:
@@ -5168,7 +5167,7 @@ class Music(commands.Cog):
                         if control == PlayerControls.embed_forceplay and player.current and (player.current.uri.startswith(url) or url.startswith(player.current.uri)):
                             await self.check_stage_title(inter=interaction, bot=bot, player=player)
                             await player.seek(0)
-                            player.set_command_log("voltou para o início da música.", emoji="⏪")
+                            player.set_command_log("müziği başlangıç noktasına geri sardı.", emoji="⏪")
                             await asyncio.sleep(3)
                             await player.update_stage_topic()
                             await asyncio.sleep(7)
@@ -5203,7 +5202,8 @@ class Music(commands.Cog):
 
                             if (retry_after := self.bot.pool.enqueue_track_embed_cooldown.get_bucket(interaction).update_rate_limit()):
                                 raise GenericError(
-                                    f"**Você terá que aguardar {(rta:=int(retry_after))} segundo{'s'[:rta^1]} para adicionar uma nova música na fila.**")
+                                         f"**Yeni bir şarkıyı kuyruğa eklemek için {(rta:=int(retry_after))} saniye beklemeniz gerekecek.**"
+                                )
 
                             if control == PlayerControls.embed_enqueue_track:
                                 await self.check_player_queue(interaction.author, bot, interaction.guild_id)
@@ -5223,7 +5223,7 @@ class Music(commands.Cog):
                             await self.check_player_queue(interaction.author, bot, interaction.guild_id)
                             player.queue.append(track)
                             player.update = True
-                            await interaction.send(f"{author.mention}, a música [`{track.title}`](<{track.uri}>) foi adicionada na fila.{player.controller_link}", ephemeral=True)
+                            await interaction.send(f"{author.mention}, [`{track.title}`](<{track.uri}>) adlı şarkı kuyruğa eklendi.{player.controller_link}", ephemeral=True)
                             if not player.is_connected:
                                 await player.connect(vc_id)
                             if not player.current:
@@ -5255,12 +5255,12 @@ class Music(commands.Cog):
             try:
                 embed = interaction.message.embeds[0]
             except IndexError:
-                await interaction.send("A embed da mensagem foi removida...", ephemeral=True)
+                await interaction.send("Mesajın gömülü verisi kaldırıldı...", ephemeral=True)
                 return
 
             if (retry_after := self.bot.pool.add_fav_embed_cooldown.get_bucket(interaction).update_rate_limit()):
                 await interaction.send(
-                    f"**Você terá que aguardar {(rta:=int(retry_after))} segundo{'s'[:rta^1]} para adicionar um novo favorito.**",
+                    f"**Yeni bir favori eklemek için {(rta:=int(retry_after))} saniye beklemelisiniz{'.' if rta == 1 else 'ler.'}**",
                     ephemeral=True)
                 return
 
@@ -5271,16 +5271,17 @@ class Music(commands.Cog):
             if self.bot.config["MAX_USER_FAVS"] > 0 and not (await self.bot.is_owner(interaction.author)):
 
                 if (current_favs_size := len(user_data["fav_links"])) > self.bot.config["MAX_USER_FAVS"]:
-                    await interaction.edit_original_message(f"A quantidade de itens no seu arquivo de favorito excede "
-                                                            f"a quantidade máxima permitida ({self.bot.config['MAX_USER_FAVS']}).")
+                    await interaction.edit_original_message(f"Favori dosyanızdaki öğe sayısı izin verilen maksimum öğe" 
+                                                            f"sayısını ({self.bot.config['MAX_USER_FAVS']}) aşıyor.")
                     return
 
                 if (current_favs_size + (user_favs := len(user_data["fav_links"]))) > self.bot.config["MAX_USER_FAVS"]:
                     await interaction.edit_original_message(
-                        "Você não possui espaço suficiente para adicionar todos os favoritos de seu arquivo...\n"
-                        f"Limite atual: {self.bot.config['MAX_USER_FAVS']}\n"
-                        f"Quantidade de favoritos salvos: {user_favs}\n"
-                        f"Você precisa de: {(current_favs_size + user_favs) - self.bot.config['MAX_USER_FAVS']}")
+                             "Tüm favori öğelerinizi eklemek için yeterli alanınız yok...\n"
+                             f"Mevcut limit: {self.bot.config['MAX_USER_FAVS']}\n"
+                             f"Kaydedilen favori sayısı: {user_favs}\n"
+                             f"Eklemek için gereken alan: {(current_favs_size + user_favs) - self.bot.config['MAX_USER_FAVS']}"
+                    )
                     return
 
             fav_name = embed.author.name[1:]
@@ -5302,18 +5303,18 @@ class Music(commands.Cog):
                                                                 interaction.message.embeds[0].fields[0].value.replace(
                                                                     interaction.author.mention, "")
             except IndexError:
-                interaction.message.embeds[0].add_field(name="**Membros que favoritaram o link:**",
+                interaction.message.embeds[0].add_field(name="**Bağlantıyı destekleyen üyeler:**",
                                                         value=interaction.author.mention)
 
             await interaction.send(embed=disnake.Embed(
-                description=f"[`{fav_name}`](<{embed.author.url}>) **foi adicionado nos seus favoritos!**\n\n"
-                            "**Como usar?**\n"
-                            f"* Usando o comando {cmd} (selecionando o favorito no preenchimento automático da busca)\n"
-                            "* Clicando no botão/select de tocar favorito/integração do player.\n"
-                            f"* Usando o comando {global_data['prefix'] or self.bot.default_prefix}{self.play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n"
+                description=f"[`{fav_name}`](<{embed.author.url}>) **favorilerinize eklendi!**\n\n"
+                            "**Nasıl kullanılır?**\n"
+                            f"* {cmd} komutunu kullanarak (otomatik tamamlama aramasında favoriyi seçerek)\n"
+                            "* Oyunatıcının favori/entegrasyon düğmesine/seçimine tıklayın.\n"
+                            f"* Bir şarkı/video adı veya bağlantısı eklemeden {global_data['prefix'] or self.bot.default_prefix} {self.play_legacy.name} komutunu kullanın.\n"
 
 
-            ).set_footer(text=f"Caso queira ver todos os seus favoritos use o comando {global_data['prefix'] or self.bot.default_prefix}{self.fav_manager_legacy.name}"), ephemeral=True)
+            ).set_footer(text=f"Tüm favorilerinizi görmek için {global_data['prefix'] or self.bot.default_prefix}{self.fav_manager_legacy.name} komutunu kullanabilirsiniz."), ephemeral=True)
 
             if not interaction.message.flags.ephemeral:
                 if not interaction.guild:
@@ -5337,7 +5338,7 @@ class Music(commands.Cog):
             if control == PlayerControls.fav_manager:
 
                 if str(interaction.user.id) not in interaction.message.content:
-                    await interaction.send("Você não pode interagir aqui!", ephemeral=True)
+                    await interaction.send("Burada etkileşimde bulunamazsınız!", ephemeral=True)
                     return
 
                 cmd = self.bot.get_slash_command("fav_manager")
@@ -5347,7 +5348,7 @@ class Music(commands.Cog):
             if control == PlayerControls.integration_manager:
 
                 if str(interaction.user.id) not in interaction.message.content:
-                    await interaction.send("Você não pode interagir aqui!", ephemeral=True)
+                    await interaction.send("Burada etkileşimde bulunamazsınız!", ephemeral=True)
                     return
 
                 cmd = self.bot.get_slash_command("integrations")
@@ -5357,24 +5358,24 @@ class Music(commands.Cog):
             if control == PlayerControls.add_song:
 
                 if not interaction.user.voice:
-                    raise GenericError("**Você deve entrar em um canal de voz para usar esse botão.**")
+                    raise GenericError("**Bu düğmeyi kullanmak için bir ses kanalına girmelisiniz.**")
 
                 await interaction.response.send_modal(
-                    title="Pedir uma música",
+                    title="Şarkı isteğinde bulunun",
                     custom_id=f"modal_add_song" + (f"_{interaction.message.id}" if interaction.message.thread else ""),
                     components=[
                         disnake.ui.TextInput(
                             style=disnake.TextInputStyle.short,
-                            label="Nome/link da música.",
-                            placeholder="Nome ou link do youtube/spotify/soundcloud etc.",
+                            label="Şarkının adı/bağlantısı.",
+                            placeholder="Youtube/spotify/soundcloud vb. adı veya bağlantısı.",
                             custom_id="song_input",
                             max_length=150,
                             required=True
                         ),
                         disnake.ui.TextInput(
                             style=disnake.TextInputStyle.short,
-                            label="Posição da fila (número).",
-                            placeholder="Opcional, caso não seja usado será adicionada no final.",
+                            label="Sıra konumu (numara).",
+                            placeholder="İsteğe bağlıdır, kullanılmazsa sona eklenecektir.",
                             custom_id="song_position",
                             max_length=3,
                             required=False
@@ -5387,7 +5388,7 @@ class Music(commands.Cog):
             if control == PlayerControls.enqueue_fav:
 
                 if not interaction.user.voice:
-                    raise GenericError("**Você deve entrar em um canal de voz para usar esse botão.**")
+                    raise GenericError("**Bu düğmeyi kullanmak için bir ses kanalı girmelisiniz.**")
 
                 cmd_kwargs = {
                     "query": kwargs.get("query", ""),
@@ -5407,7 +5408,7 @@ class Music(commands.Cog):
                 try:
                     player: LavalinkPlayer = self.bot.music.players[interaction.guild_id]
                 except KeyError:
-                    await interaction.send("Não há player ativo no servidor...", ephemeral=True)
+                    await interaction.send("Sunucuda aktif bir oynatıcı yok...", ephemeral=True)
                     await send_idle_embed(interaction.message, bot=self.bot)
                     return
 
@@ -5416,7 +5417,7 @@ class Music(commands.Cog):
                         return
 
                 if player.interaction_cooldown:
-                    raise GenericError("O player está em cooldown, tente novamente em instantes.")
+                    raise GenericError("Oynatıcı bekleme süresinde, yakında tekrar deneyin.")
 
                 try:
                     vc = player.guild.me.voice.channel
@@ -5426,16 +5427,16 @@ class Music(commands.Cog):
 
                 if control == PlayerControls.help_button:
                     embed = disnake.Embed(
-                        description="📘 **IFORMAÇÕES SOBRE OS BOTÕES** 📘\n\n"
-                                    "⏯️ `= Pausar/Retomar a música.`\n"
-                                    "⏮️ `= Voltar para a música tocada anteriormente.`\n"
-                                    "⏭️ `= Pular para a próxima música.`\n"
-                                    "🔀 `= Misturar as músicas da fila.`\n"
-                                    "🎶 `= Adicionar música/playlist/favorito.`\n"
-                                    "⏹️ `= Parar o player e me desconectar do canal.`\n"
-                                    "📑 `= Exibir a fila de música.`\n"
-                                    "🛠️ `= Alterar algumas configurações do player:`\n"
-                                    "`volume / efeito nightcore / repetição / modo restrito.`\n",
+                        description="📘 **DÜĞME BILGILERI** 📘\n\n"
+                                    "⏯️ `= Müziği duraklatın/devam ettirir.`\n"
+                                    "⏮️ `= Daha önce çalınan şarkıya geri döner.`\n"
+                                    "⏭️ `= Bir sonraki şarkıya geçer.`\n"
+                                    "🔀 `= Kuyruktaki şarkıları karıştırır.`\n"
+                                    "🎶 `= Müzik/çalma listesi/favori ekler.`\n"
+                                    "⏹️ `= Oynatıcıyı durdurun ve kanal bağlantısını keser.`\n"
+                                    "📑 `= Bir müzik gösterisi yapar.`\n"
+                                    "🛠️ `= Oynatıcının bazı ayarlarını değiştirir:`\n"
+                                    "`ses seviyesi / nightcore efekti / tekrarlama / kısıtlı mod.`\n",
                         color=self.bot.get_color(interaction.guild.me)
                     )
 
@@ -5443,15 +5444,14 @@ class Music(commands.Cog):
                     return
 
                 if not interaction.author.voice or interaction.author.voice.channel != vc:
-                    raise GenericError(f"Você deve estar no canal <#{vc.id}> para usar os botões do player.")
+                    raise GenericError(f"Oynatıcı düğmelerini kullanmak için <#{vc.id}> kanalında olmalısınız.")
 
                 if control == PlayerControls.miniqueue:
                     await is_dj().predicate(interaction)
                     player.mini_queue_enabled = not player.mini_queue_enabled
                     player.set_command_log(
-                        emoji="📑",
-                        text=f"{interaction.author.mention} {'ativou' if player.mini_queue_enabled else 'desativou'} "
-                             f"a mini-fila do player."
+                     emoji="📑",
+                     text=f"{interaction.author.mention} {'oynatıcının mini sıralaması aktif hale getirdi' if player.mini_queue_enabled else 'oynatıcının mini sıralaması devre dışı bıraktı'} "
                     )
                     await player.invoke_np(interaction=interaction)
                     return
@@ -5461,12 +5461,13 @@ class Music(commands.Cog):
                         await self.player_interaction_concurrency.acquire(interaction)
                     except commands.MaxConcurrencyReached:
                         raise GenericError(
-                            "**Você tem uma interação em aberto!**\n`Se for uma mensagem oculta, evite clicar em \"ignorar\".`")
+                         "**Aktif bir etkileşiminiz var!**\n`Eğer gizli bir mesajsa, 'atla' düğmesine tıklamaktan kaçının.`"
+                        )
 
                 if control == PlayerControls.add_favorite:
 
                     if not player.current:
-                        await interaction.send("**Não há música tocando atualmente...**", ephemeral=True)
+                        await interaction.send("**Şu anda müzik çalmıyor...**", ephemeral=True)
                         return
 
                     choices = {}
@@ -5478,7 +5479,7 @@ class Music(commands.Cog):
                             "url": player.current.uri,
                             "emoji": "🎵"
                         }
-                        msg += f"**Música:** [`{player.current.title}`]({player.current.uri})\n"
+                        msg += f"**Şarkı:** [`{player.current.title}`]({player.current.uri})\n"
 
                     if player.current.album_url:
                         choices["Album"] = {
@@ -5486,7 +5487,7 @@ class Music(commands.Cog):
                             "url": player.current.album_url,
                             "emoji": "💽"
                         }
-                        msg += f"**Album:** [`{player.current.album_name}`]({player.current.album_url})\n"
+                        msg += f"**Albüm:** [`{player.current.album_name}`]({player.current.album_url})\n"
 
                     if player.current.playlist_url:
                         choices["Playlist"] = {
@@ -5504,7 +5505,7 @@ class Music(commands.Cog):
                         await interaction.send(
                             embed=disnake.Embed(
                                 color=self.bot.get_color(interaction.guild.me),
-                                description="### Não há itens para favoritar na música atual."
+                                description="### Şu anda favorilenecek öğe yok."
                             ), ephemeral=True
                         )
                         return
@@ -5521,7 +5522,7 @@ class Music(commands.Cog):
                         await interaction.send(
                             embed=disnake.Embed(
                                 color=self.bot.get_color(interaction.guild.me),
-                                description=f"### Selecione um item da música atual para adicionar nos seus favoritos:"
+                                description=f"### Şu anda favorilere eklemek için mevcut müzik öğesini seçin:"
                                             f"\n\n{msg}"
                             ), view=view, ephemeral=True
                         )
@@ -5538,7 +5539,7 @@ class Music(commands.Cog):
                             await interaction.edit_original_message(
                                 embed=disnake.Embed(
                                     color=self.bot.get_color(interaction.guild.me),
-                                    description="### Operação cancelada!"
+                                    description="### Operasyon iptal edildi!"
                                 ), view=None
                             )
                             return
@@ -5558,8 +5559,8 @@ class Music(commands.Cog):
                             await interaction.edit_original_message(
                                 embed=disnake.Embed(
                                     color=self.bot.get_color(interaction.guild.me),
-                                    description="Você não possui espaço suficiente para adicionar todos os favoritos de seu arquivo...\n"
-                                                f"Limite atual: {self.bot.config['MAX_USER_FAVS']}"
+                                    description="Tüm favorilerinizi dosyanıza eklemek için yeterli alanınız yok...\n"
+                                                f"Mevcut limit: {self.bot.config['MAX_USER_FAVS']}"
                                 ), view=None)
                             return
 
@@ -5578,13 +5579,13 @@ class Music(commands.Cog):
 
                     await interaction.edit_original_response(
                         embed=disnake.Embed(
-                            color=self.bot.get_color(interaction.guild.me),
-                            description="### Item adicionado/editado com sucesso nos seus favoritos:\n\n"
-                                        f"**{select_type}:** [`{info['name']}`]({info['url']})\n\n"
-                                        f"### Como usar?\n"
-                                        f"* Usando o comando {slashcmd} (no preenchimento automático da busca)\n"
-                                        f"* Clicando no botão/select de tocar favorito/integração do player.\n"
-                                        f"* Usando o comando {global_data['prefix'] or self.bot.default_prefix}{self.play_legacy.name} sem incluir um nome ou link de uma música/vídeo."
+                        color=self.bot.get_color(interaction.guild.me),
+                         description="### Favorilerinizde başarıyla eklenen/düzenlenen öğe:\n\n"
+                                     f"**{select_type}:** [`{info['name']}`]({info['url']})\n\n"
+                                     "### Nasıl kullanılır?\n"
+                                     f"* {slashcmd} komutunu kullanarak (arama otomatik tamamlamada)\n"
+                                     "* Player'ın favori/integrasyon çalma düğmesine tıklayarak.\n"
+                                     f"* {global_data['prefix'] or self.bot.default_prefix}{self.play_legacy.name} komutunu kullanarak, müzik/video adı veya bağlantı belirtmeden."
                         ), view=None
                     )
 
