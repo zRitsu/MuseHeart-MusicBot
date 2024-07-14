@@ -37,7 +37,7 @@ class ClassicSkin:
 
         queue_txt = ""
 
-        bar = "https://cdn.discordapp.com/attachments/554468640942981147/1127294696025227367/rainbow_bar3.gif"
+        bar = "https://i.ibb.co/fVgyxLZ/output-onlinegiftools.gif"
 
         embed_top = disnake.Embed(
             color=color,

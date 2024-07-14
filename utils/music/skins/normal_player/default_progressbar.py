@@ -112,7 +112,7 @@ class DefaultProgressbarSkin:
 
         txt += duration
 
-        rainbow_bar = "https://cdn.discordapp.com/attachments/554468640942981147/1127294696025227367/rainbow_bar3.gif"
+        rainbow_bar = "https://i.ibb.co/fVgyxLZ/output-onlinegiftools.gif"
 
         if player.mini_queue_enabled:
 

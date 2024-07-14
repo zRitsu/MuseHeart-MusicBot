@@ -102,7 +102,7 @@ class DefaultSkin:
 
         txt += f"{vc_txt}\n"
 
-        bar = "https://cdn.discordapp.com/attachments/554468640942981147/1127294696025227367/rainbow_bar3.gif"
+        bar = "https://i.ibb.co/fVgyxLZ/output-onlinegiftools.gif"
 
         if player.command_log:
             txt += f"```ansi\n [34;1mSon Etkileşim:[0m```**┕ {player.command_log_emoji} ⠂**{player.command_log}\n"
