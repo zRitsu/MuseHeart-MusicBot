@@ -1728,7 +1728,7 @@ class RPCCog(commands.Cog):
         )
 
         embed.set_footer(text="Not: Şu anda sadece discord masaüstü ile windows üzerinde çalışıyor, mobil cihazlarda ve discord web'de "
-                              "çalışmıyor.\n\n Dikkat: Bu özelliği botun sahibi aktif etmemiş olabilir!")
+                              "çalışmıyor.\n\nDikkat: Bu özelliği botun sahibi aktif etmemiş olabilir!")
 
         if self.bot.config["ENABLE_RPC_AUTH"]:
 
