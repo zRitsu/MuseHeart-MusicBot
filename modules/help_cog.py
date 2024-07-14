@@ -215,7 +215,7 @@ class HelpCog(commands.Cog, name="Ajuda"):
                 t.append(s)
 
             if t:
-                txt += ("🚩 **⠂Bayraklar ` (komutun sonuna eklenecek seçenekler)`:**```ini\n" + "\n\n".join(t) + "```")
+                txt += ("🚩 **⠂Etiketler ` (komutun sonuna eklenecek seçenekler)`:**```ini\n" + "\n\n".join(t) + "```")
 
         embed.set_author(name="Yardım menüsü - Komut listesi (**help)", icon_url=self.bot.user.display_avatar.url)
 

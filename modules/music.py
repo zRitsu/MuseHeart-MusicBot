@@ -2921,10 +2921,10 @@ class Music(commands.Cog):
 
         await inter.response.defer(ephemeral=True)
 
-        thread = await player.message.create_thread(name=f"{bot.user.name} temp. song-request", auto_archive_duration=10080)
+        thread = await player.message.create_thread(name=f"{bot.user.name} temp. sarki-istekleri", auto_archive_duration=10080)
 
         txt = [
-            "Müzik istekleri için geçici iş parçacığı/konuşma sistemi etkinleştirildi.",
+            "Müzik istekleri için geçici thread/kanalını etkinleştirildi.",
             f"💬 **⠂{inter.author.mention} müzik isteği için geçici bir [konuşma]({thread.jump_url}) oluşturdu.**"
         ]
 
