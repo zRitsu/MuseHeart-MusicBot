@@ -345,9 +345,9 @@ class LastFmCog(commands.Cog):
             func = inter.edit_original_message
 
         if view.session_key:
-            embeds[0].description += f"\n### Kullanıcı [{view.username}](<https://www.last.fm/user/{view.username}>) foi " \
-                                 "başarıyla bağlandı!\n\n`Artık ses kanalında şarkılarınızı dinlerken" \
-                                "otomatik olarak last.fm hesabınıza kaydedilecektir`"
+            embeds[0].description += f"\n### Kullanıcı [{view.username}](<https://www.last.fm/user/{view.username}>) hesabını " \
+                                 "başarıyla bağladı!\n\n`Artık ses kanalında şarkılarınızı dinlerken " \
+                                "otomatik olarak last.fm hesabınıza kaydedilecektir`🫡❤️‍🔥"
 
             await func(embeds=embeds, view=view, content=None)
 
