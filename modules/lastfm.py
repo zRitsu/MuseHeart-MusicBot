@@ -100,7 +100,7 @@ class LastFMView(disnake.ui.View):
             self.auth_url = f'http://www.last.fm/api/auth/?api_key={self.ctx.bot.last_fm.api_key}&token={self.token}'
             self.last_timestamp = int((disnake.utils.utcnow() + datetime.timedelta(minutes=5)).timestamp())
 
-        await interaction.send(f"### [Buraya Tıklayın](<{self.auth_url}>) last.fm hesabınızı bağlamak için (sayfada \"allow\")\n\n"
+        await interaction.send(f"### [Buraya Tıklayın](<{self.auth_url}>) last.fm hesabınızı bağlamak için (sayfada \"YES, ALLOW ACCES\" tuşuna basın.)\n\n"
                                f"`Bağlantının süresi şu tarihte doluyor` <t:{self.last_timestamp}:R> `(Süresi dolmuşsa düğmeye tekrar tıklayın).`\n\n"
                                f"`Dikkat: \"Buraya tıklayın\" bağlantısını kimseye göstermeyin veya yerlere göndermeyin. "
                                f"herkese açık, çünkü bu bağlantı last.fm hesabınıza erişim sağlayabilir`\n\n"
@@ -194,7 +194,7 @@ class LastFmCog(commands.Cog):
                 slashcmd = "/play"
 
             txt += f"\n`Komutu kullanarak müziğinizi bir ses kanalında dinleyin` {slashcmd} `bunları cihazınıza kaydetmek için " \
-                    f"conta do last.fm`\n"
+                    f"Last.fm hesabını bağla`\n"
 
             embeds = [disnake.Embed(
                 description=txt, color=self.bot.get_color()
@@ -295,8 +295,8 @@ class LastFmCog(commands.Cog):
                             "inanılmaz bir platform topluluğuna erişim.**",
                 color=embed_color
             ).set_thumbnail(url="https://www.last.fm/static/images/lastfm_avatar_twitter.52a5d69a85ac.png").
-                      set_footer(text="Not: Şu anda dinlerken şarkı kaydı göz ardı edilecektir. "
-                                      "youtube ve soundcloud'dan müzik")]
+                      set_footer(text="Not: Şu anda youtube ve soundclouddan dinledikleriniz "
+                                      "göz ardı edilecektir.")]
 
         view = LastFMView(inter, session_key=current_session_key)
 
