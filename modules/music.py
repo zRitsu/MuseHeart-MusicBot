@@ -2968,7 +2968,7 @@ class Music(commands.Cog):
             await player.update_filters()
             txt = "*Deakti̇f* hale geti̇rdi"
 
-        txt = [f"nightcore efektini {txt}.", f"🇳 **⠂{inter.author.mention} nightcore efektini {txt}.**"]
+        txt = [f"NightCore efektini {txt}.", f"🇳 **⠂{inter.author.mention} NightCore efektini {txt}.**"]
 
 
         await self.interaction_message(inter, txt, emoji="🇳")
