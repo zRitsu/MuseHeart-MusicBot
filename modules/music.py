@@ -350,7 +350,7 @@ class Music(commands.Cog):
     async def search(
             self,
             inter: disnake.AppCmdInter,
-            query: str = commands.Param(name="busca", desc="Şarkının adı veya bağlantısı."),
+            query: str = commands.Param(name="ara", desc="Şarkının adı veya bağlantısı."),
             *,
             position: int = commands.Param(name="posição", description="Müziği belirli bir konuma yerleştirin",
                                            default=0),
@@ -391,7 +391,7 @@ class Music(commands.Cog):
             manual_bot_choice=manual_bot_choice
         )
 
-    @search.autocomplete("busca")
+    @search.autocomplete("ara")
     async def search_autocomplete(self, inter: disnake.Interaction, current: str):
 
         if not current:
@@ -723,7 +723,7 @@ class Music(commands.Cog):
     async def play(
             self,
             inter: Union[disnake.AppCmdInter, CustomContext],
-            query: str = commands.Param(name="busca", desc="Şarkının adı veya bağlantısı."), *,
+            query: str = commands.Param(name="ara", desc="Şarkının adı veya bağlantısı."), *,
             position: int = commands.Param(name="posição", description="Müziği belirli bir konuma yerleştirin",
                                            default=0),
             force_play: str = commands.Param(
@@ -1775,7 +1775,7 @@ class Music(commands.Cog):
 
                 else:
                     query = fix_characters(query.replace(f"{source}:", '', 1), 25)
-                    title = f"Busca: {query}"
+                    title = f"ara: {query}"
                     icon_url = music_source_image(tracks[0].info['sourceName'])
                     log_text = f"{inter.author.mention} eklendi `{len(tracks)} müzik arama yoluyla: `{query}`{pos_txt}."
 
@@ -1920,7 +1920,7 @@ class Music(commands.Cog):
         await self.process_music(inter=inter, force_play=force_play, ephemeral=ephemeral, user_data=user_data, player=player,
                                  log_text=log_text, emoji=emoji, warn_message=warn_message, reg_query=reg_query)
 
-    @play.autocomplete("busca")
+    @play.autocomplete("ara")
     async def fav_add_autocomplete(self, inter: disnake.Interaction, query: str):
 
         if not self.bot.is_ready() or URL_REG.match(query) or URL_REG.match(query):
