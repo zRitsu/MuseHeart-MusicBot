@@ -2273,7 +2273,7 @@ class Music(commands.Cog):
     @has_source()
     @check_voice()
     @pool_command(name="volume", description="Müzik sesini ayarlayın.", aliases=["vol", "v"], only_voiced=True,
-                  cooldown=volume_cd, max_concurrency=volume_mc, usage="{prefix}{cmd} [nivel]\nEx: {prefix}{cmd} 50")
+                  cooldown=volume_cd, max_concurrency=volume_mc, usage="{prefix}{cmd} [seviye]\nÖrneğin: {prefix}{cmd} 57")
     async def volume_legacy(self, ctx: CustomContext, level: int):
 
         if not 4 < level < 151:
