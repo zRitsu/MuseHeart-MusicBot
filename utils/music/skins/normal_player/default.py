@@ -83,10 +83,10 @@ class DefaultSkin:
 
         if player.loop:
             if player.loop == 'current':
-                e = '🔂'; m = 'Güncel müzik'
+                e = '🔂'; m = 'Müzik'
             else:
-                e = '🔁'; m = 'Fila'
-            txt += f"\n> -# {e} **⠂** `Liste: {m}`"
+                e = '🔁'; m = 'Liste'
+            txt += f"\n> -# {e} **⠂** `Tekrar Modu: {m}`"
 
         if player.current.album_name:
             txt += f"\n> -# 💽 **⠂** [`{fix_characters(player.current.album_name, limit=36)}`]({player.current.album_url})"
