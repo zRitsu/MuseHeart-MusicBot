@@ -6354,7 +6354,7 @@ class Music(commands.Cog):
                                  icon_url=music_source_image(tracks.tracks[0].info["sourceName"]))
 
                 try:
-                    embed.description += f"\n🔊 **⠂ Canal de voz:** {message.author.voice.channel.mention}"
+                    embed.description += f"\n🔊 **⠂ Ses kanalı:** {message.author.voice.channel.mention}"
                 except AttributeError:
                     pass
 
@@ -6365,8 +6365,8 @@ class Music(commands.Cog):
 
                 components.extend(
                     [
-                        disnake.ui.Button(emoji="💗", label="Favoritar", custom_id=PlayerControls.embed_add_fav),
-                        disnake.ui.Button(emoji="<:add_music:588172015760965654>", label="Adicionar na fila",custom_id=PlayerControls.embed_enqueue_playlist)
+                        disnake.ui.Button(emoji="💗", label="Favori", custom_id=PlayerControls.embed_add_fav),
+                        disnake.ui.Button(emoji="<:add_music:588172015760965654>", label="Kuyruğa Ekle", custom_id=PlayerControls.embed_enqueue_playlist)
                     ]
                 )
 
@@ -6377,8 +6377,8 @@ class Music(commands.Cog):
 
             else:
                 player.set_command_log(
-                    text=f"{message.author.mention} adicionou a playlist [`{fix_characters(tracks.data['playlistInfo']['name'], 20)}`]"
-                         f"(<{tracks.tracks[0].playlist_url}>) `({len(tracks.tracks)})`.",
+                    text = (f"{message.author.mention} `{len(tracks.tracks)}` adet müziği içeren [`{fix_characters(tracks.data['playlistInfo']['name'], 20)}`]",
+                            f"(<{tracks.tracks[0].playlist_url}>) listesini ekledi."),
                     emoji="🎶"
                 )
             if destroy_message:
@@ -6401,12 +6401,12 @@ class Music(commands.Cog):
             player.queue.append(track)
 
             if isinstance(message.channel, disnake.Thread) and not isinstance(message.channel.parent, disnake.ForumChannel):
-                embed.description = f"💠 **⠂ Uploader:** `{track.author}`\n" \
-                                    f"✋ **⠂ Pedido por:** {message.author.mention}\n" \
-                                    f"⏰ **⠂ Duração:** `{time_format(track.duration) if not track.is_stream else '🔴 Livestream'}`"
+                embed.description = (f"💠 **⠂ Yükleyen:** `{track.author}`\n"
+                                     f"✋ **⠂ Tarafından Talep Edildi:** {message.author.mention}\n"
+                                     f"⏰ **⠂ Süre:** `{time_format(track.duration) if not track.is_stream else '🔴 Canlı Yayın'}`")
 
                 try:
-                    embed.description += f"\n🔊 **⠂ Canal de voz:** {message.author.voice.channel.mention}"
+                    embed.description += f"\n🔊 **⠂ Ses kanalı:** {message.author.voice.channel.mention}"
                 except AttributeError:
                     pass
 
@@ -6417,11 +6417,10 @@ class Music(commands.Cog):
 
                 components.extend(
                     [
-                        disnake.ui.Button(emoji="💗", label="Favoritar", custom_id=PlayerControls.embed_add_fav),
-                        disnake.ui.Button(emoji="<:play:914841137938829402>", label="Tocar" + (" agora" if (player.current and player.current.autoplay) else ""), custom_id=PlayerControls.embed_forceplay),
-                        disnake.ui.Button(emoji="<:add_music:588172015760965654>", label="Adicionar na fila",
-                                          custom_id=PlayerControls.embed_enqueue_track)
-                    ]
+                        disnake.ui.Button(emoji="💗", label="Favori", custom_id=PlayerControls.embed_add_fav),
+                        disnake.ui.Button(emoji="<:play:914841137938829402>", label="Çal" + (" şimdi" if (player.current and player.current.autoplay) else ""), custom_id=PlayerControls.embed_forceplay),
+                        disnake.ui.Button(emoji="<:add_music:588172015760965654>", label="Sıraya Ekle",
+                                    custom_id=PlayerControls.embed_enqueue_track)                    ]
                 )
 
                 embed.set_thumbnail(url=track.thumb)
@@ -6434,7 +6433,7 @@ class Music(commands.Cog):
             else:
                 duration = time_format(tracks[0].duration) if not tracks[0].is_stream else '🔴 Livestream'
                 player.set_command_log(
-                    text=f"{message.author.mention} adicionou [`{fix_characters(tracks[0].title, 20)}`](<{tracks[0].uri or tracks[0].search_uri}>) `({duration})`.",
+                    text=f"{message.author.mention} [`{fix_characters(tracks[0].title, 20)}`](<{tracks[0].uri or tracks[0].search_uri}>) `({duration})` eklendi."
                     emoji="🎵"
                 )
                 if destroy_message:
@@ -6503,7 +6502,7 @@ class Music(commands.Cog):
 
             try:
                 if bot.user.id != self.bot.user.id:
-                    embed.set_footer(text=f"Bot selecionado: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
+                    embed.set_footer(text=f"Bot seçildi: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
             except AttributeError:
                 pass
 
@@ -6531,7 +6530,7 @@ class Music(commands.Cog):
 
             try:
                 if bot.user.id != self.bot.user.id:
-                    embed.set_footer(text=f"Bot selecionado: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
+                    embed.set_footer(text=f"Bot seçildi: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
             except AttributeError:
                 pass
 
@@ -6559,14 +6558,13 @@ class Music(commands.Cog):
         if ((dt_now:=datetime.datetime.now()) - node._retry_dt).total_seconds() < 7:
             node._retry_count += 1
         if node._retry_count >= 4:
-            print(f"❌ - {self.bot.user} - [{node.identifier} / v{node.version}] Reconexão cancelada.")
+            print(f"❌ - {self.bot.user} - [{node.identifier} / v{node.version}] Yeniden bağlantı iptal edildi.")
             node._retry_count = 0
             return
         else:
             node._retry_dt = dt_now
 
-        print(f"⚠️ - {self.bot.user} - [{node.identifier} / v{node.version}] Conexão perdida - reconectando em {int(backoff)} segundos.")
-
+        print(f"⚠️ - {self.bot.user} - [{node.identifier} / v{node.version}] Bağlantı kesildi - {int(backoff)} saniye içinde yeniden bağlanıyor.")
         while True:
 
             if node.is_available:
