@@ -6623,7 +6623,7 @@ class Music(commands.Cog):
 
     @commands.Cog.listener("on_wavelink_node_ready")
     async def node_ready(self, node: wavelink.Node):
-        print(f'🌋 - {self.bot.user} - Servidor de música: [{node.identifier} / v{node.version}] está pronto para uso!')
+        print(f'🌋 - {self.bot.user} - Müzik sunucusu: [{node.identifier} / v{node.version}] kullanıma hazır!')
         retries = 25
         while retries > 0:
 
@@ -6782,7 +6782,7 @@ class Music(commands.Cog):
             nodes.insert(0, node)
 
         if not nodes:
-            raise GenericError("**Não há servidores de música disponível!**")
+            raise GenericError("**Müzik sunucusu bulunamadı!**")
 
         exceptions = set()
 
@@ -6860,7 +6860,7 @@ class Music(commands.Cog):
                                 break
 
                         if not isinstance(e, wavelink.TrackNotFound):
-                            print(f"Falha ao processar busca...\n{query}\n{traceback.format_exc()}")
+                            print(f"Arama işlemi başarısız oldu...\n{query}\n{traceback.format_exc()}")
 
                     if tracks or not source:
                         break
@@ -6887,8 +6887,8 @@ class Music(commands.Cog):
                     if txt:
 
                         if "This track is not readable. Available countries:" in txt:
-                            txt = "A música informada não está disponível na minha região atual..."
-                        raise GenericError(f"**Ocorreu um erro ao processar sua busca:** \n{txt}", error=txt)
+                            txt = "Şarkı şu anda bulunduğum bölgede mevcut değil..."
+                        raise GenericError(f"**Arama işleminizde bir hata oluştu:** \n{txt}", error=txt)
                     raise GenericError("**Não houve resultados para sua busca.**")
 
         if isinstance(tracks, list):
