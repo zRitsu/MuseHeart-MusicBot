@@ -1056,8 +1056,8 @@ class Music(commands.Cog):
 
             embed = disnake.Embed(
                 color=self.bot.get_color(guild.me),
-                description="**Aşağıdan bir ürün seçin:**\n"
-                            f'Not: sadece <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> seçim yapmak için!'
+                description="**Aşağıdan bir seçenek seçin:**\n"
+                            f'Not: Seçim yapmak için <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R>niz kaldı!'
             )
 
             try:
