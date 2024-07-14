@@ -3998,7 +3998,7 @@ class Music(commands.Cog):
             song_author: str = commands.Param(name="sanatçı",
                                               description="Müzikte bulunan bir ismi eklemek (yazar/sanatçı/yükleyici).",
                                               default=None),
-            user: disnake.Member = commands.Param(name='ara',
+            user: disnake.Member = commands.Param(name='üye_isteği',
                                                   description="Seçilen üye tarafından istenen müzikleri eklemek.",
                                                   default=None),
             duplicates: bool = commands.Param(name="kopyalar", description="Yinelenen müzikleri eklemek",
