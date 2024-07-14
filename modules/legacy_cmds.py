@@ -831,7 +831,7 @@ class Owner(commands.Cog):
         if counter == 1:
             txt = "**DM'nizden bir mesaj silindi.**"
         else:
-            txt = f"**{counter} DM'nizdeki mesajlar silindi.**"
+            txt = f"**DM'nizdeki {counter} mesaj silindi.**"
 
         await ctx.send(embed=disnake.Embed(description=txt, colour=self.bot.get_color(ctx.guild.me)))
 

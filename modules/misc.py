@@ -306,8 +306,8 @@ class Misc(commands.Cog):
                         embeds.append(
                             disnake.Embed(
                                 color=color,
-                                description=f"Ayrıca önek ile metin komutlarım var. {prefix_msg} (benim sözüm "
-                                            f"aynı zamanda önek olarak da çalışır). Tüm metin komutlarımı görmek için "
+                                description=f"Ayrıca önek ile metin komutlarım var. {prefix_msg} (beni etiketleyerekte "
+                                            f"kullanabilirsiniz). Tüm metin komutlarımı görmek için "
                                             f"kullan **{prefix}help** bir sunucu kanalında **{guild.name}**. "
                                             f"Ön ekimi değiştirmek istiyorsanız şu komutu kullanın: **{prefix}setprefix** "
                                             f"(komutu kullanarak kişisel bir önekiniz olabilir "
