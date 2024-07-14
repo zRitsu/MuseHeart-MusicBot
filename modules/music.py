@@ -2289,7 +2289,7 @@ class Music(commands.Cog):
     async def volume(
             self,
             inter: disnake.AppCmdInter, *,
-            value: int = commands.Param(name="nível", description="seviye 5 ile 150 arasında", min_value=5.0, max_value=150.0)
+            value: int = commands.Param(name="nível", description="seviye 5 ile 150 arasında", min_value=5.0, max_value=999.0)
     ):
 
         try:
