@@ -788,6 +788,8 @@ class LavalinkPlayer(wavelink.Player):
         self.hook_event_task[event_name] = self.bot.loop.create_task(self.hook_events(event))"""
         await self.hook_events(event)
 
+    async def hook_events(self, event):
+
         await self.bot.wait_until_ready()
 
         if isinstance(event, wavelink.TrackEnd):
