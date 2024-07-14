@@ -12,7 +12,7 @@ from collections import deque
 from contextlib import suppress
 from itertools import cycle
 from time import time
-from typing import Optional, Union, TYPE_CHECKING, List, Dict
+from typing import Optional, Union, TYPE_CHECKING, List
 from urllib import parse
 from urllib.parse import quote
 
@@ -782,12 +782,8 @@ class LavalinkPlayer(wavelink.Player):
 
         event_name = str(event)
 
-        try:
-            if not self.hook_event_task[event_name].done():
-                return
-            self.hook_event_task[event_name].cancel()
-        except:
-            pass
+        if self.hook_event_task.get(event_name):
+            return
 
         self.hook_event_task[event_name] = self.bot.loop.create_task(self.hook_events(event))
 
@@ -948,6 +944,7 @@ class LavalinkPlayer(wavelink.Player):
                     await asyncio.sleep(3)
                     self.locked = False
                     await self.process_next(start_position=self.position)
+                    self.hook_event_task[str(event)] = None
 
                 else:
                     await asyncio.sleep(10)
@@ -976,6 +973,7 @@ class LavalinkPlayer(wavelink.Player):
                             await asyncio.sleep(3)
                         self.locked = False
                         self.update = True
+                        self.hook_event_task[str(event)] = None
                         return
 
                     elif self.retries_403["counter"] < 3:
@@ -987,6 +985,7 @@ class LavalinkPlayer(wavelink.Player):
                             return
 
                         self.locked = False
+                        self.hook_event_task[str(event)] = None
                         self.set_command_log(
                             text=f'Ocorreu o erro 403 do youtube na reprodução da música atual. Tentativa {self.retries_403["counter"]}/5...')
                         if not self.auto_pause:
@@ -1015,6 +1014,7 @@ class LavalinkPlayer(wavelink.Player):
                     self.current = None
                     self.queue.appendleft(track)
                     self.locked = False
+                    self.hook_event_task[str(event)] = None
                     if track.info["sourceName"] == "youtube":
                         self.set_command_log(
                             text=f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual "
@@ -1100,6 +1100,7 @@ class LavalinkPlayer(wavelink.Player):
             await asyncio.sleep(cooldown)
 
             self.locked = False
+            self.hook_event_task[str(event)] = None
             await self.process_next(start_position=start_position)
             return
 
