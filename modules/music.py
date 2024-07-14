@@ -2102,7 +2102,7 @@ class Music(commands.Cog):
         else:
 
             if isinstance(inter, disnake.MessageInteraction):
-                player.set_command_log(text=f"{inter.author.mention} müzik atlandı", emoji="⏭️")
+                player.set_command_log(text=f"{inter.author.mention} müziği atladı", emoji="⏭️")
                 if not inter.response.is_done():
                     try:
                         await inter.response.defer()
@@ -2111,11 +2111,11 @@ class Music(commands.Cog):
                 interaction = inter
             else:
 
-                player.set_command_log(emoji="⏭️", text=f"{inter.author.mention} müzik atlandı")
+                player.set_command_log(emoji="⏭️", text=f"{inter.author.mention} müziği atladı")
 
                 embed = disnake.Embed(
                     color=self.bot.get_color(guild.me),
-                    description=f"⏭️ **⠂{inter.author.mention} müzik atlandı:\n"
+                    description=f"⏭️ **⠂{inter.author.mention} müziği atladı:\n"
                                 f"╰[`{fix_characters(player.current.title, 43)}`](<{player.current.uri or player.current.search_uri}>)**"
                                 f"{player.controller_link}"
                 )
@@ -2461,8 +2461,8 @@ class Music(commands.Cog):
             emoji = "⏩"
 
             txt = [
-                f"şarkının süresini şu şekilde ilerletir: `{time_format(milliseconds)}`",
-                f"{emoji} **⠂{inter.author.mention} şarkının süresini şu şekilde ilerletir:** `{time_format(milliseconds)}`"
+                f"şarkının süresini şu şekilde değiştirdi: `{time_format(milliseconds)}`",
+                f"{emoji} **⠂{inter.author.mention} şarkının süresini şu şekilde değiştirdi:** `{time_format(milliseconds)}`"
             ]
 
         else:
