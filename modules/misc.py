@@ -681,7 +681,7 @@ class Misc(commands.Cog):
 
         embed.set_footer(
             icon_url=avatar,
-            text=f"Dono(a): {owner} [{owner.id}]"
+            text=f"Kullanıcı: {owner} [{owner.id}]"
         )
 
         components = [disnake.ui.Button(custom_id="bot_invite", label="Beni sunucuna ekle")] if [b for b in self.bot.pool.bots if b.appinfo and (b.appinfo.bot_public or await b.is_owner(inter.author))] else None
