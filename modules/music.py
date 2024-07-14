@@ -2962,11 +2962,11 @@ class Music(commands.Cog):
 
         if player.nightcore:
             await player.set_timescale(pitch=1.2, speed=1.1)
-            txt = "Akti̇f hale geti̇ri̇ldi̇"
+            txt = "*Akti̇f* hale geti̇rdi"
         else:
             await player.set_timescale(enabled=False)
             await player.update_filters()
-            txt = "Deakti̇f hale geti̇ri̇ldi̇"
+            txt = "*Deakti̇f* hale geti̇rdi"
 
         txt = [f"nightcore efektini {txt}.", f"🇳 **⠂{inter.author.mention} nightcore efektini {txt}.**"]
 
