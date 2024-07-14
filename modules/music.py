@@ -1987,7 +1987,7 @@ class Music(commands.Cog):
             self,
             inter: disnake.AppCmdInter,
             query: str = commands.Param(
-                name="nome",
+                name="isim",
                 description="Şarkının adı (tamamı veya bir kısmı)."
             ),
             case_sensitive: bool = commands.Param(
@@ -2012,7 +2012,7 @@ class Music(commands.Cog):
             self,
             inter: disnake.AppCmdInter, *,
             query: str = commands.Param(
-                name="nome",
+                name="isim",
                 description="Şarkının adı (tamamı veya bir kısmı).",
                 default=None,
             ),
@@ -2708,7 +2708,7 @@ class Music(commands.Cog):
     async def remove(
             self,
             inter: disnake.AppCmdInter,
-            query: str = commands.Param(name="nome", description="Şarkının tam adı."),
+            query: str = commands.Param(name="isim", description="Şarkının tam adı."),
             case_sensitive: bool = commands.Param(
                 name="nome_exato", default=False,
                 description="Kelime kelime aramak yerine şarkının adındaki tam ifadeyle şarkıları arayın.",
@@ -2820,7 +2820,7 @@ class Music(commands.Cog):
     async def rotate(
             self,
             inter: disnake.AppCmdInter,
-            query: str = commands.Param(name="nome", description="Şarkının tam adı."),
+            query: str = commands.Param(name="isim", description="Şarkının tam adı."),
             case_sensitive: bool = commands.Param(
                 name="nome_exato", default=False,
                 description="Kelime kelime aramak yerine şarkının adındaki tam ifadeyle şarkıları arayın.",
@@ -3694,7 +3694,7 @@ class Music(commands.Cog):
     async def clear(
             self,
             inter: disnake.AppCmdInter,
-            song_name: str = commands.Param(name="nome", description="Müzikte bulunan bir adı dahil et.",
+            song_name: str = commands.Param(name="isim", description="Müzikte bulunan bir adı dahil et.",
                                              default=None),
             song_author: str = commands.Param(name="uploader", description="Müziğin yükleyicisi/oluşturucusunun adını dahil et.",
              default=None),
@@ -3991,7 +3991,7 @@ class Music(commands.Cog):
     async def move(
             self,
             inter: disnake.AppCmdInter,
-            song_name: str = commands.Param(name="nome",description="Müzikte bulunan bir adı eklemek.",
+            song_name: str = commands.Param(name="isim",description="Müzikte bulunan bir adı eklemek.",
                                             default=None),
             position: int = commands.Param(name="posição", description="Kuyruktaki hedef konumu (isteğe bağlı).",
                                            min_value=1, max_value=900, default=1),
@@ -4317,11 +4317,11 @@ class Music(commands.Cog):
         return list(set([track.playlist_name for track in player.queue if track.playlist_name and
                          query.lower() in track.playlist_name.lower()]))[:20]
 
-    @rotate.autocomplete("nome")
-    @move.autocomplete("nome")
-    @skip.autocomplete("nome")
-    @skipto.autocomplete("nome")
-    @remove.autocomplete("nome")
+    @rotate.autocomplete("isim")
+    @move.autocomplete("isim")
+    @skip.autocomplete("isim")
+    @skipto.autocomplete("isim")
+    @remove.autocomplete("isim")
     async def queue_tracks(self, inter: disnake.AppCmdInter, query: str):
 
         try:

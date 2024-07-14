@@ -416,7 +416,7 @@ class MusicSettings(commands.Cog):
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Nome",
+                        label="isim",
                         custom_id="forum_title",
                         min_length=4,
                         max_length=30,
@@ -714,7 +714,7 @@ class MusicSettings(commands.Cog):
                     components=[
                         disnake.ui.TextInput(
                             style=disnake.TextInputStyle.short,
-                            label="Nome",
+                            label="isim",
                             custom_id="forum_title",
                             min_length=4,
                             max_length=30,
