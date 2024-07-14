@@ -352,7 +352,7 @@ class Music(commands.Cog):
             inter: disnake.AppCmdInter,
             query: str = commands.Param(name="ara", desc="Şarkının adı veya bağlantısı."),
             *,
-            position: int = commands.Param(name="posição", description="Müziği belirli bir konuma yerleştirin",
+            position: int = commands.Param(name="sıra", description="Müziği belirli bir konuma yerleştirin",
                                            default=0),
             force_play: str = commands.Param(
                 name="tocar_agora",
@@ -649,7 +649,7 @@ class Music(commands.Cog):
             file: disnake.Attachment = commands.Param(
                 name="arquivo", description="Çalmak veya sıraya eklemek için ses dosyası."
             ),
-            position: int = commands.Param(name="posição", description="Müziği belirli bir konuma yerleştirin",
+            position: int = commands.Param(name="sıra", description="Müziği belirli bir konuma yerleştirin",
                                            default=0),
             force_play: str = commands.Param(
                 name="tocar_agora",
@@ -724,7 +724,7 @@ class Music(commands.Cog):
             self,
             inter: Union[disnake.AppCmdInter, CustomContext],
             query: str = commands.Param(name="ara", desc="Şarkının adı veya bağlantısı."), *,
-            position: int = commands.Param(name="posição", description="Müziği belirli bir konuma yerleştirin",
+            position: int = commands.Param(name="sıra", description="Müziği belirli bir konuma yerleştirin",
                                            default=0),
             force_play: str = commands.Param(
                 name="tocar_agora",
@@ -3993,7 +3993,7 @@ class Music(commands.Cog):
             inter: disnake.AppCmdInter,
             song_name: str = commands.Param(name="isim",description="Müzikte bulunan bir adı eklemek.",
                                             default=None),
-            position: int = commands.Param(name="posição", description="Kuyruktaki hedef konumu (isteğe bağlı).",
+            position: int = commands.Param(name="sıra", description="Kuyruktaki hedef konumu (isteğe bağlı).",
                                            min_value=1, max_value=900, default=1),
             song_author: str = commands.Param(name="uploader",
                                               description="Müzikte bulunan bir ismi eklemek (yazar/sanatçı/yükleyici).",
