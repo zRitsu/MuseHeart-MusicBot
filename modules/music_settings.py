@@ -208,7 +208,7 @@ class PlayerSettings(disnake.ui.View):
         restrict_mode_button.callback = self.restrict_mode_callback
         self.add_item(restrict_mode_button)
 
-        check_autoplay_button = disnake.ui.Button(label="Autoplay.",
+        check_autoplay_button = disnake.ui.Button(label="Otomatik Oynatma.",
                                                     emoji="✅" if self.enable_autoplay else "🚫")
         check_autoplay_button.callback = self.autoplay_callback
         self.add_item(check_autoplay_button)
