@@ -6431,9 +6431,9 @@ class Music(commands.Cog):
                     await message.reply(embed=embed, fail_if_not_exists=False, mention_author=False, components=components)
 
             else:
-                duration = time_format(tracks[0].duration) if not tracks[0].is_stream else '🔴 Livestream'
+                duration = time_format(tracks[0].duration) if not tracks[0].is_stream else ':red_circle: Livestream'
                 player.set_command_log(
-                    text=f"{message.author.mention} [`{fix_characters(tracks[0].title, 20)}`](<{tracks[0].uri or tracks[0].search_uri}>) `({duration})` eklendi."
+                    text = f"{message.author.mention} [`{fix_characters(tracks[0].title, 20)}`](<{tracks[0].uri or tracks[0].search_uri}>) `({duration})` ekledi.",
                     emoji="🎵"
                 )
                 if destroy_message:
