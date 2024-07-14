@@ -87,7 +87,7 @@ class ServerManagerView(disnake.ui.View):
                         f"**Sahibi:** `{self.current_guild.owner} [{self.current_guild.owner.id}]`\n"
                         f"**Oluşturulma Tarihi:** <t:{created_at}:f> - <t:{created_at}:R>\n"
                         f"**Ne zaman eklendim:** <t:{joined_at}:f> - <t:{joined_at}:R>\n"
-                        f"**Doğrulama seviyesi:** `{self.current_guild.verification_level or 'nenhuma'}`\n"
+                        f"**Doğrulama seviyesi:** `{self.current_guild.verification_level or 'hiçbiri'}`\n"
                         f"**Üyelerimiz:** `{self.member_count(self.current_guild)}`\n"
                         f"**Botlar:** `{self.bot_count(self.current_guild)}`"
         )
