@@ -1,4 +1,4 @@
-# MuseHeart-MusicBot-TURKISH / b15162b
+# MuseHeart-MusicBot-TURKISH / 59ba024
 > [!WARNING]
 > Bu repo, Museheart botunun Ekibimiz [Mahirsn](https://github.com/mahirsn), [Tospeek](https://github.com/Tospeek) Ve [Sepultrex](https://github.com/Sepultrex) Tarafından Portekizce'den Türkçe'ye çevrilmiş versiyonudur. (DİKKAT! Botun mevcut sürümü ile birebir aynı olmayabilir ve çeviride tutarsızlıklar bulunabilir.)
 
