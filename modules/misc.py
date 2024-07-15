@@ -845,20 +845,20 @@ class Misc(commands.Cog):
             embeds.append(
                 disnake.Embed(
                     description=f"{user.mention} **[banner (server)]({guild_banner_url})**",
-                    color=inter.guild.me.color).set_image(url=guild_banner_url)
+                    color=color).set_image(url=guild_banner_url)
             )
 
         embeds.append(
             disnake.Embed(
                 description=f"{user.mention} **[avatar (user)]({user_avatar_url})**",
-                color=inter.guild.me.color).set_image(url=user_avatar_url)
+                color=color).set_image(url=user_avatar_url)
         )
 
         if user_banner_url:
             embeds.append(
                 disnake.Embed(
                     description=f"{user.mention} **[banner (user)]({user_banner_url})**",
-                    color=inter.guild.me.color).set_image(url=user_banner_url)
+                    color=color).set_image(url=user_banner_url)
             )
 
         if inter.user.id != user.id:
