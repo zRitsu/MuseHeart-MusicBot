@@ -791,56 +791,74 @@ class Misc(commands.Cog):
 
         user = inter.target
 
-        headers = {"Authorization": f"Bot {self.bot.http.token}"}
+        guild = None
 
-        async with self.bot.session.get(f"https://discord.com/api/v10/guilds/{inter.guild.id}/members/{user.id}",
-                                        headers=headers) as r:
-            data = await r.json()
+        for b in self.bot.pool.get_guild_bots(inter.guild_id):
+            if (guild:=b.get_guild(inter.guild_id)):
+                break
 
-        user_avatar_url = f"https://cdn.discordapp.com/avatars/{user.id}/{data['user']['avatar']}." + (
-            "gif" if data['user']['avatar'].startswith('a_') else "png") + "?size=512"
+        if not guild:
+            user = await self.bot.fetch_user(inter.author.id)
 
-        if user_banner_url := data['user'].get('banner'):
-            user_banner_url = f"https://cdn.discordapp.com/banners/{user.id}/{user_banner_url}." + (
-                "gif" if user_banner_url.startswith('a_') else "png") + "?size=4096"
+            user_avatar_url = inter.author.display_avatar.replace(static_format="png", size=512).url
 
-        if guild_avatar_url := data.get("avatar"):
-            guild_avatar_url = f"https://cdn.discordapp.com/guilds/{inter.guild.id}/users/{user.id}/avatars/{guild_avatar_url}." + (
-                "gif" if guild_avatar_url.startswith('a_') else "png") + "?size=512"
+            if user_banner_url:=user.banner:
+                user_banner_url = inter.author.banner.replace(static_format="png", size=4096).url
 
-        if guild_banner_url := data.get("banner"):
-            guild_banner_url = f"https://cdn.discordapp.com/guilds/{inter.guild.id}/users/{user.id}/banners/{guild_banner_url}." + (
-                "gif" if guild_banner_url.startswith('a_') else "png") + "?size=4096"
+            guild_avatar_url = None
+            guild_banner_url = None
+
+        else:
+            async with self.bot.session.get(f"https://discord.com/api/v10/guilds/{inter.guild_id}/members/{user.id}",
+                                            headers={"Authorization": f"Bot {self.bot.http.token}"}) as r:
+                data = await r.json()
+
+            user_avatar_url = f"https://cdn.discordapp.com/avatars/{user.id}/{data['user']['avatar']}." + (
+                "gif" if data['user']['avatar'].startswith('a_') else "png") + "?size=512"
+
+            if user_banner_url := data['user'].get('banner'):
+                user_banner_url = f"https://cdn.discordapp.com/banners/{user.id}/{user_banner_url}." + (
+                    "gif" if user_banner_url.startswith('a_') else "png") + "?size=4096"
+
+            if guild_avatar_url := data.get("avatar"):
+                guild_avatar_url = f"https://cdn.discordapp.com/guilds/{inter.guild_id}/users/{user.id}/avatars/{guild_avatar_url}." + (
+                    "gif" if guild_avatar_url.startswith('a_') else "png") + "?size=512"
+
+            if guild_banner_url := data.get("banner"):
+                guild_banner_url = f"https://cdn.discordapp.com/guilds/{inter.guild_id}/users/{user.id}/banners/{guild_banner_url}." + (
+                    "gif" if guild_banner_url.startswith('a_') else "png") + "?size=4096"
 
         embeds = []
 
         requester = inter.author.display_avatar.with_static_format("png").url
 
+        color = self.bot.get_color()
+
         if guild_avatar_url:
             embeds.append(
                 disnake.Embed(
                     description=f"{user.mention} **[avatar (server)]({guild_avatar_url})**",
-                    color=inter.guild.me.color).set_image(url=guild_avatar_url)
+                    color=color).set_image(url=guild_avatar_url)
             )
 
         if guild_banner_url:
             embeds.append(
                 disnake.Embed(
                     description=f"{user.mention} **[banner (server)]({guild_banner_url})**",
-                    color=inter.guild.me.color).set_image(url=guild_banner_url)
+                    color=color).set_image(url=guild_banner_url)
             )
 
         embeds.append(
             disnake.Embed(
                 description=f"{user.mention} **[avatar (user)]({user_avatar_url})**",
-                color=inter.guild.me.color).set_image(url=user_avatar_url)
+                color=color).set_image(url=user_avatar_url)
         )
 
         if user_banner_url:
             embeds.append(
                 disnake.Embed(
                     description=f"{user.mention} **[banner (user)]({user_banner_url})**",
-                    color=inter.guild.me.color).set_image(url=user_banner_url)
+                    color=color).set_image(url=user_banner_url)
             )
 
         if inter.user.id != user.id:
