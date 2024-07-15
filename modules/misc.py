@@ -789,29 +789,65 @@ class Misc(commands.Cog):
     @commands.user_command(name="Avatar", dm_permission=False)
     async def avatar(self, inter: disnake.UserCommandInteraction):
 
-        embeds = []
-
-        assets = {}
-
         if self.bot.intents.members:
             user = (await self.bot.fetch_user(inter.target.id) if not inter.target.bot else self.bot.get_user(inter.target.id))
         else:
             user = inter.target
 
-        try:
-            if inter.target.guild_avatar:
-                assets["Avatar (Server)"] = inter.target.guild_avatar.with_static_format("png")
-        except AttributeError:
-            pass
-        assets["Avatar (User)"] = user.display_avatar.with_static_format("png")
-        if user.banner:
-            assets["Banner"] = user.banner.with_static_format("png")
+        headers = {"Authorization": f"Bot {self.bot.http.token}"}
 
-        for name, asset in assets.items():
-            embed = disnake.Embed(description=f"{inter.target.mention} **[{name}]({asset.with_size(2048).url})**",
-                                  color=self.bot.get_color(inter.guild.me if inter.guild else None))
-            embed.set_image(asset.with_size(256).url)
-            embeds.append(embed)
+        async with self.bot.session.get(f"https://discord.com/api/v10/guilds/{inter.guild.id}/members/{user.id}",
+                                        headers=headers) as r:
+            data = await r.json()
+
+        user_avatar_url = f"https://cdn.discordapp.com/avatars/{inter.author.id}/{data['user']['avatar']}." + (
+            "gif" if data['user']['avatar'].startswith('a_') else "png") + "?size=512"
+
+        if user_banner_url := data['user'].get('banner'):
+            user_banner_url = f"https://cdn.discordapp.com/banners/{inter.author.id}/{user_banner_url}." + (
+                "gif" if user_banner_url.startswith('a_') else "png") + "?size=4096"
+
+        if guild_avatar_url := data.get("avatar"):
+            guild_avatar_url = f"https://cdn.discordapp.com/guilds/{inter.guild.id}/users/{inter.author.id}/avatars/{guild_avatar_url}." + (
+                "gif" if guild_avatar_url.startswith('a_') else "png") + "?size=512"
+
+        if guild_banner_url := data.get("banner"):
+            guild_banner_url = f"https://cdn.discordapp.com/guilds/{inter.guild.id}/users/{inter.author.id}/banners/{guild_banner_url}." + (
+                "gif" if guild_banner_url.startswith('a_') else "png") + "?size=4096"
+
+        embeds = []
+
+        requester = inter.author.display_avatar.with_static_format("png").url
+
+        if guild_avatar_url:
+            embeds.append(
+                disnake.Embed(
+                    description=f"{user.mention} **[avatar (server)]({guild_avatar_url})**",
+                    color=inter.guild.me.color).set_image(url=guild_avatar_url)
+            )
+
+        if guild_banner_url:
+            embeds.append(
+                disnake.Embed(
+                    description=f"{user.mention} **[banner (server)]({guild_banner_url})**",
+                    color=inter.guild.me.color).set_image(url=guild_banner_url)
+            )
+
+        embeds.append(
+            disnake.Embed(
+                description=f"{user.display_name} **[avatar (user)]({user_avatar_url})**",
+                color=inter.guild.me.color).set_image(url=user_avatar_url)
+        )
+
+        if user_banner_url:
+            embeds.append(
+                disnake.Embed(
+                    description=f"{user.mention} **[banner (user)]({user_banner_url})**",
+                    color=inter.guild.me.color).set_image(url=user_banner_url)
+            )
+
+        if inter.user.id != user.id:
+            embeds[-1].set_footer(text=f"Solicitado por: {inter.author}", icon_url=requester)
 
         await inter.send(embeds=embeds, ephemeral=True)
 
