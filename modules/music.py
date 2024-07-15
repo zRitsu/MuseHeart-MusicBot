@@ -356,7 +356,7 @@ class Music(commands.Cog):
                                            default=0),
             force_play: str = commands.Param(
                 name="hemen_çal",
-                description="Şarkıyı hemen çalın (kuyruğa eklemek yerine).",
+                description="Şarkıyı hemen çalın (kuyruğa eklemeden).",
                 default="no",
                 choices=[
                     disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
