@@ -797,19 +797,19 @@ class Misc(commands.Cog):
                                         headers=headers) as r:
             data = await r.json()
 
-        user_avatar_url = f"https://cdn.discordapp.com/avatars/{inter.author.id}/{data['user']['avatar']}." + (
+        user_avatar_url = f"https://cdn.discordapp.com/avatars/{user.id}/{data['user']['avatar']}." + (
             "gif" if data['user']['avatar'].startswith('a_') else "png") + "?size=512"
 
         if user_banner_url := data['user'].get('banner'):
-            user_banner_url = f"https://cdn.discordapp.com/banners/{inter.author.id}/{user_banner_url}." + (
+            user_banner_url = f"https://cdn.discordapp.com/banners/{user.id}/{user_banner_url}." + (
                 "gif" if user_banner_url.startswith('a_') else "png") + "?size=4096"
 
         if guild_avatar_url := data.get("avatar"):
-            guild_avatar_url = f"https://cdn.discordapp.com/guilds/{inter.guild.id}/users/{inter.author.id}/avatars/{guild_avatar_url}." + (
+            guild_avatar_url = f"https://cdn.discordapp.com/guilds/{inter.guild.id}/users/{user.id}/avatars/{guild_avatar_url}." + (
                 "gif" if guild_avatar_url.startswith('a_') else "png") + "?size=512"
 
         if guild_banner_url := data.get("banner"):
-            guild_banner_url = f"https://cdn.discordapp.com/guilds/{inter.guild.id}/users/{inter.author.id}/banners/{guild_banner_url}." + (
+            guild_banner_url = f"https://cdn.discordapp.com/guilds/{inter.guild.id}/users/{user.id}/banners/{guild_banner_url}." + (
                 "gif" if guild_banner_url.startswith('a_') else "png") + "?size=4096"
 
         embeds = []
