@@ -832,7 +832,7 @@ class Misc(commands.Cog):
 
         embeds.append(
             disnake.Embed(
-                description=f"{user.display_name} **[avatar (user)]({user_avatar_url})**",
+                description=f"{user.mention} **[avatar (user)]({user_avatar_url})**",
                 color=inter.guild.me.color).set_image(url=user_avatar_url)
         )
 
