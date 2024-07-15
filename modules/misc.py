@@ -789,10 +789,7 @@ class Misc(commands.Cog):
     @commands.user_command(name="Avatar", dm_permission=False)
     async def avatar(self, inter: disnake.UserCommandInteraction):
 
-        if self.bot.intents.members:
-            user = (await self.bot.fetch_user(inter.target.id) if not inter.target.bot else self.bot.get_user(inter.target.id))
-        else:
-            user = inter.target
+        user = inter.target
 
         headers = {"Authorization": f"Bot {self.bot.http.token}"}
 
