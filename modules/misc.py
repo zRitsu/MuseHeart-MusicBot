@@ -793,12 +793,15 @@ class Misc(commands.Cog):
 
         guild = None
 
+        bot = self.bot
+
         for b in self.bot.pool.get_guild_bots(inter.guild_id):
             if (guild:=b.get_guild(inter.guild_id)):
+                bot = b
                 break
 
         if not guild:
-            user = await self.bot.fetch_user(inter.author.id)
+            user = await bot.fetch_user(inter.author.id)
 
             user_avatar_url = inter.author.display_avatar.replace(static_format="png", size=512).url
 
@@ -810,7 +813,7 @@ class Misc(commands.Cog):
 
         else:
             async with self.bot.session.get(f"https://discord.com/api/v10/guilds/{inter.guild_id}/members/{user.id}",
-                                            headers={"Authorization": f"Bot {self.bot.http.token}"}) as r:
+                                            headers={"Authorization": f"Bot {bot.http.token}"}) as r:
                 data = await r.json()
 
             user_avatar_url = f"https://cdn.discordapp.com/avatars/{user.id}/{data['user']['avatar']}." + (
