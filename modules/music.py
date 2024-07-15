@@ -2708,7 +2708,7 @@ class Music(commands.Cog):
     async def remove(
             self,
             inter: disnake.AppCmdInter,
-            query: str = commands.Param(name="isim", description="Şarkının tam adı."),
+            query: str = commands.Param(name="isim", description="Şarkının tam adı/ismi."),
             case_sensitive: bool = commands.Param(
                 name="tam_isim_ara", default=False,
                 description="Kelime kelime aramak yerine şarkının adındaki tam ifadeyle şarkıları arayın.",
