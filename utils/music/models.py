@@ -30,8 +30,8 @@ from wavelink import TrackStart, TrackEnd
 if TYPE_CHECKING:
     from utils.client import BotCore
 
-exclude_tags = ["remix", "edit", "extend", "compilation", "mashup"]
-exclude_tags_2 = ["extend", "compilation", "mashup", "nightcore", "8d"]
+exclude_tags = ["remix", "edit", "extend", "compilation", "mashup", "mixed"]
+exclude_tags_2 = ["extend", "compilation", "mashup", "nightcore", "8d", "mixed"]
 emoji_pattern = re.compile('<a?:.+?:\d+?>')
 
 thread_archive_time = {

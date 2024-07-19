@@ -474,7 +474,7 @@ class LastFmCog(commands.Cog):
                                                                      requester=self.bot.user.id, bot=self.bot)
 
                         if not [t for t in exclude_tags if t.lower() in track.title]:
-                            result = [t for t in result if check_track_title(t.title)]
+                            result = [t for t in result if (t.duration - 10000) < track.duration < (t.duration + 10000) and check_track_title(t.title)]
 
                         if not result:
                             print(f"⚠️ - Last.FM Scrobble - Sem resultados para a música: {track_query}")
