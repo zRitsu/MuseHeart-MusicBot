@@ -1218,11 +1218,17 @@ class LavalinkPlayer(wavelink.Player):
 
         if self.last_message_id != self.text_channel.last_message_id:
 
+            def check_current_message(m: disnake.Message):
+                try:
+                    return m.id == self.message.id
+                except AttributeError:
+                    return True
+
             if isinstance(self.text_channel, disnake.Thread):
-                check = (lambda m: m.id != self.last_message_id and not not m.pinned and (
+                check = (lambda m: m.id != self.last_message_id and not not m.pinned and check_current_message(m) and (
                             not m.is_system() or m.type != disnake.MessageType.channel_name_change))
             else:
-                check = (lambda m: m.id != self.last_message_id and not m.pinned)
+                check = (lambda m: m.id != self.last_message_id and not m.pinned and check_current_message())
 
             try:
                 await self.text_channel.purge(check=check)
@@ -2601,12 +2607,20 @@ class LavalinkPlayer(wavelink.Player):
 
             await self.destroy_message()
 
-            if not self.static:
+            if not self.message:
+
                 try:
                     self.message = await self.text_channel.send(allowed_mentions=self.allowed_mentions,
                                                                 **data)
                 except:
                     traceback.print_exc()
+                else:
+                    if self.static:
+                        await self.channel_cleanup()
+                        data = await self.bot.get_data(self.guild_id, db_name=DBModel.guilds)
+                        data['player_controller']['channel'] = str(self.text_channel.id)
+                        data['player_controller']['message_id'] = str(self.message.id)
+                        await self.bot.update_data(self.guild_id, data, db_name=DBModel.guilds)
 
             self.start_message_updater_task()
 
