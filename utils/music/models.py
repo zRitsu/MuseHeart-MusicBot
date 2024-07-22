@@ -1228,7 +1228,7 @@ class LavalinkPlayer(wavelink.Player):
                 check = (lambda m: m.id != self.last_message_id and not not m.pinned and check_current_message(m) and (
                             not m.is_system() or m.type != disnake.MessageType.channel_name_change))
             else:
-                check = (lambda m: m.id != self.last_message_id and not m.pinned and check_current_message())
+                check = (lambda m: m.id != self.last_message_id and not m.pinned and check_current_message(m))
 
             try:
                 await self.text_channel.purge(check=check)
