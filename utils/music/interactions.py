@@ -159,6 +159,13 @@ class QueueInteraction(disnake.ui.View):
         self.add_item(update_q)
 
     async def move_callback(self, inter: disnake.MessageInteraction):
+
+        try:
+            await check_cmd(self.bot.get_slash_command("move"), inter)
+        except Exception as e:
+            inter.bot.dispatch("interaction_player_error", inter, e)
+            return
+
         await inter.response.send_modal(
             ViewModal(
                 view=self, title="Mover música selecionada", custom_id="queue_move_modal",
@@ -183,7 +190,10 @@ class QueueInteraction(disnake.ui.View):
                     await inter.send("Você deve usar um número válido...", ephemeral=True)
                     return
 
-                await check_cmd(self.bot.get_slash_command("move"), inter)
+                try:
+                    await check_cmd(self.bot.get_slash_command("move"), inter)
+                except AttributeError:
+                    pass
 
                 player: LavalinkPlayer = self.bot.music.players[self.user.guild.id]
 
