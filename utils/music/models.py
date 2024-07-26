@@ -2809,9 +2809,9 @@ class LavalinkPlayer(wavelink.Player):
                             components=song_request_buttons
                         )
 
-                    else:
-
+                    elif not self.controller_mode:
                         await self.destroy_message()
+
                 except Exception:
                     traceback.print_exc()
 
