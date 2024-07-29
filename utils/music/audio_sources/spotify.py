@@ -12,6 +12,7 @@ from urllib.parse import quote
 
 import aiofiles
 from aiohttp import ClientSession
+from unidecode import unidecode
 
 from utils.music.converters import fix_characters, URL_REG
 from utils.music.errors import GenericError
@@ -98,7 +99,7 @@ class SpotifyClient:
 
     async def track_search(self, query: str):
         return await self.request(path='search', params = {
-        'q': query, 'type': 'track', 'limit': 10
+        'q': unidecode(query), 'type': 'track', 'limit': 10
         })
 
     async def get_access_token(self):
