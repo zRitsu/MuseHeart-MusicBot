@@ -586,6 +586,13 @@ class PlayerSession(commands.Cog):
 
             player.queue.extend(failed_tracks)
 
+            if player.controller_mode is False:
+                try:
+                    await player.message.delete()
+                    player.message = None
+                except:
+                    pass
+
             if started:
                 player.set_command_log(
                     text="Os dados do player foram restaurados com sucessos!",
