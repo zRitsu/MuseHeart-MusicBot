@@ -4,7 +4,6 @@ import asyncio
 import datetime
 import traceback
 from typing import TYPE_CHECKING, Optional
-from urllib.parse import quote
 
 import disnake
 from aiohttp import ClientSession
@@ -470,7 +469,7 @@ class LastFmCog(commands.Cog):
 
                     if (fmdata := self.bot.last_fm.cache.get(track_query)) is None:
 
-                        result = await player.bot.spotify.get_tracks(query=f"{track.author} - {track.title}",
+                        result = await player.bot.spotify.get_tracks(query=f"{track.author} - {track.title}" if len(track.title) < 11 else track.title,
                                                                      requester=self.bot.user.id, bot=self.bot)
 
                         if not [t for t in exclude_tags if t.lower() in track.title]:
