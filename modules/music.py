@@ -19,7 +19,6 @@ import aiohttp
 import disnake
 from async_timeout import timeout
 from disnake.ext import commands
-from unidecode import unidecode
 
 import wavelink
 from utils.client import BotCore
@@ -6842,8 +6841,6 @@ class Music(commands.Cog):
                 else:
                     source = True
                     providers = n.search_providers
-
-                query = unidecode(query)
 
                 for search_provider in providers:
 
