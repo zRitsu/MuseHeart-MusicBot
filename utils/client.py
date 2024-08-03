@@ -793,6 +793,9 @@ class BotPool:
 
                 if not bot.bot_ready:
 
+                    if bot.session is None:
+                        bot.session = aiohttp.ClientSession()
+
                     if bot.initializing:
                         return
 
@@ -918,7 +921,7 @@ class BotCore(commands.AutoShardedBot):
         self.session: Optional[aiohttp.ClientError] = None
         self.pool: BotPool = kwargs.pop('pool')
         self.default_prefix = kwargs.pop("default_prefix", "!!")
-        self.session = aiohttp.ClientSession()
+        self.session: Optional[aiohttp.ClientSession] = None
         self.color = kwargs.pop("embed_color", None)
         self.identifier = kwargs.pop("identifier", "")
         self.appinfo: Optional[disnake.AppInfo] = None
