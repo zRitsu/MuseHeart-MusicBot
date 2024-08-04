@@ -67,7 +67,6 @@ class BotPool:
                                                                                   type=commands.BucketType.user)
 
     def __init__(self):
-        self.playlist_cache = {}
         self.user_prefix_cache = {}
         self.guild_prefix_cache = {}
         self.mongo_database: Optional[MongoDatabase] = None
@@ -316,17 +315,6 @@ class BotPool:
 
         for data in lavalink_servers.values():
             loop.create_task(self.check_node(data, loop=loop))
-
-    async def load_playlist_cache(self):
-
-        try:
-            async with aiofiles.open(f"./.playlist_cache.pkl", 'rb') as file:
-                data = pickle.loads(zlib.decompress(await file.read()))
-        except FileNotFoundError:
-            return
-
-        for url, track_data in data.items():
-            self.playlist_cache[url] = self.process_track_cls(track_data)
 
     def process_track_cls(self, data: list, playlists: dict = None):
 
@@ -880,8 +868,6 @@ class BotPool:
                 message += "Confira se o token foi configurado na ENV/ENVIRONMENT ou no arquivo .env"
 
                 print(message)
-
-        loop.create_task(self.load_playlist_cache())
 
         if start_local:
             loop.create_task(self.start_lavalink(loop=loop))

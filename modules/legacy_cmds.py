@@ -71,10 +71,6 @@ class Owner(commands.Cog):
     os_quote = "\"" if os.name == "nt" else "'"
     git_format = f"--pretty=format:{os_quote}%H*****%h*****%s*****%ct{os_quote}"
 
-    extra_files = [
-        "./playlist_cache.json",
-    ]
-
     additional_files = [
         "./lavalink.ini",
         "./application.yml",
@@ -741,10 +737,6 @@ class Owner(commands.Cog):
         for extra_dir in self.extra_dirs:
             for dir_path, dir_names, filenames in os.walk(extra_dir):
                 filelist += "\n" + "\n".join(os.path.join(dir_path, file) for file in filenames)
-
-        for file in self.extra_files:
-            if os.path.isfile(file):
-                filelist += "\n" + file
 
         for file in self.additional_files:
             if os.path.isfile(file):
