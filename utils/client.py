@@ -75,6 +75,7 @@ class BotPool:
         self.ws_client: Optional[WSClient] = None
         self.config = self.load_cfg()
         self.playlist_cache = TTLCache(maxsize=1000, ttl=86400)
+        self.playlist_cache = TTLCache(maxsize=self.config["PLAYLIST_CACHE_SIZE"], ttl=self.config["PLAYLIST_CACHE_TTL"])
         self.spotify: Optional[SpotifyClient] = None
         self.deezer = DeezerClient(self.playlist_cache)
         self.lavalink_instance: Optional[subprocess.Popen] = None
