@@ -22,6 +22,7 @@ import aiohttp
 import disnake
 import requests
 from async_timeout import timeout
+from cachetools import TTLCache
 from disnake.ext import commands
 from disnake.http import Route
 from dotenv import dotenv_values
@@ -72,10 +73,11 @@ class BotPool:
         self.mongo_database: Optional[MongoDatabase] = None
         self.local_database: Optional[LocalDatabase] = None
         self.ws_client: Optional[WSClient] = None
+        self.config = self.load_cfg()
+        self.playlist_cache = TTLCache(maxsize=1000, ttl=86400)
         self.spotify: Optional[SpotifyClient] = None
-        self.deezer = DeezerClient()
+        self.deezer = DeezerClient(self.playlist_cache)
         self.lavalink_instance: Optional[subprocess.Popen] = None
-        self.config = {}
         self.emoji_data = {}
         self.commit = ""
         self.remote_git_url = ""
@@ -367,7 +369,7 @@ class BotPool:
 
     def load_cfg(self):
 
-        self.config = load_config()
+        config = load_config()
 
         try:
             with open("emojis.json") as f:
@@ -377,8 +379,10 @@ class BotPool:
         except:
             traceback.print_exc()
 
-        if not self.config["DEFAULT_PREFIX"]:
-            self.config["DEFAULT_PREFIX"] = "!!"
+        if not config["DEFAULT_PREFIX"]:
+            config["DEFAULT_PREFIX"] = "!!"
+
+        return config
 
     def load_skins(self):
 
@@ -452,8 +456,6 @@ class BotPool:
         return skin
 
     def setup(self):
-
-        self.load_cfg()
 
         self.load_skins()
 

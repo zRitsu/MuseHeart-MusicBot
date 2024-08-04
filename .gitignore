@@ -165,7 +165,6 @@ application.yml
 /.tempjar/
 /emojis.json
 /.spotify_cache.json
-/.playlist_cache.pkl
 /guild_bots.json
 /modules_dev/
 /.tmp/

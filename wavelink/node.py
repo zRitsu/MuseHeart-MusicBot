@@ -26,6 +26,7 @@ import inspect
 import json
 import logging
 import os
+import re
 from typing import Any, Callable, Dict, Optional, Union, List
 from urllib.parse import quote
 
@@ -35,6 +36,10 @@ from .player import Player, Track, TrackPlaylist
 from .websocket import WebSocket
 
 __log__ = logging.getLogger(__name__)
+
+yt_playlist_regex = re.compile(r"[?&]list=([^&]+)")
+spotify_regex = re.compile("https://open.spotify.com?.+(album|playlist|artist)/([a-zA-Z0-9]+)")
+deezer_regex = re.compile(r"(https?://)?(www\.)?deezer\.com/(?P<countrycode>[a-zA-Z]{2}/)?(?P<type>album|playlist|artist|profile)/(?P<identifier>[0-9]+)")
 
 
 class Node:
@@ -296,99 +301,125 @@ class Node:
         """
         backoff = ExponentialBackoff(base=1)
 
-        base_uri = f'{self.rest_uri}/v4' if self.version == 4 else self.rest_uri
+        data = {}
 
-        for attempt in range(2):
+        if yt_id:=(yt_playlist_regex.search(query)):
+            cache_key = f"youtube:{yt_id}"
 
-            async with self.session.get(f"{base_uri}/loadtracks?identifier={quote(query)}", headers={'Authorization': self.password}) as resp:
+        elif sp_match:=spotify_regex.match(query):
+            url_type, url_id = sp_match.groups()
+            cache_key = f"spotify:{url_type}:{url_id}"
 
-                if resp.status != 200 and retry_on_failure:
-                    retry = backoff.delay()
+        elif dz_match:=deezer_regex.match(query):
+            url_type, url_id = dz_match.groups()[-2:]
+            cache_key = f"deezer:{url_type}:{url_id}"
 
-                    __log__.info(f'REST | {self.identifier} | Status code ({resp.status}) while retrieving tracks. '
-                                 f'Attempt {attempt} of 5, retrying in {retry} seconds.')
+        else:
+            cache_key = None
 
-                    await asyncio.sleep(retry)
-                    continue
+        if not (data:=self._client.bot.pool.playlist_cache.get(cache_key)):
 
-                elif not resp.status == 200 and not retry_on_failure:
-                    __log__.info(f'REST | {self.identifier} | Status code ({resp.status}) while retrieving tracks. Not retrying.')
-                    return
+            base_uri = f'{self.rest_uri}/v4' if self.version == 4 else self.rest_uri
+
+            for attempt in range(2):
+
+                async with self.session.get(f"{base_uri}/loadtracks?identifier={quote(query)}", headers={'Authorization': self.password}) as resp:
+
+                    if resp.status != 200 and retry_on_failure:
+                        retry = backoff.delay()
+
+                        __log__.info(f'REST | {self.identifier} | Status code ({resp.status}) while retrieving tracks. '
+                                     f'Attempt {attempt} of 5, retrying in {retry} seconds.')
+
+                        await asyncio.sleep(retry)
+                        continue
+
+                    elif not resp.status == 200 and not retry_on_failure:
+                        __log__.info(f'REST | {self.identifier} | Status code ({resp.status}) while retrieving tracks. Not retrying.')
+                        return
+
+                    try:
+                        data = await resp.json()
+                    except Exception as e:
+                        raise WavelinkException(f"{self.identifier}: Failed to parse json result. | Error: {repr(e)}")
+
+                    if isinstance(data, list):
+                        return data
+
+        loadtype = data.get('loadType')
+
+        try:
+            new_data = data.get('data')
+        except KeyError:
+            new_data = data
+
+        if not loadtype:
+            raise WavelinkException('There was an error while trying to load this track.')
+
+        if loadtype == 'NO_MATCHES':
+            __log__.info(f'REST | {self.identifier} | No tracks with query:: <{query}> found.')
+            return []
+
+        if loadtype in ('LOAD_FAILED', 'error'):
+
+            if self.version == 4:
+                new_data['exception'] = new_data
+
+            try:
+                error = f"There was an error of severity '{new_data['exception']['severity']}' while loading tracks.\n\n{new_data['exception']['message']}"
+            except KeyError:
+                error = f"There was an error of severity '{new_data['exception']['severity']}:\n{new_data['exception']['error']}"
+            e = TrackLoadError(error=error, node=self, data=new_data)
+            if not e.message:
+                e.message = new_data['exception']['error']
+            raise e
+
+        try:
+            tracks = new_data.get('tracks')
+        except AttributeError:
+            tracks = new_data
+
+        if loadtype == 'track':
+            tracks = [new_data]
+
+        if not tracks:
+            __log__.info(f'REST | {self.identifier} | No tracks with query:: <{query}> found.')
+            raise TrackNotFound(f"{self.identifier}: Track not found... | {query}")
+
+        encoded_name = "track" if self.version == 3 else "encoded"
+
+        if loadtype in ('PLAYLIST_LOADED', 'playlist'):
+
+            if cache_key:
+                self._client.bot.pool.playlist_cache[cache_key] = data
+
+            try:
+                new_data['playlistInfo'] = new_data.pop('info')
+            except KeyError:
+                pass
+
+            playlist_cls = kwargs.pop('playlist_cls', TrackPlaylist)
+            if query.startswith("https://music.youtube.com/"):
+                query = query.replace("https://www.youtube.com/", "https://music.youtube.com/")
 
                 try:
-                    data = await resp.json()
-                except Exception as e:
-                    raise WavelinkException(f"{self.identifier}: Failed to parse json result. | Error: {repr(e)}")
-
-                if isinstance(data, list):
-                    return data
-
-                loadtype = data.get('loadType')
-
-                try:
-                    data = data.pop('data')
+                    if new_data["playlistInfo"]["name"].startswith("Album - "):
+                        new_data["playlistInfo"]["name"] = new_data["playlistInfo"]["name"][8:]
+                        new_data["pluginInfo"]["type"] = "album"
+                        new_data["pluginInfo"]["albumName"] = new_data["playlistInfo"]["name"]
+                        new_data["pluginInfo"]["albumUrl"] = query
                 except KeyError:
                     pass
+            return playlist_cls(data=new_data, url=query, encoded_name=encoded_name, pluginInfo=new_data.pop("pluginInfo", {}),
+                                **kwargs)
 
-                if not loadtype:
-                    raise WavelinkException('There was an error while trying to load this track.')
+        track_cls = kwargs.pop('track_cls', Track)
 
-                if loadtype == 'NO_MATCHES':
-                    __log__.info(f'REST | {self.identifier} | No tracks with query:: <{query}> found.')
-                    return []
+        tracks = [
+            track_cls(id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo", {}), **kwargs) for
+            track in tracks]
 
-                if loadtype in ('LOAD_FAILED', 'error'):
-
-                    if self.version == 4:
-                        data['exception'] = data
-
-                    try:
-                        error = f"There was an error of severity '{data['exception']['severity']}' while loading tracks.\n\n{data['exception']['message']}"
-                    except KeyError:
-                        error = f"There was an error of severity '{data['exception']['severity']}:\n{data['exception']['error']}"
-                    e = TrackLoadError(error=error, node=self, data=data)
-                    if not e.message:
-                        e.message = data['exception']['error']
-                    raise e
-
-                try:
-                    tracks = data.get('tracks')
-                except AttributeError:
-                    tracks = data
-
-                if loadtype == 'track':
-                    tracks = [data]
-
-                if not tracks:
-                    __log__.info(f'REST | {self.identifier} | No tracks with query:: <{query}> found.')
-                    raise TrackNotFound(f"{self.identifier}: Track not found... | {query}")
-
-                encoded_name = "track" if self.version == 3 else "encoded"
-
-                if loadtype in ('PLAYLIST_LOADED', 'playlist'):
-                    try:
-                        data['playlistInfo'] = data.pop('info')
-                    except KeyError:
-                        pass
-                    playlist_cls = kwargs.pop('playlist_cls', TrackPlaylist)
-                    if query.startswith("https://music.youtube.com/"):
-                        query = query.replace("https://www.youtube.com/", "https://music.youtube.com/")
-
-                        try:
-                            if data["playlistInfo"]["name"].startswith("Album - "):
-                                data["playlistInfo"]["name"] = data["playlistInfo"]["name"][8:]
-                                data["pluginInfo"]["type"] = "album"
-                                data["pluginInfo"]["albumName"] = data["playlistInfo"]["name"]
-                                data["pluginInfo"]["albumUrl"] = query
-                        except KeyError:
-                            pass
-                    return playlist_cls(data=data, url=query, encoded_name=encoded_name, pluginInfo=data.pop("pluginInfo", {}), **kwargs)
-
-                track_cls = kwargs.pop('track_cls', Track)
-
-                tracks = [track_cls(id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo", {}), **kwargs) for track in tracks]
-
-                return tracks
+        return tracks
 
         __log__.warning(f'REST | {self.identifier} | Failure to load tracks after 5 attempts.')
 

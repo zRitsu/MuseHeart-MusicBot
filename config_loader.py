@@ -67,6 +67,8 @@ DEFAULT_CONFIG = {
     "QUEUE_MAX_ENTRIES": 0,
     "ENABLE_DEFER_TYPING": True,
     "VOICE_CHANNEL_LATENCY_RECONNECT": 200,
+    "PLAYLIST_CACHE_SIZE": 500,
+    "PLAYLIST_CACHE_TTL": 21600,
 
     ##############################################
     ### Sistema de música - Suporte ao spotify ###
@@ -204,6 +206,8 @@ def load_config():
         "VOICE_CHANNEL_LATENCY_RECONNECT",
         "DBCACHE_SIZE",
         "DBCACHE_TTL",
+        "PLAYLIST_CACHE_SIZE",
+        "PLAYLIST_CACHE_TTL",
     ]:
         try:
             new_value = int(CONFIG[i])

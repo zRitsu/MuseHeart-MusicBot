@@ -273,7 +273,11 @@ class SpotifyClient:
 
         if url_type == "album":
 
-            result = await self.get_album_info(url_id)
+            cache_key = f"partial:spotify:{url_type}:{url_id}"
+
+            if not (result := bot.pool.playlist_cache.get(cache_key)):
+                result = await self.get_album_info(url_id)
+                bot.pool.playlist_cache[cache_key] = result
 
             try:
                 thumb = result["tracks"][0]["album"]["images"][0]["url"]
@@ -330,7 +334,11 @@ class SpotifyClient:
 
         elif url_type == "artist":
 
-            result = await self.get_artist_top(url_id)
+            cache_key = f"partial:spotify:{url_type}:{url_id}"
+
+            if not (result := bot.pool.playlist_cache.get(cache_key)):
+                result = await self.get_artist_top(url_id)
+                bot.pool.playlist_cache[cache_key] = result
 
             try:
                 data["playlistInfo"]["name"] = "As mais tocadas de: " + \
@@ -340,7 +348,13 @@ class SpotifyClient:
             tracks_data = result["tracks"]
 
         elif url_type == "playlist":
-            result = await bot.spotify.get_playlist_info(url_id)
+
+            cache_key = f"partial:spotify:{url_type}:{url_id}"
+
+            if not (result := bot.pool.playlist_cache.get(cache_key)):
+                result = await self.get_playlist_info(url_id)
+                bot.pool.playlist_cache[cache_key] = result
+
             data["playlistInfo"]["name"] = result["name"]
             data["playlistInfo"]["thumb"] = result["images"][0]["url"]
 
