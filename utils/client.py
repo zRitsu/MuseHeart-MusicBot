@@ -27,6 +27,7 @@ from disnake.http import Route
 from dotenv import dotenv_values
 from user_agent import generate_user_agent
 
+import wavelink
 from config_loader import load_config
 from utils.db import MongoDatabase, LocalDatabase, get_prefix, DBModel, global_db_models
 from utils.music.audio_sources.deezer import DeezerClient
@@ -796,6 +797,9 @@ class BotPool:
                     if bot.session is None:
                         bot.session = aiohttp.ClientSession()
 
+                    if bot.music is None:
+                        bot.music = music_mode(bot)
+
                     if bot.initializing:
                         return
 
@@ -838,6 +842,8 @@ class BotPool:
 
         load_modules_log = True
 
+        loop = asyncio.get_event_loop()
+
         for k, v in all_tokens.items():
             load_bot(k, v, load_modules_log=load_modules_log)
             load_modules_log = False
@@ -874,8 +880,6 @@ class BotPool:
                 message += "Confira se o token foi configurado na ENV/ENVIRONMENT ou no arquivo .env"
 
                 print(message)
-
-        loop = asyncio.get_event_loop()
 
         loop.create_task(self.load_playlist_cache())
 
@@ -933,7 +937,7 @@ class BotCore(commands.AutoShardedBot):
         self.dm_cooldown = commands.CooldownMapping.from_cooldown(rate=2, per=30, type=commands.BucketType.member)
         self.number = kwargs.pop("number", 0)
         super().__init__(*args, **kwargs)
-        self.music = music_mode(self)
+        self.music: Optional[wavelink.Client] = None
         self.interaction_id: Optional[int] = None
         self.wavelink_node_reconnect_tasks = {}
 
