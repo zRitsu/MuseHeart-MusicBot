@@ -301,10 +301,8 @@ class Node:
         """
         backoff = ExponentialBackoff(base=1)
 
-        data = {}
-
         if yt_id:=(yt_playlist_regex.search(query)):
-            cache_key = f"youtube:{yt_id}"
+            cache_key = f"youtube:{yt_id.group(1)}"
 
         elif sp_match:=spotify_regex.match(query):
             url_type, url_id = sp_match.groups()
