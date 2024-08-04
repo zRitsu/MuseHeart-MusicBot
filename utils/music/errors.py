@@ -172,10 +172,8 @@ def parse_error(
         mention_author = True
 
         components = [
-            disnake.ui.Button(label="Abrir o gerenciador de favoritos",
+            disnake.ui.Button(label="Abrir o gerenciador de favoritos e integrações",
                               custom_id="musicplayer_fav_manager", emoji="⭐"),
-            disnake.ui.Button(label="Abrir o gerenciador de integrações",
-                              custom_id="musicplayer_integration_manager", emoji="💠")
         ]
 
     elif isinstance(error, commands.MaxConcurrencyReached):

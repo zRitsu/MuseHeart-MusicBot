@@ -164,7 +164,6 @@ class PlayerControls:
     miniqueue = "musicplayer_miniqueue"
     song_request_thread = "musicplayer_song_request_thread"
     fav_manager = "musicplayer_fav_manager"
-    integration_manager = "musicplayer_integration_manager"
     autoplay = "musicplayer_autoplay"
     add_favorite = "musicplayer_add_favorite"
     set_voice_status = "musicplayer_set_voice_status"
