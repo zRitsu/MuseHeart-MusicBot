@@ -1175,9 +1175,12 @@ class Music(commands.Cog):
                     except:
                         pass
 
-                    result = await self.bot.spotify.get_user_playlists(user_id)
+                    cache_key = f"partial:spotify:{url_type}:{user_id}"
 
-                    info = {"entries": [{"title": t["name"], "url": t["external_urls"]["spotify"]} for t in result["items"]]}
+                    if not (info := self.bot.pool.integration_cache.get(cache_key)):
+                        result = await self.bot.spotify.get_user_playlists(user_id)
+                        info = {"entries": [{"title": t["name"], "url": t["external_urls"]["spotify"]} for t in result["items"]]}
+                        self.bot.pool.integration_cache[cache_key] = info
 
                 elif (matches := deezer_regex.match(query)):
 
@@ -1191,9 +1194,12 @@ class Music(commands.Cog):
                     except:
                         pass
 
-                    result = await bot.deezer.get_user_playlists(user_id)
+                    cache_key = f"partial:deezer:{url_type}:{user_id}"
 
-                    info = {"entries": [{"title": t['title'], "url": t['link']} for t in result]}
+                    if not (info := self.bot.pool.integration_cache.get(cache_key)):
+                        result = await bot.deezer.get_user_playlists(user_id)
+                        info = {"entries": [{"title": t['title'], "url": t['link']} for t in result]}
+                        self.bot.pool.integration_cache[cache_key] = info
 
                 elif not self.bot.config["USE_YTDL"]:
                     raise GenericError("**Não há suporte a esse tipo de requisição no momento...**")
@@ -1207,7 +1213,9 @@ class Music(commands.Cog):
                     except:
                         pass
 
-                    info = await loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(query, download=False))
+                    if not (info := self.bot.pool.integration_cache.get(query)):
+                        info = await loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(query,download=False))
+                        self.bot.pool.integration_cache[query] = info
 
                     try:
                         if not info["entries"]:
