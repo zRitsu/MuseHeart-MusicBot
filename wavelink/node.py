@@ -40,6 +40,7 @@ __log__ = logging.getLogger(__name__)
 yt_playlist_regex = re.compile(r"[?&]list=([^&]+)")
 spotify_regex = re.compile("https://open.spotify.com?.+(album|playlist|artist)/([a-zA-Z0-9]+)")
 deezer_regex = re.compile(r"(https?://)?(www\.)?deezer\.com/(?P<countrycode>[a-zA-Z]{2}/)?(?P<type>album|playlist|artist|profile)/(?P<identifier>[0-9]+)")
+soundcloud_regex = re.compile(r"https://soundcloud\.com/([^/]+)/sets/([^/]+)")
 
 
 class Node:
@@ -311,6 +312,10 @@ class Node:
         elif dz_match:=deezer_regex.match(query):
             url_type, url_id = dz_match.groups()[-2:]
             cache_key = f"deezer:{url_type}:{url_id}"
+
+        elif sc_match:=soundcloud_regex.match(query):
+            user_name, playlist_id = sc_match.groups()
+            cache_key = f"soundcloud:{user_name}:{playlist_id}"
 
         else:
             cache_key = None
