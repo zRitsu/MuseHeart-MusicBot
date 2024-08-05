@@ -74,7 +74,7 @@ class BotPool:
         self.local_database: Optional[LocalDatabase] = None
         self.ws_client: Optional[WSClient] = None
         self.config = self.load_cfg()
-        self.playlist_cache = TTLCache(maxsize=self.config["PLAYLIST_CACHE_SIZE"], ttl=self.config["PLAYLIST_CACHE_TTL"])
+        self.playlist_cache: TTLCache = self.load_playlist_cache()
         self.integration_cache = TTLCache(maxsize=500, ttl=7200)
         self.spotify: Optional[SpotifyClient] = None
         self.deezer = DeezerClient(self.playlist_cache)
@@ -98,9 +98,23 @@ class BotPool:
         self.default_static_skin = self.config.get("DEFAULT_STATIC_SKIN", "default")
         self.default_controllerless_skin = self.config.get("DEFAULT_CONTROLLERLESS_SKIN", "default")
         self.default_idling_skin = self.config.get("DEFAULT_IDLING_SKIN", "default")
+        self.playlist_cache_updater_task: Optional[asyncio.Task] = None
 
     def reset_useragent(self):
         self.current_useragent = generate_user_agent()
+
+    def load_playlist_cache(self):
+
+        if os.path.exists("./.local_database/playlist_cache.pkl"):
+            with open("./.local_database/playlist_cache.pkl", 'rb') as f:
+                return pickle.load(f)
+
+        return TTLCache(maxsize=self.config["PLAYLIST_CACHE_SIZE"], ttl=self.config["PLAYLIST_CACHE_TTL"])
+
+    async def playlist_cache_updater(self):
+        await asyncio.sleep(300)
+        async with aiofiles.open("./.local_database/playlist_cache.pkl", 'wb') as f:
+            await f.write(pickle.dumps(self.playlist_cache))
 
     async def connect_lavalink_queue_task(self, identifier: str):
 
@@ -882,6 +896,8 @@ class BotPool:
 
         if self.config["RUN_RPC_SERVER"]:
 
+            self.playlist_cache_updater_task = loop.create_task(self.playlist_cache_updater())
+
             if not message:
 
                 for bot in self.get_all_bots():
@@ -899,7 +915,10 @@ class BotPool:
 
         else:
 
+            self.playlist_cache_updater_task = loop.create_task(self.playlist_cache_updater())
+
             loop.create_task(self.connect_rpc_ws())
+
             try:
                 loop.run_until_complete(
                     self.run_bots(self.get_all_bots())
