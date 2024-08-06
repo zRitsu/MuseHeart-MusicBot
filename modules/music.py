@@ -5539,6 +5539,12 @@ class Music(commands.Cog):
                 elif control == PlayerControls.skip:
                     cmd_kwargs = {"query": None, "play_only": "no"}
 
+                elif control in (PlayerControls.back, PlayerControls.readd) and not player.current and not player.controller_mode:
+                    try:
+                        await player.message.delete()
+                    except:
+                        pass
+
             if not cmd:
                 cmd = self.bot.get_slash_command(control[12:])
 
