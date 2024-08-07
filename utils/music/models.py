@@ -1799,9 +1799,13 @@ class LavalinkPlayer(wavelink.Player):
 
         try:
             self.idle_task.cancel()
-            self.idle_task = None
         except:
             pass
+
+        if not self.controller_mode and self.idle_task:
+            await self.message.delete()
+
+        self.idle_task = None
 
         try:
             track = self.queue.popleft()
