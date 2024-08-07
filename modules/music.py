@@ -6887,10 +6887,14 @@ class Music(commands.Cog):
                 except Exception:
                     traceback.print_exc()
 
-            if member.guild.voice_client and after.channel:
+            try:
+                vc = member.guild.me.voice.channel
+            except AttributeError:
+                pass
+            else:
                 # tempfix para channel do voice_client não ser setado ao mover bot do canal.
-                player.guild.voice_client.channel = after.channel
-                player._last_channel = after.channel
+                player.guild.voice_client.channel = vc
+                player._last_channel = vc
                 player.update = True
 
         try:
