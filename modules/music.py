@@ -2897,7 +2897,12 @@ class Music(commands.Cog):
 
         ephemeral = (player.guild.id != inter.guild_id and not await player.bot.is_owner(inter.author)) or await self.is_request_channel(inter, data=guild_data)
 
-        txt = f"### [{player.current.title}](<{player.current.uri or player.current.search_uri}>)\n"
+        url = player.current.uri or player.current.search_uri
+
+        if player.current.info["sourceName"] == "youtube":
+            url += f"&t={int(player.position/1000)}s"
+
+        txt = f"### [{player.current.title}](<{url}>)\n"
 
         footer_kw = {}
 
