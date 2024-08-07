@@ -380,6 +380,9 @@ class LastFmCog(commands.Cog):
         if player.last_channel != after.channel:
             return
 
+        if not player.guild.me.voice:
+            return
+
         try:
             if not player.current or member not in player.last_channel.members:
                 return
