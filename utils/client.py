@@ -105,15 +105,15 @@ class BotPool:
 
     def load_playlist_cache(self):
 
-        if os.path.exists("./.local_database/playlist_cache.pkl"):
-            with open("./.local_database/playlist_cache.pkl", 'rb') as f:
+        if os.path.exists("./local_database/playlist_cache.pkl"):
+            with open("./local_database/playlist_cache.pkl", 'rb') as f:
                 return pickle.load(f)
 
         return TTLCache(maxsize=self.config["PLAYLIST_CACHE_SIZE"], ttl=self.config["PLAYLIST_CACHE_TTL"])
 
     async def playlist_cache_updater(self):
         await asyncio.sleep(300)
-        async with aiofiles.open("./.local_database/playlist_cache.pkl", 'wb') as f:
+        async with aiofiles.open("./local_database/playlist_cache.pkl", 'wb') as f:
             await f.write(pickle.dumps(self.playlist_cache))
 
     async def connect_lavalink_queue_task(self, identifier: str):
