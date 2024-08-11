@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import asyncio
 import base64
 import json
 import os.path
@@ -37,6 +38,7 @@ class SpotifyClient:
         self.spotify_cache = {}
         self.disabled = False
         self.type = "api" if client_id and client_secret else "visitor"
+        self.token_refresh = False
 
         try:
             with open(spotify_cache_file) as f:
@@ -103,51 +105,64 @@ class SpotifyClient:
 
     async def get_access_token(self):
 
-        if not self.client_id or not self.client_secret:
-            access_token_url = "https://open.spotify.com/get_access_token?reason=transport&productType=embed"
-            async with ClientSession() as session:
-                async with session.get(access_token_url) as response:
-                    data = await response.json()
-                    self.spotify_cache = {
-                        "access_token": data["accessToken"],
-                        "expires_in": data["accessTokenExpirationTimestampMs"],
-                        "expires_at": time.time() + data["accessTokenExpirationTimestampMs"],
-                        "type": "visitor",
-                    }
-                    self.type = "visitor"
-                    print("🎶 - Access token do spotify obtido com sucesso do tipo: visitante.")
+        if self.token_refresh:
+            while self.token_refresh:
+                await asyncio.sleep(1)
+            return
 
-        else:
-            token_url = 'https://accounts.spotify.com/api/token'
+        self.token_refresh = True
 
-            headers = {
-                'Authorization': 'Basic ' + base64.b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
-            }
+        try:
 
-            data = {
-                'grant_type': 'client_credentials'
-            }
+            if not self.client_id or not self.client_secret:
+                access_token_url = "https://open.spotify.com/get_access_token?reason=transport&productType=embed"
+                async with ClientSession() as session:
+                    async with session.get(access_token_url) as response:
+                        data = await response.json()
+                        self.spotify_cache = {
+                            "access_token": data["accessToken"],
+                            "expires_in": data["accessTokenExpirationTimestampMs"],
+                            "expires_at": time.time() + data["accessTokenExpirationTimestampMs"],
+                            "type": "visitor",
+                        }
+                        self.type = "visitor"
+                        print("🎶 - Access token do spotify obtido com sucesso do tipo: visitante.")
 
-            async with ClientSession() as session:
-                async with session.post(token_url, headers=headers, data=data) as response:
-                    data = await response.json()
+            else:
+                token_url = 'https://accounts.spotify.com/api/token'
 
-                if data.get("error"):
-                    print(f"⚠️ - Spotify: Ocorreu um erro ao obter token: {data['error_description']}")
-                    self.client_id = None
-                    self.client_secret = None
-                    await self.get_access_token()
-                    return
+                headers = {
+                    'Authorization': 'Basic ' + base64.b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
+                }
 
-                self.spotify_cache = data
+                data = {
+                    'grant_type': 'client_credentials'
+                }
 
-                self.type = "api"
+                async with ClientSession() as session:
+                    async with session.post(token_url, headers=headers, data=data) as response:
+                        data = await response.json()
 
-                self.spotify_cache["tyoe"] = "api"
+                    if data.get("error"):
+                        print(f"⚠️ - Spotify: Ocorreu um erro ao obter token: {data['error_description']}")
+                        self.client_id = None
+                        self.client_secret = None
+                        await self.get_access_token()
+                        return
 
-                self.spotify_cache["expires_at"] = time.time() + self.spotify_cache["expires_in"]
+                    self.spotify_cache = data
 
-                print("🎶 - Access token do spotify obtido com sucesso via API Oficial.")
+                    self.type = "api"
+
+                    self.spotify_cache["tyoe"] = "api"
+
+                    self.spotify_cache["expires_at"] = time.time() + self.spotify_cache["expires_in"]
+
+                    print("🎶 - Access token do spotify obtido com sucesso via API Oficial.")
+
+        except Exception as e:
+            self.token_refresh = False
+            raise e
 
         async with aiofiles.open(spotify_cache_file, "w") as f:
             await f.write(json.dumps(self.spotify_cache))
