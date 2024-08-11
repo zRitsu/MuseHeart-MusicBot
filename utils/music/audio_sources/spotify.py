@@ -12,6 +12,7 @@ from typing import Optional, TYPE_CHECKING, Union
 from urllib.parse import quote
 
 import aiofiles
+import disnake
 from aiohttp import ClientSession
 
 from utils.music.converters import fix_characters, URL_REG
@@ -170,7 +171,7 @@ class SpotifyClient:
             await f.write(json.dumps(self.spotify_cache))
 
     async def get_valid_access_token(self):
-        if time.time() >= self.spotify_cache["expires_at"] or self.spotify_cache.get("type") != self.type:
+        if disnake.utils.utcnow().timestamp() >= self.spotify_cache["expires_at"] or self.spotify_cache.get("type") != self.type:
             await self.get_access_token()
         return self.spotify_cache["access_token"]
 
