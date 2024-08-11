@@ -580,9 +580,9 @@ class BotPool:
             self.mongo_database = MongoDatabase(mongo_key, timeout=self.config["MONGO_TIMEOUT"],
                                                 cache_maxsize=self.config["DBCACHE_SIZE"],
                                                 cache_ttl=self.config["DBCACHE_TTL"])
-            print("Database em uso: MongoDB")
+            print("🍃 - Database em uso: MongoDB")
         else:
-            print("Database em uso: TinyMongo | Nota: Os arquivos da database serão salvos localmente na pasta: local_database")
+            print("🎲 - Database em uso: TinyMongo | Nota: Os arquivos da database serão salvos localmente na pasta: local_database")
 
         self.local_database = LocalDatabase(cache_maxsize=self.config["DBCACHE_SIZE"],
                                             cache_ttl=self.config["DBCACHE_TTL"])
@@ -598,7 +598,7 @@ class BotPool:
 
         try:
             self.commit = check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
-            print(f"Commit ver: {self.commit}\n{'-' * 30}")
+            print(f"📥 - Commit ver: {self.commit}")
         except:
             self.commit = None
 
@@ -1376,30 +1376,26 @@ class BotCore(commands.AutoShardedBot):
                     try:
                         self.reload_extension(module_filename)
                         if not self.bot_ready and load_modules_log:
-                            print(f"{'=' * 48}\n🟦 - {bot_name} - {filename}.py Recarregado.")
+                            print(f"🟦 - {bot_name} - {filename}.py Recarregado.")
                         load_status["reloaded"].append(f"{filename}.py")
                     except (commands.ExtensionAlreadyLoaded, commands.ExtensionNotLoaded):
                         try:
                             self.load_extension(module_filename)
                             if not self.bot_ready and load_modules_log:
-                                print(f"{'=' * 48}\n🟩 - {bot_name} - {filename}.py Carregado.")
+                                print(f"🟩 - {bot_name} - {filename}.py Carregado.")
                             load_status["loaded"].append(f"{filename}.py")
                         except Exception as e:
-                            print(f"{'=' * 48}\n❌- {bot_name} - Falha ao carregar/recarregar o módulo: {filename}\n")
+                            print(f"❌- {bot_name} - Falha ao carregar/recarregar o módulo: {filename}")
                             if not self.bot_ready:
                                 raise e
                             load_status["failed"].append(f"{filename}.py")
                             traceback.print_exc()
                     except Exception as e:
-                        print(f"{'=' * 48}\n\❌ - {bot_name} - Falha ao carregar/recarregar o módulo: {filename}")
+                        print(f"❌ - {bot_name} - Falha ao carregar/recarregar o módulo: {filename}")
                         if not self.bot_ready:
                             raise e
                         load_status["failed"].append(f"{filename}.py")
                         traceback.print_exc()
-
-
-        if not self.bot_ready:
-            print(f"{'=' * 48}")
 
         if not self.config["ENABLE_DISCORD_URLS_PLAYBACK"]:
             self.remove_slash_command("play_music_file")
