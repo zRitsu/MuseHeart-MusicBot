@@ -296,6 +296,9 @@ class BotPool:
                             if r.status == 200:
                                 data["info"] = await r.json()
                                 data["info"]["check_version"] = 4
+                            elif r.status == 403:
+                                print(f"❌ - Lavalink Server [{data['identifier']}] - Senha incorreta!")
+                                return
                             elif r.status != 404:
                                 raise Exception(f"❌ - [{r.status}]: {await r.text()}"[:300])
                             else:
