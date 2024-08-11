@@ -1,6 +1,6 @@
-run = ["bash", "deploy_handlers/replit.sh"]
+run = "bash ./deploy_handlers/replit.sh"
 entrypoint = "README.MD"
-modules = ["python-3.10:v18-20230807-322e88b"]
+modules = ["python-3.10"]
 
 [nix]
 channel = "stable-23_05"
@@ -12,7 +12,7 @@ language = "python3"
 requiredFiles = [".replit", "replit.nix"]
 
 [deployment]
-run = ["bash", "deploy_handlers/replit.sh"]
+run = ["bash", "./deploy_handlers/replit.sh"]
 deploymentTarget = "cloudrun"
 
 [[ports]]
