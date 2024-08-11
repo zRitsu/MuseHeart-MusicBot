@@ -48,6 +48,8 @@ class LiteSkin:
         if player.current.playlist_name:
             embed.description += f"\n> -# 🎼 **┃ Playlist:** [`{player.current.playlist_name}`]({player.current.playlist_url})"
 
+        embed.set_thumbnail(player.current.thumb)
+
         data["embeds"].append(embed)
 
         if player.current_hint:
