@@ -171,7 +171,7 @@ class SpotifyClient:
             await f.write(json.dumps(self.spotify_cache))
 
     async def get_valid_access_token(self):
-        if disnake.utils.utcnow().timestamp() >= self.spotify_cache["expires_at"] or self.spotify_cache.get("type") != self.type:
+        if time.time() >= self.spotify_cache["expires_at"]:
             await self.get_access_token()
         return self.spotify_cache["access_token"]
 
