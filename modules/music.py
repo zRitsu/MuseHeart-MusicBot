@@ -1263,10 +1263,10 @@ class Music(commands.Cog):
                         ], timeout=30)
 
                     embed = disnake.Embed(
-                        description="**Escolha uma playlist abaixo:**\n"
-                                    f'Selecione uma opção em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para prosseguir.',
+                        description= f"### Playlists da integração [{info['title']}]({query}):\n"+ "\n".join(f'[`{i["title"]}`]({i["url"]})' for i in info['entries']) + "\n**Escolha uma playlist abaixo:**\n"
+                                    f'-# Selecione uma playlist em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para prosseguir.',
                         color=self.bot.get_color(guild.me)
-                    )
+                    ).set_thumbnail(music_source_image(platform))
 
                     kwargs = {}
 
