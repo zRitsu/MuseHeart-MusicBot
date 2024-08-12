@@ -614,7 +614,8 @@ class BotPool:
 
         self.spotify = SpotifyClient(
             client_id=self.config['SPOTIFY_CLIENT_ID'],
-            client_secret=self.config['SPOTIFY_CLIENT_SECRET']
+            client_secret=self.config['SPOTIFY_CLIENT_SECRET'],
+            playlist_extra_page_limit=self.config['SPOTIFY_PLAYLIST_EXTRA_PAGE_LIMIT']
         )
 
         if self.config["LASTFM_KEY"] and self.config["LASTFM_SECRET"]:

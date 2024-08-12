@@ -7,12 +7,12 @@ import json
 import os.path
 import re
 import time
+import traceback
 from tempfile import gettempdir
 from typing import Optional, TYPE_CHECKING, Union
 from urllib.parse import quote
 
 import aiofiles
-import disnake
 from aiohttp import ClientSession
 
 from utils.music.converters import fix_characters, URL_REG
@@ -31,7 +31,7 @@ spotify_cache_file = os.path.join(gettempdir(), ".spotify_cache.json")
 
 class SpotifyClient:
 
-    def __init__(self, client_id: Optional[str] = None, client_secret: Optional[str] = None):
+    def __init__(self, client_id: Optional[str] = None, client_secret: Optional[str] = None, playlist_extra_page_limit: int = 0):
 
         self.client_id = client_id
         self.client_secret = client_secret
@@ -40,6 +40,7 @@ class SpotifyClient:
         self.disabled = False
         self.type = "api" if client_id and client_secret else "visitor"
         self.token_refresh = False
+        self.playlist_extra_page_limit = playlist_extra_page_limit
 
         try:
             with open(spotify_cache_file) as f:
@@ -81,7 +82,29 @@ class SpotifyClient:
         return await self.request(path=f'artists/{artist_id}/top-tracks')
 
     async def get_playlist_info(self, playlist_id: str):
-        return await self.request(path=f"playlists/{playlist_id}")
+
+        result = await self.request(path=f"playlists/{playlist_id}")
+
+        if len(result["tracks"]["items"]) == 100 and self.playlist_extra_page_limit > 0:
+
+            offset = 101
+            page_count = 0
+
+            while True:
+                try:
+                    result_extra = await self.request(path=f"playlists/{playlist_id}/tracks?offset={offset}&limit=50")
+                except:
+                    traceback.print_exc()
+                    break
+                else:
+                    result["tracks"]["items"].extend(result_extra["items"])
+                    if result_extra["next"] and page_count <= self.playlist_extra_page_limit:
+                        offset += 50
+                        page_count += 1
+                        continue
+                    break
+
+        return result
 
     async def get_user_info(self, user_id: str):
         return await self.request(path=f"users/{user_id}")
@@ -114,7 +137,6 @@ class SpotifyClient:
         self.token_refresh = True
 
         try:
-
             if not self.client_id or not self.client_secret:
                 access_token_url = "https://open.spotify.com/get_access_token?reason=transport&productType=embed"
                 async with ClientSession() as session:
@@ -174,7 +196,6 @@ class SpotifyClient:
         if time.time() >= self.spotify_cache["expires_at"]:
             await self.get_access_token()
         return self.spotify_cache["access_token"]
-
 
     async def get_tracks(self, bot: BotCore, requester: int, query: str):
 

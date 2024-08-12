@@ -75,6 +75,7 @@ DEFAULT_CONFIG = {
     ##############################################
     "SPOTIFY_CLIENT_ID": '',
     "SPOTIFY_CLIENT_SECRET": '',
+    "SPOTIFY_PLAYLIST_EXTRA_PAGE_LIMIT": 0,
 
     ################################################
     ### Sistema de música - RPC (Rich Presence): ###
@@ -208,6 +209,7 @@ def load_config():
         "DBCACHE_TTL",
         "PLAYLIST_CACHE_SIZE",
         "PLAYLIST_CACHE_TTL",
+        "SPOTIFY_PLAYLIST_EXTRA_PAGE_LIMIT",
     ]:
         try:
             new_value = int(CONFIG[i])
