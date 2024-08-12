@@ -55,11 +55,11 @@ class DeezerClient:
     async def track_search(self, query):
         return await self.request(path="search", params={'q': query})
 
-    async def get_tracks(self, requester: int, url: str):
+    async def get_tracks(self, requester: int, url: str, search: bool = True):
 
         if not (matches := deezer_regex.match(url)):
 
-            if URL_REG.match(url):
+            if URL_REG.match(url) or not search:
                 return
 
             r = await self.track_search(query=url)

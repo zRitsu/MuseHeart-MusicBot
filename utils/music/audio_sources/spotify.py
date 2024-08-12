@@ -197,7 +197,7 @@ class SpotifyClient:
             await self.get_access_token()
         return self.spotify_cache["access_token"]
 
-    async def get_tracks(self, bot: BotCore, requester: int, query: str):
+    async def get_tracks(self, bot: BotCore, requester: int, query: str, search: bool = True):
 
         if spotify_link_regex.match(query):
             async with bot.session.get(query, allow_redirects=False) as r:
@@ -207,7 +207,7 @@ class SpotifyClient:
 
         if not (matches := spotify_regex.match(query)) and not self.disabled:
 
-            if URL_REG.match(query):
+            if URL_REG.match(query) or not search:
                 return
 
             r = await self.track_search(query=query)
