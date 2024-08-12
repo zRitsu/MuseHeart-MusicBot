@@ -73,13 +73,13 @@ class BotPool:
         self.mongo_database: Optional[MongoDatabase] = None
         self.local_database: Optional[LocalDatabase] = None
         self.ws_client: Optional[WSClient] = None
+        self.emoji_data = {}
         self.config = self.load_cfg()
         self.playlist_cache: TTLCache = self.load_playlist_cache()
         self.integration_cache = TTLCache(maxsize=500, ttl=7200)
         self.spotify: Optional[SpotifyClient] = None
         self.deezer = DeezerClient(self.playlist_cache)
         self.lavalink_instance: Optional[subprocess.Popen] = None
-        self.emoji_data = {}
         self.commit = ""
         self.remote_git_url = ""
         self.max_counter: int = 0
@@ -391,7 +391,7 @@ class BotPool:
         config = load_config()
 
         try:
-            with open("emojis.json") as f:
+            with open("./emojis.json") as f:
                 self.emoji_data = json.load(f)
         except FileNotFoundError:
             pass
