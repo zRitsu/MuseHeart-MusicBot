@@ -1260,11 +1260,11 @@ class Music(commands.Cog):
                         opts=[
                             disnake.SelectOption(label=e['title'][:90], value=f"entrie_select_{c}", description=platform,
                                                  emoji=emoji) for c, e in enumerate(info['entries'])
-                        ], timeout=75)
+                        ], timeout=120)
 
                     embed = disnake.Embed(
-                        description= f"### Playlists da integração [{info['title']}]({query}):\n"+ "\n".join(f'[`{i["title"]}`]({i["url"]})' for i in info['entries']) + "\n**Selecione uma playlist abaixo:**\n"
-                                    f'-# Essa solicitação será cancelada automaticamente <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=75)).timestamp())}:R> caso não seja selecionado uma opção abaixo.',
+                        description= f"### Playlists da integração: [{info['title']}]({query})\n\n"+ "\n".join(f'[`{i["title"]}`]({i["url"]})' for i in info['entries']) + "\n\n**Selecione uma playlist abaixo:**\n"
+                                    f'-# Essa solicitação será cancelada automaticamente <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=120)).timestamp())}:R> caso não seja selecionado uma opção abaixo.',
                         color=self.bot.get_color(guild.me)
                     ).set_thumbnail(music_source_image(platform))
 
