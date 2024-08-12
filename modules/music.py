@@ -1058,19 +1058,19 @@ class Music(commands.Cog):
                 )
 
                 if menu == "favs":
-                    embed.description = f'### ⭐ ⠂Seus favoritos:\n{embed.description}\n\n' \
+                    embed.description = f'### ⭐ ⠂Usar favorito:\n{embed.description}\n\n' \
                                         f'**Selecione um favorito abaixo:**'
 
                 elif menu == "integrations":
-                    embed.description = f'### 💠 ⠂Suas integrações:\n{embed.description}\n\n' \
+                    embed.description = f'### 💠 ⠂Usar uma integração:\n{embed.description}\n\n' \
                                         f'**Selecione uma integração abaixo:**'
 
                 elif menu == "guild_favs":
-                    embed.description = f'### 📌 ⠂Favoritos do servidor:\n{embed.description}\n\n' \
+                    embed.description = f'### 📌 ⠂Usar favorito do servidor:\n{embed.description}\n\n' \
                                         f'**Selecione um favorito abaixo:**'
 
                 elif menu == "latest":
-                    embed.description = f'### 📑 ⠂Suas músicas/playlists recentes:\n{embed.description}\n\n' \
+                    embed.description = f'### 📑 ⠂Tocar música/playlist recente:\n{embed.description}\n\n' \
                                         f'**Selecione um item abaixo:**'
 
                 embed.description += f'\n-# Nota: Essa solicitação será cancelada automaticamente <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=75)).timestamp())}:R> caso não seja selecionado uma opção abaixo.'
@@ -1123,7 +1123,8 @@ class Music(commands.Cog):
 
                 if not select_interaction or view.selected is False:
 
-                    embed = disnake.Embed(description="### Tempo de seleção esgotado!" if view.selected is not False else "### Cancelado pelo usuário.", color=self.bot.get_color(guild.me))
+                    embed.description = "\n".join(embed.description.split("\n")[:-3])
+                    embed.set_footer(text="⚠️ Tempo esgotado!" if not view.selected is False else "⚠️ Cancelado pelo usuário.")
 
                     try:
                         await msg.edit(embed=embed, components=song_request_buttons)
@@ -1135,13 +1136,9 @@ class Music(commands.Cog):
                     return
 
                 if select_interaction.data.values[0] == "cancel":
-                    await msg.edit(
-                        embed=disnake.Embed(
-                            description="**Seleção cancelada!**",
-                            color=self.bot.get_color(guild.me)
-                        ),
-                        components=None
-                    )
+                    embed.description = "\n".join(embed.description.split("\n")[:-3])
+                    embed.set_footer(text="⚠️ Seleção cancelada!")
+                    await msg.edit(embed=embed, components=None)
                     return
 
                 try:
@@ -1263,7 +1260,7 @@ class Music(commands.Cog):
                         ], timeout=120)
 
                     embed = disnake.Embed(
-                        description= f"### Playlists da integração: [{info['title']}]({query})\n\n"+ "\n".join(f'[`{i["title"]}`]({i["url"]})' for i in info['entries']) + "\n\n**Selecione uma playlist abaixo:**\n"
+                        description= f"### Usar playlist da integração: [{info['title']}]({query})\n\n"+ "\n".join(f'[`{i["title"]}`]({i["url"]})' for i in info['entries']) + "\n\n**Selecione uma playlist abaixo:**\n"
                                     f'-# Essa solicitação será cancelada automaticamente <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=120)).timestamp())}:R> caso não seja selecionado uma opção abaixo.',
                         color=self.bot.get_color(guild.me)
                     ).set_thumbnail(music_source_image(platform))
@@ -1293,11 +1290,11 @@ class Music(commands.Cog):
                         except:
                             func = view.inter.response.edit_message
 
+                        embed.description = "\n".join(embed.description.split("\n")[:-3])
+                        embed.set_footer(text="⚠️ Tempo esgotado!" if not view.selected is False else "⚠️ Cancelado pelo usuário.")
+
                         try:
-                            await func(embed=disnake.Embed(color=self.bot.get_color(guild.me),
-                                description="**Tempo esgotado!**" if not view.selected is False else "### Cancelado pelo usuário."),
-                                components=song_request_buttons
-                            )
+                            await func(embed=embed,components=song_request_buttons)
                         except:
                             traceback.print_exc()
                         return
@@ -1395,19 +1392,11 @@ class Music(commands.Cog):
                         except AttributeError:
                             func = msg.edit
 
-                        mention = ""
+                        embed.description = "\n".join(embed.description.split("\n")[:-3])
+                        embed.set_footer(text="⚠️ Tempo esgotado!" if not view.selected is False else "⚠️ Cancelado pelo usuário.")
 
                         try:
-                            if inter.message.author.bot:
-                                mention = f"{inter.author.mention}, "
-                        except AttributeError:
-                            pass
-
-                        try:
-                            await func(
-                                content=f"{mention}{'operação cancelada' if view.selected is not False else 'tempo esgotado'}" if view.selected is not False else "Cancelado pelo usuário.",
-                                embed=None, components=song_request_buttons
-                            )
+                            await func(embed=embed, components=song_request_buttons)
                         except:
                             traceback.print_exc()
                         return
