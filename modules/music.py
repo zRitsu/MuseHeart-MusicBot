@@ -1073,7 +1073,7 @@ class Music(commands.Cog):
                     embed.description = f'### 📑 ⠂Suas músicas/playlists recentes:\n{embed.description}\n\n' \
                                         f'**Selecione um item abaixo:**'
 
-                embed.description += f'\n-# Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=75)).timestamp())}:R> para escolher!'
+                embed.description += f'\n-# Nota: Essa solicitação será cancelada automaticamente <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=75)).timestamp())}:R> caso não seja selecionado uma opção abaixo.'
 
                 try:
                     if bot.user.id != self.bot.user.id:
@@ -1260,11 +1260,11 @@ class Music(commands.Cog):
                         opts=[
                             disnake.SelectOption(label=e['title'][:90], value=f"entrie_select_{c}", description=platform,
                                                  emoji=emoji) for c, e in enumerate(info['entries'])
-                        ], timeout=30)
+                        ], timeout=75)
 
                     embed = disnake.Embed(
-                        description= f"### Playlists da integração [{info['title']}]({query}):\n"+ "\n".join(f'[`{i["title"]}`]({i["url"]})' for i in info['entries']) + "\n**Escolha uma playlist abaixo:**\n"
-                                    f'-# Selecione uma playlist em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para prosseguir.',
+                        description= f"### Playlists da integração [{info['title']}]({query}):\n"+ "\n".join(f'[`{i["title"]}`]({i["url"]})' for i in info['entries']) + "\n**Selecione uma playlist abaixo:**\n"
+                                    f'-# Essa solicitação será cancelada automaticamente <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=75)).timestamp())}:R> caso não seja selecionado uma opção abaixo.',
                         color=self.bot.get_color(guild.me)
                     ).set_thumbnail(music_source_image(platform))
 
