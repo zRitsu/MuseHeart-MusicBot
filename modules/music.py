@@ -37,7 +37,7 @@ from utils.music.interactions import VolumeInteraction, QueueInteraction, Select
 from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, PartialTrack
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, song_request_buttons, \
-    select_bot_pool, ProgressBar, update_inter
+    select_bot_pool, ProgressBar, update_inter, get_source_emoji_cfg
 
 
 class Music(commands.Cog):
@@ -907,8 +907,8 @@ class Music(commands.Cog):
 
             embed = disnake.Embed(
                 color=self.bot.get_color(guild.me),
-                description="**Selecione um item abaixo:**\n"
-                            f'Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para escolher!'
+                description="**Selecione uma opção abaixo:**\n"
+                            f'-# Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para escolher!'
             )
 
             try:
@@ -1002,17 +1002,21 @@ class Music(commands.Cog):
 
         fav_opts = []
 
+        menu = None
+
         if query.startswith(">> [💠 Integrações 💠] <<"):
             query = ""
+            menu = "integrations"
             for k, v in user_data["integration_links"].items():
                 emoji, platform = music_source_emoji_url(v)
-                fav_opts.append(disnake.SelectOption(label=k[5:], value=f"> itg: {k}", description=f"[💠 Integração 💠] -> {platform}", emoji=emoji))
+                fav_opts.append({"url": v, "option": disnake.SelectOption(label=k[6:], value=f"> itg: {k}", description=f"[💠 Integração 💠] -> {platform}", emoji=emoji)})
 
         elif query.startswith(">> [⭐ Favoritos ⭐] <<"):
             query = ""
+            menu = "favs"
             for k, v in user_data["fav_links"].items():
                 emoji, platform = music_source_emoji_url(v)
-                fav_opts.append(disnake.SelectOption(label=k, value=f"> fav: {k}", description=f"[⭐ Favorito ⭐] -> {platform}", emoji=emoji))
+                fav_opts.append({"url": v, "option": disnake.SelectOption(label=k, value=f"> fav: {k}", description=f"[⭐ Favorito ⭐] -> {platform}", emoji=emoji)})
 
         elif query.startswith(">> [📑 Músicas recentes 📑] <<"):
 
@@ -1021,9 +1025,11 @@ class Music(commands.Cog):
                                    "Elas vão aparecer a medida que for adicionando músicas via busca ou link.")
 
             query = ""
+            menu = "latest"
             for i, d in enumerate(user_data["last_tracks"]):
-                fav_opts.append(disnake.SelectOption(label=d["name"], value=f"> lst: {i}", description="[📑 Músicas recentes 📑]",
-                                                     emoji=music_source_emoji_url(d["url"])[0]))
+                fav_opts.append({"url": d["url"], "option": disnake.SelectOption(label=d["name"], value=f"> lst: {i}",
+                                                                                 description="[📑 Músicas recentes 📑]",
+                                                     emoji=music_source_emoji_url(d["url"])[0])})
 
         elif query.startswith(">> [📌 Favoritos do servidor 📌] <<"):
 
@@ -1032,23 +1038,42 @@ class Music(commands.Cog):
 
             if not guild_data["player_controller"]["fav_links"]:
                 raise GenericError("**O servidor não possui links fixos/favoritos.**")
+
+            menu = "guild_favs"
             
             for name, v in guild_data["player_controller"]["fav_links"].items():
-                fav_opts.append(disnake.SelectOption(label=name, value=f"> pin: {name}", description="[📌 Favorito do servidor 📌]", emoji=music_source_emoji_url(v['url'])[0]))
+                fav_opts.append({"url": v["url"], "option": disnake.SelectOption(label=name, value=f"> pin: {name}", description="[📌 Favorito do servidor 📌]", emoji=music_source_emoji_url(v['url'])[0])})
 
             is_pin = False
 
         if fav_opts:
 
             if len(fav_opts) == 1:
-                query = list(fav_opts)[0].value
+                query = list(fav_opts)[0]["option"].value
 
             else:
                 embed = disnake.Embed(
                     color=self.bot.get_color(guild.me),
-                    description="**Selecione um item abaixo:**\n"
-                                f'Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para escolher!'
+                    description="\n".join(f"{get_source_emoji_cfg(bot, i['url']) or ''} [`{i['option'].label}`]({i['url']})" for i in fav_opts)
                 )
+
+                if menu == "favs":
+                    embed.description = f'### ⭐ ⠂Seus favoritos:\n{embed.description}\n\n' \
+                                        f'**Selecione um favorito abaixo:**'
+
+                elif menu == "integrations":
+                    embed.description = f'### 💠 ⠂Suas integrações:\n{embed.description}\n\n' \
+                                        f'**Selecione uma integração abaixo:**'
+
+                elif menu == "guild_favs":
+                    embed.description = f'### 📌 ⠂Favoritos do servidor:\n{embed.description}\n\n' \
+                                        f'**Selecione um favorito abaixo:**'
+
+                elif menu == "latest":
+                    embed.description = f'### 📑 ⠂Suas músicas/playlists recentes:\n{embed.description}\n\n' \
+                                        f'**Selecione um item abaixo:**'
+
+                embed.description += f'\n-# Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=75)).timestamp())}:R> para escolher!'
 
                 try:
                     if bot.user.id != self.bot.user.id:
@@ -1068,7 +1093,7 @@ class Music(commands.Cog):
                     pass
 
                 view = SelectInteraction(
-                    user=inter.author,  timeout=45, opts=fav_opts
+                    user=inter.author,  timeout=75, opts=[i["option"] for i in fav_opts]
                 )
 
                 if isinstance(inter, disnake.MessageInteraction) and not inter.response.is_done():
