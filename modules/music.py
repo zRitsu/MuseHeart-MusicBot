@@ -1054,7 +1054,7 @@ class Music(commands.Cog):
             else:
                 embed = disnake.Embed(
                     color=self.bot.get_color(guild.me),
-                    description="\n".join(f"{get_source_emoji_cfg(bot, i['url']) or ''} [`{fix_characters(i['option'].label, 20)}`]({i['url']})" for i in fav_opts)
+                    description="\n".join(f"{get_source_emoji_cfg(bot, i['url']) or ''} [`{fix_characters(i['option'].label, 45)}`]({i['url']})" for i in fav_opts)
                 )
 
                 if menu == "favs":
