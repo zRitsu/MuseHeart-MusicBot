@@ -138,15 +138,15 @@ def percentage(part, whole):
     return int((part * whole) / 100.0)
 
 sources = {
-    "deezer": "https://i.ibb.co/Wz7kJYy/deezer.png",
-    "soundcloud": "https://i.ibb.co/CV6NB6w/soundcloud.png",
-    "spotify": "https://i.ibb.co/3SWMXj8/spotify.png",
-    "youtube": "https://i.ibb.co/LvX7dQL/yt.png",
-    "applemusic": "https://i.ibb.co/Dr4hbS5/applemusic.png",
+    "deezer": "https://iili.io/d1Kjip1.png",
+    "soundcloud": "https://iili.io/d1KjPkP.md.png",
+    "spotify": "https://iili.io/d1KVvlS.png",
+    "youtube": "https://iili.io/d1KjLTF.md.png",
+    "applemusic": "https://iili.io/d1Kj6YB.md.png",
     "twitch": "https://cdn3.iconfinder.com/data/icons/popular-services-brands-vol-2/512/twitch-512.png",
-    "jiosaavn": "https://i.ibb.co/Bfh8dW2/jiosaavn.png",
-    "tidal": "https://i.ibb.co/JkBbrXh/tidal.png",
-    "youtubemusic": "https://i.ibb.co/WtCC2pg/Youtube-music-icon.png",
+    "jiosaavn": "https://iili.io/d1KjUEx.png",
+    "tidal": "https://iili.io/d1KjgrQ.png",
+    "youtubemusic": "https://iili.io/d1Kj42V.png",
 }
 
 def music_source_image(sourcename):
