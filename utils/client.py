@@ -1092,6 +1092,7 @@ class BotCore(commands.AutoShardedBot):
                 cmd.ignore_extra = False
                 if cmd.extras.get("exclusive_cooldown"): continue
                 c = self.get_command(cmd.name)
+                if not c: continue
                 c.ignore_extra = False
                 if self.pool.config["ENABLE_COMMANDS_COOLDOWN"] is False:
                     c._buckets._cooldown = None
