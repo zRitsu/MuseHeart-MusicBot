@@ -2630,6 +2630,7 @@ class LavalinkPlayer(wavelink.Player):
 
     async def set_pause(self, pause: bool) -> None:
         await super().set_pause(pause)
+        self.bot.dispatch("player_pause" if pause else "player_resume", player=self)
 
     async def destroy_message(self):
 
