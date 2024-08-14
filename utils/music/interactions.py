@@ -1316,7 +1316,7 @@ class FavMenuView(disnake.ui.View):
                     opts.append(disnake.SelectOption(label=k[5:], emoji=emoji, description=platform, value=k))
                 integration_select = disnake.ui.Select(options=opts, min_values=1, max_values=1)
                 integration_select.options[0].default = True
-                self.current = integration_select.options[0].label
+                self.current = integration_select.options[0].value
                 integration_select.callback = self.select_callback
                 self.add_item(integration_select)
 
