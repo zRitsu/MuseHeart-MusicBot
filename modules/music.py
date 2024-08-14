@@ -1286,7 +1286,7 @@ class Music(commands.Cog):
                                                  emoji=emoji) for c, e in enumerate(info['entries'])
                         ], timeout=120)
 
-                    embed_title = f"do canal: {(info.get('title') or selected_title)[:12]}" if platform == "youtube" else f"do perfil de: {info.get('title') or selected_title}"
+                    embed_title = f"do canal: {(info.get('title') or selected_title)[:-12]}" if platform == "youtube" else f"do perfil de: {info.get('title') or selected_title}"
 
                     embed = disnake.Embed(
                         description="\n".join(f'[`{i["title"]}`]({i["url"]})' for i in info['entries']) + "\n\n**Selecione uma playlist abaixo:**\n"
