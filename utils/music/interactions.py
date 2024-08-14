@@ -1200,7 +1200,7 @@ class FavModalAdd(disnake.ui.Modal):
                 ), view=None
             )
 
-            self.view.log = f"[`{data['title']}`]({data['url']}) foi adicionado nas suas integrações."
+            self.view.log = f"[`{data['title']}`](<{data['url']}>) foi adicionado nas suas integrações."
 
         if not isinstance(self.view.ctx, CustomContext):
             await self.view.ctx.edit_original_message(embed=self.view.build_embed(), view=self.view)
@@ -1400,7 +1400,7 @@ class FavMenuView(disnake.ui.View):
 
             user, data, url = await self.bot.wait_for("fav_add", check=lambda user, data, url: user.id == self.ctx.author.id)
 
-            self.log = f"{url} foi adicionado nos seus favoritos."
+            self.log = f"<{url}> foi adicionado nos seus favoritos."
 
             if not isinstance(self.ctx, CustomContext):
                 await self.ctx.edit_original_message(content=self.build_txt(), view=self)
