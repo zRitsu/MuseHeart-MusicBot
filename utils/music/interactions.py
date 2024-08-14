@@ -1203,9 +1203,9 @@ class FavModalAdd(disnake.ui.Modal):
             self.view.log = f"[`{data['title']}`](<{data['url']}>) foi adicionado nas suas integrações."
 
         if not isinstance(self.view.ctx, CustomContext):
-            await self.view.ctx.edit_original_message(embed=self.view.build_embed(), view=self.view)
+            await self.view.ctx.edit_original_message(content=self.view.build_txt(), view=self.view)
         elif self.view.message:
-            await self.view.message.edit(embed=self.view.build_embed(), view=self.view)
+            await self.view.message.edit(content=self.view.build_txt(), view=self.view)
 
 class FavMenuView(disnake.ui.View):
 
