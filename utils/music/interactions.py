@@ -1075,7 +1075,8 @@ class FavModalAdd(disnake.ui.Modal):
                     )
                     return
 
-                data = {"title": f"[SP]: {result['display_name'][:90]}", "url": result["external_urls"]["spotify"]}
+                data = {"title": f"[SP]: {result['display_name'][:90]}", "url": result["external_urls"]["spotify"],
+                        "avatar": result["images"][-1]['url']}
 
             elif (matches:=deezer_regex.match(url)):
 
@@ -1103,7 +1104,7 @@ class FavModalAdd(disnake.ui.Modal):
                     traceback.print_exc()
                     return
 
-                data = {"title": f"[DZ]: {result['name'][:90]}", "url": result['link']}
+                data = {"title": f"[DZ]: {result['name'][:90]}", "url": result['link'], "avatar": result["picture"]}
 
             else:
 
@@ -1174,7 +1175,12 @@ class FavModalAdd(disnake.ui.Modal):
 
             title = fix_characters(data['title'], 80)
 
-            self.view.data["integration_links"][title] = data['url']
+            self.view.data["integration_links"][title] = {"url": data['url']}
+
+            try:
+                self.view.data["integration_links"][title]["avatar"] = data["avatar"]
+            except KeyError:
+                pass
 
             await self.view.bot.update_global_data(inter.author.id, self.view.data, db_name=DBModel.users)
 
@@ -1304,6 +1310,8 @@ class FavMenuView(disnake.ui.View):
             if self.data["integration_links"]:
                 opts = []
                 for k, v in list(self.data["integration_links"].items())[:25]: # TODO: Lidar depois com os dados existentes que excedem a quantidade permitida
+                    if isinstance(v, dict):
+                        v = v["url"]
                     emoji, platform = music_source_emoji_url(v)
                     opts.append(disnake.SelectOption(label=k[5:], emoji=emoji, description=platform, value=k))
                 integration_select = disnake.ui.Select(options=opts, min_values=1, max_values=1)
@@ -1509,6 +1517,8 @@ class FavMenuView(disnake.ui.View):
             else:
                 def format_itg(bot, index, data):
                     name, url = data
+                    if isinstance(url, dict):
+                        url = url["url"]
                     e = get_source_emoji_cfg(bot, url)
                     if e:
                         return f"` {index:02} ` {e} [`{name[5:]}`](<{url}>)"

@@ -1009,8 +1009,20 @@ class Music(commands.Cog):
             query = ""
             menu = "integrations"
             for k, v in user_data["integration_links"].items():
-                emoji, platform = music_source_emoji_url(v)
-                fav_opts.append({"url": v, "option": disnake.SelectOption(label=k[6:], value=f"> itg: {k}", description=f"[💠 Integração 💠] -> {platform}", emoji=emoji)})
+
+                update = False
+
+                if not isinstance(v, dict):
+                    v = {"url": v, "avatar": None}
+                    user_data["integration_links"][k] = v
+                    update = True
+
+                if update:
+                    await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
+
+                emoji, platform = music_source_emoji_url(v["url"])
+
+                fav_opts.append({"url": v["url"], "option": disnake.SelectOption(label=k[6:], value=f"> itg: {k}", description=f"[💠 Integração 💠] -> {platform}", emoji=emoji)})
 
         elif query.startswith(">> [⭐ Favoritos ⭐] <<"):
             query = ""
@@ -1182,7 +1194,15 @@ class Music(commands.Cog):
 
             else:
 
-                query = user_data["integration_links"][query[7:]]
+                integration_data = user_data["integration_links"][query[7:]]
+
+                if not isinstance(integration_data, dict):
+                    integration_data = {"url": integration_data, "avatar": None}
+                    user_data["integration_links"][query[7:]] = integration_data
+                    await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
+
+                query = integration_data["url"]
+                profile_avatar = integration_data["avatar"]
 
                 if (matches := spotify_regex_w_user.match(query)):
 
@@ -1242,6 +1262,11 @@ class Music(commands.Cog):
                         self.bot.pool.integration_cache[query] = info
 
                     try:
+                        profile_avatar = info["thumbnails"][0]['url']
+                    except KeyError:
+                        pass
+
+                    try:
                         if not info["entries"]:
                             raise GenericError(f"**Conteúdo indisponível (ou privado):**\n{query}")
                     except KeyError:
@@ -1257,15 +1282,20 @@ class Music(commands.Cog):
                     view = SelectInteraction(
                         user=inter.author,
                         opts=[
-                            disnake.SelectOption(label=e['title'][:90], value=f"entrie_select_{c}", description=platform,
+                            disnake.SelectOption(label=e['title'][:90], value=f"entrie_select_{c}",
                                                  emoji=emoji) for c, e in enumerate(info['entries'])
                         ], timeout=120)
 
+                    embed_title = f"do canal: {(info.get('title') or selected_title)[:12]}" if platform == "youtube" else f"do perfil de: {info.get('title') or selected_title}"
+
                     embed = disnake.Embed(
-                        description= f"### Usar playlist da integração do {platform}: [{info.get('title') or selected_title}]({query})\n\n"+ "\n".join(f'[`{i["title"]}`]({i["url"]})' for i in info['entries']) + "\n\n**Selecione uma playlist abaixo:**\n"
+                        description="\n".join(f'[`{i["title"]}`]({i["url"]})' for i in info['entries']) + "\n\n**Selecione uma playlist abaixo:**\n"
                                     f'-# Essa solicitação será cancelada automaticamente <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=120)).timestamp())}:R> caso não seja selecionado uma opção abaixo.',
                         color=self.bot.get_color(guild.me)
-                    ).set_thumbnail(music_source_image(platform))
+                    ).set_author(name=f"Tocar playlist {embed_title}", icon_url=music_source_image(platform), url=query)
+
+                    if profile_avatar:
+                        embed.set_thumbnail(profile_avatar)
 
                     kwargs = {}
 
