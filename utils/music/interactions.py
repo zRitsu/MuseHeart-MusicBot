@@ -1832,12 +1832,7 @@ class FavMenuView(disnake.ui.View):
         except:
             pass
 
-        await inter.response.edit_message(
-            embed=disnake.Embed(
-                description="**Gerenciador fechado.**",
-                color=self.bot.get_color(),
-            ), view=None
-        )
+        await inter.response.edit_message(content="**Gerenciador fechado.**", view=None)
         self.stop()
 
     async def mode_callback(self, inter: disnake.MessageInteraction):
