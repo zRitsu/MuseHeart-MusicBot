@@ -1296,6 +1296,10 @@ class Music(commands.Cog):
 
                     if profile_avatar:
                         embed.set_thumbnail(profile_avatar)
+                        try:
+                            embed.set_image(info["thumbnails"][0]['url'])
+                        except:
+                            pass
 
                     kwargs = {}
 
