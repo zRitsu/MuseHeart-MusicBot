@@ -1286,13 +1286,13 @@ class Music(commands.Cog):
                                                  emoji=emoji) for c, e in enumerate(info['entries'])
                         ], timeout=120)
 
-                    embed_title = f"do canal: {(info.get('title') or selected_title)[:-12]}" if platform == "youtube" else f"do perfil de: {info.get('title') or selected_title}"
+                    embed_title = f"do canal: {(info.get('title') or selected_title)[:-12]}" if platform == "youtube" else f"do usuário: {info.get('title') or selected_title}"
 
                     embed = disnake.Embed(
                         description="\n".join(f'[`{i["title"]}`]({i["url"]})' for i in info['entries']) + "\n\n**Selecione uma playlist abaixo:**\n"
                                     f'-# Essa solicitação será cancelada automaticamente <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=120)).timestamp())}:R> caso não seja selecionado uma opção abaixo.',
                         color=self.bot.get_color(guild.me)
-                    ).set_author(name=f"Tocar playlist {embed_title}", icon_url=music_source_image(platform), url=query)
+                    ).set_author(name=f"Tocar playlist pública {embed_title}", icon_url=music_source_image(platform), url=query)
 
                     if profile_avatar:
                         embed.set_thumbnail(profile_avatar)
