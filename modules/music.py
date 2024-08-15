@@ -1293,7 +1293,7 @@ class Music(commands.Cog):
                     for page_index, page in enumerate(disnake.utils.as_chunks(info['entries'], 15)):
 
                         embed = disnake.Embed(
-                            description="\n".join(f'-# ` {(25*page_index)+n+1}. `[`{i["title"]}`]({i["url"]})' for n, i in enumerate(page)) + "\n\n**Selecione uma playlist abaixo:**\n"
+                            description="\n".join(f'-# ` {(15*page_index)+n+1}. `[`{i["title"]}`]({i["url"]})' for n, i in enumerate(page)) + "\n\n**Selecione uma playlist abaixo:**\n"
                                         f'-# Essa solicitação será cancelada automaticamente <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=120)).timestamp())}:R> caso não seja selecionado uma opção abaixo.',
                             color=self.bot.get_color(guild.me)
                         ).set_author(name=f"Tocar playlist pública {embed_title}", icon_url=music_source_image(platform), url=query)
