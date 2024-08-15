@@ -1262,8 +1262,8 @@ class Music(commands.Cog):
                         self.bot.pool.integration_cache[query] = info
 
                     try:
-                        profile_avatar = info["thumbnails"][-1]['url']
-                    except KeyError:
+                        profile_avatar = [a['url'] for a in info["thumbnails"] if a["id"] == "avatar_uncropped"][0]
+                    except (KeyError, IndexError):
                         pass
 
                     try:
@@ -1280,7 +1280,7 @@ class Music(commands.Cog):
                     emoji, platform = music_source_emoji_url(query)
 
                     view = SelectInteraction(
-                        user=inter.author,
+                        user=inter.author, max_itens=15,
                         opts=[
                             disnake.SelectOption(label=e['title'][:90], value=f"entrie_select_{c}",
                                                  emoji=emoji) for c, e in enumerate(info['entries'])
@@ -1288,20 +1288,29 @@ class Music(commands.Cog):
 
                     embed_title = f"do canal: {(info.get('title') or selected_title)[:-12]}" if platform == "youtube" else f"do usuário: {info.get('title') or selected_title}"
 
-                    embed = disnake.Embed(
-                        description="\n".join(f'[`{i["title"]}`]({i["url"]})' for i in info['entries']) + "\n\n**Selecione uma playlist abaixo:**\n"
-                                    f'-# Essa solicitação será cancelada automaticamente <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=120)).timestamp())}:R> caso não seja selecionado uma opção abaixo.',
-                        color=self.bot.get_color(guild.me)
-                    ).set_author(name=f"Tocar playlist pública {embed_title}", icon_url=music_source_image(platform), url=query)
+                    embeds = []
 
-                    if profile_avatar:
-                        embed.set_thumbnail(profile_avatar)
-                        try:
-                            embed.set_image(info["thumbnails"][0]['url'])
-                        except:
-                            pass
+                    for page_index, page in enumerate(disnake.utils.as_chunks(info['entries'], 15)):
+
+                        embed = disnake.Embed(
+                            description="\n".join(f'-# ` {(25*page_index)+n+1}. `[`{i["title"]}`]({i["url"]})' for n, i in enumerate(page)) + "\n\n**Selecione uma playlist abaixo:**\n"
+                                        f'-# Essa solicitação será cancelada automaticamente <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=120)).timestamp())}:R> caso não seja selecionado uma opção abaixo.',
+                            color=self.bot.get_color(guild.me)
+                        ).set_author(name=f"Tocar playlist pública {embed_title}", icon_url=music_source_image(platform), url=query)
+
+                        if profile_avatar:
+                            embed.set_thumbnail(profile_avatar)
+                            try:
+                                if len(info["thumbnails"]) > 2:
+                                    embed.set_image(info["thumbnails"][0]['url'])
+                            except:
+                                pass
+
+                        embeds.append(embed)
 
                     kwargs = {}
+
+                    view.embeds = embeds
 
                     try:
                         func = msg.edit
@@ -1315,7 +1324,7 @@ class Music(commands.Cog):
                             except AttributeError:
                                 func = inter.send
 
-                    msg = await func(embed=embed, view=view, **kwargs)
+                    msg = await func(embed=embeds[0], view=view, **kwargs)
 
                     await view.wait()
 
@@ -1325,6 +1334,11 @@ class Music(commands.Cog):
                             func = msg.edit
                         except:
                             func = view.inter.response.edit_message
+
+                        try:
+                            embed = view.embeds[view.current_page]
+                        except:
+                            embed = embeds[0]
 
                         embed.description = "\n".join(embed.description.split("\n")[:-3])
                         embed.set_footer(text="⚠️ Tempo esgotado!" if not view.selected is False else "⚠️ Cancelado pelo usuário.")
