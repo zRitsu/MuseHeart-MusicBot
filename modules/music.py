@@ -1022,14 +1022,14 @@ class Music(commands.Cog):
 
                 emoji, platform = music_source_emoji_url(v["url"])
 
-                fav_opts.append({"url": v["url"], "option": disnake.SelectOption(label=k[6:], value=f"> itg: {k}", description=f"[💠 Integração 💠] -> {platform}", emoji=emoji)})
+                fav_opts.append({"url": v["url"], "option": disnake.SelectOption(label=fix_characters(k[6:], 45), value=f"> itg: {k}", description=f"[💠 Integração 💠] -> {platform}", emoji=emoji)})
 
         elif query.startswith(">> [⭐ Favoritos ⭐] <<"):
             query = ""
             menu = "favs"
             for k, v in user_data["fav_links"].items():
                 emoji, platform = music_source_emoji_url(v)
-                fav_opts.append({"url": v, "option": disnake.SelectOption(label=k, value=f"> fav: {k}", description=f"[⭐ Favorito ⭐] -> {platform}", emoji=emoji)})
+                fav_opts.append({"url": v, "option": disnake.SelectOption(label=fix_characters(k, 45), value=f"> fav: {k}", description=f"[⭐ Favorito ⭐] -> {platform}", emoji=emoji)})
 
         elif query.startswith(">> [📑 Músicas recentes 📑] <<"):
 
@@ -1055,7 +1055,7 @@ class Music(commands.Cog):
             menu = "guild_favs"
             
             for name, v in guild_data["player_controller"]["fav_links"].items():
-                fav_opts.append({"url": v["url"], "option": disnake.SelectOption(label=name, value=f"> pin: {name}", description="[📌 Favorito do servidor 📌]", emoji=music_source_emoji_url(v['url'])[0])})
+                fav_opts.append({"url": v["url"], "option": disnake.SelectOption(label=fix_characters(name, 45), value=f"> pin: {name}", description="[📌 Favorito do servidor 📌]", emoji=music_source_emoji_url(v['url'])[0])})
 
             is_pin = False
 
