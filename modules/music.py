@@ -1262,7 +1262,7 @@ class Music(commands.Cog):
                         self.bot.pool.integration_cache[query] = info
 
                     try:
-                        profile_avatar = info["thumbnails"][0]['url']
+                        profile_avatar = info["thumbnails"][-1]['url']
                     except KeyError:
                         pass
 
