@@ -1262,7 +1262,7 @@ class Music(commands.Cog):
 
                     if not (info := self.bot.pool.integration_cache.get(cache_key)):
                         result = await self.bot.spotify.get_user_playlists(user_id)
-                        info = {"entries": [{"title": t["name"], "url": t["external_urls"]["spotify"]} for t in result["items"]]}
+                        info = {"entries": [{"title": t["name"], "url": f'{t["external_urls"]["spotify"]}/playlists'} for t in result["items"]]}
                         self.bot.pool.integration_cache[cache_key] = info
 
                 elif (matches := deezer_regex.match(query)):
@@ -1281,7 +1281,7 @@ class Music(commands.Cog):
 
                     if not (info := self.bot.pool.integration_cache.get(cache_key)):
                         result = await bot.deezer.get_user_playlists(user_id)
-                        info = {"entries": [{"title": t['title'], "url": t['link']} for t in result]}
+                        info = {"entries": [{"title": t['title'], "url": f"{t['link']}/playlists"} for t in result]}
                         self.bot.pool.integration_cache[cache_key] = info
 
                 elif not self.bot.config["USE_YTDL"]:
