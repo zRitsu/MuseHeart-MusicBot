@@ -578,8 +578,10 @@ class LavalinkPlayer(wavelink.Player):
         if self.bot.config["USE_YTDL"]:
             hint_platforms.append("youtube, soundcloud")
 
-        if self.bot.spotify:
+        if self.bot.spotify and not self.bot.spotify.disabled:
             hint_platforms.append("spotify")
+
+        hint_platforms.append("deezer")
 
         if self.bot.config["LASTFM_KEY"] and self.bot.config["LASTFM_SECRET"]:
             self.initial_hints.append(
