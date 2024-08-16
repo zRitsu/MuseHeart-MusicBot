@@ -92,14 +92,14 @@ class SpotifyClient:
 
             while True:
                 try:
-                    result_extra = await self.request(path=f"playlists/{playlist_id}/tracks?offset={offset}&limit=50")
+                    result_extra = await self.request(path=f"playlists/{playlist_id}/tracks?offset={offset}&limit=100")
                 except:
                     traceback.print_exc()
                     break
                 else:
                     result["tracks"]["items"].extend(result_extra["items"])
                     if result_extra["next"] and page_count <= self.playlist_extra_page_limit:
-                        offset += 50
+                        offset += 100
                         page_count += 1
                         continue
                     break
