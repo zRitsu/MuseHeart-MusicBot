@@ -6160,19 +6160,21 @@ class Music(commands.Cog):
 
             for ch in (static_channel, channel):
 
-                if not ch: continue
+                if not ch:
+                    continue
 
                 if isinstance(ch, disnake.Thread):
+
+                    if not ch.parent:
+                        await self.reset_controller_db(inter.guild_id, guild_data, inter)
+                        continue
+
                     channel_check = ch.parent
+
                 else:
                     channel_check = ch
 
-                try:
-                    bot_perms = channel_check.permissions_for(guild.me)
-                except:
-                    traceback.print_exc()
-                    await self.reset_controller_db(inter.guild_id, guild_data, inter)
-                    continue
+                bot_perms = channel_check.permissions_for(guild.me)
 
                 if bot_perms.read_message_history:
                     allowed_channel = ch
