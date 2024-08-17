@@ -2131,7 +2131,7 @@ class LavalinkPlayer(wavelink.Player):
                     await self.message.edit(**kwargs)
                 except:
                     traceback.print_exc()
-                    if self.text_channel:
+                    if self.text_channel and not self.static:
                         self.message = await self.text_channel.send(**kwargs)
                 send_message = False
             else:

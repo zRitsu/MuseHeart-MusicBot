@@ -6167,7 +6167,12 @@ class Music(commands.Cog):
                 else:
                     channel_check = ch
 
-                bot_perms = channel_check.permissions_for(guild.me)
+                try:
+                    bot_perms = channel_check.permissions_for(guild.me)
+                except:
+                    traceback.print_exc()
+                    await self.reset_controller_db(inter.guild_id, guild_data, inter)
+                    continue
 
                 if bot_perms.read_message_history:
                     allowed_channel = ch
