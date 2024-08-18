@@ -1038,6 +1038,7 @@ class LavalinkPlayer(wavelink.Player):
                     "java.lang.RuntimeException: Not success status code: 204",
                     "java.net.SocketTimeoutException: Connect timed out",
                     "java.lang.IllegalArgumentException: Invalid bitrate",
+                    "java.io.EOFException",
                     "java.net.UnknownHostException:",
                     "java.lang.IllegalStateException: Error from decoder",
                     "java.lang.IllegalStateException: Current position is beyond this element",
