@@ -1244,7 +1244,8 @@ class Music(commands.Cog):
                     await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
 
                 query = integration_data["url"]
-                profile_avatar = integration_data["avatar"]
+
+                profile_avatar = integration_data.get("avatar")
 
                 if (matches := spotify_regex_w_user.match(query)):
 
