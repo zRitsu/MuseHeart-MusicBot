@@ -170,12 +170,12 @@ class LocalDatabase(BaseDB):
         data = self._connect[collection][db_name].find_one({"_id": id_})
 
         if not data:
-            data = default_model[db_name].copy()
+            data = deepcopy(default_model[db_name])
             data["_id"] = str(id_)
             self._connect[collection][db_name].insert_one(data)
 
         elif data["ver"] != default_model[db_name]["ver"]:
-            data = update_values(default_model[db_name].copy(), data)
+            data = update_values(deepcopy(default_model[db_name]), data)
             data["ver"] = default_model[db_name]["ver"]
 
             await self.update_data(id_, data, db_name=db_name, collection=collection)
@@ -284,11 +284,11 @@ class MongoDatabase(BaseDB):
         data = await self._connect[collection][db_name].find_one({"_id": id_})
 
         if not data:
-            data = default_model[db_name].copy()
+            data = deepcopy(default_model[db_name])
             return data
 
         elif data["ver"] != default_model[db_name]["ver"]:
-            data = update_values(default_model[db_name].copy(), data)
+            data = update_values(deepcopy(default_model[db_name]), data)
             data["ver"] = default_model[db_name]["ver"]
             await self.update_data(id_, data, db_name=db_name, collection=collection)
 
