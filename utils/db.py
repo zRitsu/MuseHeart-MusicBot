@@ -164,7 +164,7 @@ class LocalDatabase(BaseDB):
 
         id_ = str(id_)
 
-        if (cached_result := self.cache.get((db_name, collection, id_))) is not None:
+        if (cached_result := self.cache.get(f"{db_name}:{collection}:{id_}")) is not None:
             return cached_result
 
         data = self._connect[collection][db_name].find_one({"_id": id_})
@@ -194,7 +194,7 @@ class LocalDatabase(BaseDB):
         except:
             traceback.print_exc()
 
-        self.cache[(db_name, collection, id_)] = data
+        self.cache[f"{db_name}:{collection}:{id_}"] = data
 
         return data
 
@@ -208,7 +208,7 @@ class LocalDatabase(BaseDB):
             return
 
         try:
-            self.cache.pop((db_name, collection, id_))
+            self.cache.pop(f"{db_name}:{collection}:{id_}")
         except KeyError:
             pass
 
@@ -278,7 +278,7 @@ class MongoDatabase(BaseDB):
 
         id_ = str(id_)
 
-        if (cached_result := self.cache.get((db_name, collection, id_))) is not None:
+        if (cached_result := self.cache.get(f"{db_name}:{collection}:{id_}")) is not None:
             return cached_result
 
         data = await self._connect[collection][db_name].find_one({"_id": id_})
@@ -298,7 +298,7 @@ class MongoDatabase(BaseDB):
                           collection: str, default_model: dict = None):
 
         await self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data}, upsert=True)
-        self.cache[(db_name, collection, id_)] = data
+        self.cache[f"{db_name}:{collection}:{id_}"] = data
         return data
 
     async def query_data(self, db_name: str, collection: str, filter: dict = None, limit=100) -> list:
@@ -306,7 +306,7 @@ class MongoDatabase(BaseDB):
 
     async def delete_data(self, id_, db_name: str, collection: str):
         try:
-            self.cache.pop((db_name, collection, id_))
+            self.cache.pop(f"{db_name}:{collection}:{id_}")
         except KeyError:
             pass
         return await self._connect[collection][db_name].delete_one({'_id': str(id_)})
