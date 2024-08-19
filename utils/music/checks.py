@@ -219,6 +219,9 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
             raise NoVoice()
 
+        else:
+            user_vc = True
+
         if bot.user.id in author.voice.channel.voice_states:
 
             inter.music_bot = bot
