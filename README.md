@@ -147,7 +147,7 @@ bash source_update.sh
 
 Nota: há mais alguns guias na [wiki](https://github.com/zRitsu/MuseHeart-MusicBot/wiki).
 
-### Observaçoes importantes:
+### Observações importantes:
 
 * Você pode usar essa source como alternativa de self-hosting do meu bot principal (Muse Heart) pra hospedar/rodar seu próprio bot de música para uso privado ou em servidores públicos no qual você gerencia (que você tenha permissão de adicionar seu próprio bot no servidor). Entretanto não recomendo distribuir o bot usando essa source publicamente por não estar otimizado o suficiente pra lidar com alta demanda de servidores, mas se mesmo assim decidir fazer isso o bot terá que estar sob a [licença](/LICENSE) da source original e dependendo de onde o bot estiver sendo divulgado (ex: botlists) há possibilidade de seu bot ser apontado pelo uso dessa source.
 
