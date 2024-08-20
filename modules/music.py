@@ -964,7 +964,7 @@ class Music(commands.Cog):
             if guild_data["player_controller"]["fav_links"]:
                 txt += "### `[📌] Favoritos do servidor [📌]`\n" \
                         "`Usar favorito do servidor (adicionados por staffs do servidor).`\n"
-                disnake.SelectOption(label="Usar favorito do servidor", value=">> [📌 Favoritos do servidor 📌] <<", emoji="📌"),
+                opts.append(disnake.SelectOption(label="Usar favorito do servidor", value=">> [📌 Favoritos do servidor 📌] <<", emoji="📌"),)
 
             embed = disnake.Embed(
                 color=self.bot.get_color(guild.me),
