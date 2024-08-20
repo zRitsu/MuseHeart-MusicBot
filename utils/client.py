@@ -83,7 +83,7 @@ class BotPool:
         self.commit = ""
         self.remote_git_url = ""
         self.max_counter: int = 0
-        self.message_ids: dict = {}
+        self.message_ids = TTLCache(ttl=30, maxsize=20000)
         self.bot_mentions = set()
         self.single_bot = True
         self.failed_bots: dict = {}
@@ -687,25 +687,6 @@ class BotPool:
                                            "Use os comandos de barra /**", self_delete=True, delete_original=15)
 
                     return True
-
-            if not bot.pool.single_bot:
-
-                @bot.listen("on_command")
-                async def message_id_cleanup(ctx: CustomContext):
-
-                    id_ = f"{ctx.guild.id}-{ctx.channel.id}-{ctx.message.id}"
-
-                    try:
-                        ctx.bot.pool.message_ids[id_]
-                    except KeyError:
-                        return
-
-                    await asyncio.sleep(ctx.bot.config["PREFIXED_POOL_TIMEOUT"])
-
-                    try:
-                        del ctx.bot.pool.message_ids[id_]
-                    except KeyError:
-                        pass
 
             @bot.listen("on_resumed")
             async def clear_gc():
