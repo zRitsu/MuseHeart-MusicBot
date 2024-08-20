@@ -18,7 +18,7 @@ from disnake.ext import commands
 from utils.db import DBModel
 from utils.music.converters import perms_translations, time_format
 from utils.music.errors import GenericError, NoVoice
-from utils.music.interactions import SkinEditorMenu
+from utils.music.interactions import SkinEditorMenu, EmbedPaginatorInteraction
 from utils.music.models import LavalinkPlayer
 from utils.others import send_idle_embed, CustomContext, select_bot_pool, pool_command, CommandArgparse, update_inter
 
@@ -1533,80 +1533,102 @@ class MusicSettings(commands.Cog):
         if not bot:
             return
 
-        guild = bot.get_guild(inter.guild_id) or inter.guild
+        guild = bot.get_guild(inter.guild_id)
 
-        em = disnake.Embed(color=bot.get_color(guild.me), title="Servidores de música:")
+        color = bot.get_color(guild.me if guild else None)
+
+        embeds = []
 
         if not bot.music.nodes:
-            em.description = "**Não há servidores.**"
-            await inter.send(embed=em)
-            return
+            raise GenericError("**Não há servidores de música.**")
 
         failed_nodes = set()
 
+        available_nodes = []
+
         for identifier, node in bot.music.nodes.items():
-
-            if not node.available: continue
-
-            try:
-                current_player = node.players[inter.guild_id]
-            except KeyError:
-                current_player = None
 
             if not node.stats or not node.is_available:
                 failed_nodes.add(node.identifier)
-                continue
+            else:
+                available_nodes.append([identifier, node])
 
-            txt = f"Região: `{node.region.title()}`\n"
 
-            used = humanize.naturalsize(node.stats.memory_used)
-            total = humanize.naturalsize(node.stats.memory_allocated)
-            free = humanize.naturalsize(node.stats.memory_free)
-            cpu_cores = node.stats.cpu_cores
-            cpu_usage = f"{node.stats.lavalink_load * 100:.2f}"
-            started = node.stats.players
+        for page in disnake.utils.as_chunks(available_nodes, 6):
 
-            txt += f'RAM: `{used}/{free}`\n' \
-                   f'RAM Total: `{total}`\n' \
-                   f'CPU Cores: `{cpu_cores}`\n' \
-                   f'Uso de CPU: `{cpu_usage}%`\n' \
-                   f'Versão do Lavalink: `v{node.version}`\n' \
-                   f'Uptime: <t:{int((disnake.utils.utcnow() - datetime.timedelta(milliseconds=node.stats.uptime)).timestamp())}:R>\n'
+            em = disnake.Embed(color=color, title="Servidores de música:")
 
-            if started:
-                txt += "Players: "
-                players = node.stats.playing_players
-                idle = started - players
-                if players:
-                    txt += f'`[▶️{players}]`' + (" " if idle else "")
-                if idle:
-                    txt += f'`[💤{idle}]`'
+            for identifier, node in page:
 
-                txt += "\n"
+                try:
+                    current_player = node.players[inter.guild_id]
+                except KeyError:
+                    current_player = None
 
-            if node.website:
-                txt += f'[`Website do server`]({node.website})\n'
+                txt = f"Região: `{node.region.title()}`\n"
 
-            status = "🌟" if current_player else "✅"
+                used = humanize.naturalsize(node.stats.memory_used)
+                total = humanize.naturalsize(node.stats.memory_allocated)
+                free = humanize.naturalsize(node.stats.memory_free)
+                cpu_cores = node.stats.cpu_cores
+                cpu_usage = f"{node.stats.lavalink_load * 100:.2f}"
+                started = node.stats.players
 
-            em.add_field(name=f'**{identifier}** `{status}`', value=txt)
+                txt += f'RAM: `{used}/{free}`\n' \
+                       f'RAM Total: `{total}`\n' \
+                       f'CPU Cores: `{cpu_cores}`\n' \
+                       f'Uso de CPU: `{cpu_usage}%`\n' \
+                       f'Versão do Lavalink: `v{node.version}`\n' \
+                       f'Uptime: <t:{int((disnake.utils.utcnow() - datetime.timedelta(milliseconds=node.stats.uptime)).timestamp())}:R>\n'
+
+                if started:
+                    txt += "Players: "
+                    players = node.stats.playing_players
+                    idle = started - players
+                    if players:
+                        txt += f'`[▶️{players}]`' + (" " if idle else "")
+                    if idle:
+                        txt += f'`[💤{idle}]`'
+
+                    txt += "\n"
+
+                if node.website:
+                    txt += f'[`Website do server`]({node.website})\n'
+
+                status = "🌟" if current_player else "✅"
+
+                em.add_field(name=f'**{identifier}** `{status}`', value=txt)
+
             em.set_footer(text=f"{bot.user} - [{bot.user.id}]", icon_url=bot.user.display_avatar.with_format("png").url)
 
-        embeds = [em]
+            if failed_nodes:
+                em.add_field(name="**Servidores que falharam** `❌`",
+                             value=f"```ansi\n[31;1m" + "\n".join(failed_nodes) + "[0m\n```", inline=False)
 
-        if failed_nodes:
-            embeds.append(
-                disnake.Embed(
-                    title="**Servidores que falharam** `❌`",
-                    description=f"```ansi\n[31;1m" + "\n".join(failed_nodes) + "[0m\n```",
-                    color=bot.get_color(guild.me)
-                )
-            )
+            embeds.append(em)
 
-        if isinstance(inter, disnake.MessageInteraction):
-            await inter.response.edit_message(embeds=embeds, view=None)
+        if len(embeds) > 1:
+            view = EmbedPaginatorInteraction(inter.author, embeds)
         else:
-            await inter.send(embeds=embeds, ephemeral=True)
+            view = None
+
+        if isinstance(inter, CustomContext):
+            msg = await inter.send(embed=embeds[0], view=view)
+        elif isinstance(inter, disnake.MessageInteraction):
+            await inter.response.edit_message(embed=embeds[0], view=view)
+        else:
+            msg = await inter.edit_original_message(embed=embeds[0], view=view)
+
+        if view:
+            await view.wait()
+            for c in view.children:
+                c.disabled = True
+            if view.inter:
+                await view.inter.response.edit_message(view=view)
+            elif isinstance(inter, CustomContext):
+                await msg.edit(view=view)
+            else:
+                await inter.edit_original_message(view=view)
 
     customskin_cd = commands.CooldownMapping.from_cooldown(1, 10, commands.BucketType.guild)
     customskin__mc =commands.MaxConcurrency(1, per=commands.BucketType.guild, wait=False)
