@@ -552,7 +552,7 @@ class SelectInteraction(disnake.ui.View):
         await interaction.response.edit_message(view=self, **kwargs)
 
     async def next_callback(self, interaction: disnake.MessageInteraction):
-        if self.current_page == self.max_page:
+        if self.current_page >= self.max_page:
             self.current_page = 0
         else:
             self.current_page += 1
