@@ -964,7 +964,10 @@ class Music(commands.Cog):
             if guild_data["player_controller"]["fav_links"]:
                 txt += "### `[📌] Favoritos do servidor [📌]`\n" \
                         "`Usar favorito do servidor (adicionados por staffs do servidor).`\n"
-                opts.append(disnake.SelectOption(label="Usar favorito do servidor", value=">> [📌 Favoritos do servidor 📌] <<", emoji="📌"),)
+                opts.append(disnake.SelectOption(label="Usar favorito do servidor", value=">> [📌 Favoritos do servidor 📌] <<", emoji="📌"))
+
+            if not opts:
+                raise EmptyFavIntegration()
 
             embed = disnake.Embed(
                 color=self.bot.get_color(guild.me),
@@ -992,6 +995,8 @@ class Music(commands.Cog):
                     await inter.edit_original_message(view=view, **kwargs)
                 except AttributeError:
                     msg = await inter.send(view=view, **kwargs)
+
+
 
             await view.wait()
 
@@ -1112,23 +1117,23 @@ class Music(commands.Cog):
                     embed.description = '### `[⭐] ⠂Favoritos ⠂[⭐]`\n' \
                                         '`Tocar música ou playlist que você curtiou ou que você tenha adicionado na sua lista de favoritos.`\n' \
                                         f'-# Você pode gerenciar seus favoritos usando o comando {fav_slashcmd}.\n\n' \
-                                         f'{embed.description}\n\n'
+                                         f'{embed.description}\n\n**Selecione um favorito abaixo:**'
 
                 elif menu == "integrations":
                     embed.description = '### `[💠] ⠂Integrações ⠂[💠]`\n' \
                                         '`Tocar playlist pública de um canal do youtube (ou de um perfil de usuário de alguma plataforma de música) da sua lista de integrações.`\n' \
                                         f'-# Para gerenciar suas integrações use o comando {fav_slashcmd} e em seguida selecione a opção \"integrações\".\n\n' \
-                                         f'{embed.description}\n\n'
+                                         f'{embed.description}\n\n**Selecione uma integração abaixo:**'
 
                 elif menu == "guild_favs":
                     embed.description = f'### `[📌] ⠂Favoritos do servidor ⠂[📌]\n' \
                                         '`Usar favorito do servidor (adicionados por staffs do servidor).`\n\n'\
-                                         f'{embed.description}\n\n'
+                                         f'{embed.description}\n\n**Selecione um favorito abaixo:**'
 
                 elif menu == "latest":
-                    embed.description = f'### 📑 ⠂Tocar música/playlist recente:\n{embed.description}\n\n'
+                    embed.description = f'### 📑 ⠂Tocar música/playlist recente:\n{embed.description}\n\n**Selecione um item abaixo:**'
 
-                embed.description += f'**Selecione um favorito abaixo:**\n-# Nota: Essa solicitação será cancelada automaticamente <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=75)).timestamp())}:R> caso não seja selecionado uma opção abaixo.'
+                embed.description += f'\n-# Nota: Essa solicitação será cancelada automaticamente <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=75)).timestamp())}:R> caso não seja selecionado uma opção abaixo.'
 
                 try:
                     if bot.user.id != self.bot.user.id:
