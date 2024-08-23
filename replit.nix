@@ -5,5 +5,6 @@
     pkgs.libopus
     pkgs.zlib
     pkgs.glibc
+    pkgs.chromium
   ];
 }
