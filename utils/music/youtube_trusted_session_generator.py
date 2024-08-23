@@ -14,8 +14,8 @@ class Browser:
         self.tab: Optional[nodriver.Tab] = None
         self.data = {}
 
-    async def main_session_gen(self, sandbox=True):
-        self.browser = await start(headless=False, sandbox=sandbox)
+    async def main_session_gen(self, sandbox=True, browser_executable_path=None):
+        self.browser = await start(headless=False, sandbox=sandbox, browser_executable_path=browser_executable_path)
         print("[INFO] launching browser.")
         self.tab = self.browser.main_tab
         self.tab.add_handler(cdp.network.RequestWillBeSent, self.send_handler)
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     b = Browser()
 
     try:
-        loop().run_until_complete(b.main_session_gen())
+        loop().run_until_complete(b.main_session_gen(sandbox=False))
     except ConnectionRefusedError:
         pass
     except:
