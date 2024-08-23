@@ -6108,7 +6108,7 @@ class Music(commands.Cog):
 
         try:
             invite = global_data["listen_along_invites"][str(vc.id)]
-        except KeyError:
+        except (AttributeError, KeyError):
             invite = ""
 
         if invite:
