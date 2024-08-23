@@ -20,3 +20,5 @@ cachetools
 regex
 syncedlyrics
 pylrc
+nodriver==0.32
+undetected-chromedriver==3.5.5
