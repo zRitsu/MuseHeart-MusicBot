@@ -14,8 +14,8 @@ class Browser:
         self.tab: Optional[nodriver.Tab] = None
         self.data = {}
 
-    async def main_session_gen(self):
-        self.browser = await start(headless=False)
+    async def main_session_gen(self, sandbox=True):
+        self.browser = await start(headless=False, sandbox=sandbox)
         print("[INFO] launching browser.")
         self.tab = self.browser.main_tab
         self.tab.add_handler(cdp.network.RequestWillBeSent, self.send_handler)

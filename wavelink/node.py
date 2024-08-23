@@ -27,6 +27,7 @@ import json
 import logging
 import os
 import re
+import traceback
 from typing import Any, Callable, Dict, Optional, Union, List
 from urllib.parse import quote
 
@@ -249,6 +250,11 @@ class Node:
             await browser.main_session_gen()
         except ConnectionError:
             pass
+        except Exception as e:
+            if not browser.data:
+                raise e
+            else:
+                traceback.print_exc()
 
         r = await self.session.post(url=f"{self.rest_uri}/youtube",
             json={
