@@ -10,7 +10,6 @@ import os
 import pickle
 import subprocess
 import traceback
-import zlib
 from configparser import ConfigParser
 from copy import deepcopy
 from importlib import import_module

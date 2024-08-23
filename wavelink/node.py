@@ -30,6 +30,7 @@ import re
 from typing import Any, Callable, Dict, Optional, Union, List
 from urllib.parse import quote
 
+from utils.music.youtube_trusted_session_generator import Browser
 from .backoff import ExponentialBackoff
 from .errors import *
 from .player import Player, Track, TrackPlaylist
@@ -239,6 +240,24 @@ class Node:
         self._is_connecting = False
 
         __log__.info(f'NODE | {self.identifier} connected:: {self.__repr__()}')
+
+    async def refresh_potoken(self):
+
+        browser = Browser()
+
+        try:
+            await browser.main_session_gen()
+        except ConnectionError:
+            pass
+
+        r = await self.session.post(url=f"{self.rest_uri}/youtube",
+            json={
+              "poToken": browser.data["po_token"],
+              "visitorData": browser.data["visitor_data"]
+            }, headers=self._websocket.headers
+        )
+
+        print(f"{r.status}: {await r.text()}")
 
     async def update_player(self, guild_id: int, data: dict, replace: bool = False):
 
