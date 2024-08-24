@@ -19,7 +19,7 @@ class Browser:
         print("[INFO] launching browser.")
         self.tab = self.browser.main_tab
         self.tab.add_handler(cdp.network.RequestWillBeSent, self.send_handler)
-        page = await self.browser.get('https://www.youtube.com/embed/jNQXAC9IVRw')
+        await self.tab.get('https://www.youtube.com/embed/jNQXAC9IVRw')
         await self.tab.wait(cdp.network.RequestWillBeSent)
         button_play = await self.tab.select("#movie_player")
         await button_play.click()
