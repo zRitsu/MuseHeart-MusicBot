@@ -247,9 +247,12 @@ class Node:
         browser = Browser()
 
         try:
-            await browser.main_session_gen(sandbox=sandbox, browser_executable_path=browser_executable_path)
-        except ConnectionError:
-            pass
+            ytid = self._client.bot.config["POTOKEN_YTID"]
+        except:
+            ytid = "jNQXAC9IVRw"
+
+        try:
+            await browser.start(sandbox=sandbox, browser_executable_path=browser_executable_path, ytid=ytid)
         except Exception as e:
             if not browser.data:
                 raise e
