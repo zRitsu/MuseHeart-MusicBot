@@ -291,7 +291,7 @@ class SpotifyClient:
             t.info["extra"]["authors_md"] = ", ".join(f"[`{a['name']}`]({a['external_urls']['spotify']})" for a in result["artists"])
 
             try:
-                if result["album"]["name"] != result["name"]:
+                if result["album"]["name"] != result["name"] or result["album"]["total_tracks"] > 1:
                     t.info["extra"]["album"] = {
                         "name": result["album"]["name"],
                         "url": result["album"]["external_urls"]["spotify"]
@@ -354,10 +354,11 @@ class SpotifyClient:
                     f"[`{a['name']}`]({a['external_urls']['spotify']})" for a in track["artists"])
 
                 try:
-                    t.info["extra"]["album"] = {
-                        "name": result["name"],
-                        "url": result["external_urls"]["spotify"]
-                    }
+                    if result["name"] != track["name"] or result["total_tracks"] > 1:
+                        t.info["extra"]["album"] = {
+                            "name": result["name"],
+                            "url": result["external_urls"]["spotify"]
+                        }
                 except (AttributeError, KeyError):
                     pass
 
@@ -443,7 +444,7 @@ class SpotifyClient:
                 pass
 
             try:
-                if t["album"]["name"] != t["name"]:
+                if t["album"]["name"] != t["name"] or t["album"]["total_tracks"] > 1:
                     track.info["extra"]["album"] = {
                         "name": t["album"]["name"],
                         "url": t["album"]["external_urls"]["spotify"]
