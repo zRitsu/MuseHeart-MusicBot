@@ -443,10 +443,11 @@ class SpotifyClient:
                 pass
 
             try:
-                track.info["extra"]["album"] = {
-                    "name": t["album"]["name"],
-                    "url": t["album"]["external_urls"]["spotify"]
-                }
+                if t["album"]["name"] != t["name"]:
+                    track.info["extra"]["album"] = {
+                        "name": t["album"]["name"],
+                        "url": t["album"]["external_urls"]["spotify"]
+                    }
             except (AttributeError, KeyError):
                 pass
 
