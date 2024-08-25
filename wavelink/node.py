@@ -501,9 +501,8 @@ class Node:
             raise Exception(f"Lyrics plugin not available on Node: {self.identifier}")
 
         async with self.session.get(f"{self.rest_uri}/v4/lyrics/{ytid}", headers=self.headers) as r:
-            if r.status != 200:
-                print(f"Lyrics fetching failed: {r.status} - {await r.text()}")
-                return
+            if r.status not in (200, 404):
+                r.raise_for_status()
             return await r.json()
 
     def get_player(self, guild_id: int) -> Optional[Player]:
