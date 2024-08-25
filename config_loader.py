@@ -68,7 +68,7 @@ DEFAULT_CONFIG = {
     "ENABLE_DEFER_TYPING": True,
     "VOICE_CHANNEL_LATENCY_RECONNECT": 200,
     "PLAYLIST_CACHE_SIZE": 500,
-    "PLAYLIST_CACHE_TTL": 21600,
+    "PLAYLIST_CACHE_TTL": 1800,
 
     ##############################################
     ### Sistema de música - Suporte ao spotify ###
