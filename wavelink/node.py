@@ -259,14 +259,13 @@ class Node:
             else:
                 traceback.print_exc()
 
-        r = await self.session.post(url=f"{self.rest_uri}/youtube",
+        async with self.session.post(url=f"{self.rest_uri}/youtube",
             json={
               "poToken": browser.data["po_token"],
               "visitorData": browser.data["visitor_data"]
             }, headers=self._websocket.headers
-        )
-
-        print(f"{r.status}: {await r.text()}")
+        ) as r:
+            return f"{r.status}: {await r.text()}"
 
     async def update_player(self, guild_id: int, data: dict, replace: bool = False):
 
