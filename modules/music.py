@@ -2068,6 +2068,8 @@ class Music(commands.Cog):
 
             if isinstance(inter, disnake.MessageInteraction) and inter.data.custom_id == "queue_track_selection":
                 await inter.response.edit_message(embed=embed, view=None)
+            elif inter.data.custom_id == "musicplayer_queue_dropdown":
+                await inter.response.defer()
             else:
                 await inter.send(embed=embed, ephemeral=ephemeral)
 
@@ -5006,6 +5008,13 @@ class Music(commands.Cog):
 
     @commands.Cog.listener("on_dropdown")
     async def player_dropdown_event(self, interaction: disnake.MessageInteraction):
+
+        if interaction.data.custom_id == "musicplayer_queue_dropdown":
+            await self.process_player_interaction(
+                interaction=interaction, command=self.bot.get_slash_command("skipto"),
+                kwargs={"query": interaction.values[0], "case_sensitive": True}
+            )
+            return
 
         if not interaction.data.custom_id.startswith("musicplayer_dropdown_"):
             return

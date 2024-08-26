@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+import itertools
 from os.path import basename
 
 import disnake
@@ -276,6 +277,22 @@ class DefaultProgressbarStaticSkin:
                 ]
             ),
         ]
+
+        if (queue:=player.queue or player.queue_autoplay):
+            data["components"].append(
+                disnake.ui.Select(
+                    placeholder="Próximas músicas:",
+                    custom_id="musicplayer_queue_dropdown",
+                    min_values=0, max_values=1,
+                    options=[
+                        disnake.SelectOption(
+                            label=f"{n+1}. {fix_characters(t.author, 18)}",
+                            description=fix_characters(t.title, 47),
+                            value=t.title[:100]
+                        ) for n, t in enumerate(itertools.islice(queue, 25))
+                    ]
+                )
+            )
 
         if player.current.ytid and player.node.lyric_support:
             data["components"][5].options.append(
