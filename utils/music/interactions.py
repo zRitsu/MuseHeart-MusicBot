@@ -419,6 +419,7 @@ class EmbedPaginatorInteraction(disnake.ui.View):
         self.user = user
         self.current_page = 0
         self.max_page = len(embeds)-1
+        self.inter: Optional[disnake.MessageInteraction] = None
         self.embeds = embeds
         self.load_components()
 
@@ -455,6 +456,7 @@ class EmbedPaginatorInteraction(disnake.ui.View):
         self.add_item(button)
 
     async def back_callback(self, interaction: disnake.MessageInteraction):
+        self.inter = interaction
         if self.current_page == 0:
             self.current_page = self.max_page
         else:
@@ -466,6 +468,7 @@ class EmbedPaginatorInteraction(disnake.ui.View):
         await interaction.response.edit_message(view=self, **kwargs)
 
     async def next_callback(self, interaction: disnake.MessageInteraction):
+        self.inter = interaction
         if self.current_page == self.max_page:
             self.current_page = 0
         else:
@@ -477,6 +480,7 @@ class EmbedPaginatorInteraction(disnake.ui.View):
         await interaction.response.edit_message(view=self, **kwargs)
 
     async def cancel_callback(self, interaction: disnake.MessageInteraction):
+        self.inter = interaction
         self.selected = False
         self.inter = interaction
         self.stop()
