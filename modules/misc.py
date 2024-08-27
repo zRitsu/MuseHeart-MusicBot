@@ -816,8 +816,7 @@ class Misc(commands.Cog):
                                             headers={"Authorization": f"Bot {bot.http.token}"}) as r:
                 data = await r.json()
 
-            user_avatar_url = f"https://cdn.discordapp.com/avatars/{user.id}/{data['user']['avatar']}." + (
-                "gif" if data['user']['avatar'].startswith('a_') else "png") + "?size=512"
+            user_avatar_url = inter.author.display_avatar.replace(static_format="png", size=512).url
 
             if user_banner_url := data['user'].get('banner'):
                 user_banner_url = f"https://cdn.discordapp.com/banners/{user.id}/{user_banner_url}." + (
