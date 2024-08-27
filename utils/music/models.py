@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import datetime
+import itertools
 import pprint
 import random
 import re
@@ -2488,6 +2489,23 @@ class LavalinkPlayer(wavelink.Player):
                         ]
                     ),
                 ]
+
+                if self.static:
+                    if (queue := self.queue or self.queue_autoplay):
+                        data["components"].append(
+                            disnake.ui.Select(
+                                placeholder="Próximas músicas:",
+                                custom_id="musicplayer_queue_dropdown",
+                                min_values=0, max_values=1,
+                                options=[
+                                    disnake.SelectOption(
+                                        label=f"{n + 1}. {fix_characters(t.author, 18)}",
+                                        description=fix_characters(t.title, 47),
+                                        value=t.title[:100]
+                                    ) for n, t in enumerate(itertools.islice(queue, 25))
+                                ]
+                            )
+                        )
 
                 if self.current.ytid and self.node.lyric_support:
                     data["components"][5].options.append(
