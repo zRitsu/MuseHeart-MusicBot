@@ -5012,7 +5012,7 @@ class Music(commands.Cog):
         if interaction.data.custom_id == "musicplayer_queue_dropdown":
             await self.process_player_interaction(
                 interaction=interaction, command=self.bot.get_slash_command("skipto"),
-                kwargs={"query": interaction.values[0], "case_sensitive": True}
+                kwargs={"query": interaction.values[0][3:], "case_sensitive": True}
             )
             return
 

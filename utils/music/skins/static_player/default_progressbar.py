@@ -288,7 +288,7 @@ class DefaultProgressbarStaticSkin:
                         disnake.SelectOption(
                             label=f"{n+1}. {fix_characters(t.author, 18)}",
                             description=fix_characters(t.title, 47),
-                            value=t.title[:100]
+                            value=f"{n:02d}.{t.title[:96]}"
                         ) for n, t in enumerate(itertools.islice(queue, 25))
                     ]
                 )
