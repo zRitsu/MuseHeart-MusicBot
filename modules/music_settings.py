@@ -866,6 +866,7 @@ class MusicSettings(commands.Cog):
             player.static = True
             player.text_channel = channel
             player.setup_hints()
+            player.setup_features()
             await player.invoke_np(force=True)
 
         elif not message or message.channel.id != channel.id:
