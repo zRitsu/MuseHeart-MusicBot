@@ -214,18 +214,26 @@ class Owner(commands.Cog):
         else:
             return txt
 
+    reload_flags = CommandArgparse()
+    reload_flags.add_argument("-skins", "--skins", action="store_true",
+                              help="Recarregar skins.")
+
     @commands.is_owner()
     @panel_command(aliases=["rd", "recarregar"], description="Recarregar os módulos.", emoji="🔄",
-                   alt_name="Carregar/Recarregar módulos.")
-    async def reload(self, ctx: Union[CustomContext, disnake.MessageInteraction], *modules):
+                   alt_name="Carregar/Recarregar módulos.", extras={"flags": reload_flags})
+    async def reload(self, ctx: Union[CustomContext, disnake.MessageInteraction], *opts):
 
-        for m in list(sys.modules):
-            if not m.startswith("utils.music.skins."):
-                continue
-            try:
-                del sys.modules[m]
-            except:
-                continue
+        args, modules = self.bot.get_command("reload").extras['flags'].parse_known_args(opts)
+
+        if not modules or args.skins:
+
+            for m in list(sys.modules):
+                if not m.startswith("utils.music.skins."):
+                    continue
+                try:
+                    del sys.modules[m]
+                except:
+                    continue
 
         modules = [f"{m.lower()}.py" for m in modules]
 
