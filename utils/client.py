@@ -855,9 +855,7 @@ class BotPool:
 
         if not self.bots:
 
-            os.system('cls' if os.name == 'nt' else 'clear')
-
-            message = "O token do bot não foi configurado devidamente!\n\n"
+            message = "O token do bot não foi configurado devidamente!"
 
             if os.environ.get("REPL_SLUG"):
                 message += f"Confira se o token foi adicionado nas secrets da replit"
@@ -867,17 +865,21 @@ class BotPool:
                 message += f'. <a href="https://gist.github.com/zRitsu/70737984cbe163f890dae05a80a3ddbe#2---com-o-projeto-j%C3%A1-criado-prossiga-as-etapas-abaixo" target="_blank">Clique aqui</a> para ver o guia de como configurar.'
 
             else:
-                message += "Confira se o token foi configurado na ENV/ENVIRONMENT ou no arquivo .env"
+                message += " Confira se o token foi configurado na ENV/ENVIRONMENT ou no arquivo .env"
 
-                print(message)
+                print(f"⚠️ - {message}")
 
-        if start_local:
-            loop.create_task(self.start_lavalink(loop=loop))
+            message = f"\n\n{message}"
 
-        if not self.spotify.spotify_cache:
-            loop.create_task(self.spotify.get_access_token())
+        else:
 
-        self.node_check(LAVALINK_SERVERS, loop=loop, start_local=start_local)
+            if start_local:
+                loop.create_task(self.start_lavalink(loop=loop))
+
+            if not self.spotify.spotify_cache:
+                loop.create_task(self.spotify.get_access_token())
+
+            self.node_check(LAVALINK_SERVERS, loop=loop, start_local=start_local)
 
         if self.config["RUN_RPC_SERVER"]:
 
