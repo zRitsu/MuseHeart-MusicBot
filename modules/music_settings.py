@@ -1005,7 +1005,10 @@ class MusicSettings(commands.Cog):
             try:
                 func = inter.response.edit_message
             except AttributeError:
-                func = inter.send
+                try:
+                    func = inter.store_message.edit
+                except AttributeError:
+                    func = inter.send
 
         await func(
             embed=disnake.Embed(
