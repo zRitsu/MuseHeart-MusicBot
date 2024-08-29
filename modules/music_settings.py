@@ -997,7 +997,7 @@ class MusicSettings(commands.Cog):
             "channel": None
         })
 
-        await self.bot.update_data(guild.id, guild_data, db_name=DBModel.guilds)
+        await bot.update_data(guild.id, guild_data, db_name=DBModel.guilds)
 
         try:
             func = inter.edit_original_message
