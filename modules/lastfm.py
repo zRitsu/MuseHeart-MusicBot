@@ -41,6 +41,7 @@ class LastFMView(disnake.ui.View):
         self.clear_session = False
         self.check_loop = None
         self.error = None
+        self.account_linked = False
         self.session_key = session_key
         self.cooldown_scrobble_btn = commands.CooldownMapping.from_cooldown(1, 7, commands.BucketType.user)
         self.build_components()
@@ -75,6 +76,7 @@ class LastFMView(disnake.ui.View):
                     continue
                 self.session_key = data["session"]["key"]
                 self.username = data["session"]["name"]
+                self.account_linked = True
                 self.stop()
                 return
             except Exception as e:
@@ -322,9 +324,7 @@ class LastFmCog(commands.Cog):
                             "músicas/artistas/álbuns e ter uma estatística geral das músicas que você ouviu alem de ter "
                             "acesso a uma comunidade incrível da plataforma.**",
                 color=embed_color
-            ).set_thumbnail(url="https://www.last.fm/static/images/lastfm_avatar_twitter.52a5d69a85ac.png").
-                      set_footer(text="Nota: No momento o registro de músicas será ignorado quando você tiver ouvindo "
-                                      "músicas do youtube e soundcloud")]
+            ).set_thumbnail(url="https://www.last.fm/static/images/lastfm_avatar_twitter.52a5d69a85ac.png")]
 
         view = LastFMView(inter, session_key=current_session_key, scrobble=data["lastfm"]["scrobble"])
 
@@ -357,7 +357,7 @@ class LastFmCog(commands.Cog):
 
             return
 
-        newdata = {"scrobble": view.scrobble_enabled, "sessionkey": view.session_key, "username": view.username}
+        newdata = {"scrobble": view.scrobble_enabled, "sessionkey": view.session_key, "username": view.username or data["lastfm"]["username"]}
         data["lastfm"].update(newdata)
         await self.bot.update_global_data(inter.author.id, data=data, db_name=DBModel.users)
 
@@ -374,9 +374,10 @@ class LastFmCog(commands.Cog):
 
         if view.session_key:
 
-            if not view.interaction or view.interaction.response.is_done():
-                for c in view.children:
-                    c.disabled = True
+            for c in view.children:
+                c.disabled = True
+
+            if not view.account_linked:
                 if msg and isinstance(inter, CustomContext):
                     await msg.edit(view=view)
                 elif (inter:=view.interaction or inter):
