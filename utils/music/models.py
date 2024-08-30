@@ -2481,6 +2481,11 @@ class LavalinkPlayer(wavelink.Player):
                                 description="Sistema de reprodução de música automática quando a fila tiver vazia."
                             ),
                             disnake.SelectOption(
+                                label="Last.fm scrobble", emoji="<:Lastfm:1278883704097341541>",
+                                value=PlayerControls.lastfm_scrobble,
+                                description="Ativar/desativar o scrobble/registro de músicas na sua conta do last.fm."
+                            ),
+                            disnake.SelectOption(
                                 label=("Desativar" if self.restrict_mode else "Ativar") + " o modo restrito",
                                 emoji="🔐",
                                 value=PlayerControls.restrict_mode,

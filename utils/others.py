@@ -172,6 +172,7 @@ class PlayerControls:
     embed_enqueue_track = "musicplayer_embed_enqueue_track"
     embed_enqueue_playlist = "musicplayer_embed_enqueue_playlist"
     embed_forceplay = "musicplayer_embed_forceplay"
+    lastfm_scrobble = "musicplayer_lastfm_scrobble"
 
 
 class EmbedPaginator(disnake.ui.View):
