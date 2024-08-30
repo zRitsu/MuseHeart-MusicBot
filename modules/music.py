@@ -1845,11 +1845,16 @@ class Music(commands.Cog):
                 else:
                     func = inter.send
 
+            footer_txt = "♾️ Scrobble ativado" if user_data["lastfm"]["sessionkey"] and user_data["lastfm"]["scrobble"] else ""
+
             try:
                 if bot.user.id != self.bot.user.id:
-                    embed.set_footer(text=f"Bot selecionado: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
+                    embed.set_footer(text=f"Bot selecionado: {bot.user.display_name}" + (f" ⠂{footer_txt}" if footer_txt else ""), icon_url=bot.user.display_avatar.url)
+                if footer_txt:
+                    embed.set_footer(text=footer_txt)
             except AttributeError:
-                pass
+                if footer_txt:
+                    embed.set_footer(text=footer_txt)
 
             if loadtype == "track":
                 components = [
