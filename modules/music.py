@@ -5373,7 +5373,7 @@ class Music(commands.Cog):
                 return
 
             if control == PlayerControls.lastfm_scrobble:
-                await interaction.response.defer(ephemeral=True)
+                await interaction.response.defer(ephemeral=True, with_message=True)
                 user_data = await self.bot.get_global_data(interaction.author.id, db_name=DBModel.users)
 
                 if not user_data["lastfm"]["sessionkey"]:
