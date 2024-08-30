@@ -77,6 +77,7 @@ class LastFMView(disnake.ui.View):
                 self.session_key = data["session"]["key"]
                 self.username = data["session"]["name"]
                 self.account_linked = True
+                self.scrobble_enabled = True
                 self.stop()
                 return
             except Exception as e:
