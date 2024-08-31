@@ -790,6 +790,8 @@ class BotPool:
                 if bot.session is None:
                     bot.session = aiohttp.ClientSession()
 
+                bot.music.session = bot.session
+
                 try:
                     bot.interaction_id = bot.user.id
 
