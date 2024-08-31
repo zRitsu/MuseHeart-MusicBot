@@ -779,44 +779,39 @@ class BotPool:
                         f" - [cmd: {ctx.message.content}] {datetime.datetime.utcnow().strftime('%d/%m/%Y - %H:%M:%S')} (UTC)\n" + ("-" * 15)
                     )
 
-            @bot.listen()
+            @bot.event
             async def on_ready():
-
-                if not bot.bot_ready:
-
-                    if bot.session is None:
-                        bot.session = aiohttp.ClientSession()
-
-                    if bot.music is None:
-                        bot.music = music_mode(bot)
-
-                    if bot.initializing:
-                        return
-
-                    bot.initializing = True
-
-                    try:
-                        bot.interaction_id = bot.user.id
-
-                        bot.load_modules(load_modules_log=load_modules_log)
-
-                        bot.sync_command_cooldowns()
-
-                        if bot.config["AUTO_SYNC_COMMANDS"]:
-                            await bot.sync_app_commands(force=True)
-
-                        bot.add_view(PanelView(bot))
-
-                        self.bot_mentions.update((f"<@!{bot.user.id}>", f"<@{bot.user.id}>"))
-
-                    except Exception:
-                        traceback.print_exc()
-
-                    await bot.update_appinfo()
-
-                    bot.bot_ready = True
-
                 print(f'🟢 - {bot.user} - [{bot.user.id}] Online.')
+
+            async def initial_setup():
+
+                await bot.wait_until_ready()
+
+                if bot.session is None:
+                    bot.session = aiohttp.ClientSession()
+
+                try:
+                    bot.interaction_id = bot.user.id
+
+                    bot.load_modules(load_modules_log=load_modules_log)
+
+                    bot.sync_command_cooldowns()
+
+                    if bot.config["AUTO_SYNC_COMMANDS"]:
+                        await bot.sync_app_commands(force=True)
+
+                    bot.add_view(PanelView(bot))
+
+                    self.bot_mentions.update((f"<@!{bot.user.id}>", f"<@{bot.user.id}>"))
+
+                except Exception:
+                    traceback.print_exc()
+
+                await bot.update_appinfo()
+
+                bot.bot_ready = True
+
+            bot.loop.create_task(initial_setup())
 
             if guild_id:
                 bot.exclusive_guild_id = int(guild_id)
@@ -926,13 +921,12 @@ class BotCore(commands.AutoShardedBot):
         self.appinfo: Optional[disnake.AppInfo] = None
         self.exclusive_guild_id: Optional[int] = None
         self.bot_ready = False
-        self.initializing = False
         self.uptime = disnake.utils.utcnow()
         self.env_owner_ids = set()
         self.dm_cooldown = commands.CooldownMapping.from_cooldown(rate=2, per=30, type=commands.BucketType.member)
         self.number = kwargs.pop("number", 0)
         super().__init__(*args, **kwargs)
-        self.music: Optional[wavelink.Client] = None
+        self.music: wavelink.Client = music_mode(self)
         self.interaction_id: Optional[int] = None
         self.wavelink_node_reconnect_tasks = {}
 
