@@ -931,7 +931,7 @@ class GuildLog(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: disnake.Guild):
 
-        print(f"Removido do servidor: {guild.name} - [{guild.id}]")
+        print(f"😭 - Bot {self.bot.user.name} foi removido(a) do servidor: {guild.name} - [{guild.id}]")
 
         try:
             await self.bot.music.players[guild.id].destroy()
@@ -953,7 +953,7 @@ class GuildLog(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_join(self, guild: disnake.Guild):
 
-        print(f"{self.bot.user.name} - Adicionado(a) no servidor: {guild.name} - [{guild.id}]")
+        print(f"🎉 - Bot {self.bot.user.name} foi adicionado(a) no servidor: {guild.name} - [{guild.id}]")
 
         try:
             guild_data = await self.bot.get_data(guild.id, db_name=DBModel.guilds)
