@@ -7034,7 +7034,7 @@ class Music(commands.Cog):
 
         if member.id == player.bot.user.id:
 
-            for b in self.bot.pool.get_guild_bots(member.guild.id):
+            """for b in self.bot.pool.get_guild_bots(member.guild.id):
                 if b == player.bot:
                     if after.channel:
                         player._last_channel = after.channel
@@ -7057,7 +7057,7 @@ class Music(commands.Cog):
                 except AttributeError:
                     pass
                 except Exception:
-                    traceback.print_exc()
+                    traceback.print_exc()"""
 
             try:
                 vc = member.guild.me.voice.channel
