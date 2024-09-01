@@ -2075,7 +2075,7 @@ class Music(commands.Cog):
 
             if isinstance(inter, disnake.MessageInteraction) and inter.data.custom_id == "queue_track_selection":
                 await inter.response.edit_message(embed=embed, view=None)
-            elif inter.data.custom_id == "musicplayer_queue_dropdown":
+            elif not isinstance(inter, CustomContext) and inter.data.custom_id == "musicplayer_queue_dropdown":
                 await inter.response.defer()
             else:
                 await inter.send(embed=embed, ephemeral=ephemeral)
