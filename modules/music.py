@@ -4,7 +4,6 @@ import datetime
 import itertools
 import os.path
 import pickle
-import pprint
 import re
 import traceback
 import zlib
@@ -35,10 +34,12 @@ from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolExc
     EmptyFavIntegration, DiffVoiceChannel, NoPlayer, YoutubeSourceDisabled
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction, FavMenuView, ViewMode, \
     SetStageTitle, SelectBotVoice
-from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, PartialTrack
+from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, PartialTrack, PartialPlaylist
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, song_request_buttons, \
     select_bot_pool, ProgressBar, update_inter, get_source_emoji_cfg
+
+sc_recommended = re.compile(r"https://soundcloud\.com/.*/recommended$")
 
 
 class Music(commands.Cog):
@@ -6799,6 +6800,25 @@ class Music(commands.Cog):
             bot = self.bot
 
         tracks = []
+
+        if bool(sc_recommended.search(query)):
+            try:
+                info = await bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(query, download=False))
+            except AttributeError:
+                raise GenericError("**O uso do yt-dlp está desativado...**")
+
+            playlist = PartialPlaylist(url=info["webpage_url"], data={"playlistInfo": {"name": info["title"]}})
+
+            playlist.tracks = [PartialTrack(
+                uri=i["url"],
+                title=i["title"],
+                requester=user.id,
+                source_name="soundcloud",
+                identifier=i["id"],
+                playlist=playlist
+            ) for i in info['entries']]
+
+            return playlist, node
 
         if (bot.pool.config["FORCE_USE_DEEZER_CLIENT"] or [n for n in bot.music.nodes.values() if
                                                            "deezer" not in n.info.get("sourceManagers", [])]):

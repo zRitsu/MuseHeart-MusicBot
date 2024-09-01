@@ -129,7 +129,7 @@ class PartialTrack:
     @property
     def thumb(self) -> str:
         try:
-            return self.info["extra"]["thumb"]
+            return self.info["extra"]["thumb"] or self.info["artworkUrl"]
         except KeyError:
             try:
                 return self.info["artworkUrl"]
@@ -172,7 +172,7 @@ class PartialTrack:
 
     @property
     def author(self) -> str:
-        return self.info["author"]
+        return self.info["author"] or "Artista Desconhecido"
 
     @property
     def authors_string(self) -> str:
@@ -1570,6 +1570,23 @@ class LavalinkPlayer(wavelink.Player):
                     except Exception:
                         traceback.print_exc()
 
+                elif track_data.info["sourceName"] == "soundcloud":
+                    try:
+                        info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(f"{track_data.uri}/recommended",
+                                                                                                            download=False))
+                    except AttributeError:
+                        pass
+
+                    else:
+                        tracks = [PartialTrack(
+                            uri=i["url"],
+                            title=i["title"],
+                            requester=self.bot.user.id,
+                            source_name="soundcloud",
+                            identifier=i["id"],
+                            autoplay=True,
+                        ) for i in info['entries']]
+
                 if not tracks:
 
                     if self.bot.last_fm and not self.lastfm_artists:
@@ -1722,8 +1739,8 @@ class LavalinkPlayer(wavelink.Player):
                 if t.is_stream:
                     continue
 
-                if t.duration < 90000:
-                    continue
+                #if t.duration < 90000:
+                #    continue
 
                 if track.ytid and track.ytid == t.ytid:
                     continue
@@ -2978,6 +2995,12 @@ class LavalinkPlayer(wavelink.Player):
             track.id = selected_track.id
             track.info["length"] = selected_track.duration
             track.info["sourceNameOrig"] = selected_track.info["sourceName"]
+            if not track.info["author"]:
+                track.info["author"] = selected_track.author
+            if not track.duration:
+                track.info["duration"] = selected_track.duration
+            if not track.thumb:
+                track.info["artworkUrl"] = selected_track.thumb
 
         except Exception as e:
             traceback.print_exc()
