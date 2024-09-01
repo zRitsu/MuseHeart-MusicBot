@@ -493,7 +493,7 @@ class Node:
         if self.version < 4:
             return
 
-        return "java-lyrics-plugin" in self.plugin_names
+        return "lyrics" in self.plugin_names
 
     async def fetch_ytm_lyrics(self, ytid: str):
 

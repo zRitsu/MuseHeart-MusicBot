@@ -4,6 +4,7 @@ import datetime
 import itertools
 import os.path
 import pickle
+import pprint
 import re
 import traceback
 import zlib
@@ -5632,7 +5633,9 @@ class Music(commands.Cog):
                     await interaction.response.defer(ephemeral=True, with_message=True)
 
                     if player.current.info["extra"].get("lyrics") is None:
-                        player.current.info["extra"]["lyrics"] = await player.node.fetch_ytm_lyrics(player.current.ytid)
+                        lyrics_data = await player.node.fetch_ytm_lyrics(player.current.ytid)
+                        player.current.info["extra"]["lyrics"] = {} if lyrics_data.get("track") is None else lyrics_data
+
                     elif not player.current.info["extra"]["lyrics"]:
                         try:
                             await self.player_interaction_concurrency.release(interaction)
@@ -5646,7 +5649,6 @@ class Music(commands.Cog):
                             await self.player_interaction_concurrency.release(interaction)
                         except:
                             pass
-                        player.current.info["extra"]["lyrics"] = {}
                         await interaction.edit_original_message(f"**{not_found_msg}**")
                         return
 
