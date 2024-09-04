@@ -1007,6 +1007,25 @@ class LavalinkPlayer(wavelink.Player):
                     self.hook_event_task[str(event)] = None
 
                     if track.info["sourceName"] == "youtube":
+
+                        try:
+                            new_node = [n for n in self.bot.music.nodes.values() if n.is_available and "ytsearch" in n.search_providers][0]
+                        except:
+                            new_node = None
+
+                        if new_node:
+                            await self.change_node(new_node.identifier)
+                            txt = f"Devido a restrições do youtube no servidor `{self.node.identifier} o player foi movido para o servidor `{new_node.identifier}`."
+                            if self.controller_mode:
+                                self.set_command_log(txt, emoji="⚠️")
+                                self.update = True
+                            elif self.text_channel:
+                                try:
+                                    await self.text_channel.send(embed=disnake.Embed(description=f"-# `⚠️ -` {txt}", color=self.bot.get_color(self.guild.me)))
+                                except:
+                                    traceback.print_exc()
+                            return
+
                         txt = f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual " \
                               "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome " \
                               "das músicas do youtube que estão na fila (talvez a música tocada seja diferente do esperado " \
