@@ -1014,10 +1014,9 @@ class LavalinkPlayer(wavelink.Player):
 
                         if new_node:
                             self.native_yt = True
-                            txt = f"Devido a restrições do youtube no servidor `{self.node.identifier} o player será movido para o servidor `{new_node.identifier}`."
+                            txt = f"Devido a restrições do youtube no servidor `{self.node.identifier} o player foi movido para o servidor `{new_node.identifier}`."
                             if self.controller_mode:
                                 self.set_command_log(txt, emoji="⚠️")
-                                self.update = True
                             elif self.text_channel:
                                 try:
                                     await self.text_channel.send(embed=disnake.Embed(description=f"-# `⚠️ -` {txt}", color=self.bot.get_color(self.guild.me)), delete_after=10)
