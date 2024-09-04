@@ -1000,7 +1000,6 @@ class LavalinkPlayer(wavelink.Player):
                         self.node.partial_providers.remove("ytmsearch:\"{isrc}\"")
                         self.node.partial_providers.remove("ytmsearch:\"{title} - {author}\"")
 
-                    self.native_yt = False
                     self.current = None
                     self.queue.appendleft(track)
                     self.locked = False
@@ -1014,6 +1013,7 @@ class LavalinkPlayer(wavelink.Player):
                             new_node = None
 
                         if new_node:
+                            self.native_yt = True
                             txt = f"Devido a restrições do youtube no servidor `{self.node.identifier} o player será movido para o servidor `{new_node.identifier}`."
                             if self.controller_mode:
                                 self.set_command_log(txt, emoji="⚠️")
@@ -1027,6 +1027,8 @@ class LavalinkPlayer(wavelink.Player):
                             await self.change_node(new_node.identifier)
                             await self.process_next(start_position=self.position)
                             return
+
+                        self.native_yt = False
 
                         txt = f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual " \
                               "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome " \
