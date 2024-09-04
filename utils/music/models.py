@@ -1025,6 +1025,7 @@ class LavalinkPlayer(wavelink.Player):
                             await asyncio.sleep(5)
                             await self.change_node(new_node.identifier)
                             await self.process_next(start_position=self.position)
+                            await send_report()
                             return
 
                         self.native_yt = False
