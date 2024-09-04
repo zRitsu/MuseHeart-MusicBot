@@ -1025,6 +1025,7 @@ class LavalinkPlayer(wavelink.Player):
                                     traceback.print_exc()
                             await asyncio.sleep(5)
                             await self.change_node(new_node.identifier)
+                            await self.process_next(start_position=self.position)
                             return
 
                         txt = f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual " \
