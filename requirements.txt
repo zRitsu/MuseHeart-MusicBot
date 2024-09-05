@@ -20,5 +20,6 @@ cachetools
 regex
 syncedlyrics
 pylrc
+python-Levenshtein
 nodriver==0.32
 undetected-chromedriver==3.5.5

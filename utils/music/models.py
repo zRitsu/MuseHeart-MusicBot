@@ -17,6 +17,7 @@ from typing import Optional, Union, TYPE_CHECKING, List
 from urllib import parse
 from urllib.parse import quote
 
+import Levenshtein
 import disnake
 
 import wavelink
@@ -1983,7 +1984,7 @@ class LavalinkPlayer(wavelink.Player):
                         final_result = []
 
                         for t in tracks:
-                            if t.is_stream or not min_duration < t.duration < max_duration:
+                            if t.is_stream or not min_duration < t.duration < max_duration and Levenshtein.ratio(t.title, track.title):
                                 continue
                             final_result.append(t)
 
