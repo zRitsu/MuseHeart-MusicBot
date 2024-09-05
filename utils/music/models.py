@@ -1642,8 +1642,9 @@ class LavalinkPlayer(wavelink.Player):
                         author = self.lastfm_artists.pop(0)
                     except:
                         author = track_data.author
-
+                        
                     if track_data.info["sourceName"] == "youtube" and self.native_yt:
+
                         queries = [f"https://www.youtube.com/watch?v={track_data.ytid}&list=RD{track_data.ytid}"]
 
                         if p_dict:=providers_dict.get(track_data.info["sourceName"]):
@@ -1926,7 +1927,7 @@ class LavalinkPlayer(wavelink.Player):
                         await self.process_next()
                         return
 
-            if not self.native_yt and (track.info["sourceName"] == "youtube" or track.info.get("sourceNameOrig") == "youtube"):
+            if (not self.native_yt or not self.node.prefer_youtube_native_playback) and (track.info["sourceName"] == "youtube" or track.info.get("sourceNameOrig") == "youtube"):
 
                 if track.is_stream or track.duration > 480000:
                     self.failed_tracks.append(track)
@@ -1934,70 +1935,80 @@ class LavalinkPlayer(wavelink.Player):
                     await self.process_next()
                     return
 
-                tracks = []
+                try:
+                    tracks = []
 
-                exceptions = ""
+                    exceptions = ""
 
-                if not track.temp_id:
+                    if not track.temp_id:
 
-                    for provider in self.node.search_providers:
+                        for provider in self.node.search_providers:
 
-                        if provider in ("ytsearch", "ytmsearch"):
-                            continue
+                            if provider in ("ytsearch", "ytmsearch"):
+                                continue
 
-                        if track.author.endswith(" - topic"):
-                            query = f"{provider}:{track.title} - {track.author[:-8]}"
-                        else:
-                            query = f"{provider}:{track.title}"
+                            if track.author.endswith(" - topic"):
+                                query = f"{provider}:{track.title} - {track.author[:-8]}"
+                            else:
+                                query = f"{provider}:{track.title}"
+
+                            try:
+                                tracks = await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
+                            except:
+                                exceptions += f"{traceback.format_exc()}\n"
+                                await asyncio.sleep(1)
+                                continue
 
                         try:
-                            tracks = await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
-                        except:
-                            exceptions += f"{traceback.format_exc()}\n"
-                            await asyncio.sleep(1)
-                            continue
+                            tracks = tracks.tracks
+                        except AttributeError:
+                            pass
 
-                    try:
-                        tracks = tracks.tracks
-                    except AttributeError:
-                        pass
+                        if not [i in track.title.lower() for i in exclude_tags]:
+                            final_result = []
+                            for t in tracks:
+                                if not any((i in t.title.lower()) for i in exclude_tags):
+                                    final_result.append(t)
+                                    break
+                            tracks = final_result or tracks
 
-                    if not [i in track.title.lower() for i in exclude_tags]:
+                        min_duration = track.duration - 7000
+                        max_duration = track.duration + 7000
+
                         final_result = []
+
                         for t in tracks:
-                            if not any((i in t.title.lower()) for i in exclude_tags):
-                                final_result.append(t)
-                                break
-                        tracks = final_result or tracks
+                            if t.is_stream or not min_duration < t.duration < max_duration:
+                                continue
+                            final_result.append(t)
 
-                    min_duration = track.duration - 7000
-                    max_duration = track.duration + 7000
+                        if not (tracks:=final_result):
 
-                    final_result = []
+                            if not self.native_yt:
 
-                    for t in tracks:
-                        if t.is_stream or not min_duration < t.duration < max_duration:
-                            continue
-                        final_result.append(t)
+                                if exceptions:
+                                    print(exceptions)
+                                self.failed_tracks.append(track)
+                                self.set_command_log(emoji="⚠️", text=f"A música [`{track.title[:15]}`](<{track.uri}>) será pulada devido a falta de resultado "
+                                                                      "em outras plataformas de música.")
+                                await self.invoke_np()
+                                await asyncio.sleep(13 if not self.node.prefer_youtube_native_playback else 3)
+                                self.locked = False
+                                await self.process_next()
+                                return
 
-                    if not (tracks:=final_result):
-                        if exceptions:
-                            print(exceptions)
-                        self.failed_tracks.append(track)
-                        self.set_command_log(emoji="⚠️", text=f"A música [`{track.title[:15]}`](<{track.uri}>) será pulada devido a falta de resultado "
-                                                              "em outras plataformas de música.")
-                        await self.invoke_np()
-                        await asyncio.sleep(13)
-                        self.locked = False
-                        await self.process_next()
-                        return
-
-                    alt_track = tracks[0]
-                    track.temp_id = alt_track.id
-                    self.set_command_log(
-                        emoji="▶️",
-                        text=f"Tocando música obtida via metadados: [`{fix_characters(alt_track.title, 20)}`](<{alt_track.uri}>) `| Por: {fix_characters(alt_track.author, 15)}`"
-                    )
+                        else:
+                            alt_track = tracks[0]
+                            track.temp_id = alt_track.id
+                            self.set_command_log(
+                                emoji="▶️",
+                                text=f"Tocando música obtida via metadados: [`{fix_characters(alt_track.title, 20)}`](<{alt_track.uri}>) `| Por: {fix_characters(alt_track.author, 15)}`"
+                            )
+                except:
+                    traceback.print_exc()
+                    await asyncio.sleep(50)
+                    await self.process_next()
+                    return
 
             elif not track.id:
 

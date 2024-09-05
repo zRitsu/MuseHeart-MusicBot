@@ -6768,6 +6768,7 @@ class Music(commands.Cog):
         node.search_providers = search_providers
         node.original_providers = set(node.search_providers)
         node.partial_providers = []
+        node.prefer_youtube_native_playback = data.pop("prefer_youtube_native_playback", True)
 
         for p in node.search_providers:
             if p == "dzsearch":

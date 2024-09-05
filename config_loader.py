@@ -258,6 +258,7 @@ def load_config():
         "MESSAGE_CONTENT_INTENT",
 
         "USE_YTDL",
+        "PREFER_YOUTUBE_NATIVE_PLAYBACK",
         "FORCE_USE_DEEZER_CLIENT",
         "SILENT_PUBLICBOT_WARNING",
     ]:
