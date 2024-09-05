@@ -546,6 +546,7 @@ class LavalinkPlayer(wavelink.Player):
         self._new_node_task: Optional[asyncio.Task] = None
         self._queue_updater_task: Optional[asyncio.Task] = None
         self.auto_skip_track_task: Optional[asyncio.Task] = None
+        self.track_load_task: Optional[asyncio.Task] = None
         self.native_yt: bool = True
         self.stage_title_event = False
         self.stage_title_template: str = kwargs.pop("stage_title_template", None) or "Tocando: {track.title} | {track.author}"
@@ -1821,6 +1822,16 @@ class LavalinkPlayer(wavelink.Player):
                 pass
             self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node())
             return
+
+        try:
+            self.track_load_task.cancel()
+        except:
+            pass
+        self.track_load_task = self.bot.loop.create_task(self._process_next(start_position=start_position, inter=inter,
+                                                                            force_np=force_np))
+
+    async def _process_next(self, start_position: Union[int, float] = 0, inter: disnake.MessageInteraction = None,
+                           force_np=False):
 
         await self.bot.wait_until_ready()
 
