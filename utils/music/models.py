@@ -1964,30 +1964,36 @@ class LavalinkPlayer(wavelink.Player):
                             await asyncio.sleep(1)
                             continue
 
-                    try:
-                        tracks = tracks.tracks
-                    except AttributeError:
-                        pass
+                        try:
+                            tracks = tracks.tracks
+                        except AttributeError:
+                            pass
 
-                    if not [i in track.title.lower() for i in exclude_tags]:
+                        if not [i in track.title.lower() for i in exclude_tags]:
+                            final_result = []
+                            for t in tracks:
+                                if not any((i in t.title.lower()) for i in exclude_tags):
+                                    final_result.append(t)
+                                    break
+                            tracks = final_result or tracks
+
+                        min_duration = track.duration - 7000
+                        max_duration = track.duration + 7000
+
                         final_result = []
+
                         for t in tracks:
-                            if not any((i in t.title.lower()) for i in exclude_tags):
-                                final_result.append(t)
-                                break
-                        tracks = final_result or tracks
+                            if t.is_stream or not min_duration < t.duration < max_duration:
+                                continue
+                            final_result.append(t)
 
-                    min_duration = track.duration - 7000
-                    max_duration = track.duration + 7000
-
-                    final_result = []
-
-                    for t in tracks:
-                        if t.is_stream or not min_duration < t.duration < max_duration:
+                        if not final_result:
                             continue
-                        final_result.append(t)
 
-                    if not (tracks:=final_result):
+                        tracks = final_result
+                        break
+
+                    if not tracks:
 
                         if not self.native_yt:
 
