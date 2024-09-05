@@ -1107,6 +1107,12 @@ class LavalinkPlayer(wavelink.Player):
             elif self.keep_connected and not track.autoplay and len(self.queue) > 15:
                 self.queue.append(track)
 
+            if event.cause == "com.github.topi314.lavasrc.mirror.TrackNotFoundException: Playlist is empty":
+                embed = disnake.Embed(
+                    description=f"`Ignorando a música` [`{track.title}`](<{track.url}>)`. Pois não houve resultados em outras plataformas de música.`",
+                    color=self.bot.get_color(self.guild.me)
+                ).set_thumbnail(track.thumb)
+
             if isinstance(self.text_channel, disnake.Thread):
                 send_message_perm = self.text_channel.parent.permissions_for(self.guild.me).send_messages_in_threads
             else:
