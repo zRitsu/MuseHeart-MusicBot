@@ -3394,7 +3394,6 @@ class Music(commands.Cog):
 
             await inter.send(
                 embed=embed,
-                components=song_request_buttons if inter.guild else [],
                 ephemeral=ephemeral
             )
             await player.destroy()
