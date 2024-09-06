@@ -3338,7 +3338,7 @@ class LavalinkPlayer(wavelink.Player):
         if create_task:
             self._queue_updater_task = self.bot.loop.create_task(cog.queue_updater_task(self))
 
-    async def track_end(self):
+    async def track_end(self, ignore_track_loop=False):
 
         self.votes.clear()
 
@@ -3356,7 +3356,7 @@ class LavalinkPlayer(wavelink.Player):
             elif self.is_previows_music:
                 self.queue.insert(1, self.last_track)
                 self.is_previows_music = False
-            elif self.last_track.track_loops:
+            elif self.last_track.track_loops and not ignore_track_loop:
                 self.last_track.info["extra"]["track_loops"] -= 1
                 self.queue.insert(0, self.last_track)
             elif self.loop == "queue": # or self.keep_connected:

@@ -2118,7 +2118,7 @@ class Music(commands.Cog):
         except AttributeError:
             pass
 
-        await player.track_end()
+        await player.track_end(ignore_track_loop=True)
         player.ignore_np_once = True
         await player.process_next(inter=interaction)
 
