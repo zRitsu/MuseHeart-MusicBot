@@ -1997,7 +1997,7 @@ class LavalinkPlayer(wavelink.Player):
                             final_result = []
 
                             for t in tracks:
-                                if t.is_stream or not min_duration < t.duration < max_duration and Levenshtein.ratio(t.title, track.title) > 0.6:
+                                if t.is_stream or not min_duration < t.duration < max_duration and Levenshtein.ratio(t.title, track.title) > 0.7:
                                     continue
                                 final_result.append(t)
 
