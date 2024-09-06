@@ -639,6 +639,8 @@ class PlayerSession(commands.Cog):
                         await player.process_next(start_position=start_position)
                         if pause:
                             await player.set_pause(True)
+                            if not check:
+                                player.members_timeout_task = player.bot.loop.create_task(player.members_timeout(check=False))
 
                     player._session_resuming = False
                 except Exception:
