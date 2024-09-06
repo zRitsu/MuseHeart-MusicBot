@@ -1949,7 +1949,7 @@ class LavalinkPlayer(wavelink.Player):
 
                 if (track.is_stream or track.duration > 480000):
                     if not self.native_yt:
-                        self.failed_tracks.append(track)
+                        self.played.append(track)
                         self.locked = False
                         await self.process_next()
                         return
@@ -2013,7 +2013,7 @@ class LavalinkPlayer(wavelink.Player):
 
                                 if exceptions:
                                     print(exceptions)
-                                self.failed_tracks.append(track)
+                                self.played.append(track)
                                 self.set_command_log(emoji="⚠️", text=f"A música [`{track.title[:15]}`](<{track.uri}>) será pulada devido a falta de resultado "
                                                                       "em outras plataformas de música.")
                                 await asyncio.sleep(3)
