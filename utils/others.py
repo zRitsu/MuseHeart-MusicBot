@@ -645,7 +645,7 @@ async def select_bot_pool(inter: Union[CustomContext, disnake.MessageInteraction
 
     for pb in inter.bot.pool.get_guild_bots(inter.guild_id):
 
-        if pb.get_guild(inter.guild_id):
+        if pb.appinfo and pb.get_guild(inter.guild_id):
             bots[pb.user.id] = pb
 
     if not bots:
