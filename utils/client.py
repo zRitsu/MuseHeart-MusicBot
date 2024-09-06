@@ -104,11 +104,13 @@ class BotPool:
 
     def load_playlist_cache(self):
 
+        cache = TTLCache(maxsize=self.config["PLAYLIST_CACHE_SIZE"], ttl=self.config["PLAYLIST_CACHE_TTL"])
+
         if os.path.exists("./local_database/playlist_cache.pkl"):
             with open("./local_database/playlist_cache.pkl", 'rb') as f:
-                return pickle.load(f)
+                 cache.update(pickle.load(f))
 
-        return TTLCache(maxsize=self.config["PLAYLIST_CACHE_SIZE"], ttl=self.config["PLAYLIST_CACHE_TTL"])
+        return cache
 
     async def playlist_cache_updater(self):
         while True:

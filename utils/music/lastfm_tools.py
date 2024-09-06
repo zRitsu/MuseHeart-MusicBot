@@ -23,11 +23,13 @@ class LastFM:
 
     def scrobble_load_cache(self):
 
+        cache = TTLCache(maxsize=10000, ttl=600)
+
         if os.path.exists(cache_file):
             with open(cache_file, 'rb') as f:
-                return pickle.load(f)
+                cache.update(pickle.load(f))
 
-        return TTLCache(maxsize=10000, ttl=600)
+        return cache
 
     def scrobble_save_cache(self):
         with open(cache_file, 'wb') as f:
