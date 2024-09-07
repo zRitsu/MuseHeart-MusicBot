@@ -74,7 +74,8 @@ class BotPool:
         self.ws_client: Optional[WSClient] = None
         self.emoji_data = {}
         self.config = self.load_cfg()
-        self.playlist_cache: TTLCache = self.load_playlist_cache()
+        self.playlist_cache = TTLCache(maxsize=self.config["PLAYLIST_CACHE_SIZE"], ttl=self.config["PLAYLIST_CACHE_TTL"])
+        self.partial_track_cache =  TTLCache(maxsize=1000, ttl=80400)
         self.integration_cache = TTLCache(maxsize=500, ttl=7200)
         self.spotify: Optional[SpotifyClient] = None
         self.deezer = DeezerClient(self.playlist_cache)
@@ -97,22 +98,24 @@ class BotPool:
         self.default_static_skin = self.config.get("DEFAULT_STATIC_SKIN", "default")
         self.default_controllerless_skin = self.config.get("DEFAULT_CONTROLLERLESS_SKIN", "default")
         self.default_idling_skin = self.config.get("DEFAULT_IDLING_SKIN", "default")
-        self.playlist_cache_updater_task: Optional[asyncio.Task] = None
+        self.cache_updater_task: Optional[asyncio.Task] = None
+
+        self.load_cache()
 
     def reset_useragent(self):
         self.current_useragent = generate_user_agent()
 
-    def load_playlist_cache(self):
-
-        cache = TTLCache(maxsize=self.config["PLAYLIST_CACHE_SIZE"], ttl=self.config["PLAYLIST_CACHE_TTL"])
+    def load_cache(self):
 
         if os.path.exists("./local_database/playlist_cache.pkl"):
             with open("./local_database/playlist_cache.pkl", 'rb') as f:
-                 cache.update(pickle.load(f))
+                 self.playlist_cache.update(pickle.load(f))
 
-        return cache
+        if os.path.exists("./local_database/partial_track_cache.pkl"):
+            with open("./local_database/partial_track_cache.pkl", 'rb') as f:
+                 self.partial_track_cache.update(pickle.load(f))
 
-    async def playlist_cache_updater(self):
+    async def cache_updater(self):
         while True:
             await asyncio.sleep(300)
             async with aiofiles.open("./local_database/playlist_cache.pkl", 'wb') as f:
@@ -884,7 +887,7 @@ class BotPool:
 
         if self.config["RUN_RPC_SERVER"]:
 
-            self.playlist_cache_updater_task = loop.create_task(self.playlist_cache_updater())
+            self.cache_updater_task = loop.create_task(self.cache_updater())
 
             if not message:
 
@@ -903,7 +906,7 @@ class BotPool:
 
         else:
 
-            self.playlist_cache_updater_task = loop.create_task(self.playlist_cache_updater())
+            self.cache_updater_task = loop.create_task(self.cache_updater())
 
             loop.create_task(self.connect_rpc_ws())
 

@@ -94,7 +94,7 @@ class PartialPlaylist:
 
 
 class PartialTrack:
-    __slots__ = ('id', 'source_name', 'info', 'playlist', 'unique_id', 'ytid', 'temp_id')
+    __slots__ = ('id', 'source_name', 'info', 'playlist', 'unique_id', 'ytid')
 
     def __init__(self, *, uri: str = "", title: str = "", author="", thumb: str = "", duration: int = 0,
                  requester: int = 0, track_loops: int = 0, source_name: str = "", autoplay: bool = False,
@@ -121,7 +121,6 @@ class PartialTrack:
         self.id = None
         self.ytid = ""
         self.unique_id = str(uuid.uuid4().hex)[:10]
-        self.temp_id = None
         self.playlist: Optional[PartialPlaylist] = playlist
 
     def __repr__(self):
@@ -321,7 +320,7 @@ class LavalinkPlaylist:
 
 
 class LavalinkTrack(wavelink.Track):
-    __slots__ = ('extra', 'playlist', 'unique_id', 'temp_id')
+    __slots__ = ('extra', 'playlist', 'unique_id')
 
     def __init__(self, *args, **kwargs):
         try:
@@ -332,7 +331,6 @@ class LavalinkTrack(wavelink.Track):
         self.title = fix_characters(self.title)
         self.info["title"] = self.title
         self.unique_id = str(uuid.uuid4().hex)[:10]
-        self.temp_id = None
 
         try:
             self.info['sourceName']
@@ -1899,6 +1897,8 @@ class LavalinkPlayer(wavelink.Player):
 
         self.locked = True
 
+        encoded_track = None
+
         if not self.auto_pause:
 
             if track.info["sourceName"] not in self.node.info["sourceManagers"] and not isinstance(track, PartialTrack):
@@ -1945,89 +1945,105 @@ class LavalinkPlayer(wavelink.Player):
                         await self.process_next()
                         return
 
-            if (not self.native_yt or not self.node.prefer_youtube_native_playback) and (track.info["sourceName"] == "youtube" or track.info.get("sourceNameOrig") == "youtube"):
+            partial_data = self.bot.pool.partial_track_cache.get(f'youtube:{track.ytid}')
 
-                if (track.is_stream or track.duration > 480000):
-                    if not self.native_yt:
-                        self.played.append(track)
-                        self.locked = False
-                        await self.process_next()
-                        return
+            if (not self.native_yt or not self.node.prefer_youtube_native_playback):
 
-                else:
-                    tracks = []
+                if (track.info["sourceName"] == "youtube" or not partial_data):
 
-                    exceptions = ""
+                    try:
+                        encoded_track = partial_data[0].id
+                    except:
+                        pass
 
-                    if not track.temp_id:
+                    if (track.is_stream or track.duration > 480000):
+                        if not self.native_yt:
+                            self.played.append(track)
+                            self.locked = False
+                            await self.process_next()
+                            return
 
-                        for provider in self.node.search_providers:
+                    else:
+                        tracks = []
 
-                            if provider in ("ytsearch", "ytmsearch"):
-                                continue
+                        exceptions = ""
 
-                            if track.author.endswith(" - topic"):
-                                query = f"{provider}:{track.title} - {track.author[:-8]}"
-                            else:
-                                query = f"{provider}:{track.title}"
+                        if not partial_data:
 
-                            try:
-                                tracks = await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
-                            except:
-                                exceptions += f"{traceback.format_exc()}\n"
-                                await asyncio.sleep(1)
-                                continue
+                            for provider in self.node.search_providers:
 
-                            try:
-                                tracks = tracks.tracks
-                            except AttributeError:
-                                pass
-
-                            if not [i in track.title.lower() for i in exclude_tags]:
-                                final_result = []
-                                for t in tracks:
-                                    if not any((i in t.title.lower()) for i in exclude_tags):
-                                        final_result.append(t)
-                                        break
-                                tracks = final_result or tracks
-
-                            min_duration = track.duration - 7000
-                            max_duration = track.duration + 7000
-
-                            final_result = []
-
-                            for t in tracks:
-                                if t.is_stream or not min_duration < t.duration < max_duration and Levenshtein.ratio(t.title, track.title) > 0.7:
+                                if provider in ("ytsearch", "ytmsearch"):
                                     continue
-                                final_result.append(t)
 
-                            if not final_result:
-                                continue
+                                if track.author.endswith(" - topic"):
+                                    query = f"{provider}:{track.title} - {track.author[:-8]}"
+                                else:
+                                    query = f"{provider}:{track.title}"
 
-                            tracks = final_result
-                            break
+                                tracks = self.bot.pool.partial_track_cache.get(query)
 
-                        if not tracks:
+                                if not tracks:
 
-                            if not self.native_yt:
+                                    try:
+                                        tracks = await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
+                                    except:
+                                        exceptions += f"{traceback.format_exc()}\n"
+                                        await asyncio.sleep(1)
+                                        continue
 
-                                if exceptions:
-                                    print(exceptions)
-                                self.played.append(track)
-                                self.set_command_log(emoji="⚠️", text=f"A música [`{track.title[:15]}`](<{track.uri}>) será pulada devido a falta de resultado "
-                                                                      "em outras plataformas de música.")
-                                await asyncio.sleep(3)
-                                self.locked = False
-                                await self.process_next()
-                                return
+                                    try:
+                                        tracks = tracks.tracks
+                                    except AttributeError:
+                                        pass
 
-                        else:
-                            alt_track = tracks[0]
-                            track.temp_id = alt_track.id
-                            self.set_command_log(
-                                emoji="▶️",
-                                text=f"Tocando música obtida via metadados: [`{fix_characters(alt_track.title, 20)}`](<{alt_track.uri}>) `| Por: {fix_characters(alt_track.author, 15)}`"
-                            )
+                                    self.bot.pool.partial_track_cache[query] = tracks
+
+                                if not [i in track.title.lower() for i in exclude_tags]:
+                                    final_result = []
+                                    for t in tracks:
+                                        if not any((i in t.title.lower()) for i in exclude_tags):
+                                            final_result.append(t)
+                                            break
+                                    tracks = final_result or tracks
+
+                                min_duration = track.duration - 7000
+                                max_duration = track.duration + 7000
+
+                                final_result = []
+
+                                for t in tracks:
+                                    if t.is_stream or not min_duration < t.duration < max_duration and Levenshtein.ratio(t.title, track.title) > 0.7:
+                                        continue
+                                    final_result.append(t)
+
+                                if not final_result:
+                                    continue
+
+                                tracks = final_result
+                                break
+
+                            if not tracks:
+
+                                if not self.native_yt:
+
+                                    if exceptions:
+                                        print(exceptions)
+                                    self.played.append(track)
+                                    self.set_command_log(emoji="⚠️", text=f"A música [`{track.title[:15]}`](<{track.uri}>) será pulada devido a falta de resultado "
+                                                                          "em outras plataformas de música.")
+                                    await asyncio.sleep(3)
+                                    self.locked = False
+                                    await self.process_next()
+                                    return
+
+                            else:
+                                alt_track = tracks[0]
+                                encoded_track = alt_track.id
+                                self.bot.pool.partial_track_cache[f'youtube:{track.ytid}'] = [alt_track]
+                                self.set_command_log(
+                                    emoji="▶️",
+                                    text=f"Tocando música obtida via metadados: [`{fix_characters(alt_track.title, 20)}`](<{alt_track.uri}>) `| Por: {fix_characters(alt_track.author, 15)}`"
+                                )
 
             elif not track.id:
 
@@ -2080,7 +2096,7 @@ class LavalinkPlayer(wavelink.Player):
                      f"um membro entrar no canal <#{self.channel_id}>)."
             )
         else:
-            await self.play(track, start=start_position, temp_id=track.temp_id)
+            await self.play(track, start=start_position, temp_id=encoded_track)
 
         # TODO: rever essa parte caso adicione função de ativar track loops em músicas da fila
         if self.loop != "current" or force_np or (not self.controller_mode and self.current.track_loops == 0):
@@ -2896,8 +2912,7 @@ class LavalinkPlayer(wavelink.Player):
                             content=None,
                             embed=disnake.Embed(
                                 description=f"🛑 ⠂{self.command_log}",
-                                color=self.bot.get_color(self.guild.me)),
-                            components=song_request_buttons
+                                color=self.bot.get_color(self.guild.me))
                         )
 
                     elif self.controller_mode is True:
@@ -2974,78 +2989,88 @@ class LavalinkPlayer(wavelink.Player):
         try:
 
             exceptions = []
-            tracks = []
+            selected_track = None
 
             if track.info["sourceName"] == "http":
+                tracks = []
                 search_queries = [track.uri or track.search_uri]
             else:
-                if track.info["sourceName"] in self.node.info.get("sourceManagers", []):
-                    search_queries = [track.uri]
-                else:
-                    search_queries = []
-                    for sp in self.node.partial_providers:
-                        if "{isrc}" in sp:
-                            if isrc:=track.info.get('isrc'):
-                                search_queries.append(sp.replace("{isrc}", isrc))
+                tracks = self.bot.pool.partial_track_cache.get(f'{track.info["sourceName"]}:{track.author}-{track.single_title}') or []
+                search_queries = []
+
+            if not tracks:
+
+                if not search_queries:
+
+                    if track.info["sourceName"] in self.node.info.get("sourceManagers", []):
+                        search_queries = [track.uri]
+                    else:
+                        search_queries = []
+                        for sp in self.node.partial_providers:
+                            if "{isrc}" in sp:
+                                if isrc := track.info.get('isrc'):
+                                    search_queries.append(sp.replace("{isrc}", isrc))
+                                continue
+                            search_queries.append(sp.replace("{title}", track.single_title).replace("{author}", ", ".join(track.authors)))
+
+                for query in search_queries:
+
+                    try:
+                        tracks = (await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist))
+                    except Exception as e:
+                        if track.info["sourceName"] == "youtube" and any(e in str(e) for e in (
+                            "This video is not available",
+                            "YouTube WebM streams are currently not supported.",
+                            "Video returned by YouTube isn't what was requested",
+                            "The video returned is not what was requested.",
+                        )
+                               ):
+                            cog = self.bot.get_cog("Music")
+                            cog.remove_provider(self.node.search_providers, ["ytsearch", "ytmsearch"])
+                            cog.remove_provider(self.node.partial_providers, ["ytsearch:\"{isrc}\"",
+                                                                              "ytsearch:\"{title} - {author}\"",
+                                                                              "ytmsearch:\"{isrc}\"",
+                                                                              "ytmsearch:\"{title} - {author}\"",
+                                                                              ])
+                            self.native_yt = False
+                            await self.resolve_track(track)
+                            return
+                        exceptions.append(e)
+                        continue
+
+                    try:
+                        tracks = tracks.tracks
+                    except AttributeError:
+                        pass
+
+                    self.bot.pool.partial_track_cache[f'{track.info["sourceName"]}:{track.author}-{track.single_title}'] = tracks
+
+                    if tracks[0].info["sourceName"] == "bandcamp":
+                        check_duration = False
+
+                    has_exclude_tags = any(tag for tag in exclude_tags if tag.lower() in track.title.lower())
+
+                    for t in tracks:
+
+                        if t.is_stream or Levenshtein.ratio(t.title, track.title) < 0.8:
                             continue
-                        search_queries.append(sp.replace("{title}", track.single_title).replace("{author}", ", ".join(track.authors)))
 
-            for query in search_queries:
+                        if not has_exclude_tags and any(tag for tag in exclude_tags if tag.lower() in t.title.lower()):
+                            continue
 
-                try:
-                    tracks = (await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist))
-                except Exception as e:
-                    if track.info["sourceName"] == "youtube" and any(e in str(e) for e in (
-                        "This video is not available",
-                        "YouTube WebM streams are currently not supported.",
-                        "Video returned by YouTube isn't what was requested",
-                        "The video returned is not what was requested.",
-                    )
-                           ):
-                        cog = self.bot.get_cog("Music")
-                        cog.remove_provider(self.node.search_providers, ["ytsearch", "ytmsearch"])
-                        cog.remove_provider(self.node.partial_providers, ["ytsearch:\"{isrc}\"",
-                                                                          "ytsearch:\"{title} - {author}\"",
-                                                                          "ytmsearch:\"{isrc}\"",
-                                                                          "ytmsearch:\"{title} - {author}\"",
-                                                                          ])
-                        self.native_yt = False
-                        await self.resolve_track(track)
-                        return
-                    exceptions.append(e)
-                    continue
+                        if check_duration and ((t.duration - 10000) < track.duration < (t.duration + 10000)):
+                            selected_track = t
+                            break
 
-                if tracks:
+                    if not tracks:
+                        continue
+
                     break
-
-            try:
-                tracks = tracks.tracks
-            except AttributeError:
-                pass
 
             if not tracks:
                 if exceptions:
                     print("Falha ao resolver PartialTrack:\n" + "\n".join(repr(e) for e in exceptions))
                 return
-
-            selected_track = None
-
-            if tracks[0].info["sourceName"] == "bandcamp":
-                check_duration = False
-
-            has_exclude_tags = any(tag for tag in exclude_tags if tag.lower() in track.title.lower())
-
-            for t in tracks:
-
-                if t.is_stream:
-                    continue
-
-                if not has_exclude_tags and any(tag for tag in exclude_tags if tag.lower() in t.title.lower()):
-                    continue
-
-                if check_duration and ((t.duration - 10000) < track.duration < (t.duration + 10000)):
-                    selected_track = t
-                    break
 
             if not selected_track:
                 selected_track = tracks[0]
