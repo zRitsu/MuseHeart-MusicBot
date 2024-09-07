@@ -5,6 +5,7 @@ import datetime
 import traceback
 from typing import TYPE_CHECKING, Optional
 
+import Levenshtein
 import disnake
 from aiohttp import ClientSession
 from disnake.ext import commands
@@ -513,13 +514,15 @@ class LastFmCog(commands.Cog):
 
                     if (fmdata := self.bot.last_fm.cache.get(track_query)) is None:
 
-                        result = await player.bot.spotify.get_tracks(query=f"{track.author} - {track.title}" if len(track.title) < 11 else track.title,
-                                                                     requester=self.bot.user.id, bot=self.bot)
+                        result = await player.bot.spotify.get_tracks(
+                            query=f"{track.author} - {track.title}" if len(track.title) < 11 else track.title,
+                            requester=self.bot.user.id, bot=self.bot
+                        )
 
                         if not [t for t in exclude_tags if t.lower() in track.title]:
-                            result = [t for t in result if (t.duration - 10000) < track.duration < (t.duration + 10000) and check_track_title(t.title)]
+                            result = [t for t in result if (t.duration - 10000) < track.duration < (t.duration + 10000) and Levenshtein.ratio(t.title, track.title) > 0.7 and check_track_title(t.title)]
                         else:
-                            result = [t for t in result if (t.duration - 10000) < track.duration < (t.duration + 10000)]
+                            result = [t for t in result if (t.duration - 10000) < track.duration < (t.duration + 10000) and Levenshtein.ratio(t.title, track.title) > 0.7]
 
                         if not result:
                             print(f"⚠️ - Last.FM Scrobble - Sem resultados para a música: {track_query}")
