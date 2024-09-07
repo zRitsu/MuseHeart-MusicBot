@@ -24,6 +24,7 @@ import wavelink
 from utils.db import DBModel
 from utils.music.checks import can_connect
 from utils.music.converters import fix_characters, time_format, get_button_style
+from utils.music.errors import GenericError, PoolException
 from utils.music.filters import AudioFilter
 from utils.music.skin_utils import skin_converter
 from utils.others import music_source_emoji, send_idle_embed, PlayerControls, song_request_buttons
@@ -698,29 +699,7 @@ class LavalinkPlayer(wavelink.Player):
 
     async def reconnect_voice_channel(self):
 
-        try:
-            vc = self.bot.get_channel(self.last_channel.id)
-        except AttributeError:
-            vc = None
-
-        if not vc:
-
-            msg = "O canal de voz foi excluido..."
-
-            if self.static:
-                self.set_command_log(msg)
-                await self.destroy()
-
-            else:
-                if self.text_channel:
-                    try:
-                        self.bot.loop.create_task(self.text_channel.send(embed=disnake.Embed(
-                        description=msg,
-                        color=self.bot.get_color(self.guild.me)), delete_after=7))
-                    except:
-                        traceback.print_exc()
-                await self.destroy()
-                return
+        channel_check_retries = 2
 
         while True:
 
@@ -728,6 +707,37 @@ class LavalinkPlayer(wavelink.Player):
                 self.bot.music.players[self.guild_id]
             except KeyError:
                 return
+
+            try:
+                vc = self.bot.get_channel(self.last_channel.id)
+            except AttributeError:
+                vc = None
+
+            if not vc:
+
+                if channel_check_retries > 0:
+                    await asyncio.sleep(5)
+                    continue
+
+                channel_check_retries -= 1
+
+                msg = "O canal de voz foi excluido..."
+
+                if self.static:
+                    self.set_command_log(msg)
+                    await self.destroy()
+                    return
+
+                else:
+                    if self.text_channel:
+                        try:
+                            self.bot.loop.create_task(self.text_channel.send(embed=disnake.Embed(
+                                description=msg,
+                                color=self.bot.get_color(self.guild.me)), delete_after=7))
+                        except:
+                            traceback.print_exc()
+                    await self.destroy()
+                    return
 
             if self.guild.me.voice:
                 if isinstance(vc, disnake.StageChannel) \
@@ -746,21 +756,36 @@ class LavalinkPlayer(wavelink.Player):
 
                 try:
                     can_connect(vc, self.guild, bot=self.bot)
-                except Exception as e:
-                    self.set_command_log(f"O player foi finalizado devido ao erro: {e}")
-                    await self.destroy()
-                    return
-
-                try:
-                    await self.connect(vc.id)
-                    self.set_command_log(text=f"Notei uma tentativa de me desconectarem do canal <#{vc.id}>.\n"
-                                              f"Caso realmente queira me desconectar, use o comando/botão: **stop**.",
-                                           emoji="⚠️")
+                except (GenericError, PoolException) as e:
+                    self.set_command_log(f"Ocorreu uma falha ao reconectar o player no canal de voz: {e}.")
                     self.update = True
-                    await asyncio.sleep(5)
-                    continue
-                except Exception:
-                    traceback.print_exc()
+                except Exception as e:
+                    self.set_command_log(f"Ocorreu uma falha ao reconectar o player no canal de voz: {repr(e)}.")
+                    self.update = True
+                else:
+                    if (ping := round(self.bot.latency * 1000)) > 250:
+                        voice_msg = f"Reconectei no canal de voz devido a um possível problema de instabilidade ne conexão (ping: {ping}ms)."
+                    elif self.keep_connected:
+                        voice_msg = f"Notei uma tentativa de me desconectarem do canal <#{vc.id}>."
+                    else:
+                        voice_msg = None
+
+                    if not voice_msg:
+                        self.set_command_log(text=f"O plater foi finalizado por perca de conexão no canal <#{vc.id}>.",
+                                             emoji="⚠️")
+                        await self.destroy()
+                        return
+
+                    try:
+                        await self.connect(vc.id)
+                        self.set_command_log(
+                            text=f"{voice_msg}\nCaso realmente queira me desconectar, use o comando/botão: **stop**.",
+                            emoji="⚠️")
+                        self.update = True
+                        await asyncio.sleep(5)
+                        continue
+                    except Exception:
+                        traceback.print_exc()
 
             await asyncio.sleep(30)
 
