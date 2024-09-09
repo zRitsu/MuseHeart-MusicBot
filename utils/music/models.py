@@ -699,7 +699,7 @@ class LavalinkPlayer(wavelink.Player):
 
     async def reconnect_voice_channel(self):
 
-        channel_check_retries = 2
+        channel_check_retries = 0
 
         while True:
 
@@ -715,11 +715,10 @@ class LavalinkPlayer(wavelink.Player):
 
             if not vc:
 
-                if channel_check_retries > 0:
-                    await asyncio.sleep(5)
+                if channel_check_retries < 3:
+                    channel_check_retries += 1
+                    await asyncio.sleep(3 * channel_check_retries)
                     continue
-
-                channel_check_retries -= 1
 
                 msg = "O canal de voz foi excluido..."
 
