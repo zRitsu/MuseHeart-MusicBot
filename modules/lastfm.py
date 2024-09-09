@@ -510,19 +510,43 @@ class LastFmCog(commands.Cog):
 
                 else:
 
-                    track_query = f"{track.title} - {track.author}"
+                    track_query = f"{track.title}"
 
                     if (fmdata := self.bot.last_fm.cache.get(track_query)) is None:
 
-                        result = await player.bot.spotify.get_tracks(
-                            query=f"{track.author} - {track.title}" if len(track.title) < 11 else track.title,
-                            requester=self.bot.user.id, bot=self.bot
-                        )
+                        result = None
 
-                        if not [t for t in exclude_tags if t.lower() in track.title]:
-                            result = [t for t in result if (t.duration - 10000) < track.duration < (t.duration + 10000) and Levenshtein.ratio(t.title, track.title) > 0.7 and check_track_title(t.title)]
-                        else:
-                            result = [t for t in result if (t.duration - 10000) < track.duration < (t.duration + 10000) and Levenshtein.ratio(t.title, track.title) > 0.7]
+                        def filter_result(result):
+                            if not [t for t in exclude_tags if t.lower() in track.title]:
+                                result_ = [t for t in result if Levenshtein.ratio(f"{t.author.lower()} - {t.single_title.lower()}", track.title.lower()) > 0.6 and check_track_title(t.title)]
+                            else:
+                                result_ = [t for t in result if Levenshtein.ratio(f"{t.author.lower()} - {t.single_title.lower()}", track.title.lower()) > 0.6]
+
+                            return result_
+
+                        try:
+                            result = filter_result(await player.bot.spotify.get_tracks(
+                                query=f"{track.author} - {track.title}" if len(track.title) < 11 else track.title,
+                                requester=self.bot.user.id, bot=self.bot
+                            ))
+                        except:
+                            traceback.print_exc()
+
+                        if not result:
+                            try:
+                                result = filter_result(await player.bot.deezer.get_tracks(
+                                    url=f"{track.author} - {track.title}" if len(track.title) < 11 else track.title,
+                                    requester=self.bot.user.id
+                                ))
+                            except:
+                                traceback.print_exc()
+
+                        if not result:
+                            if self.bot.config["USE_YTM_TRACKINFO_SCROBBLE"]:
+                                try:
+                                    result = filter_result(await player.node.get_tracks(f"ytmsearch:{track_query}", track_cls=LavalinkTrack))
+                                except:
+                                    traceback.print_exc()
 
                         if not result:
                             print(f"⚠️ - Last.FM Scrobble - Sem resultados para a música: {track_query}")
@@ -530,10 +554,15 @@ class LastFmCog(commands.Cog):
                             self.bot.last_fm.scrobble_save_cache()
                             return
 
+                        try:
+                            track = result[0]
+                        except AttributeError:
+                            track = result
+
                         fmdata = {
-                            "name": result[0].single_title,
-                            "artist": result[0].author,
-                            "album": result[0].album_name,
+                            "name": track.single_title,
+                            "artist": track.author,
+                            "album": track.album_name,
                         }
 
                         self.bot.last_fm.cache[track_query] = fmdata
