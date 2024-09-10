@@ -3375,7 +3375,7 @@ class Music(commands.Cog):
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
         player.command_log = f"{inter.author.mention} **parou o player!**"
 
-        self.song_select_cooldown.get_bucket(inter).update_rate_limit()
+        self.bot.pool.song_select_cooldown.get_bucket(inter).update_rate_limit()
 
         if isinstance(inter, disnake.MessageInteraction):
             await player.destroy(inter=inter_destroy)
