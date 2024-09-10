@@ -66,6 +66,8 @@ class BotPool:
     enqueue_playlist_embed_cooldown = commands.CooldownMapping.from_cooldown(rate=1, per=14,
                                                                                   type=commands.BucketType.user)
 
+    song_select_cooldown = commands.CooldownMapping.from_cooldown(rate=2, per=15, type=commands.BucketType.member)
+
     def __init__(self):
         self.user_prefix_cache = {}
         self.guild_prefix_cache = {}
