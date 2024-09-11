@@ -5396,6 +5396,7 @@ class Music(commands.Cog):
                     return
 
                 user_data["lastfm"]["scrobble"] = not user_data["lastfm"]["scrobble"]
+                self.bot.pool.lastfm_sessions[interaction.author.id] = user_data["lastfm"]
                 await self.bot.update_global_data(interaction.author.id, user_data, db_name=DBModel.users)
                 await interaction.edit_original_message(
                     embed=disnake.Embed(
