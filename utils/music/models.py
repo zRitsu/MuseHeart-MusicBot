@@ -1969,16 +1969,11 @@ class LavalinkPlayer(wavelink.Player):
                         await self.process_next()
                         return
 
-            partial_data = self.bot.pool.partial_track_cache.get(f'youtube:{track.ytid}')
+            partial_data = self.bot.pool.partial_track_cache.get(track.id)
 
-            if (not self.native_yt or not self.node.prefer_youtube_native_playback):
+            if not self.native_yt or not self.node.prefer_youtube_native_playback:
 
-                if (track.info["sourceName"] == "youtube" or not partial_data):
-
-                    try:
-                        encoded_track = partial_data[0].id
-                    except:
-                        pass
+                if track.info["sourceName"] == "youtube" or (partial_data and partial_data[0].info["sourceName"] == "youtube"):
 
                     if (track.is_stream or track.duration > 480000):
                         if not self.native_yt:
@@ -1986,6 +1981,11 @@ class LavalinkPlayer(wavelink.Player):
                             self.locked = False
                             await self.process_next()
                             return
+
+                        try:
+                            encoded_track = partial_data[0].id
+                        except:
+                            pass
 
                     else:
                         tracks = []
@@ -2046,28 +2046,31 @@ class LavalinkPlayer(wavelink.Player):
                                 tracks = final_result
                                 break
 
-                            if not tracks:
+                        else:
+                            tracks = partial_data
 
-                                if not self.native_yt:
+                        if not tracks:
 
-                                    if exceptions:
-                                        print(exceptions)
-                                    self.played.append(track)
-                                    self.set_command_log(emoji="⚠️", text=f"A música [`{track.title[:15]}`](<{track.uri}>) será pulada devido a falta de resultado "
-                                                                          "em outras plataformas de música.")
-                                    await asyncio.sleep(3)
-                                    self.locked = False
-                                    await self.process_next()
-                                    return
+                            if not self.native_yt:
 
-                            else:
-                                alt_track = tracks[0]
-                                encoded_track = alt_track.id
-                                self.bot.pool.partial_track_cache[f'youtube:{track.ytid}'] = [alt_track]
-                                self.set_command_log(
-                                    emoji="▶️",
-                                    text=f"Tocando música obtida via metadados: [`{fix_characters(alt_track.title, 20)}`](<{alt_track.uri}>) `| Por: {fix_characters(alt_track.author, 15)}`"
-                                )
+                                if exceptions:
+                                    print(exceptions)
+                                self.played.append(track)
+                                self.set_command_log(emoji="⚠️", text=f"A música [`{track.title[:15]}`](<{track.uri}>) será pulada devido a falta de resultado "
+                                                                      "em outras plataformas de música.")
+                                await asyncio.sleep(3)
+                                self.locked = False
+                                await self.process_next()
+                                return
+
+                        else:
+                            alt_track = tracks[0]
+                            encoded_track = alt_track.id
+                            self.bot.pool.partial_track_cache[f'youtube:{track.ytid}'] = [alt_track]
+                            self.set_command_log(
+                                emoji="▶️",
+                                text=f"Tocando música obtida via metadados: [`{fix_characters(alt_track.title, 20)}`](<{alt_track.uri}>) `| Por: {fix_characters(alt_track.author, 15)}`"
+                            )
 
             elif not track.id:
 
