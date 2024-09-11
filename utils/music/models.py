@@ -2940,7 +2940,7 @@ class LavalinkPlayer(wavelink.Player):
                             embed=disnake.Embed(
                                 description=f"🛑 ⠂{self.command_log}",
                                 color=self.bot.get_color(self.guild.me)),
-                            view=song_request_buttons if self.static else None
+                            view=None
                         )
 
                     elif self.controller_mode is True:
