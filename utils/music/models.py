@@ -53,6 +53,8 @@ providers_dict = {
     "tidal": "tdsearch",
 }
 
+native_sources = ("http", "youtube", "soundcloud", "tts", "reddit", "ocremix", "tiktok", "mixcloud", "soundgasm", "flowerytts", "vimeo", "twitch", "bandcamp", "local")
+
 
 def get_start_pos(player, track, extra_milliseconds=0):
     if not track.is_stream:
@@ -3030,7 +3032,7 @@ class LavalinkPlayer(wavelink.Player):
 
                 if not search_queries:
 
-                    if track.info["sourceName"] in self.node.info.get("sourceManagers", []):
+                    if track.info["sourceName"] in self.node.info.get("sourceManagers", []) and (not self.node.only_use_native_search_providers or track.info["sourceName"] in native_sources):
                         search_queries = [track.uri]
                     else:
                         search_queries = []

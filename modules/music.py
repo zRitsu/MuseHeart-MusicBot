@@ -34,7 +34,8 @@ from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolExc
     EmptyFavIntegration, DiffVoiceChannel, NoPlayer, YoutubeSourceDisabled
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction, FavMenuView, ViewMode, \
     SetStageTitle, SelectBotVoice
-from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, PartialTrack, PartialPlaylist
+from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, PartialTrack, PartialPlaylist, \
+    native_sources
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, song_request_buttons, \
     select_bot_pool, ProgressBar, update_inter, get_source_emoji_cfg
@@ -6668,12 +6669,16 @@ class Music(commands.Cog):
 
             with suppress(IndexError, ValueError):
 
-                if "deezer" not in node.info["sourceManagers"] or node.only_use_native_search_providers is True:
+                if "deezer" not in node.info["sourceManagers"]:
+                    node.native_sources.remove("deezer")
                     self.remove_provider(node.search_providers, ["dzsearch"])
                     self.remove_provider(node.partial_providers, ["dzisrc:{isrc}", "dzsearch:{title} - {author}"])
-                elif "dzsearch" not in node.search_providers and node.only_use_native_search_providers is False:
+                elif "dzsearch" not in node.search_providers:
+                    node.native_sources.add("deezer")
                     self.add_provider(node.search_providers, ["dzsearch"])
                     self.add_provider(node.partial_providers, ["dzisrc:{isrc}", "dzsearch:{title} - {author}"])
+                else:
+                    node.native_sources.add("deezer")
 
                 if "tidal" not in node.info["sourceManagers"] or node.only_use_native_search_providers is True:
                     self.remove_provider(node.search_providers, ["tdsearch"])
@@ -6773,6 +6778,7 @@ class Music(commands.Cog):
         node.search_providers = search_providers
         node.original_providers = set(node.search_providers)
         node.partial_providers = []
+        node.native_sources = deepcopy(native_sources)
         node.prefer_youtube_native_playback = data.pop("prefer_youtube_native_playback", True)
         node.only_use_native_search_providers = data.pop("only_use_native_search_providers", True)
 
@@ -6849,8 +6855,6 @@ class Music(commands.Cog):
                     raise GenericError("**Não há servidores de música disponível!**")
 
                 exceptions = set()
-
-                tracks = []
 
                 is_yt_source = query.lower().startswith(
                     ("https://youtu.be", "https://www.youtube.com", "https://music.youtube.com")

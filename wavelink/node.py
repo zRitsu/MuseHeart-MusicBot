@@ -125,6 +125,7 @@ class Node:
         self.search_providers = []
         self.partial_providers = []
         self.original_providers = []
+        self.native_sources = kwargs.pop("native_sources", set())
 
         self._closing = False
         self._is_connecting = False
