@@ -4,6 +4,7 @@ from __future__ import annotations
 import re
 from typing import Optional
 
+import Levenshtein
 from aiohttp import ClientSession
 from cachetools import TTLCache
 
@@ -82,6 +83,9 @@ class DeezerClient:
                         identifier=result['id'],
                         requester=requester
                     )
+
+                    if Levenshtein.ratio(url.lower(), f"{t.authors_string} - {t.single_title}".lower()) < 0.8:
+                        continue
 
                     t.info["isrc"] = result.get('isrc')
                     artists = result.get('contributors') or [result['artist']]

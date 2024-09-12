@@ -31,6 +31,8 @@ import traceback
 from typing import Any, Callable, Dict, Optional, Union, List
 from urllib.parse import quote
 
+import Levenshtein
+
 from utils.music.youtube_trusted_session_generator import Browser
 from .backoff import ExponentialBackoff
 from .errors import *
@@ -43,6 +45,24 @@ yt_playlist_regex = re.compile(r"[?&]list=([^&]+)")
 spotify_regex = re.compile("https://open.spotify.com?.+(album|playlist|artist)/([a-zA-Z0-9]+)")
 deezer_regex = re.compile(r"(https?://)?(www\.)?deezer\.com/(?P<countrycode>[a-zA-Z]{2}/)?(?P<type>album|playlist|artist|profile)/(?P<identifier>[0-9]+)")
 soundcloud_regex = re.compile(r"https://soundcloud\.com/([^/]+)/sets/([^/]+)")
+
+
+def check_title(query, track):
+
+    try:
+        if track.ytid:
+            if track.author.endswith(" - topic") and not track.author.endswith(
+                    "Release - topic") and not track.title.startswith(track.author[:-8]):
+                title = f"{track.author} - {track.title}"
+            else:
+                title = f"{track.title.lower()}"
+        else:
+            title = f"{track.single_title} - {track.authors_string}"
+
+        return Levenshtein.ratio(query.strip().lower(), title) > 0.7
+
+    except AttributeError:
+        return True
 
 
 class Node:
@@ -452,11 +472,13 @@ class Node:
 
         track_cls = kwargs.pop('track_cls', Track)
 
+
+
         tracks = [
             track_cls(id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo", {}), **kwargs) for
             track in tracks]
 
-        return tracks
+        return [t for t in tracks if check_title(query=query, track=t)]
 
         __log__.warning(f'REST | {self.identifier} | Failure to load tracks after 5 attempts.')
 

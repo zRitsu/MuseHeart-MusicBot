@@ -12,6 +12,7 @@ from tempfile import gettempdir
 from typing import Optional, TYPE_CHECKING, Union
 from urllib.parse import quote
 
+import Levenshtein
 import aiofiles
 from aiohttp import ClientSession
 
@@ -230,6 +231,9 @@ class SpotifyClient:
                         identifier=result["id"],
                         requester=requester
                     )
+
+                    if Levenshtein.ratio(query.lower(), f"{t.authors_string} - {t.single_title}".lower()) < 0.8:
+                        continue
 
                     try:
                         t.info["isrc"] = result["external_ids"]["isrc"]
