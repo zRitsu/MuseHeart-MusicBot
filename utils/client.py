@@ -337,6 +337,7 @@ class BotPool:
                 'retries': 120,
                 'retry_403': False,
                 'prefer_youtube_native_playback': self.config["PREFER_YOUTUBE_NATIVE_PLAYBACK"],
+                'only_use_native_search_providers': self.config["ONLY_USE_NATIVE_SEARCH_PROVIDERS"],
                 'search_providers': self.config["SEARCH_PROVIDERS"].strip().split() or ["amsearch", "tdsearch", "spsearch", "ytsearch", "scsearch"]
             }
             loop.create_task(self.check_node(localnode, loop=loop))
@@ -541,6 +542,7 @@ class BotPool:
                     value["search"] = value.get("search", "").lower() != "false"
                     value["retry_403"] = value.get("retry_403", "").lower() == "true"
                     value["prefer_youtube_native_playback"] = value.get("prefer_youtube_native_playback", "").lower() == "true"
+                    value["only_use_native_search_providers"] = value.get("only_use_native_search_providers", "").lower() == "true"
                     value["search_providers"] = value.get("search_providers", "").strip().split()
                     LAVALINK_SERVERS[key] = value
 

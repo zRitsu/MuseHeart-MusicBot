@@ -121,6 +121,10 @@ class Node:
         self.info = {"sourceManagers": []}
         self.plugin_names: Optional[List] = None
         self.max_retries = kwargs.pop("max_retries", 1)
+        self.only_use_native_search_providers = kwargs.pop("only_use_native_search_providers", False)
+        self.search_providers = []
+        self.partial_providers = []
+        self.original_providers = []
 
         self._closing = False
         self._is_connecting = False
