@@ -53,7 +53,7 @@ providers_dict = {
     "tidal": "tdsearch",
 }
 
-native_sources = ("http", "youtube", "soundcloud", "tts", "reddit", "ocremix", "tiktok", "mixcloud", "soundgasm", "flowerytts", "vimeo", "twitch", "bandcamp", "local")
+native_sources = set("http", "youtube", "soundcloud", "tts", "reddit", "ocremix", "tiktok", "mixcloud", "soundgasm", "flowerytts", "vimeo", "twitch", "bandcamp", "local")
 
 
 def get_start_pos(player, track, extra_milliseconds=0):
