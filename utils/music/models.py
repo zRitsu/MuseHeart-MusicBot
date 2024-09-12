@@ -580,7 +580,7 @@ class LavalinkPlayer(wavelink.Player):
         if self.bot.config["USE_YTDL"]:
             hint_platforms.append("youtube, soundcloud")
 
-        if self.bot.spotify and not self.bot.spotify.disabled:
+        if (self.bot.spotify and not self.bot.spotify.disabled) or "spotify" in self.node.info["sourceManagers"]:
             hint_platforms.append("spotify")
 
         hint_platforms.append("deezer")
