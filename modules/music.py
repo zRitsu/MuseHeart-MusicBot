@@ -4998,7 +4998,6 @@ class Music(commands.Cog):
             "position": 0,
             "options": False,
             "manual_selection": True,
-            "repeat_amount": 0,
             "server": None,
             "force_play": "no"
         }
@@ -5405,7 +5404,6 @@ class Music(commands.Cog):
                     "query": kwargs.get("query", ""),
                     "position": 0,
                     "options": False,
-                    "repeat_amount": 0,
                     "server": None,
                     "force_play": "no"
                 }
@@ -5740,7 +5738,6 @@ class Music(commands.Cog):
                     "position": position or 0,
                     "options": False,
                     "manual_selection": True,
-                    "repeat_amount": 0,
                     "server": None,
                     "force_play": "no",
                 }
