@@ -3,14 +3,14 @@ from __future__ import annotations
 import asyncio
 import datetime
 import traceback
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, List
 
 import Levenshtein
 import disnake
 from aiohttp import ClientSession
 from disnake.ext import commands
 
-from utils.db import DBModel
+from utils.db import DBModel, scrobble_model
 from utils.music.errors import GenericError
 from utils.music.lastfm_tools import LastFmException
 from utils.music.models import LavalinkPlayer, LavalinkTrack, exclude_tags
@@ -445,6 +445,21 @@ class LastFmCog(commands.Cog):
     async def update_np(self, player: LavalinkPlayer):
         await self.startscrooble(player, track=player.current or player.last_track, update_np=True)"""
 
+    async def save_scrobble(self, query: str, track: LavalinkTrack, users: List[disnake.Member]):
+
+        for u in users:
+
+            data = await self.bot.pool.local_database.get_data(u.id, collection="scrobbles", db_name=DBModel.users,
+                                                               default_model=scrobble_model)
+            data["tracks"].append(
+                {
+                    "query": query,
+                    "duration": track.duration,
+                }
+            )
+            await self.bot.pool.local_database.update_data(u.id, data, collection="scrobbles", db_name=DBModel.users,
+                                                           default_model=scrobble_model)
+
     @commands.Cog.listener('on_wavelink_track_end')
     async def startscrooble(self, player: LavalinkPlayer, track: LavalinkTrack, reason: str = None, update_np=False, users=None):
 
@@ -510,7 +525,7 @@ class LastFmCog(commands.Cog):
 
                 else:
 
-                    track_query = f"{track.title}"
+                    track_query = track.title
 
                     if (fmdata := self.bot.last_fm.cache.get(track_query)) is None:
 
@@ -552,6 +567,7 @@ class LastFmCog(commands.Cog):
                             print(f"⚠️ - Last.FM Scrobble - Sem resultados para a música: {track_query}")
                             self.bot.last_fm.cache[track_query] = {}
                             self.bot.last_fm.scrobble_save_cache()
+                            await self.save_scrobble(query=track_query, track=track, users=users)
                             return
 
                         try:
@@ -570,6 +586,7 @@ class LastFmCog(commands.Cog):
 
                     if not fmdata:
                         print(f"⚠️ - Last.FM Scrobble - Ignorado: {track_query}")
+                        await self.save_scrobble(query=track_query, track=track, users=users)
                         return
 
                     name = fmdata["name"]

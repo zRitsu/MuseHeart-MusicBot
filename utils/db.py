@@ -51,6 +51,13 @@ db_models = {
     }
 }
 
+scrobble_model = {
+    DBModel.users: {
+        "ver": 1.0,
+        "tracks": []
+    }
+}
+
 global_db_models = {
     DBModel.users: {
         "ver": 1.6,
