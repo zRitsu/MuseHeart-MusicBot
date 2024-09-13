@@ -47,24 +47,6 @@ deezer_regex = re.compile(r"(https?://)?(www\.)?deezer\.com/(?P<countrycode>[a-z
 soundcloud_regex = re.compile(r"https://soundcloud\.com/([^/]+)/sets/([^/]+)")
 
 
-def check_track_title(query, track):
-
-    try:
-        if track.ytid:
-            if track.author.endswith(" - topic") and not track.author.endswith(
-                    "Release - topic") and not track.title.startswith(track.author[:-8]):
-                title = f"{track.author} - {track.title}"
-            else:
-                title = f"{track.title.lower()}"
-        else:
-            title = f"{track.single_title} - {track.authors_string}"
-
-        return Levenshtein.ratio(query.strip().lower(), title) > 0.7
-
-    except AttributeError:
-        return True
-
-
 class Node:
     """A WaveLink Node instance.
 
@@ -472,14 +454,9 @@ class Node:
 
         track_cls = kwargs.pop('track_cls', Track)
 
-        tracks = [
+        return [
             track_cls(id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo", {}), **kwargs) for
             track in tracks]
-
-        if not kwargs.get("check_title"):
-            return tracks
-
-        return [t for t in tracks if check_track_title(query=query, track=t)]
 
         __log__.warning(f'REST | {self.identifier} | Failure to load tracks after 5 attempts.')
 

@@ -6835,11 +6835,11 @@ class Music(commands.Cog):
 
         if (bot.pool.config["FORCE_USE_DEEZER_CLIENT"] or [n for n in bot.music.nodes.values() if
                                                            "deezer" not in n.info.get("sourceManagers", [])]):
-            tracks = await self.bot.pool.deezer.get_tracks(url=query, requester=user.id, search=False, check_title=True)
+            tracks = await self.bot.pool.deezer.get_tracks(url=query, requester=user.id, search=False)
 
         if not tracks:
 
-            tracks = await self.bot.pool.spotify.get_tracks(self.bot, user.id, query, search=False, check_title=True)
+            tracks = await self.bot.pool.spotify.get_tracks(self.bot, user.id, query, search=False)
 
             if not tracks:
 
@@ -6893,8 +6893,7 @@ class Music(commands.Cog):
                         try:
                             search_query = f"{search_provider}:{query}" if source else query
                             tracks = await n.get_tracks(
-                                search_query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id,
-                                check_title=True
+                                search_query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
                             )
                         except Exception as e:
                             exceptions.add(repr(e))
