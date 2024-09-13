@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import traceback
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Union
 
 import disnake
 from aiohttp import ClientSession
@@ -72,6 +72,13 @@ class ErrorHandler(commands.Cog):
         except:
             pass"""
 
+    @commands.Cog.listener('on_custom_error')
+    async def custom_error_event(self, ctx: Union[disnake.AppCmdInter, CustomContext], error: Exception):
+        if isinstance(ctx, (CustomContext, disnake.Message)):
+            await self.on_legacy_command_error(ctx=ctx, error=error, send_webhook=True)
+        else:
+            await self.process_interaction_error(inter=ctx, error=error,send_webhook=True)
+
     @commands.Cog.listener('on_user_command_error')
     @commands.Cog.listener('on_message_command_error')
     @commands.Cog.listener('on_slash_command_error')
@@ -79,7 +86,7 @@ class ErrorHandler(commands.Cog):
 
         await self.process_interaction_error(inter=inter, error=error)
 
-    async def process_interaction_error(self, inter: disnake.AppCmdInter, error: Exception):
+    async def process_interaction_error(self, inter: disnake.AppCmdInter, error: Exception, send_webhook = False):
 
         if isinstance(error, PoolException):
             return
@@ -90,7 +97,6 @@ class ErrorHandler(commands.Cog):
             return
 
         kwargs = {"text": ""}
-        send_webhook = False
         color = disnake.Color.red()
 
         try:
@@ -172,7 +178,7 @@ class ErrorHandler(commands.Cog):
                 await self.on_legacy_command_error(ctx, e)
 
     @commands.Cog.listener("on_command_error")
-    async def on_legacy_command_error(self, ctx: CustomContext, error: Exception):
+    async def on_legacy_command_error(self, ctx: CustomContext, error: Exception, send_webhook=False):
 
         """if not isinstance(error, commands.MaxConcurrencyReached):
             try:
@@ -216,7 +222,6 @@ class ErrorHandler(commands.Cog):
 
         error_msg, full_error_msg, kill_process, components, mention_author = parse_error(ctx, error)
         kwargs = {"content": ""}
-        send_webhook = False
 
         if ctx.author.bot or mention_author:
             kwargs["content"] = ctx.author.mention

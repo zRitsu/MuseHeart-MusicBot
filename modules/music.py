@@ -192,7 +192,6 @@ class Music(commands.Cog):
             position=0,
             options="",
             manual_selection=False,
-            repeat_amount=0,
             force_play="no",
         )
 
@@ -218,8 +217,6 @@ class Music(commands.Cog):
             ),
             options: str = commands.Param(name="opções", description="Opções para processar playlist",
                                           choices=playlist_opts, default=False),
-            repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.",
-                                                default=0),
             server: str = commands.Param(name="server", desc="Usar um servidor de música específico na busca.",
                                          default=None),
             manual_bot_choice: str = commands.Param(
@@ -240,7 +237,6 @@ class Music(commands.Cog):
             force_play=force_play,
             options=options,
             manual_selection=True,
-            repeat_amount=repeat_amount,
             server=server,
             manual_bot_choice=manual_bot_choice
         )
@@ -440,8 +436,7 @@ class Music(commands.Cog):
             raise GenericError("**Número da posição da fila tem que ser 1 ou superior.**")
 
         await self.play.callback(self=self, inter=ctx, query=query, position=position, options=False,
-                                 force_play="no", manual_selection=False,
-                                 repeat_amount=0, server=None)
+                                 force_play="no", manual_selection=False, server=None)
 
     stage_flags = CommandArgparse()
     stage_flags.add_argument('query', nargs='*', help="nome ou link da música")
@@ -451,7 +446,6 @@ class Music(commands.Cog):
     stage_flags.add_argument('-shuffle', '-sl', action='store_true', help='Misturar as músicas adicionadas (efetivo apenas ao adicionar playlist).')
     stage_flags.add_argument('-select', '-s', action='store_true', help='Escolher a música entre os resultados encontrados.')
     stage_flags.add_argument('-force', '-now', '-n', '-f', action='store_true', help='Tocar a música adicionada imediatamente (efetivo apenas se houver uma música tocando atualmente.)')
-    stage_flags.add_argument('-loop', '-lp', type=int, default=0, help="Definir a quantidade de repetições da música escolhida.\nEx: -loop 5")
     stage_flags.add_argument('-server', '-sv', type=str, default=None, help='Usar um servidor de música específico.')
     stage_flags.add_argument('-selectbot', '-sb', action="store_true", help="Selecionar um bot disponível manualmente.")
 
@@ -474,7 +468,6 @@ class Music(commands.Cog):
             options = "shuffle" if args.shuffle else "reversed" if args.reverse else None,
             force_play = "yes" if args.force else "no",
             manual_selection = args.select,
-            repeat_amount = args.loop,
             server = args.server,
             manual_bot_choice = "yes" if args.selectbot else "no",
         )
@@ -488,7 +481,7 @@ class Music(commands.Cog):
     async def search_legacy(self, ctx: CustomContext, *, query):
 
         await self.play.callback(self=self, inter=ctx, query=query, position=0, options=False, force_play="no",
-                                 manual_selection=True, repeat_amount=0, server=None)
+                                 manual_selection=True, server=None)
 
     @can_send_message_check()
     @check_voice()
@@ -513,8 +506,6 @@ class Music(commands.Cog):
                     disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
                 ]
             ),
-            repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.",
-                                                default=0),
             server: str = commands.Param(name="server", desc="Usar um servidor de música específico na busca.",
                                          default=None),
             manual_bot_choice: str = commands.Param(
@@ -538,7 +529,7 @@ class Music(commands.Cog):
         inter.message.thread = thread
 
         await self.play.callback(self=self, inter=inter, query="", position=position, options=False, force_play=force_play,
-                                 manual_selection=False, repeat_amount=repeat_amount, server=server,
+                                 manual_selection=False, server=server,
                                  manual_bot_choice=manual_bot_choice)
 
     async def check_player_queue(self, user: disnake.User, bot: BotCore, guild_id: int, tracks: Union[list, LavalinkPlaylist] = None):
@@ -593,8 +584,6 @@ class Music(commands.Cog):
                                                     default=False),
             options: str = commands.Param(name="opções", description="Opções para processar playlist",
                                           choices=playlist_opts, default=False),
-            repeat_amount: int = commands.Param(name="repetições", description="definir quantidade de repetições.",
-                                                default=0),
             server: str = commands.Param(name="server", desc="Usar um servidor de música específico na busca.",
                                          default=None),
             manual_bot_choice: str = commands.Param(
@@ -1522,7 +1511,7 @@ class Music(commands.Cog):
             await inter.response.defer(ephemeral=ephemeral)
 
         if not queue_loaded:
-            tracks, node = await self.get_tracks(query, inter.author, node=node, track_loops=repeat_amount, source=source, bot=bot)
+            tracks, node = await self.get_tracks(query, inter, inter.author, node=node, source=source, bot=bot)
             tracks = await self.check_player_queue(inter.author, bot, guild.id, tracks)
 
         try:
@@ -5154,7 +5143,7 @@ class Music(commands.Cog):
                                                           channel=channel, node=node)
 
                     await self.check_player_queue(interaction.author, bot, interaction.guild_id)
-                    result, node = await self.get_tracks(url, author, source=False, node=player.node, bot=bot)
+                    result, node = await self.get_tracks(url, interaction, author, source=False, node=player.node, bot=bot)
                     result = await self.check_player_queue(interaction.author, bot, interaction.guild_id, tracks=result)
                     player.queue.extend(result.tracks)
                     await interaction.send(f"{interaction.author.mention}, a playlist [`{result.name}`](<{url}>) foi adicionada com sucesso!{player.controller_link}", ephemeral=True)
@@ -5213,7 +5202,7 @@ class Music(commands.Cog):
                             if control == PlayerControls.embed_enqueue_track:
                                 await self.check_player_queue(interaction.author, bot, interaction.guild_id)
 
-                            result, node = await self.get_tracks(url, author, source=False, node=node, bot=bot)
+                            result, node = await self.get_tracks(url, interaction, author, source=False, node=node, bot=bot)
 
                             try:
                                 track = result.tracks[0]
@@ -6350,7 +6339,7 @@ class Music(commands.Cog):
             player = await self.create_player(inter=message, bot=self.bot, guild=message.guild, channel=text_channel,
                                               guild_data=data)
 
-        tracks, node = await self.get_tracks(message.content, message.author, source=source)
+        tracks, node = await self.get_tracks(message.content, message, message.author, source=source)
         tracks = await self.check_player_queue(message.author, self.bot, message.guild.id, tracks)
 
         if not player.message:
@@ -6805,14 +6794,129 @@ class Music(commands.Cog):
 
         await node.connect(info=info)
 
-    async def get_tracks(
-            self, query: str, user: disnake.Member, node: wavelink.Node = None,
-            track_loops=0, source=None, bot: BotCore = None):
+    async def get_partial_tracks(self, query: str, ctx: Union[disnake.AppCmdInter, CustomContext, disnake.MessageInteraction, disnake.Message],
+            user: disnake.Member, node: wavelink.Node = None, bot: BotCore = None):
 
         if not bot:
             bot = self.bot
 
         tracks = []
+
+        exceptions = set()
+
+        if (bot.pool.config["FORCE_USE_DEEZER_CLIENT"] or [n for n in bot.music.nodes.values() if
+                                                           "deezer" not in n.info.get("sourceManagers", [])]):
+            try:
+                tracks = await self.bot.pool.deezer.get_tracks(url=query, requester=user.id, search=True)
+            except Exception as e:
+                bot.dispatch("custom_error", ctx=ctx, error=e)
+                exceptions.add(repr(e))
+
+        if not tracks:
+            try:
+                tracks = await self.bot.pool.spotify.get_tracks(self.bot, user.id, query, search=True)
+            except Exception as e:
+                bot.dispatch("custom_error", ctx=ctx, error=e)
+                exceptions.add(repr(e))
+
+        return tracks, node, exceptions, False
+
+    async def get_lavalink_tracks(self, query: str, ctx: Union[disnake.AppCmdInter, CustomContext, disnake.MessageInteraction, disnake.Message],
+            user: disnake.Member, node: wavelink.Node = None, source=None, bot: BotCore = None):
+
+        if not bot:
+            bot = self.bot
+
+        if not node:
+            nodes = sorted([n for n in bot.music.nodes.values() if n.is_available and n.available],
+                           key=lambda n: len(n.players))
+        else:
+            nodes = sorted([n for n in bot.music.nodes.values() if n != node and n.is_available and n.available],
+                           key=lambda n: len(n.players))
+            nodes.insert(0, node)
+
+        if not nodes:
+            raise GenericError("**Não há servidores de música disponível!**")
+
+        exceptions = set()
+
+        is_yt_source = query.lower().startswith(
+            ("https://youtu.be", "https://www.youtube.com", "https://music.youtube.com")
+        )
+
+        tracks = []
+
+        for n in nodes:
+
+            node_retry = False
+
+            if source is False:
+                providers = [n.search_providers[:1]]
+                if query.startswith("https://www.youtube.com/live/"):
+                    query = query.split("?")[0].replace("/live/", "/watch?v=")
+
+                elif query.startswith("https://listen.tidal.com/album/") and "/track/" in query:
+                    query = f"http://www.tidal.com/track/{query.split('/track/')[-1]}"
+
+                elif query.startswith(("https://youtu.be/", "https://www.youtube.com/")):
+
+                    for p in ("&ab_channel=", "&start_radio="):
+                        if p in query:
+                            try:
+                                query = f'https://www.youtube.com/watch?v={re.search(r"v=([a-zA-Z0-9_-]+)", query).group(1)}'
+                            except:
+                                pass
+                            break
+            elif source:
+                providers = [s for s in n.search_providers if s != source]
+                providers.insert(0, source)
+            else:
+                source = True
+                providers = n.search_providers
+
+            for search_provider in providers:
+
+                try:
+                    search_query = f"{search_provider}:{query}" if source else query
+                    tracks = await n.get_tracks(
+                        search_query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
+                    )
+                except Exception as e:
+                    exceptions.add(repr(e))
+                    if [e for e in ("Video returned by YouTube isn't what was requested",
+                                    "The video returned is not what was requested.") if e in str(e)]:
+
+                        if is_yt_source and n.version > 3:
+                            try:
+                                n.search_providers.remove("ytsearch")
+                            except:
+                                pass
+                            try:
+                                n.search_providers.remove("ytmsearch")
+                            except:
+                                pass
+
+                        if is_yt_source:
+                            node_retry = True
+                            break
+
+                    if not isinstance(e, wavelink.TrackNotFound):
+                        print(f"Falha ao processar busca...\n{query}\n{traceback.format_exc()}")
+                    else:
+                        bot.dispatch("custom_error", ctx=ctx, error=e)
+
+                if tracks or not source:
+                    break
+
+            if not node_retry:
+                node = n
+                break
+
+        return tracks, node, exceptions, is_yt_source
+
+    async def get_tracks(
+            self, query: str, ctx: Union[disnake.AppCmdInter, CustomContext, disnake.MessageInteraction, disnake.Message],
+            user: disnake.Member, node: wavelink.Node = None, source=None, bot: BotCore = None):
 
         if bool(sc_recommended.search(query)):
             try:
@@ -6833,124 +6937,29 @@ class Music(commands.Cog):
 
             return playlist, node
 
-        if (bot.pool.config["FORCE_USE_DEEZER_CLIENT"] or [n for n in bot.music.nodes.values() if
-                                                           "deezer" not in n.info.get("sourceManagers", [])]):
-            tracks = await self.bot.pool.deezer.get_tracks(url=query, requester=user.id, search=False)
+        if self.bot.config["PARTIALTRACK_FIRST"]:
+            tracks, node, exceptions, is_yt_source = await self.get_partial_tracks(query=query, user=user, ctx=ctx, node=node, bot=bot)
+            if not tracks:
+                tracks, node, exc, is_yt_source = await self.get_lavalink_tracks(query=query, user=user, ctx=ctx, node=node, bot=bot, source=source)
+                exceptions.update(exc)
+        else:
+            tracks, node, exceptions, is_yt_source = await self.get_lavalink_tracks(query=query, user=user, ctx=ctx, node=node, bot=bot, source=source)
+            if not tracks:
+                tracks, node, exc, is_yt_source = await self.get_partial_tracks(query=query, user=user, ctx=ctx, node=node, bot=bot)
+                exceptions.update(exc)
 
         if not tracks:
 
-            tracks = await self.bot.pool.spotify.get_tracks(self.bot, user.id, query, search=False)
+            txt = "\n".join(exceptions)
 
-            if not tracks:
+            if is_yt_source and "Video returned by YouTube isn't what was requested" in txt:
+                raise YoutubeSourceDisabled()
 
-                if not node:
-                    nodes = sorted([n for n in bot.music.nodes.values() if n.is_available and n.available],
-                                   key=lambda n: len(n.players))
-                else:
-                    nodes = sorted([n for n in bot.music.nodes.values() if n != node and n.is_available and n.available],
-                                   key=lambda n: len(n.players))
-                    nodes.insert(0, node)
-
-                if not nodes:
-                    raise GenericError("**Não há servidores de música disponível!**")
-
-                exceptions = set()
-
-                is_yt_source = query.lower().startswith(
-                    ("https://youtu.be", "https://www.youtube.com", "https://music.youtube.com")
-                )
-
-                for n in nodes:
-
-                    node_retry = False
-
-                    if source is False:
-                        providers = [n.search_providers[:1]]
-                        if query.startswith("https://www.youtube.com/live/"):
-                            query = query.split("?")[0].replace("/live/", "/watch?v=")
-
-                        elif query.startswith("https://listen.tidal.com/album/") and "/track/" in query:
-                            query = f"http://www.tidal.com/track/{query.split('/track/')[-1]}"
-
-                        elif query.startswith(("https://youtu.be/", "https://www.youtube.com/")):
-
-                            for p in ("&ab_channel=", "&start_radio="):
-                                if p in query:
-                                    try:
-                                        query = f'https://www.youtube.com/watch?v={re.search(r"v=([a-zA-Z0-9_-]+)", query).group(1)}'
-                                    except:
-                                        pass
-                                    break
-                    elif source:
-                        providers = [s for s in n.search_providers if s != source]
-                        providers.insert(0, source)
-                    else:
-                        source = True
-                        providers = n.search_providers
-
-                    for search_provider in providers:
-
-                        try:
-                            search_query = f"{search_provider}:{query}" if source else query
-                            tracks = await n.get_tracks(
-                                search_query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
-                            )
-                        except Exception as e:
-                            exceptions.add(repr(e))
-                            if [e for e in ("Video returned by YouTube isn't what was requested", "The video returned is not what was requested.") if e in str(e)]:
-
-                                if is_yt_source and n.version > 3:
-                                    try:
-                                        n.search_providers.remove("ytsearch")
-                                    except:
-                                        pass
-                                    try:
-                                        n.search_providers.remove("ytmsearch")
-                                    except:
-                                        pass
-
-                                if is_yt_source:
-                                    node_retry = True
-                                    break
-
-                            if not isinstance(e, wavelink.TrackNotFound):
-                                print(f"Falha ao processar busca...\n{query}\n{traceback.format_exc()}")
-
-                        if tracks or not source:
-                            break
-
-                    if not node_retry:
-                        node = n
-                        break
-
-                if not tracks:
-
-                    try:
-                        tracks = (await self.bot.pool.deezer.get_tracks(url=query, requester=user.id, search=True, check_title=True) or
-                                  await self.bot.pool.spotify.get_tracks(self.bot, user.id, query, search=True, check_title=True))
-                    except Exception as e:
-                        exceptions.add(repr(e))
-
-                    if not tracks:
-
-                        txt = "\n".join(exceptions)
-
-                        if is_yt_source and "Video returned by YouTube isn't what was requested" in txt:
-                            raise YoutubeSourceDisabled()
-
-                        if txt:
-
-                            if "This track is not readable. Available countries:" in txt:
-                                txt = "A música informada não está disponível na minha região atual..."
-                            raise GenericError(f"**Ocorreu um erro ao processar sua busca:** \n{txt}", error=txt)
-                        raise GenericError("**Não houve resultados para sua busca.**")
-
-                if isinstance(tracks, list):
-                    tracks[0].info["extra"]["track_loops"] = track_loops
-
-                else:
-                    if (selected := tracks.data['playlistInfo']['selectedTrack']) > 0:
-                        tracks.tracks = tracks.tracks[selected:] + tracks.tracks[:selected]
+            if txt:
+                if "This track is not readable. Available countries:" in txt:
+                    txt = "A música informada não está disponível na minha região atual..."
+                raise GenericError(f"**Ocorreu um erro ao processar sua busca:** \n{txt}", error=txt)
+            raise GenericError("**Não houve resultados para sua busca.**")
 
         return tracks, node
 

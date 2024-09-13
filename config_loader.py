@@ -70,6 +70,7 @@ DEFAULT_CONFIG = {
     "PLAYLIST_CACHE_SIZE": 500,
     "PLAYLIST_CACHE_TTL": 1800,
     "USE_YTM_TRACKINFO_SCROBBLE": False,
+    "PARTIALTRACK_FIRST": False,
 
     ##############################################
     ### Sistema de música - Suporte ao spotify ###
@@ -264,6 +265,7 @@ def load_config():
         "PREFER_YOUTUBE_NATIVE_PLAYBACK",
         "ONLY_USE_NATIVE_SEARCH_PROVIDERS",
         "USE_YTM_TRACKINFO_SCROBBLE",
+        "PARTIALTRACK_FIRST",
         "FORCE_USE_DEEZER_CLIENT",
         "SILENT_PUBLICBOT_WARNING",
     ]:
