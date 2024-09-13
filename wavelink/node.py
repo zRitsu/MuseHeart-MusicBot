@@ -47,7 +47,7 @@ deezer_regex = re.compile(r"(https?://)?(www\.)?deezer\.com/(?P<countrycode>[a-z
 soundcloud_regex = re.compile(r"https://soundcloud\.com/([^/]+)/sets/([^/]+)")
 
 
-def check_title(query, track):
+def check_track_title(query, track):
 
     try:
         if track.ytid:
@@ -472,13 +472,14 @@ class Node:
 
         track_cls = kwargs.pop('track_cls', Track)
 
-
-
         tracks = [
             track_cls(id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo", {}), **kwargs) for
             track in tracks]
 
-        return [t for t in tracks if check_title(query=query, track=t)]
+        if not kwargs.get("check_title"):
+            return tracks
+
+        return [t for t in tracks if check_track_title(query=query, track=t)]
 
         __log__.warning(f'REST | {self.identifier} | Failure to load tracks after 5 attempts.')
 

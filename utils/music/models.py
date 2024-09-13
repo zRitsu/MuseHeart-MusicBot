@@ -1705,7 +1705,7 @@ class LavalinkPlayer(wavelink.Player):
                         try:
                             tracks = await self.node.get_tracks(
                                 query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, autoplay=True,
-                                requester=self.bot.user.id
+                                requester=self.bot.user.id, check_title=True
                             )
                         except Exception as e:
                             if [err for err in ("Could not find tracks from mix", "Could not read mix page") if err in str(e)] and self.native_yt:
@@ -1713,7 +1713,7 @@ class LavalinkPlayer(wavelink.Player):
                                     tracks_ytsearch = await self.node.get_tracks(
                                         f"{query}:\"{track_data.author}\"",
                                         track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, autoplay=True,
-                                        requester=self.bot.user.id)
+                                        requester=self.bot.user.id, check_title=True)
                                     break
                                 except Exception as e:
                                     exception = e
@@ -2011,7 +2011,10 @@ class LavalinkPlayer(wavelink.Player):
                                 if not tracks:
 
                                     try:
-                                        tracks = await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist)
+                                        tracks = await self.node.get_tracks(
+                                            query, track_cls=LavalinkTrack, check_title=True,
+                                            playlist_cls=LavalinkPlaylist
+                                        )
                                     except:
                                         exceptions += f"{traceback.format_exc()}\n"
                                         await asyncio.sleep(1)
@@ -3046,7 +3049,8 @@ class LavalinkPlayer(wavelink.Player):
                 for query in search_queries:
 
                     try:
-                        tracks = (await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist))
+                        tracks = (await self.node.get_tracks(query, track_cls=LavalinkTrack,
+                                                             check_title=True, playlist_cls=LavalinkPlaylist))
                     except Exception as e:
                         if track.info["sourceName"] == "youtube" and any(e in str(e) for e in (
                             "This video is not available",

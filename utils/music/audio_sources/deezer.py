@@ -56,7 +56,7 @@ class DeezerClient:
     async def track_search(self, query):
         return await self.request(path="search", params={'q': query})
 
-    async def get_tracks(self, requester: int, url: str, search: bool = True):
+    async def get_tracks(self, requester: int, url: str, search: bool = True, check_title: bool = True):
 
         if not (matches := deezer_regex.match(url)):
 
@@ -84,7 +84,7 @@ class DeezerClient:
                         requester=requester
                     )
 
-                    if Levenshtein.ratio(url.lower(), f"{t.authors_string} - {t.single_title}".lower()) < 0.8:
+                    if check_title and Levenshtein.ratio(url.lower(), f"{t.authors_string} - {t.single_title}".lower()) < 0.8:
                         continue
 
                     t.info["isrc"] = result.get('isrc')

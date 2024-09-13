@@ -198,7 +198,7 @@ class SpotifyClient:
             await self.get_access_token()
         return self.spotify_cache["access_token"]
 
-    async def get_tracks(self, bot: BotCore, requester: int, query: str, search: bool = True):
+    async def get_tracks(self, bot: BotCore, requester: int, query: str, search: bool = True, check_title: bool = False):
 
         if spotify_link_regex.match(query):
             async with bot.session.get(query, allow_redirects=False) as r:
@@ -232,7 +232,7 @@ class SpotifyClient:
                         requester=requester
                     )
 
-                    if Levenshtein.ratio(query.lower(), f"{t.authors_string} - {t.single_title}".lower()) < 0.8:
+                    if check_title and Levenshtein.ratio(query.lower(), f"{t.authors_string} - {t.single_title}".lower()) < 0.8:
                         continue
 
                     try:
