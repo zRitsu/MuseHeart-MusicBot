@@ -3075,8 +3075,11 @@ class LavalinkPlayer(wavelink.Player):
 
                     self.bot.pool.partial_track_cache[f'{track.info["sourceName"]}:{track.author}-{track.single_title}'] = tracks
 
-                    if tracks[0].info["sourceName"] == "bandcamp":
-                        check_duration = False
+                    try:
+                        if tracks[0].info["sourceName"] == "bandcamp":
+                            check_duration = False
+                    except:
+                        pass
 
                     has_exclude_tags = any(tag for tag in exclude_tags if tag.lower() in track.title.lower())
 
