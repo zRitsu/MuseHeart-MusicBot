@@ -542,7 +542,7 @@ class LastFmCog(commands.Cog):
                         try:
                             result = filter_result(await player.bot.spotify.get_tracks(
                                 query=f"{track.author} - {track.title}" if len(track.title) < 11 else track.title,
-                                requester=self.bot.user.id, bot=self.bot
+                                requester=self.bot.user.id, bot=self.bot, check_title=False
                             ))
                         except:
                             traceback.print_exc()
@@ -551,7 +551,7 @@ class LastFmCog(commands.Cog):
                             try:
                                 result = filter_result(await player.bot.deezer.get_tracks(
                                     url=f"{track.author} - {track.title}" if len(track.title) < 11 else track.title,
-                                    requester=self.bot.user.id
+                                    requester=self.bot.user.id, check_title=False
                                 ))
                             except:
                                 traceback.print_exc()
