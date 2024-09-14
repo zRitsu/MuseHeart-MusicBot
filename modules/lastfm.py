@@ -570,15 +570,12 @@ class LastFmCog(commands.Cog):
                             await self.save_scrobble(query=track_query, track=track, users=users)
                             return
 
-                        try:
-                            track = result[0]
-                        except AttributeError:
-                            track = result
+                        result = result[0]
 
                         fmdata = {
-                            "name": track.single_title,
-                            "artist": track.author,
-                            "album": track.album_name,
+                            "name": result.single_title,
+                            "artist": result.author,
+                            "album": result.album_name,
                         }
 
                         self.bot.last_fm.cache[track_query] = fmdata
