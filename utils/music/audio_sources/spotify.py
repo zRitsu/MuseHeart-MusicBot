@@ -232,6 +232,9 @@ class SpotifyClient:
                         requester=requester
                     )
 
+                    t.info["extra"]["authors"] = [fix_characters(i['name']) for i in result['artists'] if f"feat. {i['name'].lower()}"
+                                                  not in result['name'].lower()]
+
                     if check_title and Levenshtein.ratio(query.lower(), f"{t.authors_string} - {t.single_title}".lower()) < 0.8:
                         continue
 
@@ -239,9 +242,6 @@ class SpotifyClient:
                         t.info["isrc"] = result["external_ids"]["isrc"]
                     except KeyError:
                         pass
-
-                    t.info["extra"]["authors"] = [fix_characters(i['name']) for i in result['artists'] if f"feat. {i['name'].lower()}"
-                                                  not in result['name'].lower()]
 
                     t.info["extra"]["authors_md"] = ", ".join(f"[`{a['name']}`]({a['external_urls']['spotify']})" for a in result["artists"])
 

@@ -84,13 +84,15 @@ class DeezerClient:
                         requester=requester
                     )
 
+                    artists = result.get('contributors') or [result['artist']]
+
+                    t.info["extra"]["authors"] = [a['name'] for a in artists]
+
                     if check_title and Levenshtein.ratio(url.lower(), f"{t.authors_string} - {t.single_title}".lower()) < 0.8:
                         continue
 
                     t.info["isrc"] = result.get('isrc')
-                    artists = result.get('contributors') or [result['artist']]
 
-                    t.info["extra"]["authors"] = [a['name'] for a in artists]
                     t.info["extra"]["authors_md"] = ", ".join(
                         f"[`{fix_characters(a['name'])}`](https://www.deezer.com/artist/{a['id']})" for a in
                         artists)
