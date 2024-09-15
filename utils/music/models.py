@@ -851,6 +851,7 @@ class LavalinkPlayer(wavelink.Player):
                 return
 
             self.start_time = disnake.utils.utcnow()
+            self.start_timestamp = self.start_time.timestamp()
 
             self.bot.dispatch("wavelink_track_start", player=self)
 
