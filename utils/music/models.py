@@ -517,6 +517,7 @@ class LavalinkPlayer(wavelink.Player):
         self.members_timeout_task: Optional[asyncio.Task] = None
         self.reconnect_voice_channel_task: Optional[asyncio.Task] = None
         self.idle_endtime: Optional[datetime.datetime] = None
+        self.idle_start_timestamp: Optional[int] = None
         self.hint_rate = self.bot.config["HINT_RATE"]
         self.command_log: str = ""
         self.command_log_emoji: str = ""
@@ -1907,7 +1908,9 @@ class LavalinkPlayer(wavelink.Player):
 
                 if not track:
                     await self.stop()
-                    self.idle_endtime = disnake.utils.utcnow() + datetime.timedelta(seconds=self.bot.config["IDLE_TIMEOUT"])
+                    now = disnake.utils.utcnow()
+                    self.idle_start_timestamp = int(now.timestamp())
+                    self.idle_endtime = now + datetime.timedelta(seconds=self.bot.config["IDLE_TIMEOUT"])
                     self.last_track = None
                     self.idle_task = self.bot.loop.create_task(self.idling_mode())
                     self.bot.dispatch("player_queue_end", player=self)
@@ -2764,6 +2767,7 @@ class LavalinkPlayer(wavelink.Player):
 
     async def set_pause(self, pause: bool) -> None:
         await super().set_pause(pause)
+        self.start_time = (disnake.utils.utcnow() - datetime.timedelta(milliseconds=self.position))
         self.bot.dispatch("player_pause" if pause else "player_resume", player=self)
 
     async def destroy_message(self):
@@ -3316,6 +3320,7 @@ class LavalinkPlayer(wavelink.Player):
 
                 try:
                     stats["idle_endtime"] = int(self.idle_endtime.timestamp())
+                    stats["idle_starttime"] = self.idle_start_timestamp
                 except:
                     pass
 
@@ -3340,9 +3345,10 @@ class LavalinkPlayer(wavelink.Player):
                 }
 
                 if self.current.is_stream:
-                    stats["track"]["duration"] = self.start_time.timestamp()
+                    stats["track"]["duration"] = int(self.start_time.timestamp())
                 else:
                     stats["track"]["duration"] = track.duration
+                    stats["start_time"] = self.start_time.timestamp()
 
                 if track.playlist_name:
                     stats["track"].update(
