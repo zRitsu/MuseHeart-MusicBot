@@ -585,7 +585,7 @@ class LastFmCog(commands.Cog):
 
                 name = fmdata["name"]
                 artist = fmdata["artist"]
-                album = fmdata["album"]
+                album = fmdata["album"] or name
 
                 artist = artist.split(",")[0]
 
