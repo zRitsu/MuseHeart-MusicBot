@@ -180,7 +180,8 @@ class PlayerSession(commands.Cog):
             "prefix_info": player.prefix_info,
             "voice_state": player._voice_state,
             "time": disnake.utils.utcnow(),
-            "lastfm_artists": player.lastfm_artists
+            "lastfm_artists": player.lastfm_artists,
+            "start_timestamp": player.start_timestamp
         }
 
         try:
@@ -536,6 +537,9 @@ class PlayerSession(commands.Cog):
                     player._voice_state = data["voice_state"]
                 except KeyError:
                     pass
+
+                if start_timestamp:=data.get("start_timestamp"):
+                    player.start_timestamp = start_timestamp
 
                 try:
                     player.mini_queue_enabled = data["mini_queue_enabled"]

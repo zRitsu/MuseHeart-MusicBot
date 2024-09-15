@@ -560,6 +560,7 @@ class LavalinkPlayer(wavelink.Player):
         self.prefix_info = kwargs.pop("prefix", "")
 
         self.start_time = disnake.utils.utcnow()
+        self.start_timestamp = self.start_time.timestamp()
 
         self.lastfm_artists = []
 
@@ -2767,7 +2768,7 @@ class LavalinkPlayer(wavelink.Player):
 
     async def set_pause(self, pause: bool) -> None:
         await super().set_pause(pause)
-        self.start_time = (disnake.utils.utcnow() - datetime.timedelta(milliseconds=self.position))
+        self.start_timestamp = (disnake.utils.utcnow() - datetime.timedelta(milliseconds=self.position)).timestamp()
         self.bot.dispatch("player_pause" if pause else "player_resume", player=self)
 
     async def destroy_message(self):
@@ -3341,14 +3342,15 @@ class LavalinkPlayer(wavelink.Player):
                     "loop": self.current.track_loops or self.loop,
                     "queue": len(self.queue),
                     "247": self.keep_connected,
-                    "autoplay": self.current.autoplay
+                    "autoplay": self.current.autoplay,
                 }
+
+                stats["start_time"] = self.start_timestamp
 
                 if self.current.is_stream:
                     stats["track"]["duration"] = int(self.start_time.timestamp())
                 else:
                     stats["track"]["duration"] = track.duration
-                    stats["start_time"] = self.start_time.timestamp()
 
                 if track.playlist_name:
                     stats["track"].update(
@@ -3477,6 +3479,7 @@ class LavalinkPlayer(wavelink.Player):
     async def seek(self, position: int = 0) -> None:
         self.last_position = position
         await super().seek(position=position)
+        self.start_timestamp = (disnake.utils.utcnow() - datetime.timedelta(milliseconds=self.position)).timestamp()
         self.bot.dispatch("player_seek", player=self, position=position)
 
     async def set_distortion(self, sin_offset: float = 0, sin_scale: float = 1.0, cos_offset: float = 0,
