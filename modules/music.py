@@ -1613,7 +1613,7 @@ class Music(commands.Cog):
                             tracks.info["title"] = tracks.uri.split("/")[-1]
                         tracks.title = tracks.info["title"]
 
-                    tracks.uri = ""
+                    tracks.info["uri"] = ""
 
                 elif url_check:=URL_REG.match(original_query.strip("<>")):
                     track_url = url_check.group()
@@ -6388,7 +6388,7 @@ class Music(commands.Cog):
                         track.info["title"] = track.uri.split("/")[-1]
                     track.title = track.info["title"]
 
-                track.uri = ""
+                track.info["uri"] = ""
 
             player.queue.append(track)
 

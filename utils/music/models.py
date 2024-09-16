@@ -365,8 +365,7 @@ class LavalinkTrack(wavelink.Track):
             self.info["artworkUrl"] = f"https://img.youtube.com/vi/{self.ytid}/mqdefault.jpg"
             if "list=" not in self.uri:
                 try:
-                    self.uri = f"{self.uri}&list={parse.parse_qs(parse.urlparse(self.playlist_url or self.album_url).query)['list'][0]}"
-                    self.info["uri"] = self.uri
+                    self.info['uri'] = f"{self.uri}&list={parse.parse_qs(parse.urlparse(self.playlist_url or self.album_url).query)['list'][0]}"
                 except KeyError:
                     pass
 
@@ -376,8 +375,7 @@ class LavalinkTrack(wavelink.Track):
 
             if "?in=" not in self.uri:
                 try:
-                    self.uri = f"{self.uri}?in=" + self.playlist_url.split("soundcloud.com/")[1]
-                    self.info["uri"] = self.uri
+                    self.info['uri'] = f"{self.uri}?in=" + self.playlist_url.split("soundcloud.com/")[1]
                 except:
                     pass
 
