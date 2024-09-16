@@ -1624,6 +1624,9 @@ class Music(commands.Cog):
             if free_bots[0] != bot:
                 bot = free_bots.pop(0)
                 channel = bot.get_channel(channel.id)
+                guild = bot.get_guild(guild.id)
+                guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
+                node = None
 
             await check_player_perm(inter=inter, bot=bot, channel=channel, guild_data=guild_data)
 
@@ -1726,6 +1729,9 @@ class Music(commands.Cog):
             if free_bots[0] != bot:
                 bot = free_bots.pop(0)
                 channel = bot.get_channel(channel.id)
+                guild = bot.get_guild(guild.id)
+                guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
+                node = None
 
             await check_player_perm(inter=inter, bot=bot, channel=channel, guild_data=guild_data)
 
