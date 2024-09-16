@@ -1547,14 +1547,6 @@ class Music(commands.Cog):
 
         can_send_message(channel, bot.user)
 
-        await check_player_perm(inter=inter, bot=bot, channel=channel, guild_data=guild_data)
-
-        if not player:
-            player = await self.create_player(
-                inter=inter, bot=bot, guild=guild, guild_data=guild_data, channel=channel,
-                message_inter=message_inter, node=node, modal_message_id=modal_message_id
-            )
-
         pos_txt = ""
 
         embed = disnake.Embed(color=disnake.Colour.red())
@@ -1680,6 +1672,14 @@ class Music(commands.Cog):
                 elif url_check:=URL_REG.match(original_query.strip("<>")):
                     track_url = url_check.group()
 
+            await check_player_perm(inter=inter, bot=bot, channel=channel, guild_data=guild_data)
+
+            if not player:
+                player = await self.create_player(
+                    inter=inter, bot=bot, guild=guild, guild_data=guild_data, channel=channel,
+                    message_inter=message_inter, node=node, modal_message_id=modal_message_id
+                )
+
             if not isinstance(tracks, list):
 
                 if force_play == "yes":
@@ -1764,6 +1764,14 @@ class Music(commands.Cog):
                 emoji = "🎶"
 
         else:
+
+            await check_player_perm(inter=inter, bot=bot, channel=channel, guild_data=guild_data)
+
+            if not player:
+                player = await self.create_player(
+                    inter=inter, bot=bot, guild=guild, guild_data=guild_data, channel=channel,
+                    message_inter=message_inter, node=node, modal_message_id=modal_message_id
+                )
 
             if options == "shuffle":
                 shuffle(tracks.tracks)
