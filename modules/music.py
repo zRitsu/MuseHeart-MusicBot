@@ -1622,6 +1622,10 @@ class Music(commands.Cog):
                 return
 
             if free_bots[0] != bot:
+                try:
+                    voice_channel = bot.get_channel(inter.author.voice.channel.id)
+                except AttributeError:
+                    raise NoVoice()
                 bot = free_bots.pop(0)
                 channel = bot.get_channel(channel.id)
                 guild = bot.get_guild(guild.id)
@@ -1727,6 +1731,10 @@ class Music(commands.Cog):
                 return
 
             if free_bots[0] != bot:
+                try:
+                    voice_channel = bot.get_channel(inter.author.voice.channel.id)
+                except AttributeError:
+                    raise NoVoice()
                 bot = free_bots.pop(0)
                 channel = bot.get_channel(channel.id)
                 guild = bot.get_guild(guild.id)
