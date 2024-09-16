@@ -335,7 +335,12 @@ class Owner(commands.Cog):
                 raise GenericError("Já estou com os ultimos updates instalados...")
 
             elif not "Fast-forward" in str(e):
-                out_git += await self.cleanup_git(force=True)
+                traceback.print_exc()
+                try:
+                    await run_command("git --work-tree=. reset --hard origin/main")
+                except:
+                    traceback.print_exc()
+                    out_git += await self.cleanup_git(force=True)
 
             elif "Need to specify how to reconcile divergent branches" in str(e):
                 out_git += await run_command("git --work-tree=. rebase --no-ff")
