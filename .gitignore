@@ -170,3 +170,4 @@ application.yml
 /.tmp/
 /.deployed
 /.lastfm_cache
+/.ytdl_cache/
