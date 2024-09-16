@@ -675,64 +675,7 @@ class Music(commands.Cog):
 
             else:
 
-                free_bots = []
-                voice_channels = []
-                bot_count = 0
-
-                for b in self.bot.pool.get_guild_bots(guild.id):
-
-                    if not b.bot_ready:
-                        continue
-
-                    if b.user in inter.author.voice.channel.members:
-                        free_bots.append(b)
-                        break
-
-                    g = b.get_guild(guild.id)
-
-                    if not g:
-                        bot_count += 1
-                        continue
-
-                    p: LavalinkPlayer = b.music.players.get(guild.id)
-
-                    if p:
-
-                        try:
-                            vc = g.me.voice.channel
-                        except AttributeError:
-                            vc = p.last_channel
-
-                        if not vc:
-                            continue
-
-                        if inter.author in vc.members:
-                            free_bots.append(b)
-                            break
-                        else:
-                            voice_channels.append(vc.mention)
-                            continue
-
-                    free_bots.append(b)
-
-                if not free_bots:
-
-                    if bot_count:
-                        txt = "**Todos os bots estão em uso no nomento...**"
-                        if voice_channels:
-                            txt += "\n\n**Você pode conectar em um dos canais abaixo onde há sessões ativas:**\n" + ", ".join(voice_channels)
-                            if inter.author.guild_permissions.manage_guild:
-                                txt += "\n\n**Ou se preferir: Adicione mais bots de música no servidor atual clicando no botão abaixo:**"
-                            else:
-                                txt += "\n\n**Ou se preferir: Solicite a um administrador/manager do servidor para clicar no botão abaixo " \
-                                       "para adicionar mais bots de música no servidor atual.**"
-                    else:
-                        txt = "**Não há bots de música compatíveis no servidor...**" \
-                               "\n\nSerá necessário adicionar pelo menos um bot compatível clicando no botão abaixo:"
-
-                    await inter.send(
-                        txt, ephemeral=True, components=[disnake.ui.Button(custom_id="bot_invite", label="Adicionar bots")])
-                    return
+                free_bots = await self.check_available_bot(inter=inter, guild=guild, bot=bot, message=msg)
 
                 if len(free_bots) > 1 and manual_bot_choice == "yes":
 
@@ -794,7 +737,10 @@ class Music(commands.Cog):
                     await inter.response.defer()
 
                 else:
-                    current_bot = free_bots.pop(0)
+                    try:
+                        current_bot = free_bots.pop(0)
+                    except:
+                        return
 
                 if bot != current_bot:
                     guild_data = await current_bot.get_data(guild.id, db_name=DBModel.guilds)
@@ -1672,6 +1618,13 @@ class Music(commands.Cog):
                 elif url_check:=URL_REG.match(original_query.strip("<>")):
                     track_url = url_check.group()
 
+            if not (free_bots := await self.check_available_bot(inter=inter, guild=guild, bot=bot, message=msg)):
+                return
+
+            if free_bots[0] != bot:
+                bot = free_bots.pop(0)
+                channel = bot.get_channel(channel.id)
+
             await check_player_perm(inter=inter, bot=bot, channel=channel, guild_data=guild_data)
 
             try:
@@ -1766,6 +1719,13 @@ class Music(commands.Cog):
                 emoji = "🎶"
 
         else:
+
+            if not (free_bots := await self.check_available_bot(inter=inter, guild=guild, bot=bot, message=msg)):
+                return
+
+            if free_bots[0] != bot:
+                bot = free_bots.pop(0)
+                channel = bot.get_channel(channel.id)
 
             await check_player_perm(inter=inter, bot=bot, channel=channel, guild_data=guild_data)
 
@@ -7222,6 +7182,89 @@ class Music(commands.Cog):
                     pass
 
                 await player.process_rpc(vc, users=[m for m in vc.voice_states if (m != member.id)])
+
+    async def check_available_bot(self, inter, guild: disnake.Guild, bot: BotCore = None, message: disnake.Message = None):
+
+        free_bots = []
+        voice_channels = []
+        bot_count = 0
+
+        if bot:
+            try:
+                player = bot.music.players[guild.id]
+            except KeyError:
+                pass
+            else:
+                if player.guild.me.voice and inter.author.id in player.guild.me.voice.channel.voice_states:
+                    return [bot]
+
+        for b in self.bot.pool.get_guild_bots(guild.id):
+
+            if not b.bot_ready:
+                continue
+
+            if b.user in inter.author.voice.channel.members:
+                free_bots.append(b)
+                break
+
+            g = b.get_guild(guild.id)
+
+            if not g:
+                bot_count += 1
+                continue
+
+            p: LavalinkPlayer = b.music.players.get(guild.id)
+
+            if p:
+
+                try:
+                    vc = g.me.voice.channel
+                except AttributeError:
+                    vc = p.last_channel
+
+                if not vc:
+                    continue
+
+                if inter.author.id in vc.members:
+                    free_bots.append(b)
+                    break
+                else:
+                    voice_channels.append(vc.mention)
+                    continue
+
+            free_bots.append(b)
+
+        if not free_bots:
+
+            if bot_count:
+                txt = "**Todos os bots estão em uso no nomento...**"
+                if voice_channels:
+                    txt += "\n\n**Você pode conectar em um dos canais abaixo onde há sessões ativas:**\n" + ", ".join(
+                        voice_channels)
+                    if inter.author.guild_permissions.manage_guild:
+                        txt += "\n\n**Ou se preferir: Adicione mais bots de música no servidor atual clicando no botão abaixo:**"
+                    else:
+                        txt += "\n\n**Ou se preferir: Solicite a um administrador/manager do servidor para clicar no botão abaixo " \
+                               "para adicionar mais bots de música no servidor atual.**"
+            else:
+                txt = "**Não há bots de música compatíveis no servidor...**" \
+                      "\n\nSerá necessário adicionar pelo menos um bot compatível clicando no botão abaixo:"
+
+            try:
+                func = inter.edit_original_message
+            except:
+                try:
+                    func = inter.store_message.edit
+                except:
+                    try:
+                        func = message.edit
+                    except:
+                        func = inter.send
+
+            await func(txt, ephemeral=True, components=[disnake.ui.Button(custom_id="bot_invite", label="Adicionar bots")])
+            return []
+
+        return free_bots
 
     async def reset_controller_db(self, guild_id: int, data: dict, inter: disnake.AppCmdInter = None):
 
