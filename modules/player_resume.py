@@ -343,6 +343,9 @@ class PlayerSession(commands.Cog):
         if isinstance(voice_channel, disnake.StageChannel) and \
                 voice_channel.permissions_for(guild.me).mute_members:
 
+            while not guild.me.voice:
+                await asyncio.sleep(1)
+
             await asyncio.sleep(3)
 
             try:
