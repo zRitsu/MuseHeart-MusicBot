@@ -120,7 +120,6 @@ class Track:
                  'ytid',
                  'length',
                  'duration',
-                 'uri',
                  'author',
                  'is_stream',
                  'dead')
