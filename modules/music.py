@@ -1621,7 +1621,12 @@ class Music(commands.Cog):
                         check=check_song_selection
                     )
                 except asyncio.TimeoutError:
-                    raise GenericError("Tempo esgotado!")
+                    try:
+                        func = inter.edit_original_message
+                    except AttributeError:
+                        func = msg.edit
+                    await func(embed=disnake.Embed(color=disnake.Colour.red(), description="**Tempo esgotado!**"), view=None)
+                    return
 
                 if len(select_interaction.data.values) > 1:
 

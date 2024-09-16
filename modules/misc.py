@@ -346,7 +346,7 @@ class Misc(commands.Cog):
                             await entry.user.send(embeds=embeds, components=components)
                             if send_video:
                                 await asyncio.sleep(1)
-                                await entry.user.send(f"{send_video}\n\nConfira o [**vídeo**]({self.bot.config['MULTIVOICE_VIDEO_DEMO_URL']}) demonstrando essa funcionalidade.")
+                                await entry.user.send(send_video)
                             return
                         except disnake.Forbidden:
                             pass
