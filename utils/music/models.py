@@ -1215,9 +1215,15 @@ class LavalinkPlayer(wavelink.Player):
                     self.bot.music.players[self.guild_id]
                 except KeyError:
                     return
-                if self.guild and self.guild.me.voice:
+                if self.guild and self.guild.me.voice or self.is_closing:
                     return
-                await self.last_channel.connect()
+
+                try:
+                    vc_id = self.guild.me.voice.channel.id
+                except AttributeError:
+                    vc_id = self.last_channel.id
+
+                await self.connect(vc_id)
                 return
 
         if isinstance(event, wavelink.TrackStuck):
