@@ -6653,7 +6653,7 @@ class Music(commands.Cog):
                 retries -= 1
                 continue
 
-            with suppress(IndexError, ValueError):
+            with suppress(IndexError, ValueError, KeyError):
 
                 if "deezer" not in node.info["sourceManagers"]:
                     node.native_sources.remove("deezer")
