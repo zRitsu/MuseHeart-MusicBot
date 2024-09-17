@@ -69,27 +69,23 @@ class LastFMView(disnake.ui.View):
         count = 15
 
         while count > 0:
+            await asyncio.sleep(20)
             try:
-                await asyncio.sleep(20)
                 data = await self.ctx.bot.last_fm.get_session_key(token=self.token)
-                if data.get('error'):
-                    count -= 1
-                    continue
-                self.session_key = data["session"]["key"]
-                self.username = data["session"]["name"]
-                self.account_linked = True
-                self.scrobble_enabled = True
-                self.stop()
-                return
             except Exception as e:
                 self.error = e
-                self.auth_url = ""
-                self.token = ""
-                self.stop()
-                return
+                count -= 1
+                continue
+            self.session_key = data["session"]["key"]
+            self.username = data["session"]["name"]
+            self.account_linked = True
+            self.scrobble_enabled = True
+            self.stop()
+            return
 
         self.auth_url = ""
         self.token = ""
+        self.stop()
 
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
         if interaction.user.id != self.ctx.author.id:
