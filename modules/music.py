@@ -1563,7 +1563,10 @@ class Music(commands.Cog):
                         func = inter.edit_original_message
                     except AttributeError:
                         func = msg.edit
-                    await func(embed=disnake.Embed(color=disnake.Colour.red(), description="**Tempo esgotado!**"), view=None)
+                    try:
+                        await func(embed=disnake.Embed(color=disnake.Colour.red(), description="**Tempo esgotado!**"), view=None)
+                    except disnake.NotFound:
+                        pass
                     return
 
                 if len(select_interaction.data.values) > 1:
