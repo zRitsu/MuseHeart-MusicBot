@@ -848,9 +848,6 @@ class LavalinkPlayer(wavelink.Player):
             if event.node.identifier != self.node.identifier:
                 return
 
-            self.start_time = disnake.utils.utcnow()
-            self.start_timestamp = self.start_time.timestamp()
-
             self.bot.dispatch("wavelink_track_start", player=self)
 
             if self.text_channel:
@@ -2124,6 +2121,9 @@ class LavalinkPlayer(wavelink.Player):
         self.paused = False
 
         self.process_hint()
+
+        self.start_time = disnake.utils.utcnow()
+        self.start_timestamp = self.start_time.timestamp()
 
         if self.auto_pause:
             self.last_update = time() * 1000
