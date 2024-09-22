@@ -7267,6 +7267,8 @@ class Music(commands.Cog):
                 txt = "**Não há bots de música compatíveis no servidor...**" \
                       "\n\nSerá necessário adicionar pelo menos um bot compatível clicando no botão abaixo:"
 
+            kwargs = {}
+
             try:
                 func = inter.edit_original_message
             except:
@@ -7277,8 +7279,9 @@ class Music(commands.Cog):
                         func = message.edit
                     except:
                         func = inter.send
+                        kwargs["ephemeral"] = True
 
-            await func(txt, ephemeral=True, components=[disnake.ui.Button(custom_id="bot_invite", label="Adicionar bots")])
+            await func(txt, components=[disnake.ui.Button(custom_id="bot_invite", label="Adicionar bots")], **kwargs)
             return []
 
         return free_bots
