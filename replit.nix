@@ -1,5 +1,7 @@
 {pkgs}: {
   deps = [
+    pkgs.taskflow
+    pkgs.rapidfuzz-cpp
     pkgs.gettext
     pkgs.cacert
     pkgs.jdk17_headless
