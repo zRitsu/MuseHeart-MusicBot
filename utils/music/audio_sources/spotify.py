@@ -12,9 +12,9 @@ from tempfile import gettempdir
 from typing import Optional, TYPE_CHECKING, Union
 from urllib.parse import quote
 
-import Levenshtein
 import aiofiles
 from aiohttp import ClientSession
+from rapidfuzz import fuzz
 
 from utils.music.converters import fix_characters, URL_REG
 from utils.music.errors import GenericError
@@ -235,7 +235,7 @@ class SpotifyClient:
                     t.info["extra"]["authors"] = [fix_characters(i['name']) for i in result['artists'] if f"feat. {i['name'].lower()}"
                                                   not in result['name'].lower()]
 
-                    if check_title and Levenshtein.ratio(query.lower(), f"{t.authors_string} - {t.single_title}".lower()) < 0.8:
+                    if check_title and fuzz.token_sort_ratio(query.lower(), f"{t.authors_string} - {t.single_title}".lower()) < 80:
                         continue
 
                     try:

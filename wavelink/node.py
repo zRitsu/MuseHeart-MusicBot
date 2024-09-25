@@ -31,8 +31,6 @@ import traceback
 from typing import Any, Callable, Dict, Optional, Union, List
 from urllib.parse import quote
 
-import Levenshtein
-
 from utils.music.youtube_trusted_session_generator import Browser
 from .backoff import ExponentialBackoff
 from .errors import *

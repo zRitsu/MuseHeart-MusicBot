@@ -5,10 +5,10 @@ import datetime
 import traceback
 from typing import TYPE_CHECKING, Optional, List
 
-import Levenshtein
 import disnake
 from aiohttp import ClientSession
 from disnake.ext import commands
+from rapidfuzz import fuzz
 
 from utils.db import DBModel, scrobble_model
 from utils.music.errors import GenericError
@@ -527,9 +527,9 @@ class LastFmCog(commands.Cog):
 
                     def filter_result(result):
                         if not [t for t in exclude_tags if t.lower() in track.title]:
-                            result_ = [t for t in result if Levenshtein.ratio(f"{t.authors_string.lower()} - {t.single_title.lower()}", track.title.lower()) > 0.7 and check_track_title(t.title)]
+                            result_ = [t for t in result if fuzz.token_sort_ratio(f"{t.authors_string.lower()} - {t.single_title.lower()}", track.title.lower()) > 70 and check_track_title(t.title)]
                         else:
-                            result_ = [t for t in result if Levenshtein.ratio(f"{t.authors_string.lower()} - {t.single_title.lower()}", track.title.lower()) > 0.7]
+                            result_ = [t for t in result if fuzz.token_sort_ratio(f"{t.authors_string.lower()} - {t.single_title.lower()}", track.title.lower()) > 70]
 
                         return result_
 

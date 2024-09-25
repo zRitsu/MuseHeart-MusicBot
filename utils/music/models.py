@@ -17,8 +17,8 @@ from typing import Optional, Union, TYPE_CHECKING, List
 from urllib import parse
 from urllib.parse import quote
 
-import Levenshtein
 import disnake
+from rapidfuzz import fuzz
 
 import wavelink
 from utils.db import DBModel
@@ -2046,7 +2046,7 @@ class LavalinkPlayer(wavelink.Player):
                                 final_result = []
 
                                 for t in tracks:
-                                    if t.is_stream or not min_duration < t.duration < max_duration and Levenshtein.ratio(t.title, track.title) > 0.7:
+                                    if t.is_stream or not min_duration < t.duration < max_duration and fuzz.token_sort_ratio(t.title, track.title) < 75:
                                         continue
                                     final_result.append(t)
 
@@ -3098,7 +3098,7 @@ class LavalinkPlayer(wavelink.Player):
 
                     for t in tracks:
 
-                        if t.is_stream or Levenshtein.ratio(t.title, track.title) < 0.8:
+                        if t.is_stream or fuzz.token_sort_ratio(t.title, track.title) < 80:
                             continue
 
                         if not has_exclude_tags and any(tag for tag in exclude_tags if tag.lower() in t.title.lower()):

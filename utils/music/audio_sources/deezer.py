@@ -4,9 +4,9 @@ from __future__ import annotations
 import re
 from typing import Optional
 
-import Levenshtein
 from aiohttp import ClientSession
 from cachetools import TTLCache
+from rapidfuzz import fuzz
 
 from utils.music.converters import fix_characters, URL_REG
 from utils.music.errors import GenericError
@@ -88,7 +88,7 @@ class DeezerClient:
 
                     t.info["extra"]["authors"] = [a['name'] for a in artists]
 
-                    if check_title and Levenshtein.ratio(url.lower(), f"{t.authors_string} - {t.single_title}".lower()) < 0.8:
+                    if check_title and fuzz.token_sort_ratio(url.lower(), f"{t.authors_string} - {t.single_title}".lower()) < 80:
                         continue
 
                     t.info["isrc"] = result.get('isrc')
