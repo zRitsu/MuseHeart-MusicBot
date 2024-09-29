@@ -125,7 +125,7 @@ class SpotifyClient:
 
     async def track_search(self, query: str):
         return await self.request(path='search', params = {
-        'q': query, 'type': 'track', 'limit': 10
+        'q': quote(query), 'type': 'track', 'limit': 10
         })
 
     async def get_access_token(self):

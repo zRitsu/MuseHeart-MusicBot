@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+from pipes import quote
 from typing import Optional
 
 from aiohttp import ClientSession
@@ -54,7 +55,7 @@ class DeezerClient:
         return (await self.request(path=f"artist/{artist_id}/radio"))['data']
 
     async def track_search(self, query):
-        return await self.request(path="search", params={'q': query})
+        return await self.request(path="search", params={'q': quote(query)})
 
     async def get_tracks(self, requester: int, url: str, search: bool = True, check_title: bool = True):
 
