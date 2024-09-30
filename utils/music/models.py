@@ -883,7 +883,7 @@ class LavalinkPlayer(wavelink.Player):
             track = self.current or self.last_track
             node_info = f"`{event.node.identifier}`" if event.node.identifier == self.node.identifier else f"`{self.node.identifier} | {event.node.identifier}`"
             embed = disnake.Embed(
-                description=f"**Falha ao reproduzir música:\n[{track.title}]({track.uri or track.search_uri})** ```java\n{event.message}```\n"
+                description=f"**Falha ao reproduzir música{' (parcial)' if isinstance(track, PartialTrack) else ''}:\n[{track.title}]({track.uri or track.search_uri})** ```java\n{event.message}```\n"
                             f"**Causa:** ```java\n{event.cause[:200]}```\n"
                             f"**Nível:** `{event.severity}`\n"
                             f"**Servidor de música:** {node_info}",
