@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 
 exclude_tags = ["remix", "edit", "extend", "compilation", "mashup", "mixed"]
 exclude_tags_2 = ["extend", "compilation", "mashup", "nightcore", "8d", "mixed"]
-emoji_pattern = re.compile('<a?:.+?:\d+?>')
+emoji_pattern = re.compile(r'<a?:.+?:\d+?>')
 
 thread_archive_time = {
     60: 30,
@@ -1678,28 +1678,35 @@ class LavalinkPlayer(wavelink.Player):
                         author = self.lastfm_artists.pop(0)
                     except:
                         author = track_data.author
-                        
-                    if track_data.info["sourceName"] == "youtube" and self.native_yt:
 
-                        queries = [f"https://www.youtube.com/watch?v={track_data.ytid}&list=RD{track_data.ytid}"]
+                    if track_data.info["sourceName"] == "spotify" and "spotfy" in self.node.info["sourceManagers"]:
+                        queries = ["sprec:seed_tracks=" + ",".join(list(set(t.identifier for t in tracks_search if t.info["sourceName"] == "spotify"))[:5])]
+                        
+                    else:
+
+                        queries = []
+
+                        if track_data.info["sourceName"] == "youtube" and self.native_yt:
+
+                            queries.append(f"https://www.youtube.com/watch?v={track_data.ytid}&list=RD{track_data.ytid}")
 
                         if p_dict:=providers_dict.get(track_data.info["sourceName"]):
-                            providers = [p_dict] + [p for p in self.node.search_providers if p != p_dict]
+
+                            providers = []
+                            providers_alt = []
+
+                            for p in self.node.partial_providers:
+                                if p.startswith(p_dict):
+                                    providers.append(p)
+                                else:
+                                    providers_alt.append(p)
+
+                            providers.extend(providers_alt)
+
                         else:
-                            providers = self.node.search_providers
+                            providers = self.node.partial_providers
 
                         queries.extend([f"{sp}:{author.split(',')[0]}" for sp in providers])
-
-                    elif track_data.info["sourceName"] == "spotify" and "spotfy" in self.node.info["sourceManagers"]:
-                        queries = ["sprec:seed_tracks=" + ",".join(list(set(t.identifier for t in tracks_search if t.info["sourceName"] == "spotify"))[:5])]
-
-                    else:
-                        if p_dict:=providers_dict.get(track_data.info["sourceName"]):
-                            providers = [p_dict] + [p for p in self.node.search_providers if p != p_dict]
-                        else:
-                            providers = self.node.search_providers
-
-                        queries = [f"{sp}:{author.split(',')[0]}" for sp in providers]
 
                     for query in queries:
 
@@ -2896,7 +2903,7 @@ class LavalinkPlayer(wavelink.Player):
                     traceback.print_exc()
                     pass
 
-                #await self.channel_cleanup()
+                await self.channel_cleanup()
 
             else:
 
