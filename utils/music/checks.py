@@ -574,6 +574,9 @@ async def check_player_perm(inter, bot: BotCore, channel, guild_data: dict = Non
     except AttributeError:
         vc = player.last_channel
 
+    if not isinstance(inter.guild, disnake.Guild):
+        inter.author = player.guild.get_member(inter.author.id)
+
     if inter.author.guild_permissions.manage_channels:
         return True
 
