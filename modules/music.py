@@ -7215,27 +7215,27 @@ class Music(commands.Cog):
                 if player.guild.me.voice and inter.author.id in player.guild.me.voice.channel.voice_states:
                     return [bot]
 
-        author = None
-
         for b in self.bot.pool.get_guild_bots(guild.id):
 
             if not b.bot_ready:
                 continue
-
-            author = b.get_member(inter.guild_id)
-
-            if not author:
-                continue
-
-            if b.user in author.voice.channel.members:
-                free_bots.append(b)
-                break
 
             g = b.get_guild(guild.id)
 
             if not g:
                 bot_count += 1
                 continue
+
+            author = g.get_member(inter.author.id)
+
+            if not author:
+                continue
+
+            inter.author = author
+
+            if b.user in inter.author.voice.channel.members:
+                free_bots.append(b)
+                break
 
             p: LavalinkPlayer = b.music.players.get(guild.id)
 
@@ -7249,7 +7249,7 @@ class Music(commands.Cog):
                 if not vc:
                     continue
 
-                if author.id in vc.members:
+                if inter.author.id in vc.members:
                     free_bots.append(b)
                     break
                 else:
@@ -7258,7 +7258,7 @@ class Music(commands.Cog):
 
             free_bots.append(b)
 
-        if not free_bots or not author:
+        if not free_bots:
 
             if bot_count:
                 txt = "**Todos os bots estão em uso no nomento...**"
