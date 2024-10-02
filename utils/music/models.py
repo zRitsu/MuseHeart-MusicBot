@@ -805,6 +805,9 @@ class LavalinkPlayer(wavelink.Player):
 
     async def hook_events(self, event):
 
+        if self.is_closing:
+            return
+
         await self.bot.wait_until_ready()
 
         if isinstance(event, wavelink.TrackEnd):
@@ -2419,6 +2422,9 @@ class LavalinkPlayer(wavelink.Player):
 
     async def invoke_np(self, force=False, interaction=None, rpc_update=False):
 
+        if self.is_closing:
+            return
+
         if not self.text_channel:
             try:
                 if not interaction.response.is_done():
@@ -2780,6 +2786,11 @@ class LavalinkPlayer(wavelink.Player):
         self.bot.dispatch("player_pause" if pause else "player_resume", player=self)
 
     async def destroy_message(self):
+
+        try:
+            self.track_load_task.cancel()
+        except:
+            pass
 
         try:
             self.message_updater_task.cancel()
