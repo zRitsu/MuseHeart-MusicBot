@@ -2759,8 +2759,6 @@ class LavalinkPlayer(wavelink.Player):
                             self.update = True
                             return
 
-            await self.destroy_message()
-
             if not self.message:
 
                 try:
