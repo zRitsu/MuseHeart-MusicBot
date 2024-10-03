@@ -2759,6 +2759,8 @@ class LavalinkPlayer(wavelink.Player):
                             self.update = True
                             return
 
+            await self.destroy_message()
+
             if not self.message:
 
                 try:
@@ -2784,11 +2786,6 @@ class LavalinkPlayer(wavelink.Player):
         self.bot.dispatch("player_pause" if pause else "player_resume", player=self)
 
     async def destroy_message(self):
-
-        try:
-            self.track_load_task.cancel()
-        except:
-            pass
 
         try:
             self.message_updater_task.cancel()
@@ -3463,6 +3460,11 @@ class LavalinkPlayer(wavelink.Player):
         self.bot.loop.create_task(self.process_destroy(force=force, inter=inter))
 
     async def process_destroy(self, force: bool = False, inter: disnake.MessageInteraction = None):
+
+        try:
+            self.track_load_task.cancel()
+        except:
+            pass
 
         if self.is_closing:
             return
