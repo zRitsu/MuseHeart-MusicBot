@@ -1240,8 +1240,10 @@ class Music(commands.Cog):
 
             if yt_match:
                 query = f"{yt_match.group()}/playlists"
+                remove_chars = 12
             else:
                 query = f"https://soundcloud.com/{sc_match.group(1)}/sets"
+                remove_chars = 6
 
             try:
                 await inter.response.defer(ephemeral=True)
@@ -1265,7 +1267,7 @@ class Music(commands.Cog):
             except (KeyError, IndexError):
                 pass
 
-            info = {"entries": [{"title": t['title'], "url": f"{t['url']}"} for t in info["entries"]], "thumbnails": info.get("thumbnails"), "title": (info.get("channel") or "") + ("*"*12)}
+            info = {"entries": [{"title": t['title'], "url": f"{t['url']}"} for t in info["entries"]], "thumbnails": info.get("thumbnails"), "title": (info.get("channel") or "")[:-remove_chars]}
 
         if matches:
 
@@ -1283,7 +1285,7 @@ class Music(commands.Cog):
                                              emoji=emoji) for c, e in enumerate(info['entries'])
                     ], timeout=120)
 
-                embed_title = f"do canal: {(info.get('title') or selected_title)[:-12]}" if platform == "youtube" else f"do usuário: {info.get('title') or selected_title}"
+                embed_title = f"do canal: {(info.get('title') or selected_title)}" if platform == "youtube" else f"do usuário: {info.get('title') or selected_title}"
 
                 embeds = []
 
