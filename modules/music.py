@@ -1265,7 +1265,7 @@ class Music(commands.Cog):
             except (KeyError, IndexError):
                 pass
 
-            info = {"entries": [{"title": t['title'], "url": f"{t['url']}"} for t in info["entries"]]}
+            info = {"entries": [{"title": t['title'], "url": f"{t['url']}"} for t in info["entries"]], "thumbnails": info.get("thumbnails"), "title": info.get("channel") or ""}
 
         if matches:
 
