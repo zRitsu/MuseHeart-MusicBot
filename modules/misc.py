@@ -801,12 +801,12 @@ class Misc(commands.Cog):
                 break
 
         if not guild:
-            user = await bot.fetch_user(inter.author.id)
+            user = await bot.fetch_user(user.id)
 
-            user_avatar_url = inter.author.display_avatar.replace(static_format="png", size=512).url
+            user_avatar_url = user.display_avatar.replace(static_format="png", size=512).url
 
             if user_banner_url:=user.banner:
-                user_banner_url = inter.author.banner.replace(static_format="png", size=4096).url
+                user_banner_url = user.banner.replace(static_format="png", size=4096).url
 
             guild_avatar_url = None
             guild_banner_url = None
@@ -816,7 +816,7 @@ class Misc(commands.Cog):
                                             headers={"Authorization": f"Bot {bot.http.token}"}) as r:
                 data = await r.json()
 
-            user_avatar_url = inter.author.display_avatar.replace(static_format="png", size=512).url
+            user_avatar_url = user.display_avatar.replace(static_format="png", size=512).url
 
             if user_banner_url := data['user'].get('banner'):
                 user_banner_url = f"https://cdn.discordapp.com/banners/{user.id}/{user_banner_url}." + (
