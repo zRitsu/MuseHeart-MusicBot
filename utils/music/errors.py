@@ -28,6 +28,12 @@ class GenericError(commands.CheckFailure):
         self.components = components
         self.error = error
 
+    def __repr__(self):
+        return disnake.utils.escape_markdown(self.text)
+
+    def __str__(self):
+        return disnake.utils.escape_markdown(self.text)
+
 
 class EmptyFavIntegration(commands.CheckFailure):
     pass
