@@ -33,7 +33,7 @@ from utils.music.converters import time_format, fix_characters, string_to_second
 from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolException, parse_error, \
     EmptyFavIntegration, DiffVoiceChannel, NoPlayer, YoutubeSourceDisabled
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction, FavMenuView, ViewMode, \
-    SetStageTitle, SelectBotVoice
+    SetStageTitle, SelectBotVoice, youtube_regex, soundcloud_regex
 from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, PartialTrack, PartialPlaylist, \
     native_sources
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, queue_track_index, \
@@ -1170,184 +1170,194 @@ class Music(commands.Cog):
             query = user_data["last_tracks"][int(query[7:])]["url"]
             source = False
 
-        elif query.startswith(("> fav: ", "> itg: ")):
-
+        if not user_data:
             user_data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
-            if query.startswith("> fav:"):
-                query = user_data["fav_links"][query[7:]]
+        yt_match = None
+        sc_match = None
+        profile_avatar = None
+
+        if query.startswith("> fav:"):
+            query = user_data["fav_links"][query[7:]]
+
+        elif query.startswith("> itg:"):
+            integration_data = user_data["integration_links"][query[7:]]
+
+            if not isinstance(integration_data, dict):
+                integration_data = {"url": integration_data, "avatar": None}
+                user_data["integration_links"][query[7:]] = integration_data
+                await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
+
+            query = integration_data["url"]
+
+            profile_avatar = integration_data.get("avatar")
+
+        if (matches := spotify_regex_w_user.match(query)):
+
+            if not self.bot.spotify:
+                raise GenericError("**O suporte ao spotify não está disponível no momento...**")
+
+            url_type, user_id = matches.groups()
+
+            if url_type != "user":
+                raise GenericError("**Link não suportado usando este método...**")
+
+            try:
+                await inter.response.defer(ephemeral=True)
+            except:
+                pass
+
+            cache_key = f"partial:spotify:{url_type}:{user_id}"
+
+            if not (info := self.bot.pool.integration_cache.get(cache_key)):
+                result = await self.bot.spotify.get_user_playlists(user_id)
+                info = {"entries": [{"title": t["name"], "url": f'{t["external_urls"]["spotify"]}'} for t in result["items"]]}
+                self.bot.pool.integration_cache[cache_key] = info
+
+        elif (matches := deezer_regex.match(query)):
+
+            url_type, user_id = matches.groups()[-2:]
+
+            if url_type != "profile":
+                raise GenericError("**Link não suportado usando este método...**")
+
+            try:
+                await inter.response.defer(ephemeral=True)
+            except:
+                pass
+
+            cache_key = f"partial:deezer:{url_type}:{user_id}"
+
+            if not (info := self.bot.pool.integration_cache.get(cache_key)):
+                result = await bot.deezer.get_user_playlists(user_id)
+                info = {"entries": [{"title": t['title'], "url": f"{t['link']}"} for t in result]}
+                self.bot.pool.integration_cache[cache_key] = info
+
+        elif matches:=(yt_match:=youtube_regex.search(query)) or (sc_match:=soundcloud_regex.search(query)):
+
+            if not self.bot.config["USE_YTDL"]:
+                raise GenericError("**Não há suporte a esse tipo de requisição no momento...**")
+
+            if yt_match:
+                query = f"{yt_match.group()}/playlists"
+            else:
+                query = f"https://soundcloud.com/{sc_match.group(1)}/sets"
+
+            try:
+                await inter.response.defer(ephemeral=True)
+            except:
+                pass
+
+            if not (info := self.bot.pool.integration_cache.get(query)):
+                loop = self.bot.loop or asyncio.get_event_loop()
+                info = await loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(query,download=False))
+
+                try:
+                    if not info["entries"]:
+                        raise GenericError(f"**Conteúdo indisponível (ou privado):**\n{query}")
+                except KeyError:
+                    raise GenericError("**Ocorreu um erro ao tentar obter resultados para a opção selecionada...**")
+
+                self.bot.pool.integration_cache[query] = info
+
+            try:
+                profile_avatar = [a['url'] for a in info["thumbnails"] if a["id"] == "avatar_uncropped"][0]
+            except (KeyError, IndexError):
+                pass
+
+            info = {"entries": [{"title": t['title'], "url": f"{t['url']}"} for t in info["entries"]]}
+
+        if matches:
+
+            if len(info["entries"]) == 1:
+                query = info["entries"][0]['url']
 
             else:
 
-                integration_data = user_data["integration_links"][query[7:]]
+                emoji, platform = music_source_emoji_url(query)
 
-                if not isinstance(integration_data, dict):
-                    integration_data = {"url": integration_data, "avatar": None}
-                    user_data["integration_links"][query[7:]] = integration_data
-                    await self.bot.update_global_data(inter.author.id, user_data, db_name=DBModel.users)
+                view = SelectInteraction(
+                    user=inter.author, max_itens=15,
+                    opts=[
+                        disnake.SelectOption(label=e['title'][:90], value=f"entrie_select_{c}",
+                                             emoji=emoji) for c, e in enumerate(info['entries'])
+                    ], timeout=120)
 
-                query = integration_data["url"]
+                embed_title = f"do canal: {(info.get('title') or selected_title)[:-12]}" if platform == "youtube" else f"do usuário: {info.get('title') or selected_title}"
 
-                profile_avatar = integration_data.get("avatar")
+                embeds = []
 
-                if (matches := spotify_regex_w_user.match(query)):
+                for page_index, page in enumerate(disnake.utils.as_chunks(info['entries'], 15)):
 
-                    if not self.bot.spotify:
-                        raise GenericError("**O suporte ao spotify não está disponível no momento...**")
+                    embed = disnake.Embed(
+                        description="\n".join(f'-# ` {(15*page_index)+n+1}. `[`{i["title"]}`]({i["url"]})' for n, i in enumerate(page)) + "\n\n**Selecione uma playlist abaixo:**\n"
+                                    f'-# Essa solicitação será cancelada automaticamente <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=120)).timestamp())}:R> caso não seja selecionado uma opção abaixo.',
+                        color=self.bot.get_color(guild.me)
+                    ).set_author(name=f"Tocar playlist pública {embed_title}", icon_url=music_source_image(platform), url=query)
 
-                    url_type, user_id = matches.groups()
-
-                    if url_type != "user":
-                        raise GenericError("**Link não suportado usando este método...**")
-
-                    try:
-                        await inter.response.defer(ephemeral=True)
-                    except:
-                        pass
-
-                    cache_key = f"partial:spotify:{url_type}:{user_id}"
-
-                    if not (info := self.bot.pool.integration_cache.get(cache_key)):
-                        result = await self.bot.spotify.get_user_playlists(user_id)
-                        info = {"entries": [{"title": t["name"], "url": f'{t["external_urls"]["spotify"]}'} for t in result["items"]]}
-                        self.bot.pool.integration_cache[cache_key] = info
-
-                elif (matches := deezer_regex.match(query)):
-
-                    url_type, user_id = matches.groups()[-2:]
-
-                    if url_type != "profile":
-                        raise GenericError("**Link não suportado usando este método...**")
-
-                    try:
-                        await inter.response.defer(ephemeral=True)
-                    except:
-                        pass
-
-                    cache_key = f"partial:deezer:{url_type}:{user_id}"
-
-                    if not (info := self.bot.pool.integration_cache.get(cache_key)):
-                        result = await bot.deezer.get_user_playlists(user_id)
-                        info = {"entries": [{"title": t['title'], "url": f"{t['link']}"} for t in result]}
-                        self.bot.pool.integration_cache[cache_key] = info
-
-                elif not self.bot.config["USE_YTDL"]:
-                    raise GenericError("**Não há suporte a esse tipo de requisição no momento...**")
-
-                else:
-
-                    loop = self.bot.loop or asyncio.get_event_loop()
-
-                    try:
-                        await inter.response.defer(ephemeral=True)
-                    except:
-                        pass
-
-                    if not (info := self.bot.pool.integration_cache.get(query)):
-                        info = await loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(query,download=False))
-
+                    if profile_avatar:
+                        embed.set_thumbnail(profile_avatar)
                         try:
-                            if not info["entries"]:
-                                raise GenericError(f"**Conteúdo indisponível (ou privado):**\n{query}")
-                        except KeyError:
-                            raise GenericError("**Ocorreu um erro ao tentar obter resultados para a opção selecionada...**")
+                            if len(info["thumbnails"]) > 2:
+                                embed.set_image(info["thumbnails"][0]['url'])
+                        except:
+                            pass
 
-                        self.bot.pool.integration_cache[query] = info
+                    embeds.append(embed)
 
+                kwargs = {}
+
+                view.embeds = embeds
+
+                try:
+                    func = msg.edit
+                except AttributeError:
                     try:
-                        profile_avatar = [a['url'] for a in info["thumbnails"] if a["id"] == "avatar_uncropped"][0]
-                    except (KeyError, IndexError):
-                        pass
+                        func = inter.edit_original_message
+                    except AttributeError:
+                        kwargs["ephemeral"] = True
+                        try:
+                            func = inter.followup.send
+                        except AttributeError:
+                            func = inter.send
 
-                if len(info["entries"]) == 1:
-                    query = info["entries"][0]['url']
+                msg = await func(embed=embeds[0], view=view, **kwargs)
 
-                else:
+                await view.wait()
 
-                    emoji, platform = music_source_emoji_url(query)
-
-                    view = SelectInteraction(
-                        user=inter.author, max_itens=15,
-                        opts=[
-                            disnake.SelectOption(label=e['title'][:90], value=f"entrie_select_{c}",
-                                                 emoji=emoji) for c, e in enumerate(info['entries'])
-                        ], timeout=120)
-
-                    embed_title = f"do canal: {(info.get('title') or selected_title)[:-12]}" if platform == "youtube" else f"do usuário: {info.get('title') or selected_title}"
-
-                    embeds = []
-
-                    for page_index, page in enumerate(disnake.utils.as_chunks(info['entries'], 15)):
-
-                        embed = disnake.Embed(
-                            description="\n".join(f'-# ` {(15*page_index)+n+1}. `[`{i["title"]}`]({i["url"]})' for n, i in enumerate(page)) + "\n\n**Selecione uma playlist abaixo:**\n"
-                                        f'-# Essa solicitação será cancelada automaticamente <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=120)).timestamp())}:R> caso não seja selecionado uma opção abaixo.',
-                            color=self.bot.get_color(guild.me)
-                        ).set_author(name=f"Tocar playlist pública {embed_title}", icon_url=music_source_image(platform), url=query)
-
-                        if profile_avatar:
-                            embed.set_thumbnail(profile_avatar)
-                            try:
-                                if len(info["thumbnails"]) > 2:
-                                    embed.set_image(info["thumbnails"][0]['url'])
-                            except:
-                                pass
-
-                        embeds.append(embed)
-
-                    kwargs = {}
-
-                    view.embeds = embeds
+                if not view.inter or view.selected is False:
 
                     try:
                         func = msg.edit
-                    except AttributeError:
-                        try:
-                            func = inter.edit_original_message
-                        except AttributeError:
-                            kwargs["ephemeral"] = True
-                            try:
-                                func = inter.followup.send
-                            except AttributeError:
-                                func = inter.send
+                    except:
+                        func = view.inter.response.edit_message
 
-                    msg = await func(embed=embeds[0], view=view, **kwargs)
+                    try:
+                        embed = view.embeds[view.current_page]
+                    except:
+                        embed = embeds[0]
 
-                    await view.wait()
+                    embed.description = "\n".join(embed.description.split("\n")[:-3])
+                    embed.set_footer(text="⚠️ Tempo esgotado!" if not view.selected is False else "⚠️ Cancelado pelo usuário.")
 
-                    if not view.inter or view.selected is False:
+                    try:
+                        await func(embed=embed,components=song_request_buttons)
+                    except:
+                        traceback.print_exc()
+                    return
 
-                        try:
-                            func = msg.edit
-                        except:
-                            func = view.inter.response.edit_message
+                query = info["entries"][int(view.selected[14:])]["url"]
 
-                        try:
-                            embed = view.embeds[view.current_page]
-                        except:
-                            embed = embeds[0]
-
-                        embed.description = "\n".join(embed.description.split("\n")[:-3])
-                        embed.set_footer(text="⚠️ Tempo esgotado!" if not view.selected is False else "⚠️ Cancelado pelo usuário.")
-
-                        try:
-                            await func(embed=embed,components=song_request_buttons)
-                        except:
-                            traceback.print_exc()
-                        return
-
-                    query = info["entries"][int(view.selected[14:])]["url"]
-
-                    if not isinstance(inter, disnake.ModalInteraction):
-                        inter.token = view.inter.token
-                        inter.id = view.inter.id
-                        inter.response = view.inter.response
-                    else:
-                        inter = view.inter
+                if not isinstance(inter, disnake.ModalInteraction):
+                    inter.token = view.inter.token
+                    inter.id = view.inter.id
+                    inter.response = view.inter.response
+                else:
+                    inter = view.inter
 
             source = False
 
-        elif query.startswith(">> [💾 Fila Salva 💾] <<"):
+        if query.startswith(">> [💾 Fila Salva 💾] <<"):
 
             try:
                 async with aiofiles.open(f"./local_database/saved_queues_v1/users/{inter.author.id}.pkl", 'rb') as f:

@@ -605,8 +605,8 @@ class AskView(disnake.ui.View):
         self.interaction_resp = interaction
         self.stop()
 
-youtube_regex = r"https?://www\.youtube\.com/(?:channel/|@)[^/]+"
-soundcloud_regex = r"^(?:https?:\/\/)?(?:www\.)?soundcloud\.com\/([a-zA-Z0-9_-]+)"
+youtube_regex = re.compile(r"https?://www\.youtube\.com/(?:channel/|@)[^/]+")
+soundcloud_regex = re.compile(r"^(?:https?:\/\/)?(?:www\.)?soundcloud\.com\/([a-zA-Z0-9_-]+)")
 
 async def process_idle_embed(bot: BotCore, guild: disnake.Guild, guild_data: dict):
 
@@ -1211,13 +1211,13 @@ class FavModalAdd(disnake.ui.Modal):
                     )
                     return
 
-                match = re.search(youtube_regex, url)
+                match = youtube_regex.search(url)
 
                 if match:
                     base_url = f"{match.group(0)}/playlists"
                     source = "[YT]:"
                 else:
-                    match = re.search(soundcloud_regex, url)
+                    match = soundcloud_regex.search(url)
                     if match:
                         group = match.group(1)
                         base_url = f"https://soundcloud.com/{group}/sets"
