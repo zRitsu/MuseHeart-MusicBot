@@ -1174,6 +1174,7 @@ class Music(commands.Cog):
         yt_match = None
         sc_match = None
         profile_avatar = None
+        info = {"entries": []}
 
         if query.startswith("> fav:"):
             query = user_data["fav_links"][query[7:]]
@@ -1197,39 +1198,37 @@ class Music(commands.Cog):
 
             url_type, user_id = matches.groups()
 
-            if url_type != "user":
-                raise GenericError("**Link não suportado usando este método...**")
+            if url_type == "user":
 
-            try:
-                await inter.response.defer(ephemeral=True)
-            except:
-                pass
+                try:
+                    await inter.response.defer(ephemeral=True)
+                except:
+                    pass
 
-            cache_key = f"partial:spotify:{url_type}:{user_id}"
+                cache_key = f"partial:spotify:{url_type}:{user_id}"
 
-            if not (info := self.bot.pool.integration_cache.get(cache_key)):
-                result = await self.bot.spotify.get_user_playlists(user_id)
-                info = {"entries": [{"title": t["name"], "url": f'{t["external_urls"]["spotify"]}'} for t in result["items"]]}
-                self.bot.pool.integration_cache[cache_key] = info
+                if not (info := self.bot.pool.integration_cache.get(cache_key)):
+                    result = await self.bot.spotify.get_user_playlists(user_id)
+                    info = {"entries": [{"title": t["name"], "url": f'{t["external_urls"]["spotify"]}'} for t in result["items"]]}
+                    self.bot.pool.integration_cache[cache_key] = info
 
         elif (matches := deezer_regex.match(query)):
 
             url_type, user_id = matches.groups()[-2:]
 
-            if url_type != "profile":
-                raise GenericError("**Link não suportado usando este método...**")
+            if url_type == "profile":
 
-            try:
-                await inter.response.defer(ephemeral=True)
-            except:
-                pass
+                try:
+                    await inter.response.defer(ephemeral=True)
+                except:
+                    pass
 
-            cache_key = f"partial:deezer:{url_type}:{user_id}"
+                cache_key = f"partial:deezer:{url_type}:{user_id}"
 
-            if not (info := self.bot.pool.integration_cache.get(cache_key)):
-                result = await bot.deezer.get_user_playlists(user_id)
-                info = {"entries": [{"title": t['title'], "url": f"{t['link']}"} for t in result]}
-                self.bot.pool.integration_cache[cache_key] = info
+                if not (info := self.bot.pool.integration_cache.get(cache_key)):
+                    result = await bot.deezer.get_user_playlists(user_id)
+                    info = {"entries": [{"title": t['title'], "url": f"{t['link']}"} for t in result]}
+                    self.bot.pool.integration_cache[cache_key] = info
 
         elif matches:=(yt_match:=youtube_regex.search(query)) or (sc_match:=soundcloud_regex.search(query)):
 
@@ -1272,7 +1271,7 @@ class Music(commands.Cog):
 
             info = {"entries": [{"title": t['title'], "url": f"{t['url']}"} for t in info["entries"]], "thumbnails": info.get("thumbnails")}
 
-        if matches:
+        if matches and info["entries"]:
 
             if len(info["entries"]) == 1:
                 query = info["entries"][0]['url']
