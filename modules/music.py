@@ -934,8 +934,6 @@ class Music(commands.Cog):
                 except AttributeError:
                     msg = await inter.send(view=view, **kwargs)
 
-
-
             await view.wait()
 
             select_interaction = view.inter
@@ -1267,7 +1265,12 @@ class Music(commands.Cog):
             except (KeyError, IndexError):
                 pass
 
-            info = {"entries": [{"title": t['title'], "url": f"{t['url']}"} for t in info["entries"]], "thumbnails": info.get("thumbnails"), "title": (info.get("channel") or "")[:-remove_chars]}
+            try:
+                selected_title = info["channel"]
+            except KeyError:
+                selected_title = info["title"][:-remove_chars]
+
+            info = {"entries": [{"title": t['title'], "url": f"{t['url']}"} for t in info["entries"]], "thumbnails": info.get("thumbnails")}
 
         if matches:
 
