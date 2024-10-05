@@ -6942,6 +6942,8 @@ class Music(commands.Cog):
             if not self.bot.pool.last_fm:
                 raise GenericError("**No momento não há suporte a mix/recomendações devido o Last.fm não ter sido configurado na minha estrutura.**")
 
+            query = query.title()
+
             try:
                 artist, track = query.split(" - ")
             except:
@@ -6950,13 +6952,45 @@ class Music(commands.Cog):
                 except:
                     raise GenericError("Você deve informar sua busca dessa forma: nome do artista - nome da música")
 
-            info = await self.bot.pool.last_fm.get_similar_tracks(artist=artist, track=track)
+            exceptions = set()
 
-            track_url = f"https://www.last.fm/music/{quote(artist.title())}/_/{quote(track.title())}"
+            current = None
+
+            try:
+                info = await self.bot.pool.last_fm.get_similar_tracks(track=track)
+            except Exception as e:
+                exceptions.add(e)
+                info = []
+
+            if not info:
+                try:
+                    info = await self.bot.pool.last_fm.get_artist_toptracks(artist)
+                except Exception as e:
+                    exceptions.add(e)
+
+                if not info:
+                    txt = f"**Não houve resultados de mixes para sua busca: {artist} - {track}**"
+                    if exceptions:
+                        txt += f"\n\nErros: ```py\n" + "\n".join(repr(e) for e in exceptions) + "```"
+                    raise GenericError(txt)
+
+                track_url = f"https://www.last.fm/music/{quote(artist)}"
+                playlist_name = f"TopTracks: {artist}"
+
+            else:
+                track_url = f"https://www.last.fm/music/{quote(artist)}/_/{quote(track)}"
+                playlist_name = f"Mix: {artist} - {track}"
+                current = PartialTrack(
+                    uri=track_url,
+                    title=track,
+                    author=artist,
+                    requester=user.id,
+                    source_name="last.fm",
+                )
 
             playlist = PartialPlaylist(
                 url=track_url,
-                data={"playlistInfo": {"name": f"Mix: {artist.title()} - {track.title()}"}}
+                data={"playlistInfo": {"name": playlist_name}}
             )
 
             playlist.tracks = [PartialTrack(
@@ -6967,18 +7001,8 @@ class Music(commands.Cog):
                 source_name="last.fm",
             ) for i in info]
 
-            if not playlist.tracks:
-                raise GenericError(f"**Não houve resultados de mixes para sua busca: {artist} - {track}**")
-
-            playlist.tracks.insert(0,
-                PartialTrack(
-                    uri=track_url,
-                    title=track.title(),
-                    author=artist.title(),
-                    requester=user.id,
-                    source_name="last.fm",
-                )
-            )
+            if current:
+                playlist.tracks.insert(0, current)
 
             return playlist, node
 

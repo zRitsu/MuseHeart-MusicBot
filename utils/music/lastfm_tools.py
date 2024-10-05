@@ -183,7 +183,17 @@ class LastFM:
                 params['artist'] = artist
     
         return (await self.request_lastfm(params))['similartracks']['track']
-    
+
+    async def get_artist_toptracks(self, artist: str, limit=20):
+        return (await self.request_lastfm(
+            {
+                'method': 'artist.gettoptracks',
+                'api_key': self.api_key,
+                'artist': artist,
+                'limit': limit,
+            }
+        ))['toptracks']['track']
+
     async def get_similar_artists(self, artist: str, mbid: str = None):
         params = {
             'method': 'artist.getSimilar',
