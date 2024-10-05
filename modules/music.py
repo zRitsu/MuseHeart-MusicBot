@@ -1871,7 +1871,10 @@ class Music(commands.Cog):
                 if footer_txt:
                     embed.description += f"\n-# {footer_txt}"
 
-            if loadtype == "track":
+            if mix:
+                components = []
+
+            elif loadtype == "track":
                 components = [
                     disnake.ui.Button(emoji="💗", label="Favoritar", custom_id=PlayerControls.embed_add_fav),
                     disnake.ui.Button(emoji="▶️", label="Tocar" + (" agora" if (player.current and player.current.autoplay) else ""), custom_id=PlayerControls.embed_forceplay),
