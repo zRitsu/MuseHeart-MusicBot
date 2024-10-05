@@ -148,7 +148,7 @@ class ErrorHandler(commands.Cog):
 
             await self.send_webhook(
                 embed=self.build_report_embed(inter),
-                file=string_to_file(full_error_msg, "error_traceback_interaction.txt")
+                file=string_to_file(full_error_msg or error_msg, "error_traceback_interaction.txt")
             )
 
             await asyncio.sleep(20)
@@ -298,7 +298,7 @@ class ErrorHandler(commands.Cog):
 
             await self.send_webhook(
                 embed=self.build_report_embed(ctx),
-                file=string_to_file(full_error_msg, "error_traceback_prefixed.txt")
+                file=string_to_file(full_error_msg or error_msg, "error_traceback_prefixed.txt")
             )
 
             await asyncio.sleep(20)
