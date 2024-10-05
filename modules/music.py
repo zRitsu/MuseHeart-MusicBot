@@ -6970,7 +6970,7 @@ class Music(commands.Cog):
             if not playlist.tracks:
                 raise GenericError(f"**Não houve resultados de mixes para sua busca: {artist} - {track}**")
 
-            playlist.tracks.insert(
+            playlist.tracks.insert(0,
                 PartialTrack(
                     uri=track_url,
                     title=track.title(),
