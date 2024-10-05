@@ -3017,7 +3017,13 @@ class LavalinkPlayer(wavelink.Player):
                     retries -= 1
                     continue
 
-            await asyncio.sleep(sleep_time or (self.current.duration / 1000))
+            if not sleep_time:
+                if self.current.duration:
+                    sleep_time = self.current.duration / 1000
+                else:
+                    sleep_time = 180
+
+            await asyncio.sleep(sleep_time)
             self.current = None
             self.last_update = 0
             self.bot.loop.create_task(self.node.on_event(TrackEnd({"track": self.current, "player": self, "node": self.node, "reason": "FINISHED"})))
@@ -3132,7 +3138,10 @@ class LavalinkPlayer(wavelink.Player):
 
             track.id = selected_track.id
             track.info["length"] = selected_track.duration
-            track.info["sourceNameOrig"] = selected_track.info["sourceName"]
+            if track.info["sourceName"] == "last.fm":
+                track.info["sourceName"] = selected_track.info["sourceName"]
+            else:
+                track.info["sourceNameOrig"] = selected_track.info["sourceName"]
             if not track.info["author"]:
                 track.info["author"] = selected_track.author
             if not track.duration:

@@ -12,7 +12,7 @@ from contextlib import suppress
 from copy import deepcopy
 from random import shuffle
 from typing import Union, Optional
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, quote
 
 import aiofiles
 import aiohttp
@@ -445,6 +445,7 @@ class Music(commands.Cog):
     stage_flags.add_argument('-reverse', '-r', action='store_true', help='Inverter a ordem das músicas adicionadas (efetivo apenas ao adicionar playlist).')
     stage_flags.add_argument('-shuffle', '-sl', action='store_true', help='Misturar as músicas adicionadas (efetivo apenas ao adicionar playlist).')
     stage_flags.add_argument('-select', '-s', action='store_true', help='Escolher a música entre os resultados encontrados.')
+    stage_flags.add_argument('-mix', '-rec', '-recommended', action="store_true", help="Adicionar/tocar músicas recomendadas com o nome do artsta - música informado.")
     stage_flags.add_argument('-force', '-now', '-n', '-f', action='store_true', help='Tocar a música adicionada imediatamente (efetivo apenas se houver uma música tocando atualmente.)')
     stage_flags.add_argument('-server', '-sv', type=str, default=None, help='Usar um servidor de música específico.')
     stage_flags.add_argument('-selectbot', '-sb', action="store_true", help="Selecionar um bot disponível manualmente.")
@@ -470,6 +471,7 @@ class Music(commands.Cog):
             manual_selection = args.select,
             server = args.server,
             manual_bot_choice = "yes" if args.selectbot else "no",
+            mix = args.mix,
         )
 
     @can_send_message_check()
@@ -579,6 +581,14 @@ class Music(commands.Cog):
                     disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
                 ]
             ),
+            mix: str = commands.Param(
+                name="recomendadas",
+                description="Tocar músicas recomendadas com base no nome do artista - música informado",
+                default=False,
+                choices=[
+                    disnake.OptionChoice(disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"),
+                ]
+            ),
             manual_selection: bool = commands.Param(name="selecionar_manualmente",
                                                     description="Escolher uma música manualmente entre os resultados encontrados",
                                                     default=False),
@@ -602,6 +612,8 @@ class Music(commands.Cog):
         except AttributeError:
             bot = inter.bot
             guild = inter.guild
+
+        mix = mix == "yes" or mix is True
 
         msg = None
         guild_data = await bot.get_data(inter.author.id, db_name=DBModel.guilds)
@@ -1471,7 +1483,7 @@ class Music(commands.Cog):
             await inter.response.defer(ephemeral=ephemeral)
 
         if not queue_loaded:
-            tracks, node = await self.get_tracks(query, inter, inter.author, node=node, source=source, bot=bot)
+            tracks, node = await self.get_tracks(query, inter, inter.author, node=node, source=source, bot=bot, mix=mix)
             tracks = await self.check_player_queue(inter.author, bot, guild.id, tracks)
 
         try:
@@ -6921,7 +6933,37 @@ class Music(commands.Cog):
 
     async def get_tracks(
             self, query: str, ctx: Union[disnake.AppCmdInter, CustomContext, disnake.MessageInteraction, disnake.Message],
-            user: disnake.Member, node: wavelink.Node = None, source=None, bot: BotCore = None):
+            user: disnake.Member, node: wavelink.Node = None, source=None, bot: BotCore = None, mix=False):
+
+        if mix:
+            if not self.bot.pool.last_fm:
+                raise GenericError("**No momento não há suporte a mix/recomendações devido o Last.fm não ter sido configurado na minha estrutura.**")
+
+            try:
+                artist, track = query.split(" - ")
+            except:
+                try:
+                    artist, track = query.split(' ', 1)
+                except:
+                    raise GenericError("Você deve informar sua busca dessa forma: nome do artista - nome da música")
+
+            info = await self.bot.pool.last_fm.get_similar_tracks(artist=artist, track=track)
+
+            playlist = PartialPlaylist(
+                url=f"https://www.last.fm/music/{quote(artist.title())}/_/{quote(track.title())}",
+                data={"playlistInfo": {"name": f"Mix: {artist.title()} - {track.title()}"}}
+            )
+
+            playlist.tracks = [PartialTrack(
+                uri=i["url"],
+                title=i["name"],
+                author=i["artist"]["name"],
+                requester=user.id,
+                source_name="last.fm",
+                playlist=playlist
+            ) for i in info]
+
+            return playlist, node
 
         if bool(sc_recommended.search(query)):
             try:

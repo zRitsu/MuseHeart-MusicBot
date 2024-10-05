@@ -2,7 +2,6 @@ import hashlib
 import os
 import pickle
 import time
-from typing import Optional
 
 from aiohttp import ClientSession
 from cachetools import TTLCache

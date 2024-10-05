@@ -147,6 +147,7 @@ sources = {
     "jiosaavn": "https://iili.io/d1KjUEx.png",
     "tidal": "https://iili.io/d1KjgrQ.png",
     "youtubemusic": "https://iili.io/d1Kj42V.png",
+    "last.fm": "https://cdn.discordapp.com/emojis/1278883704097341541.png",
 }
 
 def music_source_image(sourcename):

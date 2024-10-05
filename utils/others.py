@@ -560,7 +560,8 @@ music_source_emoji_data = {
     "twitch": "<:Twitch:803656463695478804>",
     "jiosaavn": "<:jiosaavn:1235276169473949747>",
     "tidal": "<:tidal:1235352567048048691>",
-    "youtubemusic": "<:Youtubemusicicon:1245606364470841354>"
+    "youtubemusic": "<:Youtubemusicicon:1245606364470841354>",
+    "last.fm": "<:Lastfm:1278883704097341541>",
 }
 
 def music_source_emoji(name: str):
