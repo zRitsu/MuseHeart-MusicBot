@@ -6952,8 +6952,10 @@ class Music(commands.Cog):
 
             info = await self.bot.pool.last_fm.get_similar_tracks(artist=artist, track=track)
 
+            track_url = f"https://www.last.fm/music/{quote(artist.title())}/_/{quote(track.title())}"
+
             playlist = PartialPlaylist(
-                url=f"https://www.last.fm/music/{quote(artist.title())}/_/{quote(track.title())}",
+                url=track_url,
                 data={"playlistInfo": {"name": f"Mix: {artist.title()} - {track.title()}"}}
             )
 
@@ -6963,11 +6965,20 @@ class Music(commands.Cog):
                 author=i["artist"]["name"],
                 requester=user.id,
                 source_name="last.fm",
-                playlist=playlist
             ) for i in info]
 
             if not playlist.tracks:
                 raise GenericError(f"**Não houve resultados de mixes para sua busca: {artist} - {track}**")
+
+            playlist.tracks.insert(
+                PartialTrack(
+                    uri=track_url,
+                    title=track.title(),
+                    author=artist.title(),
+                    requester=user.id,
+                    source_name="last.fm",
+                )
+            )
 
             return playlist, node
 

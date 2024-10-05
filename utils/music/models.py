@@ -3139,7 +3139,9 @@ class LavalinkPlayer(wavelink.Player):
             track.id = selected_track.id
             track.info["length"] = selected_track.duration
             if track.info["sourceName"] == "last.fm":
+                track.playlist
                 track.info["sourceName"] = selected_track.info["sourceName"]
+                track.info["uri"] = selected_track.info["uri"]
             else:
                 track.info["sourceNameOrig"] = selected_track.info["sourceName"]
             if not track.info["author"]:
