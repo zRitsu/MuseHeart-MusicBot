@@ -6963,6 +6963,9 @@ class Music(commands.Cog):
                 playlist=playlist
             ) for i in info]
 
+            if not playlist.tracks:
+                raise GenericError(f"**Não houve resultados de mixes para sua busca: {artist} - {track}**")
+
             return playlist, node
 
         if bool(sc_recommended.search(query)):
