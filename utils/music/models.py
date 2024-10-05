@@ -3044,7 +3044,13 @@ class LavalinkPlayer(wavelink.Player):
         if track.id:
             return
 
-        check_duration = True
+        if track.info["sourceName"] == "last.fm":
+            check_author = True
+            check_duration = False
+
+        else:
+            check_author = False
+            check_duration = True
 
         try:
 
@@ -3076,7 +3082,7 @@ class LavalinkPlayer(wavelink.Player):
                 for query in search_queries:
 
                     try:
-                        tracks = (await self.node.get_tracks(query, track_cls=LavalinkTrack,
+                        result = (await self.node.get_tracks(query, track_cls=LavalinkTrack,
                                                              playlist_cls=LavalinkPlaylist))
                     except Exception as e:
                         if track.info["sourceName"] == "youtube" and any(e in str(e) for e in (
@@ -3100,67 +3106,69 @@ class LavalinkPlayer(wavelink.Player):
                         continue
 
                     try:
-                        tracks = tracks.tracks
+                        result = result.tracks
                     except AttributeError:
                         pass
 
                     self.bot.pool.partial_track_cache[f'{track.info["sourceName"]}:{track.author}-{track.single_title}'] = tracks
 
                     try:
-                        if tracks[0].info["sourceName"] == "bandcamp":
+                        if result[0].info["sourceName"] == "bandcamp":
                             check_duration = False
                     except:
                         pass
 
                     has_exclude_tags = any(tag for tag in exclude_tags if tag.lower() in track.title.lower())
 
-                    for t in tracks:
+                    tracks.extend(result)
 
-                        if t.is_stream or fuzz.token_sort_ratio(t.title, track.title) < 80:
+                    for t in result:
+
+                        if check_author and not (t.author.lower() in track.author.lower() or track.author.lower() in t.title.lower()):
+                            continue
+
+                        if t.is_stream:
                             continue
 
                         if not has_exclude_tags and any(tag for tag in exclude_tags if tag.lower() in t.title.lower()):
                             continue
 
-                        if check_duration and ((t.duration - 10000) < track.duration < (t.duration + 10000)):
-                            selected_track = t
-                            break
+                        track_check = track.title if track.info["sourceName"] not in ("youtube", "soundcloud") else f"{track.author} - {track.title}"
+                        t_check = t.title if t.info["sourceName"] not in ("youtube", "soundcloud") else f"{t.author} - {t.title}"
 
-                    if not tracks:
+                        if fuzz.token_sort_ratio(t_check, track_check) < 70:
+                            continue
+
+                        if check_duration and not ((t.duration - 10000) < track.duration < (t.duration + 10000)):
+                            continue
+
+                        selected_track = t
+                        break
+
+                    if not selected_track:
                         continue
 
                     break
 
-            if not tracks:
-                if exceptions:
-                    print("Falha ao resolver PartialTrack:\n" + "\n".join(repr(e) for e in exceptions))
-                return
-
             if not selected_track:
-                selected_track = tracks[0]
+                try:
+                    selected_track = tracks[0]
+                except IndexError:
+                    if exceptions:
+                        print("Falha ao resolver PartialTrack:\n" + "\n".join(repr(e) for e in exceptions))
+                    return
 
             track.id = selected_track.id
             track.info["length"] = selected_track.duration
             if track.info["sourceName"] == "last.fm":
-
-                try:
-                    track.info.update(
-                        {
-                            "pluginInfo": {
-                                "albumName": selected_track.info["pluginInfo"]["albumName"],
-                                "albumUrl": selected_track.info["pluginInfo"]["albumUrl"]
-                            }
-                        }
-                    )
-                except KeyError:
-                    pass
-
+                track.info["pluginInfo"] = selected_track.info.get("pluginInfo", {})
+                track.info["author"] = selected_track.author
                 track.info["sourceName"] = selected_track.info["sourceName"]
                 track.info["uri"] = selected_track.info["uri"]
             else:
                 track.info["sourceNameOrig"] = selected_track.info["sourceName"]
-            if not track.info["author"]:
-                track.info["author"] = selected_track.author
+                if not track.info["author"]:
+                    track.info["author"] = selected_track.author
             if not track.duration:
                 track.info["duration"] = selected_track.duration
             if not track.thumb:
