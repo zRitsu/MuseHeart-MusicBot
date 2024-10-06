@@ -26,7 +26,10 @@ class LastFM:
 
         if os.path.exists(cache_file):
             with open(cache_file, 'rb') as f:
-                cache.update(pickle.load(f))
+                try:
+                    cache.update(pickle.load(f))
+                except EOFError:
+                    pass
 
         return cache
 

@@ -109,11 +109,17 @@ class BotPool:
 
         if os.path.exists("./local_database/playlist_cache.pkl"):
             with open("./local_database/playlist_cache.pkl", 'rb') as f:
-                 self.playlist_cache.update(pickle.load(f))
+                try:
+                    self.playlist_cache.update(pickle.load(f))
+                except EOFError:
+                    pass
 
         if os.path.exists("./local_database/partial_track_cache.pkl"):
             with open("./local_database/partial_track_cache.pkl", 'rb') as f:
-                 self.partial_track_cache.update(pickle.load(f))
+                try:
+                    self.partial_track_cache.update(pickle.load(f))
+                except EOFError:
+                    pass
 
     async def cache_updater(self):
         while True:
