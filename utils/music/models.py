@@ -129,6 +129,9 @@ class PartialTrack:
     def __repr__(self):
         return f"{self.info['sourceName']} - {self.duration} - {self.authors_string} - {self.title}"
 
+    def __str__(self):
+        return f"{self.info['sourceName']} - {self.duration} - {self.authors_string} - {self.title}"
+
     @property
     def thumb(self) -> str:
         try:
@@ -3124,7 +3127,7 @@ class LavalinkPlayer(wavelink.Player):
 
                     for t in result:
 
-                        if check_author and not (t.author.lower() in track.author.lower() or track.author.lower() in t.title.lower()):
+                        if check_author and not (t.author.lower() not in track.author.lower() and track.author.lower() not in t.title.lower()):
                             continue
 
                         if t.is_stream:
@@ -3151,12 +3154,9 @@ class LavalinkPlayer(wavelink.Player):
                     break
 
             if not selected_track:
-                try:
-                    selected_track = tracks[0]
-                except IndexError:
-                    if exceptions:
-                        print("Falha ao resolver PartialTrack:\n" + "\n".join(repr(e) for e in exceptions))
-                    return
+                if exceptions:
+                    print("Falha ao resolver PartialTrack:\n" + "\n".join(repr(e) for e in exceptions))
+                return
 
             track.id = selected_track.id
             track.info["length"] = selected_track.duration
