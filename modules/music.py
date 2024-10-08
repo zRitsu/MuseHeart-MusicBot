@@ -6142,6 +6142,11 @@ class Music(commands.Cog):
             node: wavelink.Node = None, modal_message_id: int = None
     ):
 
+        try:
+            return bot.music.players[guild.id]
+        except KeyError:
+            pass
+
         if not guild_data:
             guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
@@ -6156,7 +6161,7 @@ class Music(commands.Cog):
             node = await self.get_best_node(bot)
 
         global_data = await bot.get_global_data(guild.id, db_name=DBModel.guilds)
-        
+
         try:
             vc = inter.author.voice.channel
         except AttributeError:
