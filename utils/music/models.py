@@ -152,7 +152,7 @@ class PartialTrack:
 
     @property
     def search_uri(self):
-        return f"https://www.youtube.com/results?search_query={quote(self.author + '-' + self.title)}"
+        return f"https://www.youtube.com/results?search_query={quote((self.author + '-' + self.title) if self.info['sourceName'] not in ('youtube', 'soundcloud') else self.title)}"
 
     @property
     def title(self) -> str:
