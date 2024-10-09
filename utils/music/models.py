@@ -3047,13 +3047,7 @@ class LavalinkPlayer(wavelink.Player):
         if track.id:
             return
 
-        if track.info["sourceName"] == "last.fm":
-            check_author = True
-            check_duration = False
-
-        else:
-            check_author = False
-            check_duration = bool(track.duration)
+        check_duration = bool(track.duration)
 
         try:
 
@@ -3126,9 +3120,6 @@ class LavalinkPlayer(wavelink.Player):
                     tracks.extend(result)
 
                     for t in result:
-
-                        if check_author and (t.author.lower() not in track.author.lower() and track.author.lower() not in t.title.lower()):
-                            continue
 
                         if t.is_stream:
                             continue
