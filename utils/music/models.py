@@ -144,7 +144,7 @@ class PartialTrack:
 
     @property
     def uri(self) -> str:
-        return self.info["uri"]
+        return self.info["uri"] or self.search_uri
 
     @property
     def url(self) -> str:
@@ -152,7 +152,7 @@ class PartialTrack:
 
     @property
     def search_uri(self):
-        return f"https://www.youtube.com/results?search_query={quote(self.title)}"
+        return f"https://www.youtube.com/results?search_query={quote(self.author + '-' + self.title)}"
 
     @property
     def title(self) -> str:
