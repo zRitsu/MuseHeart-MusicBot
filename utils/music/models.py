@@ -3154,9 +3154,12 @@ class LavalinkPlayer(wavelink.Player):
                     break
 
             if not selected_track:
-                if exceptions:
-                    print("Falha ao resolver PartialTrack:\n" + "\n".join(repr(e) for e in exceptions))
-                return
+                try:
+                    selected_track = tracks[0]
+                except IndexError:
+                    if exceptions:
+                        print("Falha ao resolver PartialTrack:\n" + "\n".join(repr(e) for e in exceptions))
+                    return
 
             track.id = selected_track.id
             track.info["length"] = selected_track.duration
