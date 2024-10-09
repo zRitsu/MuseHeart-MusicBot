@@ -3053,7 +3053,7 @@ class LavalinkPlayer(wavelink.Player):
 
         else:
             check_author = False
-            check_duration = True
+            check_duration = bool(track.duration)
 
         try:
 
@@ -3127,7 +3127,7 @@ class LavalinkPlayer(wavelink.Player):
 
                     for t in result:
 
-                        if check_author and not (t.author.lower() not in track.author.lower() and track.author.lower() not in t.title.lower()):
+                        if check_author and (t.author.lower() not in track.author.lower() and track.author.lower() not in t.title.lower()):
                             continue
 
                         if t.is_stream:
@@ -3139,7 +3139,7 @@ class LavalinkPlayer(wavelink.Player):
                         track_check = track.title if track.info["sourceName"] not in ("youtube", "soundcloud") else f"{track.author} - {track.title}"
                         t_check = t.title if t.info["sourceName"] not in ("youtube", "soundcloud") else f"{t.author} - {t.title}"
 
-                        if fuzz.token_sort_ratio(t_check, track_check) < 70:
+                        if fuzz.token_sort_ratio(t_check, track_check) < 80:
                             continue
 
                         if check_duration and not ((t.duration - 10000) < track.duration < (t.duration + 10000)):
@@ -3148,10 +3148,9 @@ class LavalinkPlayer(wavelink.Player):
                         selected_track = t
                         break
 
-                    if not selected_track:
-                        continue
+                    if selected_track:
+                        break
 
-                    break
 
             if not selected_track:
                 try:
