@@ -3127,8 +3127,8 @@ class LavalinkPlayer(wavelink.Player):
                         if not has_exclude_tags and any(tag for tag in exclude_tags if tag.lower() in t.title.lower()):
                             continue
 
-                        track_check = track.title if track.info["sourceName"] not in ("youtube", "soundcloud") else f"{track.author} - {track.title}"
-                        t_check = t.title if t.info["sourceName"] not in ("youtube", "soundcloud") else f"{t.author} - {t.title}"
+                        track_check = track.title if track.info["sourceName"] not in ("youtube", "soundcloud") else f"{track.author} - {track.single_title}"
+                        t_check = t.title if t.info["sourceName"] not in ("youtube", "soundcloud") else f"{t.author} - {t.single_title}"
 
                         if fuzz.token_sort_ratio(track_check, t_check) < 70:
                             continue
