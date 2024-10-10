@@ -3130,7 +3130,7 @@ class LavalinkPlayer(wavelink.Player):
                         track_check = track.title if track.info["sourceName"] not in ("youtube", "soundcloud") else f"{track.author} - {track.title}"
                         t_check = t.title if t.info["sourceName"] not in ("youtube", "soundcloud") else f"{t.author} - {t.title}"
 
-                        if fuzz.token_sort_ratio(t_check, track_check) < 80:
+                        if fuzz.token_sort_ratio(track_check, t_check) < 70:
                             continue
 
                         if check_duration and not ((t.duration - 10000) < track.duration < (t.duration + 10000)):
@@ -3141,7 +3141,6 @@ class LavalinkPlayer(wavelink.Player):
 
                     if selected_track:
                         break
-
 
             if not selected_track:
                 try:
