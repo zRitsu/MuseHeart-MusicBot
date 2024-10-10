@@ -3049,6 +3049,9 @@ class LavalinkPlayer(wavelink.Player):
 
         check_duration = bool(track.duration)
 
+        if track.info["sourceName"] == "last.fm":
+            check_duration = False
+
         try:
 
             exceptions = []
