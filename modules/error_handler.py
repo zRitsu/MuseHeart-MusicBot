@@ -473,10 +473,7 @@ class ErrorHandler(commands.Cog):
             file: Optional[disnake.File] = None
     ):
 
-        kwargs = {
-            "username": self.bot.user.name,
-            "avatar_url": self.bot.user.display_avatar.replace(static_format='png').url,
-        }
+        kwargs = {}
 
         if content:
             kwargs["content"] = content
@@ -487,10 +484,18 @@ class ErrorHandler(commands.Cog):
         if file:
             kwargs["file"] = file
 
-        async with ClientSession() as session:
-            webhook = disnake.Webhook.from_url(self.bot.config["AUTO_ERROR_REPORT_WEBHOOK"], session=session)
-            await webhook.send(**kwargs)
+        if (channel:=self.bot.get_channel(self.bot.config["BOT_ADD_REMOVE_LOG_CHANNEL_ID"])) and channel.permissions_for(channel.guild.me).send_messages:
+            await channel.send(**kwargs)
 
+        else:
+            kwargs.update({
+                "username": self.bot.user.name,
+                "avatar_url": self.bot.user.display_avatar.replace(static_format='png').url,
+            })
+
+            async with ClientSession() as session:
+                webhook = disnake.Webhook.from_url(self.bot.config["AUTO_ERROR_REPORT_WEBHOOK"], session=session)
+                await webhook.send(**kwargs)
 
 def setup(bot: BotCore):
     bot.add_cog(ErrorHandler(bot))
