@@ -215,6 +215,7 @@ def load_config():
         "PLAYLIST_CACHE_SIZE",
         "PLAYLIST_CACHE_TTL",
         "SPOTIFY_PLAYLIST_EXTRA_PAGE_LIMIT",
+        "BOT_ADD_REMOVE_LOG_CHANNEL_ID",
     ]:
         try:
             new_value = int(CONFIG[i])
