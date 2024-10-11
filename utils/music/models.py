@@ -1402,6 +1402,14 @@ class LavalinkPlayer(wavelink.Player):
         elif self.skin_static not in self.bot.pool.player_static_skins:
             self.skin_static = self.bot.pool.default_static_skin
 
+    def start_members_timeout(self, check: bool, force: bool = False, idle_timeout = None):
+        try:
+            self.members_timeout_task.cancel()
+        except:
+            pass
+        self.members_timeout_task = self.bot.loop.create_task(self.members_timeout(check=check, force=force,
+                                                                                   idle_timeout=idle_timeout))
+
     async def members_timeout(self, check: bool, force: bool = False, idle_timeout = None):
 
         if check:
@@ -1493,6 +1501,14 @@ class LavalinkPlayer(wavelink.Player):
         else:
 
             if self.is_closing:
+                return
+
+            try:
+                vc = self.guild.me.voice.channel
+            except AttributeError:
+                vc = self.last_channel
+
+            if [m for m in vc.members if not m.bot]:
                 return
 
             msg = "**O player foi desligado por falta de membros no canal" + (f" <#{self.guild.me.voice.channel.id}>"

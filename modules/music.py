@@ -7158,7 +7158,7 @@ class Music(commands.Cog):
                         check = (m for m in vc.members if not m.bot and not (m.voice.deaf or m.voice.self_deaf))
                     except:
                         check = None
-                    player.members_timeout_task = player.bot.loop.create_task(player.members_timeout(check=bool(check)))
+                    player.start_members_timeout(check=bool(check))
             return
 
         try:
@@ -7244,7 +7244,7 @@ class Music(commands.Cog):
                 pass
             player.auto_skip_track_task = None
 
-        player.members_timeout_task = player.bot.loop.create_task(player.members_timeout(check=bool(check)))
+        player.start_members_timeout(check=bool(check))
 
         if not member.guild.me.voice:
             await asyncio.sleep(1)
