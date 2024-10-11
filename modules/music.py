@@ -6950,7 +6950,7 @@ class Music(commands.Cog):
             query = query.title()
 
             try:
-                artist, track = query.split(" - ")
+                artist, track = query.split(" - ", 1)
             except:
                 try:
                     artist, track = query.split(' ', 1)
@@ -6962,7 +6962,7 @@ class Music(commands.Cog):
             current = None
 
             try:
-                info = await self.bot.pool.last_fm.get_similar_tracks(track=track)
+                info = await self.bot.pool.last_fm.get_similar_tracks(track=track, artist=artist)
             except Exception as e:
                 exceptions.add(e)
                 info = []
