@@ -1998,7 +1998,7 @@ class Music(commands.Cog):
     @check_stage_topic()
     @is_requester()
     @check_queue_loading()
-    @has_source()
+    @has_player()
     @check_voice()
     @commands.slash_command(
         description=f"{desc_prefix}Pular a música atual que está tocando.", dm_permission=False,
