@@ -3143,12 +3143,14 @@ class LavalinkPlayer(wavelink.Player):
                     if not has_exclude_tags and any(tag for tag in exclude_tags if tag.lower() in t.title.lower()):
                         continue
 
-                    check_similarity = lambda a, b: len(set(a) & set(b)) / len(set(a))
+                    if self.bot.config["CHECK_TRACK_SIMILARITY"]:
 
-                    norm_title = lambda tc: f"{tc.author} - {tc.single_title}".lower() if (tc.info["sourceName"] not in ("youtube", "soundcloud") or len(tc.title) < 12) else tc.title.lower()
+                        check_similarity = lambda a, b: len(set(a) & set(b)) / len(set(a))
 
-                    if check_similarity(set(norm_title(t).split()), norm_title(track).split()) < 0.70:
-                        continue
+                        norm_title = lambda tc: f"{tc.author} - {tc.single_title}".lower() if (tc.info["sourceName"] not in ("youtube", "soundcloud") or len(tc.title) < 12) else tc.title.lower()
+
+                        if check_similarity(set(norm_title(t).split()), norm_title(track).split()) < 0.70:
+                            continue
 
                     if check_duration and not ((t.duration - 10000) < track.duration < (t.duration + 10000)):
                         continue
