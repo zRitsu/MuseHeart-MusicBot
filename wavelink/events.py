@@ -75,9 +75,9 @@ class TrackException:
         self.node = data.get('node')
         self.error = data.get('error')
         self.exception = data.get('exception', {})
-        self.cause = self.exception.get('cause')
-        self.message = self.exception.get('message')
-        self.severity = self.exception.get('severity')
+        self.cause = self.exception.get('cause', '')
+        self.message = self.exception.get('message', '')
+        self.severity = self.exception.get('severity', '')
         self.data = data
 
     def __str__(self):
