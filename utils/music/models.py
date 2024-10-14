@@ -3072,34 +3072,31 @@ class LavalinkPlayer(wavelink.Player):
 
             exceptions = []
             selected_track = None
+            tracks = []
 
             if track.info["sourceName"] == "http":
-                tracks = []
                 search_queries = [track.uri or track.search_uri]
             else:
-                tracks = self.bot.pool.partial_track_cache.get(f'{track.info["sourceName"]}:{track.author}-{track.single_title}') or []
                 search_queries = []
 
-            if not tracks:
+            if not search_queries:
 
-                if not search_queries:
+                if track.info["sourceName"] in self.node.info.get("sourceManagers", []) and (not self.node.only_use_native_search_providers or track.info["sourceName"] in native_sources):
+                    search_queries = [track.uri]
+                else:
+                    search_queries = []
+                    for sp in self.node.partial_providers:
+                        if "{isrc}" in sp:
+                            if isrc := track.info.get('isrc'):
+                                search_queries.append(sp.replace("{isrc}", isrc))
+                            continue
+                        search_queries.append(sp.replace("{title}", track.single_title).replace("{author}", ", ".join(track.authors)))
 
-                    if track.info["sourceName"] in self.node.info.get("sourceManagers", []) and (not self.node.only_use_native_search_providers or track.info["sourceName"] in native_sources):
-                        search_queries = [track.uri]
-                    else:
-                        search_queries = []
-                        for sp in self.node.partial_providers:
-                            if "{isrc}" in sp:
-                                if isrc := track.info.get('isrc'):
-                                    search_queries.append(sp.replace("{isrc}", isrc))
-                                continue
-                            search_queries.append(sp.replace("{title}", track.single_title).replace("{author}", ", ".join(track.authors)))
+            for query in search_queries:
 
-                for query in search_queries:
-
+                if not (result := self.bot.pool.partial_track_cache.get(f'{track.info["sourceName"]}:{track.author}-{track.single_title}')):
                     try:
-                        result = (await self.node.get_tracks(query, track_cls=LavalinkTrack,
-                                                             playlist_cls=LavalinkPlaylist))
+                        result = (await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist))
                     except Exception as e:
                         if track.info["sourceName"] == "youtube" and any(e in str(e) for e in (
                             "This video is not available",
@@ -3128,49 +3125,44 @@ class LavalinkPlayer(wavelink.Player):
 
                     self.bot.pool.partial_track_cache[f'{track.info["sourceName"]}:{track.author}-{track.single_title}'] = tracks
 
-                    try:
-                        if result[0].info["sourceName"] == "bandcamp":
-                            check_duration = False
-                    except:
-                        pass
+                try:
+                    if result[0].info["sourceName"] == "bandcamp":
+                        check_duration = False
+                except:
+                    pass
 
-                    has_exclude_tags = any(tag for tag in exclude_tags if tag.lower() in track.title.lower())
+                has_exclude_tags = any(tag for tag in exclude_tags if tag.lower() in track.title.lower())
 
-                    tracks.extend(result)
+                tracks.extend(result)
 
-                    for t in result:
+                for t in result:
 
-                        if t.is_stream:
-                            continue
+                    if t.is_stream:
+                        continue
 
-                        if not has_exclude_tags and any(tag for tag in exclude_tags if tag.lower() in t.title.lower()):
-                            continue
+                    if not has_exclude_tags and any(tag for tag in exclude_tags if tag.lower() in t.title.lower()):
+                        continue
 
-                        check_similarity = lambda a, b: len(set(a) & set(b)) / len(set(a))
+                    check_similarity = lambda a, b: len(set(a) & set(b)) / len(set(a))
 
-                        norm_title = lambda tc: f"{tc.author} - {tc.single_title}".lower() if (tc.info["sourceName"] not in ("youtube", "soundcloud") or len(tc.title) < 12) else tc.title.lower()
+                    norm_title = lambda tc: f"{tc.author} - {tc.single_title}".lower() if (tc.info["sourceName"] not in ("youtube", "soundcloud") or len(tc.title) < 12) else tc.title.lower()
 
-                        if check_similarity(set(norm_title(t).split()), norm_title(track).split()) < 0.80:
-                            continue
+                    if check_similarity(set(norm_title(t).split()), norm_title(track).split()) < 0.70:
+                        continue
 
-                        if check_duration and not ((t.duration - 10000) < track.duration < (t.duration + 10000)):
-                            continue
+                    if check_duration and not ((t.duration - 10000) < track.duration < (t.duration + 10000)):
+                        continue
 
-                        selected_track = t
-                        break
+                    selected_track = t
+                    break
 
-                    if selected_track:
-                        break
+                if selected_track:
+                    break
 
             if not selected_track:
-
-                if track.info["sourceName"] != "last.fm":
-                    try:
-                        selected_track = tracks[0]
-                    except:
-                        pass
-
-                if not selected_track:
+                try:
+                    selected_track = tracks[0]
+                except:
                     if exceptions:
                         print("Falha ao resolver PartialTrack:\n" + "\n".join(repr(e) for e in exceptions))
                     return
@@ -3199,9 +3191,6 @@ class LavalinkPlayer(wavelink.Player):
                             f"**Servidor de música:** `{self.node.identifier}`",
                 color=disnake.Colour.red())
             await self.report_error(embed, track)
-            return
-
-        return
 
     async def _wait_for_new_node(self, txt: str = None, ignore_node: wavelink.Node = None):
 
