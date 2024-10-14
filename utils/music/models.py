@@ -1137,10 +1137,10 @@ class LavalinkPlayer(wavelink.Player):
             elif self.keep_connected and not track.autoplay and len(self.queue) > 15:
                 self.queue.append(track)
 
-            if event.cause.startswith(
+            if event.cause.startswith((
                 "com.github.topi314.lavasrc.mirror.TrackNotFoundException: Playlist is empty",
                 "com.github.topi314.lavasrc.mirror.TrackNotFoundException: No mirror found for track",
-            ):
+            )):
                 embed = disnake.Embed(
                     description=f"`Ignorando a música` [`{track.title}`](<{track.url}>)`. Pois não houve resultados em outras plataformas de música.`",
                     color=self.bot.get_color(self.guild.me)
