@@ -1564,11 +1564,11 @@ class FavMenuView(disnake.ui.View):
                     name, url = data
                     e = get_source_emoji_cfg(self.bot, url)
                     if e:
-                        return f"` {index:02} ` {e} [`{fix_characters(name, 45)}`](<{url}>)"
-                    return f"` {index:02} ` [`{fix_characters(name, 45)}`](<{url}>)"
+                        return f"` {index:02} ` {e} [`{fix_characters(name, 40)}`](<{url}>)"
+                    return f"` {index:02} ` [`{fix_characters(name, 40)}`](<{url}>)"
 
                 txt += "\n".join(
-                    f"> {format_fav(n+1, d)}" for n, d in enumerate(islice(self.data["fav_links"].items(), 25))
+                    f"> {format_fav(n+1, d)}" for n, d in enumerate(islice(self.data["fav_links"].items(), 22))
                 )
 
             if not self.light_mode:
@@ -1590,11 +1590,11 @@ class FavMenuView(disnake.ui.View):
                     name, data = data
                     e = get_source_emoji_cfg(self.bot, data['url'])
                     if e:
-                        return f"` {index:02} ` {e} [`{fix_characters(name, 45)}`](<{data['url']}>)"
-                    return f"` {index:02} ` [`{fix_characters(name, 45)}`](<{data['url']}>)"
+                        return f"` {index:02} ` {e} [`{fix_characters(name, 40)}`](<{data['url']}>)"
+                    return f"` {index:02} ` [`{fix_characters(name, 40)}`](<{data['url']}>)"
 
                 txt += f"**Links atuais no bot {self.bot.user.mention}:**\n" + "\n".join(
-                    f"> {format_gfav(n+1, d)}" for n, d in enumerate(islice(self.guild_data["player_controller"]["fav_links"].items(), 25))
+                    f"> {format_gfav(n+1, d)}" for n, d in enumerate(islice(self.guild_data["player_controller"]["fav_links"].items(), 22))
                 )
 
                 txt += "\n\n**Como usá-los?**\n" \
@@ -1615,11 +1615,11 @@ class FavMenuView(disnake.ui.View):
                         url = url["url"]
                     e = get_source_emoji_cfg(bot, url)
                     if e:
-                        return f"` {index:02} ` {e} [`{fix_characters(name[5:], 45)}`](<{url}>)"
-                    return f"` {index:02} ` [`{fix_characters(name, 45)}`](<{url}>)"
+                        return f"` {index:02} ` {e} [`{fix_characters(name[5:], 40)}`](<{url}>)"
+                    return f"` {index:02} ` [`{fix_characters(name, 40)}`](<{url}>)"
 
                 txt += f"### Suas integrações atuais:\n" + "\n".join(
-                    f"> {format_itg(self.bot, n+1, d)}" for n, d in enumerate(islice(self.data["integration_links"].items(), 25)))
+                    f"> {format_itg(self.bot, n+1, d)}" for n, d in enumerate(islice(self.data["integration_links"].items(), 22)))
 
                 if not self.light_mode:
                     txt += "\n\n**Como usá-los?**\n" \
