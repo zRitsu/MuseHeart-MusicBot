@@ -15,7 +15,6 @@ from typing import TYPE_CHECKING, List, Union
 import disnake
 import pylrc
 import syncedlyrics
-from cachetools import TTLCache
 from disnake.ext import commands
 
 from utils.music.checks import has_source, check_voice, is_dj

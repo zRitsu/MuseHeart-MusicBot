@@ -99,6 +99,7 @@ class BotPool:
         self.default_controllerless_skin = self.config.get("DEFAULT_CONTROLLERLESS_SKIN", "default")
         self.default_idling_skin = self.config.get("DEFAULT_IDLING_SKIN", "default")
         self.cache_updater_task: Optional[asyncio.Task] = None
+        self.lyric_data_cache = TTLCache(maxsize=30000, ttl=600*10)
 
         self.load_cache()
 
@@ -118,6 +119,13 @@ class BotPool:
             with open("./local_database/partial_track_cache.pkl", 'rb') as f:
                 try:
                     self.partial_track_cache.update(pickle.load(f))
+                except EOFError:
+                    pass
+
+        if os.path.exists("./local_database/.lyric_cache_data"):
+            with open("./local_database/.lyric_cache_data", 'rb') as f:
+                try:
+                    self.lyric_data_cache.update(pickle.load(f))
                 except EOFError:
                     pass
 
