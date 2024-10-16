@@ -529,6 +529,7 @@ class LavalinkPlayer(wavelink.Player):
         self.updating: bool = False
         self.auto_update: int = 0
         self.live_lyrics_enabled = False
+        self.has_lyrics = False
         self.np_original_data = None
         self.lyric_task: Optional[asyncio.Task] = None
         self.listen_along_invite = kwargs.pop("listen_along_invite", "")
@@ -1871,6 +1872,8 @@ class LavalinkPlayer(wavelink.Player):
         if self.locked or self.is_closing:
             return
 
+        self.has_lyrics = True
+
         if not self.node or not self.node.is_available:
             try:
                 self._new_node_task.cancel()
@@ -2477,7 +2480,7 @@ class LavalinkPlayer(wavelink.Player):
                 pass
             return
 
-        if self.live_lyrics_enabled and not force:
+        if self.has_lyrics:
             return
 
         if rpc_update:

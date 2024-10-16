@@ -717,6 +717,8 @@ class LiveLyrics(commands.Cog):
             except:
                 pass
 
+            player.has_lyrics = True
+
             player.update = False
 
             for n, line in enumerate(lineinfos):
@@ -854,6 +856,8 @@ class LiveLyrics(commands.Cog):
 
             if player.position > (player.current.duration - 10000):
                 return
+
+            player.has_lyrics = False
 
             if player.controller_mode:
                 await player.invoke_np()
