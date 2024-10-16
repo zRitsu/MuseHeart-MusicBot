@@ -546,7 +546,7 @@ class PlayerSession(commands.Cog):
                 except KeyError:
                     pass
 
-                player.live_lyrics_enabled = data["live_lyrics_status"]
+                player.live_lyrics_enabled = data.get("live_lyrics_status", False)
 
                 if start_timestamp:=data.get("start_timestamp"):
                     player.start_timestamp = start_timestamp
