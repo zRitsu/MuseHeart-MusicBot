@@ -125,7 +125,7 @@ class LiveLyrics(commands.Cog):
         cache_key = f"lavalyric:{ytm_id}"
 
         if (lyric_data := self.bot.pool.lyric_data_cache.get(cache_key)) is None:
-            print(f"Requisitando lyric (lavalytics): {query}")
+            print(f"Requisitando lyric (lavalyrics): {query}")
             try:
                 lyric_data = await node.fetch_ytm_lyrics(ytm_id)
             except Exception as e:
@@ -193,7 +193,7 @@ class LiveLyrics(commands.Cog):
                     try:
                         lines[n - 1]["range"]["end"] = end
                         if text != "♪":
-                            lines[n - 1]["line"] = text
+                            lines[n - 1]["line"] += f". {text}"
                         time_start += start
                     except IndexError:
                         pass
