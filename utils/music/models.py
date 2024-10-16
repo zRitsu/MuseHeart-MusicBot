@@ -528,6 +528,9 @@ class LavalinkPlayer(wavelink.Player):
         self.update: bool = False
         self.updating: bool = False
         self.auto_update: int = 0
+        self.live_lyrics_enabled = False
+        self.np_original_data = None
+        self.lyric_task: Optional[asyncio.Task] = None
         self.listen_along_invite = kwargs.pop("listen_along_invite", "")
         self.message_updater_task: Optional[asyncio.Task] = None
         # limitar apenas para dj's e staff's
@@ -2472,6 +2475,9 @@ class LavalinkPlayer(wavelink.Player):
                     await interaction.response.defer()
             except:
                 pass
+            return
+
+        if self.live_lyrics_enabled and not force:
             return
 
         if rpc_update:

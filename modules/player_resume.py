@@ -190,6 +190,11 @@ class PlayerSession(commands.Cog):
             player._last_channel_id = vc_id
             data["last_voice_channel_id"] = vc_id
 
+        try:
+            data["live_lyrics_status"] = player.live_lyrics_enabled
+        except AttributeError:
+            pass
+
         if player.static:
             if player.skin_static.startswith("> custom_skin: "):
                 custom_skin = player.skin_static[15:]
@@ -540,6 +545,8 @@ class PlayerSession(commands.Cog):
                     player._voice_state = data["voice_state"]
                 except KeyError:
                     pass
+
+                player.live_lyrics_enabled = data["live_lyrics_status"]
 
                 if start_timestamp:=data.get("start_timestamp"):
                     player.start_timestamp = start_timestamp
