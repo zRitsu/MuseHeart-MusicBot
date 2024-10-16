@@ -119,8 +119,10 @@ class LiveLyrics(commands.Cog):
             self.bot.pool.lyric_data_cache[cache_key] = lyric_data
 
         try:
-            if duration and (lyric_data["lines"][-1]["range"]["end"] + 20000) < duration:
-                return {}
+            if duration:
+                last_timestamp = lyric_data["lines"][-1]["range"]["end"]
+                if not (last_timestamp - 20000) < duration < (last_timestamp + 20000):
+                    return {}
         except KeyError:
             pass
 
@@ -154,7 +156,7 @@ class LiveLyrics(commands.Cog):
         try:
             lrc: List[pylrc.parser.LyricLine] = pylrc.parse(''.join([f"{l}\n" for l in lrc.split("\n")]))
 
-            if duration and ((lrc[-1].time * 1000) + 20000) < duration:
+            if duration and not ((lrc[-1].time * 1000) - 20000) < duration < (lrc[-1].time * 1000) + 20000:
                 self.bot.pool.lyric_data_cache[cache_key] = {}
                 if save:
                     self.lyric_id_save_cache_data()
