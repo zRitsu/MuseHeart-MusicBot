@@ -1872,7 +1872,7 @@ class LavalinkPlayer(wavelink.Player):
         if self.locked or self.is_closing:
             return
 
-        self.has_lyrics = True
+        self.has_lyrics = False
 
         if not self.node or not self.node.is_available:
             try:
