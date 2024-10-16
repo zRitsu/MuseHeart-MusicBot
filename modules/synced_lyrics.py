@@ -268,6 +268,7 @@ class LiveLyrics(commands.Cog):
         if player.live_lyrics_enabled:
             self.lyriccancel(player)
             player.live_lyrics_enabled = False
+            player.has_lyrics = False
             txt = f"{inter.author.mention} desativou o sistema de letras sincronizadas."
             emoji = "❌"
             txt_msg = f"{emoji} **⠂{txt}**"
