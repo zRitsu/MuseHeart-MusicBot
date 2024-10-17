@@ -164,6 +164,7 @@ application.yml
 /.gitbak/
 /.tempjar/
 /emojis.json
+ai_prompt.txt
 /.spotify_cache.json
 /guild_bots.json
 /modules_dev/
