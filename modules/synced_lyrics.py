@@ -173,7 +173,7 @@ class LiveLyrics(commands.Cog):
 
                 if time_start:
                     start = time_start
-                    time_start -= time_start
+                    time_start = 0
                 else:
                     start = d.time * 1000
 
@@ -189,11 +189,10 @@ class LiveLyrics(commands.Cog):
                         lines[n - 1]["range"]["end"] = end
                         if text != "♪":
                             lines[n - 1]["line"] += f". {text}"
-                        time_start += start
+                        time_start = start
+                        continue
                     except IndexError:
                         pass
-                    else:
-                        continue
 
                 lines.append({"line": text, "range": {"start": start, "end": end}})
 
