@@ -1,6 +1,6 @@
 # Nota: Code incompleto (provavelmente não será finalizado).
 # Há uma chance dos serviços de ia começar a impor limites (não terá suporte garantido).
-
+# Nos modelos atuais que não há delay e possibilita uso sem api-keys etc pode ter uma base de dados limitado (máximo até 2021, qualquer info após o ano citado pode vir resultados não esperado).
 
 from __future__ import annotations
 
@@ -95,6 +95,8 @@ class AiMusic(commands.Cog):
             if not prompt:
                 raise GenericError("**Você deve incluir um pedido/descrição de músicas.**")
 
+            prompt = prompt.strip("<>")
+
             can_connect(channel=inter.author.voice.channel, guild=guild)
             await check_player_perm(inter=inter, bot=bot, channel=inter.channel)
 
@@ -118,6 +120,9 @@ class AiMusic(commands.Cog):
         txt = str(self.default_prompt_template)
 
         original_prompt = str(prompt)
+
+        if ":" in prompt:
+            prompt = prompt.replace(":", " -> ").strip()
 
         try:
             async with timeout(1.5):
