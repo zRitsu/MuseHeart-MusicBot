@@ -1,6 +1,8 @@
 # Nota: Code incompleto (provavelmente não será finalizado).
-# Há uma chance dos serviços de ia começar a impor limites (não terá suporte garantido).
-# Nos modelos atuais que não há delay e possibilita uso sem api-keys etc pode ter uma base de dados limitado (máximo até 2021, qualquer info após o ano citado pode vir resultados não esperado).
+# * Há uma chance dos serviços de ia começar a impor limites (não terá suporte garantido, portanto recomendo não fazer
+#   alterações que permita ignorar o cooldown implementado no code do comando caso queira ajudar a evitar que isso aconteça).
+# * Nos modelos atuais que não há delay e possibilita uso sem api-keys etc pode ter uma base de dados limitada
+#   (máximo até 2021, qualquer info solicitada que seja após o ano citado pode vir resultados não esperado).
 
 from __future__ import annotations
 
