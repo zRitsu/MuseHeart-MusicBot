@@ -980,6 +980,7 @@ class LavalinkPlayer(wavelink.Player):
                 #event.message == "Video returned by YouTube isn't what was requested" or
                 event.cause.startswith(("java.lang.RuntimeException: Not success status code: 403",
                     "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: Sign in to confirm you’re not a bot",
+                    "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: Please sign in",
                     "java.io.IOException: Invalid status code for video page response: 400"))
             ) or event.cause == "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: This video is unavailable"):
 
