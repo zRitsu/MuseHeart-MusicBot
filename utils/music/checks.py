@@ -545,6 +545,28 @@ def check_stage_topic():
 
     return commands.check(predicate)
 
+def check_yt_cooldown():
+
+    def predicate(inter):
+
+        try:
+            bot = inter.music_bot
+        except AttributeError:
+            bot = inter.bot
+
+        try:
+            player: LavalinkPlayer = bot.music.players[inter.guild_id]
+        except KeyError:
+            return True
+
+        if player.current and player.current.info["sourceName"] == "youtube" and not player.native_yt and (remaining:=(disnake.utils.utcnow() - player.start_time).total_seconds()) < bot.config["YOUTUBE_TRACK_COOLDOWN"]:
+            raise GenericError("**Você só pode pular a música atual do youtube em {}**.\n"
+                               "-# Isso é uma forma de ajudar a evitar possíveis bloqueios do youtube na reprodução da música".format(time_format(int(remaining), use_names=True)))
+
+        return True
+
+    return commands.check(predicate)
+
 def user_cooldown(rate: int, per: int):
     def custom_cooldown(inter: disnake.Interaction):
         # if (await inter.bot.is_owner(inter.author)):

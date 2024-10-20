@@ -152,6 +152,7 @@ DEFAULT_CONFIG = {
     ##############
     "USE_YTDL": True,
     "FORCE_USE_DEEZER_CLIENT": False,
+    "YOUTUBE_TRACK_COOLDOWN": 20,
     "SILENT_PUBLICBOT_WARNING": False,
     "DBCACHE_SIZE": 1000,
     "DBCACHE_TTL": 300
@@ -217,6 +218,7 @@ def load_config():
         "PLAYLIST_CACHE_TTL",
         "SPOTIFY_PLAYLIST_EXTRA_PAGE_LIMIT",
         "BOT_ADD_REMOVE_LOG_CHANNEL_ID",
+        "YOUTUBE_TRACK_COOLDOWN",
     ]:
         try:
             new_value = int(CONFIG[i])
@@ -296,6 +298,9 @@ def load_config():
 
     if CONFIG["IDLE_TIMEOUT"] < 10:
         CONFIG["IDLE_TIMEOUT"] = 10
+
+    if CONFIG["YOUTUBE_TRACK_COOLDOWN"] < 20:
+        CONFIG["YOUTUBE_TRACK_COOLDOWN"] = 20
 
     if CONFIG["PLAYER_INFO_BACKUP_INTERVAL"] < 30:
         CONFIG["PLAYER_INFO_BACKUP_INTERVAL"] = 30

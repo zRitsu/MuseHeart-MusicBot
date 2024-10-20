@@ -27,7 +27,7 @@ from utils.music.audio_sources.deezer import deezer_regex
 from utils.music.audio_sources.spotify import spotify_regex_w_user
 from utils.music.checks import check_voice, has_player, has_source, is_requester, is_dj, \
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen, check_pool_bots, \
-    check_channel_limit, check_stage_topic, check_queue_loading, check_player_perm
+    check_channel_limit, check_stage_topic, check_queue_loading, check_player_perm, check_yt_cooldown
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, google_search, percentage, music_source_image
 from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolException, parse_error, \
@@ -1954,6 +1954,7 @@ class Music(commands.Cog):
     case_sensitive_args.add_argument('-casesensitive', '-cs', action='store_true',
                              help="Buscar por músicas com a frase exata no nome da música ao invés de buscar palavra por palavra.")
     @check_stage_topic()
+    @check_yt_cooldown()
     @is_requester()
     @check_queue_loading()
     @check_voice()
@@ -1971,6 +1972,7 @@ class Music(commands.Cog):
         await self.skip.callback(self=self, inter=ctx, query=" ".join(unknown), case_sensitive=args.casesensitive)
 
     @check_stage_topic()
+    @check_yt_cooldown()
     @is_requester()
     @check_queue_loading()
     @has_source()
@@ -1996,6 +1998,7 @@ class Music(commands.Cog):
         await self.skip.callback(self=self, inter=inter, query=query, case_sensitive=case_sensitive)
 
     @check_stage_topic()
+    @check_yt_cooldown()
     @is_requester()
     @check_queue_loading()
     @has_player()
@@ -2138,6 +2141,7 @@ class Music(commands.Cog):
         player.ignore_np_once = True
         await player.process_next(inter=interaction)
 
+    @check_yt_cooldown()
     @check_stage_topic()
     @is_dj()
     @check_queue_loading()
