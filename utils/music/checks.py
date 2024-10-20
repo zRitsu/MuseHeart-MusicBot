@@ -561,7 +561,7 @@ def check_yt_cooldown():
 
         if player.current and player.current.info["sourceName"] == "youtube" and player.native_yt and (remaining:=(disnake.utils.utcnow() - player.start_time).total_seconds()) < bot.config["YOUTUBE_TRACK_COOLDOWN"]:
             raise GenericError("**Você só pode pular a música atual do youtube em {}**.\n"
-                               "-# Isso é uma forma de ajudar a evitar possíveis bloqueios do youtube na reprodução da música".format(time_format(int(remaining), use_names=True)))
+                               "-# Isso é uma forma de ajudar a evitar possíveis bloqueios do youtube na reprodução da música".format(time_format((bot.config["YOUTUBE_TRACK_COOLDOWN"] - int(remaining))*1000, use_names=True)))
 
         return True
 

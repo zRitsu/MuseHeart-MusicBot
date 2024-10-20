@@ -421,11 +421,12 @@ class LiveLyrics(commands.Cog):
         if not player.live_lyrics_enabled:
             return
 
+        self.lyriccancel(player)
+
         if reason == "REPLACED":
             await self.update_no_controller_msg(player)
             return
 
-        self.lyriccancel(player)
         await self.update_no_controller_msg(player)
 
     @commands.Cog.listener("on_player_destroy")
