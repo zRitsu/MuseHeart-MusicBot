@@ -481,15 +481,6 @@ class LiveLyrics(commands.Cog):
 
         player.start_message_updater_task()
 
-
-    @commands.Cog.listener("on_player_destroy")
-    async def lyric_killer(self, player: LavalinkPlayer):
-
-        if not player.live_lyrics_enabled:
-            return
-
-        self.lyriccancel(player)
-
     async def send_lyric_message(self, player: LavalinkPlayer, embed: disnake.Embed, view=None, components=None):
 
         kwargs = {

@@ -1871,6 +1871,11 @@ class LavalinkPlayer(wavelink.Player):
     async def process_next(self, start_position: Union[int, float] = 0, inter: disnake.MessageInteraction = None,
                            force_np=False):
 
+        try:
+            self.lyric_task.cancel()
+        except:
+            pass
+
         if self.locked or self.is_closing:
             return
 
@@ -3517,6 +3522,11 @@ class LavalinkPlayer(wavelink.Player):
 
         try:
             self.track_load_task.cancel()
+        except:
+            pass
+
+        try:
+            self.lyric_task.cancel()
         except:
             pass
 
