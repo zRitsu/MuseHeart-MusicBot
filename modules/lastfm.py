@@ -293,7 +293,7 @@ class LastFmCog(commands.Cog):
 
                     embed = disnake.Embed(
                         description="\n".join(f"> ` {n+1}º ` [`{b['name']}`]({b['url']}) `de:` [`{b['artist']['name']}`]({b['artist']['url']}) `(x{int(b['playcount']):,})`" for n, b in enumerate(top_albuns)),
-                        color=embed_color).set_author(name=f"Top 5: Álbuns que você mais ouviu (do total de {int(lastfm_user['album_count']):,}):",
+                        color=embed_color).set_author(name=f"Top 3: Álbuns que você mais ouviu (do total de {int(lastfm_user['album_count']):,}):",
                         icon_url="https://i.ibb.co/s6TQK5D/muse-heart-disc-album.jpg",
                         url=f"https://www.last.fm/user/{lastfm_user['name']}/library/albums")
 
