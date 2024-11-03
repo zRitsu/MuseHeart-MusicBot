@@ -1801,48 +1801,15 @@ class Music(commands.Cog):
             if tracks.tracks[0].info["sourceName"] == "youtube":
 
                 try:
-                    """async with bot.session.get((oembed_url:=f"https://www.youtube.com/oembed?url={query}")) as r:
+                    async with bot.session.get((oembed_url:=f"https://www.youtube.com/oembed?url={query}")) as r:
                         try:
                             playlist_data = await r.json()
                         except:
-                            raise Exception(f"{r.status} | {await r.text()}")"""
-                    playlist_data = await bot.loop.run_in_executor(None, lambda: YoutubeDL(
-            {
-                'extract_flat': True,
-                'quiet': True,
-                'no_warnings': True,
-                'lazy_playlist': True,
-                'simulate': True,
-                'playlistend': 0,
-                'cachedir': "./.ytdl_cache",
-                'allowed_extractors': [
-                    r'.*youtube.*',
-                    r'.*soundcloud.*',
-                ],
-                'extractor_args': {
-                    'youtube': {
-                        'skip': [
-                            'hls',
-                            'dash',
-                            'translated_subs'
-                        ],
-                        'player_skip': [
-                            'js',
-                            'configs',
-                            'webpage'
-                        ],
-                        'player_client': ['android_creator'],
-                        'max_comments': [0],
-                    },
-                    'youtubetab': {
-                        "skip": ["webpage"]
-                    }
-                }
-            }
-        ).extract_info(query, download=False))
-                    tracks.data["playlistInfo"]["thumb"] = playlist_data["thumbnails"][-1]['url']
+                            raise Exception(f"{r.status} | {await r.text()}")
+                        else:
+                            tracks.data["playlistInfo"]["thumb"] = playlist_data["thumbnail_url"]
                 except Exception as e:
-                    print(f"Falha ao obter artwork da playlist: {query} | {repr(e)}")
+                    print(f"Falha ao obter artwork da playlist: {oembed_url} | {repr(e)}")
 
             loadtype = "playlist"
 
