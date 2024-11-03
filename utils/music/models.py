@@ -929,11 +929,7 @@ class LavalinkPlayer(wavelink.Player):
 
             cooldown = 10
 
-            if event.cause.startswith((
-                    "java.net.SocketTimeoutException: Read timed out",
-                    "java.net.SocketException: Network is unreachable",
-            )) \
-                or (video_not_available:=event.cause.startswith((
+            if (video_not_available:=event.cause.startswith((
                 "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: This video is not available",
                 "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: YouTube WebM streams are currently not supported.",
                 "java.lang.IllegalStateException: Connection pool shut down",
@@ -1089,6 +1085,8 @@ class LavalinkPlayer(wavelink.Player):
                     "java.lang.IllegalStateException: Failed to get media URL: 2000: An error occurred while decoding track token",
                     "java.lang.RuntimeException: Not success status code: 204",
                     "java.net.SocketTimeoutException: Connect timed out",
+                    "java.net.SocketTimeoutException: Read timed out",
+                    "java.net.SocketException: Network is unreachable",
                     "java.lang.IllegalArgumentException: Invalid bitrate",
                     "java.io.EOFException",
                     "java.net.UnknownHostException:",
