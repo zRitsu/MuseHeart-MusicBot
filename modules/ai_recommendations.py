@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 import re
 from asyncio import timeout
+from copy import deepcopy
 from typing import TYPE_CHECKING
 
 import disnake
@@ -126,10 +127,10 @@ class AiMusic(commands.Cog):
 
         txt = str(self.default_prompt_template)
 
-        original_prompt = str(prompt)
+        original_prompt = deepcopy(prompt)
 
         if ":" in prompt:
-            prompt = prompt.replace(":", " -> ").strip()
+            prompt = prompt.replace(":", "-> ").strip()
 
         try:
             async with timeout(1.5):
@@ -202,13 +203,14 @@ class AiMusic(commands.Cog):
 
             title = f"{track.author} - {track.single_title}".lower() if (track.info["sourceName"] not in ("youtube", "soundcloud") or len(track.title) < 12) else track.title.lower()
 
+            prompt = prompt.replace(original_search, title)
             original_prompt = original_prompt.replace(original_search, title)
 
         response = await self.ai_client.chat.completions.async_create(
             model=g4f.models.claude_3_5_sonnet,
             # model=g4f.models.gpt_4_turbo,
             ignored=["Blackbox"],
-            messages=[{"role": "user", "content": txt.replace("{prompt}", original_prompt)}],
+            messages=[{"role": "user", "content": txt.replace("{prompt}", prompt)}],
         )
 
         lines = response.choices[0].message.content.split("\n")
