@@ -55,6 +55,11 @@ class AiMusic(commands.Cog):
         except:
             pass
 
+        if not hasattr(bot.pool, 'ai_client'):
+            bot.pool.ai_client = g4f.client.Client()
+
+        self.ai_client = bot.pool.ai_client
+
     music_rec_cd = commands.CooldownMapping.from_cooldown(2, 120, commands.BucketType.member)
     music_rec_mc = commands.MaxConcurrency(1, per=commands.BucketType.guild, wait=False)
 
@@ -199,15 +204,14 @@ class AiMusic(commands.Cog):
 
             original_prompt = original_prompt.replace(original_search, title)
 
-        response = await self.bot.loop.run_in_executor(
-            None, lambda: g4f.ChatCompletion.create(
-                model=g4f.models.claude_3_5_sonnet,
-                #model=g4f.models.gpt_4_turbo,
-                messages=[{"role": "user", "content": txt.replace("{prompt}", original_prompt)}],
-            )
+        response = await self.ai_client.chat.completions.async_create(
+            model=g4f.models.claude_3_5_sonnet,
+            # model=g4f.models.gpt_4_turbo,
+            ignored=["Blackbox"],
+            messages=[{"role": "user", "content": txt.replace("{prompt}", original_prompt)}],
         )
 
-        lines = response.split("\n")
+        lines = response.choices[0].message.content.split("\n")
 
         cleaned_list = music_list_regex.findall("\n".join(lines))
 
