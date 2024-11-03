@@ -24,3 +24,4 @@ rapidfuzz
 nodriver==0.32
 undetected-chromedriver==3.5.5
 g4f>=0.3.3.3
+nest_asyncio
