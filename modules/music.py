@@ -7481,9 +7481,9 @@ def setup(bot: BotCore):
                 'extract_flat': True,
                 'quiet': True,
                 'no_warnings': True,
-                'lazy_playlist': True,
-                'simulate': True,
-                'cachedir': "./.ytdl_cache",
+                #'lazy_playlist': True,
+                #'simulate': True,
+                #'cachedir': "./.ytdl_cache",
                 'allowed_extractors': [
                     r'.*youtube.*',
                     r'.*soundcloud.*',
