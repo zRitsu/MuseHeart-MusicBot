@@ -202,7 +202,12 @@ class ErrorHandler(commands.Cog):
             print(f"{ctx.author} [{ctx.author.id}] não é dono do bot para usar o comando: {ctx.command.name}")
             return
 
-        if isinstance(error, commands.MissingPermissions) and (await ctx.bot.is_owner(ctx.author)):
+        try:
+            bot = ctx.bot
+        except AttributeError:
+            bot = self.bot
+
+        if isinstance(error, commands.MissingPermissions) and (await bot.is_owner(ctx.author)):
             try:
                 await ctx.reinvoke()
             except Exception as e:
@@ -406,8 +411,13 @@ class ErrorHandler(commands.Cog):
             timestamp=disnake.utils.utcnow()
         )
 
+        try:
+            bot = ctx.bot
+        except AttributeError:
+            bot = self.bot
+
         if ctx.guild:
-            embed.colour = ctx.bot.get_color(ctx.guild.me)
+            embed.colour = bot.get_color(ctx.guild.me)
             embed.add_field(
                 name="Servidor:", inline=False,
                 value=f"```\n{disnake.utils.escape_markdown(ctx.guild.name)}\nID: {ctx.guild.id}```"
