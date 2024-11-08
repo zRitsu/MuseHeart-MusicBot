@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 import re
-from pipes import quote
 from typing import Optional
+from urllib.parse import quote
 
 from aiohttp import ClientSession
 from cachetools import TTLCache
