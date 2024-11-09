@@ -533,6 +533,9 @@ def check_stage_topic():
         except KeyError:
             raise NoPlayer()
 
+        if not player.guild.me.voice:
+            raise NoPlayer()
+
         time_limit = 30 if isinstance(player.guild.me.voice.channel, disnake.VoiceChannel) else 120
 
         if player.stage_title_event and (time_:=int((disnake.utils.utcnow() - player.start_time).total_seconds())) < time_limit and not (await bot.is_owner(inter.author)):
