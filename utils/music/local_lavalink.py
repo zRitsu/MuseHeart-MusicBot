@@ -58,7 +58,7 @@ def download_file(url, filename):
 
 def validate_java(cmd: str, debug: bool = False):
     try:
-        java_info = subprocess.check_output([cmd.split()] + ["-version"], stderr=subprocess.STDOUT, text=True)
+        java_info = subprocess.check_output(f"{cmd} -version", stderr=subprocess.STDOUT, text=True)
         if int(java_info.splitlines()[0].split()[2].strip('"').split('.')[0]) >= 17:
             return cmd
     except Exception as e:
@@ -89,7 +89,7 @@ def run_lavalink(
             pass
 
         if os.name == "nt":
-            dirs.append(os.path.realpath(f"{tmp_dir}/.java/{jdk_platform}/bin/java"))
+            dirs.append(f"{tmp_dir}/.java/{jdk_platform}/bin/java")
             try:
                 shutil.rmtree("./.jabba")
             except:
