@@ -514,7 +514,6 @@ class LavalinkPlayer(wavelink.Player):
         self.player_creator: Optional[int] = kwargs.pop('player_creator', None)
         self.filters: dict = {}
         self.idle_task: Optional[asyncio.Task] = None
-        self.hook_event_task = {}
         self.members_timeout_task: Optional[asyncio.Task] = None
         self.reconnect_voice_channel_task: Optional[asyncio.Task] = None
         self.idle_endtime: Optional[datetime.datetime] = None
@@ -569,6 +568,8 @@ class LavalinkPlayer(wavelink.Player):
 
         self.lastfm_artists = []
 
+        self.event_queue = asyncio.Queue()
+
         self.initial_hints = [
             f"É possível alterar a skin/aparência do player usando o comando /change_skin ou {self.prefix_info}skin "
             f"(Apenas membros com permissão de gerenciar servidor podem usar esse comando).",
@@ -618,6 +619,7 @@ class LavalinkPlayer(wavelink.Player):
         self.hints: cycle = []
         self.current_hint: str = ""
         self.last_data: dict = {}
+        self.event_queue_task = self.bot.loop.create_task(self.hook_events())
         self.check_skins()
         self.setup_features()
         self.setup_hints()
@@ -799,18 +801,85 @@ class LavalinkPlayer(wavelink.Player):
 
     async def hook(self, event) -> None:
 
-        """if self.is_closing:
-            return
+        if isinstance(event, wavelink.WebsocketClosed):
 
-        event_name = str(event)
+            if event.code == 1000:
+                return
 
-        if self.hook_event_task.get(event_name):
-            return
+            if not self.guild.me:
+                await self.destroy(force=True)
+                return
 
-        self.hook_event_task[event_name] = self.bot.loop.create_task(self.hook_events(event))"""
-        await self.hook_events(event)
+            try:
+                vc = self.last_channel or self.guild.me.voice.channel
+            except AttributeError:
+                vc = None
 
-    async def hook_events(self, event):
+            if event.code == 4014 and self.guild.me.voice:
+                pass
+            else:
+                print(
+                    ("-" * 15) +
+                    f"\nErro no canal de voz!"
+                    f"\nBot: {self.bot.user} [{self.bot.user.id}] | " + (
+                        "Online" if self.bot.is_ready() else "Offline") +
+                    f"\nGuild: {self.guild.name} [{self.guild.id}]"
+                    f"\nCanal: {vc.name} [{vc.id}]"
+                    f"\nServer: {self.node.identifier} | code: {event.code} | reason: {event.reason}\n" +
+                    ("-" * 15)
+                )
+
+            if self.is_closing:
+                return
+
+            if event.code in (
+                    4000,  # internal error
+                    1006,
+                    1001,
+                    4016,  # Connection started elsewhere
+                    4005,  # Already authenticated.
+            ):
+                try:
+                    vc_id = self.guild.me.voice.channel.id
+                except AttributeError:
+                    vc_id = self.last_channel.id
+
+                await asyncio.sleep(3)
+
+                if self.is_closing:
+                    return
+
+                await self.connect(vc_id)
+                return
+
+            if event.code in (
+                    4014,
+                    4006,  # Session is no longer valid.
+            ):
+                await asyncio.sleep(5)
+
+                try:
+                    self.bot.music.players[self.guild_id]
+                except KeyError:
+                    return
+
+                if self.guild and self.guild.me.voice or self.is_closing:
+                    return
+
+                try:
+                    vc_id = self.guild.me.voice.channel.id
+                except AttributeError:
+                    vc_id = self.last_channel.id
+
+                await self.connect(vc_id)
+                return
+
+        else:
+            await self.event_queue.put(event)
+
+    async def hook_events(self):
+
+        event = await self.event_queue.get()
 
         if self.is_closing:
             return
@@ -964,7 +1033,6 @@ class LavalinkPlayer(wavelink.Player):
                     await asyncio.sleep(3)
                     self.locked = False
                     await self.process_next(start_position=self.position)
-                    self.hook_event_task[str(event)] = None
 
                 else:
                     await asyncio.sleep(10)
@@ -995,7 +1063,6 @@ class LavalinkPlayer(wavelink.Player):
                             await asyncio.sleep(3)
                         self.locked = False
                         self.update = True
-                        self.hook_event_task[str(event)] = None
                         return
 
                     elif self.retries_403["counter"] < 3:
@@ -1007,7 +1074,6 @@ class LavalinkPlayer(wavelink.Player):
                             return
 
                         self.locked = False
-                        self.hook_event_task[str(event)] = None
                         self.set_command_log(
                             text=f'Ocorreu o erro 403 do youtube na reprodução da música atual. Tentativa {self.retries_403["counter"]}/5...')
                         if not self.auto_pause:
@@ -1035,7 +1101,6 @@ class LavalinkPlayer(wavelink.Player):
                     self.current = None
                     self.queue.appendleft(track)
                     self.locked = False
-                    self.hook_event_task[str(event)] = None
 
                     if track.info["sourceName"] == "youtube":
 
@@ -1161,80 +1226,8 @@ class LavalinkPlayer(wavelink.Player):
             await asyncio.sleep(cooldown)
 
             self.locked = False
-            self.hook_event_task[str(event)] = None
             await self.process_next(start_position=start_position)
             return
-
-        if isinstance(event, wavelink.WebsocketClosed):
-
-            if event.code == 1000:
-                return
-
-            if not self.guild.me:
-                await self.destroy(force=True)
-                return
-
-            try:
-                vc = self.last_channel or self.guild.me.voice.channel
-            except AttributeError:
-                vc = None
-
-            if event.code == 4014 and self.guild.me.voice:
-                pass
-            else:
-                print(
-                    ("-" * 15) +
-                    f"\nErro no canal de voz!"
-                    f"\nBot: {self.bot.user} [{self.bot.user.id}] | " + (
-                        "Online" if self.bot.is_ready() else "Offline") +
-                    f"\nGuild: {self.guild.name} [{self.guild.id}]"
-                    f"\nCanal: {vc.name} [{vc.id}]"
-                    f"\nServer: {self.node.identifier} | code: {event.code} | reason: {event.reason}\n" +
-                    ("-" * 15)
-                )
-
-            if self.is_closing:
-                return
-
-            if event.code in (
-                    4000,  # internal error
-                    1006,
-                    1001,
-                    4016,  # Connection started elsewhere
-                    4005,  # Already authenticated.
-            ):
-                try:
-                    vc_id = self.guild.me.voice.channel.id
-                except AttributeError:
-                    vc_id = self.last_channel.id
-
-                await asyncio.sleep(3)
-
-                if self.is_closing:
-                    return
-
-                await self.connect(vc_id)
-                return
-
-            if event.code in (
-                    4014,
-                    4006,  # Session is no longer valid.
-            ):
-                await asyncio.sleep(5)
-                try:
-                    self.bot.music.players[self.guild_id]
-                except KeyError:
-                    return
-                if self.guild and self.guild.me.voice or self.is_closing:
-                    return
-
-                try:
-                    vc_id = self.guild.me.voice.channel.id
-                except AttributeError:
-                    vc_id = self.last_channel.id
-
-                await self.connect(vc_id)
-                return
 
         if isinstance(event, wavelink.TrackStuck):
 
@@ -2914,10 +2907,6 @@ class LavalinkPlayer(wavelink.Player):
         except:
             pass
 
-        try:
-            self.hook_event_task.cancel()
-        except:
-            pass
 
         try:
             vc = self.guild.voice_client.channel
@@ -3520,6 +3509,11 @@ class LavalinkPlayer(wavelink.Player):
 
         try:
             self.track_load_task.cancel()
+        except:
+            pass
+
+        try:
+            self.event_queue_task.cancel()
         except:
             pass
 
