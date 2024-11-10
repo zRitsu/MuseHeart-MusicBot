@@ -8,7 +8,9 @@ from __future__ import annotations
 
 import asyncio
 import re
-from asyncio import timeout
+
+from async_timeout import timeout
+
 from copy import deepcopy
 from typing import TYPE_CHECKING
 
