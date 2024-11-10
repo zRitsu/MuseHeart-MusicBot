@@ -8,6 +8,7 @@ from typing import Union, Optional, TYPE_CHECKING
 import disnake
 from disnake.ext import commands
 
+import wavelink
 from utils.db import DBModel
 from utils.music.converters import time_format
 from utils.music.errors import NoVoice, NoPlayer, NoSource, NotRequester, NotDJorStaff, \
@@ -340,7 +341,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
     raise PoolException()
 
-def has_player():
+def has_player(check_node = True):
 
     async def predicate(inter):
 
@@ -350,9 +351,12 @@ def has_player():
             bot = inter.bot
 
         try:
-            bot.music.players[inter.guild_id]
+            player = bot.music.players[inter.guild_id]
         except KeyError:
             raise NoPlayer()
+
+        if check_node and not player.node.is_available:
+            raise wavelink.ZeroConnectedNodes()
 
         return True
 

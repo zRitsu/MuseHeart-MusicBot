@@ -3375,7 +3375,7 @@ class Music(commands.Cog):
         await self.stop.callback(self=self, inter=ctx)
 
     @is_dj()
-    @has_player()
+    @has_player(check_node=False)
     @check_voice()
     @commands.slash_command(
         description=f"{desc_prefix}Parar o player e me desconectar do canal de voz.",
