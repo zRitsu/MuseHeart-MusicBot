@@ -1261,8 +1261,18 @@ class Music(commands.Cog):
                 pass
 
             if not (info := self.bot.pool.integration_cache.get(query)):
+
                 loop = self.bot.loop or asyncio.get_event_loop()
-                info = await loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(query,download=False))
+
+                for i in range(2):
+
+                    info = await loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(query.split("\n")[0], download=False))
+
+                    if not info.get("entries"):
+                        await asyncio.sleep(2)
+                        continue
+
+                    break
 
                 try:
                     if not info["entries"]:

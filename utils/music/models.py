@@ -886,19 +886,19 @@ class LavalinkPlayer(wavelink.Player):
                 event = await self.event_queue.get()
 
                 if self.is_closing:
-                    return
+                    continue
 
                 await self.bot.wait_until_ready()
 
                 if isinstance(event, wavelink.TrackEnd):
 
                     if event.node.identifier != self.node.identifier:
-                        return
+                        continue
 
                     self.bot.dispatch("wavelink_track_end", player=self, track=self.last_track, reason=event.reason)
 
                     if self.locked:
-                        return
+                        continue
 
                     if event.reason == "FINISHED":
                         self.set_command_log()
@@ -906,12 +906,12 @@ class LavalinkPlayer(wavelink.Player):
                     elif event.reason == "STOPPED":
 
                         if len(self.queue) == 0:
-                            return
+                            continue
 
                         self.ignore_np_once = True
 
                     else:
-                        return
+                        continue
 
                     try:
                         self.message_updater_task.cancel()
@@ -924,12 +924,12 @@ class LavalinkPlayer(wavelink.Player):
 
                     await self.process_next()
 
-                    return
+                    continue
 
                 if isinstance(event, wavelink.TrackStart):
 
                     if event.node.identifier != self.node.identifier:
-                        return
+                        continue
 
                     self.bot.dispatch("wavelink_track_start", player=self)
 
@@ -950,7 +950,7 @@ class LavalinkPlayer(wavelink.Player):
                             )
                         except asyncio.TimeoutError:
                             self.update = True
-                            return
+                            continue
 
                     try:
                         await self.process_save_queue()
@@ -959,7 +959,7 @@ class LavalinkPlayer(wavelink.Player):
 
                     await asyncio.sleep(2)
                     await self.update_stage_topic()
-                    return
+                    continue
 
                 if isinstance(event, wavelink.TrackException):
 
@@ -984,14 +984,14 @@ class LavalinkPlayer(wavelink.Player):
 
                     if event.node.identifier != self.node.identifier:
                         await send_report()
-                        return
+                        continue
 
                     if self.locked:
                         self.set_command_log(
                             text=f"A reprodução da música falhou (tentando tocar novamente): [`{fix_characters(track.title, 15)}`](<{track.uri or track.search_uri}>). **Causa:** `{event.cause[:50]}`")
                         self.update = True
                         await send_report()
-                        return
+                        continue
 
                     self.locked = True
 
@@ -1042,7 +1042,7 @@ class LavalinkPlayer(wavelink.Player):
                             await asyncio.sleep(10)
                             self.current = track
                             await self.play(track=track, start=self.position)
-                        return
+                        continue
 
                     if (youtube_exception := (event.error == "This IP address has been blocked by YouTube (429)" or
                         #event.message == "Video returned by YouTube isn't what was requested" or
@@ -1067,7 +1067,7 @@ class LavalinkPlayer(wavelink.Player):
                                     await asyncio.sleep(3)
                                 self.locked = False
                                 self.update = True
-                                return
+                                continue
 
                             elif self.retries_403["counter"] < 3:
                                 self.retries_403["counter"] += 1
@@ -1086,7 +1086,7 @@ class LavalinkPlayer(wavelink.Player):
                                     await self.play(track, start=get_start_pos(self, track, self.bot.pool.config.get("ERROR_403_ADDITIONAL_MILLISECONDS", 430)))
                                     self.update = True
                                 await send_report()
-                                return
+                                continue
 
                             self.queue.append(track)
 
@@ -1127,7 +1127,7 @@ class LavalinkPlayer(wavelink.Player):
                                     await self.change_node(new_node.identifier)
                                     await self.process_next(start_position=self.position)
                                     await send_report()
-                                    return
+                                    continue
 
                                 self.native_yt = False
 
@@ -1144,7 +1144,7 @@ class LavalinkPlayer(wavelink.Player):
                             await asyncio.sleep(5)
                             await self.process_next(start_position=self.position)
                             await send_report()
-                            return
+                            continue
 
                     await send_report()
 
@@ -1180,7 +1180,7 @@ class LavalinkPlayer(wavelink.Player):
                                 pass
                             self._new_node_task = self.bot.loop.create_task(
                                 self._wait_for_new_node(ignore_node=self.node))
-                            return
+                            continue
 
                         self.retries_general_errors["last_time"] = disnake.utils.utcnow()
 
@@ -1202,7 +1202,7 @@ class LavalinkPlayer(wavelink.Player):
                         except:
                             pass
                         self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node())
-                        return
+                        continue
 
                     elif not track.track_loops:
                         self.failed_tracks.append(track)
@@ -1231,7 +1231,7 @@ class LavalinkPlayer(wavelink.Player):
 
                     self.locked = False
                     await self.process_next(start_position=start_position)
-                    return
+                    continue
 
                 if isinstance(event, wavelink.TrackStuck):
 
@@ -1251,7 +1251,7 @@ class LavalinkPlayer(wavelink.Player):
 
                     await self.process_next()
 
-                    return
+                    continue
 
                 print(f"Unknown Wavelink event: {repr(event)}")
 
