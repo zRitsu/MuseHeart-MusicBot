@@ -220,6 +220,10 @@ def load_config():
         "BOT_ADD_REMOVE_LOG_CHANNEL_ID",
         "YOUTUBE_TRACK_COOLDOWN",
     ]:
+
+        if CONFIG[i] == "":
+            continue
+
         try:
             new_value = int(CONFIG[i])
         except ValueError as e:
@@ -275,6 +279,10 @@ def load_config():
         "FORCE_USE_DEEZER_CLIENT",
         "SILENT_PUBLICBOT_WARNING",
     ]:
+
+        if CONFIG[i] == "":
+            continue
+
         if CONFIG[i] in (True, False, None):
             continue
 
