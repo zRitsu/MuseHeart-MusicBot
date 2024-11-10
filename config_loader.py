@@ -221,7 +221,7 @@ def load_config():
         "YOUTUBE_TRACK_COOLDOWN",
     ]:
 
-        if CONFIG[i] == "":
+        if isinstance(DEFAULT_CONFIG[i], int) and CONFIG[i] == "":
             continue
 
         try:
@@ -280,7 +280,7 @@ def load_config():
         "SILENT_PUBLICBOT_WARNING",
     ]:
 
-        if CONFIG[i] == "":
+        if isinstance(DEFAULT_CONFIG[i], bool) and CONFIG[i] == "":
             continue
 
         if CONFIG[i] in (True, False, None):
