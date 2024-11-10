@@ -221,15 +221,14 @@ def load_config():
         "YOUTUBE_TRACK_COOLDOWN",
     ]:
 
-        if isinstance(DEFAULT_CONFIG[i], int) and CONFIG[i] == "":
+        if not CONFIG[i]:
+            CONFIG[i] = DEFAULT_CONFIG[i]
             continue
 
         try:
-            new_value = int(CONFIG[i])
+            CONFIG[i] = int(CONFIG[i])
         except ValueError as e:
             raise Exception(f"Você usou uma configuração inválida! {i}: {CONFIG[i]}\n{repr(e)}")
-
-        CONFIG[i] = new_value
 
     # converter strings que requer valor bool/nulo.
     for i in [
@@ -280,23 +279,16 @@ def load_config():
         "SILENT_PUBLICBOT_WARNING",
     ]:
 
-        if isinstance(DEFAULT_CONFIG[i], bool) and CONFIG[i] == "":
-            continue
-
-        if CONFIG[i] in (True, False, None):
+        if CONFIG[i] in (True, False, None, ""):
+            CONFIG[i] = DEFAULT_CONFIG[i]
             continue
 
         try:
-            new_value = bools[CONFIG[i]]
+            CONFIG[i] = bools[CONFIG[i]]
         except KeyError as e:
             raise Exception(f"Você usou uma configuração inválida! {i}: {CONFIG[i]}\n{repr(e)}")
 
-        CONFIG[i] = new_value
-
     CONFIG["RPC_SERVER"] = CONFIG["RPC_SERVER"].replace("$PORT", CONFIG.get("PORT") or environ.get("PORT", "80"))
-
-    if CONFIG["IDLE_TIMEOUT"] < 60:
-        CONFIG["IDLE_TIMEOUT"] = 60
 
     if CONFIG["WAIT_FOR_MEMBERS_TIMEOUT"] < 60:
         CONFIG["WAIT_FOR_MEMBERS_TIMEOUT"] = 60
