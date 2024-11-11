@@ -195,6 +195,11 @@ class PlayerSession(commands.Cog):
         except AttributeError:
             pass
 
+        try:
+            data["command_log_list"] = player.command_log_list
+        except AttributeError:
+            pass
+
         if player.static:
             if player.skin_static.startswith("> custom_skin: "):
                 custom_skin = player.skin_static[15:]
@@ -561,6 +566,8 @@ class PlayerSession(commands.Cog):
                 player.stage_title_event = data.get("stage_title_event", False)
 
                 player.listen_along_invite = data.pop("listen_along_invite", "")
+
+                player.command_log_list.extend(data.pop("command_log_list", []))
 
                 player.dj = set(data["dj"])
                 player.loop = data["loop"]
