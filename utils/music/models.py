@@ -502,6 +502,7 @@ class LavalinkPlayer(wavelink.Player):
         self.played: deque = deque(maxlen=20)
         self.queue_autoplay: deque = deque(maxlen=30)
         self.failed_tracks: deque = deque(maxlen=30)
+        self.command_log_list = deque(maxlen=10)
         self.autoplay: bool = kwargs.pop("autoplay", False)
         self.nightcore: bool = False
         self.loop = False
@@ -734,7 +735,7 @@ class LavalinkPlayer(wavelink.Player):
                 msg = "O canal de voz foi excluido..."
 
                 if self.static:
-                    self.set_command_log(msg)
+                    self.set_command_log(msg, controller=True)
                     await self.destroy()
                     return
 
@@ -767,10 +768,10 @@ class LavalinkPlayer(wavelink.Player):
                 try:
                     can_connect(vc, self.guild, bot=self.bot)
                 except (GenericError, PoolException) as e:
-                    self.set_command_log(f"Ocorreu uma falha ao reconectar o player no canal de voz: {e}.")
+                    self.set_command_log(f"Ocorreu uma falha ao reconectar o player no canal de voz: {e}.", controller=True)
                     self.update = True
                 except Exception as e:
-                    self.set_command_log(f"Ocorreu uma falha ao reconectar o player no canal de voz: {repr(e)}.")
+                    self.set_command_log(f"Ocorreu uma falha ao reconectar o player no canal de voz: {repr(e)}.", controller=True)
                     self.update = True
                 else:
                     if (ping := round(self.bot.latency * 1000)) > 250:
@@ -782,7 +783,7 @@ class LavalinkPlayer(wavelink.Player):
 
                     if not voice_msg:
                         self.set_command_log(text=f"O plater foi finalizado por perca de conexão no canal <#{vc.id}>.",
-                                             emoji="⚠️")
+                                             emoji="⚠️", controller=True)
                         await self.destroy()
                         return
 
@@ -790,7 +791,7 @@ class LavalinkPlayer(wavelink.Player):
                         await self.connect(vc.id)
                         self.set_command_log(
                             text=f"{voice_msg}\nCaso realmente queira me desconectar, use o comando/botão: **stop**.",
-                            emoji="⚠️")
+                            emoji="⚠️", controller=True)
                         self.update = True
                         await asyncio.sleep(5)
                         continue
@@ -901,7 +902,7 @@ class LavalinkPlayer(wavelink.Player):
                         continue
 
                     if event.reason == "FINISHED":
-                        self.set_command_log()
+                        self.set_command_log(controller=True)
 
                     elif event.reason == "STOPPED":
 
@@ -988,7 +989,7 @@ class LavalinkPlayer(wavelink.Player):
 
                     if self.locked:
                         self.set_command_log(
-                            text=f"A reprodução da música falhou (tentando tocar novamente): [`{fix_characters(track.title, 15)}`](<{track.uri or track.search_uri}>). **Causa:** `{event.cause[:50]}`")
+                            text=f"A reprodução da música falhou (tentando tocar novamente): [`{fix_characters(track.title, 15)}`](<{track.uri or track.search_uri}>). **Causa:** `{event.cause[:50]}`", controller=True)
                         self.update = True
                         await send_report()
                         continue
@@ -1033,7 +1034,7 @@ class LavalinkPlayer(wavelink.Player):
                                 try:
                                     await self.text_channel.send(embed=disnake.Embed(description=txt, color=self.bot.get_color(self.guild.me)), delete_after=60)
                                 except:
-                                    self.set_command_log(text=txt, emoji="⚠️")
+                                    self.set_command_log(text=txt, emoji="⚠️", controller=True)
                             await asyncio.sleep(3)
                             self.locked = False
                             await self.process_next(start_position=self.position)
@@ -1079,7 +1080,7 @@ class LavalinkPlayer(wavelink.Player):
 
                                 self.locked = False
                                 self.set_command_log(
-                                    text=f'Ocorreu o erro 403 do youtube na reprodução da música atual. Tentativa {self.retries_403["counter"]}/5...')
+                                    text=f'Ocorreu o erro 403 do youtube na reprodução da música atual. Tentativa {self.retries_403["counter"]}/5...', controller=True)
                                 if not self.auto_pause:
                                     self.update = True
                                 else:
@@ -1117,7 +1118,7 @@ class LavalinkPlayer(wavelink.Player):
                                     self.native_yt = True
                                     txt = f"Devido a restrições do youtube no servidor `{self.node.identifier} o player foi movido para o servidor `{new_node.identifier}`."
                                     if self.controller_mode:
-                                        self.set_command_log(txt, emoji="⚠️")
+                                        self.set_command_log(txt, emoji="⚠️", controller=True)
                                     elif self.text_channel:
                                         try:
                                             await self.text_channel.send(embed=disnake.Embed(description=f"-# `⚠️ -` {txt}", color=self.bot.get_color(self.guild.me)), delete_after=10)
@@ -1140,7 +1141,7 @@ class LavalinkPlayer(wavelink.Player):
                                         description=txt, color=self.bot.get_color(self.guild.me)
                                     ), delete_after=30)
                                 except:
-                                    self.set_command_log(text=txt, emoji="⚠️")
+                                    self.set_command_log(text=txt, emoji="⚠️", controller=True)
                             await asyncio.sleep(5)
                             await self.process_next(start_position=self.position)
                             await send_report()
@@ -1245,7 +1246,7 @@ class LavalinkPlayer(wavelink.Player):
                     self.update = False
 
                     try:
-                        self.set_command_log(text=f"A música [{fix_characters(self.current.single_title, 25)}](<{self.current.uri}>) travou.", emoji="⚠️")
+                        self.set_command_log(text=f"A música [{fix_characters(self.current.single_title, 25)}](<{self.current.uri}>) travou.", emoji="⚠️", controller=True)
                     except:
                         pass
 
@@ -1429,7 +1430,7 @@ class LavalinkPlayer(wavelink.Player):
                 self.auto_pause = False
 
                 try:
-                    self.set_command_log(emoji="🔋", text="O modo **[economia de recursos]** foi desativado.")
+                    self.set_command_log(emoji="🔋", text="O modo **[economia de recursos]** foi desativado.", controller=True)
                     await self.resolve_track(self.current)
                     if self.current.id:
                         if self.current.info["sourceName"] == "youtube" and not self.native_yt:
@@ -1496,7 +1497,7 @@ class LavalinkPlayer(wavelink.Player):
             self.set_command_log(
                 emoji="🪫",
                 text="O player está no modo **[economia de recursos]** (esse modo será desativado automaticamente quando "
-                     f"um membro entrar no canal <#{self.channel_id}>)."
+                     f"um membro entrar no canal <#{self.channel_id}>).", controller=True
             )
             self.update = True
             self.start_auto_skip()
@@ -1572,7 +1573,7 @@ class LavalinkPlayer(wavelink.Player):
                             result = await self.bot.spotify.get_recommendations(track_ids, limit=100)
                             break
                         except Exception as e:
-                            self.set_command_log(emoji="⚠️", text=f"Falha ao obter músicas recomendadas do spotify, tentativa {i+1} de 3.")
+                            self.set_command_log(emoji="⚠️", text=f"Falha ao obter músicas recomendadas do spotify, tentativa {i+1} de 3.", controller=True)
                             self.update = True
                             traceback.print_exc()
                             exception = e
@@ -2104,7 +2105,7 @@ class LavalinkPlayer(wavelink.Player):
                                         print(exceptions)
                                     self.played.append(track)
                                     self.set_command_log(emoji="⚠️", text=f"A música [`{track.title[:15]}`](<{track.uri}>) será pulada devido a falta de resultado "
-                                                                          "em outras plataformas de música.")
+                                                                          "em outras plataformas de música.", controller=True)
                                     await asyncio.sleep(3)
                                     self.locked = False
                                     await self.process_next()
@@ -2116,7 +2117,7 @@ class LavalinkPlayer(wavelink.Player):
                                 self.bot.pool.partial_track_cache[f'youtube:{track.ytid}'] = [alt_track]
                                 self.set_command_log(
                                     emoji="▶️",
-                                    text=f"Tocando música obtida via metadados: [`{fix_characters(alt_track.title, 20)}`](<{alt_track.uri}>) `| Por: {fix_characters(alt_track.author, 15)}`"
+                                    text=f"Tocando música obtida via metadados: [`{fix_characters(alt_track.title, 20)}`](<{alt_track.uri}>) `| Por: {fix_characters(alt_track.author, 15)}`", controller=True
                                 )
 
                 if not encoded_track or not track.id:
@@ -2170,7 +2171,7 @@ class LavalinkPlayer(wavelink.Player):
                 self.set_command_log(
                     emoji="🪫",
                     text="O player está no modo **[economia de recursos]** (esse modo será desativado automaticamente quando "
-                         f"um membro entrar no canal <#{self.channel_id}>)."
+                         f"um membro entrar no canal <#{self.channel_id}>).", controller=True
                 )
             else:
                 await self.play(track, start=start_position, temp_id=encoded_track)
@@ -2347,9 +2348,12 @@ class LavalinkPlayer(wavelink.Player):
 
         await self.destroy()
 
-    def set_command_log(self, text="", emoji=""):
-        self.command_log = text
-        self.command_log_emoji = emoji
+    def set_command_log(self, text="", emoji="", controller=False):
+        if controller or not text:
+            self.command_log = text
+            self.command_log_emoji = emoji
+        else:
+            self.command_log_list.append({"text": text, "emoji": emoji, "timestamp": disnake.utils.utcnow().timestamp()})
 
     async def update_stage_topic(self, reconnect=True, clear=False):
 
@@ -2440,7 +2444,7 @@ class LavalinkPlayer(wavelink.Player):
             except Exception as e:
                 if isinstance(e, disnake.Forbidden):
                     self.stage_title_event = False
-                    self.set_command_log(emoji="❌", text="O status automático foi desativado devido a falta de permissão pra alterar status.")
+                    self.set_command_log(emoji="❌", text="O status automático foi desativado devido a falta de permissão pra alterar status.", controller=True)
                     self.update = True
                 print(traceback.format_exc())
 
@@ -2791,7 +2795,7 @@ class LavalinkPlayer(wavelink.Player):
                         if self.static or self.has_thread:
                             self.set_command_log(
                                 f"{(interaction.author.mention + ' ') if interaction else ''}houve um erro na interação: {repr(e)}",
-                                "⚠️")
+                                "⚠️", controller=True)
                             self.update = True
                             return
 
@@ -3222,7 +3226,7 @@ class LavalinkPlayer(wavelink.Player):
 
             self.set_command_log(
                 txt or "Não há servidores de música disponível. Irei fazer algumas tentativas de conectar em um novo servidor de música.",
-                emoji="⏰"
+                emoji="⏰", controller=True
             )
             self.update = True
 
@@ -3255,7 +3259,7 @@ class LavalinkPlayer(wavelink.Player):
                         can_connect(self.last_channel, self.guild, bot=self.bot)
                     except Exception as e:
                         print(traceback.format_exc())
-                        self.set_command_log(f"O player foi finalizado devido ao erro: {e}")
+                        self.set_command_log(f"O player foi finalizado devido ao erro: {e}", controller=True)
                         await self.destroy()
                         return
                     await self.connect(self.last_channel.id)
@@ -3277,7 +3281,7 @@ class LavalinkPlayer(wavelink.Player):
                             txt = f"O player foi movido para o servidor de música **{node.identifier}**."
                         else:
                             txt = f"O player foi reconectado no servidor de músca **{self.node.identifier}**"
-                        self.set_command_log(emoji="📶", text=txt)
+                        self.set_command_log(emoji="📶", text=txt, controller=True)
                         self.update = True
                 except:
                     print(traceback.format_exc())

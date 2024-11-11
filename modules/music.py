@@ -3376,6 +3376,41 @@ class Music(commands.Cog):
 
         await self.interaction_message(inter, txt=text, emoji="🎧")
 
+    @has_player()
+    @check_voice()
+    @pool_command(name="commandlog", aliases=["cmdlog", "clog", "cl"], only_voiced=True,
+                  description="Ver o log de uso dos comandos.")
+    async def command_log_legacy(self, ctx: CustomContext):
+        await self.command_log.callback(self=self, inter=ctx)
+
+    @has_player(check_node=False)
+    @check_voice()
+    @commands.slash_command(
+        description=f"{desc_prefix}Ver o log de uso dos comandos.",
+        extras={"only_voiced": True}, dm_permission=False
+    )
+    async def command_log(self, inter: disnake.AppCmdInter):
+
+        try:
+            bot = inter.music_bot
+        except AttributeError:
+            bot = inter.bot
+
+        player: LavalinkPlayer = bot.music.players[inter.guild_id]
+
+        if not player.command_log_list:
+            raise GenericError("**O Log de comandos está vazio...**")
+
+        embed = disnake.Embed(
+            description="### Log de comandos:\n" + "\n".join(f"{i['emoji']} ⠂{i['text']}\n<t:{i['timestamp']}:R>" for i in player.command_log_list),
+            color=player.guild.me.color
+        )
+
+        if isinstance(inter, CustomContext):
+            await inter.reply(embed=embed)
+        else:
+            await inter.send(embed=embed, ephemeral=True)
+
     @is_dj()
     @has_player()
     @check_voice()
@@ -3403,7 +3438,7 @@ class Music(commands.Cog):
             inter_destroy = inter
 
         player: LavalinkPlayer = bot.music.players[inter.guild_id]
-        player.command_log = f"{inter.author.mention} **parou o player!**"
+        player.set_command_log(text=f"{inter.author.mention} **parou o player!**", emoji="🛑", controller=True)
 
         self.bot.pool.song_select_cooldown.get_bucket(inter).update_rate_limit()
 
