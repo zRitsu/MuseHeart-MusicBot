@@ -1041,6 +1041,7 @@ class LavalinkPlayer(wavelink.Player):
 
                         else:
                             await asyncio.sleep(10)
+                            self.locked = False
                             self.current = track
                             await self.play(track=track, start=self.position)
                         continue
@@ -1087,6 +1088,7 @@ class LavalinkPlayer(wavelink.Player):
                                     await self.play(track, start=get_start_pos(self, track, self.bot.pool.config.get("ERROR_403_ADDITIONAL_MILLISECONDS", 430)))
                                     self.update = True
                                 await send_report()
+                                self.locked = False
                                 continue
 
                             self.queue.append(track)
