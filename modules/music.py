@@ -3402,7 +3402,7 @@ class Music(commands.Cog):
             raise GenericError("**O Log de comandos está vazio...**")
 
         embed = disnake.Embed(
-            description="### Log de comandos:\n" + "\n".join(f"{i['emoji']} ⠂{i['text']}\n<t:{i['timestamp']}:R>" for i in player.command_log_list),
+            description="### Log de comandos:\n" + "\n\n".join(f"{i['emoji']} ⠂{i['text']}\n<t:{i['timestamp']}:R>" for i in player.command_log_list),
             color=player.guild.me.color
         )
 
