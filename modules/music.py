@@ -7541,7 +7541,7 @@ def setup(bot: BotCore):
                         'max_comments': [0],
                     },
                     'youtubetab': {
-                        "skip": ["webpage"]
+                        "skip": ["webpage", "authcheck"]
                     }
                 }
             }
