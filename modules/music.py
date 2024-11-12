@@ -7519,6 +7519,7 @@ def setup(bot: BotCore):
                 'no_warnings': True,
                 'lazy_playlist': True,
                 'simulate': True,
+                'cookiefile': "./.ytdl_cookie" if os.path.isfile('./.ytdl_cookie') else None,
                 'cachedir': "./.ytdl_cache",
                 'allowed_extractors': [
                     r'.*youtube.*',
