@@ -1051,6 +1051,7 @@ class LavalinkPlayer(wavelink.Player):
                         event.cause.startswith(("java.lang.RuntimeException: Not success status code: 403",
                             "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: Sign in to confirm you’re not a bot",
                             "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: Please sign in",
+                            "java.io.IOException: Invalid status code for player api response: 400",
                             "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: This video requires login.",
                             "java.io.IOException: Invalid status code for video page response: 400"))
                     ) or event.cause == "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: This video is unavailable"):
