@@ -2026,6 +2026,10 @@ class LavalinkPlayer(wavelink.Player):
 
                         if self.bot.pool.ytdl.params.get("cookiefile"):
 
+                            if track.is_stream:
+                                await self.process_next()
+                                return
+
                             if not (tracks:=self.bot.pool.partial_track_cache.get(f"ytcookiepartial:{track.ytid}")):
                                 try:
                                     info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(track.uri.split("&")[0], download=False))
