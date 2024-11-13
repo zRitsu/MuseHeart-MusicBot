@@ -2024,104 +2024,122 @@ class LavalinkPlayer(wavelink.Player):
 
                     if track.info["sourceName"] == "youtube" or (partial_data and partial_data[0].info["sourceName"] == "youtube"):
 
-                        if (track.is_stream or track.duration > 480000):
-                            if not self.native_yt:
-                                self.played.append(track)
-                                self.locked = False
-                                await self.process_next()
-                                return
+                        if self.bot.pool.ytdl.params.get("cookiefile"):
 
-                            try:
-                                encoded_track = partial_data[0].id
-                            except:
-                                pass
+                            if not (tracks:=self.bot.pool.partial_track_cache.get(f"ytcookiepartial:{track.ytid}")):
+                                try:
+                                    info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(track.uri.split("&")[0], download=False))
+                                    tracks = await self.node.get_tracks(info['url'])
+                                    self.bot.pool.partial_track_cache[f"ytcookiepartial:{track.ytid}"] = tracks
+                                except Exception as e:
+                                    if "sign in" in str(e).lower():
+                                        self.bot.pool.ytdl.params["cookiefile"] = None
+                                    else:
+                                        print(traceback.format_exc())
+                                    await self.process_next()
+                                    return
+
+                            encoded_track = tracks[0].id
 
                         else:
-                            tracks = []
-
-                            exceptions = ""
-
-                            if not partial_data:
-
-                                for provider in self.node.search_providers:
-
-                                    if provider in ("ytsearch", "ytmsearch"):
-                                        continue
-
-                                    if track.author.endswith(" - topic"):
-                                        query = f"{provider}:{track.title} - {track.author[:-8]}"
-                                    else:
-                                        query = f"{provider}:{track.title}"
-
-                                    tracks = self.bot.pool.partial_track_cache.get(query)
-
-                                    if not tracks:
-
-                                        try:
-                                            tracks = await self.node.get_tracks(
-                                                query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist
-                                            )
-                                        except:
-                                            exceptions += f"{traceback.format_exc()}\n"
-                                            await asyncio.sleep(1)
-                                            continue
-
-                                        try:
-                                            tracks = tracks.tracks
-                                        except AttributeError:
-                                            pass
-
-                                        self.bot.pool.partial_track_cache[query] = tracks
-
-                                    if not [i in track.title.lower() for i in exclude_tags]:
-                                        final_result = []
-                                        for t in tracks:
-                                            if not any((i in t.title.lower()) for i in exclude_tags):
-                                                final_result.append(t)
-                                                break
-                                        tracks = final_result or tracks
-
-                                    min_duration = track.duration - 7000
-                                    max_duration = track.duration + 7000
-
-                                    final_result = []
-
-                                    for t in tracks:
-                                        if t.is_stream or not min_duration < t.duration < max_duration and fuzz.token_sort_ratio(t.title, track.title) < 75:
-                                            continue
-                                        final_result.append(t)
-
-                                    if not final_result:
-                                        continue
-
-                                    tracks = final_result
-                                    break
-
-                            else:
-                                tracks = partial_data
-
-                            if not tracks:
-
+                            if (track.is_stream or track.duration > 480000):
                                 if not self.native_yt:
-
-                                    if exceptions:
-                                        print(exceptions)
                                     self.played.append(track)
-                                    self.set_command_log(emoji="⚠️", text=f"A música [`{track.title[:15]}`](<{track.uri}>) será pulada devido a falta de resultado "
-                                                                          "em outras plataformas de música.", controller=True)
-                                    await asyncio.sleep(3)
                                     self.locked = False
                                     await self.process_next()
                                     return
 
+                                try:
+                                    encoded_track = partial_data[0].id
+                                except:
+                                    pass
+
                             else:
-                                alt_track = tracks[0]
-                                encoded_track = alt_track.id
-                                self.bot.pool.partial_track_cache[f'youtube:{track.ytid}'] = [alt_track]
-                                self.set_command_log(
-                                    emoji="▶️",
-                                    text=f"Tocando música obtida via metadados: [`{fix_characters(alt_track.title, 20)}`](<{alt_track.uri}>) `| Por: {fix_characters(alt_track.author, 15)}`", controller=True
-                                )
+                                tracks = []
+
+                                exceptions = ""
+
+                                if not partial_data:
+
+                                    for provider in self.node.search_providers:
+
+                                        if provider in ("ytsearch", "ytmsearch"):
+                                            continue
+
+                                        if track.author.endswith(" - topic"):
+                                            query = f"{provider}:{track.title} - {track.author[:-8]}"
+                                        else:
+                                            query = f"{provider}:{track.title}"
+
+                                        tracks = self.bot.pool.partial_track_cache.get(query)
+
+                                        if not tracks:
+
+                                            try:
+                                                tracks = await self.node.get_tracks(
+                                                    query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist
+                                                )
+                                            except:
+                                                exceptions += f"{traceback.format_exc()}\n"
+                                                await asyncio.sleep(1)
+                                                continue
+
+                                            try:
+                                                tracks = tracks.tracks
+                                            except AttributeError:
+                                                pass
+
+                                            self.bot.pool.partial_track_cache[query] = tracks
+
+                                        if not [i in track.title.lower() for i in exclude_tags]:
+                                            final_result = []
+                                            for t in tracks:
+                                                if not any((i in t.title.lower()) for i in exclude_tags):
+                                                    final_result.append(t)
+                                                    break
+                                            tracks = final_result or tracks
+
+                                        min_duration = track.duration - 7000
+                                        max_duration = track.duration + 7000
+
+                                        final_result = []
+
+                                        for t in tracks:
+                                            if t.is_stream or not min_duration < t.duration < max_duration and fuzz.token_sort_ratio(t.title, track.title) < 75:
+                                                continue
+                                            final_result.append(t)
+
+                                        if not final_result:
+                                            continue
+
+                                        tracks = final_result
+                                        break
+
+                                else:
+                                    tracks = partial_data
+
+                                if not tracks:
+
+                                    if not self.native_yt:
+
+                                        if exceptions:
+                                            print(exceptions)
+                                        self.played.append(track)
+                                        self.set_command_log(emoji="⚠️", text=f"A música [`{track.title[:15]}`](<{track.uri}>) será pulada devido a falta de resultado "
+                                                                              "em outras plataformas de música.", controller=True)
+                                        await asyncio.sleep(3)
+                                        self.locked = False
+                                        await self.process_next()
+                                        return
+
+                                else:
+                                    alt_track = tracks[0]
+                                    encoded_track = alt_track.id
+                                    self.bot.pool.partial_track_cache[f'youtube:{track.ytid}'] = [alt_track]
+                                    self.set_command_log(
+                                        emoji="▶️",
+                                        text=f"Tocando música obtida via metadados: [`{fix_characters(alt_track.title, 20)}`](<{alt_track.uri}>) `| Por: {fix_characters(alt_track.author, 15)}`", controller=True
+                                    )
 
                 if not encoded_track or not track.id:
 
