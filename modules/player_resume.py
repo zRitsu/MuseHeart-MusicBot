@@ -150,6 +150,7 @@ class PlayerSession(commands.Cog):
         data = {
             "_id": player.guild.id,
             "version": getattr(player, "version", 1),
+            "current_encoded": player.current_encoded,
             "volume": player.volume,
             "nightcore": player.nightcore,
             "position": player.position,
@@ -181,7 +182,7 @@ class PlayerSession(commands.Cog):
             "voice_state": player._voice_state,
             "time": disnake.utils.utcnow(),
             "lastfm_artists": player.lastfm_artists,
-            "start_timestamp": player.start_timestamp
+            "start_timestamp": player.start_timestamp,
         }
 
         try:
@@ -307,7 +308,7 @@ class PlayerSession(commands.Cog):
         await self.voice_check(voice_channel, position)
 
         try:
-            track_id = player.current.id
+            track_id = player.current_encoded or player.current.id
         except:
             track_id = None
 
@@ -546,28 +547,17 @@ class PlayerSession(commands.Cog):
                         await self.delete_data(guild.id)
                     return
 
-                try:
-                    player._voice_state = data["voice_state"]
-                except KeyError:
-                    pass
-
+                player._voice_state = data.get("voice_state")
+                player.current_encoded = data.get("current_encoded")
                 player.live_lyrics_enabled = data.get("live_lyrics_status", False)
+                player.mini_queue_enabled = data.get("mini_queue_enabled")
+                player.lastfm_artists = data.get("lastfm_artists")
+                player.stage_title_event = data.get("stage_title_event", False)
+                player.listen_along_invite = data.pop("listen_along_invite", "")
+                player.command_log_list.extend(data.pop("command_log_list", []))
 
                 if start_timestamp:=data.get("start_timestamp"):
                     player.start_timestamp = start_timestamp
-
-                try:
-                    player.mini_queue_enabled = data["mini_queue_enabled"]
-                except:
-                    pass
-
-                player.lastfm_artists = data.get("lastfm_artists")
-
-                player.stage_title_event = data.get("stage_title_event", False)
-
-                player.listen_along_invite = data.pop("listen_along_invite", "")
-
-                player.command_log_list.extend(data.pop("command_log_list", []))
 
                 player.dj = set(data["dj"])
                 player.loop = data["loop"]

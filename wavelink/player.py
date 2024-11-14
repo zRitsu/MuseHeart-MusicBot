@@ -211,6 +211,7 @@ class Player:
         self.last_position = 0
         self.position_timestamp = None
         self.ping = None
+        self.current_encoded = None
 
         self._voice_state = {}
 
@@ -326,6 +327,7 @@ class Player:
     async def hook(self, event) -> None:
         if isinstance(event, TrackEnd) and event.reason in ("STOPPED", "FINISHED"):
             self.current = None
+            self.current_encoded = None
 
     def _get_shard_socket(self, shard_id: int) -> Optional[DiscordWebSocket]:
         if isinstance(self.bot, commands.AutoShardedBot):
@@ -430,12 +432,14 @@ class Player:
 
         self.current = track
 
+        self.current_encoded = kwargs.pop("temp_id", None) or track.id
+
         if self.node.version == 3:
 
             payload = {
                 'op': 'play',
                 'guildId': str(self.guild_id),
-                'track': kwargs.pop("temp_id", None) or track.id,
+                'track': self.current_encoded,
                 'noReplace': not replace,
                 'startTime': start,
             }
@@ -461,7 +465,7 @@ class Player:
                 pause = self.paused
 
             payload = {
-                "encodedTrack": kwargs.pop("temp_id", None) or track.id,
+                "encodedTrack": self.current_encoded,
                 "volume": vol,
                 "position": int(start),
                 "paused": pause,
@@ -486,6 +490,7 @@ class Player:
             await self.node.update_player(self.guild_id, {"encodedTrack": None}, replace=True)
         __log__.debug(f'PLAYER | Current track stopped:: {str(self.current)} ({self.channel_id})')
         self.current = None
+        self.current_encoded = None
 
     async def destroy(self, *, force: bool = False, guild: Optional[disnake.Guild] = None) -> None:
         """|coro|
@@ -666,12 +671,12 @@ class Player:
 
         if self.current and not self.auto_pause:
             if self.node.version == 3:
-                await self.node._send(op='play', guildId=str(self.guild_id), track=self.current.id, startTime=int(self.position))
+                await self.node._send(op='play', guildId=str(self.guild_id), track=self.current_encoded, startTime=int(self.position))
                 if self.paused:
                     await self.node._send(op='pause', guildId=str(self.guild_id), pause=self.paused)
             else:
                 payload = {
-                    "encodedTrack": self.current.id,
+                    "encodedTrack": self.current_encoded,
                     "volume": self.volume,
                     "position": int(self.position),
                     "paused": self.paused,
