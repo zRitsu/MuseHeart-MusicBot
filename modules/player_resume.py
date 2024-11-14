@@ -8,6 +8,7 @@ import shutil
 import traceback
 import zlib
 from base64 import b64decode, b64encode
+from contextlib import suppress
 from typing import Union
 
 import aiofiles
@@ -150,7 +151,6 @@ class PlayerSession(commands.Cog):
         data = {
             "_id": player.guild.id,
             "version": getattr(player, "version", 1),
-            "current_encoded": player.current_encoded,
             "volume": player.volume,
             "nightcore": player.nightcore,
             "position": player.position,
@@ -191,15 +191,10 @@ class PlayerSession(commands.Cog):
             player._last_channel_id = vc_id
             data["last_voice_channel_id"] = vc_id
 
-        try:
+        with suppress(AttributeError):
             data["live_lyrics_status"] = player.live_lyrics_enabled
-        except AttributeError:
-            pass
-
-        try:
+            data["current_encoded"] = player.current_encoded
             data["command_log_list"] = player.command_log_list
-        except AttributeError:
-            pass
 
         if player.static:
             if player.skin_static.startswith("> custom_skin: "):
