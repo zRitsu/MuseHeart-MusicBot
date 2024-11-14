@@ -84,7 +84,7 @@ class BotPool:
         self.remote_git_url = ""
         self.max_counter: int = 0
         self.message_ids = TTLCache(ttl=30, maxsize=20000)
-        self.ytdl_cache = TTLCache(ttl=600, maxsize=500)
+        self.ytdl_cache = TTLCache(ttl=self.config["YTDL_CACHE_TIME"], maxsize=500)
         self.bot_mentions = set()
         self.single_bot = True
         self.failed_bots: dict = {}
