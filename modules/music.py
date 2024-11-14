@@ -6975,6 +6975,8 @@ class Music(commands.Cog):
             ("https://youtu.be", "https://www.youtube.com", "https://music.youtube.com")
         )
 
+        is_yt_video = False
+
         tracks = []
 
         for n in nodes:
@@ -6990,6 +6992,15 @@ class Music(commands.Cog):
                     query = f"http://www.tidal.com/track/{query.split('/track/')[-1]}"
 
                 elif query.startswith(("https://youtu.be/", "https://www.youtube.com/")):
+
+                    if "&list=" not in query:
+                        match = re.search(r"(?:v=|/)([0-9A-Za-z_-]{11})(?:[&?]|$)", query)
+                        try:
+                            ytid = match.group(1)
+                            query = f"https://www.youtube.com/watch?v={ytid}&list=RD{ytid}"
+                            is_yt_video = True
+                        except:
+                            pass
 
                     for p in ("&ab_channel=", "&start_radio="):
                         if p in query:
@@ -7012,9 +7023,15 @@ class Music(commands.Cog):
                     tracks = await n.get_tracks(
                         search_query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
                     )
+                    if is_yt_video:
+                        t = tracks.tracks[0]
+                        t.playlist = None
+                        t.info["uri"] = t.info["uri"].split("&")[0]
+                        tracks = [t]
                 except Exception as e:
                     exceptions.add(repr(e))
                     if [e for e in ("Video returned by YouTube isn't what was requested",
+                                    "This video requires login.",
                                     "The video returned is not what was requested.") if e in str(e)]:
 
                         if is_yt_source and n.version > 3:
