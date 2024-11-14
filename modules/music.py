@@ -4,12 +4,14 @@ import datetime
 import itertools
 import os.path
 import pickle
+import pprint
 import re
 import traceback
 import zlib
 from base64 import b64decode
 from contextlib import suppress
 from copy import deepcopy
+from io import BytesIO
 from random import shuffle
 from typing import Union, Optional
 from urllib.parse import urlparse, parse_qs, quote
@@ -775,6 +777,7 @@ class Music(commands.Cog):
         warn_message = None
         queue_loaded = False
         reg_query = None
+        image_file = None
 
         try:
             if isinstance(inter.message, disnake.Message):
@@ -1267,6 +1270,7 @@ class Music(commands.Cog):
 
                 try:
                     if not info["entries"]:
+                        pprint.pprint(info)
                         raise GenericError(f"**Conteúdo indisponível (ou privado):**\n{query}")
                 except KeyError:
                     raise GenericError("**Ocorreu um erro ao tentar obter resultados para a opção selecionada...**")
@@ -1597,6 +1601,8 @@ class Music(commands.Cog):
                         pass
                     return
 
+                update_inter(inter, select_interaction)
+
                 if len(select_interaction.data.values) > 1:
 
                     indexes = set(int(v[13:]) for v in select_interaction.data.values)
@@ -1801,16 +1807,66 @@ class Music(commands.Cog):
 
             if tracks.tracks[0].info["sourceName"] == "youtube":
 
-                try:
-                    async with bot.session.get((oembed_url:=f"https://www.youtube.com/oembed?url={query}")) as r:
-                        try:
-                            playlist_data = await r.json()
-                        except:
-                            raise Exception(f"{r.status} | {await r.text()}")
-                        else:
-                            tracks.data["playlistInfo"]["thumb"] = playlist_data["thumbnail_url"]
-                except Exception as e:
-                    print(f"Falha ao obter artwork da playlist: {oembed_url} | {repr(e)}")
+                if not await bot.is_owner(inter.author):
+
+                    try:
+                        async with bot.session.get((oembed_url:=f"https://www.youtube.com/oembed?url={query}")) as r:
+                            try:
+                                playlist_data = await r.json()
+                            except:
+                                raise Exception(f"{r.status} | {await r.text()}")
+                            else:
+                                tracks.data["playlistInfo"]["thumb"] = playlist_data["thumbnail_url"]
+                    except Exception as e:
+                        print(f"Falha ao obter artwork da playlist: {oembed_url} | {repr(e)}")
+
+                else:
+
+                    try:
+                        playlist_data = await bot.loop.run_in_executor(None, lambda: YoutubeDL(
+                            {
+                                'extract_flat': True,
+                                'quiet': True,
+                                'no_warnings': True,
+                                'lazy_playlist': True,
+                                'simulate': True,
+                                'playlistend': 0,
+                                'cachedir': "./.ytdl_cache",
+                                'allowed_extractors': [
+                                    r'.*youtube.*',
+                                    r'.*soundcloud.*',
+                                ],
+                                'extractor_args': {
+                                    'youtube': {
+                                        'skip': [
+                                            'hls',
+                                            'dash',
+                                            'translated_subs'
+                                        ],
+                                        'player_skip': [
+                                            'js',
+                                            'configs',
+                                            'webpage'
+                                        ],
+                                        'max_comments': [0],
+                                    },
+                                    'youtubetab': {
+                                        "skip": ["webpage"]
+                                    }
+                                }
+                            }
+                        ).extract_info(query, download=False))
+
+                        async with aiohttp.ClientSession() as session:
+                            async with session.get(playlist_data["thumbnails"][0]['url']) as response:
+                                if response.status != 200:
+                                    response.raise_for_status()
+
+                                image_file = disnake.File(fp=BytesIO(await response.read()), filename=f'{playlist_data["id"]}.jpg')
+
+                        tracks.data["playlistInfo"]["thumb"] = playlist_data["thumbnails"][0]['url']
+                    except Exception as e:
+                        print(f"Falha ao obter artwork da playlist: {query} | {repr(e)}")
 
             loadtype = "playlist"
 
@@ -1833,7 +1889,11 @@ class Music(commands.Cog):
                     name="⠂ Spotify Playlist",
                     icon_url=music_source_image(tracks.tracks[0].info['sourceName'])
                 )
-            embed.set_thumbnail(url=tracks.thumb)
+
+            if image_file:
+                embed.set_thumbnail(f"attachment://{image_file.filename}")
+            else:
+                embed.set_thumbnail(url=tracks.thumb)
             embed.description = f"`{(tcount:=len(tracks.tracks))} música{'s'[:tcount^1]}`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
             emoji = "🎶"
 
@@ -1899,7 +1959,10 @@ class Music(commands.Cog):
             else:
                 components = None
 
-            await func(embed=embed, **{"components": components} if components else {"view": None})
+            kw_embed = {"components": components} if components else {"view": None}
+            if image_file:
+                kw_embed["file"] = image_file
+            await func(embed=embed, **kw_embed)
 
         if not player.is_connected:
 
