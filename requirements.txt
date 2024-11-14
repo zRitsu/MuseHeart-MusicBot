@@ -1,4 +1,4 @@
-disnake==2.9.2
+disnake==2.9.3
 python-dotenv
 user_agent
 requests>=2.31.0
@@ -14,7 +14,7 @@ aiosqlite
 yt-dlp>=2024.11.4
 tornado
 emoji
-urllib3>=2.1.0
+urllib3>=2.2.2
 async-timeout
 cachetools
 regex
