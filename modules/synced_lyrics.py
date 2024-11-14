@@ -492,6 +492,7 @@ class LiveLyrics(commands.Cog):
             kwargs["components"] = components
 
         if not player.controller_mode:
+            current = player.current
             player.current = player.last_track
             data = player.bot.pool.player_skins[player.skin].load(player)
             data["content"] = ""
@@ -499,7 +500,7 @@ class LiveLyrics(commands.Cog):
                 await player.message.edit(**data)
             except:
                 pass
-            player.current = None
+            player.current = current
 
         elif player.message:
 

@@ -998,6 +998,8 @@ class LavalinkPlayer(wavelink.Player):
 
                     self.current = None
 
+                    self.current_encoded = None
+
                     youtube_exception = False
                     video_not_available = False
 
@@ -1011,6 +1013,7 @@ class LavalinkPlayer(wavelink.Player):
                         await send_report()
 
                         self.current = None
+                        self.current_encoded = None
                         self.queue.appendleft(track)
 
                         if video_not_available:
@@ -1112,6 +1115,7 @@ class LavalinkPlayer(wavelink.Player):
                                 pass
 
                             self.current = None
+                            self.current_encoded = None
                             self.queue.appendleft(track)
                             self.locked = False
 
@@ -1450,6 +1454,7 @@ class LavalinkPlayer(wavelink.Player):
                             stream = self.current.is_stream
                             self.queue.appendleft(self.current)
                             self.current = None
+                            self.current_encoded = None
                             await self.process_next(start_position=0 if stream else self.position)
                         else:
                             await self.play(self.current, start=0 if self.current.is_stream else self.position)
@@ -3095,6 +3100,7 @@ class LavalinkPlayer(wavelink.Player):
 
             await asyncio.sleep(sleep_time)
             self.current = None
+            self.current_encoded = None
             self.last_update = 0
             self.bot.loop.create_task(self.node.on_event(TrackEnd({"track": self.current, "player": self, "node": self.node, "reason": "FINISHED"})))
             return
@@ -3304,6 +3310,7 @@ class LavalinkPlayer(wavelink.Player):
                     self.queue.appendleft(self.current)
                     start_position = self.position
                     self.current = None
+                    self.current_encoded = None
                 else:
                     start_position = 0
 
