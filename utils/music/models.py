@@ -1106,6 +1106,11 @@ class LavalinkPlayer(wavelink.Player):
                                 self.node.partial_providers.remove("ytmsearch:\"{isrc}\"")
                                 self.node.partial_providers.remove("ytmsearch:\"{title} - {author}\"")
 
+                            try:
+                                del self.bot.pool.ytdl_cache[track.ytid]
+                            except KeyError:
+                                pass
+
                             self.current = None
                             self.queue.appendleft(track)
                             self.locked = False
@@ -2035,16 +2040,15 @@ class LavalinkPlayer(wavelink.Player):
                                 await self.process_next()
                                 return
 
-                            if not (tracks:=self.bot.pool.partial_track_cache.get(f"ytcookiepartial:{track.ytid}")):
+                            if not (tracks:=self.bot.pool.ytdl_cache.get(track.ytid)):
                                 try:
                                     info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(track.uri.split("&")[0], download=False))
                                     tracks = await self.node.get_tracks(info['url'])
-                                    self.bot.pool.partial_track_cache[f"ytcookiepartial:{track.ytid}"] = tracks
+                                    self.bot.pool.ytdl_cache[track.ytid] = tracks
                                 except Exception as e:
+                                    print(traceback.format_exc())
                                     if "sign in" in str(e).lower():
                                         self.bot.pool.ytdl.params["cookiefile"] = None
-                                    else:
-                                        print(traceback.format_exc())
                                     await self.process_next()
                                     return
 
