@@ -2000,7 +2000,7 @@ class LavalinkPlayer(wavelink.Player):
                 if track.info["sourceName"] not in self.node.info["sourceManagers"] and not isinstance(track, PartialTrack):
                     track.id = ""
 
-                if isinstance(track, PartialTrack):
+                if isinstance(track, PartialTrack) and track.info["sourceName"] != "youtube":
 
                     if not track.id:
                         try:
@@ -2059,7 +2059,7 @@ class LavalinkPlayer(wavelink.Player):
                                     if not ytdl_url:
                                         info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(track.uri.split("&")[0], download=False))
                                         ytdl_url = info['url']
-                                    self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"] = ytdl_url
+                                        self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"] = ytdl_url
                                     tracks = await self.node.get_tracks(ytdl_url)
                                     self.bot.pool.ytdl_cache[f"lavalink_ytdl:{track.ytid}"] = tracks
                                 except Exception as e:
@@ -2068,6 +2068,10 @@ class LavalinkPlayer(wavelink.Player):
                                         return await self.process_next()
                                     else:
                                         raise e
+
+                            if not tracks:
+                                await self.process_next()
+                                return
 
                             encoded_track = tracks[0].id
 

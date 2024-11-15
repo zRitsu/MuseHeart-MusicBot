@@ -7038,7 +7038,7 @@ class Music(commands.Cog):
                                     source_name="youtube",
                                 )]
 
-                                self.bot.pool.ytdl_cache[f"ytdl:{info['id']}"] = info['url']
+                                self.bot.pool.ytdl_cache[f"ytdl:{ytid}"] = info['url']
                             except Exception as e:
                                 exceptions.add(repr(e))
 
