@@ -5275,8 +5275,32 @@ class Music(commands.Cog):
                     result = await self.check_player_queue(interaction.author, bot, interaction.guild_id, tracks=result)
                     player.queue.extend(result.tracks)
                     await interaction.send(f"{interaction.author.mention}, a playlist [`{result.name}`](<{url}>) foi adicionada com sucesso!{player.controller_link}", ephemeral=True)
+
                     if not player.is_connected:
                         await player.connect(vc_id)
+
+                    try:
+                        vc = interaction.author.voice.channel
+                    except AttributeError:
+                        vc = player.bot.get_channel(vc_id)
+
+                    if isinstance(vc, disnake.StageChannel):
+
+                        retries = 5
+
+                        while retries > 0:
+
+                            await asyncio.sleep(1)
+
+                            if not player.guild.me.voice:
+                                retries -= 1
+                                continue
+
+                            if player.guild.me not in vc.speakers:
+                                stage_perms = vc.permissions_for(player.guild.me)
+                                if stage_perms.manage_permissions:
+                                    await player.guild.me.edit(suppress=False)
+
                     if not player.current:
                         await player.process_next()
 
