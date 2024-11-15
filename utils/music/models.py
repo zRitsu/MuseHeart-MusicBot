@@ -2055,17 +2055,19 @@ class LavalinkPlayer(wavelink.Player):
 
                             if not (tracks:=self.bot.pool.ytdl_cache.get(f"lavalink_ytdl:{track.ytid}")):
                                 try:
-                                    ytdl_url = self.bot.pool.ytdl_cache.get(f"ytdl:{track.ytid}") or (await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(track.uri.split("&")[0], download=False)))['url']
+                                    ytdl_url = self.bot.pool.ytdl_cache.get(f"ytdl:{track.ytid}")
+                                    if not ytdl_url:
+                                        info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(track.uri.split("&")[0], download=False))
+                                        ytdl_url = info['url']
                                     self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"] = ytdl_url
                                     tracks = await self.node.get_tracks(ytdl_url)
                                     self.bot.pool.ytdl_cache[f"lavalink_ytdl:{track.ytid}"] = tracks
                                 except Exception as e:
-                                    traceback.print_exc()
                                     if "sign in" in str(e).lower():
                                         self.bot.pool.ytdl.params["cookiefile"] = None
-                                    await asyncio.sleep(3)
-                                    await self.process_next()
-                                    return
+                                        return await self.process_next()
+                                    else:
+                                        raise e
 
                             encoded_track = tracks[0].id
 
