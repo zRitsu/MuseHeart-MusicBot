@@ -1171,6 +1171,7 @@ class LavalinkPlayer(wavelink.Player):
                     if event.cause.startswith((
                             "java.lang.IllegalStateException: Failed to get media URL: 2000: An error occurred while decoding track token",
                             "java.lang.RuntimeException: Not success status code: 204",
+                            "java.lang.RuntimeException: Not success status code: 302",
                             "java.net.SocketTimeoutException: Connect timed out",
                             "java.net.SocketTimeoutException: Read timed out",
                             "java.net.SocketException: Network is unreachable",
