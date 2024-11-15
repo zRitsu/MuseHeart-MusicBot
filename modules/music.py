@@ -6999,8 +6999,6 @@ class Music(commands.Cog):
             ("https://youtu.be", "https://www.youtube.com", "https://music.youtube.com")
         )
 
-        is_yt_video = False
-
         tracks = []
 
         for n in nodes:
@@ -7019,9 +7017,32 @@ class Music(commands.Cog):
 
                     if "&list=" not in query and self.bot.pool.ytdl.params.get("cookiefile"):
                         try:
-                            is_yt_video = re.search(r"(?:v=|/)([0-9A-Za-z_-]{11})(?:[&?]|$)", query).group(1)
+                            ytid = re.search(r"(?:v=|/)([0-9A-Za-z_-]{11})(?:[&?]|$)", query).group(1)
                         except:
                             pass
+                        else:
+                            is_yt_source = True
+                            try:
+                                info = await self.bot.loop.run_in_executor(
+                                    None, lambda: self.bot.pool.ytdl.extract_info(
+                                        f"https://www.youtube.com/watch?v={ytid}", download=False)
+                                )
+
+                                tracks = [PartialTrack(
+                                    uri=info['webpage_url'],
+                                    title=info['title'],
+                                    author=info['uploader'],
+                                    thumb=f'https://img.youtube.com/vi/{info["id"]}/mqdefault.jpg',
+                                    duration=info['duration'] * 1000,
+                                    requester=user.id,
+                                    source_name="youtube",
+                                )]
+
+                                self.bot.pool.ytdl_cache[f"ytdl:{info['id']}"] = info['url']
+                            except Exception as e:
+                                exceptions.add(repr(e))
+
+                            return tracks, node, exceptions, is_yt_source
 
                     for p in ("&ab_channel=", "&start_radio="):
                         if p in query:
@@ -7037,68 +7058,44 @@ class Music(commands.Cog):
                 source = True
                 providers = n.search_providers
 
-            if is_yt_video:
-                info = await self.bot.loop.run_in_executor(
-                    None, lambda: self.bot.pool.ytdl.extract_info(
-                        f"https://www.youtube.com/watch?v={is_yt_video}", download=False)
-                )
+            for search_provider in providers:
 
-                tracks = [PartialTrack(
-                    uri=info['webpage_url'],
-                    title=info['title'],
-                    author=info['uploader'],
-                    thumb=f'https://img.youtube.com/vi/{info["id"]}/mqdefault.jpg',
-                    duration=info['duration'] * 1000,
-                    requester=user.id,
-                    source_name="youtube",
-                )]
+                try:
+                    search_query = f"{search_provider}:{query}" if source else query
+                    tracks = await n.get_tracks(
+                        search_query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
+                    )
+                except Exception as e:
+                    exceptions.add(repr(e))
+                    if [e for e in ("Video returned by YouTube isn't what was requested",
+                                    "This video requires login.",
+                                    "The video returned is not what was requested.") if e in str(e)]:
 
-                self.bot.pool.ytdl_cache[f"ytdl:{info['id']}"] = info['url']
+                        if is_yt_source and n.version > 3:
+                            try:
+                                n.search_providers.remove("ytsearch")
+                            except:
+                                pass
+                            try:
+                                n.search_providers.remove("ytmsearch")
+                            except:
+                                pass
 
-            else:
-                for search_provider in providers:
+                        if is_yt_source:
+                            node_retry = True
+                            break
 
-                    try:
-                        search_query = f"{search_provider}:{query}" if source else query
-                        tracks = await n.get_tracks(
-                            search_query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
-                        )
-                        if is_yt_video:
-                            t = tracks.tracks[0]
-                            t.playlist = None
-                            t.info["uri"] = t.info["uri"].split("&")[0]
-                            tracks = [t]
-                    except Exception as e:
-                        exceptions.add(repr(e))
-                        if [e for e in ("Video returned by YouTube isn't what was requested",
-                                        "This video requires login.",
-                                        "The video returned is not what was requested.") if e in str(e)]:
+                    if not isinstance(e, wavelink.TrackNotFound):
+                        print(f"Falha ao processar busca...\n{query}\n{traceback.format_exc()}")
+                    else:
+                        bot.dispatch("custom_error", ctx=ctx, error=e)
 
-                            if is_yt_source and n.version > 3:
-                                try:
-                                    n.search_providers.remove("ytsearch")
-                                except:
-                                    pass
-                                try:
-                                    n.search_providers.remove("ytmsearch")
-                                except:
-                                    pass
-
-                            if is_yt_source:
-                                node_retry = True
-                                break
-
-                        if not isinstance(e, wavelink.TrackNotFound):
-                            print(f"Falha ao processar busca...\n{query}\n{traceback.format_exc()}")
-                        else:
-                            bot.dispatch("custom_error", ctx=ctx, error=e)
-
-                    if tracks or not source:
-                        break
-
-                if not node_retry:
-                    node = n
+                if tracks or not source:
                     break
+
+            if not node_retry:
+                node = n
+                break
 
         return tracks, node, exceptions, is_yt_source
 
