@@ -2048,9 +2048,9 @@ class LavalinkPlayer(wavelink.Player):
 
                             if not (tracks:=self.bot.pool.ytdl_cache.get(f"lavalink_ytdl:{track.ytid}")):
                                 try:
-                                    info = self.bot.pool.ytdl_cache.get(f"ytdl:{track.ytid}") or await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(track.uri.split("&")[0], download=False))
-                                    self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"] = info['url']
-                                    tracks = await self.node.get_tracks(info['url'])
+                                    ytdl_url = self.bot.pool.ytdl_cache.get(f"ytdl:{track.ytid}") or (await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(track.uri.split("&")[0], download=False)))['url']
+                                    self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"] = ytdl_url
+                                    tracks = await self.node.get_tracks(ytdl_url)
                                     self.bot.pool.ytdl_cache[track.ytid] = tracks
                                 except Exception as e:
                                     print(traceback.format_exc())
