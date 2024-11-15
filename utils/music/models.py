@@ -2053,23 +2053,7 @@ class LavalinkPlayer(wavelink.Player):
                                 await self.process_next()
                                 return
 
-                            if not (tracks:=self.bot.pool.ytdl_cache.get(f"lavalink_ytdl:{track.ytid}")):
-                                try:
-                                    ytdl_url = self.bot.pool.ytdl_cache.get(f"ytdl:{track.ytid}")
-                                    if not ytdl_url:
-                                        info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(track.uri.split("&")[0], download=False))
-                                        ytdl_url = info['url']
-                                        self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"] = ytdl_url
-                                    tracks = await self.node.get_tracks(ytdl_url)
-                                    self.bot.pool.ytdl_cache[f"lavalink_ytdl:{track.ytid}"] = tracks
-                                except Exception as e:
-                                    if "sign in" in str(e).lower():
-                                        self.bot.pool.ytdl.params["cookiefile"] = None
-                                        return await self.process_next()
-                                    else:
-                                        raise e
-
-                            if not tracks:
+                            if not (tracks:= await self.fetch_ytdl_info(track)):
                                 await self.process_next()
                                 return
 
@@ -2175,7 +2159,7 @@ class LavalinkPlayer(wavelink.Player):
                                         text=f"Tocando música obtida via metadados: [`{fix_characters(alt_track.title, 20)}`](<{alt_track.uri}>) `| Por: {fix_characters(alt_track.author, 15)}`", controller=True
                                     )
 
-                if not encoded_track or not track.id:
+                if not encoded_track and not track.id:
 
                     await self.resolve_track(track)
 
@@ -3128,6 +3112,27 @@ class LavalinkPlayer(wavelink.Player):
             traceback.print_exc()
             return
 
+    async def fetch_ytdl_info(self, track: Union[LavalinkTrack, PartialTrack]):
+
+        if not (tracks := self.bot.pool.ytdl_cache.get(f"lavalink_ytdl:{track.ytid}")):
+            try:
+                ytdl_url = self.bot.pool.ytdl_cache.get(f"ytdl:{track.ytid}")
+                if not ytdl_url:
+                    info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(
+                        track.uri.split("&")[0], download=False))
+                    ytdl_url = info['url']
+                    self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"] = ytdl_url
+                tracks = await self.node.get_tracks(ytdl_url)
+                self.bot.pool.ytdl_cache[f"lavalink_ytdl:{track.ytid}"] = tracks
+            except Exception as e:
+                if "sign in" in str(e).lower():
+                    self.bot.pool.ytdl.params["cookiefile"] = None
+                else:
+                    raise e
+
+        return tracks
+
+
     async def resolve_track(self, track: PartialTrack):
 
         if track.id:
@@ -3146,12 +3151,17 @@ class LavalinkPlayer(wavelink.Player):
 
             if track.info["sourceName"] == "http":
                 search_queries = [track.uri or track.search_uri]
+            elif track.info["sourceName"] == "youtube" and (not self.native_yt or not self.node.prefer_youtube_native_playback):
+                return
             else:
                 search_queries = []
 
             if not search_queries:
 
                 if track.info["sourceName"] in self.node.info.get("sourceManagers", []) and (not self.node.only_use_native_search_providers or track.info["sourceName"] in native_sources):
+
+
+
                     search_queries = [track.uri]
                 else:
                     search_queries = []
