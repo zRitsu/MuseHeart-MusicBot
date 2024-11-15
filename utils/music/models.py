@@ -1101,18 +1101,15 @@ class LavalinkPlayer(wavelink.Player):
 
                         if youtube_exception:
 
-                            with suppress(IndexError, ValueError):
+                            with suppress(IndexError, ValueError, KeyError):
                                 self.node.search_providers.remove("ytsearch")
                                 self.node.search_providers.remove("ytmsearch")
                                 self.node.partial_providers.remove("ytsearch:\"{isrc}\"")
                                 self.node.partial_providers.remove("ytsearch:\"{title} - {author}\"")
                                 self.node.partial_providers.remove("ytmsearch:\"{isrc}\"")
                                 self.node.partial_providers.remove("ytmsearch:\"{title} - {author}\"")
-
-                            try:
-                                del self.bot.pool.ytdl_cache[track.ytid]
-                            except KeyError:
-                                pass
+                                del self.bot.pool.ytdl_cache[f"lavalink_ytdl:{track.ytid}"]
+                                del self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"]
 
                             self.current = None
                             self.current_encoded = None
