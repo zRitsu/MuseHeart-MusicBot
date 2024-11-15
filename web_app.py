@@ -294,6 +294,12 @@ class WSClient:
 
     async def connect(self):
 
+        for t in self.connect_task:
+            try:
+                t.cancel()
+            except:
+                continue
+
         if not self.session:
             self.session = aiohttp.ClientSession()
 
