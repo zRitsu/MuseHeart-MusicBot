@@ -27,7 +27,7 @@ from utils.music.converters import fix_characters, time_format, get_button_style
 from utils.music.errors import GenericError, PoolException
 from utils.music.filters import AudioFilter
 from utils.music.skin_utils import skin_converter
-from utils.others import music_source_emoji, send_idle_embed, PlayerControls, song_request_buttons
+from utils.others import music_source_emoji, send_idle_embed, PlayerControls, song_request_buttons, string_to_file
 from wavelink import TrackStart, TrackEnd
 
 if TYPE_CHECKING:
@@ -688,7 +688,7 @@ class LavalinkPlayer(wavelink.Player):
         self.position_timestamp = state.get('time', 0)
         self.ping = state.get('ping', None)
 
-    async def report_error(self, embed: disnake.Embed, track: Union[LavalinkTrack, PartialTrack]):
+    async def report_error(self, embed: disnake.Embed, track: Union[LavalinkTrack, PartialTrack], error: Exception = None):
 
         cog = self.bot.get_cog("Music")
 
@@ -707,7 +707,15 @@ class LavalinkPlayer(wavelink.Player):
             if self.guild.icon:
                 embed.set_thumbnail(url=self.guild.icon.with_format("png").url)
 
-            await cog.error_report_queue.put({"embed": embed})
+            error_kwargs = {"embed": embed}
+
+            if error:
+                error_kwargs["file"] = string_to_file(
+                    "".join(traceback.format_exception(type(error), error, error.__traceback__)),
+                    "error_partialtrack.txt"
+                )
+
+            await cog.error_report_queue.put(error_kwargs)
 
     async def reconnect_voice_channel(self):
 
@@ -2050,11 +2058,12 @@ class LavalinkPlayer(wavelink.Player):
                                     ytdl_url = self.bot.pool.ytdl_cache.get(f"ytdl:{track.ytid}") or (await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(track.uri.split("&")[0], download=False)))['url']
                                     self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"] = ytdl_url
                                     tracks = await self.node.get_tracks(ytdl_url)
-                                    self.bot.pool.ytdl_cache[track.ytid] = tracks
+                                    self.bot.pool.ytdl_cache[f"lavalink_ytdl:{track.ytid}"] = tracks
                                 except Exception as e:
-                                    print(traceback.format_exc())
+                                    traceback.print_exc()
                                     if "sign in" in str(e).lower():
                                         self.bot.pool.ytdl.params["cookiefile"] = None
+                                    await asyncio.sleep(3)
                                     await self.process_next()
                                     return
 
