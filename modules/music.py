@@ -7631,7 +7631,7 @@ def setup(bot: BotCore):
 
         bot.pool.ytdl = YoutubeDL(
             {
-                'format': 'bestaudio',
+                'format': 'bestaudio[abr<=64]',
                 'extract_flat': True,
                 'quiet': True,
                 'no_warnings': True,
