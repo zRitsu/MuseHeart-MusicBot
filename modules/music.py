@@ -7036,6 +7036,7 @@ class Music(commands.Cog):
                                     duration=info['duration'] * 1000,
                                     requester=user.id,
                                     source_name="youtube",
+                                    ytid=ytid,
                                 )]
 
                                 self.bot.pool.ytdl_cache[f"ytdl:{ytid}"] = info['url']
@@ -7185,7 +7186,7 @@ class Music(commands.Cog):
                 requester=user.id,
                 source_name="soundcloud",
                 identifier=i["id"],
-                playlist=playlist
+                playlist=playlist,
             ) for i in info['entries']]
 
             return playlist, node

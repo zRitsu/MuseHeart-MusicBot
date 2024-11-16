@@ -101,7 +101,7 @@ class PartialTrack:
 
     def __init__(self, *, uri: str = "", title: str = "", author="", thumb: str = "", duration: int = 0,
                  requester: int = 0, track_loops: int = 0, source_name: str = "", autoplay: bool = False,
-                 identifier: str = "", info: dict = None, playlist: PartialPlaylist = None):
+                 identifier: str = "", info: dict = None, playlist: PartialPlaylist = None, ytid = ''):
 
         self.info = info or {
             "author": fix_characters(author)[:97],
@@ -122,7 +122,7 @@ class PartialTrack:
         }
 
         self.id = None
-        self.ytid = ""
+        self.ytid = ytid
         self.unique_id = str(uuid.uuid4().hex)[:10]
         self.playlist: Optional[PartialPlaylist] = playlist
 
@@ -2041,9 +2041,9 @@ class LavalinkPlayer(wavelink.Player):
                             await self.process_next()
                             return
 
-                partial_data = self.bot.pool.partial_track_cache.get(track.id)
-
                 if not self.native_yt or not self.node.prefer_youtube_native_playback:
+
+                    partial_data = self.bot.pool.partial_track_cache.get(track.id)
 
                     if track.info["sourceName"] == "youtube" or (partial_data and partial_data[0].info["sourceName"] == "youtube"):
 
