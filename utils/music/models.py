@@ -3122,7 +3122,14 @@ class LavalinkPlayer(wavelink.Player):
                         track.uri.split("&")[0], download=False))
                     ytdl_url = info['url']
                     self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"] = ytdl_url
-                tracks = await self.node.get_tracks(ytdl_url)
+                try:
+                    tracks = await self.node.get_tracks(ytdl_url)
+                except Exception as e:
+                    try:
+                        del self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"]
+                    except KeyError:
+                        pass
+                    raise e
                 self.bot.pool.ytdl_cache[f"lavalink_ytdl:{track.ytid}"] = tracks
             except Exception as e:
                 if "sign in" in str(e).lower():
