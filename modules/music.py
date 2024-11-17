@@ -138,10 +138,10 @@ class Music(commands.Cog):
             except KeyError:
                 raise NoPlayer()
 
-            if not inter.author.voice:
+            if not author.voice:
                 raise NoVoice()
 
-            if inter.author.id not in guild.me.voice.channel.voice_states:
+            if author.id not in guild.me.voice.channel.voice_states:
                 raise DiffVoiceChannel()
 
             await inter.response.defer()
@@ -612,9 +612,11 @@ class Music(commands.Cog):
         try:
             bot = inter.music_bot
             guild = inter.music_guild
+            author = guild.get_member(inter.author.id)
         except AttributeError:
             bot = inter.bot
             guild = inter.guild
+            author = inter.author
 
         original_bot = bot
 
@@ -680,7 +682,7 @@ class Music(commands.Cog):
                 raise GenericError(f"**O canal <#{inter.channel.id}> não foi encontrado (ou foi excluido).**")
             await check_pool_bots(inter, check_player=False, bypass_prefix=True)"""
 
-        if bot.user.id not in inter.author.voice.channel.voice_states:
+        if bot.user.id not in author.voice.channel.voice_states:
 
             if str(inter.channel.id) == guild_data['player_controller']['channel']:
 
@@ -708,7 +710,7 @@ class Music(commands.Cog):
 
                     newmsg = await func(
                         embed=disnake.Embed(
-                            description=f"**Escolha qual bot você deseja usar no canal {inter.author.voice.channel.mention}**",
+                            description=f"**Escolha qual bot você deseja usar no canal {author.voice.channel.mention}**",
                             color=self.bot.get_color(guild.me)), view=v
                     )
                     await v.wait()
@@ -736,7 +738,7 @@ class Music(commands.Cog):
                                                        color=self.bot.get_color(guild.me)), view=None)
                         return
 
-                    if not v.inter.author.voice:
+                    if not author.voice:
                         try:
                             func = msg.edit
                         except AttributeError:
@@ -770,8 +772,8 @@ class Music(commands.Cog):
 
         await check_player_perm(inter=inter, bot=bot, channel=channel, guild_data=guild_data)
 
-        if not guild.voice_client and not check_channel_limit(guild.me, inter.author.voice.channel):
-            raise GenericError(f"**O canal {inter.author.voice.channel.mention} está lotado!**")
+        if not guild.voice_client and not check_channel_limit(guild.me, author.voice.channel):
+            raise GenericError(f"**O canal {author.voice.channel.mention} está lotado!**")
 
         await self.check_player_queue(inter.author, bot, guild.id)
 
@@ -797,7 +799,7 @@ class Music(commands.Cog):
         attachment: Optional[disnake.Attachment] = None
 
         try:
-            voice_channel: disnake.VoiceChannel = bot.get_channel(inter.author.voice.channel.id)
+            voice_channel: disnake.VoiceChannel = bot.get_channel(author.voice.channel.id)
         except AttributeError:
             raise NoVoice()
 
@@ -1655,7 +1657,7 @@ class Music(commands.Cog):
                 elif url_check:=URL_REG.match(original_query.strip("<>")):
                     track_url = url_check.group()
 
-            if not inter.author.voice:
+            if not author.voice:
                 raise NoVoice()
 
             if inter.author.id not in voice_channel.voice_states and bot.user.id not in voice_channel.voice_states:
@@ -1665,7 +1667,7 @@ class Music(commands.Cog):
 
                 if free_bots[0] != bot:
                     try:
-                        voice_channel = bot.get_channel(inter.author.voice.channel.id)
+                        voice_channel = bot.get_channel(author.voice.channel.id)
                     except AttributeError:
                         raise NoVoice()
                     bot = free_bots.pop(0)
@@ -1769,7 +1771,7 @@ class Music(commands.Cog):
 
         else:
 
-            if not inter.author.voice:
+            if not author.voice:
                 raise NoVoice()
 
             if inter.author.id not in voice_channel.voice_states and bot.user.id not in voice_channel.voice_states:
@@ -1779,7 +1781,7 @@ class Music(commands.Cog):
 
                 if free_bots[0] != bot:
                     try:
-                        voice_channel = bot.get_channel(inter.author.voice.channel.id)
+                        voice_channel = bot.get_channel(author.voice.channel.id)
                     except AttributeError:
                         raise NoVoice()
                     bot = free_bots.pop(0)
