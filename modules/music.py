@@ -616,6 +616,8 @@ class Music(commands.Cog):
             bot = inter.bot
             guild = inter.guild
 
+        original_bot = bot
+
         mix = mix == "yes" or mix is True
 
         msg = None
@@ -795,7 +797,7 @@ class Music(commands.Cog):
         attachment: Optional[disnake.Attachment] = None
 
         try:
-            voice_channel = bot.get_channel(inter.author.voice.channel.id)
+            voice_channel: disnake.VoiceChannel = bot.get_channel(inter.author.voice.channel.id)
         except AttributeError:
             raise NoVoice()
 
@@ -1507,10 +1509,8 @@ class Music(commands.Cog):
                 channel = inter.channel
 
             try:
-                player = new_bot.music.players[guild.id]
+                new_bot.music.players[guild.id]
             except KeyError:
-                player = None
-
                 if new_bot != bot or not guild_data:
                     guild_data = await new_bot.get_data(guild.id, db_name=DBModel.guilds)
 
@@ -1655,19 +1655,24 @@ class Music(commands.Cog):
                 elif url_check:=URL_REG.match(original_query.strip("<>")):
                     track_url = url_check.group()
 
-            if not (free_bots := await self.check_available_bot(inter=inter, guild=guild, bot=bot, message=msg)):
-                return
+            if not inter.author.voice:
+                raise NoVoice()
 
-            if free_bots[0] != bot:
-                try:
-                    voice_channel = bot.get_channel(inter.author.voice.channel.id)
-                except AttributeError:
-                    raise NoVoice()
-                bot = free_bots.pop(0)
-                channel = bot.get_channel(channel.id)
-                guild = bot.get_guild(guild.id)
-                guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
-                node = None
+            if inter.author.id not in voice_channel.voice_states and bot.user.id not in voice_channel.voice_states:
+
+                if not (free_bots := await self.check_available_bot(inter=inter, guild=guild, bot=bot, message=msg)):
+                    return
+
+                if free_bots[0] != bot:
+                    try:
+                        voice_channel = bot.get_channel(inter.author.voice.channel.id)
+                    except AttributeError:
+                        raise NoVoice()
+                    bot = free_bots.pop(0)
+                    channel = bot.get_channel(channel.id)
+                    guild = bot.get_guild(guild.id)
+                    guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
+                    node = None
 
             await check_player_perm(inter=inter, bot=bot, channel=channel, guild_data=guild_data)
 
@@ -1764,19 +1769,24 @@ class Music(commands.Cog):
 
         else:
 
-            if not (free_bots := await self.check_available_bot(inter=inter, guild=guild, bot=bot, message=msg)):
-                return
+            if not inter.author.voice:
+                raise NoVoice()
 
-            if free_bots[0] != bot:
-                try:
-                    voice_channel = bot.get_channel(inter.author.voice.channel.id)
-                except AttributeError:
-                    raise NoVoice()
-                bot = free_bots.pop(0)
-                channel = bot.get_channel(channel.id)
-                guild = bot.get_guild(guild.id)
-                guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
-                node = None
+            if inter.author.id not in voice_channel.voice_states and bot.user.id not in voice_channel.voice_states:
+
+                if not (free_bots := await self.check_available_bot(inter=inter, guild=guild, bot=bot, message=msg)):
+                    return
+
+                if free_bots[0] != bot:
+                    try:
+                        voice_channel = bot.get_channel(inter.author.voice.channel.id)
+                    except AttributeError:
+                        raise NoVoice()
+                    bot = free_bots.pop(0)
+                    channel = bot.get_channel(channel.id)
+                    guild = bot.get_guild(guild.id)
+                    guild_data = await bot.get_data(guild.id, db_name=DBModel.guilds)
+                    node = None
 
             await check_player_perm(inter=inter, bot=bot, channel=channel, guild_data=guild_data)
 
@@ -1927,7 +1937,7 @@ class Music(commands.Cog):
             footer_txt = f"`♾️` [`{user_data['lastfm']['username']}`](https://www.last.fm/user/{user_data['lastfm']['username']})" if user_data["lastfm"]["sessionkey"] and user_data["lastfm"]["scrobble"] else ""
 
             try:
-                if bot.user.id != self.bot.user.id:
+                if original_bot.user.id != self.bot.user.id:
                     embed.description += f"\n-# **Via:** {bot.user.mention}" + (f" ⠂{footer_txt}" if footer_txt else "")
                 elif footer_txt:
                     embed.description += f"\n-# {footer_txt}"
