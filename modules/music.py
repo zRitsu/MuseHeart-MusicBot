@@ -5308,10 +5308,12 @@ class Music(commands.Cog):
                                 retries -= 1
                                 continue
 
-                            if player.guild.me not in vc.speakers:
-                                stage_perms = vc.permissions_for(player.guild.me)
-                                if stage_perms.manage_permissions:
-                                    await player.guild.me.edit(suppress=False)
+                            break
+
+                        if player.guild.me not in vc.speakers:
+                            stage_perms = vc.permissions_for(player.guild.me)
+                            if stage_perms.manage_permissions:
+                                await player.guild.me.edit(suppress=False)
 
                     if not player.current:
                         await player.process_next()
