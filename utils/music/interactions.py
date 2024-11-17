@@ -1235,7 +1235,8 @@ class FavModalAdd(disnake.ui.Modal):
                 loop = self.view.bot.loop or asyncio.get_event_loop()
 
                 try:
-                    info = await loop.run_in_executor(None, lambda: self.view.bot.pool.ytdl.extract_info(base_url, download=False))
+                    with self.view.bot.pool.ytdl as ydl:
+                        info = await loop.run_in_executor(None, lambda: ydl.extract_info(base_url, download=False))
                 except Exception as e:
                     traceback.print_exc()
                     await inter.edit_original_message(f"**Ocorreu um erro ao obter informação da url:** ```py\n{repr(e)}```")

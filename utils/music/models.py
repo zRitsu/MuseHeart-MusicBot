@@ -1697,7 +1697,8 @@ class LavalinkPlayer(wavelink.Player):
 
                 elif track_data.info["sourceName"] == "soundcloud":
                     try:
-                        info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(f"{track_data.uri}/recommended",
+                        with self.bot.pool.ytdl as ydl:
+                            info = await self.bot.loop.run_in_executor(None, lambda: ydl.extract_info(f"{track_data.uri}/recommended",
                                                                                                             download=False))
                     except AttributeError:
                         pass
@@ -3142,8 +3143,9 @@ class LavalinkPlayer(wavelink.Player):
             try:
                 ytdl_url = self.bot.pool.ytdl_cache.get(f"ytdl:{track.ytid}")
                 if not ytdl_url:
-                    info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(
-                        track.uri.split("&")[0], download=False))
+                    with self.bot.pool.ytdl as ydl:
+                        info = await self.bot.loop.run_in_executor(None, lambda: ydl.extract_info(
+                            track.uri.split("&")[0], download=False))
                     ytdl_url = info['url']
                     self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"] = ytdl_url
                 try:

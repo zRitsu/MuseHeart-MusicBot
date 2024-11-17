@@ -1269,7 +1269,8 @@ class Music(commands.Cog):
 
             if not (info := self.bot.pool.integration_cache.get(query)):
 
-                info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(query.split("\n")[0],
+                with self.bot.pool.ytdl as ydl:
+                    info = await self.bot.loop.run_in_executor(None, lambda: ydl.extract_info(query.split("\n")[0],
                                                                                                 download=False))
 
                 try:
@@ -1835,7 +1836,7 @@ class Music(commands.Cog):
                 else:
 
                     try:
-                        playlist_data = await bot.loop.run_in_executor(None, lambda: YoutubeDL(
+                        with YoutubeDL(
                             {
                                 'extract_flat': True,
                                 'quiet': True,
@@ -1867,7 +1868,8 @@ class Music(commands.Cog):
                                     }
                                 }
                             }
-                        ).extract_info(query, download=False))
+                        ) as ydl:
+                            playlist_data = await bot.loop.run_in_executor(None, lambda: ydl.extract_info(query, download=False))
 
                         async with aiohttp.ClientSession() as session:
                             async with session.get(playlist_data["thumbnails"][0]['url']) as response:
@@ -7037,10 +7039,11 @@ class Music(commands.Cog):
                         else:
                             is_yt_source = True
                             try:
-                                info = await self.bot.loop.run_in_executor(
-                                    None, lambda: self.bot.pool.ytdl.extract_info(
-                                        f"https://www.youtube.com/watch?v={ytid}", download=False)
-                                )
+                                with self.bot.pool.ytdl as ydl:
+                                    info = await self.bot.loop.run_in_executor(
+                                        None, lambda: ydl.extract_info(
+                                            f"https://www.youtube.com/watch?v={ytid}", download=False)
+                                    )
 
                                 tracks = [PartialTrack(
                                     uri=info['webpage_url'],
@@ -7188,7 +7191,8 @@ class Music(commands.Cog):
 
         if bool(sc_recommended.search(query)):
             try:
-                info = await bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(query, download=False))
+                with self.bot.pool.ytdl as ydl:
+                    info = await bot.loop.run_in_executor(None, lambda: ydl.extract_info(query, download=False))
             except AttributeError:
                 raise GenericError("**O uso do yt-dlp está desativado...**")
 
@@ -7642,7 +7646,7 @@ class Music(commands.Cog):
 
 def setup(bot: BotCore):
 
-    if bot.config["USE_YTDL"] and not hasattr(bot.pool, 'ytdl'):
+    if bot.config["USE_YTDL"] and not bot.pool.ytdl:
 
         bot.pool.ytdl = YoutubeDL(
             {

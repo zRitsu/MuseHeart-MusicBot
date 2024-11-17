@@ -26,6 +26,7 @@ from disnake.ext import commands
 from disnake.http import Route
 from dotenv import dotenv_values
 from user_agent import generate_user_agent
+from yt_dlp import YoutubeDL
 
 import wavelink
 from config_loader import load_config
@@ -101,6 +102,7 @@ class BotPool:
         self.default_idling_skin = self.config.get("DEFAULT_IDLING_SKIN", "default")
         self.cache_updater_task: Optional[asyncio.Task] = None
         self.lyric_data_cache = TTLCache(maxsize=30000, ttl=600*10)
+        self.ytdl: Optional[YoutubeDL] = None
 
         self.load_cache()
 
