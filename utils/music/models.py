@@ -2053,7 +2053,24 @@ class LavalinkPlayer(wavelink.Player):
                                 await self.process_next()
                                 return
 
-                            if not (tracks:= await self.fetch_ytdl_info(track)):
+                            try:
+                                tracks = await self.fetch_ytdl_info(track)
+                            except Exception as e:
+                                if self.text_channel:
+                                    try:
+                                        await self.text_channel.send(
+                                            embed=disnake.Embed(
+                                                description=f"**Ocorreu um erro ao reproduzir a música via ytdl:** [`{track.title}`]({track.uri}) ```py\n{repr(e)}```"
+                                            )
+                                        )
+                                    except:
+                                        pass
+                                await asyncio.sleep(7)
+                                await self.process_next()
+                                return
+
+                            if not tracks:
+                                await asyncio.sleep(3)
                                 await self.process_next()
                                 return
 
