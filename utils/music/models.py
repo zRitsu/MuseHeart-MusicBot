@@ -2066,11 +2066,13 @@ class LavalinkPlayer(wavelink.Player):
                                     except:
                                         pass
                                 await asyncio.sleep(7)
+                                self.locked = False
                                 await self.process_next()
                                 return
 
                             if not tracks:
                                 await asyncio.sleep(3)
+                                self.locked = False
                                 await self.process_next()
                                 return
 
