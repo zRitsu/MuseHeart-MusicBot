@@ -2063,11 +2063,18 @@ class LavalinkPlayer(wavelink.Player):
                             except Exception as e:
                                 if self.text_channel:
                                     try:
-                                        await self.text_channel.send(
-                                            embed=disnake.Embed(
-                                                description=f"**Ocorreu um erro ao reproduzir a música via ytdl:** [`{track.title}`]({track.uri}) ```py\n{repr(e)}```"
-                                            )
+                                        embed = disnake.Embed(
+                                            description=f"**Ocorreu um erro ao reproduzir a música via ytdl:** "
+                                                        f"[`{track.title}`]({track.uri}) ```py\n{repr(e)}```"
                                         )
+                                        await self.text_channel.send(embed=embed, delete_after=15)
+                                        cog = self.bot.get_cog("ErrorHandler")
+                                        if cog:
+                                            embed.add_field(name="Servidor:", value=f"{self.guild.name} [{self.guild.id}]")
+                                            await cog.send_webhook(
+                                                embed=embed,
+                                                file=string_to_file("".join(traceback.format_exception(type(e), e, e.__traceback__)), "error_traceback_ytdl.txt")
+                                            )
                                     except:
                                         pass
                                 await asyncio.sleep(7)

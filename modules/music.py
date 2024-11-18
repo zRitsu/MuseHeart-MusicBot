@@ -7055,6 +7055,7 @@ class Music(commands.Cog):
 
                                 self.bot.pool.ytdl_cache[f"ytdl:{ytid}"] = info['url']
                             except Exception as e:
+                                bot.dispatch("custom_error", ctx=ctx, error=e)
                                 exceptions.add(repr(e))
 
                             return tracks, node, exceptions, is_yt_source
@@ -7102,7 +7103,7 @@ class Music(commands.Cog):
 
                     if not isinstance(e, wavelink.TrackNotFound):
                         print(f"Falha ao processar busca...\n{query}\n{traceback.format_exc()}")
-                    else:
+                    elif not isinstance(e, GenericError):
                         bot.dispatch("custom_error", ctx=ctx, error=e)
 
                 if tracks or not source:
