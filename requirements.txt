@@ -23,6 +23,6 @@ pylrc
 rapidfuzz
 nodriver==0.32
 undetected-chromedriver==3.5.5
-g4f>=0.3.3.3
+g4f>=0.3.4.5
 nest_asyncio
 audioop-lts; python_version>='3.13'

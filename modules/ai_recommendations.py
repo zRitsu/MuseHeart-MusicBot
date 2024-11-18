@@ -59,7 +59,7 @@ class AiMusic(commands.Cog):
             pass
 
         if not hasattr(bot.pool, 'ai_client'):
-            bot.pool.ai_client = g4f.client.Client()
+            bot.pool.ai_client = g4f.client.AsyncClient()
 
         self.ai_client = bot.pool.ai_client
 
@@ -208,7 +208,7 @@ class AiMusic(commands.Cog):
             prompt = prompt.replace(original_search, title)
             original_prompt = original_prompt.replace(original_search, title)
 
-        response = await self.ai_client.chat.completions.async_create(
+        response = await self.ai_client.chat.completions.create(
             model=g4f.models.claude_3_5_sonnet,
             # model=g4f.models.gpt_4_turbo,
             ignored=["Blackbox"],
