@@ -995,7 +995,7 @@ class GuildLog(commands.Cog):
 
         if (channel:=self.bot.get_channel(self.bot.config["BOT_ADD_REMOVE_LOG_CHANNEL_ID"])) and channel.permissions_for(channel.guild.me).send_messages:
             await channel.send(
-                ", ".join(f"<@{owner_id}>" for owner_id in self.bot.owner_ids) or self.bot.owner.mentionm,
+                ", ".join(f"<@{owner_id}>" for owner_id in self.bot.owner_ids) or self.bot.owner.mention,
                 embed=embed
             )
 
