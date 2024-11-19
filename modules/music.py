@@ -1836,7 +1836,7 @@ class Music(commands.Cog):
                 else:
 
                     try:
-                        playlist_data = await bot.loop.run_in_executor(None, lambda: YoutubeDL(
+                        with YoutubeDL(
                             {
                                 'extract_flat': True,
                                 'quiet': True,
@@ -1847,28 +1847,15 @@ class Music(commands.Cog):
                                 'cachedir': "./.ytdl_cache",
                                 'allowed_extractors': [
                                     r'.*youtube.*',
-                                    r'.*soundcloud.*',
                                 ],
                                 'extractor_args': {
-                                    'youtube': {
-                                        'skip': [
-                                            'hls',
-                                            'dash',
-                                            'translated_subs'
-                                        ],
-                                        'player_skip': [
-                                            'js',
-                                            'configs',
-                                            'webpage'
-                                        ],
-                                        'max_comments': [0],
-                                    },
                                     'youtubetab': {
                                         "skip": ["webpage"]
                                     }
                                 }
                             }
-                        ).extract_info(query, download=False))
+                        ) as ydl:
+                            playlist_data = await bot.loop.run_in_executor(None, lambda: ydl.extract_info(query, download=False))
 
                         async with aiohttp.ClientSession() as session:
                             async with session.get(playlist_data["thumbnails"][0]['url']) as response:
