@@ -2056,6 +2056,10 @@ class LavalinkPlayer(wavelink.Player):
                             try:
                                 tracks = await self.fetch_ytdl_info(track)
                             except Exception as e:
+                                embed = disnake.Embed(
+                                    description=f"**Ocorreu um erro ao reproduzir a música via ytdl:** "
+                                                f"[`{track.title}`]({track.uri}) ```py\n{repr(e)}```"
+                                )
                                 if self.text_channel:
                                     try:
                                         embed = disnake.Embed(
@@ -2063,15 +2067,20 @@ class LavalinkPlayer(wavelink.Player):
                                                         f"[`{track.title}`]({track.uri}) ```py\n{repr(e)}```"
                                         )
                                         await self.text_channel.send(embed=embed, delete_after=15)
-                                        cog = self.bot.get_cog("ErrorHandler")
-                                        if cog:
-                                            embed.add_field(name="Servidor:", value=f"{self.guild.name} [{self.guild.id}]")
-                                            await cog.send_webhook(
-                                                embed=embed,
-                                                file=string_to_file("".join(traceback.format_exception(type(e), e, e.__traceback__)), "error_traceback_ytdl.txt")
-                                            )
-                                    except:
+                                    except Exception:
                                         pass
+                                cog = self.bot.get_cog("ErrorHandler")
+                                if cog:
+                                    embed.add_field(name="Servidor:", value=f"{self.guild.name} [{self.guild.id}]")
+                                    try:
+                                        await cog.send_webhook(
+                                            embed=embed,
+                                            file=string_to_file(
+                                                "".join(traceback.format_exception(type(e), e, e.__traceback__)),
+                                                "error_traceback_ytdl.txt")
+                                        )
+                                    except Exception:
+                                        print(traceback.format_exc())
                                 await asyncio.sleep(7)
                                 self.locked = False
                                 await self.process_next()
@@ -2252,8 +2261,37 @@ class LavalinkPlayer(wavelink.Player):
                     force=True if (self.static or not self.loop or not self.is_last_message()) else False,
                     rpc_update=True
                 )
-        except Exception:
+        except Exception as e:
             print(traceback.format_exc())
+
+            embed = disnake.Embed(
+                description="**Ocorreu um erro ao reproduzir a música:**"
+            )
+
+            if self.current:
+                embed.description += f" [`{self.current.title}`]({self.current.uri})"
+
+            embed.description += f" ```py\n{repr(e)}```"
+
+            if self.text_channel:
+                try:
+                    await self.text_channel.send(embed=embed, delete_after=15)
+                except Exception:
+                    print(traceback.format_exc())
+
+            cog = self.bot.get_cog("ErrorHandler")
+            if cog:
+                embed.add_field(name="Servidor:", value=f"{self.guild.name} [{self.guild.id}]")
+                try:
+                    await cog.send_webhook(
+                        embed=embed,
+                        file=string_to_file("".join(traceback.format_exception(type(e), e, e.__traceback__)),
+                                            "error_traceback_ytdl.txt")
+                    )
+                except Exception:
+                    print(traceback.format_exc())
+            await asyncio.sleep(10)
+            await self.process_next()
 
     async def process_idle_message(self):
 

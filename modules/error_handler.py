@@ -483,6 +483,9 @@ class ErrorHandler(commands.Cog):
             file: Optional[disnake.File] = None
     ):
 
+        if not self.bot.config["AUTO_ERROR_REPORT_WEBHOOK"]:
+            return
+
         kwargs = {
             "username": self.bot.user.name,
             "avatar_url": self.bot.user.display_avatar.replace(static_format='png').url,
