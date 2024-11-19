@@ -7047,7 +7047,11 @@ class Music(commands.Cog):
                                     LavalinkTrack(id_=encode_track(trackinfo)[1], info=trackinfo, query=query, requester=user.id)
                                 ]
 
-                                self.bot.pool.ytdl_cache[f"{ctx.guild_id}:{trackinfo['sourceName']}:{info['id']}"] = {'url':info['url'], 'duration': info['duration'] * 1000}
+                                self.bot.pool.ytdl_cache[f"{ctx.guild_id}:{trackinfo['sourceName']}:{info['id']}"] = {
+                                    'url': info['url'],
+                                    'format': 'mp4' if 'm4a' in info.get('container', '') else 'matroska/webm',
+                                    'duration': int(info['duration'] * 1000)
+                                }
                             except Exception as e:
                                 bot.dispatch("custom_error", ctx=ctx, error=e)
                                 exceptions.add(repr(e))
@@ -7641,7 +7645,7 @@ def setup(bot: BotCore):
 
         bot.pool.ytdl = YoutubeDL(
             {
-                'format': 'bestaudio[ext=webm]',
+                'format': 'bestaudio/best',
                 'extract_flat': True,
                 'quiet': True,
                 'no_warnings': True,

@@ -3193,11 +3193,19 @@ class LavalinkPlayer(wavelink.Player):
         if not (ytdl_info:=self.bot.pool.ytdl_cache.get(f"{self.guild.id}:{track.source_name}:{track.identifier}")):
             info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(
                 track.uri.split("&")[0], download=False))
-            ytdl_info = {'url': info['url'], 'duration': int(info['duration'] * 1000)}
+
+            container = info.get('container', '')
+
+            ytdl_info = {
+                'url': info['url'],
+                'format': 'mp4' if 'm4a' in container else 'matroska/webm',
+                'duration': int(info['duration'] * 1000)
+            }
+
             self.bot.pool.ytdl_cache[f"{self.guild.id}:{track.source_name}:{track.identifier}"] = ytdl_info
 
         def write_http_format(writer: DataWriter, *args):
-            writer.write_utf('matroska/webm')
+            writer.write_utf(ytdl_info.get("format", "matroska/webm"))
 
         trackinfo = {
             'title': 'Unknown title',
