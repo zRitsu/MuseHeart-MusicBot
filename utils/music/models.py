@@ -1073,6 +1073,11 @@ class LavalinkPlayer(wavelink.Player):
                             "java.io.IOException: Invalid status code for video page response: 400"))
                     ) or event.cause == "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: This video is unavailable"):
 
+                        try:
+                            del self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"]
+                        except KeyError:
+                            pass
+
                         if youtube_exception and self.node.retry_403:
 
                             if not hasattr(self, 'retries_403'):
@@ -1112,10 +1117,6 @@ class LavalinkPlayer(wavelink.Player):
                             self.queue.append(track)
 
                         self.retries_403 = {"last_time": None, 'counter': 0}
-
-                        with suppress(IndexError, ValueError, KeyError):
-                            del self.bot.pool.ytdl_cache[f"lavalink_ytdl:{track.ytid}"]
-                            del self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"]
 
                         if youtube_exception:
 
