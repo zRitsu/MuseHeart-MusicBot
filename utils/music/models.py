@@ -964,7 +964,9 @@ class LavalinkPlayer(wavelink.Player):
 
                     try:
                         await self.process_save_queue()
-                    except:
+                    except asyncio.CancelledError:
+                        pass
+                    except Exception:
                         traceback.print_exc()
 
                     await asyncio.sleep(2)
@@ -3177,47 +3179,33 @@ class LavalinkPlayer(wavelink.Player):
 
     async def fetch_ytdl_info(self, track: Union[LavalinkTrack, PartialTrack]):
 
-        if not (tracks := self.bot.pool.ytdl_cache.get(f"lavalink_ytdl:{track.ytid}")):
-            try:
-                ytdl_info = self.bot.pool.ytdl_cache.get(f"ytdl:{track.ytid}")
-                if not ytdl_info:
-                    info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(
-                        track.uri.split("&")[0], download=False))
-                    ytdl_info = {'url':info['url'], 'duration': int(info['duration'] * 1000)}
-                    self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"] = ytdl_info
+        if not (ytdl_info:=self.bot.pool.ytdl_cache.get(f"ytdl:{track.ytid}")):
+            info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(
+                track.uri.split("&")[0], download=False))
+            ytdl_info = {'url': info['url'], 'duration': int(info['duration'] * 1000)}
+            self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"] = ytdl_info
 
-                def write_http_format(writer: DataWriter, *args):
-                    writer.write_utf('matroska/webm')
+        def write_http_format(writer: DataWriter, *args):
+            writer.write_utf('matroska/webm')
 
-                trackinfo = {
-                    'title': 'Unknown title',
-                    'author': 'Unknown artist',
-                    'length': ytdl_info['duration'],
-                    'identifier': ytdl_info['url'],
-                    'isStream': False,
-                    'uri': ytdl_info['url'],
-                    'sourceName': 'http',
-                    'position': 0,
-                    'artworkUrl': None,
-                    'isrc': None,
-                }
+        trackinfo = {
+            'title': 'Unknown title',
+            'author': 'Unknown artist',
+            'length': ytdl_info['duration'],
+            'identifier': ytdl_info['url'],
+            'isStream': False,
+            'uri': ytdl_info['url'],
+            'sourceName': 'http',
+            'position': 0,
+            'artworkUrl': None,
+            'isrc': None,
+        }
 
-                encoded = encode_track(trackinfo, {'http': write_http_format})[1]
+        encoded = encode_track(trackinfo, {'http': write_http_format})[1]
 
-                trackinfo['id'] = encoded
+        trackinfo['id'] = encoded
 
-                tracks = [
-                    LavalinkTrack(id_=encoded, info=trackinfo)
-                ]
-
-                self.bot.pool.ytdl_cache[f"lavalink_ytdl:{track.ytid}"] = tracks
-            except Exception as e:
-                if "sign in" in str(e).lower():
-                    self.bot.pool.ytdl.params["cookiefile"] = None
-                else:
-                    raise e
-
-        return tracks
+        return [LavalinkTrack(id_=encoded, info=trackinfo)]
 
 
     async def resolve_track(self, track: PartialTrack):
