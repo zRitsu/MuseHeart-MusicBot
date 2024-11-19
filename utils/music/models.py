@@ -27,6 +27,7 @@ from utils.music.converters import fix_characters, time_format, get_button_style
 from utils.music.errors import GenericError, PoolException
 from utils.music.filters import AudioFilter
 from utils.music.skin_utils import skin_converter
+from utils.music.track_encoder import encode_track, DataWriter
 from utils.others import music_source_emoji, send_idle_embed, PlayerControls, song_request_buttons, string_to_file
 from wavelink import TrackStart, TrackEnd
 
@@ -2056,16 +2057,13 @@ class LavalinkPlayer(wavelink.Player):
                             try:
                                 tracks = await self.fetch_ytdl_info(track)
                             except Exception as e:
+                                print(traceback.format_exc())
                                 embed = disnake.Embed(
                                     description=f"**Ocorreu um erro ao reproduzir a música via ytdl:** "
                                                 f"[`{track.title}`]({track.uri}) ```py\n{repr(e)}```"
                                 )
                                 if self.text_channel:
                                     try:
-                                        embed = disnake.Embed(
-                                            description=f"**Ocorreu um erro ao reproduzir a música via ytdl:** "
-                                                        f"[`{track.title}`]({track.uri}) ```py\n{repr(e)}```"
-                                        )
                                         await self.text_channel.send(embed=embed, delete_after=15)
                                     except Exception:
                                         pass
@@ -3181,20 +3179,37 @@ class LavalinkPlayer(wavelink.Player):
 
         if not (tracks := self.bot.pool.ytdl_cache.get(f"lavalink_ytdl:{track.ytid}")):
             try:
-                ytdl_url = self.bot.pool.ytdl_cache.get(f"ytdl:{track.ytid}")
-                if not ytdl_url:
+                ytdl_info = self.bot.pool.ytdl_cache.get(f"ytdl:{track.ytid}")
+                if not ytdl_info:
                     info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(
                         track.uri.split("&")[0], download=False))
-                    ytdl_url = info['url']
-                    self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"] = ytdl_url
-                try:
-                    tracks = await self.node.get_tracks(ytdl_url)
-                except Exception as e:
-                    try:
-                        del self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"]
-                    except KeyError:
-                        pass
-                    raise e
+                    ytdl_info = {'url':info['url'], 'duration': int(info['duration'] * 1000)}
+                    self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"] = ytdl_info
+
+                def write_http_format(writer: DataWriter, *args):
+                    writer.write_utf('matroska/webm')
+
+                trackinfo = {
+                    'title': 'Unknown title',
+                    'author': 'Unknown artist',
+                    'length': ytdl_info['duration'],
+                    'identifier': ytdl_info['url'],
+                    'isStream': False,
+                    'uri': ytdl_info['url'],
+                    'sourceName': 'http',
+                    'position': 0,
+                    'artworkUrl': None,
+                    'isrc': None,
+                }
+
+                encoded = encode_track(trackinfo, {'http': write_http_format})[1]
+
+                trackinfo['id'] = encoded
+
+                tracks = [
+                    LavalinkTrack(id_=encoded, info=trackinfo)
+                ]
+
                 self.bot.pool.ytdl_cache[f"lavalink_ytdl:{track.ytid}"] = tracks
             except Exception as e:
                 if "sign in" in str(e).lower():

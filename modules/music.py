@@ -39,6 +39,7 @@ from utils.music.interactions import VolumeInteraction, QueueInteraction, Select
     SetStageTitle, SelectBotVoice, youtube_regex, soundcloud_regex
 from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, PartialTrack, PartialPlaylist, \
     native_sources
+from utils.music.track_encoder import encode_track
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, song_request_buttons, \
     select_bot_pool, ProgressBar, update_inter, get_source_emoji_cfg
@@ -7042,18 +7043,28 @@ class Music(commands.Cog):
                                         f"https://www.youtube.com/watch?v={ytid}", download=False)
                                 )
 
-                                tracks = [PartialTrack(
-                                    uri=info['webpage_url'],
-                                    title=info['title'],
-                                    author=info['uploader'],
-                                    thumb=f'https://img.youtube.com/vi/{info["id"]}/mqdefault.jpg',
-                                    duration=info['duration'] * 1000,
-                                    requester=user.id,
-                                    source_name="youtube",
-                                    ytid=ytid,
-                                )]
+                                trackinfo = {
+                                    'title': info['title'],
+                                    'author': info['uploader'],
+                                    'length': int(info['duration'] * 1000),
+                                    'identifier': info['id'],
+                                    'isStream': False,
+                                    'uri': info['webpage_url'],
+                                    'sourceName': 'youtube',
+                                    'position': 0,
+                                    'artworkUrl': f'https://img.youtube.com/vi/{info["id"]}/mqdefault.jpg',
+                                    'isrc': None,
+                                }
 
-                                self.bot.pool.ytdl_cache[f"ytdl:{ytid}"] = info['url']
+                                encoded = encode_track(trackinfo)[1]
+
+                                trackinfo['id'] = encoded
+
+                                tracks = [
+                                    LavalinkTrack(id_=encoded, info=trackinfo, query=query)
+                                ]
+
+                                self.bot.pool.ytdl_cache[f"ytdl:{ytid}"] = {'url':info['url'], 'duration': info['duration'] * 1000}
                             except Exception as e:
                                 bot.dispatch("custom_error", ctx=ctx, error=e)
                                 exceptions.add(repr(e))
@@ -7647,7 +7658,7 @@ def setup(bot: BotCore):
 
         bot.pool.ytdl = YoutubeDL(
             {
-                'format': 'bestaudio',
+                'format': 'bestaudio[ext=webm]',
                 'extract_flat': True,
                 'quiet': True,
                 'no_warnings': True,
