@@ -1112,6 +1112,10 @@ class LavalinkPlayer(wavelink.Player):
 
                         self.retries_403 = {"last_time": None, 'counter': 0}
 
+                        with suppress(IndexError, ValueError, KeyError):
+                            del self.bot.pool.ytdl_cache[f"lavalink_ytdl:{track.ytid}"]
+                            del self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"]
+
                         if youtube_exception:
 
                             with suppress(IndexError, ValueError, KeyError):
@@ -1121,8 +1125,6 @@ class LavalinkPlayer(wavelink.Player):
                                 self.node.partial_providers.remove("ytsearch:\"{title} - {author}\"")
                                 self.node.partial_providers.remove("ytmsearch:\"{isrc}\"")
                                 self.node.partial_providers.remove("ytmsearch:\"{title} - {author}\"")
-                                del self.bot.pool.ytdl_cache[f"lavalink_ytdl:{track.ytid}"]
-                                del self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"]
 
                             self.current = None
                             self.current_encoded = None
@@ -1180,8 +1182,6 @@ class LavalinkPlayer(wavelink.Player):
 
                     if event.cause.startswith((
                             "java.lang.IllegalStateException: Failed to get media URL: 2000: An error occurred while decoding track token",
-                            "java.lang.RuntimeException: Not success status code: 204",
-                            "java.lang.RuntimeException: Not success status code: 302",
                             "java.net.SocketTimeoutException: Connect timed out",
                             "java.net.SocketTimeoutException: Read timed out",
                             "java.net.SocketException: Network is unreachable",
