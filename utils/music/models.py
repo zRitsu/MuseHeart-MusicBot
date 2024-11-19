@@ -1083,6 +1083,7 @@ class LavalinkPlayer(wavelink.Player):
 
                         try:
                             del self.bot.pool.ytdl_cache[f"{self.guild.id}:{track.source_name}:{track.identifier}"]
+                            print(f"♻️ Removendo item do cache: {self.guild.id}:{track.source_name}:{track.identifier}")
                         except KeyError:
                             pass
 
