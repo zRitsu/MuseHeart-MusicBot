@@ -98,7 +98,7 @@ class PartialPlaylist:
 
 
 class PartialTrack:
-    __slots__ = ('id', 'source_name', 'info', 'playlist', 'unique_id', 'ytid')
+    __slots__ = ('id', 'info', 'playlist', 'unique_id', 'ytid')
 
     def __init__(self, *, uri: str = "", title: str = "", author="", thumb: str = "", duration: int = 0,
                  requester: int = 0, track_loops: int = 0, source_name: str = "", autoplay: bool = False,
