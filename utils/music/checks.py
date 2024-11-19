@@ -41,6 +41,8 @@ def can_send_message(
 
 async def check_requester_channel(ctx: CustomContext):
 
+    error_msg = "**No momento você só pode usar comandos de barra (/) nesse canal!**"
+
     guild_data = await ctx.bot.get_data(ctx.guild_id, db_name=DBModel.guilds)
 
     if guild_data['player_controller']["channel"] == str(ctx.channel.id):
@@ -50,15 +52,30 @@ async def check_requester_channel(ctx: CustomContext):
         except AttributeError:
             return True
 
-        else:
-            if isinstance(parent, disnake.ForumChannel):
+        if isinstance(parent, disnake.ForumChannel):
 
-                if ctx.channel.owner_id != ctx.bot.user.id:
+            if ctx.channel.owner_id == ctx.bot.user.id:
+
+                try:
+                    vc = ctx.author.voice.channel
+                except AttributeError:
                     raise PoolException()
-                else:
-                    return True
+                if ctx.bot.user.id not in vc.voice_states:
+                    raise PoolException()
+            else:
+                raise PoolException()
 
-        raise GenericError("**Use apenas comandos de barra (/) neste canal!**", self_delete=True, delete_original=15)
+        raise GenericError(error_msg, self_delete=True, delete_original=15)
+
+    for bot in ctx.bot.pool.get_guild_bots(ctx.guild_id):
+
+        if bot == ctx.bot:
+            continue
+
+        data = await bot.get_data(ctx.guild_id, db_name=DBModel.guilds)
+
+        if data['player_controller']["channel"] == str(ctx.channel.id):
+            raise GenericError(error_msg, self_delete=True, delete_original=15)
 
     return True
 
