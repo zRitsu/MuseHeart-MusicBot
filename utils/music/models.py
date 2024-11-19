@@ -174,6 +174,10 @@ class PartialTrack:
                 return ""
 
     @property
+    def source_name(self):
+        return self.info["sourceName"] or "unkown"
+
+    @property
     def single_title(self) -> str:
         return self.info["title"]
 
@@ -393,6 +397,10 @@ class LavalinkTrack(wavelink.Track):
     @property
     def thumb(self) -> str:
         return self.info["artworkUrl"] or ""
+
+    @property
+    def source_name(self):
+        return self.info["sourceName"] or "unkown"
 
     @property
     def name(self) -> str:
@@ -1074,7 +1082,7 @@ class LavalinkPlayer(wavelink.Player):
                     ) or event.cause == "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: This video is unavailable"):
 
                         try:
-                            del self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"]
+                            del self.bot.pool.ytdl_cache[f"{self.guild.id}:{track.source_name}:{track.identifier}"]
                         except KeyError:
                             pass
 
@@ -3179,13 +3187,13 @@ class LavalinkPlayer(wavelink.Player):
             traceback.print_exc()
             return
 
-    async def fetch_ytdl_info(self, track: Union[LavalinkTrack, PartialTrack]):
+    async def fetch_ytdl_info(self, track: LavalinkTrack):
 
-        if not (ytdl_info:=self.bot.pool.ytdl_cache.get(f"ytdl:{track.ytid}")):
+        if not (ytdl_info:=self.bot.pool.ytdl_cache.get(f"{self.guild.id}:{track.source_name}:{track.identifier}")):
             info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(
                 track.uri.split("&")[0], download=False))
             ytdl_info = {'url': info['url'], 'duration': int(info['duration'] * 1000)}
-            self.bot.pool.ytdl_cache[f"ytdl:{track.ytid}"] = ytdl_info
+            self.bot.pool.ytdl_cache[f"{self.guild.id}:{track.source_name}:{track.identifier}"] = ytdl_info
 
         def write_http_format(writer: DataWriter, *args):
             writer.write_utf('matroska/webm')

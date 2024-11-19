@@ -7047,7 +7047,7 @@ class Music(commands.Cog):
                                     LavalinkTrack(id_=encode_track(trackinfo)[1], info=trackinfo, query=query, requester=user.id)
                                 ]
 
-                                self.bot.pool.ytdl_cache[f"ytdl:{ytid}"] = {'url':info['url'], 'duration': info['duration'] * 1000}
+                                self.bot.pool.ytdl_cache[f"{ctx.guild_id}:{trackinfo['sourceName']}:{info['id']}"] = {'url':info['url'], 'duration': info['duration'] * 1000}
                             except Exception as e:
                                 bot.dispatch("custom_error", ctx=ctx, error=e)
                                 exceptions.add(repr(e))
