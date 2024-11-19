@@ -1286,6 +1286,9 @@ class LavalinkPlayer(wavelink.Player):
 
     async def channel_cleanup(self):
 
+        if not self.text_channel:
+            return
+
         try:
             parent = self.text_channel.parent
         except AttributeError:
@@ -1301,32 +1304,24 @@ class LavalinkPlayer(wavelink.Player):
                 self.channel_purged = True
                 return
 
-        try:
-            self.last_message_id = int(self.last_message_id)
-        except TypeError:
-            self.channel_purged = True
-            return
-
-        if self.last_message_id != self.text_channel.last_message_id:
-
-            def check_current_message(m: disnake.Message):
-                try:
-                    return m.id == self.message.id
-                except AttributeError:
-                    return True
-
-            if isinstance(self.text_channel, disnake.Thread):
-                check = (lambda m: m.id != self.last_message_id and not not m.pinned and check_current_message(m) and (
-                            not m.is_system() or m.type != disnake.MessageType.channel_name_change))
-            else:
-                check = (lambda m: m.id != self.last_message_id and not m.pinned and check_current_message(m))
-
+        def check_current_message(m: disnake.Message):
             try:
-                await self.text_channel.purge(check=check)
-            except:
-                print(f"Falha ao limpar mensagens do canal {self.text_channel} [ID: {self.text_channel.id}]:\n"
-                      f"{traceback.format_exc()}")
-                pass
+                return m.id != self.message.id
+            except AttributeError:
+                return True
+
+        if isinstance(self.text_channel, disnake.Thread):
+            check = (lambda m: m.id != self.last_message_id and not not m.pinned and check_current_message(m) and (
+                        not m.is_system() or m.type != disnake.MessageType.channel_name_change))
+        else:
+            check = (lambda m: m.id != self.last_message_id and not m.pinned and  check_current_message(m))
+
+        try:
+            await self.text_channel.purge(check=check)
+        except Exception:
+            print(f"Falha ao limpar mensagens do canal {self.text_channel} [ID: {self.text_channel.id}]:\n"
+                  f"{traceback.format_exc()}")
+            pass
 
         self.channel_purged = True
 
