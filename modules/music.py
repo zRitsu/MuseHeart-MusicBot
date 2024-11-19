@@ -7043,12 +7043,8 @@ class Music(commands.Cog):
                                     'isrc': None,
                                 }
 
-                                encoded = encode_track(trackinfo)[1]
-
-                                trackinfo['id'] = encoded
-
                                 tracks = [
-                                    LavalinkTrack(id_=encoded, info=trackinfo, query=query)
+                                    LavalinkTrack(id_=encode_track(trackinfo)[1], info=trackinfo, query=query, requester=user.id)
                                 ]
 
                                 self.bot.pool.ytdl_cache[f"ytdl:{ytid}"] = {'url':info['url'], 'duration': info['duration'] * 1000}

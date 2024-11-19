@@ -293,8 +293,9 @@ class LavalinkPlaylist:
                     self.url = f"https://www.youtube.com/playlist?list={parse.parse_qs(parse.urlparse(self.url).query)['list'][0]}"
                 except KeyError:
                     pass
-        except IndexError:
+        except (IndexError, KeyError):
             pass
+
         pluginInfo = kwargs.pop("pluginInfo", {})
         thumb = None
         try:
@@ -304,7 +305,7 @@ class LavalinkPlaylist:
         except KeyError:
             playlist = self
         self.tracks = [LavalinkTrack(
-            id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo") or pluginInfo, thumb=thumb, playlist=playlist, **kwargs) for track in data['tracks']]
+            id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo") or pluginInfo, thumb=thumb, playlist=playlist, **kwargs) for track in data.get('tracks', [])]
 
     @property
     def uri(self):
@@ -896,7 +897,7 @@ class LavalinkPlayer(wavelink.Player):
                 event = await self.event_queue.get()
 
                 if self.is_closing:
-                    continue
+                    return
 
                 await self.bot.wait_until_ready()
 
@@ -3660,10 +3661,17 @@ class LavalinkPlayer(wavelink.Player):
 
     async def process_destroy(self, force: bool = False, inter: disnake.MessageInteraction = None):
 
+        if self.is_closing:
+            return
+
+        self.is_closing = True
+
         try:
             self.track_load_task.cancel()
         except:
             pass
+
+        await self.event_queue.put(None)
 
         try:
             self.event_queue_task.cancel()
@@ -3674,11 +3682,6 @@ class LavalinkPlayer(wavelink.Player):
             self.lyric_task.cancel()
         except:
             pass
-
-        if self.is_closing:
-            return
-
-        self.is_closing = True
 
         await self.cleanup(inter)
 

@@ -18,7 +18,8 @@ from rapidfuzz import fuzz
 
 from utils.music.converters import fix_characters, URL_REG
 from utils.music.errors import GenericError
-from utils.music.models import PartialPlaylist, PartialTrack
+from utils.music.models import LavalinkTrack, LavalinkPlaylist
+from utils.music.track_encoder import encode_track
 
 if TYPE_CHECKING:
     from utils.client import BotCore
@@ -221,16 +222,25 @@ class SpotifyClient:
                 pass
             else:
                 for result in tracks_result:
-                    t = PartialTrack(
-                        uri=result["external_urls"]["spotify"],
-                        author=result["artists"][0]["name"] or "Unknown Artist",
-                        title=result["name"],
-                        thumb=result["album"]["images"][0]["url"],
-                        duration=result["duration_ms"],
-                        source_name="spotify",
-                        identifier=result["id"],
-                        requester=requester
-                    )
+
+                    trackinfo = {
+                        'title': result["name"],
+                        'author': result["artists"][0]["name"] or "Unknown Artist",
+                        'length': result["duration_ms"],
+                        'identifier': result["id"],
+                        'isStream': False,
+                        'uri': result["external_urls"]["spotify"],
+                        'sourceName': 'spotify',
+                        'position': 0,
+                        'artworkUrl': result["album"]["images"][0]["url"],
+                    }
+
+                    try:
+                        trackinfo["isrc"] = result["external_ids"]["isrc"]
+                    except KeyError:
+                        pass
+
+                    t = LavalinkTrack(id_=encode_track(trackinfo)[1], info=trackinfo, requester=requester)
 
                     t.info["extra"]["authors"] = [fix_characters(i['name']) for i in result['artists'] if f"feat. {i['name'].lower()}"
                                                   not in result['name'].lower()]
@@ -273,21 +283,24 @@ class SpotifyClient:
 
             result = await self.get_track_info(url_id)
 
-            t = PartialTrack(
-                uri=result["external_urls"]["spotify"],
-                author=result["artists"][0]["name"] or "Unknown Artist",
-                title=result["name"],
-                thumb=result["album"]["images"][0]["url"],
-                duration=result["duration_ms"],
-                source_name="spotify",
-                identifier=result["id"],
-                requester=requester
-            )
+            trackinfo = {
+                'title': result["name"],
+                'author': result["artists"][0]["name"] or "Unknown Artist",
+                'length': result["duration_ms"],
+                'identifier': result["id"],
+                'isStream': False,
+                'uri': result["external_urls"]["spotify"],
+                'sourceName': 'spotify',
+                'position': 0,
+                'artworkUrl': result["album"]["images"][0]["url"],
+            }
 
             try:
-                t.info["isrc"] = result["external_ids"]["isrc"]
+                trackinfo["isrc"] = result["external_ids"]["isrc"]
             except KeyError:
                 pass
+
+            t = LavalinkTrack(id_=encode_track(trackinfo)[1], info=trackinfo, requester=requester)
 
             t.info["extra"]["authors"] = [fix_characters(i['name']) for i in result['artists'] if f"feat. {i['name'].lower()}"
                                           not in result['name'].lower()]
@@ -334,21 +347,24 @@ class SpotifyClient:
 
                 track = result["tracks"][0]
 
-                t = PartialTrack(
-                    uri=track["external_urls"]["spotify"],
-                    author=track["artists"][0]["name"] or "Unknown Artist",
-                    title=track["name"],
-                    thumb=thumb,
-                    duration=track["duration_ms"],
-                    source_name="spotify",
-                    identifier=track["id"],
-                    requester=requester
-                )
+                trackinfo = {
+                    'title': track["name"],
+                    'author': track["artists"][0]["name"] or "Unknown Artist",
+                    'length': track["duration_ms"],
+                    'identifier': track["id"],
+                    'isStream': False,
+                    'uri': track["external_urls"]["spotify"],
+                    'sourceName': 'spotify',
+                    'position': 0,
+                    'artworkUrl': track["album"]["images"][0]["url"],
+                }
 
                 try:
-                    t.info["isrc"] = track["external_ids"]["isrc"]
+                    trackinfo["isrc"] = track["external_ids"]["isrc"]
                 except KeyError:
                     pass
+
+                t = LavalinkTrack(id_=encode_track(trackinfo)[1], info=trackinfo, requester=requester)
 
                 t.info["extra"]["authors"] = [fix_characters(i['name']) for i in track['artists'] if
                                               f"feat. {i['name'].lower()}"
@@ -416,7 +432,7 @@ class SpotifyClient:
         data["playlistInfo"]["selectedTrack"] = -1
         data["playlistInfo"]["type"] = url_type
 
-        playlist = PartialPlaylist(data, url=query)
+        playlist = LavalinkPlaylist(data, url=query)
 
         playlist_info = playlist if url_type != "album" else None
 
@@ -430,22 +446,24 @@ class SpotifyClient:
             except (IndexError, KeyError):
                 thumb = ""
 
-            track = PartialTrack(
-                uri=t["external_urls"].get("spotify", f"https://www.youtube.com/results?search_query={quote(t['name'])}"),
-                author=t["artists"][0]["name"] or "Unknown Artist",
-                title=t["name"],
-                thumb=thumb,
-                duration=t["duration_ms"],
-                source_name="spotify",
-                identifier=t["id"],
-                playlist=playlist_info,
-                requester=requester
-            )
+            trackinfo = {
+                'title': t["name"],
+                'author': t["artists"][0]["name"] or "Unknown Artist",
+                'length': t["duration_ms"],
+                'identifier': t["id"],
+                'isStream': False,
+                'uri': t["external_urls"].get("spotify", f"https://www.youtube.com/results?search_query={quote(t['name'])}"),
+                'sourceName': 'spotify',
+                'position': 0,
+                'artworkUrl': thumb,
+            }
 
             try:
-                track.info["isrc"] = t["external_ids"]["isrc"]
+                trackinfo["isrc"] = t["external_ids"]["isrc"]
             except KeyError:
                 pass
+
+            track = LavalinkTrack(id_=encode_track(trackinfo)[1], info=trackinfo, requester=requester, playlist=playlist_info)
 
             try:
                 if t["album"]["name"] != t["name"] or t["album"]["total_tracks"] > 1:
