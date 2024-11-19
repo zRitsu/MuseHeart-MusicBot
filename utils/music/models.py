@@ -2291,6 +2291,7 @@ class LavalinkPlayer(wavelink.Player):
                 except Exception:
                     print(traceback.format_exc())
             await asyncio.sleep(10)
+            self.locked = False
             await self.process_next()
 
     async def process_idle_message(self):
