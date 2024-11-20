@@ -3215,6 +3215,7 @@ class LavalinkPlayer(wavelink.Player):
                 while retries > 0:
                     try:
                         lavalink_track = await self.node.get_tracks(ytdl_info['url'])
+
                         break
                     except Exception as e:
                         exception = e
@@ -3228,7 +3229,14 @@ class LavalinkPlayer(wavelink.Player):
                 if exception:
                     raise exception
 
-            return [lavalink_track]
+                try:
+                    lavalink_track = lavalink_track.tracks
+                except:
+                    pass
+
+                self.bot.pool.ytdl_cache[f"lavalink.ytdl:{self.guild.id}:{track.source_name}:{track.identifier}"] = lavalink_track
+
+            return lavalink_track
 
         else:
             if not (ytdl_info:=self.bot.pool.ytdl_cache.get(f"ytdl:{self.guild.id}:{track.source_name}:{track.identifier}")):
