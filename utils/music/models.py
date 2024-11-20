@@ -1140,7 +1140,6 @@ class LavalinkPlayer(wavelink.Player):
                             self.current = None
                             self.current_encoded = None
                             self.queue.appendleft(track)
-                            self.locked = False
 
                             if track.info["sourceName"] == "youtube":
 
@@ -1166,6 +1165,7 @@ class LavalinkPlayer(wavelink.Player):
                                                 traceback.print_exc()
                                         await asyncio.sleep(5)
                                         await self.change_node(new_node.identifier)
+                                        self.locked = False
                                         await self.process_next(start_position=self.position)
                                         await send_report()
                                         continue
@@ -1183,6 +1183,7 @@ class LavalinkPlayer(wavelink.Player):
                                     except:
                                         self.set_command_log(text=txt, emoji="⚠️", controller=True)
                                 await asyncio.sleep(5)
+                            self.locked = False
                             await self.process_next(start_position=self.position)
                             await send_report()
                             continue
