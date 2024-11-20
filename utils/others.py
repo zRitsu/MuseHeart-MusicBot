@@ -504,8 +504,7 @@ async def send_idle_embed(
 def string_to_file(txt, filename="result.txt"):
     if isinstance(txt, dict):
         txt = json.dumps(txt, indent=4, ensure_ascii=False)
-    txt = BytesIO(bytes(str(txt), 'utf-8'))
-    return disnake.File(fp=txt, filename=filename or "result.txt")
+    return disnake.File(fp=BytesIO(txt.encode('utf-8')), filename=filename or "result.txt")
 
 
 async def fav_list(inter, query: str):
