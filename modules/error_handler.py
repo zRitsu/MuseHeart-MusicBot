@@ -449,9 +449,13 @@ class ErrorHandler(commands.Cog):
 
         else:
             embed.colour = self.bot.get_color()
+            try:
+                guild_id = ctx.guild_id
+            except AttributeError:
+                guild_id = ctx.guild.id
             embed.add_field(
                 name="Servidor [ID]:", inline=False,
-                value=f"```\n{ctx.guild_id}```"
+                value=f"```\n{guild_id}```"
             )
 
         embed.set_footer(
@@ -470,8 +474,16 @@ class ErrorHandler(commands.Cog):
 
         except AttributeError:
             if self.bot.intents.message_content and not ctx.author.bot:
-                embed.description = f"**Commando:**```\n" \
-                                    f"{ctx.message.content}" \
+
+                try:
+                    message = ctx.message
+                    type_ ="Comando"
+                except AttributeError:
+                    message = ctx
+                    type_ = "Mensagem"
+
+                embed.description = f"**{type_}:**```\n" \
+                                    f"{message.content}" \
                                     f"```"
 
         return embed
