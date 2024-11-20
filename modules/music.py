@@ -7047,7 +7047,12 @@ class Music(commands.Cog):
                                     LavalinkTrack(id_=encode_track(trackinfo)[1], info=trackinfo, query=query, requester=user.id)
                                 ]
 
-                                self.bot.pool.ytdl_cache[f"{ctx.guild_id}:{trackinfo['sourceName']}:{info['id']}"] = {
+                                try:
+                                    guild_id = ctx.guild.id
+                                except AttributeError:
+                                    guild_id = ctx.guild_id
+
+                                self.bot.pool.ytdl_cache[f"{guild_id}:{trackinfo['sourceName']}:{info['id']}"] = {
                                     'url': info['url'],
                                     'format': 'mp4' if 'm4a' in info.get('container', '') else 'matroska/webm',
                                     'duration': int(info['duration'] * 1000)
