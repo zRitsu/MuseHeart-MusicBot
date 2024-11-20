@@ -202,6 +202,7 @@ class Node:
                         else:
                             self.version = 3
                             self.info["sourceManagers"] = ["youtube", "soundcloud", "http"]
+                            return
                         break
                 except Exception as e:
                     if retries >= max_retries:
