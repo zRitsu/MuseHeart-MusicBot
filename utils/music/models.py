@@ -1082,8 +1082,12 @@ class LavalinkPlayer(wavelink.Player):
                     ) or event.cause == "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: This video is unavailable"):
 
                         try:
-                            del self.bot.pool.ytdl_cache[f"{self.guild.id}:{track.source_name}:{track.identifier}"]
-                            print(f"♻️ Removendo item do cache: {self.guild.id}:{track.source_name}:{track.identifier}")
+                            del self.bot.pool.ytdl_cache[f"ytdl:{self.guild.id}:{track.source_name}:{track.identifier}"]
+                        except KeyError:
+                            pass
+
+                        try:
+                            del self.bot.pool.ytdl_cache[f"lavalink.ytdl:{self.guild.id}:{track.source_name}:{track.identifier}"]
                         except KeyError:
                             pass
 
@@ -3191,39 +3195,75 @@ class LavalinkPlayer(wavelink.Player):
 
     async def fetch_ytdl_info(self, track: LavalinkTrack):
 
-        if not (ytdl_info:=self.bot.pool.ytdl_cache.get(f"{self.guild.id}:{track.source_name}:{track.identifier}")):
-            info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(
-                track.uri.split("&")[0], download=False))
+        if self.bot.config.get("FETCH_LAVALINK_YTDL_INFO") == "true":
 
-            container = info.get('container', '')
+            if not (lavalink_track:=self.bot.pool.ytdl_cache.get(
+                    f"lavalink.ytdl:{self.guild.id}:{track.source_name}:{track.identifier}")
+                ):
 
-            ytdl_info = {
-                'url': info['url'],
-                'format': 'mp4' if 'm4a' in container else 'matroska/webm',
-                'duration': int(info['duration'] * 1000)
+                if not (ytdl_info := self.bot.pool.ytdl_cache.get(
+                        f"ytdl:{self.guild.id}:{track.source_name}:{track.identifier}")):
+                    info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(
+                        track.uri.split("&")[0], download=False))
+
+                    ytdl_info = {"url": info['url']}
+
+                retries = 3
+
+                exception = None
+
+                while retries > 0:
+                    try:
+                        lavalink_track = await self.node.get_tracks(ytdl_info['url'])
+                        break
+                    except Exception as e:
+                        exception = e
+                        retries -= 1
+
+                try:
+                    del self.bot.pool.ytdl_cache[f"ytdl:{self.guild.id}:{track.source_name}:{track.identifier}"]
+                except KeyError:
+                    pass
+
+                if exception:
+                    raise exception
+
+            return [lavalink_track]
+
+        else:
+            if not (ytdl_info:=self.bot.pool.ytdl_cache.get(f"ytdl:{self.guild.id}:{track.source_name}:{track.identifier}")):
+                info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(
+                    track.uri.split("&")[0], download=False))
+
+                container = info.get('container', '')
+
+                ytdl_info = {
+                    'url': info['url'],
+                    'format': 'mp4' if 'm4a' in container else 'matroska/webm',
+                    'duration': int(info['duration'] * 1000)
+                }
+
+                self.bot.pool.ytdl_cache[f"ytdl:{self.guild.id}:{track.source_name}:{track.identifier}"] = ytdl_info
+
+            def write_http_format(writer: DataWriter, *args):
+                writer.write_utf(ytdl_info.get("format", "matroska/webm"))
+
+            trackinfo = {
+                'title': 'Unknown title',
+                'author': 'Unknown artist',
+                'length': ytdl_info['duration'],
+                'identifier': ytdl_info['url'],
+                'isStream': False,
+                'uri': ytdl_info['url'],
+                'sourceName': 'http',
+                'position': 0,
+                'artworkUrl': None,
+                'isrc': None,
             }
 
-            self.bot.pool.ytdl_cache[f"{self.guild.id}:{track.source_name}:{track.identifier}"] = ytdl_info
+            encoded = encode_track(trackinfo, {'http': write_http_format})[1]
 
-        def write_http_format(writer: DataWriter, *args):
-            writer.write_utf(ytdl_info.get("format", "matroska/webm"))
-
-        trackinfo = {
-            'title': 'Unknown title',
-            'author': 'Unknown artist',
-            'length': ytdl_info['duration'],
-            'identifier': ytdl_info['url'],
-            'isStream': False,
-            'uri': ytdl_info['url'],
-            'sourceName': 'http',
-            'position': 0,
-            'artworkUrl': None,
-            'isrc': None,
-        }
-
-        encoded = encode_track(trackinfo, {'http': write_http_format})[1]
-
-        trackinfo['id'] = encoded
+            trackinfo['id'] = encoded
 
         return [LavalinkTrack(id_=encoded, info=trackinfo)]
 
