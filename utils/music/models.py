@@ -1462,15 +1462,16 @@ class LavalinkPlayer(wavelink.Player):
                 self.auto_skip_track_task.cancel()
             except:
                 pass
+
             self.auto_skip_track_task = None
+
+            self.auto_pause = False
 
             if self.current and self.auto_pause:
 
-                self.auto_pause = False
-
                 try:
                     self.set_command_log(emoji="🔋", text="O modo **[economia de recursos]** foi desativado.", controller=True)
-                    if self.current.info["sourceName"] == "youube" and (not self.native_yt or not self.node.prefer_youtube_native_playback) and self.bot.pool.ytdl.params.get("cookiefile"):
+                    if self.current.info["sourceName"] == "youtube" and (not self.native_yt or not self.node.prefer_youtube_native_playback) and self.bot.pool.ytdl.params.get("cookiefile"):
                         if self.current:
                             self.queue.insert(0, self.current)
                         await self.process_next(start_position=self.position)
@@ -1492,8 +1493,6 @@ class LavalinkPlayer(wavelink.Player):
                             await self.process_next()
                 except Exception:
                     traceback.print_exc()
-            else:
-                self.auto_pause = False
             return
 
         if not force:
@@ -2256,6 +2255,7 @@ class LavalinkPlayer(wavelink.Player):
             if self.auto_pause:
                 self.last_update = time() * 1000
                 self.current = track
+                self.current_encoded = None
                 self.start_auto_skip()
                 self.bot.loop.create_task(self.node.on_event(TrackStart({"track": track, "player": self,"node": self.node})))
                 self.set_command_log(
