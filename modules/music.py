@@ -7648,40 +7648,48 @@ def setup(bot: BotCore):
 
     if bot.config["USE_YTDL"] and not hasattr(bot.pool, 'ytdl'):
 
-        bot.pool.ytdl = YoutubeDL(
-            {
-                'format': 'bestaudio/best',
-                'extract_flat': True,
-                'quiet': True,
-                'no_warnings': True,
-                'lazy_playlist': True,
-                'simulate': True,
-                'cookiefile': "./.ytdl_cookie" if os.path.isfile('./.ytdl_cookie') else None,
-                'cachedir': "./.ytdl_cache",
-                'allowed_extractors': [
-                    r'.*youtube.*',
-                    r'.*soundcloud.*',
-                ],
-                'extractor_args': {
-                    'youtube': {
-                        'skip': [
-                            'hls',
-                            'dash',
-                            'translated_subs'
-                        ],
-                        'player_skip': [
-                            'js',
-                            'configs',
-                            'webpage'
-                        ],
-                        #'player_client': ['android_creator'],
-                        'max_comments': [0],
-                    },
-                    'youtubetab': {
-                        "skip": ["webpage", "authcheck"]
+        class YTDl:
+
+            def __init__(self, bot: BotCore):
+                self.bot = bot
+                self.params = {
+                    'format': 'bestaudio/best',
+                    'extract_flat': True,
+                    'quiet': True,
+                    'no_warnings': True,
+                    'lazy_playlist': True,
+                    'simulate': True,
+                    'download': False,
+                    'cookiefile': "./.ytdl_cookie" if os.path.isfile('./.ytdl_cookie') else None,
+                    'cachedir': False,
+                    'allowed_extractors': [
+                        r'.*youtube.*',
+                        r'.*soundcloud.*',
+                    ],
+                    'extractor_args': {
+                        'youtube': {
+                            'skip': [
+                                'hls',
+                                'dash',
+                                'translated_subs'
+                            ],
+                            'player_skip': [
+                                'js',
+                                'configs',
+                                'webpage'
+                            ],
+                            #'player_client': ['android_creator'],
+                            'max_comments': [0],
+                        },
+                        'youtubetab': {
+                            "skip": ["webpage", "authcheck"]
+                        }
                     }
                 }
-            }
-        )
+
+            def extract_info(self, url: str, download=False, *args, **kwargs):
+                return YoutubeDL(self.params).extract_info(url=url, download=download)
+
+        bot.pool.ytdl = YTDl(bot)
 
     bot.add_cog(Music(bot))
