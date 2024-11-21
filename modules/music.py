@@ -1820,10 +1820,14 @@ class Music(commands.Cog):
 
             if tracks.tracks[0].info["sourceName"] == "youtube":
 
-                if not await bot.is_owner(inter.author):
+                try:
+                    q = f"https://www.youtube.com/playlist?list={query.split('&list=')[1]}"
+                except:
+                    q = query
 
+                if not await bot.is_owner(inter.author):
                     try:
-                        async with bot.session.get((oembed_url:=f"https://www.youtube.com/oembed?url={query}")) as r:
+                        async with bot.session.get((oembed_url:=f"https://www.youtube.com/oembed?url={q}")) as r:
                             try:
                                 playlist_data = await r.json()
                             except:
@@ -1831,7 +1835,7 @@ class Music(commands.Cog):
                             else:
                                 tracks.data["playlistInfo"]["thumb"] = playlist_data["thumbnail_url"]
                     except Exception as e:
-                        print(f"Falha ao obter artwork da playlist: {oembed_url} | {repr(e)}")
+                        print(f"Falha ao obter artwork da playlist (oembed): {oembed_url} | {repr(e)}")
 
                 else:
 
@@ -1855,7 +1859,7 @@ class Music(commands.Cog):
                                 }
                             }
                         ) as ydl:
-                            playlist_data = await bot.loop.run_in_executor(None, lambda: ydl.extract_info(query, download=False))
+                            playlist_data = await bot.loop.run_in_executor(None, lambda: ydl.extract_info(q, download=False))
 
                         async with aiohttp.ClientSession() as session:
                             async with session.get(playlist_data["thumbnails"][0]['url']) as response:
@@ -1866,7 +1870,7 @@ class Music(commands.Cog):
 
                         tracks.data["playlistInfo"]["thumb"] = playlist_data["thumbnails"][0]['url']
                     except Exception as e:
-                        print(f"Falha ao obter artwork da playlist: {query} | {repr(e)}")
+                        print(f"Falha ao obter artwork da playlist: {q} | {repr(e)}")
 
             loadtype = "playlist"
 

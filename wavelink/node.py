@@ -26,6 +26,7 @@ import inspect
 import json
 import logging
 import os
+import pprint
 import re
 import traceback
 from typing import Any, Callable, Dict, Optional, Union, List
@@ -40,6 +41,7 @@ from .websocket import WebSocket
 __log__ = logging.getLogger(__name__)
 
 yt_playlist_regex = re.compile(r"[?&]list=([^&]+)")
+yt_video_regex = re.compile(r"(?:v=|/)([0-9A-Za-z_-]{11})(?:[&?]|$)")
 spotify_regex = re.compile("https://open.spotify.com?.+(album|playlist|artist)/([a-zA-Z0-9]+)")
 deezer_regex = re.compile(r"(https?://)?(www\.)?deezer\.com/(?P<countrycode>[a-zA-Z]{2}/)?(?P<type>album|playlist|artist|profile)/(?P<identifier>[0-9]+)")
 soundcloud_regex = re.compile(r"https://soundcloud\.com/([^/]+)/sets/([^/]+)")
@@ -335,8 +337,14 @@ class Node:
         """
         backoff = ExponentialBackoff(base=1)
 
+        yt_id = None
+
         if yt_id:=(yt_playlist_regex.search(query)):
             cache_key = f"youtube:{yt_id.group(1)}"
+            try:
+                ytid = yt_video_regex.search(query).group(1)
+            except:
+                pass
 
         elif sp_match:=spotify_regex.match(query):
             url_type, url_id = sp_match.groups()
@@ -437,6 +445,18 @@ class Node:
                 pass
 
             playlist_cls = kwargs.pop('playlist_cls', TrackPlaylist)
+
+            if yt_id:
+
+                index = 0
+
+                for n, t in enumerate(new_data['tracks']):
+                    if t['info']['identifier'] == yt_id:
+                        index = n
+
+                if index > 0:
+                    new_data['tracks'] = new_data['tracks'][index:] + new_data['tracks'][:index]
+
             if query.startswith("https://music.youtube.com/"):
                 query = query.replace("https://www.youtube.com/", "https://music.youtube.com/")
 
