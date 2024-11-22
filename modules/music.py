@@ -7034,6 +7034,9 @@ class Music(commands.Cog):
                                         f"https://www.youtube.com/watch?v={ytid}", download=False)
                                 )
 
+                                if not info.get('duration'):
+                                    raise GenericError("**No momento não há suporte a streams de vídeos do youtube...**")
+
                                 trackinfo = {
                                     'title': info['title'],
                                     'author': info['uploader'],
