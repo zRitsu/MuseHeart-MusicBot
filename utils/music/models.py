@@ -1465,9 +1465,9 @@ class LavalinkPlayer(wavelink.Player):
 
             self.auto_skip_track_task = None
 
-            self.auto_pause = False
-
             if self.current and self.auto_pause:
+
+                self.auto_pause = False
 
                 try:
                     self.set_command_log(emoji="🔋", text="O modo **[economia de recursos]** foi desativado.", controller=True)
@@ -1493,6 +1493,8 @@ class LavalinkPlayer(wavelink.Player):
                             await self.process_next()
                 except Exception:
                     traceback.print_exc()
+            else:
+                self.auto_pause = False
             return
 
         if not force:
