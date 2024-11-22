@@ -7659,15 +7659,19 @@ def setup(bot: BotCore):
 
             def __init__(self, bot: BotCore):
                 self.bot = bot
-                self.params = {
-                    'format': 'bestaudio/best',
+                self.params = {'cookiefile': "./.ytdl_cookie" if os.path.isfile('./.ytdl_cookie') else None}
+
+            def extract_info(self, url: str, download=False, *args, **kwargs):
+
+                with YoutubeDL({
+                    'format': 'webm[abr>0]/bestaudio/best',
                     'extract_flat': True,
                     'quiet': True,
                     'no_warnings': True,
                     'lazy_playlist': True,
                     'simulate': True,
                     'download': False,
-                    'cookiefile': "./.ytdl_cookie" if os.path.isfile('./.ytdl_cookie') else None,
+                    'cookiefile': self.params["cookiefile"],
                     'cachedir': False,
                     'allowed_extractors': [
                         r'.*youtube.*',
@@ -7692,10 +7696,10 @@ def setup(bot: BotCore):
                             "skip": ["webpage", "authcheck"]
                         }
                     }
-                }
-
-            def extract_info(self, url: str, download=False, *args, **kwargs):
-                return YoutubeDL(self.params).extract_info(url=url, download=download)
+                }) as ytdl:
+                    info = ytdl.sanitize_info(ytdl.extract_info(url, download=download))
+                    ytdl.params["cookiefile"] = None
+                    return info
 
         bot.pool.ytdl = YTDl(bot)
 
