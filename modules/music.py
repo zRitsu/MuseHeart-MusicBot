@@ -7655,15 +7655,16 @@ def setup(bot: BotCore):
 
     if bot.config["USE_YTDL"] and not hasattr(bot.pool, 'ytdl'):
 
+        class CustomYTDL(YoutubeDL):
+
+            def save_cookies(self):
+                pass
+
         class YTDl:
 
             def __init__(self, bot: BotCore):
                 self.bot = bot
-                self.params = {'cookiefile': "./.ytdl_cookie" if os.path.isfile('./.ytdl_cookie') else None}
-
-            def extract_info(self, url: str, download=False, *args, **kwargs):
-
-                with YoutubeDL({
+                self.params = {
                     'format': 'webm[abr>0]/bestaudio/best',
                     'extract_flat': True,
                     'quiet': True,
@@ -7671,7 +7672,7 @@ def setup(bot: BotCore):
                     'lazy_playlist': True,
                     'simulate': True,
                     'download': False,
-                    'cookiefile': self.params["cookiefile"],
+                    'cookiefile': "./.ytdl_cookie" if os.path.isfile('./.ytdl_cookie') else None,
                     'cachedir': False,
                     'allowed_extractors': [
                         r'.*youtube.*',
@@ -7696,10 +7697,12 @@ def setup(bot: BotCore):
                             "skip": ["webpage", "authcheck"]
                         }
                     }
-                }) as ytdl:
-                    info = ytdl.sanitize_info(ytdl.extract_info(url, download=download))
-                    ytdl.params["cookiefile"] = None
-                    return info
+                }
+
+            def extract_info(self, url: str, download=False, *args, **kwargs):
+
+                with CustomYTDL(self.params) as ytdl:
+                    return ytdl.sanitize_info(ytdl.extract_info(url, download=download))
 
         bot.pool.ytdl = YTDl(bot)
 
