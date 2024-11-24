@@ -7023,53 +7023,7 @@ class Music(commands.Cog):
                 elif query.startswith(("https://youtu.be/", "https://www.youtube.com/")):
 
                     if "&list=" not in query and self.bot.pool.ytdl.params.get("cookiefile"):
-                        try:
-                            ytid = re.search(r"(?:v=|/)([0-9A-Za-z_-]{11})(?:[&?]|$)", query).group(1)
-                        except:
-                            pass
-                        else:
-                            is_yt_source = True
-                            try:
-                                info = await self.bot.loop.run_in_executor(
-                                    None, lambda: self.bot.pool.ytdl.extract_info(
-                                        f"https://www.youtube.com/watch?v={ytid}", download=False)
-                                )
-
-                                if not info.get('duration'):
-                                    raise GenericError("**No momento não há suporte a streams de vídeos do youtube...**")
-
-                                trackinfo = {
-                                    'title': info['title'],
-                                    'author': info['uploader'],
-                                    'length': int(info['duration'] * 1000),
-                                    'identifier': info['id'],
-                                    'isStream': False,
-                                    'uri': info['webpage_url'],
-                                    'sourceName': 'youtube',
-                                    'position': 0,
-                                    'artworkUrl': f'https://img.youtube.com/vi/{info["id"]}/mqdefault.jpg',
-                                    'isrc': None,
-                                }
-
-                                tracks = [
-                                    LavalinkTrack(id_=encode_track(trackinfo)[1], info=trackinfo, query=query, requester=user.id)
-                                ]
-
-                                try:
-                                    guild_id = ctx.guild.id
-                                except AttributeError:
-                                    guild_id = ctx.guild_id
-
-                                self.bot.pool.ytdl_cache[f"{guild_id}:{trackinfo['sourceName']}:{info['id']}"] = {
-                                    'url': info['url'],
-                                    'format': 'mp4' if 'm4a' in info.get('container', '') else 'matroska/webm',
-                                    'duration': int(info['duration'] * 1000)
-                                }
-                            except Exception as e:
-                                bot.dispatch("custom_error", ctx=ctx, error=e)
-                                exceptions.add(repr(e))
-
-                            return tracks, node, exceptions, is_yt_source
+                        is_yt_source = True
 
                     for p in ("&ab_channel=", "&start_radio="):
                         if p in query:
@@ -7237,14 +7191,61 @@ class Music(commands.Cog):
             if not URL_REG.match(query):
                 query_yt = f"ytsearch10:{query}"
 
-            elif pl_yt_id := (yt_playlist_regex.search(query)):
-                pl_yt_id = pl_yt_id.group(1)
-                cache_key = f"youtube:{pl_yt_id}"
-                query_yt = f"https://www.youtube.com/playlist?list={pl_yt_id}"
-                try:
-                    yt_id = yt_video_regex.search(query).group(1)
-                except:
-                    pass
+            else:
+                if pl_yt_id := (yt_playlist_regex.search(query)):
+                    pl_yt_id = pl_yt_id.group(1)
+                    cache_key = f"youtube:{pl_yt_id}"
+                    query_yt = f"https://www.youtube.com/playlist?list={pl_yt_id}"
+                    try:
+                        yt_id = yt_video_regex.search(query).group(1)
+                    except:
+                        pass
+
+                elif yt_id:=yt_video_regex.search(query) and self.bot.pool.ytdl.params.get("cookiefile"):
+
+                    yt_id = yt_id.group(1)
+                    try:
+                        info = await self.bot.loop.run_in_executor(
+                            None, lambda: self.bot.pool.ytdl.extract_info(
+                                f"https://www.youtube.com/watch?v={yt_id}", download=False)
+                        )
+
+                        if not info.get('duration'):
+                            raise GenericError("**No momento não há suporte a streams de vídeos do youtube...**")
+
+                        trackinfo = {
+                            'title': info['title'],
+                            'author': info['uploader'],
+                            'length': int(info['duration'] * 1000),
+                            'identifier': info['id'],
+                            'isStream': False,
+                            'uri': info['webpage_url'],
+                            'sourceName': 'youtube',
+                            'position': 0,
+                            'artworkUrl': f'https://img.youtube.com/vi/{info["id"]}/mqdefault.jpg',
+                            'isrc': None,
+                        }
+
+                        tracks = [
+                            LavalinkTrack(id_=encode_track(trackinfo)[1], info=trackinfo, query=query,
+                                          requester=user.id)
+                        ]
+
+                        try:
+                            guild_id = ctx.guild.id
+                        except AttributeError:
+                            guild_id = ctx.guild_id
+
+                        self.bot.pool.ytdl_cache[f"{guild_id}:{trackinfo['sourceName']}:{info['id']}"] = {
+                            'url': info['url'],
+                            'format': 'mp4' if 'm4a' in info.get('container', '') else 'matroska/webm',
+                            'duration': int(info['duration'] * 1000)
+                        }
+                    except Exception as e:
+                        bot.dispatch("custom_error", ctx=ctx, error=e)
+                        exceptions.add(repr(e))
+
+                    return tracks, node, exceptions, is_yt_source
 
             if query_yt:
 
