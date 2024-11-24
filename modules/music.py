@@ -7206,7 +7206,7 @@ class Music(commands.Cog):
                     try:
                         info = await self.bot.loop.run_in_executor(
                             None, lambda: self.bot.pool.ytdl.extract_info(
-                                f"https://www.youtube.com/watch?v={yt_id}", download=False)
+                                f"https://www.youtube.com/watch?v={yt_id.group(1)}", download=False)
                         )
 
                         if not info.get('duration'):
