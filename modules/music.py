@@ -43,6 +43,7 @@ from utils.music.track_encoder import encode_track
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, song_request_buttons, \
     select_bot_pool, ProgressBar, update_inter, get_source_emoji_cfg
+from wavelink.node import yt_playlist_regex, yt_video_regex
 
 sc_recommended = re.compile(r"https://soundcloud\.com/.*/recommended$")
 
@@ -7229,6 +7230,105 @@ class Music(commands.Cog):
 
         if not tracks:
 
+            query_yt = None
+            yt_id = None
+            cache_key = None
+
+            if not URL_REG.match(query):
+                query_yt = f"ytsearch10:{query}"
+
+            elif pl_yt_id := (yt_playlist_regex.search(query)):
+                pl_yt_id = pl_yt_id.group(1)
+                cache_key = f"youtube:{pl_yt_id}"
+                query_yt = f"https://www.youtube.com/playlist?list={pl_yt_id}"
+                try:
+                    yt_id = yt_video_regex.search(query).group(1)
+                except:
+                    pass
+
+            if query_yt:
+
+                playlist_data = None
+
+                if not (data := self.bot.pool.playlist_cache.get(cache_key)):
+
+                    info = await self.bot.loop.run_in_executor(
+                        None, lambda: self.bot.pool.ytdl.extract_info(query_yt, download=False))
+
+                    if cache_key:
+
+                        playlist_data = {
+                            'loadType': 'PLAYLIST_LOADED',
+                            'playlistInfo': {'name': info['title']},
+                            'sourceName': 'youtube',
+                            'tracks_data': [],
+                            'thumb': '',
+                            'type': 'playlist'
+                        }
+
+                    tracks_data = []
+
+                    for e in info['entries']:
+
+                        if not e.get('duration'):
+                            continue
+
+                        trackinfo = {
+                            'title': e['title'],
+                            'author': e['uploader'],
+                            'length': int(e['duration'] * 1000),
+                            'identifier': e['id'],
+                            'isStream': False,
+                            'uri': e['url'],
+                            'sourceName': 'youtube',
+                            'position': 0,
+                            'artworkUrl': f'https://img.youtube.com/vi/{e["id"]}/mqdefault.jpg',
+                            'isrc': None,
+                        }
+
+                        trackinfo = {
+                            'track': encode_track(trackinfo)[1],
+                            'info': trackinfo
+                        }
+
+                        tracks_data.append(trackinfo)
+
+                    if playlist_data:
+                        playlist_data["tracks"] = tracks_data
+
+                    data = playlist_data
+
+                if data.get("tracks"):
+
+                    if yt_id:
+
+                        index = None
+
+                        for n, t in enumerate(data['tracks']):
+                            if t['info']['identifier'] == yt_id:
+                                index = n
+                                break
+
+                        if index is None:
+                            try:
+                                del self.bot.pool.playlist_cache[cache_key]
+                            except KeyError:
+                                return await self.get_tracks(query=query, ctx=ctx, user=user, node=node, source=source,
+                                                             bot=bot, mix=mix)
+
+                        if index > 0:
+                            data['tracks'] = data['tracks'][index:] + data['tracks'][:index]
+
+                    tracks = LavalinkPlaylist(data=data, url=query, encoded_name="track", pluginInfo=data.pop("pluginInfo", {}))
+
+                    if tracks:
+                        self.bot.pool.playlist_cache[cache_key] = data
+
+                else:
+                    tracks = [LavalinkTrack(id_=track["track"], info=track['info'], pluginInfo=track.get("pluginInfo", {})) for track in tracks]
+
+        if not tracks:
+
             txt = "\n".join(exceptions)
 
             if is_yt_source and "Video returned by YouTube isn't what was requested" in txt:
@@ -7670,6 +7770,7 @@ def setup(bot: BotCore):
                     'quiet': True,
                     'no_warnings': True,
                     'lazy_playlist': True,
+                    'playlist_items': '1-700',
                     'simulate': True,
                     'download': False,
                     'cookiefile': "./.ytdl_cookie" if os.path.isfile('./.ytdl_cookie') else None,

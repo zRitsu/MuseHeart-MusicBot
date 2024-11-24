@@ -10,6 +10,7 @@ from aiohttp import ClientSession
 from disnake.ext import commands
 from rapidfuzz import fuzz
 
+import wavelink
 from utils.db import DBModel, scrobble_model
 from utils.music.errors import GenericError
 from utils.music.lastfm_tools import LastFmException
@@ -554,8 +555,9 @@ class LastFmCog(commands.Cog):
                         if self.bot.config["USE_YTM_TRACKINFO_SCROBBLE"]:
                             try:
                                 result = filter_result(await player.node.get_tracks(f"ytmsearch:{track_query}", track_cls=LavalinkTrack))
-                            except:
-                                traceback.print_exc()
+                            except Exception as e:
+                                if not isinstance(e, wavelink.TrackNotFound):
+                                    traceback.print_exc()
 
                     if not result:
                         print(f"⚠️ - Last.FM Scrobble - Sem resultados para a música: {track_query}")
