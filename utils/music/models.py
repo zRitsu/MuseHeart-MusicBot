@@ -3309,7 +3309,7 @@ class LavalinkPlayer(wavelink.Player):
 
             if not search_queries:
 
-                if track.info["sourceName"] in self.node.info.get("sourceManagers", []) and (not self.node.only_use_native_search_providers or track.info["sourceName"] in native_sources):
+                if not force and track.info["sourceName"] in self.node.info.get("sourceManagers", []) and (not self.node.only_use_native_search_providers or track.info["sourceName"] in native_sources):
 
 
 
