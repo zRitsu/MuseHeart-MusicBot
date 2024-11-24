@@ -7244,7 +7244,7 @@ class Music(commands.Cog):
                         bot.dispatch("custom_error", ctx=ctx, error=e)
                         exceptions.add(repr(e))
 
-                    return tracks, node, exceptions, is_yt_source
+                    return tracks, node
 
             if query_yt:
 
