@@ -7201,7 +7201,7 @@ class Music(commands.Cog):
                     except:
                         pass
 
-                elif yt_id:=yt_video_regex.search(query) and self.bot.pool.ytdl.params.get("cookiefile"):
+                elif (yt_id:=yt_video_regex.search(query)) and self.bot.pool.ytdl.params.get("cookiefile"):
 
                     try:
                         info = await self.bot.loop.run_in_executor(

@@ -3302,7 +3302,7 @@ class LavalinkPlayer(wavelink.Player):
 
             if track.info["sourceName"] == "http":
                 search_queries = [track.uri or track.search_uri]
-            elif track.info["sourceName"] == "youtube" and force and (not self.native_yt or not self.node.prefer_youtube_native_playback):
+            elif track.info["sourceName"] == "youtube" and not force and (not self.native_yt or not self.node.prefer_youtube_native_playback):
                 return
             else:
                 search_queries = []
