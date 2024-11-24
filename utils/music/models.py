@@ -3317,6 +3317,10 @@ class LavalinkPlayer(wavelink.Player):
                 else:
                     search_queries = []
                     for sp in self.node.partial_providers:
+
+                        if track.info["sourceName"] == "youtube" and sp.startswith(("ytsearch:", "ytmsearch:")) and not self.native_yt:
+                            continue
+
                         if "{isrc}" in sp:
                             if isrc := track.info.get('isrc'):
                                 search_queries.append(sp.replace("{isrc}", isrc))
