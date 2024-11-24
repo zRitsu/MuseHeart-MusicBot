@@ -7203,7 +7203,6 @@ class Music(commands.Cog):
 
                 elif yt_id:=yt_video_regex.search(query) and self.bot.pool.ytdl.params.get("cookiefile"):
 
-                    yt_id = yt_id.group(1)
                     try:
                         info = await self.bot.loop.run_in_executor(
                             None, lambda: self.bot.pool.ytdl.extract_info(
