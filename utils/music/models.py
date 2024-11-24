@@ -3205,8 +3205,14 @@ class LavalinkPlayer(wavelink.Player):
 
                 if not (ytdl_info := self.bot.pool.ytdl_cache.get(
                         f"ytdl:{self.guild.id}:{track.source_name}:{track.identifier}")):
-                    info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(
-                        track.uri.split("&")[0], download=False))
+                    try:
+                        info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(
+                            track.uri.split("&")[0], download=False))
+                    except Exception as e:
+                        if "This video is not available" in str(e):
+                            track.id = ""
+                            return await self.resolve_track(track, force=True)
+                        raise e
 
                     ytdl_info = {"url": info['url']}
 
@@ -3278,7 +3284,7 @@ class LavalinkPlayer(wavelink.Player):
         return [LavalinkTrack(id_=encoded, info=trackinfo)]
 
 
-    async def resolve_track(self, track: PartialTrack):
+    async def resolve_track(self, track: PartialTrack, force=False):
 
         if track.id:
             return
@@ -3296,7 +3302,7 @@ class LavalinkPlayer(wavelink.Player):
 
             if track.info["sourceName"] == "http":
                 search_queries = [track.uri or track.search_uri]
-            elif track.info["sourceName"] == "youtube" and (not self.native_yt or not self.node.prefer_youtube_native_playback):
+            elif track.info["sourceName"] == "youtube" and force and (not self.native_yt or not self.node.prefer_youtube_native_playback):
                 return
             else:
                 search_queries = []
