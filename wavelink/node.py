@@ -314,7 +314,7 @@ class Node:
 
         raise WavelinkException(f"{self.identifier}: UpdatePlayer Failed = {resp.status}: {resp_data}")
 
-    async def get_tracks(self, query: str, *, retry_on_failure: bool = True, **kwargs) -> Union[list, TrackPlaylist, None]:
+    async def get_tracks(self, query: str, *, retry_on_failure: bool = False, **kwargs) -> Union[list, TrackPlaylist, None]:
         """|coro|
 
         Search for and return a list of Tracks for the given query.
@@ -337,7 +337,7 @@ class Node:
         """
         backoff = ExponentialBackoff(base=1)
 
-        yt_id = None
+        ytid = None
 
         if yt_id:=(yt_playlist_regex.search(query)):
             cache_key = f"youtube:{yt_id.group(1)}"
@@ -446,13 +446,21 @@ class Node:
 
             playlist_cls = kwargs.pop('playlist_cls', TrackPlaylist)
 
-            if yt_id:
+            if ytid:
 
-                index = 0
+                index = None
 
                 for n, t in enumerate(new_data['tracks']):
-                    if t['info']['identifier'] == yt_id:
+                    if t['info']['identifier'] == ytid:
                         index = n
+
+                if index is None:
+                    try:
+                        del self._client.bot.pool.playlist_cache[cache_key]
+                    except KeyError:
+                        pass
+
+                    return await self.get_tracks(query=query, retry_on_failure=retry_on_failure, **kwargs)
 
                 if index > 0:
                     new_data['tracks'] = new_data['tracks'][index:] + new_data['tracks'][:index]
