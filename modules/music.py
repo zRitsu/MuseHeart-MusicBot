@@ -7319,13 +7319,13 @@ class Music(commands.Cog):
                         if index > 0:
                             data['tracks'] = data['tracks'][index:] + data['tracks'][:index]
 
-                    tracks = LavalinkPlaylist(data=data, url=query, encoded_name="track", pluginInfo=data.pop("pluginInfo", {}))
+                    tracks = LavalinkPlaylist(data=data, url=query, encoded_name="track", pluginInfo=data.pop("pluginInfo", {}), requester=user.id)
 
                     if tracks:
                         self.bot.pool.playlist_cache[cache_key] = data
 
                 else:
-                    tracks = [LavalinkTrack(id_=track["track"], info=track['info'], pluginInfo=track.get("pluginInfo", {})) for track in tracks]
+                    tracks = [LavalinkTrack(id_=track["track"], info=track['info'], pluginInfo=track.get("pluginInfo", {}), requester=user.id) for track in tracks]
 
         if not tracks:
 
