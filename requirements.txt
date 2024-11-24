@@ -11,8 +11,8 @@ aiofiles
 disnake-jishaku
 packaging
 aiosqlite
-yt-dlp[default]>=2024.11.18
-tornado
+git+https://github.com/yt-dlp/yt-dlp.git@fe70f20aedf528fdee332131bc9b6710e54e6f10
+tornado>=6.4.2
 emoji
 urllib3>=2.2.2
 async-timeout
