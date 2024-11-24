@@ -2076,32 +2076,37 @@ class LavalinkPlayer(wavelink.Player):
                             try:
                                 tracks = await self.fetch_ytdl_info(track)
                             except Exception as e:
-                                print(traceback.format_exc())
-                                embed = disnake.Embed(
-                                    description=f"**Ocorreu um erro ao reproduzir a música via ytdl:** "
-                                                f"[`{track.title}`]({track.uri}) ```py\n{repr(e)}```"
-                                )
-                                if self.text_channel:
-                                    try:
-                                        await self.text_channel.send(embed=embed, delete_after=15)
-                                    except Exception:
-                                        pass
-                                cog = self.bot.get_cog("ErrorHandler")
-                                if cog:
-                                    embed.add_field(name="Servidor:", value=f"{self.guild.name} [{self.guild.id}]")
-                                    try:
-                                        await cog.send_webhook(
-                                            embed=embed,
-                                            file=string_to_file(
-                                                "".join(traceback.format_exception(type(e), e, e.__traceback__)),
-                                                "error_traceback_ytdl.txt")
-                                        )
-                                    except Exception:
-                                        print(traceback.format_exc())
-                                await asyncio.sleep(7)
-                                self.locked = False
-                                await self.process_next()
-                                return
+                                if "This video is not available" in str(e):
+                                    track.id = ""
+                                    await self.resolve_track(track, force=True)
+                                    tracks = [track] if track.id else []
+                                else:
+                                    print(traceback.format_exc())
+                                    embed = disnake.Embed(
+                                        description=f"**Ocorreu um erro ao reproduzir a música via ytdl:** "
+                                                    f"[`{track.title}`]({track.uri}) ```py\n{repr(e)}```"
+                                    )
+                                    if self.text_channel:
+                                        try:
+                                            await self.text_channel.send(embed=embed, delete_after=15)
+                                        except Exception:
+                                            pass
+                                    cog = self.bot.get_cog("ErrorHandler")
+                                    if cog:
+                                        embed.add_field(name="Servidor:", value=f"{self.guild.name} [{self.guild.id}]")
+                                        try:
+                                            await cog.send_webhook(
+                                                embed=embed,
+                                                file=string_to_file(
+                                                    "".join(traceback.format_exception(type(e), e, e.__traceback__)),
+                                                    "error_traceback_ytdl.txt")
+                                            )
+                                        except Exception:
+                                            print(traceback.format_exc())
+                                    await asyncio.sleep(7)
+                                    self.locked = False
+                                    await self.process_next()
+                                    return
 
                             if not tracks:
                                 await asyncio.sleep(3)
@@ -3205,14 +3210,9 @@ class LavalinkPlayer(wavelink.Player):
 
                 if not (ytdl_info := self.bot.pool.ytdl_cache.get(
                         f"ytdl:{self.guild.id}:{track.source_name}:{track.identifier}")):
-                    try:
-                        info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(
-                            track.uri.split("&")[0], download=False))
-                    except Exception as e:
-                        if "This video is not available" in str(e):
-                            track.id = ""
-                            return await self.resolve_track(track, force=True)
-                        raise e
+
+                    info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(
+                        track.uri.split("&")[0], download=False))
 
                     ytdl_info = {"url": info['url']}
 
