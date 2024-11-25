@@ -7314,8 +7314,9 @@ class Music(commands.Cog):
                             try:
                                 del self.bot.pool.playlist_cache[cache_key]
                             except KeyError:
-                                return await self.get_tracks(query=query, ctx=ctx, user=user, node=node, source=source,
-                                                             bot=bot, mix=mix)
+                                pass
+                            return await self.get_tracks(query=query, ctx=ctx, user=user, node=node, source=source,
+                                                         bot=bot, mix=mix)
 
                         if index > 0:
                             data['tracks'] = data['tracks'][index:] + data['tracks'][:index]
