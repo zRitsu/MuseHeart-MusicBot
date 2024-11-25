@@ -7295,10 +7295,11 @@ class Music(commands.Cog):
 
                     if playlist_data:
                         playlist_data["tracks"] = tracks_data
+                        data = playlist_data
+                    else:
+                        data = tracks_data
 
-                    data = playlist_data
-
-                if data.get("tracks"):
+                if isinstance(data, dict):
 
                     if yt_id:
 
