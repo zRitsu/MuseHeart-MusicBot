@@ -7240,94 +7240,97 @@ class Music(commands.Cog):
                             'format': 'mp4' if 'm4a' in info.get('container', '') else 'matroska/webm',
                             'duration': int(info['duration'] * 1000)
                         }
+                        return tracks, node
                     except Exception as e:
                         bot.dispatch("custom_error", ctx=ctx, error=e)
                         exceptions.add(repr(e))
-
-                    return tracks, node
 
             if query_yt:
 
                 playlist_data = None
 
-                if not (data := self.bot.pool.playlist_cache.get(cache_key)):
+                try:
+                    if not (data := self.bot.pool.playlist_cache.get(cache_key)):
 
-                    info = await self.bot.loop.run_in_executor(
-                        None, lambda: self.bot.pool.ytdl.extract_info(query_yt, download=False))
+                        info = await self.bot.loop.run_in_executor(
+                            None, lambda: self.bot.pool.ytdl.extract_info(query_yt, download=False))
 
-                    if cache_key:
+                        if cache_key:
 
-                        playlist_data = {
-                            'loadType': 'PLAYLIST_LOADED',
-                            'playlistInfo': {'name': info['title']},
-                            'sourceName': 'youtube',
-                            'tracks_data': [],
-                            'thumb': '',
-                            'type': 'playlist'
-                        }
+                            playlist_data = {
+                                'loadType': 'PLAYLIST_LOADED',
+                                'playlistInfo': {'name': info['title']},
+                                'sourceName': 'youtube',
+                                'tracks_data': [],
+                                'thumb': '',
+                                'type': 'playlist'
+                            }
 
-                    tracks_data = []
+                        tracks_data = []
 
-                    for e in info['entries']:
+                        for e in info['entries']:
 
-                        if not e.get('duration'):
-                            continue
+                            if not e.get('duration'):
+                                continue
 
-                        trackinfo = {
-                            'title': e['title'],
-                            'author': e['uploader'],
-                            'length': int(e['duration'] * 1000),
-                            'identifier': e['id'],
-                            'isStream': False,
-                            'uri': e['url'],
-                            'sourceName': 'youtube',
-                            'position': 0,
-                            'artworkUrl': f'https://img.youtube.com/vi/{e["id"]}/mqdefault.jpg',
-                            'isrc': None,
-                        }
+                            trackinfo = {
+                                'title': e['title'],
+                                'author': e['uploader'],
+                                'length': int(e['duration'] * 1000),
+                                'identifier': e['id'],
+                                'isStream': False,
+                                'uri': e['url'],
+                                'sourceName': 'youtube',
+                                'position': 0,
+                                'artworkUrl': f'https://img.youtube.com/vi/{e["id"]}/mqdefault.jpg',
+                                'isrc': None,
+                            }
 
-                        trackinfo = {
-                            'track': encode_track(trackinfo)[1],
-                            'info': trackinfo
-                        }
+                            trackinfo = {
+                                'track': encode_track(trackinfo)[1],
+                                'info': trackinfo
+                            }
 
-                        tracks_data.append(trackinfo)
+                            tracks_data.append(trackinfo)
 
-                    if playlist_data:
-                        playlist_data["tracks"] = tracks_data
-                        data = playlist_data
+                        if playlist_data:
+                            playlist_data["tracks"] = tracks_data
+                            data = playlist_data
+                        else:
+                            data = tracks_data
+
+                    if isinstance(data, dict):
+
+                        if yt_id:
+
+                            index = None
+
+                            for n, t in enumerate(data['tracks']):
+                                if t['info']['identifier'] == yt_id:
+                                    index = n
+                                    break
+
+                            if index is None:
+                                try:
+                                    del self.bot.pool.playlist_cache[cache_key]
+                                except KeyError:
+                                    pass
+                                return await self.get_tracks(query=query, ctx=ctx, user=user, node=node, source=source,
+                                                             bot=bot, mix=mix)
+
+                            if index > 0:
+                                data['tracks'] = data['tracks'][index:] + data['tracks'][:index]
+
+                        tracks = LavalinkPlaylist(data=data, url=query, encoded_name="track", pluginInfo=data.pop("pluginInfo", {}), requester=user.id)
+
+                        if tracks:
+                            self.bot.pool.playlist_cache[cache_key] = data
+
                     else:
-                        data = tracks_data
-
-                if isinstance(data, dict):
-
-                    if yt_id:
-
-                        index = None
-
-                        for n, t in enumerate(data['tracks']):
-                            if t['info']['identifier'] == yt_id:
-                                index = n
-                                break
-
-                        if index is None:
-                            try:
-                                del self.bot.pool.playlist_cache[cache_key]
-                            except KeyError:
-                                pass
-                            return await self.get_tracks(query=query, ctx=ctx, user=user, node=node, source=source,
-                                                         bot=bot, mix=mix)
-
-                        if index > 0:
-                            data['tracks'] = data['tracks'][index:] + data['tracks'][:index]
-
-                    tracks = LavalinkPlaylist(data=data, url=query, encoded_name="track", pluginInfo=data.pop("pluginInfo", {}), requester=user.id)
-
-                    if tracks:
-                        self.bot.pool.playlist_cache[cache_key] = data
-
-                else:
-                    tracks = [LavalinkTrack(id_=track["track"], info=track['info'], pluginInfo=track.get("pluginInfo", {}), requester=user.id) for track in tracks]
+                        tracks = [LavalinkTrack(id_=track["track"], info=track['info'], pluginInfo=track.get("pluginInfo", {}), requester=user.id) for track in tracks]
+                except Exception as e:
+                    bot.dispatch("custom_error", ctx=ctx, error=e)
+                    exceptions.add(repr(e))
 
         if not tracks:
 
