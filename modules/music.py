@@ -6291,7 +6291,7 @@ class Music(commands.Cog):
         static_skin = guild_data["player_controller"]["static_skin"]
         static_player = guild_data["player_controller"]
 
-        if not channel:
+        if not channel or inter.bot != bot:
             channel = bot.get_channel(getattr(inter, 'channel_id', inter.channel.id))
 
         if not node:

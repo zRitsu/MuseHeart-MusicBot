@@ -190,8 +190,8 @@ class AiMusic(commands.Cog):
 
         if url_search:
 
-            cog = self.bot.get_cog("Music")
-            search_result, node = await cog.get_tracks(url_search, inter, user=inter.author, source=False)
+            cog = bot.get_cog("Music")
+            search_result, node = await cog.get_tracks(url_search, inter, user=inter.author, source=False, bot=bot, node=node)
 
             if not search_result:
                 raise GenericError("**Não houve resultados para o link informado no pedido...**")
@@ -246,7 +246,7 @@ class AiMusic(commands.Cog):
                                "-# Lembrando que esse recurso está em beta (sujeito a várias falhas).")
 
         player: LavalinkPlayer = await bot.get_cog("Music").create_player(
-            inter=inter, bot=bot, guild=guild, channel=inter.channel
+            inter=inter, bot=bot, guild=guild, node=node
         )
 
         player.queue.extend(tracklist)
