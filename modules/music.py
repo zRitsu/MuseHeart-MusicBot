@@ -6452,11 +6452,11 @@ class Music(commands.Cog):
 
         if not player.static and player.text_channel:
 
-            if message_inter:
+            if message_inter and inter.bot != bot:
                 player.message = message_inter
             elif modal_message_id:
                 try:
-                    player.message = await inter.channel.fetch_message(modal_message_id)
+                    player.message = await player.text_channel.fetch_message(modal_message_id)
                 except:
                     pass
 
