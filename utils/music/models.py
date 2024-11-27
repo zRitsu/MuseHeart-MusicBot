@@ -1471,26 +1471,9 @@ class LavalinkPlayer(wavelink.Player):
 
                 try:
                     self.set_command_log(emoji="🔋", text="O modo **[economia de recursos]** foi desativado.", controller=True)
-                    if self.current.info["sourceName"] == "youtube" and (not self.native_yt or not self.node.prefer_youtube_native_playback) and self.bot.pool.ytdl.params.get("cookiefile"):
-                        if self.current:
-                            self.queue.insert(0, self.current)
-                        await self.process_next(start_position=self.position)
-                    else:
-                        await self.resolve_track(self.current)
-                        if self.current.id:
-                            if self.current.info["sourceName"] == "youtube" and not self.native_yt:
-                                stream = self.current.is_stream
-                                self.queue.appendleft(self.current)
-                                self.current = None
-                                self.current_encoded = None
-                                await self.process_next(start_position=0 if stream else self.position)
-                            else:
-                                await self.play(self.current, start=0 if self.current.is_stream else self.position)
-                                await asyncio.sleep(1.5)
-                                await self.invoke_np(rpc_update=True)
-                                await self.update_stage_topic()
-                        else:
-                            await self.process_next()
+                    if self.current:
+                        self.queue.insert(0, self.current)
+                    await self.process_next(start_position=self.position)
                 except Exception:
                     traceback.print_exc()
             else:
