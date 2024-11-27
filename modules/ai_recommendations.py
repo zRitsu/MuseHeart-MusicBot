@@ -209,9 +209,9 @@ class AiMusic(commands.Cog):
             original_prompt = original_prompt.replace(original_search, title)
 
         response = await self.ai_client.chat.completions.create(
-            model=g4f.models.claude_3_5_sonnet,
+            model=g4f.models.gpt_4o_mini,
             # model=g4f.models.gpt_4_turbo,
-            ignored=["Blackbox"],
+            ignored=["Blackbox", "Liaobots"],
             messages=[{"role": "user", "content": txt.replace("{prompt}", prompt)}],
         )
 
