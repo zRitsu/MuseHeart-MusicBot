@@ -246,7 +246,7 @@ class AiMusic(commands.Cog):
                                "-# Lembrando que esse recurso está em beta (sujeito a várias falhas).")
 
         player: LavalinkPlayer = await bot.get_cog("Music").create_player(
-            inter=inter, bot=bot, guild=guild, node=node
+            inter=inter, bot=bot, guild=guild, node=node, channel=bot.get_channel(getattr(inter, 'channel_id', inter.channel.id))
         )
 
         player.queue.extend(tracklist)

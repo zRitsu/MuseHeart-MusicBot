@@ -6275,7 +6275,8 @@ class Music(commands.Cog):
     async def create_player(
             self,
             inter: Union[disnake.Message, disnake.MessageInteraction, disnake.AppCmdInter, CustomContext, disnake.ModalInteraction],
-            bot: BotCore, guild: disnake.Guild, guild_data: dict = None, channel = None, message_inter = None,
+            bot: BotCore, guild: disnake.Guild, channel: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.Thread],
+            guild_data: dict = None, message_inter = None,
             node: wavelink.Node = None, modal_message_id: int = None
     ):
 
@@ -6290,11 +6291,6 @@ class Music(commands.Cog):
         skin = guild_data["player_controller"]["skin"]
         static_skin = guild_data["player_controller"]["static_skin"]
         static_player = guild_data["player_controller"]
-
-        if channel:
-            channel = bot.get_channel(channel.id)
-        else:
-            channel = bot.get_channel(getattr(inter, 'channel_id', inter.channel.id))
 
         if not node:
             node = await self.get_best_node(bot)
