@@ -77,8 +77,8 @@ class DataWriter:
             return track_buf.read()
 
 def _write_track_common(track: Dict[str, Any], writer: DataWriter):
-    writer.write_utf(track['title'])
-    writer.write_utf(track['author'])
+    writer.write_utf(track['title'].encode('ascii', 'ignore').decode('ascii'))
+    writer.write_utf(track['author'].encode('ascii', 'ignore').decode('ascii'))
     writer.write_long(track['length'])
     writer.write_utf(track['identifier'])
     writer.write_boolean(track['isStream'])

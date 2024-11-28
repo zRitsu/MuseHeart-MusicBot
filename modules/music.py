@@ -7247,6 +7247,8 @@ class Music(commands.Cog):
 
                 playlist_data = None
 
+                encoded_name = "track" if node.version == 3 else "encoded"
+
                 try:
                     if not (data := self.bot.pool.playlist_cache.get(cache_key)):
 
@@ -7285,7 +7287,7 @@ class Music(commands.Cog):
                             }
 
                             trackinfo = {
-                                'track': encode_track(trackinfo)[1],
+                                encoded_name: encode_track(trackinfo)[1],
                                 'info': trackinfo
                             }
 
@@ -7319,13 +7321,13 @@ class Music(commands.Cog):
                             if index > 0:
                                 data['tracks'] = data['tracks'][index:] + data['tracks'][:index]
 
-                        tracks = LavalinkPlaylist(data=data, url=query, encoded_name="track", pluginInfo=data.pop("pluginInfo", {}), requester=user.id)
+                        tracks = LavalinkPlaylist(data=data, url=query, encoded_name=encoded_name, pluginInfo=data.pop("pluginInfo", {}), requester=user.id)
 
                         if tracks:
                             self.bot.pool.playlist_cache[cache_key] = data
 
                     else:
-                        tracks = [LavalinkTrack(id_=track["track"], info=track['info'], pluginInfo=track.get("pluginInfo", {}), requester=user.id) for track in tracks]
+                        tracks = [LavalinkTrack(id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo", {}), requester=user.id) for track in tracks]
                 except Exception as e:
                     bot.dispatch("custom_error", ctx=ctx, error=e)
                     exceptions.add(repr(e))
