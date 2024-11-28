@@ -7182,6 +7182,7 @@ class Music(commands.Cog):
             query_yt = None
             yt_id = None
             cache_key = None
+            is_mix = False
 
             if not URL_REG.match(query):
                 query_yt = f"ytsearch10:{query}"
@@ -7189,12 +7190,16 @@ class Music(commands.Cog):
             else:
                 if pl_yt_id := (yt_playlist_regex.search(query)):
                     pl_yt_id = pl_yt_id.group(1)
-                    cache_key = f"youtube:{pl_yt_id}"
-                    query_yt = f"https://www.youtube.com/playlist?list={pl_yt_id}"
                     try:
                         yt_id = yt_video_regex.search(query).group(1)
                     except:
                         pass
+                    if yt_id and pl_yt_id.startswith("RD"):
+                        query_yt = f"https://www.youtube.com/watch?v={yt_id}&list={pl_yt_id}"
+                        is_mix = True
+                    else:
+                        cache_key = f"youtube:{pl_yt_id}"
+                        query_yt = f"https://www.youtube.com/playlist?list={pl_yt_id}"
 
                 elif (yt_id:=yt_video_regex.search(query)) and self.bot.pool.ytdl.params.get("cookiefile"):
 
@@ -7320,7 +7325,7 @@ class Music(commands.Cog):
 
                         tracks = LavalinkPlaylist(data=data, url=query, encoded_name=encoded_name, pluginInfo=data.pop("pluginInfo", {}), requester=user.id)
 
-                        if tracks:
+                        if tracks and not is_mix:
                             self.bot.pool.playlist_cache[cache_key] = data
 
                     else:

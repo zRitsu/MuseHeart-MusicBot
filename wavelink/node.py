@@ -340,7 +340,8 @@ class Node:
         ytid = None
 
         if yt_id:=(yt_playlist_regex.search(query)):
-            cache_key = f"youtube:{yt_id.group(1)}"
+            yt_id = yt_id.group(1)
+            cache_key = f"youtube:{yt_id}" if not yt_id.startswith("RD") else None
             try:
                 ytid = yt_video_regex.search(query).group(1)
             except:
