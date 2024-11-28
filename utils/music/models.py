@@ -19,6 +19,7 @@ from urllib.parse import quote
 
 import disnake
 from rapidfuzz import fuzz
+from yt_dlp import YoutubeDL
 
 import wavelink
 from utils.db import DBModel
@@ -596,10 +597,7 @@ class LavalinkPlayer(wavelink.Player):
 
         self.retry_setup_hints = False
 
-        hint_platforms = []
-
-        if self.bot.config["USE_YTDL"]:
-            hint_platforms.append("youtube, soundcloud")
+        hint_platforms = ["youtube, soundcloud"]
 
         if (self.bot.spotify and not self.bot.spotify.disabled) or "spotify" in self.node.info["sourceManagers"]:
             hint_platforms.append("spotify")
@@ -3891,6 +3889,11 @@ class LavalinkPlayer(wavelink.Player):
         await self.update_filters()
 
         return filter_type
+
+
+class CustomYTDL(YoutubeDL):
+    def save_cookies(self):
+        pass
 
 
 def music_mode(bot: BotCore):

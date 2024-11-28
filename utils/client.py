@@ -26,6 +26,7 @@ from disnake.ext import commands
 from disnake.http import Route
 from dotenv import dotenv_values
 from user_agent import generate_user_agent
+from yt_dlp import YoutubeDL
 
 import wavelink
 from config_loader import load_config
@@ -36,7 +37,8 @@ from utils.music.checks import check_pool_bots
 from utils.music.errors import GenericError
 from utils.music.lastfm_tools import LastFM
 from utils.music.local_lavalink import run_lavalink
-from utils.music.models import music_mode, LavalinkPlayer, LavalinkPlaylist, LavalinkTrack, PartialTrack, native_sources
+from utils.music.models import music_mode, LavalinkPlayer, LavalinkPlaylist, LavalinkTrack, PartialTrack, \
+    native_sources, CustomYTDL
 from utils.music.remote_lavalink_serverlist import get_lavalink_servers
 from utils.others import CustomContext, token_regex, sort_dict_recursively
 from utils.owner_panel import PanelView
@@ -101,6 +103,38 @@ class BotPool:
         self.default_idling_skin = self.config.get("DEFAULT_IDLING_SKIN", "default")
         self.cache_updater_task: Optional[asyncio.Task] = None
         self.lyric_data_cache = TTLCache(maxsize=30000, ttl=600*10)
+        self.ytdl = CustomYTDL(
+            {
+                'format': 'webm[abr>0]/bestaudio/best',
+                'extract_flat': True,
+                'quiet': True,
+                'no_warnings': True,
+                'lazy_playlist': True,
+                'playlist_items': '1-700',
+                'simulate': True,
+                'download': False,
+                'cookiefile': "./.ytdl_cookie" if os.path.isfile('./.ytdl_cookie') else None,
+                'cachedir': False,
+                'allowed_extractors': [
+                    r'.*youtube.*',
+                    r'.*soundcloud.*',
+                ],
+                'extractor_args': {
+                    'youtube': {
+                        'player_client': [
+                            'web',
+                            'android',
+                            'android_creator',
+                            'web_creator',
+                        ],
+                        'max_comments': [0],
+                    },
+                    'youtubetab': {
+                        "skip": ["webpage", "authcheck"]
+                    }
+                }
+            }
+        )
 
         self.load_cache()
 
@@ -574,13 +608,11 @@ class BotPool:
                         pass
                     else:
                         self.config["AUTO_DOWNLOAD_LAVALINK_SERVERLIST"] = not start_local
-                        self.config['USE_YTDL'] = int(square_cfg["MEMORY"]) >= 512
                         self.config['USE_JABBA'] = False
                         if not square_cfg.get("SUBDOMAIN"):
                             self.config["RUN_RPC_SERVER"] = False
                         print("Usando a configuração automática na squarecloud\n"
                               f"Lavalink local: {start_local}\n"
-                              f"YTDL: {self.config['USE_YTDL']}\n"
                               f"Memória: {square_cfg['MEMORY']}\n"
                               f"Run RPC Server: {self.config['RUN_RPC_SERVER']}\n"
                               f"Usando JABBA: {self.config['USE_JABBA']}")

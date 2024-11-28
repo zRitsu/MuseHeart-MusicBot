@@ -1202,15 +1202,6 @@ class FavModalAdd(disnake.ui.Modal):
 
             else:
 
-                if not self.view.bot.config["USE_YTDL"]:
-                    await inter.edit_original_message(
-                        embed=disnake.Embed(
-                            description="**Não há suporte a esse tipo de link no momento...**",
-                            color=self.view.bot.get_color()
-                        )
-                    )
-                    return
-
                 match = youtube_regex.search(url)
 
                 if match:
@@ -1537,8 +1528,7 @@ class FavMenuView(disnake.ui.View):
 
         if self.mode == ViewMode.integrations_manager:
 
-            if self.bot.config["USE_YTDL"]:
-                supported_platforms.extend(["[`Youtube`](<https://www.youtube.com/>)", "[`Soundcloud`](<https://soundcloud.com/>)"])
+            supported_platforms.extend(["[`Youtube`](<https://www.youtube.com/>)", "[`Soundcloud`](<https://soundcloud.com/>)"])
 
             if self.bot.spotify:
                 supported_platforms.append("[`Spotify`](<https://open.spotify.com/>)")

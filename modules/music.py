@@ -38,7 +38,7 @@ from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolExc
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction, FavMenuView, ViewMode, \
     SetStageTitle, SelectBotVoice, youtube_regex, soundcloud_regex
 from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, PartialTrack, PartialPlaylist, \
-    native_sources
+    native_sources, CustomYTDL
 from utils.music.track_encoder import encode_track
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, song_request_buttons, \
@@ -1253,9 +1253,6 @@ class Music(commands.Cog):
                     self.bot.pool.integration_cache[cache_key] = info
 
         elif matches:=(yt_match:=youtube_regex.search(query)) or (sc_match:=soundcloud_regex.search(query)):
-
-            if not self.bot.config["USE_YTDL"]:
-                raise GenericError("**Não há suporte a esse tipo de requisição no momento...**")
 
             if yt_match:
                 query = f"{yt_match.group()}/playlists"
@@ -7758,53 +7755,39 @@ class Music(commands.Cog):
 
 def setup(bot: BotCore):
 
-    if bot.config["USE_YTDL"] and not hasattr(bot.pool, 'ytdl'):
+    if not getattr(bot.pool, 'ytdl', None):
 
-        class CustomYTDL(YoutubeDL):
-
-            def save_cookies(self):
-                pass
-
-        class YTDl:
-
-            def __init__(self, bot: BotCore):
-                self.bot = bot
-                self.params = {
-                    'format': 'webm[abr>0]/bestaudio/best',
-                    'extract_flat': True,
-                    'quiet': True,
-                    'no_warnings': True,
-                    'lazy_playlist': True,
-                    'playlist_items': '1-700',
-                    'simulate': True,
-                    'download': False,
-                    'cookiefile': "./.ytdl_cookie" if os.path.isfile('./.ytdl_cookie') else None,
-                    'cachedir': False,
-                    'allowed_extractors': [
-                        r'.*youtube.*',
-                        r'.*soundcloud.*',
-                    ],
-                    'extractor_args': {
-                        'youtube': {
-                            'player_client': [
-                                'web',
-                                'android',
-                                'android_creator',
-                                'web_creator',
-                            ],
-                            'max_comments': [0],
-                        },
-                        'youtubetab': {
-                            "skip": ["webpage", "authcheck"]
-                        }
+        bot.pool.ytdl = CustomYTDL(
+            {
+                'format': 'webm[abr>0]/bestaudio/best',
+                'extract_flat': True,
+                'quiet': True,
+                'no_warnings': True,
+                'lazy_playlist': True,
+                'playlist_items': '1-700',
+                'simulate': True,
+                'download': False,
+                'cookiefile': "./.ytdl_cookie" if os.path.isfile('./.ytdl_cookie') else None,
+                'cachedir': False,
+                'allowed_extractors': [
+                    r'.*youtube.*',
+                    r'.*soundcloud.*',
+                ],
+                'extractor_args': {
+                    'youtube': {
+                        'player_client': [
+                            'web',
+                            'android',
+                            'android_creator',
+                            'web_creator',
+                        ],
+                        'max_comments': [0],
+                    },
+                    'youtubetab': {
+                        "skip": ["webpage", "authcheck"]
                     }
                 }
-
-            def extract_info(self, url: str, download=False, *args, **kwargs):
-
-                with CustomYTDL(self.params) as ytdl:
-                    return ytdl.sanitize_info(ytdl.extract_info(url, download=download))
-
-        bot.pool.ytdl = YTDl(bot)
+            }
+        )
 
     bot.add_cog(Music(bot))

@@ -151,7 +151,6 @@ DEFAULT_CONFIG = {
     ##############
     ### Tests ####
     ##############
-    "USE_YTDL": True,
     "FORCE_USE_DEEZER_CLIENT": False,
     "YOUTUBE_TRACK_COOLDOWN": 20,
     "SILENT_PUBLICBOT_WARNING": False,
@@ -272,7 +271,6 @@ def load_config():
         "PRESENCES_INTENT",
         "MESSAGE_CONTENT_INTENT",
 
-        "USE_YTDL",
         "PREFER_YOUTUBE_NATIVE_PLAYBACK",
         "ONLY_USE_NATIVE_SEARCH_PROVIDERS",
         "USE_YTM_TRACKINFO_SCROBBLE",
