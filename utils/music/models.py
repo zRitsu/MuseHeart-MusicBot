@@ -3203,12 +3203,17 @@ class LavalinkPlayer(wavelink.Player):
 
                 exception = None
 
+                retry_download = False
+
                 while retries > 0:
                     try:
                         lavalink_track = await self.node.get_tracks(ytdl_info['url'])
 
                         break
                     except Exception as e:
+                        if "that url is not playable" in str(e).lower():
+                            retry_download = True
+                            break
                         exception = e
                         retries -= 1
 
@@ -3216,6 +3221,9 @@ class LavalinkPlayer(wavelink.Player):
                     del self.bot.pool.ytdl_cache[f"ytdl:{self.guild.id}:{track.source_name}:{track.identifier}"]
                 except KeyError:
                     pass
+
+                if retry_download:
+                    return await self.fetch_ytdl_info(track)
 
                 if exception:
                     raise exception
