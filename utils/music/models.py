@@ -2044,7 +2044,9 @@ class LavalinkPlayer(wavelink.Player):
 
                 if not self.native_yt or not self.node.prefer_youtube_native_playback:
 
-                    partial_data = self.bot.pool.partial_track_cache.get(track.id)
+                    cache_key = f"{track.info['sourceName']}:id:{track.identifier or track.id or track.ytid}"
+
+                    partial_data = self.bot.pool.partial_track_cache.get(cache_key)
 
                     if track.info["sourceName"] == "youtube" or (partial_data and partial_data[0].info["sourceName"] == "youtube"):
 
@@ -2191,7 +2193,7 @@ class LavalinkPlayer(wavelink.Player):
                                 else:
                                     alt_track = tracks[0]
                                     encoded_track = alt_track.id
-                                    self.bot.pool.partial_track_cache[f'youtube:{track.ytid}'] = [alt_track]
+                                    self.bot.pool.partial_track_cache[cache_key] = [alt_track]
                                     self.set_command_log(
                                         emoji="▶️",
                                         text=f"Tocando música obtida via metadados: [`{fix_characters(alt_track.title, 20)}`](<{alt_track.uri}>) `| Por: {fix_characters(alt_track.author, 15)}`", controller=True
