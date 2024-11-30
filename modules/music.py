@@ -7249,6 +7249,11 @@ class Music(commands.Cog):
 
                 playlist_data = None
 
+                if not node:
+                    node = self.bot.music.get_best_node()
+                    if not node:
+                        raise GenericError("**Não há servidores de música disponível!**")
+
                 encoded_name = "track" if node.version == 3 else "encoded"
 
                 try:
@@ -7780,12 +7785,12 @@ def setup(bot: BotCore):
                 ],
                 'extractor_args': {
                     'youtube': {
-                        'player_client': [
-                            'web',
-                            'android',
-                            'android_creator',
-                            'web_creator',
-                        ],
+                        #'player_client': [
+                        #    'web',
+                        #    'android',
+                        #    'android_creator',
+                        #    'web_creator',
+                        #],
                         'max_comments': [0],
                     },
                     'youtubetab': {
