@@ -3003,6 +3003,37 @@ class LavalinkPlayer(wavelink.Player):
         else:
             self.update = True
 
+    def get_skin(self, disable=False):
+
+        if self.static:
+
+            if self.skin_static.startswith("> custom_skin: "):
+                data = skin_converter(self.custom_skin_static_data[self.skin_static[15:]], player=self,
+                                      guild=self.guild)
+            else:
+                data = self.bot.pool.player_static_skins[self.skin_static].load(self)
+
+        else:
+            if self.skin.startswith("> custom_skin: "):
+                data = skin_converter(self.custom_skin_data[self.skin[15:]], player=self,
+                                      guild=self.guild)
+            else:
+                data = self.bot.pool.player_skins[self.skin].load(self)
+
+        if disable:
+
+            data = self.get_skin()
+
+            components = []
+
+            for c in data.get("components", []):
+                c.disabled = True
+                components.append(c)
+
+            data["components"] = components
+
+        return data
+
     async def cleanup(self, inter: disnake.MessageInteraction = None):
 
         self.queue.clear()
@@ -3027,7 +3058,6 @@ class LavalinkPlayer(wavelink.Player):
             self._queue_updater_task.cancel()
         except:
             pass
-
 
         try:
             vc = self.guild.voice_client.channel
@@ -3056,7 +3086,7 @@ class LavalinkPlayer(wavelink.Player):
             else:
 
                 try:
-                    if self.has_thread:
+                    if self.has_thread or self.static:
 
                         try:
                             if inter.message.id == self.message.id:
@@ -3072,11 +3102,13 @@ class LavalinkPlayer(wavelink.Player):
                         if func:
                             try:
                                 await func(
-                                    embed=disnake.Embed(
+                                    allowed_mentions=self.allowed_mentions,
+                                    **self.get_skin(disable=True) if (not self.static and
+                                    (disnake.utils.utcnow() - datetime.datetime.fromtimestamp(
+                                        self.uptime, datetime.timezone.utc)).total_seconds() > 15) else
+                                    {"embed": disnake.Embed(
                                         description=self.command_log,
-                                        color=self.bot.get_color(self.guild.me)
-                                    ), allowed_mentions=self.allowed_mentions,
-                                    components=song_request_buttons
+                                        color=self.bot.get_color(self.guild.me))}
                                 )
                                 channel: disnake.Thread = self.bot.get_channel(self.message.id)
 
@@ -3104,16 +3136,28 @@ class LavalinkPlayer(wavelink.Player):
 
                     elif inter:
 
-                        await inter.response.edit_message(
-                            content=None,
-                            embed=disnake.Embed(
-                                description=f"🛑 ⠂{self.command_log}",
-                                color=self.bot.get_color(self.guild.me)),
-                            view=None
-                        )
+                        kw = {
+                                "embed": disnake.Embed(
+                                    description=f"🛑 ⠂{self.command_log}",
+                                    color=self.bot.get_color(self.guild.me)),
+                                "view": None
+                            }
+
+                        if inter.message.id == self.message.id:
+                            func = inter.response.edit_message
+                            if (disnake.utils.utcnow() - datetime.datetime.fromtimestamp(self.uptime, datetime.timezone.utc)).total_seconds() > 15:
+                                kw = self.get_skin(disable=True)
+                        else:
+                            try:
+                                func = self.message.edit
+                            except:
+                                func = None
+
+                        if func:
+                            await func(**kw)
 
                     elif self.controller_mode is True:
-                        await self.destroy_message()
+                        await self.message.edit(**self.get_skin(disable=True))
 
                 except Exception:
                     traceback.print_exc()
