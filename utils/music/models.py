@@ -628,6 +628,7 @@ class LavalinkPlayer(wavelink.Player):
         self.hints: cycle = []
         self.current_hint: str = ""
         self.last_data: dict = {}
+        self.lyric_embed: Optional[disnake.Embed] = None
         self.event_queue_task = self.bot.loop.create_task(self.hook_events())
         self.check_skins()
         self.setup_features()
@@ -3136,16 +3137,27 @@ class LavalinkPlayer(wavelink.Player):
 
                     elif inter:
 
-                        kw = {
-                                "embed": disnake.Embed(
-                                    description=f"🛑 ⠂{self.command_log}",
-                                    color=self.bot.get_color(self.guild.me)),
-                                "view": None
-                            }
+                        kw = {}
+
+                        if self.lyric_embed and self.message and self.message.components:
+                            self.lyric_embed.description += f"\n🛑 ⠂{self.command_log}"
+
+                            components = []
+
+                            for component in self.message.components:
+                                for item in component.children:
+                                    if isinstance(item, disnake.Button):
+                                        item = disnake.ui.Button().from_component(item)
+                                    elif isinstance(item, disnake.SelectMenu):
+                                        item = disnake.ui.Select().from_component(item)
+                                    item.disabled = True
+                                    components.append(item)
+
+                            kw = {"embed": self.lyric_embed, "components": components}
 
                         if inter.message.id == self.message.id:
                             func = inter.response.edit_message
-                            if (disnake.utils.utcnow() - datetime.datetime.fromtimestamp(self.uptime, datetime.timezone.utc)).total_seconds() > 15:
+                            if not kw and (disnake.utils.utcnow() - datetime.datetime.fromtimestamp(self.uptime, datetime.timezone.utc)).total_seconds() > 15:
                                 kw = self.get_skin(disable=True)
                         else:
                             try:
@@ -3154,10 +3166,30 @@ class LavalinkPlayer(wavelink.Player):
                                 func = None
 
                         if func:
+
+                            if not kw:
+                                kw = {
+                                    "embed": disnake.Embed(
+                                        description=f"🛑 ⠂{self.command_log}",
+                                        color=self.bot.get_color(self.guild.me)),
+                                    "view": None
+                                }
+
                             await func(**kw)
 
                     elif self.controller_mode is True:
-                        await self.message.edit(**self.get_skin(disable=True))
+
+                        kw = {}
+
+                        if self.lyric_embed and self.message and self.message.components:
+                            self.lyric_embed.description += f"\n🛑 ⠂{self.command_log}"
+                            kw = {"embed": self.lyric_embed, "components": []}
+
+                            for c in disnake.ui.View(timeout=0).from_message(self.message).children:
+                                c.disabled = True
+                                kw["components"].append(c)
+
+                        await self.message.edit(**kw or self.get_skin(disable=True))
 
                 except Exception:
                     traceback.print_exc()
