@@ -6966,14 +6966,14 @@ class Music(commands.Cog):
             try:
                 tracks = await self.bot.pool.deezer.get_tracks(url=query, requester=user.id, search=True)
             except Exception as e:
-                bot.dispatch("custom_error", ctx=ctx, error=e)
+                self.bot.dispatch("custom_error", ctx=ctx, error=e)
                 exceptions.add(repr(e))
 
         if not tracks:
             try:
                 tracks = await self.bot.pool.spotify.get_tracks(self.bot, user.id, query, search=True)
             except Exception as e:
-                bot.dispatch("custom_error", ctx=ctx, error=e)
+                self.bot.dispatch("custom_error", ctx=ctx, error=e)
                 exceptions.add(repr(e))
 
         return tracks, node, exceptions, False
@@ -7064,7 +7064,7 @@ class Music(commands.Cog):
                     if not isinstance(e, wavelink.TrackNotFound):
                         print(f"Falha ao processar busca...\n{query}\n{traceback.format_exc()}")
                     elif not isinstance(e, GenericError):
-                        bot.dispatch("custom_error", ctx=ctx, error=e)
+                        self.bot.dispatch("custom_error", ctx=ctx, error=e)
 
                 if tracks or not source:
                     break
@@ -7242,7 +7242,7 @@ class Music(commands.Cog):
                         }
                         return tracks, node
                     except Exception as e:
-                        bot.dispatch("custom_error", ctx=ctx, error=e)
+                        self.bot.dispatch("custom_error", ctx=ctx, error=e)
                         exceptions.add(repr(e))
 
             if query_yt:
@@ -7336,7 +7336,7 @@ class Music(commands.Cog):
                     else:
                         tracks = [LavalinkTrack(id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo", {}), requester=user.id) for track in tracks]
                 except Exception as e:
-                    bot.dispatch("custom_error", ctx=ctx, error=e)
+                    self.bot.dispatch("custom_error", ctx=ctx, error=e)
                     exceptions.add(repr(e))
 
         if not tracks:
