@@ -3006,6 +3006,9 @@ class LavalinkPlayer(wavelink.Player):
 
     def get_skin(self, disable=False):
 
+        if not self.current:
+            return
+
         if self.static:
 
             if self.skin_static.startswith("> custom_skin: "):
