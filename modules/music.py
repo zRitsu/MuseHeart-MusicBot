@@ -7177,7 +7177,7 @@ class Music(commands.Cog):
                 tracks, node, exc, is_yt_source = await self.get_partial_tracks(query=query, user=user, ctx=ctx, node=node, bot=bot)
                 exceptions.update(exc)
 
-        if not tracks:
+        """if not tracks:
 
             query_yt = None
             yt_id = None
@@ -7337,7 +7337,7 @@ class Music(commands.Cog):
                         tracks = [LavalinkTrack(id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo", {}), requester=user.id) for track in tracks]
                 except Exception as e:
                     self.bot.dispatch("custom_error", ctx=ctx, error=e)
-                    exceptions.add(repr(e))
+                    exceptions.add(repr(e))"""
 
         if not tracks:
 
