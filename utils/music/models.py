@@ -3182,6 +3182,10 @@ class LavalinkPlayer(wavelink.Player):
 
                     elif self.controller_mode is True:
 
+                        if not self.current:
+                            await self.destroy_message()
+                            return
+
                         kw = {}
 
                         if self.lyric_embed and self.message and self.message.components:
