@@ -11,7 +11,7 @@ aiofiles
 disnake-jishaku
 packaging
 aiosqlite
-git+https://github.com/yt-dlp/yt-dlp.git@fe70f20aedf528fdee332131bc9b6710e54e6f10
+yt-dlp[default]>=2024.12.03
 tornado>=6.4.2
 emoji
 urllib3>=2.2.2
