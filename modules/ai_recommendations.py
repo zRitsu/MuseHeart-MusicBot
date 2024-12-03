@@ -63,6 +63,14 @@ class AiMusic(commands.Cog):
 
         self.ai_client = bot.pool.ai_client
 
+        self.models = [
+            g4f.models.claude_3_5_haiku,
+            g4f.models.claude_3_5_sonnet,
+            g4f.models.gpt_4o,
+            g4f.models.gpt_4o_mini,
+            g4f.models.default,
+        ]
+
     music_rec_cd = commands.CooldownMapping.from_cooldown(2, 120, commands.BucketType.member)
     music_rec_mc = commands.MaxConcurrency(1, per=commands.BucketType.guild, wait=False)
 
@@ -208,12 +216,21 @@ class AiMusic(commands.Cog):
             prompt = prompt.replace(original_search, title)
             original_prompt = original_prompt.replace(original_search, title)
 
-        response = await self.ai_client.chat.completions.create(
-            model=g4f.models.default,
-            # model=g4f.models.gpt_4_turbo,
-            #ignored=["Blackbox", "Liaobots"],
-            messages=[{"role": "user", "content": txt.replace("{prompt}", prompt)}],
-        )
+        response = None
+
+        for m in self.models:
+            try:
+                response = await self.ai_client.chat.completions.create(
+                    model=m, #ignored=["Blackbox", "Liaobots"],
+                    messages=[{"role": "user", "content": txt.replace("{prompt}", prompt)}],
+                )
+                break
+            except Exception as e:
+                print(f"{m.name} - Falha ao obter info via AI: {prompt}\n{repr(e)}")
+                await asyncio.sleep(1)
+
+        if not response:
+            raise GenericError("Ocorreu alguns erros ao processar sua solicitação (Meu desenvolvedor será notificado sobre o problema).")
 
         lines = response.choices[0].message.content.split("\n")
 
