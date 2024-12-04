@@ -1037,17 +1037,17 @@ class LavalinkPlayer(wavelink.Player):
 
                         if video_not_available:
 
-                            with suppress(IndexError, ValueError):
-                                self.node.search_providers.remove("ytsearch")
-                                self.node.search_providers.remove("ytmsearch")
-                                self.node.partial_providers.remove("ytsearch:\"{isrc}\"")
-                                self.node.partial_providers.remove("ytsearch:\"{title} - {author}\"")
-                                self.node.partial_providers.remove("ytmsearch:\"{isrc}\"")
-                                self.node.partial_providers.remove("ytmsearch:\"{title} - {author}\"")
+                            #with suppress(IndexError, ValueError):
+                            #    self.node.search_providers.remove("ytsearch")
+                            #    self.node.search_providers.remove("ytmsearch")
+                            #    self.node.partial_providers.remove("ytsearch:\"{isrc}\"")
+                            #    self.node.partial_providers.remove("ytsearch:\"{title} - {author}\"")
+                            #    self.node.partial_providers.remove("ytmsearch:\"{isrc}\"")
+                            #    self.node.partial_providers.remove("ytmsearch:\"{title} - {author}\"")
 
                             self.native_yt = False
 
-                            if track.info["sourceName"] == "youtube":
+                            """if track.info["sourceName"] == "youtube":
                                 txt = f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual " \
                                          "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome " \
                                          "das músicas do youtube que estão na fila (talvez a música tocada seja diferente do esperado " \
@@ -1056,7 +1056,7 @@ class LavalinkPlayer(wavelink.Player):
                                 try:
                                     await self.text_channel.send(embed=disnake.Embed(description=txt, color=self.bot.get_color(self.guild.me)), delete_after=60)
                                 except:
-                                    self.set_command_log(text=txt, emoji="⚠️", controller=True)
+                                    self.set_command_log(text=txt, emoji="⚠️", controller=True)"""
                             await asyncio.sleep(3)
                             self.locked = False
                             await self.process_next(start_position=self.position)
@@ -2020,6 +2020,7 @@ class LavalinkPlayer(wavelink.Player):
                                 print(traceback.format_exc())
 
                             self.locked = False
+                            self.native_yt = True
 
                             await self.process_next()
                             return
@@ -2054,6 +2055,8 @@ class LavalinkPlayer(wavelink.Player):
                         if self.bot.pool.ytdl.params.get("cookiefile"):
 
                             if track.is_stream:
+                                self.locked = False
+                                self.native_yt = True
                                 await self.process_next()
                                 return
 
@@ -2089,12 +2092,14 @@ class LavalinkPlayer(wavelink.Player):
                                             print(traceback.format_exc())
                                     await asyncio.sleep(7)
                                     self.locked = False
+                                    self.native_yt = True
                                     await self.process_next()
                                     return
 
                             if not tracks:
                                 await asyncio.sleep(3)
                                 self.locked = False
+                                self.native_yt = True
                                 await self.process_next()
                                 return
 
@@ -2105,6 +2110,7 @@ class LavalinkPlayer(wavelink.Player):
                                 if not self.native_yt:
                                     self.played.append(track)
                                     self.locked = False
+                                    self.native_yt = True
                                     await self.process_next()
                                     return
 
@@ -2188,6 +2194,7 @@ class LavalinkPlayer(wavelink.Player):
                                                                               "em outras plataformas de música.", controller=True)
                                         await asyncio.sleep(3)
                                         self.locked = False
+                                        self.native_yt = True
                                         await self.process_next()
                                         return
 
@@ -2199,6 +2206,7 @@ class LavalinkPlayer(wavelink.Player):
                                         emoji="▶️",
                                         text=f"Tocando música obtida via metadados: [`{fix_characters(alt_track.title, 20)}`](<{alt_track.uri}>) `| Por: {fix_characters(alt_track.author, 15)}`", controller=True
                                     )
+                                    self.native_yt = True
 
                 if not encoded_track and not track.id:
 
@@ -3368,6 +3376,8 @@ class LavalinkPlayer(wavelink.Player):
         if track.info["sourceName"] == "last.fm":
             check_duration = False
 
+        similarity_treshold = 0.70 if check_duration else 0.90
+
         try:
 
             exceptions = []
@@ -3458,7 +3468,7 @@ class LavalinkPlayer(wavelink.Player):
 
                         norm_title = lambda tc: f"{tc.author} - {tc.single_title}".lower() if (tc.info["sourceName"] not in ("youtube", "soundcloud") or len(tc.title) < 12) else tc.title.lower()
 
-                        if check_similarity(set(norm_title(t).split()), norm_title(track).split()) < 0.70:
+                        if check_similarity(set(norm_title(t).split()), norm_title(track).split()) < similarity_treshold:
                             continue
 
                     if check_duration and not ((t.duration - 10000) < track.duration < (t.duration + 10000)):
