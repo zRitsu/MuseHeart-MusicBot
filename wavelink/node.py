@@ -338,10 +338,15 @@ class Node:
         backoff = ExponentialBackoff(base=1)
 
         ytid = None
+        playlist_id = None
 
         if yt_id:=(yt_playlist_regex.search(query)):
             yt_id = yt_id.group(1)
-            cache_key = f"youtube:{yt_id}" if not yt_id.startswith("RD") else None
+            playlist_id = yt_id
+            if yt_id.startswith("RD"):
+                cache_key = None
+            else:
+                cache_key = f"youtube:{yt_id}"
             try:
                 ytid = yt_video_regex.search(query).group(1)
             except:
@@ -370,7 +375,12 @@ class Node:
 
                 async with self.session.get(f"{base_uri}/loadtracks?identifier={quote(query)}", headers={'Authorization': self.password}) as resp:
 
-                    if resp.status != 200 and retry_on_failure:
+                    if resp.status != 200:
+
+                        if not retry_on_failure:
+                            __log__.info(f'REST | {self.identifier} | Status code ({resp.status}) while retrieving tracks. Not retrying.')
+                            return
+
                         retry = backoff.delay()
 
                         __log__.info(f'REST | {self.identifier} | Status code ({resp.status}) while retrieving tracks. '
@@ -378,10 +388,6 @@ class Node:
 
                         await asyncio.sleep(retry)
                         continue
-
-                    elif not resp.status == 200 and not retry_on_failure:
-                        __log__.info(f'REST | {self.identifier} | Status code ({resp.status}) while retrieving tracks. Not retrying.')
-                        return
 
                     try:
                         data = await resp.json()
@@ -437,9 +443,6 @@ class Node:
 
         if loadtype in ('PLAYLIST_LOADED', 'playlist'):
 
-            if cache_key:
-                self._client.bot.pool.playlist_cache[cache_key] = data
-
             try:
                 new_data['playlistInfo'] = new_data.pop('info')
             except KeyError:
@@ -447,24 +450,30 @@ class Node:
 
             playlist_cls = kwargs.pop('playlist_cls', TrackPlaylist)
 
-            if ytid:
+            if cache_key:
 
-                index = None
+                if not ytid:
+                    self._client.bot.pool.playlist_cache[cache_key] = data
 
-                for n, t in enumerate(new_data['tracks']):
-                    if t['info']['identifier'] == ytid:
-                        index = n
+                else:
 
-                if index is None:
-                    try:
-                        del self._client.bot.pool.playlist_cache[cache_key]
-                    except KeyError:
-                        pass
+                    index = None
 
-                    return await self.get_tracks(query=query, retry_on_failure=retry_on_failure, **kwargs)
+                    for n, t in enumerate(new_data['tracks']):
+                        if t['info']['identifier'] == ytid:
+                            index = n
 
-                if index > 0:
-                    new_data['tracks'] = new_data['tracks'][index:] + new_data['tracks'][:index]
+                    if index is None:
+                        try:
+                            del self._client.bot.pool.playlist_cache[cache_key]
+                        except KeyError:
+                            pass
+                        return await self.get_tracks(query=f"https://www.youtube.com/playlist?list={playlist_id}", retry_on_failure=retry_on_failure, playlist_cls=playlist_cls, **kwargs)
+
+                    self._client.bot.pool.playlist_cache[cache_key] = data
+
+                    if index > 0:
+                        new_data['tracks'] = new_data['tracks'][index:] + new_data['tracks'][:index]
 
             if query.startswith("https://music.youtube.com/"):
                 query = query.replace("https://www.youtube.com/", "https://music.youtube.com/")

@@ -1908,6 +1908,8 @@ class LavalinkPlayer(wavelink.Player):
 
         self.has_lyrics = False
 
+        self.lyric_embed = None
+
         if not self.node or not self.node.is_available:
             try:
                 self._new_node_task.cancel()

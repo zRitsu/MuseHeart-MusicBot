@@ -412,9 +412,15 @@ class Music(commands.Cog):
             stage_perms = channel.permissions_for(me)
 
             if stage_perms.mute_members:
-                while not me.voice:
+
+                retries = 5
+
+                while retries > 0:
                     await asyncio.sleep(1)
-                await asyncio.sleep(3)
+                    if not me.voice:
+                        retries -= 1
+                        continue
+                    break
                 await me.edit(suppress=False)
             else:
                 embed = disnake.Embed(color=self.bot.get_color(me))
@@ -5310,7 +5316,7 @@ class Music(commands.Cog):
 
                 else:
 
-                    track: Optional[LavalinkTrack, PartialTrack] = None
+                    track = []
                     seek_status = False
 
                     if player:
@@ -5328,14 +5334,14 @@ class Music(commands.Cog):
 
                             for t in list(player.queue):
                                 if t.uri.startswith(url) or url.startswith(t.uri):
-                                    track = t
+                                    track = [t]
                                     player.queue.remove(t)
                                     break
 
                             if not track:
                                 for t in list(player.played):
                                     if t.uri.startswith(url) or url.startswith(t.uri):
-                                        track = t
+                                        track = [t]
                                         player.played.remove(t)
                                         break
 
@@ -5343,7 +5349,7 @@ class Music(commands.Cog):
 
                                     for t in list(player.failed_tracks):
                                         if t.uri.startswith(url) or url.startswith(t.uri):
-                                            track = t
+                                            track = [t]
                                             player.failed_tracks.remove(t)
                                             break
 
@@ -5360,10 +5366,7 @@ class Music(commands.Cog):
 
                             result, node = await self.get_tracks(url, interaction, author, source=False, node=node, bot=bot)
 
-                            try:
-                                track = result.tracks[0]
-                            except:
-                                track = result[0]
+                            track = result
 
                         if control == PlayerControls.embed_enqueue_track:
 
@@ -5371,9 +5374,18 @@ class Music(commands.Cog):
                                 player = await self.create_player(inter=interaction, bot=bot, guild=channel.guild,
                                                                   channel=channel, node=node)
                             await self.check_player_queue(interaction.author, bot, interaction.guild_id)
-                            player.queue.append(track)
                             player.update = True
-                            await interaction.send(f"{author.mention}, a música [`{track.title}`](<{track.uri}>) foi adicionada na fila.{player.controller_link}", ephemeral=True)
+                            if isinstance(track, list):
+                                t = track[0]
+                                player.queue.append(t)
+                                await interaction.send(
+                                    f"{author.mention}, a música [`{t.title}`](<{t.uri}>) foi adicionada na fila.{player.controller_link}",
+                                    ephemeral=True)
+                            else:
+                                player.queue.extend(track.tracks)
+                                await interaction.send(
+                                    f"{author.mention}, a playlist [`{track.name}`](<{track.url}>) foi adicionada na fila.{player.controller_link}",
+                                    ephemeral=True)
                             if not player.is_connected:
                                 await player.connect(vc_id)
                             if not player.current:
@@ -5385,7 +5397,14 @@ class Music(commands.Cog):
                                                                   channel=channel, node=node)
                             else:
                                 await self.check_stage_title(inter=interaction, bot=bot, player=player)
-                            player.queue.insert(0, track)
+
+                            if isinstance(track, list):
+                                player.queue.insert(0, track[0])
+                            else:
+                                index = len(player.queue)
+                                player.queue.extend(track.tracks)
+                                if index:
+                                    player.queue.rotate(index * -1)
                             if not player.is_connected:
                                 await player.connect(vc_id)
                             await self.process_music(inter=interaction, player=player, force_play="yes")
@@ -7008,7 +7027,7 @@ class Music(commands.Cog):
             node_retry = False
 
             if source is False:
-                providers = [n.search_providers[:1]]
+                providers = n.search_providers[:1]
                 if query.startswith("https://www.youtube.com/live/"):
                     query = query.split("?")[0].replace("/live/", "/watch?v=")
 
@@ -7017,8 +7036,8 @@ class Music(commands.Cog):
 
                 elif query.startswith(("https://youtu.be/", "https://www.youtube.com/")):
 
-                    if "&list=" not in query and self.bot.pool.ytdl.params.get("cookiefile"):
-                        is_yt_source = True
+                    """if "&list=" not in query and self.bot.pool.ytdl.params.get("cookiefile"):
+                        is_yt_source = True"""
 
                     for p in ("&ab_channel=", "&start_radio="):
                         if p in query:
@@ -7042,6 +7061,7 @@ class Music(commands.Cog):
                         search_query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
                     )
                 except Exception as e:
+                    traceback.print_exc()
                     exceptions.add(repr(e))
                     if [e for e in ("Video returned by YouTube isn't what was requested",
                                     "This video requires login.",
