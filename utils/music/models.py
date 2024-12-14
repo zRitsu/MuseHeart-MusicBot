@@ -3378,7 +3378,7 @@ class LavalinkPlayer(wavelink.Player):
         if track.info["sourceName"] == "last.fm":
             check_duration = False
 
-        similarity_treshold = 0.70 if check_duration else 0.90
+        similarity_treshold = 70 if check_duration else 85
 
         try:
 
@@ -3466,11 +3466,9 @@ class LavalinkPlayer(wavelink.Player):
 
                     if self.bot.config["CHECK_TRACK_SIMILARITY"]:
 
-                        check_similarity = lambda a, b: len(set(a) & set(b)) / len(set(a))
-
                         norm_title = lambda tc: f"{tc.author} - {tc.single_title}".lower() if (tc.info["sourceName"] not in ("youtube", "soundcloud") or len(tc.title) < 12) else tc.title.lower()
 
-                        if check_similarity(set(norm_title(t).split()), norm_title(track).split()) < similarity_treshold:
+                        if fuzz.token_sort_ratio(norm_title(t), norm_title(track)) < similarity_treshold:
                             continue
 
                     if check_duration and not ((t.duration - 10000) < track.duration < (t.duration + 10000)):
