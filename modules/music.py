@@ -1740,10 +1740,18 @@ class Music(commands.Cog):
 
                     pos_txt = f" (Pos. {position + 1})"
 
+                total_duration = 0
+
+                for t in tracks:
+                    if not t.is_stream:
+                        total_duration += t.duration
+
                 if queue_loaded:
                     log_text = f"{inter.author.mention} adicionou `{len(tracks)} músicas` via: {query[7:]}."
                     title = f"Usando músicas salvas de {inter.author.display_name}"
                     icon_url = "https://i.ibb.co/51yMNPw/floppydisk.png"
+
+                    desc = ""
 
                     tracks_playlists = {}
 
@@ -1759,19 +1767,14 @@ class Music(commands.Cog):
 
                 else:
                     query = fix_characters(query.replace(f"{source}:", '', 1), 25)
-                    title = f"Busca: {query}"
+                    title = "Músicas adicionadas:"
                     icon_url = music_source_image(tracks[0].info['sourceName'])
                     log_text = f"{inter.author.mention} adicionou `{len(tracks)} músicas` via busca: `{query}`{pos_txt}."
-
-                total_duration = 0
-
-                for t in tracks:
-                    if not t.is_stream:
-                        total_duration += t.duration
+                    desc = "\n".join(f"` {c+1}. ` [`{fix_characters(t.title, 30)}`](<{t.uri}>) `{time_format(t.duration)}`" for c, t in enumerate(tracks))
 
                 embed.set_author(name="⠂" + title, icon_url=icon_url)
                 embed.set_thumbnail(url=tracks[0].thumb)
-                embed.description = f"`{(tcount:=len(tracks))} música{'s'[:tcount^1]}`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
+                embed.description = desc or f"`{(tcount:=len(tracks))} música{'s'[:tcount^1]}`**┃**`{time_format(total_duration)}`**┃**{inter.author.mention}"
                 emoji = "🎶"
 
         else:
