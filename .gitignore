@@ -173,3 +173,6 @@ ai_prompt.txt
 /.lastfm_cache
 /.ytdl_cache/
 /.ytdl_cookie
+
+# g4f cookies
+/har_and_cookies/
