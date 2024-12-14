@@ -149,7 +149,12 @@ class AiMusic(commands.Cog):
         except asyncio.TimeoutError:
             ephemeral = True
 
-        await inter.response.defer(ephemeral=ephemeral, with_message=True)
+        msg = await inter.send(
+            embed=disnake.Embed(
+                description=f"**⌛️ {inter.author.mention} seu pedido de recomendações de músicas está sendo processado...** ```\n{original_prompt}```",
+                color=self.bot.get_color(),
+            ), ephemeral=ephemeral
+        )
 
         url_search = None
 
@@ -217,7 +222,9 @@ class AiMusic(commands.Cog):
             prompt = prompt.replace(original_search, title)
             original_prompt = original_prompt.replace(original_search, title)
 
-        response = None
+        tracklist = []
+        lines = []
+        provider = ""
 
         for m in self.models:
             try:
@@ -225,41 +232,40 @@ class AiMusic(commands.Cog):
                     model=m, #ignored=["Blackbox", "Liaobots"],
                     messages=[{"role": "user", "content": txt.replace("{prompt}", prompt)}],
                 )
+                lines = [l for l in response.choices[0].message.content.split("\n") if l]
+
+                cleaned_list = music_list_regex.findall("\n".join(lines))
+
+                try:
+                    for a, t in cleaned_list:
+
+                        a = a.replace('"', "")
+                        t = t.replace('"', "")
+
+                        if len(t) > 40 or len(a) > 50 or a.endswith(":") or t.endswith(":"):
+                            continue
+
+                        track = PartialTrack(
+                            title=t.strip(), author=a.split(",")[0].strip(), requester=inter.author.id,
+                            source_name="last.fm"
+                        )
+
+                        track.info["extra"]["authors"] = [i.strip() for i in a.split(",")]
+
+                        tracklist.append(track)
+                except:
+                    print(f"Falha ao processar pedido de música via IA: {original_prompt}\n{response}")
+                    continue
+                if len(tracklist) < 1:
+                    print(f"{m.name} - Falha ao obter info via AI: {response}")
+                    continue
+                provider = m.name
                 break
             except Exception as e:
                 print(f"{m.name} - Falha ao obter info via AI: {prompt}\n{repr(e)}")
                 await asyncio.sleep(1)
 
-        if not response:
-            raise GenericError("Ocorreu alguns erros ao processar sua solicitação (Meu desenvolvedor será notificado sobre o problema).")
-
-        lines = response.choices[0].message.content.split("\n")
-
-        cleaned_list = music_list_regex.findall("\n".join(lines))
-
-        tracklist = []
-
-        try:
-            for a, t in cleaned_list:
-
-                a = a.replace('"', "")
-                t = t.replace('"', "")
-
-                if len(t) > 40 or len(a) > 50 or a.endswith(":") or t.endswith(":"):
-                    continue
-
-                track = PartialTrack(
-                    title=t.strip(), author=a.split(",")[0].strip(), requester=inter.author.id, source_name="last.fm"
-                )
-
-                track.info["extra"]["authors"] = [i.strip() for i in a.split(",")]
-
-                tracklist.append(track)
-        except:
-            tracklist = []
-
         if len(tracklist) < 2:
-            print(f"Falha ao processar pedido de música via IA: {original_prompt}\n{response}")
             raise GenericError("**Infelizmente não encontrei nada relacionado ao seu pedido...**\n"
                                "-# Lembrando que esse recurso está em beta (sujeito a várias falhas).")
 
@@ -283,12 +289,14 @@ class AiMusic(commands.Cog):
         if len(last_line:=lines[-1]) > 40:
             txt += f"\n{last_line}\n"
 
-        txt += f"\nElas serão tocadas no canal de voz: <#{channel_id}>\n-# AI Music Recommendations (Alpha / Experimental)."
+        txt += (f"\n**Elas serão tocadas no canal de voz:** <#{channel_id}>\n"
+                f"-# **Recomendações obtidas via** `{provider}`\n"
+                f"-# AI Music Recommendations (Alpha / Experimental).")
 
         if isinstance(inter, CustomContext):
-            await inter.send(embed=disnake.Embed(description=txt, color=guild.me.color))
+            await msg.edit(embed=disnake.Embed(description=txt, color=self.bot.get_color(player.guild.me)))
         else:
-            await inter.edit_original_message(embed=disnake.Embed(description=txt, color=guild.me.color))
+            await inter.edit_original_message(embed=disnake.Embed(description=txt, color=self.bot.get_color(player.guild.me)))
 
         if not player.current:
             await player.process_next()
