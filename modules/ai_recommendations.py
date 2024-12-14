@@ -232,15 +232,15 @@ class AiMusic(commands.Cog):
                     model=m, #ignored=["Blackbox", "Liaobots"],
                     messages=[{"role": "user", "content": txt.replace("{prompt}", prompt)}],
                 )
-                lines = [l for l in response.choices[0].message.content.split("\n") if l]
+                lines = [l for l in disnake.utils.escape_markdown(response.choices[0].message.content.replace("*", ""), as_needed=True).split("\n") if l]
 
                 cleaned_list = music_list_regex.findall("\n".join(lines))
 
                 try:
                     for a, t in cleaned_list:
 
-                        a = a.replace('"', "")
-                        t = t.replace('"', "")
+                        a = a.replace('"', "").strip()
+                        t = t.replace('"', "").strip()
 
                         if len(t) > 40 or len(a) > 50 or a.endswith(":") or t.endswith(":"):
                             continue
