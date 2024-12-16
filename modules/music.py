@@ -1770,7 +1770,7 @@ class Music(commands.Cog):
                     title = "Músicas adicionadas:"
                     icon_url = music_source_image(tracks[0].info['sourceName'])
                     log_text = f"{inter.author.mention} adicionou `{len(tracks)} músicas` via busca: `{query}`{pos_txt}."
-                    desc = "\n".join(f"` {c+1}. ` [`{fix_characters(t.title, 30)}`](<{t.uri}>) `{time_format(t.duration)}`" for c, t in enumerate(tracks))
+                    desc = "\n".join(f"` {c+1}. ` [`{fix_characters(t.title, 75)}`](<{t.uri}>) `{time_format(t.duration)}`" for c, t in enumerate(tracks))
 
                 embed.set_author(name="⠂" + title, icon_url=icon_url)
                 embed.set_thumbnail(url=tracks[0].thumb)
