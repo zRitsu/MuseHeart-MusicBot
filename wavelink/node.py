@@ -423,8 +423,20 @@ class Node:
             except KeyError:
                 error = f"There was an error of severity '{new_data['exception']['severity']}:\n{new_data['exception']['error']}"
             e = TrackLoadError(error=error, node=self, data=new_data)
+
             if not e.message:
                 e.message = new_data['exception']['error']
+
+            if ytid:
+
+                if e.message.endswith("The playlist does not exist."):
+                    return await self.get_tracks(query=f"https://www.youtube.com/watch?v={ytid}",
+                                                 retry_on_failure=retry_on_failure, **kwargs)
+
+                if e.message.endswith("This video cannot be loaded.") and playlist_id:
+                    return await self.get_tracks(query=f"https://www.youtube.com/watch?v={ytid}",
+                                                 retry_on_failure=retry_on_failure, **kwargs)
+
             raise e
 
         try:
