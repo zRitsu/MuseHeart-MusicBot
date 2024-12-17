@@ -491,6 +491,39 @@ class EmbedPaginatorInteraction(disnake.ui.View):
         self.stop()
 
 
+class ButtonInteraction(disnake.ui.View):
+
+    def __init__(self, user: disnake.Member, buttons: List[disnake.ui.Button], *, timeout=180):
+        super().__init__(timeout=timeout)
+        self.user = user
+        self.selected = None
+        self.current_page = 0
+        self.inter = None
+        self.embeds = []
+
+        self.load_components(buttons)
+
+    def load_components(self, buttons: List[disnake.ui.Button]):
+
+        for b in buttons:
+            b.callback = self.callback
+            self.add_item(b)
+
+        button = disnake.ui.Button(label="Cancelar", emoji="❌")
+        button.callback = self.cancel_callback
+        self.add_item(button)
+
+    async def cancel_callback(self, interaction: disnake.MessageInteraction):
+        self.selected = False
+        self.inter = interaction
+        self.stop()
+
+    async def callback(self, interaction: disnake.MessageInteraction):
+        self.selected = interaction.data.custom_id
+        self.inter = interaction
+        self.stop()
+
+
 class SelectInteraction(disnake.ui.View):
 
     def __init__(self, user: disnake.Member, opts: List[disnake.SelectOption], *, timeout=180, max_itens=25):

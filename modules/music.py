@@ -36,14 +36,12 @@ from utils.music.converters import time_format, fix_characters, string_to_second
 from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolException, parse_error, \
     EmptyFavIntegration, DiffVoiceChannel, NoPlayer, YoutubeSourceDisabled
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction, FavMenuView, ViewMode, \
-    SetStageTitle, SelectBotVoice, youtube_regex, soundcloud_regex
+    SetStageTitle, SelectBotVoice, youtube_regex, soundcloud_regex, ButtonInteraction
 from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, PartialTrack, PartialPlaylist, \
     native_sources, CustomYTDL
-from utils.music.track_encoder import encode_track
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, song_request_buttons, \
     select_bot_pool, ProgressBar, update_inter, get_source_emoji_cfg
-from wavelink.node import yt_playlist_regex, yt_video_regex
 
 sc_recommended = re.compile(r"https://soundcloud\.com/.*/recommended$")
 
@@ -1430,18 +1428,18 @@ class Music(commands.Cog):
 
                 elif "&list=" in query and (link_re := YOUTUBE_VIDEO_REG.match(query)):
 
-                    view = SelectInteraction(
-                        user=inter.author,
-                        opts=[
-                            disnake.SelectOption(label="Música", emoji="🎵",
-                                                 description="Carregar apenas a música do link.", value="music"),
-                            disnake.SelectOption(label="Playlist", emoji="🎶",
-                                                 description="Carregar playlist com a música atual.", value="playlist"),
-                        ], timeout=30)
+                    view = ButtonInteraction(
+                        user=inter.author, timeout=45,
+                        buttons=[
+                            disnake.ui.Button(label="Carregar apenas a música", emoji="🎵", custom_id="music"),
+                            disnake.ui.Button(label="Carregar playlist", emoji="🎶", custom_id="playlist"),
+                        ]
+                    )
 
                     embed = disnake.Embed(
                         description='**O link contém vídeo com playlist.**\n'
-                                    f'Selecione uma opção em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para prosseguir.',
+                                    f'Selecione uma opção em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para prosseguir.\n'
+                                    f'-# Nota: Caso o link seja de uma playlist privada, apenas o vídeo do link atual será carregado.',
                         color=self.bot.get_color(guild.me)
                     )
 
@@ -6107,18 +6105,18 @@ class Music(commands.Cog):
 
                 if "&list=" in message.content:
 
-                    view = SelectInteraction(
-                        user=message.author,
-                        opts=[
-                            disnake.SelectOption(label="Música", emoji="🎵",
-                                                 description="Carregar apenas a música do link.", value="music"),
-                            disnake.SelectOption(label="Playlist", emoji="🎶",
-                                                 description="Carregar playlist com a música atual.", value="playlist"),
-                        ], timeout=30)
+                    view = ButtonInteraction(
+                        user=message.author, timeout=45,
+                        buttons=[
+                            disnake.ui.Button(label="Carregar apenas a música", emoji="🎵", custom_id="music"),
+                            disnake.ui.Button(label="Carregar playlist", emoji="🎶", custom_id="playlist"),
+                        ]
+                    )
 
                     embed = disnake.Embed(
-                        description="**O link contém vídeo com playlist.**\n"
-                                    f'Selecione uma opção em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para prosseguir.',
+                        description='**O link contém vídeo com playlist.**\n'
+                                    f'Selecione uma opção em até <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para prosseguir.\n'
+                                    f'-# Nota: Caso o link seja de uma playlist privada, apenas o vídeo do link atual será carregado.',
                         color=self.bot.get_color(message.guild.me)
                     )
 
