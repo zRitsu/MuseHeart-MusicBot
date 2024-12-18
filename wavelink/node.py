@@ -120,8 +120,7 @@ class Node:
         self.restarting = False
 
         self.stats = None
-        self.info = {"sourceManagers": []}
-        self.plugin_names: Optional[List] = None
+        self.info = {"sourceManagers": [], "plugins": {}}
         self.max_retries = kwargs.pop("max_retries", 1)
         self.only_use_native_search_providers = kwargs.pop("only_use_native_search_providers", False)
         self.search_providers = []
@@ -222,10 +221,8 @@ class Node:
                     await asyncio.sleep(backoff)
                     continue
 
-        if self.version < 4:
-            self.plugin_names = set()
-        else:
-            self.plugin_names = set([p["name"] for p in self.info["plugins"]])
+        if self.version > 3:
+            self.info["plugins"] = {d["name"]: d["version"] for d in self.info["plugins"]}
 
         if not self._websocket:
 
@@ -547,7 +544,7 @@ class Node:
         if self.version < 4:
             return
 
-        return "lyrics" in self.plugin_names
+        return "lyrics" in self.info["plugins"]
 
     async def fetch_ytm_lyrics(self, ytid: str):
 
