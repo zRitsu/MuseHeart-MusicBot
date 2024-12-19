@@ -2871,7 +2871,11 @@ class LavalinkPlayer(wavelink.Player):
                             return
                         except:
                             traceback.print_exc()
-                            self.text_channel = self.bot.get_channel(self.text_channel.id)
+
+                            try:
+                                self.text_channel = self.bot.get_channel(self.text_channel.id)
+                            except AttributeError:
+                                self.text_channel = None
 
                             if not self.text_channel:
                                 self.message = None
