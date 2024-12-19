@@ -544,7 +544,17 @@ class Node:
         if self.version < 4:
             return
 
-        return "lyrics" in self.info["plugins"]
+        try:
+            return bool(self.info["plugins"]["lyrics"])
+        except KeyError:
+            pass
+
+        try:
+            return bool(self.info["plugins"]["java-lyrics-plugin"])
+        except KeyError:
+            pass
+
+        return False
 
     async def fetch_ytm_lyrics(self, ytid: str):
 
