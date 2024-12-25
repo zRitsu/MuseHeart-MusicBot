@@ -130,9 +130,9 @@ def run_lavalink(
                     pass
 
                 if platform.architecture()[0] != "64bit":
-                    jdk_url = "https://download.bell-sw.com/java/21.0.3+12/bellsoft-jdk21.0.3+12-windows-i586-lite.zip"
+                    jdk_url = "https://download.bell-sw.com/java/17.0.13+12/bellsoft-jdk17.0.13+12-linux-i586.tar.gz"
                 else:
-                    jdk_url = "https://download.bell-sw.com/java/21.0.3+12/bellsoft-jdk21.0.3+12-windows-amd64-lite.zip"
+                    jdk_url = "https://download.bell-sw.com/java/17.0.13+12/bellsoft-jdk17.0.13+12-linux-amd64.tar.gz"
 
                 jdk_filename = "java.zip"
 
