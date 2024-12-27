@@ -1547,7 +1547,7 @@ class LavalinkPlayer(wavelink.Player):
             msg = "**O player foi desligado por falta de membros no canal" + (f" <#{self.guild.me.voice.channel.id}>"
                                                                                if self.guild.me.voice else '') + "...**"
             self.command_log = msg
-            if not self.static and not self.has_thread:
+            if not self.controller_mode:
                 embed = disnake.Embed(
                     description=msg, color=self.bot.get_color(self.guild.me))
                 try:
