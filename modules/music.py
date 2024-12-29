@@ -971,11 +971,10 @@ class Music(commands.Cog):
 
             if not select_interaction or view.selected is False:
 
-                text = "### Tempo de seleção esgotado!" if view.selected is not False else "### Cancelado pelo usuário."
+                embed.set_footer(text="⚠️ " + ("Tempo de seleção esgotado!" if view.selected is not False else "Cancelado pelo usuário."))
 
                 try:
-                    await func(embed=disnake.Embed(description=text, color=self.bot.get_color(guild.me)),
-                                   components=song_request_buttons)
+                    await func(embed=embed, components=song_request_buttons)
                 except AttributeError:
                     traceback.print_exc()
                     pass
