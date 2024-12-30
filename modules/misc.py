@@ -447,9 +447,10 @@ class Misc(commands.Cog):
 
 
     @commands.slash_command(
-        description=f"{desc_prefix}Exibir informações sobre mim.", cooldown=about_cd, dm_permission=False,
+        description=f"{desc_prefix}Exibir informações sobre mim.", cooldown=about_cd,
         extras={"allow_private": True}
     )
+    @commands.contexts(guild=True)
     async def about(
             self,
             interaction: disnake.AppCmdInter
@@ -778,15 +779,16 @@ class Misc(commands.Cog):
 
     @commands.slash_command(
         description=f"{desc_prefix}Exibir meu link de convite para você me adicionar no seu servidor.",
-        dm_permission=False, extras={"allow_private": True}
+        extras={"allow_private": True}
     )
+    @commands.contexts(guild=True)
     async def invite(self, inter: disnake.AppCmdInter):
 
         await inter.response.defer(ephemeral=True)
 
         await self.invite_button(inter, is_command=True)
 
-    @commands.user_command(name="Avatar", dm_permission=False)
+    @commands.user_command(name="Avatar")
     async def avatar(self, inter: disnake.UserCommandInteraction):
 
         user = inter.target

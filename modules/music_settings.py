@@ -313,8 +313,9 @@ class MusicSettings(commands.Cog):
 
     @commands.slash_command(
         description=f"{desc_prefix}Alterar algumas configurações padrões do player.",
-        default_member_permissions=disnake.Permissions(manage_guild=True), dm_permission=False
+        default_member_permissions=disnake.Permissions(manage_guild=True)
     )
+    @commands.contexts(guild=True)
     async def player_settings(self, interaction: disnake.AppCmdInter):
 
         inter, bot = await select_bot_pool(interaction, return_new=True)
@@ -371,9 +372,9 @@ class MusicSettings(commands.Cog):
 
     @commands.slash_command(
         description=f"{desc_prefix}Criar/escolher um canal dedicado para pedir músicas e deixar player fixado.",
-        default_member_permissions=disnake.Permissions(manage_guild=True), cooldown=setup_cd, max_concurrency=setup_mc,
-        dm_permission=False
+        default_member_permissions=disnake.Permissions(manage_guild=True), cooldown=setup_cd, max_concurrency=setup_mc
     )
+    @commands.contexts(guild=True)
     async def setup(
             self,
             interaction: disnake.AppCmdInter,
@@ -928,9 +929,9 @@ class MusicSettings(commands.Cog):
 
     @commands.slash_command(
         description=f"{desc_prefix}Resetar as configurações relacionadas ao canal de pedir música (song request).",
-        default_member_permissions=disnake.Permissions(manage_guild=True), cooldown=setup_cd, max_concurrency=setup_mc,
-        dm_permission=False
+        default_member_permissions=disnake.Permissions(manage_guild=True), cooldown=setup_cd, max_concurrency=setup_mc
     )
+    @commands.contexts(guild=True)
     async def reset(
             self,
             interaction: disnake.AppCmdInter,
@@ -1058,9 +1059,10 @@ class MusicSettings(commands.Cog):
         await self.add_dj_role.callback(self=self, interaction=ctx, role=role)
 
     @commands.slash_command(
-        description=f"{desc_prefix}Adicionar um cargo para a lista de DJ's do servidor.", dm_permission=False,
+        description=f"{desc_prefix}Adicionar um cargo para a lista de DJ's do servidor.",
         default_member_permissions=disnake.Permissions(manage_guild=True), cooldown=djrole_cd, max_concurrency=djrole_mc
     )
+    @commands.contexts(guild=True)
     async def add_dj_role(
             self,
             interaction: disnake.ApplicationCommandInteraction,
@@ -1095,9 +1097,10 @@ class MusicSettings(commands.Cog):
         await self.remove_dj_role.callback(self=self, interaction=ctx, role=role)
 
     @commands.slash_command(
-        description=f"{desc_prefix}Remover um cargo da lista de DJ's do servidor.", dm_permission=False,
+        description=f"{desc_prefix}Remover um cargo da lista de DJ's do servidor.",
         default_member_permissions=disnake.Permissions(manage_guild=True), cooldown=djrole_cd, max_concurrency=djrole_mc
     )
+    @commands.contexts(guild=True)
     async def remove_dj_role(
             self,
             interaction: disnake.ApplicationCommandInteraction,
@@ -1142,8 +1145,9 @@ class MusicSettings(commands.Cog):
 
     @commands.slash_command(
         description=f"{desc_prefix}Alterar aparência/skin do player.", cooldown=skin_cd, max_concurrency=skin_mc,
-        default_member_permissions=disnake.Permissions(manage_guild=True), dm_permission=False
+        default_member_permissions=disnake.Permissions(manage_guild=True)
     )
+    @commands.contexts(guild=True)
     async def change_skin(self, interaction: disnake.AppCmdInter):
 
         inter, bot = await select_bot_pool(interaction, return_new=True)
@@ -1528,8 +1532,9 @@ class MusicSettings(commands.Cog):
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.slash_command(
-        description=f"{desc_prefix}Ver informações dos servidores de música (lavalink servers).", dm_permission=False
+        description=f"{desc_prefix}Ver informações dos servidores de música (lavalink servers)."
     )
+    @commands.contexts(guild=True)
     async def nodeinfo(self, interaction: disnake.AppCmdInter):
 
         inter, bot = await select_bot_pool(interaction, return_new=True)
@@ -1646,7 +1651,8 @@ class MusicSettings(commands.Cog):
 
     @commands.slash_command(cooldown=customskin_cd, max_concurrency=customskin__mc,
                             description=f"{desc_prefix}Criar suas próprias skins/templates para o player de música.",
-                            default_member_permissions=disnake.Permissions(administrator=True), dm_permission=False)
+                            default_member_permissions=disnake.Permissions(administrator=True))
+    @commands.contexts(guild=True)
     async def custom_skin(self, inter: disnake.AppCmdInter):
 
         inter, bot = await select_bot_pool(inter, return_new=True)
@@ -1729,9 +1735,9 @@ class RPCCog(commands.Cog):
         await self.rich_presence.callback(self=self, inter=ctx)
 
     @commands.slash_command(
-        description=f"{desc_prefix}Ativar/Desativar o sistema de rich-presence no seu status.", cooldown=rpc_cd,
-        dm_permission=False
+        description=f"{desc_prefix}Ativar/Desativar o sistema de rich-presence no seu status.", cooldown=rpc_cd
     )
+    @commands.contexts(guild=True)
     async def rich_presence(self, inter: disnake.AppCmdInter):
 
         if not self.bot.config["ENABLE_RPC_COMMAND"] and not any([await b.is_owner(inter.author) for b in self.bot.pool.get_guild_bots(inter.guild_id)]):

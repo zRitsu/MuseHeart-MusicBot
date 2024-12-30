@@ -93,7 +93,8 @@ class AiMusic(commands.Cog):
 
     @can_send_message_check()
     @check_voice()
-    @commands.slash_command(name="recommendations", extras={"check_player": False}, dm_permission=False,
+    @commands.contexts(guild=True)
+    @commands.slash_command(name="recommendations", extras={"check_player": False},
                             max_concurrency=music_rec_mc, cooldown=music_rec_cd,
                             description=f"{desc_prefix}Tocar recomendações de músicas por IA de acordo com o pedido/prompt.")
     async def musicrecommendations(

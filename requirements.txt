@@ -1,4 +1,4 @@
-disnake==2.9.3
+disnake==2.10.1
 python-dotenv
 user_agent
 requests>=2.31.0

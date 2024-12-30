@@ -152,11 +152,11 @@ class LastFmCog(commands.Cog):
 
         await self.lastfm.callback(self=self, inter=ctx)
 
-
     @commands.slash_command(hidden=True, name="lastfm",
                       description=f"{desc_prefix}Vincular sua conta do last.fm para registrar as músicas via scrobble.",
                       extras={"allow_private": True},
                       cooldown=lastfm_cd, max_concurrency=lastfm_mc)
+    @commands.contexts(guild=True)
     async def lastfm(self, inter: disnake.AppCmdInter):
 
         try:

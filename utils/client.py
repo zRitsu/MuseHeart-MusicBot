@@ -303,8 +303,8 @@ class BotPool:
                 pass
 
     async def run_bots(self, bots: List[BotCore]):
-        await asyncio.wait(
-            [asyncio.create_task(self.start_bot(bot)) for bot in bots]
+        await asyncio.gather(
+            [(self.start_bot(bot)) for bot in bots]
         )
 
     async def connect_node(self, bot: BotCore, data: dict):
@@ -1075,15 +1075,6 @@ class BotCore(commands.AutoShardedBot):
 
         if not self.command_sync_flags.sync_commands and not force:
             return
-
-        for cmd in self.slash_commands:
-            cmd.body.dm_permission = False
-
-        for cmd in self.user_commands:
-            cmd.body.dm_permission = False
-
-        for cmd in self.message_commands:
-            cmd.body.dm_permission = False
 
         current_cmds = sorted([sort_dict_recursively(cmd.body.to_dict()) for cmd in self.application_commands], key=lambda k: k["name"])
 
