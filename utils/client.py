@@ -304,7 +304,7 @@ class BotPool:
 
     async def run_bots(self, bots: List[BotCore]):
         await asyncio.gather(
-            [(self.start_bot(bot)) for bot in bots]
+            *[self.start_bot(bot) for bot in bots]
         )
 
     async def connect_node(self, bot: BotCore, data: dict):
