@@ -939,10 +939,7 @@ class BotPool:
             self.cache_updater_task = loop.create_task(self.cache_updater())
 
             if not message:
-
-                for bot in self.get_all_bots():
-                    loop.create_task(self.start_bot(bot))
-
+                loop.create_task(self.run_bots(self.get_all_bots()))
                 loop.create_task(self.connect_rpc_ws())
 
             try:
