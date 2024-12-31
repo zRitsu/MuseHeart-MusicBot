@@ -199,7 +199,7 @@ class SpotifyClient:
             await self.get_access_token()
         return self.spotify_cache["access_token"]
 
-    async def get_tracks(self, bot: BotCore, requester: int, query: str, search: bool = True, check_title: bool = False):
+    async def get_tracks(self, bot: BotCore, requester: int, query: str, search: bool = True, check_title: float = None):
 
         if spotify_link_regex.match(query):
             async with bot.session.get(query, allow_redirects=False) as r:
@@ -245,7 +245,7 @@ class SpotifyClient:
                     t.info["extra"]["authors"] = [fix_characters(i['name']) for i in result['artists'] if f"feat. {i['name'].lower()}"
                                                   not in result['name'].lower()]
 
-                    if check_title and fuzz.token_sort_ratio(query.lower(), f"{t.authors_string} - {t.single_title}".lower()) < 80:
+                    if check_title and fuzz.token_sort_ratio(query.lower(), f"{t.authors_string} - {t.single_title}".lower()) < check_title:
                         continue
 
                     try:

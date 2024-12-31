@@ -57,7 +57,7 @@ class DeezerClient:
     async def track_search(self, query):
         return await self.request(path="search", params={'q': quote(query)})
 
-    async def get_tracks(self, requester: int, url: str, search: bool = True, check_title: bool = True):
+    async def get_tracks(self, requester: int, url: str, search: bool = True, check_title: float = None):
 
         if not (matches := deezer_regex.match(url)):
 
@@ -94,7 +94,7 @@ class DeezerClient:
 
                     t.info["extra"]["authors"] = [a['name'] for a in artists]
 
-                    if check_title and fuzz.token_sort_ratio(url.lower(), f"{t.authors_string} - {t.single_title}".lower()) < 80:
+                    if check_title and fuzz.token_sort_ratio(url.lower(), f"{t.authors_string} - {t.single_title}".lower()) < check_title:
                         continue
 
                     t.info["extra"]["authors_md"] = ", ".join(

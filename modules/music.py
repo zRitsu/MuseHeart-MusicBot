@@ -7015,14 +7015,14 @@ class Music(commands.Cog):
         if (bot.pool.config["FORCE_USE_DEEZER_CLIENT"] or [n for n in bot.music.nodes.values() if
                                                            "deezer" not in n.info.get("sourceManagers", [])]):
             try:
-                tracks = await self.bot.pool.deezer.get_tracks(url=query, requester=user.id, search=True)
+                tracks = await self.bot.pool.deezer.get_tracks(url=query, requester=user.id, search=True, check_title=50)
             except Exception as e:
                 self.bot.dispatch("custom_error", ctx=ctx, error=e)
                 exceptions.add(repr(e))
 
         if not tracks:
             try:
-                tracks = await self.bot.pool.spotify.get_tracks(self.bot, user.id, query, search=True)
+                tracks = await self.bot.pool.spotify.get_tracks(self.bot, user.id, query, search=True, check_title=50)
             except Exception as e:
                 self.bot.dispatch("custom_error", ctx=ctx, error=e)
                 exceptions.add(repr(e))
