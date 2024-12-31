@@ -501,7 +501,7 @@ class Node:
 
         track_cls = kwargs.pop('track_cls', Track)
 
-        if check_title:=kwargs.get("check_title") and len(tracks) > 1:
+        if (check_title:=kwargs.get("check_title")) and len(tracks) > 1:
 
             tracks_ = [
                 track_cls(
