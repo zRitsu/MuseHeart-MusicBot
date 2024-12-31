@@ -7090,7 +7090,8 @@ class Music(commands.Cog):
                 try:
                     search_query = f"{search_provider}:{query}" if source else query
                     tracks = await n.get_tracks(
-                        search_query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id
+                        search_query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id,
+                        check_title=50
                     )
                 except Exception as e:
                     traceback.print_exc()

@@ -26,11 +26,12 @@ import inspect
 import json
 import logging
 import os
-import pprint
 import re
 import traceback
-from typing import Any, Callable, Dict, Optional, Union, List
+from typing import Any, Callable, Dict, Optional, Union
 from urllib.parse import quote
+
+from rapidfuzz import fuzz
 
 from utils.music.youtube_trusted_session_generator import Browser
 from .backoff import ExponentialBackoff
@@ -499,6 +500,30 @@ class Node:
                                 **kwargs)
 
         track_cls = kwargs.pop('track_cls', Track)
+
+        if check_title:=kwargs.get("check_title") and len(tracks) > 1:
+
+            tracks_ = [
+                track_cls(
+                    id_=track[encoded_name], info=track['info'],
+                    pluginInfo=track.get("pluginInfo", {}), **kwargs
+                ) for track in tracks
+            ]
+
+            search = "".join(query.split(":", 1)[1]).strip().lower()
+
+            if tracks_[0].info['sourceName'] in ("youtube", "soundcloud"):
+
+                def chk(t):
+                    if t.author.endswith(" - topic") and not t.author.endswith(
+                            "Release - topic") and not t.title.startswith(t.author[:-8]):
+                        return f"{t.author} - {t.title}".lower()
+                    else:
+                        return t.title.lower()
+
+                return [t for t in tracks_ if fuzz.token_sort_ratio(chk(t), search) >= check_title]
+
+            return [t for t in tracks_ if fuzz.token_sort_ratio(f"{t.author} - {t.title}".lower(), search) >= check_title]
 
         return [
             track_cls(id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo", {}), **kwargs) for
