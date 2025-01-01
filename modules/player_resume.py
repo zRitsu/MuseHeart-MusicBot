@@ -443,17 +443,18 @@ class PlayerSession(commands.Cog):
                             else:
                                 await text_channel.send("Desarquivando o tópico.", delete_after=2)
 
-                    try:
-                        can_send_message(text_channel, self.bot.user)
-                    except Exception:
-                        print(f"{self.bot.user} - Controller Ignorado (falta de permissão) [Canal: {text_channel.name} | ID: {text_channel.id}] - [ {guild.name} - {guild.id} ]")
-                        text_channel = None
-                    else:
-                        if data["message_id"]:
-                            try:
-                                message = await text_channel.fetch_message(data["message_id"])
-                            except (disnake.NotFound, disnake.Forbidden):
-                                pass
+                    if text_channel:
+                        try:
+                            can_send_message(text_channel, self.bot.user)
+                        except Exception:
+                            print(f"{self.bot.user} - Controller Ignorado (falta de permissão) [Canal: {text_channel.name} | ID: {text_channel.id}] - [ {guild.name} - {guild.id} ]")
+                            text_channel = None
+                        else:
+                            if data["message_id"]:
+                                try:
+                                    message = await text_channel.fetch_message(data["message_id"])
+                                except (disnake.NotFound, disnake.Forbidden):
+                                    pass
 
                 message_without_thread = None
 
