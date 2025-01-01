@@ -420,6 +420,29 @@ class PlayerSession(commands.Cog):
                     data["message_id"] = None
 
                 if text_channel:
+
+                    if isinstance(text_channel, disnake.Thread):
+
+                        if not text_channel.parent.permissions_for(
+                                guild.me).send_messages_in_threads or not text_channel.permissions_for(
+                            guild.me).read_messages:
+                            text_channel = None
+
+                        elif text_channel.locked:
+
+                            if not text_channel.parent.permissions_for(guild.me).manage_threads:
+                                text_channel = None
+                                message = None
+                            else:
+                                await text_channel.edit(archived=False, locked=False)
+
+                        elif text_channel.archived:
+
+                            if text_channel.owner_id == self.bot.user.id:
+                                await text_channel.edit(archived=False)
+                            else:
+                                await text_channel.send("Desarquivando o tópico.", delete_after=2)
+
                     try:
                         can_send_message(text_channel, self.bot.user)
                     except Exception:

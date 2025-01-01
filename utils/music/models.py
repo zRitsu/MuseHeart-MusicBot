@@ -2886,6 +2886,7 @@ class LavalinkPlayer(wavelink.Player):
                                 if not self.text_channel.parent.permissions_for(
                                         self.guild.me).send_messages_in_threads or not self.text_channel.permissions_for(
                                         self.guild.me).read_messages:
+                                    self.text_channel = None
                                     return
 
                                 if self.text_channel.locked:
@@ -2919,7 +2920,7 @@ class LavalinkPlayer(wavelink.Player):
                         return
                     except Exception as e:
                         self.updating = False
-                        traceback.print_exc()
+                        print(traceback.format_exc())
                         if self.static or self.has_thread:
                             self.set_command_log(
                                 f"{(interaction.author.mention + ' ') if interaction else ''}houve um erro na interação: {repr(e)}",
