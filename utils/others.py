@@ -95,8 +95,8 @@ class CustomContext(commands.Context):
         except:
             pass
 
-        if self.channel.permissions_for(self.guild.me).read_message_history:
-            return await super().reply(fail_if_not_exists=False, content=content, **kwargs)
+        #if self.channel.permissions_for(self.guild.me).read_message_history:
+        #    return await super().reply(fail_if_not_exists=False, content=content, **kwargs)
 
         return await super().send(content=content, **kwargs)
 
