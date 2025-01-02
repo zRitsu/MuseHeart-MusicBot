@@ -204,9 +204,9 @@ class Owner(commands.Cog):
                    alt_name="Recarregar as configs do bot.")
     async def reloadconfig(self, ctx: Union[CustomContext, disnake.MessageInteraction]):
 
-        self.bot.pool.load_cfg()
+        self.bot.pool.config = self.bot.pool.load_cfg()
 
-        txt = "**AS Configurações do bot foram recarregadas com sucesso!**"
+        txt = "**As configurações do bot foram recarregadas com sucesso!**"
 
         if isinstance(ctx, CustomContext):
             embed = disnake.Embed(colour=self.bot.get_color(ctx.me), description=txt)
