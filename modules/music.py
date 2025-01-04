@@ -1538,23 +1538,21 @@ class Music(commands.Cog):
 
                 await view.wait()
 
-                if not view.selected:
+                if view.selected:
+                    inter = view.inter
+                    source = self.providers_info[view.selected]
+
+                elif view.selected is False:
                     for c in view.children:
                         c.disabled = True
                     embed.description = embed.description.split("\n")[0]
-                    embed.set_footer(text="Interação cancelada/esgotada.")
-
+                    embed.set_footer(text="Interação cancelada.")
                     try:
                         func = msg.edit
                     except:
                         func = view.inter.response.edit_message
-
                     await func(view=view, embed=embed)
                     return
-
-                inter = view.inter
-
-                source = self.providers_info[view.selected]
 
         if not inter.response.is_done():
             await inter.response.defer(ephemeral=ephemeral)
