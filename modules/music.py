@@ -41,7 +41,7 @@ from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, 
     native_sources, CustomYTDL
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, song_request_buttons, \
-    select_bot_pool, ProgressBar, update_inter, get_source_emoji_cfg
+    select_bot_pool, ProgressBar, update_inter, get_source_emoji_cfg, music_source_emoji
 
 sc_recommended = re.compile(r"https://soundcloud\.com/.*/recommended$")
 
@@ -58,6 +58,17 @@ class Music(commands.Cog):
     ]
 
     audio_formats = ("audio/mpeg", "audio/ogg", "audio/mp4", "audio/aac")
+
+    providers_info = {
+        "youtube": "ytsearch",
+        "soundcloud": "scsearch",
+        "spotify": "spsearch",
+        "titdal": "tdsearch",
+        "bandcamp": "bcsearch",
+        "apple music": "amsearch",
+        "deezer": "dzsearch",
+        "jiosaavn": "jssearch",
+    }
 
     def __init__(self, bot: BotCore):
 
@@ -1204,6 +1215,7 @@ class Music(commands.Cog):
         sc_match = None
         profile_avatar = None
         info = {"entries": []}
+        node: Optional[wavelink.Node] = None
 
         if query.startswith("> fav:"):
             query = user_data["fav_links"][query[7:]]
@@ -1494,6 +1506,55 @@ class Music(commands.Cog):
                         inter.response = view.inter.response
                     else:
                         inter = view.inter
+
+            else:
+
+                music_sources = set()
+
+                for b in self.bot.pool.get_guild_bots(inter.guild_id):
+
+                    if not b.get_guild(inter.guild_id):
+                        continue
+
+                    for n in b.music.nodes.values():
+                        for s in n.info["sourceManagers"]:
+                            if s in self.providers_info:
+                                music_sources.add(s)
+
+                view = ButtonInteraction(
+                    user=inter.author, timeout=30,
+                    buttons=[
+                        disnake.ui.Button(label=ms.title(), custom_id=ms, emoji=music_source_emoji(ms)) for ms in music_sources
+                    ]
+                )
+
+                embed = disnake.Embed(
+                    color=inter.bot.get_color(),
+                    description="**De qual serviço você deseja priorizar a busca da música?**\n"
+                                f'-# Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para clicar em um dos botões abaixo.'
+                )
+
+                msg = await inter.send(embed=embed, view=view)
+
+                await view.wait()
+
+                if not view.selected:
+                    for c in view.children:
+                        c.disabled = True
+                    embed.description = embed.description.split("\n")[0]
+                    embed.set_footer(text="Interação cancelada/esgotada.")
+
+                    try:
+                        func = msg.edit
+                    except:
+                        func = view.inter.response.edit_message
+
+                    await func(view=view, embed=embed)
+                    return
+
+                inter = view.inter
+
+                source = self.providers_info[view.selected]
 
         if not inter.response.is_done():
             await inter.response.defer(ephemeral=ephemeral)
