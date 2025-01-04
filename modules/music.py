@@ -1529,7 +1529,7 @@ class Music(commands.Cog):
                 )
 
                 embed = disnake.Embed(
-                    color=inter.bot.get_color(),
+                    color=inter.bot.get_color(guild.me),
                     description="**De qual serviço você deseja priorizar a busca da música?**\n"
                                 f'-# Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para clicar em um dos botões abaixo.'
                 )
