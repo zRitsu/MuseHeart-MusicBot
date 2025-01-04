@@ -824,7 +824,7 @@ class LavalinkPlayer(wavelink.Player):
             if event.code == 1000:
                 return
 
-            if not self.guild.me or (event.code == 4014 and event.reason.startswith("Disconnected")):
+            if not self.guild.me or (event.code == 4014 and event.reason.startswith("Disconnected") and not self.keep_connected):
                 await self.destroy(force=True)
                 return
 
