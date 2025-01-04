@@ -64,7 +64,7 @@ class AiMusic(commands.Cog):
         self.ai_client = bot.pool.ai_client
 
         self.models = [
-            g4f.models.gemini_flash,
+            g4f.models.gemini_2_0_flash,
             g4f.models.claude_3_haiku,
             g4f.models.claude_3_5_sonnet,
             g4f.models.gpt_4o,
