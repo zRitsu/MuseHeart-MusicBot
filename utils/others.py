@@ -561,6 +561,7 @@ music_source_emoji_data = {
     "tidal": "<:tidal:1235352567048048691>",
     "youtubemusic": "<:Youtubemusicicon:1245606364470841354>",
     "last.fm": "<:Lastfm:1278883704097341541>",
+    "bandcamp": "<:bandcamp:767129639490420796>",
 }
 
 def music_source_emoji(name: str):
