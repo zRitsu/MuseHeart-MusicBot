@@ -824,7 +824,7 @@ class LavalinkPlayer(wavelink.Player):
             if event.code == 1000:
                 return
 
-            if not self.guild.me:
+            if not self.guild.me or (event.code == 4014 and event.reason.startswith("Disconnected")):
                 await self.destroy(force=True)
                 return
 
@@ -874,6 +874,7 @@ class LavalinkPlayer(wavelink.Player):
                     4014,
                     4006,  # Session is no longer valid.
             ):
+
                 await asyncio.sleep(5)
 
                 try:
