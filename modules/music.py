@@ -7096,9 +7096,9 @@ class Music(commands.Cog):
                 except Exception as e:
                     traceback.print_exc()
                     exceptions.add(repr(e))
-                    if [e for e in ("Video returned by YouTube isn't what was requested",
+                    if [msg for msg in ("Video returned by YouTube isn't what was requested",
                                     "This video requires login.",
-                                    "The video returned is not what was requested.") if e in str(e)]:
+                                    "The video returned is not what was requested.") if msg in str(e)]:
 
                         if is_yt_source and n.version > 3:
                             try:
