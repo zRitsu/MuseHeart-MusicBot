@@ -1576,6 +1576,9 @@ class Music(commands.Cog):
                 guild = inter.guild
                 channel = inter.channel
 
+            if not guild:
+                guild = new_bot.get_guild(inter.guild_id)
+
             try:
                 new_bot.music.players[guild.id]
             except KeyError:
