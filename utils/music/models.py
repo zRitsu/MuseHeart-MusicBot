@@ -1038,13 +1038,13 @@ class LavalinkPlayer(wavelink.Player):
 
                         if video_not_available:
 
-                            #with suppress(IndexError, ValueError):
+                            with suppress(IndexError, ValueError):
                             #    self.node.search_providers.remove("ytsearch")
                             #    self.node.search_providers.remove("ytmsearch")
-                            #    self.node.partial_providers.remove("ytsearch:\"{isrc}\"")
-                            #    self.node.partial_providers.remove("ytsearch:\"{title} - {author}\"")
-                            #    self.node.partial_providers.remove("ytmsearch:\"{isrc}\"")
-                            #    self.node.partial_providers.remove("ytmsearch:\"{title} - {author}\"")
+                                self.node.partial_providers.remove("ytsearch:\"{isrc}\"")
+                                self.node.partial_providers.remove("ytsearch:\"{title} - {author}\"")
+                                self.node.partial_providers.remove("ytmsearch:\"{isrc}\"")
+                                self.node.partial_providers.remove("ytmsearch:\"{title} - {author}\"")
 
                             self.native_yt = False
 
@@ -1134,8 +1134,8 @@ class LavalinkPlayer(wavelink.Player):
                         if youtube_exception:
 
                             with suppress(IndexError, ValueError, KeyError):
-                                self.node.search_providers.remove("ytsearch")
-                                self.node.search_providers.remove("ytmsearch")
+                            #    self.node.search_providers.remove("ytsearch")
+                            #    self.node.search_providers.remove("ytmsearch")
                                 self.node.partial_providers.remove("ytsearch:\"{isrc}\"")
                                 self.node.partial_providers.remove("ytsearch:\"{title} - {author}\"")
                                 self.node.partial_providers.remove("ytmsearch:\"{isrc}\"")
@@ -1147,11 +1147,10 @@ class LavalinkPlayer(wavelink.Player):
 
                             if track.info["sourceName"] == "youtube":
 
-                                if self.bot.pool.ytdl.params.get("cookiefile"):
-                                    self.native_yt = False
-                                    await asyncio.sleep(3)
+                                self.native_yt = False
 
-                                else:
+                                if not self.bot.pool.ytdl.params.get("cookiefile"):
+
                                     try:
                                         new_node = [n for n in self.bot.music.nodes.values() if n.is_available and "ytsearch" in n.search_providers][0]
                                     except:
@@ -1186,7 +1185,7 @@ class LavalinkPlayer(wavelink.Player):
                                         ), delete_after=30)
                                     except:
                                         self.set_command_log(text=txt, emoji="⚠️", controller=True)
-                                await asyncio.sleep(5)
+
                             self.locked = False
                             await self.process_next(start_position=self.position)
                             await send_report()
