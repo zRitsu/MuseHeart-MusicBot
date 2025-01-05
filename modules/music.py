@@ -1522,7 +1522,7 @@ class Music(commands.Cog):
                                 music_sources.add(s)
 
                 view = ButtonInteraction(
-                    user=inter.author, timeout=30,
+                    user=inter.author, timeout=45,
                     buttons=[
                         disnake.ui.Button(label=ms.title(), custom_id=ms, emoji=music_source_emoji(ms)) for ms in music_sources
                     ]
@@ -1530,8 +1530,9 @@ class Music(commands.Cog):
 
                 embed = disnake.Embed(
                     color=inter.bot.get_color(guild.me),
-                    description="**De qual serviço você deseja priorizar a busca da música?**\n"
-                                f'-# Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R> para clicar em um dos botões abaixo.'
+                    description="**Qual serviço de música você deseja priorizar a busca da música?**\n"
+                                "-# Nota: Caso não retorne a musica desejada no serviço escolhido será usado outro selecionado automaticamente.\n"
+                                f'-# Nota 2: Caso não escolha alguma opção abaixo <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> será usado o serviço padrão automaticamente.'
                 )
 
                 msg = await inter.send(embed=embed, view=view)
@@ -1545,7 +1546,7 @@ class Music(commands.Cog):
                 elif view.selected is False:
                     for c in view.children:
                         c.disabled = True
-                    embed.description = embed.description.split("\n")[0]
+                    embed.description = "\n".join(embed.description.split("\n")[:-1])
                     embed.set_footer(text="Interação cancelada.")
                     try:
                         func = msg.edit
@@ -7278,16 +7279,10 @@ class Music(commands.Cog):
 
             return playlist, node
 
-        if self.bot.config["PARTIALTRACK_FIRST"]:
-            tracks, node, exceptions, is_yt_source = await self.get_partial_tracks(query=query, user=user, ctx=ctx, node=node, bot=bot)
-            if not tracks:
-                tracks, node, exc, is_yt_source = await self.get_lavalink_tracks(query=query, user=user, ctx=ctx, node=node, bot=bot, source=source)
-                exceptions.update(exc)
-        else:
-            tracks, node, exceptions, is_yt_source = await self.get_lavalink_tracks(query=query, user=user, ctx=ctx, node=node, bot=bot, source=source)
-            if not tracks:
-                tracks, node, exc, is_yt_source = await self.get_partial_tracks(query=query, user=user, ctx=ctx, node=node, bot=bot)
-                exceptions.update(exc)
+        tracks, node, exceptions, is_yt_source = await self.get_lavalink_tracks(query=query, user=user, ctx=ctx, node=node, bot=bot, source=source)
+        if not tracks:
+            tracks, node, exc, is_yt_source = await self.get_partial_tracks(query=query, user=user, ctx=ctx, node=node, bot=bot)
+            exceptions.update(exc)
 
         """if not tracks:
 
