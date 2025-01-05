@@ -15,7 +15,7 @@ from itertools import cycle
 from time import time
 from typing import Optional, Union, TYPE_CHECKING, List
 from urllib import parse
-from urllib.parse import quote
+from urllib.parse import quote, quote_plus
 
 import disnake
 from rapidfuzz import fuzz
@@ -29,7 +29,7 @@ from utils.music.errors import GenericError, PoolException
 from utils.music.filters import AudioFilter
 from utils.music.skin_utils import skin_converter
 from utils.music.track_encoder import encode_track, DataWriter
-from utils.others import music_source_emoji, send_idle_embed, PlayerControls, song_request_buttons, string_to_file
+from utils.others import music_source_emoji, send_idle_embed, PlayerControls, string_to_file
 from wavelink import TrackStart, TrackEnd
 
 if TYPE_CHECKING:
@@ -154,7 +154,7 @@ class PartialTrack:
 
     @property
     def search_uri(self):
-        return f"https://www.youtube.com/results?search_query={quote((self.author + '-' + self.single_title) if self.info['sourceName'] not in ('youtube', 'soundcloud') else self.title)}"
+        return f"https://www.youtube.com/results?search_query={quote_plus((self.author + '-' + self.single_title) if self.info['sourceName'] not in ('youtube', 'soundcloud') else self.title)}"
 
     @property
     def title(self) -> str:
