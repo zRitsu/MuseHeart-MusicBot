@@ -225,7 +225,7 @@ class AiMusic(commands.Cog):
 
         tracklist = []
         lines = []
-        provider = ""
+        model = ""
 
         for m in self.models:
             try:
@@ -260,7 +260,7 @@ class AiMusic(commands.Cog):
                 if len(tracklist) < 1:
                     print(f"{m.name} - Falha ao obter info via AI: {response}")
                     continue
-                provider = m.name
+                model = m.name
                 break
             except Exception as e:
                 print(f"{m.name} - Falha ao obter info via AI: {prompt}\n{repr(e)}")
@@ -290,9 +290,12 @@ class AiMusic(commands.Cog):
         if len(last_line:=lines[-1]) > 40:
             txt += f"\n{last_line}\n"
 
-        txt += (f"\n**Elas serão tocadas no canal de voz:** <#{channel_id}>\n"
-                f"-# **Recomendações obtidas via** `{provider}`\n"
-                f"-# AI Music Recommendations (Alpha / Experimental).")
+        txt += f"\n**Elas serão tocadas no canal de voz:** <#{channel_id}>"
+
+        if self.bot.config.get("AI_REC_PROVIDER_LOG") == "true":
+            txt += f"\n-# Modelo utilizado: {model}"
+
+        txt += "\n-# AI Music Recommendations (Alpha / Experimental)."
 
         if isinstance(inter, CustomContext):
             await msg.edit(embed=disnake.Embed(description=txt, color=self.bot.get_color(player.guild.me)))
