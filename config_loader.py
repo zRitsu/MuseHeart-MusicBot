@@ -71,7 +71,6 @@ DEFAULT_CONFIG = {
     "PLAYLIST_CACHE_SIZE": 500,
     "PLAYLIST_CACHE_TTL": 1800,
     "USE_YTM_TRACKINFO_SCROBBLE": False,
-    "CHECK_TRACK_SIMILARITY": False,
     "YTDL_CACHE_TIME": 900,
 
     ##############################################
@@ -244,7 +243,6 @@ def load_config():
         "AUTO_DOWNLOAD_LAVALINK_SERVERLIST",
         "ENABLE_LOGGER",
         "GUILD_DEAFEN_WARN",
-        "CHECK_TRACK_SIMILARITY",
         "ENABLE_DISCORD_URLS_PLAYBACK",
         "PLAYER_SESSIONS_MONGODB",
         "SENSITIVE_INFO_WARN",

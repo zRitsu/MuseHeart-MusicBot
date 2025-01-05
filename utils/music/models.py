@@ -1767,10 +1767,12 @@ class LavalinkPlayer(wavelink.Player):
                         if query.startswith("jssearch"):
                             continue
 
+                        check_title = 60 if query.startswith(("ytmsearch", "ytsearch", "scsearch")) else 75
+
                         try:
                             tracks = await self.node.get_tracks(
                                 query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, autoplay=True,
-                                requester=self.bot.user.id
+                                requester=self.bot.user.id, check_title=check_title
                             )
                         except Exception as e:
                             if [err for err in ("Could not find tracks from mix", "Could not read mix page") if err in str(e)] and self.native_yt:
@@ -1778,7 +1780,7 @@ class LavalinkPlayer(wavelink.Player):
                                     tracks_ytsearch = await self.node.get_tracks(
                                         f"{query}:\"{track_data.author}\"",
                                         track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, autoplay=True,
-                                        requester=self.bot.user.id)
+                                        requester=self.bot.user.id, check_title=check_title)
                                     break
                                 except Exception as e:
                                     exception = e
@@ -3383,11 +3385,6 @@ class LavalinkPlayer(wavelink.Player):
 
         check_duration = bool(track.duration)
 
-        if track.info["sourceName"] == "last.fm":
-            check_duration = False
-
-        similarity_treshold = 70 if check_duration else 85
-
         try:
 
             exceptions = []
@@ -3471,13 +3468,6 @@ class LavalinkPlayer(wavelink.Player):
 
                     if not has_exclude_tags and any(tag for tag in exclude_tags if tag.lower() in t.title.lower()):
                         continue
-
-                    if self.bot.config["CHECK_TRACK_SIMILARITY"]:
-
-                        norm_title = lambda tc: f"{tc.author} - {tc.single_title}".lower() if (tc.info["sourceName"] not in ("youtube", "soundcloud") or len(tc.title) < 12) else tc.title.lower()
-
-                        if fuzz.token_sort_ratio(norm_title(t), norm_title(track)) < similarity_treshold:
-                            continue
 
                     if check_duration and not ((t.duration - 10000) < track.duration < (t.duration + 10000)):
                         continue
