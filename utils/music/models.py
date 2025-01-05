@@ -1767,12 +1767,10 @@ class LavalinkPlayer(wavelink.Player):
                         if query.startswith("jssearch"):
                             continue
 
-                        check_title = 60 if query.startswith(("ytmsearch", "ytsearch", "scsearch")) else 75
-
                         try:
                             tracks = await self.node.get_tracks(
                                 query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, autoplay=True,
-                                requester=self.bot.user.id, check_title=check_title
+                                requester=self.bot.user.id
                             )
                         except Exception as e:
                             if [err for err in ("Could not find tracks from mix", "Could not read mix page") if err in str(e)] and self.native_yt:
@@ -1780,7 +1778,7 @@ class LavalinkPlayer(wavelink.Player):
                                     tracks_ytsearch = await self.node.get_tracks(
                                         f"{query}:\"{track_data.author}\"",
                                         track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, autoplay=True,
-                                        requester=self.bot.user.id, check_title=check_title)
+                                        requester=self.bot.user.id)
                                     break
                                 except Exception as e:
                                     exception = e
@@ -3422,7 +3420,7 @@ class LavalinkPlayer(wavelink.Player):
 
                 if not (result := self.bot.pool.partial_track_cache.get(f'{track.info["sourceName"]}:{track.author}-{track.single_title}')):
                     try:
-                        result = (await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist))
+                        result = (await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, check_title = 60 if query.startswith(("ytmsearch", "ytsearch", "scsearch")) else 75))
                     except Exception as e:
                         if track.info["sourceName"] == "youtube" and any(e in str(e) for e in (
                             "This video is not available",
