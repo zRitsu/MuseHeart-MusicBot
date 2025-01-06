@@ -65,7 +65,7 @@ class Music(commands.Cog):
         "spotify": "spsearch",
         "titdal": "tdsearch",
         "bandcamp": "bcsearch",
-        "apple music": "amsearch",
+        "applemusic": "amsearch",
         "deezer": "dzsearch",
         "jiosaavn": "jssearch",
     }
@@ -1524,7 +1524,7 @@ class Music(commands.Cog):
                 view = ButtonInteraction(
                     user=inter.author, timeout=45,
                     buttons=[
-                        disnake.ui.Button(label=ms.title(), custom_id=ms, emoji=music_source_emoji(ms)) for ms in music_sources
+                        disnake.ui.Button(label=ms.title(), custom_id=ms, emoji=music_source_emoji(ms)) for ms in sorted(music_sources)
                     ]
                 )
 
@@ -7154,7 +7154,7 @@ class Music(commands.Cog):
                     search_query = f"{search_provider}:{query}" if source else query
                     tracks = await n.get_tracks(
                         search_query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, requester=user.id,
-                        check_title=60 if search_provider in ("ytmsearch", "ytsearch", "scsearch") else 75
+                        check_title=50
                     )
                 except Exception as e:
                     traceback.print_exc()

@@ -47,6 +47,7 @@ spotify_regex = re.compile("https://open.spotify.com?.+(album|playlist|artist)/(
 deezer_regex = re.compile(r"(https?://)?(www\.)?deezer\.com/(?P<countrycode>[a-zA-Z]{2}/)?(?P<type>album|playlist|artist|profile)/(?P<identifier>[0-9]+)")
 soundcloud_regex = re.compile(r"https://soundcloud\.com/([^/]+)/sets/([^/]+)")
 
+exclude_tags = ["remix", "edit", "extend", "compilation", "mashup", "mixed"]
 
 class Node:
     """A WaveLink Node instance.
@@ -521,9 +522,16 @@ class Node:
                     else:
                         return t.title.lower()
 
-                return [t for t in tracks_ if fuzz.token_sort_ratio(chk(t), search) >= check_title]
+                tracks_ = [t for t in tracks_ if fuzz.token_sort_ratio(chk(t), search) >= check_title]
 
-            return [t for t in tracks_ if fuzz.token_sort_ratio(f"{t.author} - {t.title}".lower(), search) >= check_title]
+            else:
+                print( f"{query}\n"+ "\n".join([f"{t.author} - {t.title} -> " + str(fuzz.token_sort_ratio(f"{t.author} - {t.title}".lower(), search)) for t in tracks_]) + "\n" + ("-"*50))
+                tracks_ = [t for t in tracks_ if fuzz.token_sort_ratio(f"{t.author} - {t.title}".lower(), search) >= check_title]
+
+            if not any(tag for tag in exclude_tags if tag in search.lower()):
+                return [t for t in tracks_ if not any(tag for tag in exclude_tags if tag in t.title.lower())]
+
+            return tracks_
 
         return [
             track_cls(id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo", {}), **kwargs) for
