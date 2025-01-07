@@ -525,7 +525,6 @@ class Node:
                 tracks_ = [t for t in tracks_ if fuzz.token_sort_ratio(chk(t), search) >= check_title]
 
             else:
-                print( f"{query}\n"+ "\n".join([f"{t.author} - {t.title} -> " + str(fuzz.token_sort_ratio(f"{t.author} - {t.title}".lower(), search)) for t in tracks_]) + "\n" + ("-"*50))
                 tracks_ = [t for t in tracks_ if fuzz.token_sort_ratio(f"{t.author} - {t.title}".lower(), search) >= check_title]
 
             if not any(tag for tag in exclude_tags if tag in search.lower()):
