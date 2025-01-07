@@ -1565,7 +1565,7 @@ class Music(commands.Cog):
         try:
             player = bot.music.players[guild.id]
         except KeyError:
-            await check_pool_bots(inter, check_player=False, bypass_prefix=True)
+            await check_pool_bots(inter, check_player=False, bypass_prefix=True, bypass_attribute=True)
 
             try:
                 new_bot = inter.music_bot

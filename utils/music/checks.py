@@ -92,13 +92,14 @@ def check_forum(inter, bot):
             raise PoolException()
 
 async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool = True, return_first=False,
-                          bypass_prefix=False):
+                          bypass_prefix=False, bypass_attribute=False):
 
-    try:
-        inter.music_bot
-        return True
-    except AttributeError:
-        pass
+    if not bypass_attribute:
+        try:
+            inter.music_bot
+            return True
+        except AttributeError:
+            pass
 
     if isinstance(inter, disnake.MessageInteraction):
         if inter.data.custom_id not in ("favmanager_play_button", "musicplayer_embed_enqueue_track", "musicplayer_embed_forceplay"):
