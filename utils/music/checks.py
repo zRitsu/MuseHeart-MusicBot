@@ -264,7 +264,8 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         if only_voiced:
             continue
 
-        channel = bot.get_channel(inter.channel.id)
+        if not (channel := bot.get_channel(inter.channel.id)):
+            continue
 
         if isinstance(channel, disnake.Thread):
             send_message_perm = channel.parent.permissions_for(channel.guild.me).send_messages_in_threads
