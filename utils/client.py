@@ -803,9 +803,9 @@ class BotPool:
 
                     available_bot = False
 
-                    for bot in inter.bot.pool.get_guild_bots(inter.guild_id):
-                        if bot.appinfo and (
-                                bot.appinfo.bot_public or await bot.is_owner(inter.author)) and bot.get_guild(
+                    for b in inter.bot.pool.get_guild_bots(inter.guild_id):
+                        if b.appinfo and (
+                                b.appinfo.bot_public or await b.is_owner(inter.author)) and b.get_guild(
                                 inter.guild_id):
                             available_bot = True
                             break
@@ -818,7 +818,11 @@ class BotPool:
                 if not kwargs:
                     kwargs["return_first"] = True
 
-                await check_pool_bots(inter, **kwargs)
+                try:
+                    await check_pool_bots(inter, **kwargs)
+                except Exception as e:
+                    bot.dispatch("slash_command_error", inter, e, no_log=True)
+                    raise e
 
                 return True
 

@@ -82,16 +82,16 @@ class ErrorHandler(commands.Cog):
     @commands.Cog.listener('on_user_command_error')
     @commands.Cog.listener('on_message_command_error')
     @commands.Cog.listener('on_slash_command_error')
-    async def on_interaction_command_error(self, inter: disnake.AppCmdInter, error: Exception):
+    async def on_interaction_command_error(self, inter: disnake.AppCmdInter, error: Exception, **kwargs):
 
-        await self.process_interaction_error(inter=inter, error=error)
+        await self.process_interaction_error(inter=inter, error=error, **kwargs)
 
-    async def process_interaction_error(self, inter: disnake.AppCmdInter, error: Exception, resp_msg = True):
+    async def process_interaction_error(self, inter: disnake.AppCmdInter, error: Exception, resp_msg = True, **kwargs):
 
         if isinstance(error, PoolException):
             return
 
-        error_msg, full_error_msg, kill_process, components, mention_author = parse_error(inter, error)
+        error_msg, full_error_msg, kill_process, components, mention_author = parse_error(inter, error, **kwargs)
 
         if isinstance(error, disnake.NotFound) and str(error).endswith("Unknown Interaction"):
             return
