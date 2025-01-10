@@ -6,6 +6,7 @@ import subprocess
 import tempfile
 import time
 import zipfile
+from contextlib import suppress
 
 import requests
 
@@ -129,26 +130,48 @@ def run_lavalink(
                 except:
                     pass
 
-                if platform.architecture()[0] != "64bit":
-                    jdk_url = "https://download.bell-sw.com/java/17.0.13+12/bellsoft-jdk17.0.13+12-linux-i586.tar.gz"
+                if platform.architecture()[0] == "64bit":
+                    jdk_url = "https://download.bell-sw.com/java/17.0.13+12/bellsoft-jdk17.0.13+12-windows-amd64.zip"
                 else:
-                    jdk_url = "https://download.bell-sw.com/java/17.0.13+12/bellsoft-jdk17.0.13+12-linux-amd64.tar.gz"
+                    jdk_url = "https://download.bell-sw.com/java/17.0.13+12/bellsoft-jdk17.0.13+12-windows-i586.zip"
 
                 jdk_filename = "java.zip"
 
-                download_file(jdk_url, jdk_filename)
+                download_file(jdk_url, f"{tmp_dir}/{jdk_filename}")
 
-                with zipfile.ZipFile(jdk_filename, 'r') as zip_ref:
-                    zip_ref.extractall(f"{tmp_dir}/.java/{jdk_platform}")
+                os.makedirs(f"{tmp_dir}/.java/{jdk_platform}", exist_ok=True)
 
-                extracted_folder = os.path.join(f"{tmp_dir}/.java/{jdk_platform}", os.listdir(f"{tmp_dir}/.java/{jdk_platform}")[0])
+                with zipfile.ZipFile(os.path.normpath(f"{tmp_dir}/{jdk_filename}"), 'r') as zip_ref:
+                    try:
+                        zip_ref.extractall(f"{tmp_dir}/.java")
+                    except Exception as e:
+                        if isinstance(e, zipfile.BadZipFile):
+                            os.remove(f"{tmp_dir}/{jdk_filename}")
+                        raise e
+
+                extracted_folder = None
+
+                java_dirs = os.listdir(f"{tmp_dir}/.java")
+
+                for d in os.listdir(f"{tmp_dir}/.java"):
+                    if d == jdk_platform:
+                        continue
+                    if os.path.isfile(f"{tmp_dir}/.java/{d}/bin/java.exe"):
+                        extracted_folder = f"{tmp_dir}/.java/{d}"
+
+                if not extracted_folder:
+                    raise Exception(
+                        f"JDK não encontrando no diretório: {tmp_dir}/.java\n" + "\n".join(java_dirs)
+                    )
 
                 for item in os.listdir(extracted_folder):
                     item_path = os.path.join(extracted_folder, item)
                     dest_path = os.path.join(f"{tmp_dir}/.java/{jdk_platform}", item)
                     os.rename(item_path, dest_path)
 
-                os.remove(jdk_filename)
+                with suppress(FileNotFoundError):
+                    os.remove(f"{tmp_dir}/{jdk_filename}")
+                    shutil.rmtree(extracted_folder)
 
                 java_cmd = os.path.realpath(f"{tmp_dir}/.java/{jdk_platform}/bin/java")
 
