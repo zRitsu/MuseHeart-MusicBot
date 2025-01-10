@@ -97,16 +97,16 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
     if not bypass_attribute:
         try:
             inter.music_bot
-            return True
+            return inter.music_bot, inter.music_guild
         except AttributeError:
             pass
 
     if isinstance(inter, disnake.MessageInteraction):
         if inter.data.custom_id not in ("favmanager_play_button", "musicplayer_embed_enqueue_track", "musicplayer_embed_forceplay"):
-            return
+            return inter.bot, inter.guild
 
     elif isinstance(inter, disnake.ModalInteraction):
-        return
+        return inter.bot, inter.guild
 
     if len((guild_bots:=inter.bot.pool.get_guild_bots(inter.guild_id))) < 2 and inter.guild:
         try:
@@ -114,7 +114,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
             inter.music_guild = inter.guild
         except AttributeError:
             pass
-        return True
+        return inter.bot, inter.guild
 
     if not inter.guild_id:
         raise GenericError("**Esse comando não pode ser usado nas mensagens privada.**")
@@ -123,7 +123,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         if inter.bot.user.id in inter.author.voice.channel.voice_states:
             inter.music_bot = inter.bot
             inter.music_guild = inter.guild
-            return True
+            return inter.music_bot, inter.music_guild
     except AttributeError:
         pass
 
@@ -136,7 +136,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         is_forum = check_forum(inter, inter.bot)
 
         if is_forum:
-            return True
+            return inter.music_bot, inter.music_guild
 
         if not (mention_prefixed:=inter.message.content.startswith(tuple(inter.bot.pool.bot_mentions))):
 
@@ -165,8 +165,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
                 inter.music_bot = inter.bot
                 inter.music_guild = inter.guild
-
-                return True
+                return inter.music_bot, inter.music_guild
 
         else:
 
@@ -175,12 +174,12 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
                 if inter.author.voice:
                     user_vc = True
                 else:
-                    return True
+                    return inter.music_bot, inter.music_guild
 
             elif not inter.author.voice:
 
                 if return_first:
-                    return True
+                    return inter.music_bot, inter.music_guild
 
                 raise NoVoice()
             else:
@@ -189,7 +188,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
             if inter.bot.user.id in inter.author.voice.channel.voice_states:
                 inter.music_bot = inter.bot
                 inter.music_guild = inter.guild
-                return True
+                return inter.bot, inter.guild
 
             if only_voiced:
                 pass
@@ -197,7 +196,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
             elif not inter.guild.me.voice:
                 inter.music_bot = inter.bot
                 inter.music_guild = inter.guild
-                return True
+                return inter.bot, inter.guild
 
     free_bot = []
 
@@ -259,7 +258,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
                 inter.music_bot.dispatch("pool_dispatch", inter, bot.user.id)
                 raise PoolException()
 
-            return True
+            return bot, guild
 
         if only_voiced:
             continue
@@ -295,7 +294,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
             inter.music_guild = inter.guild
             inter.bot.dispatch("pool_dispatch", inter, None)
 
-            return True
+            return inter.bot, inter.guild
 
     except AttributeError:
         pass
@@ -313,7 +312,8 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
                 pass
             inter.music_bot.dispatch("pool_dispatch", inter, inter.music_bot.user.id, bot=inter.music_bot)
             raise PoolException()
-        return True
+
+        return inter.music_bot, inter.music_guild
 
     elif check_player:
 
@@ -322,7 +322,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         if return_first:
             inter.music_bot = inter.bot
             inter.music_guild = inter.guild
-            return True
+            return inter.bot, inter.guild
 
         raise NoPlayer()
 

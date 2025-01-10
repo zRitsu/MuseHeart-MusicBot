@@ -821,7 +821,7 @@ class BotPool:
                 try:
                     await check_pool_bots(inter, **kwargs)
                 except Exception as e:
-                    bot.dispatch("slash_command_error", inter, e, no_log=True)
+                    bot.dispatch("custom_slash_command_error", inter, e, no_log=True)
                     raise e
 
                 return True

@@ -79,6 +79,7 @@ class ErrorHandler(commands.Cog):
         else:
             await self.process_interaction_error(inter=ctx, error=error, resp_msg=False)
 
+    @commands.Cog.listener('on_custom_slash_command_error')
     @commands.Cog.listener('on_user_command_error')
     @commands.Cog.listener('on_message_command_error')
     @commands.Cog.listener('on_slash_command_error')
