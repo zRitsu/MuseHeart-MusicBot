@@ -266,8 +266,7 @@ class Music(commands.Cog):
             return [current] if len(current) < 100 else []
 
         try:
-            await check_pool_bots(inter, only_voiced=True)
-            bot = inter.music_bot
+            bot, guild = await check_pool_bots(inter, only_voiced=True)
         except GenericError:
             return [current[:99]]
         except:
@@ -1565,19 +1564,8 @@ class Music(commands.Cog):
         try:
             player = bot.music.players[guild.id]
         except KeyError:
-            await check_pool_bots(inter, check_player=False, bypass_prefix=True, bypass_attribute=True)
-
-            try:
-                new_bot = inter.music_bot
-                guild = inter.music_guild
-                channel = bot.get_channel(inter.channel.id)
-            except AttributeError:
-                new_bot = inter.bot
-                guild = inter.guild
-                channel = inter.channel
-
-            if not guild:
-                guild = new_bot.get_guild(inter.guild_id)
+            new_bot, guild = await check_pool_bots(inter, check_player=False, bypass_prefix=True, bypass_attribute=True)
+            channel = bot.get_channel(inter.channel.id)
 
             try:
                 new_bot.music.players[guild.id]
