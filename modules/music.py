@@ -7071,7 +7071,7 @@ class Music(commands.Cog):
                 self.bot.dispatch("custom_error", ctx=ctx, error=e)
                 exceptions.add(repr(e))
 
-        if not tracks:
+        if not tracks and not [n for n in bot.music.nodes.values() if "spotify" in n.info.get("sourceManagers", [])]:
             try:
                 tracks = await self.bot.pool.spotify.get_tracks(self.bot, user.id, query, search=True, check_title=80)
             except Exception as e:
