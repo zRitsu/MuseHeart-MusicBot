@@ -1626,7 +1626,7 @@ class MusicSettings(commands.Cog):
         elif isinstance(inter, disnake.MessageInteraction):
             await inter.response.edit_message(embed=embeds[0], view=view)
         else:
-            msg = await inter.edit_original_message(embed=embeds[0], view=view)
+            msg = await inter.send(embed=embeds[0], view=view)
 
         if view:
             await view.wait()
