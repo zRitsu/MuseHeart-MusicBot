@@ -6880,7 +6880,7 @@ class Music(commands.Cog):
                 async with self.bot.session.get(f"{node.rest_uri}/v4/info", timeout=45, headers=node.headers) as r:
                     if r.status == 200:
                         node.version = 4
-                        node.info = await r.json()
+                        node.update_info(await r.json())
                     elif r.status != 404:
                         raise Exception(f"{self.bot.user} - [{r.status}]: {await r.text()}"[:300])
                     else:

@@ -122,7 +122,10 @@ class Node:
         self.restarting = False
 
         self.stats = None
-        self.info = {"sourceManagers": [], "plugins": {}}
+        self.info = {}
+
+        self.update_info()
+
         self.max_retries = kwargs.pop("max_retries", 1)
         self.only_use_native_search_providers = kwargs.pop("only_use_native_search_providers", False)
         self.search_providers = []
@@ -138,6 +141,15 @@ class Node:
 
     def __repr__(self):
         return f'{self.identifier} | {self.region} | (Shard: {self.shard_id})'
+
+    def update_info(self, data: dict = None):
+        if not data:
+            self.info = {"sourceManagers": [], "plugins": {}}
+        else:
+            self.info = data
+            self.version = data["check_version"]
+            if self.version > 3:
+                self.info["plugins"] = {d["name"]: d["version"] for d in self.info["plugins"]}
 
     @property
     def is_available(self) -> bool:
@@ -189,8 +201,7 @@ class Node:
         max_retries = int(self.max_retries)
 
         if (info:=kwargs.get("info")):
-            self.version = info["check_version"]
-            self.info = info
+            self.update_info(info)
 
         else:
             print(f"📶 - {self._client.bot.user} - Iniciando servidor de música: {self.identifier}")
@@ -222,9 +233,6 @@ class Node:
                     retries += 1
                     await asyncio.sleep(backoff)
                     continue
-
-        if self.version > 3:
-            self.info["plugins"] = {d["name"]: d["version"] for d in self.info["plugins"]}
 
         if not self._websocket:
 
