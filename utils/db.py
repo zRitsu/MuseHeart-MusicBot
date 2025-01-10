@@ -298,6 +298,12 @@ class MongoDatabase(BaseDB):
                           collection: str, default_model: dict = None):
 
         self.cache[f"{collection}:{db_name}:{id_}"] = data
+
+        try:
+            del data["_id"]
+        except KeyError:
+            pass
+
         await self._connect[collection][db_name].update_one({'_id': str(id_)}, {'$set': data}, upsert=True)
         return data
 
