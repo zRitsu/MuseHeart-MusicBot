@@ -147,7 +147,8 @@ class Node:
             self.info = {"sourceManagers": [], "plugins": {}}
         else:
             self.info = data
-            self.version = data["check_version"]
+            if (version:=data.get("check_version")):
+                self.version = version
             if self.version > 3:
                 self.info["plugins"] = {d["name"]: d["version"] for d in self.info["plugins"]}
 
