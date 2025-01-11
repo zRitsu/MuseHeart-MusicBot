@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import traceback
 from typing import Union, Optional, TYPE_CHECKING
 
@@ -91,6 +92,15 @@ def check_forum(inter, bot):
         else:
             raise PoolException()
 
+def update_attr(inter: Union[disnake.MessageInteraction, disnake.ModalInteraction, disnake.ApplicationCommandInteraction],
+                bot: BotCore, guild: disnake.Guild):
+
+    with contextlib.suppress(AttributeError):
+        inter.music_bot = bot
+        inter.music_guild = guild
+
+    return bot, guild
+
 async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool = True, return_first=False,
                           bypass_prefix=False, bypass_attribute=False):
 
@@ -101,31 +111,21 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         except AttributeError:
             pass
 
-    if isinstance(inter, disnake.MessageInteraction):
-        if inter.data.custom_id not in ("favmanager_play_button", "musicplayer_embed_enqueue_track", "musicplayer_embed_forceplay"):
-            return inter.bot, inter.guild
+        #if isinstance(inter, disnake.MessageInteraction):
+        #    if inter.data.custom_id not in ("favmanager_play_button", "musicplayer_embed_enqueue_track", "musicplayer_embed_forceplay"):
+        #        return update_attr(inter.bot, inter.guild)
 
-    elif isinstance(inter, disnake.ModalInteraction):
-        return inter.bot, inter.guild
+        if isinstance(inter, disnake.ModalInteraction):
+            return update_attr(inter, inter.bot, inter.guild)
 
     if len((guild_bots:=inter.bot.pool.get_guild_bots(inter.guild_id))) < 2 and inter.guild:
-        try:
-            inter.music_bot = inter.bot
-            inter.music_guild = inter.guild
-        except AttributeError:
-            pass
-        return inter.bot, inter.guild
+        return update_attr(inter, inter.bot, inter.guild)
 
     if not inter.guild_id:
         raise GenericError("**Esse comando não pode ser usado nas mensagens privada.**")
 
-    try:
-        if inter.bot.user.id in inter.author.voice.channel.voice_states:
-            inter.music_bot = inter.bot
-            inter.music_guild = inter.guild
-            return inter.music_bot, inter.music_guild
-    except AttributeError:
-        pass
+    if inter.bot.user.id in inter.author.voice.channel.voice_states:
+        return update_attr(inter, inter.bot, inter.guild)
 
     mention_prefixed = False
 
@@ -136,7 +136,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         is_forum = check_forum(inter, inter.bot)
 
         if is_forum:
-            return inter.music_bot, inter.music_guild
+            return update_attr(inter, inter.music_bot, inter.music_guild)
 
         if not (mention_prefixed:=inter.message.content.startswith(tuple(inter.bot.pool.bot_mentions))):
 
@@ -165,7 +165,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
                 inter.music_bot = inter.bot
                 inter.music_guild = inter.guild
-                return inter.music_bot, inter.music_guild
+                return update_attr(inter, inter.music_bot, inter.music_guild)
 
         else:
 
@@ -174,21 +174,19 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
                 if inter.author.voice:
                     user_vc = True
                 else:
-                    return inter.music_bot, inter.music_guild
+                    return update_attr(inter, inter.music_bot, inter.music_guild)
 
             elif not inter.author.voice:
 
                 if return_first:
-                    return inter.music_bot, inter.music_guild
+                    return update_attr(inter, inter.music_bot, inter.music_guild)
 
                 raise NoVoice()
             else:
                 user_vc = True
 
             if inter.bot.user.id in inter.author.voice.channel.voice_states:
-                inter.music_bot = inter.bot
-                inter.music_guild = inter.guild
-                return inter.bot, inter.guild
+                return update_attr(inter, inter.music_bot, inter.music_guild)
 
             if only_voiced:
                 pass
@@ -196,7 +194,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
             elif not inter.guild.me.voice:
                 inter.music_bot = inter.bot
                 inter.music_guild = inter.guild
-                return inter.bot, inter.guild
+                return update_attr(inter, inter.music_bot, inter.music_guild)
 
     free_bot = []
 
@@ -244,18 +242,17 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
 
         if bot.user.id in author.voice.channel.voice_states:
 
-            inter.music_bot = bot
-            inter.music_guild = guild
+            update_attr(inter, bot, guild)
 
             if isinstance(inter, CustomContext) and bot.user.id != inter.bot.user.id and not mention_prefixed:
                 try:
-                    await inter.music_bot.wait_for(
+                    await bot.wait_for(
                         "pool_payload_ready", timeout=10,
                         check=lambda ctx: f"{ctx.guild_id}-{ctx.channel.id}-{ctx.message.id}" == msg_id
                     )
                 except asyncio.TimeoutError:
                     pass
-                inter.music_bot.dispatch("pool_dispatch", inter, bot.user.id)
+                bot.dispatch("pool_dispatch", inter, bot.user.id)
                 raise PoolException()
 
             return bot, guild
@@ -283,24 +280,18 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         else:
             voice_channels.append(guild.me.voice.channel.mention)
 
-    try:
-        if not isinstance(inter, CustomContext) and not inter.guild.voice_client:
+    if not isinstance(inter, CustomContext) and not inter.guild.voice_client:
 
-            if only_voiced:
-                inter.bot.dispatch("pool_dispatch", None, None)
-                raise NoPlayer()
+        if only_voiced:
+            inter.bot.dispatch("pool_dispatch", None, None)
+            raise NoPlayer()
 
-            inter.music_bot = inter.bot
-            inter.music_guild = inter.guild
-            inter.bot.dispatch("pool_dispatch", inter, None)
+        inter.bot.dispatch("pool_dispatch", inter, None)
 
-            return inter.bot, inter.guild
-
-    except AttributeError:
-        pass
+        return update_attr(inter, inter.bot, inter.guild)
 
     if free_bot:
-        inter.music_bot, inter.music_guild = free_bot.pop(0)
+        bot, guild = update_attr(inter, *free_bot.pop(0))
 
         if isinstance(inter, CustomContext) and not mention_prefixed and not bypass_prefix and inter.music_bot.user.id != inter.bot.user.id:
             try:
@@ -310,10 +301,10 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
                 )
             except asyncio.TimeoutError:
                 pass
-            inter.music_bot.dispatch("pool_dispatch", inter, inter.music_bot.user.id, bot=inter.music_bot)
+            bot.dispatch("pool_dispatch", inter, inter.music_bot.user.id, bot=inter.music_bot)
             raise PoolException()
 
-        return inter.music_bot, inter.music_guild
+        return bot, guild
 
     elif check_player:
 
