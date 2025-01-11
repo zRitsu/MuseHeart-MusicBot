@@ -1602,7 +1602,7 @@ class Music(commands.Cog):
             if self.bot.pool.song_select_cooldown.get_bucket(inter).get_retry_after() > 0:
                 manual_selection = True
 
-            if not queue_loaded and len(tracks) > 1 and (tracks[0].info['sourceName'] == "deezer" or manual_selection):
+            if not queue_loaded and len(tracks) > 1 and manual_selection:
 
                 embed.description = f"**Selecione a(s) música(s) desejada(s) abaixo:**"
 
