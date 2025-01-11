@@ -431,6 +431,7 @@ class Music(commands.Cog):
                         retries -= 1
                         continue
                     break
+                await asyncio.sleep(1.5)
                 await me.edit(suppress=False)
             else:
                 embed = disnake.Embed(color=self.bot.get_color(me))
@@ -5392,6 +5393,7 @@ class Music(commands.Cog):
                         if player.guild.me not in vc.speakers:
                             stage_perms = vc.permissions_for(player.guild.me)
                             if stage_perms.manage_permissions:
+                                await asyncio.sleep(1.5)
                                 await player.guild.me.edit(suppress=False)
 
                     if not player.current:
