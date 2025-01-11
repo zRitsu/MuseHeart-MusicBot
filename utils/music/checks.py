@@ -124,8 +124,11 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
     if not inter.guild_id:
         raise GenericError("**Esse comando não pode ser usado nas mensagens privada.**")
 
-    if inter.bot.user.id in inter.author.voice.channel.voice_states:
-        return update_attr(inter, inter.bot, inter.guild)
+    try:
+        if inter.bot.user.id in inter.author.voice.channel.voice_states:
+            return update_attr(inter, inter.bot, inter.guild)
+    except AttributeError:
+        pass
 
     mention_prefixed = False
 
@@ -280,15 +283,18 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         else:
             voice_channels.append(guild.me.voice.channel.mention)
 
-    if not isinstance(inter, CustomContext) and not inter.guild.voice_client:
+    try:
+        if not isinstance(inter, CustomContext) and not inter.guild.voice_client:
 
-        if only_voiced:
-            inter.bot.dispatch("pool_dispatch", None, None)
-            raise NoPlayer()
+            if only_voiced:
+                inter.bot.dispatch("pool_dispatch", None, None)
+                raise NoPlayer()
 
-        inter.bot.dispatch("pool_dispatch", inter, None)
+            inter.bot.dispatch("pool_dispatch", inter, None)
 
-        return update_attr(inter, inter.bot, inter.guild)
+            return update_attr(inter, inter.bot, inter.guild)
+    except AttributeError:
+        pass
 
     if free_bot:
         bot, guild = update_attr(inter, *free_bot.pop(0))
