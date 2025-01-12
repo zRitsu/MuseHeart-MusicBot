@@ -139,7 +139,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         is_forum = check_forum(inter, inter.bot)
 
         if is_forum:
-            return update_attr(inter, inter.music_bot, inter.music_guild)
+            return update_attr(inter, inter.bot, inter.guild)
 
         if not (mention_prefixed:=inter.message.content.startswith(tuple(inter.bot.pool.bot_mentions))):
 
@@ -166,9 +166,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
                 if not bot_id or bot_id != inter.bot.user.id:
                     raise PoolException()
 
-                inter.music_bot = inter.bot
-                inter.music_guild = inter.guild
-                return update_attr(inter, inter.music_bot, inter.music_guild)
+                return update_attr(inter, inter.bot, inter.guild)
 
         else:
 
@@ -177,27 +175,25 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
                 if inter.author.voice:
                     user_vc = True
                 else:
-                    return update_attr(inter, inter.music_bot, inter.music_guild)
+                    return update_attr(inter, inter.bot, inter.guild)
 
             elif not inter.author.voice:
 
                 if return_first:
-                    return update_attr(inter, inter.music_bot, inter.music_guild)
+                    return update_attr(inter, inter.bot, inter.guild)
 
                 raise NoVoice()
             else:
                 user_vc = True
 
             if inter.bot.user.id in inter.author.voice.channel.voice_states:
-                return update_attr(inter, inter.music_bot, inter.music_guild)
+                return update_attr(inter, inter.bot, inter.guild)
 
             if only_voiced:
                 pass
 
             elif not inter.guild.me.voice:
-                inter.music_bot = inter.bot
-                inter.music_guild = inter.guild
-                return update_attr(inter, inter.music_bot, inter.music_guild)
+                return update_attr(inter, inter.bot, inter.guild)
 
     free_bot = []
 
@@ -317,9 +313,7 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         inter.bot.dispatch("pool_dispatch", inter, None)
 
         if return_first:
-            inter.music_bot = inter.bot
-            inter.music_guild = inter.guild
-            return inter.bot, inter.guild
+            return update_attr(inter, inter.bot, inter.guild)
 
         raise NoPlayer()
 
