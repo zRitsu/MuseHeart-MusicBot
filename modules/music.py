@@ -63,7 +63,7 @@ class Music(commands.Cog):
         "youtube": "ytsearch",
         "soundcloud": "scsearch",
         "spotify": "spsearch",
-        "titdal": "tdsearch",
+        "tidal": "tdsearch",
         "bandcamp": "bcsearch",
         "applemusic": "amsearch",
         "deezer": "dzsearch",
@@ -1548,10 +1548,7 @@ class Music(commands.Cog):
                         c.disabled = True
                     embed.description = "\n".join(embed.description.split("\n")[:-1])
                     embed.set_footer(text="Interação cancelada.")
-                    try:
-                        func = msg.edit
-                    except:
-                        func = view.inter.response.edit_message
+                    func = view.inter.response.edit_message
                     await func(view=view, embed=embed)
                     return
 
