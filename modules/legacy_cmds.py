@@ -264,7 +264,7 @@ class Owner(commands.Cog):
             txt += f'**Módulos que falharam:** ```ansi\n[0;31m{" [0;37m| [0;31m".join(data["failed"])}```\n'
 
         if not txt:
-            txt = "**Nenhum módulo encontrado...**"
+            raise GenericError("**Nenhum módulo encontrado...**")
 
         self.bot.pool.config = load_config()
 
