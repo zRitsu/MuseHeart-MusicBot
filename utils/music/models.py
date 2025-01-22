@@ -582,6 +582,8 @@ class LavalinkPlayer(wavelink.Player):
 
         self.event_queue = asyncio.Queue()
 
+        self.extra_info = {}
+
         self.initial_hints = [
             f"É possível alterar a skin/aparência do player usando o comando /change_skin ou {self.prefix_info}skin "
             f"(Apenas membros com permissão de gerenciar servidor podem usar esse comando).",

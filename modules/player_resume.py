@@ -192,6 +192,7 @@ class PlayerSession(commands.Cog):
             data["last_voice_channel_id"] = vc_id
 
         with suppress(AttributeError):
+            data["extra_info"] = player.extra_info
             data["live_lyrics_status"] = player.live_lyrics_enabled
             data["current_encoded"] = player.current_encoded
             data["command_log_list"] = player.command_log_list
@@ -566,6 +567,7 @@ class PlayerSession(commands.Cog):
                         await self.delete_data(guild.id)
                     return
 
+                player.extra_info = data.get("extra_info", {})
                 player._voice_state = data.get("voice_state")
                 player.current_encoded = data.get("current_encoded")
                 player.live_lyrics_enabled = data.get("live_lyrics_status", False)
