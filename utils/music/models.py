@@ -3084,14 +3084,22 @@ class LavalinkPlayer(wavelink.Player):
             pass
 
         try:
-            vc = self.guild.voice_client.channel
+            self.message_updater_task.cancel()
         except:
-            vc = self.last_channel
+            pass
+        self.message_updater_task = None
 
         try:
-            await self.process_rpc(vc, close=True)
+            self._new_node_task.cancel()
         except:
-            traceback.print_exc()
+            pass
+        self._new_node_task = None
+
+        try:
+            self.idle_task.cancel()
+        except:
+            pass
+        self.idle_task = None
 
         if self.guild.me:
 
@@ -3221,23 +3229,15 @@ class LavalinkPlayer(wavelink.Player):
                 except Exception:
                     traceback.print_exc()
 
-        try:
-            self.message_updater_task.cancel()
-        except:
-            pass
-        self.message_updater_task = None
+            try:
+                vc = self.guild.voice_client.channel
+            except:
+                vc = self.last_channel
 
-        try:
-            self._new_node_task.cancel()
-        except:
-            pass
-        self._new_node_task = None
-
-        try:
-            self.idle_task.cancel()
-        except:
-            pass
-        self.idle_task = None
+            try:
+                await self.process_rpc(vc, close=True)
+            except:
+                traceback.print_exc()
 
     async def auto_skip_track(self):
 
