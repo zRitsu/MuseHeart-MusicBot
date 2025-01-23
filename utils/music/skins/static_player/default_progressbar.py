@@ -291,8 +291,8 @@ class DefaultProgressbarStaticSkin:
                     min_values=0, max_values=1,
                     options=[
                         disnake.SelectOption(
-                            label=f"{n+1}. {fix_characters(t.author, 18)}",
-                            description=fix_characters(t.title, 47),
+                            label=fix_characters(f"{n+1}. {t.single_title}", 47),
+                            description=fix_characters(f"[{time_format(t.duration) if not t.is_stream else '🔴 Live'}]. {t.authors_string}", 47),
                             value=f"{n:02d}.{t.title[:96]}"
                         ) for n, t in enumerate(itertools.islice(queue, 25))
                     ]

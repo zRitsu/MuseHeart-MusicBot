@@ -257,7 +257,7 @@ class QueueInteraction(disnake.ui.View):
 
             opts.append(
                 disnake.SelectOption(
-                    label=f"{index}. {t.author}"[:25], description=f"[{duration}] | {t.title}"[:50],
+                    label=fix_characters(f"{index}. {t.single_title}", 47), description=f"[{duration}]. {t.authors_string}"[:50],
                     value=f"queue_select_{t.unique_id}", default=t == self.current_track
                 )
             )
