@@ -72,6 +72,8 @@ class AiMusic(commands.Cog):
             g4f.models.default,
         ]
 
+        self.ignored = ["HuggingChat", "DeepInfraChat", "HuggingFace", "Jmuz"]
+
     music_rec_cd = commands.CooldownMapping.from_cooldown(2, 120, commands.BucketType.member)
     music_rec_mc = commands.MaxConcurrency(1, per=commands.BucketType.guild, wait=False)
 
@@ -230,7 +232,7 @@ class AiMusic(commands.Cog):
         for m in self.models:
             try:
                 response = await self.ai_client.chat.completions.create(
-                    model=m, #ignored=["Blackbox", "Liaobots"],
+                    model=m, web_search=True, ignored=self.ignored, #ignored=["Blackbox", "Liaobots"],
                     messages=[{"role": "user", "content": txt.replace("{prompt}", prompt)}],
                 )
                 lines = [l for l in disnake.utils.escape_markdown(response.choices[0].message.content.replace("*", ""), as_needed=True).split("\n") if l]
