@@ -11,7 +11,7 @@ aiofiles
 disnake-jishaku
 packaging
 aiosqlite
-yt-dlp[default]>=2025.01.15
+yt-dlp[default]>=2025.01.26
 tornado>=6.4.2
 emoji
 urllib3>=2.2.2
