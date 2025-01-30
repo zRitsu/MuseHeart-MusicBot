@@ -214,6 +214,8 @@ class YtOauthLL(commands.Cog):
         else:
             func = msg.edit
 
+        txts.append("Evite mostrar esse token publicamente!")
+
         await func(embed=disnake.Embed(
             color=color,
             description=f"### refreshToken da conta do google obtido com sucesso!\n```{view.refresh_token}```\n**Nota:**\n" + "\n".join(f"* {t}" for t in txts)
