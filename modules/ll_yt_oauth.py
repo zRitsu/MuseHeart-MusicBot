@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import os.path
-import pprint
 import traceback
 import uuid
 from typing import TYPE_CHECKING, Optional
@@ -55,8 +54,6 @@ class YtOauthView(disnake.ui.View):
 
             async with self.bot.session.post('https://oauth2.googleapis.com/token', data=payload) as response:
                 response_data = await response.json()
-
-                pprint.pprint(response_data)
 
                 if response.status != 200:
 
@@ -137,9 +134,22 @@ class YtOauthLL(commands.Cog):
         self.bot = bot
 
     @commands.is_owner()
-    @commands.max_concurrency(1, commands.BucketType.default)
     @commands.command(hidden=True)
     async def ytoauth(self, ctx: CustomContext):
+
+        try:
+            self.bot.pool.yt_oauth_loop.cancel()
+        except:
+            pass
+
+        try:
+            self.bot.pool.yt_oauth_loop_command.cancel()
+        except:
+            pass
+
+        self.bot.pool.yt_oauth_loop_command = self.bot.loop.create_task(self.oauth_command(ctx))
+
+    async def oauth_command(self, ctx: CustomContext):
 
         color = self.bot.get_color(ctx.guild.me)
 
