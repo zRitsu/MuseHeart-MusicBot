@@ -312,7 +312,7 @@ class Owner(commands.Cog):
         except:
             pass
 
-        if args.force or not os.path.exists(os.environ["GIT_DIR"]):
+        if git_clean:=args.force or not os.path.exists(os.environ["GIT_DIR"]):
             out_git += await self.cleanup_git(force=args.force)
 
         try:
@@ -320,30 +320,32 @@ class Owner(commands.Cog):
         except:
             pass
 
-        try:
-            pull_log = await run_command("git --work-tree=. pull --allow-unrelated-histories -X theirs")
-            if "Already up to date" in pull_log:
-                raise GenericError("**Já estou com os ultimos updates instalados...**")
-            out_git += pull_log
+        if not git_clean:
 
-        except GenericError as e:
-            raise e
+            try:
+                pull_log = await run_command("git --work-tree=. pull --allow-unrelated-histories -X theirs")
+                if "Already up to date" in pull_log:
+                    raise GenericError("**Já estou com os ultimos updates instalados...**")
+                out_git += pull_log
 
-        except Exception as e:
+            except GenericError as e:
+                raise e
 
-            if "Already up to date" in str(e):
-                raise GenericError("Já estou com os ultimos updates instalados...")
+            except Exception as e:
 
-            elif not "Fast-forward" in str(e):
-                traceback.print_exc()
-                try:
-                    await run_command("git --work-tree=. reset --hard origin/main")
-                except:
+                if "Already up to date" in str(e):
+                    raise GenericError("Já estou com os ultimos updates instalados...")
+
+                elif not "Fast-forward" in str(e):
                     traceback.print_exc()
-                    out_git += await self.cleanup_git(force=True)
+                    try:
+                        await run_command("git --work-tree=. reset --hard origin/main")
+                    except:
+                        traceback.print_exc()
+                        out_git += await self.cleanup_git(force=True)
 
-            elif "Need to specify how to reconcile divergent branches" in str(e):
-                out_git += await run_command("git --work-tree=. rebase --no-ff")
+                elif "Need to specify how to reconcile divergent branches" in str(e):
+                    out_git += await run_command("git --work-tree=. rebase --no-ff")
 
         commit = ""
 
@@ -366,6 +368,8 @@ class Owner(commands.Cog):
             txt += f"\n\n{self.format_log(git_log[:10])}"
 
         if git_log_txt := out_git[:1000].split('Fast-forward')[-1]:
+            if git_clean:
+                git_log_txt = "\n".join(l for l in git_log_txt.split("\n") if not l.startswith("hint: "))
             txt += f"\n\n`📄` **Log:** ```py\n{git_log_txt}```\n{text}"
         else:
             txt += f"\n\n{text}"
