@@ -1257,6 +1257,7 @@ class LavalinkPlayer(wavelink.Player):
                         self.queue.append(track)
 
                     if event.cause.startswith((
+                        "com.github.topi314.lavasrc.mirror.TrackNotFoundException: No tracks found in playlist or search result for track",
                         "com.github.topi314.lavasrc.mirror.TrackNotFoundException: Playlist is empty",
                         "com.github.topi314.lavasrc.mirror.TrackNotFoundException: No mirror found for track",
                     )):
