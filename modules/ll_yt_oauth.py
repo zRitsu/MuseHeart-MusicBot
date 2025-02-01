@@ -201,7 +201,7 @@ class YtOauthLL(commands.Cog):
                 with open('./application.yml', 'w') as file:
                     yaml.dump(yml_data, file)
 
-                if (node := self.bot.music.nodes.get("LOCAL")) and "youtube" in node.info["sourceManagers"] and "youtube-plugin" in node.info["plguins"]:
+                if (node := self.bot.music.nodes.get("LOCAL")) and "youtube-plugin" in node.info["plguins"]:
                     resp = await node.session.post(
                         f"{node.rest_uri}/youtube", headers=node._websocket.headers,
                         json={"refreshToken": view.refresh_token}
