@@ -1154,7 +1154,7 @@ class LavalinkPlayer(wavelink.Player):
                                 if not self.bot.pool.ytdl.params.get("cookiefile"):
 
                                     try:
-                                        new_node = [n for n in self.bot.music.nodes.values() if n.is_available and "ytsearch" in n.search_providers][0]
+                                        new_node = [n for n in self.bot.music.nodes.values() if n != self.node and n.is_available and "ytsearch" in n.search_providers][0]
                                     except:
                                         new_node = None
 
