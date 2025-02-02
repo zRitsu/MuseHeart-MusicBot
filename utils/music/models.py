@@ -1071,6 +1071,16 @@ class LavalinkPlayer(wavelink.Player):
                             await self.play(track=track, start=self.position)
                         continue
 
+                    if event.cause.startswith(
+                            ("com.sedmelluq.discord.lavaplayer.tools.FriendlyException: The uploader has not made this video available in your country")
+                    ):
+                        if track.source_name == "youtube":
+                            self.native_yt = False
+                            self.locked = False
+                            await self.process_next(start_position=self.position)
+                            await send_report()
+                            continue
+
                     if (youtube_exception := (event.error == "This IP address has been blocked by YouTube (429)" or
                         #event.message == "Video returned by YouTube isn't what was requested" or
                         event.cause.startswith(("java.lang.RuntimeException: Not success status code: 403",
