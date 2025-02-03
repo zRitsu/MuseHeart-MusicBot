@@ -7118,9 +7118,6 @@ class Music(commands.Cog):
 
                 elif query.startswith(("https://youtu.be/", "https://www.youtube.com/")):
 
-                    """if "&list=" not in query and self.bot.pool.ytdl.params.get("cookiefile"):
-                        is_yt_source = True"""
-
                     for p in ("&ab_channel=", "&start_radio="):
                         if p in query:
                             try:
@@ -7273,168 +7270,6 @@ class Music(commands.Cog):
         if not tracks:
             tracks, node, exc, is_yt_source = await self.get_partial_tracks(query=query, user=user, ctx=ctx, node=node, bot=bot)
             exceptions.update(exc)
-
-        """if not tracks:
-
-            query_yt = None
-            yt_id = None
-            cache_key = None
-            is_mix = False
-
-            if not URL_REG.match(query):
-                query_yt = f"ytsearch10:{query}"
-
-            else:
-                if pl_yt_id := (yt_playlist_regex.search(query)):
-                    pl_yt_id = pl_yt_id.group(1)
-                    try:
-                        yt_id = yt_video_regex.search(query).group(1)
-                    except:
-                        pass
-                    if yt_id and pl_yt_id.startswith("RD"):
-                        query_yt = f"https://www.youtube.com/watch?v={yt_id}&list={pl_yt_id}"
-                        is_mix = True
-                    else:
-                        cache_key = f"youtube:{pl_yt_id}"
-                        query_yt = f"https://www.youtube.com/playlist?list={pl_yt_id}"
-
-                elif (yt_id:=yt_video_regex.search(query)) and self.bot.pool.ytdl.params.get("cookiefile"):
-
-                    try:
-                        info = await self.bot.loop.run_in_executor(
-                            None, lambda: self.bot.pool.ytdl.extract_info(
-                                f"https://www.youtube.com/watch?v={yt_id.group(1)}", download=False)
-                        )
-
-                        if not info.get('duration'):
-                            raise GenericError("**No momento não há suporte a streams de vídeos do youtube...**")
-
-                        trackinfo = {
-                            'title': info['title'],
-                            'author': info['uploader'],
-                            'length': int(info['duration'] * 1000),
-                            'identifier': info['id'],
-                            'isStream': False,
-                            'uri': info['webpage_url'],
-                            'sourceName': 'youtube',
-                            'position': 0,
-                            'artworkUrl': f'https://img.youtube.com/vi/{info["id"]}/mqdefault.jpg',
-                            'isrc': None,
-                        }
-
-                        tracks = [
-                            LavalinkTrack(id_=encode_track(trackinfo)[1], info=trackinfo, query=query,
-                                          requester=user.id)
-                        ]
-
-                        try:
-                            guild_id = ctx.guild.id
-                        except AttributeError:
-                            guild_id = ctx.guild_id
-
-                        self.bot.pool.ytdl_cache[f"{guild_id}:{trackinfo['sourceName']}:{info['id']}"] = {
-                            'url': info['url'],
-                            'format': 'mp4' if 'm4a' in info.get('container', '') else 'matroska/webm',
-                            'duration': int(info['duration'] * 1000)
-                        }
-                        return tracks, node
-                    except Exception as e:
-                        self.bot.dispatch("custom_error", ctx=ctx, error=e)
-                        exceptions.add(repr(e))
-
-            if query_yt:
-
-                playlist_data = None
-
-                if not node:
-                    node = self.bot.music.get_best_node()
-                    if not node:
-                        raise GenericError("**Não há servidores de música disponível!**")
-
-                encoded_name = "track" if node.version == 3 else "encoded"
-
-                try:
-                    if not (data := self.bot.pool.playlist_cache.get(cache_key)):
-
-                        info = await self.bot.loop.run_in_executor(
-                            None, lambda: self.bot.pool.ytdl.extract_info(query_yt, download=False))
-
-                        if cache_key:
-
-                            playlist_data = {
-                                'loadType': 'PLAYLIST_LOADED',
-                                'playlistInfo': {'name': info['title']},
-                                'sourceName': 'youtube',
-                                'tracks_data': [],
-                                'thumb': '',
-                                'type': 'playlist'
-                            }
-
-                        tracks_data = []
-
-                        for e in info['entries']:
-
-                            if not e.get('duration'):
-                                continue
-
-                            trackinfo = {
-                                'title': e['title'],
-                                'author': e['uploader'],
-                                'length': int(e['duration'] * 1000),
-                                'identifier': e['id'],
-                                'isStream': False,
-                                'uri': e['url'],
-                                'sourceName': 'youtube',
-                                'position': 0,
-                                'artworkUrl': f'https://img.youtube.com/vi/{e["id"]}/mqdefault.jpg',
-                                'isrc': None,
-                            }
-
-                            trackinfo = {
-                                encoded_name: encode_track(trackinfo)[1],
-                                'info': trackinfo
-                            }
-
-                            tracks_data.append(trackinfo)
-
-                        if playlist_data:
-                            playlist_data["tracks"] = tracks_data
-                            data = playlist_data
-                        else:
-                            data = tracks_data
-
-                    if isinstance(data, dict):
-
-                        if yt_id:
-
-                            index = None
-
-                            for n, t in enumerate(data['tracks']):
-                                if t['info']['identifier'] == yt_id:
-                                    index = n
-                                    break
-
-                            if index is None:
-                                try:
-                                    del self.bot.pool.playlist_cache[cache_key]
-                                except KeyError:
-                                    pass
-                                return await self.get_tracks(query=query, ctx=ctx, user=user, node=node, source=source,
-                                                             bot=bot, mix=mix)
-
-                            if index > 0:
-                                data['tracks'] = data['tracks'][index:] + data['tracks'][:index]
-
-                        tracks = LavalinkPlaylist(data=data, url=query, encoded_name=encoded_name, pluginInfo=data.pop("pluginInfo", {}), requester=user.id)
-
-                        if tracks and not is_mix:
-                            self.bot.pool.playlist_cache[cache_key] = data
-
-                    else:
-                        tracks = [LavalinkTrack(id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo", {}), requester=user.id) for track in tracks]
-                except Exception as e:
-                    self.bot.dispatch("custom_error", ctx=ctx, error=e)
-                    exceptions.add(repr(e))"""
 
         if not tracks:
 
@@ -7874,7 +7709,6 @@ def setup(bot: BotCore):
                 'playlist_items': '1-700',
                 'simulate': True,
                 'download': False,
-                'cookiefile': "./.ytdl_cookie" if os.path.isfile('./.ytdl_cookie') else None,
                 'cachedir': False,
                 'allowed_extractors': [
                     r'.*youtube.*',

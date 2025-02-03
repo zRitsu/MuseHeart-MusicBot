@@ -1161,42 +1161,38 @@ class LavalinkPlayer(wavelink.Player):
 
                                 self.native_yt = False
 
-                                if not self.bot.pool.ytdl.params.get("cookiefile"):
+                                try:
+                                    new_node = [n for n in self.bot.music.nodes.values() if n != self.node and n.is_available and "ytsearch" in n.search_providers][0]
+                                except:
+                                    new_node = None
 
-                                    try:
-                                        new_node = [n for n in self.bot.music.nodes.values() if n != self.node and n.is_available and "ytsearch" in n.search_providers][0]
-                                    except:
-                                        new_node = None
+                                if new_node:
+                                    self.native_yt = True
+                                    txt = f"Devido a restrições do youtube no servidor `{self.node.identifier} o player foi movido para o servidor `{new_node.identifier}`."
+                                    if self.controller_mode:
+                                        self.set_command_log(txt, emoji="⚠️", controller=True)
+                                    elif self.text_channel:
+                                        try:
+                                            await self.text_channel.send(embed=disnake.Embed(description=f"-# `⚠️ -` {txt}", color=self.bot.get_color(self.guild.me)), delete_after=10)
+                                        except:
+                                            traceback.print_exc()
+                                    await asyncio.sleep(5)
+                                    await self.change_node(new_node.identifier)
+                                    self.locked = False
+                                    await self.process_next(start_position=self.position)
+                                    await send_report()
+                                    continue
 
-                                    if new_node:
-                                        self.native_yt = True
-                                        txt = f"Devido a restrições do youtube no servidor `{self.node.identifier} o player foi movido para o servidor `{new_node.identifier}`."
-                                        if self.controller_mode:
-                                            self.set_command_log(txt, emoji="⚠️", controller=True)
-                                        elif self.text_channel:
-                                            try:
-                                                await self.text_channel.send(embed=disnake.Embed(description=f"-# `⚠️ -` {txt}", color=self.bot.get_color(self.guild.me)), delete_after=10)
-                                            except:
-                                                traceback.print_exc()
-                                        await asyncio.sleep(5)
-                                        await self.change_node(new_node.identifier)
-                                        self.locked = False
-                                        await self.process_next(start_position=self.position)
-                                        await send_report()
-                                        continue
-
-                                    self.native_yt = False
-
-                                    txt = f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual " \
-                                          "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome " \
-                                          "das músicas do youtube que estão na fila (talvez a música tocada seja diferente do esperado " \
-                                          "ou até mesmo ignoradas caso não retorne resultados)."
-                                    try:
-                                        await self.text_channel.send(embed=disnake.Embed(
-                                            description=txt, color=self.bot.get_color(self.guild.me)
-                                        ), delete_after=30)
-                                    except:
-                                        self.set_command_log(text=txt, emoji="⚠️", controller=True)
+                                txt = f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual " \
+                                      "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome " \
+                                      "das músicas do youtube que estão na fila (talvez a música tocada seja diferente do esperado " \
+                                      "ou até mesmo ignoradas caso não retorne resultados)."
+                                try:
+                                    await self.text_channel.send(embed=disnake.Embed(
+                                        description=txt, color=self.bot.get_color(self.guild.me)
+                                    ), delete_after=30)
+                                except:
+                                    self.set_command_log(text=txt, emoji="⚠️", controller=True)
 
                             self.locked = False
                             await self.process_next(start_position=self.position)
@@ -2070,161 +2066,107 @@ class LavalinkPlayer(wavelink.Player):
 
                     if track.info["sourceName"] == "youtube" or (partial_data and partial_data[0].info["sourceName"] == "youtube"):
 
-                        if self.bot.pool.ytdl.params.get("cookiefile"):
-
-                            if track.is_stream:
+                        if (track.is_stream or track.duration > 480000):
+                            if not self.native_yt:
+                                self.played.append(track)
                                 self.locked = False
                                 self.native_yt = True
                                 await self.process_next()
                                 return
 
                             try:
-                                tracks = await self.fetch_ytdl_info(track)
-                            except Exception as e:
-                                if "This video is not available" in str(e):
-                                    track.id = ""
-                                    await self.resolve_track(track, force=True)
-                                    tracks = [track] if track.id else []
-                                else:
-                                    print(traceback.format_exc())
-                                    embed = disnake.Embed(
-                                        description=f"**Ocorreu um erro ao reproduzir a música via ytdl:** "
-                                                    f"[`{track.title}`]({track.uri}) ```py\n{repr(e)}```"
-                                    )
-                                    if self.text_channel:
-                                        try:
-                                            await self.text_channel.send(embed=embed, delete_after=15)
-                                        except Exception:
-                                            pass
-                                    cog = self.bot.get_cog("ErrorHandler")
-                                    if cog:
-                                        embed.add_field(name="Servidor:", value=f"{self.guild.name} [{self.guild.id}]")
-                                        try:
-                                            await cog.send_webhook(
-                                                embed=embed,
-                                                file=string_to_file(
-                                                    "".join(traceback.format_exception(type(e), e, e.__traceback__)),
-                                                    "error_traceback_ytdl.txt")
-                                            )
-                                        except Exception:
-                                            print(traceback.format_exc())
-                                    await asyncio.sleep(7)
-                                    self.locked = False
-                                    self.native_yt = True
-                                    await self.process_next()
-                                    return
-
-                            if not tracks:
-                                await asyncio.sleep(3)
-                                self.locked = False
-                                self.native_yt = True
-                                await self.process_next()
-                                return
-
-                            encoded_track = tracks[0].id
+                                encoded_track = partial_data[0].id
+                            except:
+                                pass
 
                         else:
-                            if (track.is_stream or track.duration > 480000):
+                            tracks = []
+
+                            exceptions = ""
+
+                            if not partial_data:
+
+                                for provider in self.node.search_providers:
+
+                                    if provider in ("ytsearch", "ytmsearch"):
+                                        continue
+
+                                    if track.author.endswith(" - topic"):
+                                        query = f"{provider}:{track.title} - {track.author[:-8]}"
+                                    else:
+                                        query = f"{provider}:{track.title}"
+
+                                    tracks = self.bot.pool.partial_track_cache.get(query)
+
+                                    if not tracks:
+
+                                        try:
+                                            tracks = await self.node.get_tracks(
+                                                query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist
+                                            )
+                                        except:
+                                            exceptions += f"{traceback.format_exc()}\n"
+                                            await asyncio.sleep(1)
+                                            continue
+
+                                        try:
+                                            tracks = tracks.tracks
+                                        except AttributeError:
+                                            pass
+
+                                        self.bot.pool.partial_track_cache[query] = tracks
+
+                                    if not [i in track.title.lower() for i in exclude_tags]:
+                                        final_result = []
+                                        for t in tracks:
+                                            if not any((i in t.title.lower()) for i in exclude_tags):
+                                                final_result.append(t)
+                                                break
+                                        tracks = final_result or tracks
+
+                                    min_duration = track.duration - 7000
+                                    max_duration = track.duration + 7000
+
+                                    final_result = []
+
+                                    for t in tracks:
+                                        if t.is_stream or not min_duration < t.duration < max_duration and fuzz.token_sort_ratio(t.title, track.title) < 75:
+                                            continue
+                                        final_result.append(t)
+
+                                    if not final_result:
+                                        continue
+
+                                    tracks = final_result
+                                    break
+
+                            else:
+                                tracks = partial_data
+
+                            if not tracks:
+
                                 if not self.native_yt:
+
+                                    if exceptions:
+                                        print(exceptions)
                                     self.played.append(track)
+                                    self.set_command_log(emoji="⚠️", text=f"A música [`{track.title[:15]}`](<{track.uri}>) será pulada devido a falta de resultado "
+                                                                          "em outras plataformas de música.", controller=True)
+                                    await asyncio.sleep(3)
                                     self.locked = False
                                     self.native_yt = True
                                     await self.process_next()
                                     return
 
-                                try:
-                                    encoded_track = partial_data[0].id
-                                except:
-                                    pass
-
                             else:
-                                tracks = []
-
-                                exceptions = ""
-
-                                if not partial_data:
-
-                                    for provider in self.node.search_providers:
-
-                                        if provider in ("ytsearch", "ytmsearch"):
-                                            continue
-
-                                        if track.author.endswith(" - topic"):
-                                            query = f"{provider}:{track.title} - {track.author[:-8]}"
-                                        else:
-                                            query = f"{provider}:{track.title}"
-
-                                        tracks = self.bot.pool.partial_track_cache.get(query)
-
-                                        if not tracks:
-
-                                            try:
-                                                tracks = await self.node.get_tracks(
-                                                    query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist
-                                                )
-                                            except:
-                                                exceptions += f"{traceback.format_exc()}\n"
-                                                await asyncio.sleep(1)
-                                                continue
-
-                                            try:
-                                                tracks = tracks.tracks
-                                            except AttributeError:
-                                                pass
-
-                                            self.bot.pool.partial_track_cache[query] = tracks
-
-                                        if not [i in track.title.lower() for i in exclude_tags]:
-                                            final_result = []
-                                            for t in tracks:
-                                                if not any((i in t.title.lower()) for i in exclude_tags):
-                                                    final_result.append(t)
-                                                    break
-                                            tracks = final_result or tracks
-
-                                        min_duration = track.duration - 7000
-                                        max_duration = track.duration + 7000
-
-                                        final_result = []
-
-                                        for t in tracks:
-                                            if t.is_stream or not min_duration < t.duration < max_duration and fuzz.token_sort_ratio(t.title, track.title) < 75:
-                                                continue
-                                            final_result.append(t)
-
-                                        if not final_result:
-                                            continue
-
-                                        tracks = final_result
-                                        break
-
-                                else:
-                                    tracks = partial_data
-
-                                if not tracks:
-
-                                    if not self.native_yt:
-
-                                        if exceptions:
-                                            print(exceptions)
-                                        self.played.append(track)
-                                        self.set_command_log(emoji="⚠️", text=f"A música [`{track.title[:15]}`](<{track.uri}>) será pulada devido a falta de resultado "
-                                                                              "em outras plataformas de música.", controller=True)
-                                        await asyncio.sleep(3)
-                                        self.locked = False
-                                        self.native_yt = True
-                                        await self.process_next()
-                                        return
-
-                                else:
-                                    alt_track = tracks[0]
-                                    encoded_track = alt_track.id
-                                    self.bot.pool.partial_track_cache[cache_key] = [alt_track]
-                                    self.set_command_log(
-                                        emoji="▶️",
-                                        text=f"Tocando música obtida via metadados: [`{fix_characters(alt_track.title, 20)}`](<{alt_track.uri}>) `| Por: {fix_characters(alt_track.author, 15)}`", controller=True
-                                    )
-                                    self.native_yt = True
+                                alt_track = tracks[0]
+                                encoded_track = alt_track.id
+                                self.bot.pool.partial_track_cache[cache_key] = [alt_track]
+                                self.set_command_log(
+                                    emoji="▶️",
+                                    text=f"Tocando música obtida via metadados: [`{fix_characters(alt_track.title, 20)}`](<{alt_track.uri}>) `| Por: {fix_characters(alt_track.author, 15)}`", controller=True
+                                )
+                                self.native_yt = True
 
                 if not encoded_track and not track.id:
 
@@ -3296,98 +3238,6 @@ class LavalinkPlayer(wavelink.Player):
         except Exception:
             traceback.print_exc()
             return
-
-    async def fetch_ytdl_info(self, track: LavalinkTrack):
-
-        if self.bot.config.get("FETCH_LAVALINK_YTDL_INFO") == "true":
-
-            if not (lavalink_track:=self.bot.pool.ytdl_cache.get(
-                    f"lavalink.ytdl:{self.guild.id}:{track.source_name}:{track.identifier}")
-                ):
-
-                if not (ytdl_info := self.bot.pool.ytdl_cache.get(
-                        f"ytdl:{self.guild.id}:{track.source_name}:{track.identifier}")):
-
-                    info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(
-                        track.uri.split("&")[0], download=False))
-
-                    ytdl_info = {"url": info['url']}
-
-                retries = 3
-
-                exception = None
-
-                retry_download = False
-
-                while retries > 0:
-                    try:
-                        lavalink_track = await self.node.get_tracks(ytdl_info['url'])
-
-                        break
-                    except Exception as e:
-                        if "that url is not playable" in str(e).lower():
-                            retry_download = True
-                            break
-                        exception = e
-                        retries -= 1
-
-                try:
-                    del self.bot.pool.ytdl_cache[f"ytdl:{self.guild.id}:{track.source_name}:{track.identifier}"]
-                except KeyError:
-                    pass
-
-                if retry_download:
-                    return await self.fetch_ytdl_info(track)
-
-                if exception:
-                    raise exception
-
-                try:
-                    lavalink_track = lavalink_track.tracks
-                except:
-                    pass
-
-                self.bot.pool.ytdl_cache[f"lavalink.ytdl:{self.guild.id}:{track.source_name}:{track.identifier}"] = lavalink_track
-
-            return lavalink_track
-
-        else:
-            if not (ytdl_info:=self.bot.pool.ytdl_cache.get(f"ytdl:{self.guild.id}:{track.source_name}:{track.identifier}")):
-                info = await self.bot.loop.run_in_executor(None, lambda: self.bot.pool.ytdl.extract_info(
-                    track.uri.split("&")[0], download=False))
-
-                container = info.get('container', '')
-
-                ytdl_info = {
-                    'url': info['url'],
-                    'format': 'mp4' if 'm4a' in container else 'matroska/webm',
-                    'duration': int(info['duration'] * 1000)
-                }
-
-                self.bot.pool.ytdl_cache[f"ytdl:{self.guild.id}:{track.source_name}:{track.identifier}"] = ytdl_info
-
-            def write_http_format(writer: DataWriter, *args):
-                writer.write_utf(ytdl_info.get("format", "matroska/webm"))
-
-            trackinfo = {
-                'title': 'Unknown title',
-                'author': 'Unknown artist',
-                'length': ytdl_info['duration'],
-                'identifier': ytdl_info['url'],
-                'isStream': False,
-                'uri': ytdl_info['url'],
-                'sourceName': 'http',
-                'position': 0,
-                'artworkUrl': None,
-                'isrc': None,
-            }
-
-            encoded = encode_track(trackinfo, {'http': write_http_format})[1]
-
-            trackinfo['id'] = encoded
-
-        return [LavalinkTrack(id_=encoded, info=trackinfo)]
-
 
     async def resolve_track(self, track: PartialTrack, force=False):
 

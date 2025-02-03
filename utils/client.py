@@ -113,7 +113,6 @@ class BotPool:
                 'playlist_items': '1-700',
                 'simulate': True,
                 'download': False,
-                'cookiefile': "./.ytdl_cookie" if os.path.isfile('./.ytdl_cookie') else None,
                 'cachedir': False,
                 'allowed_extractors': [
                     r'.*youtube.*',
