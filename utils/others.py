@@ -306,9 +306,6 @@ async def send_message(
         else:
             await inter.response.edit_message(content=text, **kwargs)
 
-    elif inter.response.is_done() and isinstance(inter, disnake.AppCmdInter):
-        await inter.edit_original_message(content=text, **kwargs)
-
     else:
 
         try:
@@ -337,11 +334,12 @@ async def send_message(
 
         except AttributeError:
             pass
-
         try:
-            await inter.send(text, ephemeral=True, **kwargs)
+            if inter.response.is_done() and isinstance(inter, disnake.AppCmdInter):
+                await inter.edit_original_message(content=text, **kwargs)
+            else:
+                await inter.send(text, ephemeral=True, **kwargs)
         except (disnake.InteractionTimedOut, disnake.HTTPException):
-
             try:
                 if isinstance(inter.channel, disnake.Thread):
                     send_message_perm = inter.channel.parent.permissions_for(inter.guild.me).send_messages_in_threads
