@@ -15,10 +15,6 @@ services:
         sync: false
       - key: DEFAULT_PREFIX
         sync: false
-      - key: SPOTIFY_CLIENT_ID
-        sync: false
-      - key: SPOTIFY_CLIENT_SECRET
-        sync: false
       - key: MONGO
         sync: false
       - key: PYTHON_VERSION
