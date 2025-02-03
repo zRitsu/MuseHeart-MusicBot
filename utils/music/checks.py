@@ -210,16 +210,15 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
         if not bot.bot_ready:
             continue
 
-        if bot.user.id == inter.bot.user.id and mention_prefixed:
-            continue
-
         if not (guild := bot.get_guild(inter.guild_id)):
+            if bot.user.id != inter.bot.user.id:
+                extra_bots_counter += 1
             continue
 
         bot_in_guild = True
 
-        if bot.user.id != inter.bot.user.id:
-            extra_bots_counter += 1
+        if bot.user.id == inter.bot.user.id and mention_prefixed:
+            continue
 
         if not (author := guild.get_member(inter.author.id)):
             continue
@@ -337,11 +336,12 @@ async def check_pool_bots(inter, only_voiced: bool = False, check_player: bool =
                 ", ".join(b.user.mention for b in bot_missing_perms)
         else:
             msg = "**Todos os bots estão em uso no nomento...**\n\n**Você pode conectar em um dos canais abaixo onde há sessões ativas:**\n" + ", ".join(voice_channels)
+
         if extra_bots_counter:
             if inter.author.guild_permissions.manage_guild:
-                msg += "\n\n**Ou se preferir: Adicione mais bots de música no servidor atual clicando no botão abaixo:**"
+                msg += "\n\n**Ou se preferir, você pode Adicionar mais bots de música no servidor atual clicando no botão abaixo:**"
             else:
-                msg += "\n\n**Ou, se preferir: Peça a um administrador/manager do servidor para clicar no botão abaixo " \
+                msg += "\n\n**Ou, se preferir, você pode pedir a um administrador/manager do servidor para clicar no botão abaixo " \
                         "para adicionar mais bots de música no servidor atual.**"
             components = [disnake.ui.Button(custom_id="bot_invite", label="Adicione mais bots de música clicando aqui")]
 
