@@ -20,6 +20,7 @@ import aiofiles
 import aiohttp
 import disnake
 import requests
+from aiohttp import ClientSession
 from async_timeout import timeout
 from cachetools import TTLCache
 from disnake.ext import commands
@@ -366,6 +367,25 @@ class BotPool:
                               f'nova tentativa [{retries}/{max_retries}] em {backoff} segundos.')
                     backoff += 2
                     retries += 1
+
+        if data['identifier'] == 'LOCAL' and self.mongo_database and data["info"]["check_version"] > 3 and [i for i in data["info"].get("plugins", {}) if i["name"] == "youtube-plugin"]:
+
+            try:
+                mongo_data = await self.mongo_database._connect["global"]["global"].find_one({"_id": "youtube_data"}) or {}
+            except Exception:
+                traceback.print_exc()
+            else:
+                if tokens:=mongo_data.get("refresh_tokens"):
+                    for v in tokens.values():
+                        async with ClientSession() as session:
+                            resp = await session.post(
+                                f"{data['rest_uri']}/youtube", headers=headers,
+                                json={"refreshToken": v}
+                            )
+                            if resp.status != 204:
+                                resp.raise_for_status()
+                        print(f"🌋 - Youtube refreshToken aplicado no servidor lavalink: {data['identifier']}")
+                        break
 
         for bot in self.get_all_bots():
             loop.create_task(self.connect_node(bot, data))

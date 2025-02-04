@@ -223,6 +223,17 @@ class YtOauthLL(commands.Cog):
 
         txts = []
 
+        if self.bot.pool.mongo_database:
+            try:
+                await self.bot.pool.mongo_database.update_data(
+                    id_="youtube_data",
+                    data={"refresh_tokens": {data['email']: refresh_token}},
+                    collection="global",
+                    db_name="global",
+                )
+            except Exception as e:
+                txts.append(f"Falha ao salvar refreshToken no MongoDB: {repr(e)}")
+
         if os.path.isfile("./application.yml"):
 
             try:
