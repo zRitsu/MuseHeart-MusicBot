@@ -1422,7 +1422,8 @@ class BotCore(commands.AutoShardedBot):
                     filename, _ = os.path.splitext(file)
                     module_filename = os.path.join(module_dir, filename).replace('\\', '.').replace('/', '.')
                     try:
-                        self.reload_extension(module_filename)
+                        self.unload_extension(module_filename)
+                        self.load_extension(module_filename)
                         if not self.bot_ready and load_modules_log:
                             print(f"🟦 - {bot_name} - {filename}.py Recarregado.")
                         load_status["reloaded"].append(f"{filename}.py")
