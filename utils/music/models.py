@@ -2828,8 +2828,8 @@ class LavalinkPlayer(wavelink.Player):
                             traceback.print_exc()
 
                             try:
-                                self.text_channel = self.bot.get_channel(self.text_channel.id)
-                            except AttributeError:
+                                self.text_channel = self.bot.get_channel(self.text_channel.id) or await self.bot.fetch_channel(self.text_channel.id)
+                            except (AttributeError, disnake.Forbidden, disnake.HTTPException):
                                 self.text_channel = None
 
                             if not self.text_channel:
@@ -2859,6 +2859,9 @@ class LavalinkPlayer(wavelink.Player):
                                         await self.text_channel.edit(archived=False)
                                     else:
                                         await self.text_channel.send("Desarquivando o tópico.", delete_after=2)
+
+                                await self.message.edit(allowed_mentions=self.allowed_mentions, **data)
+                                await asyncio.sleep(0.5)
 
                                 #elif ((
                                 #              self.text_channel.archive_timestamp - disnake.utils.utcnow()).total_seconds() / 60) < (
