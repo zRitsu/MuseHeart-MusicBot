@@ -7098,10 +7098,6 @@ class Music(commands.Cog):
 
         exceptions = set()
 
-        is_yt_source = query.lower().startswith(
-            ("https://youtu.be", "https://www.youtube.com", "https://music.youtube.com")
-        )
-
         tracks = []
 
         for n in nodes:
@@ -7143,23 +7139,6 @@ class Music(commands.Cog):
                 except Exception as e:
                     traceback.print_exc()
                     exceptions.add(repr(e))
-                    if [msg for msg in ("Video returned by YouTube isn't what was requested",
-                                    "This video requires login.",
-                                    "The video returned is not what was requested.") if msg in str(e)]:
-
-                        if is_yt_source and n.version > 3:
-                            try:
-                                n.search_providers.remove("ytsearch")
-                            except:
-                                pass
-                            try:
-                                n.search_providers.remove("ytmsearch")
-                            except:
-                                pass
-
-                        if is_yt_source:
-                            node_retry = True
-                            break
 
                     if not isinstance(e, wavelink.TrackNotFound):
                         print(f"Falha ao processar busca...\n{query}\n{traceback.format_exc()}")
@@ -7173,7 +7152,7 @@ class Music(commands.Cog):
                 node = n
                 break
 
-        return tracks, node, exceptions, is_yt_source
+        return tracks, node, exceptions
 
     async def get_tracks(
             self, query: str, ctx: Union[disnake.AppCmdInter, CustomContext, disnake.MessageInteraction, disnake.Message],
@@ -7266,17 +7245,14 @@ class Music(commands.Cog):
 
             return playlist, node
 
-        tracks, node, exceptions, is_yt_source = await self.get_lavalink_tracks(query=query, user=user, ctx=ctx, node=node, bot=bot, source=source)
+        tracks, node, exceptions = await self.get_lavalink_tracks(query=query, user=user, ctx=ctx, node=node, bot=bot, source=source)
         if not tracks:
-            tracks, node, exc, is_yt_source = await self.get_partial_tracks(query=query, user=user, ctx=ctx, node=node, bot=bot)
+            tracks, node, exc = await self.get_partial_tracks(query=query, user=user, ctx=ctx, node=node, bot=bot)
             exceptions.update(exc)
 
         if not tracks:
 
             txt = "\n".join(exceptions)
-
-            if is_yt_source and "Video returned by YouTube isn't what was requested" in txt:
-                raise YoutubeSourceDisabled()
 
             if txt:
                 if "This track is not readable. Available countries:" in txt:
