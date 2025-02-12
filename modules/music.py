@@ -7077,7 +7077,7 @@ class Music(commands.Cog):
                 self.bot.dispatch("custom_error", ctx=ctx, error=e)
                 exceptions.add(repr(e))
 
-        return tracks, node, exceptions, False
+        return tracks, node, exceptions
 
     async def get_lavalink_tracks(self, query: str, ctx: Union[disnake.AppCmdInter, CustomContext, disnake.MessageInteraction, disnake.Message],
             user: disnake.Member, node: wavelink.Node = None, source=None, bot: BotCore = None):
