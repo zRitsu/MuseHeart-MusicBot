@@ -27,7 +27,6 @@ from disnake.ext import commands
 from disnake.http import Route
 from dotenv import dotenv_values
 from user_agent import generate_user_agent
-from yt_dlp import YoutubeDL
 
 import wavelink
 from config_loader import load_config
@@ -44,6 +43,10 @@ from utils.music.remote_lavalink_serverlist import get_lavalink_servers
 from utils.others import CustomContext, token_regex, sort_dict_recursively
 from utils.owner_panel import PanelView
 from web_app import WSClient, start
+
+if os.name != "nt":
+    import uvloop
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 class BotPool:
 
