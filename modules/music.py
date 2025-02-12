@@ -7142,6 +7142,7 @@ class Music(commands.Cog):
 
                     if not isinstance(e, wavelink.TrackNotFound):
                         print(f"Falha ao processar busca...\n{query}\n{traceback.format_exc()}")
+                        node_retry = True
                     elif not isinstance(e, GenericError):
                         self.bot.dispatch("custom_error", ctx=ctx, error=e)
 
