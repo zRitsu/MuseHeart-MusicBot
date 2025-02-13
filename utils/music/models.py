@@ -1022,184 +1022,7 @@ class LavalinkPlayer(wavelink.Player):
 
                     self.current_encoded = None
 
-                    youtube_exception = False
-                    video_not_available = False
-
                     cooldown = 10
-
-                    if (video_not_available:=event.cause.startswith((
-                        "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: This video is not available",
-                        "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: YouTube WebM streams are currently not supported.",
-                        "java.lang.IllegalStateException: Connection pool shut down",
-                    )) or event.message in ("Video returned by YouTube isn't what was requested", "The video returned is not what was requested.")):
-                        await send_report()
-
-                        self.current = None
-                        self.current_encoded = None
-                        self.queue.appendleft(track)
-
-                        if video_not_available:
-
-                            with suppress(IndexError, ValueError):
-                            #    self.node.search_providers.remove("ytsearch")
-                            #    self.node.search_providers.remove("ytmsearch")
-                                self.node.partial_providers.remove("ytsearch:\"{isrc}\"")
-                                self.node.partial_providers.remove("ytsearch:\"{title} - {author}\"")
-                                self.node.partial_providers.remove("ytmsearch:\"{isrc}\"")
-                                self.node.partial_providers.remove("ytmsearch:\"{title} - {author}\"")
-
-                            self.native_yt = False
-
-                            """if track.info["sourceName"] == "youtube":
-                                txt = f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual " \
-                                         "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome " \
-                                         "das músicas do youtube que estão na fila (talvez a música tocada seja diferente do esperado " \
-                                         "ou até mesmo ignoradas caso não retorne resultados)."
-
-                                try:
-                                    await self.text_channel.send(embed=disnake.Embed(description=txt, color=self.bot.get_color(self.guild.me)), delete_after=60)
-                                except:
-                                    self.set_command_log(text=txt, emoji="⚠️", controller=True)"""
-                            await asyncio.sleep(3)
-                            self.locked = False
-                            await self.process_next(start_position=self.position)
-
-                        else:
-                            await asyncio.sleep(10)
-                            self.locked = False
-                            self.current = track
-                            await self.play(track=track, start=self.position)
-                        continue
-
-                    if event.cause.startswith(
-                            ("com.sedmelluq.discord.lavaplayer.tools.FriendlyException: The uploader has not made this video available in your country")
-                    ):
-                        if track.source_name == "youtube":
-                            self.native_yt = False
-                            self.locked = False
-                            await self.process_next(start_position=self.position)
-                            await send_report()
-                            continue
-
-                    if (youtube_exception := (event.error == "This IP address has been blocked by YouTube (429)" or
-                        #event.message == "Video returned by YouTube isn't what was requested" or
-                        event.cause.startswith(("java.lang.RuntimeException: Not success status code: 403",
-                            "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: Sign in to confirm you’re not a bot",
-                            "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: Please sign in",
-                            "java.io.IOException: Invalid status code for player api response: 400",
-                            "java.lang.RuntimeException: Not success status code: 204",
-                            "java.lang.RuntimeException: Not success status code: 302",
-                            "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: This video requires login.",
-                            "java.io.IOException: Invalid status code for video page response: 400"))
-                    ) or event.cause == "com.sedmelluq.discord.lavaplayer.tools.FriendlyException: This video is unavailable"):
-
-                        try:
-                            del self.bot.pool.ytdl_cache[f"ytdl:{self.guild.id}:{track.source_name}:{track.identifier}"]
-                        except KeyError:
-                            pass
-
-                        try:
-                            del self.bot.pool.ytdl_cache[f"lavalink.ytdl:{self.guild.id}:{track.source_name}:{track.identifier}"]
-                        except KeyError:
-                            pass
-
-                        if youtube_exception and self.node.retry_403:
-
-                            if not hasattr(self, 'retries_403'):
-                                self.retries_403 = {"last_time": None, 'counter': 0}
-
-                            if not self.retries_403["last_time"] or ((disnake.utils.utcnow() - self.retries_403["last_time"]).total_seconds() > self.bot.pool.config.get("ERROR_403_RETRIES", 7)):
-                                self.retries_403 = {"last_time": disnake.utils.utcnow(), 'counter': 0}
-                                if self.auto_pause:
-                                    self.update = True
-                                else:
-                                    await self.play(track, start=get_start_pos(self, track, self.bot.pool.config.get("ERROR_403_ADDITIONAL_MILLISECONDS", 430)))
-                                    await asyncio.sleep(3)
-                                self.locked = False
-                                self.update = True
-                                continue
-
-                            elif self.retries_403["counter"] < 3:
-                                self.retries_403["counter"] += 1
-                                await asyncio.sleep(3)
-                                self.retries_403["last_time"] = disnake.utils.utcnow()
-
-                                if self.is_closing:
-                                    return
-
-                                self.locked = False
-                                self.set_command_log(
-                                    text=f'Ocorreu o erro 403 do youtube na reprodução da música atual. Tentativa {self.retries_403["counter"]}/5...', controller=True)
-                                if not self.auto_pause:
-                                    self.update = True
-                                else:
-                                    await self.play(track, start=get_start_pos(self, track, self.bot.pool.config.get("ERROR_403_ADDITIONAL_MILLISECONDS", 430)))
-                                    self.update = True
-                                await send_report()
-                                self.locked = False
-                                continue
-
-                            self.queue.append(track)
-
-                        self.retries_403 = {"last_time": None, 'counter': 0}
-
-                        if youtube_exception:
-
-                            with suppress(IndexError, ValueError, KeyError):
-                            #    self.node.search_providers.remove("ytsearch")
-                            #    self.node.search_providers.remove("ytmsearch")
-                                self.node.partial_providers.remove("ytsearch:\"{isrc}\"")
-                                self.node.partial_providers.remove("ytsearch:\"{title} - {author}\"")
-                                self.node.partial_providers.remove("ytmsearch:\"{isrc}\"")
-                                self.node.partial_providers.remove("ytmsearch:\"{title} - {author}\"")
-
-                            self.current = None
-                            self.current_encoded = None
-                            self.queue.appendleft(track)
-
-                            if track.info["sourceName"] == "youtube":
-
-                                self.native_yt = False
-
-                                try:
-                                    new_node = [n for n in self.bot.music.nodes.values() if n != self.node and n.is_available and "ytsearch" in n.search_providers][0]
-                                except:
-                                    new_node = None
-
-                                if new_node:
-                                    self.native_yt = True
-                                    txt = f"Devido a restrições do youtube no servidor `{self.node.identifier} o player foi movido para o servidor `{new_node.identifier}`."
-                                    if self.controller_mode:
-                                        self.set_command_log(txt, emoji="⚠️", controller=True)
-                                    elif self.text_channel:
-                                        try:
-                                            await self.text_channel.send(embed=disnake.Embed(description=f"-# `⚠️ -` {txt}", color=self.bot.get_color(self.guild.me)), delete_after=10)
-                                        except:
-                                            traceback.print_exc()
-                                    await asyncio.sleep(5)
-                                    await self.change_node(new_node.identifier)
-                                    self.locked = False
-                                    await self.process_next(start_position=self.position)
-                                    await send_report()
-                                    continue
-
-                                txt = f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual " \
-                                      "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome " \
-                                      "das músicas do youtube que estão na fila (talvez a música tocada seja diferente do esperado " \
-                                      "ou até mesmo ignoradas caso não retorne resultados)."
-                                try:
-                                    await self.text_channel.send(embed=disnake.Embed(
-                                        description=txt, color=self.bot.get_color(self.guild.me)
-                                    ), delete_after=30)
-                                except:
-                                    self.set_command_log(text=txt, emoji="⚠️", controller=True)
-
-                            self.locked = False
-                            await self.process_next(start_position=self.position)
-                            await send_report()
-                            continue
-
-                    await send_report()
 
                     start_position = 0
 
@@ -1211,6 +1034,7 @@ class LavalinkPlayer(wavelink.Player):
                             "java.lang.IllegalArgumentException: Invalid bitrate",
                             "java.io.EOFException",
                             "java.net.UnknownHostException:",
+                            "java.lang.IllegalStateException: Connection pool shut down",
                             "java.lang.IllegalStateException: Error from decoder",
                             "java.lang.IllegalStateException: Current position is beyond this element",
                             "com.sedmelluq.discord.lavaplayer.tools.io.PersistentHttpStream$PersistentHttpException: Not success status code: 403",
@@ -1224,7 +1048,10 @@ class LavalinkPlayer(wavelink.Player):
 
                         self.queue.appendleft(track)
 
-                        if self.retries_general_errors["counter"] < 1 and self.node.identifier == self.retries_general_errors["last_node"] and (disnake.utils.utcnow() - self.retries_general_errors["last_time"]).total_seconds() < 180:
+                        if self.retries_general_errors["counter"] < 1 and self.node.identifier == \
+                                self.retries_general_errors["last_node"] and (
+                                disnake.utils.utcnow() - self.retries_general_errors[
+                            "last_time"]).total_seconds() < 180:
 
                             try:
                                 self._new_node_task.cancel()
@@ -1254,6 +1081,51 @@ class LavalinkPlayer(wavelink.Player):
                         except:
                             pass
                         self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node())
+                        continue
+
+                    elif track.source_name == "youtube":
+
+                        self.current = None
+                        self.current_encoded = None
+                        self.native_yt = False
+                        self.queue.appendleft(track)
+
+                        try:
+                            new_node = [n for n in self.bot.music.nodes.values() if n != self.node and n.is_available and "ytsearch" in n.search_providers][0]
+                        except:
+                            new_node = None
+
+                        if new_node:
+                            self.native_yt = True
+                            txt = f"Devido a restrições do youtube no servidor `{self.node.identifier} o player foi movido para o servidor `{new_node.identifier}`."
+                            if self.controller_mode:
+                                self.set_command_log(txt, emoji="⚠️", controller=True)
+                            elif self.text_channel:
+                                try:
+                                    await self.text_channel.send(embed=disnake.Embed(description=f"-# `⚠️ -` {txt}", color=self.bot.get_color(self.guild.me)), delete_after=10)
+                                except:
+                                    traceback.print_exc()
+                            await asyncio.sleep(5)
+                            await self.change_node(new_node.identifier)
+                            self.locked = False
+                            await self.process_next(start_position=self.position)
+                            await send_report()
+                            continue
+
+                        txt = f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual " \
+                              "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome " \
+                              "das músicas do youtube que estão na fila (talvez a música tocada seja diferente do esperado " \
+                              "ou até mesmo ignoradas caso não retorne resultados)."
+                        try:
+                            await self.text_channel.send(embed=disnake.Embed(
+                                description=txt, color=self.bot.get_color(self.guild.me)
+                            ), delete_after=30)
+                        except:
+                            self.set_command_log(text=txt, emoji="⚠️", controller=True)
+
+                        self.locked = False
+                        await self.process_next(start_position=self.position)
+                        await send_report()
                         continue
 
                     elif not track.track_loops:

@@ -10,7 +10,6 @@ secure=false
 region=us_central
 website=https://support.something.host/en/article/lavalink-hosting-okm26z/
 search=true
-retry_403=false
 search_providers=ytsearch scsearch
 prefer_youtube_native_playback=true
 only_use_native_search_providers=true

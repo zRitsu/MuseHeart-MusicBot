@@ -90,7 +90,6 @@ class BotPool:
         self.remote_git_url = ""
         self.max_counter: int = 0
         self.message_ids = TTLCache(ttl=30, maxsize=20000)
-        self.ytdl_cache = TTLCache(ttl=self.config["YTDL_CACHE_TIME"], maxsize=500)
         self.bot_mentions = set()
         self.single_bot = True
         self.failed_bots: dict = {}
@@ -404,7 +403,6 @@ class BotPool:
                 'identifier': 'LOCAL',
                 'region': 'us_central',
                 'retries': 120,
-                'retry_403': False,
                 'prefer_youtube_native_playback': self.config["PREFER_YOUTUBE_NATIVE_PLAYBACK"],
                 'only_use_native_search_providers': self.config["ONLY_USE_NATIVE_SEARCH_PROVIDERS"],
                 'search_providers': self.config["SEARCH_PROVIDERS"].strip().split() or ["amsearch", "tdsearch", "spsearch", "ytsearch", "scsearch"]
@@ -609,7 +607,6 @@ class BotPool:
                     value["secure"] = value.get("secure", "").lower() == "true"
                     value["port"] = value["port"].replace("{SERVER_PORT}", os.environ.get("SERVER_PORT") or "8090")
                     value["search"] = value.get("search", "").lower() != "false"
-                    value["retry_403"] = value.get("retry_403", "").lower() == "true"
                     value["prefer_youtube_native_playback"] = value.get("prefer_youtube_native_playback", "").lower() == "true"
                     value["only_use_native_search_providers"] = value.get("only_use_native_search_providers", "").lower() == "true"
                     value["search_providers"] = value.get("search_providers", "").strip().split()

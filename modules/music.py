@@ -7009,7 +7009,6 @@ class Music(commands.Cog):
         region = data.pop('region', 'us_central')
         heartbeat = int(data.pop('heartbeat', 30))
         search_providers = data.pop("search_providers", None) or ["ytsearch", "scsearch"]
-        retry_403 = data.pop('retry_403', False)
         info = data.pop("info", {})
 
         try:
@@ -7021,7 +7020,6 @@ class Music(commands.Cog):
         node.info = info
         node.search = search
         node.website = node_website
-        node.retry_403 = retry_403
         node.search_providers = search_providers
         node.original_providers = set(node.search_providers)
         node.partial_providers = []

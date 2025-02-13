@@ -71,7 +71,6 @@ DEFAULT_CONFIG = {
     "PLAYLIST_CACHE_SIZE": 500,
     "PLAYLIST_CACHE_TTL": 1800,
     "USE_YTM_TRACKINFO_SCROBBLE": False,
-    "YTDL_CACHE_TIME": 900,
 
     ##############################################
     ### Sistema de música - Suporte ao spotify ###
@@ -217,7 +216,6 @@ def load_config():
         "SPOTIFY_PLAYLIST_EXTRA_PAGE_LIMIT",
         "BOT_ADD_REMOVE_LOG_CHANNEL_ID",
         "YOUTUBE_TRACK_COOLDOWN",
-        "YTDL_CACHE_TIME",
     ]:
 
         if not CONFIG[i]:
