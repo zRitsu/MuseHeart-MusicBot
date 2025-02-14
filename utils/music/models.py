@@ -1081,6 +1081,7 @@ class LavalinkPlayer(wavelink.Player):
                         except:
                             pass
                         self._new_node_task = self.bot.loop.create_task(self._wait_for_new_node())
+                        await send_report()
                         continue
 
                     elif track.source_name == "youtube":
@@ -1148,6 +1149,8 @@ class LavalinkPlayer(wavelink.Player):
                         send_message_perm = self.text_channel.parent.permissions_for(self.guild.me).send_messages_in_threads
                     else:
                         send_message_perm = self.text_channel.permissions_for(self.guild.me).send_messages
+
+                    await send_report()
 
                     if embed and self.text_channel and send_message_perm:
                         await self.text_channel.send(embed=embed, delete_after=10)
