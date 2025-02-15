@@ -680,6 +680,9 @@ class BotPool:
             self.remote_git_url = check_output(['git', 'remote', '-v']).decode(
                 'ascii').strip().split("\n")[0][7:].replace(".git", "").replace(" (fetch)", "")
         except:
+            pass
+
+        if not self.remote_git_url:
             self.remote_git_url = self.config["SOURCE_REPO"]
 
         prefix = get_prefix if intents.message_content else commands.when_mentioned
