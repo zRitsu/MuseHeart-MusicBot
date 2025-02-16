@@ -243,22 +243,26 @@ class Owner(commands.Cog):
 
         modules = [f"{m.lower()}.py" for m in modules]
 
+        for bot in (allbots:=set(self.bot.pool.get_all_bots())):
+            for m in list(bot.extensions):
+                for m_name in modules:
+                    if m_name[:-3].lower() in m.split(".")[-1]:
+                        bot.unload_extension(m)
+
         data = {}
 
-        for bot in (allbots:=set(self.bot.pool.get_all_bots())):
-            data = bot.load_modules(modules)
-            bot.sync_command_cooldowns(force=True)
+        if isinstance(ctx, CustomContext):
+            await ctx.trigger_typing()
 
         for bot in allbots:
+            data = bot.load_modules(modules)
+            bot.sync_command_cooldowns(force=True)
             await bot.sync_app_commands(force=True)
 
         txt = ""
 
-        if data["loaded"]:
-            txt += f'**Módulos carregados:** ```ansi\n[0;34m{" [0;37m| [0;34m".join(data["loaded"])}```\n'
-
-        if data["reloaded"]:
-            txt += f'**Módulos recarregados:** ```ansi\n[0;32m{" [0;37m| [0;32m".join(data["reloaded"])}```\n'
+        if loaded := data["loaded"] + data["reloaded"]:
+            txt += f'**Módulos carregados/recarregados:** ```ansi\n[0;34m{" [0;37m| [0;34m".join(loaded)}```\n'
 
         if data["failed"]:
             txt += f'**Módulos que falharam:** ```ansi\n[0;31m{" [0;37m| [0;31m".join(data["failed"])}```\n'
@@ -269,8 +273,7 @@ class Owner(commands.Cog):
         self.bot.pool.config = load_config()
 
         if isinstance(ctx, CustomContext):
-            embed = disnake.Embed(colour=self.bot.get_color(ctx.me), description=txt)
-            await ctx.send(embed=embed, view=self.owner_view)
+            await ctx.send(embed=disnake.Embed(colour=self.bot.get_color(ctx.me), description=txt))
         else:
             return txt
 
