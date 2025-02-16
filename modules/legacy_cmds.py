@@ -246,7 +246,7 @@ class Owner(commands.Cog):
         for bot in (allbots:=set(self.bot.pool.get_all_bots())):
             for m in list(bot.extensions):
                 for m_name in modules:
-                    if m_name[:-3].lower() in m.split(".")[-1]:
+                    if m_name[:-3].lower() == m.split(".")[-1]:
                         bot.unload_extension(m)
 
         data = {}
@@ -257,7 +257,8 @@ class Owner(commands.Cog):
         for bot in allbots:
             data = bot.load_modules(modules)
             bot.sync_command_cooldowns(force=True)
-            await bot.sync_app_commands(force=True)
+            if not data["failed"]:
+                await bot.sync_app_commands(force=True)
 
         txt = ""
 
