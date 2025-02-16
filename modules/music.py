@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import asyncio
+import contextlib
 import datetime
 import itertools
 import os.path
 import pickle
 import pprint
 import re
+import sys
 import traceback
 import zlib
 from base64 import b64decode
@@ -6740,6 +6742,18 @@ class Music(commands.Cog):
         except:
             pass
 
+        with contextlib.suppress(KeyError):
+            for m in [
+                "utils.music.models",
+                "utils.music.audio_sources.spotify",
+                "utils.music.audio_sources.deezer",
+                "utils.music.filters",
+                "utils.music.local_lavalink",
+                "utils.music.skin_utils",
+                "utils.music.errors",
+                "utils.music.interactions",
+            ]:
+                del sys.modules[m]
 
     async def interaction_message(self, inter: Union[disnake.Interaction, CustomContext], txt, emoji: str = "✅",
                                   rpc_update: bool = False, data: dict = None, store_embed: bool = False, force=False,
