@@ -1098,7 +1098,7 @@ class LavalinkPlayer(wavelink.Player):
 
                         if new_node:
                             self.native_yt = True
-                            txt = f"Devido a restrições do youtube no servidor `{self.node.identifier} o player foi movido para o servidor `{new_node.identifier}`."
+                            txt = f"Devido a restrições do youtube no servidor `{self.node.identifier}` o player foi movido para o servidor `{new_node.identifier}`."
                             if self.controller_mode:
                                 self.set_command_log(txt, emoji="⚠️", controller=True)
                             elif self.text_channel:
