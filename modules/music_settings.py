@@ -1756,7 +1756,9 @@ class RPCCog(commands.Cog):
         bot: Optional[BotCore] = None
 
         for b in self.bot.pool.get_guild_bots(ctx.guild_id):
-            if ctx.author.voice.channel.permissions_for(ctx.guild.get_member(b.user.id)).manage_channels:
+            if not (bot_member:= ctx.guild.get_member(b.user.id)):
+                continue
+            if ctx.author.voice.channel.permissions_for(bot_member).manage_channels:
                 bot = b
                 break
 
