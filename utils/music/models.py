@@ -596,7 +596,7 @@ class LavalinkPlayer(wavelink.Player):
             "a música que está sendo tocada no momento. Experimente usando o comando /set_voice_status ou "
             f"{self.prefix_info}stageannounce (Apenas membros com permissão de gerenciar servidor podem usar esse recurso).",
 
-            f"Caso a música esteja comlag, audio travando etc. Experimente alterar a região do canal de voz "
+            f"Caso a música esteja com lag, audio travando etc. Experimente alterar a região do canal de voz "
             f"(caso esteja em um palco/stage use o comando {self.prefix_info}stageregion)."
         ]
 
