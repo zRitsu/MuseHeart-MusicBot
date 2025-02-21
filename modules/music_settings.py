@@ -1764,14 +1764,14 @@ class RPCCog(commands.Cog):
             ctx.command.reset_cooldown(ctx)
             raise GenericError("**Não há bots com permissão de gerenciar canais no servidor**")
 
+        vc = ctx.author.voice.channel
+
         view = ButtonInteraction(
             user=ctx.author,
-            buttons=[disnake.ui.Button(label=k, custom_id=k, emoji=v) for k, v in self.voice_regions.items()]
+            buttons=[disnake.ui.Button(label=k, custom_id=k, emoji=v) for k, v in self.voice_regions.items() if k != vc.rtc_region]
         )
 
         color = self.bot.get_color(ctx.guild.me)
-
-        vc = ctx.author.voice.channel
 
         msg = await ctx.send(
             embed=disnake.Embed(description="### Selecione uma região abaixo:", color=color),
