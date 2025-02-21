@@ -11,7 +11,7 @@ aiofiles
 disnake-jishaku
 packaging
 aiosqlite
-yt-dlp[default]>=2025.01.26
+yt-dlp[default]>=2025.02.19
 tornado>=6.4.2
 emoji
 urllib3>=2.2.2
@@ -23,7 +23,7 @@ pylrc
 rapidfuzz
 nodriver==0.32
 undetected-chromedriver==3.5.5
-g4f[all]==0.4.6.0
+g4f[all]==0.4.6.2
 ruamel.yaml
 nest_asyncio
 setuptools>=70.0.0; python_version>='3.12'
