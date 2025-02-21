@@ -18,7 +18,7 @@ from disnake.ext import commands
 from utils.db import DBModel
 from utils.music.converters import perms_translations, time_format
 from utils.music.errors import GenericError, NoVoice
-from utils.music.interactions import SkinEditorMenu, EmbedPaginatorInteraction
+from utils.music.interactions import SkinEditorMenu, EmbedPaginatorInteraction, ButtonInteraction
 from utils.music.models import LavalinkPlayer
 from utils.others import send_idle_embed, CustomContext, select_bot_pool, pool_command, CommandArgparse, update_inter
 
@@ -1725,6 +1725,88 @@ class RPCCog(commands.Cog):
 
     def __init__(self, bot: BotCore):
         self.bot = bot
+        self.voice_regions= {
+            "brazil": "🇧🇷",
+            "hongkong": "🇭🇰",
+            "india": "🇮🇳",
+            "japan": "🇯🇵",
+            "rotterdam": "🇳🇱",
+            "russia": "🇷🇺",
+            "singapore": "🇸🇬",
+            "southafrica": "🇿🇦",
+            "sydney": "🇦🇺",
+            "us-central": "🇺🇸",
+            "us-east": "🇺🇸",
+            "us-west": "🇺🇸",
+            "us-south": "🇺🇸",
+        }
+
+    @commands.max_concurrency(1, commands.BucketType.guild)
+    @commands.cooldown(1,  120, commands.BucketType.guild)
+    @commands.has_permissions(manage_channels=True)
+    @commands.command(
+        description="Alterar a região de um canal de palco"
+    )
+    async def stageregion(self, ctx: CustomContext):
+
+        if not isinstance(ctx.author.voice.channel, disnake.StageChannel):
+            ctx.command.reset_cooldown(ctx)
+            raise GenericError("**Você deve estar conectado em um canal de palco para usar esse comando.**")
+
+        bot: Optional[BotCore] = None
+
+        for b in self.bot.pool.get_guild_bots(ctx.guild_id):
+            if ctx.author.voice.channel.permissions_for(ctx.guild.get_member(b.user.id)).manage_channels:
+                bot = b
+                break
+
+        if not bot:
+            ctx.command.reset_cooldown(ctx)
+            raise GenericError("**Não há bots com permissão de gerenciar canais no servidor**")
+
+        view = ButtonInteraction(
+            user=ctx.author,
+            buttons=[disnake.ui.Button(label=k, custom_id=k, emoji=v) for k, v in self.voice_regions.items()]
+        )
+
+        color = self.bot.get_color(ctx.guild.me)
+
+        vc = ctx.author.voice.channel
+
+        msg = await ctx.send(
+            embed=disnake.Embed(description="### Selecione uma região abaixo:", color=color),
+            view=view,
+        )
+
+        await view.wait()
+
+        if view.inter:
+            ctx.inter = view.inter
+
+        try:
+            func = view.inter.edit_original_response
+            await view.inter.response.defer()
+        except AttributeError:
+            func = msg.edit
+
+        if not view.selected:
+            await func(
+                embed=disnake.Embed(
+                    color=color,
+                    description="### Operação cancelada!"
+                ), view=None
+            )
+            return
+
+        await vc.edit(rtc_region=view.selected, reason=f"Região alterada por: {ctx.author.name} [{ctx.author.id}]")
+
+        await func(
+            embed=disnake.Embed(
+                color=color,
+                description=f"**A região do canal {vc.mention} foi alterado com sucesso para:\n"
+                            f"{view.selected}**"
+            ), view=None
+        )
 
     rpc_cd = commands.CooldownMapping.from_cooldown(1, 30, commands.BucketType.user)
 

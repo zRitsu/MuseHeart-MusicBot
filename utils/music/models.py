@@ -594,7 +594,10 @@ class LavalinkPlayer(wavelink.Player):
 
             "É possível definir o status automático no canal de voz com informações sobre "
             "a música que está sendo tocada no momento. Experimente usando o comando /set_voice_status ou "
-            f"{self.prefix_info}stageannounce (Apenas membros com permissão de gerenciar servidor podem usar esse recurso)."
+            f"{self.prefix_info}stageannounce (Apenas membros com permissão de gerenciar servidor podem usar esse recurso).",
+
+            f"Caso a música esteja comlag, audio travando etc. Experimente alterar a região do canal de voz "
+            f"(caso esteja em um palco/stage use o comando {self.prefix_info}stageregion)."
         ]
 
         self.retry_setup_hints = False
