@@ -23,7 +23,7 @@ pylrc
 rapidfuzz
 nodriver==0.32
 undetected-chromedriver==3.5.5
-g4f[all]==0.4.7.2
+g4f[all]==0.4.7.3
 ruamel.yaml
 nest_asyncio
 setuptools>=70.0.0; python_version>='3.12'
