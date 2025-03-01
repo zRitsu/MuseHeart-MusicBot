@@ -6,10 +6,10 @@ import traceback
 import uuid
 from typing import TYPE_CHECKING, Optional
 
+import aiohttp
 import disnake
 import ruamel.yaml
 from disnake.ext import commands
-from g4f.requests import aiohttp
 
 from utils.music.errors import GenericError
 from utils.music.interactions import AskView
@@ -112,9 +112,9 @@ class YtOauthView(disnake.ui.View):
             data = await self.get_device_code(session)
             verification_url = f"{data['verification_url']}?user_code={data['user_code']}"
 
-            self.bot.pool.yt_oauth_loop = self.bot.loop.create_task(
-                self.check_session_loop(device_code=data['device_code'], expire_in=data['expires_in'])
-            )
+        self.bot.pool.yt_oauth_loop = self.bot.loop.create_task(
+            self.check_session_loop(device_code=data['device_code'], expire_in=data['expires_in'])
+        )
 
         await interaction.message.delete()
 
