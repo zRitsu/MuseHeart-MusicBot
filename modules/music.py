@@ -36,9 +36,9 @@ from utils.music.checks import check_voice, has_player, has_source, is_requester
 from utils.music.converters import time_format, fix_characters, string_to_seconds, URL_REG, \
     YOUTUBE_VIDEO_REG, google_search, percentage, music_source_image
 from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolException, parse_error, \
-    EmptyFavIntegration, DiffVoiceChannel, NoPlayer, YoutubeSourceDisabled
+    EmptyFavIntegration, DiffVoiceChannel, NoPlayer
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction, FavMenuView, ViewMode, \
-    SetStageTitle, SelectBotVoice, youtube_regex, soundcloud_regex, ButtonInteraction
+    SetStageTitle, SelectBotVoice, youtube_regex, ButtonInteraction
 from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, PartialTrack, PartialPlaylist, \
     native_sources, CustomYTDL
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, queue_track_index, \
@@ -46,7 +46,7 @@ from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerContro
     select_bot_pool, ProgressBar, update_inter, get_source_emoji_cfg, music_source_emoji
 
 sc_recommended = re.compile(r"https://soundcloud\.com/.*/recommended$")
-
+sc_profile_regex = re.compile(r"<?https://soundcloud\.com/[a-zA-Z0-9_-]+>?$")
 
 class Music(commands.Cog):
 
@@ -1273,13 +1273,13 @@ class Music(commands.Cog):
                     info = {"entries": [{"title": t['title'], "url": f"{t['link']}"} for t in result]}
                     self.bot.pool.integration_cache[cache_key] = info
 
-        elif matches:=(yt_match:=youtube_regex.search(query)) or (sc_match:=soundcloud_regex.search(query)):
+        elif matches:=(yt_match:=youtube_regex.search(query)) or (sc_match:=sc_profile_regex.match(query)):
 
             if yt_match:
                 query = f"{yt_match.group()}/playlists"
                 remove_chars = 12
             else:
-                query = f"https://soundcloud.com/{sc_match.group(1)}/sets"
+                query = f"{sc_match.group(0).strip('<>')}/sets"
                 remove_chars = 6
 
             try:
