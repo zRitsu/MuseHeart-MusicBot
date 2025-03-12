@@ -670,7 +670,7 @@ async def check_player_perm(inter, bot: BotCore, channel, guild_data: dict = Non
     if inter.author.guild_permissions.manage_channels:
         return True
 
-    if player.keep_connected and not (await bot.is_owner(inter.author)):
+    if player.keep_connected:
 
         txt, components = get_available_bots_info(bot.pool, player.guild_id, inter.author)
 
