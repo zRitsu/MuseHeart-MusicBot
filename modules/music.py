@@ -904,7 +904,7 @@ class Music(commands.Cog):
 
             if user_data["fav_links"]:
                 opts.append(disnake.SelectOption(label="Usar favorito", value=">> [⭐ Favoritos ⭐] <<", emoji="⭐"))
-                txt += f"`Tocar música ou playlist que você curtiou ou que você tenha adicionado nos seus favoritos.`\n"
+                txt += f"`Tocar música ou playlist que você curtiu ou que você tenha adicionado nos seus favoritos.`\n"
 
             else:
                 txt += f"`Você não possui favoritos...`\n"
@@ -1093,7 +1093,7 @@ class Music(commands.Cog):
 
                 if menu == "favs":
                     embed.description = '### `[⭐] ⠂Favoritos ⠂[⭐]`\n' \
-                                        '`Tocar música ou playlist que você curtiou ou que você tenha adicionado na sua lista de favoritos.`\n' \
+                                        '`Tocar música ou playlist que você curtiu ou que você tenha adicionado na sua lista de favoritos.`\n' \
                                         f'-# Você pode gerenciar seus favoritos usando o comando {fav_slashcmd}.\n\n' \
                                          f'{embed.description}\n\n**Selecione um favorito abaixo:**'
 
