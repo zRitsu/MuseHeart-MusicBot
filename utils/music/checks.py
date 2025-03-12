@@ -18,7 +18,7 @@ from utils.others import CustomContext
 
 if TYPE_CHECKING:
     from utils.music.models import LavalinkPlayer
-    from utils.client import BotCore
+    from utils.client import BotCore, BotPool
 
 
 def can_send_message(
@@ -594,6 +594,56 @@ def user_cooldown(rate: int, per: int):
 
     return custom_cooldown
 
+def get_available_bots_info(pool: BotPool, guild_id: int, member: disnake.Member):
+
+    extra_bot_counter = 0
+
+    available_bots = set()
+
+    voice_channels = set()
+
+    for b in pool.get_guild_bots(guild_id):
+
+        if not b.bot_ready:
+            continue
+
+        try:
+            p = b.music.players[guild_id]
+        except KeyError:
+            if not b.get_guild(guild_id):
+                extra_bot_counter += 1
+                continue
+            available_bots.add(b.user.mention)
+        else:
+            if p.keep_connected or p.restrict_mode or not p.last_channel or not p.last_channel.permissions_for(member).connect:
+                continue
+            voice_channels.add(p.last_channel.mention)
+
+    txts = []
+
+    components = []
+
+    if available_bots:
+        txts.append(f"Você pode usar outro{(s:='s'[:(abcount:=len(available_bots))^1])} bot{s} de música disponíve{'is'[:abcount^1] or 'l'} no servidor para usar em outro canal de voz: " + " ".join(available_bots))
+    else:
+        t = ""
+        if voice_channels:
+            t += f"Você pode se juntar em um dos canais com sessões ativas no servidor: " + " ".join(voice_channels)
+        if extra_bot_counter:
+            t += "\n\n" + ("Ou se preferir, você pode" if t else "Você pode")
+            if member.guild_permissions.manage_guild:
+                t += "solicitar para um administrador do server "
+            t += "adicionar mais bots de música clicando no botão abaixo."
+
+            components = [disnake.ui.Button(custom_id="bot_invite", label="Adicione mais bots de música clicando aqui")]
+
+        if t:
+            txts.append(t)
+
+    return "\n\n".join(txts), components
+
+
+
 
 #######################################################################
 
@@ -621,8 +671,11 @@ async def check_player_perm(inter, bot: BotCore, channel, guild_data: dict = Non
         return True
 
     if player.keep_connected and not (await bot.is_owner(inter.author)):
+
+        txt, components = get_available_bots_info(bot.pool, player.guild_id, inter.author)
+
         raise GenericError("Apenas membros com a permissão de **gerenciar canais** "
-                           f"podem usar esse comando/botão com o **modo 24/7 ativo** no canal <#{player.channel_id}>...")
+                           f"podem usar esse comando/botão com o **modo 24/7 ativo** no canal <#{player.channel_id}>...\n\n" + txt, components=components)
 
     if inter.author.id == player.player_creator or inter.author.id in player.dj:
         return True
@@ -642,8 +695,11 @@ async def check_player_perm(inter, bot: BotCore, channel, guild_data: dict = Non
         return True
 
     if player.restrict_mode:
+
+        txt, components = get_available_bots_info(bot.pool, player.guild_id, inter.author)
+
         raise GenericError("Apenas DJ's ou membros com a permissão de **mover membros** "
-                           "podem usar este comando/botão com o **modo restrito ativo**...")
+                           "podem usar este comando/botão com o **modo restrito ativo**...\n\n" + txt, components=components)
 
     if not vc and inter.author.voice:
         player.dj.add(inter.author.id)
