@@ -631,7 +631,7 @@ def get_available_bots_info(pool: BotPool, guild_id: int, member: disnake.Member
             t += f"Você pode se juntar em um dos canais com sessões ativas no servidor: " + " ".join(voice_channels)
         if extra_bot_counter:
             t += "\n\n" + ("Ou se preferir, você pode" if t else "Você pode")
-            if member.guild_permissions.manage_guild:
+            if not member.guild_permissions.manage_guild:
                 t += "solicitar para um administrador do server "
             t += "adicionar mais bots de música clicando no botão abaixo."
 
