@@ -2939,6 +2939,16 @@ class LavalinkPlayer(wavelink.Player):
 
             self.bot.loop.create_task(self.update_stage_topic(reconnect=False, clear=True))
 
+            try:
+                vc = self.guild.voice_client.channel
+            except:
+                vc = self.last_channel
+
+            try:
+                await self.process_rpc(vc, close=True)
+            except:
+                traceback.print_exc()
+
             if self.static:
 
                 try:
@@ -3062,16 +3072,6 @@ class LavalinkPlayer(wavelink.Player):
 
                 except Exception:
                     traceback.print_exc()
-
-            try:
-                vc = self.guild.voice_client.channel
-            except:
-                vc = self.last_channel
-
-            try:
-                await self.process_rpc(vc, close=True)
-            except:
-                traceback.print_exc()
 
     async def auto_skip_track(self):
 
@@ -3573,8 +3573,6 @@ class LavalinkPlayer(wavelink.Player):
             self.track_load_task.cancel()
         except:
             pass
-
-        await self.event_queue.put(None)
 
         try:
             self.event_queue_task.cancel()
