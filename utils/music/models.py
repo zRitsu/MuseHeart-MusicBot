@@ -10,7 +10,6 @@ import re
 import traceback
 import uuid
 from collections import deque
-from contextlib import suppress
 from itertools import cycle
 from time import time
 from typing import Optional, Union, TYPE_CHECKING, List
@@ -429,8 +428,8 @@ class LavalinkTrack(wavelink.Track):
         return f"`{self.author}`"
 
     @property
-    def authors(self) -> str:
-        return f"{self.author}"
+    def authors(self) -> List[str]:
+        return [f"{self.author}"]
 
     @property
     def authors_string(self) -> str:
