@@ -193,8 +193,11 @@ class PlayerSession(commands.Cog):
 
         with suppress(AttributeError):
             data["extra_info"] = player.extra_info
+        with suppress(AttributeError):
             data["live_lyrics_status"] = player.live_lyrics_enabled
+        with suppress(AttributeError):
             data["current_encoded"] = player.current_encoded
+        with suppress(AttributeError):
             data["command_log_list"] = player.command_log_list
 
         if player.static:

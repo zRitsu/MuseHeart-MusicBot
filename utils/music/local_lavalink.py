@@ -171,6 +171,7 @@ def run_lavalink(
 
                 with suppress(FileNotFoundError):
                     os.remove(f"{tmp_dir}/{jdk_filename}")
+                with suppress(AttributeError):
                     shutil.rmtree(extracted_folder)
 
                 java_cmd = os.path.realpath(f"{tmp_dir}/.java/{jdk_platform}/bin/java")
