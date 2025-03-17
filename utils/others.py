@@ -805,6 +805,9 @@ def queue_track_index(inter: disnake.AppCmdInter, bot: BotCore, query: str, matc
 
 def update_inter(old: Union[disnake.Interaction, CustomContext], new: disnake.Interaction):
 
+    if not new:
+        return
+
     if isinstance(old, CustomContext):
         old.inter = new
     else:
