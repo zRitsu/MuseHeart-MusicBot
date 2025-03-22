@@ -2146,6 +2146,69 @@ class LavalinkPlayer(wavelink.Player):
             self.locked = False
             await self.process_next()
 
+    async def play(self, track: Union[LavalinkTrack], *, replace: bool = True, start: int = 0, end: int = 0, **kwargs):
+
+        if replace or not self.is_playing:
+            self.last_update = 0
+            self.last_position = 0
+            self.position_timestamp = 0
+            self.paused = False
+        else:
+            return
+
+        self.current = track
+
+        self.current_encoded = kwargs.pop("temp_id", None) or track.id
+
+        if self.node.version == 3:
+
+            payload = {
+                'op': 'play',
+                'guildId': str(self.guild_id),
+                'track': self.current_encoded,
+                'noReplace': not replace,
+                'startTime': start,
+            }
+
+            payload.update(kwargs)
+
+            if end > 0:
+                payload['endTime'] = str(end)
+
+            await self.node._send(**payload, **kwargs)
+        else:
+
+            vol: int = kwargs.get('volume') or self.volume
+
+            if vol != self.volume:
+                self.volume = vol
+
+            pause: bool
+
+            if (p := kwargs.get("paused")) is not None:
+                pause = p
+            else:
+                pause = self.paused
+
+            payload = {
+                "encodedTrack": self.current_encoded,
+                "volume": vol,
+                "position": int(start),
+                "paused": pause,
+                "filters": self.filters,
+            }
+
+            if end > 0:
+                payload['endTime'] = str(end)
+
+            if track.source_name == "youtube":
+                try:
+                    payload["userData"] = {"oauth-token": self.extra_info["guild-yt-oauth"][0]}
+                except KeyError:
+                    pass
+
+            await self.node.update_player(self.guild_id, payload, replace)
+
     async def process_idle_message(self):
 
         controller_opts = [
