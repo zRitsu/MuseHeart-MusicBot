@@ -205,7 +205,7 @@ class MiniSkin:
                 )
             )
 
-        if not player.static and not player.has_thread:
+        if not player.has_thread:
             data["components"][5].options.append(
                 disnake.SelectOption(
                     label="Song-Request Thread", emoji="💬",
