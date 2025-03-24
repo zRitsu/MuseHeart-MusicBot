@@ -1372,7 +1372,7 @@ class LavalinkPlayer(wavelink.Player):
             except AttributeError:
                 vc = self.last_channel
 
-            if [m for m in vc.members if not m.bot and not (m.voice.deaf or m.voice.self_deaf)]:
+            if vc and [m for m in vc.members if not m.bot and not (m.voice.deaf or m.voice.self_deaf)]:
                 try:
                     self.auto_skip_track_task.cancel()
                 except:
@@ -1387,7 +1387,12 @@ class LavalinkPlayer(wavelink.Player):
 
             await asyncio.sleep(idle_timeout)
 
-            if [m for m in vc.members if not m.bot and not (m.voice.deaf or m.voice.self_deaf)]:
+            try:
+                vc = self.guild.me.voice.channel
+            except AttributeError:
+                vc = self.last_channel
+
+            if vc and [m for m in vc.members if not m.bot and not (m.voice.deaf or m.voice.self_deaf)]:
                 try:
                     self.auto_skip_track_task.cancel()
                 except:
@@ -1427,12 +1432,13 @@ class LavalinkPlayer(wavelink.Player):
             except AttributeError:
                 vc = self.last_channel
 
-            if [m for m in vc.members if not m.bot]:
+            if vc and [m for m in vc.members if not m.bot]:
                 return
 
-            msg = "O player foi desligado por falta de membros no canal" + (f" <#{self.guild.me.voice.channel.id}>"
-                                                                               if self.guild.me.voice else '') + "..."
+            msg = "O player foi desligado por falta de membros no canal" + (f" <#{vc.id}>" if vc else '') + "..."
+
             self.command_log = msg
+
             if not self.controller_mode:
                 embed = disnake.Embed(
                     description=f"**{msg}**", color=self.bot.get_color(self.guild.me))
