@@ -1115,20 +1115,22 @@ class LavalinkPlayer(wavelink.Player):
                             await send_report()
                             continue
 
-                        txt = f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual " \
-                              "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome " \
-                              "das músicas do youtube que estão na fila (talvez a música tocada seja diferente do esperado " \
-                              "ou até mesmo ignoradas caso não retorne resultados)."
-                        try:
-                            await self.text_channel.send(embed=disnake.Embed(
-                                description=txt, color=self.bot.get_color(self.guild.me)
-                            ), delete_after=30)
-                        except:
-                            self.set_command_log(text=txt, emoji="⚠️", controller=True)
+                        if not getattr(self, "yt_warn", None):
+                            txt = f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual " \
+                                  "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome " \
+                                  "das músicas do youtube que estão na fila (talvez a música tocada seja diferente do esperado " \
+                                  "ou até mesmo ignoradas caso não retorne resultados)."
+                            try:
+                                await self.text_channel.send(embed=disnake.Embed(
+                                    description=txt, color=self.bot.get_color(self.guild.me)
+                                ), delete_after=30)
+                            except:
+                                self.set_command_log(text=txt, emoji="⚠️", controller=True)
+                            self.yt_warn = True
+                            await send_report()
 
                         self.locked = False
                         await self.process_next(start_position=self.position)
-                        await send_report()
                         continue
 
                     elif not track.track_loops:
