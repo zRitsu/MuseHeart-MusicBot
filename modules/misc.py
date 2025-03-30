@@ -550,12 +550,15 @@ class Misc(commands.Cog):
 
             for p in b.music.players.values():
 
-                if p.auto_pause:
+                if not p.last_channel:
+                    continue
+
+                if p.auto_pause or not p.current:
                     inactive_players_other_bots += 1
 
                 elif p.paused:
                     try:
-                        if any(m for m in p.guild.me.voice.channel.members if not m.bot):
+                        if any(m for m in p.last_channel if not m.bot):
                             paused_players_other_bots += 1
                             continue
                     except AttributeError:
@@ -564,11 +567,7 @@ class Misc(commands.Cog):
 
                 else:
                     active_players_other_bots += 1
-                    try:
-                        vc = p.guild.me.voice.channel
-                    except AttributeError:
-                        continue
-                    for u in vc.members:
+                    for u in p.last_channel.members:
                         if u.bot or u.voice.deaf or u.voice.self_deaf:
                             continue
                         listeners.add(u.id)
