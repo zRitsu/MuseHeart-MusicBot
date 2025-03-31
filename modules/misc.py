@@ -561,7 +561,7 @@ class Misc(commands.Cog):
                         if any(m for m in p.last_channel if not m.bot):
                             paused_players_other_bots += 1
                             continue
-                    except AttributeError:
+                    except (AttributeError, TypeError):
                         pass
                     inactive_players_other_bots += 1
 
