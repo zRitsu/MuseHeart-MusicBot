@@ -71,6 +71,7 @@ DEFAULT_CONFIG = {
     "PLAYLIST_CACHE_SIZE": 500,
     "PLAYLIST_CACHE_TTL": 1800,
     "USE_YTM_TRACKINFO_SCROBBLE": False,
+    "ENABLE_SONGREQUEST_MENTION": True,
 
     ##############################################
     ### Sistema de música - Suporte ao spotify ###

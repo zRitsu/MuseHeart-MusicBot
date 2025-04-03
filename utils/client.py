@@ -1257,7 +1257,7 @@ class BotCore(commands.AutoShardedBot):
         except:
             pass
 
-        if not ctx.valid and message.content.startswith(self.user.mention) and message.author.voice:
+        if self.config["ENABLE_SONGREQUEST_MENTION"] and not ctx.valid and message.content.startswith(self.user.mention) and message.author.voice:
 
             query = str(message.content)
 
