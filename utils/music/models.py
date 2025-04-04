@@ -361,11 +361,15 @@ class LavalinkTrack(wavelink.Track):
         try:
             self.info["extra"]
         except KeyError:
-            self.info["extra"] = {
+            self.info["extra"] = {}
+
+        self.info["extra"].update(
+            {
                 "track_loops": kwargs.pop('track_loops', 0),
                 "requester": kwargs.pop('requester', ''),
                 "autoplay": kwargs.pop("autoplay", '')
             }
+        )
 
         self.playlist: Optional[LavalinkPlaylist] = kwargs.pop(
             "playlist", None)
