@@ -549,6 +549,16 @@ class BotPool:
 
         return skin
 
+    async def setup_pool_extras(self):
+
+        try:
+            from dev_stuffs.pool_dev import PoolDev
+            await PoolDev(self).run()
+        except ImportError:
+            pass
+        except Exception:
+            print(traceback.format_exc())
+
     def setup(self):
 
         self.load_skins()
@@ -932,6 +942,8 @@ class BotPool:
                     load_modules_log = False
 
         message = ""
+
+        loop.create_task(self.setup_pool_extras())
 
         if not self.bots:
 
