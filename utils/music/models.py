@@ -1050,8 +1050,6 @@ class LavalinkPlayer(wavelink.Player):
                             self.retries_general_errors = {'counter': 6, 'last_node': self.node.identifier,
                                                            "last_time": disnake.utils.utcnow()}
 
-                        embed = None
-
                         self.queue.appendleft(track)
 
                         if self.retries_general_errors["counter"] < 1 and self.node.identifier == \
@@ -1080,7 +1078,6 @@ class LavalinkPlayer(wavelink.Player):
                         cooldown = 4
 
                     elif event.cause == "java.lang.InterruptedException":
-                        embed = None
                         self.queue.appendleft(track)
                         try:
                             self._new_node_task.cancel()
