@@ -92,6 +92,7 @@ class BotPool:
         self.message_ids = TTLCache(ttl=30, maxsize=20000)
         self.bot_mentions = set()
         self.single_bot = True
+        self.loop: Optional[asyncio.EventLoop] = None
         self.failed_bots: dict = {}
         self.current_useragent = self.reset_useragent()
         self.processing_gc: bool = False
@@ -208,7 +209,7 @@ class BotPool:
 
         return self.local_database
 
-    async def start_lavalink(self, loop=None):
+    async def start_lavalink(self):
 
         if self.lavalink_instance:
             try:
@@ -216,11 +217,11 @@ class BotPool:
             except:
                 traceback.print_exc()
 
-        if not loop:
-            loop = asyncio.get_event_loop()
+        if not self.loop:
+            self.loop = asyncio.get_event_loop()
 
         try:
-            self.lavalink_instance = await loop.run_in_executor(
+            self.lavalink_instance = await self.loop.run_in_executor(
                 None, lambda: run_lavalink(
                     lavalink_file_url=self.config['LAVALINK_FILE_URL'],
                     lavalink_initial_ram=self.config['LAVALINK_INITIAL_RAM'],
@@ -318,7 +319,7 @@ class BotPool:
         if music_cog:
             await music_cog.connect_node(data)
 
-    async def check_node(self, data: dict, loop=None):
+    async def check_node(self, data: dict):
 
         data = deepcopy(data)
 
@@ -390,10 +391,10 @@ class BotPool:
                         break
 
         for bot in self.get_all_bots():
-            loop.create_task(self.connect_node(bot, data))
+            self.loop.create_task(self.connect_node(bot, data))
             await asyncio.sleep(1)
 
-    def node_check(self, lavalink_servers: dict, start_local=True, loop = None):
+    def node_check(self, lavalink_servers: dict, start_local=True):
 
         if start_local and "LOCAL" not in lavalink_servers:
             localnode = {
@@ -407,10 +408,10 @@ class BotPool:
                 'only_use_native_search_providers': self.config["ONLY_USE_NATIVE_SEARCH_PROVIDERS"],
                 'search_providers': self.config["SEARCH_PROVIDERS"].strip().split() or ["amsearch", "tdsearch", "spsearch", "ytsearch", "scsearch"]
             }
-            loop.create_task(self.check_node(localnode, loop=loop))
+            self.loop.create_task(self.check_node(localnode))
 
         for data in lavalink_servers.values():
-            loop.create_task(self.check_node(data, loop=loop))
+            self.loop.create_task(self.check_node(data))
 
     def process_track_cls(self, data: list, playlists: dict = None):
 
@@ -922,7 +923,7 @@ class BotPool:
 
         load_modules_log = True
 
-        loop = asyncio.get_event_loop()
+        self.loop = asyncio.get_event_loop()
 
         for k, v in all_tokens.items():
             load_bot(k, v, load_modules_log=load_modules_log)
@@ -943,7 +944,7 @@ class BotPool:
 
         message = ""
 
-        loop.create_task(self.setup_pool_extras())
+        self.loop.create_task(self.setup_pool_extras())
 
         if not self.bots:
 
@@ -966,20 +967,20 @@ class BotPool:
         else:
 
             if start_local:
-                loop.create_task(self.start_lavalink(loop=loop))
+                self.loop.create_task(self.start_lavalink())
 
             if not self.spotify.spotify_cache:
-                loop.create_task(self.spotify.get_access_token())
+                self.loop.create_task(self.spotify.get_access_token())
 
-            self.node_check(LAVALINK_SERVERS, loop=loop, start_local=start_local)
+            self.node_check(LAVALINK_SERVERS, start_local=start_local)
 
         if self.config["RUN_RPC_SERVER"]:
 
-            self.cache_updater_task = loop.create_task(self.cache_updater())
+            self.cache_updater_task = self.loop.create_task(self.cache_updater())
 
             if not message:
-                loop.create_task(self.run_bots(self.get_all_bots()))
-                loop.create_task(self.connect_rpc_ws())
+                self.loop.create_task(self.run_bots(self.get_all_bots()))
+                self.loop.create_task(self.connect_rpc_ws())
 
             try:
                 start(self, message=message)
@@ -991,12 +992,12 @@ class BotPool:
 
         else:
 
-            self.cache_updater_task = loop.create_task(self.cache_updater())
+            self.cache_updater_task = self.loop.create_task(self.cache_updater())
 
-            loop.create_task(self.connect_rpc_ws())
+            self.loop.create_task(self.connect_rpc_ws())
 
             try:
-                loop.run_until_complete(
+                self.loop.run_until_complete(
                     self.run_bots(self.get_all_bots())
                 )
             except KeyboardInterrupt:
