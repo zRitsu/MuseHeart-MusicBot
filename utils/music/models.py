@@ -1032,7 +1032,7 @@ class LavalinkPlayer(wavelink.Player):
 
                     start_position = 0
 
-                    if event.cause.startswith((
+                    if ignore_error_log:=event.cause.startswith((
                             "java.lang.IllegalStateException: Failed to get media URL: 2000: An error occurred while decoding track token",
                             "java.net.SocketTimeoutException: Connect timed out",
                             "java.net.SocketTimeoutException: Read timed out",
@@ -1157,7 +1157,7 @@ class LavalinkPlayer(wavelink.Player):
 
                     await send_report()
 
-                    if embed and self.text_channel and send_message_perm:
+                    if not ignore_error_log and embed and self.text_channel and send_message_perm:
                         await self.text_channel.send(embed=embed, delete_after=10)
 
                     await asyncio.sleep(cooldown)
