@@ -272,6 +272,7 @@ def load_config():
         "USE_YTM_TRACKINFO_SCROBBLE",
         "FORCE_USE_DEEZER_CLIENT",
         "SILENT_PUBLICBOT_WARNING",
+        "ENABLE_SONGREQUEST_MENTION",
     ]:
 
         if CONFIG[i] in (True, False, None, ""):
