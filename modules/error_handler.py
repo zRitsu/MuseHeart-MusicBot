@@ -162,7 +162,8 @@ class ErrorHandler(commands.Cog):
     async def do_playcmd(self, ctx: CustomContext):
 
         if not self.bot.pool.config["ENABLE_SONGREQUEST_MENTION"]:
-            ctx.bot.dispatch("on_message", ctx.message)
+            # em testes
+            ctx.bot.dispatch("custom_message", ctx.message)
             return
 
         query = str(ctx.message.content)
