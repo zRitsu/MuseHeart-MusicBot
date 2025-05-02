@@ -78,7 +78,7 @@ def run_lavalink(
     arch, osname = platform.architecture()
     jdk_platform = f"{platform.system()}-{arch}-{osname}"
 
-    tmp_dir = tempfile.gettempdir()
+    tmp_dir = tempfile.gettempdir() if os.name == "nt" else "."
 
     if not (java_cmd := validate_java("java")):
 
