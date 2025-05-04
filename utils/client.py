@@ -380,15 +380,20 @@ class BotPool:
             else:
                 if tokens:=mongo_data.get("refresh_tokens"):
                     for v in tokens.values():
-                        async with ClientSession() as session:
-                            resp = await session.post(
-                                f"{data['rest_uri']}/youtube", headers=headers,
-                                json={"refreshToken": v}
-                            )
-                            if resp.status != 204:
-                                resp.raise_for_status()
-                        print(f"🌋 - Youtube refreshToken aplicado no servidor lavalink: {data['identifier']}")
-                        break
+                        try:
+                            async with ClientSession() as session:
+                                resp = await session.post(
+                                    f"{data['rest_uri']}/youtube", headers=headers,
+                                    json={"refreshToken": v}
+                                )
+                                if resp.status != 204:
+                                    resp.raise_for_status()
+                        except Exception as e:
+                            print(f"🌋 - Falha ao aplicar o Youtube refreshToken no servidor lavalink: {data['identifier']} - {repr(e)}")
+                            break
+                        else:
+                            print(f"🌋 - Youtube refreshToken aplicado no servidor lavalink: {data['identifier']}")
+                            break
 
         for bot in self.get_all_bots():
             self.loop.create_task(self.connect_node(bot, data))
