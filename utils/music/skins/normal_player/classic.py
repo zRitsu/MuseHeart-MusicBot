@@ -183,11 +183,6 @@ class ClassicSkin:
                         description="Ativar/desativar o scrobble/registro de músicas na sua conta do last.fm."
                     ),
                     disnake.SelectOption(
-                        label="Last.fm scrobble", emoji="🔄",
-                        value=PlayerControls.autoplay,
-                        description="Ativar/desativar o scrobble/registro de músicas na sua conta do last.fm."
-                    ),
-                    disnake.SelectOption(
                         label= ("Desativar" if player.restrict_mode else "Ativar") + " o modo restrito", emoji="🔐",
                         value=PlayerControls.restrict_mode,
                         description="Apenas DJ's/Staff's podem usar comandos restritos."
