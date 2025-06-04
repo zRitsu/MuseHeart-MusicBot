@@ -486,8 +486,8 @@ class PlayerSession(commands.Cog):
                               f"channel_id: {text_channel.id} | message_id {data['message']}")
 
                 if not voice_channel or not voice_channel.permissions_for(guild.me).connect:
-                    if data["voice_channel"] != (vc:=data.get("last_voice_channel_id", data["voice_channel"])):
-                        voice_channel=vc
+                    if data["voice_channel"] != (vc_id:=data.get("last_voice_channel_id", data["voice_channel"])):
+                        voice_channel=self.bot.get_channel(int(vc_id))
                         try:
                             del data["voice_state"]
                         except:
