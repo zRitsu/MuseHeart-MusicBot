@@ -628,37 +628,10 @@ class BotPool:
                     value["search_providers"] = value.get("search_providers", "").strip().split()
                     LAVALINK_SERVERS[key] = value
 
-        start_local = None
-
-        if os.environ.get("HOSTNAME", "").lower() == "squarecloud.app" and self.config.get("SQUARECLOUD_LAVALINK_AUTO_CONFIG", "").lower() != "false":
-            for f in ("squarecloud.config", "squarecloud.app"):
-                try:
-                    square_cfg = dotenv_values(f"./{f}")
-                except:
-                    continue
-                else:
-                    try:
-                        start_local = int(square_cfg["MEMORY"]) >= 490
-                    except KeyError:
-                        pass
-                    else:
-                        self.config["AUTO_DOWNLOAD_LAVALINK_SERVERLIST"] = not start_local
-                        self.config['USE_JABBA'] = False
-                        if not square_cfg.get("SUBDOMAIN"):
-                            self.config["RUN_RPC_SERVER"] = False
-                        print("Usando a configuração automática na squarecloud\n"
-                              f"Lavalink local: {start_local}\n"
-                              f"Memória: {square_cfg['MEMORY']}\n"
-                              f"Run RPC Server: {self.config['RUN_RPC_SERVER']}\n"
-                              f"Usando JABBA: {self.config['USE_JABBA']}")
-                    break
-
-        if start_local is None:
-
-            if start_local := (self.config['RUN_LOCAL_LAVALINK'] is True or not LAVALINK_SERVERS):
-                pass
-            else:
-                start_local = False
+        if start_local := (self.config['RUN_LOCAL_LAVALINK'] is True or not LAVALINK_SERVERS):
+            pass
+        else:
+            start_local = False
 
         intents = disnake.Intents(**{i[:-7].lower(): v for i, v in self.config.items() if i.lower().endswith("_intent")})
         intents.members = True
