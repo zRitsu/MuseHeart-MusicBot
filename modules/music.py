@@ -334,7 +334,7 @@ class Music(commands.Cog):
             try:
                 me = ctx.music_guild.me
             except AttributeError:
-                me = ctx.guild.me
+                me = channel.guild.me
 
         try:
             guild_id = ctx.guild_id
@@ -403,7 +403,7 @@ class Music(commands.Cog):
                     break
 
                 await asyncio.sleep(1)
-                retries += 0
+                retries += 1
 
             if not await check_deafen(me):
                 await text_channel.send(
@@ -2042,7 +2042,7 @@ class Music(commands.Cog):
             await self.do_connect(
                 inter, channel=voice_channel,
                 check_other_bots_in_vc=guild_data["check_other_bots_in_vc"],
-                bot=bot, me=guild.me
+                bot=bot, me=player.guild.me
             )
 
         await self.process_music(inter=inter, force_play=force_play, ephemeral=ephemeral, user_data=user_data, player=player,
