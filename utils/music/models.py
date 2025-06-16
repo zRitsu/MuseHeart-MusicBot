@@ -2974,7 +2974,6 @@ class LavalinkPlayer(wavelink.Player):
 
     async def cleanup(self, inter: disnake.MessageInteraction = None):
 
-        self.queue.clear()
         self.played.clear()
 
         try:
@@ -3156,6 +3155,8 @@ class LavalinkPlayer(wavelink.Player):
 
                 except Exception:
                     traceback.print_exc()
+
+        self.queue.clear()
 
     async def auto_skip_track(self):
 
