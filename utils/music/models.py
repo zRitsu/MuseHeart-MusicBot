@@ -2558,11 +2558,12 @@ class LavalinkPlayer(wavelink.Player):
 
         self.last_data = data
 
-        try:
-            if self.static and isinstance(self.text_channel.parent, disnake.ForumChannel):
-                data["content"] = f"`{'▶️' if not self.paused else '⏸️'} {fix_characters(self.current.title, 50)}` |\n\n" + (data.get("content") or "")
-        except:
-            pass
+        if not data.get("flags"):
+            try:
+                if self.static and isinstance(self.text_channel.parent, disnake.ForumChannel):
+                    data["content"] = f"`{'▶️' if not self.paused else '⏸️'} {fix_characters(self.current.title, 50)}` |\n\n" + (data.get("content") or "")
+            except:
+                pass
 
         if not self.controller_mode:
 
@@ -2745,6 +2746,12 @@ class LavalinkPlayer(wavelink.Player):
             self.updating = True
 
             if interaction:
+
+                try:
+                    del data["flags"]
+                except KeyError:
+                    pass
+
                 try:
                     if interaction.response.is_done():
                         await interaction.message.edit(allowed_mentions=self.allowed_mentions, **data)
@@ -2766,8 +2773,10 @@ class LavalinkPlayer(wavelink.Player):
                     self.ignore_np_once = False
 
                     try:
-
                         try:
+                            if data.get("flags"):
+                                data["content"] = None
+                                data["embed"] = None
                             await self.message.edit(allowed_mentions=self.allowed_mentions, **data)
                             await asyncio.sleep(0.5)
                         except asyncio.CancelledError:
@@ -3105,6 +3114,10 @@ class LavalinkPlayer(wavelink.Player):
                             func = inter.response.edit_message
                             if not kw and (disnake.utils.utcnow() - datetime.datetime.fromtimestamp(self.uptime, datetime.timezone.utc)).total_seconds() > 15:
                                 kw = self.get_skin(disable=True)
+                                try:
+                                    del kw['flags']
+                                except:
+                                    pass
                         else:
                             try:
                                 func = self.message.edit
