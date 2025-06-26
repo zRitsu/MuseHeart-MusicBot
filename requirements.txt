@@ -11,10 +11,10 @@ aiofiles
 disnake-jishaku
 packaging
 aiosqlite
-yt-dlp[default]>=2025.06.09
+yt-dlp[default]>=2025.06.25
 tornado>=6.4.2
 emoji
-urllib3>=2.2.2
+urllib3>=2.5.0
 async-timeout
 cachetools
 regex
