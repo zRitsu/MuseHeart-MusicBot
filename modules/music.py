@@ -7086,7 +7086,7 @@ class Music(commands.Cog):
                 self.bot.dispatch("custom_error", ctx=ctx, error=e)
                 exceptions.add(repr(e))
 
-        if not tracks and not [n for n in bot.music.nodes.values() if "spotify" in n.info.get("sourceManagers", [])]:
+        if not tracks and bot.spotify and not [n for n in bot.music.nodes.values() if "spotify" in n.info.get("sourceManagers", [])]:
             try:
                 tracks = await self.bot.pool.spotify.get_tracks(self.bot, user.id, query, search=True, check_title=80)
             except Exception as e:
@@ -7180,7 +7180,7 @@ class Music(commands.Cog):
                         #check_title=80
                     )
                 except Exception as e:
-                    traceback.print_exc()
+                    #traceback.print_exc()
                     exceptions.add(repr(e))
 
                     if not isinstance(e, wavelink.TrackNotFound):
@@ -7202,6 +7202,8 @@ class Music(commands.Cog):
             self, query: str, ctx: Union[disnake.AppCmdInter, CustomContext, disnake.MessageInteraction, disnake.Message],
             user: disnake.Member, node: wavelink.Node = None, source=None, bot: BotCore = None, mix=False):
 
+        exceptions = set()
+
         if mix:
             if not self.bot.pool.last_fm:
                 raise GenericError("**No momento não há suporte a mix/recomendações devido o Last.fm não ter sido configurado na minha estrutura.**")
@@ -7215,8 +7217,6 @@ class Music(commands.Cog):
                     artist, track = query.split(' ', 1)
                 except:
                     raise GenericError("Você deve informar sua busca dessa forma: nome do artista - nome da música")
-
-            exceptions = set()
 
             current = None
 
@@ -7293,13 +7293,17 @@ class Music(commands.Cog):
 
         if not tracks:
 
-            txt = "\n".join(exceptions)
+            tracks, node, exceptions = await self.get_partial_tracks(query=query, ctx=ctx, user=user, node=node, bot=bot)
 
-            if txt:
-                if "This track is not readable. Available countries:" in txt:
-                    txt = "A música informada não está disponível na minha região atual..."
-                raise GenericError(f"**Ocorreu um erro ao processar sua busca:** \n{txt}", error=txt)
-            raise GenericError("**Não houve resultados para sua busca.**")
+            if not tracks:
+
+                txt = "\n".join(exceptions)
+
+                if txt:
+                    if "This track is not readable. Available countries:" in txt:
+                        txt = "A música informada não está disponível na minha região atual..."
+                    raise GenericError(f"**Ocorreu um erro ao processar sua busca:** \n{txt}", error=txt)
+                raise GenericError("**Não houve resultados para sua busca.**")
 
         return tracks, node
 
