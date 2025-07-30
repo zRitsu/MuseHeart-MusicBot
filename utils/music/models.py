@@ -1602,7 +1602,7 @@ class LavalinkPlayer(wavelink.Player):
                             source_name="soundcloud",
                             identifier=i["id"],
                             autoplay=True,
-                        ) for i in info['entries']]
+                        ) for i in info.get('entries', [])]
 
                 if not tracks:
 
