@@ -1643,8 +1643,8 @@ class LavalinkPlayer(wavelink.Player):
 
                         queries.extend([f"{sp}:{author.split(',')[0]}" for sp in providers])
 
-                    elif track_data.info["sourceName"] == "spotify" and "spotify" in self.node.info["sourceManagers"] and (spotify_tracks:=[t.identifier for t in tracks_search if t.info["sourceName"] == "spotify"]):
-                        queries = ["sprec:seed_tracks=" + ",".join(set(spotify_tracks[:5]))]
+                    #elif track_data.info["sourceName"] == "spotify" and "spotify" in self.node.info["sourceManagers"] and (spotify_tracks:=[t.identifier for t in tracks_search if t.info["sourceName"] == "spotify"]):
+                    #    queries = ["sprec:seed_tracks=" + ",".join(set(spotify_tracks[:5]))]
 
                     elif track_data.info["sourceName"] == "deezer" and "deezer" in self.node.info["sourceManagers"] and (deezer_tracks:=[t.identifier for t in tracks_search if t.info["sourceName"] == "deezer"]):
                         queries = [f"dzrec:{deezer_tracks[0]}"]
