@@ -25,7 +25,6 @@ from async_timeout import timeout
 from cachetools import TTLCache
 from disnake.ext import commands
 from disnake.http import Route
-from dotenv import dotenv_values
 from user_agent import generate_user_agent
 
 import wavelink
@@ -558,7 +557,7 @@ class BotPool:
     async def setup_pool_extras(self):
 
         try:
-            from dev_stuffs.pool_dev import PoolDev
+            from dev.pool_dev import PoolDev
             await PoolDev(self).run()
         except ImportError:
             pass
