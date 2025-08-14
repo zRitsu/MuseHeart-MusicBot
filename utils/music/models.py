@@ -26,6 +26,7 @@ from utils.music.checks import can_connect
 from utils.music.converters import fix_characters, time_format, get_button_style
 from utils.music.errors import GenericError, PoolException
 from utils.music.filters import AudioFilter
+from utils.music.lastfm_tools import LastFmException
 from utils.music.skin_utils import skin_converter
 from utils.music.track_encoder import encode_track, DataWriter
 from utils.others import music_source_emoji, send_idle_embed, PlayerControls, string_to_file
@@ -1624,6 +1625,8 @@ class LavalinkPlayer(wavelink.Player):
                             self.lastfm_artists = [a['name'] for a in
                                                    await self.bot.last_fm.get_similar_artists(artist) if a['name'].lower() not in track_data.author.lower()]
                             self.lastfm_artists.insert(0, track_data.author)
+                        except LastFmException as e:
+                            print(f"Last.FM recommendations error: {repr(e)}")
                         except:
                             traceback.print_exc()
 
