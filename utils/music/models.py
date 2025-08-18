@@ -842,6 +842,17 @@ class LavalinkPlayer(wavelink.Player):
             except AttributeError:
                 vc = None
 
+            if event.code == 4022:
+                if self.keep_connected and vc:
+                    await asyncio.sleep(5)
+                    self.set_command_log(emoji="⚠️", text=f"Caso queira me desconectar do canal {vc.mention} com o modo 24/7 ativo, use o comando ou o botão **stop/parar**.")
+                    await self.connect(vc.id)
+                    self.update = True
+                else:
+                    await self.destroy(force=True)
+                    print(f"Bot: {self.bot.user} | Desconectado do canal de voz: {self.guild_id}")
+                return
+
             if event.code == 4014 and self.guild.me.voice:
                 pass
             else:
