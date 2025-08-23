@@ -1443,7 +1443,7 @@ class Music(commands.Cog):
                         raise GenericError(f"**Não há suporte para o link informado:** {query}")
                     manual_selection = True
 
-                elif "&list=" in query and (link_re := YOUTUBE_VIDEO_REG.match(query)):
+                elif "&list=" in query and (link_re := YOUTUBE_VIDEO_REG.search(query)):
 
                     view = ButtonInteraction(
                         user=inter.author, timeout=45,
@@ -6215,7 +6215,7 @@ class Music(commands.Cog):
                         pass
 
                     if view.selected == "music":
-                        message.content = YOUTUBE_VIDEO_REG.match(message.content).group()
+                        message.content = YOUTUBE_VIDEO_REG.search(message.content).group()
 
             await self.parse_song_request(message, text_channel, data, response=msg, source=source)
 
