@@ -18,6 +18,7 @@ from disnake.ext import commands
 from utils.client import BotCore
 from utils.db import DBModel
 from utils.music.checks import can_connect, can_send_message
+from utils.music.errors import PoolException
 from utils.music.filters import AudioFilter
 from utils.music.models import LavalinkPlayer
 from utils.others import send_idle_embed, CustomContext
@@ -524,8 +525,11 @@ class PlayerSession(commands.Cog):
                             await text_channel.send(embed=disnake.Embed(description=msg, color=self.bot.get_color(guild.me)))
                         else:
                             await send_idle_embed(text_channel, bot=self.bot, text=msg)
+                        return
                     except Exception:
                         traceback.print_exc()
+                    if isinstance(e, PoolException):
+                        await self.delete_data(guild.id)
                     return
 
                 while True:
