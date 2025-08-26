@@ -5614,16 +5614,17 @@ class Music(commands.Cog):
                             placeholder="Nome ou link do youtube/spotify/soundcloud etc.",
                             custom_id="song_input",
                             max_length=150,
-                            required=True
+                            required=bool(not user_favs)
                         ),
-                        disnake.ui.TextInput(
-                            style=disnake.TextInputStyle.short,
-                            label="Posição da fila (número).",
-                            placeholder="Opcional, caso não seja usado será adicionada no final.",
-                            custom_id="song_position",
-                            max_length=3,
-                            required=False
-                        ),
+                        disnake.ui.Select(
+                            placeholder="ou selecione um favorito (opcional)",
+                            options=user_favs or [
+                                disnake.SelectOption(
+                                    label="Você não possui favoritos...", value="no_fav", emoji="⚠️",
+                                    description="Adicione um usando o comando: /fav add"
+                                )
+                            ], min_values=0, max_values=1
+                        )
                     ]
                 )
 
@@ -5987,13 +5988,48 @@ class Music(commands.Cog):
                 query = inter.text_values["song_input"]
                 position = inter.text_values["song_position"]
 
-                if position:
-                    if not position.isdigit():
-                        raise GenericError("**A posição da fila tem que ser um número.**")
-                    position = int(position)
+                selected_dropdown = inter.data['components'][1]['components'][0]['values']
 
-                    if position < 1:
-                        raise GenericError("**Número da posição da fila tem que ser 1 ou superior.**")
+                selected_fav = selected_dropdown[0] if (selected_dropdown and selected_dropdown[0] != "no_fav") else None
+
+                if not query and not selected_fav:
+                    raise GenericError("Você deve adicionar o nome de uma música ou ter/escolher um favorito")
+
+                if not query:
+                    query = selected_fav
+
+                elif selected_fav:
+
+                    view = SelectInteraction(
+                        user=inter.author,
+                        opts=[
+                            disnake.SelectOption(label="Nome/Link:", emoji="🔍",
+                                                 description=fix_characters(query, limit=45), value="music_query"),
+                            disnake.SelectOption(label="Favorito:", emoji="⭐",
+                                                 description=fix_characters(selected_fav[6:], 45), value="music_fav"),
+                        ], timeout=30)
+
+                    embed = disnake.Embed(
+                        description="**Você usou dois itens na sua requisição...**\n"
+                                    f'Selecione uma opção para prosseguir (tempo limite: <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=30)).timestamp())}:R>).',
+                        color=self.bot.get_color(inter.guild.me)
+                    )
+
+                    await inter.send(inter.author.mention, embed=embed, view=view, ephemeral=True)
+
+                    await view.wait()
+
+                    if not view.inter:
+                        await inter.edit_original_message(
+                            content=f"{inter.author.mention}, tempo esgotado!",
+                            embed=None, view=None
+                        )
+                        return
+
+                    inter = view.inter
+
+                    if view.selected == "music_fav":
+                        query = selected_fav
 
                 kwargs = {
                     "query": query,
