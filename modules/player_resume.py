@@ -525,7 +525,6 @@ class PlayerSession(commands.Cog):
                             await text_channel.send(embed=disnake.Embed(description=msg, color=self.bot.get_color(guild.me)))
                         else:
                             await send_idle_embed(text_channel, bot=self.bot, text=msg)
-                        return
                     except Exception:
                         traceback.print_exc()
                     if isinstance(e, PoolException):
