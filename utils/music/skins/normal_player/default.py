@@ -155,7 +155,7 @@ class DefaultSkin:
             disnake.ui.Select(
                 placeholder="Mais opções:",
                 custom_id="musicplayer_dropdown_inter",
-                min_values=0, max_values=1,
+                min_values=0, max_values=1, required = False,
                 options=[
                     disnake.SelectOption(
                         label="Adicionar música", emoji="<:add_music:588172015760965654>",

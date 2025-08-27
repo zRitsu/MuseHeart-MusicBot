@@ -182,7 +182,7 @@ class MiniStaticSkin:
             disnake.ui.Select(
                 placeholder="Mais opções:",
                 custom_id="musicplayer_dropdown_inter",
-                min_values=0, max_values=1,
+                min_values=0, max_values=1, required = False,
                 options=[
                     disnake.SelectOption(
                         label="Adicionar música", emoji="<:add_music:588172015760965654>",
@@ -253,7 +253,7 @@ class MiniStaticSkin:
                 disnake.ui.Select(
                     placeholder="Próximas músicas:",
                     custom_id="musicplayer_queue_dropdown",
-                    min_values=0, max_values=1,
+                    min_values=0, max_values=1, required = False,
                     options=[
                         disnake.SelectOption(
                             label=fix_characters(f"{n+1}. {t.single_title}", 47),

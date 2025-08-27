@@ -1627,6 +1627,7 @@ class Music(commands.Cog):
                             custom_id=f"track_selection{add_id}",
                             min_values=1,
                             max_values=len(tracks),
+                            required = False,
                             options=[
                                 disnake.SelectOption(
                                     label=f"{n+1}. {t.title[:96]}",

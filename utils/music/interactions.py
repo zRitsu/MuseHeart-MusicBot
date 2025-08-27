@@ -3228,7 +3228,7 @@ class SelectBotVoice(disnake.ui.View):
             self.stop()
             return
 
-        bot_select = disnake.ui.Select(min_values=0, max_values=1, options=bot_select_opts)
+        bot_select = disnake.ui.Select(min_values=0, max_values=1, required = False, options=bot_select_opts)
         bot_select.callback = self.bot_select_callback
         self.add_item(bot_select)
 
