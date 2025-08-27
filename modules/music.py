@@ -5914,94 +5914,94 @@ class Music(commands.Cog):
 
                 return
 
-                if control == PlayerControls.lyrics:
-                    if not player.current:
-                        try:
-                            await self.player_interaction_concurrency.release(interaction)
-                        except:
-                            pass
-                        await interaction.send("**Não estou tocando algo no momento...**", ephemeral=True)
-                        return
-
-                    if not player.current.ytid:
-                        try:
-                            await self.player_interaction_concurrency.release(interaction)
-                        except:
-                            pass
-                        await interaction.send("No momento apenas músicas do youtube são suportadas.", ephemeral=True)
-                        return
-
-                    not_found_msg = "Não há letras disponíveis para a música atual..."
-
-                    await interaction.response.defer(ephemeral=True, with_message=True)
-
-                    if player.current.info["extra"].get("lyrics") is None:
-                        lyrics_data = await player.node.fetch_ytm_lyrics(player.current.ytid)
-                        player.current.info["extra"]["lyrics"] = {} if lyrics_data.get("track") is None else lyrics_data
-
-                    elif not player.current.info["extra"]["lyrics"]:
-                        try:
-                            await self.player_interaction_concurrency.release(interaction)
-                        except:
-                            pass
-                        await interaction.edit_original_message(f"**{not_found_msg}**")
-                        return
-
-                    if not player.current.info["extra"]["lyrics"]:
-                        try:
-                            await self.player_interaction_concurrency.release(interaction)
-                        except:
-                            pass
-                        await interaction.edit_original_message(f"**{not_found_msg}**")
-                        return
-
-                    player.current.info["extra"]["lyrics"]["track"]["albumArt"] = player.current.info["extra"]["lyrics"]["track"]["albumArt"][:-1]
-
-                    try:
-                        lyrics_string = "\n".join([d['line'] for d in  player.current.info["extra"]["lyrics"]['lines']])
-                    except KeyError:
-                        lyrics_string = player.current.info["extra"]["lyrics"]["text"]
-
+            if control == PlayerControls.lyrics:
+                if not player.current:
                     try:
                         await self.player_interaction_concurrency.release(interaction)
                     except:
                         pass
-
-                    await interaction.edit_original_message(
-                        embed=disnake.Embed(
-                            description=f"### Letras da música: [{player.current.title}](<{player.current.uri}>)\n{lyrics_string}",
-                            color=self.bot.get_color(player.guild.me)
-                        )
-                    )
+                    await interaction.send("**Não estou tocando algo no momento...**", ephemeral=True)
                     return
 
-                if control == PlayerControls.volume:
-                    cmd_kwargs = {"value": None}
+                if not player.current.ytid:
+                    try:
+                        await self.player_interaction_concurrency.release(interaction)
+                    except:
+                        pass
+                    await interaction.send("No momento apenas músicas do youtube são suportadas.", ephemeral=True)
+                    return
 
-                elif control == PlayerControls.queue:
-                    cmd = self.bot.get_slash_command("queue").children.get("display")
+                not_found_msg = "Não há letras disponíveis para a música atual..."
 
-                elif control == PlayerControls.shuffle:
-                    cmd = self.bot.get_slash_command("queue").children.get("shuffle")
+                await interaction.response.defer(ephemeral=True, with_message=True)
 
-                elif control == PlayerControls.seek_to_start:
-                    cmd = self.bot.get_slash_command("seek")
-                    cmd_kwargs = {"position": "0"}
+                if player.current.info["extra"].get("lyrics") is None:
+                    lyrics_data = await player.node.fetch_ytm_lyrics(player.current.ytid)
+                    player.current.info["extra"]["lyrics"] = {} if lyrics_data.get("track") is None else lyrics_data
 
-                elif control == PlayerControls.pause_resume:
-                    control = PlayerControls.pause if not player.paused else PlayerControls.resume
+                elif not player.current.info["extra"]["lyrics"]:
+                    try:
+                        await self.player_interaction_concurrency.release(interaction)
+                    except:
+                        pass
+                    await interaction.edit_original_message(f"**{not_found_msg}**")
+                    return
 
-                elif control == PlayerControls.loop_mode:
+                if not player.current.info["extra"]["lyrics"]:
+                    try:
+                        await self.player_interaction_concurrency.release(interaction)
+                    except:
+                        pass
+                    await interaction.edit_original_message(f"**{not_found_msg}**")
+                    return
 
-                    if player.loop == "current":
-                        cmd_kwargs['mode'] = 'queue'
-                    elif player.loop == "queue":
-                        cmd_kwargs['mode'] = 'off'
-                    else:
-                        cmd_kwargs['mode'] = 'current'
+                player.current.info["extra"]["lyrics"]["track"]["albumArt"] = player.current.info["extra"]["lyrics"]["track"]["albumArt"][:-1]
 
-                elif control == PlayerControls.skip:
-                    cmd_kwargs = {"query": None, "play_only": "no"}
+                try:
+                    lyrics_string = "\n".join([d['line'] for d in  player.current.info["extra"]["lyrics"]['lines']])
+                except KeyError:
+                    lyrics_string = player.current.info["extra"]["lyrics"]["text"]
+
+                try:
+                    await self.player_interaction_concurrency.release(interaction)
+                except:
+                    pass
+
+                await interaction.edit_original_message(
+                    embed=disnake.Embed(
+                        description=f"### Letras da música: [{player.current.title}](<{player.current.uri}>)\n{lyrics_string}",
+                        color=self.bot.get_color(player.guild.me)
+                    )
+                )
+                return
+
+            if control == PlayerControls.volume:
+                cmd_kwargs = {"value": None}
+
+            elif control == PlayerControls.queue:
+                cmd = self.bot.get_slash_command("queue").children.get("display")
+
+            elif control == PlayerControls.shuffle:
+                cmd = self.bot.get_slash_command("queue").children.get("shuffle")
+
+            elif control == PlayerControls.seek_to_start:
+                cmd = self.bot.get_slash_command("seek")
+                cmd_kwargs = {"position": "0"}
+
+            elif control == PlayerControls.pause_resume:
+                control = PlayerControls.pause if not player.paused else PlayerControls.resume
+
+            elif control == PlayerControls.loop_mode:
+
+                if player.loop == "current":
+                    cmd_kwargs['mode'] = 'queue'
+                elif player.loop == "queue":
+                    cmd_kwargs['mode'] = 'off'
+                else:
+                    cmd_kwargs['mode'] = 'current'
+
+            elif control == PlayerControls.skip:
+                cmd_kwargs = {"query": None, "play_only": "no"}
 
             if not cmd:
                 cmd = self.bot.get_slash_command(control[12:])
