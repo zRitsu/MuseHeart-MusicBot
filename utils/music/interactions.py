@@ -1886,7 +1886,7 @@ class FavMenuView(disnake.ui.View):
 
     async def play_callback(self, inter: disnake.MessageInteraction):
         await check_pool_bots(inter, check_player=False)
-        await self.bot.get_cog("Music").player_controller(inter, PlayerControls.enqueue_fav, query=f"> itg: {self.current}" if self.mode == ViewMode.integrations_manager else f"> fav: {self.current}")
+        await self.bot.get_cog("Music").player_controller(inter, PlayerControls.add_song, query=f"> itg: {self.current}" if self.mode == ViewMode.integrations_manager else f"> fav: {self.current}")
 
     async def export_callback(self, inter: disnake.MessageInteraction):
         cog = self.bot.get_cog("Music")

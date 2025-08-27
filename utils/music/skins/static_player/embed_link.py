@@ -122,11 +122,6 @@ class EmbedLinkStaticSkin:
                             description="Adicionar uma música/playlist na fila."
                         ),
                         disnake.SelectOption(
-                            label="Adicionar favorito na fila", emoji="⭐",
-                            value=PlayerControls.enqueue_fav,
-                            description="Adicionar um de seus favoritos na fila."
-                        ),
-                        disnake.SelectOption(
                             label="Tocar do inicio", emoji="⏪",
                             value=PlayerControls.seek_to_start,
                             description="Voltar o tempo da música atual para o inicio."

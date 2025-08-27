@@ -5600,33 +5600,94 @@ class Music(commands.Cog):
                 await self.process_player_interaction(interaction, cmd, cmd_kwargs)
                 return
 
-            if control == PlayerControls.add_song:
+            if control in (PlayerControls.add_song, PlayerControls.enqueue_fav):
 
                 if not interaction.user.voice:
                     raise GenericError("**Você deve entrar em um canal de voz para usar esse botão.**")
 
+                user_data = await self.bot.get_global_data(id_=interaction.user.id, db_name=DBModel.users)
+
+                modal_components = []
+
+                if user_data["fav_links"]:
+
+                    fav_opts = []
+
+                    for k, v in list(user_data["fav_links"].items())[:25]:
+                        emoji, platform = music_source_emoji_url(v)
+                        fav_opts.append(
+                            disnake.SelectOption(
+                                label=fix_characters(k, 35),
+                                value=f"> fav: {k}",
+                                description=f"⭐ -> {platform}",
+                                emoji=emoji
+                            )
+                        )
+
+                    modal_components.append(
+                        disnake.ui.Label(
+                            text="⭐⠂Favoritos:",
+                            component=disnake.ui.StringSelect(
+                                options=fav_opts, required=False, min_values=0, custom_id="fav_links"
+                            )
+                        ),
+                    )
+
+                if user_data["integration_links"]:
+
+                    integration_opts = []
+
+                    update = False
+
+                    for k, v in list(user_data["integration_links"].items())[:25]:
+
+                        if not isinstance(v, dict):
+                            v = {"url": v, "avatar": None}
+                            user_data["integration_links"][k] = v
+                            update = True
+
+                        emoji, platform = music_source_emoji_url(v["url"])
+
+                        integration_opts.append(
+                            disnake.SelectOption(
+                                label=fix_characters(k[6:], 35),
+                                value=f"> itg: {k}",
+                                description=f"💠 -> {platform}",
+                                emoji=emoji
+                            )
+                        )
+
+                    modal_components.append(
+                        disnake.ui.Label(
+                            text="💠⠂Integrações:",
+                            component=disnake.ui.StringSelect(
+                                options=integration_opts, required=False, min_values=0, custom_id="integration_links"
+                            )
+                        )
+                    )
+
+                    if update:
+                        await self.bot.update_global_data(interaction.author.id, user_data, db_name=DBModel.users)
+
+                modal_components = [
+                   disnake.ui.Label(
+                       text="Nome ou link do youtube/spotify/soundcloud...",
+                       component=disnake.ui.TextInput(
+                           custom_id="song_input", max_length=150, required=not modal_components
+                       )
+                   ),
+                   disnake.ui.Label(
+                       text="Posição da fila (número).",
+                       component=disnake.ui.TextInput(
+                           custom_id="song_position", max_length=3, required=False
+                       )
+                   )
+                ] + modal_components
+
                 await interaction.response.send_modal(
                     title="Pedir uma música",
-                    custom_id=f"modal_add_song" + (f"_{interaction.message.id}" if interaction.message.thread else ""),
-                    components=[
-                        disnake.ui.TextInput(
-                            style=disnake.TextInputStyle.short,
-                            label="Nome/link da música.",
-                            placeholder="Nome ou link do youtube/spotify/soundcloud etc.",
-                            custom_id="song_input",
-                            max_length=150,
-                            required=bool(not user_favs)
-                        ),
-                        disnake.ui.Select(
-                            placeholder="ou selecione um favorito (opcional)",
-                            options=user_favs or [
-                                disnake.SelectOption(
-                                    label="Você não possui favoritos...", value="no_fav", emoji="⚠️",
-                                    description="Adicione um usando o comando: /fav add"
-                                )
-                            ], min_values=0, max_values=1
-                        )
-                    ]
+                    custom_id="modal_add_song" + (f"_{interaction.message.id}" if interaction.message.thread else ""),
+                    components=modal_components
                 )
 
                 return
@@ -5659,215 +5720,196 @@ class Music(commands.Cog):
                 )
                 return
 
-            if control == PlayerControls.enqueue_fav:
+            try:
+                player: LavalinkPlayer = self.bot.music.players[interaction.guild_id]
+            except KeyError:
+                await interaction.send("Não há player ativo no servidor...", ephemeral=True)
+                await send_idle_embed(interaction.message, bot=self.bot)
+                return
 
-                if not interaction.user.voice:
-                    raise GenericError("**Você deve entrar em um canal de voz para usar esse botão.**")
-
-                cmd_kwargs = {
-                    "query": kwargs.get("query", ""),
-                    "position": 0,
-                    "options": False,
-                    "server": None,
-                    "force_play": "no"
-                }
-
-                cmd_kwargs["manual_selection"] = not cmd_kwargs["query"]
-
-                cmd = self.bot.get_slash_command("play")
-
-            else:
-
-                try:
-                    player: LavalinkPlayer = self.bot.music.players[interaction.guild_id]
-                except KeyError:
-                    await interaction.send("Não há player ativo no servidor...", ephemeral=True)
-                    await send_idle_embed(interaction.message, bot=self.bot)
-                    return
-
-                if interaction.message != player.message:
-                    if control != PlayerControls.queue:
-                        return
-
-                if player.interaction_cooldown:
-                    raise GenericError("O player está em cooldown, tente novamente em instantes.")
-
-                try:
-                    vc = player.guild.me.voice.channel
-                except AttributeError:
-                    await player.destroy(force=True)
-                    return
-
-                if control == PlayerControls.help_button:
-                    embed = disnake.Embed(
-                        description="📘 **IFORMAÇÕES SOBRE OS BOTÕES** 📘\n\n"
-                                    "⏯️ `= Pausar/Retomar a música.`\n"
-                                    "⏮️ `= Voltar para a música tocada anteriormente.`\n"
-                                    "⏭️ `= Pular para a próxima música.`\n"
-                                    "🔀 `= Misturar as músicas da fila.`\n"
-                                    "🎶 `= Adicionar música/playlist/favorito.`\n"
-                                    "⏹️ `= Parar o player e me desconectar do canal.`\n"
-                                    "📑 `= Exibir a fila de música.`\n"
-                                    "🛠️ `= Alterar algumas configurações do player:`\n"
-                                    "`volume / efeito nightcore / repetição / modo restrito.`\n",
-                        color=self.bot.get_color(interaction.guild.me)
-                    )
-
-                    await interaction.response.send_message(embed=embed, ephemeral=True)
-                    return
-
-                if not interaction.author.voice or interaction.author.voice.channel != vc:
-                    raise GenericError(f"Você deve estar no canal <#{vc.id}> para usar os botões do player.")
-
-                if control == PlayerControls.miniqueue:
-                    await is_dj().predicate(interaction)
-                    player.mini_queue_enabled = not player.mini_queue_enabled
-                    player.set_command_log(
-                        emoji="📑",
-                        text=f"{interaction.author.mention} {'ativou' if player.mini_queue_enabled else 'desativou'} "
-                             f"a mini-fila do player."
-                    )
-                    await player.invoke_np(interaction=interaction)
-                    return
-
+            if interaction.message != player.message:
                 if control != PlayerControls.queue:
-                    try:
-                        await self.player_interaction_concurrency.acquire(interaction)
-                    except commands.MaxConcurrencyReached:
-                        raise GenericError(
-                            "**Você tem uma interação em aberto!**\n`Se for uma mensagem oculta, evite clicar em \"ignorar\".`")
+                    return
 
-                if control == PlayerControls.add_favorite:
+            if player.interaction_cooldown:
+                raise GenericError("O player está em cooldown, tente novamente em instantes.")
 
-                    if not player.current:
-                        await interaction.send("**Não há música tocando atualmente...**", ephemeral=True)
-                        return
+            try:
+                vc = player.guild.me.voice.channel
+            except AttributeError:
+                await player.destroy(force=True)
+                return
 
-                    choices = {}
-                    msg = ""
+            if control == PlayerControls.help_button:
+                embed = disnake.Embed(
+                    description="📘 **IFORMAÇÕES SOBRE OS BOTÕES** 📘\n\n"
+                                "⏯️ `= Pausar/Retomar a música.`\n"
+                                "⏮️ `= Voltar para a música tocada anteriormente.`\n"
+                                "⏭️ `= Pular para a próxima música.`\n"
+                                "🔀 `= Misturar as músicas da fila.`\n"
+                                "🎶 `= Adicionar música/playlist/favorito.`\n"
+                                "⏹️ `= Parar o player e me desconectar do canal.`\n"
+                                "📑 `= Exibir a fila de música.`\n"
+                                "🛠️ `= Alterar algumas configurações do player:`\n"
+                                "`volume / efeito nightcore / repetição / modo restrito.`\n",
+                    color=self.bot.get_color(interaction.guild.me)
+                )
 
-                    if player.current.uri:
-                        choices["Track"] = {
-                            "name": player.current.title,
-                            "url": player.current.uri,
-                            "emoji": "🎵"
-                        }
-                        msg += f"**Música:** [`{player.current.title}`]({player.current.uri})\n"
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+                return
 
-                    if player.current.album_url:
-                        choices["Album"] = {
-                            "name": player.current.album_name,
-                            "url": player.current.album_url,
-                            "emoji": "💽"
-                        }
-                        msg += f"**Album:** [`{player.current.album_name}`]({player.current.album_url})\n"
+            if not interaction.author.voice or interaction.author.voice.channel != vc:
+                raise GenericError(f"Você deve estar no canal <#{vc.id}> para usar os botões do player.")
 
-                    if player.current.playlist_url:
-                        choices["Playlist"] = {
-                            "name": player.current.playlist_name,
-                            "url": player.current.playlist_url,
-                            "emoji": "<:music_queue:703761160679194734>"
-                        }
-                        msg += f"**Playlist:** [`{player.current.playlist_name}`]({player.current.playlist_url})\n"
+            if control == PlayerControls.miniqueue:
+                await is_dj().predicate(interaction)
+                player.mini_queue_enabled = not player.mini_queue_enabled
+                player.set_command_log(
+                    emoji="📑",
+                    text=f"{interaction.author.mention} {'ativou' if player.mini_queue_enabled else 'desativou'} "
+                         f"a mini-fila do player."
+                )
+                await player.invoke_np(interaction=interaction)
+                return
 
-                    if not choices:
-                        try:
-                            await self.player_interaction_concurrency.release(interaction)
-                        except:
-                            pass
-                        await interaction.send(
-                            embed=disnake.Embed(
-                                color=self.bot.get_color(interaction.guild.me),
-                                description="### Não há itens para favoritar na música atual."
-                            ), ephemeral=True
-                        )
-                        return
+            if control != PlayerControls.queue:
+                try:
+                    await self.player_interaction_concurrency.acquire(interaction)
+                except commands.MaxConcurrencyReached:
+                    raise GenericError(
+                        "**Você tem uma interação em aberto!**\n`Se for uma mensagem oculta, evite clicar em \"ignorar\".`")
 
-                    if len(choices) == 1:
-                        select_type, info = list(choices.items())[0]
+            if control == PlayerControls.add_favorite:
 
-                    else:
-                        view = SelectInteraction(
-                            user=interaction.author, timeout=30,
-                            opts=[disnake.SelectOption(label=k, description=v["name"][:50], emoji=v["emoji"]) for k,v in choices.items()]
-                        )
+                if not player.current:
+                    await interaction.send("**Não há música tocando atualmente...**", ephemeral=True)
+                    return
 
-                        await interaction.send(
-                            embed=disnake.Embed(
-                                color=self.bot.get_color(interaction.guild.me),
-                                description=f"### Selecione um item da música atual para adicionar nos seus favoritos:"
-                                            f"\n\n{msg}"
-                            ), view=view, ephemeral=True
-                        )
+                choices = {}
+                msg = ""
 
-                        await view.wait()
+                if player.current.uri:
+                    choices["Track"] = {
+                        "name": player.current.title,
+                        "url": player.current.uri,
+                        "emoji": "🎵"
+                    }
+                    msg += f"**Música:** [`{player.current.title}`]({player.current.uri})\n"
 
-                        select_interaction = view.inter
+                if player.current.album_url:
+                    choices["Album"] = {
+                        "name": player.current.album_name,
+                        "url": player.current.album_url,
+                        "emoji": "💽"
+                    }
+                    msg += f"**Album:** [`{player.current.album_name}`]({player.current.album_url})\n"
 
-                        if not select_interaction or view.selected is False:
-                            try:
-                                await self.player_interaction_concurrency.release(interaction)
-                            except:
-                                pass
-                            await interaction.edit_original_message(
-                                embed=disnake.Embed(
-                                    color=self.bot.get_color(interaction.guild.me),
-                                    description="### Operação cancelada!"
-                                ), view=None
-                            )
-                            return
+                if player.current.playlist_url:
+                    choices["Playlist"] = {
+                        "name": player.current.playlist_name,
+                        "url": player.current.playlist_url,
+                        "emoji": "<:music_queue:703761160679194734>"
+                    }
+                    msg += f"**Playlist:** [`{player.current.playlist_name}`]({player.current.playlist_url})\n"
 
-                        interaction = select_interaction
-
-                        select_type = view.selected
-                        info = choices[select_type]
-
-                    await interaction.response.defer()
-
-                    user_data = await self.bot.get_global_data(interaction.author.id, db_name=DBModel.users)
-
-                    if self.bot.config["MAX_USER_FAVS"] > 0 and not (await self.bot.is_owner(interaction.author)):
-
-                        if len(user_data["fav_links"]) >= self.bot.config["MAX_USER_FAVS"]:
-                            await interaction.edit_original_message(
-                                embed=disnake.Embed(
-                                    color=self.bot.get_color(interaction.guild.me),
-                                    description="Você não possui espaço suficiente para adicionar todos os favoritos de seu arquivo...\n"
-                                                f"Limite atual: {self.bot.config['MAX_USER_FAVS']}"
-                                ), view=None)
-                            return
-
-                    user_data["fav_links"][fix_characters(info["name"], self.bot.config["USER_FAV_MAX_URL_LENGTH"])] = info["url"]
-
-                    await self.bot.update_global_data(interaction.author.id, user_data, db_name=DBModel.users)
-
-                    self.bot.dispatch("fav_add", interaction.user, user_data, f"[`{info['name']}`]({info['url']})")
-
-                    global_data = await self.bot.get_global_data(interaction.author.id, db_name=DBModel.guilds)
-
-                    try:
-                        slashcmd = f"</play:" + str(self.bot.get_global_command_named("play", cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
-                    except AttributeError:
-                        slashcmd = "/play"
-
-                    await interaction.edit_original_response(
-                        embed=disnake.Embed(
-                            color=self.bot.get_color(interaction.guild.me),
-                            description="### Item adicionado/editado com sucesso nos seus favoritos:\n\n"
-                                        f"**{select_type}:** [`{info['name']}`]({info['url']})\n\n"
-                                        f"### Como usar?\n"
-                                        f"* Usando o comando {slashcmd} (no preenchimento automático da busca)\n"
-                                        f"* Clicando no botão/select de tocar favorito/integração do player.\n"
-                                        f"* Usando o comando {global_data['prefix'] or self.bot.default_prefix}{self.play_legacy.name} sem incluir um nome ou link de uma música/vídeo."
-                        ), view=None
-                    )
-
+                if not choices:
                     try:
                         await self.player_interaction_concurrency.release(interaction)
                     except:
                         pass
-
+                    await interaction.send(
+                        embed=disnake.Embed(
+                            color=self.bot.get_color(interaction.guild.me),
+                            description="### Não há itens para favoritar na música atual."
+                        ), ephemeral=True
+                    )
                     return
+
+                if len(choices) == 1:
+                    select_type, info = list(choices.items())[0]
+
+                else:
+                    view = SelectInteraction(
+                        user=interaction.author, timeout=30,
+                        opts=[disnake.SelectOption(label=k, description=v["name"][:50], emoji=v["emoji"]) for k,v in choices.items()]
+                    )
+
+                    await interaction.send(
+                        embed=disnake.Embed(
+                            color=self.bot.get_color(interaction.guild.me),
+                            description=f"### Selecione um item da música atual para adicionar nos seus favoritos:"
+                                        f"\n\n{msg}"
+                        ), view=view, ephemeral=True
+                    )
+
+                    await view.wait()
+
+                    select_interaction = view.inter
+
+                    if not select_interaction or view.selected is False:
+                        try:
+                            await self.player_interaction_concurrency.release(interaction)
+                        except:
+                            pass
+                        await interaction.edit_original_message(
+                            embed=disnake.Embed(
+                                color=self.bot.get_color(interaction.guild.me),
+                                description="### Operação cancelada!"
+                            ), view=None
+                        )
+                        return
+
+                    interaction = select_interaction
+
+                    select_type = view.selected
+                    info = choices[select_type]
+
+                await interaction.response.defer()
+
+                user_data = await self.bot.get_global_data(interaction.author.id, db_name=DBModel.users)
+
+                if self.bot.config["MAX_USER_FAVS"] > 0 and not (await self.bot.is_owner(interaction.author)):
+
+                    if len(user_data["fav_links"]) >= self.bot.config["MAX_USER_FAVS"]:
+                        await interaction.edit_original_message(
+                            embed=disnake.Embed(
+                                color=self.bot.get_color(interaction.guild.me),
+                                description="Você não possui espaço suficiente para adicionar todos os favoritos de seu arquivo...\n"
+                                            f"Limite atual: {self.bot.config['MAX_USER_FAVS']}"
+                            ), view=None)
+                        return
+
+                user_data["fav_links"][fix_characters(info["name"], self.bot.config["USER_FAV_MAX_URL_LENGTH"])] = info["url"]
+
+                await self.bot.update_global_data(interaction.author.id, user_data, db_name=DBModel.users)
+
+                self.bot.dispatch("fav_add", interaction.user, user_data, f"[`{info['name']}`]({info['url']})")
+
+                global_data = await self.bot.get_global_data(interaction.author.id, db_name=DBModel.guilds)
+
+                try:
+                    slashcmd = f"</play:" + str(self.bot.get_global_command_named("play", cmd_type=disnake.ApplicationCommandType.chat_input).id) + ">"
+                except AttributeError:
+                    slashcmd = "/play"
+
+                await interaction.edit_original_response(
+                    embed=disnake.Embed(
+                        color=self.bot.get_color(interaction.guild.me),
+                        description="### Item adicionado/editado com sucesso nos seus favoritos:\n\n"
+                                    f"**{select_type}:** [`{info['name']}`]({info['url']})\n\n"
+                                    f"### Como usar?\n"
+                                    f"* Usando o comando {slashcmd} (no preenchimento automático da busca)\n"
+                                    f"* Clicando no botão/select de tocar favorito/integração do player.\n"
+                                    f"* Usando o comando {global_data['prefix'] or self.bot.default_prefix}{self.play_legacy.name} sem incluir um nome ou link de uma música/vídeo."
+                    ), view=None
+                )
+
+                try:
+                    await self.player_interaction_concurrency.release(interaction)
+                except:
+                    pass
+
+                return
 
                 if control == PlayerControls.lyrics:
                     if not player.current:
@@ -5986,29 +6028,59 @@ class Music(commands.Cog):
 
             try:
 
-                query = inter.text_values["song_input"]
-                position = inter.text_values["song_position"]
+                query = inter.values["song_input"]
+                position = inter.values["song_position"]
 
-                selected_dropdown = inter.data['components'][1]['components'][0]['values']
+                try:
+                    selected_fav = inter.values["fav_links"][0]
+                except (KeyError, IndexError):
+                    selected_fav = None
 
-                selected_fav = selected_dropdown[0] if (selected_dropdown and selected_dropdown[0] != "no_fav") else None
+                try:
+                    selected_integration = inter.values["integration_links"][0]
+                except (KeyError, IndexError):
+                    selected_integration = None
 
-                if not query and not selected_fav:
-                    raise GenericError("Você deve adicionar o nome de uma música ou ter/escolher um favorito")
+                multichoice_opts = []
 
-                if not query:
-                    query = selected_fav
+                if query:
+                    multichoice_opts.append(
+                        disnake.SelectOption(
+                            label="Nome/Link:",
+                            emoji="🔍",
+                            description=fix_characters(query, limit=45),
+                            value="music_query"
+                        )
+                    )
 
-                elif selected_fav:
+                if selected_fav:
+                    multichoice_opts.append(
+                        disnake.SelectOption(
+                            label="Favorito:",
+                            emoji="⭐",
+                            description=fix_characters(selected_fav[6:], 45),
+                            value="music_fav"
+                        )
+                    )
+
+                if selected_integration:
+                    multichoice_opts.append(
+                        disnake.SelectOption(
+                            label="Integração:",
+                            emoji="💠",
+                            description=fix_characters(selected_integration[13:], 45),
+                            value="music_integration"
+                        )
+                    )
+
+                if not multichoice_opts:
+                    raise GenericError("Você deve incluir pelo menos uma informação")
+                
+                if len(multichoice_opts) > 1:
 
                     view = SelectInteraction(
                         user=inter.author,
-                        opts=[
-                            disnake.SelectOption(label="Nome/Link:", emoji="🔍",
-                                                 description=fix_characters(query, limit=45), value="music_query"),
-                            disnake.SelectOption(label="Favorito:", emoji="⭐",
-                                                 description=fix_characters(selected_fav[6:], 45), value="music_fav"),
-                        ], timeout=30)
+                        opts=multichoice_opts, timeout=30)
 
                     embed = disnake.Embed(
                         description="**Você usou dois itens na sua requisição...**\n"
@@ -6027,10 +6099,22 @@ class Music(commands.Cog):
                         )
                         return
 
+                    update_inter(inter, view.inter)
+
                     inter = view.inter
 
-                    if view.selected == "music_fav":
+                    selected_opt = view.selected
+
+                    await inter.response.defer(ephemeral=True)
+                    
+                else:
+                    selected_opt = multichoice_opts[0].value
+                    
+                match selected_opt:
+                    case "music_fav":
                         query = selected_fav
+                    case "music_integration":
+                        query = selected_integration
 
                 kwargs = {
                     "query": query,

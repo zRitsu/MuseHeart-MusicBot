@@ -2239,10 +2239,6 @@ class LavalinkPlayer(wavelink.Player):
                 emoji="<:add_music:588172015760965654>", value=PlayerControls.add_song, label="Adicionar música",
                 description=f"Tocar nova música/playlist."
             ),
-            disnake.SelectOption(
-                emoji="⭐", value=PlayerControls.enqueue_fav, label="Adicionar favorito",
-                description=f"Adicionar favorito na fila."
-            ),
         ]
 
         if (played := len(self.played)) or self.last_track:
@@ -2642,11 +2638,6 @@ class LavalinkPlayer(wavelink.Player):
                                 label="Adicionar música", emoji="<:add_music:588172015760965654>",
                                 value=PlayerControls.add_song,
                                 description="Adicionar uma música/playlist na fila."
-                            ),
-                            disnake.SelectOption(
-                                label="Adicionar favorito na fila", emoji="⭐",
-                                value=PlayerControls.enqueue_fav,
-                                description="Adicionar um de seus favoritos na fila."
                             ),
                             disnake.SelectOption(
                                 label="Adicionar nos seus favoritos", emoji="💗",

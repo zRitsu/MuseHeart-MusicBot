@@ -232,7 +232,6 @@ class EmbedPaginator(disnake.ui.View):
 
 song_request_buttons = [
     disnake.ui.Button(label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song),
-    #disnake.ui.Button(label="Tocar favorito/integração", emoji="⭐", custom_id=PlayerControls.enqueue_fav)
 ]
 
 
