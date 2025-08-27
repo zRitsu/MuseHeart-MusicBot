@@ -1537,7 +1537,10 @@ class Music(commands.Cog):
                                 f'-# Nota 2: Caso não escolha alguma opção abaixo <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> será usado o serviço padrão automaticamente.'
                 )
 
-                msg = await inter.send(embed=embed, view=view)
+                if inter.response.is_done():
+                    await inter.edit_original_message(embed=embed, view=view)
+                else:
+                    msg = await inter.send(embed=embed, view=view)
 
                 await view.wait()
 
