@@ -6121,7 +6121,7 @@ class Music(commands.Cog):
 
                 kwargs = {
                     "query": query,
-                    "position": position or 0,
+                    "position": int(position) if position else 0,
                     "options": False,
                     "manual_selection": True,
                     "server": None,
