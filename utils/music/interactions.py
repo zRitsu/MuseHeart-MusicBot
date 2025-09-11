@@ -24,7 +24,7 @@ from utils.music.errors import GenericError
 from utils.music.models import LavalinkPlayer, LavalinkTrack
 from utils.music.skin_utils import skin_converter
 from utils.others import check_cmd, CustomContext, send_idle_embed, music_source_emoji_url, \
-    PlayerControls, get_source_emoji_cfg
+    PlayerControls, get_source_emoji_cfg, paginator
 
 if TYPE_CHECKING:
     from utils.client import BotCore
@@ -1590,9 +1590,9 @@ class FavMenuView(disnake.ui.View):
                         return f"` {index:02} ` {e} [`{fix_characters(name, 40)}`](<{url}>)"
                     return f"` {index:02} ` [`{fix_characters(name, 40)}`](<{url}>)"
 
-                txt += "\n".join(
+                txt += paginator("\n".join(
                     f"> {format_fav(n+1, d)}" for n, d in enumerate(islice(self.data["fav_links"].items(), 22))
-                )
+                ), max_size=1400)[0]
 
             if not self.light_mode:
                 txt += "\n\n**Como usá-los?**\n" \
@@ -1616,9 +1616,9 @@ class FavMenuView(disnake.ui.View):
                         return f"` {index:02} ` {e} [`{fix_characters(name, 40)}`](<{data['url']}>)"
                     return f"` {index:02} ` [`{fix_characters(name, 40)}`](<{data['url']}>)"
 
-                txt += f"**Links atuais no bot {self.bot.user.mention}:**\n" + "\n".join(
+                txt += f"**Links atuais no bot {self.bot.user.mention}:**\n" + paginator("\n".join(
                     f"> {format_gfav(n+1, d)}" for n, d in enumerate(islice(self.guild_data["player_controller"]["fav_links"].items(), 22))
-                )
+                ), max_size=1400)[0]
 
                 txt += "\n\n**Como usá-los?**\n" \
                         f"* Usando o menu de seleção do player durante o modo de espera.\n" \
@@ -1641,8 +1641,8 @@ class FavMenuView(disnake.ui.View):
                         return f"` {index:02} ` {e} [`{fix_characters(name[5:], 40)}`](<{url}>)"
                     return f"` {index:02} ` [`{fix_characters(name, 40)}`](<{url}>)"
 
-                txt += f"### Suas integrações atuais:\n" + "\n".join(
-                    f"> {format_itg(self.bot, n+1, d)}" for n, d in enumerate(islice(self.data["integration_links"].items(), 22)))
+                txt += f"### Suas integrações atuais:\n" + paginator("\n".join(
+                    f"> {format_itg(self.bot, n+1, d)}" for n, d in enumerate(islice(self.data["integration_links"].items(), 22))), max_size=1400)[0]
 
                 if not self.light_mode:
                     txt += "\n\n**Como usá-los?**\n" \
