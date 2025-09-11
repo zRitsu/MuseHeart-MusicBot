@@ -1616,28 +1616,30 @@ class MusicSettings(commands.Cog):
 
             embeds.append(em)
 
+        kwargs = {}
+
+        msg = None
+
         if len(embeds) > 1:
-            view = EmbedPaginatorInteraction(inter.author, embeds)
-        else:
-            view = None
+            kwargs["view"] = EmbedPaginatorInteraction(inter.author, embeds)
 
         if isinstance(inter, CustomContext):
-            msg = await inter.send(embed=embeds[0], view=view)
+            msg = await inter.send(embed=embeds[0], **kwargs)
         elif isinstance(inter, disnake.MessageInteraction):
-            await inter.response.edit_message(embed=embeds[0], view=view)
+            await inter.response.edit_message(embed=embeds[0], **kwargs)
         else:
-            msg = await inter.send(embed=embeds[0], view=view)
+            msg = await inter.send(embed=embeds[0], **kwargs)
 
-        if view:
-            await view.wait()
-            for c in view.children:
+        if kwargs.get("view"):
+            await kwargs["view"].wait()
+            for c in kwargs["view"].children:
                 c.disabled = True
-            if view.inter:
-                await view.inter.response.edit_message(view=view)
-            elif isinstance(inter, CustomContext):
-                await msg.edit(view=view)
+            if kwargs["view"].inter:
+                await kwargs["view"].inter.response.edit_message(view=kwargs["view"])
+            elif msg or isinstance(inter, CustomContext):
+                await msg.edit(view=kwargs["view"])
             else:
-                await inter.edit_original_message(view=view)
+                await inter.edit_original_message(view=kwargs["view"])
 
     customskin_cd = commands.CooldownMapping.from_cooldown(1, 10, commands.BucketType.guild)
     customskin__mc =commands.MaxConcurrency(1, per=commands.BucketType.guild, wait=False)

@@ -95,6 +95,12 @@ class CustomContext(commands.Context):
         except:
             pass
 
+        try:
+            if not kwargs["view"]:
+                del kwargs["view"]
+        except KeyError:
+            pass
+
         #if self.channel.permissions_for(self.guild.me).read_message_history:
         #    return await super().reply(fail_if_not_exists=False, content=content, **kwargs)
 
@@ -109,6 +115,12 @@ class CustomContext(commands.Context):
         try:
             kwargs.pop("fail_if_not_exists")
         except:
+            pass
+
+        try:
+            if not kwargs["view"]:
+                del kwargs["view"]
+        except KeyError:
             pass
 
         if not self.channel.permissions_for(self.guild.me).read_message_history:
@@ -296,6 +308,12 @@ async def send_message(
     try:
         if not kwargs["components"]:
             kwargs["components"] = []
+    except KeyError:
+        pass
+
+    try:
+        if not kwargs["view"]:
+            del kwargs["view"]
     except KeyError:
         pass
 
