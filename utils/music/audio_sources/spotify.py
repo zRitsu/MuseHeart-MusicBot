@@ -35,12 +35,22 @@ class SpotifyClient:
 
     def __init__(self, client_id: Optional[str] = None, client_secret: Optional[str] = None, playlist_extra_page_limit: int = 0):
 
+        if not client_id:
+            raise Exception(
+                "CLIENT_ID do spotify não informado."
+            )
+
+        if not client_secret:
+            raise Exception(
+                "CLIENT_SECRET do spotify não informado."
+            )
+
         self.client_id = client_id
         self.client_secret = client_secret
         self.base_url = "https://api.spotify.com/v1"
         self.spotify_cache = {}
         self.disabled = False
-        self.type = "api" if client_id and client_secret else "visitor"
+        self.type = "api"
         self.token_refresh = False
         self.playlist_extra_page_limit = playlist_extra_page_limit
 
@@ -139,51 +149,36 @@ class SpotifyClient:
         self.token_refresh = True
 
         try:
-            if not self.client_id or not self.client_secret:
-                access_token_url = "https://open.spotify.com/get_access_token?reason=transport&productType=embed"
-                async with ClientSession() as session:
-                    async with session.get(access_token_url) as response:
-                        data = await response.json()
-                        self.spotify_cache = {
-                            "access_token": data["accessToken"],
-                            "expires_in": data["accessTokenExpirationTimestampMs"],
-                            "expires_at": time.time() + data["accessTokenExpirationTimestampMs"],
-                            "type": "visitor",
-                        }
-                        self.type = "visitor"
-                        print("🎶 - Access token do spotify obtido com sucesso do tipo: visitante.")
+            token_url = 'https://accounts.spotify.com/api/token'
 
-            else:
-                token_url = 'https://accounts.spotify.com/api/token'
+            headers = {
+                'Authorization': 'Basic ' + base64.b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
+            }
 
-                headers = {
-                    'Authorization': 'Basic ' + base64.b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
-                }
+            data = {
+                'grant_type': 'client_credentials'
+            }
 
-                data = {
-                    'grant_type': 'client_credentials'
-                }
+            async with ClientSession() as session:
+                async with session.post(token_url, headers=headers, data=data) as response:
+                    data = await response.json()
 
-                async with ClientSession() as session:
-                    async with session.post(token_url, headers=headers, data=data) as response:
-                        data = await response.json()
+                if data.get("error"):
+                    print(f"⚠️ - Spotify: Ocorreu um erro ao obter token: {data['error_description']}")
+                    self.client_id = None
+                    self.client_secret = None
+                    await self.get_access_token()
+                    return
 
-                    if data.get("error"):
-                        print(f"⚠️ - Spotify: Ocorreu um erro ao obter token: {data['error_description']}")
-                        self.client_id = None
-                        self.client_secret = None
-                        await self.get_access_token()
-                        return
+                self.spotify_cache = data
 
-                    self.spotify_cache = data
+                self.type = "api"
 
-                    self.type = "api"
+                self.spotify_cache["tyoe"] = "api"
 
-                    self.spotify_cache["tyoe"] = "api"
+                self.spotify_cache["expires_at"] = time.time() + self.spotify_cache["expires_in"]
 
-                    self.spotify_cache["expires_at"] = time.time() + self.spotify_cache["expires_in"]
-
-                    print("🎶 - Access token do spotify obtido com sucesso via API Oficial.")
+                print("🎶 - Access token do spotify obtido com sucesso via API Oficial.")
 
         except Exception as e:
             self.token_refresh = False

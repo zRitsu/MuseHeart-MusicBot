@@ -677,11 +677,17 @@ class BotPool:
 
         self.ws_client = WSClient(self.config["RPC_SERVER"], pool=self)
 
-        self.spotify = SpotifyClient(
-            client_id=self.config['SPOTIFY_CLIENT_ID'],
-            client_secret=self.config['SPOTIFY_CLIENT_SECRET'],
-            playlist_extra_page_limit=self.config['SPOTIFY_PLAYLIST_EXTRA_PAGE_LIMIT']
-        )
+        try:
+            spotify_client = SpotifyClient(
+                client_id=self.config['SPOTIFY_CLIENT_ID'],
+                client_secret=self.config['SPOTIFY_CLIENT_SECRET'],
+                playlist_extra_page_limit=self.config['SPOTIFY_PLAYLIST_EXTRA_PAGE_LIMIT']
+            )
+        except Exception as e:
+            print(f"⚠️ - Suporte interno ao spotify desativado: {repr(e)}")
+            spotify_client = None
+
+        self.spotify = spotify_client
 
         if self.config["LASTFM_KEY"] and self.config["LASTFM_SECRET"]:
             self.last_fm = LastFM(api_key=self.config["LASTFM_KEY"], api_secret=self.config["LASTFM_SECRET"])

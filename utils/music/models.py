@@ -1499,13 +1499,12 @@ class LavalinkPlayer(wavelink.Player):
             for track_data in tracks_search:
 
                 if track_data.info["sourceName"] == "spotify" and "spotify" not in self.node.info["sourceManagers"] and self.bot.spotify:
-                    track_ids = list(set(t.identifier for t in tracks_search if t.info["sourceName"] == "spotify"))[:5]
 
                     result = None
 
                     for i in range(3):
                         try:
-                            result = await self.bot.spotify.get_recommendations(track_ids, limit=100)
+                            result = await self.bot.spotify.track_search(tracks_search[0].author, limit=100)
                             break
                         except Exception as e:
                             self.set_command_log(emoji="⚠️", text=f"Falha ao obter músicas recomendadas do spotify, tentativa {i+1} de 3.", controller=True)
