@@ -76,6 +76,17 @@ class Music(commands.Cog):
 
         self.bot = bot
 
+        self.modules = [
+                "utils.music.models",
+                "utils.music.audio_sources.spotify",
+                "utils.music.audio_sources.deezer",
+                "utils.music.filters",
+                "utils.music.local_lavalink",
+                "utils.music.skin_utils",
+                "utils.music.errors",
+                "utils.music.interactions",
+            ]
+
         self.extra_hints = bot.config["EXTRA_HINTS"].split("||")
 
         self.song_request_concurrency = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
@@ -6867,20 +6878,6 @@ class Music(commands.Cog):
             self.error_report_task.cancel()
         except:
             pass
-
-        # Ao usar com múltiplos bots alguns erros que eram pra ser ignorados no error_handler.py são enviados normalmente.
-        #with contextlib.suppress(KeyError):
-        #    for m in [
-        #        "utils.music.models",
-        #        "utils.music.audio_sources.spotify",
-        #        "utils.music.audio_sources.deezer",
-        #        "utils.music.filters",
-        #        "utils.music.local_lavalink",
-        #        "utils.music.skin_utils",
-        #        "utils.music.errors",
-        #        "utils.music.interactions",
-        #    ]:
-        #        del sys.modules[m]
 
     async def interaction_message(self, inter: Union[disnake.Interaction, CustomContext], txt, emoji: str = "✅",
                                   rpc_update: bool = False, data: dict = None, store_embed: bool = False, force=False,
