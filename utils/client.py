@@ -952,7 +952,7 @@ class BotPool:
             if start_local:
                 self.loop.create_task(self.start_lavalink())
 
-            if not self.spotify.spotify_cache:
+            if self.spotify and not self.spotify.spotify_cache:
                 self.loop.create_task(self.spotify.get_access_token())
 
             self.node_check(LAVALINK_SERVERS, start_local=start_local)
