@@ -1049,6 +1049,7 @@ class LavalinkPlayer(wavelink.Player):
                             "java.net.SocketTimeoutException: Connect timed out",
                             "java.net.SocketTimeoutException: Read timed out",
                             "java.net.SocketException: Network is unreachable",
+                            "java.net.ConnectException: Connection refused",
                             "java.lang.IllegalArgumentException: Invalid bitrate",
                             "java.io.EOFException",
                             "java.net.UnknownHostException:",
