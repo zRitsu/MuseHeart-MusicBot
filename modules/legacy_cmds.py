@@ -251,22 +251,22 @@ class Owner(commands.Cog):
                     if m_name[:-3].lower() == m.split(".")[-1]:
                         modules_list.add(m)
 
-        unload_sys_list = set()
+        # unload_sys_list = set()
 
-        for m in modules_list:
-            for cog_name, cog in self.bot.cogs.items():
-                if cog.__module__ == m and (cog_modules:=getattr(cog, "modules", None)):
-                    unload_sys_list.update(cog_modules)
+        #for m in modules_list:
+        #    for cog_name, cog in self.bot.cogs.items():
+        #        if cog.__module__ == m and (cog_modules:=getattr(cog, "modules", None)):
+        #            unload_sys_list.update(cog_modules)
 
         for bot in allbots:
             for m in modules_list:
                 bot.unload_extension(m)
 
-        for m in unload_sys_list:
-            try:
-                del sys.modules[m]
-            except KeyError:
-                pass
+        #for m in unload_sys_list:
+        #    try:
+        #        del sys.modules[m]
+        #    except KeyError:
+        #        pass
 
         data = {}
 
