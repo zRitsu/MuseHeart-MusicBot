@@ -1,4 +1,4 @@
-disnake==2.11.0
+git+https://github.com/DisnakeDev/disnake.git@96ed4459eff7f7b8a841f62e5d542d44dc721895
 python-dotenv
 user_agent
 requests>=2.31.0

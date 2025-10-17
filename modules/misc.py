@@ -453,7 +453,7 @@ class Misc(commands.Cog):
     @commands.contexts(guild=True)
     async def about(
             self,
-            interaction: disnake.AppCmdInter
+            interaction: disnake.ApplicationCommandInteraction
     ):
 
         inter, bot = await select_bot_pool(interaction, first=True)
@@ -781,7 +781,7 @@ class Misc(commands.Cog):
         extras={"allow_private": True}
     )
     @commands.contexts(guild=True)
-    async def invite(self, inter: disnake.AppCmdInter):
+    async def invite(self, inter: disnake.ApplicationCommandInteraction):
 
         await inter.response.defer(ephemeral=True)
 

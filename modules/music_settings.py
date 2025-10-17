@@ -50,7 +50,7 @@ class SkinSelector(disnake.ui.View):
 
     def __init__(
             self,
-            ctx: Union[disnake.AppCmdInter, CustomContext],
+            ctx: Union[disnake.ApplicationCommandInteraction, CustomContext],
             embed: disnake.Embed,
             select_opts: list,
             static_select_opts: list,
@@ -168,7 +168,7 @@ class SkinSelector(disnake.ui.View):
 
 class PlayerSettings(disnake.ui.View):
 
-    def __init__(self, ctx: Union[disnake.AppCmdInter, CustomContext], bot: BotCore, data: dict):
+    def __init__(self, ctx: Union[disnake.ApplicationCommandInteraction, CustomContext], bot: BotCore, data: dict):
         super().__init__()
         self.ctx = ctx
         self.bot = bot
@@ -316,7 +316,7 @@ class MusicSettings(commands.Cog):
         default_member_permissions=disnake.Permissions(manage_guild=True)
     )
     @commands.contexts(guild=True)
-    async def player_settings(self, interaction: disnake.AppCmdInter):
+    async def player_settings(self, interaction: disnake.ApplicationCommandInteraction):
 
         inter, bot = await select_bot_pool(interaction, return_new=True)
 
@@ -377,7 +377,7 @@ class MusicSettings(commands.Cog):
     @commands.contexts(guild=True)
     async def setup(
             self,
-            interaction: disnake.AppCmdInter,
+            interaction: disnake.ApplicationCommandInteraction,
             target: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.ForumChannel, disnake.StageChannel] = commands.Param(
                 name="canal", default=None, description="Selecionar um canal existente"
             ),
@@ -934,7 +934,7 @@ class MusicSettings(commands.Cog):
     @commands.contexts(guild=True)
     async def reset(
             self,
-            interaction: disnake.AppCmdInter,
+            interaction: disnake.ApplicationCommandInteraction,
             delete_channel: str = commands.Param(
                 name="deletar_canal",
                 description="deletar o canal do player controller", default=None, choices=["sim", "não"]
@@ -1148,7 +1148,7 @@ class MusicSettings(commands.Cog):
         default_member_permissions=disnake.Permissions(manage_guild=True)
     )
     @commands.contexts(guild=True)
-    async def change_skin(self, interaction: disnake.AppCmdInter):
+    async def change_skin(self, interaction: disnake.ApplicationCommandInteraction):
 
         inter, bot = await select_bot_pool(interaction, return_new=True)
 
@@ -1535,7 +1535,7 @@ class MusicSettings(commands.Cog):
         description=f"{desc_prefix}Ver informações dos servidores de música (lavalink servers)."
     )
     @commands.contexts(guild=True)
-    async def nodeinfo(self, interaction: disnake.AppCmdInter):
+    async def nodeinfo(self, interaction: disnake.ApplicationCommandInteraction):
 
         inter, bot = await select_bot_pool(interaction, return_new=True)
 
@@ -1655,7 +1655,7 @@ class MusicSettings(commands.Cog):
                             description=f"{desc_prefix}Criar suas próprias skins/templates para o player de música.",
                             default_member_permissions=disnake.Permissions(administrator=True))
     @commands.contexts(guild=True)
-    async def custom_skin(self, inter: disnake.AppCmdInter):
+    async def custom_skin(self, inter: disnake.ApplicationCommandInteraction):
 
         inter, bot = await select_bot_pool(inter, return_new=True)
 
@@ -1824,7 +1824,7 @@ class RPCCog(commands.Cog):
         description=f"{desc_prefix}Ativar/Desativar o sistema de rich-presence no seu status.", cooldown=rpc_cd
     )
     @commands.contexts(guild=True)
-    async def rich_presence(self, inter: disnake.AppCmdInter):
+    async def rich_presence(self, inter: disnake.ApplicationCommandInteraction):
 
         if not self.bot.config["ENABLE_RPC_COMMAND"] and not any([await b.is_owner(inter.author) for b in self.bot.pool.get_guild_bots(inter.guild_id)]):
             raise GenericError("**Este comando está desativado nas minhas configurações...**\n"

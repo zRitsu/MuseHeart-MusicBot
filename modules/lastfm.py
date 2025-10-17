@@ -157,7 +157,7 @@ class LastFmCog(commands.Cog):
                       extras={"allow_private": True},
                       cooldown=lastfm_cd, max_concurrency=lastfm_mc)
     @commands.contexts(guild=True)
-    async def lastfm(self, inter: disnake.AppCmdInter):
+    async def lastfm(self, inter: disnake.ApplicationCommandInteraction):
 
         try:
             if not inter.permissions.embed_links:

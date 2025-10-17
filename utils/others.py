@@ -352,7 +352,7 @@ async def send_message(
         except AttributeError:
             pass
         try:
-            if inter.response.is_done() and isinstance(inter, disnake.AppCmdInter):
+            if inter.response.is_done() and isinstance(inter, disnake.ApplicationCommandInteraction):
                 await inter.edit_original_message(content=text, **kwargs)
             else:
                 await inter.send(text, ephemeral=True, **kwargs)
@@ -651,7 +651,7 @@ def music_source_emoji_id(id_: str):
 
     return "<:play:734221719774035968>"
 
-async def select_bot_pool(inter: Union[CustomContext, disnake.MessageInteraction, disnake.AppCmdInter], first=False, return_new=False, edit_original=False):
+async def select_bot_pool(inter: Union[CustomContext, disnake.MessageInteraction, disnake.ApplicationCommandInteraction], first=False, return_new=False, edit_original=False):
 
     if isinstance(inter, CustomContext):
         if len(inter.bot.pool.get_guild_bots(inter.guild_id)) < 2:
@@ -758,7 +758,7 @@ async def select_bot_pool(inter: Union[CustomContext, disnake.MessageInteraction
         except KeyError:
             raise GenericError("**O bot selecionado foi removido do servidor antes de sua seleção...**")
 
-def queue_track_index(inter: disnake.AppCmdInter, bot: BotCore, query: str, match_count: int = 1,
+def queue_track_index(inter: disnake.ApplicationCommandInteraction, bot: BotCore, query: str, match_count: int = 1,
                       case_sensitive: bool = False):
 
     player: LavalinkPlayer = bot.music.players[inter.guild_id]

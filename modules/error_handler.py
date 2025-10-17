@@ -43,7 +43,7 @@ class ErrorHandler(commands.Cog):
             )
 
     @commands.Cog.listener('on_interaction_player_error')
-    async def on_inter_player_error(self, inter: disnake.AppCmdInter, error: Exception):
+    async def on_inter_player_error(self, inter: disnake.ApplicationCommandInteraction, error: Exception):
 
         if not isinstance(error, commands.MaxConcurrencyReached):
             try:
@@ -56,7 +56,7 @@ class ErrorHandler(commands.Cog):
     """@commands.Cog.listener('on_user_command_completion')
     @commands.Cog.listener('on_message_command_completion')
     @commands.Cog.listener('on_slash_command_completion')
-    async def interaction_command_completion(self, inter: disnake.AppCmdInter):
+    async def interaction_command_completion(self, inter: disnake.ApplicationCommandInteraction):
 
         try:
             await inter.application_command._max_concurrency.release(inter)
@@ -73,7 +73,7 @@ class ErrorHandler(commands.Cog):
             pass"""
 
     @commands.Cog.listener('on_custom_error')
-    async def custom_error_event(self, ctx: Union[disnake.AppCmdInter, CustomContext], error: Exception):
+    async def custom_error_event(self, ctx: Union[disnake.ApplicationCommandInteraction, CustomContext], error: Exception):
         if isinstance(ctx, (CustomContext, disnake.Message)):
             await self.on_legacy_command_error(ctx=ctx, error=error, resp_msg=False)
         else:
@@ -83,11 +83,11 @@ class ErrorHandler(commands.Cog):
     @commands.Cog.listener('on_user_command_error')
     @commands.Cog.listener('on_message_command_error')
     @commands.Cog.listener('on_slash_command_error')
-    async def on_interaction_command_error(self, inter: disnake.AppCmdInter, error: Exception, **kwargs):
+    async def on_interaction_command_error(self, inter: disnake.ApplicationCommandInteraction, error: Exception, **kwargs):
 
         await self.process_interaction_error(inter=inter, error=error, **kwargs)
 
-    async def process_interaction_error(self, inter: disnake.AppCmdInter, error: Exception, resp_msg = True, **kwargs):
+    async def process_interaction_error(self, inter: disnake.ApplicationCommandInteraction, error: Exception, resp_msg = True, **kwargs):
 
         if isinstance(error, PoolException):
             return

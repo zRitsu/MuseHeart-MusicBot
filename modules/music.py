@@ -126,7 +126,7 @@ class Music(commands.Cog):
     )
     @commands.contexts(guild=True)
     async def set_voice_status(
-            self, inter: disnake.AppCmdInter,
+            self, inter: disnake.ApplicationCommandInteraction,
             template: str = commands.Param(
                 name="modelo", default="",
                 description="Especifique manualmente um modelo de status (inclua placeholders)."
@@ -230,7 +230,7 @@ class Music(commands.Cog):
     @commands.contexts(guild=True)
     async def search(
             self,
-            inter: disnake.AppCmdInter,
+            inter: disnake.ApplicationCommandInteraction,
             query: str = commands.Param(name="busca", desc="Nome ou link da música."),
             *,
             position: int = commands.Param(name="posição", description="Colocar a música em uma posição específica",
@@ -304,7 +304,7 @@ class Music(commands.Cog):
     @commands.contexts(guild=True)
     async def connect(
             self,
-            inter: disnake.AppCmdInter,
+            inter: disnake.ApplicationCommandInteraction,
             channel: Union[disnake.VoiceChannel, disnake.StageChannel] = commands.Param(
                 name="canal",
                 description="Canal para me conectar"
@@ -319,7 +319,7 @@ class Music(commands.Cog):
 
     async def do_connect(
             self,
-            ctx: Union[disnake.AppCmdInter, commands.Context, disnake.Message],
+            ctx: Union[disnake.ApplicationCommandInteraction, commands.Context, disnake.Message],
             channel: Union[disnake.VoiceChannel, disnake.StageChannel] = None,
             check_other_bots_in_vc: bool = False,
             bot: BotCore = None,
@@ -370,7 +370,7 @@ class Music(commands.Cog):
 
         deafen_check = True
 
-        if isinstance(ctx, disnake.AppCmdInter) and ctx.application_command.name == self.connect.name:
+        if isinstance(ctx, disnake.ApplicationCommandInteraction) and ctx.application_command.name == self.connect.name:
 
             perms = channel.permissions_for(me)
 
@@ -530,7 +530,7 @@ class Music(commands.Cog):
     @commands.contexts(guild=True)
     async def play_file(
             self,
-            inter: Union[disnake.AppCmdInter, CustomContext],
+            inter: Union[disnake.ApplicationCommandInteraction, CustomContext],
             file: disnake.Attachment = commands.Param(
                 name="arquivo", description="arquivo de audio para tocar ou adicionar na fila"
             ),
@@ -606,7 +606,7 @@ class Music(commands.Cog):
     @commands.contexts(guild=True)
     async def play(
             self,
-            inter: Union[disnake.AppCmdInter, CustomContext],
+            inter: Union[disnake.ApplicationCommandInteraction, CustomContext],
             query: str = commands.Param(name="busca", desc="Nome ou link da música."), *,
             position: int = commands.Param(name="posição", description="Colocar a música em uma posição específica",
                                            default=0),
@@ -2131,7 +2131,7 @@ class Music(commands.Cog):
     @commands.contexts(guild=True)
     async def skipto(
             self,
-            inter: disnake.AppCmdInter,
+            inter: disnake.ApplicationCommandInteraction,
             query: str = commands.Param(
                 name="nome",
                 description="Nome da música (completa ou parte dela)."
@@ -2158,7 +2158,7 @@ class Music(commands.Cog):
     @commands.contexts(guild=True)
     async def skip(
             self,
-            inter: disnake.AppCmdInter, *,
+            inter: disnake.ApplicationCommandInteraction, *,
             query: str = commands.Param(
                 name="nome",
                 description="Nome da música (completa ou parte dela).",
@@ -2244,7 +2244,7 @@ class Music(commands.Cog):
 
             if isinstance(inter, disnake.MessageInteraction) and inter.data.custom_id == "queue_track_selection":
                 await inter.response.edit_message(embed=embed, view=None)
-            elif not isinstance(inter, (CustomContext, disnake.AppCmdInter)) and inter.data.custom_id == "musicplayer_queue_dropdown":
+            elif not isinstance(inter, (CustomContext, disnake.ApplicationCommandInteraction)) and inter.data.custom_id == "musicplayer_queue_dropdown":
                 await inter.response.defer()
             else:
                 await inter.send(embed=embed, ephemeral=ephemeral)
@@ -2312,7 +2312,7 @@ class Music(commands.Cog):
         extras={"only_voiced": True}, cooldown=skip_back_cd, max_concurrency=skip_back_mc
     )
     @commands.contexts(guild=True)
-    async def back(self, inter: disnake.AppCmdInter):
+    async def back(self, inter: disnake.ApplicationCommandInteraction):
 
         try:
             bot = inter.music_bot
@@ -2386,7 +2386,7 @@ class Music(commands.Cog):
         extras={"only_voiced": True}
     )
     @commands.contexts(guild=True)
-    async def voteskip(self, inter: disnake.AppCmdInter):
+    async def voteskip(self, inter: disnake.ApplicationCommandInteraction):
 
         try:
             bot = inter.music_bot
@@ -2442,7 +2442,7 @@ class Music(commands.Cog):
     @commands.contexts(guild=True)
     async def volume(
             self,
-            inter: disnake.AppCmdInter, *,
+            inter: disnake.ApplicationCommandInteraction, *,
             value: int = commands.Param(name="nível", description="nível entre 5 a 150", min_value=5.0, max_value=150.0)
     ):
 
@@ -2504,7 +2504,7 @@ class Music(commands.Cog):
         cooldown=pause_resume_cd, max_concurrency=pause_resume_mc
     )
     @commands.contexts(guild=True)
-    async def pause(self, inter: disnake.AppCmdInter):
+    async def pause(self, inter: disnake.ApplicationCommandInteraction):
 
         try:
             bot = inter.music_bot
@@ -2539,7 +2539,7 @@ class Music(commands.Cog):
         extras={"only_voiced": True}, cooldown=pause_resume_cd, max_concurrency=pause_resume_mc
     )
     @commands.contexts(guild=True)
-    async def resume(self, inter: disnake.AppCmdInter):
+    async def resume(self, inter: disnake.ApplicationCommandInteraction):
 
         try:
             bot = inter.music_bot
@@ -2585,7 +2585,7 @@ class Music(commands.Cog):
     @commands.contexts(guild=True)
     async def seek(
             self,
-            inter: disnake.AppCmdInter,
+            inter: disnake.ApplicationCommandInteraction,
             position: str = commands.Param(name="tempo", description="Tempo para avançar/voltar (ex: 1:45 / 40 / 0:30)")
     ):
 
@@ -2758,7 +2758,7 @@ class Music(commands.Cog):
     @commands.contexts(guild=True)
     async def loop_mode(
             self,
-            inter: disnake.AppCmdInter,
+            inter: disnake.ApplicationCommandInteraction,
             mode: str = commands.Param(
                 name="modo",
                 choices=[
@@ -2817,7 +2817,7 @@ class Music(commands.Cog):
     @commands.contexts(guild=True)
     async def loop_amount(
             self,
-            inter: disnake.AppCmdInter,
+            inter: disnake.ApplicationCommandInteraction,
             value: int = commands.Param(name="valor", description="número de repetições.")
     ):
 
@@ -2866,7 +2866,7 @@ class Music(commands.Cog):
     @commands.contexts(guild=True)
     async def remove(
             self,
-            inter: disnake.AppCmdInter,
+            inter: disnake.ApplicationCommandInteraction,
             query: str = commands.Param(name="nome", description="Nome da música completo."),
             case_sensitive: bool = commands.Param(
                 name="nome_exato", default=False,
@@ -2918,7 +2918,7 @@ class Music(commands.Cog):
         extras={"only_voiced": True}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc
     )
     @commands.contexts(guild=True)
-    async def readd_songs(self, inter: disnake.AppCmdInter):
+    async def readd_songs(self, inter: disnake.ApplicationCommandInteraction):
 
         try:
             bot = inter.music_bot
@@ -2980,7 +2980,7 @@ class Music(commands.Cog):
     @commands.contexts(guild=True)
     async def rotate(
             self,
-            inter: disnake.AppCmdInter,
+            inter: disnake.ApplicationCommandInteraction,
             query: str = commands.Param(name="nome", description="Nome da música completo."),
             case_sensitive: bool = commands.Param(
                 name="nome_exato", default=False,
@@ -3044,7 +3044,7 @@ class Music(commands.Cog):
     @commands.slash_command(extras={"only_voiced": True}, cooldown=song_request_thread_cd,
                             description=f"{desc_prefix}Criar uma thread/conversa temporária para song-request (pedido de música)")
     @commands.contexts(guild=True)
-    async def song_request_thread(self, inter: disnake.AppCmdInter):
+    async def song_request_thread(self, inter: disnake.ApplicationCommandInteraction):
 
         try:
             bot = inter.music_bot
@@ -3116,7 +3116,7 @@ class Music(commands.Cog):
         extras={"only_voiced": True}, cooldown=nightcore_cd, max_concurrency=nightcore_mc,
     )
     @commands.contexts(guild=True)
-    async def nightcore(self, inter: disnake.AppCmdInter):
+    async def nightcore(self, inter: disnake.ApplicationCommandInteraction):
 
         try:
             bot = inter.music_bot
@@ -3150,7 +3150,7 @@ class Music(commands.Cog):
     @commands.slash_command(description=f"{desc_prefix}Exibir info da música que que você está ouvindo (em qualquer servidor).",
                             cooldown=np_cd, extras={"allow_private": True})
     @commands.contexts(guild=True)
-    async def now_playing(self, inter: disnake.AppCmdInter):
+    async def now_playing(self, inter: disnake.ApplicationCommandInteraction):
 
         player: Optional[LavalinkPlayer] = None
 
@@ -3350,7 +3350,7 @@ class Music(commands.Cog):
     @commands.slash_command(description=f"{desc_prefix}Enviar player controller para um canal específico/atual.",
                             extras={"only_voiced": True}, cooldown=controller_cd, max_concurrency=controller_mc)
     @commands.contexts(guild=True)
-    async def controller(self, inter: disnake.AppCmdInter):
+    async def controller(self, inter: disnake.ApplicationCommandInteraction):
 
         try:
             bot = inter.music_bot
@@ -3436,7 +3436,7 @@ class Music(commands.Cog):
     @commands.contexts(guild=True)
     async def add_dj(
             self,
-            inter: disnake.AppCmdInter, *,
+            inter: disnake.ApplicationCommandInteraction, *,
             user: disnake.User = commands.Param(name="membro", description="Membro a ser adicionado.")
     ):
 
@@ -3490,7 +3490,7 @@ class Music(commands.Cog):
     @commands.contexts(guild=True)
     async def remove_dj(
             self,
-            inter: disnake.AppCmdInter, *,
+            inter: disnake.ApplicationCommandInteraction, *,
             user: disnake.User = commands.Param(name="membro", description="Membro a ser adicionado.")
     ):
 
@@ -3542,7 +3542,7 @@ class Music(commands.Cog):
         extras={"only_voiced": True}
     )
     @commands.contexts(guild=True)
-    async def command_log(self, inter: disnake.AppCmdInter):
+    async def command_log(self, inter: disnake.ApplicationCommandInteraction):
 
         try:
             bot = inter.music_bot
@@ -3580,7 +3580,7 @@ class Music(commands.Cog):
         extras={"only_voiced": True}
     )
     @commands.contexts(guild=True)
-    async def stop(self, inter: disnake.AppCmdInter):
+    async def stop(self, inter: disnake.ApplicationCommandInteraction):
 
         try:
             bot = inter.music_bot
@@ -3641,7 +3641,7 @@ class Music(commands.Cog):
         extras={"only_voiced": True}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc
     )
     @commands.contexts(guild=True)
-    async def save_queue(self, inter: disnake.AppCmdInter):
+    async def save_queue(self, inter: disnake.ApplicationCommandInteraction):
 
         try:
             bot = inter.music_bot
@@ -3732,7 +3732,7 @@ class Music(commands.Cog):
         name="shuffle",
         description=f"{desc_prefix}Misturar as músicas da fila",
         extras={"only_voiced": True}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc)
-    async def shuffle_(self, inter: disnake.AppCmdInter):
+    async def shuffle_(self, inter: disnake.ApplicationCommandInteraction):
 
         try:
             bot = inter.music_bot
@@ -3766,7 +3766,7 @@ class Music(commands.Cog):
         description=f"{desc_prefix}Inverter a ordem das músicas na fila",
         extras={"only_voiced": True}, cooldown=queue_manipulation_cd, max_concurrency=remove_mc
     )
-    async def reverse(self, inter: disnake.AppCmdInter):
+    async def reverse(self, inter: disnake.ApplicationCommandInteraction):
 
         try:
             bot = inter.music_bot
@@ -3799,7 +3799,7 @@ class Music(commands.Cog):
     @q.sub_command(
         description=f"{desc_prefix}Exibir as músicas que estão na fila.", max_concurrency=queue_show_mc
     )
-    async def display(self, inter: disnake.AppCmdInter):
+    async def display(self, inter: disnake.ApplicationCommandInteraction):
 
         try:
             bot = inter.music_bot
@@ -3904,7 +3904,7 @@ class Music(commands.Cog):
     )
     async def clear(
             self,
-            inter: disnake.AppCmdInter,
+            inter: disnake.ApplicationCommandInteraction,
             song_name: str = commands.Param(name="nome", description="Incluir um nome que tiver na música.",
                                             default=None),
             song_author: str = commands.Param(name="uploader",
@@ -4208,7 +4208,7 @@ class Music(commands.Cog):
     @commands.contexts(guild=True)
     async def move(
             self,
-            inter: disnake.AppCmdInter,
+            inter: disnake.ApplicationCommandInteraction,
             song_name: str = commands.Param(name="nome", description="Incluir um nome que tiver na música.",
                                             default=None),
             position: int = commands.Param(name="posição", description="Posição de destino na fila (Opcional).",
@@ -4248,7 +4248,7 @@ class Music(commands.Cog):
         )
 
     async def do_move(
-            self, inter: Union[disnake.AppCmdInter, CustomContext], position: int = 1, song_name: str = None,
+            self, inter: Union[disnake.ApplicationCommandInteraction, CustomContext], position: int = 1, song_name: str = None,
             song_author: str = None, user: disnake.Member = None, duplicates: bool = False, playlist: str = None,
             min_duration: str = None, max_duration: str = None, amount: int = None, range_start: int = 0,
             range_end: int = 0, absent_members: bool = False, case_sensitive=False
@@ -4540,7 +4540,7 @@ class Music(commands.Cog):
     @skip.autocomplete("nome")
     @skipto.autocomplete("nome")
     @remove.autocomplete("nome")
-    async def queue_tracks(self, inter: disnake.AppCmdInter, query: str):
+    async def queue_tracks(self, inter: disnake.ApplicationCommandInteraction, query: str):
 
         try:
             if not inter.author.voice:
@@ -4638,7 +4638,7 @@ class Music(commands.Cog):
         description=f"{desc_prefix}Ativar/Desativar o modo restrito de comandos que requer DJ/Staff.",
         extras={"only_voiced": True}, cooldown=restrict_cd, max_concurrency=restrict_mc)
     @commands.contexts(guild=True)
-    async def restrict_mode(self, inter: disnake.AppCmdInter):
+    async def restrict_mode(self, inter: disnake.ApplicationCommandInteraction):
 
         try:
             bot = inter.music_bot
@@ -4678,7 +4678,7 @@ class Music(commands.Cog):
         extras={"only_voiced": True}, cooldown=nonstop_cd, max_concurrency=nonstop_mc
     )
     @commands.contexts(guild=True)
-    async def nonstop(self, inter: disnake.AppCmdInter):
+    async def nonstop(self, inter: disnake.ApplicationCommandInteraction):
 
         try:
             bot = inter.music_bot
@@ -4728,7 +4728,7 @@ class Music(commands.Cog):
         extras={"only_voiced": True}, cooldown=autoplay_cd, max_concurrency=autoplay_mc
     )
     @commands.contexts(guild=True)
-    async def autoplay(self, inter: disnake.AppCmdInter):
+    async def autoplay(self, inter: disnake.ApplicationCommandInteraction):
 
         try:
             bot = inter.music_bot
@@ -4762,7 +4762,7 @@ class Music(commands.Cog):
     @commands.contexts(guild=True)
     async def change_node(
             self,
-            inter: disnake.AppCmdInter,
+            inter: disnake.ApplicationCommandInteraction,
             node: str = commands.Param(name="servidor", description="Servidor de música")
     ):
 
@@ -4871,7 +4871,7 @@ class Music(commands.Cog):
         description=f"{desc_prefix}Gerenciar seus favoritos/integrações e links do server.",
         cooldown=fav_cd, extras={"allow_private": True})
     @commands.contexts(guild=True)
-    async def fav_manager(self, inter: disnake.AppCmdInter):
+    async def fav_manager(self, inter: disnake.ApplicationCommandInteraction):
 
         bot = self.bot
 
@@ -4994,7 +4994,7 @@ class Music(commands.Cog):
             except:
                 traceback.print_exc()
 
-    async def is_request_channel(self, ctx: Union[disnake.AppCmdInter, disnake.MessageInteraction, CustomContext], *,
+    async def is_request_channel(self, ctx: Union[disnake.ApplicationCommandInteraction, disnake.MessageInteraction, CustomContext], *,
                                  data: dict = None, ignore_thread=False) -> bool:
 
         if isinstance(ctx, (CustomContext, disnake.MessageInteraction)):
@@ -5042,7 +5042,7 @@ class Music(commands.Cog):
     async def check_channel(
             self,
             guild_data: dict,
-            inter: Union[disnake.AppCmdInter, CustomContext],
+            inter: Union[disnake.ApplicationCommandInteraction, CustomContext],
             channel: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.Thread],
             guild: disnake.Guild,
             bot: BotCore
@@ -5171,7 +5171,7 @@ class Music(commands.Cog):
     async def process_player_interaction(
             self,
             interaction: Union[disnake.MessageInteraction, disnake.ModalInteraction],
-            command: Optional[disnake.AppCmdInter],
+            command: Optional[disnake.ApplicationCommandInteraction],
             kwargs: dict
     ):
 
@@ -5293,7 +5293,7 @@ class Music(commands.Cog):
 
         cmd_kwargs = {}
 
-        cmd: Optional[disnake.AppCmdInter] = None
+        cmd: Optional[disnake.ApplicationCommandInteraction] = None
 
         if control in (
                 PlayerControls.embed_forceplay,
@@ -6467,7 +6467,7 @@ class Music(commands.Cog):
 
 
     async def process_music(
-            self, inter: Union[disnake.Message, disnake.MessageInteraction, disnake.AppCmdInter, CustomContext, disnake.ModalInteraction],
+            self, inter: Union[disnake.Message, disnake.MessageInteraction, disnake.ApplicationCommandInteraction, CustomContext, disnake.ModalInteraction],
             player: LavalinkPlayer, force_play: str = "no", ephemeral=True, log_text = "", emoji="",
             warn_message: str = "", user_data: dict = None, reg_query: dict = None
     ):
@@ -6511,7 +6511,7 @@ class Music(commands.Cog):
 
     async def create_player(
             self,
-            inter: Union[disnake.Message, disnake.MessageInteraction, disnake.AppCmdInter, CustomContext, disnake.ModalInteraction],
+            inter: Union[disnake.Message, disnake.MessageInteraction, disnake.ApplicationCommandInteraction, CustomContext, disnake.ModalInteraction],
             bot: BotCore, guild: disnake.Guild, channel: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.Thread],
             guild_data: dict = None, message_inter = None,
             node: wavelink.Node = None, modal_message_id: int = None
@@ -7189,7 +7189,7 @@ class Music(commands.Cog):
 
         await node.connect(info=info)
 
-    async def get_partial_tracks(self, query: str, ctx: Union[disnake.AppCmdInter, CustomContext, disnake.MessageInteraction, disnake.Message],
+    async def get_partial_tracks(self, query: str, ctx: Union[disnake.ApplicationCommandInteraction, CustomContext, disnake.MessageInteraction, disnake.Message],
             user: disnake.Member, node: wavelink.Node = None, bot: BotCore = None):
 
         if not bot:
@@ -7216,7 +7216,7 @@ class Music(commands.Cog):
 
         return tracks, node, exceptions
 
-    async def get_lavalink_tracks(self, query: str, ctx: Union[disnake.AppCmdInter, CustomContext, disnake.MessageInteraction, disnake.Message],
+    async def get_lavalink_tracks(self, query: str, ctx: Union[disnake.ApplicationCommandInteraction, CustomContext, disnake.MessageInteraction, disnake.Message],
             user: disnake.Member, node: wavelink.Node = None, source=None, bot: BotCore = None):
 
         if not bot:
@@ -7320,7 +7320,7 @@ class Music(commands.Cog):
         return tracks, node, exceptions
 
     async def get_tracks(
-            self, query: str, ctx: Union[disnake.AppCmdInter, CustomContext, disnake.MessageInteraction, disnake.Message],
+            self, query: str, ctx: Union[disnake.ApplicationCommandInteraction, CustomContext, disnake.MessageInteraction, disnake.Message],
             user: disnake.Member, node: wavelink.Node = None, source=None, bot: BotCore = None, mix=False):
 
         exceptions = set()
@@ -7767,7 +7767,7 @@ class Music(commands.Cog):
 
         return free_bots
 
-    async def reset_controller_db(self, guild_id: int, data: dict, inter: disnake.AppCmdInter = None):
+    async def reset_controller_db(self, guild_id: int, data: dict, inter: disnake.ApplicationCommandInteraction = None):
 
         data['player_controller']['channel'] = None
         data['player_controller']['message_id'] = None

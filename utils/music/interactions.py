@@ -1327,7 +1327,7 @@ class FavModalAdd(disnake.ui.Modal):
 
 class FavMenuView(disnake.ui.View):
 
-    def __init__(self, bot: BotCore, ctx: Union[disnake.AppCmdInter, CustomContext], data: dict, log: str = "",
+    def __init__(self, bot: BotCore, ctx: Union[disnake.ApplicationCommandInteraction, CustomContext], data: dict, log: str = "",
                  prefix="", mode: str = ViewMode.fav_manager, is_owner=False):
         super().__init__(timeout=180)
         self.mode = mode
@@ -2344,7 +2344,7 @@ class SetStageTitle(disnake.ui.View):
 
 class SkinEditorMenu(disnake.ui.View):
 
-    def __init__(self, ctx: Union[CustomContext, disnake.AppCmdInter], bot: BotCore, guild: disnake.Guild, global_data: dict):
+    def __init__(self, ctx: Union[CustomContext, disnake.ApplicationCommandInteraction], bot: BotCore, guild: disnake.Guild, global_data: dict):
         super().__init__(timeout=600)
         self.ctx = ctx
         self.bot = bot
@@ -3184,7 +3184,7 @@ class SelectBotVoice(disnake.ui.View):
 
     def __init__(
             self,
-            inter: Union[disnake.AppCmdInter, disnake.MessageInteraction, disnake.ModalInteraction, CustomContext],
+            inter: Union[disnake.ApplicationCommandInteraction, disnake.MessageInteraction, disnake.ModalInteraction, CustomContext],
             guild: disnake.Guild, freebots: List[BotCore]
     ):
         super().__init__(timeout=45)
