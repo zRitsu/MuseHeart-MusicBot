@@ -906,8 +906,6 @@ class BotPool:
 
         load_modules_log = True
 
-        self.loop = asyncio.get_event_loop()
-
         for k, v in all_tokens.items():
             load_bot(k, v, load_modules_log=load_modules_log)
             load_modules_log = False
@@ -926,6 +924,8 @@ class BotPool:
                     load_modules_log = False
 
         message = ""
+
+        self.loop = asyncio.get_event_loop()
 
         self.loop.create_task(self.setup_pool_extras())
 
