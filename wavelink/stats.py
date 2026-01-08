@@ -54,9 +54,10 @@ class Stats:
         self.memory_reservable = memory['reservable']
 
         cpu = data['cpu']
+
         self.cpu_cores = cpu['cores']
         self.system_load = cpu['systemLoad']
-        self.lavalink_load = cpu['lavalinkLoad']
+        self.lavalink_load = cpu.get('lavalinkLoad') or cpu.get('nodelinkLoad') or 0
 
         frame_stats = data.get('frameStats', {}) or {}
         self.frames_sent = frame_stats.get('sent', -1)

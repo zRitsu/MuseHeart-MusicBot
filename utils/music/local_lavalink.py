@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
+import io
 import os
 import platform
-import shutil
 import subprocess
-import tempfile
 import time
 import zipfile
-from contextlib import suppress
 
 import requests
 
@@ -68,206 +66,63 @@ def validate_java(cmd: str, debug: bool = False):
                   f"Path: {cmd} | Erro: {repr(e)}\n")
 
 def run_lavalink(
-        lavalink_file_url: str = None,
-        lavalink_initial_ram: int = 30,
-        lavalink_ram_limit: int = 100,
         lavalink_additional_sleep: int = 0,
-        lavalink_cpu_cores: int = 1,
-        use_jabba: bool = False
+        *args, **kwargs
 ):
-    arch, osname = platform.architecture()
-    jdk_platform = f"{platform.system()}-{arch}-{osname}"
+    version = "v3.4.0"
+    base_url = f"https://github.com/PerformanC/NodeLink/releases/download/{version}"
 
-    tmp_dir = tempfile.gettempdir() if os.name == "nt" else "."
+    os_name = platform.system().lower()  # windows, linux, darwin (macos)
+    arch = platform.machine().lower()  # x86_64, amd64, arm64, aarch64
 
-    if not (java_cmd := validate_java("java")):
+    os_map = {
+        "windows": "win",
+        "linux": "linux",
+        "darwin": "macos"
+    }
 
-        dirs = []
+    arch_map = {
+        "x86_64": "x64",
+        "amd64": "x64",
+        "i386": "x86",
+        "arm64": "arm64",
+        "aarch64": "arm64"
+    }
 
-        try:
-            dirs.append(os.path.join(os.environ["JAVA_HOME"] + "bin/java"))
-        except KeyError:
-            pass
+    target_os = os_map.get(os_name)
+    target_arch = arch_map.get(arch)
 
-        if os.name == "nt":
-            dirs.append(f"{tmp_dir}/.java/{jdk_platform}/bin/java")
-            try:
-                shutil.rmtree("./.jabba")
-            except:
-                pass
+    if not target_os or not target_arch:
+        print(f"Sistema ou arquitetura não suportada: {os_name} {arch}")
+        return
 
-        else:
-            if use_jabba:
-                dirs.extend(
-                    [
-                        os.path.realpath("./.jabba/jdk/zulu@1.17.0-0/bin/java"),
-                        os.path.expanduser("./.jabba/jdk/zulu@1.17.0-0/bin/java")
-                    ]
-                )
-                try:
-                    shutil.rmtree(f"{tmp_dir}/.java")
-                except:
-                    pass
+    download_file("https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/config.default.js", "config.default.js")
 
-            else:
-                dirs.append(os.path.realpath(f"{tmp_dir}/.java/{jdk_platform}/bin/java"))
-                try:
-                    shutil.rmtree("./.jabba")
-                except:
-                    pass
+    nodelink = f"nodelink-{target_os}-{target_arch}" + ".exe" if target_os == "win" else ""
 
-        for cmd in dirs:
-            if validate_java(cmd):
-                java_cmd = cmd
-                break
+    if not os.path.isfile(nodelink):
 
-        if not java_cmd:
+        extension = ".exe.zip" if target_os == "win" else ".zip"
+        filename = f"nodelink-{target_os}-{target_arch}{extension}"
+        download_url = f"{base_url}/{filename}"
 
-            if os.name == "nt":
+        print(f"Nodelink - Detectado: {os_name} ({arch})")
+        print(f"Nodelink - Baixando de: {download_url}...")
 
-                try:
-                    shutil.rmtree(f"{tmp_dir}/.java")
-                except:
-                    pass
+        response = requests.get(download_url)
+        response.raise_for_status()  # Verifica se houve erro no download
 
-                if platform.architecture()[0] == "64bit":
-                    jdk_url = "https://download.bell-sw.com/java/17.0.13+12/bellsoft-jdk17.0.13+12-windows-amd64.zip"
-                else:
-                    jdk_url = "https://download.bell-sw.com/java/17.0.13+12/bellsoft-jdk17.0.13+12-windows-i586.zip"
+        with zipfile.ZipFile(io.BytesIO(response.content)) as z:
+            z.extractall(".")
+            print(f"Sucesso! Arquivos extraídos na pasta atual: {os.getcwd()}")
 
-                jdk_filename = "java.zip"
-
-                download_file(jdk_url, f"{tmp_dir}/{jdk_filename}")
-
-                os.makedirs(f"{tmp_dir}/.java/{jdk_platform}", exist_ok=True)
-
-                with zipfile.ZipFile(os.path.normpath(f"{tmp_dir}/{jdk_filename}"), 'r') as zip_ref:
-                    try:
-                        zip_ref.extractall(f"{tmp_dir}/.java")
-                    except Exception as e:
-                        if isinstance(e, zipfile.BadZipFile):
-                            os.remove(f"{tmp_dir}/{jdk_filename}")
-                        raise e
-
-                extracted_folder = None
-
-                java_dirs = os.listdir(f"{tmp_dir}/.java")
-
-                for d in os.listdir(f"{tmp_dir}/.java"):
-                    if d == jdk_platform:
-                        continue
-                    if os.path.isfile(f"{tmp_dir}/.java/{d}/bin/java.exe"):
-                        extracted_folder = f"{tmp_dir}/.java/{d}"
-
-                if not extracted_folder:
-                    raise Exception(
-                        f"JDK não encontrando no diretório: {tmp_dir}/.java\n" + "\n".join(java_dirs)
-                    )
-
-                for item in os.listdir(extracted_folder):
-                    item_path = os.path.join(extracted_folder, item)
-                    dest_path = os.path.join(f"{tmp_dir}/.java/{jdk_platform}", item)
-                    os.rename(item_path, dest_path)
-
-                with suppress(FileNotFoundError):
-                    os.remove(f"{tmp_dir}/{jdk_filename}")
-                with suppress(AttributeError):
-                    shutil.rmtree(extracted_folder)
-
-                java_cmd = os.path.realpath(f"{tmp_dir}/.java/{jdk_platform}/bin/java")
-
-            elif use_jabba:
-
-                try:
-                    shutil.rmtree("./.jabba/jdk/zulu@1.17.0-0")
-                except:
-                    pass
-
-                download_file("https://raw.githubusercontent.com/shyiko/jabba/master/install.sh", "install_jabba.sh")
-                subprocess.call("bash install_jabba.sh", shell=True)
-                subprocess.call("./.jabba/bin/jabba install zulu@1.17.0-0", shell=True)
-                os.remove("install_jabba.sh")
-
-                java_cmd = os.path.expanduser("./.jabba/jdk/zulu@1.17.0-0/bin/java")
-
-            else:
-                if not os.path.isdir(f"{tmp_dir}/.java/{jdk_platform}"):
-
-                    try:
-                        shutil.rmtree(f"{tmp_dir}/.java")
-                    except:
-                        pass
-
-                    if platform.architecture()[0] != "64bit":
-                        jdk_url = "https://download.bell-sw.com/java/21.0.3+12/bellsoft-jdk21.0.3+12-linux-i586-lite.tar.gz"
-                    else:
-                        jdk_url = "https://download.bell-sw.com/java/21.0.3+12/bellsoft-jdk21.0.3+12-linux-amd64-lite.tar.gz"
-
-                    java_cmd = os.path.realpath(f"{tmp_dir}/.java/{jdk_platform}/bin/java")
-
-                    jdk_filename = "java.tar.gz"
-
-                    download_file(jdk_url, jdk_filename)
-
-                    try:
-                        shutil.rmtree(f"{tmp_dir}/.java")
-                    except:
-                        pass
-
-                    os.makedirs(f"{tmp_dir}/.java/{jdk_platform}")
-
-                    p = subprocess.Popen(["tar", "--strip-components=1", "-zxvf", "java.tar.gz", "-C", f"{tmp_dir}/.java/{jdk_platform}"])
-                    p.wait()
-                    os.remove(f"./{jdk_filename}")
-
-                else:
-                    java_cmd = os.path.realpath(f"{tmp_dir}/.java/{jdk_platform}/bin/java")
-
-    clear_plugins = False
-
-    for filename, url in (
-        ("Lavalink.jar", lavalink_file_url),
-        ("application.yml", "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/application.yml")
-    ):
-        if download_file(url, filename):
-            clear_plugins = True
-
-    if lavalink_cpu_cores >= 1:
-        java_cmd += f" -XX:ActiveProcessorCount={lavalink_cpu_cores}"
-
-    if lavalink_ram_limit > 10:
-        java_cmd += f" -Xmx{lavalink_ram_limit}m"
-
-    if 0 < lavalink_initial_ram < lavalink_ram_limit:
-        java_cmd += f" -Xms{lavalink_ram_limit}m"
-
-    if os.name != "nt":
-
-        if os.path.isdir("./.tempjar"):
-            shutil.rmtree("./.tempjar")
-
-        os.makedirs("./.tempjar/undertow-docbase.80.2258596138812103750")
-
-        java_cmd += f" -Djava.io.tmpdir={os.getcwd()}/.tempjar"
-
-    if clear_plugins:
-        try:
-            shutil.rmtree("./plugins")
-        except:
-            pass
-
-    java_cmd += " -jar Lavalink.jar"
-
-    print("🌋 - Iniciando o servidor Lavalink (dependendo da hospedagem o lavalink pode demorar iniciar, "
-          "o que pode ocorrer falhas em algumas tentativas de conexão até ele iniciar totalmente).")
-
-    lavalink_process = subprocess.Popen(java_cmd.split(), stdout=subprocess.DEVNULL)
+    nodelink_process = subprocess.Popen(nodelink.split(), stdout=subprocess.DEVNULL)
 
     if lavalink_additional_sleep:
         print(f"🕙 - Aguarde {lavalink_additional_sleep} segundos...")
         time.sleep(lavalink_additional_sleep)
 
-    return lavalink_process
+    return nodelink_process
 
 if __name__ == "__main__":
     run_lavalink()

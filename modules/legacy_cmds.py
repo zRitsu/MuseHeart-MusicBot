@@ -74,6 +74,7 @@ class Owner(commands.Cog):
     additional_files = [
         "./lavalink.ini",
         "./application.yml",
+        "./config.default.js"
         "./squarecloud.config",
         "./squarecloud.app",
         "./discloud.config",
@@ -165,11 +166,11 @@ class Owner(commands.Cog):
             if os.path.isfile("./Lavalink.jar"):
                 os.remove("./Lavalink.jar")
 
-            if args.yml and os.path.isfile("./application.yml"):
-                os.remove("./application.yml")
-                txt = "Os arquivos Lavalink.jar e application.yml serão atualizados"
+            if args.yml and os.path.isfile("./config.default.js"):
+                os.remove("./config.default.js")
+                txt = "Os arquivos do Nodelink e config.default.js serão atualizados"
             else:
-                txt = "O arquivo Lavalink.jar será atualizado"
+                txt = "O arquivo do Nodelink será atualizado"
 
             await self.bot.pool.start_lavalink()
 

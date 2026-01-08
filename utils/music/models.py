@@ -2213,20 +2213,36 @@ class LavalinkPlayer(wavelink.Player):
             else:
                 pause = self.paused
 
-            payload = {
-                "encodedTrack": self.current_encoded,
-                "volume": vol,
-                "position": int(start),
-                "paused": pause,
-                "filters": self.filters,
-            }
+            if is_nodelink:=self.node.get("isNodelink"):
+                payload = {
+                    "track": {
+                        "encoded": self.current_encoded,
+                        "pluginInfo": self.current.info.get("pluginInfo", {})
+                    },
+                    "volume": vol,
+                    "position": int(start),
+                    "paused": pause,
+                    "filters": self.filters,
+                }
+
+            else:
+                payload = {
+                    "encodedTrack": self.current_encoded,
+                    "volume": vol,
+                    "position": int(start),
+                    "paused": pause,
+                    "filters": self.filters,
+                }
 
             if end > 0:
                 payload['endTime'] = str(end)
 
             if track.source_name == "youtube":
                 try:
-                    payload["userData"] = {"oauth-token": self.extra_info["guild-yt-oauth"][0]}
+                    if is_nodelink:
+                        payload['track']["userData"] = {"oauth-token": self.extra_info["guild-yt-oauth"][0]}
+                    else:
+                        payload["userData"] = {"oauth-token": self.extra_info["guild-yt-oauth"][0]}
                 except KeyError:
                     pass
 

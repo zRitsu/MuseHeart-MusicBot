@@ -195,6 +195,10 @@ class WebSocket:
 
             listener, payload = self._get_event_payload(data['type'], data)
 
+            if not payload:
+                __log__.debug(f"WEBSOCKET | op: unknown event: {listener}")
+                return
+
             __log__.debug(f'WEBSOCKET | op: event:: {data}')
 
             # Dispatch node event/player hooks
@@ -227,6 +231,8 @@ class WebSocket:
             return 'wavelink_track_stuck', TrackStuck(data)
         elif name == 'WebSocketClosedEvent':
             return 'wavelink_websocket_closed', WebsocketClosed(data)
+        else:
+            return 'PlayerConnectedEvent', None
 
     async def _send(self, **data):
         if self.is_connected:
