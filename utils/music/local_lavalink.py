@@ -2,9 +2,9 @@
 import io
 import os
 import platform
+import shutil
 import subprocess
 import time
-import zipfile
 
 import requests
 
@@ -69,7 +69,7 @@ def run_lavalink(
         lavalink_additional_sleep: int = 0,
         *args, **kwargs
 ):
-    version = "v3.4.0"
+    """version = "v3.4.0"
     base_url = f"https://github.com/PerformanC/NodeLink/releases/download/{version}"
 
     os_name = platform.system().lower()  # windows, linux, darwin (macos)
@@ -116,7 +116,36 @@ def run_lavalink(
             z.extractall(".")
             print(f"Sucesso! Arquivos extraídos na pasta atual: {os.getcwd()}")
 
-    nodelink_process = subprocess.Popen(nodelink.split(), stdout=subprocess.DEVNULL)
+    nodelink_process = subprocess.Popen(nodelink.split(), stdout=subprocess.DEVNULL)"""
+
+    if shutil.which("npm") is None: raise EnvironmentError(
+        "npm não está instalado ou não está configurado no PATH. Instale o Node.js e npm.")
+
+    node_dir = os.path.join(os.getcwd(), "NodeLink")
+    deployed_flag = os.path.join(node_dir, ".deployed")
+
+    if not os.path.isfile(deployed_flag):
+
+        subprocess.call(["git", "clone", "https://github.com/PerformanC/NodeLink.git"])
+        subprocess.call(["npm", "install"], cwd=node_dir, shell=True)
+
+        with open(deployed_flag, "w") as deployed_file:
+            deployed_file.write("")
+
+    download_file("https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/config.default.js",
+                  "Nodelink/config.js")
+
+    node_dir = os.path.join(os.getcwd(), "NodeLink")
+
+    kw = {} if platform.system() != "Windows" else {"shell": True}
+
+    nodelink_process = subprocess.Popen(
+        ["npm", "run", "start"],
+        cwd=node_dir,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        **kw
+    )
 
     if lavalink_additional_sleep:
         print(f"🕙 - Aguarde {lavalink_additional_sleep} segundos...")

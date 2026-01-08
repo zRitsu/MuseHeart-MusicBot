@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import pickle
+import platform
 import subprocess
 import traceback
 from configparser import ConfigParser
@@ -212,7 +213,11 @@ class BotPool:
 
         if self.lavalink_instance:
             try:
-                self.lavalink_instance.kill()
+
+                if platform.system() == "Windows":  # taskkill garante que filhos também morram
+                    subprocess.call(["taskkill", "/F", "/T", "/PID", str(self.lavalink_instance.pid)])
+                else: # kill direto funciona em Linux/macOS
+                    self.lavalink_instance.kill()
             except:
                 traceback.print_exc()
 
