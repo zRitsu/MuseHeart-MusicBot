@@ -2213,7 +2213,7 @@ class LavalinkPlayer(wavelink.Player):
             else:
                 pause = self.paused
 
-            if is_nodelink:=self.node.get("isNodelink"):
+            if is_nodelink:=self.node.info.get("isNodelink"):
                 payload = {
                     "track": {
                         "encoded": self.current_encoded,

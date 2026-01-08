@@ -124,26 +124,26 @@ def run_lavalink(
     node_dir = os.path.join(os.getcwd(), "NodeLink")
     deployed_flag = os.path.join(node_dir, ".deployed")
 
+    kw = {} if platform.system() != "Windows" else {"shell": True}
+
     if not os.path.isfile(deployed_flag):
 
-        subprocess.call(["git", "clone", "https://github.com/PerformanC/NodeLink.git"])
-        subprocess.call(["npm", "install"], cwd=node_dir, shell=True)
+        subprocess.call(["git", "clone", "https://github.com/PerformanC/NodeLink.git"], **kw)
+        subprocess.call(["npm", "install"], cwd=node_dir, **kw)
 
         with open(deployed_flag, "w") as deployed_file:
             deployed_file.write("")
 
-    download_file("https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/config.default.js",
-                  "Nodelink/config.js")
+    #download_file("https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/config.default.js",
+    #              "Nodelink/config.js")
 
     node_dir = os.path.join(os.getcwd(), "NodeLink")
-
-    kw = {} if platform.system() != "Windows" else {"shell": True}
 
     nodelink_process = subprocess.Popen(
         ["npm", "run", "start"],
         cwd=node_dir,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        #stdout=subprocess.DEVNULL,
+        #stderr=subprocess.DEVNULL,
         **kw
     )
 
