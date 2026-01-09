@@ -300,6 +300,14 @@ class Node:
 
         retries = 3
 
+        if not data.get("filters"):
+            # nodelink fix
+
+            try:
+                del data["filters"]
+            except KeyError:
+                pass
+
         while retries > 0:
 
             async with self.session.patch(url=uri, json=data, headers=self._websocket.headers) as resp:
@@ -319,14 +327,6 @@ class Node:
         if new_node := self._client.get_best_node(ignore_node=self):
             await self.players[guild_id].change_node(new_node.identifier)
             return
-
-        if not data.get("filters"):
-            # nodelink fix
-
-            try:
-                del data["filters"]
-            except KeyError:
-                pass
 
         raise WavelinkException(f"{self.identifier}: UpdatePlayer Failed = {resp.status}: {resp_data}")
 
