@@ -3305,9 +3305,10 @@ class LavalinkPlayer(wavelink.Player):
                 except:
                     pass
 
-                has_exclude_tags = any(tag for tag in exclude_tags if tag.lower() in track.title.lower())
+                if result is None:
+                    result = []
 
-                tracks.extend(result)
+                has_exclude_tags = any(tag for tag in exclude_tags if tag.lower() in track.title.lower())
 
                 for t in result:
 

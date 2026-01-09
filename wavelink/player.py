@@ -465,13 +465,26 @@ class Player:
             else:
                 pause = self.paused
 
-            payload = {
-                "encodedTrack": self.current_encoded,
-                "volume": vol,
-                "position": int(start),
-                "paused": pause,
-                "filters": self.filters,
-            }
+            if self.node.info.get("isNodelink"):
+                payload = {
+                    "track": {
+                        "encoded": self.current_encoded,
+                        "pluginInfo": self.current.info.get("pluginInfo", {})
+                    },
+                    "volume": vol,
+                    "position": int(start),
+                    "paused": pause,
+                    "filters": self.filters,
+                }
+
+            else:
+                payload = {
+                    "encodedTrack": self.current_encoded,
+                    "volume": vol,
+                    "position": int(start),
+                    "paused": pause,
+                    "filters": self.filters,
+                }
 
             if end > 0:
                 payload['endTime'] = str(end)

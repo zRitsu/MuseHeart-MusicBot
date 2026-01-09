@@ -313,9 +313,36 @@ class PlayerSession(commands.Cog):
             track_id = None
 
         if track_id and has_members:
+
+            if player.node.info.get("isNodelink"):
+
+                data.update(
+                    {
+                        "track": {
+                            "encoded": track_id, "pluginInfo": player.current.info.get("pluginInfo", {})
+                        }
+                    }
+                )
+
+                # testfix
+                try:
+                    data.update(
+                        {
+                            "voice": {
+                                "sessionId": player._voice_state["sessionId"],
+                                "token": player._voice_state["event"]["token"],
+                                "endpoint": player._voice_state["event"]["endpoint"]
+                            }
+                        }
+                    )
+                except (KeyError, TypeError):
+                    pass
+
+            else:
+                data["encodedTrack"] = track_id
+
             data.update(
                 {
-                    "encodedTrack": track_id,
                     "position": position,
                     "paused": pause,
                 }
