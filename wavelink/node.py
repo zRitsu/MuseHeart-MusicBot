@@ -460,12 +460,12 @@ class Node:
         except AttributeError:
             tracks = new_data
 
-        if loadtype == 'track':
-            tracks = [new_data]
-
         if not tracks:
             __log__.info(f'REST | {self.identifier} | No tracks with query:: <{query}> found.')
             raise TrackNotFound(f"{self.identifier}: Track not found... | {query}")
+
+        if loadtype == 'track':
+            tracks = [new_data]
 
         encoded_name = "track" if self.version == 3 else "encoded"
 
