@@ -320,6 +320,14 @@ class Node:
             await self.players[guild_id].change_node(new_node.identifier)
             return
 
+        if not data.get("filters"):
+            # nodelink fix
+
+            try:
+                del data["filters"]
+            except KeyError:
+                pass
+
         raise WavelinkException(f"{self.identifier}: UpdatePlayer Failed = {resp.status}: {resp_data}")
 
     async def get_tracks(self, query: str, *, retry_on_failure: bool = False, **kwargs) -> Union[list, TrackPlaylist, None]:
