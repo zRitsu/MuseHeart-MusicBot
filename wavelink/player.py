@@ -474,8 +474,10 @@ class Player:
                     "volume": vol,
                     "position": int(start),
                     "paused": pause,
-                    "filters": self.filters,
                 }
+
+                if self.filters:
+                    payload["filters"] = self.filters
 
             else:
                 payload = {
@@ -500,6 +502,8 @@ class Player:
         """
         if self.node.version == 3:
             await self.node._send(op='stop', guildId=str(self.guild_id))
+        elif self.node.info.get("isNodelink"):
+            await self.node.update_player(self.guild_id, {"track": {"encoded": None}}, replace=True)
         else:
             await self.node.update_player(self.guild_id, {"encodedTrack": None}, replace=True)
         __log__.debug(f'PLAYER | Current track stopped:: {str(self.current)} ({self.channel_id})')
@@ -690,12 +694,25 @@ class Player:
                     await self.node._send(op='pause', guildId=str(self.guild_id), pause=self.paused)
             else:
                 payload = {
-                    "encodedTrack": self.current_encoded,
                     "volume": self.volume,
                     "position": int(self.position),
                     "paused": self.paused,
                     "filters": self.filters,
                 }
+
+                if self.node.info.get("isNodelink"):
+                    payload.update(
+                        {
+                            "track": {
+                                "encoded": self.current_encoded,
+                                "pluginInfo": self.current.info.get("pluginInfo", {})
+                            }
+                        }
+                    )
+
+                else:
+                    payload["encodedTrack"] = self.current_encoded
+
                 await self.node.update_player(self.guild_id, payload, replace=True)
 
             self.last_update = time.time() * 1000
