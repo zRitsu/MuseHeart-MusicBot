@@ -309,6 +309,13 @@ class Node:
             except KeyError:
                 pass
 
+        try:
+            if not data["track"]["pluginInfo"]:
+                del data["track"]["pluginInfo"]
+        except KeyError:
+            pass
+
+
         while retries > 0:
 
             async with self.session.patch(url=uri, json=data, headers=self._websocket.headers) as resp:
@@ -329,9 +336,7 @@ class Node:
             await self.players[guild_id].change_node(new_node.identifier)
             return
 
-        print(f"Data info:\n{pprint.pformat(data)}\n" + '='*50) # nodelink temp debug
-
-        raise WavelinkException(f"{self.identifier}: UpdatePlayer Failed = {resp.status}: {resp_data}")
+        raise WavelinkException(f"{self.identifier}: UpdatePlayer Failed = {resp.status}: {resp_data}" + f"\n\nData info:\n{pprint.pformat(data)}\n")
 
     async def get_tracks(self, query: str, *, retry_on_failure: bool = False, **kwargs) -> Union[list, TrackPlaylist, None]:
         """|coro|
