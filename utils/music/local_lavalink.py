@@ -69,6 +69,7 @@ def run_lavalink(
         lavalink_additional_sleep: int = 0,
         *args, **kwargs
 ):
+
     """version = "v3.4.0"
     base_url = f"https://github.com/PerformanC/NodeLink/releases/download/{version}"
 
@@ -121,6 +122,8 @@ def run_lavalink(
     if shutil.which("npm") is None: raise EnvironmentError(
         "npm não está instalado ou não está configurado no PATH. Instale o Node.js e npm.")
 
+    UPDATE_INTERVAL = 2 * 60 * 60  # 2 horas em segundos
+
     node_dir = os.path.join(os.getcwd(), "NodeLink")
     deployed_flag = os.path.join(node_dir, ".deployed")
 
@@ -133,6 +136,34 @@ def run_lavalink(
 
         with open(deployed_flag, "w") as deployed_file:
             deployed_file.write("")
+
+    else:
+
+        last_update_file = os.path.join(node_dir, ".last_update")
+
+        now = time.time()
+
+        # lê timestamp do último update
+        if os.path.isfile(last_update_file):
+            with open(last_update_file, "r") as f:
+                last_update = float(f.read().strip())
+        else:
+            last_update = 0  # força update se o arquivo não existir
+
+        if now - last_update >= UPDATE_INTERVAL:
+            subprocess.call(
+                ["git", "pull", "--rebase", "--autostash"],
+                cwd=node_dir,
+                **kw
+            )
+            subprocess.call(["npm", "install"], cwd=node_dir, **kw)
+
+            # atualiza timestamp
+            with open(last_update_file, "w") as f:
+                f.write(str(now))
+        else:
+            remaining = int((UPDATE_INTERVAL - (now - last_update)) / 60)
+            print(f"Update ignorado (faltam ~{remaining} min)")
 
     #download_file("https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/config.default.js",
     #              "Nodelink/config.js")
