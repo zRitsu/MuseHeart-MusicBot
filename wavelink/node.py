@@ -26,6 +26,7 @@ import inspect
 import json
 import logging
 import os
+import pprint
 import re
 import traceback
 from typing import Any, Callable, Dict, Optional, Union
@@ -328,6 +329,8 @@ class Node:
             await self.players[guild_id].change_node(new_node.identifier)
             return
 
+        print(f"Data info:\n{pprint.pformat(data)}\n" + '='*50) # nodelink temp debug
+
         raise WavelinkException(f"{self.identifier}: UpdatePlayer Failed = {resp.status}: {resp_data}")
 
     async def get_tracks(self, query: str, *, retry_on_failure: bool = False, **kwargs) -> Union[list, TrackPlaylist, None]:
@@ -460,12 +463,12 @@ class Node:
         except AttributeError:
             tracks = new_data
 
+        if loadtype == 'track' and new_data:
+            tracks = [new_data]
+
         if not tracks:
             __log__.info(f'REST | {self.identifier} | No tracks with query:: <{query}> found.')
             raise TrackNotFound(f"{self.identifier}: Track not found... | {query}")
-
-        if loadtype == 'track':
-            tracks = [new_data]
 
         encoded_name = "track" if self.version == 3 else "encoded"
 
