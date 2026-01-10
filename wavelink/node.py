@@ -301,20 +301,27 @@ class Node:
 
         retries = 3
 
-        if not data.get("filters"):
+        if self.info.get("isNodelink"):
             # nodelink fix
 
+            if not data.get("track"):
+                try:
+                    data["volume"]
+                except KeyError:
+                    pass
+
+            if not data.get("filters"):
+
+                try:
+                    del data["filters"]
+                except KeyError:
+                    pass
+
             try:
-                del data["filters"]
+                if not data["track"]["pluginInfo"]:
+                    del data["track"]["pluginInfo"]
             except KeyError:
                 pass
-
-        try:
-            if not data["track"]["pluginInfo"]:
-                del data["track"]["pluginInfo"]
-        except KeyError:
-            pass
-
 
         while retries > 0:
 
