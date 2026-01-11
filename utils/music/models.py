@@ -3319,6 +3319,7 @@ class LavalinkPlayer(wavelink.Player):
                     return
 
             track.id = selected_track.id
+            track.info["id"] = selected_track.id
             track.info["length"] = selected_track.duration
             if track.info["sourceName"] == "last.fm":
                 track.info["pluginInfo"] = selected_track.info.get("pluginInfo", {})
