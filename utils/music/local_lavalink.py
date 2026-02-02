@@ -171,12 +171,13 @@ def run_lavalink(
                 remaining = int((UPDATE_INTERVAL - (now - last_update)) / 60)
                 print(f"Update ignorado (faltam ~{remaining} min)")
 
-        #download_file("https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/config.default.js",
-        #              "Nodelink/config.js")
+            download_file("https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/config.default.js",
+                          "config.js")
+
+            if os.path.isfile("./config.js"):
+                shutil.copy("./config.js", os.path.join(node_dir, 'config.js'))
 
         node_dir = os.path.join(os.getcwd(), "NodeLink")
-
-        shutil.copy("./config.js", os.path.join(node_dir, 'config.js'))
 
         nodelink_process = subprocess.Popen(
             ["npm", "run", "start"],
