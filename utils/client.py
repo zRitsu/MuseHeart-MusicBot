@@ -375,7 +375,7 @@ class BotPool:
                     backoff += 2
                     retries += 1
 
-        if data['identifier'] == 'LOCAL' and self.mongo_database and data["info"]["check_version"] > 3 and [i for i in data["info"].get("plugins", {}) if i["name"] == "youtube-plugin"]:
+        if data['identifier'] == 'LOCAL' and self.mongo_database and data["info"]["check_version"] > 3:
 
             try:
                 mongo_data = await self.mongo_database._connect["global"]["global"].find_one({"_id": "youtube_data"}) or {}
@@ -386,12 +386,11 @@ class BotPool:
                     for v in tokens.values():
                         try:
                             async with ClientSession() as session:
-                                resp = await session.post(
-                                    f"{data['rest_uri']}/youtube", headers=headers,
+                                resp = await session.patch(
+                                    f"{data['rest_uri']}/v4/youtube/config", headers=headers,
                                     json={"refreshToken": v}
                                 )
-                                if resp.status != 204:
-                                    resp.raise_for_status()
+                                resp.raise_for_status()
                         except Exception as e:
                             print(f"🌋 - Falha ao aplicar o Youtube refreshToken no servidor lavalink: {data['identifier']} - {repr(e)}")
                             break

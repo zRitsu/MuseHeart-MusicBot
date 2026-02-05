@@ -621,12 +621,12 @@ class Node:
 
         try:
             return bool(self.info["plugins"]["lyrics"])
-        except KeyError:
+        except:
             pass
 
         try:
             return bool(self.info["plugins"]["java-lyrics-plugin"])
-        except KeyError:
+        except:
             pass
 
         return False
