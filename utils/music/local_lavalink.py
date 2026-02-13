@@ -218,9 +218,8 @@ def run_lavalink(
     if not os.path.isfile(deployed_flag):
 
         subprocess.call(["git", "clone", "https://github.com/PerformanC/NodeLink.git"], **kw)
-        subprocess.call([npm_cmd, "install"], cwd=node_dir, **kw)
-
         subprocess.call([npm_cmd, "git", "switch", "dev"], cwd=node_dir, **kw)
+        subprocess.call([npm_cmd, "install"], cwd=node_dir, **kw)
 
         with open(deployed_flag, "w") as deployed_file:
             deployed_file.write("")
