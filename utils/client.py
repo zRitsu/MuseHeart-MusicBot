@@ -388,7 +388,7 @@ class BotPool:
                             async with ClientSession() as session:
                                 resp = await session.patch(
                                     f"{data['rest_uri']}/v4/youtube/config", headers=headers,
-                                    json={"refreshToken": v}
+                                    json={"refreshToken": v}, timeout=30
                                 )
                                 resp.raise_for_status()
                         except Exception as e:
