@@ -11,7 +11,6 @@ import requests
 
 
 def download_file(url, filename):
-
     if os.path.isfile(filename):
         return
 
@@ -28,7 +27,7 @@ def download_file(url, filename):
 
     with open(f"{filename}.tmp", 'wb') as f:
 
-        for data in r.iter_content(chunk_size=2500*1024):
+        for data in r.iter_content(chunk_size=2500 * 1024):
             f.write(data)
             bytes_downloaded += len(data)
             try:
@@ -46,7 +45,8 @@ def download_file(url, filename):
                         speed_txt = "MB/s"
                     else:
                         speed_txt = "KB/s"
-                    print(f"Download do arquivo {filename} {current_progress}% concluído ({download_speed:.2f} {speed_txt} / {total_txt})")
+                    print(
+                        f"Download do arquivo {filename} {current_progress}% concluído ({download_speed:.2f} {speed_txt} / {total_txt})")
                 except:
                     print(f"Download do arquivo {filename} {current_progress}% concluído")
 
@@ -55,6 +55,7 @@ def download_file(url, filename):
     os.rename(f"{filename}.tmp", filename)
 
     return True
+
 
 def validate_java(cmd: str, debug: bool = False):
     try:
@@ -66,132 +67,214 @@ def validate_java(cmd: str, debug: bool = False):
             print(f"\nFalha ao obter versão do java...\n"
                   f"Path: {cmd} | Erro: {repr(e)}\n")
 
+
+def download_nodejs_portable():
+
+    os_name = platform.system().lower()
+    arch = platform.machine().lower()
+
+    os_map = {
+        "windows": "win",
+        "linux": "linux",
+        "darwin": "darwin"
+    }
+
+    arch_map = {
+        "x86_64": "x64",
+        "amd64": "x64",
+        "arm64": "arm64",
+        "aarch64": "arm64"
+    }
+
+    target_os = os_map.get(os_name)
+    target_arch = arch_map.get(arch)
+
+    if not target_os or not target_arch:
+        print(f"Sistema ou arquitetura não suportada: {os_name} {arch}")
+        return None
+
+    node_version = "v20.11.0"  # LTS
+    node_dir = f"node-{node_version}-{target_os}-{target_arch}"
+
+    if os.path.isdir(node_dir):
+        if target_os == "win":
+            return os.path.join(node_dir, "npm.cmd")
+        else:
+            return os.path.join(node_dir, "bin", "npm")
+
+    if target_os == "win":
+        extension = ".zip"
+        base_url = f"https://nodejs.org/dist/{node_version}/{node_dir}{extension}"
+    else:
+        extension = ".tar.xz"
+        base_url = f"https://nodejs.org/dist/{node_version}/{node_dir}{extension}"
+
+    filename = f"{node_dir}{extension}"
+
+    print(f"Node.js não encontrado. Baixando versão portátil {node_version}...")
+    print(f"URL: {base_url}")
+
+    try:
+        download_file(base_url, filename)
+
+        print(f"Extraindo Node.js...")
+
+        if target_os == "win":
+            with zipfile.ZipFile(filename, 'r') as zip_ref:
+                zip_ref.extractall(".")
+        else:
+            import tarfile
+            with tarfile.open(filename, 'r:xz') as tar_ref:
+                tar_ref.extractall(".")
+
+        print("Node.js portátil instalado com sucesso!")
+
+        # Remove arquivo compactado
+        os.remove(filename)
+
+        # Retorna caminho do npm
+        if target_os == "win":
+            return os.path.join(node_dir, "npm.cmd")
+        else:
+            return os.path.join(node_dir, "bin", "npm")
+
+    except Exception as e:
+        print(f"Erro ao baixar/extrair Node.js: {e}")
+        return None
+
+
 def run_lavalink(
         lavalink_additional_sleep: int = 0,
         *args, **kwargs
 ):
+    npm_cmd = shutil.which("npm")
 
-    if shutil.which("npm") is None:
+    if npm_cmd is None:
+        print("npm não encontrado no sistema. Tentando usar Node.js portátil...")
+        npm_cmd = download_nodejs_portable()
 
-        print("Usando nodelink a partir da versão release.")
+        if npm_cmd is None:
+            print("Não foi possível obter Node.js. Usando nodelink a partir da versão release.")
 
-        version = "v3.4.0"
-        base_url = f"https://github.com/PerformanC/NodeLink/releases/download/{version}"
+            version = "v3.4.0"
+            base_url = f"https://github.com/PerformanC/NodeLink/releases/download/{version}"
 
-        os_name = platform.system().lower()  # windows, linux, darwin (macos)
-        arch = platform.machine().lower()  # x86_64, amd64, arm64, aarch64
+            os_name = platform.system().lower()
+            arch = platform.machine().lower()
 
-        os_map = {
-            "windows": "win",
-            "linux": "linux",
-            "darwin": "macos"
-        }
+            os_map = {
+                "windows": "win",
+                "linux": "linux",
+                "darwin": "macos"
+            }
 
-        arch_map = {
-            "x86_64": "x64",
-            "amd64": "x64",
-            "i386": "x86",
-            "arm64": "arm64",
-            "aarch64": "arm64"
-        }
+            arch_map = {
+                "x86_64": "x64",
+                "amd64": "x64",
+                "i386": "x86",
+                "arm64": "arm64",
+                "aarch64": "arm64"
+            }
 
-        target_os = os_map.get(os_name)
-        target_arch = arch_map.get(arch)
+            target_os = os_map.get(os_name)
+            target_arch = arch_map.get(arch)
 
-        if not target_os or not target_arch:
-            print(f"Sistema ou arquitetura não suportada: {os_name} {arch}")
-            return
+            if not target_os or not target_arch:
+                print(f"Sistema ou arquitetura não suportada: {os_name} {arch}")
+                return
 
-        download_file("https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/config.default.js",
-                      "config.default.js")
+            download_file("https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/config.default.js",
+                          "config.default.js")
 
-        nodelink = f"nodelink-{target_os}-{target_arch}" + ".exe" if target_os == "win" else ""
+            nodelink = f"nodelink-{target_os}-{target_arch}" + ".exe" if target_os == "win" else ""
 
-        if not os.path.isfile(nodelink):
-            extension = ".exe.zip" if target_os == "win" else ".zip"
-            filename = f"nodelink-{target_os}-{target_arch}{extension}"
-            download_url = f"{base_url}/{filename}"
+            if not os.path.isfile(nodelink):
+                extension = ".exe.zip" if target_os == "win" else ".zip"
+                filename = f"nodelink-{target_os}-{target_arch}{extension}"
+                download_url = f"{base_url}/{filename}"
 
-            print(f"Nodelink - Detectado: {os_name} ({arch})")
-            print(f"Nodelink - Baixando de: {download_url}...")
+                print(f"Nodelink - Detectado: {os_name} ({arch})")
+                print(f"Nodelink - Baixando de: {download_url}...")
 
-            response = requests.get(download_url)
-            response.raise_for_status()  # Verifica se houve erro no download
+                response = requests.get(download_url)
+                response.raise_for_status()
 
-            with zipfile.ZipFile(io.BytesIO(response.content)) as z:
-                z.extractall(".")
-                print(f"Sucesso! Arquivos extraídos na pasta atual: {os.getcwd()}")
+                with zipfile.ZipFile(io.BytesIO(response.content)) as z:
+                    z.extractall(".")
+                    print(f"Sucesso! Arquivos extraídos na pasta atual: {os.getcwd()}")
 
-        nodelink_process = subprocess.Popen(nodelink.split(), stdout=subprocess.DEVNULL)
+            nodelink_process = subprocess.Popen(nodelink.split(), stdout=subprocess.DEVNULL)
+            return nodelink_process
+
+    print(f"Usando nodelink a partir da source com npm: {npm_cmd}")
+
+    UPDATE_INTERVAL = 2 * 60 * 60  # 2 horas em segundos
+
+    node_dir = os.path.join(os.getcwd(), "NodeLink")
+    deployed_flag = os.path.join(node_dir, ".deployed")
+
+    kw = {} if platform.system() != "Windows" else {"shell": True}
+
+    if not os.path.isfile(deployed_flag):
+
+        subprocess.call(["git", "clone", "https://github.com/PerformanC/NodeLink.git"], **kw)
+        subprocess.call([npm_cmd, "install"], cwd=node_dir, **kw)
+
+        subprocess.call([npm_cmd, "git", "switch", "dev"], cwd=node_dir, **kw)
+
+        with open(deployed_flag, "w") as deployed_file:
+            deployed_file.write("")
 
     else:
 
-        print("Usando nodelink a partir da source.")
+        last_update_file = os.path.join(node_dir, ".last_update")
 
-        UPDATE_INTERVAL = 2 * 60 * 60  # 2 horas em segundos
+        now = time.time()
 
-        node_dir = os.path.join(os.getcwd(), "NodeLink")
-        deployed_flag = os.path.join(node_dir, ".deployed")
-
-        kw = {} if platform.system() != "Windows" else {"shell": True}
-
-        if not os.path.isfile(deployed_flag):
-
-            subprocess.call(["git", "clone", "https://github.com/PerformanC/NodeLink.git"], **kw)
-            subprocess.call(["npm", "install"], cwd=node_dir, **kw)
-
-            with open(deployed_flag, "w") as deployed_file:
-                deployed_file.write("")
-
+        # lê timestamp do último update
+        if os.path.isfile(last_update_file):
+            with open(last_update_file, "r") as f:
+                last_update = float(f.read().strip())
         else:
+            last_update = 0  # força update se o arquivo não existir
 
-            last_update_file = os.path.join(node_dir, ".last_update")
+        if now - last_update >= UPDATE_INTERVAL:
+            subprocess.call(
+                ["git", "pull", "--rebase", "--autostash"],
+                cwd=node_dir,
+                **kw
+            )
+            subprocess.call([npm_cmd, "install"], cwd=node_dir, **kw)
 
-            now = time.time()
+            # atualiza timestamp
+            with open(last_update_file, "w") as f:
+                f.write(str(now))
+        else:
+            remaining = int((UPDATE_INTERVAL - (now - last_update)) / 60)
+            print(f"Update ignorado (faltam ~{remaining} min)")
 
-            # lê timestamp do último update
-            if os.path.isfile(last_update_file):
-                with open(last_update_file, "r") as f:
-                    last_update = float(f.read().strip())
-            else:
-                last_update = 0  # força update se o arquivo não existir
+        download_file("https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/config.default.js",
+                      "config.js")
 
-            if now - last_update >= UPDATE_INTERVAL:
-                subprocess.call(
-                    ["git", "pull", "--rebase", "--autostash"],
-                    cwd=node_dir,
-                    **kw
-                )
-                subprocess.call(["npm", "install"], cwd=node_dir, **kw)
+        if os.path.isfile("./config.js"):
+            shutil.copy("./config.js", os.path.join(node_dir, 'config.js'))
 
-                # atualiza timestamp
-                with open(last_update_file, "w") as f:
-                    f.write(str(now))
-            else:
-                remaining = int((UPDATE_INTERVAL - (now - last_update)) / 60)
-                print(f"Update ignorado (faltam ~{remaining} min)")
+    node_dir = os.path.join(os.getcwd(), "NodeLink")
 
-            download_file("https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/config.default.js",
-                          "config.js")
+    nodelink_process = subprocess.Popen(
+        [npm_cmd, "run", "start"],
+        cwd=node_dir,
+        # stdout=subprocess.DEVNULL,
+        # stderr=subprocess.DEVNULL,
+        **kw
+    )
 
-            if os.path.isfile("./config.js"):
-                shutil.copy("./config.js", os.path.join(node_dir, 'config.js'))
-
-        node_dir = os.path.join(os.getcwd(), "NodeLink")
-
-        nodelink_process = subprocess.Popen(
-            ["npm", "run", "start"],
-            cwd=node_dir,
-            #stdout=subprocess.DEVNULL,
-            #stderr=subprocess.DEVNULL,
-            **kw
-        )
-
-        if lavalink_additional_sleep:
-            print(f"🕙 - Aguarde {lavalink_additional_sleep} segundos...")
-            time.sleep(lavalink_additional_sleep)
+    if lavalink_additional_sleep:
+        print(f"🕙 - Aguarde {lavalink_additional_sleep} segundos...")
+        time.sleep(lavalink_additional_sleep)
 
     return nodelink_process
+
 
 if __name__ == "__main__":
     run_lavalink()
