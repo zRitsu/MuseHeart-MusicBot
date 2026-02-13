@@ -218,7 +218,7 @@ def run_lavalink(
     if not os.path.isfile(deployed_flag):
 
         subprocess.call(["git", "clone", "https://github.com/PerformanC/NodeLink.git"], **kw)
-        subprocess.call([npm_cmd, "git", "switch", "dev"], cwd=node_dir, **kw)
+        subprocess.call(["git", "switch", "dev"], cwd=node_dir, **kw)
         subprocess.call([npm_cmd, "install"], cwd=node_dir, **kw)
 
         with open(deployed_flag, "w") as deployed_file:
@@ -255,8 +255,8 @@ def run_lavalink(
         download_file("https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/config.default.js",
                       "config.js")
 
-        if os.path.isfile("./config.js"):
-            shutil.copy("./config.js", os.path.join(node_dir, 'config.js'))
+    if os.path.isfile("./config.js"):
+        shutil.copy("./config.js", os.path.join(node_dir, 'config.js'))
 
     node_dir = os.path.join(os.getcwd(), "NodeLink")
 
