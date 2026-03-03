@@ -314,8 +314,8 @@ class Player:
                     "voice": {
                         "sessionId": self._voice_state["sessionId"],
                         "token": self._voice_state["event"]["token"],
-                        "endpoint": self._voice_state["event"]["endpoint"]
-
+                        "endpoint": self._voice_state["event"]["endpoint"],
+                        "channelId": str(self.channel_id) if self.channel_id else None
                     }
                 }
             except KeyError:
