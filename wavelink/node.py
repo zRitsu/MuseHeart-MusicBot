@@ -300,8 +300,6 @@ class Node:
 
         uri: str = f"{self.rest_uri}/v4/sessions/{self.session_id}/players/{guild_id}?noReplace={no_replace}"
 
-        retries = 3
-
         if self.info.get("isNodelink"):
             # nodelink fix
 
@@ -329,26 +327,47 @@ class Node:
         except AttributeError:
             player.status = data
 
-        while retries > 0:
+        async with self.session.patch(url=uri, json=data, headers=self._websocket.headers) as resp:
 
-            async with self.session.patch(url=uri, json=data, headers=self._websocket.headers) as resp:
+            try:
+                resp_data = await resp.json()
+            except:
+                resp_data = await resp.text()
 
+            if resp.status == 200:
+                return resp_data
+
+            # Nodelink: worker restarted — player no longer exists in the new session.
+            # Re-send voice state and, if a track was active, rebuild the full payload.
+            if resp.status == 404 and self.info.get("isNodelink"):
+                __log__.warning(
+                    f"NODE | {self.identifier} | Player not found (worker restart?). "
+                    f"Attempting to recreate player for guild {guild_id}."
+                )
                 try:
-                    resp_data = await resp.json()
-                except:
-                    resp_data = await resp.text()
+                    await player._dispatch_voice_update()
+                    if "voice" not in data and player.current and player.current_encoded:
+                        rebuild_payload = {
+                            "track": {
+                                "encoded": player.current_encoded,
+                                "pluginInfo": player.current.info.get("pluginInfo", {})
+                            },
+                            "volume": player.volume,
+                            "position": int(player.position),
+                            "paused": player.paused,
+                        }
+                        if player.filters:
+                            rebuild_payload["filters"] = player.filters
+                        rebuild_uri = f"{self.rest_uri}/v4/sessions/{self.session_id}/players/{guild_id}?noReplace=false"
+                        async with self.session.patch(url=rebuild_uri, json=rebuild_payload, headers=self._websocket.headers) as rebuild_resp:
+                            if rebuild_resp.status == 200:
+                                __log__.info(f"NODE | {self.identifier} | Player recreated successfully for guild {guild_id}.")
+                                return await rebuild_resp.json()
+                except Exception as rebuild_err:
+                    __log__.error(f"NODE | {self.identifier} | Failed to recreate player: {rebuild_err}")
+                return
 
-                if resp.status == 200:
-                    return resp_data
-
-                elif resp.status == 404:
-                    await player.connect(player.channel_id)
-                    data.update(player.status)
-
-                else:
-                    retries -= 1
-
-                await asyncio.sleep(1.5)
+            await asyncio.sleep(1.5)
 
         if new_node := self._client.get_best_node(ignore_node=self):
             await self.players[guild_id].change_node(new_node.identifier)

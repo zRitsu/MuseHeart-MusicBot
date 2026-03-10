@@ -323,6 +323,18 @@ class Player:
                 traceback.print_exc()
                 return
 
+            # Wait for session_id if the node is still reconnecting after a worker restart.
+            if not self.node.session_id:
+                __log__.warning(f"PLAYER | guild {self.guild_id} | session_id not ready, waiting...")
+                for _ in range(10):
+                    import asyncio as _asyncio
+                    await _asyncio.sleep(1)
+                    if self.node.session_id:
+                        break
+                else:
+                    __log__.error(f"PLAYER | guild {self.guild_id} | Timed out waiting for session_id, skipping voice update.")
+                    return
+
             await self.node.update_player(self.guild_id, data=data)
 
     async def hook(self, event) -> None:
