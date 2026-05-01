@@ -830,6 +830,12 @@ class LavalinkPlayer(wavelink.Player):
 
         if isinstance(event, wavelink.WebsocketClosed):
 
+            if event.code == 5001 or event.reason == "worker_failed":
+                cog = self.bot.get_cog("Music")
+                if cog:
+                    await cog.queue_worker_failed_reconnect(self, event=event)
+                return
+
             if event.code == 1000:
                 return
 
@@ -928,6 +934,12 @@ class LavalinkPlayer(wavelink.Player):
                     return
 
                 await self.bot.wait_until_ready()
+
+                if isinstance(event, wavelink.ExtraEvent) and event.name == "WorkerFailedEvent":
+                    cog = self.bot.get_cog("Music")
+                    if cog:
+                        await cog.queue_worker_failed_reconnect(self, event=event)
+                    continue
 
                 if isinstance(event, wavelink.TrackEnd):
 
@@ -2196,7 +2208,7 @@ class LavalinkPlayer(wavelink.Player):
             payload.update(kwargs)
 
             if end > 0:
-                payload['endTime'] = str(end)
+                payload['endTime'] = int(end)
 
             await self.node._send(**payload, **kwargs)
         else:
@@ -2213,36 +2225,22 @@ class LavalinkPlayer(wavelink.Player):
             else:
                 pause = self.paused
 
-            if is_nodelink:=self.node.info.get("isNodelink"):
-                payload = {
-                    "track": {
-                        "encoded": self.current_encoded,
-                        "pluginInfo": self.current.info.get("pluginInfo", {})
-                    },
-                    "volume": vol,
-                    "position": int(start),
-                    "paused": pause,
-                    "filters": self.filters,
-                }
-
-            else:
-                payload = {
-                    "encodedTrack": self.current_encoded,
-                    "volume": vol,
-                    "position": int(start),
-                    "paused": pause,
-                    "filters": self.filters,
-                }
+            payload = self._build_v4_play_payload(
+                self.current,
+                start=start,
+                end=end,
+                volume=vol,
+                paused=pause,
+                filters=self.filters,
+            )
+            payload["track"]["encoded"] = self.current_encoded
 
             if end > 0:
-                payload['endTime'] = str(end)
+                payload['endTime'] = int(end)
 
             if track.source_name == "youtube":
                 try:
-                    if is_nodelink:
-                        payload['track']["userData"] = {"oauth-token": self.extra_info["guild-yt-oauth"][0]}
-                    else:
-                        payload["userData"] = {"oauth-token": self.extra_info["guild-yt-oauth"][0]}
+                    payload['track']["userData"] = {"oauth-token": self.extra_info["guild-yt-oauth"][0]}
                 except KeyError:
                     pass
 

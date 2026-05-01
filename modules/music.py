@@ -7025,6 +7025,138 @@ class Music(commands.Cog):
             await asyncio.sleep(backoff)
             retries += 1
 
+    def _snapshot_worker_failed_state(self, player: LavalinkPlayer) -> dict:
+        return {
+            "live_lyrics_status": getattr(player, "live_lyrics_enabled", False),
+            "v4_state": {
+                "fading": getattr(player, "fading_config", None),
+                "crossfade": getattr(player, "crossfade_config", None),
+                "loudness_normalizer": getattr(player, "loudness_normalizer_enabled", False),
+                "next_track": getattr(player, "next_track_payload", None),
+                "lyrics_enabled": getattr(player, "live_lyrics_enabled", False),
+                "lyrics_skip_track_source": getattr(player, "lyrics_skip_track_source", False),
+                "mixes": list(getattr(player, "active_mixes", [])),
+            }
+        }
+
+    async def queue_worker_failed_reconnect(self, player: LavalinkPlayer, event=None):
+
+        task = getattr(player, "worker_failed_reconnect_task", None)
+
+        if task and not task.done():
+            return task
+
+        player.worker_failed_reconnect_task = self.bot.loop.create_task(
+            self.worker_failed_reconnect(player, event=event)
+        )
+        return player.worker_failed_reconnect_task
+
+    async def worker_failed_reconnect(self, player: LavalinkPlayer, event=None):
+
+        await asyncio.sleep(1.5)
+
+        if player.is_closing:
+            return
+
+        if not player.node.is_available:
+            try:
+                player._new_node_task.cancel()
+            except:
+                pass
+            player._new_node_task = player.bot.loop.create_task(
+                player._wait_for_new_node(
+                    txt="O worker do servidor de música falhou. Vou tentar restaurar o player em um servidor disponível."
+                )
+            )
+            return
+
+        try:
+            voice_channel = player.guild.me.voice.channel
+        except AttributeError:
+            voice_channel = player.last_channel
+
+        if not voice_channel:
+            return
+
+        try:
+            has_members = any(
+                m for m in voice_channel.members if not m.bot or not (m.voice.deaf or m.voice.self_deaf)
+            )
+        except Exception:
+            has_members = None
+
+        if not has_members:
+            player.auto_pause = True
+
+        state = self._snapshot_worker_failed_state(player)
+        position = int(player.position) if player.current else 0
+        pause = player.paused and bool(has_members)
+
+        player.set_command_log(
+            text="O worker do servidor de música falhou. Estou restaurando a conexão e o player.",
+            emoji="📶",
+            controller=True
+        )
+        player.update = True
+
+        session_cog = self.bot.get_cog("PlayerSession")
+
+        try:
+            if session_cog:
+                await session_cog.update_player(
+                    player=player,
+                    voice_channel=voice_channel,
+                    pause=pause,
+                    position=position,
+                    has_members=has_members
+                )
+                await session_cog.restore_v4_state(player, state)
+            else:
+                data = {
+                    "volume": player.volume,
+                    "filters": player.filters,
+                }
+                if player.current_encoded or player.current:
+                    track_id = player.current_encoded or player.current.id
+                    data["track"] = player._build_v4_track_payload(player.current)
+                    data["track"]["encoded"] = track_id
+                    data["position"] = position
+                    data["paused"] = pause
+                    try:
+                        data["voice"] = {
+                            "sessionId": player._voice_state["sessionId"],
+                            "token": player._voice_state["event"]["token"],
+                            "endpoint": player._voice_state["event"]["endpoint"]
+                        }
+                    except (KeyError, TypeError):
+                        pass
+
+                await player.node.update_player(player.guild.id, data=data)
+
+            if player.text_channel:
+                with suppress(Exception):
+                    await player.invoke_np(force=True, rpc_update=True)
+
+            player.set_command_log(
+                text="O player foi restaurado após falha do worker do servidor de música.",
+                emoji="📶",
+                controller=True
+            )
+            player.update = True
+        except Exception:
+            traceback.print_exc()
+            try:
+                player._new_node_task.cancel()
+            except:
+                pass
+            player._new_node_task = player.bot.loop.create_task(
+                player._wait_for_new_node(
+                    txt="Falhei ao restaurar o player após a queda do worker. Vou tentar mover o player para um servidor disponível."
+                )
+            )
+        finally:
+            player.worker_failed_reconnect_task = None
+
     def remove_provider(self, lst, queries: list):
         for q in queries:
             try:

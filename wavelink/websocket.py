@@ -250,8 +250,18 @@ class WebSocket:
             return 'wavelink_track_stuck', TrackStuck(data)
         elif name == 'WebSocketClosedEvent':
             return 'wavelink_websocket_closed', WebsocketClosed(data)
+        elif name == 'MixStartedEvent':
+            return 'wavelink_mix_started', MixStarted(data)
+        elif name == 'MixEndedEvent':
+            return 'wavelink_mix_ended', MixEnded(data)
+        elif name == 'LyricsFoundEvent':
+            return 'wavelink_lyrics_found', LyricsFound(data)
+        elif name == 'LyricsLineEvent':
+            return 'wavelink_lyrics_line', LyricsLine(data)
+        elif name == 'LyricsNotFoundEvent':
+            return 'wavelink_lyrics_not_found', LyricsNotFound(data)
         else:
-            return 'PlayerConnectedEvent', None
+            return f'wavelink_{name}', ExtraEvent(name, data)
 
     async def _send(self, **data):
         if self.is_connected:

@@ -223,6 +223,12 @@ class Player:
         self.channel_id = None
 
         self.auto_pause = False
+        self.fading_config = None
+        self.crossfade_config = None
+        self.loudness_normalizer_enabled = False
+        self.next_track_payload = None
+        self.lyrics_skip_track_source = False
+        self.active_mixes = []
 
     @property
     def equalizer(self):
@@ -267,6 +273,60 @@ class Player:
             return 0
 
         return min(position, self.current.duration)
+
+    @property
+    def active_filters(self):
+        return getattr(self, "filters", {})
+
+    def _build_v4_track_payload(self, track: Union[Track, str, dict] = None, *, encoded: str = None,
+                                user_data=None, audio_track_id: str = None, include_plugin_info: bool = True):
+        if encoded is not None:
+            payload = {"encoded": encoded}
+        elif isinstance(track, Track):
+            payload = {"encoded": track.id}
+            if include_plugin_info:
+                plugin_info = track.info.get("pluginInfo", {})
+                if plugin_info:
+                    payload["pluginInfo"] = plugin_info
+        elif isinstance(track, str):
+            payload = {"encoded": track}
+        elif isinstance(track, dict):
+            payload = dict(track)
+        elif track is None:
+            payload = {"encoded": None}
+        else:
+            raise TypeError("track must be a Track, encoded string or payload dict.")
+
+        if user_data is not None:
+            payload["userData"] = user_data
+
+        if audio_track_id is not None:
+            payload["audioTrackId"] = audio_track_id
+
+        return payload
+
+    def _build_v4_play_payload(self, track: Union[Track, str, dict], *, start: int = 0, end: int = 0,
+                               volume: int = None, paused: bool = None, filters: dict = None,
+                               user_data=None, audio_track_id: str = None):
+        payload = {
+            "track": self._build_v4_track_payload(
+                track,
+                user_data=user_data,
+                audio_track_id=audio_track_id
+            ),
+            "volume": self.volume if volume is None else volume,
+            "position": int(start),
+            "paused": self.paused if paused is None else paused,
+        }
+
+        filters_payload = self.active_filters if filters is None else filters
+        if filters_payload:
+            payload["filters"] = filters_payload
+
+        if end > 0:
+            payload["endTime"] = int(end)
+
+        return payload
 
     async def update_state(self, state: dict) -> None:
         state = state['state']
@@ -460,7 +520,7 @@ class Player:
             payload.update(kwargs)
 
             if end > 0:
-                payload['endTime'] = str(end)
+                payload['endTime'] = int(end)
 
             await self.node._send(**payload, **kwargs)
         else:
@@ -477,31 +537,15 @@ class Player:
             else:
                 pause = self.paused
 
-            if self.node.info.get("isNodelink"):
-                payload = {
-                    "track": {
-                        "encoded": self.current_encoded,
-                        "pluginInfo": self.current.info.get("pluginInfo", {})
-                    },
-                    "volume": vol,
-                    "position": int(start),
-                    "paused": pause,
-                }
-
-                if self.filters:
-                    payload["filters"] = self.filters
-
-            else:
-                payload = {
-                    "encodedTrack": self.current_encoded,
-                    "volume": vol,
-                    "position": int(start),
-                    "paused": pause,
-                    "filters": self.filters,
-                }
-
-            if end > 0:
-                payload['endTime'] = str(end)
+            payload = self._build_v4_play_payload(
+                self.current,
+                start=start,
+                end=end,
+                volume=vol,
+                paused=pause,
+                filters=self.active_filters,
+            )
+            payload["track"]["encoded"] = self.current_encoded
 
             await self.node.update_player(self.guild_id, payload, replace)
 
@@ -514,10 +558,8 @@ class Player:
         """
         if self.node.version == 3:
             await self.node._send(op='stop', guildId=str(self.guild_id))
-        elif self.node.info.get("isNodelink"):
-            await self.node.update_player(self.guild_id, {"track": {"encoded": None}}, replace=True)
         else:
-            await self.node.update_player(self.guild_id, {"encodedTrack": None}, replace=True)
+            await self.node.update_player(self.guild_id, {"track": {"encoded": None}}, replace=True)
         __log__.debug(f'PLAYER | Current track stopped:: {str(self.current)} ({self.channel_id})')
         self.current = None
         self.current_encoded = None
@@ -625,6 +667,115 @@ class Player:
             await self.node.update_player(guild_id=self.guild_id, data={"volume": vol})
         __log__.debug(f'PLAYER | Set volume:: {self.volume} ({self.channel_id})')
 
+    async def set_fading(self, config: dict) -> None:
+        if self.node.version < 4:
+            raise WavelinkException("Fading is only available on v4-compatible servers.")
+        self.fading_config = config or {}
+        await self.node.update_player(self.guild_id, {"fading": config or {}})
+
+    async def set_crossfade(self, config: dict) -> None:
+        if self.node.version < 4:
+            raise WavelinkException("Crossfade is only available on v4-compatible servers.")
+        self.crossfade_config = config or {}
+        await self.node.update_player(self.guild_id, {"crossfade": config or {}})
+
+    async def set_loudness_normalizer(self, enabled: bool) -> None:
+        if self.node.version < 4:
+            raise WavelinkException("Loudness normalizer is only available on v4-compatible servers.")
+        self.loudness_normalizer_enabled = bool(enabled)
+        await self.node.update_player(self.guild_id, {"loudnessNormalizer": bool(enabled)})
+
+    async def set_next_track(self, track: Union[Track, str, dict], *, user_data=None,
+                             audio_track_id: str = None) -> None:
+        if self.node.version < 4:
+            raise WavelinkException("Next track preloading is only available on v4-compatible servers.")
+        payload = self._build_v4_track_payload(track, user_data=user_data, audio_track_id=audio_track_id)
+        self.next_track_payload = payload
+        await self.node.update_player(self.guild_id, {"nextTrack": payload})
+
+    async def clear_next_track(self) -> None:
+        if self.node.version < 4:
+            raise WavelinkException("Next track preloading is only available on v4-compatible servers.")
+        self.next_track_payload = None
+        await self.node.update_player(self.guild_id, {"nextTrack": None})
+
+    async def subscribe_lyrics(self, *, skip_track_source: bool = False) -> None:
+        self.live_lyrics_enabled = True
+        self.lyrics_skip_track_source = bool(skip_track_source)
+        await self.node.subscribe_lyrics(self.guild_id, skip_track_source=skip_track_source)
+
+    async def unsubscribe_lyrics(self) -> None:
+        self.live_lyrics_enabled = False
+        await self.node.unsubscribe_lyrics(self.guild_id)
+
+    async def add_mix(self, track: Union[Track, str, dict], *, volume: float = None,
+                      user_data=None, audio_track_id: str = None):
+        result = await self.node.add_mix(
+            self.guild_id,
+            track,
+            volume=volume,
+            user_data=user_data,
+            audio_track_id=audio_track_id,
+        )
+        try:
+            self.active_mixes = [m for m in self.active_mixes if m.get("id") != result.get("id")]
+            self.active_mixes.append(result)
+        except Exception:
+            pass
+        return result
+
+    async def get_mixes(self):
+        result = await self.node.get_mixes(self.guild_id)
+        try:
+            self.active_mixes = result.get("mixes", [])
+        except Exception:
+            pass
+        return result
+
+    async def update_mix(self, mix_id: str, *, volume: float):
+        await self.node.update_mix(self.guild_id, mix_id, volume=volume)
+        try:
+            for mix in self.active_mixes:
+                if mix.get("id") == mix_id:
+                    mix["volume"] = float(volume)
+                    break
+        except Exception:
+            pass
+
+    async def remove_mix(self, mix_id: str):
+        await self.node.remove_mix(self.guild_id, mix_id)
+        try:
+            self.active_mixes = [m for m in self.active_mixes if m.get("id") != mix_id]
+        except Exception:
+            pass
+
+    async def fetch_lyrics(self, track: Union[Track, str, dict] = None, *, language: str = None):
+        return await self.node.load_lyrics(track or self.current_encoded or self.current, language=language)
+
+    async def fetch_chapters(self, track: Union[Track, str, dict] = None):
+        return await self.node.load_chapters(track or self.current_encoded or self.current)
+
+    async def fetch_meaning(self, track: Union[Track, str, dict] = None, *, language: str = None):
+        return await self.node.load_meaning(track or self.current_encoded or self.current, language=language)
+
+    async def fetch_track_stream(self, track: Union[Track, str, dict] = None, *, itag: int = None):
+        return await self.node.track_stream(track or self.current_encoded or self.current, itag=itag)
+
+    async def load_stream(self, track: Union[Track, str, dict] = None, *, volume: int = None,
+                          position: int = None, filters: dict = None):
+        if volume is None:
+            volume = self.volume
+        if position is None:
+            position = int(self.position)
+        if filters is None:
+            filters = self.active_filters
+        return await self.node.load_stream(
+            track or self.current_encoded or self.current,
+            volume=volume,
+            position=position,
+            filters=filters,
+        )
+
     async def seek(self, position: int = 0) -> None:
         """Seek to the given position in the song.
 
@@ -709,21 +860,11 @@ class Player:
                     "volume": self.volume,
                     "position": int(self.position),
                     "paused": self.paused,
-                    "filters": self.filters,
                 }
-
-                if self.node.info.get("isNodelink"):
-                    payload.update(
-                        {
-                            "track": {
-                                "encoded": self.current_encoded,
-                                "pluginInfo": self.current.info.get("pluginInfo", {})
-                            }
-                        }
-                    )
-
-                else:
-                    payload["encodedTrack"] = self.current_encoded
+                if self.active_filters:
+                    payload["filters"] = self.active_filters
+                payload["track"] = self._build_v4_track_payload(self.current)
+                payload["track"]["encoded"] = self.current_encoded
 
                 await self.node.update_player(self.guild_id, payload, replace=True)
 

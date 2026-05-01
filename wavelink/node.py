@@ -298,7 +298,8 @@ class Node:
 
         no_replace: bool = not replace
 
-        uri: str = f"{self.rest_uri}/v4/sessions/{self.session_id}/players/{guild_id}?noReplace={no_replace}"
+        no_replace_qs = "true" if no_replace else "false"
+        uri: str = f"{self.rest_uri}/v4/sessions/{self.session_id}/players/{guild_id}?noReplace={no_replace_qs}"
 
         if self.info.get("isNodelink"):
             # nodelink fix
@@ -374,6 +375,80 @@ class Node:
             return
 
         raise WavelinkException(f"{self.identifier}: UpdatePlayer Failed = {resp.status}: {resp_data}" + f"\n\nData info:\n{pprint.pformat(data)}\n")
+
+    def _require_v4(self):
+        if self.version < 4:
+            raise WavelinkException(f"{self.identifier}: This endpoint requires a v4-compatible server.")
+
+    def _require_session(self):
+        self._require_v4()
+        if not self.session_id:
+            raise MissingSessionID(self)
+
+    def _player_uri(self, guild_id: int, suffix: str = "") -> str:
+        self._require_session()
+        base = f"{self.rest_uri}/v4/sessions/{self.session_id}/players/{guild_id}"
+        if suffix:
+            if not suffix.startswith("/"):
+                suffix = f"/{suffix}"
+            base += suffix
+        return base
+
+    @staticmethod
+    def _track_to_encoded(track: Union[Track, str, dict]) -> str:
+        if isinstance(track, Track):
+            return track.id
+        if isinstance(track, str):
+            return track
+        if isinstance(track, dict):
+            encoded = track.get("encoded") or track.get("track")
+            if encoded:
+                return encoded
+        raise TypeError("track must be a Track, encoded track string or payload dict containing 'encoded'.")
+
+    @staticmethod
+    def _track_to_payload(track: Union[Track, str, dict], *, user_data: Any = None,
+                          audio_track_id: str = None, include_plugin_info: bool = True) -> dict:
+        if isinstance(track, Track):
+            payload = {"encoded": track.id}
+            if include_plugin_info:
+                plugin_info = track.info.get("pluginInfo", {})
+                if plugin_info:
+                    payload["pluginInfo"] = plugin_info
+        elif isinstance(track, str):
+            payload = {"encoded": track}
+        elif isinstance(track, dict):
+            payload = dict(track)
+        else:
+            raise TypeError("track must be a Track, encoded track string or payload dict.")
+
+        if user_data is not None:
+            payload["userData"] = user_data
+
+        if audio_track_id is not None:
+            payload["audioTrackId"] = audio_track_id
+
+        return payload
+
+    async def _json_request(self, method: str, url: str, *, json_data: dict = None, params: dict = None,
+                            expected_status: tuple = (200,), allow_empty: bool = False):
+        async with self.session.request(method, url, json=json_data, params=params, headers=self.headers) as resp:
+            if resp.status in expected_status:
+                if allow_empty or resp.status == 204:
+                    return None
+                try:
+                    return await resp.json()
+                except Exception:
+                    return await resp.text()
+
+            try:
+                resp_data = await resp.json()
+            except Exception:
+                resp_data = await resp.text()
+
+            raise WavelinkException(
+                f"{self.identifier}: {method.upper()} {url} failed = {resp.status}: {resp_data}"
+            )
 
     async def get_tracks(self, query: str, *, retry_on_failure: bool = False, **kwargs) -> Union[list, TrackPlaylist, None]:
         """|coro|
@@ -659,6 +734,124 @@ class Node:
             if r.status not in (200, 404):
                 r.raise_for_status()
             return await r.json()
+
+    async def update_session(self, *, resuming: bool = None, timeout: int = None):
+        self._require_session()
+        payload = {}
+        if resuming is not None:
+            payload["resuming"] = resuming
+        if timeout is not None:
+            payload["timeout"] = int(timeout)
+        if not payload:
+            return None
+        return await self._json_request(
+            "PATCH",
+            f"{self.rest_uri}/v4/sessions/{self.session_id}",
+            json_data=payload
+        )
+
+    async def load_lyrics(self, track: Union[Track, str, dict], *, language: str = None):
+        encoded = self._track_to_encoded(track)
+        params = {"encodedTrack": encoded}
+        if language:
+            params["lang"] = language
+        return await self._json_request("GET", f"{self.rest_uri}/v4/loadlyrics", params=params)
+
+    async def load_chapters(self, track: Union[Track, str, dict]):
+        encoded = self._track_to_encoded(track)
+        return await self._json_request(
+            "GET",
+            f"{self.rest_uri}/v4/loadchapters",
+            params={"encodedTrack": encoded}
+        )
+
+    async def load_meaning(self, track: Union[Track, str, dict], *, language: str = None):
+        encoded = self._track_to_encoded(track)
+        params = {"encodedTrack": encoded}
+        if language:
+            params["lang"] = language
+        return await self._json_request("GET", f"{self.rest_uri}/v4/meaning", params=params)
+
+    async def track_stream(self, track: Union[Track, str, dict], *, itag: int = None):
+        encoded = self._track_to_encoded(track)
+        params = {"encodedTrack": encoded}
+        if itag is not None:
+            params["itag"] = int(itag)
+        return await self._json_request("GET", f"{self.rest_uri}/v4/trackstream", params=params)
+
+    async def load_stream(self, track: Union[Track, str, dict], *, volume: int = 100, position: int = 0,
+                          filters: dict = None) -> bytes:
+        encoded = self._track_to_encoded(track)
+        payload = {
+            "encodedTrack": encoded,
+            "volume": int(volume),
+            "position": int(position),
+        }
+        if filters is not None:
+            payload["filters"] = filters
+
+        async with self.session.post(f"{self.rest_uri}/v4/loadstream", json=payload, headers=self.headers) as resp:
+            if resp.status == 200:
+                return await resp.read()
+
+            try:
+                resp_data = await resp.json()
+            except Exception:
+                resp_data = await resp.text()
+
+            raise WavelinkException(
+                f"{self.identifier}: POST {self.rest_uri}/v4/loadstream failed = {resp.status}: {resp_data}"
+            )
+
+    async def subscribe_lyrics(self, guild_id: int, *, skip_track_source: bool = False):
+        skip_track_source_qs = "true" if skip_track_source else "false"
+        return await self._json_request(
+            "POST",
+            f"{self._player_uri(guild_id, 'lyrics/subscribe')}?skipTrackSource={skip_track_source_qs}",
+            expected_status=(204,),
+            allow_empty=True
+        )
+
+    async def unsubscribe_lyrics(self, guild_id: int):
+        return await self._json_request(
+            "DELETE",
+            self._player_uri(guild_id, "lyrics/subscribe"),
+            expected_status=(204,),
+            allow_empty=True
+        )
+
+    async def add_mix(self, guild_id: int, track: Union[Track, str, dict], *, volume: float = None,
+                      user_data: Any = None, audio_track_id: str = None):
+        payload = {"track": self._track_to_payload(track, user_data=user_data, audio_track_id=audio_track_id,
+                                                   include_plugin_info=False)}
+        if volume is not None:
+            payload["volume"] = float(volume)
+        return await self._json_request(
+            "POST",
+            self._player_uri(guild_id, "mix"),
+            json_data=payload,
+            expected_status=(201,)
+        )
+
+    async def get_mixes(self, guild_id: int):
+        return await self._json_request("GET", self._player_uri(guild_id, "mix"))
+
+    async def update_mix(self, guild_id: int, mix_id: str, *, volume: float):
+        return await self._json_request(
+            "PATCH",
+            self._player_uri(guild_id, f"mix/{quote(str(mix_id), safe='')}"),
+            json_data={"volume": float(volume)},
+            expected_status=(204,),
+            allow_empty=True
+        )
+
+    async def remove_mix(self, guild_id: int, mix_id: str):
+        return await self._json_request(
+            "DELETE",
+            self._player_uri(guild_id, f"mix/{quote(str(mix_id), safe='')}"),
+            expected_status=(204,),
+            allow_empty=True
+        )
 
     def get_player(self, guild_id: int) -> Optional[Player]:
         """Retrieve a player object associated with the Node.

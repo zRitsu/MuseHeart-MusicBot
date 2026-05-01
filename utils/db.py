@@ -92,8 +92,20 @@ global_db_models = {
 
 async def get_prefix(bot: BotCore, message: disnake.Message):
 
-    if str(message.content).startswith((f"<@!{bot.user.id}> ", f"<@{bot.user.id}> ")):
+    content = str(message.content)
+
+    # ── Menção deste bot como prefixo ────────────────────────────────────────
+    if content.startswith((f"<@!{bot.user.id}> ", f"<@{bot.user.id}> ")):
         return commands.when_mentioned(bot, message)
+
+    # ── Menção de OUTRO bot do pool: este bot deve ignorar completamente ──────
+    # Sem isso, todos os bots entram em disputa quando qualquer um é mencionado.
+    if message.guild and content.startswith(("<@!", "<@")):
+        for other in bot.pool.get_guild_bots(message.guild.id):
+            if other.user.id == bot.user.id:
+                continue
+            if content.startswith((f"<@!{other.user.id}> ", f"<@{other.user.id}> ")):
+                return "\x00"
 
     try:
         user_prefix = bot.pool.user_prefix_cache[message.author.id]
@@ -102,17 +114,18 @@ async def get_prefix(bot: BotCore, message: disnake.Message):
         bot.pool.user_prefix_cache[message.author.id] = user_data["custom_prefix"]
         user_prefix = user_data["custom_prefix"]
 
-    if user_prefix and message.content.startswith(user_prefix):
+    if user_prefix and content.startswith(user_prefix):
         return user_prefix
 
     if not message.guild:
-        return commands.when_mentioned_or(bot.default_prefix)
+        return commands.when_mentioned_or(bot.default_prefix)(bot, message)
 
     try:
         guild_prefix = bot.pool.guild_prefix_cache[message.guild.id]
     except KeyError:
         data = await bot.get_global_data(message.guild.id, db_name=DBModel.guilds)
-        guild_prefix = data.get("prefix")
+        guild_prefix = data.get("prefix") or ""
+        bot.pool.guild_prefix_cache[message.guild.id] = guild_prefix
 
     if not guild_prefix:
         guild_prefix = bot.config.get("DEFAULT_PREFIX") or "!!"

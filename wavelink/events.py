@@ -25,7 +25,13 @@ __all__ = ('TrackEnd',
            'TrackException',
            'TrackStuck',
            'TrackStart',
-           'WebsocketClosed')
+           'WebsocketClosed',
+           'MixStarted',
+           'MixEnded',
+           'LyricsFound',
+           'LyricsLine',
+           'LyricsNotFound',
+           'ExtraEvent')
 
 
 class TrackEnd:
@@ -159,3 +165,85 @@ class WebsocketClosed:
 
     def __str__(self):
         return 'WebsocketClosedEvent'
+
+
+class MixStarted:
+    __slots__ = ('player', 'node', 'mix_id', 'track', 'volume', 'data')
+
+    def __init__(self, data: dict):
+        self.player = data.pop('player', None)
+        self.node = data.pop('node', None)
+        self.mix_id = data.pop('mixId', None)
+        self.track = data.pop('track', None)
+        self.volume = data.pop('volume', None)
+        self.data = data
+
+    def __str__(self):
+        return 'MixStartedEvent'
+
+
+class MixEnded:
+    __slots__ = ('player', 'node', 'mix_id', 'reason', 'data')
+
+    def __init__(self, data: dict):
+        self.player = data.pop('player', None)
+        self.node = data.pop('node', None)
+        self.mix_id = data.pop('mixId', None)
+        self.reason = data.pop('reason', None)
+        self.data = data
+
+    def __str__(self):
+        return 'MixEndedEvent'
+
+
+class LyricsFound:
+    __slots__ = ('player', 'node', 'lyrics', 'data')
+
+    def __init__(self, data: dict):
+        self.player = data.pop('player', None)
+        self.node = data.pop('node', None)
+        self.lyrics = data.pop('lyrics', None)
+        self.data = data
+
+    def __str__(self):
+        return 'LyricsFoundEvent'
+
+
+class LyricsLine:
+    __slots__ = ('player', 'node', 'line_index', 'line', 'skipped', 'data')
+
+    def __init__(self, data: dict):
+        self.player = data.pop('player', None)
+        self.node = data.pop('node', None)
+        self.line_index = data.pop('lineIndex', None)
+        self.line = data.pop('line', None)
+        self.skipped = data.pop('skipped', False)
+        self.data = data
+
+    def __str__(self):
+        return 'LyricsLineEvent'
+
+
+class LyricsNotFound:
+    __slots__ = ('player', 'node', 'data')
+
+    def __init__(self, data: dict):
+        self.player = data.pop('player', None)
+        self.node = data.pop('node', None)
+        self.data = data
+
+    def __str__(self):
+        return 'LyricsNotFoundEvent'
+
+
+class ExtraEvent:
+    __slots__ = ('name', 'player', 'node', 'data')
+
+    def __init__(self, name: str, data: dict):
+        self.name = name
+        self.player = data.pop('player', None)
+        self.node = data.pop('node', None)
+        self.data = data
+
+    def __str__(self):
+        return self.name

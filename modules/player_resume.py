@@ -201,6 +201,17 @@ class PlayerSession(commands.Cog):
         with suppress(AttributeError):
             data["command_log_list"] = player.command_log_list
 
+        if player.node.version > 3:
+            data["v4_state"] = {
+                "fading": getattr(player, "fading_config", None),
+                "crossfade": getattr(player, "crossfade_config", None),
+                "loudness_normalizer": getattr(player, "loudness_normalizer_enabled", False),
+                "next_track": getattr(player, "next_track_payload", None),
+                "lyrics_enabled": getattr(player, "live_lyrics_enabled", False),
+                "lyrics_skip_track_source": getattr(player, "lyrics_skip_track_source", False),
+                "mixes": list(getattr(player, "active_mixes", [])),
+            }
+
         if player.static:
             if player.skin_static.startswith("> custom_skin: "):
                 custom_skin = player.skin_static[15:]
@@ -313,33 +324,21 @@ class PlayerSession(commands.Cog):
             track_id = None
 
         if track_id and has_members:
+            data["track"] = player._build_v4_track_payload(player.current)
+            data["track"]["encoded"] = track_id
 
-            if player.node.info.get("isNodelink"):
-
+            try:
                 data.update(
                     {
-                        "track": {
-                            "encoded": track_id, "pluginInfo": player.current.info.get("pluginInfo", {})
+                        "voice": {
+                            "sessionId": player._voice_state["sessionId"],
+                            "token": player._voice_state["event"]["token"],
+                            "endpoint": player._voice_state["event"]["endpoint"]
                         }
                     }
                 )
-
-                # testfix
-                try:
-                    data.update(
-                        {
-                            "voice": {
-                                "sessionId": player._voice_state["sessionId"],
-                                "token": player._voice_state["event"]["token"],
-                                "endpoint": player._voice_state["event"]["endpoint"]
-                            }
-                        }
-                    )
-                except (KeyError, TypeError):
-                    pass
-
-            else:
-                data["encodedTrack"] = track_id
+            except (KeyError, TypeError):
+                pass
 
             data.update(
                 {
@@ -353,6 +352,51 @@ class PlayerSession(commands.Cog):
             if player.current:
                 player.queue.appendleft(player.current)
             await player.process_next(start_position=position)
+
+    async def restore_v4_state(self, player: LavalinkPlayer, data: dict):
+
+        if player.node.version < 4:
+            return
+
+        v4_state = data.get("v4_state") or {}
+
+        if not v4_state and not data.get("live_lyrics_status"):
+            return
+
+        if v4_state.get("fading") is not None:
+            await player.set_fading(v4_state["fading"])
+
+        if v4_state.get("crossfade") is not None:
+            await player.set_crossfade(v4_state["crossfade"])
+
+        if v4_state.get("loudness_normalizer"):
+            await player.set_loudness_normalizer(True)
+
+        if v4_state.get("next_track"):
+            await player.node.update_player(player.guild.id, {"nextTrack": v4_state["next_track"]})
+            player.next_track_payload = v4_state["next_track"]
+
+        mixes = v4_state.get("mixes") or []
+        if mixes:
+            if player.current and not player.auto_pause:
+                player.active_mixes = []
+                for mix in mixes:
+                    track = mix.get("track")
+                    if not track:
+                        continue
+                    try:
+                        await player.add_mix(track, volume=mix.get("volume"))
+                    except Exception:
+                        traceback.print_exc()
+            else:
+                player.active_mixes = list(mixes)
+
+        lyrics_enabled = v4_state.get("lyrics_enabled", data.get("live_lyrics_status", False))
+
+        if lyrics_enabled and player.current and not player.auto_pause:
+            await player.subscribe_lyrics(
+                skip_track_source=v4_state.get("lyrics_skip_track_source", False)
+            )
 
     async def voice_check(self, voice_channel: Union[disnake.VoiceChannel, disnake.StageChannel], position: int = 0):
 
@@ -604,11 +648,19 @@ class PlayerSession(commands.Cog):
                 player._voice_state = data.get("voice_state")
                 player.current_encoded = data.get("current_encoded")
                 player.live_lyrics_enabled = data.get("live_lyrics_status", False)
+                player.lyrics_skip_track_source = False
                 player.mini_queue_enabled = data.get("mini_queue_enabled")
                 player.lastfm_artists = data.get("lastfm_artists")
                 player.stage_title_event = data.get("stage_title_event", False)
                 player.listen_along_invite = data.pop("listen_along_invite", "")
                 player.command_log_list.extend(data.pop("command_log_list", []))
+                v4_state = data.get("v4_state") or {}
+                player.fading_config = v4_state.get("fading")
+                player.crossfade_config = v4_state.get("crossfade")
+                player.loudness_normalizer_enabled = v4_state.get("loudness_normalizer", False)
+                player.next_track_payload = v4_state.get("next_track")
+                player.lyrics_skip_track_source = v4_state.get("lyrics_skip_track_source", False)
+                player.active_mixes = list(v4_state.get("mixes", []))
 
                 if start_timestamp:=data.get("start_timestamp"):
                     player.start_timestamp = start_timestamp
@@ -649,7 +701,7 @@ class PlayerSession(commands.Cog):
 
             failed_tracks, playlists = self.bot.pool.process_track_cls(data.get("failed_tracks", []), playlists)
 
-            player.queue.extend(failed_tracks)
+            player.failed_tracks.extend(failed_tracks)
 
             if player.controller_mode is False:
                 try:
@@ -699,6 +751,7 @@ class PlayerSession(commands.Cog):
                         await self.update_player(
                             player=player, voice_channel=voice_channel, pause=pause, position=start_position, has_members=check
                         )
+                        await self.restore_v4_state(player, data)
                         await player.invoke_np()
                     else:
                         await player.process_next(start_position=start_position)
