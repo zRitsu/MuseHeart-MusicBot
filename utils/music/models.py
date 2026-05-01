@@ -935,11 +935,28 @@ class LavalinkPlayer(wavelink.Player):
 
                 await self.bot.wait_until_ready()
 
-                if isinstance(event, wavelink.ExtraEvent) and event.name == "WorkerFailedEvent":
-                    cog = self.bot.get_cog("Music")
-                    if cog:
-                        await cog.queue_worker_failed_reconnect(self, event=event)
-                    continue
+                if isinstance(event, wavelink.ExtraEvent):
+                    if event.name == "WorkerFailedEvent":
+                        cog = self.bot.get_cog("Music")
+                        if cog:
+                            await cog.queue_worker_failed_reconnect(self, event=event)
+                        continue
+
+                    if event.name in (
+                        "PlayerConnectedEvent",
+                        "PlayerCreatedEvent",
+                        "PlayerDestroyedEvent",
+                        "PlayerReconnectingEvent",
+                        "ConnectionStatusEvent",
+                        "VolumeChangedEvent",
+                        "FiltersChangedEvent",
+                        "SeekEvent",
+                        "PauseEvent",
+                        "EternalBoxInfoEvent",
+                        "EternalBoxJumpEvent",
+                        "StreamMetadataEvent",
+                    ):
+                        continue
 
                 if isinstance(event, wavelink.TrackEnd):
 
@@ -1209,6 +1226,10 @@ class LavalinkPlayer(wavelink.Player):
 
                     await self.process_next()
 
+                    continue
+
+                if isinstance(event, wavelink.ExtraEvent):
+                    print(f"Unhandled Wavelink extra event: {event.name} | data={repr(event.data)[:500]}")
                     continue
 
                 print(f"Unknown Wavelink event: {repr(event)}")
