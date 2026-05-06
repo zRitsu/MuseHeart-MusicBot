@@ -29,9 +29,3 @@ setuptools>=70.0.0; python_version>='3.12'
 curl_cffi
 audioop-lts; python_version>='3.13'
 uvloop; sys_platform != 'win32'
-
-ddgs
-python-dateutil
-googlesearch-python
-APScheduler
-g4f
