@@ -94,6 +94,7 @@ DEFAULT_CONFIG = {
     ### Sistema de música - Local lavalink stuffs: ###
     ##################################################
     "RUN_LOCAL_LAVALINK": False,
+    "LOCAL_AUDIO_SERVER": "nodelink",
     "CONNECT_LOCAL_LAVALINK": True,
     "USE_JABBA": False,
     "LAVALINK_ADDITIONAL_SLEEP": 0,
@@ -285,6 +286,17 @@ def load_config():
             raise Exception(f"Você usou uma configuração inválida! {i}: {CONFIG[i]}\n{repr(e)}")
 
     CONFIG["RPC_SERVER"] = CONFIG["RPC_SERVER"].replace("$PORT", CONFIG.get("PORT") or environ.get("PORT", "80"))
+
+    if not CONFIG["LOCAL_AUDIO_SERVER"]:
+        CONFIG["LOCAL_AUDIO_SERVER"] = DEFAULT_CONFIG["LOCAL_AUDIO_SERVER"]
+    else:
+        CONFIG["LOCAL_AUDIO_SERVER"] = str(CONFIG["LOCAL_AUDIO_SERVER"]).strip().lower()
+
+    if CONFIG["LOCAL_AUDIO_SERVER"] not in {"nodelink", "lavalink"}:
+        raise Exception(
+            "Você usou uma configuração inválida! LOCAL_AUDIO_SERVER: "
+            f"{CONFIG['LOCAL_AUDIO_SERVER']} (use 'nodelink' ou 'lavalink')"
+        )
 
     if CONFIG["WAIT_FOR_MEMBERS_TIMEOUT"] < 60:
         CONFIG["WAIT_FOR_MEMBERS_TIMEOUT"] = 60

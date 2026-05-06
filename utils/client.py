@@ -213,11 +213,7 @@ class BotPool:
 
         if self.lavalink_instance:
             try:
-
-                if platform.system() == "Windows":  # taskkill garante que filhos também morram
-                    subprocess.call(["taskkill", "/F", "/T", "/PID", str(self.lavalink_instance.pid)])
-                else: # kill direto funciona em Linux/macOS
-                    self.lavalink_instance.kill()
+                self.lavalink_instance.kill()
             except:
                 traceback.print_exc()
 
@@ -231,7 +227,9 @@ class BotPool:
                     lavalink_initial_ram=self.config['LAVALINK_INITIAL_RAM'],
                     lavalink_ram_limit=self.config['LAVALINK_RAM_LIMIT'],
                     lavalink_additional_sleep=int(self.config['LAVALINK_ADDITIONAL_SLEEP']),
-                    use_jabba=self.config["USE_JABBA"]
+                    lavalink_cpu_cores=self.config["LAVALINK_CPU_CORES"],
+                    use_jabba=self.config["USE_JABBA"],
+                    local_audio_server=self.config["LOCAL_AUDIO_SERVER"],
                 )
             )
         except Exception:
