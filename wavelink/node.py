@@ -301,6 +301,12 @@ class Node:
         no_replace_qs = "true" if no_replace else "false"
         uri: str = f"{self.rest_uri}/v4/sessions/{self.session_id}/players/{guild_id}?noReplace={no_replace_qs}"
 
+        if data.get("filters") == {}:
+            try:
+                del data["filters"]
+            except KeyError:
+                pass
+
         if self.info.get("isNodelink"):
             # nodelink fix
 
@@ -320,6 +326,16 @@ class Node:
             try:
                 if not data["track"]["pluginInfo"]:
                     del data["track"]["pluginInfo"]
+            except KeyError:
+                pass
+        else:
+            try:
+                del data["voice"]["channelId"]
+            except KeyError:
+                pass
+
+            try:
+                del data["track"]["pluginInfo"]
             except KeyError:
                 pass
 
