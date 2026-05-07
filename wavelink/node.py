@@ -362,24 +362,51 @@ class Node:
                     f"Attempting to recreate player for guild {guild_id}."
                 )
                 try:
-                    await player._dispatch_voice_update()
-                    if "voice" not in data and player.current and player.current_encoded:
-                        rebuild_payload = {
-                            "track": {
-                                "encoded": player.current_encoded,
-                                "pluginInfo": player.current.info.get("pluginInfo", {})
-                            },
-                            "volume": player.volume,
-                            "position": int(player.position),
-                            "paused": player.paused,
+                    rebuild_payload = {}
+
+                    try:
+                        rebuild_payload["voice"] = {
+                            "sessionId": player._voice_state["sessionId"],
+                            "token": player._voice_state["event"]["token"],
+                            "endpoint": player._voice_state["event"]["endpoint"],
+                            "channelId": str(player.channel_id) if player.channel_id else None,
                         }
+                    except KeyError:
+                        if "voice" in data:
+                            rebuild_payload["voice"] = dict(data["voice"])
+
+                    if player.current and player.current_encoded:
+                        rebuild_payload.update(
+                            {
+                                "track": {
+                                    "encoded": player.current_encoded,
+                                },
+                                "volume": player.volume,
+                                "position": int(player.position),
+                                "paused": player.paused,
+                            }
+                        )
                         if player.filters:
                             rebuild_payload["filters"] = player.filters
-                        rebuild_uri = f"{self.rest_uri}/v4/sessions/{self.session_id}/players/{guild_id}?noReplace=false"
-                        async with self.session.patch(url=rebuild_uri, json=rebuild_payload, headers=self._websocket.headers) as rebuild_resp:
-                            if rebuild_resp.status == 200:
-                                __log__.info(f"NODE | {self.identifier} | Player recreated successfully for guild {guild_id}.")
-                                return await rebuild_resp.json()
+
+                    for key, value in data.items():
+                        rebuild_payload.setdefault(key, value)
+
+                    rebuild_uri = f"{self.rest_uri}/v4/sessions/{self.session_id}/players/{guild_id}?noReplace=false"
+                    async with self.session.patch(url=rebuild_uri, json=rebuild_payload, headers=self._websocket.headers) as rebuild_resp:
+                        if rebuild_resp.status == 200:
+                            __log__.info(f"NODE | {self.identifier} | Player recreated successfully for guild {guild_id}.")
+                            return await rebuild_resp.json()
+
+                        try:
+                            rebuild_data = await rebuild_resp.json()
+                        except Exception:
+                            rebuild_data = await rebuild_resp.text()
+
+                        __log__.error(
+                            f"NODE | {self.identifier} | Recreate player failed for guild {guild_id}: "
+                            f"{rebuild_resp.status} | {rebuild_data}"
+                        )
                 except Exception as rebuild_err:
                     __log__.error(f"NODE | {self.identifier} | Failed to recreate player: {rebuild_err}")
                 return
