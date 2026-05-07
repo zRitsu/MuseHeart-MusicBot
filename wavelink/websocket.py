@@ -185,20 +185,19 @@ class WebSocket:
             self._node.session_id = data["sessionId"]
 
             # Session ID changed — worker restarted and all players were lost.
-            # Re-dispatch voice state for every active player so Nodelink can
-            # recreate them before any subsequent update_player calls arrive.
+            # Re-dispatch voice state and rebuild active players, since a new
+            # v4 session starts without any prior player state.
             if previous_session and previous_session != self._node.session_id:
                 __log__.warning(
                     f"WEBSOCKET | {self._node.identifier} | Session ID changed "
                     f"({previous_session} -> {self._node.session_id}), "
-                    f"re-dispatching voice state for {len(self._node.players)} player(s)."
+                    f"restoring {len(self._node.players)} player(s)."
                 )
                 for player in list(self._node.players.values()):
                     try:
-                        if player._voice_state:
-                            self.bot.loop.create_task(player._dispatch_voice_update())
+                        self.bot.loop.create_task(player._restore_v4_player_state())
                     except Exception as e:
-                        __log__.error(f"WEBSOCKET | Failed to re-dispatch voice update: {e}")
+                        __log__.error(f"WEBSOCKET | Failed to restore player state: {e}")
 
             self.bot.dispatch("wavelink_node_ready", self._node)
 

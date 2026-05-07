@@ -677,6 +677,13 @@ class LavalinkPlayer(wavelink.Player):
         return ""
 
     @property
+    def using_nodelink(self) -> bool:
+        return bool(self.node.info.get("isNodelink"))
+
+    def get_source_provider(self, source_name: str) -> str | None:
+        return providers_dict.get(source_name)
+
+    @property
     def position(self):
 
         if not self.current:
@@ -1683,12 +1690,13 @@ class LavalinkPlayer(wavelink.Player):
 
                         queries = [f"https://www.youtube.com/watch?v={track_data.ytid}&list=RD{track_data.ytid}"]
 
-                        if p_dict:=providers_dict.get(track_data.info["sourceName"]):
-                            providers = [p_dict] + [p for p in self.node.search_providers if p != p_dict]
-                        else:
-                            providers = self.node.search_providers
+                        if not self.using_nodelink:
+                            if p_dict := self.get_source_provider(track_data.info["sourceName"]):
+                                providers = [p_dict] + [p for p in self.node.search_providers if p != p_dict]
+                            else:
+                                providers = self.node.search_providers
 
-                        queries.extend([f"{sp}:{author.split(',')[0]}" for sp in providers])
+                            queries.extend([f"{sp}:{author.split(',')[0]}" for sp in providers])
 
                     #elif track_data.info["sourceName"] == "spotify" and "spotify" in self.node.info["sourceManagers"] and (spotify_tracks:=[t.identifier for t in tracks_search if t.info["sourceName"] == "spotify"]):
                     #    queries = ["sprec:seed_tracks=" + ",".join(set(spotify_tracks[:5]))]
@@ -1697,10 +1705,16 @@ class LavalinkPlayer(wavelink.Player):
                         queries = [f"dzrec:{deezer_tracks[0]}"]
 
                     else:
-                        if p_dict:=providers_dict.get(track_data.info["sourceName"]):
-                            providers = [p_dict] + [p for p in self.node.search_providers if p != p_dict]
+                        if self.using_nodelink:
+                            if p_dict := self.get_source_provider(track_data.info["sourceName"]):
+                                providers = [p_dict]
+                            else:
+                                providers = []
                         else:
-                            providers = self.node.search_providers
+                            if p_dict := self.get_source_provider(track_data.info["sourceName"]):
+                                providers = [p_dict] + [p for p in self.node.search_providers if p != p_dict]
+                            else:
+                                providers = self.node.search_providers
 
                         queries = [f"{sp}:{author.split(',')[0]}" for sp in providers]
 
@@ -1715,7 +1729,11 @@ class LavalinkPlayer(wavelink.Player):
                                 requester=self.bot.user.id
                             )
                         except Exception as e:
-                            if [err for err in ("Could not find tracks from mix", "Could not read mix page") if err in str(e)] and self.native_yt:
+                            if (
+                                not self.using_nodelink
+                                and [err for err in ("Could not find tracks from mix", "Could not read mix page") if err in str(e)]
+                                and self.native_yt
+                            ):
                                 try:
                                     tracks_ytsearch = await self.node.get_tracks(
                                         f"{query}:\"{track_data.author}\"",
@@ -2013,6 +2031,13 @@ class LavalinkPlayer(wavelink.Player):
                                 pass
 
                         else:
+                            if self.using_nodelink:
+                                self.played.append(track)
+                                self.locked = False
+                                self.native_yt = True
+                                await self.process_next()
+                                return
+
                             tracks = []
 
                             exceptions = ""
@@ -3268,10 +3293,13 @@ class LavalinkPlayer(wavelink.Player):
             if not search_queries:
 
                 if not force and track.info["sourceName"] in self.node.info.get("sourceManagers", []) and (not self.node.only_use_native_search_providers or track.info["sourceName"] in native_sources):
-
-
-
                     search_queries = [track.uri]
+                elif self.using_nodelink:
+                    provider = self.get_source_provider(track.info["sourceName"])
+                    if provider:
+                        search_queries = [f"{provider}:{track.single_title} - {', '.join(track.authors)}"]
+                    else:
+                        search_queries = [track.search_uri]
                 else:
                     search_queries = []
                     for sp in self.node.partial_providers:
@@ -3291,13 +3319,16 @@ class LavalinkPlayer(wavelink.Player):
                     try:
                         result = (await self.node.get_tracks(query, track_cls=LavalinkTrack, playlist_cls=LavalinkPlaylist, check_title = 60 if query.startswith(("ytmsearch", "ytsearch", "scsearch")) else 75))
                     except Exception as e:
-                        if track.info["sourceName"] == "youtube" and any(e in str(e) for e in (
+                        if (
+                            not self.using_nodelink
+                            and track.info["sourceName"] == "youtube"
+                            and any(e in str(e) for e in (
                             "This video is not available",
                             "YouTube WebM streams are currently not supported.",
                             "Video returned by YouTube isn't what was requested",
                             "The video returned is not what was requested.",
-                        )
-                               ):
+                        ))
+                        ):
                             cog = self.bot.get_cog("Music")
                             cog.remove_provider(self.node.search_providers, ["ytsearch", "ytmsearch"])
                             cog.remove_provider(self.node.partial_providers, ["ytsearch:\"{isrc}\"",

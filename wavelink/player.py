@@ -397,6 +397,29 @@ class Player:
 
             await self.node.update_player(self.guild_id, data=data)
 
+    async def _restore_v4_player_state(self) -> None:
+        if self.node.version < 4:
+            return
+
+        if self._voice_state:
+            await self._dispatch_voice_update()
+
+        if not self.current_encoded:
+            return
+
+        payload = {
+            "volume": self.volume,
+            "position": int(self.position),
+            "paused": self.paused,
+            "track": {"encoded": self.current_encoded},
+        }
+
+        filters_payload = self.active_filters
+        if filters_payload:
+            payload["filters"] = filters_payload
+
+        await self.node.update_player(self.guild_id, payload, replace=True)
+
     async def hook(self, event) -> None:
         if isinstance(event, TrackEnd) and event.reason in ("STOPPED", "FINISHED"):
             self.current = None
