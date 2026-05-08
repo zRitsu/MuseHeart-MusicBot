@@ -362,51 +362,7 @@ class Node:
                     f"Attempting to recreate player for guild {guild_id}."
                 )
                 try:
-                    rebuild_payload = {}
-
-                    try:
-                        rebuild_payload["voice"] = {
-                            "sessionId": player._voice_state["sessionId"],
-                            "token": player._voice_state["event"]["token"],
-                            "endpoint": player._voice_state["event"]["endpoint"],
-                            "channelId": str(player.channel_id) if player.channel_id else None,
-                        }
-                    except KeyError:
-                        if "voice" in data:
-                            rebuild_payload["voice"] = dict(data["voice"])
-
-                    if player.current and player.current_encoded:
-                        rebuild_payload.update(
-                            {
-                                "track": {
-                                    "encoded": player.current_encoded,
-                                },
-                                "volume": player.volume,
-                                "position": int(player.position),
-                                "paused": player.paused,
-                            }
-                        )
-                        if player.filters:
-                            rebuild_payload["filters"] = player.filters
-
-                    for key, value in data.items():
-                        rebuild_payload.setdefault(key, value)
-
-                    rebuild_uri = f"{self.rest_uri}/v4/sessions/{self.session_id}/players/{guild_id}?noReplace=false"
-                    async with self.session.patch(url=rebuild_uri, json=rebuild_payload, headers=self._websocket.headers) as rebuild_resp:
-                        if rebuild_resp.status == 200:
-                            __log__.info(f"NODE | {self.identifier} | Player recreated successfully for guild {guild_id}.")
-                            return await rebuild_resp.json()
-
-                        try:
-                            rebuild_data = await rebuild_resp.json()
-                        except Exception:
-                            rebuild_data = await rebuild_resp.text()
-
-                        __log__.error(
-                            f"NODE | {self.identifier} | Recreate player failed for guild {guild_id}: "
-                            f"{rebuild_resp.status} | {rebuild_data}"
-                        )
+                    return await self._recreate_nodelink_player(player=player, guild_id=guild_id, original_data=data)
                 except Exception as rebuild_err:
                     __log__.error(f"NODE | {self.identifier} | Failed to recreate player: {rebuild_err}")
                 return
@@ -418,6 +374,84 @@ class Node:
             return
 
         raise WavelinkException(f"{self.identifier}: UpdatePlayer Failed = {resp.status}: {resp_data}" + f"\n\nData info:\n{pprint.pformat(data)}\n")
+
+    async def _recreate_nodelink_player(self, player: Player, guild_id: int, original_data: dict):
+        if getattr(player, "_nodelink_recreating", False):
+            __log__.warning(
+                f"NODE | {self.identifier} | Player recreate already in progress for guild {guild_id}. Skipping duplicate attempt."
+            )
+            return
+
+        player._nodelink_recreating = True
+
+        try:
+            last_error = None
+
+            for attempt, delay in enumerate((0, 0.75, 1.5, 3), start=1):
+                if delay:
+                    await asyncio.sleep(delay)
+
+                rebuild_payload = {}
+
+                try:
+                    rebuild_payload["voice"] = {
+                        "sessionId": player._voice_state["sessionId"],
+                        "token": player._voice_state["event"]["token"],
+                        "endpoint": player._voice_state["event"]["endpoint"],
+                        "channelId": str(player.channel_id) if player.channel_id else None,
+                    }
+                except KeyError:
+                    if "voice" in original_data:
+                        rebuild_payload["voice"] = dict(original_data["voice"])
+
+                if player.current and player.current_encoded:
+                    rebuild_payload.update(
+                        {
+                            "track": {
+                                "encoded": player.current_encoded,
+                            },
+                            "volume": player.volume,
+                            "position": int(player.position),
+                            "paused": player.paused,
+                        }
+                    )
+                    if player.filters:
+                        rebuild_payload["filters"] = player.filters
+
+                for key, value in original_data.items():
+                    rebuild_payload.setdefault(key, value)
+
+                rebuild_uri = f"{self.rest_uri}/v4/sessions/{self.session_id}/players/{guild_id}?noReplace=false"
+
+                async with self.session.patch(url=rebuild_uri, json=rebuild_payload, headers=self._websocket.headers) as rebuild_resp:
+                    if rebuild_resp.status == 200:
+                        __log__.info(
+                            f"NODE | {self.identifier} | Player recreated successfully for guild {guild_id} on attempt {attempt}."
+                        )
+                        return await rebuild_resp.json()
+
+                    try:
+                        rebuild_data = await rebuild_resp.json()
+                    except Exception:
+                        rebuild_data = await rebuild_resp.text()
+
+                    last_error = f"{rebuild_resp.status} | {rebuild_data}"
+
+                    if rebuild_resp.status not in (404, 409):
+                        __log__.error(
+                            f"NODE | {self.identifier} | Recreate player failed for guild {guild_id}: {last_error}"
+                        )
+                        return
+
+                    __log__.warning(
+                        f"NODE | {self.identifier} | Recreate player retry {attempt} for guild {guild_id}: {last_error}"
+                    )
+
+            __log__.error(
+                f"NODE | {self.identifier} | Exhausted recreate retries for guild {guild_id}. Last error: {last_error}"
+            )
+        finally:
+            player._nodelink_recreating = False
 
     def _require_v4(self):
         if self.version < 4:

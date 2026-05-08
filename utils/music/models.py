@@ -2239,7 +2239,8 @@ class LavalinkPlayer(wavelink.Player):
 
         self.current = track
 
-        self.current_encoded = kwargs.pop("temp_id", None) or track.id
+        temp_id = kwargs.pop("temp_id", None)
+        self.current_encoded = temp_id or track.id
 
         if self.node.version == 3:
 
@@ -2271,8 +2272,15 @@ class LavalinkPlayer(wavelink.Player):
             else:
                 pause = self.paused
 
+            payload_track = self.current
+
+            if isinstance(self.current, PartialTrack):
+                if not self.current_encoded:
+                    raise TypeError("PartialTrack requer um encoded track válido para reprodução v4.")
+                payload_track = self.current_encoded
+
             payload = self._build_v4_play_payload(
-                self.current,
+                payload_track,
                 start=start,
                 end=end,
                 volume=vol,

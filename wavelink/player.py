@@ -213,6 +213,8 @@ class Player:
         self.position_timestamp = None
         self.ping = None
         self.current_encoded = None
+        self._nodelink_recreate_task = None
+        self._nodelink_recreating = False
 
         self._voice_state = {}
 
