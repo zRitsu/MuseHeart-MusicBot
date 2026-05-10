@@ -381,13 +381,29 @@ class BotPool:
                 traceback.print_exc()
             else:
                 if tokens:=mongo_data.get("refresh_tokens"):
+                    plugins = data["info"].get("plugins", {})
+                    is_nodelink = data["info"].get("isNodelink")
+
                     for v in tokens.values():
                         try:
                             async with ClientSession() as session:
-                                resp = await session.patch(
-                                    f"{data['rest_uri']}/v4/youtube/config", headers=headers,
-                                    json={"refreshToken": v}, timeout=30
-                                )
+                                if is_nodelink:
+                                    resp = await session.patch(
+                                        f"{data['rest_uri']}/v4/youtube/config", headers=headers,
+                                        json={"refreshToken": v}, timeout=30
+                                    )
+                                elif "youtube-plugin" in plugins:
+                                    resp = await session.post(
+                                        f"{data['rest_uri']}/youtube", headers=headers,
+                                        json={"refreshToken": v}, timeout=30
+                                    )
+                                else:
+                                    print(
+                                        f"🌋 - Endpoint de refreshToken do YouTube não suportado no servidor local: "
+                                        f"{data['identifier']}"
+                                    )
+                                    break
+
                                 resp.raise_for_status()
                         except Exception as e:
                             print(f"🌋 - Falha ao aplicar o Youtube refreshToken no servidor lavalink: {data['identifier']} - {repr(e)}")

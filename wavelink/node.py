@@ -330,7 +330,8 @@ class Node:
                 pass
         else:
             try:
-                del data["voice"]["channelId"]
+                if not data["voice"].get("channelId"):
+                    del data["voice"]["channelId"]
             except KeyError:
                 pass
 
