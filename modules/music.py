@@ -7123,13 +7123,17 @@ class Music(commands.Cog):
                     data["position"] = position
                     data["paused"] = pause
                     try:
-                        data["voice"] = {
+                        voice_data = {
                             "sessionId": player._voice_state["sessionId"],
                             "token": player._voice_state["event"]["token"],
-                            "endpoint": player._voice_state["event"]["endpoint"]
+                            "endpoint": player._voice_state["event"]["endpoint"],
+                            "channelId": str(player.channel_id) if player.channel_id else str(voice_channel.id),
                         }
                     except (KeyError, TypeError):
-                        pass
+                        voice_data = None
+
+                    if voice_data:
+                        await player.node.update_player(player.guild.id, data={"voice": voice_data})
 
                 await player.node.update_player(player.guild.id, data=data)
 

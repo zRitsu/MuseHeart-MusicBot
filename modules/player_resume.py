@@ -328,17 +328,14 @@ class PlayerSession(commands.Cog):
             data["track"]["encoded"] = track_id
 
             try:
-                data.update(
-                    {
-                        "voice": {
-                            "sessionId": player._voice_state["sessionId"],
-                            "token": player._voice_state["event"]["token"],
-                            "endpoint": player._voice_state["event"]["endpoint"]
-                        }
-                    }
-                )
+                voice_data = {
+                    "sessionId": player._voice_state["sessionId"],
+                    "token": player._voice_state["event"]["token"],
+                    "endpoint": player._voice_state["event"]["endpoint"],
+                    "channelId": str(player.channel_id) if player.channel_id else str(voice_channel.id),
+                }
             except (KeyError, TypeError):
-                pass
+                voice_data = None
 
             data.update(
                 {
@@ -346,6 +343,10 @@ class PlayerSession(commands.Cog):
                     "paused": pause,
                 }
             )
+
+            if voice_data:
+                await player.node.update_player(player.guild.id, data={"voice": voice_data})
+
             await player.node.update_player(player.guild.id, data=data)
         else:
             await player.node.update_player(player.guild.id, data=data)
