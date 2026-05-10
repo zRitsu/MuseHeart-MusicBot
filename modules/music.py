@@ -40,7 +40,7 @@ from utils.music.errors import GenericError, MissingVoicePerms, NoVoice, PoolExc
 from utils.music.interactions import VolumeInteraction, QueueInteraction, SelectInteraction, FavMenuView, ViewMode, \
     SetStageTitle, SelectBotVoice, youtube_regex, ButtonInteraction
 from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, PartialTrack, PartialPlaylist, \
-    native_sources, CustomYTDL
+    native_sources, CustomYTDL, build_ytdl_options
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, song_request_buttons, \
     select_bot_pool, ProgressBar, update_inter, get_source_emoji_cfg, music_source_emoji
@@ -71,6 +71,18 @@ class Music(commands.Cog):
         "deezer": "dzsearch",
         "jiosaavn": "jssearch",
     }
+
+    youtube_fallback_error_hints = (
+        "youtube",
+        "ytsearch",
+        "ytmsearch",
+        "this video is not available",
+        "video returned by youtube isn't what was requested",
+        "the video returned is not what was requested",
+        "youtube webm streams are currently not supported",
+        "sign in to confirm your age",
+        "available countries",
+    )
 
     def __init__(self, bot: BotCore):
 
@@ -197,6 +209,124 @@ class Music(commands.Cog):
             "{track.title} ( {track.playlist} )",
             "{track.title}  Solicitado por: {requester.name}",
         ]
+
+    @staticmethod
+    def _is_youtube_query(query: str):
+        q = (query or "").lower()
+        return q.startswith(("ytsearch:", "ytmsearch:")) or "youtube.com/" in q or "youtu.be/" in q
+
+    def _should_try_ytdlp_fallback(self, query: str, source, exceptions: set):
+        if self._is_youtube_query(query):
+            return True
+
+        if source in ("ytsearch", "ytmsearch"):
+            return True
+
+        return any(hint in exc.lower() for exc in exceptions for hint in self.youtube_fallback_error_hints)
+
+    @staticmethod
+    def _build_ytdlp_partial_track(entry: dict, requester: int, *, fallback_url: str = "", playlist: PartialPlaylist = None):
+        if not entry:
+            return None
+
+        identifier = entry.get("id", "")
+        webpage_url = entry.get("webpage_url") or entry.get("original_url")
+
+        if not webpage_url:
+            if identifier:
+                webpage_url = f"https://www.youtube.com/watch?v={identifier}"
+            else:
+                webpage_url = fallback_url
+
+        thumb = entry.get("thumbnail")
+        if not thumb:
+            thumbnails = entry.get("thumbnails") or []
+            if thumbnails:
+                thumb = thumbnails[-1].get("url", "")
+        if not thumb and identifier:
+            thumb = f"https://img.youtube.com/vi/{identifier}/mqdefault.jpg"
+
+        duration = entry.get("duration") or 0
+        if duration:
+            duration *= 1000
+
+        return PartialTrack(
+            uri=webpage_url,
+            title=entry.get("title") or "Título desconhecido",
+            author=entry.get("uploader") or entry.get("channel") or entry.get("artist") or "Artista desconhecido",
+            thumb=thumb or "",
+            duration=duration,
+            requester=requester,
+            source_name="youtube",
+            identifier=identifier,
+            playlist=playlist,
+            ytid=identifier,
+        )
+
+    async def get_ytdlp_youtube_fallback_tracks(
+        self,
+        query: str,
+        user: disnake.Member,
+        bot: BotCore = None,
+    ):
+        if not bot:
+            bot = self.bot
+
+        try:
+            ytdl = bot.pool.ytdl
+        except AttributeError:
+            raise GenericError("**O fallback alternativo do YouTube via yt-dlp não está disponível...**")
+
+        ytdl_query = query
+
+        if query.startswith("https://www.youtube.com/results"):
+            try:
+                ytdl_query = f"ytsearch10:{parse_qs(urlparse(query).query)['search_query'][0]}"
+            except Exception:
+                ytdl_query = query
+        elif query.startswith(("ytsearch:", "ytmsearch:")):
+            ytdl_query = f"ytsearch10:{query.split(':', 1)[1]}"
+        elif not URL_REG.match(query):
+            ytdl_query = f"ytsearch10:{query}"
+
+        info = await bot.loop.run_in_executor(None, lambda: ytdl.extract_info(ytdl_query, download=False))
+
+        if not info:
+            return None
+
+        entries = [e for e in (info.get("entries") or []) if e]
+
+        if entries:
+            is_playlist = info.get("_type") == "playlist" and not ytdl_query.startswith("ytsearch")
+
+            if is_playlist:
+                playlist = PartialPlaylist(
+                    url=info.get("webpage_url") or query,
+                    data={"playlistInfo": {"name": info.get("title") or "Playlist do YouTube"}}
+                )
+
+                playlist.tracks = [
+                    t for t in (
+                        self._build_ytdlp_partial_track(
+                            entry,
+                            requester=user.id,
+                            fallback_url=query,
+                            playlist=playlist,
+                        ) for entry in entries
+                    ) if t
+                ]
+
+                return playlist if playlist.tracks else None
+
+            return [
+                t for t in (
+                    self._build_ytdlp_partial_track(entry, requester=user.id, fallback_url=query)
+                    for entry in entries
+                ) if t
+            ] or None
+
+        track = self._build_ytdlp_partial_track(info, requester=user.id, fallback_url=query)
+        return [track] if track else None
 
     play_cd = commands.CooldownMapping.from_cooldown(3, 12, commands.BucketType.member)
     play_mc = commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
@@ -1917,7 +2047,7 @@ class Music(commands.Cog):
 
                     try:
                         with YoutubeDL(
-                            {
+                            build_ytdl_options({
                                 'extract_flat': True,
                                 'quiet': True,
                                 'no_warnings': True,
@@ -1933,7 +2063,7 @@ class Music(commands.Cog):
                                         "skip": ["webpage"]
                                     }
                                 }
-                            }
+                            })
                         ) as ydl:
                             playlist_data = await bot.loop.run_in_executor(None, lambda: ydl.extract_info(q, download=False))
 
@@ -7550,7 +7680,15 @@ class Music(commands.Cog):
 
         if not tracks:
 
-            tracks, node, exceptions = await self.get_partial_tracks(query=query, ctx=ctx, user=user, node=node, bot=bot)
+            if self._should_try_ytdlp_fallback(query=query, source=source, exceptions=exceptions):
+                try:
+                    tracks = await self.get_ytdlp_youtube_fallback_tracks(query=query, user=user, bot=bot)
+                except Exception as e:
+                    self.bot.dispatch("custom_error", ctx=ctx, error=e)
+                    exceptions.add(repr(e))
+
+            if not tracks:
+                tracks, node, exceptions = await self.get_partial_tracks(query=query, ctx=ctx, user=user, node=node, bot=bot)
 
             if not tracks:
 
@@ -7978,7 +8116,7 @@ def setup(bot: BotCore):
     if not getattr(bot.pool, 'ytdl', None):
 
         bot.pool.ytdl = CustomYTDL(
-            {
+            build_ytdl_options({
                 'format': 'webm[abr>0]/bestaudio/best',
                 'extract_flat': True,
                 'quiet': True,
@@ -8006,7 +8144,7 @@ def setup(bot: BotCore):
                         "skip": ["webpage", "authcheck"]
                     }
                 }
-            }
+            })
         )
 
     bot.add_cog(Music(bot))

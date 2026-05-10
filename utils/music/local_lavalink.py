@@ -23,6 +23,7 @@ DEFAULT_LOCAL_SERVER_PORT = 8090
 DEFAULT_LOCAL_SERVER_PASSWORD = "youshallnotpass"
 DEFAULT_NODELINK_CONFIG_URL = "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/config.default.js"
 DEFAULT_LAVALINK_APPLICATION_YML_URL = "https://github.com/zRitsu/LL-binaries/releases/download/0.0.1/application.yml"
+YTDLP_RELEASE_BASE_URL = "https://github.com/yt-dlp/yt-dlp/releases/latest/download"
 
 
 def download_file(url, filename):
@@ -93,6 +94,63 @@ def get_local_server_port():
 
 def get_local_server_password():
     return os.environ.get("SERVER_PASSWORD") or DEFAULT_LOCAL_SERVER_PASSWORD
+
+
+def get_yt_dlp_version(binary_path: str):
+    try:
+        version_out = subprocess.check_output([binary_path, "--version"], text=True).strip()
+        return version_out.splitlines()[0]
+    except Exception:
+        return "0.0.0"
+
+
+def download_yt_dlp_portable():
+    os_name = platform.system().lower()
+    arch = platform.machine().lower()
+
+    if os_name == "windows":
+        asset_name = "yt-dlp.exe"
+        target_name = "yt-dlp.exe"
+    elif os_name in {"linux", "darwin"}:
+        asset_name = "yt-dlp"
+        target_name = "yt-dlp.exe" if os.name == "nt" else "yt-dlp"
+    else:
+        print(f"Sistema não suportado para yt-dlp portátil: {os_name} {arch}")
+        return None
+
+    ytdlp_dir = os.path.abspath(f"yt-dlp-portable-{os_name}-{arch}")
+    ytdlp_bin = os.path.join(ytdlp_dir, target_name)
+
+    if os.path.isfile(ytdlp_bin):
+        return ytdlp_bin
+
+    os.makedirs(ytdlp_dir, exist_ok=True)
+    url = f"{YTDLP_RELEASE_BASE_URL}/{asset_name}"
+
+    print("yt-dlp não encontrado. Baixando versão portátil oficial...")
+
+    try:
+        download_file(url, ytdlp_bin)
+        if os.path.isfile(ytdlp_bin) and os_name != "windows":
+            os.chmod(ytdlp_bin, 0o755)
+        print(f"yt-dlp portátil instalado com sucesso! Versão detectada: {get_yt_dlp_version(ytdlp_bin)}")
+        return ytdlp_bin
+    except Exception as e:
+        print(f"Erro ao baixar yt-dlp portátil: {e}")
+        return None
+
+
+def get_yt_dlp_binary():
+    custom_path = os.environ.get("YT_DLP_PATH")
+
+    if custom_path and os.path.isfile(custom_path):
+        return os.path.abspath(custom_path)
+
+    system_ytdlp = shutil.which("yt-dlp")
+    if system_ytdlp:
+        return system_ytdlp
+
+    return download_yt_dlp_portable()
 
 
 def update_git_repo(repo_dir: str, repo_url: str, update_interval: int):
@@ -373,7 +431,12 @@ def ensure_nodelink_cipher_config(config_path: str, cipher_url: str, cipher_toke
         print("Aviso: bloco de configuração do cipher não foi encontrado no config.js do NodeLink.")
 
 
-def ensure_lavalink_cipher_config(application_yml_path: str, cipher_url: str, cipher_token: str | None):
+def ensure_lavalink_runtime_config(
+    application_yml_path: str,
+    cipher_url: str | None,
+    cipher_token: str | None,
+    ytdlp_path: str | None,
+):
     if not os.path.isfile(application_yml_path):
         return
 
@@ -397,11 +460,23 @@ def ensure_lavalink_cipher_config(application_yml_path: str, cipher_url: str, ci
     plugins = yml_data.setdefault("plugins", {})
     youtube = plugins.setdefault("youtube", {})
     youtube["enabled"] = True
-    youtube["remoteCipher"] = {
-        "url": cipher_url.rstrip("/"),
-        "password": cipher_token or "",
-        "userAgent": "MuseHeart-MusicBot/Lavalink"
-    }
+    if cipher_url:
+        youtube["remoteCipher"] = {
+            "url": cipher_url.rstrip("/"),
+            "password": cipher_token or "",
+            "userAgent": "MuseHeart-MusicBot/Lavalink"
+        }
+
+    lavasrc = plugins.setdefault("lavasrc", {})
+    lavasrc_sources = lavasrc.setdefault("sources", {})
+    lavasrc_sources["ytdlp"] = bool(ytdlp_path)
+
+    if ytdlp_path:
+        ytdlp_config = lavasrc.setdefault("ytdlp", {})
+        ytdlp_config["path"] = ytdlp_path
+    else:
+        with suppress(KeyError):
+            del lavasrc["ytdlp"]["path"]
 
     with open(application_yml_path, "w", encoding="utf-8") as file:
         yaml.dump(yml_data, file)
@@ -602,6 +677,8 @@ def run_java_lavalink_backend(
     cipher_token: str | None,
 ):
     java_cmd = get_system_java(use_jabba=use_jabba)
+    deno_cmd = get_deno_binary()
+    ytdlp_cmd = get_yt_dlp_binary()
     clear_plugins = False
 
     for filename, url in (
@@ -611,10 +688,26 @@ def run_java_lavalink_backend(
         if download_file(url, filename):
             clear_plugins = True
 
-    if cipher_url:
-        ensure_lavalink_cipher_config("application.yml", cipher_url, cipher_token)
+    ensure_lavalink_runtime_config(
+        "application.yml",
+        cipher_url=cipher_url,
+        cipher_token=cipher_token,
+        ytdlp_path=ytdlp_cmd,
+    )
 
     command = [java_cmd]
+    env = os.environ.copy()
+
+    extra_path_entries = []
+    if deno_cmd:
+        extra_path_entries.append(os.path.abspath(os.path.dirname(deno_cmd)))
+    if ytdlp_cmd:
+        extra_path_entries.append(os.path.abspath(os.path.dirname(ytdlp_cmd)))
+
+    if extra_path_entries:
+        separator = ";" if platform.system() == "Windows" else ":"
+        existing_path = env.get("PATH", "")
+        env["PATH"] = separator.join(extra_path_entries + ([existing_path] if existing_path else []))
 
     if lavalink_cpu_cores >= 1:
         command.append(f"-XX:ActiveProcessorCount={lavalink_cpu_cores}")
@@ -643,7 +736,12 @@ def run_java_lavalink_backend(
         "o que pode ocorrer falhas em algumas tentativas de conexão até ele iniciar totalmente)."
     )
 
-    return subprocess.Popen(command)
+    if ytdlp_cmd:
+        print(f"🌋 - yt-dlp disponível para fallback do YouTube via LavaSrc: {ytdlp_cmd}")
+    else:
+        print("🌋 - yt-dlp indisponível. O fallback alternativo do YouTube via LavaSrc permanecerá desativado.")
+
+    return subprocess.Popen(command, env=env)
 
 
 class ManagedProcess:

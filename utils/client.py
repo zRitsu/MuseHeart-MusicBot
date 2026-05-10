@@ -38,7 +38,7 @@ from utils.music.errors import GenericError
 from utils.music.lastfm_tools import LastFM
 from utils.music.local_lavalink import run_lavalink
 from utils.music.models import music_mode, LavalinkPlayer, LavalinkPlaylist, LavalinkTrack, PartialTrack, \
-    native_sources, CustomYTDL
+    native_sources, CustomYTDL, build_ytdl_options
 from utils.music.remote_lavalink_serverlist import get_lavalink_servers
 from utils.others import CustomContext, token_regex, sort_dict_recursively
 from utils.owner_panel import PanelView
@@ -108,7 +108,7 @@ class BotPool:
         self.cache_updater_task: Optional[asyncio.Task] = None
         self.lyric_data_cache = TTLCache(maxsize=30000, ttl=600*10)
         self.ytdl = CustomYTDL(
-            {
+            build_ytdl_options({
                 'format': 'webm[abr>0]/bestaudio/best',
                 'extract_flat': True,
                 'quiet': True,
@@ -136,7 +136,7 @@ class BotPool:
                         "skip": ["webpage", "authcheck"]
                     }
                 }
-            }
+            })
         )
 
         self.load_cache()

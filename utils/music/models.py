@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import datetime
 import itertools
+import os
 import pprint
 import random
 import re
@@ -3900,6 +3901,30 @@ class LavalinkPlayer(wavelink.Player):
 class CustomYTDL(YoutubeDL):
     def save_cookies(self):
         pass
+
+
+def get_ytdlp_cookiefile():
+    custom_cookiefile = os.environ.get("YT_DLP_COOKIEFILE")
+
+    if custom_cookiefile:
+        custom_cookiefile = os.path.abspath(custom_cookiefile)
+        if os.path.isfile(custom_cookiefile):
+            return custom_cookiefile
+
+    default_cookiefile = os.path.abspath(".ytcookie.txt")
+    if os.path.isfile(default_cookiefile):
+        return default_cookiefile
+
+    return None
+
+
+def build_ytdl_options(options: dict):
+    final_options = dict(options)
+
+    if cookiefile := get_ytdlp_cookiefile():
+        final_options["cookiefile"] = cookiefile
+
+    return final_options
 
 
 def music_mode(bot: BotCore):

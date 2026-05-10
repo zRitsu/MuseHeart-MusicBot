@@ -6,7 +6,7 @@ import disnake
 import yt_dlp
 
 from utils.music.errors import GenericError
-from utils.music.models import PartialTrack
+from utils.music.models import PartialTrack, build_ytdl_options
 
 exclude_extractors = ["youtube", "soundcloud", "deezer", "applemusic", "twitch"]
 
@@ -54,7 +54,7 @@ class YTDLTools:
     ]
 
     def extract_info(self, url: str):
-        return yt_dlp.YoutubeDL(YTDL_OPTS).extract_info(url=url, download=False)
+        return yt_dlp.YoutubeDL(build_ytdl_options(YTDL_OPTS)).extract_info(url=url, download=False)
 
     async def get_track_info(self, url: str, user: disnake.Member = None, loop = None):
 
