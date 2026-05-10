@@ -381,8 +381,19 @@ class BotPool:
                 traceback.print_exc()
             else:
                 if tokens:=mongo_data.get("refresh_tokens"):
-                    plugins = data["info"].get("plugins", {})
+                    raw_plugins = data["info"].get("plugins", {})
                     is_nodelink = data["info"].get("isNodelink")
+
+                    if isinstance(raw_plugins, dict):
+                        plugins = raw_plugins
+                    elif isinstance(raw_plugins, list):
+                        plugins = {
+                            p.get("name"): p.get("version")
+                            for p in raw_plugins
+                            if isinstance(p, dict) and p.get("name")
+                        }
+                    else:
+                        plugins = {}
 
                     for v in tokens.values():
                         try:
