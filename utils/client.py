@@ -387,14 +387,14 @@ class BotPool:
                     for v in tokens.values():
                         try:
                             async with ClientSession() as session:
-                                if is_nodelink:
-                                    resp = await session.patch(
-                                        f"{data['rest_uri']}/v4/youtube/config", headers=headers,
-                                        json={"refreshToken": v}, timeout=30
-                                    )
-                                elif "youtube-plugin" in plugins:
+                                if "youtube-plugin" in plugins:
                                     resp = await session.post(
                                         f"{data['rest_uri']}/youtube", headers=headers,
+                                        json={"refreshToken": v}, timeout=30
+                                    )
+                                elif is_nodelink:
+                                    resp = await session.patch(
+                                        f"{data['rest_uri']}/v4/youtube/config", headers=headers,
                                         json={"refreshToken": v}, timeout=30
                                     )
                                 else:
