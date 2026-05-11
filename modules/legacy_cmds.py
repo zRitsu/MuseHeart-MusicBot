@@ -24,6 +24,12 @@ from utils.music.checks import check_voice, check_requester_channel, can_connect
 from utils.music.converters import URL_REG
 from utils.music.errors import GenericError, NoVoice
 from utils.music.interactions import SelectBotVoice
+from utils.music.local_resource_paths import (
+    get_application_yml_path,
+    get_config_default_js_path,
+    get_lavalink_ini_path,
+    get_lavalink_jar_path,
+)
 from utils.music.models import LavalinkPlayer
 from utils.others import CustomContext, string_to_file, token_regex, CommandArgparse, \
     select_bot_pool
@@ -72,9 +78,9 @@ class Owner(commands.Cog):
     git_format = f"--pretty=format:{os_quote}%H*****%h*****%s*****%ct{os_quote}"
 
     additional_files = [
-        "./lavalink.ini",
-        "./application.yml",
-        "./config.default.js"
+        get_lavalink_ini_path(),
+        get_application_yml_path(),
+        get_config_default_js_path(),
         "./squarecloud.config",
         "./squarecloud.app",
         "./discloud.config",
@@ -163,11 +169,11 @@ class Owner(commands.Cog):
 
             await asyncio.sleep(1.5)
 
-            if os.path.isfile("./Lavalink.jar"):
-                os.remove("./Lavalink.jar")
+            if os.path.isfile(get_lavalink_jar_path()):
+                os.remove(get_lavalink_jar_path())
 
-            if args.yml and os.path.isfile("./config.default.js"):
-                os.remove("./config.default.js")
+            if args.yml and os.path.isfile(get_config_default_js_path()):
+                os.remove(get_config_default_js_path())
                 txt = "Os arquivos do Nodelink e config.default.js serão atualizados"
             else:
                 txt = "O arquivo do Nodelink será atualizado"
@@ -1131,7 +1137,7 @@ class Owner(commands.Cog):
         async with ClientSession() as session:
             async with session.get(self.bot.config["LAVALINK_SERVER_LIST"]) as r:
                 ini_file = await r.read()
-                with open("lavalink.ini", "wb") as f:
+                with open(get_lavalink_ini_path(), "wb") as f:
                     f.write(ini_file)
 
 def setup(bot: BotCore):

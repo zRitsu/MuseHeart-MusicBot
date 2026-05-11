@@ -37,6 +37,7 @@ from utils.music.checks import check_pool_bots
 from utils.music.errors import GenericError
 from utils.music.lastfm_tools import LastFM
 from utils.music.local_lavalink import run_lavalink
+from utils.music.local_resource_paths import get_auto_lavalink_ini_path, get_lavalink_ini_path
 from utils.music.models import music_mode, LavalinkPlayer, LavalinkPlaylist, LavalinkTrack, PartialTrack, \
     native_sources, CustomYTDL, build_ytdl_options
 from utils.music.remote_lavalink_serverlist import get_lavalink_servers
@@ -617,17 +618,17 @@ class BotPool:
                 ini_file = None
             except Exception:
                 traceback.print_exc()
-                ini_file = "auto_lavalink.ini"
+                ini_file = get_auto_lavalink_ini_path()
                 print(f"Baixando lista de servidores lavalink (arquivo: {ini_file})")
                 try:
                     r = requests.get(self.config["LAVALINK_SERVER_LIST"], allow_redirects=False)
-                    with open("auto_lavalink.ini", 'wb') as f:
+                    with open(ini_file, 'wb') as f:
                         f.write(r.content)
                     r.close()
                 except Exception:
                     traceback.print_exc()
         else:
-            ini_file = "lavalink.ini"
+            ini_file = get_lavalink_ini_path()
 
         for key, value in self.config.items():
 

@@ -10,6 +10,7 @@ import aiohttp
 import disnake
 import ruamel.yaml
 from disnake.ext import commands
+from utils.music.local_resource_paths import get_application_yml_path
 
 from utils.music.errors import GenericError
 from utils.music.interactions import AskView
@@ -234,7 +235,9 @@ class YtOauthLL(commands.Cog):
             except Exception as e:
                 txts.append(f"Falha ao salvar refreshToken no MongoDB: {repr(e)}")
 
-        if os.path.isfile("./application.yml"):
+        application_yml = get_application_yml_path()
+
+        if os.path.isfile(application_yml):
 
             try:
 
@@ -242,7 +245,7 @@ class YtOauthLL(commands.Cog):
                 yaml.preserve_quotes = True
                 yaml.explicit_start = True
 
-                with open('./application.yml', 'r', encoding='utf-8') as file:
+                with open(application_yml, 'r', encoding='utf-8') as file:
                     yml_data = yaml.load(file.read())
 
                 new_value = {
@@ -255,7 +258,7 @@ class YtOauthLL(commands.Cog):
                 except KeyError:
                     yml_data['plugins']['youtube'] = {'oauth': new_value}
 
-                with open('./application.yml', 'w') as file:
+                with open(application_yml, 'w', encoding='utf-8') as file:
                     yaml.dump(yml_data, file)
 
                 if (node := self.bot.music.nodes.get("LOCAL")) and "youtube-plugin" in node.info["plugins"]:

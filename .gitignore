@@ -147,16 +147,14 @@ discloud.txt
 *.7z
 /.config
 /poetry.lock
-/lavalink.ini
+/local_audio/
 database.json
 /index.html
 /local_dbs/
 /local_database/
-application.yml
 .local/
 .player_sessions/
 .jabba/
-/auto_lavalink.ini
 /.test/
 /.local_database_sqlite
 /.db_cache/
@@ -179,5 +177,3 @@ ai_prompt.txt
 /ai_extensions/
 /dev_stuffs/
 /dev/
-NodeLink/
-/config.js

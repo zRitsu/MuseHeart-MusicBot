@@ -13,6 +13,14 @@ from contextlib import suppress
 
 import requests
 from ruamel.yaml import YAML
+from utils.music.local_resource_paths import (
+    get_application_yml_path,
+    get_config_js_path,
+    get_lavalink_jar_path,
+    get_nodelink_dir,
+    get_yt_cipher_dir,
+    local_audio_abspath,
+)
 
 YT_CIPHER_REPO_URL = "https://github.com/rive-hq/yt-cipher.git"
 YT_CIPHER_EJS_REPO_URL = "https://github.com/rive-hq/ejs.git"
@@ -118,7 +126,7 @@ def download_yt_dlp_portable():
         print(f"Sistema não suportado para yt-dlp portátil: {os_name} {arch}")
         return None
 
-    ytdlp_dir = os.path.abspath(f"yt-dlp-portable-{os_name}-{arch}")
+    ytdlp_dir = local_audio_abspath(f"yt-dlp-portable-{os_name}-{arch}")
     ytdlp_bin = os.path.join(ytdlp_dir, target_name)
 
     if os.path.isfile(ytdlp_bin):
@@ -218,7 +226,7 @@ def download_nodejs_portable():
 
     node_version = "v23.7.0"
     node_dir = f"node-{node_version}-{target_os}-{target_arch}"
-    node_dir_abs = os.path.abspath(node_dir)
+    node_dir_abs = local_audio_abspath(node_dir)
 
     def get_npm_path():
         if target_os == "win":
@@ -230,7 +238,7 @@ def download_nodejs_portable():
 
     extension = ".zip" if target_os == "win" else ".tar.xz"
     base_url = f"https://nodejs.org/dist/{node_version}/{node_dir}{extension}"
-    filename = f"{node_dir}{extension}"
+    filename = local_audio_abspath(f"{node_dir}{extension}")
 
     print(f"Node.js não encontrado. Baixando versão portátil {node_version}...")
     try:
@@ -239,10 +247,10 @@ def download_nodejs_portable():
 
         if target_os == "win":
             with zipfile.ZipFile(filename, "r") as zip_ref:
-                zip_ref.extractall(".")
+                zip_ref.extractall(local_audio_abspath())
         else:
             with tarfile.open(filename, "r:xz") as tar_ref:
-                tar_ref.extractall(".")
+                tar_ref.extractall(local_audio_abspath())
 
         if target_os != "win":
             node_bin = os.path.join(node_dir_abs, "bin", "node")
@@ -283,7 +291,7 @@ def download_deno_portable():
         print(f"Sistema ou arquitetura não suportada para Deno: {os_name} {arch}")
         return None
 
-    deno_dir = os.path.abspath(f"deno-portable-{os_name}-{arch}")
+    deno_dir = local_audio_abspath(f"deno-portable-{os_name}-{arch}")
     deno_bin = os.path.join(deno_dir, "deno.exe" if os_name == "windows" else "deno")
 
     if os.path.isfile(deno_bin):
@@ -349,7 +357,7 @@ def start_yt_cipher(update_interval: int):
         print("Aviso: Deno não disponível. O yt-cipher local não será iniciado.")
         return None, None, None
 
-    cipher_dir = os.path.abspath(os.path.join(os.getcwd(), "yt-cipher"))
+    cipher_dir = get_yt_cipher_dir()
     update_git_repo(cipher_dir, YT_CIPHER_REPO_URL, update_interval=update_interval)
     ensure_yt_cipher_ejs(cipher_dir)
 
@@ -649,16 +657,17 @@ def run_nodelink_backend(cipher_url: str | None, cipher_token: str | None):
     separator = ";" if platform.system() == "Windows" else ":"
     env["PATH"] = f"{node_bin_dir}{separator}{env.get('PATH', '')}"
 
-    node_dir = os.path.abspath(os.path.join(os.getcwd(), "NodeLink"))
+    node_dir = get_nodelink_dir()
     repo_status = update_git_repo(node_dir, NODELINK_REPO_URL, update_interval=LOCAL_UPDATE_INTERVAL)
 
     subprocess.call(["git", "switch", "dev"], cwd=node_dir)
     if repo_status in {"cloned", "updated"} or not os.path.isdir(os.path.join(node_dir, "node_modules")):
         subprocess.call([npm_cmd, "install"], cwd=node_dir, env=env)
 
-    download_file(DEFAULT_NODELINK_CONFIG_URL, "config.js")
-    if os.path.isfile("./config.js"):
-        shutil.copy("./config.js", os.path.join(node_dir, "config.js"))
+    config_js_path = get_config_js_path()
+    download_file(DEFAULT_NODELINK_CONFIG_URL, config_js_path)
+    if os.path.isfile(config_js_path):
+        shutil.copy(config_js_path, os.path.join(node_dir, "config.js"))
 
     if cipher_url:
         ensure_nodelink_cipher_config(os.path.join(node_dir, "config.js"), cipher_url, cipher_token)
@@ -682,14 +691,14 @@ def run_java_lavalink_backend(
     clear_plugins = False
 
     for filename, url in (
-        ("Lavalink.jar", lavalink_file_url),
-        ("application.yml", DEFAULT_LAVALINK_APPLICATION_YML_URL),
+        (get_lavalink_jar_path(), lavalink_file_url),
+        (get_application_yml_path(), DEFAULT_LAVALINK_APPLICATION_YML_URL),
     ):
         if download_file(url, filename):
             clear_plugins = True
 
     ensure_lavalink_runtime_config(
-        "application.yml",
+        get_application_yml_path(),
         cipher_url=cipher_url,
         cipher_token=cipher_token,
         ytdlp_path=ytdlp_cmd,
@@ -719,17 +728,18 @@ def run_java_lavalink_backend(
         command.append(f"-Xms{lavalink_initial_ram}m")
 
     if os.name != "nt":
-        if os.path.isdir("./.tempjar"):
-            shutil.rmtree("./.tempjar")
+        tempjar_dir = local_audio_abspath(".tempjar")
+        if os.path.isdir(tempjar_dir):
+            shutil.rmtree(tempjar_dir)
 
-        os.makedirs("./.tempjar/undertow-docbase.80.2258596138812103750", exist_ok=True)
-        command.append(f"-Djava.io.tmpdir={os.getcwd()}/.tempjar")
+        os.makedirs(os.path.join(tempjar_dir, "undertow-docbase.80.2258596138812103750"), exist_ok=True)
+        command.append(f"-Djava.io.tmpdir={tempjar_dir}")
 
     if clear_plugins:
         with suppress(Exception):
-            shutil.rmtree("./plugins")
+            shutil.rmtree(local_audio_abspath("plugins"))
 
-    command.extend(["-jar", "Lavalink.jar"])
+    command.extend(["-jar", get_lavalink_jar_path()])
 
     print(
         "🌋 - Iniciando o servidor Lavalink (dependendo da hospedagem o lavalink pode demorar iniciar, "
@@ -741,7 +751,7 @@ def run_java_lavalink_backend(
     else:
         print("🌋 - yt-dlp indisponível. O fallback alternativo do YouTube via LavaSrc permanecerá desativado.")
 
-    return subprocess.Popen(command, env=env)
+    return subprocess.Popen(command, env=env, cwd=local_audio_abspath())
 
 
 class ManagedProcess:

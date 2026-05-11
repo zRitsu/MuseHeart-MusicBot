@@ -22,6 +22,7 @@ from rapidfuzz import fuzz
 from yt_dlp import YoutubeDL
 
 import wavelink
+from utils.music.local_resource_paths import get_yt_cookie_path
 from utils.db import DBModel
 from utils.music.checks import can_connect
 from utils.music.converters import fix_characters, time_format, get_button_style
@@ -3911,7 +3912,7 @@ def get_ytdlp_cookiefile():
         if os.path.isfile(custom_cookiefile):
             return custom_cookiefile
 
-    default_cookiefile = os.path.abspath(".ytcookie.txt")
+    default_cookiefile = get_yt_cookie_path()
     if os.path.isfile(default_cookiefile):
         return default_cookiefile
 

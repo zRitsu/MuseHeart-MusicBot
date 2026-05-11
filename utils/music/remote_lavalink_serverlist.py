@@ -4,6 +4,7 @@ import traceback
 from configparser import ConfigParser
 
 import requests
+from utils.music.local_resource_paths import get_auto_lavalink_ini_path
 
 lavalink_urls = {
     "ssl": "https://raw.githubusercontent.com/DarrenOfficial/lavalink-list/master/docs/SSL/lavalink-with-ssl.md",
@@ -68,7 +69,7 @@ def get_lavalink_servers():
                 lavalink_nodes[identifier] = data
 
     try:
-        with open("auto_lavalink.ini", "w", encoding="utf-8") as f:
+        with open(get_auto_lavalink_ini_path(), "w", encoding="utf-8") as f:
             config.write(f)
     except Exception:
         traceback.print_exc()

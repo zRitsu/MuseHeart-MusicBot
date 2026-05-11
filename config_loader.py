@@ -4,6 +4,7 @@ from os import environ
 
 import disnake
 from dotenv import dotenv_values
+from utils.music.local_resource_paths import migrate_legacy_local_audio_files
 
 bools = {
     "true": True,
@@ -159,6 +160,8 @@ DEFAULT_CONFIG = {
 
 
 def load_config():
+
+    migrate_legacy_local_audio_files()
 
     CONFIG = dict(DEFAULT_CONFIG)
 
