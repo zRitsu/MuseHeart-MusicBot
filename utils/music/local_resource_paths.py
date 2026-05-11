@@ -84,10 +84,13 @@ def get_config_js_backup_path() -> str:
 
 
 def get_yt_cookie_path() -> str:
-    preferred = local_audio_abspath(".ytcookie")
+    preferred = local_audio_abspath(".ytcookie.txt")
     legacy = str(Path(".ytdl_cookie").resolve())
+    legacy_local = local_audio_abspath(".ytcookie")
     if os.path.isfile(preferred):
         return preferred
+    if os.path.isfile(legacy_local):
+        return legacy_local
     if os.path.isfile(legacy):
         return legacy
     return preferred
@@ -112,15 +115,20 @@ def migrate_legacy_local_audio_files() -> list[str]:
         moved_items.append(item_name)
 
     legacy_cookie = root / ".ytdl_cookie"
-    target_cookie = target_root / ".ytcookie"
+    target_cookie = target_root / ".ytcookie.txt"
     if legacy_cookie.exists() and not target_cookie.exists():
         shutil.move(str(legacy_cookie), str(target_cookie))
-        moved_items.append(".ytdl_cookie -> .ytcookie")
+        moved_items.append(".ytdl_cookie -> .ytcookie.txt")
 
     legacy_cookie_txt = root / ".ytcookie.txt"
     if legacy_cookie_txt.exists() and not target_cookie.exists():
         shutil.move(str(legacy_cookie_txt), str(target_cookie))
-        moved_items.append(".ytcookie.txt -> .ytcookie")
+        moved_items.append(".ytcookie.txt")
+
+    local_short_cookie = target_root / ".ytcookie"
+    if local_short_cookie.exists() and not target_cookie.exists():
+        shutil.move(str(local_short_cookie), str(target_cookie))
+        moved_items.append("local_audio/.ytcookie -> local_audio/.ytcookie.txt")
 
     if moved_items:
         print(
