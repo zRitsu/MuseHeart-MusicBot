@@ -29,7 +29,7 @@ import wavelink
 from utils.client import BotCore
 from utils.db import DBModel
 from utils.music.audio_sources.deezer import deezer_regex
-from utils.music.audio_sources.spotify import spotify_regex_w_user
+from utils.music.audio_sources.spotify import spotify_regex_w_user, spotify_search_regex
 from utils.music.checks import check_voice, has_player, has_source, is_requester, is_dj, \
     can_send_message_check, check_requester_channel, can_send_message, can_connect, check_deafen, check_pool_bots, \
     check_channel_limit, check_stage_topic, check_queue_loading, check_player_perm, check_yt_cooldown
@@ -7362,19 +7362,19 @@ class Music(commands.Cog):
 
             if "youtube" not in node.info["sourceManagers"] and "ytsearch" not in node.original_providers:
                 self.remove_provider(node.search_providers, ["ytsearch"])
-                self.remove_provider(node.partial_providers, ["ytsearch:\"{isrc}\"", "ytsearch:\"{title} - {author}\""])
+                self.remove_provider(node.partial_providers, ["ytsearch:{isrc}", "ytsearch:{title} - {author}"])
             elif "ytsearch" not in node.search_providers:
                 if "ytsearch" in node.original_providers:
                     self.add_provider(node.search_providers, ["ytsearch"])
-                    self.add_provider(node.partial_providers, ["ytsearch:\"{isrc}\"", "ytsearch:\"{title} - {author}\""])
+                    self.add_provider(node.partial_providers, ["ytsearch:{isrc}", "ytsearch:{title} - {author}"])
 
             if "youtube" not in node.info["sourceManagers"] and "ytmsearch" not in node.original_providers:
                 self.remove_provider(node.search_providers, ["ytmsearch"])
-                self.remove_provider(node.partial_providers, ["ytmsearch:\"{isrc}\"", "ytmsearch:\"{title} - {author}\""])
+                self.remove_provider(node.partial_providers, ["ytmsearch:{isrc}", "ytmsearch:{title} - {author}"])
             elif "ytmsearch" not in node.search_providers:
                 if "ytmsearch" in node.original_providers:
                     self.add_provider(node.search_providers, ["ytmsearch"])
-                    self.add_provider(node.partial_providers, ["ytmsearch:\"{isrc}\"", "ytmsearch:\"{title} - {author}\""])
+                    self.add_provider(node.partial_providers, ["ytmsearch:{isrc}", "ytmsearch:{title} - {author}"])
 
             if "soundcloud" not in node.info["sourceManagers"]:
                 self.remove_provider(node.search_providers, ["scsearch"])
@@ -7445,11 +7445,11 @@ class Music(commands.Cog):
             elif p == "bcsearch":
                 node.partial_providers.append("bcsearch:{title} - {author}")
             elif p == "ytsearch":
-                node.partial_providers.append("ytsearch:\"{isrc}\"")
-                node.partial_providers.append("ytsearch:\"{title} - {author}\"")
+                node.partial_providers.append("ytsearch:{isrc}")
+                node.partial_providers.append("ytsearch:{title} - {author}")
             elif p == "ytmsearch":
-                node.partial_providers.append("ytmsearch:\"{isrc}\"")
-                node.partial_providers.append("ytmsearch:\"{title} - {author}\"")
+                node.partial_providers.append("ytmsearch:{isrc}")
+                node.partial_providers.append("ytmsearch:{title} - {author}")
             elif p == "scsearch":
                 node.partial_providers.append("scsearch:{title} - {author}")
 
@@ -7465,15 +7465,22 @@ class Music(commands.Cog):
 
         exceptions = set()
 
-        if (bot.pool.config["FORCE_USE_DEEZER_CLIENT"] or [n for n in bot.music.nodes.values() if
-                                                           "deezer" not in n.info.get("sourceManagers", [])]):
+        node_sources = node.info.get("sourceManagers", []) if node else []
+        node_supports_deezer = "deezer" in node_sources if node else any(
+            "deezer" in n.info.get("sourceManagers", []) for n in bot.music.nodes.values()
+        )
+        node_supports_spotify = "spotify" in node_sources if node else any(
+            "spotify" in n.info.get("sourceManagers", []) for n in bot.music.nodes.values()
+        )
+
+        if bot.pool.config["FORCE_USE_DEEZER_CLIENT"] or not node_supports_deezer:
             try:
                 tracks = await self.bot.pool.deezer.get_tracks(url=query, requester=user.id, search=True, check_title=80)
             except Exception as e:
                 self.bot.dispatch("custom_error", ctx=ctx, error=e)
                 exceptions.add(repr(e))
 
-        if not tracks and bot.spotify and not [n for n in bot.music.nodes.values() if "spotify" in n.info.get("sourceManagers", [])]:
+        if not tracks and bot.spotify and not node_supports_spotify:
             try:
                 tracks = await self.bot.pool.spotify.get_tracks(self.bot, user.id, query, search=True, check_title=80)
             except Exception as e:
@@ -7503,9 +7510,29 @@ class Music(commands.Cog):
 
         tracks = []
 
+        spotify_matches = spotify_regex_w_user.match(query) or spotify_search_regex.match(query)
+
         for n in nodes:
 
             node_retry = False
+
+            if spotify_matches and "spotify" not in n.info.get("sourceManagers", []):
+
+                if bot.spotify:
+                    try:
+                        tracks = await self.bot.pool.spotify.get_tracks(
+                            self.bot, user.id, query, search=True, check_title=80
+                        )
+                    except Exception as e:
+                        self.bot.dispatch("custom_error", ctx=ctx, error=e, resp_msg=True)
+                        exceptions.add(repr(e))
+                        tracks = None
+                    else:
+                        if tracks:
+                            return tracks, n, exceptions
+
+                node = n
+                continue
 
             if source is False:
                 providers = n.search_providers[:1]

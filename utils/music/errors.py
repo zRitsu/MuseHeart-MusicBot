@@ -6,6 +6,7 @@ from typing import Union, Optional
 import disnake
 from disnake.ext import commands
 from disnake.utils import escape_mentions
+from aiohttp import ClientResponseError
 from pymongo.errors import ServerSelectionTimeoutError
 
 from utils.music.converters import time_format, perms_translations
@@ -203,6 +204,9 @@ def parse_error(
     elif isinstance(error, YoutubeSourceDisabled):
         error_txt = "O suporte a links/buscas do youtube está desativado devido a medidas reforçadas do próprio youtube " \
                      "que impede o funcionamento nativo de links do yt. Caso queira conferir a postagem do youtube sobre isso você pode [clicar aqui](<https://support.google.com/youtube/thread/269521462/enforcement-on-third-party-apps?hl=en>)."
+
+    elif isinstance(error, ClientResponseError):
+        error_txt = f"**Falha ao consultar um serviço externo:** `{error.status} {error.message or 'HTTP error'}`"
 
     if isinstance(error, ServerSelectionTimeoutError) and os.environ.get("REPL_SLUG"):
         error_txt = "Foi detectado um erro de dns na repl.it que me impede de conectar com minha database " \

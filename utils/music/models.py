@@ -140,7 +140,7 @@ class PartialTrack:
     @property
     def thumb(self) -> str:
         try:
-            return self.info["extra"]["thumb"] or self.info["artworkUrl"]
+            return self.info["extra"].get("original_thumb") or self.info["extra"]["thumb"] or self.info["artworkUrl"]
         except KeyError:
             try:
                 return self.info["artworkUrl"]
@@ -684,7 +684,15 @@ class LavalinkPlayer(wavelink.Player):
         return bool(self.node.info.get("isNodelink"))
 
     def get_source_provider(self, source_name: str) -> str | None:
-        return providers_dict.get(source_name)
+        provider = providers_dict.get(source_name)
+
+        if not provider:
+            return None
+
+        if source_name not in self.node.info.get("sourceManagers", []):
+            return None
+
+        return provider
 
     @property
     def position(self):
@@ -1964,6 +1972,10 @@ class LavalinkPlayer(wavelink.Player):
             self.locked = True
 
             encoded_track = None
+            track.info.setdefault("extra", {})
+
+            if original_thumb := (track.info["extra"].get("thumb") or track.info.get("artworkUrl")):
+                track.info["extra"].setdefault("original_thumb", original_thumb)
 
             if not self.auto_pause:
 
@@ -3342,10 +3354,10 @@ class LavalinkPlayer(wavelink.Player):
                         ):
                             cog = self.bot.get_cog("Music")
                             cog.remove_provider(self.node.search_providers, ["ytsearch", "ytmsearch"])
-                            cog.remove_provider(self.node.partial_providers, ["ytsearch:\"{isrc}\"",
-                                                                              "ytsearch:\"{title} - {author}\"",
-                                                                              "ytmsearch:\"{isrc}\"",
-                                                                              "ytmsearch:\"{title} - {author}\"",
+                            cog.remove_provider(self.node.partial_providers, ["ytsearch:{isrc}",
+                                                                              "ytsearch:{title} - {author}",
+                                                                              "ytmsearch:{isrc}",
+                                                                              "ytmsearch:{title} - {author}",
                                                                               ])
                             self.native_yt = False
                             await self.resolve_track(track)
@@ -3358,7 +3370,7 @@ class LavalinkPlayer(wavelink.Player):
                     except AttributeError:
                         pass
 
-                    self.bot.pool.partial_track_cache[f'{track.info["sourceName"]}:{track.author}-{track.single_title}'] = tracks
+                    self.bot.pool.partial_track_cache[f'{track.info["sourceName"]}:{track.author}-{track.single_title}'] = result
 
                 try:
                     if result[0].info["sourceName"] == "bandcamp":
@@ -3410,6 +3422,9 @@ class LavalinkPlayer(wavelink.Player):
                     track.info["author"] = selected_track.author
             if not track.duration:
                 track.info["duration"] = selected_track.duration
+            track.info.setdefault("extra", {})
+            if original_thumb := (track.info.get("extra", {}).get("thumb") or track.info.get("artworkUrl")):
+                track.info["extra"]["original_thumb"] = original_thumb
             if not track.thumb:
                 track.info["artworkUrl"] = selected_track.thumb
 

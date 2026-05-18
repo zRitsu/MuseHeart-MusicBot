@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import datetime
+import re
 import traceback
 from typing import TYPE_CHECKING, Optional, List
 
@@ -24,6 +25,39 @@ if TYPE_CHECKING:
 def check_track_title(t: str):
     title = t.lower()
     return [tg for tg in exclude_tags if tg.lower() not in title]
+
+
+def normalize_match_text(text: str) -> str:
+    text = (text or "").lower()
+    text = re.sub(r"\((?:lyrics?|official|audio|video)\)", " ", text)
+    text = re.sub(r"\b(?:ft|feat)\.?\b", " ", text)
+    text = text.replace("&", " ")
+    text = re.sub(r"[^a-z0-9]+", " ", text)
+    return " ".join(text.split())
+
+
+def is_scrobble_match(source_track, candidate) -> bool:
+    source_title = normalize_match_text(getattr(source_track, "single_title", "") or source_track.title)
+    source_artist = normalize_match_text(getattr(source_track, "authors_string", "") or source_track.author)
+    candidate_title = normalize_match_text(candidate.single_title)
+    candidate_artist = normalize_match_text(candidate.authors_string)
+
+    title_score = max(
+        fuzz.token_sort_ratio(candidate_title, source_title),
+        fuzz.token_set_ratio(candidate_title, source_title),
+        fuzz.partial_ratio(candidate_title, source_title),
+    )
+    artist_score = max(
+        fuzz.token_sort_ratio(candidate_artist, source_artist),
+        fuzz.token_set_ratio(candidate_artist, source_artist),
+        fuzz.partial_ratio(candidate_artist, source_artist),
+    )
+    combined_score = max(
+        fuzz.token_sort_ratio(f"{candidate_artist} {candidate_title}", f"{source_artist} {source_title}"),
+        fuzz.token_set_ratio(f"{candidate_artist} {candidate_title}", f"{source_artist} {source_title}"),
+    )
+
+    return title_score >= 70 and (artist_score >= 55 or combined_score >= 72)
 
 
 class LastFMView(disnake.ui.View):
@@ -528,9 +562,9 @@ class LastFmCog(commands.Cog):
 
                     def filter_result(result):
                         if not [t for t in exclude_tags if t.lower() in track.title]:
-                            result_ = [t for t in result if fuzz.token_sort_ratio(f"{t.authors_string.lower()} - {t.single_title.lower()}", track.title.lower()) > 70 and check_track_title(t.title)]
+                            result_ = [t for t in result if is_scrobble_match(track, t) and check_track_title(t.title)]
                         else:
-                            result_ = [t for t in result if fuzz.token_sort_ratio(f"{t.authors_string.lower()} - {t.single_title.lower()}", track.title.lower()) > 70]
+                            result_ = [t for t in result if is_scrobble_match(track, t)]
 
                         return result_
 

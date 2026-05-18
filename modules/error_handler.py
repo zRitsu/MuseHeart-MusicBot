@@ -88,6 +88,38 @@ class ErrorHandler(commands.Cog):
     async def on_interaction_command_error(self, inter: disnake.ApplicationCommandInteraction, error: Exception, **kwargs):
         await self.process_interaction_error(inter=inter, error=error, **kwargs)
 
+    def build_report_embed(self, ctx_or_inter) -> disnake.Embed:
+
+        embed = disnake.Embed(
+            color=disnake.Color.red(),
+            title="Relatório de erro"
+        )
+
+        try:
+            embed.description = (
+                f"Servidor: `{ctx_or_inter.guild}` (`{ctx_or_inter.guild_id}`)\n"
+                f"Canal: `{ctx_or_inter.channel}` (`{ctx_or_inter.channel.id}`)\n"
+                f"Usuário: `{ctx_or_inter.author}` (`{ctx_or_inter.author.id}`)"
+            )
+        except AttributeError:
+            embed.description = "Não foi possível coletar todos os metadados do contexto."
+
+        try:
+            if command := getattr(ctx_or_inter, "command", None):
+                embed.add_field(name="Comando", value=f"`{getattr(command, 'qualified_name', command)}`", inline=False)
+        except Exception:
+            pass
+
+        try:
+            if message := getattr(ctx_or_inter, "message", None):
+                jump_url = getattr(message, "jump_url", None)
+                if jump_url:
+                    embed.add_field(name="Mensagem", value=f"[Abrir mensagem]({jump_url})", inline=False)
+        except Exception:
+            pass
+
+        return embed
+
     async def process_interaction_error(self, inter: disnake.ApplicationCommandInteraction, error: Exception, resp_msg=True, **kwargs):
 
         if isinstance(error, PoolException):
