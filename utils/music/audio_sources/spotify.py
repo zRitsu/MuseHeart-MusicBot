@@ -3,14 +3,17 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import hmac
 import json
 import os.path
 import re
+import struct
 import time
 import traceback
+from hashlib import sha1
 from tempfile import gettempdir
 from typing import Optional, TYPE_CHECKING, Union
-from urllib.parse import quote
+from urllib.parse import quote, urljoin
 
 import aiofiles
 from aiohttp import ClientSession
@@ -33,30 +36,30 @@ spotify_cache_file = os.path.join(gettempdir(), ".spotify_cache.json")
 
 class SpotifyClient:
 
+    PARTNER_API_BASE = "https://api-partner.spotify.com/pathfinder/v1/query"
+    SEARCH_OPERATION = "searchDesktop"
+    SEARCH_HASH = "fcad5a3e0d5af727fb76966f06971c19cfa2275e6ff7671196753e008611873c"
+    RECOMMENDATIONS_OPERATION = "internalLinkRecommenderTrack"
+    RECOMMENDATIONS_HASH = "c77098ee9d6ee8ad3eb844938722db60570d040b49f41f5ec6e7be9160a7c86b"
+    SECRET_ARRAY_PATTERN = re.compile(r'"secret":\[(\d+(?:,\d+)+)]')
+    SECRET_VERSIONED_PATTERN = re.compile(r'\{secret:(?:"([^"]+)"|\'([^\']+)\'),version:(\d+)\}')
+    SCRIPT_SRC_PATTERN = re.compile(r"<script[^>]+src=[\"']([^\"']+)[\"']", re.IGNORECASE)
+
     def __init__(self, client_id: Optional[str] = None, client_secret: Optional[str] = None, playlist_extra_page_limit: int = 0):
-
-        if not client_id:
-            raise Exception(
-                "CLIENT_ID do spotify não informado."
-            )
-
-        if not client_secret:
-            raise Exception(
-                "CLIENT_SECRET do spotify não informado."
-            )
-
+        self.spotify_cache_file = spotify_cache_file
         self.client_id = client_id
         self.client_secret = client_secret
         self.base_url = "https://api.spotify.com/v1"
         self.spotify_cache = {}
         self.disabled = False
-        self.type = "api"
+        self.type = "api" if client_id and client_secret else "visitor"
         self.token_refresh = False
         self.playlist_extra_page_limit = playlist_extra_page_limit
 
         try:
-            with open(spotify_cache_file) as f:
+            with open(self.spotify_cache_file) as f:
                 self.spotify_cache = json.load(f)
+                self.type = self.spotify_cache.get("type", self.type)
         except FileNotFoundError:
             pass
 
@@ -130,14 +133,296 @@ class SpotifyClient:
         else:
             track_ids = ",".join(seed_tracks)
 
+        if self.type == "visitor":
+            track_ids = track_ids.split(",")[0]
+            return await self._get_recommendations_visitor(track_ids, limit)
+
         return await self.request(path='recommendations', params={
             'seed_tracks': track_ids, 'limit': limit
         })
 
-    async def track_search(self, query: str):
+    async def track_search(self, query: str, limit: int = 10):
+        if self.type == "visitor":
+            return await self._track_search_visitor(query=query, limit=limit)
+
         return await self.request(path='search', params = {
-        'q': quote(query), 'type': 'track', 'limit': 10
+        'q': quote(query), 'type': 'track', 'limit': limit
         })
+
+    async def _post_partner_api(self, operation_name: str, sha256_hash: str, variables: dict) -> dict:
+        headers = {
+            "Authorization": f"Bearer {await self.get_valid_access_token()}",
+            "Content-Type": "application/json",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Spotify-App-Version": "1.2.80.289.gd6b01cc3",
+            "Referer": "https://open.spotify.com/",
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/134.0.6998.178 Spotify/1.2.65.255 Safari/537.36"
+            ),
+        }
+        payload = {
+            "operationName": operation_name,
+            "variables": variables,
+            "extensions": {
+                "persistedQuery": {
+                    "version": 1,
+                    "sha256Hash": sha256_hash,
+                }
+            },
+        }
+
+        async with ClientSession(headers=headers) as session:
+            async with session.post(self.PARTNER_API_BASE, json=payload) as response:
+                if response.status == 401:
+                    await self.get_access_token()
+                    return await self._post_partner_api(operation_name, sha256_hash, variables)
+                if response.status == 429:
+                    retry_after = int(response.headers.get("Retry-After", "1") or "1")
+                    await asyncio.sleep(max(1, retry_after))
+                    return await self._post_partner_api(operation_name, sha256_hash, variables)
+
+                data = await response.json(content_type=None)
+
+                if response.status >= 400:
+                    response.raise_for_status()
+
+                return data
+
+    @staticmethod
+    def _spotify_uri_to_id(uri: str) -> str:
+        try:
+            return uri.rsplit(":", maxsplit=1)[-1]
+        except AttributeError:
+            return ""
+
+    @staticmethod
+    def _pick_image_url(images) -> str:
+        for image in images or []:
+            if isinstance(image, dict) and image.get("url"):
+                return image["url"]
+        return ""
+
+    def _normalize_partner_track(self, track_data: dict) -> dict:
+        album_data = track_data.get("albumOfTrack") or track_data.get("album") or {}
+        album_cover = (album_data.get("coverArt") or {}).get("sources") or album_data.get("images") or []
+        artist_items = (track_data.get("artists") or {}).get("items") or track_data.get("artists") or []
+        track_id = track_data.get("id") or self._spotify_uri_to_id(track_data.get("uri"))
+        track_url = (
+            ((track_data.get("sharingInfo") or {}).get("shareUrl"))
+            or ((track_data.get("external_urls") or {}).get("spotify"))
+            or (f"https://open.spotify.com/track/{track_id}" if track_id else "")
+        )
+        album_id = album_data.get("id") or self._spotify_uri_to_id(album_data.get("uri"))
+        album_url = (
+            ((album_data.get("sharingInfo") or {}).get("shareUrl"))
+            or ((album_data.get("external_urls") or {}).get("spotify"))
+            or (f"https://open.spotify.com/album/{album_id}" if album_id else "")
+        )
+
+        artists = []
+
+        for artist in artist_items:
+            artist_data = (artist.get("profile") and {"name": artist["profile"].get("name")}) or artist
+            artist_id = artist.get("id") or self._spotify_uri_to_id(artist.get("uri"))
+            artist_url = (
+                ((artist.get("sharingInfo") or {}).get("shareUrl"))
+                or ((artist.get("external_urls") or {}).get("spotify"))
+                or (f"https://open.spotify.com/artist/{artist_id}" if artist_id else "")
+            )
+            artists.append({
+                "name": artist_data.get("name") or "",
+                "id": artist_id,
+                "external_urls": {"spotify": artist_url},
+            })
+
+        return {
+            "name": track_data.get("name"),
+            "duration_ms": track_data.get("duration") or track_data.get("duration_ms") or 0,
+            "id": track_id,
+            "uri": track_data.get("uri"),
+            "artists": artists,
+            "album": {
+                "name": album_data.get("name") or "",
+                "id": album_id,
+                "images": [{"url": self._pick_image_url(album_cover)}] if self._pick_image_url(album_cover) else [],
+                "external_urls": {"spotify": album_url},
+                "total_tracks": album_data.get("totalTracks") or album_data.get("total_tracks") or 0,
+            },
+            "external_urls": {"spotify": track_url},
+            "external_ids": {},
+        }
+
+    async def _track_search_visitor(self, query: str, limit: int = 10) -> dict:
+        data = await self._post_partner_api(
+            operation_name=self.SEARCH_OPERATION,
+            sha256_hash=self.SEARCH_HASH,
+            variables={
+                "searchTerm": query,
+                "offset": 0,
+                "limit": limit,
+                "numberOfTopResults": 5,
+                "includeAudiobooks": True,
+                "includeArtistHasConcertsField": False,
+                "includePreReleases": True,
+                "includeAuthors": False,
+            },
+        )
+
+        items = (
+            (((data or {}).get("data") or {}).get("searchV2") or {})
+            .get("tracksV2", {})
+            .get("items", [])
+        )
+        tracks = []
+
+        for item in items:
+            track_data = (((item or {}).get("item") or {}).get("data")) or {}
+            if track_data:
+                tracks.append(self._normalize_partner_track(track_data))
+
+        return {"tracks": {"items": tracks}, "tracks_data": tracks}
+
+    async def _get_recommendations_visitor(self, seed_track_id: str, limit: int) -> dict:
+        data = await self._post_partner_api(
+            operation_name=self.RECOMMENDATIONS_OPERATION,
+            sha256_hash=self.RECOMMENDATIONS_HASH,
+            variables={"uri": f"spotify:track:{seed_track_id}"},
+        )
+
+        payload = (data or {}).get("data") or {}
+        items = ((payload.get("internalLinkRecommenderTrack") or {}).get("items")) or (
+            (payload.get("seoRecommendedTrack") or {}).get("items") or []
+        )
+
+        tracks = []
+
+        for item in items[:limit]:
+            track_data = (((item or {}).get("content") or {}).get("data")) or ((item or {}).get("data")) or {}
+            if track_data and track_data.get("__typename") == "Track":
+                tracks.append(self._normalize_partner_track(track_data))
+
+        return {"tracks": tracks}
+
+    @staticmethod
+    def _generate_totp(secret: bytes, period: int = 30, digits: int = 6) -> str:
+        counter = int(time.time() // period)
+        counter_bytes = struct.pack(">Q", counter)
+        digest = hmac.new(secret, counter_bytes, sha1).digest()
+        offset = digest[-1] & 0x0F
+        binary = (
+            ((digest[offset] & 0x7F) << 24)
+            | ((digest[offset + 1] & 0xFF) << 16)
+            | ((digest[offset + 2] & 0xFF) << 8)
+            | (digest[offset + 3] & 0xFF)
+        )
+        otp = binary % (10 ** digits)
+        return f"{otp:0{digits}d}"
+
+    @staticmethod
+    def _transform_secret_values(secret_values: list[int]) -> bytes:
+        transformed_values = [
+            value ^ ((index % 33) + 9)
+            for index, value in enumerate(secret_values)
+        ]
+        return "".join(str(value) for value in transformed_values).encode("utf-8")
+
+    async def _request_spotify_web_secret(self, session: ClientSession) -> tuple[bytes, str]:
+        homepage_url = "https://open.spotify.com/"
+
+        async with session.get(homepage_url) as response:
+            response.raise_for_status()
+            html = await response.text()
+
+        script_urls = []
+
+        for script_url in self.SCRIPT_SRC_PATTERN.findall(html):
+            if "web-player" in script_url and "vendor" not in script_url:
+                script_urls.append(urljoin(homepage_url, script_url))
+
+        if not script_urls:
+            raise RuntimeError("Nenhum script do Web Player foi encontrado na pagina do Spotify.")
+
+        for script_url in script_urls:
+            async with session.get(script_url) as response:
+                response.raise_for_status()
+                script_content = await response.text()
+
+            if match := self.SECRET_ARRAY_PATTERN.search(script_content):
+                secret_array = [int(value.strip()) for value in match.group(1).split(",")]
+                return self._transform_secret_values(secret_array), "7"
+
+            if matches := self.SECRET_VERSIONED_PATTERN.findall(script_content):
+                secret_raw_a, secret_raw_b, secret_version = matches[0]
+                secret_raw = secret_raw_a or secret_raw_b
+                secret_values = [ord(char) for char in secret_raw]
+                return self._transform_secret_values(secret_values), secret_version
+
+        raise RuntimeError("Nao foi possivel extrair o secret do Web Player do Spotify.")
+
+    async def _get_visitor_token_via_web_player(self) -> dict:
+        headers = {
+            "App-Platform": "WebPlayer",
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/136.0.0.0 Safari/537.36"
+            ),
+        }
+
+        async with ClientSession(headers=headers) as session:
+            secret, secret_version = await self._request_spotify_web_secret(session)
+            totp = self._generate_totp(secret)
+            access_token_url = (
+                "https://open.spotify.com/api/token"
+                f"?reason=transport&productType=web-player&totp={totp}"
+                f"&totpServer=unavailable&totpVer={secret_version}"
+            )
+
+            async with session.get(access_token_url) as response:
+                data = await response.json(content_type=None)
+
+                if response.status >= 400:
+                    error = data.get("error") if isinstance(data, dict) else None
+                    raise RuntimeError(f"Spotify retornou erro no token guest: {error or response.status}")
+
+                if data.get("error"):
+                    raise RuntimeError(f"Spotify retornou erro no token guest: {data['error']}")
+
+                return data
+
+    async def _get_visitor_token_legacy(self) -> dict:
+        access_token_url = "https://open.spotify.com/get_access_token?reason=transport&productType=embed"
+        headers = {
+            "App-Platform": "WebPlayer",
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/136.0.0.0 Safari/537.36"
+            ),
+        }
+
+        async with ClientSession(headers=headers) as session:
+            async with session.get(access_token_url) as response:
+                data = await response.json(content_type=None)
+
+                if response.status >= 400:
+                    error = data.get("error") if isinstance(data, dict) else None
+                    raise RuntimeError(f"Spotify retornou erro no endpoint legacy guest: {error or response.status}")
+
+                return data
+
+    async def _get_visitor_access_token_payload(self) -> dict:
+        errors = []
+
+        for loader in (self._get_visitor_token_via_web_player, self._get_visitor_token_legacy):
+            try:
+                return await loader()
+            except Exception as exc:
+                errors.append(repr(exc))
+
+        raise RuntimeError("Falha ao obter token guest do Spotify. Tentativas: " + " | ".join(errors))
 
     async def get_access_token(self):
 
@@ -149,36 +434,52 @@ class SpotifyClient:
         self.token_refresh = True
 
         try:
-            token_url = 'https://accounts.spotify.com/api/token'
+            if self.client_id and self.client_secret:
+                token_url = 'https://accounts.spotify.com/api/token'
 
-            headers = {
-                'Authorization': 'Basic ' + base64.b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
-            }
+                headers = {
+                    'Authorization': 'Basic ' + base64.b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
+                }
 
-            data = {
-                'grant_type': 'client_credentials'
-            }
+                data = {
+                    'grant_type': 'client_credentials'
+                }
 
-            async with ClientSession() as session:
-                async with session.post(token_url, headers=headers, data=data) as response:
-                    data = await response.json()
+                async with ClientSession() as session:
+                    async with session.post(token_url, headers=headers, data=data) as response:
+                        data = await response.json()
 
                 if data.get("error"):
-                    print(f"⚠️ - Spotify: Ocorreu um erro ao obter token: {data['error_description']}")
+                    print(f"⚠️ - Spotify: Ocorreu um erro ao obter token oficial: {data.get('error_description', data['error'])}")
                     self.client_id = None
                     self.client_secret = None
+                    self.type = "visitor"
                     await self.get_access_token()
                     return
 
                 self.spotify_cache = data
-
                 self.type = "api"
-
-                self.spotify_cache["tyoe"] = "api"
-
+                self.spotify_cache["type"] = "api"
                 self.spotify_cache["expires_at"] = time.time() + self.spotify_cache["expires_in"]
 
                 print("🎶 - Access token do spotify obtido com sucesso via API Oficial.")
+
+            else:
+                data = await self._get_visitor_access_token_payload()
+                expires_at = (data.get("accessTokenExpirationTimestampMs", 0) or 0) / 1000
+
+                if not expires_at:
+                    expires_at = time.time() + 300
+
+                self.spotify_cache = {
+                    "access_token": data["accessToken"],
+                    "expires_in": max(0, int(expires_at - time.time())),
+                    "expires_at": expires_at,
+                    "type": "visitor",
+                }
+                self.type = "visitor"
+
+                print("🎶 - Access token do spotify obtido com sucesso do tipo: visitante.")
 
         except Exception as e:
             self.token_refresh = False
@@ -186,11 +487,11 @@ class SpotifyClient:
 
         self.token_refresh = False
 
-        async with aiofiles.open(spotify_cache_file, "w") as f:
+        async with aiofiles.open(self.spotify_cache_file, "w") as f:
             await f.write(json.dumps(self.spotify_cache))
 
     async def get_valid_access_token(self):
-        if time.time() >= self.spotify_cache["expires_at"]:
+        if not (exp_date := self.spotify_cache.get("expires_at")) or time.time() >= exp_date:
             await self.get_access_token()
         return self.spotify_cache["access_token"]
 
