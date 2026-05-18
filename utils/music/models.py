@@ -22,6 +22,7 @@ from rapidfuzz import fuzz
 from yt_dlp import YoutubeDL
 
 import wavelink
+from utils.music.local_lavalink import get_deno_binary
 from utils.music.local_resource_paths import get_yt_cookie_path
 from utils.db import DBModel
 from utils.music.checks import can_connect
@@ -3924,6 +3925,28 @@ def build_ytdl_options(options: dict):
 
     if cookiefile := get_ytdlp_cookiefile():
         final_options["cookiefile"] = cookiefile
+
+    js_runtimes = dict(final_options.get("js_runtimes") or {})
+    remote_components = list(final_options.get("remote_components") or [])
+
+    try:
+        deno_bin = get_deno_binary()
+    except Exception:
+        deno_bin = None
+
+    if deno_bin:
+        deno_config = dict(js_runtimes.get("deno") or {})
+        deno_config.setdefault("path", deno_bin)
+        js_runtimes["deno"] = deno_config
+
+        if "ejs:npm" not in remote_components:
+            remote_components.append("ejs:npm")
+
+    if js_runtimes:
+        final_options["js_runtimes"] = js_runtimes
+
+    if remote_components:
+        final_options["remote_components"] = remote_components
 
     return final_options
 
