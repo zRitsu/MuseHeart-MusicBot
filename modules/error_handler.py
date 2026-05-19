@@ -75,11 +75,17 @@ class ErrorHandler(commands.Cog):
         await self.process_interaction_error(inter=inter, error=error)
 
     @commands.Cog.listener('on_custom_error')
-    async def custom_error_event(self, ctx: Union[disnake.ApplicationCommandInteraction, CustomContext], error: Exception):
+    async def custom_error_event(
+        self,
+        ctx: Union[disnake.ApplicationCommandInteraction, CustomContext],
+        error: Exception,
+        resp_msg=False,
+        **kwargs,
+    ):
         if isinstance(ctx, (CustomContext, disnake.Message)):
-            await self.on_legacy_command_error(ctx=ctx, error=error, resp_msg=False)
+            await self.on_legacy_command_error(ctx=ctx, error=error, resp_msg=resp_msg)
         else:
-            await self.process_interaction_error(inter=ctx, error=error, resp_msg=False)
+            await self.process_interaction_error(inter=ctx, error=error, resp_msg=resp_msg, **kwargs)
 
     @commands.Cog.listener('on_custom_slash_command_error')
     @commands.Cog.listener('on_user_command_error')
