@@ -27,9 +27,9 @@ from utils.music.track_encoder import encode_track
 if TYPE_CHECKING:
     from utils.client import BotCore
 
-spotify_regex = re.compile("https://open.spotify.com?.+(album|playlist|artist|track)/([a-zA-Z0-9]+)")
+spotify_regex = re.compile(r"(?i)https://open\.spotify\.com(?:/intl-[^/]+)?/(album|playlist|artist|track)/([a-zA-Z0-9]+)")
 spotify_link_regex = re.compile(r"(?i)https?:\/\/spotify\.link\/?(?P<id>[a-zA-Z0-9]+)")
-spotify_regex_w_user = re.compile("https://open.spotify.com?.+(album|playlist|artist|track|user)/([a-zA-Z0-9]+)")
+spotify_regex_w_user = re.compile(r"(?i)https://open\.spotify\.com(?:/intl-[^/]+)?/(album|playlist|artist|track|user)/([a-zA-Z0-9]+)")
 spotify_search_regex = re.compile(r"(?i)https://open\.spotify\.com(?:/intl-[^/]+)?/search/([^?#]+)")
 
 spotify_cache_file = os.path.join(gettempdir(), ".spotify_cache.json")
@@ -116,6 +116,16 @@ class SpotifyClient:
         return isinstance(error, GenericError) and "Spotify bloqueou o acesso" in getattr(error, "text", "")
 
     @staticmethod
+    def _is_temporary_partner_api_failure(error: Exception) -> bool:
+        return isinstance(error, GenericError) and any(
+            text in getattr(error, "text", "")
+            for text in (
+                "Spotify retornou uma resposta vazia",
+                "Spotify retornou uma resposta inválida",
+            )
+        )
+
+    @staticmethod
     def _extract_search_term(query: str) -> str:
         if not (match := spotify_search_regex.match(query)):
             return ""
@@ -130,21 +140,47 @@ class SpotifyClient:
 
         return unquote(raw_term.replace("/", " ")).strip()
 
+    async def _get_track_info_api(self, track_id: str) -> dict:
+        if not (self.client_id and self.client_secret):
+            raise RuntimeError("Spotify API oficial indisponivel: credenciais ausentes.")
+
+        if self.type != "api":
+            await self.get_access_token()
+
+        if self.type != "api":
+            raise RuntimeError("Spotify API oficial indisponivel: token oficial nao foi obtido.")
+
+        return await self.request(path=f"tracks/{track_id}")
+
     async def get_track_info(self, track_id: str):
-        if self.type == "visitor":
+        errors = []
+
+        if self.client_id and self.client_secret:
             try:
-                result = await self._get_track_info_visitor(track_id)
+                result = await self._get_track_info_api(track_id)
                 if result.get("name"):
                     return result
-            except Exception:
-                pass
-            return await self._get_track_info_public(track_id)
+            except Exception as e:
+                errors.append(repr(e))
+
         try:
-            return await self.request(path=f'tracks/{track_id}')
+            result = await self._get_track_info_public(track_id)
+            if result.get("name"):
+                return result
         except Exception as e:
-            if self._is_spotify_access_blocked(e):
-                return await self._get_track_info_public(track_id)
-            raise
+            errors.append(repr(e))
+
+        try:
+            result = await self._get_track_info_visitor(track_id)
+            if result.get("name"):
+                return result
+        except Exception as e:
+            errors.append(repr(e))
+
+        raise GenericError(
+            "**Não houve resultados para o link da música informado...**\n\n"
+            + " | ".join(errors[-3:])
+        )
 
     async def get_album_info(self, album_id: str):
         if self.type == "visitor":
@@ -243,7 +279,12 @@ class SpotifyClient:
 
     async def track_search(self, query: str, limit: int = 10):
         if self.type == "visitor":
-            return await self._track_search_visitor(query=query, limit=limit)
+            try:
+                return await self._track_search_visitor(query=query, limit=limit)
+            except Exception as e:
+                if self._is_temporary_partner_api_failure(e):
+                    return {"tracks": {"items": []}, "tracks_data": []}
+                raise
 
         try:
             return await self.request(path='search', params={
@@ -252,14 +293,26 @@ class SpotifyClient:
         except Exception as e:
             if self._is_spotify_access_blocked(e):
                 payload = await self._get_visitor_access_token_payload()
-                return await self._track_search_visitor(
-                    query=query,
-                    limit=limit,
-                    access_token=payload["accessToken"]
-                )
+                try:
+                    return await self._track_search_visitor(
+                        query=query,
+                        limit=limit,
+                        access_token=payload["accessToken"]
+                    )
+                except Exception as inner_error:
+                    if self._is_temporary_partner_api_failure(inner_error):
+                        return {"tracks": {"items": []}, "tracks_data": []}
+                    raise
             raise
 
-    async def _post_partner_api(self, operation_name: str, sha256_hash: str, variables: dict, access_token: str = None) -> dict:
+    async def _post_partner_api(
+        self,
+        operation_name: str,
+        sha256_hash: str,
+        variables: dict,
+        access_token: str = None,
+        retry_count: int = 0,
+    ) -> dict:
         headers = {
             "Authorization": f"Bearer {access_token or await self.get_valid_access_token()}",
             "Content-Type": "application/json",
@@ -287,13 +340,61 @@ class SpotifyClient:
             async with session.post(self.PARTNER_API_BASE, json=payload) as response:
                 if response.status == 401 and not access_token:
                     await self.get_access_token()
-                    return await self._post_partner_api(operation_name, sha256_hash, variables)
+                    return await self._post_partner_api(
+                        operation_name,
+                        sha256_hash,
+                        variables,
+                        retry_count=retry_count,
+                    )
                 if response.status == 429:
                     retry_after = int(response.headers.get("Retry-After", "1") or "1")
                     await asyncio.sleep(max(1, retry_after))
-                    return await self._post_partner_api(operation_name, sha256_hash, variables, access_token=access_token)
+                    return await self._post_partner_api(
+                        operation_name,
+                        sha256_hash,
+                        variables,
+                        access_token=access_token,
+                        retry_count=retry_count,
+                    )
 
-                data = await response.json(content_type=None)
+                body = await response.text()
+
+                if response.status == 404:
+                    raise GenericError("**Não houve resultado para a consulta enviada ao Spotify.**")
+
+                if response.status == 403:
+                    raise GenericError(
+                        "**O Spotify bloqueou o acesso a esse conteúdo para minha sessão atual.**\n\n"
+                        "`Isso costuma acontecer por restrição regional, conteúdo privado ou limitação temporária da API.`"
+                    )
+
+                if not body.strip():
+                    if retry_count < 1:
+                        await asyncio.sleep(1)
+                        return await self._post_partner_api(
+                            operation_name,
+                            sha256_hash,
+                            variables,
+                            access_token=access_token,
+                            retry_count=retry_count + 1,
+                        )
+                    raise GenericError("**O Spotify retornou uma resposta vazia ao consultar dados internos.**")
+
+                try:
+                    data = json.loads(body)
+                except json.JSONDecodeError as e:
+                    if retry_count < 1:
+                        await asyncio.sleep(1)
+                        return await self._post_partner_api(
+                            operation_name,
+                            sha256_hash,
+                            variables,
+                            access_token=access_token,
+                            retry_count=retry_count + 1,
+                        )
+                    raise GenericError(
+                        "**O Spotify retornou uma resposta inválida ao consultar dados internos.**"
+                    ) from e
 
                 if response.status >= 400:
                     response.raise_for_status()
@@ -311,6 +412,48 @@ class SpotifyClient:
     def _extract_id_from_url(url: str) -> str:
         path_parts = [part for part in urlparse(url).path.split("/") if part]
         return path_parts[-1] if path_parts else ""
+
+    @staticmethod
+    def _get_track_artist_name(track_data: dict) -> str:
+        for artist in track_data.get("artists") or []:
+            if artist and artist.get("name"):
+                return artist["name"]
+        return "Unknown Artist"
+
+    @staticmethod
+    def _get_track_artists(track_data: dict) -> list[dict]:
+        return [artist for artist in (track_data.get("artists") or []) if artist]
+
+    @classmethod
+    def _get_track_authors(cls, track_data: dict) -> list[str]:
+        artists = cls._get_track_artists(track_data)
+        track_name = (track_data.get("name") or "").lower()
+        authors = [
+            fix_characters(artist["name"])
+            for artist in artists
+            if artist.get("name") and f"feat. {artist['name'].lower()}" not in track_name
+        ]
+        return authors or ["Unknown Artist"]
+
+    @classmethod
+    def _get_track_authors_md(cls, track_data: dict) -> str:
+        artists = cls._get_track_artists(track_data)
+        if not artists:
+            return "`Unknown Artist`"
+
+        track_name = quote(track_data.get("name") or "")
+        return ", ".join(
+            f"[`{fix_characters(artist['name'])}`](<{artist.get('external_urls', {}).get('spotify', f'https://www.youtube.com/results?search_query={track_name}')}>)"
+            for artist in artists
+            if artist.get("name")
+        ) or "`Unknown Artist`"
+
+    @staticmethod
+    def _get_artwork_url(track_data: dict) -> str:
+        try:
+            return track_data["album"]["images"][0]["url"]
+        except (IndexError, KeyError, TypeError):
+            return ""
 
     @classmethod
     def _extract_meta_tags(cls, html: str) -> tuple[dict[str, str], list[tuple[str, str]]]:
@@ -820,14 +963,14 @@ class SpotifyClient:
 
                     trackinfo = {
                         'title': result["name"],
-                        'author': result["artists"][0]["name"] or "Unknown Artist",
+                        'author': self._get_track_artist_name(result),
                         'length': self._coerce_duration_ms(result["duration_ms"]),
                         'identifier': result["id"],
                         'isStream': False,
                         'uri': result["external_urls"]["spotify"],
                         'sourceName': 'spotify',
                         'position': 0,
-                        'artworkUrl': result["album"]["images"][0]["url"],
+                        'artworkUrl': self._get_artwork_url(result),
                     }
 
                     try:
@@ -837,8 +980,7 @@ class SpotifyClient:
 
                     t = LavalinkTrack(id_=encode_track(trackinfo)[1], info=trackinfo, requester=requester)
 
-                    t.info["extra"]["authors"] = [fix_characters(i['name']) for i in result['artists'] if f"feat. {i['name'].lower()}"
-                                                  not in result['name'].lower()]
+                    t.info["extra"]["authors"] = self._get_track_authors(result)
 
                     if check_title and fuzz.token_sort_ratio(query.lower(), f"{t.authors_string} - {t.single_title}".lower()) < check_title:
                         continue
@@ -883,14 +1025,14 @@ class SpotifyClient:
 
             trackinfo = {
                 'title': result["name"],
-                'author': result["artists"][0]["name"] or "Unknown Artist",
+                'author': self._get_track_artist_name(result),
                 'length': self._coerce_duration_ms(result["duration_ms"]),
                 'identifier': result["id"],
                 'isStream': False,
                 'uri': result["external_urls"]["spotify"],
                 'sourceName': 'spotify',
                 'position': 0,
-                'artworkUrl': result["album"]["images"][0]["url"],
+                'artworkUrl': self._get_artwork_url(result),
             }
 
             try:
@@ -900,10 +1042,8 @@ class SpotifyClient:
 
             t = LavalinkTrack(id_=encode_track(trackinfo)[1], info=trackinfo, requester=requester)
 
-            t.info["extra"]["authors"] = [fix_characters(i['name']) for i in result['artists'] if f"feat. {i['name'].lower()}"
-                                          not in result['name'].lower()]
-
-            t.info["extra"]["authors_md"] = ", ".join(f"[`{a['name']}`]({a['external_urls']['spotify']})" for a in result["artists"])
+            t.info["extra"]["authors"] = self._get_track_authors(result)
+            t.info["extra"]["authors_md"] = self._get_track_authors_md(result)
 
             try:
                 if result["album"]["name"] != result["name"] or result["album"]["total_tracks"] > 1:
@@ -957,14 +1097,14 @@ class SpotifyClient:
 
                 trackinfo = {
                     'title': track["name"],
-                    'author': track["artists"][0]["name"] or "Unknown Artist",
+                    'author': self._get_track_artist_name(track),
                     'length': self._coerce_duration_ms(track["duration_ms"]),
                     'identifier': track["id"],
                     'isStream': False,
                     'uri': track["external_urls"]["spotify"],
                     'sourceName': 'spotify',
                     'position': 0,
-                    'artworkUrl': track["album"]["images"][0]["url"],
+                    'artworkUrl': self._get_artwork_url(track),
                 }
 
                 try:
@@ -974,12 +1114,8 @@ class SpotifyClient:
 
                 t = LavalinkTrack(id_=encode_track(trackinfo)[1], info=trackinfo, requester=requester)
 
-                t.info["extra"]["authors"] = [fix_characters(i['name']) for i in track['artists'] if
-                                              f"feat. {i['name'].lower()}"
-                                              not in track['name'].lower()]
-
-                t.info["extra"]["authors_md"] = ", ".join(
-                    f"[`{a['name']}`]({a['external_urls']['spotify']})" for a in track["artists"])
+                t.info["extra"]["authors"] = self._get_track_authors(track)
+                t.info["extra"]["authors_md"] = self._get_track_authors_md(track)
 
                 try:
                     if result["name"] != track["name"] or result["total_tracks"] > 1:
@@ -1015,7 +1151,7 @@ class SpotifyClient:
                 data["playlistInfo"]["name"] = "As mais tocadas de: " + \
                                                [a["name"] for a in result["tracks"][0]["artists"] if a["id"] == url_id][0]
             except IndexError:
-                data["playlistInfo"]["name"] = "As mais tocadas de: " + result["tracks"][0]["artists"][0]["name"]
+                data["playlistInfo"]["name"] = "As mais tocadas de: " + self._get_track_artist_name(result["tracks"][0])
             tracks_data = result["tracks"]
 
         elif url_type == "playlist":
@@ -1067,7 +1203,7 @@ class SpotifyClient:
 
             trackinfo = {
                 'title': t["name"],
-                'author': t["artists"][0]["name"] or "Unknown Artist",
+                'author': self._get_track_artist_name(t),
                 'length': self._coerce_duration_ms(t["duration_ms"]),
                 'identifier': t["id"],
                 'isStream': False,
@@ -1093,12 +1229,8 @@ class SpotifyClient:
             except (AttributeError, KeyError):
                 pass
 
-            if t["artists"][0]["name"]:
-                track.info["extra"]["authors"] = [fix_characters(i['name']) for i in t['artists'] if f"feat. {i['name'].lower()}" not in t['name'].lower()]
-                track.info["extra"]["authors_md"] = ", ".join(f"[`{fix_characters(a['name'])}`](<" + a['external_urls'].get('spotify', f'https://www.youtube.com/results?search_query={quote(t["name"])}') + ">)" for a in t['artists'])
-            else:
-                track.info["extra"]["authors"] = ["Unknown Artist"]
-                track.info["extra"]["authors_md"] = "`Unknown Artist`"
+            track.info["extra"]["authors"] = self._get_track_authors(t)
+            track.info["extra"]["authors_md"] = self._get_track_authors_md(t)
 
             playlist.tracks.append(track)
 
