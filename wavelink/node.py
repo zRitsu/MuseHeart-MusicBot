@@ -630,16 +630,27 @@ class Node:
         if loadtype in ('LOAD_FAILED', 'error'):
 
             if self.version == 4:
-                new_data['exception'] = new_data
+                if isinstance(new_data, dict):
+                    if 'exception' not in new_data:
+                        new_data['exception'] = new_data
+                else:
+                    new_data = data if isinstance(data, dict) else {}
 
-            try:
-                error = f"There was an error of severity '{new_data['exception']['severity']}' while loading tracks.\n\n{new_data['exception']['message']}"
-            except KeyError:
-                error = f"There was an error of severity '{new_data['exception']['severity']}:\n{new_data['exception']['error']}"
+            exception_data = {}
+
+            if isinstance(new_data, dict):
+                exception_data = new_data.get('exception') or new_data
+
+            if not isinstance(exception_data, dict):
+                exception_data = {}
+
+            severity = exception_data.get('severity', 'unknown')
+            message = exception_data.get('message') or exception_data.get('error') or repr(data)
+            error = f"There was an error of severity '{severity}' while loading tracks.\n\n{message}"
             e = TrackLoadError(error=error, node=self, data=new_data)
 
             if not e.message:
-                e.message = new_data['exception']['error']
+                e.message = exception_data.get('error') or exception_data.get('message') or message
 
             if ytid:
 
