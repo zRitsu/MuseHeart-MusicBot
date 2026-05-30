@@ -488,6 +488,17 @@ def ensure_lavalink_runtime_config(
     server_cfg["address"] = "127.0.0.1"
 
     lavalink_cfg = yml_data.setdefault("lavalink", {})
+    lavalink_plugins = lavalink_cfg.get("plugins")
+    if isinstance(lavalink_plugins, list):
+        lavalink_cfg["plugins"] = [
+            plugin
+            for plugin in lavalink_plugins
+            if not (
+                isinstance(plugin, dict)
+                and "dev.lavalink.youtube:youtube-plugin" in str(plugin.get("dependency", ""))
+            )
+        ]
+
     lavalink_server = lavalink_cfg.setdefault("server", {})
     lavalink_server["password"] = get_local_server_password()
     lavalink_sources = lavalink_server.setdefault("sources", {})
@@ -495,13 +506,9 @@ def ensure_lavalink_runtime_config(
 
     plugins = yml_data.setdefault("plugins", {})
     youtube = plugins.setdefault("youtube", {})
-    youtube["enabled"] = True
-    if cipher_url:
-        youtube["remoteCipher"] = {
-            "url": cipher_url.rstrip("/"),
-            "password": cipher_token or "",
-            "userAgent": "MuseHeart-MusicBot/Lavalink"
-        }
+    youtube["enabled"] = False
+    with suppress(KeyError):
+        del youtube["remoteCipher"]
 
     lavasrc = plugins.setdefault("lavasrc", {})
     lavasrc_sources = lavasrc.setdefault("sources", {})
