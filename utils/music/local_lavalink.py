@@ -148,17 +148,45 @@ def download_yt_dlp_portable():
         return None
 
 
+def get_local_yt_dlp_binary():
+    os_name = platform.system().lower()
+    arch = platform.machine().lower()
+
+    if os_name == "windows":
+        target_name = "yt-dlp.exe"
+    elif os_name in {"linux", "darwin"}:
+        target_name = "yt-dlp.exe" if os.name == "nt" else "yt-dlp"
+    else:
+        return None
+
+    ytdlp_dir = local_audio_abspath(f"yt-dlp-portable-{os_name}-{arch}")
+    ytdlp_bin = os.path.join(ytdlp_dir, target_name)
+
+    if os.path.isfile(ytdlp_bin):
+        return ytdlp_bin
+
+    return None
+
+
 def get_yt_dlp_binary():
     custom_path = os.environ.get("YT_DLP_PATH")
 
     if custom_path and os.path.isfile(custom_path):
         return os.path.abspath(custom_path)
 
+    local_ytdlp = get_local_yt_dlp_binary()
+    if local_ytdlp:
+        return local_ytdlp
+
+    downloaded_ytdlp = download_yt_dlp_portable()
+    if downloaded_ytdlp:
+        return downloaded_ytdlp
+
     system_ytdlp = shutil.which("yt-dlp")
     if system_ytdlp:
         return system_ytdlp
 
-    return download_yt_dlp_portable()
+    return None
 
 
 def update_git_repo(repo_dir: str, repo_url: str, update_interval: int):
