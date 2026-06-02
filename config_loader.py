@@ -39,6 +39,10 @@ DEFAULT_CONFIG = {
     ################
     "MONGO": "",
     "MONGO_TIMEOUT": 30,
+    "LOCAL_MONGO_VERSION": "8.2.3",
+    "LOCAL_MONGO_PORT": 27018,
+    "LOCAL_MONGO_START_TIMEOUT": 45,
+    "LOCAL_MONGO_DOWNLOAD_URL": "",
     "SENSITIVE_INFO_WARN": True,
 
     #########################
@@ -207,6 +211,8 @@ def load_config():
         "PRESENCE_INTERVAL",
         "HINT_RATE",
         "MONGO_TIMEOUT",
+        "LOCAL_MONGO_PORT",
+        "LOCAL_MONGO_START_TIMEOUT",
         "INVITE_PERMISSIONS",
         "PREFIXED_POOL_TIMEOUT",
         "PLAYER_INFO_BACKUP_INTERVAL",

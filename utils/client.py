@@ -374,10 +374,11 @@ class BotPool:
                     backoff += 2
                     retries += 1
 
-        if data['identifier'] == 'LOCAL' and self.mongo_database and data["info"]["check_version"] > 3:
+        if data['identifier'] == 'LOCAL' and data["info"]["check_version"] > 3:
 
             try:
-                mongo_data = await self.mongo_database._connect["global"]["global"].find_one({"_id": "youtube_data"}) or {}
+                db_client = self.database
+                mongo_data = await db_client._connect["global"]["global"].find_one({"_id": "youtube_data"}) or {}
             except Exception:
                 traceback.print_exc()
             else:
@@ -674,10 +675,11 @@ class BotPool:
                                                 cache_ttl=self.config["DBCACHE_TTL"])
             print("🍃 - Database em uso: MongoDB")
         else:
-            print("🎲 - Database em uso: TinyMongo | Nota: Os arquivos da database serão salvos localmente na pasta: local_database")
+            print("🎲 - Database em uso: MongoDB local portable | Dados e binários serão gerenciados em: local_database")
 
         self.local_database = LocalDatabase(cache_maxsize=self.config["DBCACHE_SIZE"],
-                                            cache_ttl=self.config["DBCACHE_TTL"])
+                                            cache_ttl=self.config["DBCACHE_TTL"],
+                                            config=self.config)
 
         os.environ.update(
             {

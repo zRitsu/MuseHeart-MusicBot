@@ -224,9 +224,9 @@ class YtOauthLL(commands.Cog):
 
         txts = []
 
-        if self.bot.pool.mongo_database:
+        if self.bot.pool.database:
             try:
-                await self.bot.pool.mongo_database.update_data(
+                await self.bot.pool.database.update_data(
                     id_="youtube_data",
                     data={"refresh_tokens": {data['email']: refresh_token}},
                     collection="global",

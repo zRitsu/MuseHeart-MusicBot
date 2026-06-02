@@ -3689,7 +3689,7 @@ class LavalinkPlayer(wavelink.Player):
             self._session_resuming = False
             return
 
-        if self._queue_updater_task and self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
+        if self._queue_updater_task and self.bot.config["PLAYER_SESSIONS_MONGODB"]:
             return
 
         cog = self.bot.get_cog("PlayerSession")
