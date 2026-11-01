@@ -5,15 +5,15 @@ import asyncio
 import base64
 import json
 import os.path
+import random
 import re
 import time
-import traceback
 from tempfile import gettempdir
 from typing import Optional, TYPE_CHECKING, Union
 from urllib.parse import quote
 
 import aiofiles
-from aiohttp import ClientSession
+from aiohttp import ClientSession, ClientTimeout
 from rapidfuzz import fuzz
 
 from utils.music.converters import fix_characters, URL_REG
@@ -24,9 +24,9 @@ from utils.music.track_encoder import encode_track
 if TYPE_CHECKING:
     from utils.client import BotCore
 
-spotify_regex = re.compile("https://open.spotify.com?.+(album|playlist|artist|track)/([a-zA-Z0-9]+)")
+spotify_regex = re.compile(r"(?i)^https?://open\.spotify\.com/(?:intl-[a-z]{2}/)?(album|playlist|artist|track)/([a-zA-Z0-9]+)(?:[/?#].*)?$")
 spotify_link_regex = re.compile(r"(?i)https?:\/\/spotify\.link\/?(?P<id>[a-zA-Z0-9]+)")
-spotify_regex_w_user = re.compile("https://open.spotify.com?.+(album|playlist|artist|track|user)/([a-zA-Z0-9]+)")
+spotify_regex_w_user = re.compile(r"(?i)^https?://open\.spotify\.com/(?:intl-[a-z]{2}/)?(album|playlist|artist|track|user)/([a-zA-Z0-9]+)(?:[/?#].*)?$")
 
 spotify_cache_file = os.path.join(gettempdir(), ".spotify_cache.json")
 
@@ -34,55 +34,72 @@ spotify_cache_file = os.path.join(gettempdir(), ".spotify_cache.json")
 class SpotifyClient:
 
     def __init__(self, client_id: Optional[str] = None, client_secret: Optional[str] = None, playlist_extra_page_limit: int = 0):
-
-        if not client_id:
-            raise Exception(
-                "CLIENT_ID do spotify não informado."
-            )
-
-        if not client_secret:
-            raise Exception(
-                "CLIENT_SECRET do spotify não informado."
-            )
-
-        self.client_id = client_id
-        self.client_secret = client_secret
+        # SlugYZeon/LavaSrc podem resolver links Spotify diretamente no Lavalink.
+        # As credenciais da API oficial ficam opcionais e são usadas apenas como fallback.
+        self.client_id = client_id or None
+        self.client_secret = client_secret or None
+        self.api_available = bool(self.client_id and self.client_secret)
         self.base_url = "https://api.spotify.com/v1"
         self.spotify_cache = {}
         self.disabled = False
         self.type = "api"
         self.token_refresh = False
-        self.playlist_extra_page_limit = playlist_extra_page_limit
+        self._token_lock = asyncio.Lock()
+        self.playlist_extra_page_limit = max(0, int(playlist_extra_page_limit or 0))
+        self.timeout = ClientTimeout(total=30, connect=10)
 
         try:
-            with open(spotify_cache_file) as f:
-                self.spotify_cache = json.load(f)
-        except FileNotFoundError:
-            pass
+            with open(spotify_cache_file, encoding="utf-8") as f:
+                cached = json.load(f)
+            if isinstance(cached, dict):
+                self.spotify_cache = cached
+        except (FileNotFoundError, json.JSONDecodeError, OSError):
+            self.spotify_cache = {}
+
+    def _token_is_valid(self) -> bool:
+        return bool(
+            self.spotify_cache.get("access_token")
+            and self.spotify_cache.get("expires_at", 0) > time.time() + 60
+        )
 
     async def request(self, path: str, params: dict = None):
-
         if self.disabled:
-            return
+            return None
 
-        headers = {'Authorization': f'Bearer {await self.get_valid_access_token()}'}
-
-        async with ClientSession() as session:
-            async with session.get(f"{self.base_url}/{path}", headers=headers, params=params) as response:
-                if response.status == 200:
-                    return await response.json()
-                elif response.status == 401:
-                    await self.get_access_token()
-                    return await self.request(path=path, params=params)
-                elif response.status == 404:
-                    raise GenericError("**Não houve resultado para o link informado (confira se o link está correto ou se o conteúdo dele está privado ou se foi deletado).**\n\n"
-                                       f"{str(response.url).replace('api.', 'open.').replace('/v1/', '/').replace('s/', '/')}")
-                elif response.status == 429:
-                    self.disabled = True
-                    print(f"⚠️ - Spotify: Suporte interno desativado devido a ratelimit (429).")
-                    return
+        # A 401 pode ocorrer se o token for revogado antes da expiração prevista.
+        for auth_attempt in range(2):
+            token = await self.get_valid_access_token()
+            headers = {"Authorization": f"Bearer {token}"}
+            async with ClientSession(timeout=self.timeout) as session:
+                for attempt in range(3):
+                    async with session.get(f"{self.base_url}/{path.lstrip('/')}", headers=headers, params=params) as response:
+                        if response.status == 200:
+                            return await response.json()
+                        if response.status == 401:
+                            if auth_attempt == 0:
+                                self.spotify_cache = {}
+                                await self.get_access_token(force=True)
+                                break
+                            raise GenericError("**O Spotify recusou a autenticação. Confira CLIENT_ID e CLIENT_SECRET.**")
+                        if response.status == 404:
+                            raise GenericError(
+                                "**Não houve resultado para o link informado (confira se o link está correto, "
+                                "se o conteúdo está privado ou se foi deletado).**"
+                            )
+                        if response.status == 429:
+                            retry_after = response.headers.get("Retry-After", "1")
+                            try:
+                                delay = max(1.0, float(retry_after))
+                            except (TypeError, ValueError):
+                                delay = 2.0
+                            if attempt < 2:
+                                await asyncio.sleep(min(delay, 30))
+                                continue
+                            raise GenericError("**O Spotify está limitando temporariamente as requisições. Tente novamente em instantes.**")
+                        response.raise_for_status()
                 else:
-                    response.raise_for_status()
+                    return None
+        return None
 
     async def get_track_info(self, track_id: str):
         return await self.request(path=f'tracks/{track_id}')
@@ -94,27 +111,29 @@ class SpotifyClient:
         return await self.request(path=f'artists/{artist_id}/top-tracks')
 
     async def get_playlist_info(self, playlist_id: str):
-
         result = await self.request(path=f"playlists/{playlist_id}")
+        if not result:
+            return result
 
-        if len(result["tracks"]["items"]) == 100 and self.playlist_extra_page_limit > 0:
+        tracks = result.get("tracks") or {}
+        items = tracks.get("items") or []
+        offset = len(items)
+        page_count = 0
 
-            offset = 101
-            page_count = 0
-
-            while True:
-                try:
-                    result_extra = await self.request(path=f"playlists/{playlist_id}/tracks?offset={offset}&limit=100")
-                except:
-                    traceback.print_exc()
-                    break
-                else:
-                    result["tracks"]["items"].extend(result_extra["items"])
-                    if result_extra["next"] and page_count <= self.playlist_extra_page_limit:
-                        offset += 100
-                        page_count += 1
-                        continue
-                    break
+        while tracks.get("next") and page_count < self.playlist_extra_page_limit:
+            page = await self.request(
+                path=f"playlists/{playlist_id}/tracks",
+                params={"offset": offset, "limit": 100},
+            )
+            if not page:
+                break
+            page_items = page.get("items") or []
+            if not page_items:
+                break
+            items.extend(page_items)
+            offset += len(page_items)
+            tracks["next"] = page.get("next")
+            page_count += 1
 
         return result
 
@@ -139,60 +158,82 @@ class SpotifyClient:
         'q': quote(query), 'type': 'track', 'limit': 10
         })
 
-    async def get_access_token(self):
+    async def get_access_token(self, force: bool = False):
+        if not self.api_available:
+            raise GenericError("**A API oficial do Spotify não está configurada; configure CLIENT_ID e CLIENT_SECRET ou utilize um nó Lavalink com SlugYZeon/LavaSrc.**")
 
-        if self.token_refresh:
-            while self.token_refresh:
-                await asyncio.sleep(1)
-            return
+        async with self._token_lock:
+            if not force and self._token_is_valid():
+                return self.spotify_cache["access_token"]
 
-        self.token_refresh = True
-
-        try:
-            token_url = 'https://accounts.spotify.com/api/token'
-
+            token_url = "https://accounts.spotify.com/api/token"
+            credentials = f"{self.client_id}:{self.client_secret}".encode("utf-8")
             headers = {
-                'Authorization': 'Basic ' + base64.b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
+                "Authorization": "Basic " + base64.b64encode(credentials).decode("ascii"),
+                "Content-Type": "application/x-www-form-urlencoded",
             }
 
-            data = {
-                'grant_type': 'client_credentials'
+            async with ClientSession(timeout=self.timeout) as session:
+                async with session.post(token_url, headers=headers, data={"grant_type": "client_credentials"}) as response:
+                    payload = await response.json(content_type=None)
+                    if response.status != 200:
+                        description = payload.get("error_description") or payload.get("error") or f"HTTP {response.status}"
+                        raise GenericError(f"**Não foi possível autenticar no Spotify: {description}**")
+
+            access_token = payload.get("access_token")
+            expires_in = payload.get("expires_in")
+            if not access_token or not isinstance(expires_in, (int, float)):
+                raise GenericError("**O Spotify retornou um token inválido ou incompleto.**")
+
+            self.spotify_cache = {
+                "access_token": access_token,
+                "token_type": payload.get("token_type", "Bearer"),
+                "expires_in": expires_in,
+                "expires_at": time.time() + expires_in,
+                "type": "api",
             }
-
-            async with ClientSession() as session:
-                async with session.post(token_url, headers=headers, data=data) as response:
-                    data = await response.json()
-
-                if data.get("error"):
-                    print(f"⚠️ - Spotify: Ocorreu um erro ao obter token: {data['error_description']}")
-                    self.client_id = None
-                    self.client_secret = None
-                    await self.get_access_token()
-                    return
-
-                self.spotify_cache = data
-
-                self.type = "api"
-
-                self.spotify_cache["tyoe"] = "api"
-
-                self.spotify_cache["expires_at"] = time.time() + self.spotify_cache["expires_in"]
-
-                print("🎶 - Access token do spotify obtido com sucesso via API Oficial.")
-
-        except Exception as e:
+            self.type = "api"
             self.token_refresh = False
-            raise e
+            try:
+                async with aiofiles.open(spotify_cache_file, "w", encoding="utf-8") as f:
+                    await f.write(json.dumps(self.spotify_cache))
+            except OSError as exc:
+                # A falha ao persistir cache não deve impedir o uso do token em memória.
+                print(f"⚠️ - Spotify: não foi possível salvar o cache do token: {exc}")
 
-        self.token_refresh = False
-
-        async with aiofiles.open(spotify_cache_file, "w") as f:
-            await f.write(json.dumps(self.spotify_cache))
+            print("🎶 - Access token do Spotify obtido com sucesso via API oficial.")
+            return access_token
 
     async def get_valid_access_token(self):
-        if time.time() >= self.spotify_cache["expires_at"]:
+        if not self._token_is_valid():
             await self.get_access_token()
         return self.spotify_cache["access_token"]
+
+    async def _load_from_lavalink_plugin(self, bot: BotCore, requester: int, identifier: str):
+        """Resolve Spotify URLs/queries através dos plugins instalados no Lavalink.
+
+        SlugYZeon documenta URLs Spotify diretas e o prefixo spsearch:. LavaSrc
+        também pode resolver URLs diretamente. O resultado já vem como Track/Playlist
+        do Wavelink, evitando reconstruir e re-encodar faixas no Python.
+        """
+        nodes = list(getattr(getattr(bot, "music", None), "nodes", {}).values())
+        if not nodes:
+            return None
+
+        for node in nodes:
+            try:
+                result = await node.get_tracks(
+                    identifier,
+                    track_cls=LavalinkTrack,
+                    playlist_cls=LavalinkPlaylist,
+                    requester=requester,
+                )
+                if result:
+                    return result
+            except Exception as exc:
+                # Um nó sem o plugin/fonte Spotify não deve impedir o fallback.
+                print(f"⚠️ - Spotify: resolução via Lavalink falhou em {getattr(node, 'identifier', 'node')}: {exc}")
+        return None
 
     async def get_tracks(self, bot: BotCore, requester: int, query: str, search: bool = True, check_title: float = None):
 
@@ -202,7 +243,26 @@ class SpotifyClient:
                     raise GenericError("**Falha ao obter resultado para o link informado...**")
                 query = str(r.headers["location"])
 
-        if not (matches := spotify_regex.match(query)) and not self.disabled:
+        matches = spotify_regex.match(query)
+        is_spotify_url = bool(matches)
+
+        # Preferência: SlugYZeon/LavaSrc no Lavalink. Para pesquisa textual,
+        # SlugYZeon documenta o prefixo spsearch:. Mantemos API oficial como fallback.
+        if is_spotify_url:
+            plugin_result = await self._load_from_lavalink_plugin(bot, requester, query)
+            if plugin_result:
+                return plugin_result
+        elif search and not URL_REG.match(query):
+            plugin_result = await self._load_from_lavalink_plugin(bot, requester, f"spsearch:{query}")
+            if plugin_result:
+                if check_title and isinstance(plugin_result, list):
+                    plugin_result = [t for t in plugin_result if fuzz.token_sort_ratio(
+                        query.lower(), f"{getattr(t, 'author', '')} - {getattr(t, 'title', '')}".lower()
+                    ) >= check_title]
+                if plugin_result:
+                    return plugin_result
+
+        if not (matches := spotify_regex.match(query)) and not self.disabled and self.api_available:
 
             if URL_REG.match(query) or not search:
                 return
@@ -212,9 +272,9 @@ class SpotifyClient:
             tracks = []
 
             try:
-                tracks_result = r['tracks']['items']
-            except KeyError:
-                pass
+                tracks_result = (r or {}).get('tracks', {}).get('items', [])
+            except (AttributeError, TypeError):
+                tracks_result = []
             else:
                 for result in tracks_result:
 
@@ -265,12 +325,11 @@ class SpotifyClient:
 
             return
 
-        if self.disabled:
-
-            if [n for n in bot.music.nodes.values() if "spotify" in n.info.get("sourceManagers", [])]:
-                return
-
-            raise GenericError("**O suporte a links do spotify está temporariamente desativado.**")
+        if not self.api_available or self.disabled:
+            raise GenericError(
+                "**Não foi possível resolver esse conteúdo do Spotify.** Verifique se o SlugYZeon/LavaSrc está ativo no Lavalink; "
+                "como fallback, configure CLIENT_ID e CLIENT_SECRET da API oficial."
+            )
 
         url_type, url_id = matches.groups()
 
@@ -328,6 +387,8 @@ class SpotifyClient:
 
             if not (result := bot.pool.playlist_cache.get(cache_key)):
                 result = await self.get_album_info(url_id)
+                if result is None:
+                    raise GenericError("**Não foi possível obter os dados do álbum no Spotify.**")
                 bot.pool.playlist_cache[cache_key] = result
 
             try:
@@ -477,5 +538,3 @@ class SpotifyClient:
                 track.info["extra"]["authors_md"] = "`Unknown Artist`"
 
             playlist.tracks.append(track)
-
-        return playlist
