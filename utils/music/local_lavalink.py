@@ -16,7 +16,8 @@ def download_file(url, filename):
     if os.path.isfile(filename):
         return
 
-    r = requests.get(url, stream=True)
+    r = requests.get(url, stream=True, timeout=(15, 120))
+    r.raise_for_status()
     total_size = int(r.headers.get('content-length', 0))
     bytes_downloaded = 0
     previows_progress = 0
@@ -75,8 +76,25 @@ def run_lavalink(
         lavalink_cpu_cores: int = 1,
         use_jabba: bool = False
 ):
+    # platform.architecture() reports the Python process bitness, not the CPU
+    # architecture. Use platform.machine() to distinguish x86_64 from ARM64.
     arch, osname = platform.architecture()
-    jdk_platform = f"{platform.system()}-{arch}-{osname}"
+    machine = platform.machine().lower()
+
+    if machine in ("aarch64", "arm64"):
+        jdk_arch = "aarch64"
+    elif machine in ("x86_64", "amd64"):
+        jdk_arch = "amd64"
+    elif machine in ("i386", "i486", "i586", "i686", "x86"):
+        jdk_arch = "i586"
+    else:
+        raise RuntimeError(
+            f"Arquitetura não suportada para download automático do Java: {machine!r}"
+        )
+
+    # Include the machine architecture in the cache path so a previously
+    # downloaded x86_64 JDK is never reused on an ARM64 host.
+    jdk_platform = f"{platform.system()}-{arch}-{osname}-{machine}"
 
     tmp_dir = tempfile.gettempdir() if os.name == "nt" else "."
 
@@ -84,10 +102,9 @@ def run_lavalink(
 
         dirs = []
 
-        try:
-            dirs.append(os.path.join(os.environ["JAVA_HOME"] + "bin/java"))
-        except KeyError:
-            pass
+        java_home = os.environ.get("JAVA_HOME")
+        if java_home:
+            dirs.append(os.path.join(java_home, "bin", "java"))
 
         if os.name == "nt":
             dirs.append(f"{tmp_dir}/.java/{jdk_platform}/bin/java")
@@ -198,10 +215,10 @@ def run_lavalink(
                     except:
                         pass
 
-                    if platform.architecture()[0] != "64bit":
-                        jdk_url = "https://download.bell-sw.com/java/21.0.3+12/bellsoft-jdk21.0.3+12-linux-i586-lite.tar.gz"
-                    else:
-                        jdk_url = "https://download.bell-sw.com/java/21.0.3+12/bellsoft-jdk21.0.3+12-linux-amd64-lite.tar.gz"
+                    jdk_url = (
+                        "https://download.bell-sw.com/java/21.0.3+12/"
+                        f"bellsoft-jdk21.0.3+12-linux-{jdk_arch}-lite.tar.gz"
+                    )
 
                     java_cmd = os.path.realpath(f"{tmp_dir}/.java/{jdk_platform}/bin/java")
 
@@ -216,9 +233,18 @@ def run_lavalink(
 
                     os.makedirs(f"{tmp_dir}/.java/{jdk_platform}")
 
-                    p = subprocess.Popen(["tar", "--strip-components=1", "-zxvf", "java.tar.gz", "-C", f"{tmp_dir}/.java/{jdk_platform}"])
-                    p.wait()
-                    os.remove(f"./{jdk_filename}")
+                    p = subprocess.run(
+                        ["tar", "--strip-components=1", "-zxf", jdk_filename,
+                         "-C", f"{tmp_dir}/.java/{jdk_platform}"],
+                        check=False,
+                    )
+                    with suppress(FileNotFoundError):
+                        os.remove(f"./{jdk_filename}")
+                    if p.returncode != 0:
+                        shutil.rmtree(f"{tmp_dir}/.java/{jdk_platform}", ignore_errors=True)
+                        raise RuntimeError(
+                            f"Falha ao extrair o JDK para {jdk_platform} (código {p.returncode})."
+                        )
 
                 else:
                     java_cmd = os.path.realpath(f"{tmp_dir}/.java/{jdk_platform}/bin/java")
