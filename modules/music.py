@@ -7085,7 +7085,7 @@ class Music(commands.Cog):
         node.search = search
         node.website = node_website
         node.search_providers = search_providers
-        node.original_providers = set(node.search_providers)
+        node.original_providers = list(node.search_providers)
         node.partial_providers = []
         node.native_sources = deepcopy(native_sources)
         node.prefer_youtube_native_playback = data.pop("prefer_youtube_native_playback", True)
