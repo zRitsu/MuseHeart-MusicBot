@@ -191,6 +191,15 @@ SOURCE_PROVIDER_PREFIX.update({
 
 PROVIDER_PREFIX_BY_SOURCE = SOURCE_PROVIDER_PREFIX
 
+# Direct URL resolvers without a text-search prefix.
+URL_ONLY_DIRECT_SOURCES = {
+    "getyarn": ("get-yarn", "getyarn"),
+    "clypit": ("clypit",),
+    "elgato": ("elgato",),
+    "pixeldrain": ("pixeldrain",),
+    "tumblr": ("tumblr",),
+}
+
 
 def sync_node_providers(node):
     """Reconcile configured providers with source managers reported by Lavalink."""
@@ -236,6 +245,17 @@ def sync_node_providers(node):
             for manager in spec["managers"]:
                 if manager not in {"youtube", "soundcloud", "bandcamp"}:
                     node.native_sources.discard(manager)
+
+    # Direct URL resolvers without search prefixes still need native resolution.
+    for source, managers in URL_ONLY_DIRECT_SOURCES.items():
+        manager_available = any(manager in available_managers for manager in managers)
+        if manager_available:
+            node.native_sources.add(source)
+            node.native_sources.update(managers)
+        else:
+            node.native_sources.discard(source)
+            for manager in managers:
+                node.native_sources.discard(manager)
 
     # LavaSrc's "youtube" manager is YouTube Music search-only. Actual
     # YouTube playback belongs to the separate yt-dlp source.
