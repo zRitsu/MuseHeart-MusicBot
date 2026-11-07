@@ -68,7 +68,7 @@ PROVIDER_SPECS = {
     },
     "ytdlp": {
         "prefix": "ytsearch",
-        "managers": ("ytdlp", "youtube"),
+        "managers": ("ytdlp",),
         "auto_add": False,
         "native_only": True,
         "direct_playback": True,
