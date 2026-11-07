@@ -41,6 +41,7 @@ from utils.music.interactions import VolumeInteraction, QueueInteraction, Select
     SetStageTitle, SelectBotVoice, youtube_regex, ButtonInteraction
 from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, PartialTrack, PartialPlaylist, \
     native_sources, CustomYTDL
+from utils.music.providers import PROVIDER_PREFIX_BY_SOURCE, sync_node_providers
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, song_request_buttons, \
     select_bot_pool, ProgressBar, update_inter, get_source_emoji_cfg, music_source_emoji
@@ -61,16 +62,7 @@ class Music(commands.Cog):
 
     audio_formats = ("audio/mpeg", "audio/ogg", "audio/mp4", "audio/aac")
 
-    providers_info = {
-        "youtube": "ytsearch",
-        "soundcloud": "scsearch",
-        "spotify": "spsearch",
-        "tidal": "tdsearch",
-        "bandcamp": "bcsearch",
-        "applemusic": "amsearch",
-        "deezer": "dzsearch",
-        "jiosaavn": "jssearch",
-    }
+    providers_info = PROVIDER_PREFIX_BY_SOURCE
 
     def __init__(self, bot: BotCore):
 
@@ -1522,6 +1514,7 @@ class Music(commands.Cog):
 
             else:
 
+                # Spotify and Deezer retain their existing bot-level integrations.
                 music_sources = {"deezer", "spotify"}
 
                 for b in self.bot.pool.get_guild_bots(inter.guild_id):
@@ -1530,9 +1523,11 @@ class Music(commands.Cog):
                         continue
 
                     for n in b.music.nodes.values():
-                        for s in n.info["sourceManagers"]:
-                            if s in self.providers_info:
-                                music_sources.add(s)
+                        active_providers = set(n.search_providers)
+                        for source_name in n.info.get("sourceManagers", []):
+                            prefix = self.providers_info.get(source_name)
+                            if prefix and prefix in active_providers:
+                                music_sources.add(source_name)
 
                 view = ButtonInteraction(
                     user=inter.author, timeout=45,
@@ -7042,8 +7037,8 @@ class Music(commands.Cog):
     async def node_ready(self, node: wavelink.Node):
         print(f'🌋 - {self.bot.user} - Servidor de música: [{node.identifier} / v{node.version}] está pronto para uso!')
         retries = 25
-        while retries > 0:
 
+        while retries > 0:
             if not node._websocket.is_connected:
                 return
 
@@ -7052,77 +7047,7 @@ class Music(commands.Cog):
                 retries -= 1
                 continue
 
-            if "deezer" not in node.info["sourceManagers"]:
-                self.remove_provider(node.search_providers, ["dzsearch"])
-                self.remove_provider(node.partial_providers, ["dzisrc:{isrc}", "dzsearch:{author} - {title}"])
-                try:
-                    node.native_sources.remove("deezer")
-                except:
-                    pass
-            elif "dzsearch" not in node.search_providers:
-                node.native_sources.add("deezer")
-                self.add_provider(node.search_providers, ["dzsearch"])
-                self.add_provider(node.partial_providers, ["dzisrc:{isrc}", "dzsearch:{author} - {title}"])
-            else:
-                node.native_sources.add("deezer")
-
-            if "tidal" not in node.info["sourceManagers"] or node.only_use_native_search_providers is True:
-                self.remove_provider(node.search_providers, ["tdsearch"])
-                self.remove_provider(node.partial_providers, ["tdsearch:{author} - {title}"])
-            elif "tdsearch" not in node.search_providers and node.only_use_native_search_providers is False:
-                self.add_provider(node.search_providers, ["tdsearch"])
-                self.add_provider(node.partial_providers, ["tdsearch:{author} - {title}"])
-
-            if "applemusic" not in node.info["sourceManagers"] or node.only_use_native_search_providers is True:
-                self.remove_provider(node.search_providers, ["amsearch"])
-                self.remove_provider(node.partial_providers, ["amsearch:{author} - {title}"])
-            elif "amsearch" not in node.search_providers and node.only_use_native_search_providers is False:
-                self.add_provider(node.search_providers, ["amsearch"])
-                self.add_provider(node.partial_providers, ["amsearch:{author} - {title}"])
-
-            if "bandcamp" not in node.info["sourceManagers"]:
-                self.remove_provider(node.search_providers, ["bcsearch"])
-                self.remove_provider(node.partial_providers, ["bcsearch:{author} - {title}"])
-            elif "bcsearch" not in node.search_providers:
-                self.add_provider(node.search_providers, ["bcsearch"])
-                self.add_provider(node.partial_providers, ["bcsearch:{author} - {title}"])
-
-            if "spotify" not in node.info["sourceManagers"] or node.only_use_native_search_providers is True:
-                self.remove_provider(node.search_providers, ["spsearch"])
-                self.remove_provider(node.partial_providers, ["spsearch:{author} - {title}"])
-            elif "spsearch" not in node.search_providers and node.only_use_native_search_providers is False:
-                self.add_provider(node.search_providers, ["spsearch"])
-                self.add_provider(node.partial_providers, ["spsearch:{author} - {title}"])
-
-            if "youtube" not in node.info["sourceManagers"] and "ytsearch" not in node.original_providers:
-                self.remove_provider(node.search_providers, ["ytsearch"])
-                self.remove_provider(node.partial_providers, ["ytsearch:\"{isrc}\"", "ytsearch:\"{title} - {author}\""])
-            elif "ytsearch" not in node.search_providers:
-                if "ytsearch" in node.original_providers:
-                    self.add_provider(node.search_providers, ["ytsearch"])
-                    self.add_provider(node.partial_providers, ["ytsearch:\"{isrc}\"", "ytsearch:\"{title} - {author}\""])
-
-            if "youtube" not in node.info["sourceManagers"] and "ytmsearch" not in node.original_providers:
-                self.remove_provider(node.search_providers, ["ytmsearch"])
-                self.remove_provider(node.partial_providers, ["ytmsearch:\"{isrc}\"", "ytmsearch:\"{title} - {author}\""])
-            elif "ytmsearch" not in node.search_providers:
-                if "ytmsearch" in node.original_providers:
-                    self.add_provider(node.search_providers, ["ytmsearch"])
-                    self.add_provider(node.partial_providers, ["ytmsearch:\"{isrc}\"", "ytmsearch:\"{title} - {author}\""])
-
-            if "soundcloud" not in node.info["sourceManagers"]:
-                self.remove_provider(node.search_providers, ["scsearch"])
-                self.remove_provider(node.partial_providers, ["scsearch:{author} - {title}"])
-            elif "scsearch" not in node.search_providers:
-                self.add_provider(node.search_providers, ["scsearch"])
-                self.add_provider(node.partial_providers, ["scsearch:{author} - {title}"])
-
-            if "jiosaavn" not in node.info["sourceManagers"]:
-                self.remove_provider(node.search_providers, ["jssearch"])
-                # self.remove_provider(node.partial_providers, ["jssearch:{title} - {author}"])
-            elif "jssearch" not in node.search_providers:
-                self.add_provider(node.search_providers, ["jssearch"])
-                # self.add_provider(node.partial_providers, ["jssearch:{title} {author}"])
+            sync_node_providers(node)
 
             if node.stats.uptime < 600000:
                 node.open()
