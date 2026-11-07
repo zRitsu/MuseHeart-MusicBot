@@ -131,13 +131,14 @@ class PartialTrack:
 
     @property
     def thumb(self) -> str:
-        try:
-            return self.info["extra"]["thumb"] or self.info["artworkUrl"]
-        except KeyError:
-            try:
-                return self.info["artworkUrl"]
-            except KeyError:
-                return ""
+        plugin_info = self.info.get("pluginInfo") or {}
+        return (
+            self.info.get("extra", {}).get("thumb")
+            or self.info.get("artworkUrl")
+            or plugin_info.get("albumArtUrl")
+            or plugin_info.get("artistArtworkUrl")
+            or ""
+        )
 
     @property
     def uri(self) -> str:
@@ -235,23 +236,13 @@ class PartialTrack:
 
     @property
     def album_name(self) -> str:
-        try:
-            return self.info["extra"]["album"]["name"]
-        except KeyError:
-            try:
-                self.info["pluginInfo"]["albumName"]
-            except KeyError:
-                return ""
+        plugin_info = self.info.get("pluginInfo") or {}
+        return self.info.get("extra", {}).get("album", {}).get("name") or plugin_info.get("albumName", "")
 
     @property
     def album_url(self) -> str:
-        try:
-            return self.info["extra"]["album"]["url"]
-        except KeyError:
-            try:
-                self.info["pluginInfo"]["albumUrl"]
-            except KeyError:
-                return ""
+        plugin_info = self.info.get("pluginInfo") or {}
+        return self.info.get("extra", {}).get("album", {}).get("url") or plugin_info.get("albumUrl", "")
 
     @property
     def playlist_name(self) -> str:
@@ -296,16 +287,31 @@ class LavalinkPlaylist:
         except (IndexError, KeyError):
             pass
 
-        pluginInfo = kwargs.pop("pluginInfo", {})
-        thumb = None
-        try:
-            playlist = self if pluginInfo["type"] == "playlist" else None
-            if pluginInfo["type"] == "album":
-                thumb = self.thumb
-        except KeyError:
-            playlist = self
-        self.tracks = [LavalinkTrack(
-            id_=track[encoded_name], info=track['info'], pluginInfo=track.get("pluginInfo") or pluginInfo, thumb=thumb, playlist=playlist, **kwargs) for track in data.get('tracks', [])]
+        pluginInfo = kwargs.pop("pluginInfo", {}) or {}
+        if pluginInfo.get("url"):
+            self.url = pluginInfo["url"]
+
+        playlist_type = pluginInfo.get("type")
+        playlist = self if playlist_type == "playlist" else None
+        thumb = self.thumb if playlist_type == "album" else None
+
+        self.tracks = []
+        for track in data.get("tracks", []):
+            track_plugin_info = dict(pluginInfo)
+            track_plugin_info.update(track.get("pluginInfo") or {})
+
+            if playlist_type == "album":
+                track_plugin_info.setdefault("albumUrl", pluginInfo.get("url", ""))
+                track_plugin_info.setdefault("albumName", self.data.get("playlistInfo", {}).get("name", ""))
+
+            self.tracks.append(LavalinkTrack(
+                id_=track[encoded_name],
+                info=track["info"],
+                pluginInfo=track_plugin_info,
+                thumb=thumb,
+                playlist=playlist,
+                **kwargs
+            ))
 
     @property
     def uri(self):
@@ -338,6 +344,15 @@ class LavalinkTrack(wavelink.Track):
         super().__init__(*args, **kwargs)
         self.title = fix_characters(self.title)
         self.info["title"] = self.title
+
+        plugin_info = self.info.get("pluginInfo") or {}
+        if not self.info.get("artworkUrl"):
+            self.info["artworkUrl"] = (
+                plugin_info.get("albumArtUrl")
+                or plugin_info.get("artistArtworkUrl")
+                or ""
+            )
+
         self.unique_id = str(uuid.uuid4().hex)[:10]
 
         try:
@@ -3224,7 +3239,7 @@ class LavalinkPlayer(wavelink.Player):
 
             if not search_queries:
 
-                if not force and track.info["sourceName"] in self.node.info.get("sourceManagers", []) and (not self.node.only_use_native_search_providers or track.info["sourceName"] in native_sources):
+                if not force and track.info["sourceName"] in self.node.info.get("sourceManagers", []) and (not self.node.only_use_native_search_providers or track.info["sourceName"] in self.node.native_sources):
 
 
 
