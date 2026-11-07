@@ -191,6 +191,31 @@ SOURCE_PROVIDER_PREFIX.update({
 
 PROVIDER_PREFIX_BY_SOURCE = SOURCE_PROVIDER_PREFIX
 
+# Explicit LavaSrc query schemes must bypass the bot's default search prefix.
+EXPLICIT_QUERY_PREFIXES = tuple(
+    f"{spec['prefix']}:" for spec in PROVIDER_SPECS.values()
+) + (
+    "dzisrc:",
+    "sprec:",
+    "dzrec:",
+    "ymrec:",
+    "vkrec:",
+    "tdrec:",
+    "qbisrc:",
+    "qbrec:",
+    "gntrending:",
+    "gncharts:",
+    "gnreleases:",
+    "gnalbums:",
+    "ftts://",
+    "speak:",
+)
+
+
+def is_explicit_lavasrc_query(query):
+    return query.lower().startswith(EXPLICIT_QUERY_PREFIXES)
+
+
 # Direct URL resolvers without a text-search prefix.
 URL_ONLY_DIRECT_SOURCES = {
     "getyarn": ("get-yarn", "getyarn"),
