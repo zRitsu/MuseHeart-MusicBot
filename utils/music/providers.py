@@ -219,11 +219,6 @@ def sync_node_providers(node):
                 if query not in partial:
                     partial.append(query)
 
-    # Keep the legacy native YouTube search available when explicitly configured.
-    if "ytsearch" in configured and "youtube" in available_managers and "ytsearch" not in providers:
-        providers.append("ytsearch")
-        partial.extend(query for query in PROVIDER_SPECS["ytdlp"]["partial"] if query not in partial)
-
     node.search_providers = providers
     node.partial_providers = partial
 
