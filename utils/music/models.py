@@ -3288,7 +3288,7 @@ class LavalinkPlayer(wavelink.Player):
                     except AttributeError:
                         pass
 
-                    self.bot.pool.partial_track_cache[f'{track.info["sourceName"]}:{track.author}-{track.single_title}'] = tracks
+                    self.bot.pool.partial_track_cache[f'{track.info["sourceName"]}:{track.author}-{track.single_title}'] = result
 
                 try:
                     if result[0].info["sourceName"] == "bandcamp":
