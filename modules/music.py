@@ -41,7 +41,7 @@ from utils.music.interactions import VolumeInteraction, QueueInteraction, Select
     SetStageTitle, SelectBotVoice, youtube_regex, ButtonInteraction
 from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, PartialTrack, PartialPlaylist, \
     native_sources, CustomYTDL
-from utils.music.providers import PROVIDER_PREFIX_BY_SOURCE, sync_node_providers
+from utils.music.providers import PROVIDER_PREFIX_BY_SOURCE, is_explicit_lavasrc_query, sync_node_providers
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, song_request_buttons, \
     select_bot_pool, ProgressBar, update_inter, get_source_emoji_cfg, music_source_emoji
@@ -7151,6 +7151,9 @@ class Music(commands.Cog):
         if not bot:
             bot = self.bot
 
+        if is_explicit_lavasrc_query(query):
+            source = False
+
         if not node:
             nodes = sorted([n for n in bot.music.nodes.values() if n.is_available and n.available],
                            key=lambda n: len(n.players))
@@ -7171,7 +7174,7 @@ class Music(commands.Cog):
             node_retry = False
 
             if source is False:
-                providers = n.search_providers[:1]
+                providers = [None]
                 if query.startswith("https://www.youtube.com/live/"):
                     query = query.split("?")[0].replace("/live/", "/watch?v=")
 
