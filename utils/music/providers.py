@@ -59,14 +59,14 @@ PROVIDER_SPECS = {
         "prefix": "ytmsearch",
         "managers": ("youtube",),
         "auto_add": False,
-        "native_only": False,
+        "native_only": True,
         "partial": ('ytmsearch:"{isrc}"', 'ytmsearch:"{title} - {author}"'),
     },
     "ytdlp": {
         "prefix": "ytsearch",
         "managers": ("ytdlp", "youtube"),
         "auto_add": False,
-        "native_only": False,
+        "native_only": True,
         "partial": ('ytsearch:"{isrc}"', 'ytsearch:"{title} - {author}"'),
     },
     "yandexmusic": {
