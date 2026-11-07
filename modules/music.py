@@ -1514,8 +1514,12 @@ class Music(commands.Cog):
 
             else:
 
-                # Spotify and Deezer retain their existing bot-level integrations.
-                music_sources = {"deezer", "spotify"}
+                # Keep bot-level integrations available even when their LavaSrc manager is absent.
+                music_sources = set()
+                if self.bot.deezer:
+                    music_sources.add("deezer")
+                if self.bot.spotify:
+                    music_sources.add("spotify")
 
                 for b in self.bot.pool.get_guild_bots(inter.guild_id):
 
