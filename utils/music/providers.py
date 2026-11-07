@@ -237,4 +237,9 @@ def sync_node_providers(node):
                 if manager not in {"youtube", "soundcloud", "bandcamp"}:
                     node.native_sources.discard(manager)
 
+    # LavaSrc's "youtube" manager is YouTube Music search-only. Actual
+    # YouTube playback belongs to the separate yt-dlp source.
+    if "youtube" in available_managers and "ytdlp" not in available_managers:
+        node.native_sources.discard("youtube")
+
     return providers
