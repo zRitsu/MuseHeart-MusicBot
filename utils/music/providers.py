@@ -234,7 +234,12 @@ def sync_node_providers(node):
         manager_available = any(manager in available_managers for manager in spec["managers"])
         if manager_available:
             node.native_sources.add(source)
-        elif source not in {"soundcloud", "bandcamp"}:
-            node.native_sources.discard(source)
+            node.native_sources.update(spec["managers"])
+        else:
+            if source not in {"soundcloud", "bandcamp"}:
+                node.native_sources.discard(source)
+            for manager in spec["managers"]:
+                if manager not in {"youtube", "soundcloud", "bandcamp"}:
+                    node.native_sources.discard(manager)
 
     return providers
