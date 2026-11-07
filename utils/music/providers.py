@@ -198,6 +198,7 @@ EXPLICIT_QUERY_PREFIXES = tuple(
     "dzisrc:",
     "sprec:",
     "dzrec:",
+    "jsrec:",
     "ymrec:",
     "vkrec:",
     "tdrec:",
