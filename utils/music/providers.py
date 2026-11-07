@@ -164,7 +164,7 @@ PROVIDER_SPECS = {
     "googledrive": {
         "prefix": "dvsearch",
         "managers": ("googledrive", "google-drive"),
-        "auto_add": True,
+        "auto_add": False,
         "native_only": True,
         "direct_playback": True,
         "partial": ("dvsearch:{title} - {author}",),
