@@ -292,7 +292,7 @@ class LavalinkPlaylist:
             self.url = pluginInfo["url"]
 
         playlist_type = pluginInfo.get("type")
-        playlist = self if playlist_type == "playlist" else None
+        playlist = self if playlist_type in (None, "playlist") else None
         thumb = self.thumb if playlist_type == "album" else None
 
         self.tracks = []
