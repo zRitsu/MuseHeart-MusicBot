@@ -11,6 +11,7 @@ PROVIDER_SPECS = {
         "managers": ("deezer",),
         "auto_add": True,
         "native_only": True,
+        "direct_playback": True,
         "partial": ("dzisrc:{isrc}", "dzsearch:{title} - {author}"),
     },
     "soundcloud": {
@@ -18,6 +19,7 @@ PROVIDER_SPECS = {
         "managers": ("soundcloud",),
         "auto_add": True,
         "native_only": True,
+        "direct_playback": True,
         "partial": ("scsearch:{title} - {author}",),
     },
     "bandcamp": {
@@ -25,6 +27,7 @@ PROVIDER_SPECS = {
         "managers": ("bandcamp",),
         "auto_add": True,
         "native_only": True,
+        "direct_playback": True,
         "partial": ("bcsearch:{title} - {author}",),
     },
     "jiosaavn": {
@@ -32,6 +35,7 @@ PROVIDER_SPECS = {
         "managers": ("jiosaavn",),
         "auto_add": True,
         "native_only": True,
+        "direct_playback": True,
         "partial": ("jssearch:{title} - {author}",),
     },
     "spotify": {
@@ -67,6 +71,7 @@ PROVIDER_SPECS = {
         "managers": ("ytdlp", "youtube"),
         "auto_add": False,
         "native_only": True,
+        "direct_playback": True,
         "partial": ('ytsearch:"{isrc}"', 'ytsearch:"{title} - {author}"'),
     },
     "yandexmusic": {
@@ -74,6 +79,7 @@ PROVIDER_SPECS = {
         "managers": ("yandexmusic",),
         "auto_add": True,
         "native_only": True,
+        "direct_playback": True,
         "partial": ("ymsearch:{title} - {author}",),
     },
     "vkmusic": {
@@ -81,6 +87,7 @@ PROVIDER_SPECS = {
         "managers": ("vkmusic",),
         "auto_add": True,
         "native_only": True,
+        "direct_playback": True,
         "partial": ("vksearch:{title} - {author}",),
     },
     "qobuz": {
@@ -88,6 +95,7 @@ PROVIDER_SPECS = {
         "managers": ("qobuz",),
         "auto_add": True,
         "native_only": True,
+        "direct_playback": True,
         "partial": ("qbisrc:{isrc}", "qbsearch:{title} - {author}"),
     },
     "amazonmusic": {
@@ -102,6 +110,7 @@ PROVIDER_SPECS = {
         "managers": ("audiomack",),
         "auto_add": True,
         "native_only": True,
+        "direct_playback": True,
         "partial": ("admsearch:{title} - {author}",),
     },
     "audius": {
@@ -109,6 +118,7 @@ PROVIDER_SPECS = {
         "managers": ("audius",),
         "auto_add": True,
         "native_only": True,
+        "direct_playback": True,
         "partial": ("audsearch:{title} - {author}",),
     },
     "jamendo": {
@@ -116,6 +126,7 @@ PROVIDER_SPECS = {
         "managers": ("jamendo",),
         "auto_add": True,
         "native_only": True,
+        "direct_playback": True,
         "partial": ("jamsearch:{title} - {author}",),
     },
     "ccmixter": {
@@ -123,6 +134,7 @@ PROVIDER_SPECS = {
         "managers": ("ccmixter",),
         "auto_add": True,
         "native_only": True,
+        "direct_playback": True,
         "partial": ("ccsearch:{title} - {author}",),
     },
     "gaana": {
@@ -130,6 +142,7 @@ PROVIDER_SPECS = {
         "managers": ("gaana",),
         "auto_add": True,
         "native_only": True,
+        "direct_playback": True,
         "partial": ("gnsearch:{title} - {author}",),
     },
     "bilibili": {
@@ -137,6 +150,7 @@ PROVIDER_SPECS = {
         "managers": ("bilibili",),
         "auto_add": True,
         "native_only": True,
+        "direct_playback": True,
         "partial": ("bilisearch:{title} - {author}",),
     },
     "internetarchive": {
@@ -144,6 +158,7 @@ PROVIDER_SPECS = {
         "managers": ("internetarchive", "internet-archive"),
         "auto_add": True,
         "native_only": True,
+        "direct_playback": True,
         "partial": ("iasearch:{title} - {author}",),
     },
     "googledrive": {
@@ -151,6 +166,7 @@ PROVIDER_SPECS = {
         "managers": ("googledrive", "google-drive"),
         "auto_add": True,
         "native_only": True,
+        "direct_playback": True,
         "partial": ("dvsearch:{title} - {author}",),
     },
     "pornhub": {
@@ -158,6 +174,7 @@ PROVIDER_SPECS = {
         "managers": ("pornhub",),
         "auto_add": True,
         "native_only": True,
+        "direct_playback": True,
         "partial": ("phsearch:{title} - {author}",),
     },
 }
@@ -210,10 +227,14 @@ def sync_node_providers(node):
     node.search_providers = providers
     node.partial_providers = partial
 
-    # Preserve the existing Deezer native-source handling used by track resolution.
-    if "deezer" in available_managers:
-        node.native_sources.add("deezer")
-    else:
-        node.native_sources.discard("deezer")
+    # Direct-playback LavaSrc managers can resolve their own partial-track URLs.
+    for source, spec in PROVIDER_SPECS.items():
+        if not spec.get("direct_playback"):
+            continue
+        manager_available = any(manager in available_managers for manager in spec["managers"])
+        if manager_available:
+            node.native_sources.add(source)
+        elif source not in {"soundcloud", "bandcamp"}:
+            node.native_sources.discard(source)
 
     return providers
