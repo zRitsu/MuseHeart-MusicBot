@@ -29,6 +29,7 @@ from utils.music.filters import AudioFilter
 from utils.music.lastfm_tools import LastFmException
 from utils.music.skin_utils import skin_converter
 from utils.music.track_encoder import encode_track, DataWriter
+from utils.music.providers import SOURCE_PROVIDER_PREFIX
 from utils.others import music_source_emoji, send_idle_embed, PlayerControls, string_to_file
 from wavelink import TrackStart, TrackEnd
 
@@ -46,14 +47,8 @@ thread_archive_time = {
     10080: 2880,
 }
 
-providers_dict = {
-    "youtube": "ytmsearch",
-    "soundcloud": "scsearch",
-    "applemusic": "amsearch",
-    "deezer": "dzsearch",
-    "spotify": "spsearch",
-    "tidal": "tdsearch",
-}
+# Backwards-compatible name used by autoplay provider prioritization.
+providers_dict = SOURCE_PROVIDER_PREFIX
 
 native_sources = {"http", "youtube", "soundcloud", "tts", "reddit", "ocremix", "tiktok", "mixcloud", "soundgasm", "flowerytts", "vimeo", "twitch", "bandcamp", "local"}
 
@@ -1672,9 +1667,6 @@ class LavalinkPlayer(wavelink.Player):
                         queries = [f"{sp}:{author.split(',')[0]}" for sp in providers]
 
                     for query in queries:
-
-                        if query.startswith("jssearch"):
-                            continue
 
                         try:
                             tracks = await self.node.get_tracks(
