@@ -1526,8 +1526,6 @@ class Music(commands.Cog):
                         active_providers = set(n.search_providers)
                         for source_name in n.info.get("sourceManagers", []):
                             prefix = self.providers_info.get(source_name)
-                            if source_name == "youtube" and prefix not in active_providers:
-                                prefix = "ytsearch"
                             if prefix and prefix in active_providers:
                                 music_sources.add(source_name)
 
