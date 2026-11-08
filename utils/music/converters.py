@@ -138,6 +138,7 @@ def percentage(part, whole):
     return int((part * whole) / 100.0)
 
 sources = {
+    # Fontes já existentes
     "deezer": "https://iili.io/d1Kjip1.png",
     "soundcloud": "https://iili.io/d1KjPkP.md.png",
     "spotify": "https://iili.io/d1KVvlS.png",
@@ -152,6 +153,34 @@ sources = {
     "gaana": "https://www.google.com/s2/favicons?domain=gaana.com&sz=128",
     "qobuz": "https://www.google.com/s2/favicons?domain=qobuz.com&sz=128",
     "ytdlp": "https://iili.io/d1KjLTF.md.png",
+
+    # Fontes adicionais do LavaSrc Definitive
+    "bandcamp": "https://www.google.com/s2/favicons?domain=bandcamp.com&sz=128",
+    "yandexmusic": "https://www.google.com/s2/favicons?domain=music.yandex.com&sz=128",
+    "vkmusic": "https://www.google.com/s2/favicons?domain=vk.com&sz=128",
+    "flowerytts": "https://www.google.com/s2/favicons?domain=flowery.pw&sz=128",
+    "audiomack": "https://www.google.com/s2/favicons?domain=audiomack.com&sz=128",
+    "audius": "https://www.google.com/s2/favicons?domain=audius.co&sz=128",
+    "jamendo": "https://www.google.com/s2/favicons?domain=jamendo.com&sz=128",
+    "ccmixter": "https://www.google.com/s2/favicons?domain=ccmixter.org&sz=128",
+    "bilibili": "https://www.google.com/s2/favicons?domain=bilibili.com&sz=128",
+    "internetarchive": "https://www.google.com/s2/favicons?domain=archive.org&sz=128",
+    "internet-archive": "https://www.google.com/s2/favicons?domain=archive.org&sz=128",
+    "googledrive": "https://www.google.com/s2/favicons?domain=drive.google.com&sz=128",
+    "google-drive": "https://www.google.com/s2/favicons?domain=drive.google.com&sz=128",
+    "getyarn": "https://www.google.com/s2/favicons?domain=getyarn.io&sz=128",
+    "clypit": "https://www.google.com/s2/favicons?domain=clyp.it&sz=128",
+    "elgato": "https://www.google.com/s2/favicons?domain=elgato.com&sz=128",
+    "pixeldrain": "https://www.google.com/s2/favicons?domain=pixeldrain.com&sz=128",
+    "pornhub": "https://www.google.com/s2/favicons?domain=pornhub.com&sz=128",
+    "reddit": "https://www.google.com/s2/favicons?domain=reddit.com&sz=128",
+    "ocremix": "https://www.google.com/s2/favicons?domain=ocremix.org&sz=128",
+    "tiktok": "https://www.google.com/s2/favicons?domain=tiktok.com&sz=128",
+    "mixcloud": "https://www.google.com/s2/favicons?domain=mixcloud.com&sz=128",
+    "soundgasm": "https://www.google.com/s2/favicons?domain=soundgasm.net&sz=128",
+    "speechtts": "https://www.google.com/s2/favicons?domain=flowery.pw&sz=128",
+    "speech-tts": "https://www.google.com/s2/favicons?domain=flowery.pw&sz=128",
+    "tumblr": "https://www.google.com/s2/favicons?domain=tumblr.com&sz=128",
 }
 def music_source_image(sourcename):
     return sources.get(
