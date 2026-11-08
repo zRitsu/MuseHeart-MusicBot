@@ -577,8 +577,8 @@ music_source_emoji_data = {
     "youtubemusic": "<:Youtubemusicicon:1245606364470841354>",
     "last.fm": "<:Lastfm:1278883704097341541>",
     "bandcamp": "<:bandcamp:767129639490420796>",
-    "amazonmusic": "<:play:734221719774035968>",
-    "qobuz": "<:play:734221719774035968>",
+    "amazonmusic": "<:amazonmusic:1492241680097611950>",
+    "qobuz": "<:qobuz:1492240299890573422>",
 }
 
 MUSIC_SOURCE_BUTTONS = frozenset(music_source_emoji_data)
