@@ -149,7 +149,6 @@ sources = {
     "youtubemusic": "https://iili.io/d1Kj42V.png",
     "last.fm": "https://cdn.discordapp.com/emojis/1278883704097341541.png",
     "amazonmusic": "https://www.google.com/s2/favicons?domain=music.amazon.com&sz=128",
-    "gaana": "https://www.google.com/s2/favicons?domain=gaana.com&sz=128",
     "qobuz": "https://www.google.com/s2/favicons?domain=qobuz.com&sz=128",
     "ytdlp": "https://iili.io/d1KjLTF.md.png",
 }
