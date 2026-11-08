@@ -566,11 +566,11 @@ am_url_regex = re.compile(r"(https?://)?(www\.)?music\.apple\.com/((?P<countryco
 js_url_regex = re.compile(r"(https?://)(www\.)?jiosaavn\.com/(song|album|featured|artist)/([a-zA-Z0-9-_]+)")
 
 music_source_emoji_data = {
-    # Existing custom server emojis
     "youtube": "<:youtube:647253940882374656>",
     "soundcloud": "<:soundcloud:721530214764773427>",
     "spotify": "<:spotify:715717523626000445>",
     "deezer": "<:deezer:1226124676372365402>",
+    "applemusic": "<:applemusic:1225631877658968164>",
     "twitch": "<:Twitch:803656463695478804>",
     "jiosaavn": "<:jiosaavn:1235276169473949747>",
     "tidal": "<:tidal:1235352567048048691>",
@@ -578,44 +578,11 @@ music_source_emoji_data = {
     "last.fm": "<:Lastfm:1278883704097341541>",
     "bandcamp": "<:bandcamp:767129639490420796>",
 
-    # Sources using the generic play icon
+    # Additional LavaSrc Definitive sources using the generic play icon
     "amazonmusic": "<:play:734221719774035968>",
-    "applemusic": "<:play:734221719774035968>",
     "gaana": "<:play:734221719774035968>",
-
-    # LavaSrc Definitive sources
-    "yandexmusic": "🎵",
-    "vkmusic": "▶️",
-    "qobuz": "🎼",
-    "audiomack": "🎧",
-    "audius": "🎧",
-    "jamendo": "🎶",
-    "ccmixter": "🎶",
-    "bilibili": "📺",
-    "internetarchive": "📚",
-    "internet-archive": "📚",
-    "googledrive": "📁",
-    "google-drive": "📁",
-    "pornhub": "▶️",
-
-    # Direct URL sources
-    "getyarn": "🎬",
-    "get-yarn": "🎬",
-    "clypit": "🔊",
-    "elgato": "🎥",
-    "pixeldrain": "📁",
-    "tumblr": "📝",
-
-    # Other supported integrations
-    "flowerytts": "🗣️",
-    "ytdlp": "<:youtube:647253940882374656>",
-    "reddit": "🔴",
-    "ocremix": "🎮",
-    "tiktok": "🎵",
-    "mixcloud": "🎧",
-    "soundgasm": "🔊",
+    "qobuz": "<:play:734221719774035968>",
 }
-
 def music_source_emoji(name: str):
     return music_source_emoji_data.get(name, "<:play:734221719774035968>")
 
