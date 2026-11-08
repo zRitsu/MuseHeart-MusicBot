@@ -44,7 +44,7 @@ from utils.music.models import LavalinkPlayer, LavalinkTrack, LavalinkPlaylist, 
 from utils.music.providers import PROVIDER_PREFIX_BY_SOURCE, is_explicit_lavasrc_query, sync_node_providers
 from utils.others import check_cmd, send_idle_embed, CustomContext, PlayerControls, queue_track_index, \
     pool_command, string_to_file, CommandArgparse, music_source_emoji_url, song_request_buttons, \
-    select_bot_pool, ProgressBar, update_inter, get_source_emoji_cfg, music_source_emoji
+    select_bot_pool, ProgressBar, update_inter, get_source_emoji_cfg, music_source_emoji, MUSIC_SOURCE_BUTTONS
 
 sc_recommended = re.compile(r"https://soundcloud\.com/.*/recommended$")
 sc_profile_regex = re.compile(r"<?https://soundcloud\.com/[a-zA-Z0-9_-]+>?$")
@@ -1530,7 +1530,7 @@ class Music(commands.Cog):
                         active_providers = set(n.search_providers)
                         for source_name in n.info.get("sourceManagers", []):
                             prefix = self.providers_info.get(source_name)
-                            if prefix and prefix in active_providers:
+                            if prefix and prefix in active_providers and source_name in MUSIC_SOURCE_BUTTONS:
                                 music_sources.add(source_name)
 
                 view = ButtonInteraction(
