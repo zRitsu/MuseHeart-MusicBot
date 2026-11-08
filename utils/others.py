@@ -577,12 +577,12 @@ music_source_emoji_data = {
     "youtubemusic": "<:Youtubemusicicon:1245606364470841354>",
     "last.fm": "<:Lastfm:1278883704097341541>",
     "bandcamp": "<:bandcamp:767129639490420796>",
-
-    # Additional LavaSrc Definitive sources using the generic play icon
     "amazonmusic": "<:play:734221719774035968>",
     "gaana": "<:play:734221719774035968>",
     "qobuz": "<:play:734221719774035968>",
 }
+
+MUSIC_SOURCE_BUTTONS = frozenset(music_source_emoji_data)
 def music_source_emoji(name: str):
     return music_source_emoji_data.get(name, "<:play:734221719774035968>")
 
